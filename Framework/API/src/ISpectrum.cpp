@@ -1,4 +1,5 @@
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
 
@@ -18,6 +19,8 @@ ISpectrum::ISpectrum(const specnum_t specNo) : m_specNo(specNo) {}
 void ISpectrum::copyInfoFrom(const ISpectrum &other) {
   m_specNo = other.m_specNo;
   detectorIDs = other.detectorIDs;
+  invalidateCachedSpectrumNumbers();
+  invalidateSpectrumDefinition();
 }
 
 /**
@@ -41,7 +44,10 @@ const MantidVec &ISpectrum::readE() const { return this->dataE(); }
  * @param detID :: detector ID to insert in set.
  */
 void ISpectrum::addDetectorID(const detid_t detID) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detID);
+  if (detectorIDs.size() != oldSize)
+    invalidateSpectrumDefinition();
 }
 
 /** Add a set of detector IDs to the set of detector IDs
@@ -49,7 +55,10 @@ void ISpectrum::addDetectorID(const detid_t detID) {
  * @param detIDs :: set of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
+  if (detectorIDs.size() != oldSize)
+    invalidateSpectrumDefinition();
 }
 
 /** Add a vector of detector IDs to the set of detector IDs
@@ -57,7 +66,10 @@ void ISpectrum::addDetectorIDs(const std::set<detid_t> &detIDs) {
  * @param detIDs :: vector of detector IDs to insert in set.
  */
 void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
+  size_t oldSize = detectorIDs.size();
   this->detectorIDs.insert(detIDs.begin(), detIDs.end());
+  if (detectorIDs.size() != oldSize)
+    invalidateSpectrumDefinition();
 }
 
 /** Clear the list of detector IDs, then add one.
@@ -67,6 +79,7 @@ void ISpectrum::addDetectorIDs(const std::vector<detid_t> &detIDs) {
 void ISpectrum::setDetectorID(const detid_t detID) {
   this->detectorIDs.clear();
   this->detectorIDs.insert(detID);
+  invalidateSpectrumDefinition();
 }
 
 /** Set the detector IDs to be the set given.
@@ -75,6 +88,7 @@ void ISpectrum::setDetectorID(const detid_t detID) {
  */
 void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
   detectorIDs = detIDs;
+  invalidateSpectrumDefinition();
 }
 
 /** Set the detector IDs to be the set given (move version).
@@ -83,6 +97,7 @@ void ISpectrum::setDetectorIDs(const std::set<detid_t> &detIDs) {
  */
 void ISpectrum::setDetectorIDs(std::set<detid_t> &&detIDs) {
   detectorIDs = std::move(detIDs);
+  invalidateSpectrumDefinition();
 }
 
 /** Return true if the given detector ID is in the list for this ISpectrum */
@@ -98,18 +113,20 @@ const std::set<detid_t> &ISpectrum::getDetectorIDs() const {
 
 /** Clear the detector IDs set.
  */
-void ISpectrum::clearDetectorIDs() { this->detectorIDs.clear(); }
-
-/** Get a mutable reference to the detector IDs set.
- */
-std::set<detid_t> &ISpectrum::getDetectorIDs() { return this->detectorIDs; }
+void ISpectrum::clearDetectorIDs() {
+  this->detectorIDs.clear();
+  invalidateSpectrumDefinition();
+}
 
 /// @return the spectrum number of this spectrum
 specnum_t ISpectrum::getSpectrumNo() const { return m_specNo; }
 
 /** Sets the the spectrum number of this spectrum
  * @param num :: the spectrum number of this spectrum */
-void ISpectrum::setSpectrumNo(specnum_t num) { m_specNo = num; }
+void ISpectrum::setSpectrumNo(specnum_t num) {
+  m_specNo = num;
+  invalidateCachedSpectrumNumbers();
+}
 
 /**
  * Gets the value of the use flag.
@@ -121,6 +138,66 @@ bool ISpectrum::hasDx() const { return bool(histogramRef().sharedDx()); }
  * Resets the hasDx flag
  */
 void ISpectrum::resetHasDx() { mutableHistogramRef().setSharedDx(nullptr); }
+
+/// Copy constructor.
+ISpectrum::ISpectrum(const ISpectrum &other)
+    : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs) {
+  // m_matrixWorkspace and m_index are not copied: A copy should not refer to
+  // the parent of the source. m_experimentInfo will be nullptr.
+}
+
+/// Move constructor.
+ISpectrum::ISpectrum(ISpectrum &&other)
+    : m_specNo(other.m_specNo), detectorIDs(std::move(other.detectorIDs)) {
+  // m_matrixWorkspace and m_index are not copied: A copy should not refer to
+  // the parent of the source. m_experimentInfo will be nullptr.
+}
+
+/// Copy assignment.
+ISpectrum &ISpectrum::operator=(const ISpectrum &other) {
+  m_specNo = other.m_specNo;
+  detectorIDs = other.detectorIDs;
+  // m_matrixWorkspace and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
+  invalidateCachedSpectrumNumbers();
+  invalidateSpectrumDefinition();
+  return *this;
+}
+
+/// Move assignment.
+ISpectrum &ISpectrum::operator=(ISpectrum &&other) {
+  m_specNo = other.m_specNo;
+  detectorIDs = std::move(other.detectorIDs);
+  // m_matrixWorkspace and m_index are not assigned: The lhs of the assignment
+  // keeps its current values.
+  invalidateCachedSpectrumNumbers();
+  invalidateSpectrumDefinition();
+  return *this;
+}
+
+/** Sets the MatrixWorkspace pointer (pointer to the owning workspace).
+ *
+ * This method should not need to be called explicitly, it is called when
+ * getting a mutable reference to an ISpectrum stored in a MatrixWorkspace. The
+ * pointer set by this method is used to push updates of the detector IDs into
+ * the Beamline::SpectrumInfo that is stored in the ExperimentInfo. */
+void ISpectrum::setMatrixWorkspace(MatrixWorkspace *matrixWorkspace,
+                                   const size_t index) {
+  m_matrixWorkspace = matrixWorkspace;
+  m_index = index;
+}
+
+/// Invalidates cached spectrum numbers in the owning workspace.
+void ISpectrum::invalidateCachedSpectrumNumbers() const {
+  if (m_matrixWorkspace)
+    m_matrixWorkspace->invalidateCachedSpectrumNumbers();
+}
+
+/// Invalidates spectrum definitions in the owning workspace.
+void ISpectrum::invalidateSpectrumDefinition() const {
+  if (m_matrixWorkspace)
+    m_matrixWorkspace->invalidateSpectrumDefinition(m_index);
+}
 
 } // namespace Mantid
 } // namespace API

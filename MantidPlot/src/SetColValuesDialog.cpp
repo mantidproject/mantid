@@ -31,7 +31,7 @@
  ***************************************************************************/
 #include "SetColValuesDialog.h"
 #include "Table.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 #include <QTableWidget>
 #include <QTableWidgetSelectionRange>
@@ -68,6 +68,8 @@ SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
   end->setMinimum(1);
   hbox1->addWidget(end);
 
+  // Ideally this would be checked at compile time. Until we have 'constexpr if`
+  // on all platforms, the added complexity and minimal cost isn't worthwhile.
   if (sizeof(int) == 2) { // 16 bit signed integer
     start->setMaximum(0x7fff);
     end->setMaximum(0x7fff);

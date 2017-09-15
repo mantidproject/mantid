@@ -20,7 +20,6 @@
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Matrix.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
 
 namespace Mantid {
@@ -43,6 +42,8 @@ public:
   double get(size_t iY, size_t iP) override {
     return m_data[iY * m_nParams + iP];
   }
+  /// Zero
+  void zero() override { m_data.assign(m_data.size(), 0.0); }
 
 private:
   size_t m_nParams;           ///< number of parameters / second dimension
@@ -137,52 +138,49 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
  */
 std::pair<size_t, size_t> IMWDomainCreator::getXInterval() const {
 
-  const Mantid::MantidVec &X = m_matrixWorkspace->readX(m_workspaceIndex);
+  const auto &X = m_matrixWorkspace->x(m_workspaceIndex);
   if (X.empty()) {
     throw std::runtime_error("Workspace contains no data.");
   }
 
   setParameters();
 
-  // find the fitting interval: from -> to
+  // From points to the first occurrence of StartX in the workspace interval.
+  // End points to the last occurrence of EndX in the workspace interval.
+  // Find the fitting interval: from -> to
   Mantid::MantidVec::const_iterator from;
   Mantid::MantidVec::const_iterator to;
 
   bool isXAscending = X.front() < X.back();
 
-  if (isXAscending) {
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX > m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX);
-      to = std::upper_bound(from, X.end(), m_endX);
+  if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
+    m_startX = X.front();
+    from = X.begin();
+    m_endX = X.back();
+    to = X.end();
+  } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
+    throw std::invalid_argument(
+        "Both StartX and EndX must be given to set fitting interval.");
+  } else if (isXAscending) {
+    if (m_startX > m_endX) {
+      std::swap(m_startX, m_endX);
     }
-  } else {
-    // x is descending
-    if (m_startX == EMPTY_DBL() && m_endX == EMPTY_DBL()) {
-      m_startX = X.front();
-      from = X.begin();
-      m_endX = X.back();
-      to = X.end();
-    } else if (m_startX == EMPTY_DBL() || m_endX == EMPTY_DBL()) {
-      throw std::invalid_argument(
-          "Both StartX and EndX must be given to set fitting interval.");
-    } else {
-      if (m_startX < m_endX) {
-        std::swap(m_startX, m_endX);
-      }
-      from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
-      to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+    from = std::lower_bound(X.begin(), X.end(), m_startX);
+    to = std::upper_bound(from, X.end(), m_endX);
+  } else { // x is descending
+    if (m_startX < m_endX) {
+      std::swap(m_startX, m_endX);
     }
+    from = std::lower_bound(X.begin(), X.end(), m_startX, greaterIsLess);
+    to = std::upper_bound(from, X.end(), m_endX, greaterIsLess);
+  }
+
+  // Check whether the fitting interval defined by StartX and EndX is 0.
+  // This occurs when StartX and EndX are both less than the minimum workspace
+  // x-value or greater than the maximum workspace x-value.
+  if (to - from == 0) {
+    throw std::invalid_argument("StartX and EndX values do not capture a range "
+                                "within the workspace interval.");
   }
 
   if (m_matrixWorkspace->isHistogramData()) {
@@ -317,11 +315,15 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
   }
 
   // Set the difference spectrum
-  MantidVec &Ycal = ws->dataY(1);
-  MantidVec &Diff = ws->dataY(2);
+  auto &Ycal = ws->mutableY(1);
+  auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {
-    Diff[i] = values->getFitData(i) - Ycal[i];
+    if (values->getFitWeight(i) != 0.0) {
+      Diff[i] = values->getFitData(i) - Ycal[i];
+    } else {
+      Diff[i] = 0.0;
+    }
   }
 
   if (!outputWorkspacePropertyName.empty()) {
@@ -466,8 +468,8 @@ void IMWDomainCreator::addFunctionValuesToWS(
     }
 
     double chi2 = function->getChiSquared();
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
+    auto &yValues = ws->mutableY(wsIndex);
+    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
       eValues[i] = std::sqrt(E[i] * chi2);
@@ -476,8 +478,8 @@ void IMWDomainCreator::addFunctionValuesToWS(
   } else {
     // otherwise use the parameter errors which is OK for uncorrelated
     // parameters
-    MantidVec &yValues = ws->dataY(wsIndex);
-    MantidVec &eValues = ws->dataE(wsIndex);
+    auto &yValues = ws->mutableY(wsIndex);
+    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
       double err = 0.0;

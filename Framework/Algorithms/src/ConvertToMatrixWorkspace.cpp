@@ -48,7 +48,7 @@ void ConvertToMatrixWorkspace::exec() {
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
     // ...but not the data, so do that here.
-    PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
     for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i) {
       PARALLEL_START_INTERUPT_REGION
       const auto &inSpec = inputWorkspace->getSpectrum(i);

@@ -14,6 +14,7 @@ set ( TEST_PY_FILES
   CompositeFunctionTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
+  DetectorInfoTest.py
   ExperimentInfoTest.py
   FilePropertyTest.py
   FileFinderTest.py
@@ -42,6 +43,7 @@ set ( TEST_PY_FILES
   RunPythonScriptTest.py
   RunTest.py
   SampleTest.py
+  SpectrumInfoTest.py
   WorkspaceFactoryTest.py
   WorkspaceTest.py
   WorkspaceGroupTest.py
@@ -53,4 +55,4 @@ set ( TEST_PY_FILES
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test=PythonInterfaceAPI
-pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceAPI ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} python.api ${TEST_PY_FILES} )

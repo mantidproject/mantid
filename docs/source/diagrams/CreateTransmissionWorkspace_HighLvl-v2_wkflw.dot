@@ -1,0 +1,53 @@
+digraph CreateTransmissionWorkspace {
+label = ""
+ $global_style
+
+subgraph params {
+ $param_style
+  firstRun      [label="FirstTransmissionRun", group=g1]
+  secondRun     [label="SecondTransmissionRun", group=g2]
+  outputWS		[label="OutputWorkspace"]
+  params		[label="Params"]
+  startOv		[label="StartOverlap"]
+  endOv			[label="EndOverlap"]
+}
+
+subgraph decisions {
+ $decision_style
+  checkSecondRun  [label="SecondTransmissionRun?", group=g1]
+}
+
+subgraph algorithms {
+ $algorithm_style
+ stitch		[label="Stitch1D"]
+}
+
+subgraph processes {
+ $process_style
+  convertFirst         [label="Convert to &lambda; and\nnormalize", group=g1]
+  convertSecond        [label="Convert to &lambda; and\nnormalize", group=g2]
+}
+
+subgraph values {
+ $value_style
+  valFirst        [label="I(&lambda;)", group=g1]
+  valSecond       [label="I(&lambda;)", group=g2]
+}
+
+ firstRun		-> convertFirst
+ convertFirst	-> valFirst
+ valFirst	-> checkSecondRun
+ checkSecondRun	-> outputWS		[label="No"]
+ checkSecondRun	-> stitch		[label="Yes"]
+ secondRun		-> convertSecond
+ convertSecond	-> valSecond
+ valSecond		-> stitch
+ convertSecond	-> params		[style=invis]
+ startOv		-> stitch
+ endOv			-> stitch
+ stitch			-> outputWS
+ params			-> stitch
+
+{rank = same; valFirst; valSecond}
+{rank = same; params; startOv; endOv}
+}

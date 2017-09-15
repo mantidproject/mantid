@@ -14,7 +14,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-using namespace Mantid;
 //==============================================================================================
 // Class ProcessBankData
 //==============================================================================================
@@ -53,6 +52,8 @@ public:
   void run() override;
 
 private:
+  size_t getWorkspaceIndexFromPixelID(const detid_t pixID);
+
   /// Algorithm being run
   LoadEventNexus *alg;
   /// NXS path to bank

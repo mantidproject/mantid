@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OFFSPEC" valid-from = "2012-01-31T00:00:00">
+<parameter-file instrument = "OFFSPEC" valid-from = "2017-01-31T00:00:00">
 <component-link name = "OFFSPEC">
   <parameter name="show-signed-theta" type="string">
     <value val="Always" />
@@ -20,8 +20,6 @@
   <parameter name="MonitorIntegralMax">
    <value val="14.0"/>
   </parameter>
-
-<!-- here we need to add the other monitors -->
 
   <parameter name="PointDetectorStart">
     <value val="3"/>
@@ -49,6 +47,14 @@
   <parameter name="LambdaMax">
     <value val="14.0"/>
   </parameter>
+  
+  <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
+    <value val="10"/>
+  </parameter>
 
+  <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
+    <value val="12"/>
+  </parameter>
+  
 </component-link>
 </parameter-file>

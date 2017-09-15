@@ -24,6 +24,9 @@ public:
   static CrystalFieldTest *createSuite() { return new CrystalFieldTest(); }
   static void destroySuite(CrystalFieldTest *suite) { delete suite; }
 
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_it_works() {
     int nre = 1;
     DoubleFortranVector bmol(1, 3);
@@ -72,7 +75,12 @@ public:
     ComplexFortranMatrix bkq(0, 6, 0, 6);
     zeroAllEntries(bmol, bext, bkq);
 
-    bmol(1) = 10.;
+    // The internal (molecular) field is not rotated. So we leave it at zero
+    // else in the rotated case (en2) it will be in a different [physical]
+    // direction and so give a different splitting. The external field
+    // is rotated in the code, so we set it to some value to check the
+    // rotation works.
+    bext(1) = 10.;
     bkq(2, 0) = 0.3365;
     bkq(2, 2) = 7.4851;
     bkq(4, 0) = 0.4062;
@@ -99,7 +107,7 @@ public:
       en2 = en;
     }
     for (size_t i = 1; i < en1.size(); ++i) {
-      TS_ASSERT_LESS_THAN(1.0, fabs(en1.get(i) - en2.get(i)));
+      TS_ASSERT_DELTA(en1.get(i), en2.get(i), 1e-6);
     }
   }
 
@@ -162,7 +170,7 @@ public:
     DoubleFortranVector e_energies;
     DoubleFortranMatrix i_energies;
     const double de = 1e-10;
-    const double di = 1e-3;
+    const double di = 1e-3 * c_mbsr;
     calculateIntensities(nre, en, wf, temperature, de, degeneration, e_energies,
                          i_energies);
 
@@ -175,9 +183,9 @@ public:
     TS_ASSERT_DELTA(e_excitations(1), 0.0, 1e-10);
     TS_ASSERT_DELTA(e_excitations(2), 29.33, 0.01);
     TS_ASSERT_DELTA(e_excitations(3), 44.34, 0.01);
-    TS_ASSERT_DELTA(i_excitations(1), 2.75, 0.01);
-    TS_ASSERT_DELTA(i_excitations(2), 0.72, 0.01);
-    TS_ASSERT_DELTA(i_excitations(3), 0.43, 0.01);
+    TS_ASSERT_DELTA(i_excitations(1), 2.75 * c_mbsr, 0.01 * c_mbsr);
+    TS_ASSERT_DELTA(i_excitations(2), 0.72 * c_mbsr, 0.01 * c_mbsr);
+    TS_ASSERT_DELTA(i_excitations(3), 0.43 * c_mbsr, 0.01 * c_mbsr);
   }
 
 private:

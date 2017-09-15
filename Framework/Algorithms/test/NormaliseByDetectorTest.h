@@ -1,21 +1,18 @@
 #ifndef MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_
 #define MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidKernel/Timer.h"
 #include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
+#include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAlgorithms/NormaliseByDetector.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -179,9 +176,10 @@ private:
 
     const double A1 = 1;
     std::string componentLinks = "";
-    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
 
+    const auto &spectrumInfo = ws->spectrumInfo();
+    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
+      const auto &detector = spectrumInfo.detector(wsIndex);
       // A0, will vary with workspace index, from detector to detector, A1 is
       // constant = 1.
       componentLinks +=
@@ -195,7 +193,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     det->getName() % wsIndex % A1);
+                     detector.getName() % wsIndex % A1);
     }
 
     // Create a parameter file, with a root equation that will apply to all
@@ -232,8 +230,10 @@ private:
     const std::string instrumentName = ws->getInstrument()->getName();
 
     std::string componentLinks = "";
+    const auto &spectrumInfo = ws->spectrumInfo();
+
     for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+      const auto &detector = spectrumInfo.detector(wsIndex);
 
       // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
       componentLinks +=
@@ -243,7 +243,7 @@ private:
                <fixed />\n\
            </parameter>\n\
            </component-link>\n") %
-                     det->getName() % wsIndex);
+                     detector.getName() % wsIndex);
     }
 
     // Create a parameter file, with a root equation that will apply to all
@@ -347,7 +347,6 @@ public:
   }
 
   void test_workspace_with_instrument_only_fitting_functions() {
-    const std::string outWSName = "normalised_ws";
     // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT
     // FUNCTION ONLY.
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
@@ -360,25 +359,25 @@ public:
     // Test the application of the linear function
     for (size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms();
          ++wsIndex) {
-      const MantidVec &yValues = outWS->readY(wsIndex);
-      const MantidVec &xValues = outWS->readX(wsIndex);
-      const MantidVec &eValues = outWS->readE(wsIndex);
+      const auto &yValues = outWS->y(wsIndex);
+      const auto &xValues = outWS->x(wsIndex);
+      const auto &eValues = outWS->e(wsIndex);
 
       TS_ASSERT_EQUALS(3, yValues.size());
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
-      const MantidVec &yInputValues = inputWS->readY(wsIndex);
-      const MantidVec &eInputValues = inputWS->readE(wsIndex);
+      const auto &yInputValues = inputWS->y(wsIndex);
+      const auto &eInputValues = inputWS->e(wsIndex);
 
+      const auto &wavelength = outWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex) {
-        const double wavelength =
-            (xValues[binIndex] + xValues[binIndex + 1]) / 2;
         const double expectedValue =
             yInputValues[binIndex] /
-            ((2 * wavelength) + 1); // According to the equation written into
-                                    // the instrument parameter file for the
-                                    // instrument component link.
+            ((2 * wavelength[binIndex]) +
+             1); // According to the equation written into
+                 // the instrument parameter file for the
+                 // instrument component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
         const double expectedError =
             (eInputValues[binIndex] * expectedValue) /
@@ -390,7 +389,6 @@ public:
   }
 
   void test_compare_sequential_and_parallel_results() {
-    const std::string outWSName = "normalised_ws";
     // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT
     // FUNCTION ONLY.
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
@@ -409,13 +407,13 @@ public:
     // Test the application of the linear function
     for (size_t wsIndex = 0; wsIndex < inputWS->getNumberHistograms();
          ++wsIndex) {
-      const MantidVec &yValuesParallel = outWS_parallel->readY(wsIndex);
-      const MantidVec &xValuesParallel = outWS_parallel->readX(wsIndex);
-      const MantidVec &eValuesParallel = outWS_parallel->readE(wsIndex);
+      const auto &yValuesParallel = outWS_parallel->y(wsIndex);
+      const auto &xValuesParallel = outWS_parallel->x(wsIndex);
+      const auto &eValuesParallel = outWS_parallel->e(wsIndex);
 
-      const MantidVec &yValuesSequential = outWS_sequential->readY(wsIndex);
-      const MantidVec &xValuesSequential = outWS_sequential->readX(wsIndex);
-      const MantidVec &eValuesSequential = outWS_sequential->readE(wsIndex);
+      const auto &yValuesSequential = outWS_sequential->y(wsIndex);
+      const auto &xValuesSequential = outWS_sequential->x(wsIndex);
+      const auto &eValuesSequential = outWS_sequential->e(wsIndex);
 
       // Compare against known sizes.
       TS_ASSERT_EQUALS(3, yValuesParallel.size());
@@ -426,19 +424,19 @@ public:
       TS_ASSERT_EQUALS(xValuesSequential.size(), xValuesParallel.size());
       TS_ASSERT_EQUALS(eValuesSequential.size(), eValuesParallel.size());
 
-      const MantidVec &yInputValues = inputWS->readY(wsIndex);
-      const MantidVec &xInputValues = inputWS->readX(wsIndex);
-      const MantidVec &eInputValues = inputWS->readE(wsIndex);
+      const auto &yInputValues = inputWS->y(wsIndex);
+      const auto &xInputValues = inputWS->x(wsIndex);
+      const auto &eInputValues = inputWS->e(wsIndex);
 
+      const auto &wavelength = inputWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xInputValues.size() - 1);
            ++binIndex) {
-        const double wavelength =
-            (xInputValues[binIndex] + xInputValues[binIndex + 1]) / 2;
         const double expectedValue =
             yInputValues[binIndex] /
-            ((2 * wavelength) + 1); // According to the equation written into
-                                    // the instrument parameter file for the
-                                    // instrument component link.
+            ((2 * wavelength[binIndex]) +
+             1); // According to the equation written into
+                 // the instrument parameter file for the
+                 // instrument component link.
         // Compare against the known/calculated value.
         TS_ASSERT_EQUALS(expectedValue, yValuesParallel[binIndex]);
         // Compare results from different execution types.
@@ -456,7 +454,6 @@ public:
   }
 
   void test_workspace_with_detector_level_only_fit_functions() {
-    const std::string outWSName = "normalised_ws";
     // Linear function 1*x + N applied to each x-value, where N is the workspace
     // index. DETECTOR LEVEL FIT FUNCTIONS ONLY.
     MatrixWorkspace_sptr inputWS =
@@ -470,23 +467,22 @@ public:
     // Test the application of the linear function
     for (size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms();
          ++wsIndex) {
-      const MantidVec &yValues = outWS->readY(wsIndex);
-      const MantidVec &xValues = outWS->readX(wsIndex);
-      const MantidVec &eValues = outWS->readE(wsIndex);
+      const auto &yValues = outWS->y(wsIndex);
+      const auto &xValues = outWS->x(wsIndex);
+      const auto &eValues = outWS->e(wsIndex);
 
       TS_ASSERT_EQUALS(3, yValues.size());
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
-      const MantidVec &yInputValues = inputWS->readY(wsIndex);
-      const MantidVec &eInputValues = inputWS->readE(wsIndex);
+      const auto &yInputValues = inputWS->y(wsIndex);
+      const auto &eInputValues = inputWS->e(wsIndex);
 
+      const auto &wavelength = outWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex) {
-        const double wavelength =
-            (xValues[binIndex] + xValues[binIndex + 1]) / 2;
         const double expectedValue =
             yInputValues[binIndex] /
-            ((1 * wavelength) +
+            ((1 * wavelength[binIndex]) +
              static_cast<double>(wsIndex)); // According to the equation written
                                             // into the instrument parameter
                                             // file for the detector component
@@ -526,23 +522,22 @@ public:
     // Test the application of the linear function
     for (size_t wsIndex = 0; wsIndex < completeWS->getNumberHistograms();
          ++wsIndex) {
-      const MantidVec &yValues = outWS->readY(wsIndex);
-      const MantidVec &xValues = outWS->readX(wsIndex);
-      const MantidVec &eValues = outWS->readE(wsIndex);
+      const auto &yValues = outWS->y(wsIndex);
+      const auto &xValues = outWS->x(wsIndex);
+      const auto &eValues = outWS->e(wsIndex);
 
       TS_ASSERT_EQUALS(3, yValues.size());
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
-      const MantidVec &yInputValues = completeWS->readY(wsIndex);
-      const MantidVec &eInputValues = completeWS->readE(wsIndex);
+      const auto &yInputValues = completeWS->y(wsIndex);
+      const auto &eInputValues = completeWS->e(wsIndex);
 
+      const auto &wavelength = outWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex) {
-        const double wavelength =
-            (xValues[binIndex] + xValues[binIndex + 1]) / 2;
         const double expectedValue =
             yInputValues[binIndex] /
-            ((1 * static_cast<double>(wsIndex) * wavelength) +
+            ((1 * static_cast<double>(wsIndex) * wavelength[binIndex]) +
              3.0); // According to the equation written into the instrument
                    // parameter file for the detector component link.
         const double expectedError =
@@ -562,18 +557,6 @@ Performance Tests
 
 */
 class NormaliseByDetectorTestPerformance : public CxxTest::TestSuite {
-private:
-  MatrixWorkspace_sptr ws;
-
-  /// Helper method to run common sanity checks.
-  void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
-    TS_ASSERT(normalisedWS != NULL);
-    TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
-    TS_ASSERT(ws->readX(0).size() == normalisedWS->readX(0).size());
-    TS_ASSERT(ws->readY(0).size() == normalisedWS->readY(0).size());
-    TS_ASSERT(ws->readE(0).size() == normalisedWS->readE(0).size());
-  }
-
 public:
   static NormaliseByDetectorTestPerformance *createSuite() {
     return new NormaliseByDetectorTestPerformance();
@@ -660,6 +643,18 @@ public:
     // Run some basic sanity checks
     do_basic_checks(normalisedWS);
   }
+
+private:
+  /// Helper method to run common sanity checks.
+  void do_basic_checks(MatrixWorkspace_sptr normalisedWS) {
+    TS_ASSERT(normalisedWS != NULL);
+    TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
+    TS_ASSERT(ws->x(0).size() == normalisedWS->x(0).size());
+    TS_ASSERT(ws->y(0).size() == normalisedWS->y(0).size());
+    TS_ASSERT(ws->e(0).size() == normalisedWS->e(0).size());
+  }
+
+  MatrixWorkspace_sptr ws;
 };
 
 #endif /* MANTID_ALGORITHMS_NORMALISEBYDETECTORTEST_H_ */

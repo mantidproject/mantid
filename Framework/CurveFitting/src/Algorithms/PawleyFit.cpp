@@ -14,6 +14,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitConversion.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 #include <algorithm>
 
 namespace Mantid {
@@ -97,11 +101,11 @@ void PawleyFit::addHKLsToFunction(Functions::PawleyFunction_sptr &pawleyFn,
         if (center > startX && center < endX) {
           pawleyFn->addPeak(hkl, fwhm, height);
         }
-      } catch (std::bad_alloc) {
+      } catch (const std::bad_alloc &) {
         // do nothing.
       }
     }
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // Column does not exist
     throw std::runtime_error("Can not process table, the following columns are "
                              "required: HKL, d, Intensity, FWHM (rel.)");
@@ -299,7 +303,7 @@ void PawleyFit::exec() {
   int wsIndex = getProperty("WorkspaceIndex");
 
   // Get x-range start and end values, depending on user input
-  const MantidVec &xData = ws->readX(static_cast<size_t>(wsIndex));
+  const auto &xData = ws->x(static_cast<size_t>(wsIndex));
   double startX = xData.front();
   double endX = xData.back();
 

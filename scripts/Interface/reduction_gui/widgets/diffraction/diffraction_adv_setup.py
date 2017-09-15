@@ -2,12 +2,14 @@
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 import ui.diffraction.ui_diffraction_adv_setup
 import ui.diffraction.ui_diffraction_info
+
 
 class AdvancedSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -23,6 +25,7 @@ class AdvancedSetupWidget(BaseWidget):
         class AdvancedSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_adv_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
+
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
@@ -91,11 +94,11 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_edit.setText("95.")
 
         # Connections from action/event to function to handle
-        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._stripvanpeaks_clicked)
+        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._stripvanpeaks_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
-                self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
         # Hanlder for events
         # TODO - Need to add an event hanlder for the change of instrument and facility
 
@@ -132,7 +135,6 @@ class AdvancedSetupWidget(BaseWidget):
 
         return
 
-
     def get_state(self):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
@@ -160,7 +162,6 @@ class AdvancedSetupWidget(BaseWidget):
         s.outputfileprefix = self._content.outputfileprefix_edit.text()
 
         return s
-
 
     def _detinstrumentchange(self):
         """

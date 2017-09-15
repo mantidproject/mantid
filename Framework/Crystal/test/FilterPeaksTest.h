@@ -127,8 +127,8 @@ public:
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_hkl_sq_sum() {
@@ -153,8 +153,8 @@ public:
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_intensity() {
@@ -180,8 +180,8 @@ public:
     outWS = runAlgorithm(inWS, "Intensity", intensity, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 
   void test_filter_by_signal_to_noise() {
@@ -209,8 +209,8 @@ public:
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "<=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
-    AnalysisDataService::Instance().remove(outWS->name());
-    AnalysisDataService::Instance().remove(inWS->name());
+    AnalysisDataService::Instance().remove(outWS->getName());
+    AnalysisDataService::Instance().remove(inWS->getName());
   }
 };
 

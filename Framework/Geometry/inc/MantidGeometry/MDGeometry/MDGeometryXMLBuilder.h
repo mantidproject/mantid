@@ -108,7 +108,7 @@ private:
   mutable IMDDimension_const_sptr m_spTDimension;
 
   /// Instantiate and apply the checking policy.
-  void applyPolicyChecking(IMDDimension_const_sptr dimensionToAdd) const;
+  void applyPolicyChecking(const IMDDimension &dimensionToAdd) const;
 
   /// Flag indicating that some change in the inputs has occured. Triggers full
   /// recreation.
@@ -125,17 +125,16 @@ private:
  @date May 2011
  @version 1.0
 */
-struct MANTID_GEOMETRY_DLL StrictDimensionPolicy
-    : public std::unary_function<IMDDimension_const_sptr, void> {
+struct MANTID_GEOMETRY_DLL StrictDimensionPolicy {
 public:
   StrictDimensionPolicy() {}
-  void operator()(IMDDimension_const_sptr item) {
-    if (true == item->getIsIntegrated()) {
+  void operator()(const IMDDimension &item) {
+    if (true == item.getIsIntegrated()) {
       std::string message = "StrictDimensionPolicy bans the use of integrated "
                             "IMDDimensions mapped to x, y, z or t in a "
-                            "IMDWorkspace.";
-      message +=
-          "Attempted to do so with IMDDimension: " + item->getDimensionId();
+                            "IMDWorkspace."
+                            "Attempted to do so with IMDDimension: " +
+                            item.getDimensionId();
       throw std::invalid_argument(message);
     }
   }
@@ -147,9 +146,8 @@ public:
  @author Owen Arnold
  @date May 2011
 */
-struct MANTID_GEOMETRY_DLL NoDimensionPolicy
-    : public std::unary_function<IMDDimension_const_sptr, void> {
-  void operator()(IMDDimension_const_sptr) {
+struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
+  void operator()(const IMDDimension &) {
     // Do nothing.
   }
 };

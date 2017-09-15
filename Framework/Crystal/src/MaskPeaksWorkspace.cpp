@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/MaskPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -9,6 +6,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/math/special_functions/round.hpp>
 
@@ -72,7 +70,6 @@ void MaskPeaksWorkspace::init() {
 void MaskPeaksWorkspace::exec() {
   retrieveProperties();
 
-  MantidVecPtr XValues;
   PeaksWorkspace_const_sptr peaksW = getProperty("InPeaksWorkspace");
 
   // To get the workspace index from the detector ID
@@ -90,7 +87,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
-  PARALLEL_FOR3(m_inputW, peaksW, tablews)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputW, *peaksW, *tablews))
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) { // NOLINT
     PARALLEL_START_INTERUPT_REGION
     const Peak &peak = peaks[i];
@@ -104,7 +101,7 @@ void MaskPeaksWorkspace::exec() {
 
     // the detector component for the peak will have all pixels that we mask
     const string &bankName = peak.getBankName();
-    if (bankName.compare("None") == 0)
+    if (bankName == "None")
       continue;
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
     if (!comp) {
@@ -120,7 +117,7 @@ void MaskPeaksWorkspace::exec() {
     size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
     if (wi !=
         static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
-      this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wi));
+      this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wi));
       tofRangeSet = true;
     }
 
@@ -135,7 +132,7 @@ void MaskPeaksWorkspace::exec() {
           continue;
         spectra.insert(wj);
         if (!tofRangeSet) { // scope limit the workspace index
-          this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wj));
+          this->getTofRange(x0, xf, peak.getTOF(), m_inputW->x(wj));
           tofRangeSet = true;
         }
       }
@@ -255,7 +252,7 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
  */
 void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
                                      const double tofPeak,
-                                     const MantidVec &tof) {
+                                     const HistogramData::HistogramX &tof) {
   tofMin = tof.front();
   tofMax = tof.back() - 1;
   if (!isEmpty(m_tofMin)) {
@@ -269,7 +266,7 @@ int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 

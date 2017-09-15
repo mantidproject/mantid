@@ -1,22 +1,16 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidWorkflowAlgorithms/EQSANSLoad.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FileFinder.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 
 #include "Poco/DirectoryIterator.h"
@@ -24,9 +18,7 @@
 #include "Poco/NumberFormatter.h"
 #include "Poco/String.h"
 
-#include <iostream>
 #include <fstream>
-#include <istream>
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -95,6 +87,13 @@ void EQSANSLoad::init() {
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
                   "using the distance found in the meta data), in mm");
+  declareProperty("SampleOffset", EMPTY_DBL(),
+                  "Offset to be applied to the sample position (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty(
+      "DetectorOffset", EMPTY_DBL(),
+      "Offset to be applied to the detector position (use only when "
+      "using the distance found in the meta data), in mm");
   declareProperty("LoadMonitors", true,
                   "If true, the monitor workspace will be loaded");
   declareProperty("OutputMessage", "", Direction::Output);
@@ -110,10 +109,9 @@ double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
   Mantid::Kernel::PropertyWithValue<double> *dp =
       dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  if (!dp) {
+  if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " +
                              pname + " as a floating point numeric value.");
-  }
   return *dp;
 }
 
@@ -274,32 +272,45 @@ void EQSANSLoad::getSourceSlitSize() {
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
   Mantid::Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  Mantid::Kernel::TimeSeriesProperty<int> *ip =
+      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit1;
+  if (dp)
+    slit1 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit1 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit1Name + " as a time series property with "
-                                         "floating point values.");
-  }
-  int slit1 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   const std::string slit2Name = "vBeamSlit2";
   prop = dataWS->run().getProperty(slit2Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit2;
+  if (dp)
+    slit2 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit2 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit2Name + " as a time series property with "
-                                         "floating point values.");
-  }
-  int slit2 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   const std::string slit3Name = "vBeamSlit3";
   prop = dataWS->run().getProperty(slit3Name);
   dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  if (!dp) {
+  ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  int slit3;
+  if (dp)
+    slit3 = static_cast<int>(dp->getStatistics().mean);
+  else if (ip)
+    slit3 = static_cast<int>(ip->getStatistics().mean);
+  else
     throw std::runtime_error("Could not cast (interpret) the property " +
                              slit3Name + " as a time series property with "
-                                         "floating point values.");
-  }
-  int slit3 = static_cast<int>(dp->getStatistics().mean);
+                                         "int or floating point values.");
 
   if (slit1 < 0 && slit2 < 0 && slit3 < 0) {
     m_output_message += "   Could not determine source aperture diameter\n";
@@ -345,12 +356,13 @@ void EQSANSLoad::moveToBeamCenter() {
       dataWS->getInstrument()->getNumberParameter("number-of-x-pixels")[0]);
   int ny_pixels = static_cast<int>(
       dataWS->getInstrument()->getNumberParameter("number-of-y-pixels")[0]);
-  V3D pixel_first = dataWS->getInstrument()->getDetector(0)->getPos();
+  const auto &detInfo = dataWS->detectorInfo();
+  const V3D pixel_first = detInfo.position(detInfo.indexOf(0));
   int detIDx = EQSANSInstrument::getDetectorFromPixel(nx_pixels - 1, 0, dataWS);
   int detIDy = EQSANSInstrument::getDetectorFromPixel(0, ny_pixels - 1, dataWS);
 
-  V3D pixel_last_x = dataWS->getInstrument()->getDetector(detIDx)->getPos();
-  V3D pixel_last_y = dataWS->getInstrument()->getDetector(detIDy)->getPos();
+  const V3D pixel_last_x = detInfo.position(detInfo.indexOf(detIDx));
+  const V3D pixel_last_y = detInfo.position(detInfo.indexOf(detIDy));
   double x_offset = (pixel_first.X() + pixel_last_x.X()) / 2.0;
   double y_offset = (pixel_first.Y() + pixel_last_y.Y()) / 2.0;
   double beam_ctr_x = 0.0;
@@ -418,10 +430,9 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
     readSourceSlitSize(line);
   }
 
-  if (use_config_mask) {
+  if (use_config_mask)
     dataWS->mutableRun().addProperty("rectangular_masks", m_mask_as_string,
                                      "pixels", true);
-  }
 
   dataWS->mutableRun().addProperty("low_tof_cut", m_low_TOF_cut, "microsecond",
                                    true);
@@ -432,10 +443,9 @@ void EQSANSLoad::readConfigFile(const std::string &filePath) {
       " and upper " + Poco::NumberFormatter::format(m_high_TOF_cut) +
       " microsec\n";
 
-  if (m_moderator_position != 0) {
+  if (m_moderator_position != 0)
     dataWS->mutableRun().addProperty("moderator_position", m_moderator_position,
                                      "mm", true);
-  }
 }
 
 void EQSANSLoad::exec() {
@@ -444,12 +454,12 @@ void EQSANSLoad::exec() {
   // live data reduction (when it's implemented...)
   const std::string fileName = getPropertyValue("Filename");
   EventWorkspace_sptr inputEventWS = getProperty("InputWorkspace");
-  if (fileName.size() == 0 && !inputEventWS) {
+  if (fileName.empty() && !inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
                      "input workspace must be provided\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
                              "or an input workspace must be provided");
-  } else if (fileName.size() > 0 && inputEventWS) {
+  } else if (!fileName.empty() && inputEventWS) {
     g_log.error() << "EQSANSLoad input error: Either a valid file path or an "
                      "input workspace must be provided, but not both\n";
     throw std::runtime_error("EQSANSLoad input error: Either a valid file path "
@@ -487,11 +497,10 @@ void EQSANSLoad::exec() {
     reductionManager->declareProperty(std::move(loadProp));
   }
 
-  if (!reductionManager->existsProperty("InstrumentName")) {
+  if (!reductionManager->existsProperty("InstrumentName"))
     reductionManager->declareProperty(
         make_unique<PropertyWithValue<std::string>>("InstrumentName",
                                                     "EQSANS"));
-  }
 
   // Output log
   m_output_message = "";
@@ -519,13 +528,12 @@ void EQSANSLoad::exec() {
       Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
       MatrixWorkspace_sptr monWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-      if ((monWSOutput) && (!monWS)) {
+      if ((monWSOutput) && (!monWS))
         // this was a group workspace - EQSansLoad does not support multi period
         // data yet
         throw Exception::NotImplementedError("The file contains multi period "
                                              "data, support for this is not "
                                              "implemented in EQSANSLoad yet");
-      }
       declareProperty(Kernel::make_unique<WorkspaceProperty<>>(
                           "MonitorWorkspace", mon_wsname, Direction::Output),
                       "Monitors from the Event NeXus file");
@@ -546,11 +554,13 @@ void EQSANSLoad::exec() {
     }
   }
 
-  // Get the sample-detector distance
-  double sdd = 0.0;
-  const double sample_det_dist = getProperty("SampleDetectorDistance");
-  if (!isEmpty(sample_det_dist)) {
-    sdd = sample_det_dist;
+  // Get the sample flange-to-detector distance
+  // We have to call it "SampleDetectorDistance" in the workspace
+  double sfdd = 0.0;
+  double s2d = 0.0;
+  const double sampleflange_det_dist = getProperty("SampleDetectorDistance");
+  if (!isEmpty(sampleflange_det_dist)) {
+    sfdd = sampleflange_det_dist;
   } else {
     if (!dataWS->run().hasProperty("detectorZ")) {
       g_log.error()
@@ -565,32 +575,64 @@ void EQSANSLoad::exec() {
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(dzName);
     Mantid::Kernel::TimeSeriesProperty<double> *dp =
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-    if (!dp) {
+    if (!dp)
       throw std::runtime_error("Could not cast (interpret) the property " +
                                dzName + " as a time series property value.");
-    }
-    sdd = dp->getStatistics().mean;
+    sfdd = dp->getStatistics().mean;
 
-    // Modify SDD according to offset if given
+    // Modify SDD according to the DetectorDistance offset if given
+    const double sampleflange_det_offset = getProperty("DetectorOffset");
+    if (!isEmpty(sampleflange_det_offset))
+      sfdd += sampleflange_det_offset;
+
+    // Modify SDD according to SampleDetectorDistanceOffset offset if given.
+    // This is here for backward compatibility.
     const double sample_det_offset =
         getProperty("SampleDetectorDistanceOffset");
-    if (!isEmpty(sample_det_offset)) {
-      sdd += sample_det_offset;
+    if (!isEmpty(sample_det_offset))
+      sfdd += sample_det_offset;
+    if (!isEmpty(sample_det_offset) && !isEmpty(sampleflange_det_offset))
+      g_log.error() << "Both DetectorOffset and SampleDetectorDistanceOffset "
+                       "are set. Only one should be used.\n";
+
+    s2d = sfdd;
+    // Modify S2D according to the SampleDistance offset if given
+    // This assumes that a positive offset moves the sample toward the detector
+    const double sampleflange_sample_offset = getProperty("SampleOffset");
+    if (!isEmpty(sampleflange_sample_offset)) {
+      s2d -= sampleflange_sample_offset;
+
+      // Move the sample to its correct position
+      IAlgorithm_sptr mvAlg =
+          createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+      mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
+      mvAlg->setProperty("ComponentName", "sample-position");
+      mvAlg->setProperty("Z", sampleflange_sample_offset / 1000.0);
+      mvAlg->setProperty("RelativePosition", false);
+      mvAlg->executeAsChildAlg();
+      g_log.information() << "Moving sample to "
+                          << sampleflange_sample_offset / 1000.0 << " meters\n";
+      m_output_message += "   Sample position: " +
+                          Poco::NumberFormatter::format(
+                              sampleflange_sample_offset / 1000.0, 3) +
+                          " m\n";
     }
   }
-  dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
+  dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm",
+                                   true);
+  dataWS->mutableRun().addProperty("sample_detector_distance", s2d, "mm", true);
 
   // Move the detector to its correct position
   IAlgorithm_sptr mvAlg =
       createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
-  mvAlg->setProperty("Z", sdd / 1000.0);
+  mvAlg->setProperty("Z", sfdd / 1000.0);
   mvAlg->setProperty("RelativePosition", false);
   mvAlg->executeAsChildAlg();
-  g_log.information() << "Moving detector to " << sdd / 1000.0 << " meters\n";
+  g_log.information() << "Moving detector to " << sfdd / 1000.0 << " meters\n";
   m_output_message += "   Detector position: " +
-                      Poco::NumberFormatter::format(sdd / 1000.0, 3) + " m\n";
+                      Poco::NumberFormatter::format(sfdd / 1000.0, 3) + " m\n";
 
   // Get the run number so we can find the proper config file
   int run_number = 0;
@@ -609,13 +651,12 @@ void EQSANSLoad::exec() {
 
   // Process the config file
   bool use_config = getProperty("UseConfig");
-  if (use_config && config_file.size() > 0) {
+  if (use_config && !config_file.empty()) {
     // Special case to force reading the beam center from the config file
     // We're adding this to be compatible with the original EQSANS load
     // written in python
-    if (m_center_x == 0.0 && m_center_y == 0.0) {
+    if (m_center_x == 0.0 && m_center_y == 0.0)
       setProperty("UseConfigBeam", true);
-    }
 
     readConfigFile(config_file);
   } else if (use_config) {
@@ -735,9 +776,11 @@ void EQSANSLoad::exec() {
   }
 
   // Convert to wavelength
+  // Checked on 8/10/17 - changed from "sdd" to "sfdd" as was done above
+  // sfdd + ssd gives total distance (corrected by offset) from the source
   const double ssd =
       fabs(dataWS->getInstrument()->getSource()->getPos().Z()) * 1000.0;
-  const double conversion_factor = 3.9560346 / (sdd + ssd);
+  const double conversion_factor = 3.9560346 / (sfdd + ssd);
   m_output_message += "   TOF to wavelength conversion factor: " +
                       Poco::NumberFormatter::format(conversion_factor) + "\n";
 
@@ -789,7 +832,6 @@ void EQSANSLoad::exec() {
                                    getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>(
       "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
-  // m_output_message = "Loaded " + fileName + '\n' + m_output_message;
   setPropertyValue("OutputMessage", m_output_message);
 }
 

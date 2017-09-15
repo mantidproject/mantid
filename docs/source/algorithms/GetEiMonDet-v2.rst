@@ -9,11 +9,11 @@
 Description
 -----------
 
-This algorithm calculates the incident energy from the time-of-flight between one monitor and some detectors. The time information is extracted from the PeakCentre columns of the EPP workspaces. The FitSuccess column in the EPP tables is used to single out detectors without good quality elastic peaks: only detectors with ``success`` in the column are accepted. Monitor-to-sample and sample-to-detector distances are loaded from the instrument definition. Both the time and the distance data is averaged over the specified detectors. 
+This algorithm calculates the incident energy from the time-of-flight between one monitor and some detectors. The time information is extracted from the 'PeakCentre' columns of the EPP workspaces. The 'FitSuccess' column in the EPP tables is used to single out detectors without good quality elastic peaks: only detectors with ``success`` in the column are accepted. Monitor-to-sample and sample-to-detector distances are loaded from the instrument definition. Both the time and the distance data is averaged over the specified detectors. 
 
 The EPP tables can be produced using the :ref:`algm-FindEPP` algorithm.
 
-If no MonitorWorkspace is specified, the monitor spectrum is expected to be in the detector workspace.
+If no *MonitorWorkspace* is specified, the monitor spectrum is expected to be in the detector workspace.
 
 Specifying the detectors and monitor
 ####################################
@@ -23,7 +23,7 @@ The drop-down menu is used to specify what the numbers in the *Detectors* and *M
 Neutrons detected in later frames
 #################################
 
-It is possible that a neutron pulse is detected at the detectors in a later frame than at the monitor. These cases can be identified if the time-of-flight from the monitor to the detectors is negative or if the calculated incident energy would end up being too large. In these cases, the value of  the *PulseInterval* field is added to the time-of-flight until the result is satisfactory.
+It is possible that a neutron pulse is detected at the detectors in a later frame than at the monitor. These cases can be identified if the time-of-flight from the monitor to the detectors is negative or if the calculated incident energy would end up being too large. In these cases, the value of  the *PulseInterval* field (in micro seconds) is added to the time-of-flight until the result is satisfactory. If *PulseInterval* is not given, the algorithm uses the 'pulse_interval' sample log (in seconds) instead.
 
 To identify when the incident energy is within acceptable bounds, the algorithm applies simple heuristics. Basically, the final energy has to be within 20% of the *NominalIncidentEnergy* or within the *PulseInterval* corrected time-of-flight :math:`\pm` *PulseInterval* / 2.
 

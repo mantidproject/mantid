@@ -55,16 +55,14 @@ Output:
     wsOrder2Test = FFTDerivative(wsOrder1,Order=1)
 
     print "The direct 2nd order derivative and the derivative of a derivative should match"
-    print CheckWorkspacesMatch(wsOrder2,wsOrder2Test,CheckAllData=True,Tolerance=1e10)
+    print CompareWorkspaces(wsOrder2,wsOrder2Test,CheckAllData=True,Tolerance=1e10)[0]
 
 Output:
 
 .. testoutput:: ExFFTDerivOrderCheck2Ways
 
     The direct 2nd order derivative and the derivative of a derivative should match
-    Success!
-
-
+    True
 
 .. categories::
 

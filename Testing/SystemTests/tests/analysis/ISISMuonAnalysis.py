@@ -1,12 +1,16 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import math
 import stresstesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 #----------------------------------------------------------------------
-class ISISMuonAnalysis(stresstesting.MantidStressTest):
+
+
+class ISISMuonAnalysis(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply
@@ -24,7 +28,6 @@ class ISISMuonAnalysis(stresstesting.MantidStressTest):
         - rebin_fixed: Optional boolean to tell if the rebinning is in fixed steps.
         - rebin_params: A string containing the rebin parameters. See wiki rebin for more info.
     """
-    __metaclass__ = ABCMeta # Mark as an abstract class
 
     @abstractmethod
     def get_reference_file(self):
@@ -93,13 +96,12 @@ class ISISMuonAnalysis(stresstesting.MantidStressTest):
         """Check the object properties are
       in an expected state to continue
       """
-        if type(self.instr_name) != str:
+        if not isinstance(self.instr_name, str):
             raise RuntimeError("instr_name property should be a string")
-        if type(self.file_name) != str:
+        if not isinstance(self.file_name, str):
             raise RuntimeError("file_name property should be a string")
-        if type(self.period_data) != bool:
+        if not isinstance(self.period_data, bool):
             raise RuntimeError("period_data property should be a bool")
-
 
 
 #------------------------- ARGUS tests -------------------------------------------------
@@ -186,5 +188,3 @@ class MuSRAnalysisFromFile(ISISMuonAnalysis):
 
     def get_reference_file(self):
         return "MuSRAnalysis.nxs"
-
-

@@ -62,8 +62,10 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       // if the line doesn't start with a time treat it as a continuation of the
       // previous data
       if (change_times.empty() || isNumeric) { // if there are no previous data
-        std::string mess =
-            "Cannot parse log file " + logFName + ". Line:" + str;
+        std::string mess = std::string("Cannot parse log file ")
+                               .append(logFName)
+                               .append(". Line:")
+                               .append(str);
         g_log.error(mess);
         throw std::logic_error(mess);
       }
@@ -128,21 +130,22 @@ LogParser::CommandMap LogParser::createCommandMap(bool newStyle) const {
   CommandMap command_map;
 
   if (newStyle) {
-    command_map["START_COLLECTION"] = BEGIN;
-    command_map["STOP_COLLECTION"] = END;
-    command_map["CHANGE"] = CHANGE_PERIOD;
-    command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+    command_map["START_COLLECTION"] = commands::BEGIN;
+    command_map["STOP_COLLECTION"] = commands::END;
+    command_map["CHANGE"] = commands::CHANGE_PERIOD;
+    command_map["CHANGE_PERIOD"] = commands::CHANGE_PERIOD;
+    command_map["ABORT"] = commands::ABORT;
   } else {
-    command_map["BEGIN"] = BEGIN;
-    command_map["RESUME"] = BEGIN;
-    command_map["END_SE_WAIT"] = BEGIN;
-    command_map["PAUSE"] = END;
-    command_map["END"] = END;
-    command_map["ABORT"] = END;
-    command_map["UPDATE"] = END;
-    command_map["START_SE_WAIT"] = END;
-    command_map["CHANGE"] = CHANGE_PERIOD;
-    command_map["CHANGE_PERIOD"] = CHANGE_PERIOD;
+    command_map["BEGIN"] = commands::BEGIN;
+    command_map["RESUME"] = commands::BEGIN;
+    command_map["END_SE_WAIT"] = commands::BEGIN;
+    command_map["PAUSE"] = commands::END;
+    command_map["END"] = commands::END;
+    command_map["ABORT"] = commands::ABORT;
+    command_map["UPDATE"] = commands::END;
+    command_map["START_SE_WAIT"] = commands::END;
+    command_map["CHANGE"] = commands::CHANGE_PERIOD;
+    command_map["CHANGE_PERIOD"] = commands::CHANGE_PERIOD;
   }
   return command_map;
 }
@@ -218,11 +221,18 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
     std::istringstream idata(it->second);
     idata >> scom;
     commands com = command_map[scom];
-    if (com == CHANGE_PERIOD) {
+    if (com == commands::CHANGE_PERIOD) {
       tryParsePeriod(scom, it->first, idata, periods);
-    } else if (com == BEGIN) {
+    } else if (com == commands::BEGIN) {
       status->addValue(it->first, true);
-    } else if (com == END) {
+    } else if (com == commands::END) {
+      status->addValue(it->first, false);
+    } else if (com == commands::ABORT) {
+      // Set all previous values to false
+      const auto &times = status->timesAsVector();
+      const std::vector<bool> values(times.size(), false);
+      status->replaceValues(times, values);
+      // Add a new value at the present time
       status->addValue(it->first, false);
     }
   };

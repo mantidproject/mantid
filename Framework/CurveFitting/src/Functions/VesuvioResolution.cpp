@@ -1,11 +1,10 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <gsl/gsl_poly.h>
 
@@ -27,10 +26,6 @@ const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 // Register into factory
 DECLARE_FUNCTION(VesuvioResolution)
 
-//---------------------------------------------------------------------------
-// Static functions
-//---------------------------------------------------------------------------
-
 /**
 * @param ws The workspace with attached instrument
 * @param index Index of the spectrum
@@ -38,35 +33,26 @@ DECLARE_FUNCTION(VesuvioResolution)
 */
 ResolutionParams VesuvioResolution::getResolutionParameters(
     const API::MatrixWorkspace_const_sptr &ws, const size_t index) {
-  Geometry::IDetector_const_sptr detector;
-  try {
-    detector = ws->getDetector(index);
-  } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = ws->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(index))
     throw std::invalid_argument("VesuvioResolution - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(index));
-  }
 
   ResolutionParams respar;
   const auto &pmap = ws->constInstrumentParameters();
-  respar.dl1 =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l1");
-  respar.dl2 =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_l2");
-  respar.dtof =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_tof");
+  const auto &det = spectrumInfo.detector(index);
+  respar.dl1 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l1");
+  respar.dl2 = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_l2");
+  respar.dtof = ConvertToYSpace::getComponentParameter(det, pmap, "sigma_tof");
   respar.dthe = ConvertToYSpace::getComponentParameter(
-      detector, pmap, "sigma_theta"); // radians
+      det, pmap, "sigma_theta"); // radians
   respar.dEnLorentz =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "hwhm_lorentz");
+      ConvertToYSpace::getComponentParameter(det, pmap, "hwhm_lorentz");
   respar.dEnGauss =
-      ConvertToYSpace::getComponentParameter(detector, pmap, "sigma_gauss");
+      ConvertToYSpace::getComponentParameter(det, pmap, "sigma_gauss");
   return respar;
 }
-
-//---------------------------------------------------------------------------
-// Member functions
-//---------------------------------------------------------------------------
 
 VesuvioResolution::VesuvioResolution()
     : API::ParamFunction(), API::IFunction1D(), m_log("VesuvioResolution"),
@@ -77,9 +63,6 @@ VesuvioResolution::VesuvioResolution()
  * @returns A string containing the name of the function
  */
 std::string VesuvioResolution::name() const { return "VesuvioResolution"; }
-
-//-------------------------------------- Function evaluation
-//-----------------------------------------
 
 /*
  * Creates the internal caches

@@ -4,6 +4,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
 
+
 class LRSubtractAverageBackground(PythonAlgorithm):
 
     def category(self):
@@ -121,5 +122,6 @@ class LRSubtractAverageBackground(PythonAlgorithm):
             AnalysisDataService.remove(average_name)
 
         self.setProperty('OutputWorkspace', workspace)
+
 
 AlgorithmFactory.subscribe(LRSubtractAverageBackground)

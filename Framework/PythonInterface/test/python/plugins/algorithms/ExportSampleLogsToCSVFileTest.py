@@ -9,6 +9,7 @@ import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
+from six.moves import range
 
 class ExportVulcanSampleLogTest(unittest.TestCase):
 
@@ -334,7 +335,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             if i > 0:
                 numnorecord = random.randint(-1, 4)
                 if numnorecord > 0:
-                    for j in xrange(numnorecord):
+                    for j in range(numnorecord):
                         logindex = random.randint(0, 6)
                         skiploglist.append(logindex)
                     # ENDFOR (j)
@@ -344,7 +345,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             dbbuf += "----------- %d -------------\n" % (i)
 
             # Record
-            for j in xrange(4):
+            for j in range(4):
                 # Skip if selected
                 if j in skiploglist:
                     continue

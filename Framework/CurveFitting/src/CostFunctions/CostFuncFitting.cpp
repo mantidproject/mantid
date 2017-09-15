@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/GSLJacobian.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
@@ -16,7 +17,8 @@ namespace CostFunctions {
  * Constructor.
  */
 CostFuncFitting::CostFuncFitting()
-    : m_dirtyVal(true), m_dirtyDeriv(true), m_dirtyHessian(true) {}
+    : m_numberFunParams(0), m_dirtyVal(true), m_dirtyDeriv(true),
+      m_dirtyHessian(true) {}
 
 /**
  * Set all dirty flags.
@@ -44,6 +46,16 @@ void CostFuncFitting::setParameter(size_t i, const double &value) {
   setDirty();
 }
 
+/// Get parameter name.
+/// @param i :: Index of a cost function parameter. It may be
+/// different from the index of the same parameter in the fitting
+/// function.
+/// @return The name of the parameter as defined by the fitting function.
+std::string CostFuncFitting::parameterName(size_t i) const {
+  checkValidity();
+  return m_function->parameterName(m_indexMap[i]);
+}
+
 /// Number of parameters
 size_t CostFuncFitting::nParams() const {
   checkValidity();
@@ -64,23 +76,30 @@ void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
   m_function = function;
   m_domain = domain;
   m_values = values;
-  m_indexMap.clear();
-  for (size_t i = 0; i < m_function->nParams(); ++i) {
-    if (m_function->isActive(i)) {
-      m_indexMap.push_back(i);
-    }
-    API::IConstraint *c = m_function->getConstraint(i);
-    if (c) {
-      c->setParamToSatisfyConstraint();
-    }
-  }
+  reset();
 }
 
 /**
  * Is the function set and valid?
  */
 bool CostFuncFitting::isValid() const {
-  return m_function != API::IFunction_sptr();
+  if (m_function == API::IFunction_sptr()) {
+    return false;
+  }
+  if (m_function->nParams() != m_numberFunParams) {
+    reset();
+  }
+  auto nActive = m_indexMap.size();
+  for (size_t i = 0, j = 0; i < m_numberFunParams; ++i) {
+    if (m_function->isActive(i)) {
+      if (j >= nActive || m_indexMap[j] != i) {
+        reset();
+        break;
+      }
+      ++j;
+    }
+  }
+  return true;
 }
 
 /**
@@ -116,20 +135,19 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
   * @param epsrel :: Is used to remove linear-dependent columns
   */
 void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
+  checkValidity();
   GSLMatrix c;
   calActiveCovarianceMatrix(c, epsrel);
 
   size_t np = m_function->nParams();
 
   bool isTransformationIdentity = true;
-  size_t ii = 0;
   for (size_t i = 0; i < np; ++i) {
     if (!m_function->isActive(i))
       continue;
     isTransformationIdentity =
         isTransformationIdentity &&
         (m_function->activeParameter(i) == m_function->getParameter(i));
-    ++ii;
   }
 
   if (isTransformationIdentity) {
@@ -150,17 +168,18 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
  * @param chi2 :: The final chi-squared of the fit.
  */
 void CostFuncFitting::calFittingErrors(const GSLMatrix &covar, double chi2) {
+  checkValidity();
   size_t np = m_function->nParams();
   auto covarMatrix = boost::shared_ptr<Kernel::Matrix<double>>(
       new Kernel::Matrix<double>(np, np));
   size_t ia = 0;
   for (size_t i = 0; i < np; ++i) {
-    if (m_function->isFixed(i)) {
+    if (!m_function->isActive(i)) {
       m_function->setError(i, 0);
     } else {
       size_t ja = 0;
       for (size_t j = 0; j < np; ++j) {
-        if (!m_function->isFixed(j)) {
+        if (m_function->isActive(j)) {
           (*covarMatrix)[i][j] = covar.get(ia, ja);
           ++ja;
         }
@@ -185,7 +204,7 @@ void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
   tm.resize(na, na);
   size_t ia = 0;
   for (size_t i = 0; i < np; ++i) {
-    if (m_function->isFixed(i))
+    if (!m_function->isActive(i))
       continue;
     double p0 = m_function->getParameter(i);
     for (size_t j = 0; j < na; ++j) {
@@ -196,6 +215,59 @@ void CostFuncFitting::calTransformationMatrixNumerically(GSLMatrix &tm) {
       setParameter(j, ap);
     }
     ++ia;
+  }
+}
+
+/// Apply ties in the fitting function
+void CostFuncFitting::applyTies() {
+  if (m_function) {
+    m_function->applyTies();
+  }
+}
+
+/// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+void CostFuncFitting::reset() const {
+  m_numberFunParams = m_function->nParams();
+  m_indexMap.clear();
+  for (size_t i = 0; i < m_numberFunParams; ++i) {
+    if (m_function->isActive(i)) {
+      m_indexMap.push_back(i);
+    }
+    API::IConstraint *c = m_function->getConstraint(i);
+    if (c) {
+      c->setParamToSatisfyConstraint();
+    }
+  }
+  m_dirtyDeriv = true;
+  m_dirtyHessian = true;
+}
+
+/**
+ * Copy the parameter values from a GSLVector.
+ * @param params :: A vector to copy the parameters from
+ */
+void CostFuncFitting::setParameters(const GSLVector &params) {
+  auto np = nParams();
+  if (np != params.size()) {
+    throw Kernel::Exception::FitSizeWarning(params.size(), np);
+  }
+  for (size_t i = 0; i < np; ++i) {
+    setParameter(i, params.get(i));
+  }
+  m_function->applyTies();
+}
+
+/**
+ * Copy the parameter values to a GSLVector.
+ * @param params :: A vector to copy the parameters to
+ */
+void CostFuncFitting::getParameters(GSLVector &params) const {
+  auto np = nParams();
+  if (params.size() != np) {
+    params.resize(np);
+  }
+  for (size_t i = 0; i < np; ++i) {
+    params.set(i, getParameter(i));
   }
 }
 

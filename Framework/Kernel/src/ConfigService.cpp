@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/NetworkProxy.h"
@@ -26,11 +27,17 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include <Poco/URI.h>
-#ifdef _WIN32
-#pragma warning(disable : 4250)
-#endif
+
+#include <Poco/AutoPtr.h>
+#include <Poco/Channel.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/Exception.h>
+#include <Poco/Instantiator.h>
+#include <Poco/Pipe.h>
+#include <Poco/Platform.h>
+#include <Poco/String.h>
 #include <Poco/Logger.h>
-#include <Poco/SplitterChannel.h>
 #include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
@@ -38,7 +45,14 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/regex.hpp>
 
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <functional>
+#include <iostream>
+#include <stdexcept>
+#include <utility>
+#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -67,7 +81,7 @@ Logger g_log("ConfigService");
  * Split the supplied string on semicolons.
  *
  * @param path The path to split.
- * @returns vector containing the splitted path.
+ * @returns vector containing the split path.
  */
 std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
@@ -102,6 +116,12 @@ public:
 
   /** Constructor with a class to wrap
    *  @param F :: The object to wrap
+   *
+   * Note that this constructor can hide the copy constructor because it takes
+   * precedence over the copy constructor if supplied with a non-const
+   * WrappedObject argument. However, it just calls the base class copy
+   * constructor and sets m_pPtr, so the behaviour is the same as the copy
+   * constructor.
    */
   template <typename Field> explicit WrappedObject(Field &F) : T(F) {
     m_pPtr = static_cast<T *>(this);
@@ -112,6 +132,15 @@ public:
     m_pPtr = static_cast<T *>(this);
   }
 
+  /// Overloaded = operator sets the pointer to the wrapped class
+  /// and copies over the contents
+  WrappedObject<T> &operator=(const WrappedObject<T> &rhs) {
+    if (this != &rhs) {
+      m_pPtr = static_cast<T *>(this);
+      *m_pPtr = rhs;
+    }
+    return *this;
+  }
   /// Overloaded * operator returns the wrapped object pointer
   const T &operator*() const { return *m_pPtr; }
   /// Overloaded * operator returns the wrapped object pointer
@@ -160,28 +189,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       "StdoutChannel",
       new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
-  // Define the directory to search for the Mantid.properties file.
-  Poco::File f;
-
-  // First directory: the current working
-  m_strBaseDir = Poco::Path::current();
-  f = Poco::File(m_strBaseDir + m_properties_file_name);
-  if (!f.exists()) {
-    // Check the executable directory to see if it includes a mantid.properties
-    // file
-    m_strBaseDir = getDirectoryOfExecutable();
-    f = Poco::File(m_strBaseDir + m_properties_file_name);
-    if (!f.exists()) {
-      // Last, use the MANTIDPATH environment var
-      if (Poco::Environment::has("MANTIDPATH")) {
-        // Here we have to follow the convention of the rest of this code and
-        // add a trailing slash.
-        // Note: adding it to the MANTIDPATH itself will make other parts of the
-        // code crash.
-        m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
-      }
-    }
-  }
+  setBaseDirectory();
 
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
@@ -228,8 +236,6 @@ ConfigServiceImpl::ConfigServiceImpl()
     propertiesFilesList += ", " + getUserFilename();
   }
 
-  updateFacilities();
-
   g_log.debug() << "ConfigService created.\n";
   g_log.debug() << "Configured Mantid.properties directory of application as "
                 << getPropertiesDir() << '\n';
@@ -272,6 +278,14 @@ ConfigServiceImpl::ConfigServiceImpl()
   }
   // must update the cache of instrument paths
   cacheInstrumentPaths();
+
+  // update the facilities AFTER we have ensured that all of the directories are
+  // created and the paths updated
+  // if we don't do that first the function below will silently fail without
+  // initialising the facilities vector
+  // and Mantid will crash when it tries to access them, for example when
+  // creating the first time startup screen
+  updateFacilities();
 }
 
 /** Private Destructor
@@ -283,6 +297,55 @@ ConfigServiceImpl::~ConfigServiceImpl() {
   delete m_pSysConfig;
   delete m_pConf; // potential double delete???
   clearFacilities();
+}
+
+/**
+ * Set the base directory path so we can file the Mantid.properties file.
+ *
+ * This will search for the base directory that contains the .properties file
+ * by checking the following places:
+ *  - The current working directory
+ *  - The executable directory
+ *  - The directory defined by the MANTIDPATH enviroment var
+ *  - OSX only: the directory two directories up from the executable (which
+ *    is the base on the OSX package.
+ *
+ */
+void ConfigServiceImpl::setBaseDirectory() {
+  // Define the directory to search for the Mantid.properties file.
+  Poco::File f;
+
+  // First directory: the current working
+  m_strBaseDir = Poco::Path::current();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the executable directory to see if it includes a mantid.properties
+  // file
+  m_strBaseDir = getDirectoryOfExecutable();
+  f = Poco::File(m_strBaseDir + m_properties_file_name);
+  if (f.exists())
+    return;
+
+  // Check the MANTIDPATH environment var
+  if (Poco::Environment::has("MANTIDPATH")) {
+    // Here we have to follow the convention of the rest of this code and
+    // add a trailing slash.
+    // Note: adding it to the MANTIDPATH itself will make other parts of the
+    // code crash.
+    m_strBaseDir = Poco::Environment::get("MANTIDPATH") + "/";
+    f = Poco::File(m_strBaseDir + m_properties_file_name);
+    if (f.exists())
+      return;
+  }
+
+#ifdef __APPLE__
+  // Finally, on OSX check if we're in the package directory and the .properties
+  // file just happens to be two directories up
+  auto path = Poco::Path(getDirectoryOfExecutable());
+  m_strBaseDir = path.parent().parent().parent().toString();
+#endif
 }
 
 /** Loads the config file provided.
@@ -309,7 +372,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     bool good = readFile(filename, temp);
 
     // check if we have failed to open the file
-    if ((!good) || (temp == "")) {
+    if ((!good) || (temp.empty())) {
       if (filename == getUserPropertiesDir() + m_user_properties_file_name) {
         // write out a fresh file
         createUserPropertiesFile();
@@ -319,7 +382,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     }
 
     // store the property string
-    if ((append) && (m_PropertyString != "")) {
+    if ((append) && (!m_PropertyString.empty())) {
       m_PropertyString = m_PropertyString + "\n" + temp;
     } else {
       m_PropertyString = temp;
@@ -829,7 +892,7 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
       // If it does exist make sure the value is current
       std::string value = getString(key, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
-      updated_file += key + "=" + value;
+      updated_file.append(key).append("=").append(value);
       // Remove the key from the changed key list
       m_changed_keys.erase(key);
     }
@@ -929,9 +992,9 @@ void ConfigServiceImpl::getKeysRecursive(
   for (auto &rootKey : rootKeys) {
     std::string searchString;
     if (root.empty()) {
-      searchString = rootKey;
+      searchString.append(rootKey);
     } else {
-      searchString = root + "." + rootKey;
+      searchString.append(root).append(".").append(rootKey);
     }
 
     getKeysRecursive(searchString, allKeys);
@@ -1594,6 +1657,15 @@ const std::vector<std::string> &ConfigServiceImpl::getUserSearchDirs() const {
 }
 
 /**
+* Sets the search directories for XML instrument definition files (IDFs)
+* @param directories An ordered list of paths for instrument searching
+*/
+void ConfigServiceImpl::setInstrumentDirectories(
+    const std::vector<std::string> &directories) {
+  m_InstrumentDirs = directories;
+}
+
+/**
  * Return the search directories for XML instrument definition files (IDFs)
  * @returns An ordered list of paths for instrument searching
  */
@@ -1627,19 +1699,26 @@ const std::string ConfigServiceImpl::getVTPFileDirectory() {
   return directoryName;
 }
 /**
- * Fills the internal cache of instrument definition directories
+ * Fills the internal cache of instrument definition directories and creates
+ * The %appdata%/mantidproject/mantid or $home/.mantid directory.
+ *
+ * This will normally contain from Index 0
+ * - The download directory (win %appdata%/mantidproject/mantid/instrument)
+ *   (linux $home/.mantid/instrument )
+ * - The user instrument area /etc/mantid/instrument (not on windows)
+ * - The install directory/instrument
  */
 void ConfigServiceImpl::cacheInstrumentPaths() {
   m_InstrumentDirs.clear();
+
   Poco::Path path(getAppDataDir());
   path.makeDirectory();
   path.pushDirectory("instrument");
-  std::string appdatadir = path.toString();
+  const std::string appdatadir = path.toString();
   addDirectoryifExists(appdatadir, m_InstrumentDirs);
 
 #ifndef _WIN32
-  std::string etcdatadir = "/etc/mantid/instrument";
-  addDirectoryifExists(etcdatadir, m_InstrumentDirs);
+  addDirectoryifExists("/etc/mantid/instrument", m_InstrumentDirs);
 #endif
 
   // Determine the search directory for XML instrument definition files (IDFs)
@@ -1680,53 +1759,96 @@ bool ConfigServiceImpl::addDirectoryifExists(
   }
 }
 
+std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
+  // first try the supplied file
+  if (!fName.empty()) {
+    const Poco::File fileObj(fName);
+    if (fileObj.exists()) {
+      return fName;
+    }
+  }
+
+  // search all of the instrument directories
+  const std::vector<std::string> directoryNames = getInstrumentDirectories();
+
+  // only use downloaded instruments if configured to download
+  const std::string updateInstrStr =
+      this->getString("UpdateInstrumentDefinitions.OnStartup");
+
+  auto instrDir = directoryNames.begin();
+
+  // If we are not updating the instrument definitions
+  // update the iterator, this means we will skip the folder in HOME and
+  // look in the instrument folder in mantid install directory or mantid source
+  // code directory
+  if (updateInstrStr != "1" || updateInstrStr != "on" ||
+      updateInstrStr != "On") {
+    instrDir++;
+  }
+
+  // look through all the possible files
+  for (; instrDir != directoryNames.end(); ++instrDir) {
+    std::string filename = (*instrDir) + "Facilities.xml";
+
+    Poco::File fileObj(filename);
+    // stop when you find the first one
+    if (fileObj.exists())
+      return filename;
+  }
+
+  // getting this far means the file was not found
+  std::string directoryNamesList = boost::algorithm::join(directoryNames, ", ");
+  throw std::runtime_error("Failed to find \"Facilities.xml\". Searched in " +
+                           directoryNamesList);
+}
+
 /**
  * Load facility information from instrumentDir/Facilities.xml file if fName
- * parameter
- * is not set
+ * parameter is not set.
+ *
+ * If any of the steps fail, we cannot sensibly recover, because the
+ * Facilities.xml file is missing or corrupted.
+ *
  * @param fName :: An alternative file name for loading facilities information.
+ * @throws std::runtime_error :: If the file is not found or fails to parse
  */
 void ConfigServiceImpl::updateFacilities(const std::string &fName) {
   clearFacilities();
 
-  std::string instrDir = getString("instrumentDefinition.directory");
-  std::string fileName = fName.empty() ? instrDir + "Facilities.xml" : fName;
+  // Try to find the file. If it does not exist we will crash, and cannot read
+  // the Facilities file
+  std::string fileName = getFacilityFilename(fName);
 
   // Set up the DOM parser and parse xml file
-  Poco::XML::DOMParser pParser;
   Poco::AutoPtr<Poco::XML::Document> pDoc;
-
   try {
-    try {
-      pDoc = pParser.parse(fileName);
-    } catch (...) {
-      throw Kernel::Exception::FileError("Unable to parse file:", fileName);
-    }
-    // Get pointer to root element
-    Poco::XML::Element *pRootElem = pDoc->documentElement();
-    if (!pRootElem->hasChildNodes()) {
-      throw std::runtime_error("No root element in Facilities.xml file");
-    }
+    Poco::XML::DOMParser pParser;
+    pDoc = pParser.parse(fileName);
+  } catch (...) {
+    throw Kernel::Exception::FileError("Unable to parse file:", fileName);
+  }
 
-    Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
-        pRootElem->getElementsByTagName("facility");
-    unsigned long n = pNL_facility->length();
+  // Get pointer to root element
+  Poco::XML::Element *pRootElem = pDoc->documentElement();
+  if (!pRootElem->hasChildNodes()) {
+    throw std::runtime_error("No root element in Facilities.xml file");
+  }
 
-    for (unsigned long i = 0; i < n; ++i) {
-      Poco::XML::Element *elem =
-          dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
-      if (elem) {
-        m_facilities.push_back(new FacilityInfo(elem));
-      }
+  Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
+      pRootElem->getElementsByTagName("facility");
+  size_t n = pNL_facility->length();
+
+  for (unsigned long i = 0; i < n; ++i) {
+    Poco::XML::Element *elem =
+        dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+    if (elem) {
+      m_facilities.push_back(new FacilityInfo(elem));
     }
+  }
 
-    if (m_facilities.empty()) {
-      throw std::runtime_error("The facility definition file " + fileName +
-                               " defines no facilities");
-    }
-
-  } catch (std::exception &e) {
-    g_log.error(e.what());
+  if (m_facilities.empty()) {
+    throw std::runtime_error("The facility definition file " + fileName +
+                             " defines no facilities");
   }
 }
 

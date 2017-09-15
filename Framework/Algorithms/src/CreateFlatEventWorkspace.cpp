@@ -101,7 +101,7 @@ void CreateFlatEventWorkspace::exec() {
   MatrixWorkspace_sptr tmpChunkWs =
       boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
 
-  Progress progress(this, 0, 1, nRegions);
+  Progress progress(this, 0.0, 1.0, nRegions);
 
   for (int i = 0; i < nRegions; ++i) {
 

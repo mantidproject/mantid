@@ -27,6 +27,7 @@ public:
     double get(size_t iY, size_t iP) override {
       return m_buffer[iY * m_nParams + iP];
     }
+    void zero() override { m_buffer.assign(m_buffer.size(), 0.0); }
   };
 
   void testIt() {

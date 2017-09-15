@@ -6,6 +6,10 @@
 namespace Mantid {
 namespace API {
 
+/// The constructor
+FunctionDomain1D::FunctionDomain1D(const double *x, size_t n)
+    : m_data(x), m_n(n), m_peakRadius(0) {}
+
 /// Convert to a vector
 std::vector<double> FunctionDomain1D::toVector() const {
   std::vector<double> res;
@@ -14,6 +18,17 @@ std::vector<double> FunctionDomain1D::toVector() const {
   }
   return res;
 }
+
+/**
+ * Set a peak redius to pass to peak functions.
+ * @param radius :: New radius value.
+ */
+void FunctionDomain1D::setPeakRadius(int radius) { m_peakRadius = radius; }
+
+/**
+ * Get the peak radius.
+ */
+int FunctionDomain1D::getPeakRadius() const { return m_peakRadius; }
 
 /**
   * Create a domain from a vector.

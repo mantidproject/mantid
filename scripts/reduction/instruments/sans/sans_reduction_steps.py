@@ -2,6 +2,7 @@
 """
     Implementation of reduction steps for SANS
 """
+from __future__ import (absolute_import, division, print_function)
 import math
 import pickle
 from reduction import ReductionStep
@@ -56,10 +57,10 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
-        beam_x, beam_y, msg = SANSBeamFinder(Filename=self._datafile, \
-                                             UseDirectBeamMethod=direct_beam, \
-                                             BeamRadius=self._beam_radius, \
-                                             PersistentCorrection=self._persistent, \
+        beam_x, beam_y, msg = SANSBeamFinder(Filename=self._datafile,
+                                             UseDirectBeamMethod=direct_beam,
+                                             BeamRadius=self._beam_radius,
+                                             PersistentCorrection=self._persistent,
                                              ReductionProperties=reducer.get_reduction_table_name())
 
         self._beam_center_x = beam_x
@@ -223,10 +224,6 @@ class Mask(ReductionStep):
             @param complement: mask in the direction of the normal or away
             @return the xml string
         """
-        if complement:
-            addition = '#'
-        else:
-            addition = ''
         return '<infinite-plane id="' + str(id) + '">' + \
                '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + \
                '" />' + '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + \
@@ -309,7 +306,7 @@ class Mask(ReductionStep):
             mask_str = run.getProperty("rectangular_masks").value
             try:
                 rectangular_masks = pickle.loads(mask_str)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 rectangular_masks = []
                 toks = mask_str.split(',')
                 for item in toks:
@@ -320,7 +317,7 @@ class Mask(ReductionStep):
             for rec in rectangular_masks:
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
-                except (StandardError, Warning):
+                except (Exception, Warning):
                     mantid.logger.notice("Badly defined mask from configuration file: %s" % str(rec))
 
         for shape in self._xml:
@@ -557,9 +554,9 @@ class ConvertToQ(ReductionStep):
         if (not self._grav_set) or override:
             self._use_gravity = bool(flag)
         else:
-            msg = "User file can't override previous gravity setting, do gravity correction remains " + str(
-                self._use_gravity)
-            print msg
+            msg = "User file can't override previous gravity setting, do gravity correction remains " \
+                  + str(self._use_gravity)
+            print(msg)
             sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
@@ -613,7 +610,7 @@ class ConvertToQ(ReductionStep):
             try:
                 if AnalysisDataService.doesExist(wk):
                     AnalysisDataService.remove(wk)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if the workspace can't be deleted this function does nothing
                 pass
 
@@ -707,7 +704,7 @@ class GetSampleGeom(ReductionStep):
         self._use_wksp_height = False
 
         # For a cylinder and sphere the height=width=radius
-        if (not self._shape is None) and (self._shape.startswith('cylinder')):
+        if (self._shape is not None) and (self._shape.startswith('cylinder')):
             self._width = self._height
         self._use_wksp_widtht = False
 

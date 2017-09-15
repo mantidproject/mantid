@@ -13,6 +13,7 @@
 #information.
 #
 #
+from __future__ import (absolute_import, division, print_function)
 import time
 
 import stresstesting
@@ -20,6 +21,7 @@ import stresstesting
 import os
 from mantid.api import *
 from mantid.simpleapi import *
+
 
 class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
@@ -34,7 +36,6 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     def runTest(self):
         start_time = time.time()
-
 
         instrument_name             = "TOPAZ"
         calibration_file_1          = "TOPAZ_2011_02_16.DetCal"
@@ -79,7 +80,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
         full_name = instrument_name + "_" + (run) + "_event.nxs"
 
-        print "\nProcessing File: " + full_name + " ......\n"
+        print("\nProcessing File: " + full_name + " ......\n")
 
 #
 # Name the files to write for this run
@@ -104,7 +105,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
                                             StartWorkspaceIndex=monitor_index, EndWorkspaceIndex=monitor_index)
 
         monitor_count = integrated_monitor_ws.dataY(0)[0]
-        print "\n", run, " has calculated monitor count", monitor_count, "\n"
+        print("\n", run, " has calculated monitor count", monitor_count, "\n")
 
 #
 # Make MD workspace using Lorentz correction, to find peaks
@@ -121,7 +122,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         peaks_ws = FindPeaksMD( MDEW, MaxPeaks=num_peaks_to_find,
                                 PeakDistanceThreshold=distance_threshold )
 
-        AnalysisDataService.remove( MDEW.getName() )
+        AnalysisDataService.remove( MDEW.name() )
 #      SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
 #               Filename='A'+run_niggli_integrate_file )
 #
@@ -144,13 +145,13 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # PeakIntegration algorithm.
 #
         if integrate_predicted_peaks:
-            print "PREDICTING peaks to integrate...."
+            print("PREDICTING peaks to integrate....")
             peaks_ws = PredictPeaks(InputWorkspace=peaks_ws,
                                     WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,
                                     MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,
                                     ReflectionCondition='Primitive' )
         else:
-            print "Only integrating FOUND peaks ...."
+            print("Only integrating FOUND peaks ....")
 #
 # Set the monitor counts for all the peaks that will be integrated
 #
@@ -195,7 +196,7 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 # If requested, also switch to the specified conventional cell and save the
 # corresponding matrix and integrate file
 #
-        if (not cell_type is None) and (not centering is None) :
+        if (cell_type is not None) and (centering is not None) :
             self.run_conventional_matrix_file = self.output_directory + "/" + run + "_" +    \
                                  cell_type + "_" + centering + ".mat"
         #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
@@ -211,7 +212,6 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         end_time = time.time()
 
         CreateSingleValuedWorkspace(OutputWorkspace="XX1",DataValue="3")
-
 
         LoadIsawUB(InputWorkspace="XX1",Filename=self.run_conventional_matrix_file )
         s1 = mtd["XX1"].sample()
@@ -234,8 +234,8 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
         self.__reduced_ws_name = str(peaks_ws)
 
-        print '\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec'
-        print ["output directory=",self.output_directory]
+        print('\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec')
+        print(["output directory=",self.output_directory])
 
     def cleanup(self):
         if self.saved:
@@ -246,4 +246,3 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     def validate(self):
         return [self.__reduced_ws_name,'PeaksP']
-

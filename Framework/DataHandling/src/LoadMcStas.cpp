@@ -433,7 +433,8 @@ void LoadMcStas::readHistogramData(
       nxFile.closeData();
     }
 
-    std::vector<double> axis1Values, axis2Values;
+    std::vector<double> axis1Values;
+    std::vector<double> axis2Values;
     nxFile.readData<double>(axis1Name, axis1Values);
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
@@ -483,17 +484,17 @@ void LoadMcStas::readHistogramData(
     ws->replaceAxis(1, axis2);
 
     for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
-      auto &dataY = ws->dataY(wsIndex);
-      auto &dataE = ws->dataE(wsIndex);
-      auto &dataX = ws->dataX(wsIndex);
+      auto &dataX = ws->mutableX(wsIndex);
+      auto &dataY = ws->mutableY(wsIndex);
+      auto &dataE = ws->mutableE(wsIndex);
 
       for (size_t j = 0; j < axis1Length; ++j) {
         // Data is stored in column-major order so we are translating to
         // row major for Mantid
         const size_t fileDataIndex = j * axis2Length + wsIndex;
 
-        dataY[j] = data[fileDataIndex];
         dataX[j] = axis1Values[j];
+        dataY[j] = data[fileDataIndex];
         if (!errors.empty())
           dataE[j] = errors[fileDataIndex];
       }
@@ -509,8 +510,9 @@ void LoadMcStas::readHistogramData(
 
     // ensure that specified name is given to workspace (eventWS) when added to
     // outputGroup
-    std::string nameOfGroupWS = getProperty("OutputWorkspace");
-    std::string nameUserSee = nameAttrValueTITLE + "_" + nameOfGroupWS;
+    std::string nameUserSee = std::string(nameAttrValueTITLE)
+                                  .append("_")
+                                  .append(getProperty("OutputWorkspace"));
     std::string extraProperty =
         "Outputworkspace_dummy_" + std::to_string(m_countNumWorkspaceAdded);
     declareProperty(Kernel::make_unique<WorkspaceProperty<Workspace>>(

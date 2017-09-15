@@ -435,7 +435,7 @@ bool observePeakParameters(DataObjects::Workspace2D_sptr dataws, size_t wsindex,
                            std::string &errmsg);
 
 /// Find maximum value
-size_t findMaxValue(const Mantid::MantidVec Y);
+size_t findMaxValue(const std::vector<double> &Y);
 
 /// Find maximum value
 size_t findMaxValue(API::MatrixWorkspace_sptr dataws, size_t wsindex,

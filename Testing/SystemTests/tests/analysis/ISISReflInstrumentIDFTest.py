@@ -3,14 +3,15 @@
 These system tests are to verify that the IDF and parameter files for POLREF, CRISP, INTER and SURF are read properly
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
-class ISISReflInstrumentIDFTest(stresstesting.MantidStressTest):
 
-    __metaclass__ = ABCMeta # Mark as an abstract class
+class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     @abstractmethod
     def get_IDF_name(self):
@@ -38,21 +39,29 @@ class ISISReflInstrumentIDFTest(stresstesting.MantidStressTest):
         return True
 
 # Specialisation for testing POLREF
+
+
 class POLREF_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "POLREF_Definition.xml"
 
 # Specialisation for testing INTER
+
+
 class INTER_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "INTER_Definition.xml"
 
 # Specialisation for testing SURF
+
+
 class SURF_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "SURF_Definition.xml"
 
 # Specialisation for testing CRISP
+
+
 class CRISP_ISISReflInstrumentIDFTest(ISISReflInstrumentIDFTest):
     def get_IDF_name(self):
         return "CRISP_Definition.xml"

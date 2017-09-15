@@ -1,21 +1,19 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataHandling/XmlHandler.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -39,8 +37,6 @@
 #include <string>
 #include <vector>
 #include <utility>
-
-//-----------------------------------------------------------------------
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -83,9 +79,9 @@ bool from_string(T &t, const std::string &s,
  */
 void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
                  double error, double wavelength, double dwavelength) {
-  MantidVec &X = ws->dataX(specID);
-  MantidVec &Y = ws->dataY(specID);
-  MantidVec &E = ws->dataE(specID);
+  auto &X = ws->mutableX(specID);
+  auto &Y = ws->mutableY(specID);
+  auto &E = ws->mutableE(specID);
   // The following is mostly to make Mantid happy by defining a histogram with
   // a single bin around the neutron wavelength
   X[0] = wavelength - dwavelength / 2.0;
@@ -102,7 +98,7 @@ void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
  * be used
  */
 int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
-  if (descriptor.extension().compare(".xml") != 0)
+  if (descriptor.extension() != ".xml")
     return 0;
 
   std::istream &is = descriptor.data();
@@ -127,7 +123,7 @@ int LoadSpice2D::confidence(Kernel::FileDescriptor &descriptor) const {
     // Get pointer to root element
     Element *pRootElem = pDoc->documentElement();
     if (pRootElem) {
-      if (pRootElem->tagName().compare("SPICErack") == 0) {
+      if (pRootElem->tagName() == "SPICErack") {
         confidence = 80;
       }
     }
@@ -172,6 +168,8 @@ void LoadSpice2D::exec() {
   setTimes();
   std::map<std::string, std::string> metadata =
       m_xmlHandler.get_metadata("Detector");
+
+  setSansSpiceXmlFormatVersion(metadata);
   setWavelength(metadata);
 
   std::vector<int> data = getData("//Data");
@@ -318,7 +316,8 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
 
   // iterate every detector in the xml file
   for (const auto &detector : detectors) {
-    std::string detectorXpath = dataXpath + "/" + detector;
+    std::string detectorXpath =
+        std::string(dataXpath).append("/").append(detector);
     // type : INT32[192,256]
     std::map<std::string, std::string> attributes =
         m_xmlHandler.get_attributes_from_tag(detectorXpath);
@@ -469,6 +468,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
 
   // store trap diameters in use
   std::vector<double> trapDiametersInUse;
+  trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
     trapDiametersInUse.push_back(trapDiameters[index]);
   }
@@ -507,6 +507,18 @@ void LoadSpice2D::setMetadataAsRunProperties(
   m_workspace->mutableRun().setStartAndEndTime(m_startTime, m_endTime);
 
   // sample thickness
+  // XML 1.03: source distance is now in meters
+  double sample_thickness;
+  from_string<double>(sample_thickness, metadata["Header/Sample_Thickness"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug()
+        << "sans_spice_xml_format_version >= 1.03 :: sample_thickness "
+           "in mm. Converting to cm...";
+    sample_thickness *= 0.1;
+  }
+  addRunProperty<double>("sample-thickness", sample_thickness, "cm");
+
   addRunProperty<double>(metadata, "Header/Sample_Thickness",
                          "sample-thickness", "mm");
 
@@ -514,13 +526,25 @@ void LoadSpice2D::setMetadataAsRunProperties(
                          "source-aperture-diameter", "mm");
   addRunProperty<double>(metadata, "Header/sample_aperture_size",
                          "sample-aperture-diameter", "mm");
-  addRunProperty<double>(metadata, "Header/source_distance",
-                         "source-sample-distance", "mm");
+
+  // XML 1.03: source distance is now in meters
+  double source_distance;
+  from_string<double>(source_distance, metadata["Header/source_distance"],
+                      std::dec);
+  if (m_sansSpiceXmlFormatVersion >= 1.03) {
+    g_log.debug() << "sans_spice_xml_format_version >= 1.03 :: source_distance "
+                     "in meters. Converting to mm...";
+    source_distance *= 1000.0;
+  }
+  addRunProperty<double>("source-sample-distance", source_distance, "mm");
+
   addRunProperty<int>(metadata, "Motor_Positions/nguides", "number-of-guides",
                       "");
 
   addRunProperty<double>("wavelength", m_wavelength, "Angstrom");
   addRunProperty<double>("wavelength-spread", m_dwavelength, "Angstrom");
+  addRunProperty<double>("wavelength-spread-ratio",
+                         m_dwavelength / m_wavelength);
 
   addRunProperty<double>(metadata, "Counters/monitor", "monitor", "");
   addRunProperty<double>(metadata, "Counters/time", "timer", "sec");
@@ -721,6 +745,23 @@ void LoadSpice2D::rotateDetector(const double &angle) {
 
   p->addValue(DateAndTime::getCurrentTime(), angle);
   runDetails.addLogData(p);
+}
+
+/***
+ * 2016/11/09 : There is a new tag sans_spice_xml_format_version in the XML
+ * It identifies changes in the XML format.
+ * Useful to test tags rather than using the date.
+ * @param metadata
+ */
+void LoadSpice2D::setSansSpiceXmlFormatVersion(
+    std::map<std::string, std::string> &metadata) {
+
+  if (metadata.find("Header/sans_spice_xml_format_version") != metadata.end()) {
+    m_sansSpiceXmlFormatVersion = boost::lexical_cast<double>(
+        metadata["Header/sans_spice_xml_format_version"]);
+  }
+  g_log.debug() << "Sans_spice_xml_format_version == "
+                << m_sansSpiceXmlFormatVersion << "\n";
 }
 }
 }

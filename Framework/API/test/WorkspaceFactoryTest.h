@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -32,6 +34,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite {
       size.push_back(YLength);
       WorkspaceTester::init(NVectors, XLength, YLength);
     }
+    using WorkspaceTester::init;
     std::vector<size_t> size;
   };
 

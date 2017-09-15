@@ -35,10 +35,12 @@
 #include "ApplicationWindow.h"
 #include "Mantid/MantidUI.h"
 
-#include <QApplication>
-#include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/StringTokenizer.h"
+
+#include <QApplication>
+#include <Qsci/qscilexerpython.h>
 
 #include <cassert>
 
@@ -67,7 +69,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
     : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL) {}
+      m_sys(NULL), m_mainThreadState(NULL), m_gil() {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -75,8 +77,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL gil;
-
+  ScopedPythonGIL lock(gil());
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);
@@ -117,10 +118,10 @@ void PythonScripting::redirectStdOut(bool on) {
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
   } else {
-    PyDict_SetItemString(m_sys, "stdout",
-                         PyDict_GetItemString(m_sys, "__stdout__"));
-    PyDict_SetItemString(m_sys, "stderr",
-                         PyDict_GetItemString(m_sys, "__stderr__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stdout"),
+                   PyDict_GetItemString(m_sys, "__stdout__"));
+    PyDict_SetItem(m_sys, FROM_CSTRING("stderr"),
+                   PyDict_GetItemString(m_sys, "__stderr__"));
   }
 }
 
@@ -136,9 +137,8 @@ bool PythonScripting::start() {
 #else
   PyImport_AppendInittab("_qti", &init_qti);
 #endif
-  Py_Initialize();
-  // Assume this is called at startup by the the main thread so no GIL
-  // required...yet
+  PythonInterpreter::initialize();
+  ScopedPythonGIL lock(gil());
 
   // Keep a hold of the globals, math and sys dictionary objects
   PyObject *mainmod = PyImport_AddModule("__main__");
@@ -188,20 +188,6 @@ bool PythonScripting::start() {
   } else {
     d_initialized = false;
   }
-  if (d_initialized) {
-    // We will be using C threads created outside of the Python threading module
-    // so we need the GIL. This creates and acquires the lock for this thread
-    PyEval_InitThreads();
-    // We immediately release the lock and threadstate so that other points in
-    // the code can simply use the PyGILstate_Ensure/PyGILstate_Release()
-    // mechanism (through the ScopedPythonGIL class) and they don't
-    // need to worry about swapping out the threadstate before hand.
-    // It would be better if the ScopedPythonGIL handled this but
-    // PyEval_SaveThread() needs to be called in the thread that spawns the
-    // new C thread meaning that ScopedPythonGIL could no longer
-    // be used as a simple RAII class on the stack from within the new thread.
-    m_mainThreadState = PyEval_SaveThread();
-  }
   return d_initialized;
 }
 
@@ -209,9 +195,12 @@ bool PythonScripting::start() {
  * Shutdown the interpreter
  */
 void PythonScripting::shutdown() {
-  PyEval_RestoreThread(m_mainThreadState);
+  // The scoped lock cannot be used here as after the
+  // finalize call no Python code can execute.
+  PythonGIL gil;
+  gil.acquire();
   Py_XDECREF(m_math);
-  Py_Finalize();
+  PythonInterpreter::finalize();
 }
 
 void PythonScripting::setupPythonPath() {
@@ -221,6 +210,7 @@ void PythonScripting::setupPythonPath() {
 //     behaviour of the vanilla python interpreter
 //   - the directory of MantidPlot is added after this to find our bundled
 //   - modules
+//
 #if PY_MAJOR_VERSION >= 3
   PyObject *syspath = PySys_GetObject("path");
 #else
@@ -228,8 +218,29 @@ void PythonScripting::setupPythonPath() {
   PyObject *syspath = PySys_GetObject(&path[0]);
 #endif
   PyList_Insert(syspath, 0, FROM_CSTRING(""));
-  // This should contain only / separators
+
   const auto appPath = ConfigService::Instance().getPropertiesDir();
+
+  // These should contain only / separators
+  // Python paths required by VTK and ParaView
+  const auto pvPythonPaths =
+      ConfigService::Instance().getString("paraview.pythonpaths");
+
+  if (!pvPythonPaths.empty()) {
+    Mantid::Kernel::StringTokenizer tokenizer(
+        pvPythonPaths, ";", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY |
+                                Mantid::Kernel::StringTokenizer::TOK_TRIM);
+    for (const auto &pvPath : tokenizer) {
+      if (pvPath.substr(0, 3) == "../") {
+        std::string fullPath = appPath + pvPath;
+        PyList_Insert(syspath, 1, FROM_CSTRING(fullPath.c_str()));
+      } else {
+        PyList_Insert(syspath, 1, FROM_CSTRING(pvPath.c_str()));
+      }
+    }
+  }
+
+  // MantidPlot Directory
   PyList_Insert(syspath, 1, FROM_CSTRING(appPath.c_str()));
 }
 
@@ -324,10 +335,10 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   if (!sipAPI__qti->api_find_class) {
     throw std::runtime_error("sipAPI_qti->api_find_class is undefined");
   }
-  sipWrapperType *klass = sipFindClass(val->metaObject()->className());
+  const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromInstance(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, NULL);
 
   if (!pyobj)
     return false;

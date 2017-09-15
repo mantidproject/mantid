@@ -296,7 +296,6 @@ void FunctionDialog::acceptFunction() {
     parser.DefineVar("x", &x);
     parser.SetExpr(formula.toAscii().constData());
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     x = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
@@ -370,7 +369,6 @@ void FunctionDialog::acceptParametric() {
     parser.DefineVar((boxParameter->text()).toAscii().constData(), &parameter);
     parser.SetExpr(xformula.toAscii().constData());
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
@@ -385,7 +383,6 @@ void FunctionDialog::acceptParametric() {
     parser.DefineVar((boxParameter->text()).toAscii().constData(), &parameter);
     parser.SetExpr(yformula.toAscii().constData());
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
@@ -464,7 +461,6 @@ void FunctionDialog::acceptPolar() {
                      &parameter);
     parser.SetExpr(rformula.toAscii().constData());
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
@@ -481,7 +477,6 @@ void FunctionDialog::acceptPolar() {
                      &parameter);
     parser.SetExpr(tformula.toAscii().constData());
     parser.Eval();
-    // cppcheck-suppress unreadVariable
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {

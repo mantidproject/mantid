@@ -5,14 +5,13 @@
 """
 TOFTOF reduction workflow gui.
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
-
-from PyQt4.QtCore import *
-from PyQt4.QtGui  import *
 
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 class TOFTOFScriptElement(BaseScriptElement):
 
@@ -131,7 +130,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if els:
             dom = els[0]
 
-            def get_str(tag, default = ''):
+            def get_str(tag, default=''):
                 return BaseScriptElement.getStringElement(dom, tag, default=default)
 
             def get_int(tag, default):
@@ -217,14 +216,16 @@ class TOFTOFScriptElement(BaseScriptElement):
         script = ['']
 
         # helper: add a line to the script
-        def l(line = ''):
+        def l(line=''):
             script[0] += line + '\n'
 
         # helpers
         def get_log(workspace, tag):
             return "{}.getRun().getLogData('{}').value".format(workspace, tag)
+
         def get_ei(workspace):
             return get_log(workspace, 'Ei')
+
         def get_time(workspace):
             return get_log(workspace, 'duration')
 
@@ -290,7 +291,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             if i == 0:
                 wsData0 = wsData
 
-        def group_list(listVal, postfix = ''):
+        def group_list(listVal, postfix=''):
             return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
 
         gPrefix = 'g' + self.prefix
@@ -346,26 +347,26 @@ class TOFTOFScriptElement(BaseScriptElement):
 
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
-                l("{} = Scale({}, 1.0 / float({}), 'Multiply')" \
-                    .format(wsVanNorm, wsVan, get_time(wsVan)))
+                l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
+                  .format(wsVanNorm, wsVan, get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
-                l("{} = Scale({}, 1.0 / float({}), 'Multiply')" \
-                    .format(wsECNorm, wsEC, get_time(wsEC)))
+                l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
+                  .format(wsECNorm, wsEC, get_time(wsEC)))
 
             l("names = []")
             l("for ws in {}:" .format(gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
-            l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)" \
-                .format(get_time('ws')))
+            l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
+              .format(get_time('ws')))
             l()
             l("{} = GroupWorkspaces(names)" .format(gDataNorm))
 
             l()
 
-        else: # none, simply use the not normalised workspaces
+        else:  # none, simply use the not normalised workspaces
             gDataNorm = gDataRuns
 
             if self.vanRuns:
@@ -378,21 +379,21 @@ class TOFTOFScriptElement(BaseScriptElement):
             scaledEC   = self.prefix + 'ScaledEC'
             l("# subtract empty can")
             l("ecFactor = {:.3f}" .format(self.ecFactor))
-            l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')" \
-                .format(scaledEC, wsECNorm))
+            l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
+              .format(scaledEC, wsECNorm))
             l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
                 l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
             l()
 
-        l("# group data for processing") # without empty can
+        l("# group data for processing")  # without empty can
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
         gData = gPrefix + 'Data'
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
-            l("{} = GroupWorkspaces({}list({}.getNames()))" \
-                .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+            l("{} = GroupWorkspaces({}list({}.getNames()))"
+              .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
         else:
             l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
@@ -411,8 +412,8 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
-        l("{} = TOFTOFCropWorkspace({})" \
-            .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
+        l("{} = TOFTOFCropWorkspace({})"
+          .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
         l()
 
         gData2 = gData + 'TofCorr'
@@ -433,8 +434,8 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         gDataDeltaE = gData + 'DeltaE'
         l("# convert units")
-        l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)" \
-            .format(gDataDeltaE, gData2))
+        l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)"
+          .format(gDataDeltaE, gData2))
         l("ConvertToDistribution({})" .format(gDataDeltaE))
         l()
 
@@ -452,42 +453,43 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.binEon:
             gDataBinE = gData + 'BinE'
             l("# energy binning")
-            l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'" \
-                .format(self.binEstart, self.binEstep, self.binEend))
-            l("{} = Rebin({}, Params=rebinEnergy)" .format(gDataBinE, gLast))
+            l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'"
+              .format(self.binEstart, self.binEstep, self.binEend))
+            l("{} = Rebin({}, Params=rebinEnergy, IgnoreBinErrors=True)" .format(gDataBinE, gLast))
             l()
             gLast = gDataBinE
 
         if self.binQon:
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
-            l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'" \
-                .format(self.binQstart, self.binQstep, self.binQend))
-            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)" \
-                .format(gDataBinQ, gLast))
+            l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
+              .format(self.binQstart, self.binQstep, self.binQend))
+            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)"
+              .format(gDataBinQ, gLast))
             l()
 
         l("# make nice workspace names")
         l("for ws in {}:" .format(gDataS))
-        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())" \
-            .format(self.prefix))
+        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+          .format(self.prefix))
         if self.binEon:
             l("for ws in {}:" .format(gDataBinE))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())" \
-                .format(self.prefix))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
+              .format(self.prefix))
         if self.binQon:
             l("for ws in {}:" .format(gDataBinQ))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())" \
-                .format(self.prefix))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())"
+              .format(self.prefix))
 
         return script[0]
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 class TOFTOFReductionScripter(BaseReductionScripter):
 
     def __init__(self, name, facility):
         BaseReductionScripter.__init__(self, name, facility)
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # eof

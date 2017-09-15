@@ -12,7 +12,6 @@
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 
@@ -169,7 +168,7 @@ void CreateTransmissionWorkspaceAuto::exec() {
   // construct the algorithm
 
   IAlgorithm_sptr algCreateTransWS =
-      createChildAlgorithm("CreateTransmissionWorkspace");
+      createChildAlgorithm("CreateTransmissionWorkspace", -1, -1, true, 1);
   algCreateTransWS->setRethrows(true);
   algCreateTransWS->initialize();
 

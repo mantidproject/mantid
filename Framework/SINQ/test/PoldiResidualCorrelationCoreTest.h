@@ -5,8 +5,8 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
@@ -39,8 +39,8 @@ public:
 
     // test data with all 0s except (0, 0) - it's -1.0
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
-    testWorkspace->dataY(0)[0] = -1.0;
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+    testWorkspace->mutableY(0)[0] = -1.0;
 
     core.setNormCountData(testWorkspace);
 
@@ -63,14 +63,14 @@ public:
     TestablePoldiResidualCorrelationCore core(m_log);
 
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     core.setCountData(testWorkspace);
 
-    TS_ASSERT_EQUALS(testWorkspace->dataY(0)[0], 0.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 0.0);
     core.addToCountData(0, 0, 23.0);
-    TS_ASSERT_EQUALS(testWorkspace->dataY(0)[0], 23.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 23.0);
     core.addToCountData(0, 0, 23.0);
-    TS_ASSERT_EQUALS(testWorkspace->dataY(0)[0], 46.0);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], 46.0);
   }
 
   void testCalculateCorrelationBackground() {
@@ -98,7 +98,7 @@ public:
     TestablePoldiResidualCorrelationCore core(m_log);
 
     Mantid::DataObjects::Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     core.setCountData(testWorkspace);
     core.m_timeBinCount = 2;
     core.m_detectorElements = {0, 1};
@@ -108,10 +108,10 @@ public:
     // subtracted from all counts.
     core.correctCountData();
 
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[0], -0.5);
-    TS_ASSERT_EQUALS(testWorkspace->readY(0)[1], -0.5);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[0], 0.5);
-    TS_ASSERT_EQUALS(testWorkspace->readY(1)[1], 0.5);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[0], -0.5);
+    TS_ASSERT_EQUALS(testWorkspace->y(0)[1], -0.5);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[0], 0.5);
+    TS_ASSERT_EQUALS(testWorkspace->y(1)[1], 0.5);
   }
 
   void testCalculateAverage() {

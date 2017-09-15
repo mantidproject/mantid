@@ -2,10 +2,13 @@
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
@@ -26,6 +29,7 @@ namespace {
  * @param Pointer to byte src
  */
 template <typename InterpretType> double toDouble(uint8_t *src) {
+  // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
 }
@@ -44,12 +48,8 @@ struct FITSInfo {
   int offset;
   int headerSizeMultiplier;
   std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
   double scale;
   std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
   std::string extension;
   std::string filePath;
   bool isFloat;
@@ -293,7 +293,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // scale parameter, header BSCALE in the fits standard
-  if ("" == header.headerKeys[m_headerScaleKey]) {
+  if (header.headerKeys[m_headerScaleKey].empty()) {
     header.scale = 1;
   } else {
     try {
@@ -308,7 +308,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // data offsset parameter, header BZERO in the fits standard
-  if ("" == header.headerKeys[m_headerOffsetKey]) {
+  if (header.headerKeys[m_headerOffsetKey].empty()) {
     header.offset = 0;
   } else {
     try {
@@ -361,7 +361,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
 void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
                                  const FITSInfo &hdrFirst) {
   bool valid = true;
-  if (hdr.extension != "") {
+  if (!hdr.extension.empty()) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": extensions found in the header.\n";
@@ -470,19 +470,17 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create a group for these new workspaces, if the group already exists, add
   // to it.
-  std::string groupName = outWSName;
-
   size_t fileNumberInGroup = 0;
   WorkspaceGroup_sptr wsGroup;
 
-  if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
-    wsGroup->setTitle(groupName);
+  if (!AnalysisDataService::Instance().doesExist(outWSName)) {
+    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup->setTitle(outWSName);
   } else {
     // Get the name of the latest file in group to start numbering from
-    if (AnalysisDataService::Instance().doesExist(groupName))
+    if (AnalysisDataService::Instance().doesExist(outWSName))
       wsGroup =
-          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
 
     std::string latestName = wsGroup->getNames().back();
     // Set next file number
@@ -491,7 +489,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   size_t totalWS = headers.size();
   // Create a progress reporting object
-  API::Progress progress(this, 0, 1, totalWS + 1);
+  API::Progress progress(this, 0.0, 1.0, totalWS + 1);
   progress.report(0, "Loading file(s) into workspace(s)");
 
   // Create first workspace (with instrument definition). This is also used as
@@ -627,7 +625,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
         if (key == g_END_KEYNAME)
           endFound = true;
 
-        if (key != "")
+        if (!key.empty())
           headerInfo.headerKeys[key] = value;
       }
     }
@@ -858,10 +856,10 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(nrows); ++i) {
-    auto &dataX = ws->dataX(i);
-    auto &dataY = ws->dataY(i);
-    auto &dataE = ws->dataE(i);
-    std::fill(dataX.begin(), dataX.end(), static_cast<double>(i) * cmpp);
+    auto &xVals = ws->mutableX(i);
+    auto &yVals = ws->mutableY(i);
+    auto &eVals = ws->mutableE(i);
+    xVals = static_cast<double>(i) * cmpp;
 
     for (size_t j = 0; j < ncols; ++j) {
       // Map from 2D->1D index
@@ -888,8 +886,8 @@ void LoadFITS::readDataToWorkspace(const FITSInfo &fileInfo, double cmpp,
       }
 
       val = fileInfo.scale * val - fileInfo.offset;
-      dataY[j] = val;
-      dataE[j] = sqrt(val);
+      yVals[j] = val;
+      eVals[j] = sqrt(val);
     }
   }
 }
@@ -1143,7 +1141,7 @@ void LoadFITS::setupDefaultKeywordNames() {
  *  Maps the header keys to specified values
  */
 void LoadFITS::mapHeaderKeys() {
-  if ("" == getPropertyValue(g_HEADER_MAP_NAME))
+  if (getPropertyValue(g_HEADER_MAP_NAME).empty())
     return;
 
   // If a map file is selected, use that.
@@ -1159,19 +1157,19 @@ void LoadFITS::mapHeaderKeys() {
       while (getline(fStream, line)) {
         boost::split(lineSplit, line, boost::is_any_of("="));
 
-        if (lineSplit[0] == g_ROTATION_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_ROTATION_NAME && !lineSplit[1].empty())
           m_headerRotationKey = lineSplit[1];
 
-        if (lineSplit[0] == g_BIT_DEPTH_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_BIT_DEPTH_NAME && !lineSplit[1].empty())
           m_headerBitDepthKey = lineSplit[1];
 
-        if (lineSplit[0] == g_AXIS_NAMES_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_AXIS_NAMES_NAME && !lineSplit[1].empty()) {
           m_headerAxisNameKeys.clear();
           boost::split(m_headerAxisNameKeys, lineSplit[1],
                        boost::is_any_of(","));
         }
 
-        if (lineSplit[0] == g_IMAGE_KEY_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_IMAGE_KEY_NAME && !lineSplit[1].empty()) {
           m_headerImageKeyKey = lineSplit[1];
         }
       }

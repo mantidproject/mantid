@@ -51,16 +51,17 @@ class MaskBTPTest(unittest.TestCase):
         self.assertTrue(array_equal(m3,concatenate((b5t3,b5t3+1024,b5t3+2048))))
         #check whether some pixels are masked when they should
         w=mtd['CNCSMaskBTP']
-        self.assertTrue(w.getInstrument().getDetector(29696).isMasked()) #pixel1
-        self.assertTrue(w.getInstrument().getDetector(29697).isMasked()) #pixel2
-        self.assertTrue(w.getInstrument().getDetector(29698).isMasked()) #pixel3
-        self.assertTrue(not w.getInstrument().getDetector(29699).isMasked()) #pixel4
-        self.assertTrue(w.getInstrument().getDetector(29700).isMasked()) #pixel5
+        detInfo = w.detectorInfo()
+        self.assertTrue(detInfo.isMasked(29699)) #pixel1 (detID 29696)
+        self.assertTrue(detInfo.isMasked(29700)) #pixel2 (detID 29697)
+        self.assertTrue(detInfo.isMasked(29701)) #pixel3 (detID 29698)
+        self.assertFalse(detInfo.isMasked(29702)) #pixel4 (detID 29699)
+        self.assertTrue(detInfo.isMasked(29703)) #pixel5 (detID 29700)
 
-        self.assertTrue(w.getInstrument().getDetector(1020).isMasked()) #bank 1
-        self.assertTrue(not w.getInstrument().getDetector(3068).isMasked()) #bank3, tube 8
+        self.assertTrue(detInfo.isMasked(1023)) #bank1 (detID 1020)
+        self.assertFalse(detInfo.isMasked(3071)) #bank3, tube 8 (detID 3068)
 
-        self.assertTrue(w.getInstrument().getDetector(4400).isMasked()) #bank5, tube 3
+        self.assertTrue(detInfo.isMasked(4403)) #bank5, tube 3 (detID 4400)
         DeleteWorkspace(w)
 
 if __name__ == '__main__':

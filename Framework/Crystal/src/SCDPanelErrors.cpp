@@ -1,11 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -46,6 +45,7 @@ SCDPanelErrors::SCDPanelErrors() : m_setupFinished(false) {
   declareParameter("ZRotate", 0.0, "Rotate angle in Z");
   declareParameter("ScaleWidth", 1.0, "Scale width of detector");
   declareParameter("ScaleHeight", 1.0, "Scale height of detector");
+  declareParameter("T0Shift", 0.0, "Shift for TOF");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("Bank", Attribute(""));
@@ -68,6 +68,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
                                   double roty, double rotz, double scalex,
                                   double scaley, std::string detname,
                                   Workspace_sptr inputW) const {
+  if (detname.compare("none") == 0.0)
+    return;
   // CORELLI has sixteenpack under bank
   DataObjects::PeaksWorkspace_sptr inputP =
       boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
@@ -145,8 +147,19 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
         boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet) {
       Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+      auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
+      auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+      double relscalex = scalex;
+      double relscaley = scaley;
+      if (!oldscalex.empty())
+        relscalex /= oldscalex[0];
+      if (!oldscaley.empty())
+        relscaley /= oldscaley[0];
       pmap.addDouble(rectDet.get(), "scalex", scalex);
       pmap.addDouble(rectDet.get(), "scaley", scaley);
+      applyRectangularDetectorScaleToComponentInfo(
+          inputP->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
+          relscaley);
     }
   }
 }
@@ -155,7 +168,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
 void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
                           double xrotate, double yrotate, double zrotate,
                           double scalex, double scaley, double *out,
-                          const double *xValues, const size_t nData) const {
+                          const double *xValues, const size_t nData,
+                          double tShift) const {
   UNUSED_ARG(xValues);
   if (nData == 0)
     return;
@@ -176,18 +190,23 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
-    DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
-                            hkl, peak.getGoniometerMatrix());
-    Units::Wavelength wl;
+    try {
+      DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
+                              hkl, peak.getGoniometerMatrix());
+      Units::Wavelength wl;
 
-    wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
-                  peak.getInitialEnergy(), 0.0);
-
-    peak2.setWavelength(wl.singleFromTOF(peak.getTOF()));
-    V3D Q3 = peak2.getQSampleFrame();
-    out[i * 3] = Q3[0] - Q2[0];
-    out[i * 3 + 1] = Q3[1] - Q2[1];
-    out[i * 3 + 2] = Q3[2] - Q2[2];
+      wl.initialize(peak2.getL1(), peak2.getL2(), peak2.getScattering(), 0,
+                    peak2.getInitialEnergy(), 0.0);
+      peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
+      V3D Q3 = peak2.getQSampleFrame();
+      out[i * 3] = Q3[0] - Q2[0];
+      out[i * 3 + 1] = Q3[1] - Q2[1];
+      out[i * 3 + 2] = Q3[2] - Q2[2];
+    } catch (std::runtime_error &) {
+      out[i * 3] = std::numeric_limits<double>::infinity();
+      out[i * 3 + 1] = std::numeric_limits<double>::infinity();
+      out[i * 3 + 2] = std::numeric_limits<double>::infinity();
+    }
   }
   moveDetector(-xshift, -yshift, -zshift, -xrotate, -yrotate, -zrotate,
                1.0 / scalex, 1.0 / scaley, m_bank, m_workspace);
@@ -209,8 +228,9 @@ void SCDPanelErrors::function1D(double *out, const double *xValues,
   const double zrotate = getParameter("ZRotate");
   const double scalex = getParameter("ScaleWidth");
   const double scaley = getParameter("ScaleHeight");
+  const double tShift = getParameter("T0Shift");
   eval(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, out,
-       xValues, nData);
+       xValues, nData, tShift);
 }
 
 /**
@@ -243,7 +263,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     FileValidator fval;
     std::string error = fval.isValid(fileName);
-    if (error == "") {
+    if (error.empty()) {
       storeAttributeValue(attName, Attribute(fileName, true));
       storeAttributeValue("Workspace", Attribute(""));
     } else {
@@ -326,7 +346,7 @@ void SCDPanelErrors::setupData() const {
 
   m_bank = getAttribute("Bank").asString();
 
-  g_log.debug() << "Setting up " << m_workspace->name() << " bank " << m_bank
+  g_log.debug() << "Setting up " << m_workspace->getName() << " bank " << m_bank
                 << '\n';
 
   m_setupFinished = true;

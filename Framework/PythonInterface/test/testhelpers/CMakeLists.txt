@@ -5,7 +5,9 @@
 set ( PY_FILES
   __init__.py
   algorithm_decorator.py
+  illhelpers.py
   tempfile_wrapper.py
+  testrunner.py
   mlzhelpers.py
 )
 

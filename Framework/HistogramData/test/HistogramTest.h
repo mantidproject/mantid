@@ -12,6 +12,7 @@ using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::getHistogramXMode;
 using Mantid::HistogramData::Points;
+using Mantid::HistogramData::PointStandardDeviations;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountVariances;
@@ -361,15 +362,14 @@ public:
     TS_ASSERT_THROWS(h.setPoints(x), std::logic_error);
   }
 
-  void test_setPoints_changesDxStorageMode() {
+  void test_setPoints_keepsDxStorageMode() {
     Histogram hist(BinEdges{1.0, 2.0, 3.0});
-    auto dx = {1.0, 2.0, 3.0};
-    hist.setBinEdgeStandardDeviations(dx);
-    TS_ASSERT_EQUALS(hist.dx().size(), 3);
+    auto dx = {1.0, 2.0};
+    hist.setPointStandardDeviations(dx);
     hist.setPoints(Points{1.0, 2.0});
     TS_ASSERT_EQUALS(hist.dx().size(), 2);
-    TS_ASSERT_DELTA(hist.dx()[0], 1.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[1], 2.5, 1e-14);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
   }
 
   void test_edges_from_edges() {
@@ -514,16 +514,14 @@ public:
     TS_ASSERT_THROWS(h.setBinEdges(x), std::logic_error);
   }
 
-  void test_setBinEdges_changesDxStorageMode() {
+  void test_setBinEdges_keepsDxStorageMode() {
     Histogram hist(Points{1.0, 2.0});
     auto dx = {1.0, 2.0};
     hist.setPointStandardDeviations(dx);
-    TS_ASSERT_EQUALS(hist.dx().size(), 2);
     hist.setBinEdges(BinEdges{1.0, 2.0, 3.0});
-    TS_ASSERT_EQUALS(hist.dx().size(), 3);
-    TS_ASSERT_DELTA(hist.dx()[0], 0.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[1], 1.5, 1e-14);
-    TS_ASSERT_DELTA(hist.dx()[2], 2.5, 1e-14);
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
   }
 
   void test_setCounts_size_mismatch() {
@@ -888,6 +886,67 @@ public:
     TS_ASSERT_THROWS(hist.setSharedE(data2), std::logic_error);
   }
 
+  void test_setPointStandardDeviations_point_data() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS_NOTHING(
+        hist.setPointStandardDeviations(std::vector<double>{1.0, 2.0}));
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
+  }
+
+  void test_setPointStandardDeviations_point_data_size_mismatch() {
+    Histogram hist(Points(2));
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(0)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(1)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(3)),
+        std::logic_error);
+  }
+
+  void test_setPointStandardDeviations_histogram_data() {
+    Histogram hist(BinEdges(3));
+    TS_ASSERT_THROWS_NOTHING(
+        hist.setPointStandardDeviations(std::vector<double>{1.0, 2.0}));
+    TS_ASSERT_EQUALS(hist.dx().size(), 2);
+    TS_ASSERT_EQUALS(hist.dx()[0], 1.0);
+    TS_ASSERT_EQUALS(hist.dx()[1], 2.0);
+  }
+
+  void test_setPointStandardDeviations_histogram_data_size_mismatch() {
+    Histogram hist(BinEdges(3));
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(0)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(1)),
+        std::logic_error);
+    TS_ASSERT_THROWS(
+        hist.setPointStandardDeviations(PointStandardDeviations(3)),
+        std::logic_error);
+  }
+
+  void test_setPointStandardDeviations_can_set_null() {
+    Histogram hist(Points(2));
+    hist.setPointStandardDeviations(2);
+    PointStandardDeviations null;
+    TS_ASSERT(hist.sharedDx());
+    TS_ASSERT_THROWS_NOTHING(hist.setPointStandardDeviations(null));
+    TS_ASSERT(!hist.sharedDx());
+  }
+
+  void test_setPointStandardDeviations_accepts_default_construction() {
+    Histogram hist(Points(2));
+    hist.setPointStandardDeviations(2);
+    TS_ASSERT(hist.sharedDx());
+    TS_ASSERT_THROWS_NOTHING(hist.setPointStandardDeviations());
+    TS_ASSERT(!hist.sharedDx());
+  }
+
   void test_yMode() {
     Histogram hist1(Histogram::XMode::Points, Histogram::YMode::Counts);
     TS_ASSERT_EQUALS(hist1.yMode(), Histogram::YMode::Counts);
@@ -954,6 +1013,100 @@ public:
     Histogram hist(Points(1));
     Counts counts(1);
     TS_ASSERT_THROWS(hist.setSharedY(counts.cowData()), std::logic_error);
+  }
+
+  void test_that_can_change_histogram_size_for_points_with_dx() {
+    Histogram h(Points{1, 2}, Counts{3, 4});
+    h.setPointStandardDeviations(std::vector<double>{5.0, 6.0});
+    auto isSizeAsSpecified = [](Histogram &h, size_t n) {
+      return (h.x().size() == n && h.y().size() == n && h.e().size() == n &&
+              h.dx().size() == n);
+    };
+
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 0);
+
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.y()[1], 4);
+    TS_ASSERT_EQUALS(h.y()[2], 0);
+
+    TS_ASSERT_EQUALS(h.dx()[0], 5);
+    TS_ASSERT_EQUALS(h.dx()[1], 6);
+    TS_ASSERT_EQUALS(h.dx()[2], 0);
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.dx()[0], 5);
+  }
+
+  void test_that_can_change_histogram_size_for_bin_edges_without_dx() {
+    Histogram h(BinEdges{1, 2, 3}, Counts{3, 4});
+    auto isSizeAsSpecified = [](const Histogram &h, size_t n) {
+      return (h.x().size() == (n + 1) && h.y().size() == n &&
+              h.e().size() == n);
+    };
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 3);
+    TS_ASSERT_EQUALS(h.x()[3], 0);
+
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+    TS_ASSERT_EQUALS(h.y()[1], 4);
+    TS_ASSERT_EQUALS(h.y()[2], 0);
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.y()[0], 3);
+  }
+
+  void test_that_can_change_histogram_size_when_only_x_is_present() {
+    Histogram h(BinEdges{1, 2, 3});
+    auto isSizeAsSpecified =
+        [](const Histogram &h, size_t n) { return (h.x().size() == (n + 1)); };
+    TS_ASSERT(isSizeAsSpecified(h, 2));
+
+    // Increase the size
+    h.resize(3);
+    TS_ASSERT(isSizeAsSpecified(h, 3));
+
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+    TS_ASSERT_EQUALS(h.x()[2], 3);
+    TS_ASSERT_EQUALS(h.x()[3], 0);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
+
+    // Decrease the size
+    h.resize(1);
+    TS_ASSERT(isSizeAsSpecified(h, 1));
+    TS_ASSERT_EQUALS(h.x()[0], 1);
+    TS_ASSERT_EQUALS(h.x()[1], 2);
+
+    TS_ASSERT(!h.sharedY());
+    TS_ASSERT(!h.sharedE());
+    TS_ASSERT(!h.sharedDx());
   }
 };
 

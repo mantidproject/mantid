@@ -1,0 +1,138 @@
+digraph Stitch1D {
+splines=false
+label = "\nStitch1D workflow - no manual scale factor                                                                                                                  Stitch1D workflow - manual scale factor given\n\n"
+ $global_style
+
+subgraph params {
+ $param_style
+  lhsworkspace          [label="LHSWorkspace", group=g1]
+  rhsworkspace          [label="RHSWorkspace", group=g2]
+  params				[label="Params", group=g3]
+  startOv				[label="StartOverlap"]
+  endOv					[label="EndOverlap"]
+  scaleFactor           [label="OutScaleFactor"]
+  lhsworkspace_o		[label="LHSWorkspace\n([StartX, StartOverlap])", group=g1]
+  rhsworkspace_o		[label="RHSWorkspace\n([EndOverlap, EndX])", group=g2]
+  outputworkspace		[label="OutputWorkspace", group=g3]
+  outputworkspace_2		[label="OutputWorkspace", group=g3]
+
+  lhsworkspace_1        [label="LHSWorkspace", group=g4]
+  rhsworkspace_1        [label="RHSWorkspace", group=g5]
+  params_1				[label="Params", group=g6]
+  scaleFactor_in		[label="ManualScaleFactor"]
+  lhsworkspace_1_1		[label="LHSWorkspace\n([StartX, StartOverlap])", group=g4]
+  rhsworkspace_1_1		[label="RHSWorkspace\n([EndOverlap, EndX])", group=g5]
+  outputworkspace_1		[label="OutputWorkspace", group=g6]
+  outputworkspace_2_1	[label="OutputWorkspace", group=g6]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  rebin_lhsw				[label="Rebin", group=g1]
+  rebin_rhsw				[label="Rebin", group=g2]
+  integrate_lhsw            [label="Integration", group=g1]
+  integrate_rhsw            [label="Integration", group=g2]
+  multiply					[label="Multiply", group=g2]
+  weightedMean				[label="WeightedMean\n([StartOverlap, EndOverlap])", group=g3]
+  divideScaleFactor		    [label="Divide"]
+  plus						[label="Plus"]
+
+  rebin_lhsw_1				[label="Rebin", group=g4]
+  rebin_rhsw_1				[label="Rebin", group=g5]
+  multiply_1				[label="Multiply", group=g5]
+  weightedMean_1			[label="WeightedMean\n([StartOverlap, EndOverlap])", group=g6]
+  plus_1					[label="Plus"]
+}
+
+subgraph processes {
+ $process_style
+  maskSpecialValues_1    [label="Mask special values", group=g1]
+  maskSpecialValues_2    [label="Mask special values", group=g2]
+  insertSpecialValues    [label="Reinsert special values"]
+
+  maskSpecialValues_1_1    [label="Mask special values", group=g4]
+  maskSpecialValues_2_1    [label="Mask special values", group=g5]
+  insertSpecialValues_1    [label="Reinsert special values"]
+}
+
+subgraph values {
+ $value_style
+}
+
+lhsworkspace -> rebin_lhsw
+rhsworkspace -> rebin_rhsw
+params       -> rebin_lhsw
+params       -> rebin_rhsw
+
+rebin_lhsw   -> maskSpecialValues_1
+rebin_rhsw   -> maskSpecialValues_2
+
+maskSpecialValues_1 -> integrate_lhsw
+maskSpecialValues_2 -> integrate_rhsw
+startOv				-> integrate_lhsw
+startOv				-> integrate_rhsw
+endOv				-> integrate_lhsw
+endOv				-> integrate_rhsw
+
+integrate_lhsw		-> lhsworkspace_o
+
+integrate_lhsw		-> divideScaleFactor
+integrate_rhsw		-> divideScaleFactor
+divideScaleFactor	-> scaleFactor
+
+scaleFactor			-> multiply
+maskSpecialValues_2 -> multiply
+
+lhsworkspace_o		-> plus
+
+multiply			-> weightedMean
+maskSpecialValues_1	-> weightedMean
+weightedMean		-> plus
+
+multiply			-> rhsworkspace_o
+rhsworkspace_o		-> plus
+plus				-> outputworkspace
+
+outputworkspace		-> insertSpecialValues
+insertSpecialValues	-> outputworkspace_2
+
+{rank=same; lhsworkspace_o; rhsworkspace_o}
+
+lhsworkspace_1 -> rebin_lhsw_1
+rhsworkspace_1 -> rebin_rhsw_1
+params_1       -> rebin_lhsw_1
+params_1       -> rebin_rhsw_1
+
+rebin_lhsw_1   -> maskSpecialValues_1_1
+rebin_rhsw_1   -> maskSpecialValues_2_1
+
+maskSpecialValues_1_1	-> lhsworkspace_1_1
+maskSpecialValues_2_1   -> multiply_1
+scaleFactor_in			-> multiply_1
+multiply_1			    -> weightedMean_1
+maskSpecialValues_1_1	-> weightedMean_1
+
+lhsworkspace_1_1	-> plus_1
+weightedMean_1		-> plus_1
+
+multiply_1			-> rhsworkspace_1_1
+rhsworkspace_1_1	-> plus_1
+plus_1				-> outputworkspace_1
+
+outputworkspace_1	-> insertSpecialValues_1
+insertSpecialValues_1 -> outputworkspace_2_1
+
+rhsworkspace_o	-> lhsworkspace_1_1 [style=invis; label="                "]
+
+{rank=same; lhsworkspace_1_1; rhsworkspace_1_1}
+
+{rank=same; lhsworkspace; rhsworkspace; lhsworkspace_1; rhsworkspace_1}
+{rank=same; rebin_lhsw; rebin_rhsw; rebin_lhsw_1; rebin_rhsw_1}
+{rank=same; maskSpecialValues_1; maskSpecialValues_2; maskSpecialValues_1_1; maskSpecialValues_2_1}
+{rank=same; lhsworkspace_o; rhsworkspace_o; lhsworkspace_1_1; rhsworkspace_1_1}
+{rank=same; scaleFactor; scaleFactor_in}
+}

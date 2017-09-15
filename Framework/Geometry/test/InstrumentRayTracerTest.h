@@ -61,7 +61,7 @@ public:
     // Check they are actually what we expect: 1 with the sample and 1 with the
     // central detector
     IComponent_const_sptr centralPixel =
-        testInst->getComponentByName("pixel-(0,0)");
+        testInst->getComponentByName("pixel-(0;0)");
     IComponent_const_sptr sampleComp = testInst->getSample();
 
     if (!sampleComp) {
@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(results.size(), 1);
 
     const IComponent *interceptedPixel =
-        testInst->getComponentByName("pixel-(1,0)").get();
+        testInst->getComponentByName("pixel-(1;0)").get();
 
     Link intersect = results.front();
     TS_ASSERT_DELTA(intersect.distFromStart, 15.003468, 1e-6);

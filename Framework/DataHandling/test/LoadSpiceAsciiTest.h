@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSpiceAscii.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 
 using Mantid::DataHandling::LoadSpiceAscii;
 using namespace Mantid::API;
@@ -139,11 +141,11 @@ public:
     std::string ipts = runinfows->run().getProperty("proposal")->value();
     TS_ASSERT_EQUALS(ipts, "IPTS-6174");
 
-    int mode = atoi(runinfows->run().getProperty("mode")->value().c_str());
+    int mode = std::stoi(runinfows->run().getProperty("mode")->value());
     TS_ASSERT_EQUALS(mode, 3);
 
-    double comerr = atof(
-        runinfows->run().getProperty("Center of Mass.error")->value().c_str());
+    double comerr = std::stod(
+        runinfows->run().getProperty("Center of Mass.error")->value());
     TS_ASSERT_DELTA(comerr, 0.009214, 0.000001);
 
     AnalysisDataService::Instance().remove("HB2A_0231_0001_Data");

@@ -1,10 +1,14 @@
 #include "ManageCustomMenus.h"
 #include "../ApplicationWindow.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <QtGui>
+
+using MantidQt::API::MantidDesktopServices;
+
 /**
 * Constructor for object. Performs initial setup and calls subsequent setup
 * functions.
@@ -129,8 +133,9 @@ void ManageCustomMenus::remScriptClicked() {
         this, "MantidPlot",
         "No item selected - please select a script from the left-hand list.");
   } else {
-    QTreeWidgetItem *item;
-    foreach (item, m_scriptsTree->selectedItems()) { delete item; }
+    foreach (QTreeWidgetItem *item, m_scriptsTree->selectedItems()) {
+      delete item;
+    }
   }
 }
 /**
@@ -158,8 +163,7 @@ void ManageCustomMenus::addItemClicked() {
       menu = menu->parent();
     }
 
-    QTreeWidgetItem *item;
-    foreach (item, selection) { // foreach is a Qt macro (
+    foreach (QTreeWidgetItem *item, selection) { // foreach is a Qt macro (
       // http://doc.qt.nokia.com/4.4/containers.html#the-foreach-keyword
       // )
       menu->addChild(item);
@@ -224,5 +228,5 @@ void ManageCustomMenus::addMenuClicked() {
 */
 void ManageCustomMenus::helpClicked() {
   QUrl helpUrl("http://www.mantidproject.org/ManageCustomMenus");
-  QDesktopServices::openUrl(helpUrl);
+  MantidDesktopServices::openUrl(helpUrl);
 }

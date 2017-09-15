@@ -2,6 +2,7 @@
 """
     Simple Reducer example
 """
+from __future__ import (absolute_import, division, print_function)
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
@@ -9,6 +10,7 @@ from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 from reduction import validate_step, validate_loader
 import mantid
 from mantid.simpleapi import *
+
 
 class ExampleReducer(Reducer):
 
@@ -108,8 +110,3 @@ if __name__ == '__main__':
     r.set_second_step(step)
 
     r.reduce()
-
-
-
-
-

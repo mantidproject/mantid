@@ -5,8 +5,10 @@
 
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::RemoveMaskedSpectra;
@@ -40,8 +42,8 @@ public:
     maskWorkspace(maskedWS);
     auto output = runAlgorithm(inputWS, maskedWS);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(output->readY(0).front(), 1.0);
-    TS_ASSERT_EQUALS(output->readY(1).front(), 3.0);
+    TS_ASSERT_EQUALS(output->y(0).front(), 1.0);
+    TS_ASSERT_EQUALS(output->y(1).front(), 3.0);
   }
 
   void test_mask_workspace_mask() {
@@ -59,8 +61,8 @@ public:
 
     auto output = runAlgorithm(inputWS, maskedWS);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(output->readY(0).front(), 1.0);
-    TS_ASSERT_EQUALS(output->readY(1).front(), 3.0);
+    TS_ASSERT_EQUALS(output->y(0).front(), 1.0);
+    TS_ASSERT_EQUALS(output->y(1).front(), 3.0);
   }
 
   void test_self_mask() {
@@ -68,8 +70,8 @@ public:
     maskWorkspace(inputWS);
     auto output = runAlgorithm(inputWS);
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
-    TS_ASSERT_EQUALS(output->readY(0).front(), 1.0);
-    TS_ASSERT_EQUALS(output->readY(1).front(), 3.0);
+    TS_ASSERT_EQUALS(output->y(0).front(), 1.0);
+    TS_ASSERT_EQUALS(output->y(1).front(), 3.0);
   }
 
 private:
@@ -84,12 +86,16 @@ private:
         "Workspace2D", nSpec, nBins + 1, nBins);
     space->setInstrument(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    HistogramData::BinEdges edges(nBins + 1,
+                                  HistogramData::LinearGenerator(0.0, 1.0));
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k <= nBins; ++k) {
-        space->dataX(j)[k] = double(k);
-      }
-      space->dataY(j).assign(nBins, double(j));
-      space->dataE(j).assign(nBins, sqrt(double(j)));
+      const double yVal{static_cast<double>(j)};
+      const double eVal{sqrt(yVal)};
+      space->setBinEdges(j, edges);
+      const std::vector<double> counts(nBins, yVal);
+      const std::vector<double> errors(nBins, eVal);
+      space->setCounts(j, counts);
+      space->setCountStandardDeviations(j, errors);
       space->getSpectrum(j).setDetectorID(detid_t(j + 1));
     }
     return space;

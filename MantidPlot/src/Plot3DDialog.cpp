@@ -47,14 +47,13 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QWidgetList>
-#include <QFileDialog>
 #include <QGroupBox>
 #include <QFontDialog>
 #include <QApplication>
 
 #include <qwt3d_color.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtWidgets/Common/MantidColorMap.h"
 
 using Mantid::Kernel::ConfigService;
 

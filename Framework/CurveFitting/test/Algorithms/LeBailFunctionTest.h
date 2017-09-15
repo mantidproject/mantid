@@ -187,9 +187,6 @@ public:
     const vector<double> vecX = testws->readX(0);
     const vector<double> vecY = testws->readY(0);
 
-    size_t nData = vecX.size();
-    vector<double> out(nData);
-
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
     lebailfunction.calculatePeaksIntensities(vecX, vecY, summedpeaksvalue);
@@ -214,8 +211,8 @@ public:
          << imax111 << "-th points.\n";
 
     // Calculate diffraction patters
-    lebailfunction.function(out, vecX, true, false);
-    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true, true));
+    auto out = lebailfunction.function(vecX, true, false);
+    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(vecX, true, true));
 
     vector<string> vecbkgdparnames(2);
     vecbkgdparnames[0] = "A0";
@@ -226,7 +223,7 @@ public:
     lebailfunction.addBackgroundFunction("Polynomial", 2, vecbkgdparnames,
                                          bkgdvec, vecX.front(), vecX.back());
 
-    lebailfunction.function(out, vecX, true, true);
+    out = lebailfunction.function(vecX, true, true);
 
     double v1 = out[imax111];
     double v2 = out[imax110];

@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidHistogramData/HistogramX.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -43,8 +44,9 @@ private:
   void init() override;
   void exec() override;
 
-  std::pair<double, double> getStartEnd(const MantidVec &X,
-                                        bool isHistogram) const;
+  std::pair<double, double>
+  getStartEnd(const Mantid::HistogramData::HistogramX &X,
+              bool isHistogram) const;
   API::MatrixWorkspace_sptr copyInput(API::MatrixWorkspace_sptr inputWS,
                                       size_t wsIndex);
   API::MatrixWorkspace_sptr

@@ -35,7 +35,7 @@ public:
     MyTestProgress prog1(0.1, 0.5, 10);
     prog1.report("Hello");
 
-    MyTestProgress prog2(0, 1, 5);
+    MyTestProgress prog2(0.0, 1.0, 5);
     prog2 = prog1; // copy assign
     TS_ASSERT_EQUALS(prog2.last_report_counter, 1);
     TS_ASSERT_DELTA(prog2.last_report_value, 0.14, 1e-3);

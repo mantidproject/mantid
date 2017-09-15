@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidAPI/Workspace.h"
 
 #include <fstream>
 
@@ -21,9 +22,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GeneratePythonScript)
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void GeneratePythonScript::init() {
@@ -60,7 +58,6 @@ void GeneratePythonScript::init() {
       "When to specify which algorithm version was used by Mantid.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
 */
 void GeneratePythonScript::exec() {
@@ -82,8 +79,8 @@ void GeneratePythonScript::exec() {
   }
 
   // Need at least a start time to do time filter
-  if (startTime != "") {
-    if (endTime == "") {
+  if (!startTime.empty()) {
+    if (endTime.empty()) {
       // If no end time was given then filter up to now
       view->filterBetweenExecDate(DateAndTime(startTime));
     } else {

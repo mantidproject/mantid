@@ -5,25 +5,22 @@
 // Includes
 //--------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <Poco/Logger.h>
-
-#ifdef _MSC_VER
-// Disable a flood of warnings about inheriting from std streams
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
 
 #include <Poco/LogStream.h>
-#include <Poco/UnbufferedStreamBuf.h>
-
-#include <istream>
+#include <Poco/Message.h>
 #include <Poco/Thread.h>
+
+#include <map>
+#include <string>
+#include <iosfwd>
 #include <mutex>
 
-namespace Mantid {
+// Forward Declare
+namespace Poco {
+class Logger;
+}
 
+namespace Mantid {
 namespace Kernel {
 /**
 
@@ -165,9 +162,5 @@ public:
 };
 }
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 #endif // MANTID_KERNEL_THREADSAFELOGSTREAM

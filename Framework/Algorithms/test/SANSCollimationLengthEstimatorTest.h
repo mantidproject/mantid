@@ -123,7 +123,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     double numberOfGuides = 5, V3D sourcePosition = V3D(0.0, 0.0, -25.0),
     V3D samplePosition = V3D(0.0, 0.0, 0.0),
     std::vector<double> guideLogDetails = std::vector<double>()) {
-  auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(
+  auto ws2d = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
       ones(), static_cast<int>(nhist), x0, x1, dx);
 
   // Add the instrument with a single detector

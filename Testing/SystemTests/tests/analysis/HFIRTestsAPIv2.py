@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
+# pylint:
+# disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
 
 """
     System tests for HFIR SANS reduction.
@@ -6,6 +7,7 @@
     The following tests were converted from the unittest framework
     that is part of python to the stresstesting framework used in Mantid.
 """
+from __future__ import (absolute_import, division, print_function)
 import types
 
 import traceback
@@ -16,16 +18,21 @@ import stresstesting
 from mantid.api import *
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
+from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
+from functools import reduce
 
 
-# Set directory containing the test data, relative to the Mantid release directory.
+# Set directory containing the test data, relative to the Mantid release
+# directory.
 TEST_DIR = "."
-data_search_dirs = ConfigService.Instance()["datasearch.directories"].split(';')
+data_search_dirs = ConfigService.Instance(
+)["datasearch.directories"].split(';')
 for item in data_search_dirs:
     if item.endswith("SANS2D/"):
         TEST_DIR = item
 if len(TEST_DIR) == 0:
-    raise RuntimeError("Could not locate test data directory: [...]/Data/SANS2D")
+    raise RuntimeError(
+        "Could not locate test data directory: [...]/Data/SANS2D")
 
 
 def _diff_iq(x, y):
@@ -53,7 +60,7 @@ def _read_IGOR(filepath):
                 diq = float(toks[2])
                 data.append([q, iq, diq])
             except:
-                print "_read_IGOR:", sys.exc_value
+                print("_read_IGOR:", sys.exc_info()[1])
                 raise
     return data
 
@@ -70,14 +77,14 @@ def _check_result(ws, test_file, tolerance=1e-6):
     x = ws.dataX(0)[:len(ws.dataX(0))]
     y = ws.dataY(0)
     e = ws.dataE(0)
-    data_mantid = zip(x, y, e)
+    data_mantid = list(zip(x, y, e))
 
     # Read the test data to compare with
     data_igor = _read_IGOR(test_file)
 
     # Check length
     if not len(data_mantid) == len(data_igor):
-        print "Incompatible data lengths"
+        print("Incompatible data lengths")
         return False
 
     # Utility methods for manipulating the lists
@@ -94,25 +101,25 @@ def _check_result(ws, test_file, tolerance=1e-6):
         return x + y
 
     # Check that I(q) is the same for both data sets
-    deltas = map(_diff_iq, data_mantid, data_igor)
+    deltas = list(map(_diff_iq, data_mantid, data_igor))
     delta = reduce(_add, deltas) / len(deltas)
     if math.fabs(delta) > tolerance or math.isnan(delta):
         passed = False
-        print "Sum of I(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta), tolerance)
+        print("Sum of I(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta), tolerance))
 
     # Then compare the errors
-    deltas = map(_diff_err, data_mantid, data_igor)
+    deltas = list(map(_diff_err, data_mantid, data_igor))
     delta_err = reduce(_add, deltas) / len(deltas)
     if math.fabs(delta_err) > tolerance or math.isnan(delta):
         passed = False
-        print "Sum of dI(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta_err), tolerance)
+        print("Sum of dI(q) deltas is outside tolerance: %g > %g" % (math.fabs(delta_err), tolerance))
 
     # Compute chi2 of our result relative to IGOR
-    deltas = map(_diff_chi2, data_mantid, data_igor)
+    deltas = list(map(_diff_chi2, data_mantid, data_igor))
     chi2 = reduce(_add, deltas) / len(data_igor)
     if chi2 > 10.0 * tolerance or math.isnan(delta):
         passed = False
-        print "Chi2 is outside tolerance: %g > %g" % (chi2, 10.0 * tolerance)
+        print("Chi2 is outside tolerance: %g > %g" % (chi2, 10.0 * tolerance))
 
     return passed
 
@@ -139,6 +146,7 @@ def do_cleanup():
 
 
 class HFIRTestsAPIv2(stresstesting.MantidStressTest):
+
     def cleanup(self):
         do_cleanup()
         return True
@@ -168,6 +176,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
     def runTest(self):
 
         class TestStub(object):
+
             def __init__(self, test_method):
                 self._test_method = test_method
                 self._passed = True
@@ -177,10 +186,10 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                 ReductionSingleton.clean()
                 # Execute the test
                 try:
-                    print self._test_method.__name__
+                    print(self._test_method.__name__)
                     return self._test_method()
                 except:
-                    print traceback.format_exc()
+                    print(traceback.format_exc())
                     raise
                 return False
 
@@ -190,12 +199,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.failed_tests = []
         for current_item in dir(self):
             m = getattr(self, current_item)
-            if current_item.startswith("test_") and type(m) == types.MethodType:
+            if current_item.startswith("test_") and isinstance(m, types.MethodType):
                 self.n_tests += 1
                 t = TestStub(m)
                 result = t.run_test()
                 self._cleanup()
-                if result is None or result == True:
+                if result is None or result:
                     self.n_passed += 1
                 else:
                     self.failed_tests.append(current_item)
@@ -204,7 +213,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
         # any path that definitely exists on a computer with Mantid installed
-        test_path = os.path.normcase(ConfigService.Instance()['instrumentDefinition.directory'])
+        test_path = os.path.normcase(ConfigService.Instance()[
+                                     'instrumentDefinition.directory'])
         DataPath(test_path)
         self.assertEqual(ReductionSingleton()._data_path, test_path)
 
@@ -224,7 +234,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         SetSampleDetectorDistance(6500)
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
-        #SetSampleDetectorOffset(500.0)
+        # SetSampleDetectorOffset(500.0)
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
@@ -311,7 +321,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
@@ -320,7 +331,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.assertEqual(sdd, 6000.0)
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_center_calculated.txt", tolerance=1e-4))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_center_calculated.txt", tolerance=1e-4))
 
     def test_reduction_1(self):
         GPSANS()
@@ -350,9 +362,65 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.192082, 0.193783, 0.193787, 0.190557, 0.190471, 0.186827, 0.190088, 0.188204, 0.187547, 0.182206,
                  0.181384, 0.180358, 0.182663, 0.178844, 0.176556]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
+
+    def test_reduction_iqxqy(self):
+        '''
+        Test reduction with IQxQy in log binning
+        '''
+        GPSANS()
+        SetSampleDetectorDistance(6000)
+        DataPath(TEST_DIR)
+        DirectBeamCenter("BioSANS_empty_cell.xml")
+        AppendDataFile("BioSANS_test_data.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml")
+        AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
+        IQxQy(nbins=100, log_binning=True)
+        Reduce()
+
+        ws = AnalysisDataService.retrieve("BioSANS_test_data_Iqxy")
+        data = ws.dataX(0)
+        check = [
+            -0.11,-0.10489929,-0.1000351,-0.09539647,-0.09097293,-0.08675451,
+            -0.08273169,-0.07889542,-0.07523703,-0.07174829,-0.06842131,-0.06524861,
+            -0.06222303,-0.05933774,-0.05658625,-0.05396234,-0.0514601,-0.04907389,
+            -0.04679833,-0.04462829,-0.04255887,-0.04058542,-0.03870347,-0.03690878,
+            -0.03519732,-0.03356522,-0.0320088,-0.03052455,-0.02910912,-0.02775933,
+            -0.02647213,-0.02524461,-0.02407402,-0.0229577,-0.02189315,-0.02087797,
+            -0.01990985,-0.01898663,-0.01810622,-0.01726663,-0.01646598,-0.01570245,
+            -0.01497433,-0.01427997,-0.0136178,-0.01298634,-0.01238417,-0.01180991,
+            -0.01126229,-0.01074005,-0.01024204,-0.00976711,-0.00931421,-0.00888231,
+            -0.00847044,-0.00807766,-0.0077031,-0.00734591,-0.00700528,-0.00668044,
+            -0.00637067,-0.00607526,-0.00579355,-0.0055249,-0.00526871,-0.0050244,
+            -0.00479142,-0.00456924,-0.00435737,-0.00415531,-0.00396263,-0.00377888,
+            -0.00360366,-0.00343656,-0.0032772,-0.00312524,-0.00298032,-0.00284212,
+            -0.00271033,-0.00258465,-0.0024648,-0.00235051,-0.00224152,-0.00213758,
+            -0.00203846,-0.00194394,-0.00185379,-0.00176783,-0.00168586,-0.00160769,
+            -0.00153314,-0.00146205,-0.00139425,-0.0013296,-0.00126795,-0.00120915,
+            -0.00115308,-0.00109961,-0.00104862,-0.001,0.,0.001,
+            0.00104862,0.00109961,0.00115308,0.00120915,0.00126795,0.0013296,
+            0.00139425,0.00146205,0.00153314,0.00160769,0.00168586,0.00176783,
+            0.00185379,0.00194394,0.00203846,0.00213758,0.00224152,0.00235051,
+            0.0024648,0.00258465,0.00271033,0.00284212,0.00298032,0.00312524,
+            0.0032772,0.00343656,0.00360366,0.00377888,0.00396263,0.00415531,
+            0.00435737,0.00456924,0.00479142,0.0050244,0.00526871,0.0055249,
+            0.00579355,0.00607526,0.00637067,0.00668044,0.00700528,0.00734591,
+            0.0077031,0.00807766,0.00847044,0.00888231,0.00931421,0.00976711,
+            0.01024204,0.01074005,0.01126229,0.01180991,0.01238417,0.01298634,
+            0.0136178,0.01427997,0.01497433,0.01570245,0.01646598,0.01726663,
+            0.01810622,0.01898663,0.01990985,0.02087797,0.02189315,0.0229577,
+            0.02407402,0.02524461,0.02647213,0.02775933,0.02910912,0.03052455,
+            0.0320088,0.03356522,0.03519732,0.03690878,0.03870347,0.04058542,
+            0.04255887,0.04462829,0.04679833,0.04907389,0.0514601,0.05396234,
+            0.05658625,0.05933774,0.06222303,0.06524861,0.06842131,0.07174829,
+            0.07523703,0.07889542,0.08273169,0.08675451,0.09097293,0.09539647,
+            0.1000351,0.10489929,0.11]
+        deltas = list(map(_diff_iq, data, check))
+        delta = reduce(_add, deltas) / len(deltas)
+        self.assertTrue(math.fabs(delta) < 0.00001)
+        print(data)
 
     def test_no_solid_angle(self):
         GPSANS()
@@ -405,7 +473,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.190122, 0.189119, 0.18864, 0.185473,
                  0.184958, 0.183981, 0.182581]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
@@ -438,7 +506,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.195653, 0.19322, 0.193537, 0.191503, 0.190253,
                  0.189253, 0.188771, 0.1856, 0.185099, 0.184111, 0.182717]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
@@ -474,7 +542,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.369733, 0.370353, 0.366464, 0.364109, 0.362184, 0.361299,
                  0.355246, 0.354339, 0.352412, 0.349748]
 
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.001)
 
@@ -508,11 +576,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
-        property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
-        _p = property_manager.getProperty("TransmissionAlgorithm")
+        #property_manager = PropertyManagerDataService.retrieve(ReductionSingleton().get_reduction_table_name())
+        #_p = property_manager.getProperty("TransmissionAlgorithm")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_transmission.txt", 0.0001))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_transmission.txt", 0.0001))
 
     def test_center_by_hand(self):
         GPSANS()
@@ -520,13 +589,15 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         Reduce1D()
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
-        self.assertTrue(_check_result(ws, TEST_DIR + "reduced_center_by_hand.txt", 0.0001))
+        self.assertTrue(_check_result(
+            ws, TEST_DIR + "reduced_center_by_hand.txt", 0.0001))
 
     def test_background(self):
         GPSANS()
@@ -534,7 +605,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
@@ -556,7 +628,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         Background("BioSANS_test_data.xml,BioSANS_test_data.xml")
@@ -575,7 +648,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml", "test_data")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         Background("BioSANS_test_data.xml")
         SetTransmission(0.6, 0.1)
@@ -621,12 +695,12 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                  0.3479, 0.352355, 0.344987, 0.340605]
 
         # Check that I(q) is the same for both data sets
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.00001)
 
     def test_SampleGeometry_functions(self):
-        print "SKIPPING test_SampleGeometry_functions()"
+        print("SKIPPING test_SampleGeometry_functions()")
         return
         # pylint: disable=unreachable
         GPSANS()
@@ -638,23 +712,28 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         SampleHeight(3.0)
         SampleWidth(5.0)
 
-        # we don't need to do a full reduction for this test, do a partial reduction
+        # we don't need to do a full reduction for this test, do a partial
+        # reduction
         ReductionSingleton().pre_process()
-        ReductionSingleton()._reduction_steps[0].execute(ReductionSingleton(), "BioSANS_test_data")
-        ReductionSingleton().geometry_correcter.execute(ReductionSingleton(), "BioSANS_test_data")
+        ReductionSingleton()._reduction_steps[0].execute(
+            ReductionSingleton(), "BioSANS_test_data")
+        ReductionSingleton().geometry_correcter.execute(
+            ReductionSingleton(), "BioSANS_test_data")
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data")
-        data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]
+        data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(
+            2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]
 
         check = [500091.0, 60.0, 40.8333, 13.6333, 13.4667, 13.6667]
         # Check that I(q) is the same for both data sets
-        deltas = map(_diff_iq, data, check)
+        deltas = list(map(_diff_iq, data, check))
         delta = reduce(_add, deltas) / len(deltas)
         self.assertTrue(math.fabs(delta) < 0.1)
 
     def test_noDC_eff_with_DC(self):
         ref = [28.06525, 136.94662, -16.20412, 0.00000, 147.79915, 146.42713, 302.00869,
-               0.00000, 0.00000, -1869.20724, -2190.89681, -1892.14939, -2140.79608, -1980.60037,
+               0.00000, 0.00000, -1869.20724, -2190.89681, -
+               1892.14939, -2140.79608, -1980.60037,
                -2096.75974, -2221.30118, -2263.51541, -2264.89989, -2364.83528,
                -2420.58152, -2444.51906, -2418.28886, -2606.16991, -2556.93660,
                -2623.71380, -2547.79671, -2670.60962, -2714.35237, -2717.01692,
@@ -673,7 +752,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1666.47199, -1608.86707, -1544.26178, -1492.78389, -1438.69256,
                -1358.60437, -1299.34476, -1221.57010, -1080.69421, -609.77891, -77.72765]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle() # name clash with SolidAngle algorithm
         MonitorNormalization()
@@ -717,7 +796,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1768.67, -1721.61, -1666.51, -1608.91, -1544.31,
                -1492.83, -1438.74, -1358.65, -1299.39, -1221.61, -1080.73, -609.821, -77.7712]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
@@ -760,7 +839,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
                -1874.31, -1819.05, -1767.14, -1722.35, -1670.38, -1606.61,
                -1544.51, -1496.24, -1438.21, -1360.12, -1299.68, -1221.61, -1080.91, -610.638, -71.9557]
         BIOSANS()
-        #SetSampleDetectorOffset(837.9)
+        # SetSampleDetectorOffset(837.9)
         SetSampleDetectorDistance(6837.9)
         # SolidAngle()
         DarkCurrent("BioSANS_dark_current.xml")
@@ -768,7 +847,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         AzimuthalAverage(n_bins=100, n_subpix=1, log_binning=True)
         # IQxQy(nbins=100)
         DirectBeamCenter("BioSANS_empty_cell.xml")
-        SensitivityCorrection('BioSANS_flood_data.xml', min_sensitivity=0.5, max_sensitivity=1.5, use_sample_dc=False)
+        SensitivityCorrection('BioSANS_flood_data.xml', min_sensitivity=0.5,
+                              max_sensitivity=1.5, use_sample_dc=False)
         DivideByThickness(1)
         SetTransmission(1, 0)
         ThetaDependentTransmission(True)
@@ -792,7 +872,8 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         DataPath(TEST_DIR)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
-        SensitivityCorrection("BioSANS_flood_data.xml", dark_current="BioSANS_dark_current.xml")
+        SensitivityCorrection("BioSANS_flood_data.xml",
+                              dark_current="BioSANS_dark_current.xml")
         DarkCurrent("BioSANS_dark_current.xml")
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
                                empty_file="BioSANS_empty_trans.xml",
@@ -869,9 +950,9 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
         self.assertAlmostEqual(data[20], -0.047785, delta=0.00001)
 
     def validate(self):
-        print "HFIRTests: %d / %d tests passed" % (self.n_passed, self.n_tests)
+        print("HFIRTests: %d / %d tests passed" % (self.n_passed, self.n_tests))
         for items in self.failed_tests:
-            print items
+            print(items)
         return self.all_passed
 
 
@@ -891,9 +972,9 @@ def assertAlmostEqual(first, second, places=None, _msg=None, delta=None, rel_del
         if abs(first - second) <= delta:
             return True
         elif abs(first - second) / abs(second) < rel_delta:
-            print '\n-----> %s != %s but within %s percent' % (str(first),
+            print('\n-----> %s != %s but within %s percent' % (str(first),
                                                                str(second),
-                                                               str(rel_delta * 100.0))
+                                                               str(rel_delta * 100.0)))
             return True
 
         standardMsg = '%s != %s within %s delta' % (str(first),
@@ -909,5 +990,5 @@ def assertAlmostEqual(first, second, places=None, _msg=None, delta=None, rel_del
         standardMsg = '%s != %s within %r places' % (str(first),
                                                      str(second),
                                                      places)
-    print standardMsg
+    print(standardMsg)
     return False

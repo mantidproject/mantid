@@ -5,12 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/System.h"
+
+#include <map>
 #include <iosfwd>
 #include <set>
 #include <sstream>
+#include <string>
 #include <vector>
-#include <map>
-#include <iterator>
 
 namespace Mantid {
 namespace Kernel {
@@ -57,7 +59,7 @@ namespace Strings {
  */
 template <typename ITERATOR_TYPE>
 DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
-                           const std::string separator) {
+                           const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -68,6 +70,69 @@ DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end,
   }
   return output.str();
 }
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+* into one string, separated by a separator,
+* adjacent items that are precisely 1 away from each other
+* will be compressed into a list syntax e.g. 1-5.
+* Returns an empty string if the range is null.
+* Does not add the separator after the LAST item.
+*
+* For example, join a vector of strings with commas with:
+*  out = join(v.begin(), v.end(), ", ");
+*
+* @param begin :: iterator at the start
+* @param end :: iterator at the end
+* @param separator :: string to append between items.
+* @param listSeparator :: string to append between list items.
+* @return A string with contiguous values compressed using the list syntax
+*/
+template <typename ITERATOR_TYPE>
+DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end,
+                                   const std::string &separator = ",",
+                                   const std::string &listSeparator = "-") {
+
+  if (begin == end) {
+    return "";
+  }
+  std::stringstream result;
+
+  ITERATOR_TYPE i = begin;
+  // Always include the first value
+  result << *begin;
+  // move on to the next value
+  ITERATOR_TYPE previousValue = i;
+  ++i;
+
+  std::string currentSeparator = separator;
+  for (; i != end; ++i) {
+    // if it is one higher than the last value
+    if (*i == (*previousValue + 1)) {
+      currentSeparator = listSeparator;
+    } else {
+      if (currentSeparator == listSeparator) {
+        // add the last value that was the end of the list
+        result << currentSeparator;
+        result << *previousValue;
+        currentSeparator = separator;
+      }
+      // add the current value
+      result << currentSeparator;
+      result << *i;
+    }
+    previousValue = i;
+  }
+  // if we have got to the end and part of a list output the last value
+  if (currentSeparator == listSeparator) {
+    result << currentSeparator;
+    result << *previousValue;
+  }
+  return result.str();
+}
+/// Converts long strings into "start ... end"
+MANTID_KERNEL_DLL std::string shorten(const std::string &input,
+                                      const size_t max_length);
 
 /// Return a string with all matching occurence-strings
 MANTID_KERNEL_DLL std::string replace(const std::string &input,
@@ -101,7 +166,11 @@ MANTID_KERNEL_DLL int isEmpty(const std::string &A);
 /// Determines if a string starts with a #
 MANTID_KERNEL_DLL bool skipLine(const std::string &line);
 /// Get a line and strip comments
-MANTID_KERNEL_DLL std::string getLine(std::istream &fh, const int spc = 256);
+/// Use only for a single call
+MANTID_KERNEL_DLL std::string getLine(std::istream &fh);
+/// Get a line and strip comments
+/// Use within a loop
+MANTID_KERNEL_DLL void getLine(std::istream &fh, std::string &Line);
 /// Peek at a line without extracting it from the stream
 MANTID_KERNEL_DLL std::string peekLine(std::istream &fh);
 /// get a part of a long line
@@ -144,7 +213,7 @@ template <typename T> int sectionMCNPX(std::string &A, T &out);
 MANTID_KERNEL_DLL void writeMCNPX(const std::string &Line, std::ostream &OX);
 
 /// Split tring into spc deliminated components
-MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
+MANTID_KERNEL_DLL std::vector<std::string> StrParts(const std::string &Ln);
 
 /// Splits a string into key value pairs
 MANTID_KERNEL_DLL std::map<std::string, std::string>

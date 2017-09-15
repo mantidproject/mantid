@@ -2,9 +2,11 @@
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import SensitivityCorrection, SetTransmission
 from mantid.api import FileFinder
 
 import os
+
 
 class EQSANSEff(stresstesting.MantidStressTest):
 
@@ -44,4 +46,3 @@ class EQSANSEff(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSEff.nxs'
-

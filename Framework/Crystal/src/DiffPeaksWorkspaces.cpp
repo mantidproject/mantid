@@ -1,6 +1,7 @@
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -72,8 +73,9 @@ void DiffPeaksWorkspaces::exec() {
   // Get hold of the peaks in the first workspace as we'll need to examine them
   auto &lhsPeaks = output->getPeaks();
 
-  Progress progress(this, 0, 1, rhsPeaks.size());
+  Progress progress(this, 0.0, 1.0, rhsPeaks.size());
 
+  std::vector<int> badPeaks;
   // Loop over the peaks in the second workspace, searching for a match in the
   // first
   for (const auto &currentPeak : rhsPeaks) {
@@ -87,14 +89,14 @@ void DiffPeaksWorkspaces::exec() {
       {
         // As soon as we find a match, remove it from the output and move onto
         // the next rhs peak
-        output->removePeak(j);
+        badPeaks.push_back(j);
         break;
       }
     }
 
     progress.report();
   }
-
+  output->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", output);
 }
 

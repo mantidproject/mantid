@@ -1,20 +1,23 @@
 #ifndef LOADNEXUSMONITORSTEST_H_
 #define LOADNEXUSMONITORSTEST_H_
 
-#include <cxxtest/TestSuite.h>
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadNexusMonitors2.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
-#include <nexus/NeXusFile.hpp>
-#include <boost/shared_ptr.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -43,21 +46,20 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
     // Check some histogram data
     // TOF
-    TS_ASSERT_EQUALS((*WS->refX(1)).size(), 200002);
-    TS_ASSERT_DELTA((*WS->refX(1))[3412], 3412.0, 1e-6);
+    TS_ASSERT_EQUALS(WS->x(1).size(), 200002);
+    TS_ASSERT_DELTA(WS->x(1)[3412], 3412.0, 1e-6);
     // Data
-    TS_ASSERT_EQUALS(WS->dataY(1).size(), 200001);
-    TS_ASSERT_DELTA(WS->dataY(1)[3412], 197., 1e-6);
+    TS_ASSERT_EQUALS(WS->y(1).size(), 200001);
+    TS_ASSERT_DELTA(WS->y(1)[3412], 197., 1e-6);
     // Error
-    TS_ASSERT_EQUALS(WS->dataE(1).size(), 200001);
-    TS_ASSERT_DELTA(WS->dataE(1)[3412], 14.03567, 1e-4);
+    TS_ASSERT_EQUALS(WS->e(1).size(), 200001);
+    TS_ASSERT_DELTA(WS->e(1)[3412], 14.03567, 1e-4);
     // Check geometry for a monitor
-    IDetector_const_sptr mon = WS->getDetector(2);
-    TS_ASSERT(mon->isMonitor());
-    TS_ASSERT_EQUALS(mon->getID(), -3);
-    boost::shared_ptr<const IComponent> sample =
-        WS->getInstrument()->getSample();
-    TS_ASSERT_DELTA(mon->getDistance(*sample), 1.426, 1e-6);
+    const auto &specInfo = WS->spectrumInfo();
+    TS_ASSERT(specInfo.isMonitor(2));
+    TS_ASSERT_EQUALS(specInfo.detector(2).getID(), -3);
+    TS_ASSERT_DELTA(specInfo.samplePosition().distance(specInfo.position(2)),
+                    1.426, 1e-6);
     // Check if filename is saved
     TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),
                      WS->run().getProperty("Filename")->value());
@@ -114,11 +116,11 @@ public:
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 2);
     // Monitors data is correct
-    TS_ASSERT_EQUALS(WS->readY(0)[0], 0);
-    TS_ASSERT_EQUALS(WS->readY(1)[0], 0);
+    TS_ASSERT_EQUALS(WS->y(0)[0], 0);
+    TS_ASSERT_EQUALS(WS->y(1)[0], 0);
 
-    TS_ASSERT_EQUALS(WS->readX(0)[0], 5.0);
-    TS_ASSERT_EQUALS(WS->readX(1)[5], 19995.0);
+    TS_ASSERT_EQUALS(WS->x(0)[0], 5.0);
+    TS_ASSERT_EQUALS(WS->x(1)[5], 19995.0);
   }
 
   void test_10_monitors() {
@@ -143,9 +145,9 @@ public:
     // Correct number of monitors found
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 3);
     // Monitors are in the right order
-    TS_ASSERT_EQUALS(WS->readY(0)[0], 1);
-    TS_ASSERT_EQUALS(WS->readY(1)[0], 2);
-    TS_ASSERT_EQUALS(WS->readY(2)[0], 10);
+    TS_ASSERT_EQUALS(WS->y(0)[0], 1);
+    TS_ASSERT_EQUALS(WS->y(1)[0], 2);
+    TS_ASSERT_EQUALS(WS->y(2)[0], 10);
 
     AnalysisDataService::Instance().clear();
     Poco::File(filename).remove();
@@ -236,6 +238,63 @@ public:
     file.writeData("time_of_flight", timeOfFlight);
     file.closeGroup();
   }
+};
+
+class LoadNexusMonitorsTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadNexusMonitorsTestPerformance *createSuite() {
+    return new LoadNexusMonitorsTestPerformance();
+  }
+
+  static void destroySuite(LoadNexusMonitorsTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    ld.initialize();
+    ld2.initialize();
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("cncs");
+    AnalysisDataService::Instance().remove("hyspec");
+  }
+
+  void testExecV1() {
+    Mantid::API::FrameworkManager::Instance();
+    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", "cncs");
+
+    ld.execute();
+  }
+
+  void testExecEventV1() {
+    Mantid::API::FrameworkManager::Instance();
+    ld.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
+    ld.setPropertyValue("OutputWorkspace", "hyspec");
+
+    ld.execute();
+  }
+
+  void testExecV2() {
+    Mantid::API::FrameworkManager::Instance();
+    ld2.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    ld2.setPropertyValue("OutputWorkspace", "cncs");
+
+    ld2.execute();
+  }
+
+  void testExecEventV2() {
+    Mantid::API::FrameworkManager::Instance();
+    ld2.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
+    ld2.setPropertyValue("OutputWorkspace", "hyspec");
+
+    ld2.execute();
+  }
+
+private:
+  LoadNexusMonitors ld;
+  LoadNexusMonitors2 ld2;
 };
 
 #endif /*LOADNEXUSMONITORSTEST_H_*/

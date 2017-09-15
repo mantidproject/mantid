@@ -10,8 +10,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
+#include <boost/lexical_cast.hpp>
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
@@ -155,8 +157,7 @@ private:
         dynamic_cast<PropertyWithValue<int> *>(prop);
     TS_ASSERT(current_period_property != NULL);
     int actual_period;
-    Mantid::Kernel::toValue<int>(current_period_property->value(),
-                                 actual_period);
+    actual_period = boost::lexical_cast<int>(current_period_property->value());
     TS_ASSERT_EQUALS(expected_period, actual_period);
     // Check the period n property.
     std::stringstream stream;

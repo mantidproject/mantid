@@ -8,8 +8,10 @@
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -44,7 +46,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    auto det10Pos = output->getDetector(10)->getPos();
+    const auto &spectrumInfo = output->spectrumInfo();
+    auto det10Pos = spectrumInfo.position(10);
     TS_ASSERT_DELTA(det10Pos.X(), 1.06477, 1e-4);
     TS_ASSERT_DELTA(det10Pos.Y(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det10Pos.Z(), 0.984261, 1e-4);
@@ -56,7 +59,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
-    auto det0Pos = output->getDetector(0)->getPos();
+    const auto &spectrumInfo2 = output->spectrumInfo();
+    auto det0Pos = spectrumInfo2.position(0);
     TS_ASSERT_DELTA(det0Pos.X(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det0Pos.Y(), 0.0, 1e-4);
     TS_ASSERT_DELTA(det0Pos.Z(), 0.355, 1e-4);
@@ -114,10 +118,10 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
 
-    auto det4 = output->getDetector(3); // spectrum 4 = ws index 3
-    TS_ASSERT(det4);
+    const auto &spectrumInfo = output->spectrumInfo();
+    auto det4Position = spectrumInfo.position(3); // spectrum 4 = ws index 3
     double r(-1.0), theta(-1.0), phi(-1.0);
-    det4->getPos().getSpherical(r, theta, phi);
+    det4Position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(0.6545, r, 1e-4);
     TS_ASSERT_DELTA(131.9319, theta, 1e-4);
     TS_ASSERT_DELTA(179.0, phi, 1e-4);
@@ -158,23 +162,29 @@ public:
 
     auto output =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+    const auto &spectrumInfo = output->spectrumInfo();
+    const auto &detector = spectrumInfo.detector(0);
 
-    auto group = boost::dynamic_pointer_cast<const DetectorGroup>(
-        output->getDetector(0));
-    TSM_ASSERT("Expected a DetectorGroup", group);
-    double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
-    auto dets = group->getDetectors();
-    for (const auto &comp : dets) {
-      double r(-1.0), theta(-1.0), phi(-1.0);
-      comp->getPos().getSpherical(r, theta, phi);
-      TS_ASSERT_DELTA(expectedR, r, 1e-4);
-      TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
-      TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
+    auto canCastToGroup(true);
+    try {
+      const auto &group = dynamic_cast<const DetectorGroup &>(detector);
+      double expectedR(0.6708), expectedTheta(130.4653), expectedPhi(1.4320);
+      const auto dets = group.getDetectors();
+      for (const auto &comp : dets) {
+        double r(-1.0), theta(-1.0), phi(-1.0);
+        comp->getPos().getSpherical(r, theta, phi);
+        TS_ASSERT_DELTA(expectedR, r, 1e-4);
+        TS_ASSERT_DELTA(expectedTheta, theta, 1e-4);
+        TS_ASSERT_DELTA(expectedPhi, phi, 1e-4);
 
-      std::vector<double> par = comp->getNumberParameter("t0");
-      TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
-      TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
+        std::vector<double> par = comp->getNumberParameter("t0");
+        TSM_ASSERT_EQUALS("Expected a single t0 parameter", 1, par.size());
+        TS_ASSERT_DELTA(par[0], -0.4157, 1e-4)
+      }
+    } catch (const std::bad_cast &) {
+      canCastToGroup = false;
     }
+    TS_ASSERT(canCastToGroup);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -210,22 +220,23 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             wsName));
+    auto spectrumInfo = output->spectrumInfo();
+    auto det4Position = spectrumInfo.position(3); // spectrum 4 = ws index 3
 
-    auto det4 = output->getDetector(3); // spectrum 4 = ws index 3
-    TS_ASSERT(det4);
     double r(-1.0), theta(-1.0), phi(-1.0);
-    det4->getPos().getSpherical(r, theta, phi);
+    det4Position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(0.6545, r, 1e-4);
     TS_ASSERT_DELTA(131.9319, theta, 1e-4);
     TS_ASSERT_DELTA(180.0, phi, 1e-4);
 
-    std::vector<double> par = det4->getNumberParameter("t0");
+    const auto &det4 = spectrumInfo.detector(3);
+    std::vector<double> par = det4.getNumberParameter("t0");
     TS_ASSERT_EQUALS(1, par.size());
     if (par.size() == 1) {
       TS_ASSERT_DELTA(par[0], -0.5338, 1e-4)
     }
     // Check that the "-" column was skipped
-    par = det4->getNumberParameter("-");
+    par = det4.getNumberParameter("-");
     TS_ASSERT_EQUALS(0, par.size());
 
     AnalysisDataService::Instance().remove(wsName);

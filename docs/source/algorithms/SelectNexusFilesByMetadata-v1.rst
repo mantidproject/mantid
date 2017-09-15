@@ -11,12 +11,13 @@ Description
 
 This algorithm returns the nexus (HDF) files in the given files list that satisfy the specified criteria.
 This is done without actually loading the data, but just the needed metadata.
-Input files need to exist and be specified following the Mantid rules in `MultiFileLoading <http://www.mantidproject.org/MultiFileLoading>`_.
-Note, that the ``+`` and ``-`` rules will act as ``,`` and ``:`` correspondingly, since the summing does not make sense for the given purpose.
+Input files need to exist and be specified following the Mantid rules in
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`.
 Criteria could be any python logical expression involving the nexus entry names enclosed with ``$`` symbol.
 Arbitrary number of criteria can be combined. The metadata entry should contain only one element.
 Note, that if the entry is of string type, string comparison will be performed.
-As a result, a plain comma separated list of fully resolved file names satisfying the criteria will be returned.
+As a result, a string of the fully resolved file names satisfying the criteria
+(and following the same algebra as in input, i.e. ``+`` or ``,``) will be returned.
 Note, that this algorithm requires `h5py <https://pypi.python.org/pypi/h5py>`_ package installed.
 
 **Example - Running SelectNexusFilesByMetadata**

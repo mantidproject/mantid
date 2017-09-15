@@ -1,7 +1,10 @@
 #pylint: disable=no-init
+
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
+
 
 class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
 
@@ -9,7 +12,7 @@ class SANS2DLimitEventsTime(stresstesting.MantidStressTest):
         SANS2D()
         MaskFile('MaskSANS2DReductionGUI_LimitEventsTime.txt')
         AssignSample('22048')
-        reduced = WavRangeReduction()
+        WavRangeReduction()
 
     def validate(self):
         self.disableChecking.append('SpectraMap')

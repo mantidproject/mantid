@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, too-many-instance-attributes, too-many-arguments
 # used to parse files more easily
-from __future__ import with_statement
+from __future__ import (with_statement, absolute_import, division, print_function)
 # Qt4 bindings for core Qt functionalities (non-GUI)
 from PyQt4 import QtCore
 # python Qt4 bindings for GUI objects
@@ -22,6 +22,7 @@ CSS_BACK = """QLineEdit{
 CSS_LOWRES = """QLineEdit{
                    background-color: #a7f6a1;
                 }"""
+
 
 class DesignerMainWindow(QtGui.QMainWindow):
     """ Customization for Qt Designer created window """
@@ -264,7 +265,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def peak_input_changed(self):
         self.update_graph()
 
-
     def update_peak_back_selection_mode(self, bPeak):
         """Make sure that only 1 peak/back selection is activated at the same time"""
         self.peakSwitch.setChecked(bPeak)
@@ -450,7 +450,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
             def on_release(self, event):
                 """on release we reset the press data"""
-                _event = event
                 self.xpress = None
                 self.rect.figure.canvas.draw()
 

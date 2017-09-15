@@ -58,7 +58,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
       {
         confidence = 0;
       }
-    } catch (std::length_error) {
+    } catch (const std::length_error &) {
       confidence = 0;
     }
   }
@@ -130,7 +130,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
                        std::vector<std::vector<size_t>> &quoteBounds,
                        size_t expectedCommas) const {
   size_t pairID = 0;
-  size_t valsFound = 0;
   size_t lastComma = 0;
   size_t pos = 0;
   bool firstCheck = true;
@@ -153,7 +152,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
                                      quoteBounds.at(pairID).at(1) -
                                          (quoteBounds.at(pairID).at(0) + 1)));
           ++pairID;
-          ++valsFound;
         }
       } else {
         if (firstCell) {
@@ -163,7 +161,6 @@ void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
           auto colVal = line.substr(lastComma + 1, pos - (lastComma + 1));
           cols.push_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
         }
-        ++valsFound;
       }
       lastComma = pos;
     } else {
@@ -296,7 +293,7 @@ void LoadTBL::exec() {
   boost::split(columnHeadings, line, boost::is_any_of(","),
                boost::token_compress_off);
   for (auto entry = columnHeadings.begin(); entry != columnHeadings.end();) {
-    if (std::string(*entry).compare("") == 0) {
+    if (entry->empty()) {
       // erase the empty values
       entry = columnHeadings.erase(entry);
     } else {
@@ -345,7 +342,7 @@ void LoadTBL::exec() {
     std::string line;
     int stitchID = 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
-      if (line == "" || line == ",,,,,,,,,,,,,,,,") {
+      if (line.empty() || line == ",,,,,,,,,,,,,,,,") {
         continue;
       }
       getCells(line, rowVec, 16, isOld);
@@ -354,8 +351,8 @@ void LoadTBL::exec() {
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
-      if (rowVec[0] != "" || rowVec[1] != "" || rowVec[2] != "" ||
-          rowVec[3] != "" || rowVec[4] != "") {
+      if (!rowVec[0].empty() || !rowVec[1].empty() || !rowVec[2].empty() ||
+          !rowVec[3].empty() || !rowVec[4].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 0; i < 5; ++i) {
@@ -367,8 +364,8 @@ void LoadTBL::exec() {
 
       // check if the second run in the row has any data associated with it
       // 5 = runs, 6 = theta, 7 = trans, 8 = qmin, 9 = qmax
-      if (rowVec[5] != "" || rowVec[6] != "" || rowVec[7] != "" ||
-          rowVec[8] != "" || rowVec[9] != "") {
+      if (!rowVec[5].empty() || !rowVec[6].empty() || !rowVec[7].empty() ||
+          !rowVec[8].empty() || !rowVec[9].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 5; i < 10; ++i) {
@@ -380,8 +377,8 @@ void LoadTBL::exec() {
 
       // check if the third run in the row has any data associated with it
       // 10 = runs, 11 = theta, 12 = trans, 13 = qmin, 14 = qmax
-      if (rowVec[10] != "" || rowVec[11] != "" || rowVec[12] != "" ||
-          rowVec[13] != "" || rowVec[14] != "") {
+      if (!rowVec[10].empty() || !rowVec[11].empty() || !rowVec[12].empty() ||
+          !rowVec[13].empty() || !rowVec[14].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 10; i < 17; ++i) {
@@ -403,7 +400,7 @@ void LoadTBL::exec() {
       // the columns vector to the TableWorkspace
       for (auto heading = columnHeadings.begin();
            heading != columnHeadings.end();) {
-        if (std::string(*heading).compare("") == 0) {
+        if (heading->empty()) {
           // there is no need to have empty column headings.
           heading = columnHeadings.erase(heading);
         } else {
@@ -416,7 +413,7 @@ void LoadTBL::exec() {
     }
     size_t expectedCommas = columnHeadings.size() - 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
-      if (line == "" || line == ",,,,,,,,,,,,,,,,") {
+      if (line.empty() || line == ",,,,,,,,,,,,,,,,") {
         // skip over any empty lines
         continue;
       }

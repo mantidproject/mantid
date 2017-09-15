@@ -1,4 +1,6 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -13,14 +15,11 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
     _peak_position = None
     _peak_function = None
 
-
     def category(self):
         return 'Inelastic\\Corrections;CorrectionFunctions\\SpecialCorrections'
 
-
     def summary(self):
         return 'Corrects TOSCA reductions where the peaks across banks are not in alignment.'
-
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty(name='InputWorkspace', defaultValue='',
@@ -47,7 +46,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
         self.declareProperty(name='TargetPeakCentre', defaultValue=0.0,
                              direction=Direction.Output,
-                             doc='X position between the centres of the two ' \
+                             doc='X position between the centres of the two '
                                  'selected peaks')
 
         self.declareProperty(name='ScaleFactor1', defaultValue=1.0,
@@ -57,7 +56,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         self.declareProperty(name='ScaleFactor2', defaultValue=1.0,
                              direction=Direction.Output,
                              doc='Scale factor for the second bank (histogram 1)')
-
 
     def validateInputs(self):
         self._get_properties()
@@ -75,7 +73,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                 issues['PeakPosition'] = 'Peak position must be inside SearchRange'
 
         return issues
-
 
     def PyExec(self):
         self._get_properties()
@@ -110,7 +107,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         self.setProperty('ScaleFactor1', bank_1_scale_factor)
         self.setProperty('ScaleFactor2', bank_2_scale_factor)
 
-
     def _get_properties(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
@@ -124,7 +120,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
             self._peak_position = float(self.getPropertyValue('PeakPosition'))
         except ValueError:
             self._peak_position = None
-
 
     def _get_peak(self, search_ws):
         """
@@ -184,7 +179,6 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
             logger.warning('No peak found')
 
         return selected_peak
-
 
     def _apply_correction(self, bank_1_sf, bank_2_sf):
         """

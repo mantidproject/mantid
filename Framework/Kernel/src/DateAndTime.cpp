@@ -1,8 +1,20 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
+
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/date_time/time.hpp>
+#include <boost/date_time/date.hpp>
+
+#include <math.h>
+#include <exception>
+#include <limits>
+#include <memory>
+#include <ostream>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -43,7 +55,6 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 #ifdef _WIN32
   // Windows implementation
   if (!gmtime_s(result, clock)) { // Returns zero if successful
-    // cppcheck-suppress CastIntegerToAddressAtReturn
     return result;
   } else { // Returned some non-zero error code
     return NULL;
@@ -172,11 +183,12 @@ DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime)
  * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const double seconds, const double nanoseconds) {
-  double nano = seconds * 1e9 + nanoseconds;
-  // Limit times
-  if (nano > MAX_NANOSECONDS)
+  double nano = seconds * 1.e9 + nanoseconds;
+  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
+  if (nano > maximum)
     _nanoseconds = MAX_NANOSECONDS;
-  else if (nano < MIN_NANOSECONDS)
+  else if (nano < minimum)
     _nanoseconds = MIN_NANOSECONDS;
   else
     _nanoseconds = static_cast<int64_t>(nano);
@@ -529,17 +541,23 @@ int DateAndTime::day() const { return to_ptime().date().day(); }
 /** Get the hour (0-24) of this time.
  * @return the hour
  */
-int DateAndTime::hour() const { return to_ptime().time_of_day().hours(); }
+int DateAndTime::hour() const {
+  return static_cast<int>(to_ptime().time_of_day().hours());
+}
 
 /** Get the minute (0-60) of this time.
  * @return the minute
  */
-int DateAndTime::minute() const { return to_ptime().time_of_day().minutes(); }
+int DateAndTime::minute() const {
+  return static_cast<int>(to_ptime().time_of_day().minutes());
+}
 
 /** Get the seconds (0-60) of this time.
  * @return the second
  */
-int DateAndTime::second() const { return to_ptime().time_of_day().seconds(); }
+int DateAndTime::second() const {
+  return static_cast<int>(to_ptime().time_of_day().seconds());
+}
 
 /** Get the nanoseconds (remainder, < 1 second) of this time.
  * @return the nanoseconds
@@ -838,11 +856,13 @@ time_duration DateAndTime::durationFromNanoseconds(int64_t dur) {
  * @return int64 of the number of nanoseconds
  */
 int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
-  double nano = sec * 1e9;
+  const double nano = sec * 1e9;
+  constexpr double minimum = static_cast<double>(MIN_NANOSECONDS);
+  constexpr double maximum = static_cast<double>(MAX_NANOSECONDS);
   // Use these limits to avoid integer overflows
-  if (nano > MAX_NANOSECONDS)
+  if (nano > maximum)
     return MAX_NANOSECONDS;
-  else if (nano < MIN_NANOSECONDS)
+  else if (nano < minimum)
     return MIN_NANOSECONDS;
   else
     return int64_t(nano);

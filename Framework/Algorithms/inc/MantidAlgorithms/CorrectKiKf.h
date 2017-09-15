@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -90,6 +91,9 @@ private:
   template <class T>
   void correctKiKfEventHelper(std::vector<T> &wevector, double efixed,
                               const std::string emodeStr);
+  void getEfixedFromParameterMap(double &Efi, int64_t i,
+                                 const Mantid::API::SpectrumInfo &spectrumInfo,
+                                 const Mantid::Geometry::ParameterMap &pmap);
 };
 
 } // namespace Algorithm

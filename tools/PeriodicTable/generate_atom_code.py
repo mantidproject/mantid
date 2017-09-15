@@ -1,18 +1,19 @@
-#pylint: disable=invalid-name
 #!/usr/bin/env python
-
-VERSION = "1.0"
-
+#pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import optparse
+import sys
 try:
     import periodictable
     if not periodictable.__version__.startswith("1.3."):
-        print "*****Require periodictable 1.3.*"
+        print("*****Require periodictable 1.3.*")
         sys.exit(-1)
-except ImportError, e:
-    print "*****To use this you must 'easy_install periodictable'"
+except ImportError as e:
+    print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
-import sys
+
+VERSION = "1.0"
 
 # elements not to put in the output file
 BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
@@ -21,8 +22,10 @@ BANNED = ['n', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
 DELIMITOR_START = "// ---------- START DO NOT EDIT AREA----------"
 DELIMITOR_STOP = "// ---------- END DO NOT EDIT AREA----------"
 
+
 def writeBegin(handle, label, symbol, z, a=0):
     handle.write("static const Atom %s(\"%s\", %d, %d, " % (label, symbol, z, a))
+
 
 def writeMiddle(handle, abundance, atom):
     mass = atom.mass
@@ -36,8 +39,10 @@ def writeMiddle(handle, abundance, atom):
         density = "NAN"
     handle.write("%f, %f, %s" % (abundance, mass, density))
 
+
 def writeEnd(handle):
     handle.write(");\n")
+
 
 def writeIsotope(handle, element, atomicnumber):
     isotope = element._isotopes[atomicnumber]
@@ -46,6 +51,7 @@ def writeIsotope(handle, element, atomicnumber):
     writeMiddle(handle, isotope.abundance, isotope)
     writeEnd(handle)
     return label
+
 
 def writeElement(handle, element):
     label = element.symbol
@@ -58,6 +64,7 @@ def writeElement(handle, element):
     for key in element._isotopes.keys():
         labels.append(writeIsotope(handle, element, key))
     return labels
+
 
 def readExisting(filename):
     # open the file and scoop up everyting
@@ -76,6 +83,7 @@ def readExisting(filename):
     before = "".join(lines[:index_start])
     after = "".join(lines[index_stop+1:])
     return (before, after)
+
 
 if __name__ == "__main__":
     # command line options
@@ -99,7 +107,7 @@ if __name__ == "__main__":
     (code_before, code_after) = readExisting(filename)
 
     # setup the file for the elements and isotopes
-    print "writing information to %s" % filename
+    print("writing information to %s" % filename)
     handle = open(filename, 'w')
     handle.write(code_before) # write out what was before the delimitor
     handle.write(DELIMITOR_START+"\n")
@@ -116,7 +124,7 @@ if __name__ == "__main__":
     handle.write("/// All of the atoms in a single array so it can be searched.\n")
     handle.write("static Atom ATOMS[] = {\n")
     numAtoms = len(atomNames)
-    for i in xrange(0, numAtoms, 10):
+    for i in range(0, numAtoms, 10):
         handle.write(", ".join(atomNames[i:i+10]))
         if i+10 < numAtoms:
             handle.write(",")

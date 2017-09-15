@@ -4,6 +4,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"

@@ -5,6 +5,7 @@
 
 #include "MantidMDAlgorithms/IntegrateFlux.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -42,8 +43,8 @@ struct TestingFunction {
       return x * x / dx;
     case HistogramNonUniform: {
       double res = 0.0;
-      auto &X = workspace.readX(0);
-      auto &Y = workspace.readY(0);
+      auto &X = workspace.x(0);
+      auto &Y = workspace.y(0);
       auto ix = std::lower_bound(X.begin(), X.end(), x);
       if (ix != X.end()) {
         if (x < *ix) {
@@ -196,8 +197,8 @@ private:
     TS_ASSERT(ws->getAxis(0)->unit() == inWS->getAxis(0)->unit());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4);
 
-    auto &x = ws->readX(0);
-    auto &y = ws->readY(0);
+    auto &x = ws->x(0);
+    auto &y = ws->y(0);
 
     size_t n = x.size();
     TS_ASSERT_EQUALS(n, y.size());
@@ -239,7 +240,7 @@ private:
   }
 
   void do_test_unsorted(const MatrixWorkspace &outWS) {
-    auto &y = outWS.readY(0);
+    auto &y = outWS.y(0);
     double oldValue = 0.0;
     for (size_t i = 0; i < y.size(); ++i) {
       if (y[i] != 0.0 && y[i] != oldValue) {

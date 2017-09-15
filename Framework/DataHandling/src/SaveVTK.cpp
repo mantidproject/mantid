@@ -3,11 +3,11 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveVTK.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/BoundedValidator.h"
 #include <Poco/File.h>
-#include <string>
 #include <fstream>
+#include <string>
 
 namespace Mantid {
 namespace DataHandling {
@@ -81,36 +81,45 @@ void SaveVTK::exec() {
   if (workspaceID.find("Workspace2D") != std::string::npos) {
     const Workspace2D_sptr localWorkspace =
         boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
-    //      const size_t numberOfHist = localWorkspace->getNumberHistograms();
 
     // Write out whole range
     bool xMin(m_Xmin > 0.0), xMax(m_Xmax > 0.0);
     Progress prog(this, 0.0, 1.0, 97);
     if (!xMin && !xMax) {
       for (int hNum = 2; hNum < 100; ++hNum) {
-        writeVTKPiece(outVTP, localWorkspace->dataX(hNum),
-                      localWorkspace->dataY(hNum), localWorkspace->dataE(hNum),
-                      hNum);
+        writeVTKPiece(outVTP, localWorkspace->x(hNum).rawData(),
+                      localWorkspace->y(hNum).rawData(),
+                      localWorkspace->e(hNum).rawData(), hNum);
         prog.report();
       }
     } else {
       for (int hNum = 2; hNum < 100; ++hNum) {
+
+        auto &X = localWorkspace->x(hNum);
+        auto &Y = localWorkspace->y(hNum);
+        auto &E = localWorkspace->e(hNum);
+
         std::vector<double> xValue, yValue, errors;
-        std::vector<double>::size_type nVals(
-            localWorkspace->dataY(hNum).size());
+        std::vector<double>::size_type nVals(Y.size());
+
         for (int i = 0; i < static_cast<int>(nVals); ++i) {
-          if (xMin && localWorkspace->dataX(hNum)[i] < m_Xmin)
+
+          if (xMin && X[i] < m_Xmin) {
             continue;
-          if (xMax && localWorkspace->dataX(hNum)[i + 1] > m_Xmax) {
-            xValue.push_back(localWorkspace->dataX(hNum)[i]);
+          }
+
+          if (xMax && X[i + 1] > m_Xmax) {
+            xValue.push_back(X[i]);
             break;
           }
-          xValue.push_back(localWorkspace->dataX(hNum)[i]);
+
+          xValue.push_back(X[i]);
           if (i == static_cast<int>(nVals) - 1) {
-            xValue.push_back(localWorkspace->dataX(hNum)[i + 1]);
+            xValue.push_back(X[i + 1]);
           }
-          yValue.push_back(localWorkspace->dataY(hNum)[i]);
-          errors.push_back(localWorkspace->dataE(hNum)[i]);
+
+          yValue.push_back(Y[i]);
+          errors.push_back(E[i]);
         }
         // sanity check
         assert((int)xValue.size() == (int)yValue.size() + 1);

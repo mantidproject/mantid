@@ -1,4 +1,6 @@
 #pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import mantid.simpleapi as s_api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace, Progress
@@ -22,15 +24,13 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
     _can_shift_factor = 0.0
     _scaled_container_wavelength = None
     _sample_ws_wavelength = None
-
+    _rebin_container_ws = False
 
     def category(self):
         return "Workflow\\MIDAS"
 
-
     def summary(self):
         return "Applies a calculated absorption correction in the Paalman and Pings factor style."
-
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -53,6 +53,9 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
+        self.declareProperty(name='RebinCanToSample',
+                             defaultValue=True,
+                             doc=('Enable or disable RebinToWorkspace on CanWorkspace.'))
 
     #pylint: disable=too-many-branches
     def PyExec(self):
@@ -253,6 +256,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         self._can_shift_factor = self.getProperty('CanShiftFactor').value
         self._shift_can = self._can_shift_factor != 0.0
 
+        self._rebin_container_ws = self.getProperty('RebinCanToSample').value
+
         # This temporary WS is needed because ConvertUnits does not like named WS in a Group
         self._corrections = '__converted_corrections'
         self._scaled_container = '__scaled_container'
@@ -272,15 +277,18 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 from IndirectCommon import getEfixed
                 efixed = getEfixed(input_ws)
             else:
-                raise ValueError('Unit %s in sample workspace is not supported' % unit)
+                s_api.CloneWorkspace(InputWorkspace=input_ws,
+                                     OutputWorkspace=output_ws)
+                #raise ValueError('Unit %s in sample workspace is not supported' % unit)
 
-            # Do conversion
-            # Use temporary workspace so we don't modify data
-            s_api.ConvertUnits(InputWorkspace=input_ws,
-                               OutputWorkspace=output_ws,
-                               Target=target,
-                               EMode=emode,
-                               EFixed=efixed)
+            if unit == 'dSpacing' or unit == 'DeltaE':
+                # Do conversion
+                # Use temporary workspace so we don't modify data
+                s_api.ConvertUnits(InputWorkspace=input_ws,
+                                   OutputWorkspace=output_ws,
+                                   Target=target,
+                                   EMode=emode,
+                                   EFixed=efixed)
 
         else:
             # No need to convert
@@ -332,17 +340,14 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Do a simple container subtraction (when no corrections are given).
         """
 
-        logger.information('Rebining container to ensure Minus')
-        s_api.RebinToWorkspace(WorkspaceToRebin=self._can_ws_name,
-                               WorkspaceToMatch=self._sample_ws_wavelength,
-                               OutputWorkspace=self._can_ws_name)
-
         logger.information('Using simple container subtraction')
 
-        # Rebin can
-        s_api.RebinToWorkspace(WorkspaceToRebin=self._scaled_container_wavelength,
-                               WorkspaceToMatch=self._sample_ws_wavelength,
-                               OutputWorkspace=self._scaled_container_wavelength)
+        if self._rebin_container_ws:
+            logger.information('Rebining container to ensure Minus')
+            s_api.RebinToWorkspace(
+                WorkspaceToRebin=self._scaled_container_wavelength,
+                WorkspaceToMatch=self._sample_ws_wavelength,
+                OutputWorkspace=self._scaled_container_wavelength)
 
         s_api.Minus(LHSWorkspace=self._sample_ws_wavelength,
                     RHSWorkspace=self._scaled_container_wavelength,
@@ -378,9 +383,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                                            self._corrections + f_type,
                                            "Wavelength")
 
-        s_api.RebinToWorkspace(WorkspaceToRebin=self._scaled_container_wavelength,
-                               WorkspaceToMatch=self._corrections + '_acc',
-                               OutputWorkspace=self._scaled_container_wavelength)
+        if self._rebin_container_ws:
+            s_api.RebinToWorkspace(WorkspaceToRebin=self._scaled_container_wavelength,
+                                   WorkspaceToMatch=self._corrections + '_acc',
+                                   OutputWorkspace=self._scaled_container_wavelength)
 
         # Acc
         s_api.Divide(LHSWorkspace=self._scaled_container_wavelength,

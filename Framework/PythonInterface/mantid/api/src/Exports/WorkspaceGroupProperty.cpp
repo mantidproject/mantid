@@ -1,6 +1,6 @@
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceProperty;

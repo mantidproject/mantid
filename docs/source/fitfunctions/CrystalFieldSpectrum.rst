@@ -17,6 +17,8 @@ Any other parameters that need fixing has to be tied explicitly. Peak centres an
 field parameters with the :ref:`CrystalFieldPeaks <func-CrystalFieldPeaks>` function. Any other peak parameter can be set using
 the "f-index-dot-name" syntax (see :ref:`CompositeFunction <func-CompositeFunction>` for more details).
 
+The `x`-axis is given in meV, and the intensity (`y`-axis) is in milibarn per steradian per meV.
+
 .. code::
 
     import numpy as np

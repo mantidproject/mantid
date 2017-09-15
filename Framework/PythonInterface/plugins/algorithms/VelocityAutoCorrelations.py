@@ -1,4 +1,5 @@
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -42,7 +43,7 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # Convert description object to string via for loop. The original object has strange formatting
         particleID = ''
         for i in description:
-            particleID += i
+            particleID += i.decode('UTF-8')
 
         # Extract particle id's from string using regular expressions
         p_atoms=re.findall(r"A\('[a-z]+\d+',\d+", particleID)
@@ -88,7 +89,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Transforming coordinates...")
         start_time=time.time()
 
@@ -116,7 +116,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating velocities...")
         start_time=time.time()
 
@@ -137,7 +136,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                               for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating velocity auto-correlations (resource intensive calculation)...")
         start_time=time.time()
 
@@ -156,7 +154,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
             correlation_count[k,k]+=1
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         # Neutron incoherent scattering lengths (fm) weighted by isotope abundancies
         # Sources:
@@ -259,7 +256,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                'am':1.0,
                'cm':1.0}
 
-
         logger.information("Averaging auto-correlations...")
         start_time=time.time()
 
@@ -269,7 +265,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
                 correlations[i,j]=correlations[i,j]*Coh_b[elements[i]]*Coh_b[elements[j]]/correlation_count[i,j]
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         # Generate a list of row names according to the atomic species present in the simulation
         row_names=[]
@@ -297,7 +292,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)
 
-
     def auto_correlation(self,u):
         # Returns auto-correlation of a 3-vectors
         n=np.shape(u)[0]
@@ -312,10 +306,9 @@ class VelocityAutoCorrelations(PythonAlgorithm):
 
         return C
 
-
     def fold_correlation(self,w):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=w[len(w)/2:]
+        right_half=w[len(w)//2:]
         left_half=w[:int(np.ceil(len(w)/2.0))][::-1]
 
         return (left_half+right_half)/2.0

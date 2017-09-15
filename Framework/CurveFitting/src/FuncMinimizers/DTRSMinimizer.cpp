@@ -16,7 +16,7 @@ namespace FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(DTRSMinimizer, DTRS)
+DECLARE_FUNCMINIMIZER(DTRSMinimizer, Trust Region)
 ///@endcond
 // clang-format on
 
@@ -25,7 +25,7 @@ using namespace NLLS;
 DTRSMinimizer::DTRSMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
-std::string DTRSMinimizer::name() const { return "DTRS"; }
+std::string DTRSMinimizer::name() const { return "Trust Region"; }
 
 namespace {
 
@@ -240,7 +240,7 @@ std::pair<double, double> minMaxValues(const DoubleFortranVector &v) {
 /// Compute the 2-norm of a vector which is a square root of the
 /// sum of squares of its elements.
 /// @param v :: The vector.
-double two_norm(const DoubleFortranVector &v) {
+double twoNorm(const DoubleFortranVector &v) {
   if (v.size() == 0)
     return 0.0;
   return gsl_blas_dnrm2(v.gsl());
@@ -249,8 +249,8 @@ double two_norm(const DoubleFortranVector &v) {
 /// Get the dot-product of two vectors of the same size.
 /// @param v1 :: The first vector.
 /// @param v2 :: The second vector.
-double dot_product(const DoubleFortranVector &v1,
-                   const DoubleFortranVector &v2) {
+double dotProduct(const DoubleFortranVector &v1,
+                  const DoubleFortranVector &v2) {
   return v1.dot(v2);
 }
 
@@ -258,7 +258,7 @@ double dot_product(const DoubleFortranVector &v1,
 /// @param v :: The vector.
 /// @param n :: The number of elements to examine.
 double maxVal(const DoubleFortranVector &v, int n) {
-  double res = -std::numeric_limits<double>::max();
+  double res = std::numeric_limits<double>::lowest();
   for (int i = 1; i <= n; ++i) {
     auto val = v(i);
     if (val > res) {
@@ -280,8 +280,8 @@ double maxVal(const DoubleFortranVector &v, int n) {
 /// @param nroots :: The output number of real roots.
 /// @param root1 :: The first real root if nroots > 0.
 /// @param root2 :: The second real root if nroots = 2.
-void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
-                     double &root1, double &root2) {
+void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
+                    double &root1, double &root2) {
 
   auto rhs = tol * a1 * a1;
   if (fabs(a0 * a2) > rhs) { // really is quadratic
@@ -364,12 +364,12 @@ void roots_quadratic(double a0, double a1, double a2, double tol, int &nroots,
 /// @param root1 :: The first real root.
 /// @param root2 :: The second real root if nroots > 1.
 /// @param root3 :: The third real root if nroots == 3.
-void roots_cubic(double a0, double a1, double a2, double a3, double tol,
-                 int &nroots, double &root1, double &root2, double &root3) {
+void rootsCubic(double a0, double a1, double a2, double a3, double tol,
+                int &nroots, double &root1, double &root2, double &root3) {
 
   //  Check to see if the cubic is actually a quadratic
   if (a3 == zero) {
-    roots_quadratic(a0, a1, a2, tol, nroots, root1, root2);
+    rootsQuadratic(a0, a1, a2, tol, nroots, root1, root2);
     root3 = infinity;
     return;
   }
@@ -377,7 +377,7 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
   //  Deflate the polnomial if the trailing coefficient is zero
   if (a0 == zero) {
     root1 = zero;
-    roots_quadratic(a1, a2, a3, tol, nroots, root2, root3);
+    rootsQuadratic(a1, a2, a3, tol, nroots, root2, root3);
     nroots = nroots + 1;
     return;
   }
@@ -502,9 +502,9 @@ void roots_cubic(double a0, double a1, double a2, double a3, double tol,
 ///                   (i) ith derivative of ||x||^2, i = 1, max_order
 /// @param pi_beta :: (0) value of ||x||^beta,
 ///                   (i) ith derivative of ||x||^beta, i = 1, max_order
-void dtrs_pi_derivs(int max_order, double beta,
-                    const DoubleFortranVector &x_norm2,
-                    DoubleFortranVector &pi_beta) {
+void dtrsPiDerivs(int max_order, double beta,
+                  const DoubleFortranVector &x_norm2,
+                  DoubleFortranVector &pi_beta) {
   double hbeta = half * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
   pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - one))) * x_norm2(1);
@@ -524,7 +524,7 @@ void dtrs_pi_derivs(int max_order, double beta,
 ///
 /// @param control :: A structure containing control information.
 /// @param inform  :: A structure containing information.
-void dtrs_initialize(dtrs_control_type &control, dtrs_inform_type &inform) {
+void dtrsInitialize(dtrs_control_type &control, dtrs_inform_type &inform) {
   inform.status = ErrorCode::ral_nlls_ok;
   control.stop_normal = pow(epsmch, 0.75);
   control.stop_absolute_normal = pow(epsmch, 0.75);
@@ -546,10 +546,9 @@ void dtrs_initialize(dtrs_control_type &control, dtrs_inform_type &inform) {
 /// @param control :: A structure containing control information.
 /// @param inform :: A structure containing information.
 ///
-void dtrs_solve_main(int n, double radius, double f,
-                     const DoubleFortranVector &c, const DoubleFortranVector &h,
-                     DoubleFortranVector &x, const dtrs_control_type &control,
-                     dtrs_inform_type &inform) {
+void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
+                   const DoubleFortranVector &h, DoubleFortranVector &x,
+                   const dtrs_control_type &control, dtrs_inform_type &inform) {
 
   //  set initial values
 
@@ -572,7 +571,7 @@ void dtrs_solve_main(int n, double radius, double f,
 
   //  compute the two-norm of c and the extreme eigenvalues of H
 
-  double c_norm = two_norm(c);
+  double c_norm = twoNorm(c);
   double lambda_min = 0.0;
   double lambda_max = 0.0;
   std::tie(lambda_min, lambda_max) = minMaxValues(h);
@@ -640,7 +639,7 @@ void dtrs_solve_main(int n, double radius, double f,
           x(i) = zero;
         }
       }
-      inform.x_norm = two_norm(x);
+      inform.x_norm = twoNorm(x);
 
       //  the hard case does occur
 
@@ -661,8 +660,8 @@ void dtrs_solve_main(int n, double radius, double f,
 
           x(i_hard) = x(i_hard) + alpha;
         }
-        inform.x_norm = two_norm(x);
-        inform.obj = f + half * (dot_product(c, x) - lambda * pow(radius, 2));
+        inform.x_norm = twoNorm(x);
+        inform.obj = f + half * (dotProduct(c, x) - lambda * pow(radius, 2));
         inform.status = ErrorCode::ral_nlls_ok;
         return;
 
@@ -705,13 +704,13 @@ void dtrs_solve_main(int n, double radius, double f,
     }
 
     //  compute the two-norm of x
-    inform.x_norm = two_norm(x);
+    inform.x_norm = twoNorm(x);
     x_norm2(0) = pow(inform.x_norm, 2);
 
     //  if the newton step lies within the trust region, exit
 
     if (lambda == zero && inform.x_norm <= radius) {
-      inform.obj = f + half * dot_product(c, x);
+      inform.obj = f + half * dotProduct(c, x);
       inform.status = ErrorCode::ral_nlls_ok;
       return;
     }
@@ -760,7 +759,7 @@ void dtrs_solve_main(int n, double radius, double f,
 
     //  compute pi_beta = ||x||^beta and its first derivative when beta = - 1
     double beta = -one;
-    dtrs_pi_derivs(1, beta, x_norm2, pi_beta);
+    dtrsPiDerivs(1, beta, x_norm2, pi_beta);
 
     //  compute the Newton correction (for beta = - 1)
 
@@ -791,7 +790,7 @@ void dtrs_solve_main(int n, double radius, double f,
       //  compute pi_beta = ||x||^beta and its derivatives when beta = 2
 
       beta = two;
-      dtrs_pi_derivs(max_order, beta, x_norm2, pi_beta);
+      dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = 2)
 
@@ -809,7 +808,7 @@ void dtrs_solve_main(int n, double radius, double f,
       int nroots = 0;
       double root1 = 0, root2 = 0, root3 = 0;
 
-      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
+      rootsCubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -820,7 +819,7 @@ void dtrs_solve_main(int n, double radius, double f,
       //  compute pi_beta = ||x||^beta and its derivatives when beta = - 0.4
 
       beta = -point4;
-      dtrs_pi_derivs(max_order, beta, x_norm2, pi_beta);
+      dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = - 0.4)
 
@@ -835,7 +834,7 @@ void dtrs_solve_main(int n, double radius, double f,
         a_2 = a_2 / a_max;
         a_3 = a_3 / a_max;
       }
-      roots_cubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
+      rootsCubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -880,9 +879,9 @@ void dtrs_solve_main(int n, double radius, double f,
 /// @param control :: A structure containing control information.
 /// @param inform :: A structure containing information.
 ///
-void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
-                const DoubleFortranVector &h, DoubleFortranVector &x,
-                const dtrs_control_type &control, dtrs_inform_type &inform) {
+void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
+               const DoubleFortranVector &h, DoubleFortranVector &x,
+               const dtrs_control_type &control, dtrs_inform_type &inform) {
   //  scale the problem to solve instead
   //      minimize    q_s(x_s) = 1/2 <x_s, H_s x_s> + <c_s, x_s> + f_s
   //      subject to    ||x_s||_2 <= radius_s  or ||x_s||_2 = radius_s
@@ -944,8 +943,8 @@ void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
 
   //  solve the scaled problem
 
-  dtrs_solve_main(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale,
-                  inform);
+  dtrsSolveMain(n, radius_scale, f_scale, c_scale, h_scale, x, control_scale,
+                inform);
 
   //  unscale the solution, function value, multiplier and related values
 
@@ -978,11 +977,11 @@ void dtrs_solve(int n, double radius, double f, const DoubleFortranVector &c,
 /// @param options :: The options.
 /// @param inform :: The inform struct.
 /// @param w :: The work struct.
-void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, double Delta,
-                DoubleFortranVector &d, double &normd,
-                const nlls_options &options, nlls_inform &inform,
-                solve_dtrs_work &w) {
+void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+               const DoubleFortranMatrix &hf, double Delta,
+               DoubleFortranVector &d, double &normd,
+               const nlls_options &options, nlls_inform &inform,
+               solve_dtrs_work &w) {
 
   dtrs_control_type dtrs_options;
   dtrs_inform_type dtrs_inform;
@@ -1000,23 +999,23 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //
   //  first, find the matrix H and vector v
   //  Set A = J^T J
-  matmult_inner(J, w.A);
+  matmultInner(J, w.A);
   // add any second order information...
   // so A = J^T J + HF
   w.A += hf;
 
   // now form v = J^T f
-  mult_Jt(J, f, w.v);
+  multJt(J, f, w.v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    apply_scaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
+    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
   }
 
   // Now that we have the unprocessed matrices, we need to get an
   // eigendecomposition to make A diagonal
   //
-  all_eig_symm(w.A, w.ew, w.ev);
+  allEigSymm(w.A, w.ew, w.ev);
   if (inform.status != NLLS_ERROR::OK) {
     return;
   }
@@ -1029,10 +1028,10 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //       s.t.  ||x|| \leq Delta
   // <=>
   // we need to get the transformed vector v
-  mult_Jt(w.ev, w.v, w.v_trans);
+  multJt(w.ev, w.v, w.v_trans);
 
-  // we've now got the vectors we need, pass to dtrs_solve
-  dtrs_initialize(dtrs_options, dtrs_inform);
+  // we've now got the vectors we need, pass to dtrsSolve
+  dtrsInitialize(dtrs_options, dtrs_inform);
 
   auto n = J.len2();
   if (w.v_trans.len() != n) {
@@ -1048,8 +1047,8 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     }
   }
 
-  dtrs_solve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
-             dtrs_inform);
+  dtrsSolve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
+            dtrs_inform);
   if (dtrs_inform.status != ErrorCode::ral_nlls_ok) {
     inform.external_return = int(dtrs_inform.status);
     inform.external_name = "galahad_dtrs";
@@ -1058,7 +1057,7 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   // and return the un-transformed vector
-  mult_J(w.ev, w.d_trans, d);
+  multJ(w.ev, w.d_trans, d);
 
   normd = norm2(d); // ! ||d||_D
 
@@ -1068,17 +1067,17 @@ void solve_dtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     }
   }
 
-} // solve_dtrs
+} // solveDtrs
 
 } // namespace
 
 /// Implements the abstarct method of TrustRegionMinimizer.
-void DTRSMinimizer::calculate_step(
+void DTRSMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
     NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-  solve_dtrs(J, f, hf, Delta, d, normd, options, inform, w.solve_dtrs_ws);
+  solveDtrs(J, f, hf, Delta, d, normd, options, inform, w.solve_dtrs_ws);
 }
 
 } // namespace FuncMinimisers

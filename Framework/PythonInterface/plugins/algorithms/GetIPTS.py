@@ -19,10 +19,9 @@ class GetIPTS(PythonAlgorithm):
 
         for name in ['SNS', 'HFIR']:
             facility = ConfigService.getFacility(name)
-            facilityInstruments = [item.shortName()
-                                   for item in facility.instruments()
-                                   if item != 'DAS']
-            facilityInstruments.sort()
+            facilityInstruments = sorted([item.shortName()
+                                          for item in facility.instruments()
+                                          if item != 'DAS'])
             instruments.extend(facilityInstruments)
 
         return instruments
@@ -84,5 +83,6 @@ class GetIPTS(PythonAlgorithm):
         direc = self.getIPTSLocal(instrument, runnumber)
         self.setPropertyValue('Directory', direc)
         self.log().notice('IPTS directory is: %s' % direc)
+
 
 AlgorithmFactory.subscribe(GetIPTS)

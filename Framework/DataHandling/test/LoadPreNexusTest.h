@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/LoadPreNexus.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"

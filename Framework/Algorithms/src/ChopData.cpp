@@ -2,6 +2,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -48,8 +49,7 @@ void ChopData::exec() {
   std::map<int, double> intMap;
   int prelow = -1;
   std::vector<MatrixWorkspace_sptr> workspaces;
-
-  boost::shared_ptr<Progress> progress;
+  std::unique_ptr<Progress> progress;
 
   if (maxX < step) {
     throw std::invalid_argument(
@@ -59,7 +59,7 @@ void ChopData::exec() {
   if (rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() &&
       monitorWi != EMPTY_INT()) {
 
-    progress = boost::make_shared<Progress>(this, 0, 1, chops * 2);
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops * 2);
 
     // Select the spectrum that is to be used to compare the sections of the
     // workspace
@@ -93,10 +93,11 @@ void ChopData::exec() {
     if (nlow != intMap.end() && intMap[lowest] < (0.1 * nlow->second)) {
       prelow = nlow->first;
     }
-  } else
-    progress = boost::make_shared<Progress>(this, 0, 1, chops);
+  } else {
+    progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, chops);
+  }
 
-  int wsCounter(1);
+  int wsCounter{1};
 
   for (int i = 0; i < chops; i++) {
     const double stepDiff = (i * step);
@@ -129,7 +130,7 @@ void ChopData::exec() {
                                                          nbins + 1, nbins);
 
     // Copy over X, Y and E data
-    PARALLEL_FOR2(inputWS, workspace)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *workspace))
     for (int j = 0; j < nHist; j++) {
 
       auto edges = inputWS->binEdges(j);

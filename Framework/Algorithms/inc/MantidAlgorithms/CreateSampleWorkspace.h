@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
@@ -55,13 +56,16 @@ private:
   DataObjects::EventWorkspace_sptr
   createEventWorkspace(int numPixels, int numBins, int numMonitors,
                        int numEvents, double x0, double binDelta,
-                       int start_at_pixelID, Geometry::Instrument_sptr inst,
+                       Geometry::Instrument_sptr inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
   createHistogramWorkspace(int numPixels, int numBins, int numMonitors,
-                           double x0, double binDelta, int start_at_pixelID,
+                           double x0, double binDelta,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
+  API::MatrixWorkspace_sptr createScanningWorkspace(
+      int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+      const std::string &functionString, bool isRandom, int numScanPoints);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
       API::Progress &progress, int numBanks, int numMonitors, int pixels,
       double pixelSpacing, const double bankDistanceFromSample,

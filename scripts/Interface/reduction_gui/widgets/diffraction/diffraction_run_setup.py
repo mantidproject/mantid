@@ -2,6 +2,7 @@
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.widgets.base_widget import BaseWidget
 from mantid.kernel import Logger
@@ -10,18 +11,19 @@ from reduction_gui.reduction.diffraction.diffraction_run_setup_script import Run
 import ui.diffraction.ui_diffraction_run_setup
 import ui.diffraction.ui_diffraction_info
 
-#import mantid.simpleapi as api
 IS_IN_MANTIDPLOT = False
 try:
-    from mantid.api import *
-    from mantid.kernel import *
+    from mantid.api import * # noqa
+    from mantid.kernel import * # noqa
     IS_IN_MANTIDPLOT = True
 except:
     pass
 
+
 def generateRegExpValidator(widget, expression):
     rx = QtCore.QRegExp(expression)
     return QtGui.QRegExpValidator(rx, widget)
+
 
 class RunSetupWidget(BaseWidget):
     """ Widget that presents run setup including sample run, optional vanadium run and etc.
@@ -37,6 +39,7 @@ class RunSetupWidget(BaseWidget):
         class RunSetFrame(QtGui.QFrame, ui.diffraction.ui_diffraction_run_setup.Ui_Frame):
             """ Define class linked to UI Frame
             """
+
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
@@ -131,6 +134,8 @@ class RunSetupWidget(BaseWidget):
                      self._calfile_browse)
         self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
                      self._charfile_browse)
+        self.connect(self._content.groupfile_browse, QtCore.SIGNAL("clicked()"),
+                     self._groupfile_browse)
         self.connect(self._content.pushButton_browseExpIniFile, QtCore.SIGNAL('clicked()'),
                      self.do_browse_ini_file)
         self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
@@ -147,20 +152,20 @@ class RunSetupWidget(BaseWidget):
         #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overridevanbkgdrun_clicked)
 
-        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablebkgdcorr_clicked)
-        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablevancorr_clicked)
-        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
-                self._disablevanbkgdcorr_clicked)
+        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablebkgdcorr_clicked)
+        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevancorr_clicked)
+        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+                     self._disablevanbkgdcorr_clicked)
 
-        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),\
-                self._usebin_clicked)
-        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),\
-                self._resamplex_clicked)
+        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
+                     self._usebin_clicked)
+        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),
+                     self._resamplex_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
-                self._show_help)
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+                     self._show_help)
 
         # Validated widgets
 
@@ -171,9 +176,10 @@ class RunSetupWidget(BaseWidget):
             @param state: RunSetupScript object
         """
         self._content.runnumbers_edit.setText(state.runnumbers)
-        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-]*'))
+        self._content.runnumbers_edit.setValidator(generateRegExpValidator(self._content.runnumbers_edit, r'[\d,-:]*'))
 
         self._content.calfile_edit.setText(state.calibfilename)
+        self._content.groupfile_edit.setText(state.groupfilename)
         self._content.lineEdit_expIniFile.setText(state.exp_ini_file_name)
         self._content.charfile_edit.setText(state.charfilename)
         self._content.sum_checkbox.setChecked(state.dosum)
@@ -237,7 +243,6 @@ class RunSetupWidget(BaseWidget):
 
         return
 
-
     def get_state(self):
         """ Returns a RunSetupScript with the state of Run_Setup_Interface
         Set up all the class parameters in RunSetupScrpt with values in the content
@@ -245,13 +250,17 @@ class RunSetupWidget(BaseWidget):
         """
         s = RunSetupScript(self._instrument_name)
 
-        s.runnumbers = self._content.runnumbers_edit.text()
+        s.runnumbers = str(self._content.runnumbers_edit.text())
         rtup = self.validateIntegerList(s.runnumbers)
         isvalid = rtup[0]
         if isvalid is False:
             raise NotImplementedError("Run number error @ %s" % (rtup[1]))
+        else:
+            # s.runnumbers = rtup[2]
+            pass
 
         s.calibfilename = self._content.calfile_edit.text()
+        s.groupfilename = self._content.groupfile_edit.text()
         s.exp_ini_file_name = str(self._content.lineEdit_expIniFile.text())
         s.charfilename = self._content.charfile_edit.text()
         s.dosum = self._content.sum_checkbox.isChecked()
@@ -278,7 +287,7 @@ class RunSetupWidget(BaseWidget):
             s.doresamplex = False
             try:
                 s.binning = float(self._content.binning_edit.text())
-            except ValueError as e:
+            except ValueError:
                 raise RuntimeError('Binning parameter is not given!')
 
             if s.binning < 0. and bintypestr.startswith('Linear'):
@@ -304,11 +313,10 @@ class RunSetupWidget(BaseWidget):
 
         return s
 
-
     def _calfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*.*")
+        fname = self.data_browse_dialog(data_type="*.h5;;*.cal;;*.hd5;;*.hdf;;*")
         if fname:
             self._content.calfile_edit.setText(fname)
 
@@ -317,9 +325,18 @@ class RunSetupWidget(BaseWidget):
     def _charfile_browse(self):
         """ Event handing for browsing calibrtion file
         """
-        fname = self.data_browse_dialog("*.txt;;*.*")
+        fname = self.data_browse_dialog("*.txt;;*", multi=True)
         if fname:
-            self._content.charfile_edit.setText(fname)
+            self._content.charfile_edit.setText(','.join(fname))
+
+        return
+
+    def _groupfile_browse(self):
+        ''' Event handling for browsing for a grouping file
+        '''
+        fname = self.data_browse_dialog(data_type='*.xml;;*.h5;;*')
+        if fname:
+            self._content.groupfile_edit.setText(fname)
 
         return
 
@@ -327,7 +344,7 @@ class RunSetupWidget(BaseWidget):
         """ Event handling for browsing Exp Ini file
         :return:
         """
-        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*.*")
+        exp_ini_file_name = self.data_browse_dialog(data_type="*.ini;;*")
         if exp_ini_file_name:
             self._content.lineEdit_expIniFile.setText(exp_ini_file_name)
 
@@ -361,7 +378,7 @@ class RunSetupWidget(BaseWidget):
         """
         currindex = self._content.bintype_combo.currentIndex()
         curbinning = self._content.binning_edit.text()
-        if curbinning != "" and curbinning != None:
+        if curbinning != "" and curbinning is not None:
             curbinning = float(curbinning)
             if currindex == 0:
                 self._content.binning_edit.setText(str(abs(curbinning)))
@@ -374,11 +391,16 @@ class RunSetupWidget(BaseWidget):
 
     def validateIntegerList(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
-        Allowed: a, b, c-d, e, f
+        Allowed: a, b, c-d, e, f, g:h
+        and replace ':' by ':'
+        :return: 3-tuple: state/error message/new integer list string
         """
         intliststring = str(intliststring)
         if intliststring == "":
-            return (True, "")
+            return True, "", intliststring
+
+        # replace ':' by '-'
+        intliststring = intliststring.replace(':', '-')
 
         # 1. Split by ","
         termlevel0s = intliststring.split(",")
@@ -392,9 +414,11 @@ class RunSetupWidget(BaseWidget):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        return (False, valuestr)
+                        err_msg = 'String {0} cannot be converted to an integer properly.'.format(valuestr)
+                        return False, err_msg, ''
                 except ValueError:
-                    return (False, valuestr)
+                    err_msg = 'String {0} cannot be converted to an integer.'.format(valuestr)
+                    return False, err_msg, ''
 
             elif numdashes == 1:
                 # Integer range
@@ -409,10 +433,10 @@ class RunSetupWidget(BaseWidget):
                 # ENDFOR
 
             else:
-                return (False, level0term)
+                return False, level0term, intliststring
         # ENDFOR
 
-        return (True, "")
+        return True, '', intliststring
 
     def _overrideemptyrun_clicked(self):
         """ Handling event if overriding emptry run

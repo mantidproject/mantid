@@ -1,16 +1,20 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
 
+from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import DirectBeamCenter, NoSolidAngle, SetTransmission
+
 import os
+
 
 def do_cleanup():
     absfile = FileFinder.getFullPath("EQSANS_4061_event_reduction.log")
     if os.path.exists(absfile):
         os.remove(absfile)
     return True
+
 
 class EQSANSBeamCenter(stresstesting.MantidStressTest):
 
@@ -47,6 +51,7 @@ class EQSANSBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_4061_event_frame2_Iq", 'EQSANSBeamCenter.nxs'
+
 
 class EQSANSBeamCenterEvent(EQSANSBeamCenter):
 

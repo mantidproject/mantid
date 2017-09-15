@@ -8,10 +8,11 @@ from six import iteritems
 # Define all mantid exported classes first
 import mantid
 
-# Add workspace creation namespace
+#Add workspace creation namespace
 from . import WorkspaceCreationHelper
 
 # Define some pure-Python functions to add to the mix
+
 
 def run_algorithm(name, **kwargs):
     """Run a named algorithm and return the
@@ -24,6 +25,7 @@ def run_algorithm(name, **kwargs):
     alg = create_algorithm(name, **kwargs)
     alg.execute()
     return alg
+
 
 def create_algorithm(name, **kwargs):
     """Create a named algorithm, set the properties given by the keywords and return the
@@ -38,7 +40,11 @@ def create_algorithm(name, **kwargs):
         kwargs - A dictionary of property name:value pairs
     @returns The algorithm handle
     """
-    alg = mantid.api.AlgorithmManager.createUnmanaged(name)
+    if 'Version' in kwargs:
+        alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs['Version'])
+        del kwargs['Version']
+    else:
+        alg = mantid.api.AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
     if name == 'Load' and 'Filename' in kwargs:
@@ -56,6 +62,7 @@ def create_algorithm(name, **kwargs):
         alg.setProperty(key, value)
     return alg
 
+
 # Case difference is to be consistent with the unittest module
 def assertRaisesNothing(testobj, callable, *args, **kwargs):
     """
@@ -69,10 +76,11 @@ def assertRaisesNothing(testobj, callable, *args, **kwargs):
             **kwargs - Keyword arguments, passed on as they are
     """
     try:
-         return callable(*args, **kwargs)
+        return callable(*args, **kwargs)
     except Exception as exc:
         testobj.fail("Assertion error. An exception was caught where none was expected in %s. Message: %s"
                      % (callable.__name__, str(exc)))
+
 
 def can_be_instantiated(cls):
     """The Python unittest assertRaises does not

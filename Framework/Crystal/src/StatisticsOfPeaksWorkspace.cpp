@@ -143,7 +143,7 @@ void StatisticsOfPeaksWorkspace::exec() {
     else
       sequence = p.getBankName();
 
-    if (sequence.compare(oldSequence) != 0 && tempWS->getNumberPeaks() > 0) {
+    if (sequence != oldSequence && tempWS->getNumberPeaks() > 0) {
       if (tempWS->getNumberPeaks() > 1)
         doSortHKL(tempWS, oldSequence);
       tempWS = WorkspaceFactory::Instance().createPeaks();
@@ -174,12 +174,12 @@ void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
   statsAlg->setProperty("PointGroup", pointGroup);
   statsAlg->setProperty("LatticeCentering", latticeCentering);
   statsAlg->setProperty("RowName", runName);
-  if (runName.compare("Overall") != 0)
+  if (runName != "Overall")
     statsAlg->setProperty("Append", true);
   statsAlg->executeAsChildAlg();
   PeaksWorkspace_sptr statsWksp = statsAlg->getProperty("OutputWorkspace");
   ITableWorkspace_sptr tablews = statsAlg->getProperty("StatisticsTable");
-  if (runName.compare("Overall") == 0)
+  if (runName == "Overall")
     setProperty("OutputWorkspace", statsWksp);
   setProperty("StatisticsTable", tablews);
 }

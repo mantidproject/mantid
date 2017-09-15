@@ -1,4 +1,5 @@
-﻿import os,sys,inspect
+from __future__ import (absolute_import, division, print_function)
+import os,sys,inspect
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -48,9 +49,9 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertEqual(PropertyManager.sample_run.run_number(),0)
 
         stor_ws = PropertyManager.sample_run.get_workspace()
-        rez = CheckWorkspacesMatch(Workspace1=run_ws,Workspace2=stor_ws)
+        rez = CompareWorkspaces(Workspace1=run_ws,Workspace2=stor_ws)
 
-        self.assertEqual(rez,'Success!')
+        self.assertTrue(rez[0])
 
         propman.sample_run='MAR11001.RAW'
         self.assertFalse('run_ws' in mtd)
@@ -253,8 +254,8 @@ class RunDescriptorTest(unittest.TestCase):
 
         ws1 = PropertyManager.sample_run.chop_ws_part(None,(2000,1,5000),False,1,2)
 
-        rez=CheckWorkspacesMatch('SR_ws',ws1)
-        self.assertEqual(rez,'Success!')
+        rez=CompareWorkspaces('SR_ws',ws1)
+        self.assertTrue(rez[0])
 
         wsc=PropertyManager.sample_run.get_workspace()
         x =wsc.readX(0)
@@ -378,6 +379,12 @@ class RunDescriptorTest(unittest.TestCase):
         propman.sample_run = 11999
         run_list = PropertyManager.sample_run.get_run_list()
         self.assertEqual(len(run_list),1)
+
+        # check if run list can be set up using range
+        propman.sample_run = range(1,4)
+        run_list = PropertyManager.sample_run.get_run_list()
+        self.assertEqual(len(run_list),3)
+        self.assertTrue(isinstance(run_list,list))
 
     def test_sum_runs(self):
         propman  = self.prop_man
@@ -555,16 +562,16 @@ class RunDescriptorTest(unittest.TestCase):
         AddSampleLog(source_wksp,LogName='NormalizationFactor',LogText='5.',LogType='Number')
         PropertyManager.sample_run.export_normalization(a_wksp)
 
-        rez = CheckWorkspacesMatch(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-8)
-        self.assertEqual(rez,'Success!')
+        rez = CompareWorkspaces(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-8)
+        self.assertTrue(rez[0])
 
         # divide by 20 to get final normalization factor equal 100 (ws/(5*20))
         a_wksp/= 20
         AddSampleLog(a_wksp,LogName='NormalizationFactor',LogText='100',LogType='Number')
         # export normalization by 5
         PropertyManager.sample_run.export_normalization(a_wksp)
-        rez = CheckWorkspacesMatch(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-6)
-        self.assertEqual(rez,'Success!')
+        rez = CompareWorkspaces(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-6)
+        self.assertTrue(rez[0])
         self.assertAlmostEqual(a_wksp.getRun().getLogData('NormalizationFactor').value,5.)
 
         propman.sample_run = None

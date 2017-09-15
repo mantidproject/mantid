@@ -28,6 +28,7 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class ChudleyElliot(IFunction1D):
 
     def category(self):
@@ -57,6 +58,7 @@ class ChudleyElliot(IFunction1D):
             jacobian.set(i,0,-h/tau)
             jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau))
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ChudleyElliot)

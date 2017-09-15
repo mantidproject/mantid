@@ -7,10 +7,11 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Strings.h"
 #include <fstream>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -119,8 +120,7 @@ void SaveLauenorm::exec() {
     Peak &p = peaks[wi];
     double intensity = p.getIntensity();
     double sigI = p.getSigmaIntensity();
-    if (intensity == 0.0 || boost::math::isnan(intensity) ||
-        boost::math::isnan(sigI))
+    if (intensity == 0.0 || !(std::isfinite(sigI)))
       continue;
     if (minIsigI != EMPTY_DBL() && intensity < std::abs(minIsigI * sigI))
       continue;
@@ -217,13 +217,13 @@ void SaveLauenorm::exec() {
   out.close();
 }
 void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
-  if (bankName.compare("None") == 0)
+  if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
-  if (parent->type().compare("RectangularDetector") == 0) {
+  if (parent->type() == "RectangularDetector") {
     boost::shared_ptr<const RectangularDetector> RDet =
         boost::dynamic_pointer_cast<const RectangularDetector>(parent);
 

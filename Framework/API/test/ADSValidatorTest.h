@@ -6,6 +6,7 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
+#include <boost/make_shared.hpp>
 
 using Mantid::API::ADSValidator;
 using Mantid::API::AnalysisDataService;
@@ -19,6 +20,9 @@ class MockWorkspace : public Workspace {
 
 private:
   MockWorkspace *doClone() const override {
+    throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+  }
+  MockWorkspace *doCloneEmpty() const override {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };

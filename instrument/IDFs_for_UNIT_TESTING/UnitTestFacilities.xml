@@ -3,28 +3,43 @@
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
-   <livedata listener="MockILiveListener"/>
+  <livedata listener="MockLiveListener"/>
 
-   <instrument name="MINITOPAZ"> 
-      <technique>Test Neutron Diffraction</technique>
-      <livedata address="127.0.0.1:0" />
-   </instrument>
+  <instrument name="MINITOPAZ">
+    <technique>Test Neutron Diffraction</technique>
+    <livedata>
+      <connection name="default" address="127.0.0.1:0" listener="MockLiveListener" />
+    </livedata>
+  </instrument>
 
   <instrument name="TESTHISTOLISTENER"> 
     <zeropadding size="8"/>
     <zeropadding size="11" startRunNumber="300" prefix="TST"/>
     <technique>Test ISISHistoDataListener</technique>
-    <livedata listener="ISISHistoDataListener" address="127.0.0.1:56789" />
+    <livedata>
+      <connection name="default" listener="ISISHistoDataListener" address="127.0.0.1:56789" />
+    </livedata>
   </instrument>
 
   <instrument name="TestDataListener">
     <technique>Test Listener</technique>
-    <livedata listener="TestDataListener" address="127.0.0.1:0" />
+    <livedata>
+      <connection name="default" listener="TestDataListener" address="127.0.0.1:0" />
+    </livedata>
   </instrument>
 
   <instrument name="FakeEventDataListener">
     <technique>Test Listener</technique>
-    <livedata listener="FakeEventDataListener" address="127.0.0.1:0" />
+    <livedata>
+      <connection name="default" listener="FakeEventDataListener" address="127.0.0.1:0" />
+    </livedata>
+  </instrument>
+
+  <instrument name="HRPDTEST">
+    <technique>Test Listener</technique>
+    <livedata>
+      <connection name="default" listener="KafkaEventListener" address="127.0.0.1:0" />
+    </livedata>
   </instrument>
 
 </facility>

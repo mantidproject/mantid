@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/SaveDiffFittingAscii.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -88,6 +86,7 @@ bool SaveDiffFittingAscii::processGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
+    input_ws.reserve(inputGroup->getNumberOfEntries());
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
       input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));
@@ -142,7 +141,7 @@ void SaveDiffFittingAscii::processAll(
   std::vector<std::string> splitBank = splitList(bankList);
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, input_ws.size());
+  Progress progress(this, 0.0, 1.0, input_ws.size());
 
   size_t breaker = input_ws.size();
   if (outMode == "AppendToExistingFile" && input_ws.size() == 1)

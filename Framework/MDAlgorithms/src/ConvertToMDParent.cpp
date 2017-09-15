@@ -1,7 +1,9 @@
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -24,7 +26,6 @@ const std::string ConvertToMDParent::category() const {
   return "MDAlgorithms\\Creation";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
 */
 void ConvertToMDParent::init() {

@@ -3,6 +3,7 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
+
 class RefRoiTest(stresstesting.MantidStressTest):
     def runTest(self):
         workspace = Load(Filename="REF_L_119814")
@@ -18,4 +19,3 @@ class RefRoiTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "roi", 'REFL_119814_roi_peak.nxs'
-

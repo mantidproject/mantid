@@ -40,7 +40,7 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 class QTableWidgetItem;
 
@@ -156,7 +156,8 @@ public slots:
 
   int colPlotDesignation(int col) { return col_plot_type[col]; };
   void setColPlotDesignation(int col, PlotDesignation pd);
-  void setPlotDesignation(PlotDesignation pd, bool rightColumns = false);
+  virtual void setPlotDesignation(PlotDesignation pd,
+                                  bool rightColumns = false);
   QList<int> plotDesignations() { return col_plot_type; };
 
   void setHeader(QStringList header);
@@ -165,6 +166,7 @@ public slots:
   void setText(int row, int col, const QString &text);
   void setRandomValues();
   void setAscValues();
+  void setTextAlignment(int row, int col, QFlags<Qt::AlignmentFlag> alignment);
 
   virtual void cellEdited(int, int col);
   void moveCurrentCell();
@@ -196,6 +198,7 @@ public slots:
   void showAllColumns();
   void hideColumn(int col, bool = true);
   bool isColumnHidden(int col) { return d_table->isColumnHidden(col); };
+  void resizeColumnsToContents();
   //@}
 
   //! \name Sorting
@@ -394,6 +397,9 @@ public slots:
   static MantidQt::API::IProjectSerialisable *
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+
   void restore(const QStringList &lst) override;
 
   //! This slot notifies the main application that the table has been modified.

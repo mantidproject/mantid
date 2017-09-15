@@ -6,53 +6,59 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
-#include "MantidLiveData/SNSLiveEventDataListener.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/SNSLiveEventDataListener.h"
 
 // Includes for parsing the XML device descriptions
 #include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/NodeList.h>
 
 #include <Poco/Net/NetException.h>
-#include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketStream.h>
+#include <Poco/Net/StreamSocket.h>
 #include <Poco/Timestamp.h>
 
-#include <Poco/Thread.h>
 #include <Poco/Runnable.h>
+#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace { // anonymous namespace
 // Time we'll wait on a receive call (in seconds)
 // Also used when shutting down the thread so we know how long to wait there
-#define RECV_TIMEOUT 30
+const int64_t RECV_TIMEOUT = 30;
 
 // Names for a couple of time series properties
-#define PAUSE_PROPERTY "pause"
-#define SCAN_PROPERTY "scan_index"
-#define PROTON_CHARGE_PROPERTY "proton_charge"
+const std::string PAUSE_PROPERTY("pause");
+const std::string SCAN_PROPERTY("scan_index");
+const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
 // Helper function to get a DateAndTime value from an ADARA packet header
 Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
-  uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
-  uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
+  const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
+  const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
   return DateAndTime(static_cast<int64_t>(seconds),
                      static_cast<int64_t>(nanoseconds));
 }
+
+} // anonymous namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -68,10 +74,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 SNSLiveEventDataListener::SNSLiveEventDataListener()
-    : ILiveListener(), ADARA::Parser(), m_status(NoRun), m_runNumber(0),
-      m_workspaceInitialized(false), m_socket(), m_isConnected(false),
-      m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
-      m_ignorePackets(true), m_filterUntilRunStart(false)
+    : LiveListener(), ADARA::Parser(), m_socket()
 // ADARA::Parser() will accept values for buffer size and max packet size,
 // but the defaults will work fine
 {
@@ -83,10 +86,13 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
   // documented anywhere and this lack of documentation is deliberate.
-  if (!ConfigService::Instance().getValue("livelistener.keeppausedevents",
-                                          m_keepPausedEvents)) {
+  int keepPausedEvents;
+  if (ConfigService::Instance().getValue("livelistener.keeppausedevents",
+                                         keepPausedEvents)) {
+    m_keepPausedEvents = (keepPausedEvents != 0);
+  } else {
     // If the property hasn't been set, assume false
-    m_keepPausedEvents = 0;
+    m_keepPausedEvents = false;
   }
 }
 
@@ -135,7 +141,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString().compare("0.0.0.0") == 0) {
+  if (address.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("localhost:31415");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
@@ -174,7 +180,7 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// @param startTime Specifies how much historical data the SMS should send
 /// before continuing the current 'live' data.  Use 0 to indicate no
 /// historical data.
-void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
+void SNSLiveEventDataListener::start(const Kernel::DateAndTime startTime) {
   // Save the startTime and kick off the background thread
   // (Can't really do anything else until we send the hello packet and the SMS
   // sends us
@@ -384,7 +390,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
   // First, check to see if the run has been paused.  We don't process
   // the events if we're paused unless the user has specifically overridden
   // this behavior with the livelistener.keeppausedevents property.
-  if (m_runPaused && m_keepPausedEvents == 0) {
+  if (m_runPaused && (!m_keepPausedEvents)) {
     return false;
   }
 
@@ -1197,8 +1203,8 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   } // mutex auto unlocks here
 
   // if there's a comment in the packet, log it at the info level
-  std::string comment = pkt.comment();
-  if (comment.size() > 0) {
+  const std::string &comment = pkt.comment();
+  if (!comment.empty()) {
     g_log.information() << "Annotation: " << comment << '\n';
   }
 
@@ -1225,6 +1231,7 @@ void SNSLiveEventDataListener::initWorkspacePart1() {
   prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
   m_eventBuffer->mutableRun().addLogData(prop);
   prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
+  prop->setUnits("picoCoulomb");
   m_eventBuffer->mutableRun().addLogData(prop);
 }
 
@@ -1254,7 +1261,11 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 
   auto tmp = createWorkspace<DataObjects::EventWorkspace>(
       m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
+  if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
+    // need to generate the spectra to detector map
+    tmp->rebuildSpectraMapping();
+  }
   m_eventBuffer = std::move(tmp);
 
   // Set the units
@@ -1288,8 +1299,8 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer,
-                                                    monitorsBuffer, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
+                                                    *monitorsBuffer, true);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
     monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
@@ -1325,15 +1336,16 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 
 /// Adds an event to the workspace
 void SNSLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime)
+    const uint32_t pixelId, const double tof,
+    const Mantid::Kernel::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
   // It'd be nice to use operator[], but we might end up inserting a value....
   // Have to use find() instead.
-  auto it = m_indexMap.find(pixelId);
+  const auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
-    std::size_t workspaceIndex = it->second;
+    const std::size_t workspaceIndex = it->second;
     Mantid::DataObjects::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
@@ -1385,7 +1397,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp,
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
                                                          false);
 
   // Clear out the old logs, except for the most recent entry
@@ -1401,8 +1413,8 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(monitorBuffer,
-                                                    newMonitorBuffer, false);
+  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
+                                                    *newMonitorBuffer, false);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces

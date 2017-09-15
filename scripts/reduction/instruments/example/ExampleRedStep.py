@@ -1,7 +1,9 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
+
 
 class ExampleRedStep(PythonAlgorithm):
 
@@ -24,6 +26,7 @@ class ExampleRedStep(PythonAlgorithm):
 
 #AlgorithmFactory.subscribe(ExampleRedStep)
 
+
 class ExampleLoader(PythonAlgorithm):
 
     def name(self):
@@ -38,5 +41,4 @@ class ExampleLoader(PythonAlgorithm):
         output_ws = self.getProperty("OutputWorkspace").value
         LoadAscii(filename, output_ws)
 
-        print filename, output_ws
-
+        print(filename, output_ws)

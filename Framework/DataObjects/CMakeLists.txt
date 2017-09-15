@@ -36,14 +36,18 @@ set ( SRC_FILES
 	src/PeakShapeSpherical.cpp
 	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
+	src/PropertyWithValue.cpp
 	src/RebinnedOutput.cpp
 	src/ReflectometryTransform.cpp
+	src/ScanningWorkspaceBuilder.cpp
 	src/SpecialWorkspace2D.cpp
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
 	src/VectorColumn.cpp
 	src/Workspace2D.cpp
+	src/WorkspaceCreation.cpp
+	src/WorkspaceProperty.cpp
 	src/WorkspaceSingleValue.cpp
 )
 
@@ -58,9 +62,9 @@ set ( INC_FILES
 	inc/MantidDataObjects/AffineMatrixParameterParser.h
 	inc/MantidDataObjects/BoxControllerNeXusIO.h
 	inc/MantidDataObjects/CalculateReflectometry.h
-    inc/MantidDataObjects/CalculateReflectometryKiKf.h
+	inc/MantidDataObjects/CalculateReflectometryKiKf.h
+	inc/MantidDataObjects/CalculateReflectometryP.h
 	inc/MantidDataObjects/CalculateReflectometryQxQz.h
-    inc/MantidDataObjects/CalculateReflectometryP.h
 	inc/MantidDataObjects/CoordTransformAffine.h
 	inc/MantidDataObjects/CoordTransformAffineParser.h
 	inc/MantidDataObjects/CoordTransformAligned.h
@@ -114,6 +118,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
 	inc/MantidDataObjects/ReflectometryTransform.h
+	inc/MantidDataObjects/ScanningWorkspaceBuilder.h
 	inc/MantidDataObjects/SkippingPolicy.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
@@ -121,8 +126,8 @@ set ( INC_FILES
 	inc/MantidDataObjects/TableWorkspace.h
 	inc/MantidDataObjects/VectorColumn.h
 	inc/MantidDataObjects/Workspace2D.h
+	inc/MantidDataObjects/WorkspaceCreation.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
-
 )
 
 set ( TEST_FILES
@@ -171,7 +176,8 @@ set ( TEST_FILES
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
 	RefAxisTest.h
-        ReflectometryTransformTest.h
+	ReflectometryTransformTest.h
+	ScanningWorkspaceBuilderTest.h
 	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h
@@ -183,6 +189,7 @@ set ( TEST_FILES
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h
 	Workspace2DTest.h
+	WorkspaceCreationTest.h
 	WorkspaceSingleValueTest.h
 	WorkspaceValidatorsTest.h
 )

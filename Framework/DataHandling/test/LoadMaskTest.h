@@ -10,6 +10,9 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -91,7 +94,7 @@ public:
 
     // 3. Check
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000) {
         // These 3 workspace index are masked
         TS_ASSERT_DELTA(y, 1.0, 1.0E-5);
@@ -143,7 +146,7 @@ public:
     // 3. Check
     size_t errorcounts = 0;
     for (size_t iws = 0; iws < maskws->getNumberHistograms(); iws++) {
-      double y = maskws->dataY(iws)[0];
+      double y = maskws->y(iws)[0];
       if (iws == 34 || iws == 1000 || iws == 2000 || (iws >= 36 && iws <= 39) ||
           (iws >= 1001 && iws <= 1004)) {
         // All these workspace index are masked
@@ -193,8 +196,7 @@ public:
     // modify spectra-detector map on the sample workspace to check masking
     std::vector<detid_t> detIDs = source->getInstrument()->getDetectorIDs(true);
     size_t index = 0;
-    auto it = --detIDs.end();
-    for (; it > detIDs.begin(); --it) {
+    for (auto it = detIDs.rbegin(); it != detIDs.rend(); ++it) {
       const detid_t detId = *it;
       auto &spec = source->getSpectrum(index);
       Mantid::specnum_t specNo =
@@ -204,7 +206,6 @@ public:
 
       index++;
     }
-    source->buildNearestNeighbours(true);
 
     auto masker = AlgorithmManager::Instance().create("MaskDetectors");
     masker->initialize();
@@ -260,15 +261,21 @@ public:
     // masked
     std::vector<detid_t> maskSourceDet, maskTargDet;
 
+    const auto &spectrumInfoSource = source->spectrumInfo();
+    const auto &spectrumInfoTarget = maskWs->spectrumInfo();
     size_t n_steps = source->getNumberHistograms();
     for (size_t i = 0; i < n_steps; ++i) {
-      bool source_masked = source->getDetector(i)->isMasked();
+      bool source_masked = spectrumInfoSource.isMasked(i);
       if (source_masked) {
-        maskSourceDet.push_back(source->getDetector(i)->getID());
+        const auto &detector = spectrumInfoSource.detector(i);
+        const auto detectorId = detector.getID();
+        maskSourceDet.push_back(detectorId);
       }
-      bool targ_masked = (maskWs->getSpectrum(i).readY()[0] > 0.5);
+      bool targ_masked = (maskWs->getSpectrum(i).y()[0] > 0.5);
       if (targ_masked) {
-        maskTargDet.push_back(maskWs->getDetector(i)->getID());
+        const auto &detector = spectrumInfoTarget.detector(i);
+        const auto detectorId = detector.getID();
+        maskTargDet.push_back(detectorId);
       }
     }
     std::sort(maskSourceDet.begin(), maskSourceDet.end());
@@ -279,6 +286,7 @@ public:
       TS_ASSERT_EQUALS(maskSourceDet[i], maskTargDet[i]);
     }
   }
+
   void test_IDF_acceptedAsFileName() {
     auto ws_creator = AlgorithmManager::Instance().createUnmanaged(
         "CreateSimulationWorkspace");
@@ -506,6 +514,37 @@ public:
 
     return ScopedFileHelper::ScopedFile(ss.str(), maskfilename);
   }
+};
+
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class LoadMaskTestPerformance : public CxxTest::TestSuite {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadMaskTestPerformance *createSuite() {
+    return new LoadMaskTestPerformance();
+  }
+
+  static void destroySuite(LoadMaskTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
+    loadFile.initialize();
+    loadFile.setProperty("Instrument", "POWGEN");
+    loadFile.setProperty("InputFile", "testmasking.xml");
+    loadFile.setProperty("OutputWorkspace", "outputWS");
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testDefaultLoad() { loadFile.execute(); }
+
+private:
+  LoadMask loadFile;
 };
 
 #endif /* MANTID_DATAHANDLING_LOADMASKINGFILETEST_H_ */

@@ -5,6 +5,7 @@ from mantid.api import *
 import mantid.simpleapi as ms
 import numpy as np
 
+
 class SortByQVectors(PythonAlgorithm):
     """
     Sorts spectra from a workspace
@@ -34,7 +35,7 @@ class SortByQVectors(PythonAlgorithm):
         wsNames = []
         for wsName in wsString.split(","):
             ws = mtd[wsName.strip()]
-            if type(ws) == WorkspaceGroup:
+            if isinstance(ws, WorkspaceGroup):
                 wsNames.extend(ws.getNames())
             else:
                 wsNames.append(wsName)
@@ -82,8 +83,8 @@ class SortByQVectors(PythonAlgorithm):
                 ms.Transpose(InputWorkspace=wsOutput, OutputWorkspace=wsOutput)
             ms.RenameWorkspace(InputWorkspace=wsOutput, OutputWorkspace=wsName)
 
-
     def GetXValue(self, xs):
         return np.linalg.norm(xs)
+
 
 AlgorithmFactory.subscribe(SortByQVectors)

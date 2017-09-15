@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
@@ -14,6 +15,7 @@ E_GUESS = 50
 E_RANGE = "-10.0,0.2,45.0"
 #######################################################################
 
+
 def makeOutputName(ws_name, dohist, doproj):
     md_ws_name = ws_name + '_md'
     tag=""
@@ -28,6 +30,7 @@ def makeOutputName(ws_name, dohist, doproj):
 
     md_ws_name += "_" + tag
     return md_ws_name
+
 
 def execReduction(dohist, doproj):
     # Set the facility
@@ -75,6 +78,7 @@ def execReduction(dohist, doproj):
 
     return md_output_ws
 
+
 def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
     """Returns the name of the workspace & file to compare"""
       #elf.disableChecking.append('SpectraMap')
@@ -82,7 +86,7 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
 
     valNames = [result,reference]
 
-    if not reference in mtd:
+    if reference not in mtd:
         Load(Filename=reference,OutputWorkspace=valNames[1])
 
     checker = AlgorithmManager.create("CompareMDWorkspaces")
@@ -95,8 +99,8 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
 
     checker.execute()
     if checker.getPropertyValue("Equals") != "1":
-        print " Workspaces do not match, result: ",checker.getPropertyValue("Result")
-        print " Test {0} fails".format(class_name)
+        print(" Workspaces do not match, result: ",checker.getPropertyValue("Result"))
+        print(" Test {0} fails".format(class_name))
         if mismatchName:
             targetFilename = class_name+mismatchName+'-mismatch.nxs'
         else:
@@ -106,7 +110,6 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
         return False
     else:
         return True
-
 
 
 class SNSConvertToMDNoHistNoProjTest(stresstesting.MantidStressTest):
@@ -129,10 +132,10 @@ class SNSConvertToMDNoHistNoProjTest(stresstesting.MantidStressTest):
         self.gold_ws_name = self.truth_file.split('.')[0] + "_golden"
         LoadMD(self.truth_file, OutputWorkspace=self.gold_ws_name)
 
-
     def validate(self):
         self.tolerance = 1.0e-1
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__)
+
 
 class SNSConvertToMDHistNoProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_hnp.nxs"
@@ -159,6 +162,7 @@ class SNSConvertToMDHistNoProjTest(stresstesting.MantidStressTest):
         self.tolerance = 1.0e-1
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__,self.gold_ws_name)
 
+
 class SNSConvertToMDNoHistProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_ewp.nxs"
     output_ws=None
@@ -179,11 +183,11 @@ class SNSConvertToMDNoHistProjTest(stresstesting.MantidStressTest):
         self.gold_ws_name = self.truth_file.split('.')[0] + "_golden"
         LoadMD(self.truth_file, OutputWorkspace=self.gold_ws_name)
 
-
     def validate(self):
         self.tolerance = 1.0e-3
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__,self.gold_ws_name)
         #return (self.output_ws, self.gold_ws_name)
+
 
 class SNSConvertToMDHistProjTest(stresstesting.MantidStressTest):
     truth_file = "SEQ_11499_md_hwp.nxs"
@@ -205,9 +209,7 @@ class SNSConvertToMDHistProjTest(stresstesting.MantidStressTest):
         self.gold_ws_name = self.truth_file.split('.')[0] + "_golden"
         LoadMD(self.truth_file, OutputWorkspace=self.gold_ws_name)
 
-
     def validate(self):
         self.tolerance = 1.0e-3
         return validateMD(self.output_ws, self.gold_ws_name,self.tolerance,self.__class__.__name__,self.gold_ws_name)
         #return (self.output_ws, self.gold_ws_name)
-

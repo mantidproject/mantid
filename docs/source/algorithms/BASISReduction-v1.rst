@@ -52,15 +52,15 @@ There are typical values for the properties of each reflection:
 | silicon311 | -740, 1.6, 740 |      0.5, 0.2, 3.7     |
 +------------+----------------+------------------------+
 
-Also the following mask files are associated to each reflection:
+Also the following default mask files are associated to each reflection:
 
-+-----------+------------------------------------------------------------------------------------------------+
-|Reflection | Mask file                                                                                      |
-+===========+================================================================================================+
-|silicon111 | BASIS_Mask_ThreeQuartersRemain_SouthTop_NorthTop_NorthBottom_MorePixelsEliminated_08122015.xml |
-+-----------+------------------------------------------------------------------------------------------------+
-|silicon311 | BASIS_Mask_OneQuarterRemains_SouthBottom.xml                                                   |
-+-----------+------------------------------------------------------------------------------------------------+
++-----------+----------------------------+
+|Reflection | Mask file                  |
++===========+============================+
+|silicon111 | BASIS_Mask_default_111.xml |
++-----------+----------------------------+
+|silicon311 | BASIS_Mask_default_311.xml |
++-----------+----------------------------+
 
 These mask files can be found in the SNS filesystem
 (**/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/**)
@@ -90,12 +90,26 @@ range given by **NormWavelengthRange** to obtain
 :math:`S_v(i)` and then divide :math:`S_s(\lambda, i)/S_v(i)=S'_s(\lambda, i)`. From this
 point on, the reduction process continues using :math:`S'_s` in place of :math:`S_s`.
 
+Dynamic Susceptibility
+======================
+
+If <i>OutputSusceptibility</i> is checked, one additional workspace and one Nexus file will be generated,
+both containing the dynamic susceptibility as a function of frequency, in units of GHz.
+The extension denoting this quantity in the workspace and file names is "Xqw"
+(the extension for the structure factor is "sqw").
+
 Usage
 -----
 
-.. warning::
+**Perform a reduction:**
 
-    This algorithm is not meant to be run from the command line.
+.. code-block:: python
+
+    BASISReduction(RunNumbers="59671",
+                   EnergyBins=[-120,0.4,120],
+                   MomentumTransferBins=[0.3, 0.2, 1.9],
+                   DivideByVanadium=1,
+                   NormRunNumbers="58183")
 
 .. categories::
 

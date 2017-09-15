@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterReference.h"
+#include <string>
 
 namespace Mantid {
 namespace API {

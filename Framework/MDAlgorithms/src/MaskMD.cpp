@@ -116,7 +116,7 @@ size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws,
   size_t dimWorkspaceIndex;
   try {
     dimWorkspaceIndex = ws->getDimensionIndexById(candidateNameOrId);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // this will throw if the name is unknown.
     dimWorkspaceIndex = ws->getDimensionIndexByName(candidateNameOrId);
   }
@@ -213,7 +213,7 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   for (const auto &dimension_name : dimensions) {
     try {
       tryFetchDimensionIndex(ws, dimension_name);
-    } catch (std::runtime_error) {
+    } catch (const std::runtime_error &) {
       messageStream << "Dimension '" << dimension_name << "' not found. ";
     }
   }

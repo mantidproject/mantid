@@ -1,9 +1,9 @@
 #include "MantidSINQ/PoldiAnalyseResiduals.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h"
 
 #include <numeric>
 
@@ -42,12 +42,12 @@ const std::string PoldiAnalyseResiduals::summary() const {
 double PoldiAnalyseResiduals::sumCounts(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
-  return std::accumulate(
-      workspaceIndices.begin(), workspaceIndices.end(), 0.0,
-      [&workspace](double sum, int workspaceIndex) {
-        const MantidVec &counts = workspace->readY(workspaceIndex);
-        return sum + std::accumulate(counts.begin(), counts.end(), 0.0);
-      });
+  return std::accumulate(workspaceIndices.begin(), workspaceIndices.end(), 0.0,
+                         [&workspace](double sum, int workspaceIndex) {
+                           auto &counts = workspace->y(workspaceIndex);
+                           return sum + std::accumulate(counts.cbegin(),
+                                                        counts.cend(), 0.0);
+                         });
 }
 
 /// Counts the number of values in each spectrum specified by the list of
@@ -55,12 +55,12 @@ double PoldiAnalyseResiduals::sumCounts(
 size_t PoldiAnalyseResiduals::numberOfPoints(
     const DataObjects::Workspace2D_sptr &workspace,
     const std::vector<int> &workspaceIndices) const {
-  return std::accumulate(
-      workspaceIndices.begin(), workspaceIndices.end(), size_t{0},
-      [&workspace](size_t sum, int workspaceIndex) {
-        const MantidVec &counts = workspace->readY(workspaceIndex);
-        return sum + counts.size();
-      });
+  return std::accumulate(workspaceIndices.begin(), workspaceIndices.end(),
+                         size_t{0},
+                         [&workspace](size_t sum, int workspaceIndex) {
+                           auto &counts = workspace->y(workspaceIndex);
+                           return sum + counts.size();
+                         });
 }
 
 /// Adds the specified value to all spectra specified by the given workspace
@@ -69,10 +69,7 @@ void PoldiAnalyseResiduals::addValue(
     DataObjects::Workspace2D_sptr &workspace, double value,
     const std::vector<int> &workspaceIndices) const {
   for (auto workspaceIndex : workspaceIndices) {
-    MantidVec &counts = workspace->dataY(workspaceIndex);
-    for (double &count : counts) {
-      count += value;
-    }
+    workspace->mutableY(workspaceIndex) += value;
   }
 }
 
@@ -182,13 +179,11 @@ bool PoldiAnalyseResiduals::iterationLimitReached(int iterations) {
 /// total number of counts
 double PoldiAnalyseResiduals::relativeCountChange(
     const DataObjects::Workspace2D_sptr &sum, double totalMeasuredCounts) {
-  const MantidVec &corrCounts = sum->readY(0);
-  double csum = 0.0;
-  for (double corrCount : corrCounts) {
-    csum += fabs(corrCount);
-  }
-
-  return csum / totalMeasuredCounts * 100.0;
+  auto &corrCounts = sum->y(0);
+  return std::accumulate(
+             corrCounts.cbegin(), corrCounts.cend(), 0.0,
+             [](double sum, double val) { return sum += fabs(val); }) /
+         totalMeasuredCounts * 100.0;
 }
 
 void PoldiAnalyseResiduals::exec() {
@@ -199,7 +194,7 @@ void PoldiAnalyseResiduals::exec() {
       boost::make_shared<PoldiInstrumentAdapter>(measured);
   // Dead wires need to be taken into account
   PoldiAbstractDetector_sptr deadWireDetector =
-      boost::make_shared<PoldiDeadWireDecorator>(measured->getInstrument(),
+      boost::make_shared<PoldiDeadWireDecorator>(measured->detectorInfo(),
                                                  poldiInstrument->detector());
 
   // Since the valid workspace indices are required for some calculations, we

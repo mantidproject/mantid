@@ -27,10 +27,10 @@ ComplexType conjg(const ComplexMatrixValueConverter &conv) {
   return std::conj(static_cast<ComplexType>(conv));
 }
 
-// number of rare earth ions (?)
+// number of rare earth ions (trivalent rare earths with unfilled f-shell)
 const int maxNre = 13;
 
-// define some rare earth constants (?)
+// define some rare earth constants (ggj is the Lande g-factor, ddimj=2J+1)
 const std::array<double, maxNre> ggj = {
     6.0 / 7., 4.0 / 5., 8.0 / 11., 3.0 / 5., 2.0 / 7., 0.0,     2.0,
     3.0 / 2., 4.0 / 3., 5.0 / 4.,  6.0 / 5., 7.0 / 6., 8.0 / 7.};
@@ -51,8 +51,8 @@ const double me = 9.109389754;  // x 10**(-31) kg, electron mass
 //       10*ee/kb =: fmevkelvin = 11.6047...
 //       this means 1 meV is nearly 11.6 K
 const double c_fmevkelvin = 10 * ee / kb;
-//  magneton of Bohr in kelvin per tesla
-const double c_myb = hq / me / 2 * c_fmevkelvin;
+//  magneton of Bohr in meV per tesla
+const double c_myb = hq / me / 2;
 
 //--------------------------------
 // define the delta function
@@ -335,7 +335,7 @@ double binom(int n, int k) {
 
 //--------------------------------------------------------
 //              (k)
-// calculates  D    (a,b,c)
+// calculates  D    (a,b,c)   [ The Wigner D-matrix ]
 //              ms m
 //
 // see Lindner A, 'Drehimpulse in der Quantenmechanik',
@@ -527,10 +527,14 @@ double exp_(double z) {
 // calculates all transition intensities for
 // a polycrystalline sample (powder)
 //------------------------------------------
-void intcalc(double pi, double r0, double gj, double z,
-             const DoubleFortranMatrix &jt2, const DoubleFortranVector &e,
-             DoubleFortranMatrix &inten, int dim, double temp) {
-  auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+void intcalc(double r0, double gj, double z, const DoubleFortranMatrix &jt2,
+             const DoubleFortranVector &e, DoubleFortranMatrix &inten, int dim,
+             double temp) {
+  // Original code from FOCUS calculated integrated intensity in barn
+  // auto constant = 4.0 * pi * pow(0.5 * r0 * gj, 2);
+  // ISIS normalised data is in milibarn/steradian - need to multiply
+  // by 1000 / 4 / PI
+  auto constant = pow(0.5 * r0 * gj, 2) * 1000.;
   if (temp == 0.0) {
     temp = 1.0;
   }
@@ -562,11 +566,108 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
   return occupation_factor;
 }
 
+//--------------------------------------
+// calculation of the zeeman hamiltonian
+//--------------------------------------
+void zeeman(ComplexFortranMatrix &hamiltonian, const int nre,
+            const DoubleFortranVector &bext, const DoubleFortranVector &bmol) {
+  auto i = ComplexType(0.0, 1.0);
+  auto bmolp = bmol(1) + i * bmol(2);
+  auto bmolm = bmol(1) - i * bmol(2);
+  auto bmolz = bmol(3);
+  auto bextp = bext(1) + i * bext(2);
+  auto bextm = bext(1) - i * bext(2);
+  ComplexType bextz = bext(3);
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
+  auto facmol = 2 * (gj - 1) * c_myb;
+  auto facext = gj * c_myb;
+  // Negative nre means arbitrary J, with abs(nre) = 2J. dimj=2J+1
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
+  auto j = 0.5 * (dimj - 1.0);
+  int dim = static_cast<int>(dimj);
+  hamiltonian.allocate(1, dim, 1, dim);
+  hamiltonian.zero();
+  //-------------------------------------------------------------------
+  //       define only the lower triangle of h(m,n)
+  //-------------------------------------------------------------------
+  for (int m = 1; m <= dim; ++m) { //	do 10 m=1,dim
+    auto mj = double(m) - j - 1.0;
+    for (int n = 1; n <= m; ++n) { // do 20 n=1,m
+      auto nj = double(n) - j - 1.0;
+      // add the molecular field
+      //  f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
+      hamiltonian(m, n) =
+          hamiltonian(m, n) +
+          0.5 * facmol * bmolm * delta(mj, nj + 1, j) * jp(nj, j) +
+          0.5 * facmol * bmolp * delta(mj, nj - 1, j) * jm(nj, j) +
+          facmol * bmolz * delta(mj, nj, j) * nj +
+          // c add an external magnetic field
+          0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) +
+          0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) +
+          facext * bextz * delta(mj, nj, j) * nj;
+      hamiltonian(n, m) = conjg(hamiltonian(m, n));
+    }
+  }
+}
+
+//---------------------------------------
+// Calculation of the eigenvalues/vectors
+//---------------------------------------
+void diagonalise(const ComplexFortranMatrix &hamiltonian,
+                 DoubleFortranVector &eigenvalues,
+                 ComplexFortranMatrix &eigenvectors) {
+  // Diagonalisation of the hamiltonian
+  auto dim = hamiltonian.len1();
+  eigenvalues.allocate(1, dim);
+  eigenvectors.allocate(1, dim, 1, dim);
+  ComplexFortranMatrix h = hamiltonian;
+  h.eigenSystemHermitian(eigenvalues, eigenvectors);
+
+  // Sort the eigenvalues in ascending order
+  auto sortedIndices = eigenvalues.sortIndices();
+  eigenvalues.sort(sortedIndices);
+  // Eigenvectors are in columns. Sort the columns
+  // to match the sorted eigenvalues.
+  eigenvectors.sortColumns(sortedIndices);
+
+  // Shift the lowest energy level to 0
+  auto indexMin = static_cast<int>(eigenvalues.indexOfMinElement() + 1);
+  auto eshift = eigenvalues(indexMin);
+  eigenvalues += -eshift;
+}
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 
 } // anonymous namespace
+
+/// Calculates the eigenvalues/vectors of a crystal field Hamiltonian in a
+/// specified external magnetic field.
+/// @param eigenvalues :: Output. The eigenvalues in ascending order. The
+/// smallest value is subtracted from all eigenvalues so they always
+/// start with 0.
+/// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
+///    are in columns with indices corresponding to the indices of eigenvalues.
+/// @param hamiltonian  :: The crystal field hamiltonian in meV.
+/// @param nre :: A number denoting the type of ion.
+///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
+/// @param bext :: The external field in Cartesians (Hx, Hy, Hz) in Tesla
+///    The z-axis is parallel to the crystal field quantisation axis.
+void calculateZeemanEigensystem(DoubleFortranVector &eigenvalues,
+                                ComplexFortranMatrix &eigenvectors,
+                                const ComplexFortranMatrix &hamiltonian,
+                                int nre, const DoubleFortranVector &bext) {
+  ComplexFortranMatrix h = hamiltonian;
+  DoubleFortranVector bmol(1, 3);
+  bmol.zero();
+  // Adds the external and molecular fields
+  ComplexFortranMatrix hz;
+  zeeman(hz, nre, bext, bmol);
+  h -= hz;
+  // Now run the actual diagonalisation
+  diagonalise(h, eigenvalues, eigenvectors);
+}
 
 /// Calculate eigenvalues and eigenvectors of the crystal field hamiltonian.
 /// @param eigenvalues :: Output. The eigenvalues in ascending order. The
@@ -574,33 +675,32 @@ double c_occupation_factor(const DoubleFortranVector &energy, double dimj,
 /// start with 0.
 /// @param eigenvectors :: Output. The matrix of eigenvectors. The eigenvectors
 ///    are in columns with indices corresponding to the indices of eigenvalues.
-/// @param hamiltonian  :: Output. The hamiltonian.
+/// @param hamiltonian  :: Output. The crystal field hamiltonian.
+/// @param hzeeman  :: Output. The zeeman hamiltonian.
 /// @param nre :: A number denoting the type of ion.
 ///  |1=Ce|2=Pr|3=Nd|4=Pm|5=Sm|6=Eu|7=Gd|8=Tb|9=Dy|10=Ho|11=Er|12=Tm|13=Yb|
-/// @param bmol :: Parameters of the molecular field. TODO: ref. frame, units.
-/// @param bext :: Parameters of the external field. TODO: ref. frame, units.
-/// @param bkq :: The crystal field parameters. TODO: confirm units. It look
-/// like in meV.
-/// @param alpha_euler :: The alpha Euler angle. TOD: units.
-/// @param beta_euler :: The beta Euler angle. TOD: units.
-/// @param gamma_euler :: The gamma Euler angle. TOD: units.
+/// @param bmol :: The molecular field in Cartesian (Bx, By, Bz) in Tesla
+/// @param bext :: The external field in Cartesian (Hx, Hy, Hz) in Tesla
+///    The z-axis is parallel to the crystal field quantisation axis.
+/// @param bkq :: The crystal field parameters in meV.
+/// @param alpha_euler :: The alpha Euler angle in radians
+/// @param beta_euler :: The beta Euler angle in radians
+/// @param gamma_euler :: The gamma Euler angle in radians
 void calculateEigensystem(DoubleFortranVector &eigenvalues,
                           ComplexFortranMatrix &eigenvectors,
-                          ComplexFortranMatrix &hamiltonian, int nre,
+                          ComplexFortranMatrix &hamiltonian,
+                          ComplexFortranMatrix &hzeeman, int nre,
                           const DoubleFortranVector &bmol,
                           const DoubleFortranVector &bext,
                           const ComplexFortranMatrix &bkq, double alpha_euler,
                           double beta_euler, double gamma_euler) {
-  if (nre <= 0 || nre > maxNre) {
+  if (nre > maxNre) {
     throw std::out_of_range("nre is out of range");
   }
 
   // initialize some rare earth constants
-  auto gj = ggj[nre - 1];
-  auto dimj = ddimj[nre - 1];
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
 
-  // magneton of Bohr in kelvin per tesla
-  auto myb = c_myb;
   //------------------------------------------------------------
   //       transform the Bkq with
   //       H = sum_k=0 Bk0 Ok0 + sum_k>0_q>0  ReBkq ReOkq + ImBkq ImOkq
@@ -632,7 +732,22 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
     }
   }
   //-------------------------------------------------------------------
-  // Rotate the crystal field (?)
+  // Rotate the crystal field quantisation axis by the specified
+  // Euler angles. In some cases the number of CF parameters can be
+  // reduced by chosing the quantisation axis along a high symmetry
+  // rotation axis, rather than along a crystallographic axis.
+  // The eigenvalues should remain the same, but the eigenvectors will
+  // change.
+  // The rotation is done using a Wigner D-matrix. As noted by
+  // Buckmaster, the Stevens operators cannot be rotated as is, because
+  // the have an inconsistent normalisation between differen k, q terms
+  // Thus they have to be converted to and from the "Wybourne"
+  // normalisation using the epsilon / omega values.
+  // There was a bug in the original FOCUS code. Multiplying by
+  // omega*epsilon converts Wybourne parameters to Stevens parameters.
+  // Thus to convert the original dkq_star(k,qs) from Steven to Wybourn
+  // we should divide by epsilon(k,qs)*omega(k,qs) and then multiply by
+  // the new dkq_star(k,q) by epsilon(k,q)*omega(k,q).
   //-------------------------------------------------------------------
   ComplexFortranMatrix rdkq_star(1, 6, -6, 6);
   for (int k = 2; k <= 6; k += 2) { // do k=2,6,2
@@ -641,8 +756,8 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
       for (int qs = -k; qs <= k; ++qs) { // do qs=-k,k
         rdkq_star(k, q) =
             rdkq_star(k, q) +
-            dkq_star(k, qs) * epsilon(k, qs) / epsilon(k, q) * omega(k, qs) /
-                omega(k, q) *
+            dkq_star(k, qs) * epsilon(k, q) / epsilon(k, qs) * omega(k, q) /
+                omega(k, qs) *
                 ddrot(k, q, qs, alpha_euler, beta_euler, gamma_euler);
       }
     }
@@ -680,21 +795,10 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
           bex(1, qs) * ddrot(1, q, qs, alpha_euler, beta_euler, gamma_euler);
     }
   }
-
-  ComplexType rbextp, rbextm, rbextz;
-  rbextp = rbex(1, -1) * M_SQRT2;
-  rbextm = rbex(1, 1) * (-M_SQRT2);
-  rbextz = rbex(1, 0);
-
-  auto facmol = 2 * (gj - 1) * myb;
-  auto facext = gj * myb;
-
-  auto bmolp = bmol(1) + i * bmol(2);
-  auto bmolm = bmol(1) - i * bmol(2);
-  auto bmolz = bmol(3);
-  auto bextp = rbextp;
-  auto bextm = rbextm;
-  auto bextz = rbextz;
+  DoubleFortranVector rbext(1, 3);
+  rbext(1) = real(static_cast<ComplexType>(rbex(1, -1))) * M_SQRT2;
+  rbext(2) = imag(static_cast<ComplexType>(rbex(1, -1))) * M_SQRT2;
+  rbext(3) = real(static_cast<ComplexType>(rbex(1, 0)));
 
   int dim = static_cast<int>(dimj);
   hamiltonian.allocate(1, dim, 1, dim);
@@ -715,47 +819,16 @@ void calculateEigensystem(DoubleFortranVector &eigenvalues,
               hamiltonian(m, n) + rdkq_star(k, q) * full_okq(k, q, mj, nj, j);
         }
       }
-    }
-  }
-  //-------------------------------------------------------------------
-  //       define only the lower triangle of h(m,n)
-  //-------------------------------------------------------------------
-  for (int m = 1; m <= dim; ++m) { //	do 10 m=1,dim
-    auto mj = double(m) - j - 1.0;
-    for (int n = 1; n <= m; ++n) { // do 20 n=1,m
-      auto nj = double(n) - j - 1.0;
-      // add the molecular field
-      //  f*J*B = f*( 1/2*(J+ * B-  +  J- * B+) + Jz*Bz )
-      hamiltonian(m, n) =
-          hamiltonian(m, n) +
-          0.5 * facmol * bmolm * delta(mj, nj + 1, j) * jp(nj, j) +
-          0.5 * facmol * bmolp * delta(mj, nj - 1, j) * jm(nj, j) +
-          facmol * bmolz * delta(mj, nj, j) * nj +
-          // c add an external magnetic field
-          0.5 * facext * bextm * delta(mj, nj + 1, j) * jp(nj, j) +
-          0.5 * facext * bextp * delta(mj, nj - 1, j) * jm(nj, j) +
-          facext * bextz * delta(mj, nj, j) * nj;
       hamiltonian(n, m) = conjg(hamiltonian(m, n));
     }
   }
 
-  // Diagonalisation of the hamiltonian
-  eigenvalues.allocate(1, dim);
-  eigenvectors.allocate(1, dim, 1, dim);
-  ComplexFortranMatrix h = hamiltonian;
-  h.eigenSystemHermitian(eigenvalues, eigenvectors);
+  // Adds the external and molecular fields
+  zeeman(hzeeman, nre, rbext, bmol);
+  hamiltonian -= hzeeman;
 
-  // Sort the eigenvalues in ascending order
-  auto sortedIndices = eigenvalues.sortIndices();
-  eigenvalues.sort(sortedIndices);
-  // Eigenvectors are in columns. Sort the columns
-  // to match the sorted eigenvalues.
-  eigenvectors.sortColumns(sortedIndices);
-
-  // Shift the lowest energy level to 0
-  auto indexMin = static_cast<int>(eigenvalues.indexOfMinElement() + 1);
-  auto eshift = eigenvalues(indexMin);
-  eigenvalues += -eshift;
+  // Now run the actual diagonalisation
+  diagonalise(hamiltonian, eigenvalues, eigenvectors);
 }
 
 //-------------------------
@@ -856,7 +929,7 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
                           DoubleFortranVector &e_energies,
                           DoubleFortranMatrix &i_energies) {
   int dim = static_cast<int>(energies.size());
-  auto dimj = ddimj[nre - 1];
+  auto dimj = (nre > 0) ? ddimj[nre - 1] : (abs(nre) + 1);
   if (static_cast<double>(dim) != dimj) {
     throw std::runtime_error("calculateIntensities was called for a wrong ion");
   }
@@ -874,10 +947,9 @@ void calculateIntensities(int nre, const DoubleFortranVector &energies,
 
   // calculates the transition intensities for a powdered sample
   auto r0 = c_r0();
-  auto gj = ggj[nre - 1];
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
   DoubleFortranMatrix mat(1, dim, 1, dim);
-  intcalc(pi, r0, gj, occupation_factor, jt2mat, energies, mat, dim,
-          temperature);
+  intcalc(r0, gj, occupation_factor, jt2mat, energies, mat, dim, temperature);
 
   deg_on(energies, mat, degeneration, e_energies, i_energies, de);
 }
@@ -968,6 +1040,47 @@ void calculateExcitations(const DoubleFortranVector &e_energies,
     e_excitations.allocate(nex);
     i_excitations.allocate(nex);
   }
+}
+
+/// Calculate the diagonal matrix elements of the magnetic moment operator
+/// in a particular eigenvector basis.
+/// @param ev :: Input. The eigenvector basis.
+/// @param Hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param nre :: Input. The ion number to calculate for.
+/// @param moment :: Output. The diagonal elements of the magnetic moment matrix
+void calculateMagneticMoment(const ComplexFortranMatrix &ev,
+                             const DoubleFortranVector &Hdir, const int nre,
+                             DoubleFortranVector &moment) {
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
+  moment.allocate(dim);
+  for (auto i = 1; i <= dim; ++i) {
+    moment(i) = real(matjx(ev, i, i, dim)) * Hdir(1) + // <ev|jx|ev>
+                real(matjy(ev, i, i, dim)) * Hdir(2) + // <ev|jy|ev>
+                real(matjz(ev, i, i, dim)) * Hdir(3);  // <ev|jz|ev>
+  }
+  moment *= gj;
+}
+
+/// Calculate the full magnetic moment matrix in a particular eigenvector basis.
+/// @param ev :: Input. The eigenvector basis.
+/// @param Hdir :: Input. Cartesian direction of the magnetic moment operator
+/// @param nre :: Input. The ion number to calculate for.
+/// @param mumat :: Output. The matrix elements of the magnetic moment matrix
+void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev,
+                                   const std::vector<double> &Hdir,
+                                   const int nre, ComplexFortranMatrix &mumat) {
+  int dim = (nre > 0) ? (int)ddimj[nre - 1] : (abs(nre) + 1);
+  auto gj = (nre > 0) ? ggj[nre - 1] : 2.;
+  mumat.allocate(1, dim, 1, dim);
+  for (auto i = 1; i <= dim; ++i) {
+    for (auto j = 1; j <= dim; ++j) {
+      mumat(i, j) = matjx(ev, i, j, dim) * Hdir[0] + // <ev|jx|ev'>
+                    matjy(ev, i, j, dim) * Hdir[1] + // <ev|jy|ev'>
+                    matjz(ev, i, j, dim) * Hdir[2];  // <ev|jz|ev'>
+    }
+  }
+  mumat *= gj;
 }
 
 } // namespace Functions

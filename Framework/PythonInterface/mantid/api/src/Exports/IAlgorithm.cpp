@@ -93,7 +93,7 @@ struct MandatoryFirst {
   /// in the list
   bool operator()(const Property *p1, const Property *p2) const {
     // this is false, unless p1 is not valid and p2 is valid
-    return (p1->isValid() != "") && (p2->isValid() == "");
+    return (!p1->isValid().empty()) && (p2->isValid().empty());
   }
 };
 
@@ -186,7 +186,7 @@ std::string createDocString(IAlgorithm &self) {
   // Put in the quick overview message
   std::stringstream buffer;
   std::string temp = self.summary();
-  if (temp.size() > 0)
+  if (!temp.empty())
     buffer << temp << EOL << EOL;
 
   // get a sorted copy of the properties
@@ -346,6 +346,8 @@ void export_ialgorithm() {
            "Returns the list of categories this algorithm belongs to")
       .def("summary", &IAlgorithm::summary, arg("self"),
            "Returns a summary message describing the algorithm")
+      .def("helpURL", &IAlgorithm::helpURL, arg("self"),
+           "Returns optional URL for algorithm documentation")
       .def("workspaceMethodName", &IAlgorithm::workspaceMethodName, arg("self"),
            "Returns a name that will be used when attached as a workspace "
            "method. Empty string indicates do not attach")

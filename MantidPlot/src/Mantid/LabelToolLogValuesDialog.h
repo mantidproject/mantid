@@ -6,7 +6,6 @@
 //----------------------------------
 
 #include "MantidSampleLogDialog.h"
-#include <MantidAPI/MultipleExperimentInfos.h>
 
 //----------------------------------
 // Forward declarations

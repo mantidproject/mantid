@@ -228,6 +228,7 @@ public:
 
   void test_groupAsymmetry_singlePeriod() {
     MatrixWorkspace_sptr inWS = createWorkspace();
+    inWS->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
 
@@ -245,23 +246,25 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.247, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.356, 0.001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 1.405, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4059, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.8981, 0.001);
 
       TS_ASSERT_EQUALS(ws->readX(0)[0], 1);
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.075, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.136, 0.01);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.240, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0594, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1070, 0.01);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1898, 0.01);
     }
   }
 
   void test_groupAsymmetry_twoPeriods_minus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
+    inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    inWSSecond->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
@@ -284,19 +287,21 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0030, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], -0.0455, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.1511, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0231, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0575, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.1066, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1885, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.3295, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0856, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1513, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.2643, 0.0001);
     }
   }
 
   void test_groupAsymmetry_twoPeriods_plus() {
     MatrixWorkspace_sptr inWS = createWorkspace(3);
+    inWS->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr inWSSecond = createWorkspace();
+    inWSSecond->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(inWS);
     inputWSGroup->addWorkspace(inWSSecond);
@@ -319,13 +324,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.2529, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.3918, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5317, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4255, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.9467, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0547, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1010, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1825, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0421, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0776, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1403, 0.0001);
     }
   }
 
@@ -334,8 +339,11 @@ public:
   */
   void test_groupAsymmetry_threePeriods_plus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
+    periodOne->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
+    periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
+    periodThree->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
@@ -359,13 +367,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.2523, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], 0.3997, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], 1.5549, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], -0.4282, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0702, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], 0.9536, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0443, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0823, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1496, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0338, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.0629, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.1144, 0.0001);
     }
   }
 
@@ -374,8 +382,11 @@ public:
   */
   void test_groupAsymmetry_threePeriods_minus() {
     MatrixWorkspace_sptr periodOne = createWorkspace();
+    periodOne->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodTwo = createWorkspace(3);
+    periodTwo->mutableRun().addProperty("goodfrm", 10);
     MatrixWorkspace_sptr periodThree = createWorkspace(1);
+    periodThree->mutableRun().addProperty("goodfrm", 10);
     auto inputWSGroup = boost::make_shared<WorkspaceGroup>();
     inputWSGroup->addWorkspace(periodOne);
     inputWSGroup->addWorkspace(periodTwo);
@@ -399,13 +410,13 @@ public:
       TS_ASSERT_EQUALS(ws->readX(0)[1], 2);
       TS_ASSERT_EQUALS(ws->readX(0)[2], 3);
 
-      TS_ASSERT_DELTA(ws->readY(0)[0], -0.0029, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[1], -0.0269, 0.0001);
-      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0777, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[0], 0.0087, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[1], 0.0000, 0.0001);
+      TS_ASSERT_DELTA(ws->readY(0)[2], -0.0216, 0.0001);
 
-      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0928, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1741, 0.0001);
-      TS_ASSERT_DELTA(ws->readE(0)[2], 0.3184, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[0], 0.0705, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[1], 0.1322, 0.0001);
+      TS_ASSERT_DELTA(ws->readE(0)[2], 0.2417, 0.0001);
     }
   }
 
@@ -620,7 +631,7 @@ private:
   * X values are 1 2 3 for all the histograms.
   */
   MatrixWorkspace_sptr createWorkspace(double delta = 0.0) {
-    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(3, 3);
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 3);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
       for (size_t j = 0; j < ws->blocksize(); j++) {

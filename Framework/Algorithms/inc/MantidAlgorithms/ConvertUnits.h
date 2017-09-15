@@ -1,11 +1,9 @@
 #ifndef MANTID_ALGORITHMS_CONVERTUNITS_H_
 #define MANTID_ALGORITHMS_CONVERTUNITS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,8 +22,8 @@ namespace Algorithms {
    </LI>
     </UL>
 
-    Optional properties required for certain units (DeltaE &
-   DeltaE_inWavenumber):
+    Optional properties required for certain units (DeltaE,
+   DeltaE_inWavenumber, DeltaE_inFrequency):
     <UL>
     <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect
    geometry) </LI>
@@ -119,12 +117,11 @@ protected:
                  const double &power);
 
   /// Internal function to gather detector specific L2, theta and efixed values
-  bool getDetectorValues(
-      const Kernel::Unit &outputUnit, const Geometry::IComponent &source,
-      const Geometry::IComponent &sample, double l1, int emode,
-      const API::MatrixWorkspace &ws,
-      boost::function<double(const Geometry::IDetector &)> thetaFunction,
-      int64_t wsIndex, double &efixed, double &l2, double &twoTheta);
+  bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
+                         const Kernel::Unit &outputUnit, int emode,
+                         const API::MatrixWorkspace &ws, const bool signedTheta,
+                         int64_t wsIndex, double &efixed, double &l2,
+                         double &twoTheta);
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test the use of proxy objects in MantidPlot that
 prevent crashes when accessing the python object
 after deletion of the object

@@ -1,6 +1,7 @@
 #ifndef MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_IMPORTMDHISTOWORKSPACETEST_H_
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"

@@ -1,8 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -30,8 +28,6 @@ const std::string INT_CHARGE_NAME("gd_prtn_chrg");
 const std::string LOG_CHARGE_NAME("proton_charge");
 }
 
-//========================================================================
-
 /// Algorithm's name for identification overriding a virtual method
 const std::string FilterBadPulses::name() const { return "FilterBadPulses"; }
 
@@ -43,7 +39,6 @@ const std::string FilterBadPulses::category() const {
   return "Events\\EventFiltering";
 }
 
-//-----------------------------------------------------------------------
 /// Initialise the properties
 void FilterBadPulses::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
@@ -58,7 +53,6 @@ void FilterBadPulses::init() {
                   "The percentage of the average to use as the lower bound");
 }
 
-//-----------------------------------------------------------------------
 /** Executes the algorithm */
 void FilterBadPulses::exec() {
   // the input workspace into the event workspace we already know it is

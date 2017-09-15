@@ -1,10 +1,8 @@
 #ifndef MANTID_LIVEDATA_TESTDATALISTENER_H_
 #define MANTID_LIVEDATA_TESTDATALISTENER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/ILiveListener.h"
+#include "MantidAPI/LiveListener.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
@@ -14,7 +12,7 @@ namespace LiveData {
    buffer
     with an identical number of events every time extractData is called.
  */
-class TestDataListener : public API::ILiveListener {
+class TestDataListener : public API::LiveListener {
 public:
   TestDataListener();
   ~TestDataListener() override;
@@ -28,6 +26,7 @@ public:
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
+  bool dataReset() override;
   ILiveListener::RunStatus runStatus() override;
   int runNumber() const override;
 

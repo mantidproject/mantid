@@ -6,12 +6,17 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/HistoryView.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+
 #include <Poco/File.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -289,7 +294,7 @@ void AccumulateMD::init() {
       "The name of the Nexus file to write, as a full or relative path.\n"
       "Only used if FileBackEnd is true.");
   setPropertySettings("Filename", make_unique<EnabledWhenProperty>(
-                                      "CreateFileBackEnd", IS_EQUAL_TO, "1"));
+                                      "FileBackEnd", IS_EQUAL_TO, "1"));
 
   declareProperty("FileBackEnd", false,
                   "If true, Filename must also be specified. The algorithm "
@@ -320,7 +325,7 @@ void AccumulateMD::exec() {
 
   // Create progress reporting object
   // Progress prog = Progress(this, 0.0, 1.0, 2);
-  this->progress(0);
+  this->progress(0.0);
 
   const std::string nonexistent =
       filterToExistingSources(input_data, psi, gl, gs, efix);

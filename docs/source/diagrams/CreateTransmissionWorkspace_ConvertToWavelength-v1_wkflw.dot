@@ -12,6 +12,8 @@ subgraph params {
   wavMax              [label="WavelengthMax"]
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  monBgWavMax         [label="MonitorBackground-\nWavelengthMax"]
+  monBgWavMin         [label="MonitorBackground-\nWavelengthMin"]
   outputWS            [label="TransmissionRun\nin wavelength"]
 
   detWS               [label="DetectorWorkspace"]
@@ -20,7 +22,7 @@ subgraph params {
 
 subgraph decisions {
  $decision_style
-  checkMon        [label="Monitors?"]
+  checkMon        [label="I0MonitorIndex and\nMonitorBackground-\nWavelengthMin\Max\nprovided?"]
   checkBgMinMax   [label="MonitorBackground-\nWavelength\nMin/Max non-zero?"]
   checkMonInt	  [label="Normalize by\nIntegrated Monitors?"]
 }
@@ -63,10 +65,12 @@ wavMax               -> cropDet
 cropDet              -> detWS
 
 firstRun	     -> checkMon	[label="Monitors"]
+monBgWavMax         -> checkMon
+monBgWavMin         -> checkMon
+monitorIndex        -> checkMon
 checkMon             -> convertMon      [label="Yes"]
 convertMon	     -> valMon
 valMon		     -> cropMon
-monitorIndex	     -> cropMon
 cropMon		     -> checkBgMinMax
 checkBgMinMax	     -> calcFlatBg	[label="Yes"]
 calcFlatBg	     -> rebinToWS
@@ -88,7 +92,7 @@ monWS		     -> divideDetMon
 
 divideDetMon	     -> outputWS
 
-{rank = same; convertDet; convertMon}
+{rank = same; convertDet; monBgWavMax; monBgWavMin; monitorIndex;}
 {rank = same; valDet; valMon; valUnity}
 {rank = same; detWS; rebinToWS}
 }

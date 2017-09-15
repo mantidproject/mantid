@@ -46,6 +46,10 @@ public:
   /// Constructor
   ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                  Handedness handedness, std::string origin);
+  /// Alternative constructor with theta sign axis
+  ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
+                 PointingAlong thetaSign, Handedness handedness,
+                 std::string origin);
   /// Gets the pointing up direction
   PointingAlong pointingUp() const;
   /// Gets the beam pointing along direction
@@ -63,6 +67,8 @@ public:
   const Mantid::Kernel::V3D vecPointingUp() const;
   /// Convert along beam axis into a 3D direction
   const Mantid::Kernel::V3D vecPointingAlongBeam() const;
+  /// Convert along the axis defining the 2theta sign
+  const Mantid::Kernel::V3D vecThetaSign() const;
   /// Pointing up axis as a string
   std::string pointingUpAxis() const;
   /// Pointing along beam axis as a string
@@ -81,6 +87,8 @@ private:
   PointingAlong m_up;
   /// Beam pointing along axis
   PointingAlong m_alongBeam;
+  /// Axis defining the 2theta sign
+  PointingAlong m_thetaSign;
   /// Handedness
   Handedness m_handedness;
   /// Origin
@@ -89,6 +97,8 @@ private:
   Mantid::Kernel::V3D m_vecPointingAlongBeam;
   /// Vector pointing up instrument
   Mantid::Kernel::V3D m_vecPointingUp;
+  /// Vector denoting the direction defining the 2theta sign
+  Mantid::Kernel::V3D m_vecThetaSign;
 };
 
 } // namespace Geometry

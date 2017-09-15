@@ -33,17 +33,17 @@ Usage
   monitor_ws = mtd['Monitors']
 
   # Detector histograms
-  print("Number of spectra in input workspace: {}").format(ws.getNumberHistograms())
+  print("Number of spectra in input workspace: {0}").format(ws.getNumberHistograms())
   # Detector histograms (spectra missing detectors generate warnings)
-  print("Number of spectra in detector workspace: {}").format(detector_ws.getNumberHistograms())
+  print("Number of spectra in detector workspace: {0}").format(detector_ws.getNumberHistograms())
   # Monitor histograms
-  print("Number of spectra in monitor workspace: {}").format(monitor_ws.getNumberHistograms())
+  print("Number of spectra in monitor workspace: {0}").format(monitor_ws.getNumberHistograms())
   # Check if the first spectrum in the detector workspace is a monitor
-  print("Detector workspace isMonitor for spectrum 0: {}").format(detector_ws.getDetector(0).isMonitor())
+  print("Detector workspace isMonitor for spectrum 0: {0}").format(detector_ws.getDetector(0).isMonitor())
   # Check if the first spectrum in the monitor workspace is a monitor
-  print("Monitor workspace isMonitor for spectrum 0: {}").format(monitor_ws.getDetector(0).isMonitor())
+  print("Monitor workspace isMonitor for spectrum 0: {0}").format(monitor_ws.getDetector(0).isMonitor())
   # See the monitor workspace is set
-  print("Name of monitor workspace: {}").format(detector_ws.getMonitorWorkspace().name())
+  print("Name of monitor workspace: {0}").format(detector_ws.getMonitorWorkspace().name())
 
 Output:
 

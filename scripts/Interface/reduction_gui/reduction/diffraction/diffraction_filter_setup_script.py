@@ -1,14 +1,14 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
-import os
-import time
 import xml.dom.minidom
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
 
 class FilterSetupScript(BaseScriptElement):
     """ Run setup script for tab 'Run Setup'
@@ -81,7 +81,6 @@ class FilterSetupScript(BaseScriptElement):
 
         return
 
-
     def buildParameterDict(self):
         """ Create a dictionary for parameter and parameter values for SNSPowderReductionPlus()
         """
@@ -108,7 +107,7 @@ class FilterSetupScript(BaseScriptElement):
         # 2. Sort out some issue
         filtertype = "NoFilter"
         if self.filterbytime is True and self.filterbylogvalue is True:
-            print "Impossible situation!  Coding must be wrong!"
+            print ("Impossible situation!  Coding must be wrong!")
         elif self.filterbytime is True:
             filtertype = "ByTime"
         elif self.filterbylogvalue is True:
@@ -175,8 +174,8 @@ class FilterSetupScript(BaseScriptElement):
             self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue", FilterSetupScript.minimumlogvalue)
             self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue", FilterSetupScript.maximumlogvalue)
             self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval", FilterSetupScript.logvalueinterval)
-            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",\
-                    FilterSetupScript.filterlogvaluebychangingdirection)
+            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",
+                                                                           FilterSetupScript.filterlogvaluebychangingdirection)
             self.timetolerance = self.getFloatElement(instrument_dom, "timetolerance", FilterSetupScript.timetolerance)
             self.logboundary = self.getStringElement(instrument_dom, "logboundary", FilterSetupScript.logboundary)
 
@@ -226,7 +225,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = float(floatstr)
             except ValueError:
-                print "Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr)
+                print ("Warning! XML field %s value %s cannot be converted to float" % (xmlname, floatstr))
                 value = None
         else:
             value = None
@@ -241,7 +240,7 @@ class FilterSetupScript(BaseScriptElement):
             try:
                 value = int(integerstr)
             except ValueError:
-                print "Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr)
+                print ("Warning! XML field %s value %s cannot be converted to integer" % (xmlname, integerstr))
                 value = None
         else:
             value = None
@@ -254,4 +253,3 @@ class FilterSetupScript(BaseScriptElement):
         value = BaseScriptElement.getStringElement(instrument_dom, xmlname, default)
 
         return value
-

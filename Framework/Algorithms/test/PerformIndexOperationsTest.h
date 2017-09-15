@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::Algorithms::PerformIndexOperations;

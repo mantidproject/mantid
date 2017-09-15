@@ -3,6 +3,7 @@
 Test the SNS inelatic reduction scripts.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 import shutil
@@ -10,6 +11,7 @@ import glob
 import numpy as np
 import mantid
 from mantid.simpleapi import *
+
 
 class DirectInelaticSNSTest(stresstesting.MantidStressTest):
     _nxspe_filename=""
@@ -44,7 +46,6 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         shutil.copyfile(filename,os.path.join(self.customDataDir,'SEQ_12385_event.nxs'))
         self.topbottom()
 
-
     #Routines from SNS scripts
     def createanglelist(self,ws,angmin,angmax,angstep):
         """
@@ -68,19 +69,19 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 ang_list.append(ang)
         # file with grouping information
         f = open(os.path.join(self.customDataDir,"group.map"),'w')
-        print >>f,len(ang_list)
+        print(len(ang_list), file=f)
         for i in range(len(ang_list)):
-            print >>f,i
-            print >>f,len(detIDlist[i])
+            print(i, file=f)
+            print(len(detIDlist[i]), file=f)
             mystring=str(detIDlist[i]).strip(']').strip('[')
             mystring=mystring.replace(',','')
-            print >>f,mystring
+            print(mystring, file=f)
         f.close()
         # par file
         f = open(os.path.join(self.customDataDir,"group.par"),'w')
-        print >>f,len(ang_list)
+        print(len(ang_list), file=f)
         for angi in ang_list:
-            print >>f,5.5,angi,0.0,1.0,1.0,1
+            print(5.5,angi,0.0,1.0,1.0,1, file=f)
         f.close()
         return [ang_list,detIDlist]
 
@@ -141,11 +142,9 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         else:
             LoadNexus(Filename=os.path.join(self.customDataDir,"van.nx5"),OutputWorkspace="VAN")
 
-
     #functions from stresstesting
     def requiredFiles(self):
         return ['SEQ_12384_event.nxs']
-
 
     def cleanup(self):
         for ws in ['IWS', 'OWST', 'VAN', 'monitor_ws']:
@@ -188,7 +187,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                     LoadNexusMonitors(Filename=f,OutputWorkspace="monitor_ws_temp")
                     Plus(LHSWorkspace="IWS",RHSWorkspace="IWS_temp",OutputWorkspace="IWS")
                     Plus(LHSWorkspace="monitor_ws",RHSWorkspace="monitor_ws_temp",OutputWorkspace="monitor_ws")
-			        #cleanup
+                                #cleanup
                     DeleteWorkspace("IWS_temp")
                     DeleteWorkspace("monitor_ws_temp")
             w=mtd["IWS"]
@@ -208,7 +207,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
                 MaskDetectors(Workspace="OWST",MaskedWorkspace="VAN")
             if do_powder:
                 if i==0:
-                    dummy_mapping=self.createanglelist("OWST",anglemin,anglemax,anglestep)
+                    self.createanglelist("OWST",anglemin,anglemax,anglestep)
                 GroupDetectors( InputWorkspace="OWST",OutputWorkspace="OWST",
                                 MapFile=os.path.join(self.customDataDir,"group.map"),Behaviour="Sum")
                 SolidAngle(InputWorkspace="OWST",OutputWorkspace="sa")
@@ -246,7 +245,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         #find the nxspe filename: it should be only one, but the name might depend on the rounding of phi
         nxspelist=glob.glob(os.path.join(self.customDataDir,'*.nxspe'))
         if len(nxspelist)>1 or len(nxspelist) == 0:
-            print "Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist))
+            print("Error: Expected single nxspe file in %s. Found %d" % (self.customDataDir, len(nxspelist)))
             return False
 
         # Name encodes rotation
@@ -265,4 +264,3 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         return "OWST",'SEQUOIAReduction.nxs'
-

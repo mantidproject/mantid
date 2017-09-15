@@ -2,12 +2,15 @@
 #define MANTID_API_AXIS_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Unit.h"
 #include "MantidGeometry/IDTypes.h"
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 
 namespace Mantid {
+namespace Kernel {
+class Unit;
+}
 namespace API {
 //----------------------------------------------------------------------
 // Forward declaration
@@ -54,11 +57,12 @@ public:
   const std::string &title() const;
   std::string &title();
 
-  const Kernel::Unit_sptr &unit() const;
-  Kernel::Unit_sptr &unit();
+  const boost::shared_ptr<Kernel::Unit> &unit() const;
+  boost::shared_ptr<Kernel::Unit> &unit();
 
   /// Set the unit on the Axis
-  virtual const Kernel::Unit_sptr &setUnit(const std::string &unitName);
+  virtual const boost::shared_ptr<Kernel::Unit> &
+  setUnit(const std::string &unitName);
 
   /// Returns true is the axis is a Spectra axis
   virtual bool isSpectra() const { return false; }
@@ -110,7 +114,7 @@ private:
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis
-  Kernel::Unit_sptr m_unit;
+  boost::shared_ptr<Kernel::Unit> m_unit;
 };
 
 } // namespace API

@@ -1,23 +1,21 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <stdexcept>
 
-#include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectraAxisValidator.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/SofQW.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -133,7 +131,7 @@ void SofQW::exec() {
   // Progress reports & cancellation
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   const size_t nHistos = inputWorkspace->getNumberHistograms();
-  auto m_progress = new Progress(this, 0.0, 1.0, nHistos);
+  auto m_progress = make_unique<Progress>(this, 0.0, 1.0, nHistos);
   m_progress->report("Creating output workspace");
 }
 

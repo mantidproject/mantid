@@ -9,6 +9,7 @@
 #include <Poco/File.h>
 
 #include <fstream>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -117,7 +118,7 @@ void SaveFullprofResolution::processProperties() {
 
   // Output file and operation
   m_outIrfFilename = getPropertyValue("OutputFilename");
-  if (m_outIrfFilename.size() == 0)
+  if (m_outIrfFilename.empty())
     throw runtime_error("Input file name invalid. ");
   m_append = getProperty("Append");
   if (m_append) {

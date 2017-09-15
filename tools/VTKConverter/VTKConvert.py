@@ -3,6 +3,7 @@
 # Convert an acor file into VTK format (specifically a vtp file)
 from xml.dom import minidom
 
+
 def convertToVTU(infile, outpath):
 
     #first need to find some things from the file
@@ -122,6 +123,7 @@ def convertToVTU(infile, outpath):
     del datalist
     del planelist
     del doc
+
 
 def writeParallelVTU(files, prefix):
 

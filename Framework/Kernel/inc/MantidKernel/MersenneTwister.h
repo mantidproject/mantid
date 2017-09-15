@@ -5,7 +5,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/ClassMacros.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/random/mersenne_twister.hpp>
@@ -50,6 +49,10 @@ class MANTID_KERNEL_DLL MersenneTwister final
     : public PseudoRandomNumberGenerator {
 
 public:
+  /// Construct the generator using time stamp for the initial seed.
+  MersenneTwister();
+  /// Construct the generator with an initial range and default seed.
+  MersenneTwister(const double start, const double end);
   /// Construct the generator with an initial seed. It can be reseeded using
   /// setSeed.
   explicit MersenneTwister(const size_t seedValue);
@@ -79,6 +82,10 @@ public:
   /// Restores the generator to the last saved point, or the beginning if
   /// nothing has been saved
   void restore() override;
+  /// Return the minimum value of the range
+  double min() const override { return m_start; }
+  /// Return the maximum value of the range
+  double max() const override { return m_end; }
 
 private:
   /// The boost Mersenne Twister generator
@@ -90,8 +97,7 @@ private:
   /// The current seed
   boost::mt19937::result_type m_currentSeed;
   /// A generator that will take the value when save is requested. Pointer so
-  /// that
-  /// it is only instantiated when required
+  /// that it is only instantiated when required
   boost::mt19937 *m_savedStateGenerator;
 };
 }

@@ -2,11 +2,10 @@
 #define MANTID_API_LOGMANAGER_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/Cache.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
-#include "MantidKernel/TimeSplitter.h"
+#include <memory>
 #include <vector>
 
 namespace NeXus {
@@ -15,7 +14,12 @@ class File;
 
 namespace Mantid {
 namespace Kernel {
+template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
+class SplittingInterval;
+typedef std::vector<SplittingInterval> TimeSplitterType;
+class DateAndTime;
+class PropertyManager;
 }
 
 namespace API {
@@ -50,9 +54,12 @@ namespace API {
 */
 class MANTID_API_DLL LogManager {
 public:
+  LogManager();
+  LogManager(const LogManager &other);
   /// Destructor. Doesn't need to be virtual as long as nothing inherits from
   /// this class.
-  virtual ~LogManager() = default;
+  virtual ~LogManager();
+  LogManager &operator=(const LogManager &other);
 
   //-------------------------------------------------------------
   /// Set the run start and end
@@ -97,13 +104,8 @@ public:
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
   void removeProperty(const std::string &name, bool delProperty = true);
-  /**
-   * Return all of the current properties
-   * @returns A vector of the current list of properties
-   */
-  inline const std::vector<Kernel::Property *> &getProperties() const {
-    return m_manager.getProperties();
-  }
+  const std::vector<Kernel::Property *> &getProperties() const;
+
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
   template <typename T>
@@ -187,18 +189,20 @@ public:
   void clearLogs();
 
 protected:
+  /// Load the run from a NeXus file with a given group name
+  void loadNexus(::NeXus::File *file,
+                 const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
-  Kernel::PropertyManager m_manager;
+  std::unique_ptr<Kernel::PropertyManager> m_manager;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;
 
 private:
-  /// Cache type for single value logs
-  typedef Kernel::Cache<std::pair<std::string, Kernel::Math::StatisticType>,
-                        double> SingleValueCache;
   /// Cache for the retrieved single values
-  mutable SingleValueCache m_singleValueCache;
+  std::unique_ptr<Kernel::Cache<
+      std::pair<std::string, Kernel::Math::StatisticType>, double>>
+      m_singleValueCache;
 };
 /// shared pointer to the logManager base class
 typedef boost::shared_ptr<LogManager> LogManager_sptr;

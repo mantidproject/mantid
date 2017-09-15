@@ -16,8 +16,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -139,7 +138,7 @@ public:
     Mantid::signal_t value = projection.signalAtPeakCenter(outOfBoundsPeak);
 
     TSM_ASSERT("Should indicate is out of bounds via a NAN.",
-               boost::math::isnan(value));
+               std::isnan(value));
   }
 
   void test_labelAtPeakCenter_with_peak_at_0_0_0() {
@@ -207,7 +206,7 @@ public:
 
     PeakClusterProjection projection(inWS);
     Mantid::signal_t value = projection.signalAtPeakCenter(outOfBoundsPeak);
-    TS_ASSERT(boost::math::isnan(value));
+    TS_ASSERT(std::isnan(value));
   }
 };
 

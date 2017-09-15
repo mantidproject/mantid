@@ -43,7 +43,7 @@ public:
   void test_exec() {
     // Fake output WS
     MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("LoadIsawUBTest_ws", ws);
 
     std::string File1, File2;

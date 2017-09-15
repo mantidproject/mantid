@@ -4,9 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
 from mantid.kernel import Direction, logger
 
+
 class CheckForSampleLogs(PythonAlgorithm):
     """ Check if certain sample logs exists on a workspace
     """
+
     def category(self):
         """ Return category
         """
@@ -25,8 +27,8 @@ class CheckForSampleLogs(PythonAlgorithm):
         """
         self.declareProperty(WorkspaceProperty("Workspace", "",Direction.Input), "The workspace to check.")
         self.declareProperty("LogNames","","Names of the logs to look for")
-        self.declareProperty("Result","A string that will be empty if all the logs are found, "\
-            "otherwise will contain an error message",Direction.Output)
+        self.declareProperty("Result","A string that will be empty if all the logs are found, "
+                             "otherwise will contain an error message",Direction.Output)
         return
 
     def PyExec(self):

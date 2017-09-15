@@ -1,11 +1,13 @@
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
@@ -19,6 +21,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace NeXus;
+using namespace HistogramData;
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 
@@ -101,7 +104,7 @@ void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
 
-  if (m_instrumentName == "") {
+  if (m_instrumentName.empty()) {
     throw std::runtime_error(
         "Cannot read the instrument name from the Nexus file!");
   }
@@ -166,30 +169,18 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   int calculatedDetectorElasticPeakPosition =
       getDetectorElasticPeakPosition(data);
 
-  std::vector<double> timeBinning =
-      getTimeBinning(calculatedDetectorElasticPeakPosition, m_channelWidth);
-
   // Assign time bin to first X entry
-  m_localWorkspace->dataX(0).assign(timeBinning.begin(), timeBinning.end());
+  setTimeBinning(m_localWorkspace->mutableX(0),
+                 calculatedDetectorElasticPeakPosition, m_channelWidth);
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      if (spec > 0) {
-        // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
-      }
-      // Assign Y
       float *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
-
-      // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
-      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                     LoadLLB::calculateError);
-
-      ++spec;
+      m_localWorkspace->setHistogram(
+          spec++, m_localWorkspace->binEdges(0),
+          Counts(data_p, data_p + m_numberOfChannels));
       progress.report();
     }
   }
@@ -237,11 +228,11 @@ int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
   return calculatedDetectorElasticPeakPosition;
 }
 
-std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition,
-                                            double channelWidth) {
+void LoadLLB::setTimeBinning(HistogramX &histX, int elasticPeakPosition,
+                             double channelWidth) {
 
-  double l1 = m_loader.getL1(m_localWorkspace);
-  double l2 = m_loader.getL2(m_localWorkspace);
+  double l1 = m_localWorkspace->spectrumInfo().l1();
+  double l2 = m_localWorkspace->spectrumInfo().l2(1);
 
   double theoreticalElasticTOF = (m_loader.calculateTOF(l1, m_wavelength) +
                                   m_loader.calculateTOF(l2, m_wavelength)) *
@@ -253,17 +244,14 @@ std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition,
   g_log.debug() << "l2 : " << l2 << '\n';
   g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << '\n';
 
-  std::vector<double> detectorTofBins(m_numberOfChannels + 1);
-
   for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    detectorTofBins[i] =
+    histX[i] =
         theoreticalElasticTOF +
         channelWidth *
             static_cast<double>(static_cast<int>(i) - elasticPeakPosition) -
         channelWidth /
             2; // to make sure the bin is in the middle of the elastic peak
   }
-  return detectorTofBins;
 }
 
 void LoadLLB::loadRunDetails(NXEntry &entry) {

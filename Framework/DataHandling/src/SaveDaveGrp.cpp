@@ -1,8 +1,9 @@
 #include "MantidDataHandling/SaveDaveGrp.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include <fstream>
 
@@ -15,7 +16,6 @@ DECLARE_ALGORITHM(SaveDaveGrp)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveDaveGrp::init() {
@@ -30,7 +30,6 @@ void SaveDaveGrp::init() {
                         "Transform all energy units from milli eV to micro eV");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveDaveGrp::exec() {
@@ -41,7 +40,6 @@ void SaveDaveGrp::exec() {
   if (nSpectra * nBins == 0)
     throw std::invalid_argument(
         "Either the number of bins or the number of histograms is 0");
-  bool isHist = ws->isHistogramData();
   std::string xcaption = ws->getAxis(0)->unit()->caption();
   std::string ycaption = ws->getAxis(1)->unit()->caption();
   if (xcaption.length() == 0)
@@ -76,9 +74,9 @@ void SaveDaveGrp::exec() {
   if (xToMicroeV)
     xunit = "micro eV";
   file << "# " << xcaption << " (" << xunit << ") values\n";
-  std::vector<double> x = ws->readX(0);
+  auto x = ws->points(0);
   for (std::size_t i = 0; i < nBins; i++) {
-    double xvalue = (isHist) ? (x[i] + x[i + 1]) * 0.5 : x[i];
+    double xvalue = x[i];
     if (xToMicroeV)
       xvalue *= 1000.;
     file << xvalue << '\n';
@@ -103,13 +101,16 @@ void SaveDaveGrp::exec() {
       file << yvalue << '\n';
     }
   }
-  Progress progress(this, 0, 1, nSpectra);
+  Progress progress(this, 0.0, 1.0, nSpectra);
   for (std::size_t i = 0; i < nSpectra; i++) {
     file << "# Group " << i << '\n';
-    std::vector<double> y = ws->readY(i), er = ws->readE(i);
-    std::vector<double>::iterator ity, iter;
-    for (ity = y.begin(), iter = er.begin(); ity != y.end(); ++ity, ++iter)
-      file << (*ity) << " " << (*iter) << '\n';
+    auto &Y = ws->y(i);
+    auto &E = ws->e(i);
+    auto itE = E.cbegin();
+    std::for_each(Y.cbegin(), Y.cend(), [&itE, &file](const double y) {
+      file << y << " " << *itE++ << "\n";
+    });
+
     progress.report();
   }
   file.close();

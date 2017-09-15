@@ -1,5 +1,7 @@
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Logger.h"
 #include <boost/algorithm/string/case_conv.hpp>
+#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 

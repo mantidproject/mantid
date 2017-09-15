@@ -29,16 +29,18 @@
  *                                                                         *
  ***************************************************************************/
 #include "MultiPeakFitTool.h"
-#include "RangeSelectorTool.h"
 #include "ApplicationWindow.h"
 #include "DataPickerTool.h"
 #include "Plot.h"
+#include "RangeSelectorTool.h"
 #include "cursors.h"
 
-#include <qwt_plot_curve.h>
 #include <QApplication>
+#include <qwt_plot_curve.h>
 
 #include <gsl/gsl_statistics.h>
+
+using namespace MantidQt::API;
 
 MultiPeakFitTool::MultiPeakFitTool(Graph *graph, ApplicationWindow *app,
                                    MultiPeakFit::PeakProfile profile,

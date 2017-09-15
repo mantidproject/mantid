@@ -6,6 +6,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -42,7 +43,8 @@ public:
     groupWS->setValue(3, 45);
     offsetsWS->setValue(1, 0.123);
     offsetsWS->setValue(2, 0.456);
-    maskWS->maskWorkspaceIndex(0);
+    maskWS->getSpectrum(0).clearData();
+    maskWS->mutableSpectrumInfo().setMasked(0, true);
 
     // Name of the output workspace.
     std::string outWSName("SaveCalFileTest_OutputWS");

@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import Direction, StringArrayProperty, StringArrayLengthValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, WorkspaceGroup
 import mantid.simpleapi as api
@@ -78,7 +80,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         result = api.CompareSampleLogs(wsnames, self.mandatory_properties[1:], 0.01)
         if len(result) > 0:
             raise RuntimeError("Sample logs " + result + " do not match!")
-            
+
         # chopper_speed can vary about 10 and for some reason it is string (will be corrected in the future)
         cstable = api.CreateLogPropertyTable(wsnames, 'chopper_speed')
         chopper_speeds = [int(val) for val in cstable.column(0)]
@@ -120,6 +122,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
         if workspaceCount < 2:
             api.CloneWorkspace(InputWorkspace=input_workspace_list[0], OutputWorkspace=wsOutput)
             self.log().warning("Cannot merge one workspace. Clone is produced.")
+            self.setProperty("OutputWorkspace", wsOutput)
             return
 
         # check whether given workspaces can be merged
@@ -197,6 +200,7 @@ class TOFTOFMergeRuns(PythonAlgorithm):
                 raise RuntimeError("Timings don't match")
             else:
                 return True
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(TOFTOFMergeRuns)

@@ -1,34 +1,21 @@
-#include <fstream>
-#include <sstream>
-#include <algorithm>
+#include "MantidDataHandling/SaveMask.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
-#include "MantidDataHandling/SaveMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 
-#include <boost/shared_ptr.hpp>
-
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
-#ifdef _MSC_VER
-// Disable a flood of warnings from Poco about inheriting from
-// std::basic_istream
-// See
-// http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
-#pragma warning(push)
-#pragma warning(disable : 4250)
-#endif
-
 #include <Poco/XML/XMLWriter.h>
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
+#include <fstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -78,7 +65,7 @@ void SaveMask::exec() {
   // 2. Convert Workspace to ...
   std::vector<detid_t> detid0s;
   for (size_t i = 0; i < inpWS->getNumberHistograms(); i++) {
-    if (inpWS->dataY(i)[0] > 0.1) {
+    if (inpWS->y(i)[0] > 0.1) {
       // It is way from 0 but smaller than 1
       for (const auto &det_id : inpWS->getSpectrum(i).getDetectorIDs()) {
         detid0s.push_back(det_id);

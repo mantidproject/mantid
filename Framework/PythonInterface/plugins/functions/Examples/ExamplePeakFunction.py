@@ -13,6 +13,7 @@ import math
 import numpy as np
 from mantid.api import IPeakFunction, FunctionFactory
 
+
 class ExamplePeakFunction(IPeakFunction):
 
     _nterms = None
@@ -174,6 +175,7 @@ class ExamplePeakFunction(IPeakFunction):
         """
         sigma = new_fwhm/(2.0*math.sqrt(2.0*math.log(2.0)))
         self.setParameter("Sigma",sigma)
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ExamplePeakFunction)

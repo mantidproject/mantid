@@ -54,8 +54,8 @@ private:
   std::string ext() override { return ".txt"; }
   /// return if the line should start with a separator
   bool leadingSep() override { return false; }
-  /// no extra properties required so override blank
-  void extraProps() override {}
+  /// only separator property required, nothing else
+  void extraProps() override { appendSeparatorProperty(); }
   /// no extra information required so override blank
   void extraHeaders(std::ofstream &file) override;
 };

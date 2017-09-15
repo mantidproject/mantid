@@ -19,6 +19,7 @@ import os.path
 #------------------------- where files live at SINQ
 datapath='/afs/psi.ch/project/sinqdata'
 
+
 class LoadSINQ(PythonAlgorithm):
 
     def category(self):
@@ -80,6 +81,7 @@ class LoadSINQ(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace",ws)
         mantid.simpleapi.DeleteWorkspace(wname)
+
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQ)

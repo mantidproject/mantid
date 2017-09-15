@@ -5,9 +5,11 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Timer.h"
-#include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Unit.h"
+
+#include <boost/scoped_ptr.hpp>
+#include <cmath>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -19,7 +21,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-//==========================================================================================
 class EventListTest : public CxxTest::TestSuite {
 private:
   EventList el;
@@ -69,7 +70,7 @@ public:
     el.setSpectrumNo(42);
     MantidVec x{0.1, 0.2, 0.3};
     el.setX(make_cow<HistogramX>(x));
-    el.setSharedDx(Kernel::make_cow<HistogramData::HistogramDx>(x));
+    el.setPointVariances(2);
 
     EventList other;
     other = el;
@@ -555,8 +556,8 @@ public:
           int bini = static_cast<int>(tof / step);
           if (bini == 7) {
             // That was zeros
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).weight()));
-            TS_ASSERT(boost::math::isnan(el.getEvent(i).errorSquared()));
+            TS_ASSERT(std::isnan(el.getEvent(i).weight()));
+            TS_ASSERT(std::isnan(el.getEvent(i).errorSquared()));
           } else {
             // Same weight error as dividing by a scalar with error before,
             // since we divided by 2+-0.5 again
@@ -868,6 +869,14 @@ public:
     for (std::size_t i = 0; i < Y.size(); i++) {
       TS_ASSERT_EQUALS(Y[i], 2.0);
       TS_ASSERT_DELTA(E[i], M_SQRT2, 1e-5);
+    }
+
+    // check uniform counts histogram.
+    size_t hist1 = Y.size();
+    MantidVec Y1(hist1, 0);
+    eList.generateCountsHistogramPulseTime(X[0], X[hist1], Y1);
+    for (std::size_t i = 0; i < Y.size(); i++) {
+      TS_ASSERT_EQUALS(Y[i], Y1[i]);
     }
   }
 
@@ -1524,7 +1533,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out = EventList();
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(el.filterByPulseTime(100, 200, out),
@@ -1541,6 +1552,8 @@ public:
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::PULSETIME_SORT,
+                         out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
@@ -1568,7 +1581,9 @@ public:
       el.switchTo(curType);
 
       // Filter into this
-      EventList out = EventList();
+      EventList out;
+      // Manually set a sort mode to verify that is it is switched afterward
+      out.setSortOrder(Mantid::DataObjects::TOF_SORT);
 
       if (curType == WEIGHTED_NOTIME) {
         TS_ASSERT_THROWS(
@@ -1587,6 +1602,8 @@ public:
         // Good # of events.
         TS_ASSERT_EQUALS(numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS(curType, out.getEventType());
+        TS_ASSERT_EQUALS(Mantid::DataObjects::TIMEATSAMPLE_SORT,
+                         out.getSortType());
 
         for (std::size_t i = 0; i < out.getNumberEvents(); i++) {
           // Check that the times are within the given limits.
@@ -1723,7 +1740,6 @@ public:
 
     for (int i = 1; i < 10; i++) {
       EventList *myOut = outputs[i];
-      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i % 2) == 0) {
         // Even
         TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
@@ -1762,13 +1778,7 @@ public:
     std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
                                         5000000, 6000000, 7000000, 8000000,
                                         9000000, 10000000};
-    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
-
-    for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
-      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
-                << ", " << vec_splitGroup[i] << "\n";
-    }
-
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      false, 1.0, 0.0);
@@ -1778,7 +1788,6 @@ public:
 
     for (int i = 1; i < 10; i++) {
       EventList *myOut = outputs[i];
-      std::cout << i << " " << myOut->getNumberEvents() << "\n";
       if ((i % 2) == 0) {
         // Even
         TS_ASSERT_EQUALS(myOut->getNumberEvents(), 1);
@@ -1967,22 +1976,6 @@ public:
         std::cout << "   - " << timer2.elapsed()
                   << " seconds to sortTof (original).\n";
       TS_ASSERT(checkSort("sortTof"));
-
-      // Reset
-      fake_data();
-      Timer timer3;
-      el.sortTof2();
-      if (verbose)
-        std::cout << "   - " << timer3.elapsed() << " seconds to sortTof2.\n";
-      TS_ASSERT(checkSort("sortTof2"));
-
-      // Reset
-      fake_data();
-      Timer timer4;
-      el.sortTof4();
-      if (verbose)
-        std::cout << "   - " << timer4.elapsed() << " seconds to sortTof4.\n";
-      TS_ASSERT(checkSort("sortTof4"));
     }
   }
 
@@ -2147,12 +2140,6 @@ public:
     fake_uniform_time_sns_data();
 
     el.sortPulseTimeTOF();
-    // for (size_t i = 0; i < el.getNumberEvents(); ++i)
-    // {
-    // std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
-    //         << ", " << el.getEvent(i).pulseTime().totalNanoseconds() +
-    //         static_cast<int64_t>(el.getEvent(i).tof()*1000.0) << "\n";
-    //}
 
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
@@ -2185,22 +2172,12 @@ public:
     vec_splitGroup[6] = 8;
     vec_splitGroup[8] = 1;
 
-    // for (size_t i = 0; i < vec_splitTimes.size()-1; ++i)
-    //{
-    //  std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i+1] <<
-    //  ", "
-    //            << vec_splitGroup[i] << "\n";
-    //}
-
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      true, 0.0, 2.0E-4);
 
-    // Exam result
+    // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
-    for (std::map<int, EventList *>::iterator mit = outputs.begin();
-         mit != outputs.end(); ++mit)
-      std::cout << "Group index = " << mit->first << "\n";
 
     // group 2
     EventList *e2 = outputs[2];
@@ -2237,14 +2214,6 @@ public:
     fake_uniform_time_sns_data();
 
     el.sortPulseTimeTOF();
-    for (size_t i = 0; i < el.getNumberEvents(); ++i) {
-      std::cout << el.getEvent(i).pulseTime() << ", " << el.getEvent(i).tof()
-                << ", "
-                << el.getEvent(i).pulseTime().totalNanoseconds() +
-                       static_cast<int64_t>(el.getEvent(i).tof() * 1000.0)
-                << "\n";
-    }
-
     // Output will be 10 event lists
     std::map<int, EventList *> outputs;
     for (int i = 0; i < 10; i++)
@@ -2276,20 +2245,12 @@ public:
     vec_splitGroup[6] = 8;
     vec_splitGroup[8] = 1;
 
-    for (size_t i = 0; i < vec_splitTimes.size() - 1; ++i) {
-      std::cout << "F " << vec_splitTimes[i] << ", " << vec_splitTimes[i + 1]
-                << ", " << vec_splitGroup[i] << "\n";
-    }
-
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      true, 0.5, 2.0E-4);
 
-    // Exam result
+    // Examine result
     TS_ASSERT_EQUALS(outputs.size(), 11);
-    for (std::map<int, EventList *>::iterator mit = outputs.begin();
-         mit != outputs.end(); ++mit)
-      std::cout << "Group index = " << mit->first << "\n";
 
     // group 2
     EventList *e2 = outputs[2];
@@ -2484,8 +2445,9 @@ public:
     el.setHistogram(HistogramData::BinEdges{0, 2});
     TS_ASSERT_THROWS_NOTHING(el.setBinEdges(HistogramData::BinEdges{0, 2}));
     TS_ASSERT_THROWS(el.setPoints(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointVariances(1), std::runtime_error);
-    TS_ASSERT_THROWS(el.setPointStandardDeviations(1), std::runtime_error);
+    // Uncertainties for X are always for Points, this must work.
+    TS_ASSERT_THROWS_NOTHING(el.setPointVariances(1));
+    TS_ASSERT_THROWS_NOTHING(el.setPointStandardDeviations(1));
   }
 
   void test_setCounts_fails() {
@@ -2626,18 +2588,18 @@ public:
   EventListTestPerformance() {
     // Source for a randome event list
     el_random_source.clear();
-    for (size_t i = 0; i < 2e6; i++)
+    for (size_t i = 0; i < 2000000; i++)
       el_random_source += TofEvent((rand() % 200000) * 0.05, rand() % 1000);
 
     // 10 million events, up to 1e5 tof
     el_sorted_original.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_original +=
           TofEvent(static_cast<double>(i) / 100.0, rand() % 1000);
     el_sorted_original.setSortOrder(TOF_SORT);
 
     el_sorted_weighted.clear();
-    for (size_t i = 0; i < 10e6; i++)
+    for (size_t i = 0; i < 10000000; i++)
       el_sorted_weighted += WeightedEvent(static_cast<double>(i) / 100.0,
                                           rand() % 1000, 2.34, 4.56);
     el_sorted_weighted.setSortOrder(TOF_SORT);
@@ -2669,22 +2631,14 @@ public:
 
   void test_sort_tof() { el_random.sortTof(); }
 
-  void test_sort_tof2() { el_random.sortTof2(); }
-
-  void test_sort_tof4() { el_random.sortTof4(); }
-
   void test_compressEvents() {
-    CPUTimer tim;
     EventList out_el;
     el_sorted.compressEvents(10.0, &out_el);
-    std::cout << '\n' << tim << " to compress events. \n";
   }
 
   void test_compressEvents_Parallel() {
-    CPUTimer tim;
     EventList out_el;
-    el_sorted.compressEvents(10.0, &out_el, true);
-    std::cout << '\n' << tim << " to compress events in parallel. \n";
+    el_sorted.compressEvents(10.0, &out_el);
   }
 
   void test_multiply() { el_random *= 2.345; }

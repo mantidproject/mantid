@@ -3,18 +3,21 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::HistogramDx;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::LinearGenerator;
 
 // Notice, the SaveCSV algorithm currently does not create
 // an output workspace and therefore no tests related to the
@@ -41,9 +44,9 @@ public:
 
     double d = 0.0;
     for (int i = 0; i < 10; ++i, d += 0.1) {
-      localWorkspace2D_onePixel->dataX(0)[i] = d;
-      localWorkspace2D_onePixel->dataY(0)[i] = d + 1.0;
-      localWorkspace2D_onePixel->dataE(0)[i] = d + 2.0;
+      localWorkspace2D_onePixel->mutableX(0)[i] = d;
+      localWorkspace2D_onePixel->mutableY(0)[i] = d + 1.0;
+      localWorkspace2D_onePixel->mutableE(0)[i] = d + 2.0;
     }
 
     AnalysisDataService::Instance().add("SAVECSVTEST-testSpace",
@@ -129,13 +132,10 @@ private:
   MatrixWorkspace_sptr createWorkspaceWithDxValues(const size_t nSpec) const {
     auto ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
                                                   nBins + 1, nBins);
+    BinEdges edges(nBins + 1, LinearGenerator(0, 1));
     for (size_t j = 0; j < nSpec; ++j) {
-      for (size_t k = 0; k < nBins + 1; ++k) {
-        ws->dataX(j)[k] = double(k);
-      }
-      ws->dataY(j).assign(nBins, double(j));
-      ws->dataE(j).assign(nBins, sqrt(double(j)));
-      ws->setBinEdgeStandardDeviations(j, nBins + 1, sqrt(double(j)));
+      ws->setHistogram(j, edges, Counts(nBins, double(j)));
+      ws->setPointStandardDeviations(j, nBins, sqrt(double(j)));
     }
     return ws;
   }
@@ -249,13 +249,12 @@ private:
       dataStream.clear();
       dataStream.str(line);
       dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >>
-          separator >> dEnd >> separator;
+          separator;
       TS_ASSERT_EQUALS(indexMarker, spec);
       TS_ASSERT_EQUALS(separator, ",");
       TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d2, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d3, sqrt(double(spec)), 1e-5);
-      TS_ASSERT_DELTA(dEnd, sqrt(double(spec)), 1e-5);
     }
     stream.close();
   }

@@ -7,6 +7,7 @@ import os
 import stresstesting
 from mantid.simpleapi import *
 
+
 class ARCSReductionTest(stresstesting.MantidStressTest):
 
     vanFile1=''
@@ -27,7 +28,6 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
         if os.path.exists(self.vanFile0):
             os.remove(self.vanFile0)
         return True
-
 
     def runTest(self):
         self.vanFile1=os.path.join(config.getString('defaultsave.directory'),'ARCSvan_1.nxs')
@@ -77,6 +77,3 @@ class ARCSReductionTest(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
 
         return 'nxspe','ARCSsystemtest.nxs'
-
-
-

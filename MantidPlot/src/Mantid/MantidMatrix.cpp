@@ -1,32 +1,31 @@
-#include "MantidKernel/Logger.h"
-#include "MantidMatrixModel.h"
 #include "MantidMatrix.h"
-#include "MantidMatrixFunction.h"
-#include "MantidUI.h"
-#include "../Graph3D.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 #include "../Spectrogram.h"
+#include "MantidKernel/Logger.h"
 #include "MantidMatrixDialog.h"
+#include "MantidMatrixFunction.h"
+#include "MantidMatrixModel.h"
+#include "MantidUI.h"
 #include "Preferences.h"
-#include "../pixmaps.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 
 #include <QApplication>
 #include <QClipboard>
 
 #include <QScrollBar>
 
-#include <stdlib.h>
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
-#include <boost/math/special_functions/fpclassify.hpp>
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -206,11 +205,6 @@ void MantidMatrix::viewChanged(int index) {
     activeView()->horizontalScrollBar()->setValue(hValue);
     activeView()->verticalScrollBar()->setValue(vValue);
   }
-}
-
-/// Checks if d is not infinity or a NaN
-bool isANumber(volatile const double &d) {
-  return d != std::numeric_limits<double>::infinity() && !boost::math::isnan(d);
 }
 
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
@@ -536,31 +530,34 @@ void MantidMatrix::goToColumn(int col) {
 }
 
 double MantidMatrix::dataX(int row, int col) const {
-  if (!m_workspace || row >= numRows() ||
-      col >= static_cast<int>(m_workspace->readX(row + m_startRow).size()))
+  const auto &x = m_workspace->x(row + m_startRow);
+  if (!m_workspace || row >= numRows() || col >= static_cast<int>(x.size()))
     return 0.;
-  double res = m_workspace->readX(row + m_startRow)[col];
+  double res = x[col];
   return res;
 }
 
 double MantidMatrix::dataY(int row, int col) const {
+  const auto &y = m_workspace->y(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readY(row + m_startRow)[col];
+  double res = y[col];
   return res;
 }
 
 double MantidMatrix::dataE(int row, int col) const {
+  const auto &e = m_workspace->e(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readE(row + m_startRow)[col];
+  double res = e[col];
   return res;
 }
 
 double MantidMatrix::dataDx(int row, int col) const {
+  const auto &dx = m_workspace->dx(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = m_workspace->readDx(row + m_startRow)[col];
+  double res = dx[col];
   return res;
 }
 
@@ -569,8 +566,12 @@ QString MantidMatrix::workspaceName() const {
 }
 
 QwtDoubleRect MantidMatrix::boundingRect() {
+  const int defaultNumberSpectroGramRows = 700;
+  const int defaultNumberSpectroGramColumns = 700;
   if (m_boundingRect.isNull()) {
-    m_spectrogramRows = numRows() > 100 ? numRows() : 100;
+    m_spectrogramRows = numRows() > defaultNumberSpectroGramRows
+                            ? numRows()
+                            : defaultNumberSpectroGramRows;
 
     // This is only meaningful if a 2D (or greater) workspace
     if (m_workspace->axes() > 1) {
@@ -584,13 +585,13 @@ QwtDoubleRect MantidMatrix::boundingRect() {
     int i0 = m_startRow;
     x_start = x_end = 0;
     while (x_start == x_end && i0 <= m_endRow) {
-      const Mantid::MantidVec &X = m_workspace->readX(i0);
+      const auto &X = m_workspace->x(i0);
       x_start = X[0];
-      if (X.size() != m_workspace->readY(i0).size())
+      if (X.size() != m_workspace->y(i0).size())
         x_end = X[m_workspace->blocksize()];
       else
         x_end = X[m_workspace->blocksize() - 1];
-      if (!isANumber(x_start) || !isANumber(x_end)) {
+      if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
       i0++;
@@ -602,8 +603,8 @@ QwtDoubleRect MantidMatrix::boundingRect() {
       bool theSame = true;
       double dx = 0.;
       for (int i = i0; i <= m_endRow; ++i) {
-        if (m_workspace->readX(i).front() != x_start ||
-            m_workspace->readX(i).back() != x_end) {
+        const auto &X = m_workspace->x(i);
+        if (X.front() != x_start || X.back() != x_end) {
           theSame = false;
           break;
         }
@@ -616,16 +617,16 @@ QwtDoubleRect MantidMatrix::boundingRect() {
         // that can be plotted from this matrix
         double ddx = dx;
         for (int i = m_startRow + 1; i <= m_endRow; ++i) {
-          const Mantid::MantidVec &X = m_workspace->readX(i);
+          const auto &X = m_workspace->x(i);
           if (X.front() < x_start) {
             double xs = X.front();
-            if (!isANumber(xs))
+            if (!std::isfinite(xs))
               continue;
             x_start = xs;
           }
           if (X.back() > x_end) {
             double xe = X.back();
-            if (!isANumber(xe))
+            if (!std::isfinite(xe))
               continue;
             x_end = xe;
           }
@@ -637,10 +638,12 @@ QwtDoubleRect MantidMatrix::boundingRect() {
           }
         }
         m_spectrogramCols = static_cast<int>((x_end - x_start) / ddx);
-        if (m_spectrogramCols < 100)
-          m_spectrogramCols = 100;
+        if (m_spectrogramCols < defaultNumberSpectroGramColumns)
+          m_spectrogramCols = defaultNumberSpectroGramColumns;
       } else {
-        m_spectrogramCols = numCols() > 100 ? numCols() : 100;
+        m_spectrogramCols = numCols() > defaultNumberSpectroGramColumns
+                                ? numCols()
+                                : defaultNumberSpectroGramColumns;
       }
       m_boundingRect = QwtDoubleRect(qMin(x_start, x_end) - 0.5 * dx,
                                      qMin(y_start, y_end) - 0.5 * dy,
@@ -717,7 +720,7 @@ void MantidMatrix::attachMultilayer(MultiLayer *ml) {
 @param type :: The "curve" type.
 @return Pointer to the created graph.
 */
-MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
+MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
@@ -740,7 +743,8 @@ MultiLayer *MantidMatrix::plotGraph2D(Graph::CurveType type) {
 }
 
 Spectrogram *MantidMatrix::plotSpectrogram(Graph *plot, ApplicationWindow *app,
-                                           Graph::CurveType type, bool project,
+                                           GraphOptions::CurveType type,
+                                           bool project,
                                            const ProjectData *const prjData) {
   app->setPreferences(plot);
 
@@ -1137,21 +1141,21 @@ const std::string &MantidMatrix::getWorkspaceName() { return m_strName; }
 void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // this is here to fill m_min and m_max with numbers that aren't nan
   miny = std::numeric_limits<double>::max();
-  maxy = -std::numeric_limits<double>::max();
+  maxy = std::numeric_limits<double>::lowest();
 
   if (ws) {
 
-    PARALLEL_FOR1(ws)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
     for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); wi++) {
       double local_min, local_max;
-      const Mantid::MantidVec &Y = ws->readY(wi);
+      const auto &Y = ws->y(wi);
 
       local_min = std::numeric_limits<double>::max();
-      local_max = -std::numeric_limits<double>::max();
+      local_max = std::numeric_limits<double>::lowest();
 
       for (size_t i = 0; i < Y.size(); i++) {
         double aux = Y[i];
-        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        if (!std::isfinite(aux))
           continue;
         if (aux < local_min)
           local_min = aux;
@@ -1174,7 +1178,7 @@ void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy) {
   // Make up some reasonable values if nothing was found
   if (miny == std::numeric_limits<double>::max())
     miny = 0;
-  if (maxy == -std::numeric_limits<double>::max())
+  if (maxy == std::numeric_limits<double>::lowest())
     maxy = miny + 1e6;
 
   if (maxy == miny) {
@@ -1242,6 +1246,10 @@ std::string MantidMatrix::saveToProject(ApplicationWindow *app) {
   tsv.writeRaw("</mantidmatrix>");
 
   return tsv.outputLines();
+}
+
+std::vector<std::string> MantidMatrix::getWorkspaceNames() {
+  return {m_strName};
 }
 
 /**

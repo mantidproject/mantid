@@ -1,22 +1,23 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui, uic, QtCore
-import os
+from __future__ import (absolute_import, division, print_function)
+from PyQt4 import QtGui, QtCore
 import sys
-import datetime
 from functools import partial
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.widgets import util
 import ui.ui_cluster_status
 
-import mantid.simpleapi as api
 from mantid.kernel import ConfigService, DateAndTime, Logger
 from mantid.api import AlgorithmManager
 
 from reduction_gui.reduction.scripter import BaseScriptElement
+
+
 class RemoteJobs(BaseScriptElement):
     def __init__(self):
         pass
+
 
 class RemoteJobsWidget(BaseWidget):
     """
@@ -112,7 +113,7 @@ class RemoteJobsWidget(BaseWidget):
                     break
 
         if self._settings.cluster_user is not None \
-            and self._settings.cluster_pass is not None:
+                and self._settings.cluster_pass is not None:
             self._content.username_edit.setText(self._settings.cluster_user)
             self._content.password_edit.setText(self._settings.cluster_pass)
 
@@ -169,7 +170,6 @@ class RemoteJobsWidget(BaseWidget):
         job_name = alg.getProperty("JobName").value
         job_trans_id = alg.getProperty("TransID").value
 
-        njobs = len(job_name)
         job_start = alg.getProperty("StartDate").value
         job_end = alg.getProperty("CompletionDate").value
 
@@ -239,7 +239,6 @@ class RemoteJobsWidget(BaseWidget):
             self.connect(btn, QtCore.SIGNAL("clicked()"), call_back)
             self._content.job_table.setCellWidget(i, 5, btn)
 
-
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(3, 1)
 
@@ -259,7 +258,7 @@ class RemoteJobsWidget(BaseWidget):
                 alg.setProperty("JobID", job_id)
                 alg.execute()
             except:
-                Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
+                Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_info()[1])
         try:
             alg = AlgorithmManager.create("StopRemoteTransaction", 1)
             alg.initialize()
@@ -267,7 +266,7 @@ class RemoteJobsWidget(BaseWidget):
             alg.setProperty("TransactionID", trans_id)
             alg.execute()
         except:
-            Logger("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_value)
+            Logger("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_info()[1])
         self._update_content()
 
     def get_state(self):

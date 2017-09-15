@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Simple local data catalog for Mantid
@@ -12,12 +13,13 @@ import traceback
 # Only way that I have found to use the logger from both the command line
 # and mantiplot
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.kernel import logger
 except ImportError:
     import logging
     logging.basicConfig()#level=logging.DEBUG)
     logger = logging.getLogger("data_cat")
+
 
 class DataType(object):
     TABLE_NAME = "datatype"
@@ -35,20 +37,20 @@ class DataType(object):
                             id integer primary key,
                             type_id integer,
                             dataset_id integer,
-                            foreign key(dataset_id) references %s(id))""" \
-                            % (cls.TABLE_NAME, data_set_table))
+                            foreign key(dataset_id) references %s(id))"""
+                       % (cls.TABLE_NAME, data_set_table))
 
     @classmethod
     def add(cls, dataset_id, type_id, cursor):
         """
             Add a data type entry to the datatype table
         """
-        if not type_id in cls.DATA_TYPES.keys():
+        if type_id not in cls.DATA_TYPES.keys():
             raise RuntimeError("DataType got an unknown type ID: %s" % type_id)
 
         t = (type_id, dataset_id,)
-        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)" \
-        % cls.TABLE_NAME, t)
+        cursor.execute("insert into %s(type_id, dataset_id) values (?,?)"
+                       % cls.TABLE_NAME, t)
 
     @classmethod
     def get_likely_type(cls, dataset_id, cursor):
@@ -58,6 +60,7 @@ class DataType(object):
         if len(rows)>1:
             return cls.DATA_TYPES[rows[len(rows)-1][0]]
         return None
+
 
 class DataSet(object):
     TABLE_NAME = "dataset"
@@ -169,11 +172,12 @@ class DataSet(object):
         cursor.execute('insert into %s(run, title, start, duration,sdd) values (?,?,?,?,?)'%self.TABLE_NAME, t)
         return cursor.lastrowid
 
+
 class DataCatalog(object):
     """
         Data catalog
     """
-    extension = "nxs"
+    extension = ["nxs"]
     data_set_cls = DataSet
 
     def __init__(self, replace_db=True):
@@ -187,8 +191,8 @@ class DataCatalog(object):
 
         try:
             self._create_db(db_path, replace_db)
-        except Exception, msg:
-            logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
+        except Exception as msg:
+            logger.error("DataCatalog: Could not access local data catalog\n%s" % sys.exc_info()[1])
             logger.exception(msg)
 
     def _create_db(self, db_path, replace_db):
@@ -211,6 +215,7 @@ class DataCatalog(object):
         """
         output = "%s\n" % self.data_set_cls.header()
         for r in self.catalog:
+            #data_cat
             output += "%s\n" % str(r)
         return output
 
@@ -242,7 +247,7 @@ class DataCatalog(object):
 
     def add_type(self, run, type):
         if self.db is None:
-            print "DataCatalog: Could not access local data catalog"
+            print ("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
@@ -260,7 +265,7 @@ class DataCatalog(object):
         self.catalog = []
 
         if self.db is None:
-            print "DataCatalog: Could not access local data catalog"
+            print ("DataCatalog: Could not access local data catalog")
             return
 
         c = self.db.cursor()
@@ -270,25 +275,25 @@ class DataCatalog(object):
 
         try:
             for f in os.listdir(data_dir):
-                if f.endswith(self.extension):
-                    file_path = os.path.join(data_dir, f)
-
-                    if hasattr(self.data_set_cls, "find_with_api"):
-                        d = self.data_set_cls.find_with_api(file_path, c,
-                                                            process_files=process_files)
-                    else:
-                        d = self.data_set_cls.find(file_path, c,
-                                                   process_files=process_files)
-                    if d is not None:
-                        if call_back is not None:
-                            attr_list = d.as_string_list()
-                            type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
-                            attr_list += (type_id,)
-                            call_back(attr_list)
-                        self.catalog.append(d)
+                for extension in self.extension:
+                    if f.endswith(extension):
+                        file_path = os.path.join(data_dir, f)
+                        if hasattr(self.data_set_cls, "find_with_api"):
+                            d = self.data_set_cls.find_with_api(file_path, c,
+                                                                process_files=process_files)
+                        else:
+                            d = self.data_set_cls.find(file_path, c,
+                                                       process_files=process_files)
+                        if d is not None:
+                            if call_back is not None:
+                                attr_list = d.as_string_list()
+                                type_id = self.data_set_cls.data_type_cls.get_likely_type(d.id, c)
+                                attr_list += (type_id,)
+                                call_back(attr_list)
+                            self.catalog.append(d)
 
             self.db.commit()
             c.close()
-        except Exception, msg:
+        except Exception as msg:
             logger.error("DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc()))
             logger.exception(msg)

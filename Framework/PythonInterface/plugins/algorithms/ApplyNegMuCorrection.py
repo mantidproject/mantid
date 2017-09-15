@@ -5,6 +5,8 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 
 #pylint: disable=no-init, too-many-arguments
+
+
 class ApplyNegMuCorrection(PythonAlgorithm):
 
     #Combining work spaces and normalising the correction.
@@ -94,7 +96,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
                 runno=str(run)
                 self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
             self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
-
 
 
 AlgorithmFactory.subscribe(ApplyNegMuCorrection)

@@ -1,17 +1,17 @@
 #ifndef MANTID_DATAHANDLING_SAVEFITSTEST_H_
 #define MANTID_DATAHANDLING_SAVEFITSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidDataHandling/SaveFITS.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 
 using Mantid::DataHandling::SaveFITS;
@@ -70,7 +70,7 @@ public:
   void test_exec_fails_units() {
     const std::string filename = "./savefits_wont_work.fits";
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 2);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 2);
 
     SaveFITS alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -102,7 +102,7 @@ public:
     const std::string filename = "./savefits_simple_test.fits";
 
     // create with appropriate units
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(2, 2);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(2, 2);
     auto lbl = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
         Mantid::Kernel::UnitFactory::Instance().create("Label"));
     lbl->setLabel("width", "cm");

@@ -30,10 +30,10 @@
 #include "ColorBox.h"
 #include "Table.h"
 
-#include <QCloseEvent>
-#include <QPainter>
-#include <QMessageBox>
 #include <QApplication>
+#include <QCloseEvent>
+#include <QMessageBox>
+#include <QPainter>
 
 QwtPieCurve::QwtPieCurve(Table *t, const QString &name, int startRow,
                          int endRow)
@@ -45,7 +45,7 @@ QwtPieCurve::QwtPieCurve(Table *t, const QString &name, int startRow,
   setPen(QPen(QColor(Qt::black), 1, Qt::SolidLine));
   setBrush(QBrush(Qt::SolidPattern));
   setStyle(QwtPlotCurve::UserCurve);
-  setType(Graph::Pie);
+  setType(GraphOptions::Pie);
   d_table_rows = QVarLengthArray<int>(0);
 }
 

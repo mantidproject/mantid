@@ -168,6 +168,7 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
                                   std::to_string(m_maxIndex) + ").");
     }
 
+    jacobian.zero();
     countValueOffsets(cd);
     // evaluate member functions derivatives
     for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {

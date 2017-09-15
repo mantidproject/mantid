@@ -5,10 +5,12 @@ from mantid.kernel import Direction, FloatBoundedValidator
 import mantid.simpleapi
 import os
 
+
 class SANSSubtract(PythonAlgorithm):
     """
         I(Q) subtraction
     """
+
     def category(self):
         """
             Return category
@@ -170,5 +172,6 @@ class SANSSubtract(PythonAlgorithm):
             op.execute()
 
         return
+
 
 AlgorithmFactory.subscribe(SANSSubtract)

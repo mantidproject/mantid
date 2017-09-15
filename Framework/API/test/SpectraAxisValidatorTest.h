@@ -19,7 +19,7 @@ public:
 
   void test_fail() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     auto newAxis = new NumericAxis(2);
     ws->replaceAxis(1, newAxis);
     SpectraAxisValidator validator;
@@ -30,9 +30,18 @@ public:
 
   void test_success() {
     auto ws = boost::make_shared<WorkspaceTester>();
-    ws->init(2, 11, 10);
+    ws->initialize(2, 11, 10);
     SpectraAxisValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
+  }
+
+  void test_axesless_workspace() {
+    auto ws = boost::make_shared<AxeslessWorkspaceTester>();
+    ws->initialize(2, 11, 10);
+    SpectraAxisValidator validator;
+    std::string s;
+    TS_ASSERT_THROWS_NOTHING(s = validator.isValid(ws))
+    TS_ASSERT_DIFFERS(s, "")
   }
 };
 

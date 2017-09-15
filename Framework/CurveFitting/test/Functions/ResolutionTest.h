@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Resolution.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -70,6 +71,9 @@ public:
 
   double get(size_t, size_t) override {
     throw std::runtime_error("Get method shouldn't be called.");
+  }
+  void zero() override {
+    throw std::runtime_error("Zero method shouldn't be called.");
   }
 };
 

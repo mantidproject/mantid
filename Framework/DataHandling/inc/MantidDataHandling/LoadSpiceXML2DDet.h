@@ -93,6 +93,16 @@ private:
                         const std::string &detnodename,
                         const bool &loadinstrument);
 
+  /// Create output MatrixWorkspace
+  API::MatrixWorkspace_sptr
+  createMatrixWorkspaceVersion2(const std::vector<SpiceXMLNode> &vecxmlnode,
+                                const std::string &detnodename,
+                                const bool &loadinstrument);
+
+  API::MatrixWorkspace_sptr parseDetectorNode(const std::string &detvaluestr,
+                                              bool loadinstrument,
+                                              double &max_counts);
+
   /// Set up sample logs from table workspace loaded where SPICE data file is
   /// loaded
   void setupSampleLogFromSpiceTable(API::MatrixWorkspace_sptr matrixws,
@@ -131,6 +141,11 @@ private:
   int m_ptNumber4Log;
   /// IDF file name to override Mantid's
   std::string m_idfFileName;
+  /// User specified wave length
+  double m_userSpecifiedWaveLength;
+  /// shift of detector on X and Y direction
+  double m_detXShift;
+  double m_detYShift;
 };
 
 } // namespace DataHandling

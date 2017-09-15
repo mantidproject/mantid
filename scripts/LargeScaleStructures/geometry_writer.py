@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
@@ -38,7 +39,7 @@ class MantidGeom(object):
         """
             Print the XML geometry to the screen
         """
-        print self
+        print(self)
 
     def addSnsDefaults(self):
         """
@@ -82,8 +83,8 @@ class MantidGeom(object):
             if distance > 0:
                 distance *= -1.0
             self._append_child("location", source, z=distance)
-        except (StandardError, StopIteration, Warning):
-            print "PROBLEM with addModerator"
+        except (Exception, StopIteration, Warning):
+            print("PROBLEM with addModerator")
 
         child = self._append_child("type", self._root, name="moderator")
         child.setAttribute("is", "Source")
@@ -123,7 +124,7 @@ class MantidGeom(object):
             for j in range(len(r[i])):
                 if str(r[i][j]) != "nan":
                     basecomponent = self._append_child("component", type_element, type="pixel")
-                    location_element = self._append_child("location", basecomponent, r=str(r[i][j]), \
+                    location_element = self._append_child("location", basecomponent, r=str(r[i][j]),
                                                           t=str(theta[i][j]), p=str(phi[i][j]), name=str(names[i][j]))
                     self._append_child("facing", location_element, x="0.0", y="0.0", z="0.0")
 
@@ -154,7 +155,6 @@ class MantidGeom(object):
         basecomponent.setAttribute("mark-as", "monitor")
 
         for i in range(len(distance)):
-            dummy_zi = float(distance[i])
             self._append_child("location", basecomponent, z=distance[i], name=names[i])
 
     def addComponent(self, type_name, idlist=None, root=None, blank_location=True):
@@ -249,17 +249,17 @@ class MantidGeom(object):
 
     def addLocationPolar(self, root, r, theta, phi, name=None):
         if name is not None:
-            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi, name=name)
+            self._append_child("location", root, r=r, t=theta, p=phi, name=name)
         else:
-            _pos_loc = self._append_child("location", root, r=r, t=theta, p=phi)
+            self._append_child("location", root, r=r, t=theta, p=phi)
 
     def addLocationRTP(self, root, r, t, p, rot_x, rot_y, rot_z, name=None):
         """
         Add a location element to a specific parent node given by root, using r, theta, phi coordinates.
         """
-        dummy_rf = float(r)
-        dummy_tf = float(f)
-        dummy_pf = float(p)
+        float(r)
+        float(t)
+        float(p)
         if name is not None:
             pos_loc = self._append_child("location", root, r=r, t=t, p=p, name=name)
         else:
@@ -269,15 +269,15 @@ class MantidGeom(object):
         # the combined rotation is equals that obtained by applying rotx, then roty and finally rotz.
         if rot_x is not None:
             log = self._append_child("parameter", pos_loc, name="rotx")
-            _rotxf = float(rot_x)
+            float(rot_x)
             self._append_child("value", log, val=rot_x)
         if rot_y is not None:
             log = self._append_child("parameter", pos_loc, name="roty")
-            _rotyf = float(rot_y)
+            float(rot_y)
             self._append_child("value", log, val=rot_y)
         if rot_z is not None:
             log = self._append_child("parameter", pos_loc, name="rotz")
-            _rotzf = float(rot_z)
+            float(rot_z)
             self._append_child("value", log, val=rot_z)
 
     def addNPack(self, name, num_tubes, tube_width, air_gap, type_name="tube"):
@@ -340,7 +340,7 @@ class MantidGeom(object):
         self._append_child("height", cylinder, val=str(pixel_height))
         self._append_child("algebra", type_element, val="cyl-approx")
 
-    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt, \
+    def addCuboidPixel(self, name, lfb_pt, lft_pt, lbb_pt, rfb_pt,
                        is_type="detector"):
         """
         Add a cuboid pixel. The origin of the cuboid is assumed to be the
@@ -349,13 +349,13 @@ class MantidGeom(object):
         """
         type_element = self._append_child("type", self._root, **{"name": name, "is": is_type})
         cuboid = self._append_child("cuboid", type_element, id="shape")
-        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]), \
+        self._append_child("left-front-bottom-point", cuboid, x=str(lfb_pt[0]),
                            y=str(lfb_pt[1]), z=str(lfb_pt[2]))
-        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]), \
+        self._append_child("left-front-top-point", cuboid, x=str(lft_pt[0]),
                            y=str(lft_pt[1]), z=str(lft_pt[2]))
-        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]), \
+        self._append_child("left-back-bottom-point", cuboid, x=str(lbb_pt[0]),
                            y=str(lbb_pt[1]), z=str(lbb_pt[2]))
-        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]), \
+        self._append_child("right-front-bottom-point", cuboid, x=str(rfb_pt[0]),
                            y=str(rfb_pt[1]), z=str(rfb_pt[2]))
         self._append_child("algebra", type_element, val="shape")
 
@@ -390,18 +390,18 @@ class MantidGeom(object):
         step2, ...]. If no step is required, use None.
         """
         if len(idlist) % 3 != 0:
-            raise IndexError("Please specifiy list as [start1, end1, step1, " \
-                             + "start2, end2, step2, ...]. If no step is" \
+            raise IndexError("Please specifiy list as [start1, end1, step1, "
+                             + "start2, end2, step2, ...]. If no step is"
                              + "required, use None.")
         num_ids = len(idlist) / 3
         id_element = self._append_child("idlist", self._root, idname=idname)
         for i in range(num_ids):
             if idlist[(i * 3) + 2] is None:
-                self._append_child("id", id_element, start=str(idlist[(i * 3)]), \
+                self._append_child("id", id_element, start=str(idlist[(i * 3)]),
                                    end=str(idlist[(i * 3) + 1]))
             else:
-                self._append_child("id", id_element, start=str(idlist[(i * 3)]), \
-                                   step=str(idlist[(i * 3) + 2]), \
+                self._append_child("id", id_element, start=str(idlist[(i * 3)]),
+                                   step=str(idlist[(i * 3) + 2]),
                                    end=str(idlist[(i * 3) + 1]))
 
     def addMonitorIds(self, ids=None):

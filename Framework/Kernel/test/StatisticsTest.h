@@ -2,7 +2,6 @@
 #define STATISTICSTEST_H_
 
 #include "MantidKernel/Statistics.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include <algorithm>
 #include <cmath>
@@ -44,10 +43,10 @@ public:
     Statistics stats =
         getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
 
-    TS_ASSERT(boost::math::isnan(stats.mean));
-    TS_ASSERT(boost::math::isnan(stats.standard_deviation));
-    TS_ASSERT(boost::math::isnan(stats.minimum));
-    TS_ASSERT(boost::math::isnan(stats.maximum));
+    TS_ASSERT(std::isnan(stats.mean));
+    TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.minimum));
+    TS_ASSERT(std::isnan(stats.maximum));
     TS_ASSERT_EQUALS(stats.median, 17.2);
   }
 
@@ -63,10 +62,10 @@ public:
     Statistics stats =
         getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
 
-    TS_ASSERT(boost::math::isnan(stats.mean));
-    TS_ASSERT(boost::math::isnan(stats.standard_deviation));
-    TS_ASSERT(boost::math::isnan(stats.minimum));
-    TS_ASSERT(boost::math::isnan(stats.maximum));
+    TS_ASSERT(std::isnan(stats.mean));
+    TS_ASSERT(std::isnan(stats.standard_deviation));
+    TS_ASSERT(std::isnan(stats.minimum));
+    TS_ASSERT(std::isnan(stats.maximum));
     TS_ASSERT_EQUALS(stats.median, 16.5);
   }
 
@@ -85,7 +84,7 @@ public:
     TS_ASSERT_DELTA(stats.standard_deviation, 2.3179, 0.0001);
     TS_ASSERT_EQUALS(stats.minimum, 12.6);
     TS_ASSERT_EQUALS(stats.maximum, 18.3);
-    TS_ASSERT(boost::math::isnan(stats.median));
+    TS_ASSERT(std::isnan(stats.median));
   }
 
   void test_Types_Can_Be_Disabled_With_Flags() {
@@ -98,10 +97,10 @@ public:
 
     Statistics justMean = getStatistics(data, StatOptions::Mean);
     TS_ASSERT_EQUALS(justMean.mean, 16.54);
-    TS_ASSERT(boost::math::isnan(justMean.standard_deviation));
-    TS_ASSERT(boost::math::isnan(justMean.minimum));
-    TS_ASSERT(boost::math::isnan(justMean.maximum));
-    TS_ASSERT(boost::math::isnan(justMean.median));
+    TS_ASSERT(std::isnan(justMean.standard_deviation));
+    TS_ASSERT(std::isnan(justMean.minimum));
+    TS_ASSERT(std::isnan(justMean.maximum));
+    TS_ASSERT(std::isnan(justMean.median));
   }
 
   void testZscores() {

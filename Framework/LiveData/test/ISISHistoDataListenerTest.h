@@ -1,15 +1,16 @@
 #ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 #define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
-#include "MantidLiveData/ISIS/ISISHistoDataListener.h"
-#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
-#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
+#include "MantidLiveData/ISIS/ISISHistoDataListener.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -21,6 +22,23 @@
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::LiveData;
+
+namespace {
+
+/**
+ * Fake Algorithm.
+ */
+class FakeAlgorithm : public Algorithm {
+public:
+  void exec() override { /*Do nothing*/
+  }
+  void init() override { /*Do nothing*/
+  }
+  const std::string name() const override { return "FakeAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return ""; }
+};
+}
 
 class ISISHistoDataListenerTest : public CxxTest::TestSuite {
 public:
@@ -44,16 +62,16 @@ public:
     dae.setProperty("NPeriods", 1);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
+    FakeAlgorithm alg;
+    alg.declareProperty(Kernel::make_unique<Kernel::ArrayProperty<specnum_t>>(
         "SpectraList", ""));
     int s[] = {1, 2, 3, 10, 11, 95, 96, 97, 98, 99, 100};
     std::vector<specnum_t> specs;
     specs.assign(s, s + 11);
-    props.setProperty("SpectraList", specs);
+    alg.setProperty("SpectraList", specs);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -67,47 +85,39 @@ public:
 
     dae.cancel();
 
-    auto x = ws->readX(0);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000.0, 1e-6);
+    TS_ASSERT_EQUALS(ws->x(0).size(), 31);
+    TS_ASSERT_EQUALS(ws->x(0)[0], 10000);
+    TS_ASSERT_DELTA(ws->x(0)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws->x(0)[30], 13000.0, 1e-6);
 
-    x = ws->readX(4);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000.0, 1e-6);
+    TS_ASSERT_EQUALS(ws->x(4).size(), 31);
+    TS_ASSERT_EQUALS(ws->x(4)[0], 10000);
+    TS_ASSERT_DELTA(ws->x(4)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws->x(4)[30], 13000.0, 1e-6);
 
-    auto y = ws->readY(2);
-    TS_ASSERT_EQUALS(y[0], 3);
-    TS_ASSERT_EQUALS(y[5], 3);
-    TS_ASSERT_EQUALS(y[29], 3);
+    TS_ASSERT_EQUALS(ws->y(2)[0], 3);
+    TS_ASSERT_EQUALS(ws->y(2)[5], 3);
+    TS_ASSERT_EQUALS(ws->y(2)[29], 3);
 
-    y = ws->readY(4);
-    TS_ASSERT_EQUALS(y[0], 11);
-    TS_ASSERT_EQUALS(y[5], 11);
-    TS_ASSERT_EQUALS(y[29], 11);
+    TS_ASSERT_EQUALS(ws->y(4)[0], 11);
+    TS_ASSERT_EQUALS(ws->y(4)[5], 11);
+    TS_ASSERT_EQUALS(ws->y(4)[29], 11);
 
-    y = ws->readY(7);
-    TS_ASSERT_EQUALS(y[0], 97);
-    TS_ASSERT_EQUALS(y[5], 97);
-    TS_ASSERT_EQUALS(y[29], 97);
+    TS_ASSERT_EQUALS(ws->y(7)[0], 97);
+    TS_ASSERT_EQUALS(ws->y(7)[5], 97);
+    TS_ASSERT_EQUALS(ws->y(7)[29], 97);
 
-    auto e = ws->readE(2);
-    TS_ASSERT_EQUALS(e[0], sqrt(3.0));
-    TS_ASSERT_EQUALS(e[5], sqrt(3.0));
-    TS_ASSERT_EQUALS(e[29], sqrt(3.0));
+    TS_ASSERT_EQUALS(ws->e(2)[0], sqrt(3.0));
+    TS_ASSERT_EQUALS(ws->e(2)[5], sqrt(3.0));
+    TS_ASSERT_EQUALS(ws->e(2)[29], sqrt(3.0));
 
-    e = ws->readE(4);
-    TS_ASSERT_EQUALS(e[0], sqrt(11.0));
-    TS_ASSERT_EQUALS(e[5], sqrt(11.0));
-    TS_ASSERT_EQUALS(e[29], sqrt(11.0));
+    TS_ASSERT_EQUALS(ws->e(4)[0], sqrt(11.0));
+    TS_ASSERT_EQUALS(ws->e(4)[5], sqrt(11.0));
+    TS_ASSERT_EQUALS(ws->e(4)[29], sqrt(11.0));
 
-    e = ws->readE(7);
-    TS_ASSERT_EQUALS(e[0], sqrt(97.0));
-    TS_ASSERT_EQUALS(e[5], sqrt(97.0));
-    TS_ASSERT_EQUALS(e[29], sqrt(97.0));
+    TS_ASSERT_EQUALS(ws->e(7)[0], sqrt(97.0));
+    TS_ASSERT_EQUALS(ws->e(7)[5], sqrt(97.0));
+    TS_ASSERT_EQUALS(ws->e(7)[29], sqrt(97.0));
 
     auto &spec = ws->getSpectrum(0);
     TS_ASSERT_EQUALS(spec.getSpectrumNo(), 1)
@@ -159,59 +169,49 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberHistograms(), 100);
     TS_ASSERT_EQUALS(ws2->blocksize(), 30);
 
-    auto x = ws1->readX(0);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000, 1e-6);
+    TS_ASSERT_EQUALS(ws1->x(0).size(), 31);
+    TS_ASSERT_EQUALS(ws1->x(0)[0], 10000);
+    TS_ASSERT_DELTA(ws1->x(0)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws1->x(0)[30], 13000, 1e-6);
 
-    x = ws1->readX(4);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000, 1e-6);
+    TS_ASSERT_EQUALS(ws1->x(4).size(), 31);
+    TS_ASSERT_EQUALS(ws1->x(4)[0], 10000);
+    TS_ASSERT_DELTA(ws1->x(4)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws1->x(4)[30], 13000, 1e-6);
 
-    x = ws2->readX(0);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000, 1e-6);
+    TS_ASSERT_EQUALS(ws2->x(0).size(), 31);
+    TS_ASSERT_EQUALS(ws2->x(0)[0], 10000);
+    TS_ASSERT_DELTA(ws2->x(0)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws2->x(0)[30], 13000, 1e-6);
 
-    x = ws2->readX(44);
-    TS_ASSERT_EQUALS(x.size(), 31);
-    TS_ASSERT_EQUALS(x[0], 10000);
-    TS_ASSERT_DELTA(x[1], 10100, 1e-6);
-    TS_ASSERT_DELTA(x[30], 13000, 1e-6);
+    TS_ASSERT_EQUALS(ws2->x(44).size(), 31);
+    TS_ASSERT_EQUALS(ws2->x(44)[0], 10000);
+    TS_ASSERT_DELTA(ws2->x(44)[1], 10100, 1e-6);
+    TS_ASSERT_DELTA(ws2->x(44)[30], 13000, 1e-6);
 
-    auto y = ws1->readY(2);
-    TS_ASSERT_EQUALS(y[0], 3);
-    TS_ASSERT_EQUALS(y[5], 3);
-    TS_ASSERT_EQUALS(y[29], 3);
+    TS_ASSERT_EQUALS(ws1->y(2)[0], 3);
+    TS_ASSERT_EQUALS(ws1->y(2)[5], 3);
+    TS_ASSERT_EQUALS(ws1->y(2)[29], 3);
 
-    y = ws1->readY(44);
-    TS_ASSERT_EQUALS(y[0], 45);
-    TS_ASSERT_EQUALS(y[5], 45);
-    TS_ASSERT_EQUALS(y[29], 45);
+    TS_ASSERT_EQUALS(ws1->y(44)[0], 45);
+    TS_ASSERT_EQUALS(ws1->y(44)[5], 45);
+    TS_ASSERT_EQUALS(ws1->y(44)[29], 45);
 
-    y = ws1->readY(77);
-    TS_ASSERT_EQUALS(y[0], 78);
-    TS_ASSERT_EQUALS(y[5], 78);
-    TS_ASSERT_EQUALS(y[29], 78);
+    TS_ASSERT_EQUALS(ws1->y(77)[0], 78);
+    TS_ASSERT_EQUALS(ws1->y(77)[5], 78);
+    TS_ASSERT_EQUALS(ws1->y(77)[29], 78);
 
-    y = ws2->readY(2);
-    TS_ASSERT_EQUALS(y[0], 1003);
-    TS_ASSERT_EQUALS(y[5], 1003);
-    TS_ASSERT_EQUALS(y[29], 1003);
+    TS_ASSERT_EQUALS(ws2->y(2)[0], 1003);
+    TS_ASSERT_EQUALS(ws2->y(2)[5], 1003);
+    TS_ASSERT_EQUALS(ws2->y(2)[29], 1003);
 
-    y = ws2->readY(44);
-    TS_ASSERT_EQUALS(y[0], 1045);
-    TS_ASSERT_EQUALS(y[5], 1045);
-    TS_ASSERT_EQUALS(y[29], 1045);
+    TS_ASSERT_EQUALS(ws2->y(44)[0], 1045);
+    TS_ASSERT_EQUALS(ws2->y(44)[5], 1045);
+    TS_ASSERT_EQUALS(ws2->y(44)[29], 1045);
 
-    y = ws2->readY(77);
-    TS_ASSERT_EQUALS(y[0], 1078);
-    TS_ASSERT_EQUALS(y[5], 1078);
-    TS_ASSERT_EQUALS(y[29], 1078);
+    TS_ASSERT_EQUALS(ws2->y(77)[0], 1078);
+    TS_ASSERT_EQUALS(ws2->y(77)[5], 1078);
+    TS_ASSERT_EQUALS(ws2->y(77)[29], 1078);
 
     auto &spec10 = ws1->getSpectrum(0);
     TS_ASSERT_EQUALS(spec10.getSpectrumNo(), 1)
@@ -255,16 +255,16 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    FakeAlgorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 3;
-    props.setProperty("PeriodList", periods);
+    alg.setProperty("PeriodList", periods);
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -277,17 +277,15 @@ public:
 
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT(ws);
-    auto y = ws->readY(2);
-    TS_ASSERT_EQUALS(y[0], 1003);
-    TS_ASSERT_EQUALS(y[5], 1003);
-    TS_ASSERT_EQUALS(y[29], 1003);
+    TS_ASSERT_EQUALS(ws->y(2)[0], 1003);
+    TS_ASSERT_EQUALS(ws->y(2)[5], 1003);
+    TS_ASSERT_EQUALS(ws->y(2)[29], 1003);
 
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT(ws);
-    y = ws->readY(2);
-    TS_ASSERT_EQUALS(y[0], 2003);
-    TS_ASSERT_EQUALS(y[5], 2003);
-    TS_ASSERT_EQUALS(y[29], 2003);
+    TS_ASSERT_EQUALS(ws->y(2)[0], 2003);
+    TS_ASSERT_EQUALS(ws->y(2)[5], 2003);
+    TS_ASSERT_EQUALS(ws->y(2)[29], 2003);
 
     dae.cancel();
     res.wait();
@@ -308,18 +306,18 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    FakeAlgorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    props.declareProperty(
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
-    props.setProperty("PeriodList", "1,3");
+    alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
-    props.setProperty("SpectraList", "11-13");
+    alg.setProperty("SpectraList", "11-13");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -332,21 +330,19 @@ public:
 
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     TS_ASSERT(ws);
-    auto y = ws->readY(2);
     // monitors in FakeISISHistoDAE have twice the number of bins of normal
     // spectra
-    TS_ASSERT_EQUALS(y.size(), 40);
-    TS_ASSERT_EQUALS(y[0], 13);
-    TS_ASSERT_EQUALS(y[5], 13);
-    TS_ASSERT_EQUALS(y[29], 13);
+    TS_ASSERT_EQUALS(ws->y(2).size(), 40);
+    TS_ASSERT_EQUALS(ws->y(2)[0], 13);
+    TS_ASSERT_EQUALS(ws->y(2)[5], 13);
+    TS_ASSERT_EQUALS(ws->y(2)[29], 13);
 
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     TS_ASSERT(ws);
-    y = ws->readY(2);
-    TS_ASSERT_EQUALS(y.size(), 40);
-    TS_ASSERT_EQUALS(y[0], 2013);
-    TS_ASSERT_EQUALS(y[5], 2013);
-    TS_ASSERT_EQUALS(y[29], 2013);
+    TS_ASSERT_EQUALS(ws->y(2).size(), 40);
+    TS_ASSERT_EQUALS(ws->y(2)[0], 2013);
+    TS_ASSERT_EQUALS(ws->y(2)[5], 2013);
+    TS_ASSERT_EQUALS(ws->y(2)[29], 2013);
 
     dae.cancel();
     res.wait();
@@ -367,18 +363,18 @@ public:
     dae.setProperty("NBins", 20);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    FakeAlgorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("SpectraList"));
-    props.declareProperty(
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
-    props.setProperty("PeriodList", "1,3");
+    alg.setProperty("PeriodList", "1,3");
     // FakeISISHistoDAE has 3 monitors with spectra numbers NSpectra+1,
     // NSpectra+2, NSpectra+2
-    props.setProperty("SpectraList", "14-17");
+    alg.setProperty("SpectraList", "14-17");
 
     auto listener = Mantid::API::LiveListenerFactory::Instance().create(
-        "TESTHISTOLISTENER", true, &props);
+        "TESTHISTOLISTENER", true, &alg);
     TS_ASSERT(listener);
     TSM_ASSERT("Listener has failed to connect", listener->isConnected());
     if (!listener->isConnected())
@@ -404,17 +400,17 @@ public:
     dae.setProperty("NPeriods", 4);
     auto res = dae.executeAsync();
 
-    Kernel::PropertyManager props;
-    props.declareProperty(
+    FakeAlgorithm alg;
+    alg.declareProperty(
         Kernel::make_unique<Kernel::ArrayProperty<int>>("PeriodList"));
     std::vector<int> periods(2);
     periods[0] = 2;
     periods[1] = 5; // this period doesn't exist in dae
-    props.setProperty("PeriodList", periods);
+    alg.setProperty("PeriodList", periods);
 
     TS_ASSERT_THROWS(auto listener =
                          Mantid::API::LiveListenerFactory::Instance().create(
-                             "TESTHISTOLISTENER", true, &props),
+                             "TESTHISTOLISTENER", true, &alg),
                      std::invalid_argument);
 
     dae.cancel();

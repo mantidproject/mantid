@@ -48,12 +48,14 @@ private:
   class FittedPeaks; // forward declare of private inner class
 
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
   API::MatrixWorkspace_sptr loadAndBin();
   API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr wksp);
   API::MatrixWorkspace_sptr load(const std::string filename);
   void loadOldCalibration();
   void createNewCalTable();
+  void createInformationWorkspaces();
   std::function<double(double)> getDSpacingToTof(const detid_t detid);
   std::vector<double> dSpacingWindows(const std::vector<double> &centres,
                                       const double widthMax);
@@ -61,17 +63,23 @@ private:
                                    const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc,
                             const double difa, const double tzero);
-  void fitDIFCtZeroDIFA(const std::vector<double> &d,
-                        const std::vector<double> &tof, double &difc,
-                        double &t0, double &difa);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                           const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc,
+                           double &t0, double &difa);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
+  API::ITableWorkspace_sptr m_peakPositionTable;
   std::vector<double> m_peaksInDspacing;
-  std::string calParams;
   std::map<detid_t, size_t> m_detidToRow;
-  double m_tofMin;
-  double m_tofMax;
-  bool m_hasDasIds;
+  double m_tofMin{0.};
+  double m_tofMax{0.};
+  double m_tzeroMin{0.};
+  double m_tzeroMax{0.};
+  double m_difaMin{0.};
+  double m_difaMax{0.};
+  bool m_hasDasIds{false};
+  size_t m_numberMaxParams{0};
 };
 
 } // namespace Algorithms

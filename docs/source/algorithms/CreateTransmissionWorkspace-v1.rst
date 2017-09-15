@@ -50,7 +50,8 @@ Usage
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
     print "The first four transWS Y values are:"
     for i in range (4):
@@ -85,7 +86,8 @@ Output:
       MonitorBackgroundWavelengthMin = 15,
       MonitorBackgroundWavelengthMax = 17,
       MonitorIntegrationWavelengthMin = 4,
-      MonitorIntegrationWavelengthMax = 10)
+      MonitorIntegrationWavelengthMax = 10,
+      Version=1)
 
     print "The first four transWS Y values are:"
     for i in range (4):

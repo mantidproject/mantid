@@ -103,7 +103,7 @@ void CalculateEfficiency::exec() {
   rebinnedWS = childAlg->getProperty("OutputWorkspace");
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, false);
   for (int i = 0; i < static_cast<int>(rebinnedWS->getNumberHistograms());
        i++) {
     outputWS->setSharedX(i, rebinnedWS->sharedX(i));
@@ -311,8 +311,11 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
       }
     }
     auto indexList = ws.getIndicesFromDetectorIDs(detectorList);
-    for (const auto &idx : indexList)
-      ws.maskWorkspaceIndex(idx);
+    auto &spectrumInfo = ws.mutableSpectrumInfo();
+    for (const auto &idx : indexList) {
+      ws.getSpectrum(idx).clearData();
+      spectrumInfo.setMasked(idx, true);
+    }
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a CompAssembly, e.g., a bank. Component not masked!");

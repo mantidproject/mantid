@@ -40,9 +40,9 @@
 #include "PlotCurve.h"
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/MantidColorMap.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
+#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <fstream>
 #include <float.h>
@@ -175,6 +175,8 @@ public:
   void setIntensityChange(bool on);
   /// returns boolan flag intensity change
   bool isIntensityChanged();
+  /// returns the name of workspace for this spectrogram
+  std::string workspaceName() { return d_wsName; };
 
 signals:
   void removeMe(Spectrogram *);

@@ -25,7 +25,6 @@
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/ClassMacros.h"
 
 namespace Mantid {
 namespace API {
@@ -51,13 +50,18 @@ public:
   /// A create method to ensure the model is initialized properly
   ForegroundModel *createModel(const std::string &name,
                                const API::IFunction &fitFunction);
+  /// Disable copy operator
+  ForegroundModelFactoryImpl(const ForegroundModelFactoryImpl &) = delete;
+
+  /// Disable assignment operator
+  ForegroundModelFactoryImpl &
+  operator=(const ForegroundModelFactoryImpl &) = delete;
 
 private:
   /// Policy needs to access constructor
   friend struct Kernel::CreateUsingNew<ForegroundModelFactoryImpl>;
   /// Default constructor
   ForegroundModelFactoryImpl();
-  DISABLE_COPY_AND_ASSIGN(ForegroundModelFactoryImpl)
 
   // Do not allow the default create & createUnwrapped to be called
   using BaseClass::create;

@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MaxEnt.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -44,7 +45,7 @@ public:
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 5;
     int nBins = 10;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -78,7 +79,7 @@ public:
     // Run one iteration, we just want to test the output workspaces' dimensions
     int nHist = 6;
     int nBins = 10;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(nHist, nBins);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -111,7 +112,7 @@ public:
 
   void test_bad_complex_data() {
 
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(5, 10);
 
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MaxEnt");
     alg->initialize();
@@ -421,9 +422,9 @@ public:
    */
   void testValidateInputsWithWSGroup() {
     auto ws1 = boost::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+        WorkspaceCreationHelper::create2DWorkspace(5, 10));
     auto ws2 = boost::static_pointer_cast<Workspace>(
-        WorkspaceCreationHelper::Create2DWorkspace(5, 10));
+        WorkspaceCreationHelper::create2DWorkspace(5, 10));
     AnalysisDataService::Instance().add("workspace1", ws1);
     AnalysisDataService::Instance().add("workspace2", ws2);
     auto group = boost::make_shared<WorkspaceGroup>();
@@ -656,7 +657,7 @@ public:
   static void destroySuite(MaxEntTestPerformance *suite) { delete suite; }
 
   MaxEntTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(10000, 100);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(10000, 100);
     alg = AlgorithmManager::Instance().create("MaxEnt");
   }
 

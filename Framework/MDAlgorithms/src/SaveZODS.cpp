@@ -1,5 +1,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/Sample.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -16,7 +18,6 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveZODS)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveZODS::name() const { return "SaveZODS"; }
 
@@ -28,9 +29,6 @@ const std::string SaveZODS::category() const {
   return "MDAlgorithms\\DataHandling";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveZODS::init() {
@@ -43,7 +41,6 @@ void SaveZODS::init() {
       "The name of the HDF5 file to write, as a full or relative path.");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void SaveZODS::exec() {

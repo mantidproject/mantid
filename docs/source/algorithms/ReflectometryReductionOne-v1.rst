@@ -206,6 +206,13 @@ setup remains unchanged for other algorithms that may need to manipulate/use it.
     :height: 250px
     :align: center
 
+
+Processing Instructions
+#######################
+
+These enable a grouping pattern on workspace indices to yield only the detectors of interest. It allows usage of the operators :literal:`,:+-` to specify or exclude specific indices or to add
+spectra together. See :literal:`Grouping Pattern` from :Ref:`algm-GroupDetectors` for further details on their usage.
+
 Usage
 -----
 
@@ -218,7 +225,7 @@ Usage
    IvsQ, IvsLam, thetaOut = ReflectometryReductionOne(InputWorkspace=run, ThetaIn=0.7, I0MonitorIndex=2, ProcessingInstructions='3:4',
    WavelengthMin=1.0, WavelengthMax=17.0,
    MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0,
-   MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0 )
+   MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0, Version=1)
 
    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])

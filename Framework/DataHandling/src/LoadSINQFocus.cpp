@@ -7,6 +7,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -111,7 +112,7 @@ void LoadSINQFocus::setInstrumentName(NeXus::NXEntry &entry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
 
-  if (m_instrumentPath == "") {
+  if (m_instrumentPath.empty()) {
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
   }
@@ -161,21 +162,23 @@ void LoadSINQFocus::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
 
   std::vector<double> timeBinning =
       m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
-  m_localWorkspace->dataX(0).assign(timeBinning.begin(), timeBinning.end());
+  auto &x = m_localWorkspace->mutableX(0);
+  x.assign(timeBinning.begin(), timeBinning.end());
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
   size_t spec = 0;
   for (size_t i = 0; i < m_numberOfTubes; ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       if (spec > 0) {
         // just copy the time binning axis to every spectra
-        m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
+        m_localWorkspace->setSharedX(spec, m_localWorkspace->sharedX(0));
       }
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j));
-      m_localWorkspace->dataY(spec).assign(data_p, data_p + m_numberOfChannels);
+      m_localWorkspace->mutableY(spec)
+          .assign(data_p, data_p + m_numberOfChannels);
       // Assign Error
-      MantidVec &E = m_localWorkspace->dataE(spec);
+      auto &E = m_localWorkspace->mutableE(spec);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      LoadSINQFocus::calculateError);
       ++spec;

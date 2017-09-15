@@ -119,7 +119,6 @@ class DSFinterp1DFit(IFunction1D):
             return None
         return {'Intensity':intensity, 'TargetParameter':f}
 
-
     def function1D(self, xvals):
         ''' Fit using the interpolated structure factor '''
         p=self.validateParams()
@@ -185,11 +184,12 @@ class DSFinterp1DFit(IFunction1D):
         intensities_interpolator = scipy.interpolate.interp1d(self._xvalues, p['Intensity']*dsf.intensities, kind='linear')
         return intensities_interpolator(xvals)  # can we pass by reference?
 
+
 # Required to have Mantid recognize the new function
 #pylint: disable=unused-import
 try:
-    import dsfinterp
+    import dsfinterp # noqa
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
-    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '+\
+    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '+
                  'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')

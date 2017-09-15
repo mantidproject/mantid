@@ -38,13 +38,29 @@ boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension &self) {
 }
 }
 
+//--------------------------------------------------------------------------------------
+// Deprecated function
+//--------------------------------------------------------------------------------------
+/**
+ * @param self Reference to the calling object
+ * @return name of the dimension.
+ */
+std::string getName(IMDDimension &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             ".getName() is deprecated. Use .name instead.");
+  return self.getName();
+}
+
 void export_IMDDimension() {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 
   class_<IMDDimension, boost::noncopyable>("IMDDimension", no_init)
-      .def("getName", &IMDDimension::getName, arg("self"),
-           "Return the name of the dimension as can be displayed "
-           "along the axis")
+      .def("getName", &getName, arg("self"), "Return the name of the dimension "
+                                             "as can be displayed along the "
+                                             "axis")
+      .add_property("name", &IMDDimension::getName,
+                    "Return the name of the dimension as can be displayed "
+                    "along the axis")
       .def("getMaximum", &IMDDimension::getMaximum, arg("self"),
            "Return the maximum extent of this dimension")
       .def("getMinimum", &IMDDimension::getMinimum, arg("self"),
@@ -54,7 +70,10 @@ void export_IMDDimension() {
            "A axis directed along dimension would have getNBins+1 axis points.")
       .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
            "Return coordinate of the axis at the given index")
+      .def("getBinWidth", &IMDDimension::getBinWidth, arg("self"),
+           "Return the width of each bin.")
       .def("getDimensionId", &IMDDimension::getDimensionId, arg("self"),
+           return_value_policy<copy_const_reference>(),
            "Return a short name which identify the dimension among other "
            "dimension."
            "A dimension can be usually find by its ID and various  ")

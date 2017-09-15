@@ -1,12 +1,10 @@
 #ifndef MANTID_GEOMETRY_ICOMPONENT_H_
 #define MANTID_GEOMETRY_ICOMPONENT_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
+#include <map>
 #include <string>
 #include <vector>
 #include <set>
@@ -22,9 +20,6 @@ class Quat;
 }
 
 namespace Geometry {
-//---------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------
 class IComponent;
 class BoundingBox;
 class ParameterMap;
@@ -121,14 +116,14 @@ public:
   //! Rotate the IComponent by an angle in degrees with respect to an axis.
   virtual void rotate(double, const Kernel::V3D &) = 0;
   //! Get the position relative to the parent IComponent (absolute if no parent)
-  virtual const Kernel::V3D getRelativePos() const = 0;
+  virtual Kernel::V3D getRelativePos() const = 0;
   //! Get the position of the IComponent. Tree structure is traverse through the
   // parent chain
   virtual Kernel::V3D getPos() const = 0;
   //! Get the relative Orientation
-  virtual const Kernel::Quat &getRelativeRot() const = 0;
+  virtual Kernel::Quat getRelativeRot() const = 0;
   //! Get the absolute orientation of the IComponent
-  virtual const Kernel::Quat getRotation() const = 0;
+  virtual Kernel::Quat getRotation() const = 0;
   //! Get the distance to another IComponent
   virtual double getDistance(const IComponent &) const = 0;
   /// Get the bounding box for this component and store it in the given argument
@@ -187,6 +182,7 @@ public:
   virtual void printSelf(std::ostream &) const = 0;
   //! Returns true if the Component is parametrized (has a parameter map)
   virtual bool isParametrized() const = 0;
+  virtual size_t registerContents(class ComponentVisitor &component) const = 0;
 };
 
 /// Typedef of a shared pointer to a IComponent

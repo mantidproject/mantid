@@ -3,13 +3,57 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Instantiator.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "ILiveListenerTest.h"
+#include "LiveListenerTest.h"
 #include <Poco/Path.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 
+namespace {
+/**
+ * Definition for our own Instantiator type for use with the
+ * LiveListenerFactory dynamic factory. The default DynamicFactory subscribe
+ * peforms hidden object creation! That makes proper use of mocking impossible.
+ */
+class MockLiveListenerInstantiator
+    : public Mantid::Kernel::Instantiator<MockLiveListener,
+                                          Mantid::API::ILiveListener> {
+public:
+  MockLiveListenerInstantiator(
+      boost::shared_ptr<Mantid::API::ILiveListener> product)
+      : product(product) {}
+
+  boost::shared_ptr<Mantid::API::ILiveListener>
+  createInstance() const override {
+    return product;
+  }
+
+  Mantid::API::ILiveListener *createUnwrappedInstance() const override {
+    return product.get();
+  }
+
+private:
+  boost::shared_ptr<Mantid::API::ILiveListener> product;
+};
+
+/**
+ * Fake Algorithm. Used to check that Algorithm references are tracked and
+ * passed on.
+ */
+class FakeAlgorithm : public Algorithm {
+public:
+  void exec() override { /*Do nothing*/
+  }
+  void init() override { /*Do nothing*/
+  }
+  const std::string name() const override { return "FakeAlgorithm"; }
+  int version() const override { return 1; }
+  const std::string summary() const override { return ""; }
+};
+}
 class LiveListenerFactoryTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -18,11 +62,6 @@ public:
     return new LiveListenerFactoryTest();
   }
   static void destroySuite(LiveListenerFactoryTest *suite) { delete suite; }
-
-  LiveListenerFactoryTest() : factory(LiveListenerFactory::Instance()) {
-    // Subscribe the mock implementation created in ILiveListenerTest.h
-    factory.subscribe<MockILiveListener>("MockILiveListener");
-  }
 
   void setUp() override {
     auto &config = Kernel::ConfigService::Instance();
@@ -41,29 +80,78 @@ public:
 
   void test_create() {
     // Check that we can successfully create a registered class
+    LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
+    // Subscribe the mock implementation created in ILiveListenerTest.h
     boost::shared_ptr<ILiveListener> l;
-    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockILiveListener", false))
+    auto product = boost::make_shared<MockLiveListener>();
+    factory.subscribe("MockLiveListener",
+                      new MockLiveListenerInstantiator{product});
+
+    EXPECT_CALL(*product, setAlgorithm(testing::_))
+        .Times(0); // variant of create below does not take an Algorithm. So we
+                   // do not expect the call to be made on the Live Listener.
+    EXPECT_CALL(*product, connect(testing::_))
+        .Times(0); // We do not ask this to connect see false below.
+    TS_ASSERT_THROWS_NOTHING(l = factory.create("MockLiveListener", false))
     // Check it's really the right class
-    TS_ASSERT(boost::dynamic_pointer_cast<MockILiveListener>(l))
+    TS_ASSERT(boost::dynamic_pointer_cast<MockLiveListener>(l))
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),
                      Mantid::Kernel::Exception::NotFoundError)
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
+    factory.unsubscribe("MockLiveListener");
   }
 
+  void test_create_with_calling_alg() {
+    // Check that we can successfully create a registered class
+    LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
+    // Subscribe the mock implementation created in ILiveListenerTest.h
+    boost::shared_ptr<ILiveListener> l;
+    auto product = boost::make_shared<MockLiveListener>();
+    factory.subscribe("MockLiveListener",
+                      new MockLiveListenerInstantiator{product});
+
+    EXPECT_CALL(*product, setAlgorithm(testing::_)).Times(1);
+    EXPECT_CALL(*product, connect(testing::_))
+        .Times(0); // We do not ask this to connect see false below.
+
+    FakeAlgorithm callingAlg;
+
+    TS_ASSERT_THROWS_NOTHING(
+        l = factory.create("MockLiveListener", false, &callingAlg))
+
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
+    factory.unsubscribe("MockLiveListener");
+  }
   void test_create_throws_when_unable_to_connect() {
+    LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
+    // Subscribe the mock implementation created in ILiveListenerTest.h
+    boost::shared_ptr<ILiveListener> l;
+    auto product = boost::make_shared<MockLiveListener>();
+    factory.subscribe("MockLiveListener",
+                      new MockLiveListenerInstantiator{product});
+    EXPECT_CALL(*product, connect(testing::_))
+        .WillOnce(testing::Return(false /*cannot connect*/));
     Kernel::ConfigService::Instance().setFacility("TEST");
     TS_ASSERT_THROWS(factory.create("MINITOPAZ", true), std::runtime_error);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
     // Now test that it doesn't throw if we ask not to connect
-    TS_ASSERT_THROWS_NOTHING(factory.create("MINITOPAZ", false));
-  }
-
-  void test_checkConnection() {
-    TS_ASSERT(factory.checkConnection("MockILiveListener"));
-    TS_ASSERT(!factory.checkConnection("MINITOPAZ"))
+    EXPECT_CALL(*product, connect(testing::_)).Times(0);
+    TS_ASSERT_THROWS_NOTHING(factory.create(
+        "MINITOPAZ",
+        false)); // But we won't ask it to connect so all should be fine.
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(product.get()));
+    factory.unsubscribe("MockLiveListener");
   }
 
   void test_createUnwrapped_throws() {
+    LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
+    // Subscribe the mock implementation created in ILiveListenerTest.h
+    boost::shared_ptr<ILiveListener> l;
+    auto product = boost::make_shared<MockLiveListener>();
+    factory.subscribe("MockLiveListener",
+                      new MockLiveListenerInstantiator{product});
     // Make sure this method just throws.
     // Note that you can't even access the method unless you assign to a
     // DynamicFactory reference.
@@ -72,10 +160,8 @@ public:
         LiveListenerFactory::Instance();
     TS_ASSERT_THROWS(f.createUnwrapped(""),
                      Mantid::Kernel::Exception::NotImplementedError)
+    factory.unsubscribe("MockLiveListener");
   }
-
-private:
-  LiveListenerFactoryImpl &factory;
 };
 
 #endif /* LIVELISTENERFACTORYTEST_H_ */

@@ -3,15 +3,16 @@
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import mantid.api
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
-class LoadAndCheckBase(stresstesting.MantidStressTest):
 
-    __metaclass__ = ABCMeta # Mark as an abstract class
+class LoadAndCheckBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     __comparison_out_workspace_name = 'a_integrated'
 
@@ -45,7 +46,6 @@ class LoadAndCheckBase(stresstesting.MantidStressTest):
     def enable_instrument_checking(self):
         return True
 
-
     def do_check_workspace_shape(self, ws1, ws2):
         self.assertTrue(ws1.getNumberHistograms(), ws2.getNumberHistograms())
         self.assertTrue(len(ws1.readX(0)) == len(ws2.readX(0)))
@@ -64,7 +64,7 @@ class LoadAndCheckBase(stresstesting.MantidStressTest):
         b = mtd['raw']
         n_periods = self.get_expected_number_of_periods()
 
-        self.assertTrue(type(a) == type(b))
+        self.assertTrue(isinstance(a, type(b)))
 
         #raise NotImplementedError()
         if isinstance(a,mantid.api.WorkspaceGroup):
@@ -90,6 +90,3 @@ class LoadAndCheckBase(stresstesting.MantidStressTest):
             return self.__comparison_out_workspace_name, self.get_integrated_reference_workspace_filename()
         else:
             return True
-
-
-

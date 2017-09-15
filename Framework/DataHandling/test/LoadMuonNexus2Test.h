@@ -4,20 +4,22 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAPI/Axis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -83,52 +85,25 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(31)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(31)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(17).size());
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(17).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(11)[686], 9);
-    TS_ASSERT_EQUALS(output2D->dataY(12)[686], 7);
-    TS_ASSERT_EQUALS(output2D->dataY(13)[686], 7);
+    TS_ASSERT_EQUALS(output2D->y(11)[686], 9);
+    TS_ASSERT_EQUALS(output2D->y(12)[686], 7);
+    TS_ASSERT_EQUALS(output2D->y(13)[686], 7);
 
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS(output2D->dataE(11)[686], 3);
-    TS_ASSERT_DELTA(output2D->dataE(12)[686], 2.646, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(13)[686], 2.646, 0.001);
+    TS_ASSERT_EQUALS(output2D->e(11)[686], 3);
+    TS_ASSERT_DELTA(output2D->e(12)[686], 2.646, 0.001);
+    TS_ASSERT_DELTA(output2D->e(13)[686], 2.646, 0.001);
     // Check that the time is as expected from bin boundary update
-    TS_ASSERT_DELTA(output2D->dataX(11)[687], 10.992, 0.001);
+    TS_ASSERT_DELTA(output2D->x(11)[687], 10.992, 0.001);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    /*
-    //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check Child Algorithm is running
-    properly
-    //----------------------------------------------------------------------
-    Instrument_sptr i = output->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-
-    Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
-    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
-
-
-    TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-
-    Mantid::Geometry::Detector *ptrDet103 =
-    dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
-    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-    */
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
@@ -175,15 +150,9 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 11);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(7)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(7)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(10).size());
-    // Check one particular value
-    // TS_ASSERT_EQUALS( output2D->dataY(11)[686], 81);
-    // Check that the error on that value is correct
-    // TS_ASSERT_EQUALS( output2D->dataE(11)[686], 9);
-    // Check that the time is as expected from bin boundary update
-    // TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(10).size());
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
@@ -219,15 +188,9 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 3);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(0)) == (output2D->dataX(2)));
+    TS_ASSERT((output2D->x(0)) == (output2D->x(2)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(0).size(), output2D->dataY(1).size());
-    // Check one particular value
-    // TS_ASSERT_EQUALS( output2D->dataY(11)[686], 81);
-    // Check that the error on that value is correct
-    // TS_ASSERT_EQUALS( output2D->dataE(11)[686], 9);
-    // Check that the time is as expected from bin boundary update
-    // TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
+    TS_ASSERT_EQUALS(output2D->y(0).size(), output2D->y(1).size());
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
@@ -265,15 +228,9 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 14);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(7)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(7)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(10).size());
-    // Check one particular value
-    // TS_ASSERT_EQUALS( output2D->dataY(11)[686], 81);
-    // Check that the error on that value is correct
-    // TS_ASSERT_EQUALS( output2D->dataE(11)[686], 9);
-    // Check that the time is as expected from bin boundary update
-    // TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(10).size());
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
@@ -341,48 +298,25 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(31)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(31)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(17).size());
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(17).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(11)[686], 7);
-    TS_ASSERT_EQUALS(output2D->dataY(12)[686], 2);
-    TS_ASSERT_EQUALS(output2D->dataY(13)[686], 6);
+    TS_ASSERT_EQUALS(output2D->y(11)[686], 7);
+    TS_ASSERT_EQUALS(output2D->y(12)[686], 2);
+    TS_ASSERT_EQUALS(output2D->y(13)[686], 6);
 
     // Check that the error on that value is correct
-    TS_ASSERT_DELTA(output2D->dataE(11)[686], 2.646, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(12)[686], 1.414, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(13)[686], 2.449, 0.001);
+    TS_ASSERT_DELTA(output2D->e(11)[686], 2.646, 0.001);
+    TS_ASSERT_DELTA(output2D->e(12)[686], 1.414, 0.001);
+    TS_ASSERT_DELTA(output2D->e(13)[686], 2.449, 0.001);
     // Check that the time is as expected from bin boundary update
-    TS_ASSERT_DELTA(output2D->dataX(11)[687], 10.992, 0.001);
+    TS_ASSERT_DELTA(output2D->x(11)[687], 10.992, 0.001);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    /*
-    //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check Child Algorithm is running
-    properly
-    //----------------------------------------------------------------------
-    Instrument_sptr i = output->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-
-    Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
-    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
-
-
-    TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-
-    Mantid::Geometry::Detector *ptrDet103 =
-    dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
-    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-    */
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check Child Algorithm is running
     // properly
@@ -433,52 +367,25 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 192);
     TS_ASSERT_EQUALS(output2D->blocksize(), 2000);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(3)) == (output2D->dataX(31)));
+    TS_ASSERT((output2D->x(3)) == (output2D->x(31)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(5).size(), output2D->dataY(17).size());
+    TS_ASSERT_EQUALS(output2D->y(5).size(), output2D->y(17).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(11)[686], 4);
-    TS_ASSERT_EQUALS(output2D->dataY(12)[686], 6);
-    TS_ASSERT_EQUALS(output2D->dataY(13)[686], 0);
+    TS_ASSERT_EQUALS(output2D->y(11)[686], 4);
+    TS_ASSERT_EQUALS(output2D->y(12)[686], 6);
+    TS_ASSERT_EQUALS(output2D->y(13)[686], 0);
 
     // Check that the error on that value is correct
-    TS_ASSERT_DELTA(output2D->dataE(11)[686], 2, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(12)[686], 2.449, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(13)[686], 0, 0.001);
+    TS_ASSERT_DELTA(output2D->e(11)[686], 2, 0.001);
+    TS_ASSERT_DELTA(output2D->e(12)[686], 2.449, 0.001);
+    TS_ASSERT_DELTA(output2D->e(13)[686], 0, 0.001);
     // Check that the time is as expected from bin boundary update
-    TS_ASSERT_DELTA(output2D->dataX(11)[687], 10.992, 0.001);
+    TS_ASSERT_DELTA(output2D->x(11)[687], 10.992, 0.001);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
     TS_ASSERT(!output->isDistribution());
 
-    /*
-    //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check Child Algorithm is running
-    properly
-    //----------------------------------------------------------------------
-    Instrument_sptr i = output->getInstrument();
-    Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-
-    Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
-    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
-
-
-    TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-
-    Mantid::Geometry::Detector *ptrDet103 =
-    dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
-    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
-    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-    */
-    //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check Child Algorithm is running
-    // properly
-    //----------------------------------------------------------------------
     Property *l_property =
         output->run().getLogData(std::string("temperature_1_log"));
     TimeSeriesProperty<double> *l_timeSeriesDouble =
@@ -537,20 +444,20 @@ public:
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(output2D->blocksize(), 8192);
     // Check two X vectors are the same
-    TS_ASSERT((output2D->dataX(0)) == (output2D->dataX(1)));
+    TS_ASSERT((output2D->x(0)) == (output2D->x(1)));
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS(output2D->dataY(0).size(), output2D->dataY(1).size());
+    TS_ASSERT_EQUALS(output2D->y(0).size(), output2D->y(1).size());
     // Check one particular value
-    TS_ASSERT_EQUALS(output2D->dataY(0)[686], 516);
-    TS_ASSERT_EQUALS(output2D->dataY(0)[687], 413);
-    TS_ASSERT_EQUALS(output2D->dataY(1)[686], 381);
+    TS_ASSERT_EQUALS(output2D->y(0)[686], 516);
+    TS_ASSERT_EQUALS(output2D->y(0)[687], 413);
+    TS_ASSERT_EQUALS(output2D->y(1)[686], 381);
 
     // Check that the error on that value is correct
-    TS_ASSERT_DELTA(output2D->dataE(0)[686], 22.7156, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(0)[687], 20.3224, 0.001);
-    TS_ASSERT_DELTA(output2D->dataE(1)[686], 19.5192, 0.001);
+    TS_ASSERT_DELTA(output2D->e(0)[686], 22.7156, 0.001);
+    TS_ASSERT_DELTA(output2D->e(0)[687], 20.3224, 0.001);
+    TS_ASSERT_DELTA(output2D->e(1)[686], 19.5192, 0.001);
     // Check that the time is as expected from bin boundary update
-    TS_ASSERT_DELTA(output2D->dataX(1)[687], 0.8050, 0.001);
+    TS_ASSERT_DELTA(output2D->x(1)[687], 0.8050, 0.001);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(), "Label");
@@ -566,13 +473,18 @@ public:
 
 class LoadMuonNexus2TestPerformance : public CxxTest::TestSuite {
 public:
-  void testDefaultLoad() {
-    LoadMuonNexus2 loader;
+  void setUp() override {
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006475.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
-    TS_ASSERT(loader.execute());
   }
+
+  void tearDown() override { AnalysisDataService::Instance().remove("ws"); }
+
+  void testDefaultLoad() { loader.execute(); }
+
+private:
+  LoadMuonNexus2 loader;
 };
 
 #endif /*LOADMUONNEXUS2TEST_H_*/

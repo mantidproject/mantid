@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
@@ -13,6 +14,7 @@ except ImportError:
 class ClassicUBInputWidget(QtGui.QWidget):
     #signal when lattice is changed and valid
     changed=QtCore.pyqtSignal(mantid.geometry.OrientedLattice)
+
     def __init__(self,ol=None,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(ClassicUBInputWidget,self).__init__()
@@ -215,9 +217,9 @@ class ClassicUBInputWidget(QtGui.QWidget):
         #update the GUI
         self.updateGui()
 
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     mainForm=ClassicUBInputWidget()
     mainForm.show()
     sys.exit(app.exec_())
-

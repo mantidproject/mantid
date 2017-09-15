@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name,no-init
 import os
 from stresstesting import MantidStressTest
@@ -5,12 +6,15 @@ from mantid.simpleapi import *
 from mantid.kernel import PropertyManager
 from mantid import config
 
+
 def MAX_DBL():
     import sys
     return sys.float_info[0]/2
 
+
 def getNamedParameter(ws, name):
     return ws.getInstrument().getNumberParameter(name)[0]
+
 
 class DirectInelasticDiagnostic2(MantidStressTest):
 
@@ -19,7 +23,6 @@ class DirectInelasticDiagnostic2(MantidStressTest):
     def requiredMemoryMB(self):
         """Requires 4Gb"""
         return 4000
-
 
     def runTest(self):
         red_man = PropertyManager()
@@ -61,7 +64,6 @@ class DirectInelasticDiagnostic2(MantidStressTest):
         red_man["BackgroundTofEnd"]=18000.
         #reducer.bkgd_range=[12000,18000]
 
-
         diag_mask = DgsDiagnose(DetVanWorkspace=detvan, SampleWorkspace=sample,
                                 ReductionProperties=red_man_name)
 
@@ -69,12 +71,12 @@ class DirectInelasticDiagnostic2(MantidStressTest):
         # Save the masked spectra numbers to a simple ASCII file for comparison
         self.saved_diag_file = os.path.join(config['defaultsave.directory'],
                                             'CurrentDirectInelasticDiag2.txt')
-        handle = file(self.saved_diag_file, 'w')
-        for index in range(sample.getNumberHistograms()):
-            if sample.getDetector(index).isMasked():
-                spec_no = sample.getSpectrum(index).getSpectrumNo()
-                handle.write(str(spec_no) + '\n')
-        handle.close()
+        with open(self.saved_diag_file, 'w') as handle:
+            spectrumInfo = sample.spectrumInfo()
+            for index in range(sample.getNumberHistograms()):
+                if spectrumInfo.isMasked(index):
+                    spec_no = sample.getSpectrum(index).getSpectrumNo()
+                    handle.write(str(spec_no) + '\n')
 
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):

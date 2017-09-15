@@ -13,7 +13,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -131,7 +131,7 @@ void IntegratePeaksUsingClusters::exec() {
   // CCL. Multi-processor version.
   ConnectedComponentLabeling analysis;
 
-  Progress progress(this, 0, 1, 1);
+  Progress progress(this, 0.0, 1.0, 1);
   // Perform CCL.
   ClusterTuple clusters =
       analysis.executeAndFetchClusters(mdWS, &backgroundStrategy, progress);
@@ -150,13 +150,13 @@ void IntegratePeaksUsingClusters::exec() {
   progress.doReport("Performing Peak Integration");
   g_log.information("Starting Integration");
   progress.resetNumSteps(peakWS->getNumberPeaks(), 0.9, 1);
-  PARALLEL_FOR1(peakWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
     Geometry::IPeak &peak = peakWS->getPeak(i);
     const Mantid::signal_t signalValue = projection.signalAtPeakCenter(
         peak); // No normalization when extracting label ids!
-    if (boost::math::isnan(signalValue)) {
+    if (std::isnan(signalValue)) {
       g_log.warning()
           << "Warning: image for integration is off edge of detector for peak "
           << i << '\n';

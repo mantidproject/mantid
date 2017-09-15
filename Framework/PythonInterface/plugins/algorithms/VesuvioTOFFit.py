@@ -1,4 +1,6 @@
 # pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.kernel import *
 from mantid.api import *
 
@@ -10,6 +12,7 @@ from vesuvio.instrument import VESUVIO
 _DIFF_MODES = ("double", "single")
 # Fitting modes
 _FIT_MODES = ("bank", "spectrum")
+
 
 class VesuvioTOFFit(VesuvioBase):
 
@@ -176,6 +179,7 @@ class VesuvioTOFFit(VesuvioBase):
                                           Operation='Multiply', Factor=1e06)
 
         return reduced_chi_squared, params, fitted_data
+
 
 # -----------------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(VesuvioTOFFit)

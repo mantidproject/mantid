@@ -1,28 +1,30 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/Jacobian.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/Expression.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -64,7 +66,8 @@ boost::shared_ptr<IFunction> IFunction::clone() const {
  * @param reporter :: A pointer to a progress reporter that can be called during
  * function evaluation
  */
-void IFunction::setProgressReporter(Kernel::ProgressBase *reporter) {
+void IFunction::setProgressReporter(
+    boost::shared_ptr<Kernel::ProgressBase> reporter) {
   m_progReporter = reporter;
   m_progReporter->setNotifyStep(0.01);
 }
@@ -75,7 +78,7 @@ void IFunction::setProgressReporter(Kernel::ProgressBase *reporter) {
  */
 void IFunction::reportProgress(const std::string &msg) const {
   if (m_progReporter) {
-    const_cast<Kernel::ProgressBase *>(m_progReporter)->report(msg);
+    const_cast<Kernel::ProgressBase *>(m_progReporter.get())->report(msg);
   }
 }
 
@@ -101,6 +104,59 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
   calNumericalDeriv(domain, jacobian);
 }
 
+/** Check if an active parameter i is actually active
+ * @param i :: Index of a parameter.
+ */
+bool IFunction::isActive(size_t i) const {
+  return getParameterStatus(i) == Active;
+}
+
+/**
+ * Query if the parameter is fixed
+ * @param i :: The index of a declared parameter
+ * @return true if parameter i is fixed
+ */
+bool IFunction::isFixed(size_t i) const {
+  auto status = getParameterStatus(i);
+  return status == Fixed || status == FixedByDefault;
+}
+
+/// Check if a parameter i is fixed by default (not by user).
+/// @param i :: The index of a parameter
+/// @return true if parameter i is fixed by default
+bool IFunction::isFixedByDefault(size_t i) const {
+  return getParameterStatus(i) == FixedByDefault;
+}
+
+/// This method doesn't create a tie
+/// @param i :: A declared parameter index to be fixed
+/// @param isDefault :: If true fix it by default
+///
+void IFunction::fix(size_t i, bool isDefault) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot fix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  if (isDefault) {
+    setParameterStatus(i, FixedByDefault);
+  } else {
+    setParameterStatus(i, Fixed);
+  }
+}
+
+/** Makes a parameter active again. It doesn't change the parameter's tie.
+ * @param i :: A declared parameter index to be restored to active
+ */
+void IFunction::unfix(size_t i) {
+  auto status = getParameterStatus(i);
+  if (status == Tied) {
+    throw std::runtime_error("Cannot unfix parameter " + std::to_string(i) +
+                             " (" + parameterName(i) + "): it has a tie.");
+  }
+  setParameterStatus(i, Active);
+}
+
 /**
  * Ties a parameter to other parameters
  * @param parName :: The name of the parameter to tie.
@@ -109,12 +165,15 @@ void IFunction::functionDeriv(const FunctionDomain &domain,
  * with this reference: a tie or a constraint.
  * @return newly ties parameters
  */
-ParameterTie *IFunction::tie(const std::string &parName,
-                             const std::string &expr, bool isDefault) {
-  auto ti = new ParameterTie(this, parName, expr, isDefault);
-  addTie(ti);
-  this->fix(getParameterIndex(*ti));
-  return ti;
+void IFunction::tie(const std::string &parName, const std::string &expr,
+                    bool isDefault) {
+  auto ti = Kernel::make_unique<ParameterTie>(this, parName, expr, isDefault);
+  if (!isDefault && ti->isConstant()) {
+    setParameter(parName, ti->eval());
+    fix(getParameterIndex(*ti));
+  } else {
+    addTie(std::move(ti));
+  }
 }
 
 /**
@@ -140,6 +199,7 @@ void IFunction::addTies(const std::string &ties, bool isDefault) {
       }
     }
   }
+  applyTies();
 }
 
 /** Removes the tie off a parameter. The parameter becomes active
@@ -151,12 +211,205 @@ void IFunction::removeTie(const std::string &parName) {
   this->removeTie(i);
 }
 
+/// Write all parameter ties owned by this function to a string
+/// @return A tie string for the parameter.
+std::string IFunction::writeTies() const {
+  std::ostringstream tieStream;
+  bool first = true;
+  for (auto &tie : m_ties) {
+    if (tie->isDefault())
+      continue;
+    if (!first) {
+      tieStream << ',';
+    } else {
+      first = false;
+    }
+    tieStream << tie->asString(this);
+  }
+  return tieStream.str();
+}
+
 /**
- * Writes a string that can be used in Fit.IFunction to create a copy of this
+ * Attaches a tie to this ParamFunction. The attached tie is owned by the
+ * ParamFunction.
+ * @param tie :: A pointer to a new tie
+ */
+void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
+
+  auto iPar = getParameterIndex(*tie);
+  bool found = false;
+  for (auto &m_tie : m_ties) {
+    auto mPar = getParameterIndex(*m_tie);
+    if (mPar == iPar) {
+      found = true;
+      m_tie = std::move(tie);
+      break;
+    }
+  }
+  if (!found) {
+    m_ties.push_back(std::move(tie));
+    setParameterStatus(iPar, Tied);
+  }
+}
+
+/**
+ * Apply the ties.
+ */
+void IFunction::applyTies() {
+  for (auto &m_tie : m_ties) {
+    m_tie->eval();
+  }
+}
+
+/**
+ * Used to find ParameterTie for a parameter i
+ */
+class ReferenceEqual {
+  /// The function that has the tie
+  const IFunction &m_fun;
+  /// index to find
+  const size_t m_i;
+
+public:
+  /// Constructor
+  explicit ReferenceEqual(const IFunction &fun, size_t i)
+      : m_fun(fun), m_i(i) {}
+  /// Bracket operator
+  /// @param p :: the element you are looking for
+  /// @return True if found
+  template <class T> bool operator()(const std::unique_ptr<T> &p) {
+    return m_fun.getParameterIndex(*p) == m_i;
+  }
+};
+
+/** Removes i-th parameter's tie if it is tied or does nothing.
+ * @param i :: The index of the tied parameter.
+ * @return True if successfull
+ */
+bool IFunction::removeTie(size_t i) {
+  if (i >= nParams()) {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  auto it =
+      std::find_if(m_ties.begin(), m_ties.end(), ReferenceEqual(*this, i));
+  if (it != m_ties.end()) {
+    m_ties.erase(it);
+    setParameterStatus(i, Active);
+    return true;
+  }
+  unfix(i);
+  return false;
+}
+
+/** Get tie of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the tie
+ */
+ParameterTie *IFunction::getTie(size_t i) const {
+  auto it =
+      std::find_if(m_ties.cbegin(), m_ties.cend(), ReferenceEqual(*this, i));
+  if (it != m_ties.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove all ties
+ */
+void IFunction::clearTies() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    setParameterStatus(i, Active);
+  }
+  m_ties.clear();
+}
+
+/** Add a constraint
+ *  @param ic :: Pointer to a constraint.
+ */
+void IFunction::addConstraint(std::unique_ptr<IConstraint> ic) {
+  size_t iPar = ic->parameterIndex();
+  bool found = false;
+  for (auto &constraint : m_constraints) {
+    if (constraint->parameterIndex() == iPar) {
+      found = true;
+      constraint = std::move(ic);
+      break;
+    }
+  }
+  if (!found) {
+    m_constraints.push_back(std::move(ic));
+  }
+}
+
+/** Get constraint of parameter number i
+ * @param i :: The index of a declared parameter.
+ * @return A pointer to the constraint or NULL
+ */
+IConstraint *IFunction::getConstraint(size_t i) const {
+  auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                         ReferenceEqual(*this, i));
+  if (it != m_constraints.cend()) {
+    return it->get();
+  }
+  return nullptr;
+}
+
+/** Remove a constraint
+ * @param parName :: The name of a parameter which constarint to remove.
+ */
+void IFunction::removeConstraint(const std::string &parName) {
+  size_t iPar = parameterIndex(parName);
+  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
+    if (iPar == (**it).getLocalIndex()) {
+      m_constraints.erase(it);
+      break;
+    }
+  }
+}
+
+/// Remove all constraints.
+void IFunction::clearConstraints() { m_constraints.clear(); }
+
+void IFunction::setUpForFit() {
+  for (auto &constraint : m_constraints) {
+    constraint->setParamToSatisfyConstraint();
+  }
+}
+
+/// Write all parameter constraints owned by this function to a string
+/// @return A constraint string for the parameter.
+std::string IFunction::writeConstraints() const {
+  std::ostringstream stream;
+  bool first = true;
+  for (auto &constrint : m_constraints) {
+    if (constrint->isDefault())
+      continue;
+    if (!first) {
+      stream << ',';
+    } else {
+      first = false;
+    }
+    stream << constrint->asString();
+  }
+  return stream.str();
+}
+
+/**
+ * Writes a string that can be used in FunctionFunctory to create a copy of this
  * IFunction
  * @return string representation of the function
  */
-std::string IFunction::asString() const {
+std::string IFunction::asString() const { return writeToString(); }
+
+/**
+ * Writes this function into a string.
+ * @param parentLocalAttributesStr :: A preformatted string with local
+ * attributes of a parent composite function. Can be passed in by a
+ * CompositeFunction (eg MultiDomainFunction).
+ * @return string representation of the function
+ */
+std::string
+IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
   // print the attributes
@@ -167,49 +420,37 @@ std::string IFunction::asString() const {
       ostr << ',' << attName << '=' << attValue;
     }
   }
+  std::vector<std::string> ties;
   // print the parameters
   for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (!tie || !tie->isDefault()) {
-      ostr << ',' << parameterName(i) << '=' << getParameter(i);
+    std::ostringstream paramOut;
+    paramOut << parameterName(i) << '=' << getParameter(i);
+    ostr << ',' << paramOut.str();
+    // Output non-default ties only.
+    if (getParameterStatus(i) == Fixed) {
+      ties.push_back(paramOut.str());
     }
   }
+
   // collect non-default constraints
-  std::string constraints;
-  for (size_t i = 0; i < nParams(); i++) {
-    const IConstraint *c = getConstraint(i);
-    if (c && !c->isDefault()) {
-      std::string tmp = c->asString();
-      if (!tmp.empty()) {
-        if (!constraints.empty()) {
-          constraints += ",";
-        }
-        constraints += tmp;
-      }
-    }
-  }
+  std::string constraints = writeConstraints();
   // print constraints
   if (!constraints.empty()) {
     ostr << ",constraints=(" << constraints << ")";
   }
+
   // collect the non-default ties
-  std::string ties;
-  for (size_t i = 0; i < nParams(); i++) {
-    const ParameterTie *tie = getTie(i);
-    if (tie && !tie->isDefault()) {
-      std::string tmp = tie->asString(this);
-      if (!tmp.empty()) {
-        if (!ties.empty()) {
-          ties += ",";
-        }
-        ties += tmp;
-      }
-    }
+  auto tiesString = writeTies();
+  if (!tiesString.empty()) {
+    ties.push_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {
-    ostr << ",ties=(" << ties << ")";
+    ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
+         << ")";
   }
+  // "local" attributes of a parent composite function
+  ostr << parentLocalAttributesStr;
   return ostr.str();
 }
 
@@ -224,9 +465,9 @@ void IFunction::addConstraints(const std::string &str, bool isDefault) {
   list.parse(str);
   list.toList();
   for (const auto &expr : list) {
-    IConstraint *c =
-        ConstraintFactory::Instance().createInitialized(this, expr, isDefault);
-    this->addConstraint(c);
+    auto c = std::unique_ptr<IConstraint>(
+        ConstraintFactory::Instance().createInitialized(this, expr, isDefault));
+    this->addConstraint(std::move(c));
   }
 }
 
@@ -341,6 +582,13 @@ private:
   /// Flag to quote a string value returned
   bool m_quoteString;
 };
+}
+
+/// Copy assignment. Do not copy m_quoteValue flag.
+/// @param attr :: The attribute to copy from.
+IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
+  m_data = attr.m_data;
+  return *this;
 }
 
 std::string IFunction::Attribute::value() const {
@@ -565,7 +813,7 @@ protected:
   }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
-    if (m_value.empty()) {
+    if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
@@ -601,7 +849,8 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return getParameter(i);
 }
@@ -610,7 +859,8 @@ double IFunction::activeParameter(size_t i) const {
 /// parameters different from the declared
 void IFunction::setActiveParameter(size_t i, double value) {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   setParameter(i, value);
 }
@@ -621,7 +871,8 @@ void IFunction::setActiveParameter(size_t i, double value) {
  */
 std::string IFunction::nameOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterName(i);
 }
@@ -632,7 +883,8 @@ std::string IFunction::nameOfActive(size_t i) const {
  */
 std::string IFunction::descriptionOfActive(size_t i) const {
   if (!isActive(i)) {
-    throw std::runtime_error("Attempt to use an inactive parameter");
+    throw std::runtime_error("Attempt to use an inactive parameter " +
+                             parameterName(i));
   }
   return parameterDescription(i);
 }
@@ -713,27 +965,33 @@ void IFunction::setMatrixWorkspace(
 
     // check if parameter are specified in instrument definition file
 
-    const Geometry::ParameterMap &paramMap = workspace->instrumentParameters();
+    const auto &paramMap = workspace->constInstrumentParameters();
 
-    Geometry::IDetector_const_sptr det;
+    Geometry::IDetector const *detectorPtr = nullptr;
     size_t numDetectors = workspace->getSpectrum(wi).getDetectorIDs().size();
     if (numDetectors > 1) {
       // If several detectors are on this workspace index, just use the ID of
       // the first detector
       // Note JZ oct 2011 - I'm not sure why the code uses the first detector
       // and not the group. Ask Roman.
-      Instrument_const_sptr inst = workspace->getInstrument();
-      det = inst->getDetector(
-          *workspace->getSpectrum(wi).getDetectorIDs().begin());
-    } else
+      auto firstDetectorId =
+          *workspace->getSpectrum(wi).getDetectorIDs().begin();
+
+      const auto &detectorInfo = workspace->detectorInfo();
+      const auto detectorIndex = detectorInfo.indexOf(firstDetectorId);
+      const auto &detector = detectorInfo.detector(detectorIndex);
+      detectorPtr = &detector;
+    } else {
       // Get the detector (single) at this workspace index
-      det = workspace->getDetector(wi);
-    ;
+      const auto &spectrumInfo = workspace->spectrumInfo();
+      const auto &detector = spectrumInfo.detector(wi);
+      detectorPtr = &detector;
+    }
 
     for (size_t i = 0; i < nParams(); i++) {
       if (!isExplicitlySet(i)) {
         Geometry::Parameter_sptr param =
-            paramMap.getRecursive(&(*det), parameterName(i), "fitting");
+            paramMap.getRecursive(detectorPtr, parameterName(i), "fitting");
         if (param != Geometry::Parameter_sptr()) {
           // get FitParameter
           const Geometry::FitParameter &fitParam =
@@ -741,19 +999,19 @@ void IFunction::setMatrixWorkspace(
 
           // check first if this parameter is actually specified for this
           // function
-          if (name().compare(fitParam.getFunction()) == 0) {
+          if (name() == fitParam.getFunction()) {
             // update value
             IFunctionWithLocation *testWithLocation =
                 dynamic_cast<IFunctionWithLocation *>(this);
             if (testWithLocation == nullptr ||
                 (!fitParam.getLookUpTable().containData() &&
-                 fitParam.getFormula().compare("") == 0)) {
+                 fitParam.getFormula().empty())) {
               setParameter(i, fitParam.getValue());
             } else {
               double centreValue = testWithLocation->centre();
               Kernel::Unit_sptr centreUnit; // unit of value used in formula or
                                             // to look up value in lookup table
-              if (fitParam.getFormula().compare("") == 0)
+              if (fitParam.getFormula().empty())
                 centreUnit = fitParam.getLookUpTable().getXUnit(); // from table
               else {
                 if (!fitParam.getFormulaUnit().empty()) {
@@ -790,7 +1048,7 @@ void IFunction::setMatrixWorkspace(
               // a unit of its own. If set convert param value
               // See section 'Using fitting parameters in
               // www.mantidproject.org/IDF
-              if (fitParam.getFormula().compare("") == 0) {
+              if (fitParam.getFormula().empty()) {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit =
                     fitParam.getLookUpTable().getYUnit(); // from table
@@ -864,14 +1122,14 @@ void IFunction::setMatrixWorkspace(
               if (fitParam.getConstraintPenaltyFactor().compare("")) {
                 try {
                   double penalty =
-                      atof(fitParam.getConstraintPenaltyFactor().c_str());
+                      std::stod(fitParam.getConstraintPenaltyFactor());
                   constraint->setPenaltyFactor(penalty);
                 } catch (...) {
                   g_log.warning()
                       << "Can't set penalty factor for constraint\n";
                 }
               }
-              addConstraint(constraint);
+              addConstraint(std::unique_ptr<IConstraint>(constraint));
             }
           }
         }
@@ -894,7 +1152,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
                                size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return value;
 
   // first check if it is possible to do a quick conversion and convert
@@ -923,7 +1181,7 @@ void IFunction::convertValue(std::vector<double> &values,
                              size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
-  if (outUnit->unitID().compare(wsUnit->unitID()) == 0)
+  if (outUnit->unitID() == wsUnit->unitID())
     return;
 
   // first check if it is possible to do a quick conversion convert
@@ -942,22 +1200,18 @@ void IFunction::convertValue(std::vector<double> &values,
           << "Ignore convertion.";
       return;
     }
-    double l1 = instrument->getSource()->getDistance(*sample);
-    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
-    double l2(-1.0), twoTheta(0.0);
-    if (!det->isMonitor()) {
-      l2 = det->getDistance(*sample);
-      twoTheta = ws->detectorTwoTheta(*det);
-    } else // If this is a monitor then make l1+l2 = source-detector distance
-           // and twoTheta=0
-    {
-      l2 = det->getDistance(*(instrument->getSource()));
-      l2 = l2 - l1;
-      twoTheta = 0.0;
-    }
+    const auto &spectrumInfo = ws->spectrumInfo();
+    double l1 = spectrumInfo.l1();
+    // If this is a monitor then l1+l2 = source-detector distance and twoTheta=0
+    double l2 = spectrumInfo.l2(wsIndex);
+    double twoTheta(0.0);
+    if (!spectrumInfo.isMonitor(wsIndex))
+      twoTheta = spectrumInfo.twoTheta(wsIndex);
     int emode = static_cast<int>(ws->getEMode());
     double efixed(0.0);
     try {
+      boost::shared_ptr<const Geometry::IDetector> det(
+          &spectrumInfo.detector(wsIndex), NoDeleting());
       efixed = ws->getEFixed(det);
     } catch (std::exception &) {
       // assume elastic
@@ -1074,6 +1328,17 @@ void IFunction::storeAttributeValue(const std::string &name,
 }
 
 /**
+*  Store a value to a named attribute if it can be considered "mutable" or
+*  read only, which simply reflects the current state of the function.
+*  @param name :: The name of the attribute
+*  @param value :: The value of the attribute
+*/
+void IFunction::storeReadOnlyAttribute(
+    const std::string &name, const API::IFunction::Attribute &value) const {
+  const_cast<IFunction *>(this)->storeAttributeValue(name, value);
+}
+
+/**
  * Set the covariance matrix. Algorithm Fit sets this matrix to the top-level
  * function
  * after fitting. If the function is composite the matrix isn't set to its
@@ -1105,9 +1370,10 @@ size_t IFunction::getValuesSize(const FunctionDomain &domain) const {
 
 /// Fix a parameter
 /// @param name :: A name of a parameter to fix
-void IFunction::fixParameter(const std::string &name) {
+/// @param isDefault :: If true fix it by default
+void IFunction::fixParameter(const std::string &name, bool isDefault) {
   auto i = parameterIndex(name);
-  fix(i);
+  fix(i, isDefault);
 }
 
 /// Free a parameter
@@ -1118,16 +1384,39 @@ void IFunction::unfixParameter(const std::string &name) {
 }
 
 /// Fix all parameters
-void IFunction::fixAll() {
+/// @param isDefault :: If true fix them by default
+void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
+    fix(i, isDefault);
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i);
+    unfix(i);
+  }
+}
+
+/// Free all parameters fixed by default
+void IFunction::unfixAllDefault() {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == FixedByDefault) {
+      unfix(i);
+    }
+  }
+}
+
+/// Fix all active parameters. This method doesn't change
+/// status of a fixed parameter, eg if one was fixed by default
+/// prior to calling this method it will remain default regardless
+/// the value of isDefault argument.
+/// @param isDefault :: If true fix them by default.
+void IFunction::fixAllActive(bool isDefault) {
+  for (size_t i = 0; i < nParams(); ++i) {
+    if (getParameterStatus(i) == Active) {
+      fix(i, isDefault);
+    }
   }
 }
 

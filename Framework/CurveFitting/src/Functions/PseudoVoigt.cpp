@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/make_unique.h"
 
 #include <cmath>
 
@@ -80,11 +81,11 @@ void PseudoVoigt::init() {
   declareParameter("PeakCentre");
   declareParameter("FWHM");
 
-  BoundaryConstraint *mixingConstraint =
-      new BoundaryConstraint(this, "Mixing", 0.0, 1.0, true);
+  auto mixingConstraint =
+      Kernel::make_unique<BoundaryConstraint>(this, "Mixing", 0.0, 1.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
 
-  addConstraint(mixingConstraint);
+  addConstraint(std::move(mixingConstraint));
 }
 
 } // namespace Functions

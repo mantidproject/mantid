@@ -27,7 +27,7 @@ namespace Detail {
 // needing to know the implementation of CompareHistory.
 template <class T> struct CompareHistory {
   bool operator()(const boost::shared_ptr<T> &lhs,
-                  const boost::shared_ptr<T> &rhs) {
+                  const boost::shared_ptr<T> &rhs) const {
     return (*lhs) < (*rhs);
   }
 };
@@ -121,7 +121,8 @@ public:
   /// Retrieve the number of child algorithms
   size_t childHistorySize() const;
   /// print contents of object
-  void printSelf(std::ostream &, const int indent = 0) const;
+  void printSelf(std::ostream &, const int indent = 0,
+                 const size_t maxPropertyLength = 0) const;
   /// Less than operator
   inline bool operator<(const AlgorithmHistory &other) const {
     return (execCount() < other.execCount());

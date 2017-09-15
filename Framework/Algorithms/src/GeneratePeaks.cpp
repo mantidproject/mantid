@@ -1,7 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,6 +10,9 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -168,7 +167,7 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
                                          std::string &bkgdfunctype) {
   // Function parameters
   std::string paramwsname = getPropertyValue("PeakParametersWorkspace");
-  if (paramwsname.size() > 0) {
+  if (!paramwsname.empty()) {
     // Using parameter table workspace has a higher priority
     m_useFuncParamWS = true;
     m_funcParamWS = getProperty("PeakParametersWorkspace");
@@ -194,14 +193,13 @@ void GeneratePeaks::processAlgProperties(std::string &peakfunctype,
     bkgdfunctype = strs[0];
   }
 
-  if (bkgdfunctype.compare("Auto") == 0) {
+  if (bkgdfunctype == "Auto") {
     m_useAutoBkgd = true;
     bkgdfunctype = "Quadratic";
-  } else if (bkgdfunctype.compare("None") == 0) {
+  } else if (bkgdfunctype == "None") {
     m_useAutoBkgd = false;
     m_genBackground = false;
-  } else if (bkgdfunctype.compare("Linear") == 0 ||
-             bkgdfunctype.compare("Flat") == 0) {
+  } else if (bkgdfunctype == "Linear" || bkgdfunctype == "Flat") {
     m_useAutoBkgd = false;
     bkgdfunctype = bkgdfunctype + "Background";
   }
@@ -519,9 +517,9 @@ void GeneratePeaks::processTableColumnNames() {
   // Initial check
   std::vector<std::string> colnames = m_funcParamWS->getColumnNames();
 
-  if (colnames[0].compare("spectrum") != 0)
+  if (colnames[0] != "spectrum")
     throw std::runtime_error("First column must be 'spectrum' in integer. ");
-  if (colnames.back().compare("chi2") != 0)
+  if (colnames.back() != "chi2")
     throw std::runtime_error("Last column must be 'chi2'.");
 
   // Process column names in case that there are not same as parameter names
@@ -761,31 +759,24 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
     else
       xvalue += fabs(dx) * xvalue;
   }
-  size_t numxvalue = xarray.size();
 
-  BinEdges xArrayEdges(xarray);
-
-  // Create new workspace
-  MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", m_spectraSet.size(), numxvalue, numxvalue - 1);
-  for (size_t ip = 0; ip < m_spectraSet.size(); ip++) {
-    ws->setBinEdges(ip, xArrayEdges);
-  }
-  // Set spectrum numbers
-  std::map<specnum_t, specnum_t>::iterator spiter;
-  for (spiter = m_SpectrumMap.begin(); spiter != m_SpectrumMap.end();
-       ++spiter) {
-    specnum_t specid = spiter->first;
-    specnum_t wsindex = spiter->second;
-    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , "
-                  << specid << "\n";
-    ws->getSpectrum(wsindex).setSpectrumNo(specid);
+  std::vector<Indexing::SpectrumNumber> specNums;
+  for (const auto &item : m_SpectrumMap) {
+    specnum_t specid = item.first;
+    g_log.debug() << "Build WorkspaceIndex-Spectrum  " << specNums.size()
+                  << " , " << specid << "\n";
+    specNums.push_back(specid);
   }
 
-  return ws;
+  Indexing::IndexInfo indices(specNums.size());
+  indices.setSpectrumNumbers(std::move(specNums));
+  // There is no instrument, so the automatic build of a 1:1 mapping would fail.
+  // Need to set empty grouping manually.
+  indices.setSpectrumDefinitions(
+      std::vector<SpectrumDefinition>(specNums.size()));
+  return create<Workspace2D>(indices, BinEdges(std::move(xarray)));
 }
 
-//----------------------------------------------------------------------------------------------
 /** Add function's parameter names after peak function name
   */
 std::vector<std::string>

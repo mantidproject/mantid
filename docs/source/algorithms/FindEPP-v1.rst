@@ -28,7 +28,7 @@ Usage
                 XMin=4005.75, XMax=7995.75, BinWidth=10.5, BankDistanceFromSample=4.0)
 
     # search for elastic peak positions
-    table = FindEPP(ws)
+    table = FindEPP(ws, Version=1)
 
     # print some results
     print "The fit status is", table.row(0)['FitStatus']
@@ -47,3 +47,6 @@ Output:
 .. categories::
 
 .. sourcelink::
+	:filename: FindEPP
+	:cpp: None
+	:h: None

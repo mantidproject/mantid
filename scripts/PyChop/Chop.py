@@ -17,11 +17,14 @@ technical reports:
     http://www.neutronresearch.com/parch/1993/01/199301013280.pdf
 """
 
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 # ------------------------------------------------------------------------------------------------- #
 # Chopper functions
 # ------------------------------------------------------------------------------------------------- #
+
+
 def tchop(freq, Ei, pslit, radius, rho):
     """
     ! Calculates the time width of a Fermi chopper given its parameters, the Ei and frequency.
@@ -51,6 +54,7 @@ def tchop(freq, Ei, pslit, radius, rho):
             gsqr = 0.60 * gamm * ((groot-2.00)**2) * (groot+8.00) / (groot+4.00)
         tausqr = ((p/(2.00*R*w))**2/ 6.00) * gsqr
     return tausqr
+
 
 def achop(Ei, freq, dslat, pslit, radius, rho):
     """
@@ -95,6 +99,8 @@ def achop(Ei, freq, dslat, pslit, radius, rho):
 # ------------------------------------------------------------------------------------------------- #
 # Moderator functions
 # ------------------------------------------------------------------------------------------------- #
+
+
 def tikeda(S1, S2, B1, B2, Emod, Ei):
     """
     ! Calculates the moderator time width based on the Ikeda-Carpenter distribution
@@ -112,6 +118,7 @@ def tikeda(S1, S2, B1, B2, Emod, Ei):
     # variance currently in mms**2. Convert to sec**2
     return tausqr*1.0e-12
 
+
 def tchi(delta, Ei):
     """
     ! Calculates the moderator time width based on the Chi^2 distribution
@@ -119,6 +126,7 @@ def tchi(delta, Ei):
     vel = 437.392 * np.sqrt(Ei)
     tausqr = ((delta/1.96)/ vel)**2
     return tausqr
+
 
 def tchi_2(delta_0, delta_G, Ei):
     """
@@ -128,6 +136,7 @@ def tchi_2(delta_0, delta_G, Ei):
     tausqr = (((delta_0+delta_G*np.sqrt(Ei))/1.96) / vel)**2
     return tausqr
 
+
 def flux_norm(ch_mod):
     """
     ! Returns an empirically determined flux normalisation factor for different ISIS moderators
@@ -136,6 +145,7 @@ def flux_norm(ch_mod):
     if ch_mod not in phi0.keys():
         raise ValueError('Moderator %s is not supported in PyChop' % (ch_mod))
     return phi0[ch_mod]
+
 
 def flux_fun(en_ev, ch_mod):
     """
@@ -170,6 +180,7 @@ def flux_fun(en_ev, ch_mod):
         delt2 = 1.00
     phifun = phi_max + delt1*delt2*phi_epi
     return phifun
+
 
 def flux_calc(Ei, ch_mod, thetam):
     """
@@ -217,6 +228,7 @@ def detect2(wd, hd, wf, idet, dd):
         sigdz = hd / np.sqrt(12.0)
         sigdd = np.sqrt(v_dd)
     return delta, sigd, sigdz, sigdd, effic
+
 
 def detect_he(wvec, rad, atms, t2rad):
     """
@@ -277,6 +289,7 @@ def detect_he(wvec, rad, atms, t2rad):
             v_dd = v_dd * (reff**2)
             v_d = v_d * (reff**2)
     return effic, delta, ddsqr, v_dd, v_d
+
 
 def tube_mts(alf):
     """
@@ -407,6 +420,7 @@ def tube_mts(alf):
             vy = (10.0-alf)*vy_f + (alf-9.0)*vy_g
     return eff, delta, xsqr, vx, vy
 
+
 def chbmts(a, b, c, m, x):
     """
     ! Essentially CHEBEV of "Numerical Recipes"
@@ -414,7 +428,6 @@ def chbmts(a, b, c, m, x):
     d = 0.0
     ddd = 0.0
     y = (2.0*x-a-b)/(b-a)
-    y2 = 2.0*y
     for j in range(m-1, 0, -1):
         sv = d
         d = 2.*y*d - ddd + c[j]
@@ -425,6 +438,8 @@ def chbmts(a, b, c, m, x):
 # ------------------------------------------------------------------------------------------------- #
 # Sample functions
 # ------------------------------------------------------------------------------------------------- #
+
+
 def sam0(sx, sy, sz, isam):
     """
     ! Calculates the sample time widths

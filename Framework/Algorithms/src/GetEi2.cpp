@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/GetEi2.h"
 
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidGeometry/IDetector_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -12,9 +14,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <cmath>
-#include <algorithm>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -215,9 +217,10 @@ double GetEi2::calculateEi(const double initial_guess) {
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
+  auto &spectrumInfo = m_input_ws->spectrumInfo();
   for (unsigned int i = 0; i < 2; ++i) {
     size_t ws_index = mon_indices[i];
-    det_distances[i] = getDistanceFromSource(ws_index);
+    det_distances[i] = getDistanceFromSource(ws_index, spectrumInfo);
     const double peak_guess =
         det_distances[i] * std::sqrt(m_t_to_mev / initial_guess);
     const double t_min = (1.0 - m_tof_window) * peak_guess;
@@ -275,31 +278,33 @@ double GetEi2::calculateEi(const double initial_guess) {
   }
 }
 
-/** Gets the distance between the source and detectors whose workspace index is
+/**
+ * Gets the distance between the source and detectors whose workspace index is
  * passed
  *  @param ws_index :: The workspace index of the detector
+ *  @param spectrumInfo :: A spectrum info object for the input workspace
  *  @return The distance between the source and the given detector(or
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(size_t ws_index) const {
+double GetEi2::getDistanceFromSource(size_t ws_index,
+                                     const SpectrumInfo &spectrumInfo) const {
   g_log.debug() << "Computing distance between spectrum at index '" << ws_index
                 << "' and the source\n";
 
+  const auto &detector = spectrumInfo.detector(ws_index);
   const IComponent_const_sptr source = m_input_ws->getInstrument()->getSource();
-  // Retrieve a pointer detector
-  IDetector_const_sptr det = m_input_ws->getDetector(ws_index);
-  if (!det) {
+  if (!spectrumInfo.hasDetectors(ws_index)) {
     std::ostringstream msg;
     msg << "A detector for monitor at workspace index " << ws_index
         << " cannot be found. ";
     throw std::runtime_error(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Detector position = " << det->getPos()
+    g_log.debug() << "Detector position = " << spectrumInfo.position(ws_index)
                   << ", Source position = " << source->getPos() << "\n";
   }
-  const double dist = det->getDistance(*source);
+  const double dist = detector.getDistance(*source);
   g_log.debug() << "Distance = " << dist << " metres\n";
   return dist;
 }
@@ -645,6 +650,7 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;
   childAlg->setPropertyValue("Params", binParams.str());
+  childAlg->setProperty("IgnoreBinErrors", true);
   childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }

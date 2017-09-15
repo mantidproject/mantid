@@ -12,8 +12,8 @@ This is **not** a replacement for ``Histogram1D`` or ``ISpectrum``, but rather d
 This document is intended for Mantid developers.
 It informs about the transition to the new way of dealing with histograms, and explains the new interfaces.
 
-Instroduction
--------------
+Introduction
+------------
 
 Motivation
 ##########
@@ -54,24 +54,24 @@ Mantid developers are all familiar with these two facts:
 1. Algorithms that "do not care" access the data and simply work with it. All other algorithms attempt to determine whether the x-data corresponds bin edges or points by comparing its length to that of the y-data (or alternatively use ``MatrixWorkspace::isHistogramData()``). Based on the result they may convert, e.g., bin edges to points.
 2. The copy-on-write mechanism is reflected in the interface of ``ISpectrum`` and ``MatrixWorkspace``:
 
-  .. code-block:: c++
-    :linenos:
+   .. code-block:: c++
+     :linenos:
 
-    using MantidVec = std::vector<double>;
-    using MantidVecPtr = Kernel::cow_ptr<std::vector<double>>;
+     using MantidVec = std::vector<double>;
+     using MantidVecPtr = Kernel::cow_ptr<std::vector<double>>;
 
-    // Current ISpectrum interface:
-    void setX(const MantidVec &X);
-    void setX(const MantidVecPtr &X);
-    void setX(const MantidVecPtr::ptr_type &X);
-    MantidVec &dataX();
-    const MantidVec &dataX() const;
-    const MantidVec &readX() const;
-    MantidVecPtr ptrX() const; // renamed to refX() in MatrixWorkspace
+     // Current ISpectrum interface:
+     void setX(const MantidVec &X);
+     void setX(const MantidVecPtr &X);
+     void setX(const MantidVecPtr::ptr_type &X);
+     MantidVec &dataX();
+     const MantidVec &dataX() const;
+     const MantidVec &readX() const;
+     MantidVecPtr ptrX() const; // renamed to refX() in MatrixWorkspace
 
-  - Non-``const`` access to data in a spectrum will trigger a copy.
-  - To avoid triggering the copy we use ``readX()``.
-  - When we want to share data we use ``setX()`` with a ``shared_ptr`` or ``cow_ptr`` (can be obtained with ``ptrX()`` or ``refX()``).
+   - Non-``const`` access to data in a spectrum will trigger a copy.
+   - To avoid triggering the copy we use ``readX()``.
+   - When we want to share data we use ``setX()`` with a ``shared_ptr`` or ``cow_ptr`` (can be obtained with ``ptrX()`` or ``refX()``).
 
 The shortcomings of the current implementation are mostly obvious and can also be found in the `design document <https://github.com/mantidproject/documents/blob/master/Design/histogram_type.md>`_.
 
@@ -254,7 +254,7 @@ The interface for Dx is mostly equivalent to that for E.
 
   .. code-block:: c++
     :linenos:
-  
+
     class Histogram {
     public:
       // Returns by value!
@@ -275,7 +275,7 @@ The interface for Dx is mostly equivalent to that for E.
 
   .. code-block:: c++
     :linenos:
-  
+
     class Histogram {
     public:
       // Returns by value!
@@ -296,7 +296,7 @@ The interface for Dx is mostly equivalent to that for E.
 
   .. code-block:: c++
     :linenos:
-  
+
     class Histogram {
     public:
       // Returns by value!
@@ -317,7 +317,7 @@ The interface for Dx is mostly equivalent to that for E.
 
   .. code-block:: c++
     :linenos:
-  
+
     class Histogram {
     public:
       // Returns by value!
@@ -338,7 +338,7 @@ The interface for Dx is mostly equivalent to that for E.
 
   .. code-block:: c++
     :linenos:
-  
+
     class Histogram {
     public:
       // Return by value!

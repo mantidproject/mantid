@@ -1,9 +1,11 @@
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "boost/lexical_cast.hpp"
@@ -19,7 +21,6 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyDetailedBalance)
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void ApplyDetailedBalance::init() {
@@ -28,16 +29,20 @@ void ApplyDetailedBalance::init() {
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "An input workspace.");
-  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
-                                                   Direction::Output),
-                  "An output workspace.");
   declareProperty(
       make_unique<PropertyWithValue<string>>("Temperature", "",
                                              Direction::Input),
       "SampleLog variable name that contains the temperature, or a number");
+  declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "An output workspace.");
+  std::vector<std::string> unitOptions{"Energy", "Frequency"};
+  declareProperty(
+      "OutputUnits", "Energy",
+      boost::make_shared<StringListValidator>(unitOptions),
+      "Susceptibility as a function of energy (meV) or frequency (GHz)");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ApplyDetailedBalance::exec() {
@@ -81,6 +86,15 @@ void ApplyDetailedBalance::exec() {
   // Get back the result
   outputWS = expcor->getProperty("OutputWorkspace");
 
+  // Select the unit, transform if different than energy
+  std::string unit = getProperty("OutputUnits");
+  if (unit == "Frequency") {
+    IAlgorithm_sptr convert = createChildAlgorithm("ConvertUnits");
+    convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+    convert->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWS);
+    convert->setProperty<std::string>("Target", "DeltaE_inFrequency");
+    convert->executeAsChildAlg();
+  }
   setProperty("OutputWorkspace", outputWS);
 }
 

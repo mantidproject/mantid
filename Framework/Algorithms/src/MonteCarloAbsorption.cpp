@@ -1,32 +1,38 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/MonteCarloAbsorption.h"
+#include "MantidAlgorithms/InterpolationOption.h"
+#include "MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h"
+#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
-#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-
+#include "MantidHistogramData/Histogram.h"
+#include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "MantidHistogramData/HistogramX.h"
-
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::Points;
+using Mantid::HistogramData::interpolateLinearInplace;
+using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 
 /// @cond
@@ -34,6 +40,8 @@ namespace {
 
 constexpr int DEFAULT_NEVENTS = 300;
 constexpr int DEFAULT_SEED = 123456789;
+constexpr int DEFAULT_LATITUDINAL_DETS = 5;
+constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 
 /// Energy (meV) to wavelength (angstroms)
 inline double toWavelength(double energy) {
@@ -51,11 +59,11 @@ struct EFixedProvider {
     }
   }
   inline DeltaEMode::Type emode() const { return m_emode; }
-  inline double value(const IDetector_const_sptr &det) const {
+  inline double value(const Mantid::detid_t detID) const {
     if (m_emode != DeltaEMode::Indirect)
       return m_value;
     else
-      return m_expt.getEFixed(det);
+      return m_expt.getEFixed(detID);
   }
 
 private:
@@ -95,12 +103,37 @@ void MonteCarloAbsorption::init() {
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
-                  "atttempted (default: all points)");
+                  "attempted (default: all points)");
   declareProperty(
       "EventsPerPoint", DEFAULT_NEVENTS, positiveInt,
       "The number of \"neutron\" events to generate per simulated point");
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
+
+  InterpolationOption interpolateOpt;
+  declareProperty(interpolateOpt.property(), interpolateOpt.propertyDoc());
+  declareProperty("SparseInstrument", false, "Enable simulation on special "
+                                             "instrument with a sparse grid of "
+                                             "detectors interpolating the "
+                                             "results to the real instrument.");
+  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  threeOrMore->setLower(3);
+  declareProperty(
+      "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
+      "Number of detector rows in the detector grid of the sparse instrument.");
+  setPropertySettings(
+      "NumberOfDetectorRows",
+      Kernel::make_unique<EnabledWhenProperty>(
+          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
+  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  twoOrMore->setLower(2);
+  declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
+                  twoOrMore, "Number of detector columns in the detector grid "
+                             "of the sparse instrument.");
+  setPropertySettings(
+      "NumberOfDetectorColumns",
+      Kernel::make_unique<EnabledWhenProperty>(
+          "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
 }
 
 /**
@@ -111,11 +144,30 @@ void MonteCarloAbsorption::exec() {
   const int nevents = getProperty("EventsPerPoint");
   const int nlambda = getProperty("NumberOfWavelengthPoints");
   const int seed = getProperty("SeedValue");
+  InterpolationOption interpolateOpt;
+  interpolateOpt.set(getPropertyValue("Interpolation"));
+  const bool useSparseInstrument = getProperty("SparseInstrument");
+  auto outputWS = doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda,
+                               seed, interpolateOpt, useSparseInstrument);
 
-  auto outputWS =
-      doSimulation(*inputWS, static_cast<size_t>(nevents), nlambda, seed);
+  setProperty("OutputWorkspace", std::move(outputWS));
+}
 
-  setProperty("OutputWorkspace", outputWS);
+/**
+ * Validate the input properties.
+ * @return a map where keys are property names and values the found issues
+ */
+std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
+  std::map<std::string, std::string> issues;
+  const int nlambda = getProperty("NumberOfWavelengthPoints");
+  InterpolationOption interpOpt;
+  const std::string interpValue = getPropertyValue("Interpolation");
+  interpOpt.set(interpValue);
+  const auto nlambdaIssue = interpOpt.validateInputSize(nlambda);
+  if (!nlambdaIssue.empty()) {
+    issues["NumberOfWavelengthPoints"] = nlambdaIssue;
+  }
+  return issues;
 }
 
 /**
@@ -125,26 +177,43 @@ void MonteCarloAbsorption::exec() {
  * @param nlambda Number of wavelength points to simulate. The remainder
  * are computed using interpolation
  * @param seed Seed value for the random number generator
+ * @param interpolateOpt Method of interpolation to compute unsimulated points
+ * @param useSparseInstrument If true, use sparse instrument in simulation
  * @return A new workspace containing the correction factors & errors
  */
-MatrixWorkspace_sptr
-MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
-                                   size_t nevents, int nlambda, int seed) {
+MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
+    const MatrixWorkspace &inputWS, const size_t nevents, int nlambda,
+    const int seed, const InterpolationOption &interpolateOpt,
+    const bool useSparseInstrument) {
   auto outputWS = createOutputWorkspace(inputWS);
-  // Cache information about the workspace that will be used repeatedly
-  auto instrument = inputWS.getInstrument();
-  const int64_t nhists = static_cast<int64_t>(inputWS.getNumberHistograms());
-  const int nbins = static_cast<int>(inputWS.blocksize());
-  if (isEmpty(nlambda) || nlambda > nbins) {
+  const auto inputNbins = static_cast<int>(inputWS.blocksize());
+  if (isEmpty(nlambda) || nlambda > inputNbins) {
     if (!isEmpty(nlambda)) {
       g_log.warning() << "The requested number of wavelength points is larger "
                          "than the spectra size. "
                          "Defaulting to spectra size.\n";
     }
-    nlambda = nbins;
+    nlambda = inputNbins;
   }
+  std::unique_ptr<const DetectorGridDefinition> detGrid;
+  MatrixWorkspace_uptr sparseWS;
+  if (useSparseInstrument) {
+    const int latitudinalDets = getProperty("NumberOfDetectorRows");
+    const int longitudinalDets = getProperty("NumberOfDetectorColumns");
+    detGrid = SparseInstrument::createDetectorGridDefinition(
+        inputWS, latitudinalDets, longitudinalDets);
+    sparseWS = SparseInstrument::createSparseWS(inputWS, *detGrid, nlambda);
+  }
+  MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
+  const MatrixWorkspace &instrumentWS =
+      useSparseInstrument ? simulationWS : inputWS;
+  // Cache information about the workspace that will be used repeatedly
+  auto instrument = instrumentWS.getInstrument();
+  const int64_t nhists =
+      static_cast<int64_t>(instrumentWS.getNumberHistograms());
+  const int nbins = static_cast<int>(simulationWS.blocksize());
 
-  EFixedProvider efixed(inputWS);
+  EFixedProvider efixed(instrumentWS);
   auto beamProfile = createBeamProfile(*instrument, inputWS.sample());
 
   // Configure progress
@@ -156,33 +225,31 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
   // Configure strategy
   MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), nevents);
 
-  PARALLEL_FOR1(outputWS)
+  const auto &spectrumInfo = simulationWS.spectrumInfo();
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    auto xvalues = outputWS->points(i);
-    auto &signal = outputWS->mutableY(i);
-    auto &errors = outputWS->mutableE(i);
+    auto &outE = simulationWS.mutableE(i);
     // The input was cloned so clear the errors out
-    // Y values are all overwritten later
-    errors = 0.0;
-
+    outE = 0.0;
     // Final detector position
-    IDetector_const_sptr detector;
-    try {
-      detector = outputWS->getDetector(i);
-    } catch (Kernel::Exception::NotFoundError &) {
+    if (!spectrumInfo.hasDetectors(i)) {
       continue;
     }
     // Per spectrum values
-    const auto &detPos = detector->getPos();
-    const double lambdaFixed = toWavelength(efixed.value(detector));
+    const auto &detPos = spectrumInfo.position(i);
+    const double lambdaFixed =
+        toWavelength(efixed.value(spectrumInfo.detector(i).getID()));
     MersenneTwister rng(seed);
 
+    auto &outY = simulationWS.mutableY(i);
+    const auto lambdas = simulationWS.points(i);
     // Simulation for each requested wavelength point
     for (int j = 0; j < nbins; j += lambdaStepSize) {
       prog.report(reportMsg);
-      const double lambdaStep = xvalues[j];
+      const double lambdaStep = lambdas[j];
       double lambdaIn(lambdaStep), lambdaOut(lambdaStep);
       if (efixed.emode() == DeltaEMode::Direct) {
         lambdaIn = lambdaFixed;
@@ -191,7 +258,7 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
       } else {
         // elastic case already initialized
       }
-      std::tie(signal[j], std::ignore) =
+      std::tie(outY[j], std::ignore) =
           strategy.calculate(rng, detPos, lambdaIn, lambdaOut);
 
       // Ensure we have the last point for the interpolation
@@ -201,21 +268,32 @@ MonteCarloAbsorption::doSimulation(const MatrixWorkspace &inputWS,
     }
 
     // Interpolate through points not simulated
-    if (lambdaStepSize > 1) {
-      Kernel::VectorHelper::linearlyInterpolateY(
-          xvalues.rawData(), outputWS->dataY(i), lambdaStepSize);
+    if (!useSparseInstrument && lambdaStepSize > 1) {
+      auto histnew = simulationWS.histogram(i);
+      if (lambdaStepSize < nbins) {
+        interpolateOpt.applyInplace(histnew, lambdaStepSize);
+      } else {
+        std::fill(histnew.mutableY().begin() + 1, histnew.mutableY().end(),
+                  histnew.y()[0]);
+      }
+
+      outputWS->setHistogram(i, histnew);
     }
 
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  if (useSparseInstrument) {
+    interpolateFromSparse(*outputWS, simulationWS, interpolateOpt, *detGrid);
+  }
+
   return outputWS;
 }
 
-MatrixWorkspace_sptr MonteCarloAbsorption::createOutputWorkspace(
+MatrixWorkspace_uptr MonteCarloAbsorption::createOutputWorkspace(
     const MatrixWorkspace &inputWS) const {
-  MatrixWorkspace_sptr outputWS = inputWS.clone();
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);
@@ -249,9 +327,38 @@ MonteCarloAbsorption::createBeamProfile(const Instrument &instrument,
     beamWidth = bbox[frame->pointingHorizontal()];
     beamHeight = bbox[frame->pointingUp()];
   }
-
   return Mantid::Kernel::make_unique<RectangularBeamProfile>(
-      *frame, instrument.getSource()->getPos(), beamWidth, beamHeight);
+      *frame, source->getPos(), beamWidth, beamHeight);
+}
+
+void MonteCarloAbsorption::interpolateFromSparse(
+    MatrixWorkspace &targetWS, const MatrixWorkspace &sparseWS,
+    const Mantid::Algorithms::InterpolationOption &interpOpt,
+    const DetectorGridDefinition &detGrid) {
+  const auto &spectrumInfo = targetWS.spectrumInfo();
+  const auto samplePos = spectrumInfo.samplePosition();
+  const auto refFrame = targetWS.getInstrument()->getReferenceFrame();
+  PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
+  for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const auto detPos = spectrumInfo.position(i) - samplePos;
+    double lat, lon;
+    std::tie(lat, lon) =
+        SparseInstrument::geographicalAngles(detPos, *refFrame);
+    const auto nearestIndices = detGrid.nearestNeighbourIndices(lat, lon);
+    const auto spatiallyInterpHisto =
+        SparseInstrument::interpolateFromDetectorGrid(lat, lon, sparseWS,
+                                                      nearestIndices);
+    if (spatiallyInterpHisto.size() > 1) {
+      auto targetHisto = targetWS.histogram(i);
+      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+      targetWS.setHistogram(i, targetHisto);
+    } else {
+      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 }
 }

@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/IQTransform.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
 class IQTransformTest : public CxxTest::TestSuite {
@@ -17,12 +18,12 @@ public:
     iq.setChild(
         true); // This means the ADS is not involved anywhere in this test
 
-    inWS_hist = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 2);
+    inWS_hist = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 2);
     inWS_hist->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
     inWS_hist->setDistribution(true);
 
-    inWS_point = WorkspaceCreationHelper::Create2DWorkspace154(1, 1);
+    inWS_point = WorkspaceCreationHelper::create2DWorkspace154(1, 1);
     inWS_point->dataX(0)[0] = 3.0; // 1 is not a good number to test with
     inWS_point->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
@@ -228,7 +229,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(iq.setPropertyValue("TransformType", "Holtzer"));
     TS_ASSERT_THROWS_NOTHING(iq.setProperty<Mantid::API::MatrixWorkspace_sptr>(
         "BackgroundWorkspace",
-        WorkspaceCreationHelper::Create2DWorkspace123(1, 1)));
+        WorkspaceCreationHelper::create2DWorkspace123(1, 1)));
     TS_ASSERT(iq.execute());
 
     // Remember that a constant value of 1.5 will also be subtracted because

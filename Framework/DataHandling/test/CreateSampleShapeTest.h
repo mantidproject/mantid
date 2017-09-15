@@ -57,7 +57,7 @@ public:
     using Mantid::Kernel::V3D;
     using Mantid::PhysicalConstants::getNeutronAtom;
 
-    auto inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 1);
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 1);
     auto sampleShape = ComponentCreationHelper::createSphere(0.5);
     sampleShape->setID("mysample");
     Material alum("Al", getNeutronAtom(13), 2.6989);
@@ -83,7 +83,7 @@ public:
     // Need a test workspace
     Mantid::API::AnalysisDataService::Instance().add(
         "TestWorkspace",
-        WorkspaceCreationHelper::Create2DWorkspace123(22, 10, 1));
+        WorkspaceCreationHelper::create2DWorkspace123(22, 10, 1));
 
     CreateSampleShape alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

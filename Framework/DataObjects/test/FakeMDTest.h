@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/FakeMD.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"

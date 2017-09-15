@@ -1,7 +1,10 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
+
 import math
 from mantid.api import *
 from mantid.kernel import *
+
 
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
@@ -53,7 +56,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # Perform azimuthal averaging according to whether or not
         # we are in frame-skipping mode
         if workspace.getRun().hasProperty('is_frame_skipping') \
-            and workspace.getRun().getProperty('is_frame_skipping').value == 0:
+                and workspace.getRun().getProperty('is_frame_skipping').value == 0:
             self._no_frame_skipping(source_aperture_radius)
         else:
             self._with_frame_skipping(source_aperture_radius)
@@ -131,7 +134,6 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         # Get output binning
         output_binning = alg.getPropertyValue("Binning")
         return (output_msg, output_ws, output_binning)
-
 
     def _with_frame_skipping(self, source_aperture_radius):
         """
@@ -351,6 +353,9 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         """
         log_binning = self.getProperty("LogBinning").value
         nbins = self.getProperty("NumberOfBins").value
+
+        # This code has been checked that it is using the correct property from the workspace
+        # it just so happens that this is not pointing to what it used to - see EQSANSLoad.cpp
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
         nx_pixels = int(workspace.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ny_pixels = int(workspace.getInstrument().getNumberParameter("number-of-y-pixels")[0])
@@ -358,14 +363,14 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
 
         if workspace.getRun().hasProperty("beam_center_x") and \
-             workspace.getRun().hasProperty("beam_center_y"):
+                workspace.getRun().hasProperty("beam_center_y"):
             beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
             beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
         else:
             property_manager_name = self.getProperty("ReductionProperties").value
             property_manager = PropertyManagerDataService.retrieve(property_manager_name)
             if property_manager.existsProperty("LatestBeamCenterX") and \
-                property_manager.existsProperty("LatestBeamCenterY"):
+                    property_manager.existsProperty("LatestBeamCenterY"):
                 beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                 beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
             else:
@@ -398,5 +403,6 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
             if f_step-n_step>10e-10:
                 qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
             return qmin, -(math.pow(10.0,qstep)-1.0), qmax
+
 
 AlgorithmFactory.subscribe(EQSANSAzimuthalAverage1D)

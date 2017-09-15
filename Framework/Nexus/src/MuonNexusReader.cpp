@@ -175,7 +175,6 @@ string MuonNexusReader::getInstrumentName() const {
 void MuonNexusReader::readLogData(const string &filename) {
   // reset the count of logs
   nexusLogCount = 0;
-  int nexusSampleCount = 0; // debug
 
   NeXus::File handle(filename, NXACC_READ);
   openFirstNXentry(handle);
@@ -203,7 +202,6 @@ void MuonNexusReader::readLogData(const string &filename) {
       handle.openGroup(nxname, nxclass);
       handle.readData("name", nexus_samplename);
       handle.closeGroup();
-      nexusSampleCount++; // debug
     }
     if (nxname == START_TIME) {
       handle.readData(START_TIME, startTime);

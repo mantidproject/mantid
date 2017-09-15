@@ -12,6 +12,8 @@ python doi.py --username=[] --password=[] --main 3.0.0
 Then at every release, the script will run again without the "--main" flag to
 generate a DOI pointing to the release notes for that particular version.
 
+If a password is not provided then it is prompted.
+
 Using the "--test" flag will run the script and post DOI's to the DataCite test
 server at https://test.datacite.org/mds/doi/10.5286/Software/.
 
@@ -54,7 +56,9 @@ USEFUL LINKS:
   http://docs.python.org/2/library/httplib.html#httplib.HTTPS_PORT
 """
 
+from __future__ import (absolute_import, division, print_function)
 import argparse
+import getpass
 import os
 import xml.etree.ElementTree as ET
 
@@ -73,6 +77,7 @@ SUCCESS_RESPONSE = r'^OK( \((.+)\))?$'
 # Point all "deleted" DOIs to here:
 INVALID_URL = 'http://www.datacite.org/invalidDOI'
 
+
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
     comments showing the definition / allowed values of the data fields have
@@ -86,9 +91,9 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
     root = ET.Element('resource')
     root.set('xmlns',              'http://datacite.org/schema/kernel-3')
     root.set('xmlns:xsi',          'http://www.w3.org/2001/XMLSchema-instance')
-    root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht' + \
-                                   'tp://schema.datacite.org/meta/kernel-3' + \
-                                   '/metadata.xsd')
+    root.set('xsi:schemaLocation', 'http://datacite.org/schema/kernel-3 ht' +
+             'tp://schema.datacite.org/meta/kernel-3' +
+             '/metadata.xsd')
 
     # "The identifier is a unique string that identifies a resource." In our
     # case, the actual DOI. "Format should be '10.1234/foo'."
@@ -184,6 +189,7 @@ def build_xml_form(doi, relationships, creator_name_list, version_str):
 
     return ET.tostring(root, encoding='utf-8')
 
+
 def _http_request(body, method, url, options):
     '''Issue an HTTP request with the given options.
 
@@ -220,15 +226,16 @@ def _http_request(body, method, url, options):
     proc = subprocess.Popen(args,stdout=subprocess.PIPE)
     result = proc.stdout.readlines()
 
-    print "Server Response: " + str(result)
+    print("Server Response: " + str(result))
     return result
+
 
 def delete_doi(base, doi, options):
     '''Will attempt to delete the given DOI.  Note that this does not actually
     remove the DOI from the DataCite servers; it makes its metadata "inactive"
     and points the DOI to a "DOI invalid" page.
     '''
-    print "\nAttempting to delete the meta data for:" + doi
+    print("\nAttempting to delete the meta data for:" + doi)
     result = _http_request(
         body    = '',
         method  = 'DELETE',
@@ -239,7 +246,7 @@ def delete_doi(base, doi, options):
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Deleting metadata unsuccessful.  Quitting.')
 
-    print "\nAttempting to point " + doi + " to invalid page."
+    print("\nAttempting to point " + doi + " to invalid page.")
     result = _http_request(
         body    = 'doi=' + doi + '\n' + 'url=' + INVALID_URL,
         method  = "PUT",
@@ -250,12 +257,13 @@ def delete_doi(base, doi, options):
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Pointing DOI to invalid page was unsuccessful.')
 
+
 def create_or_update_metadata(xml_form, base, doi, options):
     '''Attempts to create some new metadata for the doi of the given address.
     Metadata must be created before a doi can be created.  If the metadata
     already exists, then it will simply be updated.
     '''
-    print "\nAttempting to create / update metadata:"
+    print("\nAttempting to create / update metadata:")
     result = _http_request(
         body    = xml_form,
         method  = "PUT",
@@ -266,14 +274,15 @@ def create_or_update_metadata(xml_form, base, doi, options):
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating metadata unsuccessful.  Quitting.')
 
+
 def create_or_update_doi(base, doi, destination, options):
     '''Attempts to create a new DOI of the given address.  Metadata must be
     created before this can be successful.  If the doi already exists, then it
     will simply be updated.
     '''
-    print "\nAttempting to create / update the following DOI:"
-    print 'DOI = ' + doi
-    print 'URL = ' + destination
+    print("\nAttempting to create / update the following DOI:")
+    print('DOI = ' + doi)
+    print('URL = ' + destination)
     result = _http_request(
         body    = 'doi=' + doi + '\n' + 'url=' + destination,
         method  = "PUT",
@@ -284,6 +293,7 @@ def create_or_update_doi(base, doi, destination, options):
     if not re.match(SUCCESS_RESPONSE, result[0]):
         raise RuntimeError('Creation/updating DOI unsuccessful.  Quitting.')
 
+
 def check_if_doi_exists(base, doi, destination, options):
     '''Attempts to check if the given doi exists by querying the server and
     seeing if what comes back is the expected DOI destination.  Returns True
@@ -291,7 +301,7 @@ def check_if_doi_exists(base, doi, destination, options):
     as the given destination), else false.  Throws if the response from the
     server is unrecognised, or if there is no response at all.
     '''
-    print "\nChecking if \"" + base + "doi/" + doi + "\" DOI exists."
+    print("\nChecking if \"" + base + "doi/" + doi + "\" DOI exists.")
     result = _http_request(
         body    = '',
         method  = 'GET',
@@ -300,14 +310,15 @@ def check_if_doi_exists(base, doi, destination, options):
     )
 
     if result[0] == 'DOI not found' or result[0] == INVALID_URL:
-        print "\"" + doi + "\" does not exist"
+        print("\"" + doi + "\" does not exist")
         return False
     elif result[0] == destination:
-        print "DOI found."
+        print("DOI found.")
         return True
     else:
         raise RuntimeError(
             "Unexpected result back from server: \"" + result[0] + "\"")
+
 
 def check_for_curl():
     '''A check to see whether we can call cURL on the command line.
@@ -325,8 +336,8 @@ def check_for_curl():
         found = False
 
     if not found:
-        raise RuntimeError('This script requires that cURL be installed and ' + \
-                        'available on the PATH.')
+        raise RuntimeError('This script requires that cURL be installed and ' +
+                           'available on the PATH.')
 
 
 def get_urls_for_doi(version_str,  shortened_version_str,
@@ -413,6 +424,9 @@ def run(args):
     else:
         server_url_base = 'https://mds.datacite.org/'
 
+    if not args.password:
+        args.password = getpass.getpass()
+
     if args.delete:
         delete_doi(server_url_base, doi, args)
         quit()
@@ -498,9 +512,10 @@ def run(args):
         message = "\nSUCCESS!" + \
                   "\nThe DOI can be %s at \"%s\"." % (method, doi_add) + \
                   "\nThe metadata can be inspected at \"%s\"." % (meta_add)
-    print message
+    print(message)
 
     quit()
+
 
 if __name__ == "__main__":
     check_for_curl()
@@ -516,12 +531,6 @@ if __name__ == "__main__":
         help='Version of Mantid whose DOI is to be created/updated in the form "major.minor.patch"'
     )
     parser.add_argument(
-        '--password',
-        type=str,
-        required=True,
-        help='Password. This should be hidden in the Jenkins\' job logs.'
-    )
-    parser.add_argument(
         '--username',
         type=str,
         required=True,
@@ -529,6 +538,11 @@ if __name__ == "__main__":
     )
 
     # OPTIONAL
+    parser.add_argument(
+        '--password',
+        type=str,
+        help='Password for the server. If missing then a prompt is displayed requesting input'
+    )
     parser.add_argument(
         '--test',
         action='store_true',
@@ -542,14 +556,14 @@ if __name__ == "__main__":
     parser.add_argument(
         '--main',
         action='store_true',
-        help='Create the "main" DOI for Mantid.  Once it is created, this ' + \
-             'will only have to run again if it needs to be updated.'
+        help='Create the "main" DOI for Mantid.  Once it is created, this ' +
+        'will only have to run again if it needs to be updated.'
     )
     parser.add_argument(
         '--delete',
         action='store_true',
-        help='Delete ("make inactive") the DOI metadata with the given ' + \
-             'details.  Note that this does NOT delete the DOI.'
+        help='Delete ("make inactive") the DOI metadata with the given ' +
+        'details.  Note that this does NOT delete the DOI.'
     )
 
     run(parser.parse_args())

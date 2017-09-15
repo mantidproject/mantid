@@ -1,16 +1,16 @@
 #ifndef SAVEASCIITEST_H_
 #define SAVEASCIITEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/SaveAscii2.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <fstream>
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -91,7 +91,7 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
-  void testExec_DX() {
+  void testExec_DXNoData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
         boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
@@ -99,6 +99,28 @@ public:
       std::vector<double> &X = wsToSave->dataX(i);
       std::vector<double> &Y = wsToSave->dataY(i);
       std::vector<double> &E = wsToSave->dataE(i);
+      for (int j = 0; j < 3; j++) {
+        X[j] = 1.5 * j / 0.9;
+        Y[j] = (i + 1) * (2. + 4. * X[j]);
+        E[j] = 1.;
+      }
+    }
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
+    TS_ASSERT_THROWS_ANYTHING(save.execute());
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void testExec_DX() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+            WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
+    for (int i = 0; i < 2; i++) {
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
       wsToSave->setPointStandardDeviations(i, 3);
       auto &DX = wsToSave->mutableDx(i);
       for (int j = 0; j < 3; j++) {
@@ -482,6 +504,9 @@ public:
     SaveAscii2 save;
     std::string filename = initSaveAscii2(save);
 
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMin", "3"));
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WorkspaceIndexMax", "2"));
 
@@ -525,6 +550,65 @@ public:
     // the algorithm shouldn't have written a file to disk
     TS_ASSERT(!Poco::File(filename).exists());
 
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_valid_SpectrumList() {
+    Mantid::DataObjects::Workspace2D_sptr wsToSave;
+    writeSampleWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("SpectrumList", "1"));
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // the algorithm shouldn't have written a file to disk
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    int specID;
+    std::string header1, header2, header3, separator, comment;
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        specID;
+    TS_ASSERT_EQUALS(specID, 2);
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+
+    std::string binlines;
+    std::vector<std::string> binstr;
+    std::vector<double> bins;
+    std::getline(in, binlines);
+    std::getline(in, binlines);
+
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 0);
+    TS_ASSERT_EQUALS(bins[1], 4);
+    TS_ASSERT_EQUALS(bins[2], 1);
+
+    std::getline(in, binlines);
+    bins.clear();
+    boost::split(binstr, binlines, boost::is_any_of(","));
+    for (size_t i = 0; i < binstr.size(); i++) {
+      bins.push_back(boost::lexical_cast<double>(binstr.at(i)));
+    }
+    TS_ASSERT_EQUALS(bins[0], 1.66667);
+    TS_ASSERT_EQUALS(bins[1], 17.3333);
+    TS_ASSERT_EQUALS(bins[2], 1);
+
+    in.close();
+
+    Poco::File(filename).remove();
     AnalysisDataService::Instance().remove(m_name);
   }
 
@@ -744,9 +828,9 @@ private:
     wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
-      std::vector<double> &X = wsToSave->dataX(i);
-      std::vector<double> &Y = wsToSave->dataY(i);
-      std::vector<double> &E = wsToSave->dataE(i);
+      auto &X = wsToSave->mutableX(i);
+      auto &Y = wsToSave->mutableY(i);
+      auto &E = wsToSave->mutableE(i);
       for (int j = 0; j < 3; j++) {
         X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
@@ -789,4 +873,61 @@ private:
   std::string m_name;
 };
 
+class SaveAscii2TestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    createInelasticWS();
+    for (int i = 0; i < numberOfIterations; ++i) {
+      saveAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testSaveAscii2Performance() {
+    for (auto alg : saveAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete saveAlgPtrs[i];
+      saveAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(m_name);
+    Poco::File gsasfile(m_filename);
+    if (gsasfile.exists())
+      gsasfile.remove();
+  }
+
+private:
+  std::vector<SaveAscii2 *> saveAlgPtrs;
+
+  const int numberOfIterations = 5;
+
+  const std::string m_filename = "performance_filename";
+  const std::string m_name = "performance_ws";
+
+  SaveAscii2 *setupAlg() {
+    SaveAscii2 *saver = new SaveAscii2;
+    saver->initialize();
+    saver->isInitialized();
+    saver->initialize();
+    saver->isInitialized();
+    saver->setPropertyValue("Filename", m_filename);
+    saver->setPropertyValue("InputWorkspace", m_name);
+    saver->setRethrows(true);
+    return saver;
+  }
+
+  void createInelasticWS() {
+    const std::vector<double> l2{1, 2, 3, 4, 5};
+    const std::vector<double> polar{1, 2, 3, 4, 5};
+    const std::vector<double> azimutal{1, 2, 3, 4, 5};
+    const int nBins = 3;
+
+    auto wsToSave = WorkspaceCreationHelper::createProcessedInelasticWS(
+        l2, polar, azimutal, nBins);
+    AnalysisDataService::Instance().add(m_name, wsToSave);
+  }
+};
 #endif /*SAVEASCIITEST_H_*/

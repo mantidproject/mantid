@@ -28,12 +28,14 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class Porod(IFunction1D):
     """
         Provide a Porod model for SANS
 
         I(q) = C/q^4 + background
     """
+
     def category(self):
         return "SANS"
 
@@ -60,6 +62,7 @@ class Porod(IFunction1D):
             jacobian.set(i,0, math.pow(x, -4))
             jacobian.set(i,1, 1.0)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Porod)

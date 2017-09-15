@@ -1,0 +1,84 @@
+digraph IndirectILLReductionQENS {
+  label="IndirectILLReductionQENS Flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    OutputWorkspace
+  }
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+  	$param_style
+  	Run
+  	BackgroundRun
+  	CalibrationRun
+  	CalibrationBackgroundRun
+  	AlignmentRun
+  	BackgroundScalingFactor
+  	CalibrationBackgroundScalingFactor
+  	CalibrationPeakRange
+  	UnmirrorOption
+  	CropDeadMonitorChannels
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+  	SelectNexusFilesByMetadata
+  	SelectNexusFilesByMetadataA [label="SelectNexusFilesByMetadata"]
+  	SelectNexusFilesByMetadataB [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataC [label="SelectNexusFilesByMetadata"]
+    SelectNexusFilesByMetadataD [label="SelectNexusFilesByMetadata"]
+    IndirectILLEnergyTransfer
+    IndirectILLEnergyTransferA [label="IndirectILLEnergyTransfer"]
+    IndirectILLEnergyTransferB [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferC [label="IndirectILLEnergyTransfer"]
+  	IndirectILLEnergyTransferD [label="IndirectILLEnergyTransfer"]
+  	Integration
+  	MinusA [label="Minus"]
+  	MinusB [label="Minus"]
+  	Divide
+    Plus
+    ScaleA [label="Scale"]
+    ScaleB [label="Scale"]
+    MatchPeaks
+    GroupWorkspaces
+  }
+
+  subgraph processes {
+  	$process_style
+  }
+
+  Run -> SelectNexusFilesByMetadata
+  SelectNexusFilesByMetadata -> IndirectILLEnergyTransfer
+  CropDeadMonitorChannels -> IndirectILLEnergyTransfer
+  IndirectILLEnergyTransfer -> MinusA
+  BackgroundRun -> SelectNexusFilesByMetadataB
+  SelectNexusFilesByMetadataB -> IndirectILLEnergyTransferB
+  IndirectILLEnergyTransferB -> ScaleA
+  BackgroundScalingFactor -> ScaleA
+  ScaleA -> MinusA
+  CalibrationRun -> SelectNexusFilesByMetadataC
+  SelectNexusFilesByMetadataC -> IndirectILLEnergyTransferC
+  IndirectILLEnergyTransferC -> MinusB
+  CalibrationBackgroundRun -> SelectNexusFilesByMetadataD
+  SelectNexusFilesByMetadataD -> IndirectILLEnergyTransferD
+  IndirectILLEnergyTransferD -> ScaleB
+  ScaleB -> MinusB
+  CalibrationBackgroundScalingFactor -> ScaleB
+  MinusB -> Integration
+  CalibrationPeakRange -> Integration
+  Integration -> Divide
+  MinusA -> Divide
+  Divide -> MatchPeaks
+  UnmirrorOption -> MatchPeaks
+  AlignmentRun -> SelectNexusFilesByMetadataA
+  SelectNexusFilesByMetadataA -> IndirectILLEnergyTransferA
+  IndirectILLEnergyTransferA -> MatchPeaks
+  MatchPeaks -> Plus
+  Plus -> GroupWorkspaces
+  GroupWorkspaces -> OutputWorkspace
+}

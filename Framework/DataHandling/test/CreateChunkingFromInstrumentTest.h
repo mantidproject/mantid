@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 
@@ -33,7 +34,8 @@ public:
     CreateChunkingFromInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InstrumentName", "pg3"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "InstrumentFilename", "POWGEN_Definition_2015-08-01.xml"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ChunkBy", "Group"););
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));

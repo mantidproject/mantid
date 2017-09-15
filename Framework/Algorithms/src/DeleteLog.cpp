@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/DeleteLog.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
@@ -10,7 +11,6 @@ using namespace Kernel;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DeleteLog)
 
-//----------------------------------------------------------------------------------------------
 /// @copydoc Algorithm::name
 const std::string DeleteLog::name() const { return "DeleteLog"; }
 
@@ -20,9 +20,6 @@ int DeleteLog::version() const { return 1; }
 /// @copydoc Algorithm::category
 const std::string DeleteLog::category() const { return "DataHandling\\Logs"; }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DeleteLog::init() {
@@ -35,7 +32,6 @@ void DeleteLog::init() {
                   Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DeleteLog::exec() {

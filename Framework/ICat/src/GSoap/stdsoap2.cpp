@@ -3,6 +3,19 @@
 #pragma clang diagnostic ignored "-Wcast-align"
 #endif
 
+#include "MantidKernel/WarningSuppressions.h"
+// ignore warnings in gSOAP
+// Long-term solution is to use gSOAP as an external library or external
+// project. see issue #19433
+// clang-format off
+#if defined(__GNUC__) && __GNUC__ >= 7
+GCC_DIAG_OFF(deprecated-declarations)
+GCC_DIAG_OFF(format-overflow)
+GCC_DIAG_OFF(format-truncation)
+GCC_DIAG_OFF(implicit-fallthrough)
+#endif
+// clang-format on
+
 /*
   stdsoap2.c[pp] 2.8.15
 
@@ -4547,7 +4560,7 @@ again:
               break;
             name = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(subj, i));
             if (name) {
-              if (!soap_tag_cmp(host, (const char *)M_ASN1_STRING_data(name)))
+              if (!soap_tag_cmp(host, (const char *)ASN1_STRING_data(name)))
                 ok = 1;
               else {
                 unsigned char *tmp = nullptr;
@@ -17007,6 +17020,15 @@ soap::~soap() {
 #endif
 
 /******************************************************************************/
+
+// clang-format off
+#if defined(__GNUC__) && __GNUC__ >= 7
+GCC_DIAG_ON(deprecated-declarations)
+GCC_DIAG_ON(format-overflow)
+GCC_DIAG_ON(format-truncation)
+GCC_DIAG_ON(implicit-fallthrough)
+#endif
+// clang-format on
 
 #ifdef __clang__
 #pragma clang diagnostic pop

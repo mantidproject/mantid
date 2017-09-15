@@ -15,11 +15,91 @@
 #include "MantidDataHandling/SaveNexus.h"
 
 #include <Poco/File.h>
+#include <Poco/NObserver.h>
+#include <Poco/TemporaryFile.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+
+/// RAII class to temporarily rename a file for the duration of a test
+/// Original name is restored on destruction.
+class TemporaryRenamer {
+public:
+  /// Constructor: rename the file and store its original name
+  explicit TemporaryRenamer(const std::string &fileName)
+      : m_originalName(fileName) {
+    try {
+      Poco::File file(m_originalName);
+      TS_ASSERT(file.exists() && file.canWrite() && file.isFile());
+      m_tempName = Poco::TemporaryFile::tempName();
+      file.copyTo(m_tempName);
+      file.remove();
+    } catch (const Poco::FileException &ex) {
+      failCopyWithError(m_originalName, m_tempName, ex);
+    }
+  }
+  /// Destructor: restore the file's original name
+  ~TemporaryRenamer() {
+    try {
+      Poco::File file(m_tempName);
+      file.copyTo(m_originalName);
+      file.remove();
+    } catch (const Poco::FileException &ex) { // Do not throw in the destructor!
+      failCopyWithError(m_tempName, m_originalName, ex);
+    }
+  }
+  /// Fail with an error
+  void failCopyWithError(const std::string &from, const std::string &to,
+                         const Poco::FileException &error) const {
+    std::ostringstream message;
+    message << "Failed to copy " << from << " to " << to << ": "
+            << error.displayText();
+    TS_FAIL(message.str());
+  }
+
+private:
+  const std::string m_originalName;
+  std::string m_tempName;
+};
+
+/// Class to count number of progress reports given out by an algorithm
+class ProgressWatcher {
+public:
+  /// Constructor
+  ProgressWatcher()
+      : m_loadedCount(0), m_foundCount(0),
+        m_observer(*this, &ProgressWatcher::handleProgress) {}
+  /// Add a notification to the count
+  void handleProgress(const Poco::AutoPtr<
+      Mantid::API::Algorithm::ProgressNotification> &notification) {
+    const auto &message = notification->message;
+    if (0 == message.compare(0, 5, "Found")) {
+      ++m_foundCount;
+    } else if (0 == message.compare(0, 6, "Loaded")) {
+      ++m_loadedCount;
+    }
+  }
+  /// Return the number of "found" progress reports seen so far
+  size_t getFoundCount() { return m_foundCount; }
+  /// Return the number of "loaded" progress reports seen so far
+  size_t getLoadedCount() { return m_loadedCount; }
+  /// Getter for the observer
+  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification>
+  getObserver() {
+    return m_observer;
+  }
+
+private:
+  /// Count of "file loaded" progress reports seen so far
+  size_t m_loadedCount;
+  /// Count of "file found" progress reports seen so far
+  size_t m_foundCount;
+  /// Observer
+  Poco::NObserver<ProgressWatcher, Mantid::API::Algorithm::ProgressNotification>
+      m_observer;
+};
 
 class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite {
 public:
@@ -29,7 +109,6 @@ public:
     return new PlotAsymmetryByLogValueTest();
   }
   static void destroySuite(PlotAsymmetryByLogValueTest *suite) { delete suite; }
-
   PlotAsymmetryByLogValueTest()
       : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
 
@@ -56,7 +135,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
-    const Mantid::MantidVec &Y = outWS->readY(0);
+    const auto Y = outWS->y(0);
     TS_ASSERT_DELTA(Y[0], 0.0128845, 0.001);
     TS_ASSERT_DELTA(Y[1], 0.0224898, 0.00001);
 
@@ -92,7 +171,7 @@ public:
     TS_ASSERT(outWS);
     TS_ASSERT_EQUALS(outWS->blocksize(), 2);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
-    const Mantid::MantidVec &Y = outWS->readY(0);
+    const auto Y = outWS->y(0);
     TS_ASSERT_DELTA(Y[0], -0.01236, 0.001);
     TS_ASSERT_DELTA(Y[1], 0.019186, 0.00001);
   }
@@ -200,7 +279,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const Mantid::MantidVec &Y = outWs->readY(0);
+    const auto Y = outWs->y(0);
 
     TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
@@ -233,7 +312,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const Mantid::MantidVec &Y = outWs->readY(0);
+    const auto Y = outWs->y(0);
 
     TS_ASSERT_DELTA(Y[0], 0.151202, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
@@ -268,10 +347,10 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 4);
 
-    const Mantid::MantidVec &YDiff = outWs->readY(0);
-    const Mantid::MantidVec &EDiff = outWs->readE(0);
-    const Mantid::MantidVec &YSum = outWs->readY(3);
-    const Mantid::MantidVec &ESum = outWs->readE(3);
+    const auto YDiff = outWs->y(0);
+    const auto EDiff = outWs->e(0);
+    const auto YSum = outWs->y(3);
+    const auto ESum = outWs->e(3);
 
     TS_ASSERT_DELTA(YDiff[0], 0.001135, 0.000001);
     TS_ASSERT_DELTA(EDiff[0], 0.001805, 0.000001);
@@ -308,7 +387,7 @@ public:
     TS_ASSERT_EQUALS(outWs->blocksize(), 2);
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
 
-    const Mantid::MantidVec &Y = outWs->readY(0);
+    const auto Y = outWs->y(0);
     TS_ASSERT_DELTA(Y[0], 0.14700, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.13042, 0.00001);
   }
@@ -342,7 +421,7 @@ public:
 
     // Now we want to test X values (log values) in the output workspace
     // rather than asymmetry (Y values)
-    const Mantid::MantidVec &X = outWs->readX(0);
+    const auto X = outWs->x(0);
 
     TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
     TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
@@ -368,7 +447,6 @@ public:
     // number. The algorithm should ignore the supplied green and/or red periods
     // as the input nexus file is single-period
     const std::string ws = "Test_singlePeriodGreen";
-
     PlotAsymmetryByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("FirstRun", "emu00006473.nxs");
@@ -388,9 +466,9 @@ public:
     TS_ASSERT_EQUALS(outWS->blocksize(), 1);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
 
-    TS_ASSERT_EQUALS(outWS->readX(0)[0], 6473);
-    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.283444, 0.000001);
-    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.000145, 0.000001);
+    TS_ASSERT_EQUALS(outWS->x(0)[0], 6473);
+    TS_ASSERT_DELTA(outWS->y(0)[0], 0.283444, 0.000001);
+    TS_ASSERT_DELTA(outWS->e(0)[0], 0.000145, 0.000001);
   }
 
   void test_run_start_log() {
@@ -448,7 +526,95 @@ public:
     TS_ASSERT_DELTA(outputX[1], 215.0, 1.e-7);
   }
 
+  void test_skip_missing_file() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+
+    alg.setPropertyValue("FirstRun", "MUSR00015193.nxs");
+    alg.setPropertyValue("LastRun", "MUSR00015195.nxs");
+    alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+    TS_ASSERT(outWS);
+    const auto &outputX = outWS->points(0);
+    TS_ASSERT_EQUALS(outputX.size(), 2);
+    TS_ASSERT_DELTA(outputX[0], 15193.0, 1.e-7);
+    TS_ASSERT_DELTA(outputX[1], 15195.0, 1.e-7);
+  }
+
+  void test_extend_run_sequence() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+
+    // Watch for the algorithm's progress reports as it loads each file
+    ProgressWatcher watcher;
+    alg.addObserver(watcher.getObserver());
+
+    // Load the first two runs
+    alg.setPropertyValue("FirstRun", "MUSR00015189.nxs");
+    alg.setPropertyValue("LastRun", "MUSR00015190.nxs");
+    alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(watcher.getLoadedCount(), 2);
+    TS_ASSERT_EQUALS(watcher.getFoundCount(), 0);
+
+    // Now extend the run sequence with an extra run
+    alg.setPropertyValue("LastRun", "MUSR00015191.nxs");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(watcher.getLoadedCount(), 3); // i.e. not 5 loads
+    TS_ASSERT_EQUALS(watcher.getFoundCount(), 2);  // reused 2
+  }
+
 private:
+  std::string firstRun, lastRun;
+};
+
+class PlotAsymmetryByLogValueTestPerformance : public CxxTest::TestSuite {
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PlotAsymmetryByLogValueTestPerformance *createSuite() {
+    return new PlotAsymmetryByLogValueTestPerformance();
+  }
+
+  static void destroySuite(PlotAsymmetryByLogValueTestPerformance *suite) {
+    delete suite;
+  }
+
+  PlotAsymmetryByLogValueTestPerformance()
+      : firstRun("MUSR00015189.nxs"), lastRun("MUSR00015190.nxs") {}
+
+  void setUp() override {
+    alg.initialize();
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", "outputWS");
+    alg.setPropertyValue("LogValue", "Field_Danfysik");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
+  }
+
+  void testPerformanceWS() { alg.execute(); }
+
+private:
+  PlotAsymmetryByLogValue alg;
   std::string firstRun, lastRun;
 };
 

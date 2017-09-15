@@ -1,4 +1,6 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
@@ -22,18 +24,34 @@ namespace {
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
                                        Workspace::isDirty, 0, 1)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
 ///@endcond
 }
 
+//--------------------------------------------------------------------------------------
+// Deprecated function
+//--------------------------------------------------------------------------------------
+/**
+ * @param self Reference to the calling object
+ * @return name of the workspace.
+ */
+std::string getName(Workspace &self) {
+  PyErr_Warn(PyExc_DeprecationWarning,
+             ".getName() is deprecated. Use .name() instead.");
+  return self.getName();
+}
+
 void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
-      .def("getName", &Workspace::getName,
-           return_value_policy<copy_const_reference>(), arg("self"),
+      .def("getName", &getName, arg("self"),
            "Returns the name of the workspace. This could be an empty string")
       .def("getTitle", &Workspace::getTitle, arg("self"),
            "Returns the title of the workspace")
@@ -54,7 +72,8 @@ void export_Workspace() {
       .def("getHistory", (const WorkspaceHistory &(Workspace::*)() const) &
                              Workspace::getHistory,
            arg("self"), return_value_policy<reference_existing_object>(),
-           "Return read-only access to the workspace history");
+           "Return read-only access to the "
+           ":class:`~mantid.api.WorkspaceHistory`");
 
   // register pointers
   RegisterWorkspacePtrToPython<Workspace>();

@@ -99,7 +99,6 @@ class PoldiLoadRuns(PythonAlgorithm):
                                                                        "and is not supposed to be overwritten, aborting.")
                 return
 
-
         # Get the actual merge range, if the number of files is not compatible with the number of files to merge.
         mergeRange = self.getActualMergeRange(firstRun, lastRun, mergeWidth)
 
@@ -210,7 +209,7 @@ class PoldiLoadRuns(PythonAlgorithm):
     def autoMaskBadDetectors(self, currentTotalWsName):
         Integration(currentTotalWsName, OutputWorkspace='integrated')
 
-        MedianDetectorTest('integrated', SignificanceTest=3.0, HighThreshold=self._autoMaskThreshold, HighOutlier=200, \
+        MedianDetectorTest('integrated', SignificanceTest=3.0, HighThreshold=self._autoMaskThreshold, HighOutlier=200,
                            CorrectForSolidAngle=False, OutputWorkspace='maskWorkspace')
 
         MaskDetectors(Workspace=AnalysisDataService.retrieve(currentTotalWsName), MaskedWorkspace='maskWorkspace')

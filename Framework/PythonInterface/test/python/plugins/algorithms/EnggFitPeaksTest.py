@@ -82,7 +82,7 @@ class EnggFitPeaksTest(unittest.TestCase):
         cell00, cell01, cell10, cell14 = cells
         # it has ben created
         tbl = mtd[tbl_name]
-        self.assertEquals(tbl.getName(), tbl_name)
+        self.assertEquals(tbl.name(), tbl_name)
         self.assertTrue(isinstance(tbl, ITableWorkspace),
                         'The output workspace of fitted peaks should be a table workspace.')
 

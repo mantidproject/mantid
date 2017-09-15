@@ -1,6 +1,8 @@
 #pylint: disable=no-init,invalid-name
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
+
 
 class SXDAnalysis(stresstesting.MantidStressTest):
     """
@@ -18,7 +20,7 @@ class SXDAnalysis(stresstesting.MantidStressTest):
         QLab = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputDimensions='Q (lab frame)',
                                                SplitThreshold=50, LorentzCorrection='1',MaxRecursionDepth='13',
                                                Extents='-15,15,-15,15,-15,15',OneEventPerBin='0')
-        print " ConvertToMD runs for: ",clock()-start,' sec'
+        print(" ConvertToMD runs for: ",clock()-start,' sec')
 
         #  NaCl has a relatively small unit cell, so the distance between peaks is relatively large.  Setting the PeakDistanceThreshold
         #  higher avoids finding high count regions on the sides of strong peaks as separate peaks.
@@ -52,6 +54,7 @@ class SXDAnalysis(stresstesting.MantidStressTest):
     def doValidation(self):
         # If we reach here, no validation failed
         return True
+
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 2Gb"""
         return 1000

@@ -35,12 +35,29 @@ public:
     std::fill(pa->begin(), pa->end(), rand());
     pb = boost::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
-    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
-    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0))));
+    h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                             Counts(100, 0.0), CountVariances(100, 0.0)));
+    h2.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
+                              Counts(100, 0.0), CountVariances(100, 0.0)));
     h.setCounts(100);
     h.setCountStandardDeviations(100);
     h2.setCounts(100);
     h2.setCountStandardDeviations(100);
+  }
+
+  void testcheckAndSanitizeHistogramThrowsNullY() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    TS_ASSERT_THROWS(h.setHistogram(edges), std::invalid_argument);
+  }
+
+  void testcheckAndSanitizeHistogramThrowsNullE() {
+    Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
+    BinEdges edges{-0.04, 1.7};
+    Histogram histogram{edges};
+    Counts counts{23};
+    histogram.setCounts(counts);
+    TS_ASSERT_THROWS(h.setHistogram(histogram), std::invalid_argument);
   }
 
   void testsetgetXvector() {

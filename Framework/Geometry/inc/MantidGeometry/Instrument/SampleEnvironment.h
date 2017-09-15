@@ -8,6 +8,9 @@
 #include "MantidGeometry/Instrument/Container.h"
 
 namespace Mantid {
+namespace Kernel {
+class PseudoRandomNumberGenerator;
+}
 namespace Geometry {
 class Track;
 
@@ -52,6 +55,14 @@ public:
   inline size_t nelements() const { return m_components.size(); }
 
   Geometry::BoundingBox boundingBox() const;
+  /// Select a random point within a component
+  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                            const size_t maxAttempts) const;
+  /// Select a random point within a component that is also bound by a
+  /// given region
+  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
+                            const BoundingBox &activeRegion,
+                            const size_t maxAttempts) const;
   bool isValid(const Kernel::V3D &point) const;
   int interceptSurfaces(Track &track) const;
 

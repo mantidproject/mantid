@@ -1,8 +1,10 @@
 #include "MantidDataHandling/SaveNXTomo.h"
 
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidDataHandling/FindDetectorsPar.h"
 
@@ -12,8 +14,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -161,7 +163,7 @@ void SaveNXTomo::processAll() {
   ::NeXus::File nxFile = setupFile();
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, m_workspaces.size());
+  Progress progress(this, 0.0, 1.0, m_workspaces.size());
 
   for (auto &workspace : m_workspaces) {
     writeSingleWorkspace(workspace, nxFile);
@@ -343,14 +345,15 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   auto dataArr = new double[m_spectraCount];
 
   // images can be as one-spectrum-per-pixel, or one-spectrum-per-row
-  bool spectrumPerPixel = (1 == workspace->dataY(0).size());
+  bool spectrumPerPixel = (1 == workspace->y(0).size());
   for (int64_t i = 0; i < m_dimensions[1]; ++i) {
+    const auto &Y = workspace->y(i);
     for (int64_t j = 0; j < m_dimensions[2]; ++j) {
       if (spectrumPerPixel) {
         dataArr[i * m_dimensions[1] + j] =
-            workspace->dataY(i * m_dimensions[1] + j)[0];
+            workspace->y(i * m_dimensions[1] + j)[0];
       } else {
-        dataArr[i * m_dimensions[1] + j] = workspace->dataY(i)[j];
+        dataArr[i * m_dimensions[1] + j] = Y[j];
       }
     }
   }
@@ -367,9 +370,6 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
   writeLogValues(workspace, nxFile, numFiles);
   writeIntensityValue(workspace, nxFile, numFiles);
   writeImageKeyValue(workspace, nxFile, numFiles);
-
-  ++numFiles;
-
   delete[] dataArr;
 }
 

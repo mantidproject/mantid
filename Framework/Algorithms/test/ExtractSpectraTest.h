@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractSpectra.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -429,8 +429,8 @@ private:
     auto ws = createInputWorkspaceHisto();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setBinEdgeStandardDeviations(j, nBins + 1);
-      for (size_t k = 0; k <= nBins; ++k) {
+      ws->setPointStandardDeviations(j, nBins);
+      for (size_t k = 0; k < nBins; ++k) {
         // Add a constant error to all spectra
         ws->mutableDx(j)[k] = sqrt(double(k));
       }
@@ -454,7 +454,7 @@ private:
   }
 
   MatrixWorkspace_sptr createInputWorkspaceEvent() const {
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::createEventWorkspace(
         int(nSpec), int(nBins), 50, 0.0, 1., 2);
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->setInstrument(
@@ -468,13 +468,13 @@ private:
   MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
-    auto dXvals = HistogramData::BinEdgeStandardDeviations(nBins + 1, 0.0);
+    auto dXvals = HistogramData::PointStandardDeviations(nBins, 0.0);
     auto &dX = dXvals.mutableData();
-    for (size_t k = 0; k <= nBins; ++k) {
+    for (size_t k = 0; k < nBins; ++k) {
       dX[k] = sqrt(double(k)) + 1;
     }
     for (size_t j = 0; j < nSpec; ++j) {
-      ws->setBinEdgeStandardDeviations(j, dXvals);
+      ws->setPointStandardDeviations(j, dXvals);
     }
     return ws;
   }
@@ -566,9 +566,10 @@ private:
         TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
         TS_ASSERT_EQUALS(ws.y(2)[0], 3.0);
       } else if (wsType == "event") {
-        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 2);
-        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
-        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 4);
+        const auto &specrumInfo = ws.spectrumInfo();
+        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 2);
+        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
+        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 4);
       }
     }
 
@@ -587,9 +588,10 @@ private:
         TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
         TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event") {
-        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
-        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
-        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 5);
+        const auto &specrumInfo = ws.spectrumInfo();
+        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 1);
+        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
+        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 5);
       }
     }
 
@@ -608,9 +610,10 @@ private:
         TS_ASSERT_EQUALS(ws.y(1)[0], 2.0);
         TS_ASSERT_EQUALS(ws.y(2)[0], 4.0);
       } else if (wsType == "event-detector") {
-        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
-        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
-        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 5);
+        const auto &specrumInfo = ws.spectrumInfo();
+        TS_ASSERT_EQUALS(specrumInfo.detector(0).getID(), 1);
+        TS_ASSERT_EQUALS(specrumInfo.detector(1).getID(), 3);
+        TS_ASSERT_EQUALS(specrumInfo.detector(2).getID(), 5);
       }
     }
 
@@ -636,11 +639,8 @@ private:
         TS_ASSERT_EQUALS(ws.dx(0)[1], 1.0);
         TS_ASSERT_EQUALS(ws.dx(0)[2], M_SQRT2);
         TS_ASSERT_EQUALS(ws.dx(0)[3], sqrt(3.0));
-        // Check that the length of x and dx is the same
-        auto &x = ws.x(0);
-        auto dX = ws.dx(0);
-        TS_ASSERT_EQUALS(x.size(), dX.size());
-
+        // Check that the length of x and dx differs by 1
+        TS_ASSERT_EQUALS(ws.x(0).size() - 1, ws.dx(0).size());
       } else if (wsType == "event-dx") {
         TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.dx(0)[0], 0.0 + 1.0);
@@ -719,9 +719,9 @@ public:
   }
 
   ExtractSpectraTestPerformance() {
-    input = WorkspaceCreationHelper::Create2DWorkspaceBinned(40000, 10000);
+    input = WorkspaceCreationHelper::create2DWorkspaceBinned(40000, 10000);
     inputEvent =
-        WorkspaceCreationHelper::CreateEventWorkspace(40000, 10000, 2000);
+        WorkspaceCreationHelper::createEventWorkspace(40000, 10000, 2000);
   }
 
   void testExec2D() {

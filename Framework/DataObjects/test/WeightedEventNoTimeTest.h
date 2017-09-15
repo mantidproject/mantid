@@ -5,7 +5,6 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

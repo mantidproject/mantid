@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/Peak.h"
@@ -18,8 +19,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -30,6 +29,9 @@
 #include <Poco/File.h>
 
 #include <string>
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -282,7 +284,7 @@ public:
     ws->sortAll(TOF_SORT, NULL);
 
     IAlgorithm_sptr alg2 =
-        AlgorithmManager::Instance().createUnmanaged("CheckWorkspacesMatch");
+        AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
     alg2->initialize();
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace1", origWS);
     alg2->setProperty<MatrixWorkspace_sptr>("Workspace2", ws);
@@ -290,7 +292,7 @@ public:
     alg2->setProperty<bool>("CheckAxes", false);
     alg2->execute();
     if (alg2->isExecuted()) {
-      TS_ASSERT(alg2->getPropertyValue("Result") == "Success!");
+      TS_ASSERT(alg2->getProperty("Result"));
     } else {
       TS_ASSERT(false);
     }
@@ -465,7 +467,7 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 10);
-      TS_ASSERT_EQUALS(ws->name(), "group_" + std::to_string(i + 1));
+      TS_ASSERT_EQUALS(ws->getName(), "group_" + std::to_string(i + 1));
     }
   }
 
@@ -495,8 +497,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]));
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]));
     }
   }
 
@@ -526,8 +528,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]));
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]));
     }
 
     // load same file again, but to a different group
@@ -555,8 +557,8 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
-      TS_ASSERT_EQUALS(ws->name(), "irs55125_graphite002_to_55131_" +
-                                       std::string(suffix[i]) + "_1");
+      TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" +
+                                          std::string(suffix[i]) + "_1");
     }
   }
 
@@ -920,10 +922,89 @@ public:
     doTestLoadAndSaveHistogramWS(true);
   }
 
+  void test_SaveAndLoadOnHistogramWSwithLegacyXErrors() {
+    doTestLoadAndSaveHistogramWS(true, false, true);
+  }
+
   void test_SaveAndLoadOnPointLikeWS() { doTestLoadAndSavePointWS(false); }
 
   void test_SaveAndLoadOnPointLikeWSWithXErrors() {
     doTestLoadAndSavePointWS(true);
+  }
+
+  void test_that_workspace_name_is_loaded() {
+    // Arrange
+    LoadNexusProcessed loader;
+    loader.setChild(false);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "POLREF00004699_nexus.nxs");
+    loader.setPropertyValue("OutputWorkspace", "ws");
+    loader.setProperty("FastMultiPeriod", true);
+    // Act
+    TS_ASSERT(loader.execute());
+    // Assert
+    TSM_ASSERT(
+        "Can access workspace via name which was set in file",
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("y_1"));
+    TSM_ASSERT(
+        "Can access workspace via name which was set in file",
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("y_2"));
+    // Clean up
+    AnalysisDataService::Instance().remove("y_1");
+    AnalysisDataService::Instance().remove("y_2");
+  }
+
+  void test_that_workspace_name_is_not_loaded_when_is_duplicate() {
+    // Arrange
+    SaveNexusProcessed alg;
+    alg.initialize();
+    std::string tempFile = "LoadNexusProcessed_TmpTestWorkspace.nxs";
+    alg.setPropertyValue("Filename", tempFile);
+
+    std::string workspaceName = "test_workspace_name";
+    for (size_t index = 0; index < 2; ++index) {
+      // Create a sample workspace and add it to the ADS, so it gets a name.
+      auto ws = WorkspaceCreationHelper::create1DWorkspaceConstant(
+          3, static_cast<double>(index), static_cast<double>(index), true);
+      AnalysisDataService::Instance().addOrReplace(workspaceName, ws);
+      alg.setProperty("InputWorkspace",
+                      boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      if (index == 0) {
+        alg.setProperty("Append", false);
+      } else {
+        alg.setProperty("Append", true);
+      }
+      alg.execute();
+    }
+    // Delete the workspace
+    AnalysisDataService::Instance().remove(workspaceName);
+
+    tempFile = alg.getPropertyValue("Filename");
+
+    // Load the data
+    LoadNexusProcessed loader;
+    loader.setChild(false);
+    loader.initialize();
+    loader.setPropertyValue("Filename", tempFile);
+    loader.setPropertyValue("OutputWorkspace", "ws_loaded");
+    // Act
+    loader.execute();
+
+    // Assert
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_1"));
+    TSM_ASSERT("Can access workspace via name which is the name of the file "
+               "with an index",
+               AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+                   "ws_loaded_2"));
+    // Clean up
+    AnalysisDataService::Instance().remove("ws_loaded_1");
+    AnalysisDataService::Instance().remove("ws_loaded_2");
+    if (!tempFile.empty() && Poco::File(tempFile).exists()) {
+      Poco::File(tempFile).remove();
+    }
   }
 
   void do_load_multiperiod_workspace(bool fast) {
@@ -945,6 +1026,7 @@ public:
         boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(0));
     MatrixWorkspace_sptr period2 =
         boost::dynamic_pointer_cast<MatrixWorkspace>(asGroupWS->getItem(1));
+
     TSM_ASSERT("We expect the group workspace is multiperiod",
                asGroupWS->isMultiperiod());
     TSM_ASSERT_EQUALS("X-data should be identical", period1->x(0),
@@ -977,6 +1059,48 @@ public:
 
   void test_load_multiperiod_workspace_old() {
     do_load_multiperiod_workspace(false /*Use old route*/);
+  }
+
+  void test_load_workspace_empty_textaxis() {
+    // filename workspaceEmptyTextAxis
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "workspaceEmptyTextAxis.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "ws"));
+
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+      TS_ASSERT_EQUALS(outWS->x(0)[i], i);
+      TS_ASSERT_EQUALS(outWS->y(0)[i], i);
+    }
+  }
+
+  void test_load_workspace_with_textaxis() {
+    // filename workspaceWithTextAxis
+    LoadNexusProcessed loader;
+    loader.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("Filename", "workspaceWithTextAxis.nxs"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace", "ws"));
+
+    TS_ASSERT(loader.execute());
+    TS_ASSERT(loader.isExecuted());
+
+    Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
+    const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+
+    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+      TS_ASSERT_EQUALS(outWS->x(0)[i], i);
+      TS_ASSERT_EQUALS(outWS->y(0)[i], i);
+    }
   }
 
 private:
@@ -1123,7 +1247,7 @@ private:
     groups[5].push_back(20);
 
     EventWorkspace_sptr ws =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 30, 1.0);
     ws->getSpectrum(4).clear();
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), groups.size());
@@ -1152,16 +1276,17 @@ private:
   }
 
   void doTestLoadAndSaveHistogramWS(bool useXErrors = false,
-                                    bool numericAxis = false) {
+                                    bool numericAxis = false,
+                                    bool legacyXErrors = false) {
     // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace with
     // x errors
 
     // Create histogram workspace with two spectra and 4 points
     std::vector<double> x1{1, 2, 3};
-    std::vector<double> dx1{3, 2, 1};
+    std::vector<double> dx1{3, 2};
     std::vector<double> y1{1, 2};
     std::vector<double> x2{1, 2, 3};
-    std::vector<double> dx2{3, 2, 1};
+    std::vector<double> dx2{3, 2};
     std::vector<double> y2{1, 2};
     MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
         "Workspace2D", 2, x1.size(), y1.size());
@@ -1170,8 +1295,12 @@ private:
     inputWs->mutableY(0) = y1;
     inputWs->mutableY(1) = y2;
     if (useXErrors) {
-      inputWs->setBinEdgeStandardDeviations(0, dx1);
-      inputWs->setBinEdgeStandardDeviations(1, dx2);
+      inputWs->setPointStandardDeviations(0, dx1);
+      inputWs->setPointStandardDeviations(1, dx2);
+      if (legacyXErrors) {
+        inputWs->dataDx(0).push_back(1);
+        inputWs->dataDx(1).push_back(1);
+      }
     }
     if (numericAxis) {
       auto numericAxis = new NumericAxis(2);
@@ -1214,8 +1343,8 @@ private:
     TS_ASSERT_EQUALS(inputWs->e(1), outputWs->e(1));
     if (useXErrors) {
       TSM_ASSERT("Should have an x error", outputWs->hasDx(0));
-      TS_ASSERT_EQUALS(inputWs->dx(0).rawData(), outputWs->dx(0).rawData());
-      TS_ASSERT_EQUALS(inputWs->dx(1).rawData(), outputWs->dx(1).rawData());
+      TS_ASSERT_EQUALS(dx1, outputWs->dx(0).rawData());
+      TS_ASSERT_EQUALS(dx2, outputWs->dx(1).rawData());
     }
 
     // Axes
@@ -1314,6 +1443,14 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "PG3_733_focussed.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT(loader.execute());
+  }
+
+  void testPeaksWorkspace() {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "24954_allpeaksbyhand.nxs");
+    loader.setPropertyValue("OutputWorkspace", "peaks");
     TS_ASSERT(loader.execute());
   }
 };

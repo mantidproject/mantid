@@ -2,11 +2,11 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -19,7 +19,7 @@ DECLARE_LISTENER(TestDataListener)
 
 /// Constructor
 TestDataListener::TestDataListener()
-    : ILiveListener(), m_buffer(),
+    : LiveListener(), m_buffer(),
       m_rand(new Kernel::MersenneTwister(
           Kernel::DateAndTime::getCurrentTime().totalNanoseconds(), 40000,
           60000)),
@@ -27,8 +27,8 @@ TestDataListener::TestDataListener()
   // Set up the first workspace buffer
   this->createEmptyWorkspace();
 
-  m_timesCalled = 0;
   m_dataReset = false;
+  m_timesCalled = 0;
   if (!ConfigService::Instance().getValue("testdatalistener.reset_after",
                                           m_resetAfter))
     m_resetAfter = 0;
@@ -58,7 +58,13 @@ bool TestDataListener::connect(const Poco::Net::SocketAddress &) {
 }
 
 bool TestDataListener::isConnected() {
-  return true; // For the time being at least
+  // For the time being at least
+  return true;
+}
+
+bool TestDataListener::dataReset() {
+  // No support for reset signal
+  return false;
 }
 
 ILiveListener::RunStatus TestDataListener::runStatus() {
@@ -96,7 +102,8 @@ void TestDataListener::createEmptyWorkspace() {
   // Add a monitor workspace
   auto monitorWS =
       WorkspaceFactory::Instance().create("EventWorkspace", 1, 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(m_buffer, monitorWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_buffer, *monitorWS,
+                                                    true);
   monitorWS->dataX(0)[0] = 40000;
   monitorWS->dataX(0)[1] = 60000;
   m_buffer->setMonitorWorkspace(monitorWS);
@@ -104,7 +111,6 @@ void TestDataListener::createEmptyWorkspace() {
 
 boost::shared_ptr<Workspace> TestDataListener::extractData() {
   m_dataReset = false;
-
   // Add a small number of uniformly distributed events to each event list.
   using namespace DataObjects;
   EventList &el1 = m_buffer->getSpectrum(0);

@@ -7,6 +7,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <fstream>
+#include <iomanip>
 
 #include <boost/pointer_cast.hpp>
 
@@ -172,15 +173,15 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
   const size_t bytespp = static_cast<size_t>(bitDepth) / 8;
 
   for (size_t row = 0; row < sizeY; ++row) {
-    const auto &dataY = img->readY(row);
+    const auto &yData = img->y(row);
     for (size_t col = 0; col < sizeX; ++col) {
       int32_t pixelVal;
       if (8 == bitDepth) {
-        pixelVal = static_cast<uint8_t>(dataY[col]);
+        pixelVal = static_cast<uint8_t>(yData[col]);
       } else if (16 == bitDepth) {
-        pixelVal = static_cast<uint16_t>(dataY[col]);
+        pixelVal = static_cast<uint16_t>(yData[col]);
       } else if (32 == bitDepth) {
-        pixelVal = static_cast<uint32_t>(dataY[col]);
+        pixelVal = static_cast<uint32_t>(yData[col]);
       }
 
       // change endianness: to sequence of bytes in big-endian

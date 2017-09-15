@@ -1,4 +1,5 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
@@ -27,10 +28,10 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
         try:
             DeleteWorkspace(RezWS)
         except ValueError:
-            print "Target ws ",RezWS," not found in analysis data service\n"
+            print("Target ws ",RezWS," not found in analysis data service\n")
     #
         #---> Start loop over contributing files
-        for i in xrange(0,20,5):
+        for i in range(0,20,5):
             # the following operations simulate different workspaces, obtained from experiment using rotating crystal;
             # For real experiment we  usually just load these workspaces from nxspe files with proper Psi values defined there
             # and have to set up ub matrix
@@ -44,12 +45,11 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
             SetGoniometer(Workspace=SourceWS,Axis0='Psi,0,1,0,1')
             # ws emulation, end ---------------------------------------------------------------------------------------
 
-            ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='Q3D',QConversionScales='HKL',\
-            OverwriteExisting=0,dEAnalysisMode='Direct',MinValues='-3,-3,-3,-1',MaxValues='3,3,3,3',\
-            SplitInto="20,20,1,1")
+            ConvertToMD(InputWorkspace=SourceWS,OutputWorkspace=RezWS,QDimensions='Q3D',QConversionScales='HKL',
+                        OverwriteExisting=0,dEAnalysisMode='Direct',MinValues='-3,-3,-3,-1',MaxValues='3,3,3,3',
+                        SplitInto="20,20,1,1")
             # delete source workspace from memory;
             DeleteWorkspace(SourceWS)
-
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
@@ -73,12 +73,9 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
 
         checker.execute()
         if checker.getPropertyValue("Equals") != "1":
-            print " Workspaces do not match, result: ",checker.getPropertyValue("Result")
-            print self.__class__.__name__
+            print(" Workspaces do not match, result: ",checker.getPropertyValue("Result"))
+            print(self.__class__.__name__)
             SaveMD(InputWorkspace=valNames[0],Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
-
         return True
-
-

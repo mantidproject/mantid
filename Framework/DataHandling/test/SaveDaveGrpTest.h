@@ -267,7 +267,7 @@ private:
     // all the Y values in this new workspace are set to DEFAU_Y, which
     // currently = 2
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 1.0);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 1.0);
     inputWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     AnalysisDataService::Instance().add(input, inputWS);

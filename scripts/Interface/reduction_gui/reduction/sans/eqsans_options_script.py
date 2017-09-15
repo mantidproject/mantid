@@ -1,9 +1,11 @@
 """
     General options for EQSANS reduction
 """
+from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions as BaseOptions
+
 
 class ReductionOptions(BaseOptions):
     instrument_name = "EQSANS"
@@ -199,7 +201,6 @@ class ReductionOptions(BaseOptions):
         self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
                                                                  default=ReductionOptions.default_detector_offset)
 
-
         # TOF cutoff and correction
         element_list = dom.getElementsByTagName("TOFcorr")
         if len(element_list)>0:
@@ -221,8 +222,8 @@ class ReductionOptions(BaseOptions):
         # Resolution
         self.compute_resolution = BaseScriptElement.getBoolElement(dom, "ComputeResolution",
                                                                    default = ReductionOptions.compute_resolution)
-        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",\
-                                                                         default = ReductionOptions.sample_aperture_diameter)
+        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",
+                                                                          default = ReductionOptions.sample_aperture_diameter)
 
         # TOF correction
         self.perform_TOF_correction = BaseScriptElement.getBoolElement(dom, "PerformTOFCorrection",

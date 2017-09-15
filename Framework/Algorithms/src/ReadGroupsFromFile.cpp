@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -10,10 +7,11 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 
 // Poco XML Headers for Grouping File
-#include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
@@ -116,23 +114,23 @@ void ReadGroupsFromFile::exec() {
     const auto &dets = spec.getDetectorIDs();
     if (dets.empty()) // Nothing
     {
-      spec.dataY()[0] = 0.0;
+      spec.mutableY()[0] = 0.0;
       continue;
     }
     // Find the first detector ID in the list
     calmap::const_iterator it = calibration.find(*dets.begin());
     if (it == calibration.end()) // Could not find the detector
     {
-      spec.dataY()[0] = 0.0;
+      spec.mutableY()[0] = 0.0;
       continue;
     }
     if (showunselected) {
       if (((*it).second).second == 0)
-        spec.dataY()[0] = 0.0;
+        spec.mutableY()[0] = 0.0;
       else
-        spec.dataY()[0] = static_cast<double>(((*it).second).first);
+        spec.mutableY()[0] = static_cast<double>(((*it).second).first);
     } else
-      spec.dataY()[0] = static_cast<double>(((*it).second).first);
+      spec.mutableY()[0] = static_cast<double>(((*it).second).first);
     if (!success)
       success = true; // At least one detector is found in the cal file
   }

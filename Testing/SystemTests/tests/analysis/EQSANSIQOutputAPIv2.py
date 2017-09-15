@@ -1,10 +1,14 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import math
 import os
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import *
 from mantid.api import *
+from functools import reduce
+
 
 def do_cleanup():
     Files = ["EQSANS_4061_event_reduction.log",
@@ -14,6 +18,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class EQSANSIQOutput(stresstesting.MantidStressTest):
     """
@@ -57,6 +62,7 @@ class EQSANSIQOutput(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSIQOutput.nxs'
 
+
 class EQSANSBeamMonitor(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
@@ -86,6 +92,7 @@ class EQSANSBeamMonitor(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "EQSANS_1466_event_Iq", 'EQSANSBeamMonitor.nxs'
+
 
 class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
     """
@@ -123,6 +130,7 @@ class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
             if x<0:
                 return False
         return True
+
 
 class EQSANSDQOutput(stresstesting.MantidStressTest):
     """
@@ -186,8 +194,9 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
         output = reduce(lambda x,y:x and y, diff)
         if not output:
             for i,dqi in enumerate(dq):
-                print i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001
+                print(i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001)
         return output
+
 
 class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
     """
@@ -251,5 +260,5 @@ class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
 
         if not output:
             for i,dqi in enumerate(dq):
-                print i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001
+                print(i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001)
         return output

@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <unordered_map>
@@ -110,6 +111,18 @@ bool Property::remember() const { return m_remember; }
  * @param remember :: true to remember
  */
 void Property::setRemember(bool remember) { m_remember = remember; }
+
+/**
+* Returns the value as a pretty printed string
+* The default implementation just returns the value with the size limit applied
+* @param maxLength :: The Max length of the returned string
+* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+*/
+std::string Property::valueAsPrettyStr(const size_t maxLength,
+                                       const bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(value(), maxLength);
+}
 
 /** Sets the user level description of the property.
  *  In addition, if the brief documentation string is empty it will be set to

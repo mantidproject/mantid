@@ -32,7 +32,7 @@
 #include "Graph.h"
 #include "Plot.h"
 #include "ApplicationWindow.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <qwt_plot.h>
 

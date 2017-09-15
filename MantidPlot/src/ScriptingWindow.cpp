@@ -3,39 +3,40 @@
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MultiTabScriptInterpreter.h"
-#include "ScriptingEnv.h"
 #include "ScriptFileInterpreter.h"
-#include "MantidQtAPI/TSVSerialiser.h"
-#include "pixmaps.h"
+#include "ScriptingEnv.h"
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 // MantidQt
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
-#include <QTextEdit>
-#include <QMenuBar>
-#include <QMenu>
 #include <QAction>
+#include <QApplication>
 #include <QCloseEvent>
-#include <QSettings>
+#include <QDateTime>
+#include <QFileInfo>
+#include <QList>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QDateTime>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QApplication>
+#include <QSettings>
+#include <QTextEdit>
 #include <QTextStream>
-#include <QList>
 #include <QUrl>
 
 using namespace Mantid;
+using namespace MantidQt::API;
 
 namespace {
 /// static logger

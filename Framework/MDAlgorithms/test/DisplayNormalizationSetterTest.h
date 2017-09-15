@@ -15,7 +15,7 @@ public:
     // Arrange
     auto isQ = true;
     auto eventWorkspace =
-        WorkspaceCreationHelper::CreateEventWorkspace2(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace2(10, 10);
     auto mdHistoWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(
             1.0, 1, 10);
@@ -31,7 +31,7 @@ public:
     // Arrange
     auto isQ = true;
     auto eventWorkspace =
-        WorkspaceCreationHelper::CreateEventWorkspace2(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace2(10, 10);
     auto mdEventWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     auto emode = Mantid::Kernel::DeltaEMode::Elastic;
@@ -52,7 +52,7 @@ public:
     // Arrange
     auto isQ = true;
     auto eventWorkspace =
-        WorkspaceCreationHelper::CreateEventWorkspace2(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace2(10, 10);
     auto mdEventWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     auto emode = Mantid::Kernel::DeltaEMode::Direct;
@@ -72,7 +72,7 @@ public:
   test_that_indirect_energy_mode_with_input_workspace2D_creates_num_event_normalization() {
     // Arrange
     auto isQ = true;
-    auto histoWorkspace = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+    auto histoWorkspace = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     auto mdEventWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     auto emode = Mantid::Kernel::DeltaEMode::Direct;
@@ -91,7 +91,7 @@ public:
   void test_that_non_Q_creates_volume_normalization() {
     // Arrange
     auto isQ = false;
-    auto histoWorkspace = WorkspaceCreationHelper::Create2DWorkspace123(2, 2);
+    auto histoWorkspace = WorkspaceCreationHelper::create2DWorkspace123(2, 2);
     auto mdEventWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEW<3>(4, 0.0, 4.0, 1);
     auto emode = Mantid::Kernel::DeltaEMode::Direct;

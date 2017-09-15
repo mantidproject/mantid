@@ -1,7 +1,10 @@
 #pylint: disable=no-init
 # Algorithm to start Bayes programs
+from __future__ import (absolute_import, division, print_function)
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
+
 
 class MuscatData(PythonAlgorithm):
 
@@ -77,5 +80,6 @@ class MuscatData(PythonAlgorithm):
         plotOp = self.getPropertyValue('Plot')
         saveOp = self.getProperty('Save').value
         Main.MuscatDataStart(sname,geom,neut,beam,sam,sqw,kr1,verbOp,plotOp,saveOp)
+
 
 AlgorithmFactory.subscribe(MuscatData)                    # Register algorithm with Mantid

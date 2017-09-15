@@ -156,7 +156,7 @@ void LatticeDomainCreator::setWorkspaceFromPropertyManager() {
 
   try {
     m_workspace = m_manager->getProperty(m_workspacePropertyName);
-  } catch (Kernel::Exception::NotFoundError) {
+  } catch (const Kernel::Exception::NotFoundError &) {
     throw std::invalid_argument(
         "Could not extract workspace from PropertyManager.");
   }
@@ -257,25 +257,22 @@ void LatticeDomainCreator::createDomainFromPeakTable(
           double d = (*dColumn)[i];
           dSpacings.push_back(d);
         }
-      } catch (std::bad_alloc) {
+      } catch (const std::bad_alloc &) {
         // do nothing.
       }
     }
 
-    auto latticeDomain = new LatticeDomain(hkls);
-    domain.reset(latticeDomain);
-
+    domain = boost::make_shared<LatticeDomain>(hkls);
     if (!values) {
-      auto functionValues = new FunctionValues(*domain);
-      values.reset(functionValues);
+      values = boost::make_shared<FunctionValues>(*domain);
     } else {
-      values->expand(i0 + latticeDomain->size());
+      values->expand(i0 + domain->size());
     }
 
     values->setFitData(dSpacings);
 
     values->setFitWeights(1.0);
-  } catch (std::runtime_error) {
+  } catch (const std::runtime_error &) {
     // Column does not exist
     throw std::runtime_error("Can not process table, the following columns are "
                              "required: HKL, d.");

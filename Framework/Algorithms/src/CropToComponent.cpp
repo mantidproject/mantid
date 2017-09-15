@@ -17,15 +17,29 @@ void getDetectors(
   }
 }
 
-void getDetectorIDs(
+void getWorkspaceIndices(
+    Mantid::API::MatrixWorkspace_sptr workspace,
     std::vector<Mantid::Geometry::IDetector_const_sptr> &detectors,
-    std::vector<Mantid::detid_t> &detectorIDs) {
-  auto numberOfDetectors = static_cast<int>(detectors.size());
+    std::vector<size_t> &workspaceIndices) {
+  const auto numberOfDetectors = static_cast<int>(detectors.size());
+  std::vector<Mantid::detid_t> detectorIds(numberOfDetectors);
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int index = 0; index < numberOfDetectors; ++index) {
     auto det = detectors[index];
-    detectorIDs[index] = det->getID();
+    detectorIds[index] = det->getID();
   }
+
+  // Get the corresponding workspace indices
+  auto detIdToWorkspaceIndexMap =
+      workspace->getDetectorIDToWorkspaceIndexMap(true);
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int index = 0; index < numberOfDetectors; ++index) {
+    workspaceIndices[index] = detIdToWorkspaceIndexMap[detectorIds[index]];
+  }
+
+  // Sort the workspace indices
+  std::sort(workspaceIndices.begin(), workspaceIndices.end());
 }
 }
 
@@ -73,9 +87,6 @@ void CropToComponent::init() {
           "ComponentNames"),
       "List of component names which are used to crop the workspace."
       "to.");
-  declareProperty("OrderByDetId", false,
-                  "Whether to order the elements of "
-                  "the component by increasing detector ID.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -91,14 +102,9 @@ void CropToComponent::exec() {
   std::vector<Mantid::Geometry::IDetector_const_sptr> detectors;
   getDetectors(inputWorkspace, componentNames, detectors);
 
-  // Get the detector IDs from the Detectors
-  std::vector<detid_t> detectorIDs(detectors.size());
-  getDetectorIDs(detectors, detectorIDs);
-
-  const bool orderByDetID = getProperty("OrderByDetId");
-  if (orderByDetID) {
-    std::sort(detectorIDs.begin(), detectorIDs.end());
-  }
+  // Get the corresponding workspace indices from the detectors
+  std::vector<size_t> workspaceIndices(detectors.size());
+  getWorkspaceIndices(inputWorkspace, detectors, workspaceIndices);
 
   // Run ExtractSpectra in order to obtain the cropped workspace
   auto extract_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -107,7 +113,7 @@ void CropToComponent::exec() {
   extract_alg->initialize();
   extract_alg->setProperty("InputWorkspace", inputWorkspace);
   extract_alg->setProperty("OutputWorkspace", "dummy");
-  extract_alg->setProperty("DetectorList", detectorIDs);
+  extract_alg->setProperty("WorkspaceIndexList", workspaceIndices);
   extract_alg->execute();
   Mantid::API::MatrixWorkspace_sptr outputWorkspace =
       extract_alg->getProperty("OutputWorkspace");

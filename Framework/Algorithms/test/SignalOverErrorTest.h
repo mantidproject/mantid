@@ -25,7 +25,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SignalOverErrorTest_OutputWS");
 
-    Workspace2D_sptr inWS = WorkspaceCreationHelper::Create2DWorkspace(2, 10);
+    Workspace2D_sptr inWS = WorkspaceCreationHelper::create2DWorkspace(2, 10);
 
     SignalOverError alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

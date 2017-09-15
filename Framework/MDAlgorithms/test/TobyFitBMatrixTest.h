@@ -9,6 +9,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FermiChopperModel.h"
 #include "MantidAPI/IkedaCarpenterModerator.h"
+#include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"

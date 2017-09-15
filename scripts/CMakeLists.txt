@@ -3,7 +3,6 @@
 add_subdirectory(FilterEvents)
 add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
-add_subdirectory(lib1to2/gui)
 add_subdirectory(TofConverter)
 add_subdirectory(HFIR_4Circle_Reduction)
 
@@ -13,7 +12,6 @@ add_custom_target(CompilePyUI DEPENDS
   CompileUIHFIRPowderReduction
   CompileUITofConverter
   CompileUIUI
-  CompileUILib1To2
   CompileUIHFIR_4Circle_Reduction
 )
 
@@ -23,41 +21,64 @@ set_property ( TARGET CompileUIFilterEvents PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIRPowderReduction PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUITofConverter PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI" )
-set_property ( TARGET CompileUILib1To2 PROPERTY FOLDER "CompilePyUI" )
 set_property ( TARGET CompileUIHFIR_4Circle_Reduction PROPERTY FOLDER "CompilePyUI" )
 
 set ( TEST_PY_FILES
+      test/AbinsAtomsDataTest.py
+      test/AbinsCalculateDWSingleCrystalTest.py
+      test/AbinsCalculatePowderTest.py
+      test/AbinsCalculateQToscaTest.py
+      test/AbinsCalculateSingleCrystalTest.py
+      test/AbinsCalculateSPowderTest.py
+      test/AbinsDWSingleCrystalDataTest.py
+      test/AbinsFrequencyPowderGeneratorTest.py
+      test/AbinsIOmoduleTest.py
+      test/AbinsKpointsDataTest.py
+      test/AbinsLoadCASTEPTest.py
+      test/AbinsLoadCRYSTALTest.py
+      test/AbinsLoadDMOL3Test.py
+      test/AbinsLoadGAUSSIANTest.py
+      test/AbinsPowderDataTest.py
       test/ConvertToWavelengthTest.py
       test/CrystalFieldTest.py
-      test/DirectReductionHelpersTest.py
-      test/DirectPropertyManagerTest.py
       test/DirectEnergyConversionTest.py
-      test/ISISDirecInelasticConfigTest.py
+      test/DirectPropertyManagerTest.py
+      test/DirectReductionHelpersTest.py
       test/IndirectCommonTests.py
+      test/ISISDirecInelasticConfigTest.py
+      test/ISISPowderAbsorptionTest.py
+      test/ISISPowderCommonTest.py
+      test/ISISPowderInstrumentSettingsTest.py
+      test/ISISPowderRunDetailsTest.py
+      test/ISISPowderSampleDetailsTest.py
+      test/ISISPowderYamlParserTest.py
       test/PyChopTest.py
+      test/ReductionSettingsTest.py
       test/ReductionWrapperTest.py
       test/ReflectometryQuickAuxiliaryTest.py
       test/RunDescriptorTest.py
-      test/SansIsisGuiSettings.py
       test/SANSBatchModeTest.py
       test/SANSCentreFinderTest.py
       test/SANSCommandInterfaceTest.py
       test/SANSDarkRunCorrectionTest.py
+      test/SansIsisGuiSettings.py
+      test/SANSIsisInstrumentTest.py
+      test/SANSReducerTest.py
+      test/SANSReductionStepsUserFileTest.py
       test/SANSUserFileParserTest.py
       test/SANSUtilityTest.py
-      test/SANSIsisInstrumentTest.py
-      test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
       test/VesuvioBackgroundTest.py
       test/VesuvioFittingTest.py
       test/VesuvioProfileTest.py
-      test/ReductionSettingsTest.py
       )
 
+# Addition tests for SANS components
+add_subdirectory(test/SANS)
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test python.scripts ${TEST_PY_FILES} )
   # Trying to add tested modules to python system path
   #set (ENV{PYTHONPATH}  "ENV{PYTHONPATH} ${CMAKE_CURRENT_SOURCE_DIR}/Inelastic" )
 endif ()

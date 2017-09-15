@@ -1,10 +1,10 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidKernel/LogFilter.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/LogFilter.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,6 +23,10 @@ void NormaliseByCurrent::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "RecalculatePCharge", false, Kernel::Direction::Input),
+                  "Re-integrates the proton charge. This will modify the "
+                  "gd_prtn_chrg. Does nothing for multi-period data");
 }
 
 /**
@@ -30,13 +34,15 @@ void NormaliseByCurrent::init() {
  * single period or multi-period data.
  *
  * @param inputWS :: The input workspace to extract the log details from.
- *
+ * @param integratePCharge :: recalculate the integrated proton charge if true
+
  * @throws Exception::NotFoundError, std::domain_error or
  * std::runtime_error if the charge value(s) are not set in the
  * workspace logs or if the values are invalid (0)
  */
 double NormaliseByCurrent::extractCharge(
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS) const {
+    boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
+    const bool integratePCharge) const {
   // Get the good proton charge and check it's valid
   double charge(-1.0);
   const Run &run = inputWS->run();
@@ -44,7 +50,7 @@ double NormaliseByCurrent::extractCharge(
   int nPeriods = 0;
   try {
     Property *nPeriodsProperty = run.getLogData("nperiods");
-    Kernel::toValue<int>(nPeriodsProperty->value(), nPeriods);
+    nPeriods = boost::lexical_cast<int>(nPeriodsProperty->value());
   } catch (Exception::NotFoundError &) {
     g_log.information() << "No nperiods property. If this is multi-period "
                            "data, then you will be normalising against the "
@@ -52,11 +58,10 @@ double NormaliseByCurrent::extractCharge(
   }
   // Handle multiperiod data.
   // The number of periods is set above by reference
-  // cppcheck-suppress knownConditionTrueFalse
   if (nPeriods > 1) {
     // Fetch the period property
     Property *currentPeriodNumberProperty = run.getLogData("current_period");
-    int periodNumber = std::atoi(currentPeriodNumberProperty->value().c_str());
+    int periodNumber = std::stoi(currentPeriodNumberProperty->value());
 
     // Fetch the charge property
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
@@ -83,6 +88,9 @@ double NormaliseByCurrent::extractCharge(
 
   } else {
     try {
+      if (integratePCharge) {
+        inputWS->run().integrateProtonCharge();
+      }
       charge = inputWS->run().getProtonCharge();
     } catch (Exception::NotFoundError &) {
       g_log.error() << "The proton charge is not set for the run attached to "
@@ -102,9 +110,10 @@ void NormaliseByCurrent::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const bool integratePCharge = getProperty("RecalculatePCharge");
 
   // Get the good proton charge and check it's valid
-  double charge = extractCharge(inputWS);
+  double charge = extractCharge(inputWS, integratePCharge);
 
   g_log.information() << "Normalisation current: " << charge << " uamps\n";
 

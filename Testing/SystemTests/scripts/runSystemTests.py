@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import (absolute_import, division, print_function)
 import optparse
 import os
 import sys
@@ -33,7 +34,8 @@ parser.add_option("-a", "--exec-args", dest="execargs",
 parser.add_option("", "--frameworkLoc",
                   help="location of the stress test framework (default=%s)" % DEFAULT_FRAMEWORK_LOC)
 parser.add_option("", "--disablepropmake", action="store_false", dest="makeprop",
-                  help="By default this will move your properties file out of the way and create a new one. This option turns off this behavior.")
+                  help="By default this will move your properties file out of the "
+                  + "way and create a new one. This option turns off this behavior.")
 parser.add_option("-R", "--tests-regex", dest="testsInclude",
                   help="String specifying which tests to run. Simply uses 'string in testname'.")
 parser.add_option("-E", "--excluderegex", dest="testsExclude",
@@ -50,6 +52,8 @@ parser.add_option("-s", "--savedir", dest="savedir",
                   help="A directory to use for the Mantid save path")
 parser.add_option("", "--archivesearch", dest="archivesearch", action="store_true",
                   help="Turn on archive search for file finder.")
+parser.add_option("", "--exclude-in-pull-requests", dest="exclude_in_pr_builds",action="store_true",
+                  help="Skip tests that are not run in pull request builds")
 parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC, executable=sys.executable, makeprop=True,
                     loglevel="information")
 (options, args) = parser.parse_args()
@@ -62,30 +66,30 @@ import stresstesting
 # Parse files containing the search and save directories, unless otherwise given
 data_paths = options.datapaths
 if data_paths is None or data_paths == "":
-  with open(DATA_DIRS_LIST_PATH, 'r') as f_handle:
-    data_paths = f_handle.read().strip()
+    with open(DATA_DIRS_LIST_PATH, 'r') as f_handle:
+        data_paths = f_handle.read().strip()
 
 save_dir = options.savedir
 if save_dir is None or save_dir == "":
-  with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
-    save_dir = f_handle.read().strip()
+    with open(SAVE_DIR_LIST_PATH, 'r') as f_handle:
+        save_dir = f_handle.read().strip()
 # Configure properties file
 mtdconf = stresstesting.MantidFrameworkConfig(loglevel=options.loglevel,
                                               data_dirs=data_paths, save_dir=save_dir,
                                               archivesearch=options.archivesearch)
 if options.makeprop:
-  mtdconf.config()
+    mtdconf.config()
 
 # run the tests
 execargs = options.execargs
 runner = stresstesting.TestRunner(executable=options.executable, exec_args=execargs, escape_quotes=True)
 reporter = stresstesting.XmlResultReporter(showSkipped=options.showskipped)
 mgr = stresstesting.TestManager(mtdconf.testDir, runner, output = [reporter],
-                                testsInclude=options.testsInclude, testsExclude=options.testsExclude)
+                                testsInclude=options.testsInclude, testsExclude=options.testsExclude, exclude_in_pr_builds=options.exclude_in_pr_builds)
 try:
-  mgr.executeTests()
+    mgr.executeTests()
 except KeyboardInterrupt:
-  mgr.markSkipped("KeyboardInterrupt")
+    mgr.markSkipped("KeyboardInterrupt")
 
 # report the errors
 success = reporter.reportStatus()
@@ -95,17 +99,17 @@ xml_report.close()
 
 # put the configuration back to its original state
 if options.makeprop:
-  mtdconf.restoreconfig()
+    mtdconf.restoreconfig()
 
-print
+print()
 if mgr.skippedTests == mgr.totalTests:
-  print "All tests were skipped"
-  success = False # fail if everything was skipped
+    print("All tests were skipped")
+    success = False # fail if everything was skipped
 else:
-  percent = 1.-float(mgr.failedTests)/float(mgr.totalTests-mgr.skippedTests)
-  percent = int(100. * percent)
-  print "%d%s tests passed, %d tests failed out of %d (%d skipped)" % \
-      (percent, '%', mgr.failedTests, (mgr.totalTests-mgr.skippedTests), mgr.skippedTests)
-print 'All tests passed? ' + str(success)
+    percent = 1.-float(mgr.failedTests)/float(mgr.totalTests-mgr.skippedTests)
+    percent = int(100. * percent)
+    print("%d%s tests passed, %d tests failed out of %d (%d skipped)" %
+          (percent, '%', mgr.failedTests, (mgr.totalTests-mgr.skippedTests), mgr.skippedTests))
+print('All tests passed? ' + str(success))
 if not success:
-  sys.exit(1)
+    sys.exit(1)

@@ -4,7 +4,8 @@
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (SNSReduction object)
 """
-from interface import InstrumentInterface
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.eqsans_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.eqsans_data import DataSetsWidget
@@ -19,11 +20,12 @@ from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
 
 class EQSANSInterface(InstrumentInterface):
     """

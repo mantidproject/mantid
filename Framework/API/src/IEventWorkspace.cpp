@@ -1,7 +1,5 @@
-//------------------------------------------------------
-// Includes
-//------------------------------------------------------
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid {
 

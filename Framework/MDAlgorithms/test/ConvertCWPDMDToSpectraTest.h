@@ -3,13 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
-#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Unit.h"
+#include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
+#include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
 using Mantid::DataHandling::LoadSpiceAscii;
@@ -47,9 +51,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
@@ -70,9 +74,9 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
 
     // X, Y and E values
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
-    const Mantid::MantidVec &vecE = outws->readE(0);
+    auto &vecX = outws->x(0);
+    auto &vecY = outws->y(0);
+    auto &vecE = outws->e(0);
 
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 120.0, 0.0001);
@@ -109,9 +113,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0.5, 0.01, 5.0"));
@@ -134,7 +138,7 @@ public:
     std::string unit = outws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "dSpacing");
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
+    auto &vecX = outws->x(0);
     TS_ASSERT_DELTA(vecX.front(), 0.5, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 5.00, 0.0001);
 
@@ -155,9 +159,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOutput", "dSpacing"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("BinningParams", "0.01"));
     TS_ASSERT_THROWS_NOTHING(
@@ -179,7 +183,7 @@ public:
     std::string unit = outws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "dSpacing");
 
-    const Mantid::MantidVec &vecX = outws->readX(0);
+    auto &vecX = outws->x(0);
     TS_ASSERT_DELTA(vecX.front(), 1.3416, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 23.0216, 0.001);
 
@@ -243,8 +247,8 @@ public:
     TS_ASSERT(m_monitorMD);
 
     // Clean
-    AnalysisDataService::Instance().remove(datatablews->name());
-    AnalysisDataService::Instance().remove(parentlogws->name());
+    AnalysisDataService::Instance().remove(datatablews->getName());
+    AnalysisDataService::Instance().remove(parentlogws->getName());
   }
 
   //----------------------------------------------------------------------------------------------
@@ -262,9 +266,9 @@ public:
 
     // Set properties
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+        alg.setPropertyValue("InputWorkspace", m_dataMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
     TS_ASSERT_THROWS_NOTHING(
@@ -287,9 +291,9 @@ public:
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
 
     // X, Y and E values
-    const Mantid::MantidVec &vecX = outws->readX(0);
-    const Mantid::MantidVec &vecY = outws->readY(0);
-    const Mantid::MantidVec &vecE = outws->readE(0);
+    auto &vecX = outws->x(0);
+    auto &vecY = outws->y(0);
+    auto &vecE = outws->e(0);
 
     TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
     TS_ASSERT_DELTA(vecX.back(), 120.0, 0.0001);
@@ -323,8 +327,8 @@ public:
   /** Clean the testing workspaces
    */
   void test_Clean() {
-    AnalysisDataService::Instance().remove(m_dataMD->name());
-    AnalysisDataService::Instance().remove(m_monitorMD->name());
+    AnalysisDataService::Instance().remove(m_dataMD->getName());
+    AnalysisDataService::Instance().remove(m_monitorMD->getName());
   }
 
 private:

@@ -3,7 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidKernel/DateAndTime.h"
@@ -47,7 +49,7 @@ public:
     alg.initialize();
 
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("InputWorkspace", ws->name()));
+        alg.setPropertyValue("InputWorkspace", ws->getName()));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "PG3_Resolution"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("DeltaTOF", 40.0));

@@ -28,12 +28,14 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class Guinier(IFunction1D):
     """
         Provide a Guinier fit function for SANS
 
         I(q) = I(0) exp(-R^2 q^2 / 3)
     """
+
     def category(self):
         return "SANS"
 
@@ -61,6 +63,7 @@ class Guinier(IFunction1D):
             jacobian.set(i,0, math.exp(-(rg*x)**2/3.0 ) )
             jacobian.set(i,1, -self.getParameterValue("Scale") * math.exp(-(rg*x)**2/3.0 )*2.0/3.0*rg*x*x )
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Guinier)

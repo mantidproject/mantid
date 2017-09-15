@@ -1,9 +1,6 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 #include "MantidAlgorithms/GenerateEventsFilter.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -22,7 +19,6 @@ namespace Mantid {
 namespace Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
-//----------------------------------------------------------------------------------------------
 /** Constructor
  */
 GenerateEventsFilter::GenerateEventsFilter()
@@ -33,7 +29,6 @@ GenerateEventsFilter::GenerateEventsFilter()
       m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
       m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
 
-//----------------------------------------------------------------------------------------------
 /** Declare input
  */
 void GenerateEventsFilter::init() {
@@ -175,7 +170,6 @@ void GenerateEventsFilter::init() {
                   "Number of threads forced to use in the parallel mode. ");
 }
 
-//----------------------------------------------------------------------------------------------
 /** Main execute body
  */
 void GenerateEventsFilter::exec() {
@@ -222,7 +216,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
 
   // Output splitter information workspace
   std::string title = getProperty("TitleOfSplitters");
-  if (title.size() == 0) {
+  if (title.empty()) {
     // Using default
     title = "Splitters";
   }
@@ -269,8 +263,8 @@ void GenerateEventsFilter::processInputTime() {
   std::string s_inptf = this->getProperty("StopTime");
 
   // Default
-  bool defaultstart = (s_inpt0.size() == 0);
-  bool defaultstop = (s_inptf.size() == 0);
+  bool defaultstart = s_inpt0.empty();
+  bool defaultstop = s_inptf.empty();
 
   // Determine format
   bool instringformat = true;
@@ -290,13 +284,13 @@ void GenerateEventsFilter::processInputTime() {
   // Obtain time unit converter
   std::string timeunit = this->getProperty("UnitOfTime");
   m_timeUnitConvertFactorToNS = -1.0;
-  if (timeunit.compare("Seconds") == 0) {
+  if (timeunit == "Seconds") {
     // (second)
     m_timeUnitConvertFactorToNS = 1.0E9;
-  } else if (timeunit.compare("Nanoseconds") == 0) {
+  } else if (timeunit == "Nanoseconds") {
     // (nano-seconds)
     m_timeUnitConvertFactorToNS = 1.0;
-  } else if (timeunit.compare("Percent") == 0) {
+  } else if (timeunit == "Percent") {
     // (percent of total run time)
     int64_t runtime_ns =
         m_runEndTime.totalNanoseconds() - runstarttime.totalNanoseconds();
@@ -318,7 +312,7 @@ void GenerateEventsFilter::processInputTime() {
     m_startTime = DateAndTime(s_inpt0);
   } else {
     // Relative time in double.
-    double inpt0 = atof(s_inpt0.c_str());
+    double inpt0 = std::stod(s_inpt0.c_str());
     if (inpt0 < 0) {
       stringstream errss;
       errss << "Input relative StartTime " << inpt0 << " cannot be negative. ";
@@ -338,14 +332,15 @@ void GenerateEventsFilter::processInputTime() {
     m_stopTime = DateAndTime(s_inptf);
   } else {
     // Relative time in double
-    double inptf = atof(s_inptf.c_str());
+    double inptf = std::stod(s_inptf.c_str());
     int64_t tf_ns = runstarttime.totalNanoseconds() +
                     static_cast<int64_t>(inptf * m_timeUnitConvertFactorToNS);
     m_stopTime = Kernel::DateAndTime(tf_ns);
   }
 
   // Check start/stop time
-  if (m_startTime.totalNanoseconds() >= m_stopTime.totalNanoseconds()) {
+  //  if (m_startTime.totalNanoseconds() >= m_stopTime.totalNanoseconds()) {
+  if (m_startTime >= m_stopTime) {
     stringstream errss;
     errss << "Input StartTime " << m_startTime.toISO8601String()
           << " is equal or later than "
@@ -367,8 +362,16 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (vec_timeintervals.empty())
+  if (vec_timeintervals.empty()) {
     singleslot = true;
+  } else {
+    // Check that there is at least one non-zero time value/interval
+    if (std::all_of(vec_timeintervals.begin(), vec_timeintervals.end(),
+                    [](double i) { return i == 0; }))
+      throw std::invalid_argument(
+          "If TimeInterval has one or more values, at "
+          "least one of those values must be non-zero.");
+  }
 
   // Progress
   int64_t totaltime =
@@ -383,8 +386,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
 
     // Default and thus just one interval
     std::stringstream ss;
-    ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
-
+    ss << "Time.Interval.From." << m_startTime << ".To." << m_stopTime;
     addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
   } else if (vec_timeintervals.size() == 1) {
     double timeinterval = vec_timeintervals[0];
@@ -406,7 +408,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       Kernel::DateAndTime t0(curtime_ns);
       Kernel::DateAndTime tf(nexttime_ns);
       std::stringstream ss;
-      ss << "Time Interval From " << t0 << " to " << tf;
+      ss << "Time.Interval.From." << t0 << ".to." << tf;
 
       addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 
@@ -459,7 +461,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         Kernel::DateAndTime t0(curtime_ns);
         Kernel::DateAndTime tf(nexttime_ns);
         std::stringstream ss;
-        ss << "Time Interval From " << t0 << " to " << tf;
+        ss << "Time.Interval.From." << t0 << ".to." << tf;
 
         addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 
@@ -524,10 +526,10 @@ void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
       getProperty("FilterLogValueByChangingDirection");
   bool filterIncrease;
   bool filterDecrease;
-  if (filterdirection.compare("Both") == 0) {
+  if (filterdirection == "Both") {
     filterIncrease = true;
     filterDecrease = true;
-  } else if (filterdirection.compare("Increase") == 0) {
+  } else if (filterdirection == "Increase") {
     filterIncrease = true;
     filterDecrease = false;
   } else {
@@ -649,7 +651,7 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
   int wsindex = 0;
   makeFilterBySingleValue(minvalue, maxvalue,
                           static_cast<double>(timetolerance_ns) * 1.0E-9,
-                          logboundary.compare("centre") == 0, filterincrease,
+                          logboundary == "centre", filterincrease,
                           filterdecrease, m_startTime, m_stopTime, wsindex);
 
   // Create information table workspace
@@ -658,14 +660,14 @@ void GenerateEventsFilter::processSingleValueFilter(double minvalue,
 
   API::TableRow row = m_filterInfoWS->appendRow();
   std::stringstream ss;
-  ss << "Log " << m_dblLog->name() << " From " << minvalue << " To " << maxvalue
-     << "  Value-change-direction ";
+  ss << "Log." << m_dblLog->name() << ".From." << minvalue << ".To." << maxvalue
+     << ".Value-change-direction:";
   if (filterincrease && filterdecrease) {
-    ss << " both ";
+    ss << ".both ";
   } else if (filterincrease) {
-    ss << " increase";
+    ss << ".increase";
   } else {
-    ss << " decrease";
+    ss << ".decrease";
   }
   row << 0 << ss.str();
 }
@@ -715,14 +717,14 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
 
     // Workgroup information
     std::stringstream ss;
-    ss << "Log " << m_dblLog->name() << " From " << lowbound << " To "
-       << upbound << "  Value-change-direction ";
+    ss << "Log." << m_dblLog->name() << ".From." << lowbound << ".To."
+       << upbound << ".Value-change-direction:";
     if (filterincrease && filterdecrease) {
-      ss << " both ";
+      ss << "both";
     } else if (filterincrease) {
-      ss << " increase";
+      ss << "increase";
     } else {
-      ss << " decrease";
+      ss << "decrease";
     };
     API::TableRow newrow = m_filterInfoWS->appendRow();
     newrow << wsindex << ss.str();
@@ -774,13 +776,13 @@ void GenerateEventsFilter::processMultipleValueFilters(double minvalue,
   if (m_useParallel) {
     // Make filters in parallel
     makeMultipleFiltersByValuesParallel(
-        indexwsindexmap, logvalueranges, logboundary.compare("centre") == 0,
+        indexwsindexmap, logvalueranges, logboundary == "centre",
         filterincrease, filterdecrease, m_startTime, m_stopTime);
   } else {
     // Make filters in serial
-    makeMultipleFiltersByValues(
-        indexwsindexmap, logvalueranges, logboundary.compare("centre") == 0,
-        filterincrease, filterdecrease, m_startTime, m_stopTime);
+    makeMultipleFiltersByValues(indexwsindexmap, logvalueranges,
+                                logboundary == "centre", filterincrease,
+                                filterdecrease, m_startTime, m_stopTime);
   }
 }
 
@@ -822,15 +824,12 @@ void GenerateEventsFilter::makeFilterBySingleValue(
   // Initialize control parameters
   bool lastGood = false;
   bool isGood = false;
-  ;
   time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
   int numgood = 0;
   DateAndTime lastTime, currT;
   DateAndTime start, stop;
 
   size_t progslot = 0;
-  string info;
-
   for (int i = 0; i < m_dblLog->size(); i++) {
     lastTime = currT;
     // The new entry
@@ -859,7 +858,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
           stop = currT;
         }
 
-        addNewTimeFilterSplitter(start, stop, wsindex, info);
+        std::string empty("");
+        addNewTimeFilterSplitter(start, stop, wsindex, empty);
 
         // Reset the number of good ones, for next time
         numgood = 0;
@@ -884,9 +884,12 @@ void GenerateEventsFilter::makeFilterBySingleValue(
       stop = currT - tol;
     else
       stop = currT;
-    addNewTimeFilterSplitter(start, stop, wsindex, info);
-    numgood = 0;
+
+    std::string empty("");
+    addNewTimeFilterSplitter(start, stop, wsindex, empty);
   }
+
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1537,18 +1540,18 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     while (logvalue <= maxvalue) {
       stringstream message;
       if (logvalue + delta - 1 > logvalue)
-        message << m_intLog->name() << " = [" << logvalue << ", "
+        message << m_intLog->name() << "=[" << logvalue << ","
                 << logvalue + delta - 1 << "]";
       else
-        message << m_intLog->name() << " = " << logvalue;
+        message << m_intLog->name() << "=" << logvalue;
 
-      message << ". Value change direction: ";
+      message << ".Value change direction:";
       if (filterIncrease && filterDecrease)
-        message << "Both.";
+        message << "Both";
       else if (filterIncrease)
-        message << "Increasing. ";
+        message << "Increasing";
       else if (filterDecrease)
-        message << "Decreasing. ";
+        message << "Decreasing";
 
       TableRow newrow = m_filterInfoWS->appendRow();
       newrow << wsindex << message.str();
@@ -1680,7 +1683,7 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
   }
 
   // Information
-  if (info.size() > 0) {
+  if (!info.empty()) {
     API::TableRow row = m_filterInfoWS->appendRow();
     row << wsindex << info;
   }
@@ -1748,7 +1751,9 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey);
   auto &dataX = m_filterWS->mutableX(0);
   for (size_t i = 0; i < sizex; ++i) {
-    dataX[i] = static_cast<double>(m_vecSplitterTime[i].totalNanoseconds());
+    // x is in the unit as second
+    dataX[i] =
+        static_cast<double>(m_vecSplitterTime[i].totalNanoseconds()) * 1.E-9;
   }
 
   auto &dataY = m_filterWS->mutableY(0);
@@ -1785,14 +1790,18 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
   size_t index = 0;
   for (size_t i = 0; i < numThreads; ++i) {
     for (size_t j = 0; j < m_vecGroupIndexSet[i].size(); ++j) {
+      // x is in the unit as second
       dataX[index] =
-          static_cast<double>(m_vecSplitterTimeSet[i][j].totalNanoseconds());
+          static_cast<double>(m_vecSplitterTimeSet[i][j].totalNanoseconds()) *
+          1.E-9;
       dataY[index] = static_cast<double>(m_vecGroupIndexSet[i][j]);
       ++index;
     }
   }
+  // x is in the unit as second
   dataX[index] = static_cast<double>(
-      m_vecSplitterTimeSet.back().back().totalNanoseconds());
+                     m_vecSplitterTimeSet.back().back().totalNanoseconds()) *
+                 1.E-9;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1828,7 +1837,7 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   bool norunendset = false;
   try {
     runendtime = m_dataWS->run().endTime();
-  } catch (std::runtime_error err) {
+  } catch (const std::runtime_error &) {
     norunendset = true;
   }
 

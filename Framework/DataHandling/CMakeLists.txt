@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/BankPulseTimes.cpp
 	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
@@ -27,7 +28,6 @@ set ( SRC_FILES
 	src/H5Util.cpp
 	src/ISISDataArchive.cpp
 	src/ISISRunLogs.cpp
-	src/ImggAggregateWavelengths.cpp
 	src/Load.cpp
 	src/LoadANSTOHelper.cpp
 	src/LoadAscii.cpp
@@ -43,9 +43,6 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
-	src/ProcessBankData.cpp
-	src/BankPulseTimes.cpp
-	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
@@ -53,11 +50,11 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadHelper.cpp
 	src/LoadIDFFromNexus.cpp
-	src/LoadILL.cpp
-	src/LoadILLIndirect.cpp
-	src/LoadILLTOF.cpp
+        src/LoadILLDiffraction.cpp
+	src/LoadILLIndirect2.cpp
 	src/LoadILLReflectometry.cpp
 	src/LoadILLSANS.cpp
+	src/LoadILLTOF2.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
@@ -65,7 +62,6 @@ set ( SRC_FILES
 	src/LoadIsawDetCal.cpp
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
-	src/LoadLogsForSNSPulsedMagnet.cpp
 	src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
@@ -97,18 +93,18 @@ set ( SRC_FILES
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
 	src/LoadRawSpectrum0.cpp
-	src/LoadTBL.cpp
 	src/LoadSINQFocus.cpp
+	src/LoadSESANS.cpp
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
-	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadSpiceAscii.cpp
 	src/LoadSpiceXML2DDet.cpp
 	src/LoadSwans.cpp
+	src/LoadTBL.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -119,7 +115,7 @@ set ( SRC_FILES
 	src/NexusTester.cpp
 	src/PDLoadCharacterizations.cpp
 	src/PatchBBY.cpp
-	src/ProcessDasNexusLog.cpp
+	src/ProcessBankData.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
@@ -160,10 +156,10 @@ set ( SRC_FILES
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
 	src/SaveReflCustomAscii.cpp
-	src/SaveTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
+	src/SaveSESANS.cpp
 	src/SaveSPE.cpp
-	src/SaveSavuTomoConfig.cpp
+	src/SaveTBL.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetBeam.cpp
@@ -179,6 +175,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/BankPulseTimes.h
 	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
@@ -205,7 +202,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/H5Util.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISRunLogs.h
-	inc/MantidDataHandling/ImggAggregateWavelengths.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadANSTOHelper.h
 	inc/MantidDataHandling/LoadAscii.h
@@ -221,9 +217,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
-	inc/MantidDataHandling/ProcessBankData.h
-	inc/MantidDataHandling/BankPulseTimes.h
-	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
@@ -231,11 +224,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
-	inc/MantidDataHandling/LoadILL.h
-	inc/MantidDataHandling/LoadILLIndirect.h
-	inc/MantidDataHandling/LoadILLTOF.h
+        inc/MantidDataHandling/LoadILLDiffraction.h
+	inc/MantidDataHandling/LoadILLIndirect2.h
 	inc/MantidDataHandling/LoadILLReflectometry.h
 	inc/MantidDataHandling/LoadILLSANS.h
+	inc/MantidDataHandling/LoadILLTOF2.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
@@ -243,7 +236,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadIsawDetCal.h
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
-	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
 	inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
@@ -270,18 +262,18 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
 	inc/MantidDataHandling/LoadRawSpectrum0.h
-	inc/MantidDataHandling/LoadTBL.h
+	inc/MantidDataHandling/LoadSESANS.h
 	inc/MantidDataHandling/LoadSINQFocus.h
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
-	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadSpiceAscii.h
 	inc/MantidDataHandling/LoadSpiceXML2DDet.h
 	inc/MantidDataHandling/LoadSwans.h
+	inc/MantidDataHandling/LoadTBL.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -293,7 +285,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
 	inc/MantidDataHandling/PatchBBY.h
-	inc/MantidDataHandling/ProcessDasNexusLog.h
+	inc/MantidDataHandling/ProcessBankData.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
@@ -334,10 +326,10 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveReflCustomAscii.h
-	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
+	inc/MantidDataHandling/SaveSESANS.h
 	inc/MantidDataHandling/SaveSPE.h
-	inc/MantidDataHandling/SaveSavuTomoConfig.h
+	inc/MantidDataHandling/SaveTBL.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetBeam.h
@@ -382,7 +374,6 @@ set ( TEST_FILES
 	GroupDetectorsTest.h
 	H5UtilTest.h
 	ISISDataArchiveTest.h
-	ImggAggregateWavelengthsTest.h
 	InstrumentRayTracerTest.h
 	LoadAscii2Test.h
 	LoadAsciiTest.h
@@ -397,17 +388,18 @@ set ( TEST_FILES
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
-	LoadEventPreNexusTest.h
 	LoadFITSTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSASInstrumentFileTest.h
 	LoadGSSTest.h
 	LoadIDFFromNexusTest.h
-	LoadILLIndirectTest.h
-	LoadILLTOFTest.h
+	LoadILLDiffractionTest.h
+        LoadILLIndirect2Test.h
 	LoadILLReflectometryTest.h
 	LoadILLSANSTest.h
+	LoadILLTOF2Test.h
 	LoadISISNexusTest.h
+	LoadInstrumentFromNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
@@ -437,17 +429,19 @@ set ( TEST_FILES
 	LoadRawBin0Test.h
 	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
-	LoadTBLTest.h
+	LoadSESANSTest.h
 	LoadSINQFocusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
+	LoadSampleDetailsFromRawTest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
-	LoadSavuTomoConfigTest.h
+	LoadSpecTest.h
 	LoadSpice2dTest.h
 	LoadSpiceAsciiTest.h
 	LoadSpiceXML2DDetTest.h
 	LoadSwansTest.h
+	LoadTBLTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h
@@ -458,7 +452,6 @@ set ( TEST_FILES
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
 	PDLoadCharacterizationsTest.h
-	ProcessDasNexusLogTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
@@ -477,7 +470,7 @@ set ( TEST_FILES
 	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFITSTest.h
-	SaveFocussedXYETest.h
+	SaveFocusedXYETest.h
 	SaveFullprofResolutionTest.h
 	SaveGSASInstrumentFileTest.h
 	SaveGSSTest.h
@@ -490,16 +483,17 @@ set ( TEST_FILES
 	SaveNXcanSASTest.h
 	SaveNexusProcessedTest.h
 	SaveNexusTest.h
+	SaveOpenGenieAsciiTest.h
 	SavePARTest.h
 	SavePDFGuiTest.h
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
 	SaveReflCustomAsciiTest.h
-	SaveTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
+	SaveSESANSTest.h
 	SaveSPETest.h
-	SaveSavuTomoConfigTest.h
+	SaveTBLTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetBeamTest.h
 	SetSampleMaterialTest.h

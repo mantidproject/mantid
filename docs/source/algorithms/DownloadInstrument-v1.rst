@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm connects with hte cloud based Mantid Instrument Definition 
+This algorithm connects with the cloud based Mantid Instrument Definition 
 Repository and downloads any updated instrument files for use within Mantid.
 
 This algorithm is normally run on startup of Mantid for official installed 
@@ -32,7 +32,7 @@ Output Messages
 The following may be logged at Notice
 
 All instrument definitions up to date
-   Everything is fine, there are now updates to download.
+   Everything is fine, there are no updates to download.
 
 Downloading n files from the instrument repository
    Some files have changed or been added to the Instrument Repository, they are being downloaded.

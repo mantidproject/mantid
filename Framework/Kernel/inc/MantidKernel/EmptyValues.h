@@ -28,6 +28,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -36,6 +37,9 @@ DLLExport int EMPTY_INT();
 
 /// Returns what we consider an "empty" long
 DLLExport long EMPTY_LONG();
+
+/// Returns what we consider an "empty" int64_t
+DLLExport int64_t EMPTY_INT64();
 
 /// Return what we consider to be an empty double
 DLLExport double EMPTY_DBL();

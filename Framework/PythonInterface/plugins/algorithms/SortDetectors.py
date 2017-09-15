@@ -2,12 +2,15 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import Direction,IntArrayProperty, FloatArrayProperty
-import  mantid,math,numpy
+import  mantid
+import math
+import numpy
 
 
 class SortDetectors(PythonAlgorithm):
     """ Sort detectors by distance
     """
+
     def category(self):
         """ Return category
         """
@@ -73,5 +76,6 @@ class SortDetectors(PythonAlgorithm):
         self.setProperty("UpstreamDetectorDistances", numpy.array(updist))
         self.setProperty("DownstreamSpectra", numpy.array(downinds))
         self.setProperty("DownstreamDetectorDistances", numpy.array(downdist))
+
 
 AlgorithmFactory.subscribe(SortDetectors)

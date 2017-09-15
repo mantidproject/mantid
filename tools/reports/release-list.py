@@ -1,13 +1,12 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import csv
 import datetime
-import json
 import os
 import requests
 import subprocess
 import sys
+
 
 class Release:
     def __init__(self, name, datestamp):
@@ -24,8 +23,10 @@ class Release:
 
     def __eq__(self, other):
         return self.name == other.name and self.date==other.date
+
     def __hash__(self):
         return hash(str(self))
+
 
 def getTags(repolocation):
     arg_tags = ['git', 'log', '--tags', '--simplify-by-decoration', '--pretty="format:%ai %d"']
@@ -62,6 +63,7 @@ def getTags(repolocation):
 
     return result
 
+
 def parseMilestones(json_doc):
     milestones = []
     for milestone in json_doc:
@@ -70,6 +72,7 @@ def parseMilestones(json_doc):
                                               "%Y-%m-%dT%H:%M:%SZ")
         milestones.append(Release(name, datestamp))
     return milestones
+
 
 def getMilestones(endpoint, oauth=None):
     #print('Getting list of all milestones from Github.')
@@ -106,13 +109,13 @@ def getMilestones(endpoint, oauth=None):
 
     return milestones
 
+
 def writeFile(releases):
     csvreleases = open('releases.csv', 'w')
     csvreleases.write("date,milestone\n")
 
     for release in releases:
         csvreleases.write(str(release)+"\n")
-
 
     csvreleases.close()
 
@@ -132,7 +135,6 @@ if __name__ == '__main__':
         oauth = sys.argv[2]
     else:
         oauth = None
-
 
     releases = getTags(repolocation)
 

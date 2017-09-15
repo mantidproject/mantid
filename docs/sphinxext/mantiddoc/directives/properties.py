@@ -1,7 +1,9 @@
 #pylint: disable=invalid-name,deprecated-module
+from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import re
 from string import punctuation
+from six.moves import range
 
 SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
@@ -35,7 +37,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
             # names for the table headers.
             header = ('Name', 'Default', 'Description')
 
-            for i in xrange(ifunc.numParams()):
+            for i in range(ifunc.numParams()):
                 properties.append((ifunc.parameterName(i),
                                    str(ifunc.getParameterValue(i)),
                                    ifunc.paramDescription(i)

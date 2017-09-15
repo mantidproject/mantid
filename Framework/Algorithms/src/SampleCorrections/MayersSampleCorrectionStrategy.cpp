@@ -2,10 +2,10 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
-#include "MantidKernel/MersenneTwister.h"
-#include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
 #include "MantidKernel/Math/Distributions/ChebyshevSeries.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/Statistics.h"
 #include <cassert>
 #include <cmath>
 
@@ -25,8 +25,6 @@ size_t N_MUR_PTS = 21;
 size_t N_RAD = 29;
 /// Number of theta points for cylindrical integration
 size_t N_THETA = 29;
-/// Number of second order event points
-size_t N_SECOND = 10000;
 /// Order of polynomial used to fit generated points
 size_t N_POLY_ORDER = 4;
 /// 2pi
@@ -73,23 +71,18 @@ namespace Algorithms {
 /**
  * Constructor
  * @param params Defines the required parameters for the correction
- * @param tof The TOF values corresponding to the signals to correct.
- *      Number of tof values must match number of signal/error or be 1 greater
- * @param sigIn Values of the signal that will be corrected
- * @param errIn Values of the errors that will be corrected
+ * @param inputHist A histogram containing the TOF values corresponding
+ * to the values to be corrected.
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
-    const std::vector<double> &tof, const std::vector<double> &sigIn,
-    const std::vector<double> &errIn)
-    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
-      m_histogram(tof.size() == sigIn.size() + 1),
-      m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
-  // Sanity check
-  assert(sigIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
-  assert(errIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
+    const Mantid::HistogramData::Histogram &inputHist)
+    : m_pars(params), m_histogram(inputHist), m_tofVals(inputHist.points()),
+      m_histoYSize(inputHist.y().size()), m_muRrange(calculateMuRange()),
+      m_rng(new MersenneTwister(1)) {
 
-  if (!(m_tof.front() < m_tof.back())) {
+  const auto &xVals = m_histogram.x();
+  if (!(xVals.front() < xVals.back())) {
     throw std::invalid_argument(
         "TOF values are expected to be monotonically increasing");
   }
@@ -104,15 +97,11 @@ MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() = default;
  * Correct the data for absorption and multiple scattering effects. Allows
  * both histogram or point data. For histogram the TOF is taken to be
  * the mid point of a bin
- * @param sigOut Signal values to correct [In/Out]
- * @param errOut Error values to correct [In/Out]
+ *
+ * @return A histogram containing corrected values
  */
-void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
-                                           std::vector<double> &errOut) {
-  const size_t nsig(m_sigin.size());
-  // Sanity check
-  assert(sigOut.size() == m_sigin.size());
-  assert(errOut.size() == m_errin.size());
+Mantid::HistogramData::Histogram
+MayersSampleCorrectionStrategy::getCorrectedHisto() {
 
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
@@ -162,8 +151,19 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
   const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
-  for (size_t i = 0; i < nsig; ++i) {
-    const double sigt = sigmaTotal(flightPath, tof(i));
+  auto outputHistogram = m_histogram;
+
+  auto &sigOut = outputHistogram.mutableY();
+  auto &errOut = outputHistogram.mutableE();
+
+  for (size_t i = 0; i < m_histoYSize; ++i) {
+    const double yin(m_histogram.y()[i]), ein(m_histogram.e()[i]);
+    if (yin == 0) {
+      // Detector with 0 signal received - skip this bin
+      continue;
+    }
+
+    const double sigt = sigmaTotal(flightPath, m_tofVals[i]);
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
     const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
@@ -174,10 +174,11 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
       corrfact *= (1.0 - beta) / rns;
     }
     // apply correction
-    const double yin(m_sigin[i]), ein(m_errin[i]);
+
     sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
+  return outputHistogram;
 }
 
 /**
@@ -192,6 +193,7 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
   const double dyr = muR / to<double>(N_RAD - 1);
   const double dyth = TWOPI / to<double>(N_THETA - 1);
   const double muRSq = muR * muR;
+  const double cosaz = cos(m_pars.azimuth);
 
   // Store values at each point
   std::vector<double> yr(N_RAD), yth(N_THETA);
@@ -211,7 +213,7 @@ MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
       if (fact2 < 0.0)
         fact2 = 0.0;
       const double mul2 =
-          (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cos(m_pars.phi);
+          (sqrt(fact2) - r0 * cos(m_pars.twoTheta - theta)) / cosaz;
       yth[j] = exp(-mul1 - mul2);
     }
 
@@ -234,15 +236,15 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
-  double muH = muR * (m_pars.cylHeight / m_pars.cylRadius);
+  const double muH = muR * (m_pars.cylHeight / m_pars.cylRadius);
+  const double cosaz = cos(m_pars.azimuth);
   seedRNG(irp);
 
   // Take an average over a number of sets of second scatters
-  const size_t nsets(10);
-  std::vector<double> deltas(nsets, 0.0);
-  for (size_t j = 0; j < nsets; ++j) {
+  std::vector<double> deltas(m_pars.msNRuns, 0.0);
+  for (size_t j = 0; j < m_pars.msNRuns; ++j) {
     double sum = 0.0;
-    for (size_t i = 0; i < N_SECOND; ++i) {
+    for (size_t i = 0; i < m_pars.msNEvents; ++i) {
       // Random (r,theta,z)
       const double r1 = pow(m_rng->nextValue(), radDistPower) * muR;
       const double r2 = pow(m_rng->nextValue(), radDistPower) * muR;
@@ -260,7 +262,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
         fact2 = 0.0;
       // Path out from final point
       const double mul2 =
-          (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cos(m_pars.phi);
+          (sqrt(fact2) - r2 * cos(m_pars.twoTheta - th2)) / cosaz;
       // Path between point 1 & 2
       const double mul12 =
           sqrt(pow(r1 * cos(th1) - r2 * cos(th2), 2) +
@@ -270,7 +272,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
       sum += exp(-(mul1 + mul2 + mul12)) / pow(mul12, 2);
     }
     const double beta =
-        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(N_SECOND);
+        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(m_pars.msNEvents);
     const double delta = 0.25 * beta / (M_PI * abs * muH);
     deltas[j] = delta;
   }
@@ -290,7 +292,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
 std::pair<double, double>
 MayersSampleCorrectionStrategy::calculateMuRange() const {
   const double flightPath(m_pars.l1 + m_pars.l2);
-  const double tmin(tof(0)), tmax(tof(m_sigin.size() - 1));
+  const double tmin(m_tofVals[0]), tmax(m_tofVals[m_histoYSize - 1]);
   return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
 }
 
@@ -328,17 +330,6 @@ double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
   // sigabs = sigabs(@2200(m/s)^-1)*2200 * velocity;
   const double sigabs = m_pars.sigmaAbs * 2200.0 * tof * 1e-6 / flightPath;
   return sigabs + m_pars.sigmaSc;
-}
-
-/**
- * Return the TOF for the given index of the signal value, taking into account
- * if we have a histogram. Histograms will use the mid point of the bin
- * as the TOF value. Note that there is no range check for the index.
- * @param i Index of the signal value
- * @return The associated TOF value
- */
-double MayersSampleCorrectionStrategy::tof(const size_t i) const {
-  return m_histogram ? 0.5 * (m_tof[i] + m_tof[i + 1]) : m_tof[i];
 }
 
 /**

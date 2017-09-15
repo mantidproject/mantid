@@ -6,6 +6,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidHistogramData/Histogram.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -65,14 +66,12 @@ public:
   void buildCaches();
 
   /// Pre-calculate the Y-space values with specified resolution parameters
-  void cacheYSpaceValues(const std::vector<double> &tseconds,
-                         const bool isHistogram,
+  void cacheYSpaceValues(const HistogramData::Points &tseconds,
                          const Algorithms::DetectorParams &detpar,
                          const ResolutionParams &respar);
 
   /// Pre-calculate the Y-space values
-  virtual void cacheYSpaceValues(const std::vector<double> &tseconds,
-                                 const bool isHistogram,
+  virtual void cacheYSpaceValues(const HistogramData::Points &tseconds,
                                  const Algorithms::DetectorParams &detpar);
   /// Turn off logger
   void disableLogging() { m_log.setEnabled(false); }
@@ -87,7 +86,7 @@ public:
   /// of the mass profile
   virtual size_t
   fillConstraintMatrix(Kernel::DblMatrix &cmatrix, const size_t start,
-                       const std::vector<double> &errors) const = 0;
+                       const HistogramData::HistogramE &errors) const = 0;
 
   void setParameter(size_t i, const double &value,
                     bool explicitlySet = true) override;

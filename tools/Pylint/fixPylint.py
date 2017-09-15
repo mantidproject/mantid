@@ -1,7 +1,10 @@
 #pylint: disable=invalid-name,anomalous-backslash-in-string
+from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import argparse
+
 
 def fixBadIndent(toModify,indent):
     err_string=indent.replace(' Bad indentation. Found ','').replace('(bad-indentation)','').split('spaces, expected')
@@ -9,10 +12,10 @@ def fixBadIndent(toModify,indent):
     good=int(err_string[1])
     return toModify.replace(' '*bad,' '*good)
 
+
 def fixParens(fname,errorlist,errlines):
-    tofixf=open(fname,'r')
-    file_content=tofixf.readlines()
-    tofixf.close()
+    with open(fname,'r') as tofixf:
+        file_content=tofixf.readlines()
     newcontent=file_content
     for i,error in zip(errlines,errorlist):
         if error.find('(superfluous-parens)')!=-1:
@@ -21,14 +24,13 @@ def fixParens(fname,errorlist,errlines):
             match=pattern.search(file_content[i])
             d=match.groupdict()
             newcontent[i]=file_content[i].replace(kwd+d['spaces']+'('+d['file_content']+')',kwd+' '+d['file_content'])
-    tofixf=open(fname,'w')
-    tofixf.write(''.join(newcontent))
-    tofixf.close()
+    with open(fname,'w') as tofixf:
+        tofixf.write(''.join(newcontent))
+
 
 def fixSeveralErrors(fname,errorlist,errlines):
-    tofixf=open(fname,'r')
-    file_content=tofixf.readlines()
-    tofixf.close()
+    with open(fname,'r') as tofixf:
+        file_content=tofixf.readlines()
     newcontent=file_content
     for i,error in zip(errlines,errorlist):
         if error.find('Bad indentation')!=-1:
@@ -41,14 +43,13 @@ def fixSeveralErrors(fname,errorlist,errlines):
             newcontent[i]=file_content[i].rstrip()+'\n'
         if error.find('Unnecessary semicolon')!=-1:
             newcontent[i]=file_content[i].replace(';','')
-    tofixf=open(fname,'w')
-    tofixf.write(''.join(newcontent))
-    tofixf.close()
+    with open(fname,'w') as tofixf:
+        tofixf.write(''.join(newcontent))
+
 
 def addIgnoreStatement(fname,errorlist):
-    tofixf=open(fname,'r')
-    file_content=tofixf.readlines()
-    tofixf.close()
+    with open(fname,'r') as tofixf:
+        file_content=tofixf.readlines()
     ignore=[]
     for error in errorlist:
         if error.find('(invalid-name)')!=-1 and 'invalid-name' not in ignore:
@@ -58,30 +59,31 @@ def addIgnoreStatement(fname,errorlist):
         if error.find('(too-many-lines)')!=-1 and 'too-many-lines' not in ignore:
             ignore.append('too-many-lines')
     if len(ignore)!=0:
-        tofixf=open(fname,'w')
-        tofixf.write("#pylint: disable="+','.join(ignore)+'\n')
-        tofixf.write(''.join(file_content))
-        tofixf.close()
+        with open(fname,'w') as tofixf:
+            tofixf.write("#pylint: disable="+','.join(ignore)+'\n')
+            tofixf.write(''.join(file_content))
+
 
 def generate_choices():
     ch=['simple','parentheses','add_ignores']
-    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+\
+    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+
              'mixed_indentation, trailing-whitespace, unnecesary-semicolon',
              'parentheses - fixes superfluous-parens warning',
              'add_ignores - adds ignore statemets at the beginning of each file to ignore invalid-name, no-init, too-many-lines']
     chhelp="The possible choices supported are:\n\t"+'\n\t'.join(ch_help)
     return (ch,chhelp)
 
+
 if __name__=='__main__':
     choices,choices_help=generate_choices()
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                      epilog=choices_help,
-                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+\
-                                                 'rerun the pylintcheck between fixes')
+                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+
+                                     'rerun the pylintcheck between fixes')
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')
-    parser.add_argument('Filename', type=file, help='The output from "make pylint"')
+    parser.add_argument('Filename', type=argparse.FileType(), help='The output from "make pylint"')
     parser.add_argument('-v','--version', action='version', version='%(prog)s 1.0')
 
     #read pylint.log
@@ -97,7 +99,6 @@ if __name__=='__main__':
     filenumber=0
     linenumber=0
     prevFile=True
-
 
     while linenumber<fileindex:
         filename=files[filenumber]
@@ -164,10 +165,3 @@ if __name__=='__main__':
             linenumber+=j-1
         else:
             linenumber+=1
-
-
-
-
-
-
-

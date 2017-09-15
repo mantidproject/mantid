@@ -1,4 +1,4 @@
-﻿"""============================================================================
+"""============================================================================
 New Python command line interface for plotting in Mantid (a la matplotlib)
 ============================================================================
 
@@ -469,6 +469,7 @@ except ImportError:
 
 import mantidplot
 import mantidqtpython
+from six import string_types
 
 class Line2D():
     """
@@ -785,7 +786,7 @@ def __is_registered_workspace_name(arg):
 
         Returns :: True if arg is a correct workspace name
     """
-    return (isinstance(arg, basestring) and mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
+    return (isinstance(arg, string_types) and mtd.doesExist(arg) and isinstance(mtd[arg], IMDWorkspace))
 
 def __is_valid_single_workspace_arg(arg):
     """"
@@ -1063,7 +1064,7 @@ def __apply_plot_args(graph, first_line, *args):
         return
 
     for a in args:
-        if isinstance(a, basestring):
+        if isinstance(a, string_types):
             # this will eat characters as they come, without minding much the past/previous characters
             # users can chain as many modifiers as they wish. It could be modified to be more strict/picky
             i = 0
@@ -1138,7 +1139,7 @@ def __is_multiplot_command(*args, **kwargs):
             else:
                 return (False, []);
             # can have style string, but don't get confused with single workspace name strings!
-            if (not __is_registered_workspace_name(args[i])) and isinstance(args[i], basestring):
+            if (not __is_registered_workspace_name(args[i])) and isinstance(args[i], string_types):
                 style = args[i]
                 i += 1
             plots_seq.append((a,b,style))
@@ -1282,15 +1283,15 @@ def __plot_as_array(*args, **kwargs):
         if __is_array(args[1]):
             ws = __create_workspace(y, args[1])
             idx_style = 2
-        elif isinstance(args[1], basestring):
-            x = range(0, len(y), 1) # 0 to n, incremented by 1.
+        elif isinstance(args[1], string_types):
+            x = list(range(0, len(y), 1)) # 0 to n, incremented by 1.
             ws = __create_workspace(x, y)
             # have to assume that args[1] is a style string
             idx_style = 1
         else:
             raise ValueError("Inputs are of type: " + str(type(args)) + ". Not plottable." )
     else:
-        x = range(0, len(y), 1)
+        x = list(range(0, len(y), 1))
         ws = __create_workspace(x, y)
 
     lines = __plot_as_workspace(ws, [0], *args[idx_style:], **kwargs)

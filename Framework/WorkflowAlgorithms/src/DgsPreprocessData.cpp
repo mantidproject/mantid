@@ -5,6 +5,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
@@ -26,7 +27,6 @@ namespace WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsPreprocessData)
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsPreprocessData::name() const {
   return "DgsPreprocessData";
@@ -40,9 +40,6 @@ const std::string DgsPreprocessData::category() const {
   return "Workflow\\Inelastic\\UsesPropertyManager";
 }
 
-//----------------------------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void DgsPreprocessData::init() {
@@ -63,7 +60,6 @@ void DgsPreprocessData::init() {
                         Direction::Input);
 }
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void DgsPreprocessData::exec() {

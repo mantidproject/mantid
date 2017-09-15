@@ -4,15 +4,15 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+
+using Mantid::HistogramData::HistogramX;
+using Mantid::HistogramData::HistogramY;
+using Mantid::HistogramData::HistogramE;
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,16 +24,15 @@ using namespace API;
 DECLARE_ALGORITHM(RemoveBins)
 
 RemoveBins::RemoveBins()
-    : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
-      m_rangeUnit(), m_interpolate(false) {}
+    : API::Algorithm(), m_inputWorkspace(), m_spectrumInfo(nullptr),
+      m_startX(DBL_MAX), m_endX(-DBL_MAX), m_rangeUnit(), m_interpolate(false) {
+}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void RemoveBins::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>();
-  wsValidator->add<HistogramValidator>();
+  auto wsValidator = boost::make_shared<HistogramValidator>();
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
@@ -48,6 +47,14 @@ void RemoveBins::init() {
                   "The upper bound of the region to be removed.");
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
+
+  // remove some known units that will not work
+  units.erase(std::remove(units.begin(), units.end(), "Empty"));
+  units.erase(std::remove(units.begin(), units.end(), "Label"));
+  units.erase(std::remove(units.begin(), units.end(), "Time"));
+  units.erase(std::remove(units.begin(), units.end(), "Degrees"));
+
+  // add a default do nothing value
   units.insert(units.begin(), "AsInput");
   declareProperty("RangeUnit", "AsInput",
                   boost::make_shared<StringListValidator>(units),
@@ -70,20 +77,78 @@ void RemoveBins::init() {
                   "workspace. Otherwise, all spectra will be acted upon.");
 }
 
+/** Checks cross property validation
+*   @returns a map of PropertyName->ErrorMessage
+*/
+std::map<std::string, std::string> RemoveBins::validateInputs() {
+  std::map<std::string, std::string> result;
+  const std::string rangeUnit = getProperty("RangeUnit");
+
+  // Get input workspace
+  m_inputWorkspace = getProperty("InputWorkspace");
+
+  // If that was OK, then we can get their values
+  m_startX = getProperty("XMin");
+  m_endX = getProperty("XMax");
+
+  if (m_startX > m_endX) {
+    const std::string failure("XMax must be greater than XMin.");
+    g_log.error(failure);
+    result["XMax"] = failure;
+  }
+
+  // If WorkspaceIndex has been set it must be valid
+  const int index = getProperty("WorkspaceIndex");
+  if (!isEmpty(index) &&
+      index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
+    std::stringstream failureMsg;
+    failureMsg << "The value of WorkspaceIndex provided (" << index
+               << ") is larger than the size of this workspace ("
+               << m_inputWorkspace->getNumberHistograms() << ")";
+    g_log.error(failureMsg.str());
+    result["WorkspaceIndex"] = failureMsg.str();
+  }
+
+  const std::string interpolation = getProperty("Interpolation");
+  m_interpolate = (interpolation == "Linear");
+
+  const bool unitChange = (rangeUnit != "AsInput");
+  if (unitChange) {
+    std::string errorString = "";
+    if (m_inputWorkspace->axes() == 0)
+      errorString =
+          "A single valued workspace has no unit, which is required for "
+          "this algorithm";
+
+    Kernel::Unit_const_sptr unit = m_inputWorkspace->getAxis(0)->unit();
+    // If m_unitID is empty it means that the workspace must have units, which
+    // can be anything
+    if (unit && (!boost::dynamic_pointer_cast<const Kernel::Unit>(unit))) {
+      errorString =
+          "The workspace must have units if the RangeUnit is not \"AsInput\"";
+    }
+    if (!errorString.empty()) {
+      g_log.error() << "InputWorkspace: " << errorString << "\n";
+      result["InputWorkspace"] = errorString;
+    }
+  }
+  return result;
+}
+
 /** Executes the algorithm
  *
  */
 void RemoveBins::exec() {
-  this->checkProperties();
-
   // If the X range has been given in a different unit, or if the workspace
   // isn't square, then we will need
   // to calculate the bin indices to cut out each time.
   const std::string rangeUnit = getProperty("RangeUnit");
-  const bool unitChange = (rangeUnit != "AsInput" && rangeUnit != "inputUnit");
+  const bool unitChange =
+      (rangeUnit != "AsInput" &&
+       rangeUnit != m_inputWorkspace->getAxis(0)->unit()->unitID());
   if (unitChange)
     m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
-  const bool commonBins = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+  const bool commonBins = WorkspaceHelpers::commonBoundaries(*m_inputWorkspace);
   const int index = getProperty("WorkspaceIndex");
   const bool singleSpectrum = !isEmpty(index);
   const bool recalcRange = (unitChange || !commonBins);
@@ -91,7 +156,7 @@ void RemoveBins::exec() {
   // If the above evaluates to false, and the range given is at the edge of the
   // workspace, then we can just call
   // CropWorkspace as a ChildAlgorithm and we're done.
-  const MantidVec &X0 = m_inputWorkspace->readX(0);
+  auto &X0 = m_inputWorkspace->x(0);
   if (!singleSpectrum && !recalcRange &&
       (m_startX <= X0.front() || m_endX >= X0.back())) {
     double start, end;
@@ -122,21 +187,12 @@ void RemoveBins::exec() {
 
   // Loop over the spectra
   int start = 0, end = 0;
-  const int blockSize = static_cast<int>(m_inputWorkspace->readX(0).size());
+  const int blockSize = static_cast<int>(m_inputWorkspace->x(0).size());
   const int numHists =
       static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
   for (int i = 0; i < numHists; ++i) {
-    // Copy over the data
-    const MantidVec &X = m_inputWorkspace->readX(i);
-    MantidVec &myX = outputWS->dataX(i);
-    myX = X;
-    const MantidVec &Y = m_inputWorkspace->readY(i);
-    MantidVec &myY = outputWS->dataY(i);
-    myY = Y;
-    const MantidVec &E = m_inputWorkspace->readE(i);
-    MantidVec &myE = outputWS->dataE(i);
-    myE = E;
+    outputWS->setHistogram(i, m_inputWorkspace->histogram(i));
 
     // If just operating on a single spectrum and this isn't it, go to next
     // iteration
@@ -149,6 +205,9 @@ void RemoveBins::exec() {
       this->transformRangeUnit(i, startX, endX);
     }
 
+    auto &X = m_inputWorkspace->x(i);
+    auto &outY = outputWS->mutableY(i);
+    auto &outE = outputWS->mutableE(i);
     // Calculate the bin indices corresponding to the X range, if necessary
     if (recalcRange || singleSpectrum || !i) {
       start = this->findIndex(startX, X);
@@ -157,12 +216,12 @@ void RemoveBins::exec() {
 
     if (start == 0 || end == blockSize) {
       // Remove bins from either end
-      this->RemoveFromEnds(start, end, myY, myE);
+      this->RemoveFromEnds(start, end, outY, outE);
     } else {
       // Remove bins from middle
       const double startFrac = (X[start] - startX) / (X[start] - X[start - 1]);
       const double endFrac = (endX - X[end - 1]) / (X[end] - X[end - 1]);
-      this->RemoveFromMiddle(start - 1, end, startFrac, endFrac, myY, myE);
+      this->RemoveFromMiddle(start - 1, end, startFrac, endFrac, outY, outE);
     }
     prog.report();
   } // Loop over spectra
@@ -170,40 +229,6 @@ void RemoveBins::exec() {
   // Assign to the output workspace property
   setProperty("OutputWorkspace", outputWS);
   m_inputWorkspace.reset();
-}
-
-/** Retrieve the input properties and check that they are valid
- *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less
- * than XMin
- */
-void RemoveBins::checkProperties() {
-  // Get input workspace
-  m_inputWorkspace = getProperty("InputWorkspace");
-
-  // If that was OK, then we can get their values
-  m_startX = getProperty("XMin");
-  m_endX = getProperty("XMax");
-
-  if (m_startX > m_endX) {
-    const std::string failure("XMax must be greater than XMin.");
-    g_log.error(failure);
-    throw std::invalid_argument(failure);
-  }
-
-  // If WorkspaceIndex has been set it must be valid
-  const int index = getProperty("WorkspaceIndex");
-  if (!isEmpty(index) &&
-      index >= static_cast<int>(m_inputWorkspace->getNumberHistograms())) {
-    g_log.error() << "The value of WorkspaceIndex provided (" << index
-                  << ") is larger than the size of this workspace ("
-                  << m_inputWorkspace->getNumberHistograms() << ")\n";
-    throw Kernel::Exception::IndexError(
-        index, m_inputWorkspace->getNumberHistograms() - 1,
-        "RemoveBins WorkspaceIndex property");
-  }
-
-  const std::string interpolation = getProperty("Interpolation");
-  m_interpolate = (interpolation == "Linear");
 }
 
 /// Calls CropWorkspace as a Child Algorithm to remove bins from the start or
@@ -284,7 +309,7 @@ void RemoveBins::calculateDetectorPosition(const int index, double &l1,
  *  @return The index (will give vec.size()+1 if the value is past the end of
  * the vector)
  */
-int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
+int RemoveBins::findIndex(const double &value, const HistogramX &vec) {
   auto pos = std::lower_bound(vec.cbegin(), vec.cend(), value);
   return static_cast<int>(std::distance(vec.cbegin(), pos));
 }
@@ -295,8 +320,8 @@ int RemoveBins::findIndex(const double &value, const MantidVec &vec) {
  *  @param Y ::     The data vector
  *  @param E ::     The error vector
  */
-void RemoveBins::RemoveFromEnds(int start, int end, MantidVec &Y,
-                                MantidVec &E) {
+void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y,
+                                HistogramE &E) {
   if (start)
     --start;
   int size = static_cast<int>(Y.size());
@@ -324,8 +349,8 @@ void RemoveBins::RemoveFromEnds(int start, int end, MantidVec &Y,
  */
 void RemoveBins::RemoveFromMiddle(const int &start, const int &end,
                                   const double &startFrac,
-                                  const double &endFrac, MantidVec &Y,
-                                  MantidVec &E) {
+                                  const double &endFrac, HistogramY &Y,
+                                  HistogramE &E) {
   // Remove bins from middle
   double valPrev = 0;
   double valNext = 0;

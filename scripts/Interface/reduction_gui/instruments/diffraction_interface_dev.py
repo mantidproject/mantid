@@ -1,5 +1,5 @@
-from interface import InstrumentInterface
-
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.diffraction.diffraction_run_setup import RunSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_adv_setup import AdvancedSetupWidget
 from reduction_gui.widgets.diffraction.diffraction_filter_setup import FilterSetupWidget
@@ -7,12 +7,13 @@ from reduction_gui.widgets.cluster_status import RemoteJobsWidget
 
 from reduction_gui.reduction.diffraction.diffraction_reduction_script import DiffractionReductionScripter
 
+
 class DiffractionInterface(InstrumentInterface):
     """
         Defines the widgets for direct geometry spectrometer reduction
     """
     # Allowed extensions for loading data files
-    data_type = "Data files *.* (*.*)"
+    data_type = "Data files * (*)"
 
     def __init__(self, name, settings):
         """

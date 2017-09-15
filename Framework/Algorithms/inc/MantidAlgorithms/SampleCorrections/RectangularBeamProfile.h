@@ -49,6 +49,7 @@ public:
   IBeamProfile::Ray
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
                 const Geometry::BoundingBox &bounds) const override;
+  Geometry::BoundingBox defineActiveRegion(const API::Sample &) const override;
 
 private:
   const unsigned short m_upIdx;

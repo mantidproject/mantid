@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/WienerSmooth.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -522,9 +523,9 @@ private:
                double *ysmooth) {
 
     auto dataWS = WorkspaceFactory::Instance().create("Workspace2D", 1, nx, ny);
-    auto &X = dataWS->dataX(0);
-    auto &Y = dataWS->dataY(0);
-    auto &E = dataWS->dataE(0);
+    auto &X = dataWS->mutableX(0);
+    auto &Y = dataWS->mutableY(0);
+    auto &E = dataWS->mutableE(0);
     X.assign(x, x + nx);
     Y.assign(y, y + ny);
     E.assign(e, e + ny);
@@ -532,11 +533,10 @@ private:
     std::vector<int> wsIndexList(1, 0);
     auto outputWs = runWienerSmooth(dataWS, wsIndexList);
 
-    auto &outY = outputWs->readY(0);
+    auto &outY = outputWs->y(0);
 
     for (size_t i = 0; i < outY.size(); ++i) {
       TS_ASSERT_DELTA(outY[i], ysmooth[i], 1e-5);
-      // std::cerr << outY[i] << '\n';
     }
 
     AnalysisDataService::Instance().clear();
@@ -557,8 +557,8 @@ private:
 
     for (size_t outSpec = 0; outSpec < nSpec; ++outSpec) {
       size_t inSpec = wsIndexList.empty() ? outSpec : wsIndexList[outSpec];
-      auto &inY = inputWS->readY(inSpec);
-      auto &outY = outputWS->readY(outSpec);
+      auto &inY = inputWS->y(inSpec);
+      auto &outY = outputWS->y(outSpec);
       TS_ASSERT(!std::equal(outY.begin(), outY.end(), inY.begin()));
 
       std::vector<double> diff(inY.size());
@@ -599,13 +599,13 @@ private:
             outWSName));
     TS_ASSERT(ws);
 
-    auto &inX = inputWS->readX(0);
-    auto &inE = inputWS->readE(0);
+    auto &inX = inputWS->x(0);
+    auto &inE = inputWS->e(0);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
 
-      auto outX = ws->readX(i);
-      auto outE = ws->readE(i);
+      auto outX = ws->x(i);
+      auto outE = ws->e(i);
 
       TS_ASSERT(std::equal(outX.begin(), outX.end(), inX.begin()));
       TS_ASSERT(std::equal(outE.begin(), outE.end(), inE.begin()));
@@ -634,9 +634,9 @@ private:
         WorkspaceFactory::Instance().create("Workspace2D", nSpec, nx, ny);
 
     for (size_t i = 0; i < nSpec; ++i) {
-      auto &X = dataWS->dataX(i);
-      auto &Y = dataWS->dataY(i);
-      auto &E = dataWS->dataE(i);
+      auto &X = dataWS->mutableX(i);
+      auto &Y = dataWS->mutableY(i);
+      auto &E = dataWS->mutableE(i);
       X.assign(x, x + nx);
       Y.assign(y, y + ny);
       E.assign(e, e + ny);

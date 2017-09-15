@@ -14,8 +14,7 @@ The bulk of the work is done by pandoc, which is expected to be in the PATH. The
     the inline to normal format.
  3. Image links cannot have spaces in the filename in rst.
     The spaces are removed in the downloaded file names, but not the links in the rst files."""
-from __future__ import print_function
-
+from __future__ import (absolute_import, division, print_function)
 import argparse
 import json
 import os
@@ -28,6 +27,7 @@ import urllib2
 import mantid
 
 DEBUG = 0
+
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Converts mediawiki pages to rst pages for sphinx.')
@@ -46,14 +46,17 @@ def parse_arguments(argv):
 
 # ------------------------------------------------------------------------------
 
+
 def display_info(*args):
     print(*args)
+
 
 def display_debug(*args):
     if DEBUG == 1:
         print(*args)
 
 # ------------------------------------------------------------------------------
+
 
 class WikiURL(object):
 
@@ -83,7 +86,7 @@ class WikiURL(object):
                   "api.php?titles=File:{0}&action=query&prop=imageinfo&iiprop=url&format=json".format(name.replace(" ", "_"))
         try:
             json_str = urllib2.urlopen(apicall_url).read()
-        except urllib2.URLError, err:
+        except urllib2.URLError as err:
             raise RuntimeError("Failed to fetch JSON describing image page: {}".format(str(err)))
         apicall = json.loads(json_str)
         pages = apicall['query']['pages']
@@ -92,14 +95,16 @@ class WikiURL(object):
 
 # ------------------------------------------------------------------------------
 
+
 def fetch_wiki_markup(wiki_url):
     try:
         response = urllib2.urlopen(wiki_url.raw())
         return response.read()
-    except urllib2.URLError, err:
+    except urllib2.URLError as err:
         raise RuntimeError("Failed to fetch wiki page: {}".format(str(err)))
 
 # ------------------------------------------------------------------------------
+
 
 def to_rst(wiki_url, post_process_args):
     wiki_markup_text = fetch_wiki_markup(wiki_url)
@@ -111,6 +116,7 @@ def to_rst(wiki_url, post_process_args):
 
 # ------------------------------------------------------------------------------
 
+
 def run_pandoc(wiki_markup_text):
     wiki_tmp_file = tempfile.NamedTemporaryFile(delete=True)
     wiki_tmp_file.write(wiki_markup_text)
@@ -119,7 +125,7 @@ def run_pandoc(wiki_markup_text):
     args = ["-f", "mediawiki", "-t", "rst", wiki_tmp_file.name]
     try:
         rst_text = execute_process(cmd, args)
-    except Exception, err:
+    except Exception as err:
         raise RuntimeError("Error executing pandoc: '{}'".format(str(err)))
     finally:
         wiki_tmp_file.close()
@@ -127,6 +133,7 @@ def run_pandoc(wiki_markup_text):
     return rst_text
 
 # ------------------------------------------------------------------------------
+
 
 def execute_process(cmd, args):
     """Execute the command with the given arguments.
@@ -151,6 +158,7 @@ def execute_process(cmd, args):
 
 # ------------------------------------------------------------------------------
 
+
 def post_process(pandoc_rst, wiki_url, wiki_markup,
                  post_process_args):
     """Takes raw reST text produced by pandoc and applies several post-processing steps
@@ -164,6 +172,7 @@ def post_process(pandoc_rst, wiki_url, wiki_markup,
 
 # ------------------------------------------------------------------------------
 
+
 def fix_underscores_in_ref_links(pandoc_rst):
     """Defalt pandoc-translated references links seem to contain a backslash before
     the underscore of a link. This removes the backslash
@@ -171,6 +180,7 @@ def fix_underscores_in_ref_links(pandoc_rst):
     return re.sub(r"\b\\\_", "_", pandoc_rst)
 
 # ------------------------------------------------------------------------------
+
 
 def fix_image_links(rst_text, wiki_markup, rel_img_dir):
     """Fix the image links to point to the correct relative image location
@@ -212,6 +222,7 @@ def fix_image_links(rst_text, wiki_markup, rel_img_dir):
 
 # ------------------------------------------------------------------------------
 
+
 def generate_rst_img_link(match, rel_img_dir):
     link = "image:: " + rel_img_dir + "/" + match.group(2) + "\n"
     for i in range(3,len(match.groups())):
@@ -224,6 +235,7 @@ def generate_rst_img_link(match, rel_img_dir):
     return link
 
 # ------------------------------------------------------------------------------
+
 
 def add_img_option(mw_img_opt):
     mw_img_opt = mw_img_opt.strip()
@@ -239,6 +251,7 @@ def add_img_option(mw_img_opt):
 
 # ------------------------------------------------------------------------------
 
+
 def clean_inline_img_def(rst_link):
     match = re.search(r'^\s+:align:\s+\w+\s*$', rst_link, re.MULTILINE)
     if match is not None:
@@ -250,17 +263,19 @@ def clean_inline_img_def(rst_link):
 
 # ------------------------------------------------------------------------------
 
+
 def download_images_from_wiki(wiki_url, image_names, img_dir):
     for name in image_names:
         download_image_from_wiki(wiki_url, name, img_dir)
 
 # ------------------------------------------------------------------------------
 
+
 def download_image_from_wiki(wiki_url, name, img_dir):
     image_url = wiki_url.fileurl(name)
     try:
         response = urllib2.urlopen(image_url)
-    except urllib2.URLError, err:
+    except urllib2.URLError as err:
         raise RuntimeError("Failed to fetch image data: {}".format(str(err)))
     filename = os.path.join(img_dir, name)
     display_info("Downloading {0} to {1}".format(name, filename))
@@ -270,6 +285,7 @@ def download_image_from_wiki(wiki_url, name, img_dir):
     return None
 
 # ------------------------------------------------------------------------------
+
 
 def add_mantid_concept_links(post_processed_rst):
     """Adds the concept link for mantid things
@@ -343,12 +359,13 @@ def main(argv):
             open(args.output_file, 'w').write(rst_text + "\n")
         else:
             display_info(rst_text)
-    except RuntimeError, exc:
+    except RuntimeError as exc:
         display_info(str(exc))
         return 1
     return 0
 
 # ------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

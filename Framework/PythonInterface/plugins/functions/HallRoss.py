@@ -28,6 +28,7 @@ import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
+
 class HallRoss(IFunction1D):
 
     def category(self):
@@ -60,6 +61,7 @@ class HallRoss(IFunction1D):
             jacobian.set(i,0,-h/tau)
             jacobian.set(i,1,x*x*ex/tau)
             i += 1
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(HallRoss)

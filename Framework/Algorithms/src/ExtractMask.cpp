@@ -1,8 +1,6 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -17,10 +15,6 @@ using Kernel::Direction;
 using Geometry::IDetector_const_sptr;
 using namespace API;
 using namespace Kernel;
-
-//--------------------------------------------------------------------------
-// Private methods
-//--------------------------------------------------------------------------
 
 /**
  * Declare the algorithm properties
@@ -46,75 +40,45 @@ void ExtractMask::init() {
  */
 void ExtractMask::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  Geometry::Instrument_const_sptr instr = inputWS->getInstrument();
 
   // convert input to a mask workspace
-  DataObjects::MaskWorkspace_const_sptr inputMaskWS =
+  auto inputMaskWS =
       boost::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
   bool inputWSIsSpecial = bool(inputMaskWS);
   if (inputWSIsSpecial) {
     g_log.notice() << "Input workspace is a MaskWorkspace.\n";
   }
 
-  DataObjects::MaskWorkspace_sptr maskWS;
   // List masked of detector IDs
   std::vector<detid_t> detectorList;
 
-  if (instr) {
-    const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  // Create a new workspace for the results, copy from the input to ensure
+  // that we copy over the instrument and current masking
+  auto maskWS = boost::make_shared<DataObjects::MaskWorkspace>(inputWS);
+  maskWS->setTitle(inputWS->getTitle());
 
-    // Create a new workspace for the results, copy from the input to ensure
-    // that we copy over the instrument and current masking
-    maskWS = DataObjects::MaskWorkspace_sptr(
-        new DataObjects::MaskWorkspace(inputWS));
-    maskWS->setTitle(inputWS->getTitle());
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  Progress prog(this, 0.0, 1.0, nHist);
 
-    Progress prog(this, 0.0, 1.0, nHist);
-
-    MantidVecPtr xValues;
-    xValues.access() = MantidVec(1, 0.0);
-
-    PARALLEL_FOR2(inputWS, maskWS)
-    for (int i = 0; i < nHist; ++i) {
-      PARALLEL_START_INTERUPT_REGION
-
-      bool inputIsMasked(false);
-      IDetector_const_sptr inputDet;
-      try {
-        inputDet = inputWS->getDetector(i);
-        if (inputWSIsSpecial) {
-          inputIsMasked = inputMaskWS->isMaskedIndex(i);
-        }
-        // special workspaces can mysteriously have the mask bit set
-        // but only check if we haven't already decided to mask the spectrum
-        if (!inputIsMasked && inputDet->isMasked()) {
-          inputIsMasked = true;
-        }
-
-        if (inputIsMasked) {
-          detid_t id = inputDet->getID();
-          PARALLEL_CRITICAL(name) { detectorList.push_back(id); }
-        }
-      } catch (Kernel::Exception::NotFoundError &) {
-        inputIsMasked = false;
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))
+  for (int64_t i = 0; i < nHist; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    bool inputIsMasked(false);
+    if (spectrumInfo.hasDetectors(i)) {
+      // special workspaces can mysteriously have the mask bit set
+      inputIsMasked = (inputWSIsSpecial && inputMaskWS->isMaskedIndex(i)) ||
+                      spectrumInfo.isMasked(i);
+      if (inputIsMasked) {
+        detid_t id = spectrumInfo.detector(i).getID();
+        PARALLEL_CRITICAL(name) { detectorList.push_back(id); }
       }
-
-      maskWS->setMaskedIndex(i, inputIsMasked);
-
-      prog.report();
-
-      PARALLEL_END_INTERUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    // Clear all the "masked" bits on the output masked workspace
-    Geometry::ParameterMap &pmap = maskWS->instrumentParameters();
-    pmap.clearParametersByName("masked");
-  } else // no instrument
-  {
-    // TODO should fill this in
-    throw std::runtime_error("No instrument");
+    maskWS->setMaskedIndex(i, inputIsMasked);
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
   g_log.information() << detectorList.size() << " detectors are masked\n";

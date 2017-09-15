@@ -5,6 +5,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 import os
 
+
 class LoadMultipleGSS(PythonAlgorithm):
 
     __exts = None
@@ -56,5 +57,6 @@ class LoadMultipleGSS(PythonAlgorithm):
             wksp = "%s_%d" % (prefix,run)
             self.__load(directory, wksp)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
+
 
 AlgorithmFactory.subscribe(LoadMultipleGSS)

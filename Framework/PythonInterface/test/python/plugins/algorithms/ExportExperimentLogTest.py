@@ -9,6 +9,7 @@ import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
+from six.moves import range
 
 class ExportExperimentLogTest(unittest.TestCase):
 
@@ -387,7 +388,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertEquals(len(lines), 4)
 
         # Check value
-        for i in xrange(1, 3):
+        for i in range(1, 3):
             currline = lines[i]
             curr_run = int(currline.split(",")[0])
             curr_min = float(currline.split(",")[2])
@@ -503,7 +504,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertEquals(len(lines), 4)
 
         # Check value
-        for i in xrange(1, 3):
+        for i in range(1, 3):
             currline = lines[i]
             curr_run = int(currline.split("\t")[0])
             curr_min = float(currline.split("\t")[2])
@@ -599,7 +600,7 @@ class ExportExperimentLogTest(unittest.TestCase):
         self.assertEquals(len(lines), 4)
 
         # Check value
-        for i in xrange(1, 3):
+        for i in range(1, 3):
             currline = lines[i]
             curr_run = int(currline.split("\t")[0])
             curr_min = float(currline.split("\t")[2])

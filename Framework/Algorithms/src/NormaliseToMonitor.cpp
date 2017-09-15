@@ -17,6 +17,7 @@
 #include <numeric>
 
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::Kernel::IPropertyManager;
 
 namespace Mantid {
@@ -327,7 +328,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = API::WorkspaceHelpers::commonBoundaries(inputWorkspace);
+  m_commonBins = API::WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
   int spec_num(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
@@ -433,7 +434,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
   // In this case we need to test whether the bins in the monitor workspace
   // match
   m_commonBins = (m_commonBins && API::WorkspaceHelpers::matchingBins(
-                                      inputWorkspace, monitorWS, true));
+                                      *inputWorkspace, *monitorWS, true));
 
   // If the workspace passes all these tests, make a local copy because it will
   // get changed
@@ -490,17 +491,15 @@ bool NormaliseToMonitor::setIntegrationProps() {
   }
 
   // Now check the end X values are within the X value range of the workspace
-  if (isEmpty(m_integrationMin) ||
-      m_integrationMin < m_monitor->readX(0).front()) {
+  if (isEmpty(m_integrationMin) || m_integrationMin < m_monitor->x(0).front()) {
     g_log.warning() << "Integration range minimum set to workspace min: "
                     << m_integrationMin << '\n';
-    m_integrationMin = m_monitor->readX(0).front();
+    m_integrationMin = m_monitor->x(0).front();
   }
-  if (isEmpty(m_integrationMax) ||
-      m_integrationMax > m_monitor->readX(0).back()) {
+  if (isEmpty(m_integrationMax) || m_integrationMax > m_monitor->x(0).back()) {
     g_log.warning() << "Integration range maximum set to workspace max: "
                     << m_integrationMax << '\n';
-    m_integrationMax = m_monitor->readX(0).back();
+    m_integrationMax = m_monitor->x(0).back();
   }
 
   // Return indicating that these properties should be used
@@ -561,29 +560,31 @@ void NormaliseToMonitor::normaliseBinByBin(
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Get hold of the monitor spectrum
-  const MantidVec &monX = m_monitor->readX(0);
-  MantidVec &monY = m_monitor->dataY(0);
-  MantidVec &monE = m_monitor->dataE(0);
+  const auto &monX = m_monitor->binEdges(0);
+  auto monY = m_monitor->counts(0);
+  auto monE = m_monitor->countStandardDeviations(0);
   // Calculate the overall normalization just the once if bins are all matching
   if (m_commonBins)
-    this->normalisationFactor(m_monitor->readX(0), &monY, &monE);
+    this->normalisationFactor(monX, monY, monE);
 
   const size_t numHists = inputWorkspace->getNumberHistograms();
-  MantidVec::size_type specLength = inputWorkspace->blocksize();
+  auto specLength = inputWorkspace->blocksize();
   // Flag set when a division by 0 is found
   bool hasZeroDivision = false;
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over spectra
-  PARALLEL_FOR3(inputWorkspace, outputWorkspace, m_monitor)
+  PARALLEL_FOR_IF(
+      Kernel::threadSafe(*inputWorkspace, *outputWorkspace, *m_monitor))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     prog.report();
 
-    const MantidVec &X = inputWorkspace->readX(i);
+    const auto &X = inputWorkspace->binEdges(i);
     // If not rebinning, just point to our monitor spectra, otherwise create new
     // vectors
-    MantidVec *Y = (m_commonBins ? &monY : new MantidVec(specLength));
-    MantidVec *E = (m_commonBins ? &monE : new MantidVec(specLength));
+
+    auto Y = (m_commonBins ? monY : Counts(specLength));
+    auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
 
     if (!m_commonBins) {
       // ConvertUnits can give X vectors of all zeros - skip these, they cause
@@ -592,7 +593,9 @@ void NormaliseToMonitor::normaliseBinByBin(
         continue;
       // Rebin the monitor spectrum to match the binning of the current data
       // spectrum
-      VectorHelper::rebinHistogram(monX, monY, monE, X, *Y, *E, false);
+      VectorHelper::rebinHistogram(
+          monX.rawData(), monY.mutableRawData(), monE.mutableRawData(),
+          X.rawData(), Y.mutableRawData(), E.mutableRawData(), false);
       // Recalculate the overall normalization factor
       this->normalisationFactor(X, Y, E);
     }
@@ -601,20 +604,21 @@ void NormaliseToMonitor::normaliseBinByBin(
       // ----------------------------------- EventWorkspace
       // ---------------------------------------
       EventList &outEL = outputEvent->getSpectrum(i);
-      outEL.divide(X, *Y, *E);
+      outEL.divide(X.rawData(), Y.mutableRawData(), E.mutableRawData());
     } else {
       // ----------------------------------- Workspace2D
       // ---------------------------------------
-      MantidVec &YOut = outputWorkspace->dataY(i);
-      MantidVec &EOut = outputWorkspace->dataE(i);
-      const MantidVec &inY = inputWorkspace->readY(i);
-      const MantidVec &inE = inputWorkspace->readE(i);
-      outputWorkspace->dataX(i) = inputWorkspace->readX(i);
+      auto &YOut = outputWorkspace->mutableY(i);
+      auto &EOut = outputWorkspace->mutableE(i);
+      const auto &inY = inputWorkspace->y(i);
+      const auto &inE = inputWorkspace->e(i);
+      outputWorkspace->mutableX(i) = inputWorkspace->x(i);
+
       // The code below comes more or less straight out of Divide.cpp
-      for (MantidVec::size_type k = 0; k < specLength; ++k) {
-        // Get references to the input Y's
-        const double &leftY = inY[k];
-        const double &rightY = (*Y)[k];
+      for (size_t k = 0; k < specLength; ++k) {
+        // Get the input Y's
+        const double leftY = inY[k];
+        const double rightY = Y[k];
 
         if (rightY == 0.0) {
           hasZeroDivision = true;
@@ -630,7 +634,7 @@ void NormaliseToMonitor::normaliseBinByBin(
                                        ? 0.0
                                        : pow((inE[k] / leftY), 2);
           const double rhsFactor =
-              (*E)[k] < 1.0e-12 ? 0.0 : pow(((*E)[k] / rightY), 2);
+              E[k] < 1.0e-12 ? 0.0 : pow((E[k] / rightY), 2);
           EOut[k] = std::abs(newY) * sqrt(lhsFactor + rhsFactor);
         }
 
@@ -639,34 +643,36 @@ void NormaliseToMonitor::normaliseBinByBin(
       } // end Workspace2D case
     }   // end loop over current spectrum
 
-    if (!m_commonBins) {
-      delete Y;
-      delete E;
-    }
     PARALLEL_END_INTERUPT_REGION
   } // end loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
   if (hasZeroDivision) {
     g_log.warning() << "Division by zero in some of the bins.\n";
   }
+  if (inputEvent)
+    outputEvent->clearMRU();
 }
 
 /** Calculates the overall normalization factor.
  *  This multiplies result by (bin width * sum of monitor counts) / total frame
  * width.
- *  @param X The X vector
- *  @param Y The data vector
- *  @param E The error vector
+ *  @param X The BinEdges of the workspace
+ *  @param Y The Counts of the workspace
+ *  @param E The CountStandardDeviations of the workspace
  */
-void NormaliseToMonitor::normalisationFactor(const MantidVec &X, MantidVec *Y,
-                                             MantidVec *E) {
-  const double monitorSum = std::accumulate(Y->begin(), Y->end(), 0.0);
+void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y,
+                                             CountStandardDeviations &E) {
+  const double monitorSum = std::accumulate(Y.begin(), Y.end(), 0.0);
   const double range = X.back() - X.front();
-  MantidVec::size_type specLength = Y->size();
-  for (MantidVec::size_type j = 0; j < specLength; ++j) {
+  auto specLength = Y.size();
+
+  auto &yNew = Y.mutableRawData();
+  auto &eNew = E.mutableRawData();
+
+  for (size_t j = 0; j < specLength; ++j) {
     const double factor = range / ((X[j + 1] - X[j]) * monitorSum);
-    (*Y)[j] *= factor;
-    (*E)[j] *= factor;
+    yNew[j] *= factor;
+    eNew[j] *= factor;
   }
 }
 

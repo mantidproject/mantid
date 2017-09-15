@@ -43,7 +43,7 @@ Usage
    MoveInstrumentComponent(ws, 'some-surface-holder',RelativePosition=False,  X=0, Y= 0, Z=0)
 
    # Correct the detector position. Has a 45 degree incident beam angle.
-   corrected_ws = SpecularReflectionPositionCorrect(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', TwoThetaIn=45.0)
+   corrected_ws = SpecularReflectionPositionCorrect(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', TwoThetaIn=45.0, Version=1)
 
    # Get the detector position post correction. We expect that the vertical offset of the point detector == 1.0
    inst = corrected_ws.getInstrument()

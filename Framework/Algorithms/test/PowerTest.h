@@ -54,7 +54,7 @@ public:
 
   void testSetProperties() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -98,7 +98,7 @@ public:
 
   void testPowerCalculation() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -126,7 +126,7 @@ public:
 
   void testPowerCalculationWithNegativeExponent() {
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(2);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -162,7 +162,7 @@ public:
     // if x = p ^ y, then err_x = y * x * err_p / p
 
     WorkspaceSingleValue_sptr baseWs =
-        WorkspaceCreationHelper::CreateWorkspaceSingleValue(4);
+        WorkspaceCreationHelper::createWorkspaceSingleValue(4);
     AnalysisDataService::Instance().add("InputWS", baseWs);
 
     Power power;
@@ -188,7 +188,7 @@ public:
 
   void testEvents() {
     // evin has 0 events per bin in pixel0, 1 in pixel 1, 2 in pixel2, ...
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             5, 3, 1000, 0, 1, 4),
                         evout;
     AnalysisDataService::Instance().add("test_ev_pow", evin);

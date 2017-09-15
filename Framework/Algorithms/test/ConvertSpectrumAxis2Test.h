@@ -1,14 +1,17 @@
 #ifndef CONVERTSPECTRUMAXIS2TEST_H_
 #define CONVERTSPECTRUMAXIS2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/Unit.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData::detail;
@@ -16,9 +19,10 @@ using namespace Mantid::HistogramData::detail;
 class ConvertSpectrumAxis2Test : public CxxTest::TestSuite {
 private:
   void do_algorithm_run(std::string target, std::string inputWS,
-                        std::string outputWS, bool startYNegative = true) {
+                        std::string outputWS, bool startYNegative = true,
+                        bool isHistogram = true) {
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false, startYNegative);
+        3, 1, false, startYNegative, isHistogram);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
@@ -118,13 +122,31 @@ public:
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
     const std::string outputSignedThetaAxisWS2("outSignedThetaWS2");
 
+    // Histogram
     do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
 
+    // No histogram
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS, true,
+                     false);
+
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
+    clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
+
+    // Histogram
     do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2);
+
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
+    clean_up_workspaces(inputWS, outputSignedThetaAxisWS2);
+
+    // No histogram
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2, true,
+                     false);
 
     // Check output values for the workspace then clean up.
     check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
@@ -156,7 +178,7 @@ public:
     const std::string target("ElasticQ");
 
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        3, 1, false, true);
+        3, 1, false);
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
@@ -323,15 +345,10 @@ public:
     AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
 
     auto &pmap = testWS->instrumentParameters();
-
-    auto det0 = testWS->getDetector(0);
-    pmap.addDouble(det0.get(), "Efixed", 0.4);
-
-    auto det1 = testWS->getDetector(1);
-    pmap.addDouble(det1.get(), "Efixed", 0.1);
-
-    auto det2 = testWS->getDetector(2);
-    pmap.addDouble(det2.get(), "Efixed", 0.025);
+    const auto &spectrumInfo = testWS->spectrumInfo();
+    pmap.addDouble(&spectrumInfo.detector(0), "Efixed", 0.4);
+    pmap.addDouble(&spectrumInfo.detector(1), "Efixed", 0.1);
+    pmap.addDouble(&spectrumInfo.detector(2), "Efixed", 0.025);
 
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     conv.initialize();
@@ -370,6 +387,90 @@ public:
     // Clean up workspaces.
     clean_up_workspaces(inputWS, outputWS);
   }
+
+  void test_Unordered_Axis_With_Scanned_Workspace() {
+    FrameworkManager::Instance();
+
+    Mantid::Algorithms::CreateSampleWorkspace creator;
+    creator.initialize();
+    creator.setChild(true);
+    creator.setProperty("NumBanks", 2);
+    creator.setProperty("BankPixelWidth", 1);
+    creator.setProperty("XMax", 100.);
+    creator.setProperty("BinWidth", 50.);
+    creator.setProperty("NumScanPoints", 10);
+    creator.setProperty("OutputWorkspace", "__unused");
+    creator.execute();
+
+    Mantid::Algorithms::ConvertSpectrumAxis2 testee;
+    testee.initialize();
+    testee.setChild(true);
+    const MatrixWorkspace_sptr ws = creator.getProperty("OutputWorkspace");
+    testee.setProperty("InputWorkspace", ws);
+    testee.setProperty("OrderAxis", false);
+    testee.setProperty("Target", "Theta");
+    testee.setProperty("OutputWorkspace", "__unused2");
+    TS_ASSERT_THROWS_NOTHING(testee.execute());
+    TS_ASSERT(testee.isExecuted());
+    const MatrixWorkspace_sptr output = testee.getProperty("OutputWorkspace");
+    TS_ASSERT(output);
+    const Axis *axis = output->getAxis(1);
+    TS_ASSERT(axis);
+    for (size_t i = 0; i < 20; ++i) {
+      TS_ASSERT_DELTA((*axis)(i), double(i % 10), 1E-10);
+    }
+  }
+};
+
+class ConvertSpectrumAxis2TestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertSpectrumAxis2TestPerformance *createSuite() {
+    return new ConvertSpectrumAxis2TestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxis2TestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvertSpectrumAxis2TestPerformance() {
+    FrameworkManager::Instance();
+    m_testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        20000, 20000);
+    m_creator.initialize();
+    m_creator.setChild(true);
+    m_creator.setProperty("NumBanks", 100);
+    m_creator.setProperty("BankPixelWidth", 10);
+    m_creator.setProperty("XMax", 100.);
+    m_creator.setProperty("BinWidth", 1.);
+    m_creator.setProperty("NumScanPoints", 100);
+    m_creator.setProperty("OutputWorkspace", "__unused");
+    m_creator.execute();
+  }
+
+  void test_conversion_to_signed_theta_with_many_entries() {
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+    conv.initialize();
+    conv.setChild(true);
+    conv.setProperty("InputWorkspace", m_testWS);
+    conv.setPropertyValue("OutputWorkspace", "outputWS");
+    conv.setPropertyValue("Target", "SignedTheta");
+    conv.setPropertyValue("EFixed", "10.0");
+    conv.execute();
+  }
+
+  void test_large_scanning_workspace() {
+    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+    conv.initialize();
+    conv.setChild(true);
+    const MatrixWorkspace_sptr ws = m_creator.getProperty("OutputWorkspace");
+    conv.setProperty("InputWorkspace", ws);
+    conv.setPropertyValue("Target", "Theta");
+    conv.setPropertyValue("OutputWorkspace", "outputWS");
+    conv.execute();
+  }
+
+private:
+  MatrixWorkspace_sptr m_testWS;
+  Mantid::Algorithms::CreateSampleWorkspace m_creator;
 };
 
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/

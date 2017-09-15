@@ -13,6 +13,8 @@
         <file>selection-box-ring.png</file>
         <file>selection-circle-ring.png</file>
         <file>brush.png</file>
+        <file>selection-peak-compare.png</file>
+        <file>selection-peak-plane.png</file>
     </qresource>
     <qresource prefix="/MaskTools">
         <file>selection-circle.png</file>

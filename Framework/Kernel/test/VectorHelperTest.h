@@ -4,8 +4,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
-#include <cxxtest/TestSuite.h>
+#include <algorithm>
 #include <cstdlib>
+#include <cxxtest/TestSuite.h>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 
@@ -22,6 +24,61 @@ public:
     m_test_bins[2] = 0.7;
     m_test_bins[3] = 1.6;
     m_test_bins[4] = 3.2;
+  }
+
+  void test_indexOfFromEdges() {
+    std::vector<double> single;
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 7.1),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - vector is empty");
+    single.push_back(1.7);
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 4.8),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - requires at least two bin edges");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromEdges(m_test_bins, -1.2),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromEdges(m_test_bins, 3.3),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromEdges(m_test_bins, 0.55), 1);
+  }
+
+  void test_indexOfFromCenters() {
+    std::vector<double> single;
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 5.9),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - vector is empty");
+    single.push_back(2.5);
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 6.1),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 1.9),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - value out of range");
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(single, 2.25), 0);
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromCenters(m_test_bins, -1.56),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromCenters(m_test_bins, 4.1),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, -1.23),
+                     0);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 3.98),
+                     4);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 0.8),
+                     2);
   }
 
   void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins() {
@@ -427,6 +484,109 @@ public:
 private:
   /// Testing bins
   std::vector<double> m_test_bins;
+};
+
+class VectorHelperTestPerformance : public CxxTest::TestSuite {
+public:
+  VectorHelperTestPerformance *createSuite() {
+    return new VectorHelperTestPerformance();
+  }
+  void destroySuite(VectorHelperTestPerformance *suite) { delete suite; }
+
+  VectorHelperTestPerformance() {
+    setupHistogram();
+    setupOutput();
+  }
+
+  void testRebinSmaller() {
+    auto size = smallerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      VectorHelper::rebin(binEdges, counts, errors, smallerBinEdges, yout, eout,
+                          false, false);
+    }
+  }
+
+  void testRebinSmallerFrequencies() {
+    auto size = smallerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      VectorHelper::rebin(binEdges, frequencies, frequencyErrors,
+                          smallerBinEdges, yout, eout, true, false);
+    }
+  }
+
+  void testRebinLarger() {
+    auto size = largerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      VectorHelper::rebin(binEdges, counts, errors, largerBinEdges, yout, eout,
+                          false, false);
+    }
+  }
+
+  void testRebinLargerFrequencies() {
+    auto size = largerBinEdges.size() - 1;
+    for (size_t i = 0; i < nIters; i++) {
+      std::vector<double> yout(size);
+      std::vector<double> eout(size);
+      VectorHelper::rebin(binEdges, frequencies, frequencyErrors,
+                          largerBinEdges, yout, eout, true, false);
+    }
+  }
+
+private:
+  const size_t binSize = 10000;
+  const size_t nIters = 10000;
+  std::vector<double> binEdges;
+  std::vector<double> counts;
+  std::vector<double> frequencies;
+  std::vector<double> errors;
+  std::vector<double> frequencyErrors;
+  std::vector<double> smallerBinEdges;
+  std::vector<double> largerBinEdges;
+
+  void setupHistogram() {
+    binEdges.resize(binSize);
+    frequencies.resize(binSize - 1);
+    frequencyErrors.resize(binSize - 1);
+    counts.resize(binSize - 1);
+    errors.resize(binSize - 1);
+
+    std::iota(binEdges.begin(), binEdges.end(), 0);
+    std::generate(counts.begin(), counts.end(),
+                  []() { return static_cast<double>(rand() % 1000); });
+
+    for (size_t i = 0; i < counts.size(); i++)
+      frequencies[i] = counts[i] / (binEdges[i + 1] - binEdges[i]);
+
+    std::transform(counts.cbegin(), counts.cend(), errors.begin(),
+                   [](const double count) { return sqrt(count); });
+
+    std::transform(frequencies.cbegin(), frequencies.cend(),
+                   frequencyErrors.begin(),
+                   [](const double freq) { return sqrt(freq); });
+  }
+
+  void setupOutput() {
+    smallerBinEdges.resize(binSize * 2);
+    largerBinEdges.resize(binSize / 2);
+
+    auto binWidth = binEdges[1] - binEdges[0];
+
+    for (size_t i = 0; i < binSize - 1; i++) {
+      smallerBinEdges[2 * i] = binEdges[i];
+      smallerBinEdges[(2 * i) + 1] = (binEdges[i] + binEdges[i + 1]) / 2;
+    }
+    smallerBinEdges[2 * (binSize - 1)] = binEdges.back();
+    smallerBinEdges.back() = binEdges.back() + (binWidth / 2);
+
+    for (size_t i = 0; i < largerBinEdges.size(); i++)
+      largerBinEdges[i] = binEdges[(2 * i)];
+  }
 };
 
 #endif /* MANTID_KERNEL_VECTORHELPERTEST_H_ */

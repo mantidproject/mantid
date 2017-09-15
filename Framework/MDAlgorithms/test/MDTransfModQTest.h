@@ -3,6 +3,7 @@
 
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 

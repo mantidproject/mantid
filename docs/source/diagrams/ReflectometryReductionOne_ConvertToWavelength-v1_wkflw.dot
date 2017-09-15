@@ -15,13 +15,15 @@ subgraph params {
   regionOfDirectBeam  [label="RegionOf-\nDirectBeam"]
   monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
   monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monBgWavMax         [label="MonitorBackground-\nWavelengthMax"]
+  monBgWavMin         [label="MonitorBackground-\nWavelengthMin"]
   wavMaxRDB           [label="WavelengthMax"]
   wavMinRDB           [label="WavelengthMin"]
 }
 
 subgraph decisions {
  $decision_style
-  checkMonUnity   [label="Monitors?"]
+  checkMonUnity   [label="I0MonitorIndex and\nMonitorBackground-\nWavelengthMin\Max\nprovided?"]
   checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
   checkBgMinMax   [label="Monitor background\nwavelength\nmin/max non-zero?"]
   checkMultRDB    [label="MultidetectorAnalysis\nand\nRegionOfDirectBeam\ngiven?"]
@@ -59,6 +61,9 @@ subgraph values {
 
 inputWS             -> convertDet     [label="Detectors"]
 inputWS             -> checkMonUnity  [label="Monitors"]
+monBgWavMax         -> checkMonUnity
+monBgWavMin         -> checkMonUnity
+monitorIndex        -> checkMonUnity
 checkMonUnity       -> convertMon     [label="Yes"]
 checkMonUnity       -> valUnity       [label="No"]
 convertDet          -> valDet
@@ -75,7 +80,6 @@ wavMax              -> cropDetWS
 cropDetWS           -> detWS
 detWS               -> rebinToWS
 valMon              -> cropMonWS
-monitorIndex        -> cropMonWS
 cropMonWS           -> checkBgMinMax
 checkBgMinMax       -> calcFlatBg     [label="Yes"]
 checkBgMinMax       -> rebinToWS      [label="No"]
@@ -97,7 +101,7 @@ rebinToWSRDB        -> divideDetRDB
 divideDetRDB	    -> divideDetMon
 divideDetMon        -> outputWS
 
-{rank = same; convertDet; convertMon}
+{rank = same; convertDet; monBgWavMax; monBgWavMin; monitorIndex;}
 {rank = same; valUnity; valDet; valMon}
 {rank = same; cropDetWS; cropMonWS}
 {rank = same; detWS; calcFlatBg}

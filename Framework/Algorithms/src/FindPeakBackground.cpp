@@ -85,7 +85,7 @@ void FindPeakBackground::exec() {
   } else if (inpwsindex < 0 ||
              inpwsindex >= static_cast<int>(inpWS->getNumberHistograms())) {
     stringstream errss;
-    errss << "Input workspace " << inpWS->name() << " has "
+    errss << "Input workspace " << inpWS->getName() << " has "
           << inpWS->getNumberHistograms() << " spectra.  Input workspace index "
           << inpwsindex << " is out of boundary. ";
     throw runtime_error(errss.str());
@@ -120,7 +120,7 @@ void FindPeakBackground::exec() {
   m_outPeakTableWS->appendRow();
 
   // 3. Get Y values
-  Progress prog(this, 0, 1.0, 1);
+  Progress prog(this, 0.0, 1.0, 1);
 
   // Find background
 

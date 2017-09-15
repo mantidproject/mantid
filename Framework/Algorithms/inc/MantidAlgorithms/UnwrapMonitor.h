@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_UNWRAPMONITOR_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -46,7 +47,7 @@ namespace Algorithms {
 class DLLExport UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
-  ~UnwrapMonitor() override;
+  ~UnwrapMonitor() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose
@@ -69,16 +70,17 @@ private:
   void init() override;
   void exec() override;
 
-  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr &tempWS,
-                                 const int &spectrum, const double &Ld);
-  std::pair<int, int> handleFrameOverlapped(const MantidVec &xdata,
-                                            const double &Ld,
-                                            std::vector<double> &tempX);
+  const std::vector<int> unwrapX(std::vector<double> &newX, const int &spectrum,
+                                 const double &Ld);
+  std::pair<int, int>
+  handleFrameOverlapped(const Mantid::HistogramData::HistogramX &xdata,
+                        const double &Ld, std::vector<double> &tempX);
   void unwrapYandE(const API::MatrixWorkspace_sptr &tempWS, const int &spectrum,
-                   const std::vector<int> &rangeBounds);
+                   const std::vector<int> &rangeBounds,
+                   std::vector<double> &newY, std::vector<double> &newE);
   API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr &workspace,
                                   const double &min, const double &max,
-                                  const int &numBins);
+                                  const size_t &numBins);
 
   double m_conversionConstant; ///< The constant used in the conversion from TOF
   /// to wavelength
@@ -88,7 +90,7 @@ private:
   double m_Tmax;  ///< The end of the time-of-flight frame
   size_t m_XSize; ///< The size of the X vectors in the input workspace
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithm

@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,6 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -179,9 +177,15 @@ void LoadInstrument::exec() {
           InstrumentDataService::Instance().retrieve(instrumentNameMangled);
     } else {
       // Really create the instrument
-      auto prog = new Progress(this, 0, 1, 100);
-      instrument = parser.parseXML(prog);
-      delete prog;
+      Progress prog(this, 0.0, 1.0, 100);
+      instrument = parser.parseXML(&prog);
+      // Parse the instrument tree (internally create ComponentInfo and
+      // DetectorInfo). This is an optimization that avoids duplicate parsing of
+      // the instrument tree when loading multiple workspaces with the same
+      // instrument. As a consequence less time is spent and less memory is
+      // used. Note that this is only possible since the tree in `instrument`
+      // will not be modified once we add it to the IDS.
+      instrument->parseTreeAndCacheBeamline();
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
@@ -270,7 +274,7 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
   directoryPath.makeDirectory();
   // Remove the path from the filename
   Poco::Path filePath(m_filename);
-  std::string instrumentFile = filePath.getFileName();
+  const std::string &instrumentFile = filePath.getFileName();
 
   // First check whether there is a parameter file whose name is the same as the
   // IDF file,

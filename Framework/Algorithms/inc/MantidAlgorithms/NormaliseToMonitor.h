@@ -1,12 +1,18 @@
 #ifndef MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 #define MANTID_ALGORITHMS_NORMALISETOMONITOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
+
+namespace Mantid {
+namespace HistogramData {
+class BinEdges;
+class CountStandardDeviations;
+class Counts;
+}
+}
 
 namespace Mantid {
 namespace Algorithms {
@@ -111,8 +117,9 @@ protected: // for testing
 
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);
-  void normalisationFactor(const MantidVec &X, MantidVec *Y, MantidVec *E);
-  //
+  void normalisationFactor(const HistogramData::BinEdges &X,
+                           HistogramData::Counts &Y,
+                           HistogramData::CountStandardDeviations &E);
 
 private:
   /// A single spectrum workspace containing the monitor
@@ -145,7 +152,7 @@ public:
                     Kernel::Property *const pProp) override;
 
   // interface needs it but if indeed proper clone used -- do not know.
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new MonIDPropChanger(hostWSname, SpectraNum, MonitorWorkspaceProp);
   }
 

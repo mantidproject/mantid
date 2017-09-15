@@ -397,6 +397,86 @@ void convertToBinBoundary(const std::vector<double> &bin_centers,
   bin_edges[n] = bin_centers[n - 1] + (bin_centers[n - 1] - bin_edges[n - 1]);
 }
 
+/** Finds the bin index of a value from the vector of bin centers
+ * without converting the whole array to bin edges.
+ * Assumes the vector is already sorted ascending.
+ * @param bin_centers : vector of bin centers
+ * @param value : input value
+ * @return : the bin index of the value
+ * @throw std::out_of_range : if vector is empty or value is out of it's range
+ * (in bin edge representation)
+ */
+
+size_t indexOfValueFromCenters(const std::vector<double> &bin_centers,
+                               const double value) {
+  if (bin_centers.empty()) {
+    throw std::out_of_range("indexOfValue - vector is empty");
+  }
+  if (bin_centers.size() == 1) {
+    // no mean to guess bin size, assuming 1
+    if (value < bin_centers[0] - 0.5 || value > bin_centers[0] + 0.5) {
+      throw std::out_of_range("indexOfValue - value out of range");
+    } else {
+      return 0;
+    }
+  } else {
+    const size_t n = bin_centers.size();
+    const double firstBinLowEdge =
+        bin_centers[0] - 0.5 * (bin_centers[1] - bin_centers[0]);
+    const double lastBinHighEdge =
+        bin_centers[n - 1] + 0.5 * (bin_centers[n - 1] - bin_centers[n - 2]);
+    if (value < firstBinLowEdge || value > lastBinHighEdge) {
+      throw std::out_of_range("indexOfValue - value out of range");
+    } else {
+      const auto it =
+          std::lower_bound(bin_centers.begin(), bin_centers.end(), value);
+      if (it == bin_centers.end()) {
+        return n - 1;
+      }
+      size_t binIndex = std::distance(bin_centers.begin(), it);
+      if (binIndex > 0 &&
+          value <
+              bin_centers[binIndex - 1] +
+                  0.5 * (bin_centers[binIndex] - bin_centers[binIndex - 1])) {
+        binIndex--;
+      }
+      return binIndex;
+    }
+  }
+}
+
+/** Finds the bin index of a value from the vector of bin edges.
+ * Assumes the vector is already sorted ascending.
+ * @param bin_edges : vector of bin centers
+ * @param value : input value
+ * @return : the bin index of the value
+ * @throw std::out_of_range : if vector is empty, contains one element,
+ *  or value is out of it's range
+ */
+size_t indexOfValueFromEdges(const std::vector<double> &bin_edges,
+                             const double value) {
+  if (bin_edges.empty()) {
+    throw std::out_of_range("indexOfValue - vector is empty");
+  }
+  if (bin_edges.size() == 1) {
+    throw std::out_of_range("indexOfValue - requires at least two bin edges");
+  }
+  if (value < bin_edges.front()) {
+    throw std::out_of_range("indexOfValue - value out of range");
+  }
+  const auto it = std::lower_bound(bin_edges.begin(), bin_edges.end(), value);
+  if (it == bin_edges.end()) {
+    throw std::out_of_range("indexOfValue - value out of range");
+  }
+  // index of closest edge above value is distance of iterator from start
+  size_t edgeIndex = std::distance(bin_edges.begin(), it);
+  // if the element n is the first that is >= value, then the value is in (n-1)
+  // th bin
+  if (edgeIndex > 0)
+    edgeIndex--;
+  return edgeIndex;
+}
+
 //-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some
 * different values
@@ -489,43 +569,6 @@ int getBinIndex(const std::vector<double> &bins, const double value) {
 }
 
 //-------------------------------------------------------------------------------------------------
-/**
- * Linearly interpolates between Y points separated by the given step size.
- * @param x :: The X array
- * @param y :: The Y array with end points and values at stepSize intervals
- * calculated
- * @param stepSize :: The distance between each pre-calculated point
- */
-void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
-                          const double stepSize) {
-  int specSize = static_cast<int>(y.size());
-  int xSize = static_cast<int>(x.size());
-  bool isHistogram(xSize == specSize + 1);
-  int step(static_cast<int>(stepSize)), index2(0);
-  double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
-
-  for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
-  {
-    if (step ==
-        stepSize) // Point numerically integrated, does not need interpolation
-    {
-      x1 = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
-      index2 = static_cast<int>(
-          ((i + stepSize) >= specSize ? specSize - 1 : (i + stepSize)));
-      x2 = (isHistogram ? (0.5 * (x[index2] + x[index2 + 1])) : x[index2]);
-      overgap = 1.0 / (x2 - x1);
-      y1 = y[i];
-      y2 = y[index2];
-      step = 1;
-      continue;
-    }
-    xp = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
-    // Linear interpolation
-    y[i] = (xp - x1) * y2 + (x2 - xp) * y1;
-    y[i] *= overgap;
-    step++;
-  }
-}
 
 namespace {
 /** internal function converted from Lambda to identify interval around

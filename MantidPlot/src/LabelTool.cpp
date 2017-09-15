@@ -7,6 +7,7 @@
 #include "Mantid/LabelToolLogValuesDialog.h"
 // Mantid
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Run.h"
 // Qwt
 #include <qwt_picker.h>
 #include <qwt_plot_canvas.h>

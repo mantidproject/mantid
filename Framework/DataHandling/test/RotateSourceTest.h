@@ -49,7 +49,7 @@ public:
     instr->markAsSamplePos(sample);
 
     // The workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     ws->setInstrument(instr);
     // The angle
     double theta = 90.;
@@ -88,7 +88,7 @@ public:
     instr->markAsSamplePos(sample);
 
     // The workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     ws->setInstrument(instr);
     // The angle
     double theta = -90.;
@@ -127,7 +127,7 @@ public:
     instr->markAsSamplePos(sample);
 
     // The workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     ws->setInstrument(instr);
     // The angle
     double theta = 90.;
@@ -166,7 +166,7 @@ public:
     instr->markAsSamplePos(sample);
 
     // The workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 1);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 1);
     ws->setInstrument(instr);
     // The angle
     double theta = 90.;

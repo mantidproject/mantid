@@ -1,13 +1,11 @@
 #ifndef MANTID_KERNEL_LISTVALIDATOR_H_
 #define MANTID_KERNEL_LISTVALIDATOR_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/Exception.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #endif
 #include <vector>
 #include <set>

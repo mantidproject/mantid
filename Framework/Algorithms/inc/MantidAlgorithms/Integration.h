@@ -87,6 +87,7 @@ private:
   API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS,
                                                const int minSpec,
                                                const int maxSpec);
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithm

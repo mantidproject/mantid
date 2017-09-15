@@ -40,6 +40,8 @@ Params(Input:req) *dbl list*       A comma separated list of first bin boundary,
 PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorkspace, if the input has events. If the input and output EventWorkspace names are the same, only the X bins are set, which is very quick. If false, then the workspace gets converted to a Workspace2D histogram.
 
 FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller than the step size
+
+IgnoreBinErrors(Input) *boolean*       Ignore errors related to zero/negative bin widths in input/output workspaces. When ignored, the signal and errors are set to zero
 """
         doc = simpleapi.rebin.__doc__
         self.assertTrue(len(doc) > 0 )
@@ -171,7 +173,7 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         self.assertTrue( wsname in mtd )
         self.assertTrue( wsname_box in mtd )
         
-        self.assertTrue( type(query) == tuple )
+        self.assertTrue( isinstance(query, tuple) )
         self.assertEquals( 2, len(query) )
         
         self.assertTrue( isinstance(query[0], ITableWorkspace) )
@@ -200,10 +202,10 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         ws2 = simpleapi.Rebin(ws1,Params=[1.5,1.5,3])
         ws3 = ws1.rebin(Params=[1.5,1.5,3])
         ws4 = ws1.rebin([1.5,1.5,3])
-        result = simpleapi.CheckWorkspacesMatch(ws2,ws3)
-        self.assertEquals("Success!",result)
-        result = simpleapi.CheckWorkspacesMatch(ws2,ws4)
-        self.assertEquals("Success!",result)
+        result = simpleapi.CompareWorkspaces(ws2,ws3)
+        self.assertTrue(result[0])
+        result = simpleapi.CompareWorkspaces(ws2,ws4)
+        self.assertTrue(result[0])
 
         simpleapi.DeleteWorkspace(ws1)
         simpleapi.DeleteWorkspace(ws2)

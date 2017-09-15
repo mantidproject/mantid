@@ -7,15 +7,15 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiAutoCorrelationCore.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
-#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+#include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDGrid.h"
+#include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
 
-#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -219,7 +219,7 @@ public:
 
   void testgetCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -234,7 +234,7 @@ public:
 
   void testgetNormCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setNormCountData(testWorkspace);
@@ -247,7 +247,7 @@ public:
 
   void testgetSumOfCounts() {
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
 
     TestablePoldiAutoCorrelationCore autoCorrelationCore(m_log);
     autoCorrelationCore.setCountData(testWorkspace);
@@ -265,7 +265,7 @@ public:
         boost::dynamic_pointer_cast<MockChopper>(autoCorrelationCore.m_chopper);
 
     Workspace2D_sptr testWorkspace =
-        WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
+        WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(2, 2);
     autoCorrelationCore.setCountData(testWorkspace);
     autoCorrelationCore.setNormCountData(testWorkspace);
 
@@ -323,14 +323,14 @@ public:
 
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
 
-    const MantidVec &qValues = output->readX(0);
+    const auto &qValues = output->x(0);
     // qvalues should be reversed.
     TS_ASSERT_EQUALS(qValues[0], Conversions::dToQ(dValues[3]));
     TS_ASSERT_EQUALS(qValues[1], Conversions::dToQ(dValues[2]));
     TS_ASSERT_EQUALS(qValues[2], Conversions::dToQ(dValues[1]));
     TS_ASSERT_EQUALS(qValues[3], Conversions::dToQ(dValues[0]));
 
-    const MantidVec &outputIntensities = output->readY(0);
+    const auto &outputIntensities = output->y(0);
     // intensities are not reversed, they should be reversed already.
     TS_ASSERT_EQUALS(outputIntensities[0], intensities[0]);
     TS_ASSERT_EQUALS(outputIntensities[1], intensities[1]);

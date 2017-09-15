@@ -299,7 +299,7 @@ void MaxEnt::exec() {
     std::vector<double> evolTest(niter, 0.);
 
     // Progress
-    Progress progress(this, 0, 1, niter);
+    Progress progress(this, 0.0, 1.0, niter);
 
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {

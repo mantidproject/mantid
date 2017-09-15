@@ -49,12 +49,12 @@ void ModifyData::exec() {
   // Loop over spectra
   for (size_t i = 0; i < histogramCount; ++i) {
     // Retrieve the data into a vector
-    MantidVec &newX = outputW->dataX(i);
-    MantidVec &newY = outputW->dataY(i);
-    MantidVec &newE = outputW->dataE(i);
-    const MantidVec &XValues = inputW->readX(i);
-    const MantidVec &YValues = inputW->readY(i);
-    const MantidVec &EValues = inputW->readE(i);
+    auto &newX = outputW->mutableX(i);
+    auto &newY = outputW->mutableY(i);
+    auto &newE = outputW->mutableE(i);
+    const auto &XValues = inputW->x(i);
+    const auto &YValues = inputW->y(i);
+    const auto &EValues = inputW->e(i);
 
     // Iterate over i-th spectrum and modify the data
     for (size_t j = 0; j < inputW->blocksize(); j++) {
@@ -77,9 +77,9 @@ void ModifyData::exec() {
   g_log.information() << "New values:" << std::endl;
   int count = 0;
   for (size_t i = 0; i < histogramCount; ++i) {
-    const MantidVec &XValues = outputW->readX(i);
-    const MantidVec &YValues = outputW->readY(i);
-    const MantidVec &EValues = outputW->readE(i);
+    const auto &XValues = outputW->x(i);
+    const auto &YValues = outputW->y(i);
+    const auto &EValues = outputW->e(i);
 
     for (size_t j = 0; j < outputW->blocksize(); ++j) {
       // Get the reference to a data point

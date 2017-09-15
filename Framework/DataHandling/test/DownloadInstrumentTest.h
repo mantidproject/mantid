@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/DownloadInstrument.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Glob.h>
@@ -99,38 +100,75 @@ public:
   }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
+  void createDirectory(Poco::Path path) {
+    Poco::File file(path);
+    if (file.createDirectory()) {
+      m_directoriesToRemove.push_back(file);
+    }
+  }
+
+  void removeDirectories() {
+    for (auto directory : m_directoriesToRemove) {
+      try {
+        directory.remove(true);
+      } catch (Poco::FileException &fe) {
+        std::cout << fe.what() << std::endl;
+      }
+    }
+    m_directoriesToRemove.clear();
+  }
+
+  void setUp() override {
+    const std::string TEST_SUFFIX = "TEMPORARY_unitTest";
+    m_originalInstDir =
+        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+
+    // change the local download directory by adding a unittest subdirectory
+    auto testDirectories = m_originalInstDir;
+    Poco::Path localDownloadPath(m_originalInstDir[0]);
+    localDownloadPath.pushDirectory(TEST_SUFFIX);
+    m_localInstDir = localDownloadPath.toString();
+    createDirectory(localDownloadPath);
+    testDirectories[0] = m_localInstDir;
+
+    // also if you move the instrument directory to one with less files then it
+    // will run faster as it does not need to checksum as many files
+    try {
+      Poco::Path installInstrumentPath(testDirectories.back());
+      installInstrumentPath.pushDirectory(TEST_SUFFIX);
+      createDirectory(installInstrumentPath);
+      testDirectories.back() = installInstrumentPath.toString();
+    } catch (Poco::FileException &) {
+      std::cout << "Failed to change instrument directory continuing without, "
+                   "fine, just slower\n";
+    }
+
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        testDirectories);
+  }
+
+  void tearDown() override {
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        m_originalInstDir);
+    removeDirectories();
+  }
+
   void test_Init() {
     MockedDownloadInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
+  // These tests create some files, but they entire directories are created and
+  // removed in setup and teardown
   void test_exec() {
-    std::string localInstDir =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
-    cleanupDiretory(localInstDir);
-
     TSM_ASSERT_EQUALS("The expected number of files downloaded was wrong.",
                       runDownloadInstrument(), 2);
-
-    cleanupDiretory(localInstDir);
-  }
-
-  void test_execTwoTimesInARow() {
-    std::string localInstDir =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
-    cleanupDiretory(localInstDir);
-
-    cleanupDiretory(localInstDir);
   }
 
   void test_execOrphanedFile() {
-    std::string localInstDir =
-        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories()[0];
-    cleanupDiretory(localInstDir);
-
     // add an orphaned file
-    Poco::Path orphanedFilePath(localInstDir);
+    Poco::Path orphanedFilePath(m_localInstDir);
     orphanedFilePath.makeDirectory();
     orphanedFilePath.setFileName("Orphaned_Should_not_be_here.xml");
 
@@ -144,8 +182,6 @@ public:
     Poco::File orphanedFile(orphanedFilePath);
     TSM_ASSERT("The orphaned file was not deleted",
                orphanedFile.exists() == false);
-
-    deleteFile(orphanedFilePath.toString());
   }
 
   int runDownloadInstrument() {
@@ -161,23 +197,9 @@ public:
     return alg.getProperty("FileDownloadCount");
   }
 
-  void cleanupDiretory(std::string dir) {
-    Poco::Path path(dir);
-    path.makeDirectory();
-    deleteFile(path.setFileName("github.json").toString());
-    deleteFile(path.setFileName("NewFile.xml").toString());
-    deleteFile(path.setFileName("UpdatableFile.xml").toString());
-  }
-
-  bool deleteFile(std::string filePath) {
-    Poco::File file(filePath);
-    if (file.exists()) {
-      file.remove();
-      return true;
-    } else {
-      return false;
-    }
-  }
+  std::string m_localInstDir;
+  std::vector<std::string> m_originalInstDir;
+  std::vector<Poco::File> m_directoriesToRemove;
 };
 
 #endif /* MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_ */

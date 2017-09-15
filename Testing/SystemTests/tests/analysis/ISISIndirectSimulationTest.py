@@ -1,15 +1,17 @@
 #pylint: disable=no-init,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import mantid.simpleapi as ms
 
 #====================================================================================================
+
+
 class MolDynCdlTest(stresstesting.MantidStressTest):
 
     def runTest(self):
         ms.MolDyn(Data='DISF_NaF.cdl',
                   Functions=['Fqt-total', 'Sqw-total'],
                   OutputWorkspace='ISISIndirectSimulationTest_MolDynCdl')
-
 
     def validate(self):
         self.tolerance = 1e-2
@@ -26,14 +28,13 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
 
         return  ws1Match and ws2Match
 
-
     def checkWorkspacesMatch(self, ws1, ws2):
         """
         Function to check two workspaces match
         Used when the result of a test produces more than a single workspace
         """
 
-        checker = ms.AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = ms.AlgorithmManager.create("CompareWorkspaces")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", ws1)
         checker.setPropertyValue("Workspace2", ws2)
@@ -42,8 +43,8 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
 
         checker.execute()
 
-        if checker.getPropertyValue("Result") != 'Success!':
-            print self.__class__.__name__
+        if not checker.getProperty("Result"):
+            print(self.__class__.__name__)
             ms.SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
@@ -57,10 +58,8 @@ class MolDynDatTest(stresstesting.MantidStressTest):
         ms.MolDyn(Data='WSH_test.dat',
                   OutputWorkspace='WSH_test_iqt')
 
-
     def validate(self):
         self.tolerance = 1e-2
         self.disableChecking.append("Instrument")
 
         return 'WSH_test_iqt', 'ISISIndirectSimulation_MolDynDAT.nxs'
-

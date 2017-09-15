@@ -1,22 +1,23 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
-#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
@@ -264,8 +265,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
   // around `open`. `open` is slow for large multiperiod datasets, because it
   // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
   // it only searches the current group. It does, however, require that the
-  // parent
-  // group is currently open.
+  // parent group is currently open.
+  // Words of Warning: While the openLocal construct is an optimization,
+  // it is very dangerous. Forgetting to close an entry of an NXEntry in a
+  // completely unrelated part of the code can result in us opening the
+  // wrong NXEntry here!
   NXEntry mtdEntry(root, entryName);
   mtdEntry.openLocal();
 
@@ -423,9 +427,10 @@ void LoadNexusProcessed::exec() {
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
 
-    // load names of each of the workspaces and check for a common stem
-    std::vector<std::string> names(nWorkspaceEntries + 1);
-    bool commonStem = bIsMultiPeriod || checkForCommonNameStem(root, names);
+    // load names of each of the workspaces. Note that if we have duplicate
+    // names then we don't select them
+    auto names =
+        extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
 
     // remove existing workspace and replace with the one being loaded
     bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -466,8 +471,7 @@ void LoadNexusProcessed::exec() {
       os << p;
 
       // decide what the workspace should be called
-      std::string wsName =
-          buildWorkspaceName(names[p], base_name, p, commonStem);
+      std::string wsName = buildWorkspaceName(names[p], base_name, p);
 
       Workspace_sptr local_workspace;
 
@@ -509,34 +513,24 @@ void LoadNexusProcessed::exec() {
 /**
 * Decides what to call a child of a group workspace.
 *
-* This function uses information about if the child workspace has a common stem
-* and checks if the file contained a workspace name to decide what it should be
-*called
+* This function builds the workspace name bsed on either a workspace name
+* which was stored in the file or the base name.
 *
 * @param name :: The name loaded from the file (possibly the empty string if
 *none was loaded)
 * @param baseName :: The name group workspace
 * @param wsIndex :: The current index of this workspace
-* @param commonStem :: Whether the workspaces share a common name stem
 *
 * @return The name of the workspace
 */
 std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
                                                    const std::string &baseName,
-                                                   size_t wsIndex,
-                                                   bool commonStem) {
+                                                   size_t wsIndex) {
   std::string wsName;
   std::string index = std::to_string(wsIndex);
 
-  // if we don't have a common stem then use name tag
-  if (!commonStem) {
-    if (!name.empty()) {
-      // use name loaded from file there's no common stem
-      wsName = name;
-    } else {
-      // if the name property wasn't defined just use <OutputWorkspaceName>_n
-      wsName = baseName + index;
-    }
+  if (!name.empty()) {
+    wsName = name;
   } else {
     // we have a common stem so rename accordingly
     boost::smatch results;
@@ -545,9 +539,11 @@ std::string LoadNexusProcessed::buildWorkspaceName(const std::string &name,
     if (boost::regex_search(name, results, exp)) {
       wsName = baseName + std::string(results[1].first, results[1].second);
     } else {
-      // use default name if we couldn't match for some reason
+      // if the name property wasn't defined just use <OutputWorkspaceName>_n
       wsName = baseName + index;
     }
+
+    wsName = baseName + index;
   }
 
   correctForWorkspaceNameClash(wsName);
@@ -579,33 +575,29 @@ void LoadNexusProcessed::correctForWorkspaceNameClash(std::string &wsName) {
 }
 
 /**
-* Check if the workspace name contains a common stem and load the workspace
-*names
+* Extract the workspace names from the file (if any are stored)
 *
 * @param root :: the root for the NeXus document
-* @param names :: vector to store the names to be loaded.
-* @return Whether there was a common stem.
+* @param nWorkspaceEntries :: the number of workspace entries
 */
-bool LoadNexusProcessed::checkForCommonNameStem(
-    NXRoot &root, std::vector<std::string> &names) {
-  bool success(true);
-  size_t nWorkspaceEntries = root.groups().size();
+std::vector<std::string>
+LoadNexusProcessed::extractWorkspaceNames(NXRoot &root,
+                                          size_t nWorkspaceEntries) {
+  std::vector<std::string> names(nWorkspaceEntries + 1);
   for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
-    std::ostringstream os;
-    os << p;
-
-    names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
-
-    boost::smatch results;
-    const boost::regex exp(".*_\\d+$");
-
-    // check if the workspace name has an index on the end
-    if (!boost::regex_match(names[p], results, exp)) {
-      success = false;
-    }
+    auto period = std::to_string(p);
+    names[p] = loadWorkspaceName(root, "mantid_workspace_" + period);
   }
 
-  return success;
+  // Check that there are no duplicates in the workspace name
+  // This can cause severe problems
+  auto it = std::unique(names.begin(), names.end());
+  if (it != names.end()) {
+    auto size = names.size();
+    names.clear();
+    names.resize(size);
+  }
+  return names;
 }
 
 /**
@@ -619,11 +611,13 @@ std::string
 LoadNexusProcessed::loadWorkspaceName(NXRoot &root,
                                       const std::string &entry_name) {
   NXEntry mtd_entry = root.openEntry(entry_name);
+  std::string workspaceName = std::string();
   try {
-    return mtd_entry.getString("workspace_name");
+    workspaceName = mtd_entry.getString("workspace_name");
   } catch (std::runtime_error &) {
-    return std::string();
   }
+  mtd_entry.close();
+  return workspaceName;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -714,9 +708,10 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   // indices of events
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
+  int64_t max = static_cast<int64_t>(m_filtered_spec_idxs.size());
+  Progress progress(this, progressStart, progressStart + progressRange, max);
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t j = 0; j < static_cast<int64_t>(m_filtered_spec_idxs.size());
-       j++) {
+  for (int64_t j = 0; j < max; ++j) {
     PARALLEL_START_INTERUPT_REGION
     size_t wi = m_filtered_spec_idxs[j] - 1;
     int64_t index_start = indices[wi];
@@ -757,9 +752,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
-
-    progress(progressStart +
-             progressRange * (1.0 / static_cast<double>(numspec)));
+    progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -1019,6 +1012,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
                                     parameterStr);
+    // Populate the instrument parameters in this workspace
+    peakWS->readParameterMap(parameterStr);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -1070,14 +1065,17 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     qSign = -1.0;
 
   for (int r = 0; r < numberPeaks; r++) {
-    Kernel::V3D v3d;
-    if (convention == "Crystallography")
-      v3d[2] = -1.0;
-    else
-      v3d[2] = 1.0;
-    Geometry::IPeak *p;
-    p = peakWS->createPeak(v3d);
-    peakWS->addPeak(*p);
+    // Warning! Do not use anything other than the default constructor here
+    // It is currently important (10/05/17) that the DetID (set in the loop
+    // below this one) is set before QLabFrame as this causes Peak to ray trace
+    // to find the location of the detector, which significantly increases
+    // loading times.
+    const auto goniometer = peakWS->run().getGoniometer();
+    Peak peak;
+    peak.setInstrument(peakWS->getInstrument());
+    peak.setGoniometerMatrix(goniometer.getR());
+    peak.setRunNumber(peakWS->getRunNumber());
+    peakWS->addPeak(std::move(peak));
   }
 
   for (const auto &str : columnNames) {
@@ -1294,6 +1292,13 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(
   // although in this case it would never be used.
   auto hasXErrors = wksp_cls.isValid("xerrors");
   auto xErrors = hasXErrors ? wksp_cls.openNXDouble("xerrors") : errors;
+  if (hasXErrors) {
+    if (xErrors.dim1() == nchannels + 1)
+      g_log.warning() << "Legacy X uncertainty found in input file, i.e., "
+                         "delta-Q for each BIN EDGE. Uncertainties will be "
+                         "re-interpreted as delta-Q of the BIN CENTRE and the "
+                         "last value will be dropped.\n";
+  }
 
   int blocksize = 8;
   // const int fullblocks = nspectra / blocksize;
@@ -1680,17 +1685,6 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
     errorList["SpectrumMax"] = "SpectrumMax must be larger than SpectrumMin";
   }
 
-  // Next check that SpecMax is less than maximum int
-  if (specMax > INT_MAX) {
-    errorList["SpectrumMax"] =
-        "SpectrumMax must be less than " + to_string(INT_MAX);
-  }
-
-  if (specMin > INT_MAX) {
-    errorList["SpectrumMin"] =
-        "SpectrumMin must be less than " + to_string(INT_MAX);
-  }
-
   // Finished testing return any errors
   return errorList;
 }
@@ -1716,8 +1710,13 @@ void LoadNexusProcessed::loadNonSpectraAxis(
     }
   } else if (axis->isText()) {
     NXChar axisData = data.openNXChar("axis2");
-    axisData.load();
-    std::string axisLabels(axisData(), axisData.dim0());
+    std::string axisLabels;
+    try {
+      axisData.load();
+      axisLabels = std::string(axisData(), axisData.dim0());
+    } catch (std::runtime_error &) {
+      axisLabels = "";
+    }
     // Use boost::tokenizer to split up the input
     Mantid::Kernel::StringTokenizer tokenizer(
         axisLabels, "\n", Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
@@ -1829,7 +1828,7 @@ void LoadNexusProcessed::readBinMasking(
   }
   NXInt spec = wksp_cls.openNXInt("masked_spectra");
   spec.load();
-  NXInt bins = wksp_cls.openNXInt("masked_bins");
+  NXSize bins = wksp_cls.openNXSize("masked_bins");
   bins.load();
   NXDouble weights = wksp_cls.openNXDouble("mask_weights");
   weights.load();
@@ -1875,9 +1874,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const size_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(blocksize, hist);
@@ -1888,7 +1892,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(blocksize, hist);
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   int final(hist + blocksize);
@@ -1911,8 +1915,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           hist, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                              xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
 
     local_workspace->setSharedX(hist, m_xbins.cowData());
@@ -1953,9 +1957,14 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *err_end = err_start + nchannels;
   double *farea_start = nullptr;
   double *farea_end = nullptr;
-  const size_t nxbins(m_xbins.size());
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(blocksize, hist);
@@ -1966,7 +1975,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(blocksize, hist);
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   int final(hist + blocksize);
@@ -1989,8 +1998,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                                 xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
     local_workspace->setSharedX(wsIndex, m_xbins.cowData());
     ++hist;
@@ -2033,6 +2042,12 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   double *farea_end = nullptr;
   double *xErrors_start = nullptr;
   double *xErrors_end = nullptr;
+  size_t dx_increment = nchannels;
+  // NexusFileIO stores Dx data for all spectra (sharing not preserved) so dim0
+  // is the histograms, dim1 is Dx length. For old files this is nchannels+1,
+  // otherwise nchannels. See #16298.
+  // WARNING: We are dropping the last Dx value for old files!
+  size_t dx_input_increment = xErrors.dim1();
   RebinnedOutput_sptr rb_workspace;
   if (hasFArea) {
     farea.load(blocksize, hist);
@@ -2049,7 +2064,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
   if (hasXErrors) {
     xErrors.load(blocksize, hist);
     xErrors_start = xErrors();
-    xErrors_end = xErrors_start + nxbins;
+    xErrors_end = xErrors_start + dx_increment;
   }
 
   while (hist < final) {
@@ -2071,8 +2086,8 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
       local_workspace->setSharedDx(
           wsIndex, Kernel::make_cow<HistogramData::HistogramDx>(xErrors_start,
                                                                 xErrors_end));
-      xErrors_start += nxbins;
-      xErrors_end += nxbins;
+      xErrors_start += dx_input_increment;
+      xErrors_end += dx_input_increment;
     }
     auto &X = local_workspace->mutableX(wsIndex);
     X.assign(xbin_start, xbin_end);

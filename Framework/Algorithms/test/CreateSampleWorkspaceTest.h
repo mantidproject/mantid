@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
@@ -10,8 +12,10 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using namespace Mantid::Kernel;
@@ -40,7 +44,8 @@ public:
       std::string outWSName, std::string wsType = "", std::string function = "",
       std::string userFunction = "", int numBanks = 2, int bankPixelWidth = 10,
       int numEvents = 1000, bool isRandom = false, std::string xUnit = "TOF",
-      double xMin = 0.0, double xMax = 20000.0, double binWidth = 200.0) {
+      double xMin = 0.0, double xMax = 20000.0, double binWidth = 200.0,
+      int numScanPoints = 1) {
 
     CreateSampleWorkspace alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -69,6 +74,8 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("XMax", xMax));
     if (binWidth != 200.0)
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("BinWidth", binWidth));
+    if (numScanPoints != 1)
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumScanPoints", numScanPoints))
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -84,7 +91,7 @@ public:
     // check the basics
     int numBins = static_cast<int>((xMax - xMin) / binWidth);
     int numHist = numBanks * bankPixelWidth * bankPixelWidth;
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numHist);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numHist * numScanPoints);
     TS_ASSERT_EQUALS(ws->blocksize(), numBins);
 
     TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), xUnit);
@@ -463,15 +470,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
 
-    TS_ASSERT(outWS->getDetector(0)->isMonitor());
+    TS_ASSERT(outWS->spectrumInfo().isMonitor(0));
     TS_ASSERT_DELTA(outWS->readY(0)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(0)[50], 10.3, 0.0001);
 
-    TS_ASSERT(outWS->getDetector(1)->isMonitor());
+    TS_ASSERT(outWS->spectrumInfo().isMonitor(1));
     TS_ASSERT_DELTA(outWS->readY(1)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(1)[50], 10.3, 0.0001);
 
-    TS_ASSERT(!outWS->getDetector(2)->isMonitor());
+    TS_ASSERT(!outWS->spectrumInfo().isMonitor(2));
     TS_ASSERT_DELTA(outWS->readY(2)[40], 0.3, 0.0001);
     TS_ASSERT_DELTA(outWS->readY(2)[50], 10.3, 0.0001);
 
@@ -494,20 +501,56 @@ public:
 
     TS_ASSERT_EQUALS(ews->getNumberEvents(), 191900);
 
-    TS_ASSERT(ews->getDetector(0)->isMonitor());
+    TS_ASSERT(ews->spectrumInfo().isMonitor(0));
     TS_ASSERT_DELTA(ews->readY(0)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(0)[60], 7, 0.0001);
 
-    TS_ASSERT(ews->getDetector(1)->isMonitor());
+    TS_ASSERT(ews->spectrumInfo().isMonitor(1));
     TS_ASSERT_DELTA(ews->readY(1)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(1)[60], 7, 0.0001);
 
-    TS_ASSERT(!ews->getDetector(2)->isMonitor());
+    TS_ASSERT(!ews->spectrumInfo().isMonitor(2));
     TS_ASSERT_DELTA(ews->readY(2)[50], 257, 0.0001);
     TS_ASSERT_DELTA(ews->readY(2)[60], 7, 0.0001);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_ScanningWorkspace_defaults() {
+    // Name of the output workspace.
+    std::string outWSName("scanning_workspace");
+
+    const int numBanks = 2;
+    const int bankPixelWidth = 10;
+    const int numScanPoints = 10;
+
+    MatrixWorkspace_sptr ws = createSampleWorkspace(
+        outWSName, "", "", "", numBanks, bankPixelWidth, 1000, false, "TOF",
+        0.0, 20000.0, 200.0, numScanPoints);
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), numBanks * bankPixelWidth *
+                                                    bankPixelWidth *
+                                                    numScanPoints);
+
+    const auto &detectorInfo = ws->detectorInfo();
+    TS_ASSERT(detectorInfo.isScanning());
+
+    const auto centreDetector = numBanks * bankPixelWidth * bankPixelWidth / 2;
+    const auto radiansToDegrees = 180.0 / M_PI;
+
+    // The centre pixel should go from 0 -> 10 degrees, all at the same l2
+    for (size_t j = 0; j < detectorInfo.scanCount(centreDetector); ++j) {
+      const auto index = std::pair<size_t, size_t>(centreDetector, j);
+      TS_ASSERT_DELTA(10.0, detectorInfo.l2(index), 1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.twoTheta(index) * radiansToDegrees,
+                      1e-10);
+      TS_ASSERT_DELTA(j, detectorInfo.rotation(index).getEulerAngles("XYZ")[1],
+                      1e-10);
+    }
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
   }
 };
 

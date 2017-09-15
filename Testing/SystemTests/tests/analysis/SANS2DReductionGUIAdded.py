@@ -1,14 +1,11 @@
 #pylint: disable=invalid-name
-import sys
 
-if __name__ == "__main__":
-  # it is just to allow running this test in Mantid, allowing the following import
-    sys.path.append('/apps/mantid/systemtests/StressTestFramework/')
-
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import ISISCommandInterface as i
 import copy
 import SANS2DReductionGUI as sansgui
+
 
 class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
     def runTest(self):
@@ -56,6 +53,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
 
+
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
 
@@ -81,7 +79,6 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
         i.WavRangeReduction()
-
 
     def validate(self):
         self.tolerance = 0.01
@@ -170,7 +167,6 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 
         i.WavRangeReduction()
 
-
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be
         # almost the same
@@ -187,6 +183,7 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
+
 
 class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
     def runTest(self):
@@ -210,7 +207,6 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
         i.TransmissionCan(r'SANS2D00028823.nxs', r'SANS2D00028784.nxs')
 
         i.WavRangeReduction()
-
 
     def validate(self):
         # we have double the sample and the can, this means that the reduced data will be

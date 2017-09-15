@@ -43,11 +43,11 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
 
-    const double delta(1e-08);
+    const double delta(1e-04);
     const size_t middle_index = 4;
-    TS_ASSERT_DELTA(0.97773712, outWS->readY(0).front(), delta);
-    TS_ASSERT_DELTA(0.83720057, outWS->readY(0)[middle_index], delta);
-    TS_ASSERT_DELTA(0.72020602, outWS->readY(0).back(), delta);
+    TS_ASSERT_DELTA(0.9694, outWS->readY(0).front(), delta);
+    TS_ASSERT_DELTA(0.8035, outWS->readY(0)[middle_index], delta);
+    TS_ASSERT_DELTA(0.6530, outWS->readY(0).back(), delta);
   }
 
   //-------------------- Failure cases --------------------------------
@@ -57,7 +57,7 @@ public:
 
     auto alg = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    auto testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
+    auto testWS = WorkspaceCreationHelper::create2DWorkspace(10, 5);
 
     TS_ASSERT_THROWS(
         alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS),

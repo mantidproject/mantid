@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -25,8 +26,7 @@ LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0) {}
  */
 int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".grp") != 0 && extn.compare(".sqe") != 0 &&
-      extn.compare(".txt") != 0 && extn.compare(".dat") != 0)
+  if (extn != ".grp" && extn != ".sqe" && extn != ".txt" && extn != ".dat")
     return 0;
 
   if (!descriptor.isAscii())
@@ -71,172 +71,180 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor &descriptor) const {
 void LoadDaveGrp::init() {
   std::vector<std::string> exts{".grp", ".sqe", ".txt", ".dat"};
 
-  this->declareProperty(Kernel::make_unique<API::FileProperty>(
-                            "Filename", "", API::FileProperty::Load, exts),
-                        "A DAVE grouped ASCII file");
-  this->declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-                            "OutputWorkspace", "", Kernel::Direction::Output),
-                        "The name of the workspace that will be created.");
+  declareProperty(Kernel::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Load, exts),
+                  "A DAVE grouped ASCII file");
+  declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
+                      "OutputWorkspace", "", Kernel::Direction::Output),
+                  "The name of the workspace that will be created.");
 
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the X-Axis property
   auto allowedUnits = boost::make_shared<Kernel::StringListValidator>(
       Kernel::UnitFactory::Instance().getKeys());
-  this->declareProperty("XAxisUnits", "DeltaE", allowedUnits,
-                        "The name of the units for the X-Axis (must be one of "
-                        "those registered in "
-                        "the Unit Factory)");
+  declareProperty("XAxisUnits", "DeltaE", allowedUnits,
+                  "The name of the units for the X-Axis (must be one of "
+                  "those registered in "
+                  "the Unit Factory)");
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the Y-Axis property
-  this->declareProperty("YAxisUnits", "MomentumTransfer", allowedUnits,
-                        "The name of the units for the Y-Axis (must be one of "
-                        "those registered in "
-                        "the Unit Factory)");
-  this->declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-                            "IsMicroEV", false, Kernel::Direction::Input),
-                        "Original file is in units of micro-eV for DeltaE");
-  this->declareProperty(
-      Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
-          "ConvertToHistogram", false, Kernel::Direction::Input),
-      "Convert output workspace to histogram data.");
+  declareProperty("YAxisUnits", "MomentumTransfer", allowedUnits,
+                  "The name of the units for the Y-Axis (must be one of "
+                  "those registered in "
+                  "the Unit Factory)");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "IsMicroEV", false, Kernel::Direction::Input),
+                  "Original file is in units of micro-eV for DeltaE");
+  declareProperty(Kernel::make_unique<Kernel::PropertyWithValue<bool>>(
+                      "ConvertToHistogram", false, Kernel::Direction::Input),
+                  "Convert output workspace to histogram data.");
 }
 
 void LoadDaveGrp::exec() {
-  const std::string filename = this->getProperty("Filename");
+  const std::string filename = getProperty("Filename");
+  std::vector<double> xAxis;
+  std::vector<double> yAxis;
+  API::MatrixWorkspace_sptr outputWorkspace;
 
-  auto xAxis = new MantidVec();
-  auto yAxis = new MantidVec();
-
-  std::vector<MantidVec *> data;
-  std::vector<MantidVec *> errors;
-
-  this->ifile.open(filename.c_str());
-  if (this->ifile.is_open()) {
+  ifile.open(filename.c_str());
+  if (ifile.is_open()) {
     try {
       // Size of x axis
-      this->getAxisLength(this->xLength);
+      getAxisLength(xLength);
       // Size of y axis
-      this->getAxisLength(this->nGroups);
+      getAxisLength(nGroups);
     } catch (boost::bad_lexical_cast &) {
       throw std::runtime_error(
           "LoadDaveGrp: Failed to parse axis length from file.");
     }
 
+    outputWorkspace = setupWorkspace();
     // Read in the x axis values
-    this->getAxisValues(xAxis, static_cast<std::size_t>(this->xLength));
+    getAxisValues(xAxis, xLength);
     // Read in the y axis values
-    this->getAxisValues(yAxis, static_cast<std::size_t>(this->nGroups));
+    getAxisValues(yAxis, nGroups);
     // Read in the data
-    this->getData(data, errors);
+    getData(outputWorkspace);
+
+    ifile.close();
+  } else {
+    throw std::runtime_error("LoadDaveGrp: Failed to open file.");
   }
-  this->ifile.close();
 
   // Scale the x-axis if it is in micro-eV to get it to meV
-  const bool isUeV = this->getProperty("IsMicroEV");
+  const bool isUeV = getProperty("IsMicroEV");
   if (isUeV) {
-    MantidVec::iterator iter;
-    for (iter = xAxis->begin(); iter != xAxis->end(); ++iter) {
-      *iter /= 1000.0;
-    }
+    for (auto &value : xAxis)
+      value /= 1000.0;
   }
 
+  setWorkspaceAxes(outputWorkspace, xAxis, yAxis);
+
+  // convert output workspace to histogram data
+  const bool convertToHistogram = getProperty("ConvertToHistogram");
+  if (convertToHistogram)
+    outputWorkspace = convertWorkspaceToHistogram(outputWorkspace);
+
+  outputWorkspace->mutableRun().addProperty("Filename", filename);
+  setProperty("OutputWorkspace", outputWorkspace);
+}
+
+API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create(
-              "Workspace2D", this->nGroups, this->xLength, this->xLength));
+          API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
+                                                   xLength, xLength));
   // Force the workspace to be a distribution
   outputWorkspace->setDistribution(true);
-
   // Set the x-axis units
   outputWorkspace->getAxis(0)->unit() =
-      Kernel::UnitFactory::Instance().create(this->getProperty("XAxisUnits"));
+      Kernel::UnitFactory::Instance().create(getProperty("XAxisUnits"));
 
-  API::Axis *const verticalAxis = new API::NumericAxis(this->nGroups);
+  API::Axis *const verticalAxis = new API::NumericAxis(nGroups);
   // Set the y-axis units
   verticalAxis->unit() =
-      Kernel::UnitFactory::Instance().create(this->getProperty("YAxisUnits"));
+      Kernel::UnitFactory::Instance().create(getProperty("YAxisUnits"));
 
   outputWorkspace->replaceAxis(1, verticalAxis);
-
-  for (int i = 0; i < this->nGroups; i++) {
-    outputWorkspace->dataX(i) = *xAxis;
-    outputWorkspace->dataY(i) = *data[i];
-    outputWorkspace->dataE(i) = *errors[i];
-    verticalAxis->setValue(i, yAxis->at(i));
-
-    delete data[i];
-    delete errors[i];
-  }
-
-  delete xAxis;
-  delete yAxis;
-
-  // convert output workspace to histogram data
-  const bool convertToHistogram = this->getProperty("ConvertToHistogram");
-  if (convertToHistogram) {
-    auto convert2HistAlg = createChildAlgorithm("ConvertToHistogram");
-    convert2HistAlg->setProperty("InputWorkspace", outputWorkspace);
-    convert2HistAlg->setProperty("OutputWorkspace", outputWorkspace);
-    convert2HistAlg->execute();
-    outputWorkspace = convert2HistAlg->getProperty("OutputWorkspace");
-
-    auto convertFromDistAlg = createChildAlgorithm("ConvertFromDistribution");
-    convertFromDistAlg->setProperty("Workspace", outputWorkspace);
-    convertFromDistAlg->execute();
-  }
-
-  outputWorkspace->mutableRun().addProperty("Filename", filename);
-  this->setProperty("OutputWorkspace", outputWorkspace);
+  return outputWorkspace;
 }
 
-void LoadDaveGrp::readLine() { std::getline(this->ifile, this->line); }
+void LoadDaveGrp::setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
+                                   const std::vector<double> &xAxis,
+                                   const std::vector<double> &yAxis) const {
 
-void LoadDaveGrp::getAxisLength(int &length) {
+  auto verticalAxis = workspace->getAxis(1);
+  for (size_t i = 0; i < nGroups; i++) {
+    workspace->mutableX(i) = xAxis;
+    verticalAxis->setValue(i, yAxis.at(i));
+  }
+}
+
+API::MatrixWorkspace_sptr
+LoadDaveGrp::convertWorkspaceToHistogram(API::MatrixWorkspace_sptr workspace) {
+  auto convert2HistAlg = createChildAlgorithm("ConvertToHistogram");
+  convert2HistAlg->setProperty("InputWorkspace", workspace);
+  convert2HistAlg->setProperty("OutputWorkspace", workspace);
+  convert2HistAlg->execute();
+  workspace = convert2HistAlg->getProperty("OutputWorkspace");
+
+  auto convertFromDistAlg = createChildAlgorithm("ConvertFromDistribution");
+  convertFromDistAlg->setProperty("Workspace", workspace);
+  convertFromDistAlg->execute();
+
+  return workspace;
+}
+
+void LoadDaveGrp::readLine() { std::getline(ifile, line); }
+
+void LoadDaveGrp::getAxisLength(size_t &length) {
   // Skip a comment line
-  this->readLine();
+  readLine();
   // Get the axis length from the file
-  this->readLine();
-  std::istringstream is(this->line);
+  readLine();
+  std::istringstream is(line);
   std::string strLength;
   is >> strLength;
 
-  length = boost::lexical_cast<int>(strLength);
+  length = boost::lexical_cast<size_t>(strLength);
 }
 
-void LoadDaveGrp::getAxisValues(MantidVec *axis, const std::size_t length) {
+void LoadDaveGrp::getAxisValues(std::vector<double> &axis,
+                                const std::size_t length) {
   // Skip a comment line
-  this->readLine();
+  readLine();
   // Get the axis values from the file
   double value;
   for (std::size_t i = 0; i < length; i++) {
-    this->readLine();
-    std::istringstream is(this->line);
+    readLine();
+    std::istringstream is(line);
     is >> value;
-    axis->push_back(value);
+    axis.push_back(value);
   }
 }
 
-void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
-                          std::vector<MantidVec *> &errs) {
+void LoadDaveGrp::getData(API::MatrixWorkspace_sptr workspace) {
   double data_val = 0.0;
   double err_val = 0.0;
-  API::Progress progress(this, 0.0, 1.0, this->nGroups);
-  for (int j = 0; j < this->nGroups; j++) {
+
+  API::Progress progress(this, 0.0, 1.0, nGroups);
+
+  for (size_t j = 0; j < nGroups; j++) {
     // Skip the group comment line
-    this->readLine();
+    readLine();
     // Read the data block
-    auto d = new MantidVec();
-    auto e = new MantidVec();
-    for (std::size_t k = 0; k < static_cast<std::size_t>(this->xLength); k++) {
-      this->readLine();
-      std::istringstream is(this->line);
+    auto &dataY = workspace->mutableY(j);
+    auto &dataE = workspace->mutableE(j);
+
+    for (std::size_t k = 0; k < xLength; k++) {
+      readLine();
+      std::istringstream is(line);
       is >> data_val >> err_val;
-      d->push_back(data_val);
-      e->push_back(err_val);
+      dataY[k] = data_val;
+      dataE[k] = err_val;
     }
-    data.push_back(d);
-    errs.push_back(e);
+
     progress.report();
   }
 }

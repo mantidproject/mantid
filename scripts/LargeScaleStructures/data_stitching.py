@@ -2,6 +2,7 @@
 """
     Data stitching for SANS and reflectometry
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
@@ -12,6 +13,7 @@ try:
     IS_IN_MANTIDPLOT = True
 except(ImportError, ImportWarning):
     IS_IN_MANTIDPLOT = False
+
 
 class RangeSelector(object):
     """
@@ -24,6 +26,7 @@ class RangeSelector(object):
         """
             Selector class for selecting ranges in Mantidplot
         """
+
         def __init__(self):
             self._call_back = None
             self._ws_output_base = None
@@ -31,24 +34,24 @@ class RangeSelector(object):
 
         def disconnect(self):
             if IS_IN_MANTIDPLOT:
-                mantidplot.app.disconnect(mantidplot.app.mantidUI,\
-                                    QtCore.SIGNAL("x_range_update(double,double)"),\
-                                    self._call_back)
+                mantidplot.app.disconnect(mantidplot.app.mantidUI,
+                                          QtCore.SIGNAL("x_range_update(double,double)"),
+                                          self._call_back)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
                     range_min=None, range_max=None, x_title=None,
                     log_scale=False,
                     ws_output_base=None):
             if not IS_IN_MANTIDPLOT:
-                print "RangeSelector cannot be used output MantidPlot"
+                print("RangeSelector cannot be used output MantidPlot")
                 return
 
             self._call_back = call_back
             self._ws_output_base = ws_output_base
 
-            mantidplot.app.connect(mantidplot.app.mantidUI,\
-                             QtCore.SIGNAL("x_range_update(double,double)"),\
-                             self._call_back)
+            mantidplot.app.connect(mantidplot.app.mantidUI,
+                                   QtCore.SIGNAL("x_range_update(double,double)"),
+                                   self._call_back)
             g = mantidplot.graph(self._graph)
 
             if g is not None:
@@ -92,10 +95,12 @@ class RangeSelector(object):
                                          range_min=range_min, range_max=range_max,
                                          x_title=x_title, log_scale=log_scale)
 
+
 class DataSet(object):
     """
         Data set class for stitcher
     """
+
     def __init__(self, file_path=""):
         self._file_path = file_path
         self._xmin = None
@@ -230,10 +235,10 @@ class DataSet(object):
                     y_trim.append(y[i])
                     e_trim.append(e[i])
 
-            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,\
-                           OutputWorkspace=self._ws_scaled,\
-                           UnitX="MomentumTransfer",\
-                           ParentWorkspace=self._ws_name)
+            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,
+                            OutputWorkspace=self._ws_scaled,
+                            UnitX="MomentumTransfer",
+                            ParentWorkspace=self._ws_name)
 
             dq_scaled = mtd[self._ws_scaled].dataDx(0)
             for i in range(len(dq_scaled)):
@@ -372,10 +377,12 @@ class DataSet(object):
                 call_back = self.set_range
             RangeSelector.connect([self._ws_name], call_back=call_back)
 
+
 class Stitcher(object):
     """
         Data set stitcher
     """
+
     def __init__(self):
         ## Reference ID (int)
         self._reference = None
@@ -524,9 +531,7 @@ class Stitcher(object):
                 _dx = mtd[ws].dataDx(0)
                 if len(_x) == len(_y)+1:
                     xtmp = [(_x[i]+_x[i+1])/2.0 for i in range(len(_y))]
-                    dxtmp = [(_dx[i]+_dx[i+1])/2.0 for i in range(len(_y))]
                     _x = xtmp
-                    _dx = dxtmp
 
                 _x, _y, _e, _dx = self.trim_zeros(_x, _y, _e, _dx)
                 x.extend(_x)
@@ -535,6 +540,7 @@ class Stitcher(object):
                 dx.extend(_dx)
 
         zipped = zip(x, y, e, dx)
+
         def cmp(p1, p2):
             if p2[0] == p1[0]:
                 return 0
@@ -542,19 +548,20 @@ class Stitcher(object):
         combined = sorted(zipped, cmp)
         x, y, e, dx = zip(*combined)
 
-        CreateWorkspace(DataX=x, DataY=y, DataE=e,\
-                       OutputWorkspace=ws_combined,\
-                       UnitX="MomentumTransfer",\
-                       ParentWorkspace=first_ws)
+        CreateWorkspace(DataX=x, DataY=y, DataE=e,
+                        OutputWorkspace=ws_combined,
+                        UnitX="MomentumTransfer",
+                        ParentWorkspace=first_ws)
 
         dxtmp = mtd[ws_combined].dataDx(0)
 
         # Fill out dQ
-        npts = len(x)
+        npts = len(dxtmp)
         for i in range(npts):
             dxtmp[i] = dx[i]
 
         return ws_combined
+
 
 def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
@@ -575,7 +582,7 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         Logger("data_stitching").error(error_msg)
         raise RuntimeError(error_msg)
 
-    if not type(data_list) == list:
+    if not isinstance(data_list, list):
         error_msg = "The data_list parameter should be a list"
         Logger("data_stitching").error(error_msg)
         raise RuntimeError(error_msg)
@@ -589,7 +596,7 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
     # Check whether we just need to scale the data sets using the provided
     # scaling factors
     has_scale_factors = False
-    if type(scale) == list:
+    if isinstance(scale, list):
         if len(scale) == n_data_sets:
             has_scale_factors = True
         else:
@@ -605,7 +612,7 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
         if type(q_max) in [int, float]:
             q_max = [q_max]
 
-        if not type(q_min) == list or not type(q_max) == list:
+        if not isinstance(q_min, list) or not isinstance(q_max, list):
             error_msg = "The q_min and q_max parameters must be lists"
             Logger("data_stitching").error(error_msg)
             raise RuntimeError(error_msg)

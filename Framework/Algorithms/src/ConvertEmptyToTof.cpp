@@ -4,12 +4,14 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
@@ -93,7 +95,15 @@ void ConvertEmptyToTof::exec() {
   int eppSpectrum = getProperty("ElasticPeakPositionSpectrum");
 
   std::vector<double> tofAxis;
-  double channelWidth = getPropertyFromRun<double>(m_inputWS, "channel_width");
+  double channelWidth{0.0};
+  if (m_inputWS->run().hasProperty("channel_width")) {
+    channelWidth =
+        m_inputWS->run().getPropertyValueAsType<double>("channel_width");
+  } else {
+    std::string mesg =
+        "No property channel_width found in the input workspace....";
+    throw std::runtime_error(mesg);
+  }
 
   // If the ElasticPeakPosition and the ElasticPeakPositionSpectrum were
   // specified
@@ -101,7 +111,16 @@ void ConvertEmptyToTof::exec() {
     g_log.information("Using the specified ElasticPeakPosition and "
                       "ElasticPeakPositionSpectrum");
 
-    double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
+    double wavelength{0.0};
+    if (m_inputWS->run().hasProperty("wavelength")) {
+      wavelength =
+          m_inputWS->run().getPropertyValueAsType<double>("wavelength");
+    } else {
+      std::string mesg =
+          "No property wavelength found in the input workspace....";
+      throw std::runtime_error(mesg);
+    }
+
     double l1 = m_spectrumInfo->l1();
     double l2 = m_spectrumInfo->l2(eppSpectrum);
     double epTof =
@@ -331,9 +350,10 @@ bool ConvertEmptyToTof::doFitGaussianPeak(int workspaceindex, double &center,
   double centerrightend = center + sigma * 0.5;
   std::ostringstream os;
   os << centerleftend << " < PeakCentre < " << centerrightend;
-  auto *centerbound = API::ConstraintFactory::Instance().createInitialized(
-      gaussianpeak.get(), os.str(), false);
-  gaussianpeak->addConstraint(centerbound);
+  auto centerbound = std::unique_ptr<API::IConstraint>(
+      API::ConstraintFactory::Instance().createInitialized(gaussianpeak.get(),
+                                                           os.str(), false));
+  gaussianpeak->addConstraint(std::move(centerbound));
 
   g_log.debug("Calling createChildAlgorithm : Fit...");
   // 4. Fit
@@ -378,7 +398,14 @@ std::pair<int, double>
 ConvertEmptyToTof::findAverageEppAndEpTof(const std::map<int, int> &eppMap) {
 
   double l1 = m_spectrumInfo->l1();
-  double wavelength = getPropertyFromRun<double>(m_inputWS, "wavelength");
+  double wavelength{0.0};
+  if (m_inputWS->run().hasProperty("wavelength")) {
+    wavelength = m_inputWS->run().getPropertyValueAsType<double>("wavelength");
+  } else {
+    std::string mesg =
+        "No property wavelength found in the input workspace....";
+    throw std::runtime_error(mesg);
+  }
 
   std::vector<double> epTofList;
   std::vector<int> eppList;
@@ -434,19 +461,6 @@ double ConvertEmptyToTof::calculateTOF(double distance, double wavelength) {
  */
 bool ConvertEmptyToTof::areEqual(double a, double b, double epsilon) {
   return fabs(a - b) < epsilon;
-}
-
-template <typename T>
-T ConvertEmptyToTof::getPropertyFromRun(API::MatrixWorkspace_const_sptr inputWS,
-                                        const std::string &propertyName) {
-  if (inputWS->run().hasProperty(propertyName)) {
-    Kernel::Property *prop = inputWS->run().getProperty(propertyName);
-    return boost::lexical_cast<T>(prop->value());
-  } else {
-    std::string mesg =
-        "No '" + propertyName + "' property found in the input workspace....";
-    throw std::runtime_error(mesg);
-  }
 }
 
 int ConvertEmptyToTof::roundUp(double value) {

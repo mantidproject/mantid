@@ -93,6 +93,8 @@ public:
       return m_J.get(iY, j);
     return 0.0;
   }
+  /// overwrite base method
+  void zero() override { m_J.zero(); }
 };
 
 /// The implementation of Jacobian
@@ -136,6 +138,8 @@ public:
       return gsl_matrix_get(m_J, iY, j);
     return 0.0;
   }
+  /// overwrite base method
+  void zero() override { gsl_matrix_set_zero(m_J); }
 };
 
 } // namespace CurveFitting

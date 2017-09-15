@@ -21,6 +21,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
+CentroidPeaksMD::CentroidPeaksMD() { this->useAlgorithm("CentroidPeaksMD", 2); }
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */

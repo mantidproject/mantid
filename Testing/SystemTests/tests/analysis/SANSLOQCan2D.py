@@ -1,9 +1,12 @@
 #pylint: disable=no-init
+
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 # Test is giving odd results on Linux, but only this 2D one.
+
 
 class SANSLOQCan2D(stresstesting.MantidStressTest):
 
@@ -21,7 +24,6 @@ class SANSLOQCan2D(stresstesting.MantidStressTest):
         AssignCan('99631.RAW')
 
         WavRangeReduction(None, None, False)
-
 
     def validate(self):
     # Need to disable checking of the Spectra-Detector map because it isn't

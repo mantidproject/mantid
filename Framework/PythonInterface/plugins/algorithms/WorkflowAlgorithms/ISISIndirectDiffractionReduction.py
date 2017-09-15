@@ -1,4 +1,6 @@
-#pylint: disable=no-init,too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
+from __future__ import (absolute_import, division, print_function)
+
 import os
 
 from IndirectReductionCommon import load_files
@@ -10,7 +12,6 @@ from mantid import config
 
 
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
-
     _workspace_names = None
     _cal_file = None
     _chopped_data = None
@@ -27,31 +28,39 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _rebin_string = None
     _ipf_filename = None
     _sum_files = None
+    _vanadium_ws = None
 
-#------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def category(self):
         return 'Diffraction\\Reduction'
 
-
     def summary(self):
         return 'Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer'
 
-#------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files.')
 
         self.declareProperty(StringArrayProperty(name='ContainerFiles'),
-                             doc='Comma separated list of input files for the empty contianer runs.')
+                             doc='Comma separated list of input files for the empty container runs.')
 
         self.declareProperty('ContainerScaleFactor', 1.0,
                              doc='Factor by which to scale the container runs.')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
                                  '[[DiffractionFocussing]] child algorithms.')
+
+        self.declareProperty(FileProperty('InstrumentParFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['.dat', '.par']),
+                             doc='PAR file containing instrument definition. For VESUVIO only')
+
+        self.declareProperty(StringArrayProperty(name='VanadiumFiles'),
+                             doc='Comma separated array of vanadium runs')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
@@ -81,7 +90,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                     direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
-#------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def validateInputs(self):
         """
@@ -115,11 +124,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.warning('type = ' + str(type(mode)))
                 issues['CalFile'] = 'Cal Files are currently only available for use in OSIRIS diffspec mode'
 
+        num_samples = len(input_files)
+        num_vanadium = len(self.getProperty('VanadiumFiles').value)
+        if num_samples != num_vanadium and num_vanadium != 0:
+            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
+            issues['InputFiles'] = run_num_mismatch
+            issues['VanadiumFiles'] = run_num_mismatch
+
         return issues
 
-#------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def PyExec(self):
+
         from IndirectReductionCommon import (get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
@@ -135,7 +152,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         load_opts = dict()
         if self._instrument_name == 'VESUVIO':
+            load_opts['InstrumentParFile'] = self._par_filename
             load_opts['Mode'] = 'FoilOut'
+            load_opts['LoadMonitors'] = True
 
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                self._ipf_filename,
@@ -150,7 +169,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         # Load container if run is given
         self._load_and_scale_container(self._container_scale_factor, load_opts)
 
-        for c_ws_name in self._workspace_names:
+        # Load vanadium runs if given
+        if self._vanadium_runs:
+            self._vanadium_ws, _ = load_files(self._vanadium_runs,
+                                              self._ipf_filename,
+                                              self._spectra_range[0],
+                                              self._spectra_range[1],
+                                              sum_files=self._sum_files,
+                                              load_logs=self._load_logs,
+                                              load_opts=load_opts)
+
+        for index, c_ws_name in enumerate(self._workspace_names):
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
 
             # Get list of workspaces
@@ -167,13 +196,46 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             # Process workspaces
             for ws_name in workspaces:
+                monitor_ws_name = ws_name + '_mon'
+
                 # Subtract empty container if there is one
                 if self._container_workspace is not None:
                     Minus(LHSWorkspace=ws_name,
                           RHSWorkspace=self._container_workspace,
                           OutputWorkspace=ws_name)
 
-                monitor_ws_name = ws_name + '_mon'
+                if self._vanadium_ws:
+                    van_ws_name = self._vanadium_ws[index]
+                    van_ws = mtd[van_ws_name]
+                    if self._container_workspace is not None:
+                        cont_ws = mtd[self._container_workspace]
+
+                        if van_ws.blocksize() > cont_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=van_ws_name,
+                                             WorkspaceToMatch=self._container_workspace,
+                                             OutputWorkspace=van_ws_name)
+                        elif cont_ws.blocksize() > van_ws.blocksize():
+                            RebinToWorkspace(WorkspaceToRebin=self._container_workspace,
+                                             WorkspaceToMatch=van_ws_name,
+                                             OutputWorkspace=self._container_workspace)
+
+                        Minus(LHSWorkspace=van_ws_name,
+                              RHSWorkspace=self._container_workspace,
+                              OutputWorkspace=van_ws_name)
+
+                    if mtd[ws_name].blocksize() > van_ws.blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=ws_name,
+                                         WorkspaceToMatch=van_ws_name,
+                                         OutputWorkspace=ws_name)
+                    elif van_ws.blocksize() > mtd[ws_name].blocksize():
+                        RebinToWorkspace(WorkspaceToRebin=van_ws_name,
+                                         WorkspaceToMatch=ws_name,
+                                         OutputWorkspace=van_ws_name)
+
+                    Divide(LHSWorkspace=ws_name,
+                           RHSWorkspace=van_ws_name,
+                           OutputWorkspace=ws_name,
+                           AllowDifferentNumberSpectra=True)
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):
@@ -216,6 +278,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             DeleteWorkspace(self._container_workspace)
             DeleteWorkspace(self._container_workspace + '_mon')
 
+        if self._vanadium_ws:
+            for van_ws in self._vanadium_ws:
+                DeleteWorkspace(van_ws)
+                DeleteWorkspace(van_ws+'_mon')
+
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
@@ -225,7 +292,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
-#------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
     def _setup(self):
         """
@@ -236,6 +303,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
         self._cal_file = self.getProperty('CalFile').value
+        self._par_filename = self.getPropertyValue('InstrumentParFile')
+        self._vanadium_runs = self.getProperty('VanadiumFiles').value
         self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
@@ -251,11 +320,15 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         if len(self._container_data_files) == 0:
             self._container_data_files = None
 
+        self._vanadium_ws = None
+        if len(self._vanadium_runs) == 0:
+            self._vanadium_runs = None
+
         # Get the IPF filename
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
         if not os.path.exists(self._ipf_filename):
             self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
-        logger.information('IPF filename is: %s' % (self._ipf_filename))
+        logger.information('IPF filename is: %s' % self._ipf_filename)
 
         # Only enable sum files if we actually have more than one file
         sum_files = self.getProperty('SumFiles').value
@@ -268,7 +341,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.information('Summing files enabled (have %d files)' % num_raw_files)
             else:
                 logger.information('SumFiles options is ignored when only one file is provided')
-
 
     def _apply_calibration(self):
         """
@@ -283,7 +355,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 DiffractionFocussing(InputWorkspace=ws_name,
                                      OutputWorkspace=ws_name,
                                      GroupingFileName=self._cal_file)
-
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """
@@ -308,6 +379,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                       Operation='Multiply')
 
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

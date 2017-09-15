@@ -27,6 +27,7 @@ CASTEP_BOND_REGEX = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(
 
 ###===============================================###
 
+
 def _parse_block_header(header_match, block_count):
     """
     Parse the header of a block of frequencies and intensities
@@ -41,4 +42,3 @@ def _parse_block_header(header_match, block_count):
     if block_count > 1 and sum(q_vector) == 0:
         weight = 0.0
     return weight, q_vector
-

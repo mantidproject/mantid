@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
+
 class EnggCalibrate(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
@@ -17,7 +18,7 @@ class EnggCalibrate(PythonAlgorithm):
                 "fitting.")
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              doc="Workspace with the calibration run to use.")
 
         import EnggUtils
@@ -35,7 +36,6 @@ class EnggCalibrate(PythonAlgorithm):
         peaks_grp = 'Peaks to fit'
         self.setPropertyGroup('ExpectedPeaks', peaks_grp)
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
-
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),

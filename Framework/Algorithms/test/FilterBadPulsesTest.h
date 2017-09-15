@@ -5,6 +5,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/FilterBadPulses.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::API;

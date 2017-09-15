@@ -268,18 +268,6 @@ public:
     TS_ASSERT_EQUALS(icf.getParameter(3), 2.0);
   }
 
-  // BoundaryConstraint isn't defined (it's in CurveFitting) so this test
-  // doesn't work
-  void xtestConstraints() {
-    ImmutableCompositeFunctionTest_Function icf;
-
-    icf.addConstraints("0 < b1 < 5");
-    TS_ASSERT(!icf.getConstraint(0));
-    TS_ASSERT(!icf.getConstraint(1));
-    TS_ASSERT(icf.getConstraint(2));
-    TS_ASSERT(!icf.getConstraint(3));
-  }
-
   void testAsString() {
     ImmutableCompositeFunctionTest_Function icf;
 
@@ -291,9 +279,13 @@ public:
     icf.addTies("b2=b1,a2=a1/5");
     icf.applyTies();
 
-    TS_ASSERT_EQUALS(icf.asString(), "name=ImmutableCompositeFunctionTest_"
-                                     "Function,NumDeriv=false,a1=11,b1=12,a2=2."
-                                     "2,b2=12,ties=(a2=a1/5,b2=b1)");
+    auto icfString = icf.asString();
+    TS_ASSERT_EQUALS(icfString.substr(0, 91),
+                     "name=ImmutableCompositeFunctionTest_"
+                     "Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(");
+    auto icfTies = icfString.substr(91);
+    TS_ASSERT(icfTies.find("a2=a1/5") != std::string::npos)
+    TS_ASSERT(icfTies.find("b2=b1") != std::string::npos)
 
     auto fun = FunctionFactory::Instance().createInitialized(icf.asString());
     TS_ASSERT(fun);
@@ -320,7 +312,7 @@ public:
 
     TS_ASSERT_EQUALS(icf.asString(), "name=ImmutableCompositeFunctionTest_"
                                      "FunctionWithTies,NumDeriv=false,a1=1,b1="
-                                     "2");
+                                     "2,a2=0.25,b2=1");
 
     auto fun = FunctionFactory::Instance().createInitialized(icf.asString());
     TS_ASSERT(fun);

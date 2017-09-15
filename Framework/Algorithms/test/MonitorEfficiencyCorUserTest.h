@@ -155,7 +155,7 @@ public:
     API::AnalysisDataService::Instance().addOrReplace("input", input);
   }
 
-  void tearDown() {
+  void tearDown() override {
     API::AnalysisDataService::Instance().remove("input");
     API::AnalysisDataService::Instance().remove("ouput");
   }

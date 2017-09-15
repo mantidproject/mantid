@@ -1,10 +1,8 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -92,10 +90,8 @@ void ComptonProfile::setMatrixWorkspace(
 }
 
 void ComptonProfile::buildCaches() {
-  Geometry::IDetector_const_sptr det;
-  try {
-    det = m_workspace->getDetector(m_wsIndex);
-  } catch (Kernel::Exception::NotFoundError &) {
+  const auto &spectrumInfo = m_workspace->spectrumInfo();
+  if (!spectrumInfo.hasDetectors(m_wsIndex)) {
     throw std::invalid_argument("ComptonProfile - Workspace has no detector "
                                 "attached to histogram at index " +
                                 std::to_string(m_wsIndex));
@@ -107,27 +103,25 @@ void ComptonProfile::buildCaches() {
 
   Algorithms::DetectorParams detpar =
       ConvertToYSpace::getDetectorParameters(m_workspace, m_wsIndex);
-  this->cacheYSpaceValues(m_workspace->readX(m_wsIndex),
-                          m_workspace->isHistogramData(), detpar);
+  this->cacheYSpaceValues(m_workspace->points(m_wsIndex), detpar);
 }
 
-void ComptonProfile::cacheYSpaceValues(const std::vector<double> &tseconds,
-                                       const bool isHistogram,
+void ComptonProfile::cacheYSpaceValues(const HistogramData::Points &tseconds,
                                        const Algorithms::DetectorParams &detpar,
                                        const ResolutionParams &respar) {
   m_resolutionFunction->setAttributeValue("Mass", m_mass);
   m_resolutionFunction->cacheResolutionComponents(detpar, respar);
-  this->cacheYSpaceValues(tseconds, isHistogram, detpar);
+  this->cacheYSpaceValues(tseconds, detpar);
 }
 
 /**
  * @param tseconds A vector containing the time-of-flight values in seconds
- * @param isHistogram True if histogram tof values have been passed in
  * @param detpar Structure containing detector parameters
  */
 void ComptonProfile::cacheYSpaceValues(
-    const std::vector<double> &tseconds, const bool isHistogram,
+    const HistogramData::Points &tseconds,
     const Algorithms::DetectorParams &detpar) {
+
   // ------ Fixed coefficients related to resolution & Y-space transforms
   // ------------------
   const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
@@ -138,14 +132,13 @@ void ComptonProfile::cacheYSpaceValues(
   const double k1 = std::sqrt(detpar.efixed / mevToK);
 
   // Calculate energy dependent factors and transform q to Y-space
-  const size_t nData = (isHistogram) ? tseconds.size() - 1 : tseconds.size();
+  const size_t nData = tseconds.size();
 
   m_e0.resize(nData);
   m_modQ.resize(nData);
   m_yspace.resize(nData);
   for (size_t i = 0; i < nData; ++i) {
-    const double tsec =
-        (isHistogram) ? 0.5 * (tseconds[i] + tseconds[i + 1]) : tseconds[i];
+    const double tsec = tseconds[i];
     ConvertToYSpace::calculateY(m_yspace[i], m_modQ[i], m_e0[i], m_mass, tsec,
                                 k1, v1, detpar);
   }

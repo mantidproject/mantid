@@ -6,6 +6,8 @@
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -121,29 +123,29 @@ void PawleyParameterFunction::setParametersFromUnitCell(const UnitCell &cell) {
 
   try {
     setParameter("b", cell.b());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 
   try {
     setParameter("c", cell.c());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing
   }
 
   try {
     setParameter("Alpha", cell.alpha());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Beta", cell.beta());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
   try {
     setParameter("Gamma", cell.gamma());
-  } catch (std::invalid_argument) {
+  } catch (const std::invalid_argument &) {
     // do nothing.
   }
 }
@@ -283,19 +285,19 @@ void PawleyParameterFunction::createLatticeSystemParameters(
 /// Adds a default constraint so that cell edge lengths can not be less than 0.
 void PawleyParameterFunction::addLengthConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellEdgeConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, true);
+  auto cellEdgeConstraint =
+      Kernel::make_unique<BoundaryConstraint>(this, parameterName, 0.0, true);
   cellEdgeConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellEdgeConstraint);
+  addConstraint(std::move(cellEdgeConstraint));
 }
 
 /// Adds a default constraint so cell angles are in the range 0 to 180.
 void PawleyParameterFunction::addAngleConstraint(
     const std::string &parameterName) {
-  BoundaryConstraint *cellAngleConstraint =
-      new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
+  auto cellAngleConstraint = Kernel::make_unique<BoundaryConstraint>(
+      this, parameterName, 0.0, 180.0, true);
   cellAngleConstraint->setPenaltyFactor(1e12);
-  addConstraint(cellAngleConstraint);
+  addConstraint(std::move(cellAngleConstraint));
 }
 
 /// Tries to extract and store the center parameter name from the function.
@@ -473,13 +475,13 @@ void PawleyFunction::function(const FunctionDomain &domain,
       try {
         size_t offset = calculateFunctionValues(peak, domain1D, localValues);
         values.addToCalculated(offset, localValues);
-      } catch (std::invalid_argument) {
+      } catch (const std::invalid_argument &) {
         // do nothing
       }
     }
 
     setPeakPositions(centreName, 0.0, cell);
-  } catch (std::bad_cast) {
+  } catch (const std::bad_cast &) {
     // do nothing
   }
 }

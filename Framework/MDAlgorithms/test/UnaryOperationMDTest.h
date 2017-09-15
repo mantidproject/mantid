@@ -48,7 +48,7 @@ public:
   void setUp() override {
     histo = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 2, 5, 10.0, 1.0);
     event = MDEventsTestHelper::makeMDEW<2>(3, 0.0, 10.0, 1);
-    scalar = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.5);
+    scalar = WorkspaceCreationHelper::createWorkspaceSingleValue(2.5);
     AnalysisDataService::Instance().addOrReplace("histo", histo);
     AnalysisDataService::Instance().addOrReplace("event", event);
     AnalysisDataService::Instance().addOrReplace("scalar", scalar);

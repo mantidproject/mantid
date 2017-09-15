@@ -3,8 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/LoadSPE.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
 
@@ -60,21 +62,21 @@ public:
     TS_ASSERT_EQUALS((*(ws->getAxis(1)))(12), 12.5);
     TS_ASSERT_EQUALS((*(ws->getAxis(1)))(32), 32.5);
 
-    TS_ASSERT_EQUALS(ws->readX(0)[0], -20.0);
-    TS_ASSERT_EQUALS(ws->readX(22)[86], -2.8);
-    TS_ASSERT_EQUALS(ws->readX(31)[195], 19.0);
+    TS_ASSERT_EQUALS(ws->x(0)[0], -20.0);
+    TS_ASSERT_EQUALS(ws->x(22)[86], -2.8);
+    TS_ASSERT_EQUALS(ws->x(31)[195], 19.0);
     // verify result is NaN
-    TS_ASSERT_DIFFERS(ws->readY(4)[99], ws->readY(4)[99]);
-    TS_ASSERT_EQUALS(ws->readY(5)[0], 0.0);
-    TS_ASSERT_EQUALS(ws->readY(9)[48], -3.911);
-    TS_ASSERT_EQUALS(ws->readY(13)[137], 4.313);
-    TS_ASSERT_EQUALS(ws->readY(31)[194], 158.9);
+    TS_ASSERT_DIFFERS(ws->y(4)[99], ws->y(4)[99]);
+    TS_ASSERT_EQUALS(ws->y(5)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->y(9)[48], -3.911);
+    TS_ASSERT_EQUALS(ws->y(13)[137], 4.313);
+    TS_ASSERT_EQUALS(ws->y(31)[194], 158.9);
 
-    TS_ASSERT_EQUALS(ws->readE(4)[173], 0.0);
-    TS_ASSERT_EQUALS(ws->readE(9)[111], 16.48);
-    TS_ASSERT_EQUALS(ws->readE(18)[0], 0.0);
-    TS_ASSERT_EQUALS(ws->readE(26)[35], 4.908);
-    TS_ASSERT_EQUALS(ws->readE(31)[194], 60.38);
+    TS_ASSERT_EQUALS(ws->e(4)[173], 0.0);
+    TS_ASSERT_EQUALS(ws->e(9)[111], 16.48);
+    TS_ASSERT_EQUALS(ws->e(18)[0], 0.0);
+    TS_ASSERT_EQUALS(ws->e(26)[35], 4.908);
+    TS_ASSERT_EQUALS(ws->e(31)[194], 60.38);
 
     AnalysisDataService::Instance().remove(outWS);
   }

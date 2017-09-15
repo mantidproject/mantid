@@ -3,19 +3,77 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
 
 using Mantid::MDAlgorithms::ConvertCWSDExpToMomentum;
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+
+namespace {
+API::ITableWorkspace_sptr m_dataTableWS;
+API::ITableWorkspace_sptr m_detectorTableWS;
+std::vector<double> m_sourcePos;
+std::vector<double> m_samplePos;
+std::vector<double> m_pixelDimension;
+
+void generateTestInputs() {
+  // Create data table
+  DataObjects::TableWorkspace_sptr datatable =
+      boost::make_shared<DataObjects::TableWorkspace>();
+  datatable->addColumn("int", "Scan No");
+  datatable->addColumn("int", "Pt. No");
+  datatable->addColumn("str", "File Name");
+  datatable->addColumn("int", "Starting DetID");
+  datatable->addColumn("int", "Monitor");
+  datatable->addColumn("double", "Time");
+  TableRow row0 = datatable->appendRow();
+  row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
+       << 1.1;
+  m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
+  TS_ASSERT(m_dataTableWS);
+
+  // Create detector table
+  DataObjects::TableWorkspace_sptr dettable =
+      boost::make_shared<DataObjects::TableWorkspace>();
+  dettable->addColumn("int", "DetID");
+  dettable->addColumn("double", "X");
+  dettable->addColumn("double", "Y");
+  dettable->addColumn("double", "Z");
+  dettable->addColumn("int", "OriginalDetID");
+  for (size_t i = 0; i < 256; ++i) {
+    TableRow detrow = dettable->appendRow();
+    double x = 0.38 + static_cast<double>(i - 128) * 0.001;
+    double y = 0;
+    double z = 0.38 + static_cast<double>(i - 128) * 0.001;
+    int detid = static_cast<int>(i) + 1;
+    detrow << detid << x << y << z << detid;
+  }
+
+  m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);
+  TS_ASSERT(m_detectorTableWS);
+
+  AnalysisDataService::Instance().addOrReplace("DataFileTable", m_dataTableWS);
+  AnalysisDataService::Instance().addOrReplace("DetectorTable",
+                                               m_detectorTableWS);
+
+  // Source and sample position
+  m_sourcePos.resize(3, 0.0);
+  m_sourcePos[2] = -2;
+
+  m_samplePos.resize(3, 0.0);
+
+  m_pixelDimension.resize(8, 0.0);
+}
+}
 
 class ConvertCWSDExpToMomentumTest : public CxxTest::TestSuite {
 public:
@@ -113,12 +171,6 @@ public:
   }
 
 private:
-  API::ITableWorkspace_sptr m_dataTableWS;
-  API::ITableWorkspace_sptr m_detectorTableWS;
-  std::vector<double> m_sourcePos;
-  std::vector<double> m_samplePos;
-  std::vector<double> m_pixelDimension;
-
   Geometry::Instrument_sptr createInstrument() {
     // Create a virtual instrument
     std::vector<Kernel::V3D> vec_detpos;
@@ -143,56 +195,39 @@ private:
 
     return virtualInstrument;
   }
+};
 
-  void generateTestInputs() {
-    // Create data table
-    DataObjects::TableWorkspace_sptr datatable =
-        boost::make_shared<DataObjects::TableWorkspace>();
-    datatable->addColumn("int", "Scan No");
-    datatable->addColumn("int", "Pt. No");
-    datatable->addColumn("str", "File Name");
-    datatable->addColumn("int", "Starting DetID");
-    datatable->addColumn("int", "Monitor");
-    datatable->addColumn("double", "Time");
-    TableRow row0 = datatable->appendRow();
-    row0 << 1 << 522 << "HB3A_exp355_scan0001_0522.xml" << 256 * 256 << 1000
-         << 1.1;
-    m_dataTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(datatable);
-    TS_ASSERT(m_dataTableWS);
-
-    // Create detector table
-    DataObjects::TableWorkspace_sptr dettable =
-        boost::make_shared<DataObjects::TableWorkspace>();
-    dettable->addColumn("int", "DetID");
-    dettable->addColumn("double", "X");
-    dettable->addColumn("double", "Y");
-    dettable->addColumn("double", "Z");
-    dettable->addColumn("int", "OriginalDetID");
-    for (size_t i = 0; i < 256; ++i) {
-      TableRow detrow = dettable->appendRow();
-      double x = 0.38 + static_cast<double>(i - 128) * 0.001;
-      double y = 0;
-      double z = 0.38 + static_cast<double>(i - 128) * 0.001;
-      int detid = static_cast<int>(i) + 1;
-      detrow << detid << x << y << z << detid;
-    }
-
-    m_detectorTableWS = boost::dynamic_pointer_cast<ITableWorkspace>(dettable);
-    TS_ASSERT(m_detectorTableWS);
-
-    AnalysisDataService::Instance().addOrReplace("DataFileTable",
-                                                 m_dataTableWS);
-    AnalysisDataService::Instance().addOrReplace("DetectorTable",
-                                                 m_detectorTableWS);
-
-    // Source and sample position
-    m_sourcePos.resize(3, 0.0);
-    m_sourcePos[2] = -2;
-
-    m_samplePos.resize(3, 0.0);
-
-    m_pixelDimension.resize(8, 0.0);
+class ConvertCWSDExpToMomentumTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertCWSDExpToMomentumTestPerformance *createSuite() {
+    return new ConvertCWSDExpToMomentumTestPerformance();
   }
+  static void destroySuite(ConvertCWSDExpToMomentumTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    generateTestInputs();
+    alg.initialize();
+    alg.setProperty("InputWorkspace", "DataFileTable");
+    alg.setProperty("CreateVirtualInstrument", true);
+    alg.setProperty("DetectorTableWorkspace", "DetectorTable");
+    alg.setProperty("SourcePosition", m_sourcePos);
+    alg.setProperty("SamplePosition", m_samplePos);
+    alg.setProperty("PixelDimension", m_pixelDimension);
+    alg.setProperty("OutputWorkspace", "QSampleMDEvents");
+    alg.setProperty("IsBaseName", false);
+    alg.setProperty("Directory", ".");
+  }
+
+  void tearDown() override { AnalysisDataService::Instance().clear(); }
+
+  void testConvertCWSDExpToMomentumPerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+private:
+  ConvertCWSDExpToMomentum alg;
 };
 
 #endif /* MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUMTEST_H_ */

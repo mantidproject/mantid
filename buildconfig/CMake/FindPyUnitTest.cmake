@@ -8,45 +8,44 @@
 #       ${ARGN} :: List of test files
 macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Property for the module directory
+  set ( _working_dir ${CMAKE_BINARY_DIR}/bin/Testing )
   if ( MSVC )
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
     set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
-    set ( _working_dir ${_module_dir} )
-    set ( _working_dir_debug ${_module_dir_debug} )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
-    set ( _working_dir ${_module_dir} )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
   foreach ( part ${ARGN} )
     get_filename_component( _filename ${part} NAME )
     get_filename_component( _suitename ${part} NAME_WE )
-    set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
+    # We duplicate the suitename so that it matches the junit output name
+    set ( _pyunit_separate_name "${_testname_prefix}.${_suitename}.${_suitename}" )
 
     if ( MSVC )
       # Debug
       add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND ${_module_dir_debug}/mantidpython.bat --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name}_Debug PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir_debug}"
-                             WORKING_DIRECTORY ${_working_dir_debug}
+                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
+                             WORKING_DIRECTORY ${_working_dir}
                              TIMEOUT ${TESTING_TIMEOUT} )
       # Release
       add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND ${_module_dir}/mantidpython.bat --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
+                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
                              WORKING_DIRECTORY ${_working_dir}
                              TIMEOUT ${TESTING_TIMEOUT} )
     else()
       add_test ( NAME ${_pyunit_separate_name}
-                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+                 COMMAND ${_module_dir}/mantidpython --classic -m testhelpers.testrunner ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_tests_properties ( ${_pyunit_separate_name} PROPERTIES
-                             ENVIRONMENT "PYTHONPATH=${_module_dir}"
+                             ENVIRONMENT PYTHONPATH=${PYTHON_XMLRUNNER_DIR}
                              WORKING_DIRECTORY ${_working_dir}
                              TIMEOUT ${TESTING_TIMEOUT} )
     endif()
@@ -62,11 +61,6 @@ find_program ( PYUNITTEST_GEN_EXEC pyunit_gen.py
                PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/pyunit_gen
                      ${PROJECT_SOURCE_DIR}/../Testing/Tools/pyunit_gen )
 
-# determine where the xmlrunner lives
-find_path ( PYUNITTEST_XMLRUNNER xmlrunner/__init__.py
-            PATHS ${PROJECT_SOURCE_DIR}/Testing/Tools/unittest-xml-reporting/src/
-                  ${PROJECT_SOURCE_DIR}/../Testing/Tools/unittest-xml-reporting/src/ )
-
 # let people know whether or not it was found
 if (PYUNITTEST_GEN_EXEC)
   set ( PYUNITTEST_FOUND TRUE )
@@ -74,4 +68,4 @@ else ()
   set ( PYUNITTEST_FOUND FALSE )
 endif ()
 
-mark_as_advanced ( PYUNITTEST_GEN_EXEC PYUNITTEST_XMLRUNNER )
+mark_as_advanced ( PYUNITTEST_GEN_EXEC )

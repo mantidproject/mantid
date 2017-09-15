@@ -1,10 +1,8 @@
 #ifndef EXTRACTMASKINGTEST_H_
 #define EXTRACTMASKINGTEST_H_
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -36,7 +34,7 @@ public:
     // Create a simple test workspace
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspace(nvectors, nbins);
+        WorkspaceCreationHelper::create2DWorkspace(nvectors, nbins);
     // Mask every 10th spectra
     std::set<int64_t> maskedIndices;
     for (int i = 0; i < 50; i += 10) {
@@ -89,6 +87,8 @@ private:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());
+    const auto &iSpecInfo = inputWS->spectrumInfo();
+    const auto &oSpecInfo = outputWS->spectrumInfo();
     for (size_t i = 0; i < nOutputHists; ++i) {
       // Sizes
       TS_ASSERT_EQUALS(outputWS->readX(i).size(), 1);
@@ -97,17 +97,11 @@ private:
       // Data
       double expectedValue(-1.0);
       bool outputMasked(false);
-      IDetector_const_sptr inputDet, outputDet;
-      try {
-        inputDet = inputWS->getDetector(i);
-        outputDet = outputWS->getDetector(i);
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      if (!iSpecInfo.hasDetectors(i) || !oSpecInfo.hasDetectors(i)) {
         expectedValue = 1.0;
-        inputDet = IDetector_sptr();
-        outputDet = IDetector_sptr();
       }
 
-      if (inputDet && inputDet->isMasked()) {
+      if (iSpecInfo.hasDetectors(i) && iSpecInfo.isMasked(i)) {
         expectedValue = 1.0;
         outputMasked = true;
       } else {
@@ -118,8 +112,8 @@ private:
       TS_ASSERT_EQUALS(outputWS->dataY(i)[0], expectedValue);
       TS_ASSERT_EQUALS(outputWS->dataE(i)[0], expectedValue);
       TS_ASSERT_EQUALS(outputWS->dataX(i)[0], 0.0);
-      if (inputDet) {
-        TS_ASSERT_EQUALS(outputDet->isMasked(), outputMasked);
+      if (iSpecInfo.hasDetectors(i)) {
+        TS_ASSERT_EQUALS(oSpecInfo.isMasked(i), outputMasked);
       }
     }
   }

@@ -1,10 +1,8 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include <MantidKernel/StringTokenizer.h>
 
 #include <Poco/ActiveMethod.h>
 #include <Poco/ActiveResult.h>
@@ -14,10 +12,6 @@ using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace API {
-
-//----------------------------------------------------------------------
-// Public methods
-//----------------------------------------------------------------------
 
 /// Constructor
 AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)

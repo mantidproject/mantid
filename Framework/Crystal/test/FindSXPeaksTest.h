@@ -2,9 +2,11 @@
 #define FIND_SX_PEAKSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
@@ -12,24 +14,22 @@ using namespace Mantid::DataObjects;
 
 // Helper method to overwrite spectra.
 void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
-                       const Mantid::MantidVec &Yvalues) {
-  Mantid::MantidVec &Y = workspace->dataY(histo);
-  for (size_t i = 0; i < Y.size(); i++) {
-    Y[i] = Yvalues[i];
-  }
+                       const std::vector<double> &Yvalues) {
+
+  workspace->dataY(histo) = Yvalues;
 }
 
 // Helper method to make what will be recognised as a single peak.
 void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
                  Workspace2D_sptr workspace) {
-  size_t nBins = workspace->readY(0).size();
-  Mantid::MantidVec peaksInY(nBins);
+  size_t nBins = workspace->y(0).size();
+  std::vector<double> peaksInY(nBins);
 
   for (size_t i = 0; i < nBins; i++) {
     if (i == at_bin) {
       peaksInY[i] = peak_intensity; // overwrite with special value
     } else {
-      peaksInY[i] = workspace->readY(histo)[i];
+      peaksInY[i] = workspace->y(histo)[i];
     }
   }
   overWriteSpectraY(histo, workspace, peaksInY);
@@ -41,67 +41,6 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
 class FindSXPeaksTest : public CxxTest::TestSuite {
 
 public:
-  // Test out of bounds constuction arguments
-  void testSXPeakConstructorThrowsIfNegativeIntensity() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
-    double intensity = -1; // Negative intensity.
-    std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
-    TSM_ASSERT_THROWS("SXPeak: Should not construct with a negative intensity",
-                      SXPeak(0.001, 0.02, 0.01, intensity, spectra,
-                             detectorDistance, 1, instrument),
-                      std::invalid_argument);
-  }
-
-  // Test out of bounds construction arguments.
-  void testSXPeakConstructorThrowsIfSpectraSizeZero() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
-    double intensity = 1;
-    std::vector<int> spectra; // Zero size spectra list
-    double detectorDistance = 3;
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
-        std::invalid_argument);
-  }
-
-  // Test out of bounds construction arguments.
-  void testSXPeakConstructorThrowsIfNegativeDetectorDistance() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
-    double intensity = 1;
-    std::vector<int> spectra(1, 1);
-    double detectorDistance = -1; // Negative detector distance
-    TSM_ASSERT_THROWS(
-        "SXPeak: Should not construct with a zero size specral list",
-        SXPeak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 1,
-               instrument),
-        std::invalid_argument);
-  }
-
-  void testSXPeakGetters() {
-    auto workspace =
-        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
-    auto instrument = workspace->getInstrument();
-    double intensity = 1;
-    std::vector<int> spectra(1, 1);
-    double detectorDistance = 3;
-    SXPeak peak(0.001, 0.02, 0.01, intensity, spectra, detectorDistance, 2,
-                instrument);
-
-    TSM_ASSERT_EQUALS("Intensity getter is not wired-up correctly", 1,
-                      peak.getIntensity());
-    TSM_ASSERT_EQUALS("Detector Id getter is not wired-up correctly", 2,
-                      peak.getDetectorId());
-    // QSpace is also a getter, but is tested more thouroughly below.
-  }
-
   void testInvalidIndexRanges() {
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
@@ -240,6 +179,29 @@ public:
                       results[2]);
   }
 
+  void testSpectrumWithoutUniqueDetectorsDoesNotThrow() {
+    const int nHist = 10;
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);
+    makeOnePeak(2, 400, 5, workspace);
+    Mantid::DataHandling::GroupDetectors2 grouping;
+    grouping.setChild(true);
+    grouping.initialize();
+    grouping.setProperty("InputWorkspace", workspace);
+    grouping.setProperty("OutputWorkspace", "unused_for_child");
+    grouping.setProperty("GroupingPattern", "0,1-3,4,5");
+    grouping.execute();
+    MatrixWorkspace_sptr grouped = grouping.getProperty("OutputWorkspace");
+    std::cout << grouped->getNumberHistograms() << '\n';
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", grouped);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.setRethrows(true);
+    TSM_ASSERT_THROWS_NOTHING("FindSXPeak should have thrown.", alg.execute());
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+  }
+
   void testUseWorkspaceRangeCropping() {
     // creates a workspace where all y-values are 2
     Workspace2D_sptr workspace =
@@ -293,6 +255,56 @@ public:
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
     TSM_ASSERT_EQUALS("Should have found zero peaks after cropping", 0,
                       result->rowCount());
+  }
+
+  void testSetGoniometer() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    // Stick a peak in histoIndex = 1.
+    makeOnePeak(1, 40, 5, workspace);
+
+    // Get baseline for Q of Peak
+    FindSXPeaks alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "found_peaks");
+    alg.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+
+    Mantid::Kernel::V3D qNoRot = result->getPeak(0).getQSampleFrame();
+
+    // Set Goniometer to 180 degrees
+    Mantid::Geometry::Goniometer gonio;
+    gonio.makeUniversalGoniometer();
+    gonio.setRotationAngle(1, 180);
+    workspace->mutableRun().setGoniometer(gonio, false);
+
+    // Find peaks again
+    FindSXPeaks alg2;
+    alg2.initialize();
+    alg2.setProperty("InputWorkspace", workspace);
+    alg2.setProperty("OutputWorkspace", "found_peaks");
+    alg2.execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg2.isExecuted());
+
+    result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+
+    Mantid::Kernel::V3D qRot = result->getPeak(0).getQSampleFrame();
+
+    // Peak should be rotated by 180 degrees around y in Q compared to baseline
+    // Use ASSERT_DELTA to account for minor error introduced by deg/rad
+    // conversion
+    TSM_ASSERT_DELTA("Q_x should be unchanged!", qNoRot.X(), qRot.X(), 10e-10);
+    TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
+                     10e-10);
+    TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
   }
 };
 

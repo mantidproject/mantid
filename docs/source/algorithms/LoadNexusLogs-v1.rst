@@ -60,6 +60,8 @@ Items missing from the Nexus file are simply not loaded.
 |                                  |                                                    | *Existing values are always           |
 |                                  |                                                    | overwritten.*                         |
 +----------------------------------+----------------------------------------------------+---------------------------------------+
+| Run title                        | Entry ``"title"``                                  | Title in run object if it exists      |
++----------------------------------+----------------------------------------------------+---------------------------------------+
 
 If the nexus file has a ``"proton_log"`` group, then this algorithm will do some event filtering to allow SANS2D files to load.
 

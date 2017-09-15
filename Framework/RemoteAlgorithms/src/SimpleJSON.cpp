@@ -662,11 +662,8 @@ string readUntilCloseChar(istream &istr) {
       throw JSONParseException(
           "Stream unexpectedly ended without a closing char.");
     }
-
-    if ((value.size() > 0) ||
-        (!isspace(
-             next))) // don't add white space to the start of the value string
-    {
+    if (!value.empty() || !isspace(next)) {
+      // don't add white space to the start of the value string
       value += next;
     }
     istr.get(); // consume the char from the stream

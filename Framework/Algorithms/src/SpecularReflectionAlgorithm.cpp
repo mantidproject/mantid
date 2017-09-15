@@ -1,13 +1,13 @@
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include <boost/make_shared.hpp>
 
@@ -101,9 +101,6 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
                   "checking protects against non-sequential integers in which "
                   "spectrum numbers are not in {min, min+1, ..., max}");
 
-  setPropertySettings("SampleComponentName",
-                      make_unique<Kernel::EnabledWhenProperty>(
-                          "SpectrumNumbersOfGrouped", IS_NOT_DEFAULT));
   setPropertySettings("SpectrumNumbersOfDetectors",
                       make_unique<Kernel::EnabledWhenProperty>(
                           "SampleComponentName", IS_NOT_DEFAULT));
@@ -154,7 +151,7 @@ SpecularReflectionAlgorithm::getDetectorComponent(
     checkSpectrumNumbers(spectrumNumbers, strictSpectrumChecking, g_log);
     auto specToWorkspaceIndex = workspace->getSpectrumToWorkspaceIndexMap();
     DetectorGroup_sptr allDetectors = boost::make_shared<DetectorGroup>();
-    bool warnIfMasked = true;
+    const auto &spectrumInfo = workspace->spectrumInfo();
     for (auto index : spectrumNumbers) {
       const size_t spectrumNumber{static_cast<size_t>(index)};
       auto it = specToWorkspaceIndex.find(index);
@@ -166,7 +163,10 @@ SpecularReflectionAlgorithm::getDetectorComponent(
       }
       const size_t workspaceIndex = it->second;
       auto detector = workspace->getDetector(workspaceIndex);
-      allDetectors->addDetector(detector, warnIfMasked);
+      if (spectrumInfo.isMasked(workspaceIndex))
+        g_log.warning() << "Adding a detector (ID:" << detector->getID()
+                        << ") that is flagged as masked.\n";
+      allDetectors->addDetector(detector);
     }
     searchResult = allDetectors;
   } else {

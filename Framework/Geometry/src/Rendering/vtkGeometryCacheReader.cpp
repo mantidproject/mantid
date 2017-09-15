@@ -106,7 +106,7 @@ void vtkGeometryCacheReader::readCacheForObject(Object *obj) {
 Poco::XML::Element *
 vtkGeometryCacheReader::getElementByObjectName(std::string name) {
   Element *pRoot = mDoc->documentElement();
-  if (pRoot == nullptr || pRoot->nodeName().compare("VTKFile") != 0)
+  if (pRoot == nullptr || pRoot->nodeName() != "VTKFile")
     return nullptr;
   Element *pPolyData = pRoot->getChildElement("PolyData");
   if (pPolyData == nullptr)
@@ -130,7 +130,7 @@ void vtkGeometryCacheReader::readPoints(Poco::XML::Element *pEle,
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;
   }
-  if (pEle->getAttribute("format").compare("ascii") == 0) { // Read from Ascii
+  if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
     for (int i = 0; i < (*noOfPoints) * 3; i++) {
@@ -156,7 +156,7 @@ void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle,
     g_log.error("Cannot allocate memory for triangle cache of Object ");
     return;
   }
-  if (pEle->getAttribute("format").compare("ascii") == 0) { // Read from Ascii
+  if (pEle->getAttribute("format") == "ascii") { // Read from Ascii
     std::stringstream buf;
     buf << pEle->innerText();
     for (int i = 0; i < (*noOfTriangles) * 3; i++) {

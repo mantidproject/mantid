@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace Poldi {

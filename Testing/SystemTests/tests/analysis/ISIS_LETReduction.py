@@ -1,4 +1,4 @@
-﻿#pylint: disable=invalid-name
+#pylint: disable=invalid-name
 """ Sample LET reduction script """
 
 from Direct.ReductionWrapper import *
@@ -8,6 +8,8 @@ except ImportError:
     web_var = None
 
 #
+
+
 def find_binning_range(energy,ebin):
     """ function finds the binning range used in multirep mode
         for merlin ls=11.8,lm2=10. mult=2.8868 dt_DAE=1
@@ -18,7 +20,7 @@ def find_binning_range(energy,ebin):
     """
 
     InstrName =  config['default.instrument'][0:3]
-    if not InstrName in ['MER','LET']:
+    if InstrName not in ['MER','LET']:
         InstrName = 'LET'
     if InstrName.find('LET')>-1:
         ls  =25
@@ -47,11 +49,12 @@ def find_binning_range(energy,ebin):
 
     return (energybin,tbin,t_elastic)
 #--------------------------------------------------------------------------------------------------------
+
+
 class ReduceLET_OneRep(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
         """Define main properties used in reduction """
-
 
         prop = {}
         ei = 7.0
@@ -61,7 +64,6 @@ class ReduceLET_OneRep(ReductionWrapper):
         prop['wb_run'] = 'LET00005545.raw'
         prop['incident_energy'] = ei
         prop['energy_bins'] = ebin
-
 
         # Absolute units reduction properties.
         #prop['monovan_run'] = 17589
@@ -88,6 +90,7 @@ class ReduceLET_OneRep(ReductionWrapper):
         prop['load_monitors_with_workspace']=True
         return prop
         #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """run reduction, write auxiliary script to add something here."""
@@ -103,16 +106,16 @@ class ReduceLET_OneRep(ReductionWrapper):
         LoadEventNexus(Filename='LET00006278.nxs',OutputWorkspace=sample_ws,
                        SingleBankPixelsOnly='0',LoadMonitors='1',
                        MonitorsAsEvents='1')
-        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
         #prop.sample_run = sample_ws
-
 
         ebin = prop.energy_bins
         ei   = prop.incident_energy
 
         (energybin,tbin,t_elastic) = find_binning_range(ei,ebin)
         Rebin(InputWorkspace=sample_ws,OutputWorkspace=sample_ws, Params=tbin, PreserveEvents='1')
+        Rebin(InputWorkspace=monitors_ws,OutputWorkspace=monitors_ws, Params=tbin, PreserveEvents='1')
 
+        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
         prop.bkgd_range=[int(t_elastic),int(tbin[2])]
 
         ebinstring = str(energybin[0])+','+str(energybin[1])+','+str(energybin[2])
@@ -132,11 +135,11 @@ class ReduceLET_OneRep(ReductionWrapper):
         ReductionWrapper.__init__(self,'LET',web_var)
 #----------------------------------------------------------------------------------------------------------------------
 
+
 class ReduceLET_MultiRep2015(ReductionWrapper):
     @MainProperties
     def def_main_properties(self):
         """Define main properties used in reduction """
-
 
         prop = {}
         ei=[3.4,8.] # multiple energies provided in the data file
@@ -146,7 +149,6 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         prop['wb_run'] = 5545
         prop['incident_energy'] = ei
         prop['energy_bins'] = ebin
-
 
         # Absolute units reduction properties.
         # Vanadium labeled Dec 2011 - flat plate of dimensions: 40.5x41x2.0# volume = 3404.025 mm**3 mass= 20.79
@@ -194,6 +196,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         prop['multirep_tof_specta_list']="12416,21761"
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """Method executes reduction over single file
@@ -243,6 +246,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         return None
 
 #----------------------------------------------------------------------------------------------------------------------
+
 
 if __name__=="__main__":
     #maps_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\Data\SystemTest'

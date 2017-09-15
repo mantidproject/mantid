@@ -94,37 +94,6 @@
  *  For size_t and ptrdiff_t
  */
 #include <cstddef>
-
-/**
- * Information for holding onto stdint.h if it is
- * not available
- */
-#ifdef HAVE_STDINT_H
 #include <cstdint>
-#else
-#ifdef BOOST_CSTDINT_HPP
-#include <cstdint.hpp>
-#else
-#ifdef _WIN32
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned uint32_t;
-typedef long long int64_t;
-typedef unsigned long long uint64_t;
-#else
-typedef signed char int8_t;
-typedef unsigned char uint8_t;
-typedef short int16_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-typedef unsigned int uint32_t;
-typedef long int64_t;
-typedef unsigned long uint64_t;
-#endif
-#endif
-#endif
 
 #endif /*MANTID_KERNEL_SYSTEM_H_*/

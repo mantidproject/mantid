@@ -51,7 +51,7 @@ void XDataConverter::exec() {
   const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
   const size_t numYValues = inputWS->blocksize();
   const size_t numXValues = getNewXSize(inputWS);
-  m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);
+  m_sharedX = API::WorkspaceHelpers::sharedXData(*inputWS);
   // Create the new workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(
       inputWS, numSpectra, numXValues, numYValues);
@@ -61,7 +61,7 @@ void XDataConverter::exec() {
     outputWS->replaceAxis(1, inputWS->getAxis(1)->clone(outputWS.get()));
 
   Progress prog(this, 0.0, 1.0, numSpectra);
-  PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < int(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
 

@@ -7,6 +7,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -68,17 +69,17 @@ public:
   void testcheckSizeCompatibility1D1D() {
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -89,23 +90,24 @@ public:
 
   void testcheckSizeCompatibility2D1D() {
     // Register the workspace in the data service
+    const bool isHistogram(true);
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace123(10, 10, isHistogram);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+        WorkspaceCreationHelper::create1DWorkspaceFib(20, true);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+        WorkspaceCreationHelper::create1DWorkspaceFib(10, true);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(5);
+        WorkspaceCreationHelper::create1DWorkspaceFib(5, true);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(3);
+        WorkspaceCreationHelper::create1DWorkspaceFib(3, true);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+        WorkspaceCreationHelper::create1DWorkspaceFib(1, true);
     MatrixWorkspace_sptr work_inEvent1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 1);
+        WorkspaceCreationHelper::createEventWorkspace(10, 1);
     // will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(1, 10);
+        WorkspaceCreationHelper::createEventWorkspace(1, 10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -120,21 +122,21 @@ public:
 
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     Workspace2D_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 20);
+        WorkspaceCreationHelper::create2DWorkspace(10, 20);
     Workspace2D_sptr work_in3 =
-        WorkspaceCreationHelper::Create2DWorkspace(10, 10);
+        WorkspaceCreationHelper::create2DWorkspace(10, 10);
     Workspace2D_sptr work_in4 =
-        WorkspaceCreationHelper::Create2DWorkspace(5, 5);
+        WorkspaceCreationHelper::create2DWorkspace(5, 5);
     Workspace2D_sptr work_in5 =
-        WorkspaceCreationHelper::Create2DWorkspace(3, 3);
+        WorkspaceCreationHelper::create2DWorkspace(3, 3);
     Workspace2D_sptr work_in6 =
-        WorkspaceCreationHelper::Create2DWorkspace(100, 1);
+        WorkspaceCreationHelper::create2DWorkspace(100, 1);
     MatrixWorkspace_sptr work_inEvent1 =
-        WorkspaceCreationHelper::CreateEventWorkspace(5, 5);
+        WorkspaceCreationHelper::createEventWorkspace(5, 5);
     MatrixWorkspace_sptr work_inEvent2 =
-        WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1, work_in2).empty());
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_in3).empty());
@@ -153,9 +155,9 @@ public:
     masking.insert(4);
 
     MatrixWorkspace_sptr work_in1 =
-        WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins, 0, masking);
+        WorkspaceCreationHelper::create2DWorkspace123(nHist, nBins, 0, masking);
     MatrixWorkspace_sptr work_in2 =
-        WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+        WorkspaceCreationHelper::create2DWorkspace154(nHist, nBins);
 
     BinaryOpHelper helper;
     helper.initialize();
@@ -174,18 +176,14 @@ public:
     TS_ASSERT(output);
 
     for (int i = 0; i < nHist; ++i) {
-      IDetector_const_sptr det;
-      try {
-        det = output->getDetector(i);
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      }
+      auto &spectrumInfo = output->spectrumInfo();
 
-      TSM_ASSERT("Detector was found", det);
-      if (det) {
+      TSM_ASSERT("Detector was not found", spectrumInfo.hasDetectors(i));
+      if (spectrumInfo.hasDetectors(i)) {
         if (masking.count(i) == 0) {
-          TS_ASSERT_EQUALS(det->isMasked(), false);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), false);
         } else {
-          TS_ASSERT_EQUALS(det->isMasked(), true);
+          TS_ASSERT_EQUALS(spectrumInfo.isMasked(i), true);
         }
       }
     }
@@ -196,9 +194,9 @@ public:
                                     std::vector<std::vector<int>> rhs,
                                     bool expect_throw = false) {
     EventWorkspace_sptr lhsWS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(lhs, 50, 1.0);
     EventWorkspace_sptr rhsWS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 50, 1.0);
+        WorkspaceCreationHelper::createGroupedEventWorkspace(rhs, 50, 1.0);
     BinaryOperation::BinaryOperationTable_sptr table;
     Mantid::Kernel::Timer timer1;
     if (expect_throw) {

@@ -76,7 +76,7 @@ If you want to check if a variable points to something that is a Workspace Group
     wsGroup = GroupWorkspaces("ws1,ws2")
 
     if isinstance(wsGroup, WorkspaceGroup):
-        print wsGroup.getName() + " is an " + wsGroup.id()
+        print wsGroup.name() + " is an " + wsGroup.id()
 
 Output:
 

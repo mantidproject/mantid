@@ -6,7 +6,10 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -67,6 +70,10 @@ void ConvolutionFitSequential::init() {
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
+  declareProperty("PassWSIndexToFunction", false,
+                  "For each spectrum in Input pass its workspace index to all "
+                  "functions that have attribute WorkspaceIndex.");
+
   std::vector<std::string> backType{"Fixed Flat", "Fit Flat", "Fit Linear"};
 
   declareProperty("BackgroundType", "Fixed Flat",
@@ -95,9 +102,18 @@ void ConvolutionFitSequential::init() {
                                           "negative",
                   Direction::Input);
 
-  declareProperty("Convolve", true,
-                  "If true, the fit is treated as a convolution workspace.",
-                  Direction::Input);
+  declareProperty(
+      "Convolve", true,
+      "If true, output fitted model components will be convolved with "
+      "the resolution.",
+      Direction::Input);
+
+  declareProperty(
+      "ExtractMembers", false,
+      "If true, then each member of the convolution fit will be extracted"
+      ", into their own workspace. These workspaces will have a histogram"
+      " for each spectrum (Q-value) and will be grouped.",
+      Direction::Input);
 
   declareProperty("Minimizer", "Levenberg-Marquardt",
                   boost::make_shared<MandatoryValidator<std::string>>(),
@@ -109,6 +125,14 @@ void ConvolutionFitSequential::init() {
   declareProperty("MaxIterations", 500, boundedV,
                   "The maximum number of iterations permitted",
                   Direction::Input);
+  declareProperty("PeakRadius", 0,
+                  "A value of the peak radius the peak functions should use. A "
+                  "peak radius defines an interval on the x axis around the "
+                  "centre of the peak where its values are calculated. Values "
+                  "outside the interval are not calculated and assumed zeros."
+                  "Numerically the radius is a whole number of peak widths "
+                  "(FWHM) that fit into the interval on each side from the "
+                  "centre. The default value of 0 means the whole x axis.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
@@ -122,6 +146,7 @@ void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
+  const bool passIndex = getProperty("PassWSIndexToFunction");
   const std::string backType =
       convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("StartX");
@@ -129,8 +154,10 @@ void ConvolutionFitSequential::exec() {
   const int specMin = getProperty("SpecMin");
   const int specMax = getProperty("Specmax");
   const bool convolve = getProperty("Convolve");
+  const bool doExtractMembers = getProperty("ExtractMembers");
   const int maxIter = getProperty("MaxIterations");
   const std::string minimizer = getProperty("Minimizer");
+  const int peakRadius = getProperty("PeakRadius");
 
   // Inspect function to obtain fit Type and background
   const auto functionValues = findValuesFromFunction(function);
@@ -162,15 +189,18 @@ void ConvolutionFitSequential::exec() {
   if (delta) {
     outputWsName += "Delta";
   }
-  if (LorentzNum.compare("0") != 0) {
+  if (LorentzNum != "0") {
     outputWsName += LorentzNum + "L";
   } else {
     outputWsName += convertFuncToShort(funcName);
   }
   outputWsName += backType + "_s";
   outputWsName += std::to_string(specMin);
-  outputWsName += "_to_";
-  outputWsName += std::to_string(specMax);
+
+  if (specMin != specMax) {
+    outputWsName += "_to_";
+    outputWsName += std::to_string(specMax);
+  }
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
@@ -184,13 +214,6 @@ void ConvolutionFitSequential::exec() {
     nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
     plotPeakStringProg.report("Constructing PlotPeak name");
-  }
-
-  // passWSIndex
-  auto passIndex = false;
-  if (funcName.find("Diff") != std::string::npos ||
-      funcName.find("Stretched") != std::string::npos) {
-    passIndex = true;
   }
 
   // Run PlotPeaksByLogValue
@@ -207,6 +230,7 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
+  plotPeaks->setProperty("PeakRadius", peakRadius);
   plotPeaks->executeAsChildAlg();
   ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
 
@@ -230,7 +254,7 @@ void ConvolutionFitSequential::exec() {
 
   Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  if (funcName.compare("DeltaFunction") == 0) {
+  if (funcName == "DeltaFunction") {
     paramNames.emplace_back("Height");
   } else {
     auto func = FunctionFactory::Instance().createFunction(funcName);
@@ -241,7 +265,7 @@ void ConvolutionFitSequential::exec() {
       paramNames.push_back(func->parameterName(i));
       workflowProg.report("Finding parameters to process");
     }
-    if (funcName.compare("Lorentzian") == 0) {
+    if (funcName == "Lorentzian") {
       // remove peak centre
       size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
                    paramNames.begin();
@@ -336,12 +360,21 @@ void ConvolutionFitSequential::exec() {
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
-    auto outName = outputWsName + "_";
-    outName += std::to_string(i);
+    auto outName = outputWsName;
+
+    // Check if multiple spectrum were fit.
+    if (specMin != specMax) {
+      outName += "_" + std::to_string(i);
+    }
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
     renamerProg.report("Renaming group workspaces");
+  }
+
+  // Check whether to extract members into their own workspaces.
+  if (doExtractMembers) {
+    extractMembers(inputWs, groupWs, outputWsName + "_Members");
   }
 
   setProperty("OutputWorkspace", resultWs);
@@ -375,7 +408,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     auto nextPos = fitType.find_first_of(',');
     fitType = fitType.substr(5, nextPos - 5);
     functionName = fitType;
-    if (fitType.compare("Lorentzian") == 0) {
+    if (fitType == "Lorentzian") {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(newSub);
       if (isTwoL) {
@@ -557,7 +590,7 @@ void ConvolutionFitSequential::calculateEISF(
         ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
     columnName += "EISF";
     auto errorColumnName = ampErrorName.substr(
-        0, (ampName.size() - std::string("Amplitude_Err").size()));
+        0, (ampErrorName.size() - std::string("Amplitude_Err").size()));
     errorColumnName += "EISF_Err";
 
     tableWs->addColumn("double", columnName);
@@ -573,6 +606,150 @@ void ConvolutionFitSequential::calculateEISF(
       col->cell<double>(j) = eisfY.at(j);
       errCol->cell<double>(j) = eisfErr.at(j);
     }
+  }
+}
+
+/*
+ * Extracts the convolution fit members from the specified result group
+ *workspace,
+ * given the specified input workspace used for the fit, each into a workspace,
+ * stored inside a group workspace of the specified name.
+ *
+ * @param inputWs       The input workspace used in the convolution fit.
+ * @param resultGroupWs The result group workspace produced by the convolution
+ *                      fit; from which to extract the members.
+ * @param outputWsName  The name of the output group workspace to store the
+ *                      member workspaces.
+ */
+void ConvolutionFitSequential::extractMembers(
+    MatrixWorkspace_sptr inputWs, WorkspaceGroup_const_sptr resultGroupWs,
+    const std::string &outputWsName) {
+  // Get Q values from the input workspace.
+  auto getQs = createChildAlgorithm("GetQsInQENSData", -1.0, -1.0, false);
+  getQs->setProperty("InputWorkspace", inputWs);
+  getQs->executeAsChildAlg();
+  std::vector<double> qValues = getQs->getProperty("Qvalues");
+
+  // Get the delta function property and number of lorentzians from
+  // the first workspace in the result GroupWorkspace.
+  MatrixWorkspace_sptr firstSpectraWs =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(resultGroupWs->getItem(0));
+  Axis *axis = firstSpectraWs->getAxis(1);
+  const Run run = firstSpectraWs->run();
+  std::string delta = run.getProperty("delta_function")->value();
+  std::string lorentziansStr = run.getProperty("lorentzians")->value();
+  int lorentzians = boost::lexical_cast<int>(lorentziansStr);
+  m_log.information("Lorentzians = " + lorentziansStr + " ; Delta = " + delta);
+
+  // Retrieve all axis labels.
+  std::vector<std::string> params = {};
+  for (size_t i = 0; i < axis->length(); i++) {
+    params.push_back(axis->label(i));
+  }
+
+  // First four axis labels are always members.
+  std::vector<std::string> members =
+      std::vector<std::string>(params.begin(), params.begin() + 4);
+
+  // Check whether a delta function member was a member in
+  // the convolution fitting.
+  if (delta.compare("true") == 0) {
+    members.push_back("Delta");
+  }
+
+  // Add each lorentzian member.
+  for (int i = 1; i <= lorentzians; i++) {
+    members.push_back("Lorentzian" + std::to_string(i));
+  }
+
+  // Check whether the number of found members is equal to
+  // the number of parameters (valid input workspace).
+  if (members.size() != params.size()) {
+    throw std::runtime_error("Number of members is incorrect.");
+  }
+
+  // Extract the members from each workspace into their respective
+  // workspace - these are stored in the memberWorkspaces vector.
+  size_t resultSize = resultGroupWs->size();
+  if (qValues.size() < resultSize) {
+    throw std::runtime_error("Couldn't extract Q-Values from InputWorkspace.");
+  }
+
+  std::vector<std::string> memberWorkspaces = {};
+  for (size_t i = 0; i < resultSize; i++) {
+    extractMembersFrom(resultGroupWs->getItem(i), outputWsName, members, i == 0,
+                       memberWorkspaces);
+  }
+
+  // Update the y-axis of each created member workspace - set to
+  // the Q values from the QENS data.
+  auto qAxis = NumericAxis(resultSize);
+  for (size_t j = 0; j < resultSize; j++) {
+    qAxis.setValue(j, qValues[j]);
+  }
+
+  for (auto &memberWsName : memberWorkspaces) {
+    auto memberWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        memberWsName);
+    memberWs->replaceAxis(1, new NumericAxis(qAxis));
+    memberWs->setYUnitLabel("MomentumTransfer");
+  }
+
+  // Group member workspace
+  auto groupAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupAlg->setProperty("InputWorkspaces", memberWorkspaces);
+  groupAlg->setProperty("OutputWorkspace", outputWsName);
+  groupAlg->execute();
+}
+
+/*
+ * Extracts the specified members, from the specified fit result workspace, into
+ * output workspaces (one for each member), with the specified prefix. The names
+ * of the member workspaces are appended to the specified vector.
+ *
+ * @param resultWs          Workspace containing result of the fit, from which
+ *                          to extract members.
+ * @param outputWsName      The prefix of the output member workspaces.
+ *                          Format: outputWsName + NameOfMember
+ * @param members           The list (vector) of members to extract from the
+ *                          result workspace.
+ * @param createMemberWs    If True, create a new workspace for each member.
+ *                          Else, append to existing workspace.
+ * @param memberWorkspaces  The list (vector) of member workspaces to append
+ *                          output workspace names to.
+ */
+void ConvolutionFitSequential::extractMembersFrom(
+    Mantid::API::Workspace_sptr resultWs, const std::string &outputWsName,
+    const std::vector<std::string> &members, bool createMemberWs,
+    std::vector<std::string> &memberWorkspaces) {
+  // Iterate over all the members in the fit
+  for (size_t i = 0; i < members.size(); i++) {
+    std::string memberWsName = outputWsName + "_" + members[i];
+    std::string extractedWsName = "__temp";
+
+    // Extract spectra from the result workspace
+    auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
+    extractAlg->setProperty("InputWorkspace", resultWs);
+    extractAlg->setProperty("OutputWorkspace", extractedWsName);
+    extractAlg->setProperty("StartWorkspaceIndex", boost::numeric_cast<int>(i));
+    extractAlg->setProperty("EndWorkspaceIndex", boost::numeric_cast<int>(i));
+    extractAlg->executeAsChildAlg();
+
+    MatrixWorkspace_sptr memberWs = extractAlg->getProperty("OutputWorkspace");
+
+    // Check whether to append the spectra to an existing output workspace
+    if (createMemberWs) {
+      memberWorkspaces.push_back(memberWsName);
+    } else {
+      auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
+      appendAlg->setProperty("InputWorkspace1", memberWsName);
+      appendAlg->setProperty("InputWorkspace2", memberWs);
+      appendAlg->setProperty("OutputWorkspace", memberWsName);
+      appendAlg->executeAsChildAlg();
+      memberWs = appendAlg->getProperty("OutputWorkspace");
+    }
+
+    AnalysisDataService::Instance().addOrReplace(memberWsName, memberWs);
   }
 }
 
@@ -601,7 +778,7 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
   std::string result;
-  if (original.compare("DeltaFunction") != 0) {
+  if (original != "DeltaFunction") {
     if (original.at(0) == 'E') {
       result += "E";
     } else if (original.at(0) == 'I') {

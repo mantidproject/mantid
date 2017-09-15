@@ -610,6 +610,8 @@ void SetupHFIRReduction::init() {
   declareProperty("Do2DReduction", true);
   declareProperty("IQ2DNumberOfBins", 100, positiveInt,
                   "Number of I(qx,qy) bins.");
+  declareProperty("IQxQyLogBinning", false,
+                  "I(qx,qy) log binning when binning is not specified.");
 
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
   setPropertyGroup("IQBinning", iq1d_grp);
@@ -629,7 +631,7 @@ void SetupHFIRReduction::init() {
 void SetupHFIRReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  if (reductionManagerName.size() == 0) {
+  if (reductionManagerName.empty()) {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
@@ -691,7 +693,7 @@ void SetupHFIRReduction::exec() {
     if (!boost::iequals(centerMethod, "DirectBeam"))
       useDirectBeamMethod = false;
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    if (beamCenterFile.size() > 0) {
+    if (!beamCenterFile.empty()) {
       const double beamRadius = getProperty("BeamRadius");
 
       IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
@@ -713,7 +715,7 @@ void SetupHFIRReduction::exec() {
 
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-  if (darkCurrentFile.size() > 0) {
+  if (!darkCurrentFile.empty()) {
     IAlgorithm_sptr darkAlg =
         createChildAlgorithm("HFIRDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
@@ -870,8 +872,10 @@ void SetupHFIRReduction::exec() {
   const bool do2DReduction = getProperty("Do2DReduction");
   if (do2DReduction) {
     const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
+    const bool log_binning = getProperty("IQxQyLogBinning");
     IAlgorithm_sptr iqAlg = createChildAlgorithm("EQSANSQ2D");
     iqAlg->setPropertyValue("NumberOfBins", n_bins);
+    iqAlg->setProperty("IQxQyLogBinning", log_binning);
     auto xyAlgProp = make_unique<AlgorithmProperty>("IQXYAlgorithm");
     xyAlgProp->setValue(iqAlg->toString());
     reductionManager->declareProperty(std::move(xyAlgProp));
@@ -890,7 +894,7 @@ void SetupHFIRReduction::setupSensitivity(
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0) {
+  if (!sensitivityFile.empty()) {
     const bool useSampleDC = getProperty("UseDefaultDC");
     const std::string sensitivityDarkCurrentFile =
         getPropertyValue("SensitivityDarkCurrentFile");
@@ -945,7 +949,7 @@ void SetupHFIRReduction::setupSensitivity(
       const double sensitivityBeamRadius =
           getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
@@ -979,7 +983,7 @@ void SetupHFIRReduction::setupBackground(
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
-  if (backgroundFile.size() > 0)
+  if (!backgroundFile.empty())
     reductionManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
                                                             backgroundFile));
@@ -1037,7 +1041,7 @@ void SetupHFIRReduction::setupBackground(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("BckTransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
@@ -1150,7 +1154,7 @@ void SetupHFIRReduction::setupTransmission(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("TransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);

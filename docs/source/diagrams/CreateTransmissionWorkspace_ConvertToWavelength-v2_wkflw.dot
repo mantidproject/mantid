@@ -1,0 +1,77 @@
+digraph CreateTransmissionWorkspaceWavelength {
+label = ""
+rankdir = TB;
+
+$global_style
+
+subgraph params {
+ $param_style
+  inputWS             [label="TransmissionRun"]
+  procCommands        [label="ProcessingInstructions"]
+  wavMin              [label="WavelengthMin", group=gwav]
+  wavMax              [label="WavelengthMax", group=gwav]
+  monitorIndex        [label="I0MonitorIndex"]
+  monIntWavMax        [label="MonitorIntegration-\nWavelengthMax"]
+  monIntWavMin        [label="MonitorIntegration-\nWavelengthMin"]
+  monBackWavMin       [label="MonitorBackground-\nWavelengthMin"]
+  monBackWavMax       [label="MonitorBackground-\nWavelengthMax"]
+}
+
+subgraph decisions {
+ $decision_style
+}
+
+subgraph algorithms {
+ $algorithm_style
+  convertDet    [label="ConvertUnits\n(AlignBins = True)", group=g1]
+  convertMon    [label="ConvertUnits\n(AlignBins = True)", group=g11]
+  groupDet      [label="GroupDetectors", group=g1]
+  cropMonWS     [label="CropWorkspace", group=g11]
+  calcFlatBg    [label="CalculateFlatBackground", group=g11]
+  intMon        [label="Integration", group=g11]
+  divideDetMon  [label="Divide\n(Detectors / Monitors)", group=g1]
+  cropWav       [label="CropWorkspace", group=g1]
+}
+
+subgraph processes {
+ $process_style
+}
+
+subgraph values {
+ $value_style
+  valWavOut     [label="I(&lambda;)", group=g1]
+}
+
+inputWS             -> groupDet			[label="Detectors"]
+procCommands		-> groupDet
+
+inputWS				-> cropMonWS		[label="Montitors"]
+monitorIndex		-> cropMonWS
+
+groupDet			-> convertDet
+cropMonWS			-> convertMon
+
+convertMon          -> calcFlatBg
+monBackWavMin       -> calcFlatBg
+monBackWavMax       -> calcFlatBg
+calcFlatBg          -> intMon
+monIntWavMin        -> intMon
+monIntWavMax        -> intMon
+
+convertDet          -> divideDetMon
+intMon              -> divideDetMon
+wavMin              -> cropWav
+divideDetMon        -> cropWav
+wavMax              -> cropWav
+cropWav             -> valWavOut
+
+groupDet -> cropMonWS [style=invis]
+groupDet -> intMon [style=invis]
+monBackWavMin -> monIntWavMin [style=invis]
+monBackWavMax -> monIntWavMax [style=invis]
+
+{rank=same; monIntWavMin; monIntWavMax}
+{rank=same; monBackWavMin; monBackWavMax}
+{rank=same; groupDet; cropMonWS}
+{rank=same; convertDet; convertMon}
+}

@@ -1,14 +1,9 @@
-#pylint: disable=invalid-name
-import mantid
-from mantid.simpleapi import *
-from mantid import api
-import os
-import string
-
+from __future__ import (absolute_import, division, print_function)
 
 
 class switch(object):
     """ Helper class providing nice switch statement"""
+
     def __init__(self, value):
         self.value = value
         self.fall = False

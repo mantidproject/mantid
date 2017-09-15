@@ -38,7 +38,7 @@ public:
     const int nhist(18);
     Mantid::API::MatrixWorkspace_sptr workspace =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-            WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist, 1));
+            WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, 1));
     // Create a parameterised instrument
     Mantid::Geometry::Instrument_sptr instrument =
         boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(

@@ -3,6 +3,7 @@
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
 """
+from __future__ import (absolute_import, division, print_function)
 # Check whether Mantid is available
 # Disable unused import warning
 # pylint: disable=W0611
@@ -100,7 +101,7 @@ class BaseScriptElement(object):
                 r_max = int(toks[1])
                 if r_max > r_min:
                     return [str(i) for i in range(r_min, r_max + 1)]
-            except (StopIteration, StandardError, Warning):
+            except (StopIteration, AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 # Can't convert to run numbers, just skip
                 pass
         return [range_str]
@@ -205,6 +206,7 @@ class BaseScriptElement(object):
         from mantid.api import Algorithm
 
         dom = xml.dom.minidom.parseString(xml_str)
+
         def _process_setup_info(process_dom_):
             setup_alg_str = BaseScriptElement.getStringElement(process_dom_, 'SetupInfo', '')
             if len(setup_alg_str) == 0:
@@ -364,7 +366,7 @@ class BaseReductionScripter(object):
                 head, _tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):
                     self._output_directory = head
-            except (StopIteration, StandardError, Warning):
+            except (StopIteration, AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
                 Logger("scripter").debug("Could not get user filename")
 
     def clear(self):
@@ -430,7 +432,7 @@ class BaseReductionScripter(object):
         try:
             instr = self.verify_instrument(file_name, id_element=id_element)
             return instr == self.instrument_name
-        except (StandardError, Warning):
+        except (AttributeError, ImportError, NameError, TypeError, ValueError, Warning):
             # Could not load file or identify it's instrument
             pass
         return False
@@ -531,9 +533,9 @@ class BaseReductionScripter(object):
                         # Things might be broken, so update what we can
                         try:
                             item.state().update()
-                        except (StopIteration, StandardError, Warning):
+                        except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
                             pass
-                raise RuntimeError(str(sys.exc_value))
+                raise RuntimeError(str(sys.exc_info()[1]))
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 
@@ -612,7 +614,7 @@ class BaseReductionScripter(object):
         if HAS_MANTIDPLOT:
             mantidplot.runPythonScript(script, True)
         else:
-            exec script
+            exec(script)
 
     def reset(self):
         """

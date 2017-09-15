@@ -11,9 +11,87 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::MDAlgorithms::ConvertToMDMinMaxGlobal;
+
+namespace {
+Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
+                                                bool deltaEUnits, double Ei,
+                                                double Ef, int nHist = 1,
+                                                int nBins = 100) {
+
+  Mantid::API::MatrixWorkspace_sptr ws =
+      WorkspaceCreationHelper::create2DWorkspaceBinned(nHist, nBins, xmin, dx);
+
+  if ((Ei > 0 || Ef > 0) && deltaEUnits) {
+    ws->getAxis(0)->setUnit("DeltaE");
+  } else {
+    ws->getAxis(0)->setUnit("TOF");
+  }
+
+  Mantid::Geometry::Instrument_sptr testInst(new Mantid::Geometry::Instrument);
+  // Define a source and sample position
+  // Define a source component
+  Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
+      "moderator", Mantid::Geometry::Object_sptr(), testInst.get());
+  source->setPos(Mantid::Kernel::V3D(0, 0.0, -15.));
+  testInst->add(source);
+  testInst->markAsSource(source);
+  // Define a sample as a simple sphere
+  Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
+      "samplePos", Mantid::Geometry::Object_sptr(), testInst.get());
+  testInst->setPos(0.0, 0.0, 0.0);
+  testInst->add(sample);
+  testInst->markAsSamplePos(sample);
+
+  // Detectors
+  for (int i = 0; i < nHist; i++) {
+    Mantid::Geometry::Detector *physicalPixel =
+        new Mantid::Geometry::Detector("pixel", i + 1, testInst.get());
+    physicalPixel->setPos(0.5, 0, 5.0);
+    testInst->add(physicalPixel);
+    testInst->markAsDetector(physicalPixel);
+    ws->getSpectrum(i).addDetectorID(physicalPixel->getID());
+    // auto &pmap = ws->instrumentParameters();
+    // if (Ef > 0)
+    //  pmap.addDouble(physicalPixel, "Efixed", Ef);
+  }
+
+  ws->setInstrument(testInst);
+
+  auto &pmap = ws->instrumentParameters();
+  const auto &specInfo = ws->spectrumInfo();
+  if (Ef > 0) {
+    for (int i = 0; i < nHist; i++) {
+      const auto &det = specInfo.detector(i);
+      pmap.addDouble(&det, "Efixed", Ef);
+    }
+  }
+
+  if (Ei > 0) {
+    ws->mutableRun().addProperty(
+        new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
+  }
+
+  Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
+  ws->mutableSample().setOrientedLattice(&latt);
+
+  Mantid::Kernel::TimeSeriesProperty<double> *p =
+      new Mantid::Kernel::TimeSeriesProperty<double>("doubleProp");
+  TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 9.99));
+  TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 7.55));
+  TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 5.55));
+  TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 10.55));
+
+  ws->mutableRun().addLogData(p);
+
+  return ws;
+}
+}
+
 class ConvertToMDMinMaxGlobalTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -175,69 +253,41 @@ public:
 
 private:
   std::string WSName;
+};
 
-  Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin, double dx,
-                                                  bool deltaEUnits, double Ei,
-                                                  double Ef) {
-
-    Mantid::API::MatrixWorkspace_sptr ws =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 100, xmin, dx);
-
-    if ((Ei > 0 || Ef > 0) && deltaEUnits) {
-      ws->getAxis(0)->setUnit("DeltaE");
-    } else {
-      ws->getAxis(0)->setUnit("TOF");
-    }
-
-    Mantid::Geometry::Instrument_sptr testInst(
-        new Mantid::Geometry::Instrument);
-    ws->setInstrument(testInst);
-    // Define a source and sample position
-    // Define a source component
-    Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent(
-        "moderator", Mantid::Geometry::Object_sptr(), testInst.get());
-    source->setPos(Mantid::Kernel::V3D(0, 0.0, -15.));
-    testInst->add(source);
-    testInst->markAsSource(source);
-    // Define a sample as a simple sphere
-    Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
-        "samplePos", Mantid::Geometry::Object_sptr(), testInst.get());
-    testInst->setPos(0.0, 0.0, 0.0);
-    testInst->add(sample);
-    testInst->markAsSamplePos(sample);
-    // Detector
-    Mantid::Geometry::Detector *physicalPixel =
-        new Mantid::Geometry::Detector("pixel", 1, testInst.get());
-    physicalPixel->setPos(0.5, 0, 5.0);
-    testInst->add(physicalPixel);
-    testInst->markAsDetector(physicalPixel);
-
-    ws->getSpectrum(0).addDetectorID(physicalPixel->getID());
-
-    if (Ei > 0) {
-      ws->mutableRun().addProperty(
-          new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
-    }
-
-    if (Ef > 0) {
-      Mantid::Geometry::ParameterMap pmap(ws->instrumentParameters());
-      pmap.addDouble(physicalPixel, "Efixed", Ef);
-      ws->replaceInstrumentParameters(pmap);
-    }
-    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
-    ws->mutableSample().setOrientedLattice(&latt);
-
-    Mantid::Kernel::TimeSeriesProperty<double> *p =
-        new Mantid::Kernel::TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:00", 9.99));
-    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:10", 7.55));
-    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:20", 5.55));
-    TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 10.55));
-
-    ws->mutableRun().addLogData(p);
-
-    return ws;
+class ConvertToMDMinMaxGlobalTestPerformance : public CxxTest::TestSuite {
+public:
+  static ConvertToMDMinMaxGlobalTestPerformance *createSuite() {
+    return new ConvertToMDMinMaxGlobalTestPerformance();
   }
+  static void destroySuite(ConvertToMDMinMaxGlobalTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    Mantid::API::FrameworkManager::Instance();
+    Mantid::API::MatrixWorkspace_sptr ws =
+        MakeWorkspace(-2.5, 0.05, true, 0, 5, 10000, 100);
+    WorkspaceCreationHelper::storeWS(WSName, ws);
+
+    alg.initialize();
+    alg.isInitialized();
+    alg.setPropertyValue("InputWorkspace", WSName);
+    alg.setPropertyValue("QDimensions", "|Q|");
+    alg.setPropertyValue("dEAnalysisMode", "Indirect");
+  }
+
+  void tearDown() override {
+    Mantid::API::AnalysisDataService::Instance().remove(WSName);
+  }
+
+  void testNormaliseVanadiumPerformance() {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+  }
+
+private:
+  ConvertToMDMinMaxGlobal alg;
+  std::string WSName = "CMDHTestPerformance";
 };
 
 #endif /* MANTID_MDALGORITHMS_CONVERTTOMDHELPERTEST_H_ */

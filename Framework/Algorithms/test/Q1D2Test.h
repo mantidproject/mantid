@@ -10,7 +10,6 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/MaskDetectors.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -83,22 +82,22 @@ public:
     TS_ASSERT_EQUALS(result->getAxis(0)->unit()->unitID(), "MomentumTransfer")
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
-    TS_ASSERT_EQUALS(result->readX(0).size(), 26)
-    TS_ASSERT_DELTA(result->readX(0).front(), 0, 1e-5)
-    TS_ASSERT_DELTA(result->readX(0)[6], 0.12, 1e-5)
-    TS_ASSERT_DELTA(result->readX(0).back(), 0.5, 1e-5)
+    TS_ASSERT_EQUALS(result->x(0).size(), 26)
+    TS_ASSERT_DELTA(result->x(0).front(), 0, 1e-5)
+    TS_ASSERT_DELTA(result->x(0)[6], 0.12, 1e-5)
+    TS_ASSERT_DELTA(result->x(0).back(), 0.5, 1e-5)
 
     // values below taken from running the algorithm in the state it was
     // excepted by the ISIS SANS in
     // empty bins are 0/0
-    TS_ASSERT_DELTA(result->readY(0).front(), 2226533, 1)
-    TS_ASSERT_DELTA(result->readY(0)[4], 946570.8, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0)[18]))
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT_DELTA(result->y(0).front(), 2226533, 1)
+    TS_ASSERT_DELTA(result->y(0)[4], 946570.8, 0.1)
+    TS_ASSERT(std::isnan(result->y(0)[18]))
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
-    TS_ASSERT_DELTA(result->readE(0)[1], 57964.04, 0.01)
-    TS_ASSERT_DELTA(result->readE(0)[5], 166712.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readE(0).back()))
+    TS_ASSERT_DELTA(result->e(0)[1], 57964.04, 0.01)
+    TS_ASSERT_DELTA(result->e(0)[5], 166712.6, 0.1)
+    TS_ASSERT(std::isnan(result->e(0).back()))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -139,25 +138,24 @@ public:
                 Mantid::API::AnalysisDataService::Instance().retrieve(
                     outputWS + "_sumOfNormFactors")))
 
-    TS_ASSERT_DELTA(result->readX(0)[10], 0.1999, 0.0001)
-    TS_ASSERT_DELTA(sumOfCounts->readX(0)[10], 0.1999, 0.0001)
-    TS_ASSERT_DELTA(sumOfNormFactors->readX(0)[10], 0.1999, 0.0001)
+    TS_ASSERT_DELTA(result->x(0)[10], 0.1999, 0.0001)
+    TS_ASSERT_DELTA(sumOfCounts->x(0)[10], 0.1999, 0.0001)
+    TS_ASSERT_DELTA(sumOfNormFactors->x(0)[10], 0.1999, 0.0001)
 
-    TS_ASSERT_DELTA(result->readY(0)[1], 1131778.3299, 0.01)
-    TS_ASSERT_DELTA(sumOfCounts->readY(0)[1], 1016.8990, 0.01)
-    TS_ASSERT_DELTA(sumOfNormFactors->readY(0)[1], 0.00089849, 0.01)
+    TS_ASSERT_DELTA(result->y(0)[1], 1131778.3299, 0.01)
+    TS_ASSERT_DELTA(sumOfCounts->y(0)[1], 1016.8990, 0.01)
+    TS_ASSERT_DELTA(sumOfNormFactors->y(0)[1], 0.00089849, 0.01)
 
-    TS_ASSERT_DELTA(result->readE(0)[1], 57964.04, 0.01)
-    TS_ASSERT_DELTA(sumOfCounts->readE(0)[1], 31.888, 0.01)
-    TS_ASSERT_DELTA(sumOfNormFactors->readE(0)[1], 3.6381851288154988e-005,
-                    0.01)
+    TS_ASSERT_DELTA(result->e(0)[1], 57964.04, 0.01)
+    TS_ASSERT_DELTA(sumOfCounts->e(0)[1], 31.888, 0.01)
+    TS_ASSERT_DELTA(sumOfNormFactors->e(0)[1], 3.6381851288154988e-005, 0.01)
 
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(sumOfCounts->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(sumOfNormFactors->getNumberHistograms(), 1)
 
-    TS_ASSERT_EQUALS(result->dataY(0).size(), 25)
-    TS_ASSERT_EQUALS(sumOfCounts->dataY(0).size(), 25)
+    TS_ASSERT_EQUALS(result->y(0).size(), 25)
+    TS_ASSERT_EQUALS(sumOfCounts->y(0).size(), 25)
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS +
@@ -187,21 +185,21 @@ public:
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
-    TS_ASSERT_EQUALS(result->readX(0).size(), 83)
-    TS_ASSERT_EQUALS(result->readX(0).front(), 0.1)
-    TS_ASSERT_DELTA(result->readX(0)[3], 0.1061208, 1e-6)
-    TS_ASSERT_DELTA(result->readX(0)[56], 0.3031165, 1e-5)
-    TS_ASSERT_EQUALS(result->readX(0).back(), 0.5)
+    TS_ASSERT_EQUALS(result->x(0).size(), 83)
+    TS_ASSERT_EQUALS(result->x(0).front(), 0.1)
+    TS_ASSERT_DELTA(result->x(0)[3], 0.1061208, 1e-6)
+    TS_ASSERT_DELTA(result->x(0)[56], 0.3031165, 1e-5)
+    TS_ASSERT_EQUALS(result->x(0).back(), 0.5)
 
-    TS_ASSERT_DELTA(result->readY(0).front(), 944237.8, 0.1)
-    TS_ASSERT_DELTA(result->readY(0)[3], 1009296, 1)
-    TS_ASSERT_DELTA(result->readY(0)[12], 620952.6, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT_DELTA(result->y(0).front(), 944237.8, 0.1)
+    TS_ASSERT_DELTA(result->y(0)[3], 1009296, 1)
+    TS_ASSERT_DELTA(result->y(0)[12], 620952.6, 0.1)
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
     // empty bins are 0/0
-    TS_ASSERT_DELTA(result->readE(0)[2], 404981, 10)
-    TS_ASSERT_DELTA(result->readE(0)[10], 489710.39, 100)
-    TS_ASSERT(boost::math::isnan(result->readE(0)[7]))
+    TS_ASSERT_DELTA(result->e(0)[2], 404981, 10)
+    TS_ASSERT_DELTA(result->e(0)[10], 489710.39, 100)
+    TS_ASSERT(std::isnan(result->e(0)[7]))
 
     TSM_ASSERT("Should not have a DX value", !result->hasDx(0))
   }
@@ -271,16 +269,16 @@ public:
     // TS_ASSERT_EQUALS( (*(gravity->getAxis(1)))(0),
     // (*(refNoGrav->getAxis(1)))(0) )
 
-    TS_ASSERT_EQUALS(gravity->readX(0).size(), refNoGrav->readX(0).size())
-    TS_ASSERT_EQUALS(gravity->readX(0)[55], refNoGrav->readX(0)[55])
+    TS_ASSERT_EQUALS(gravity->x(0).size(), refNoGrav->x(0).size())
+    TS_ASSERT_EQUALS(gravity->x(0)[55], refNoGrav->x(0)[55])
 
-    TS_ASSERT_DELTA(gravity->readY(0)[3], 1009296.4, 0.8)
-    TS_ASSERT_DELTA(gravity->readY(0)[10], 891346.9, 0.1)
-    TS_ASSERT(boost::math::isnan(gravity->readY(0)[78]))
+    TS_ASSERT_DELTA(gravity->y(0)[3], 1009296.4, 0.8)
+    TS_ASSERT_DELTA(gravity->y(0)[10], 891346.9, 0.1)
+    TS_ASSERT(std::isnan(gravity->y(0)[78]))
 
-    TS_ASSERT_DELTA(gravity->readE(0).front(), 329383, 1)
-    TS_ASSERT_DELTA(gravity->readE(0)[10], 489708, 1) // 489710
-    TS_ASSERT(boost::math::isnan(gravity->readE(0)[77]))
+    TS_ASSERT_DELTA(gravity->e(0).front(), 329383, 1)
+    TS_ASSERT_DELTA(gravity->e(0)[10], 489708, 1) // 489710
+    TS_ASSERT(std::isnan(gravity->e(0)[77]))
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -308,20 +306,20 @@ public:
     TS_ASSERT(result)
     TS_ASSERT_EQUALS(result->getNumberHistograms(), 1)
 
-    TS_ASSERT_EQUALS(result->readX(0).size(), 83)
-    TS_ASSERT_EQUALS(result->readX(0).front(), 0.1)
-    TS_ASSERT_DELTA(result->readX(0)[3], 0.1061208, 1e-6)
-    TS_ASSERT_DELTA(result->readX(0)[56], 0.3031165, 1e-5)
-    TS_ASSERT_EQUALS(result->readX(0).back(), 0.5)
+    TS_ASSERT_EQUALS(result->x(0).size(), 83)
+    TS_ASSERT_EQUALS(result->x(0).front(), 0.1)
+    TS_ASSERT_DELTA(result->x(0)[3], 0.1061208, 1e-6)
+    TS_ASSERT_DELTA(result->x(0)[56], 0.3031165, 1e-5)
+    TS_ASSERT_EQUALS(result->x(0).back(), 0.5)
 
-    TS_ASSERT_DELTA(result->readY(0).front(), 1192471.95, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0)[3]))
-    TS_ASSERT_DELTA(result->readY(0)[12], 503242.79, 0.1)
-    TS_ASSERT(boost::math::isnan(result->readY(0).back()))
+    TS_ASSERT_DELTA(result->y(0).front(), 1192471.95, 0.1)
+    TS_ASSERT(std::isnan(result->y(0)[3]))
+    TS_ASSERT_DELTA(result->y(0)[12], 503242.79, 0.1)
+    TS_ASSERT(std::isnan(result->y(0).back()))
 
-    TS_ASSERT_DELTA(result->readE(0)[2], 404980, 1)
-    TS_ASSERT_DELTA(result->readE(0)[10], 489708, 100)
-    TS_ASSERT(boost::math::isnan(result->readE(0)[7]))
+    TS_ASSERT_DELTA(result->e(0)[2], 404980, 1)
+    TS_ASSERT_DELTA(result->e(0)[10], 489708, 100)
+    TS_ASSERT(std::isnan(result->e(0)[7]))
   }
 
   // here the cut parameters are set but should only affect detectors with lower
@@ -354,13 +352,12 @@ public:
     TS_ASSERT(nocuts)
     TS_ASSERT_EQUALS(nocuts->getNumberHistograms(), 1)
 
-    for (size_t i = 0; i < nocuts->readY(0).size(); ++i) {
-      TS_ASSERT_EQUALS(nocuts->readX(0)[i], noGrav->readX(0)[i])
-      if (!boost::math::isnan(nocuts->readY(0)[i]) &&
-          !boost::math::isnan(nocuts->readE(0)[i])) {
-        TS_ASSERT_EQUALS(nocuts->readY(0)[i], noGrav->readY(0)[i])
+    for (size_t i = 0; i < nocuts->y(0).size(); ++i) {
+      TS_ASSERT_EQUALS(nocuts->x(0)[i], noGrav->x(0)[i])
+      if (!std::isnan(nocuts->y(0)[i]) && !std::isnan(nocuts->e(0)[i])) {
+        TS_ASSERT_EQUALS(nocuts->y(0)[i], noGrav->y(0)[i])
 
-        TS_ASSERT_EQUALS(nocuts->readE(0)[i], noGrav->readE(0)[i])
+        TS_ASSERT_EQUALS(nocuts->e(0)[i], noGrav->e(0)[i])
       }
     }
 
@@ -373,7 +370,7 @@ public:
 
     // this is a small change to the normalization workspace that should be
     // enough to stop progress
-    Mantid::MantidVec &xData = m_wavNorm->dataX(0);
+    auto &xData = m_wavNorm->mutableX(0);
     xData[15] += 0.001;
 
     const std::string outputWS("Q1D2Test_invalid_result");
@@ -441,16 +438,14 @@ public:
     // into this
     // bin. We make sure that there is at least one bin with a count
     // of sqrt(1 + 0.5^2/12) ~ 1.01036297108
-    auto &dataDX = result->dx(0);
     unsigned int counter = 0;
-    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-
+    for (const auto &dx : result->dx(0)) {
       // Since we are dealing with a float it can be difficult to compare
       // our value with sqrt(1 + 0.5^2/12). Hence it is enough for us to confirm
       // that the values lie in an interval around this value
-      auto isZeroValue = *it == 0.0;
+      auto isZeroValue = dx == 0.0;
       auto isCloseToZeroPoint1DividedByRootTwelve =
-          (*it > 1.01035) && (*it < 1.01037);
+          (dx > 1.01035) && (dx < 1.01037);
       if (isCloseToZeroPoint1DividedByRootTwelve) {
         counter++;
       }
@@ -595,14 +590,14 @@ void createInputWorkspaces(int start, int end,
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   wave = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wavNorm));
-  pixels = WorkspaceCreationHelper::Create2DWorkspaceBinned(29, 1);
+  pixels = WorkspaceCreationHelper::create2DWorkspaceBinned(29, 1);
   for (int i = 0; i < 29; ++i) {
-    pixels->dataY(i)[0] = flat_cell061Ys[i];
-    pixels->dataE(i)[0] = flat_cell061Es[i];
+    pixels->mutableY(i)[0] = flat_cell061Ys[i];
+    pixels->mutableE(i)[0] = flat_cell061Es[i];
   }
   if (forMasking) {
-    pixels->dataY(5)[0] = 0.0;  // This pixels should be masked
-    pixels->dataY(6)[0] = -1.0; // This pixel should be masked
+    pixels->mutableY(5)[0] = 0.0;  // This pixels should be masked
+    pixels->mutableY(6)[0] = -1.0; // This pixel should be masked
     AnalysisDataService::Instance().add("Q1DTest_flat_file", pixels);
   } else
     AnalysisDataService::Instance().add("Q1DTest_flat_file_for_masking",
@@ -626,14 +621,12 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
 
   // Populate Y with Value1
   for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {
-    auto &data = qResolution->dataY(i);
-    std::fill(data.begin(), data.end(), value1);
+    qResolution->mutableY(i) = value1;
   }
 
   // Populate Y with Value2
   for (size_t i = 0; i < alteredInput->getNumberHistograms(); ++i) {
-    auto &data = alteredInput->dataY(i);
-    std::fill(data.begin(), data.end(), value2);
+    alteredInput->mutableY(i) = value2;
   }
 }
 

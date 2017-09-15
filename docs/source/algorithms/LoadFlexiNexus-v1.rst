@@ -73,7 +73,7 @@ Usage
     print "Name   Bins   Min     Max"
     for dim_index in range(num_dims):
         dim = wsOut.getDimension(dim_index)
-        print "%s      %i    %.2f  %.2f" % (dim.getName(),
+        print "%s      %i    %.2f  %.2f" % (dim.name,
              dim.getNBins(), dim.getMinimum(), dim.getMaximum())
 
 Output:

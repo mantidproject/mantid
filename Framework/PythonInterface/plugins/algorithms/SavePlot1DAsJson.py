@@ -9,6 +9,7 @@ from mantid.kernel import *
 class SavePlot1DAsJson(PythonAlgorithm):
     """ Save 1D plottable data in json format from workspace.
     """
+
     def category(self):
         """
         """
@@ -26,7 +27,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
 
     def require(self):
         try:
-            import json
+            import json # noqa
         except:
             raise ImportError("Missing json package")
 
@@ -38,7 +39,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         self.require()
 
         self.declareProperty(
-            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+            MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
             "Workspace that contains plottable data")
 
         self.declareProperty(
@@ -77,7 +78,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         return
 
     def _serialize(self, workspace, plotname):
-        pname = plotname or workspace.getName()
+        pname = plotname or workspace.name()
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
@@ -102,8 +103,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
             serialized['data'][spectrum_no] = arr
             continue
         # axes
-        # .. helper
-        label = lambda axis: axis.getUnit().caption()
+
         def unit(axis):
             s = axis.getUnit().symbol()
             try:
@@ -111,8 +111,8 @@ class SavePlot1DAsJson(PythonAlgorithm):
             except:
                 return '%s' % s
         axes = dict(
-            xlabel=label(workspace.getAxis(0)),
-            ylabel=label(workspace.getAxis(1)),
+            xlabel=workspace.getAxis(0).getUnit().caption(),
+            ylabel=workspace.getAxis(1).getUnit().caption(),
             xunit = unit(workspace.getAxis(0)),
             # yunit = unit(workspace.getAxis(1)),
             yunit = workspace.YUnitLabel(),
@@ -123,4 +123,3 @@ class SavePlot1DAsJson(PythonAlgorithm):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SavePlot1DAsJson)
-

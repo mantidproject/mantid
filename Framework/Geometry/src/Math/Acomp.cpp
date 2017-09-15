@@ -4,7 +4,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
+
 #include <algorithm>
+#include <iterator>
 #include <iostream>
 #include <functional>
 
@@ -459,7 +461,7 @@ Units are sorted after this function is returned.
         Express += iu;
     }
   }
-  if (Express.size() > 0) {
+  if (!Express.empty()) {
     Acomp AX;
     try {
       AX.setString(Express);

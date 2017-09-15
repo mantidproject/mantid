@@ -66,7 +66,7 @@ void ComputeSensitivity::exec() {
   // Set patch information so that the SANS sensitivity algorithm can
   // patch the sensitivity workspace
   const std::string patchWSName = getPropertyValue("PatchWorkspace");
-  if (patchWSName.size() > 0) {
+  if (!patchWSName.empty()) {
     IAlgorithm_sptr patchAlg = createChildAlgorithm("EQSANSPatchSensitivity");
     patchAlg->setPropertyValue("PatchWorkspace", patchWSName);
     if (!reductionManager->existsProperty("SensitivityPatchAlgorithm")) {

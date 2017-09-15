@@ -1,6 +1,7 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
@@ -25,7 +26,7 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
     Mantid::Geometry::MDImplicitFunction *function, size_t beginWI,
     size_t endWI)
     : m_ws(workspace), m_pos(0), m_max(0), m_function(function),
-      m_errorIsCached(false) {
+      m_errorIsCached(false), m_spectrumInfo(m_ws->spectrumInfo()) {
   if (!m_ws)
     throw std::runtime_error(
         "MatrixWorkspaceMDIterator::ctor() NULL MatrixWorkspace");
@@ -258,14 +259,10 @@ signal_t MatrixWorkspaceMDIterator::getInnerError(size_t /*index*/) const {
  * masked, or if there is no detector at that index.
 */
 bool MatrixWorkspaceMDIterator::getIsMasked() const {
-  Mantid::Geometry::IDetector_const_sptr det =
-      m_ws->getDetector(m_workspaceIndex);
-  if (det != nullptr) {
-    return det->isMasked();
-  } else {
-    return true; // TODO. Check whether it's better to return true or false
-                 // under these circumstances.
+  if (!m_spectrumInfo.hasDetectors(m_workspaceIndex)) {
+    return true;
   }
+  return m_spectrumInfo.isMasked(m_workspaceIndex);
 }
 
 /**

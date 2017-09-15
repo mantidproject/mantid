@@ -16,11 +16,13 @@ _LOGGING_ = False
 
 #----------------------------------------------------------------------------------------
 
+
 class LoadEmptyVesuvio(PythonAlgorithm):
 
     def summary(self):
         return "Loads an empty workspace containing the Vesuvio instrument at ISIS."
 #----------------------------------------------------------------------------------------
+
     def category(self):
         """ Defines the category the algorithm will be put in the algorithm browser
         """
@@ -111,5 +113,6 @@ class LoadEmptyVesuvio(PythonAlgorithm):
                              "variants. ncols=%d" % (len(columns)))
 
 #----------------------------------------------------------------------------------------
+
 
 AlgorithmFactory.subscribe(LoadEmptyVesuvio)

@@ -1,6 +1,8 @@
+from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import os
 import re
+from six import iteritems
 
 REDIRECT_TEMPLATE = "redirect.html"
 
@@ -102,7 +104,7 @@ class AlgorithmDirective(AlgorithmBaseDirective):
 
         try:
             picture = algorithm_screenshot(self.algorithm_name(), screenshots_dir, version=self.algorithm_version())
-        except RuntimeError, exc:
+        except RuntimeError as exc:
             env = self.state.document.settings.env
             env.warn(env.docname, "Unable to generate screenshot for '%s' - %s" % (self.algorithm_name(), str(exc)))
             picture = None
@@ -211,7 +213,7 @@ def html_collect_pages(dummy_app):
     template = REDIRECT_TEMPLATE
     all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-    for name, versions in all_algs.iteritems():
+    for name, versions in iteritems(all_algs):
         redirect_pagename = "algorithms/%s" % name
         versions.sort()
         highest_version = versions[-1]

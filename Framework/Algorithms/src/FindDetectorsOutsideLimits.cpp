@@ -5,8 +5,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include <fstream>
 #include <cmath>
 
@@ -145,7 +143,7 @@ void FindDetectorsOutsideLimits::exec() {
 
     const double &yValue = countsWS->y(countsInd)[0];
     // Mask out NaN and infinite
-    if (boost::math::isinf(yValue) || boost::math::isnan(yValue)) {
+    if (!std::isfinite(yValue)) {
       keepData = false;
     } else {
       if (yValue <= lowThreshold) {

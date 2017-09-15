@@ -80,9 +80,9 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
     size_t iSpctr = m_detIDMap[i];
     int32_t det_id = m_detID[i];
 
-    const MantidVec &X = m_InWS2D->readX(iSpctr);
-    const MantidVec &Signal = m_InWS2D->readY(iSpctr);
-    const MantidVec &Error = m_InWS2D->readE(iSpctr);
+    const auto &X = m_InWS2D->x(iSpctr);
+    const auto &Signal = m_InWS2D->y(iSpctr);
+    const auto &Error = m_InWS2D->e(iSpctr);
 
     // calculate the coordinates which depend on detector posision
     if (!m_QConverter->calcYDepCoordinates(locCoord, i))

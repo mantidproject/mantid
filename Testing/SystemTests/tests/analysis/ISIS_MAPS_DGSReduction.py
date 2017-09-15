@@ -54,6 +54,7 @@ class ReduceMAPS(ReductionWrapper):
 
         return prop
       #
+
     @iliad
     def reduce(self,input_file=None,output_directory=None):
         """ Method executes reduction over single file
@@ -67,6 +68,7 @@ class ReduceMAPS(ReductionWrapper):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MAP',web_var)
     #
+
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
           In addition to that, example of accessing reduction properties
@@ -92,6 +94,7 @@ class ReduceMAPS(ReductionWrapper):
         #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
+
 
 #----------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":

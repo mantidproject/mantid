@@ -1,14 +1,11 @@
 #ifndef MANTID_DATAHANDLING_LoadCanSAS1D_H
 #define MANTID_DATAHANDLING_LoadCanSAS1D_H
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
-//----------------------------------------------------------------------
 
 namespace Poco {
 namespace XML {

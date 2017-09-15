@@ -1,12 +1,12 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <algorithm>
 #include <vector>
@@ -28,23 +28,29 @@ const std::string ZERO("zero");
 const std::string SQRT("sqrt");
 const std::string ONE_IF_ZERO("oneIfZero");
 const std::string SQRT_OR_ONE("sqrtOrOne");
+const std::string CUSTOM("custom");
 
-struct resetzeroerror {
-  explicit resetzeroerror(const double constant) : zeroErrorValue(constant) {}
+struct SetError {
+  explicit SetError(const double setTo, const double ifEqualTo,
+                    const double tolerance)
+      : valueToSet(setTo), valueToCompare(ifEqualTo), tolerance(tolerance) {}
 
   double operator()(const double error) {
-    if (error < TOLERANCE) {
-      return zeroErrorValue;
+    double deviation = error - valueToCompare;
+    if (deviation < tolerance && deviation >= 0) {
+      return valueToSet;
     } else {
       return error;
     }
   }
 
-  double zeroErrorValue;
+  double valueToSet;
+  double valueToCompare;
+  double tolerance;
 };
 
-struct sqrterror {
-  explicit sqrterror(const double constant) : zeroSqrtValue(constant) {}
+struct SqrtError {
+  explicit SqrtError(const double constant) : zeroSqrtValue(constant) {}
 
   double operator()(const double intensity) {
     const double localIntensity = fabs(intensity);
@@ -66,41 +72,49 @@ const std::string SetUncertainties::name() const { return "SetUncertainties"; }
 int SetUncertainties::version() const { return (1); }
 
 void SetUncertainties::init() {
+  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveInt = boost::make_shared<BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  mustBePositiveInt->setLower(0);
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "InputWorkspace", "", Direction::Input));
   declareProperty(make_unique<WorkspaceProperty<API::MatrixWorkspace>>(
       "OutputWorkspace", "", Direction::Output));
-  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO};
+  std::vector<std::string> errorTypes = {ZERO, SQRT, SQRT_OR_ONE, ONE_IF_ZERO,
+                                         CUSTOM};
   declareProperty("SetError", ZERO,
                   boost::make_shared<StringListValidator>(errorTypes),
                   "How to reset the uncertainties");
+  declareProperty("SetErrorTo", 1.000, mustBePositive,
+                  "The error value to set when using custom mode");
+  setPropertySettings("SetErrorTo", Kernel::make_unique<VisibleWhenProperty>(
+                                        "SetError", IS_EQUAL_TO, "custom"));
+
+  declareProperty("IfEqualTo", 0.000, mustBePositive,
+                  "Which error values in the input workspace should be "
+                  "replaced when using custom mode");
+  setPropertySettings("IfEqualTo", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
+
+  declareProperty("Precision", 3, mustBePositiveInt,
+                  "How many decimal places of ``IfEqualTo`` are taken into "
+                  "account for matching when using custom mode");
+  setPropertySettings("Precision", Kernel::make_unique<VisibleWhenProperty>(
+                                       "SetError", IS_EQUAL_TO, "custom"));
 }
-
-namespace {
-inline bool isMasked(MatrixWorkspace_const_sptr wksp, const size_t index) {
-  if (!bool(wksp->getInstrument()))
-    return false;
-
-  try {
-    const auto det = wksp->getDetector(index);
-    if (bool(det))
-      return det->isMasked();
-  } catch (Kernel::Exception::NotFoundError &e) {
-    UNUSED_ARG(e);
-  }
-
-  return false;
-}
-} // anonymous namespace
 
 void SetUncertainties::exec() {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   std::string errorType = getProperty("SetError");
-  bool zeroError = (errorType.compare(ZERO) == 0);
-  bool takeSqrt =
-      ((errorType.compare(SQRT) == 0) || (errorType.compare(SQRT_OR_ONE) == 0));
-  bool resetOne = ((errorType.compare(ONE_IF_ZERO) == 0) ||
-                   (errorType.compare(SQRT_OR_ONE) == 0));
+  bool zeroError = (errorType == ZERO);
+  bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
+  bool resetOne = ((errorType == ONE_IF_ZERO) || (errorType == SQRT_OR_ONE));
+  bool customError = (errorType == CUSTOM);
+
+  double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
+  double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
+  int precision = getProperty("Precision");
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision * (-1));
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
@@ -108,33 +122,35 @@ void SetUncertainties::exec() {
       WorkspaceFactory::Instance().create(inputWorkspace);
 
   // ...but not the data, so do that here.
+  const auto &spectrumInfo = inputWorkspace->spectrumInfo();
   const size_t numHists = inputWorkspace->getNumberHistograms();
   Progress prog(this, 0.0, 1.0, numHists);
 
-  PARALLEL_FOR2(inputWorkspace, outputWorkspace)
+  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < int64_t(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
 
     // copy the X/Y
-    outputWorkspace->setX(i, inputWorkspace->refX(i));
-    outputWorkspace->dataY(i) = inputWorkspace->readY(i);
+    outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
+    outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
     // copy the E or set to zero depending on the mode
-    if (errorType.compare(ONE_IF_ZERO) == 0) {
-      outputWorkspace->dataE(i) = inputWorkspace->readE(i);
+    if (errorType == ONE_IF_ZERO || customError) {
+      outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
     } else {
-      outputWorkspace->dataE(i) =
-          std::vector<double>(inputWorkspace->readE(i).size(), 0.);
+      outputWorkspace->mutableE(i) = 0.0;
     }
 
     // ZERO mode doesn't calculate anything further
-    if ((!zeroError) && (!isMasked(inputWorkspace, i))) {
-      MantidVec &E = outputWorkspace->dataE(i);
+    if ((!zeroError) &&
+        (!(spectrumInfo.hasDetectors(i) && spectrumInfo.isMasked(i)))) {
+      auto &E = outputWorkspace->mutableE(i);
       if (takeSqrt) {
-        const MantidVec &Y = outputWorkspace->readY(i);
+        const auto &Y = outputWorkspace->y(i);
         std::transform(Y.begin(), Y.end(), E.begin(),
-                       sqrterror(resetOne ? 1. : 0.));
+                       SqrtError(resetOne ? 1. : 0.));
       } else {
-        std::for_each(E.begin(), E.end(), resetzeroerror(1.));
+        std::transform(E.begin(), E.end(), E.begin(),
+                       SetError(valueToSet, valueToCompare, tolerance));
       }
     }
 

@@ -40,13 +40,13 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex )
+find_package ( Boost 1.53.0 REQUIRED date_time regex serialization filesystem system)
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
 add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 
-find_package ( Poco 1.4.2 REQUIRED )
+find_package ( Poco 1.4.6 REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
 find_package ( Nexus 4.3.1 REQUIRED )
@@ -95,22 +95,21 @@ find_package ( OpenSSL REQUIRED )
 
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
+set ( MtdVersion_WC_LAST_CHANGED_SHA Unknown )
 set ( NOT_GIT_REPO "Not" )
 
 if ( GIT_FOUND )
   # Get the last revision
-  execute_process ( COMMAND ${GIT_EXECUTABLE} describe --long
-                    OUTPUT_VARIABLE GIT_DESCRIBE
+  execute_process ( COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+                    OUTPUT_VARIABLE GIT_SHA_HEAD
                     ERROR_VARIABLE NOT_GIT_REPO
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
-    # Remove the tag name part
-    string ( REGEX MATCH "[-](.*)" MtdVersion_WC_LAST_CHANGED_REV ${GIT_DESCRIBE} )
-    # Extract the SHA1 part (with a 'g' prefix which stands for 'git')
-    # N.B. The variable comes back from 'git describe' with a line feed on the end, so we need to lose that
-    string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
-
+    # "git describe" was originally used to produce this variable and this prefixes the short
+    # SHA1 with a 'g'. We keep the same format here now that we use rev-parse
+    set ( MtdVersion_WC_LAST_CHANGED_SHA "g${GIT_SHA_HEAD}" )
     # Get the date of the last commit
     execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -215,8 +214,8 @@ endif()
 
 ###########################################################################
 # Include the file that contains the version number
-# This must come after the git describe business above because it can be
-# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+# This must come after the git business above because it can be
+# used to override the patch version number
 ###########################################################################
 include ( VersionNumber )
 
@@ -276,17 +275,12 @@ else ()
 endif ()
 
 # Some unit tests need GMock/GTest
-find_package ( GMock )
-
-if ( GMOCK_FOUND AND GTEST_FOUND )
-  message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
-else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
-endif()
+include ( GoogleTest )
 
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
   enable_testing ()
+  include ( Python-xmlrunner )
   message (STATUS "Found pyunittest generator")
 else()
   message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )

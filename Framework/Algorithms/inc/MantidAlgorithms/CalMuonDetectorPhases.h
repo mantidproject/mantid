@@ -4,9 +4,13 @@
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
+namespace Indexing {
+class SpectrumNumber;
+}
 namespace Algorithms {
 
 /** CalMuonDetectorPhases : Calculates asymmetry and phase for each spectra in a
@@ -72,7 +76,7 @@ private:
   /// Extract asymmetry and phase from fitting results
   void extractDetectorInfo(const API::ITableWorkspace_sptr &paramTab,
                            const API::ITableWorkspace_sptr &resultsTab,
-                           const Mantid::specnum_t spectrumNumber);
+                           const Indexing::SpectrumNumber spectrumNumber);
   /// Find frequency to use in sequential fit
   double getFrequency(const API::MatrixWorkspace_sptr &ws);
   /// Get frequency hint to use when finding frequency

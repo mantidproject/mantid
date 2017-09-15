@@ -48,7 +48,7 @@ public:
 
     const std::string transWS("trans");
     Workspace2D_sptr trans_ws =
-        WorkspaceCreationHelper::Create2DWorkspace154(1, 1, 1);
+        WorkspaceCreationHelper::create2DWorkspace154(1, 1, 1);
     trans_ws->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     trans_ws->mutableY(0)[0] = 0.6;
     trans_ws->mutableE(0)[0] = 0.02;

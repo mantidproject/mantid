@@ -1,7 +1,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawUB.h"
-#include <fstream>
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Sample.h"
+
+#include <fstream>
+#include <iomanip>
 
 using Mantid::Kernel::DblMatrix;
 using Mantid::Geometry::UnitCell;
@@ -17,7 +20,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace std;
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void SaveIsawUB::init() {
@@ -73,7 +75,7 @@ double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
 
   return dV;
 }
-//----------------------------------------------------------------------------------------------
+
 /** Execute the algorithm.
  */
 void SaveIsawUB::exec() {

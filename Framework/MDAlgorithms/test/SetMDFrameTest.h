@@ -30,7 +30,7 @@ public:
 
   void test_that_is_not_executed_when_non_mdevent_and_non_mdhisto() {
     // Arrange
-    auto inputWorkspace = WorkspaceCreationHelper::Create2DWorkspace(2, 5);
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspace(2, 5);
     SetMDFrame alg;
     alg.setChild(true);
     alg.setRethrows(true);

@@ -1,26 +1,29 @@
 #pylint: disable=invalid-name, too-many-arguments
-from PyQt4 import QtGui, uic, QtCore
+from __future__ import (absolute_import, division, print_function)
+import six
+from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-import time
-import sys
 from functools import partial
 from reduction_gui.reduction.reflectometer.refm_data_script import DataSets as REFMDataSets
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
-from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.reflectometer.ui_refm_reduction
 
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.api import *
     #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
+if six.PY3:
+    unicode = str
+
 
 class DataReflWidget(BaseWidget):
     """
@@ -218,7 +221,6 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
-        _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl,True)
 
@@ -363,8 +365,8 @@ class DataReflWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                           "The automated reduction script has been updated")
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                                                  "The automated reduction script has been updated")
                 except:
                     _report_error()
             else:
@@ -482,7 +484,6 @@ class DataReflWidget(BaseWidget):
 
     def _plot_count_vs_y(self, is_peak=True):
         # removes un-used argument warning for pylint
-        _is_peak = is_peak
         """
             Plot counts as a function of high-resolution pixels
             and select peak range
@@ -562,7 +563,7 @@ class DataReflWidget(BaseWidget):
             try:
                 f = FileFinder.findRuns(str(file_ctrl.text()))
             except:
-                print "Could not find file for %s" % str(file_ctrl.text())
+                print("Could not find file for %s" % str(file_ctrl.text()))
                 return
 
         range_min = int(min_ctrl.text())
@@ -582,7 +583,7 @@ class DataReflWidget(BaseWidget):
             tof_min = int(self._summary.data_from_tof.text())
             tof_max = int(self._summary.data_to_tof.text())
 
-            print 'file requested is: ', f[0]
+            print('file requested is: ', f[0])
 
             min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
                                                                       callback=call_back,
@@ -613,13 +614,11 @@ class DataReflWidget(BaseWidget):
 
     def _add_data(self):
         state = self.get_editing_state()
-        _in_list = False
         # Check whether it's already in the list
         run_numbers = self._summary.data_run_number_edit.text()
         list_items = self._summary.angle_list.findItems(run_numbers, QtCore.Qt.MatchFixedString)
         if len(list_items) > 0:
             list_items[0].setData(QtCore.Qt.UserRole, state)
-            _in_list = True
         else:
             item_widget = QtGui.QListWidgetItem(run_numbers, self._summary.angle_list)
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -714,7 +713,7 @@ class DataReflWidget(BaseWidget):
         try:
             self._update_scattering_angle()
         except:
-            print "Unable to determine scattering angle from data set"
+            print("Unable to determine scattering angle from data set")
 
         self._reset_warnings()
 
@@ -802,7 +801,7 @@ class DataReflWidget(BaseWidget):
             self._read_logs()
             self._update_scattering_angle()
         except:
-            print "Unable to determine scattering angle from data set"
+            print("Unable to determine scattering angle from data set")
 
     def get_state(self):
         """
@@ -852,8 +851,8 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),\
-                     int(self._summary.x_max_edit.text())]
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
+                          int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
         m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),
@@ -958,7 +957,7 @@ class DataReflWidget(BaseWidget):
 
 
 #        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
-#            print 'Inside the call_back on the python side'
+#            print('Inside the call_back on the python side')
 #            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
 #            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
 #            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
@@ -996,11 +995,3 @@ class DataReflWidget(BaseWidget):
         self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
         self._summary.data_from_tof.setText("%-d" % int(tofmin))
         self._summary.data_to_tof.setText("%-d" % int(tofmax))
-
-
-
-
-
-
-
-

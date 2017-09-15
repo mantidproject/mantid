@@ -92,6 +92,14 @@ Explanation of Inputs
    :math:`0 < PeakSize \leq BackgroundInnerSize` and 
    :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
+-  If *UseOnePercentBackgroundCorrection* is enabled, then the top 1% of the background events are removed so that there are no intensity spikes near the edges. This is enabled by default.
+
+-  *AdaptiveQMultiplier* can be used with *SpecifySize* for the radius to vary as a function of the modulus of Q. If the *AdaptiveQBackground* option is set to True, the background radius also changes so each peak has a different integration radius.  Q includes the 2*pi factor.
+
+   -  PeakRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundOuterRadius + AdaptiveQMultiplier * **|Q|**
+   -  BackgroundInnerRadius + AdaptiveQMultiplier * **|Q|**
+
 -  If the *IntegrateInHKL* option is selected, then HKL space is used for
    the integration instead of reciprocal space.  This option may be useful
    for large unit cells where the radius of integration needs to be very different
@@ -199,8 +207,11 @@ on the detector.
 
 Sigma from the background
 ###################################
-The sigma from the background could be too small because the background contains events from other peaks.  In an effort to reduce this, all the 
-background events are sorted and the top 1% are removed.
+The sigma from the background could be too small because the background contains
+events from other peaks. In an effort to reduce this, all the background events
+are sorted and the top 1% are removed. Note that this behaviour is optional and
+can be enabled if the property *UseOnePercentBackgroundCorrection* is enabled.
+It is enabled by default.
 
 Usage
 ------

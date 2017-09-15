@@ -143,8 +143,8 @@ struct IntersectionPoint {
 */
 class MANTID_GEOMETRY_DLL Track {
 public:
-  typedef std::list<Link> LType;              ///< Type for the Link storage
-  typedef std::list<IntersectionPoint> PType; ///< Type for the partial
+  using LType = std::list<Link>;
+  using PType = std::list<IntersectionPoint>;
 
 public:
   /// Default constructor
@@ -175,10 +175,24 @@ public:
   LType::iterator begin() { return m_links.begin(); }
   /// Returns an interator to one-past-the-end of the set of links
   LType::iterator end() { return m_links.end(); }
-  /// Returns an interator to the start of the set of links
+  /// Returns an interator to the start of the set of links (const version)
+  LType::const_iterator begin() const { return m_links.begin(); }
+  /// Returns an interator to one-past-the-end of the set of links (const
+  /// version)
+  LType::const_iterator end() const { return m_links.end(); }
+  /// Returns an interator to the start of the set of links (const version)
   LType::const_iterator cbegin() const { return m_links.cbegin(); }
-  /// Returns an interator to one-past-the-end of the set of links
+  /// Returns an interator to one-past-the-end of the set of links (const
+  /// version)
   LType::const_iterator cend() const { return m_links.cend(); }
+  /// Returns a reference to the first link
+  LType::reference front() { return m_links.front(); }
+  /// Returns a reference to the last link
+  LType::reference back() { return m_links.back(); }
+  /// Returns a reference to the first link (const version)
+  LType::const_reference front() const { return m_links.front(); }
+  /// Returns a reference to the last link (const version)
+  LType::const_reference back() const { return m_links.back(); }
   /// Returns the number of links
   int count() const { return static_cast<int>(m_links.size()); }
   /// Is the link complete?

@@ -49,7 +49,7 @@ public:
 
   void testMultiply() {
     MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(2, 3, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(2, 3, 0.5);
     AnalysisDataService::Instance().add("PowerLawCorrectionInputWS", inputWS);
 
     Mantid::Algorithms::PowerLawCorrection expon3;
@@ -86,7 +86,7 @@ public:
   }
 
   void testEvents() {
-    EventWorkspace_sptr evin = WorkspaceCreationHelper::CreateEventWorkspace(
+    EventWorkspace_sptr evin = WorkspaceCreationHelper::createEventWorkspace(
                             1, 5, 10, 0, 1, 3),
                         evout;
     AnalysisDataService::Instance().add("test_ev_powlc", evin);

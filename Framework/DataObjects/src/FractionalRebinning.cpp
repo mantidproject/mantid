@@ -6,7 +6,7 @@
 #include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidKernel/V2D.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 namespace Mantid {
 
@@ -140,7 +140,7 @@ void rebinToOutput(const Quadrilateral &inputQ,
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
       double yValue = inY[j];
-      if (boost::math::isnan(yValue)) {
+      if (std::isnan(yValue)) {
         continue;
       }
       intersectOverlap.clear();
@@ -208,7 +208,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
       double yValue = inY[j];
-      if (boost::math::isnan(yValue)) {
+      if (std::isnan(yValue)) {
         continue;
       }
       intersectOverlap.clear();

@@ -5,6 +5,7 @@ from mantid.api import *
 import mantid.simpleapi
 import math
 
+
 class PearlMCAbsorption(PythonAlgorithm):
 
     def category(self):
@@ -76,6 +77,7 @@ class PearlMCAbsorption(PythonAlgorithm):
                 input_ws.dataY(i)[j] = math.exp(-1.0*mu_values[j]*thickness)
 
         return input_ws
+
 
 #############################################################################################
 AlgorithmFactory.subscribe(PearlMCAbsorption)

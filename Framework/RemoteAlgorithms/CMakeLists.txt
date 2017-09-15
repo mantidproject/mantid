@@ -12,7 +12,6 @@ set( SRC_FILES
   src/QueryRemoteFile2.cpp
   src/QueryRemoteJob.cpp
   src/QueryRemoteJob2.cpp
-  src/SCARFTomoReconstruction.cpp
   src/SimpleJSON.cpp
   src/StartRemoteTransaction.cpp
   src/StartRemoteTransaction2.cpp
@@ -38,7 +37,6 @@ set( INC_FILES
   inc/MantidRemoteAlgorithms/QueryRemoteFile2.h
   inc/MantidRemoteAlgorithms/QueryRemoteJob.h
   inc/MantidRemoteAlgorithms/QueryRemoteJob2.h
-  inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
   inc/MantidRemoteAlgorithms/SimpleJSON.h
   inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
   inc/MantidRemoteAlgorithms/StartRemoteTransaction2.h
@@ -64,7 +62,6 @@ set ( TEST_FILES
   QueryRemoteFile2Test.h
   QueryRemoteJobTest.h
   QueryRemoteJob2Test.h
-  SCARFTomoReconstructionTest.h
   SimpleJSONTest.h
   StartRemoteTransactionTest.h
   StartRemoteTransaction2Test.h

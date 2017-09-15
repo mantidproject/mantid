@@ -7,8 +7,9 @@ Input : the Python list is padded to Fortrans length using procedure PadArray
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
 
+from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
-if is_supported_f2py_platform():
+if is_supported_f2py_platform(): # noqa
     QLr     = import_f2py("QLres")
     QLd     = import_f2py("QLdata")
     Qse     = import_f2py("QLse")
@@ -17,10 +18,12 @@ else:
     unsupported_message()
 
 from mantid.simpleapi import *
-from mantid import config, logger, mtd
+from mantid import logger, mtd
 from IndirectCommon import *
-import sys, platform, math, os.path, numpy as np
+import os.path
+import numpy as np
 MTD_PLOT = import_mantidplot()
+
 
 def CalcErange(inWS,ns,erange,binWidth):
     #length of array in Fortran
@@ -57,6 +60,7 @@ def CalcErange(inWS,ns,erange,binWidth):
 
     return nout,bnorm,Xout,X,Y,E
 
+
 def GetXYE(inWS,n,array_len):
     Xin = mtd[inWS].readX(n)
     N = len(Xin)-1                            # get no. points from length of x array
@@ -80,9 +84,9 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     nvan,ntc = CheckHistZero(vname)
     theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
-    print "begining erange calc"
+    print("begining erange calc")
     nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
-    print "end of erange calc"
+    print("end of erange calc")
     Ndat = nout[0]
     Imin = nout[1]
     Imax = nout[2]
@@ -105,8 +109,8 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         nsp = m+1
         numb = [nvan, nsp, ntc, Ndat, nbin, Imin, Imax, Nb]
         reals = [efix, theta[0], rscl, bnorm]
-        nd,xout,yout,eout,yfit,pfit=resnorm.resnorm(numb,Xv,Yv,Ev,reals,\
-                                    Xdat,Xb,Yb,wrks,wrkr,lwrk)
+        nd,xout,yout,eout,yfit,pfit=resnorm.resnorm(numb,Xv,Yv,Ev,reals,
+                                                    Xdat,Xb,Yb,wrks,wrkr,lwrk)
         message = ' Fit paras : '+str(pfit[0])+' '+str(pfit[1])
         logger.information(message)
         dataX = xout[:nd]
@@ -114,10 +118,10 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         if m == 0:
             yPar1 = np.array([pfit[0]])
             yPar2 = np.array([pfit[1]])
-            CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],\
-                NSpec=1, UnitX='DeltaE')
-            CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),\
-                NSpec=1, UnitX='DeltaE')
+            CreateWorkspace(OutputWorkspace='Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
+                            NSpec=1, UnitX='DeltaE')
+            CreateWorkspace(OutputWorkspace='Fit', DataX=dataX, DataY=yfit[:nd], DataE=np.zeros(nd),
+                            NSpec=1, UnitX='DeltaE')
         else:
             yPar1 = np.append(yPar1,pfit[0])
             yPar2 = np.append(yPar2,pfit[1])
@@ -134,10 +138,10 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     resnorm_intesity = fname+'_ResNorm_Intensity'
     resnorm_stretch = fname+'_ResNorm_Stretch'
 
-    CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,\
-        NSpec=1, UnitX='MomentumTransfer')
-    CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,\
-        NSpec=1, UnitX='MomentumTransfer')
+    CreateWorkspace(OutputWorkspace=resnorm_intesity, DataX=xPar, DataY=yPar1, DataE=xPar,
+                    NSpec=1, UnitX='MomentumTransfer')
+    CreateWorkspace(OutputWorkspace=resnorm_stretch, DataX=xPar, DataY=yPar2, DataE=xPar,
+                    NSpec=1, UnitX='MomentumTransfer')
 
     group = resnorm_intesity + ','+ resnorm_stretch
 
@@ -167,6 +171,7 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
         ResNormPlot(fname,Plot)
     EndTime('ResNorm')
 
+
 def ResNormAddSampleLogs(workspace, e_range, v_binning):
     energy_min, energy_max = e_range
 
@@ -176,6 +181,7 @@ def ResNormAddSampleLogs(workspace, e_range, v_binning):
                  LogType="Number", LogText=str(energy_max))
     AddSampleLog(Workspace=workspace, LogName="van_binning",
                  LogType="Number", LogText=str(v_binning))
+
 
 def ResNormPlot(inputWS,Plot):
     if Plot == 'Intensity' or Plot == 'All':

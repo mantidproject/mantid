@@ -1,18 +1,19 @@
 #ifndef LOADMCSTASNEXUSTEST_H_
 #define LOADMCSTASNEXUSTEST_H_
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
+#include <fstream>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMcStasNexus.h"
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;
@@ -62,6 +63,9 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace + "_2");
     TS_ASSERT_EQUALS(outputItem2->getNumberHistograms(), 128);
+
+    AnalysisDataService::Instance().remove(outputSpace + "_1");
+    AnalysisDataService::Instance().remove(outputSpace + "_2");
   }
 
 private:
@@ -70,4 +74,37 @@ private:
   std::string outputSpace;
 };
 
+class LoadMcStasNexusTestPerformance : public CxxTest::TestSuite {
+public:
+  static LoadMcStasNexusTestPerformance *createSuite() {
+    return new LoadMcStasNexusTestPerformance();
+  }
+
+  static void destroySuite(LoadMcStasNexusTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() override {
+    if (!loadMcStasNexusAlg.isInitialized())
+      loadMcStasNexusAlg.initialize();
+
+    outputSpace = "LoadMcStasNexusTest";
+    loadMcStasNexusAlg.setPropertyValue("OutputWorkspace", outputSpace);
+
+    inputFile = "mcstas.n5";
+    loadMcStasNexusAlg.setPropertyValue("Filename", inputFile);
+  }
+
+  void tearDown() override {
+    AnalysisDataService::Instance().remove("LoadMcStasNexusTest_1");
+    AnalysisDataService::Instance().remove("LoadMcStasNexusTest_2");
+  }
+
+  void testExec() { loadMcStasNexusAlg.execute(); }
+
+private:
+  LoadMcStasNexus loadMcStasNexusAlg;
+  std::string inputFile;
+  std::string outputSpace;
+};
 #endif /*LOADMCSTASNEXUSTEST_H_*/

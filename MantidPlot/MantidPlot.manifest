@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes'?>
+<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0' xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level='asInvoker' uiAccess='false' />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+  <!-- 
+   MantidPlot embeds a Python interpreter which depends on MSVCRT90.dll.
+   Extension modules
+   can also depend on the same runtime but it exists in the SxS system folder.
+   Even though Python27.dll loads the runtime correctly there is an issue that extension
+   modules
+   using ctypes.cdll.LoadLibrary don't consult the SxS registry and fail to load
+   the correct
+   runtime library. See for example zmq.
+   For more information see https://bugs.python.org/issue24429 -->
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity type='win32' name='Microsoft.VC90.CRT' version='9.0.21022.8' processorArchitecture='amd64' publicKeyToken='1fc8b3b9a1e18e3b' />
+    </dependentAssembly>
+  </dependency>
+  <!--
+    MantidPlot is not DPI aware and we need Windows to apply the user-defined scaling factor.
+    The documentation claims that dpi unaware is the default but without this setting
+    appears to be set to SystemAware when viewed with Process Explorer.
+    https://blogs.msdn.microsoft.com/chuckw/2013/09/10/manifest-madness/ -->
+  <asmv3:application>
+    <asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">
+      <dpiAware>false</dpiAware>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+</assembly>

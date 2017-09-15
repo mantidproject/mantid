@@ -6,6 +6,8 @@ import mantid.simpleapi as msapi
 
 # Too many properties!
 #pylint: disable=too-many-instance-attributes
+
+
 class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
     Mantid algorithm to use the powder diffraction and related data
@@ -87,7 +89,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                              'the first spectrum will be processed (that is, the only spectrum '
                              'for focussed data workspaces.', direction = Direction.Input)
 
-
         self.declareProperty(FileProperty(name = self.PROP_INSTR_FILE, defaultValue = '',
                                           action = FileAction.Load,
                                           extensions = [".par", ".prm", ".ipar", ".iparm"]),
@@ -156,7 +157,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(self.PROP_BACKGROUND_TYPE, GRP_FITTING_OPTS)
         self.setPropertyGroup(self.PROP_MINX, GRP_FITTING_OPTS)
         self.setPropertyGroup(self.PROP_MAXX, GRP_FITTING_OPTS)
-
 
         GRP_PAWLEY_OPTIONS = "Pawley refinement options"
 
@@ -470,6 +470,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         @return a tuple with: 1) a tuple with the Rwp and GoF values (weighted profile
         R-factor, goodness of fit), 2) the parameters dictionary
         """
+        import GSASIIpwd
+
         (limits, peaks_list, background_def) = fit_inputs
         (inst_parm1, inst_parm2) = gs2_rd.pwdparms['Instrument Parameters']
         # peaks: ['pos','int','alp','bet','sig','gam'] / with the refine flag each
@@ -481,7 +483,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                 data = gs2_rd.powderdata,
                                 prevVaryList = None
                                 # OneCycle = False, controls = None, dlg = None
-                               )
+                                )
         self.log().debug("Result: : {0}".format(result))
         Rwp = Rvals['Rwp']
         gof = Rvals['GOF']
@@ -538,6 +540,8 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         # algorithm finishes and is destroyed!
         # This seems to destroy/close safely
         import wx
+        import GSASII
+
         self._gsas2_app = wx.App()
 
         gs2 = GSASII.GSASII(None)
@@ -700,7 +704,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                                             usedRanIdList=['noGUI'], Start=False)
         if err_msg:
             raise RuntimeError("There was a problem while importing the phase information file ({0}. "
-                               "Error details: {1}".format(phase_filename, errm_msg))
+                               "Error details: {1}".format(phase_filename, err_msg))
 
         phase_reader = phase_readers_list[0]
         GSASIIphsGUI.SetupGeneralWithoutGUI(gs2, phase_reader.Phase)
@@ -744,7 +748,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         @param phase_data :: from GSAS-II, the first entry in 'Phases'
         """
+        import GSASII
         import GSASIIspc
+
         SGData = phase_data['General']['SGData']
         use_list = phase_data['Histograms']
         NShkl = len(GSASIIspc.MustrainNames(SGData))
@@ -874,7 +880,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         with open(out_lattice_file, 'w') as lattice_txt:
             print("a, b, c, alpha, beta, gamma", file=lattice_txt)
             print(("{0}, {1}, {2}, {3}, {4}, {5}".
-                                  format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)), file=lattice_txt)
+                   format(latt_a, latt_b, latt_c, latt_alpha, latt_beta, latt_gamma)), file=lattice_txt)
 
     def _prepare_save_gsas2_project(self, gs2, gs2_rd):
         """
@@ -977,5 +983,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         gs2._init_Imports()
         readers_list = gs2.ImportPowderReaderlist
         return readers_list
+
 
 AlgorithmFactory.subscribe(GSASIIRefineFitPeaks)

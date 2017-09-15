@@ -23,7 +23,7 @@ std::string getUnit(Projection &p, size_t nd) {
   return (p.getUnit(nd) == RLU ? "r" : "a");
 }
 
-void setUnit(Projection &p, size_t nd, std::string unit) {
+void setUnit(Projection &p, size_t nd, const std::string &unit) {
   if (unit == "r")
     p.setUnit(nd, RLU);
   else if (unit == "a")
@@ -46,7 +46,7 @@ object createWorkspace() {
       "def createWorkspace(proj, OutputWorkspace=None):\n"
       "  '''Create a TableWorkspace using this projection'''\n"
       "  import inspect\n"
-      "  from mantid import api, kernel\n"
+      "  from mantid import api, kernel, AnalysisDataService\n"
       "  ws = api.WorkspaceFactory.createTable('TableWorkspace')\n"
       "  ws.addColumn('str', 'name')\n"
       "  ws.addColumn('V3D', 'value')\n"
@@ -70,7 +70,7 @@ object createWorkspace() {
       " output projection workspace. Please pass an"
       " OutputWorkspace parameter to it.')\n"
       "  if OutputWorkspace:\n"
-      "    mtd[OutputWorkspace] = ws\n"
+      "    AnalysisDataService[OutputWorkspace] = ws\n"
 
       "  return ws\n"
       "\n",

@@ -1,4 +1,4 @@
-﻿#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init
 """
 System Test for BASIS autoreduction
 """
@@ -6,6 +6,7 @@ import stresstesting
 import os
 
 from mantid.simpleapi import *
+
 
 class BASISAutoReductionTest(stresstesting.MantidStressTest):
 
@@ -58,18 +59,18 @@ class BASISAutoReductionTest(stresstesting.MantidStressTest):
         CorrectKiKf(InputWorkspace=autows, OutputWorkspace=autows,EMode='Indirect')
 
         Rebin(InputWorkspace=autows, OutputWorkspace=autows, Params='-0.12,0.0004,0.12')
-		#GroupDetectors(InputWorkspace=autows, OutputWorkspace=autows, MapFile='/SNS/BSS/shared/autoreduce/BASIS_Grouping.xml', Behaviour='Sum')
+                #GroupDetectors(InputWorkspace=autows, OutputWorkspace=autows, MapFile='/SNS/BSS/shared/autoreduce/BASIS_Grouping.xml',
+                #Behaviour='Sum')
         SofQW3(InputWorkspace=autows, OutputWorkspace=autows+'_sqw', QAxisBinning='0.2,0.2,2.0', EMode='Indirect', EFixed='2.082')
-		#SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=autows+'_sqw', ToMicroEV=True)
-		#SaveNexus(Filename="basis_auto_sqw.nxs", InputWorkspace=autows+'_sqw')
+                #SaveDaveGrp(Filename=dave_grp_filename, InputWorkspace=autows+'_sqw', ToMicroEV=True)
+                #SaveNexus(Filename="basis_auto_sqw.nxs", InputWorkspace=autows+'_sqw')
 
     def validate(self):
-		# Need to disable checking of the Spectra-Detector map because it isn't
-		# fully saved out to the nexus file; some masked detectors should be picked
-		# up with by the mask values in the spectra
+                # Need to disable checking of the Spectra-Detector map because it isn't
+                # fully saved out to the nexus file; some masked detectors should be picked
+                # up with by the mask values in the spectra
         self.tolerance = 1e-7
         self.disableChecking.append('Axes')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         return 'data_ws_sqw','BASISAutoReductionReference.nxs'
-

@@ -1,7 +1,10 @@
 #pylint: disable=no-init
+
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
+
 
 class SANSQResolutionWithoutGravity(stresstesting.MantidStressTest):
     def runTest(self):
@@ -27,6 +30,7 @@ class SANSQResolutionWithoutGravity(stresstesting.MantidStressTest):
     def validate(self):
         self.disableChecking.append('Instrument')
         return True
+
 
 class SANSQResolutionWithGravity(stresstesting.MantidStressTest):
     def runTest(self):

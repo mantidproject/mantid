@@ -13,7 +13,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_unique.h"
 
-#include "boost/math/special_functions/fpclassify.hpp"
 #include "boost/lexical_cast.hpp"
 
 namespace Mantid {
@@ -95,8 +94,8 @@ void TOFSANSResolutionByPixel::exec() {
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
-  const auto xInterpolate = sigmaModeratorVSwavelength->points(0);
-  const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
+  const auto &xInterpolate = sigmaModeratorVSwavelength->points(0);
+  const auto &yInterpolate = sigmaModeratorVSwavelength->y(0);
 
   // prefer the input to be a pointworkspace and create interpolation function
   if (sigmaModeratorVSwavelength->isHistogramData()) {
@@ -154,7 +153,7 @@ void TOFSANSResolutionByPixel::exec() {
     double sinTheta = sin(0.5 * theta);
     double factor = 4.0 * M_PI * sinTheta;
 
-    const MantidVec &xIn = inWS->readX(i);
+    const auto &xIn = inWS->x(i);
     const size_t xLength = xIn.size();
 
     // Gravity correction
@@ -165,7 +164,7 @@ void TOFSANSResolutionByPixel::exec() {
     }
 
     // Get handles on the outputWorkspace
-    MantidVec &yOut = outWS->dataY(i);
+    auto &yOut = outWS->mutableY(i);
     // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
       // use the midpoint of each bin

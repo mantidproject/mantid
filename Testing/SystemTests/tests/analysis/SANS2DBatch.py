@@ -1,14 +1,16 @@
 #pylint: disable=no-init,attribute-defined-outside-init
-import stresstesting
 
+from __future__ import (absolute_import, division, print_function)
+import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
-from mantid.simpleapi import *
 from mantid import config
 from SANSBatchMode import *
 import os.path
 
 # test batch mode with sans2d and selecting a period in batch mode
+
+
 class SANS2DBatch(stresstesting.MantidStressTest):
 
     def runTest(self):
@@ -35,6 +37,7 @@ class SANS2DBatch(stresstesting.MantidStressTest):
 
         return '5512p7_SANS2DBatch','SANS2DBatch.nxs'
 
+
 class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
@@ -43,6 +46,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
     see if the same masks get applied in the second iteration as they do in the
     first.
     """
+
     def runTest(self):
         config['default.instrument'] = 'SANS2D'
         SANS2D()
@@ -62,11 +66,13 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
         self.disableChecking.append('Instrument')
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
 
+
 class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
     """
     We want to make sure that the BatchMode can remove zero error values
     and replace them with a large default value.
     """
+
     def runTest(self):
         config['default.instrument'] = 'SANS2D'
         SANS2DTUBES()

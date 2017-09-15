@@ -1,5 +1,7 @@
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/V3D.h"
@@ -68,6 +70,35 @@ IBeamProfile::Ray RectangularBeamProfile::generatePoint(
   else if (rngPt[m_horIdx] < minBound[m_horIdx])
     rngPt[m_horIdx] = minBound[m_horIdx];
   return rngRay;
+}
+
+/**
+ * Compute a region that defines how the beam illuminates the given sample/can
+ * @param sample A reference to a sample object holding its shape
+ * @return A BoundingBox defining the active region
+ */
+Geometry::BoundingBox
+RectangularBeamProfile::defineActiveRegion(const API::Sample &sample) const {
+  auto sampleBox = sample.getShape().getBoundingBox();
+  try {
+    const auto &envBox = sample.getEnvironment().boundingBox();
+    sampleBox.grow(envBox);
+  } catch (std::runtime_error &) {
+  }
+  // In the beam direction use the maximum sample extent other wise restrict
+  // the active region to the width/height of beam
+  const auto &sampleMin(sampleBox.minPoint());
+  const auto &sampleMax(sampleBox.maxPoint());
+  V3D minPoint, maxPoint;
+  minPoint[m_horIdx] = std::max(sampleMin[m_horIdx], m_min[m_horIdx]);
+  maxPoint[m_horIdx] = std::min(sampleMax[m_horIdx], m_min[m_horIdx] + m_width);
+  minPoint[m_upIdx] = std::max(sampleMin[m_upIdx], m_min[m_upIdx]);
+  maxPoint[m_upIdx] = std::min(sampleMax[m_upIdx], m_min[m_upIdx] + m_height);
+  minPoint[m_beamIdx] = sampleMin[m_beamIdx];
+  maxPoint[m_beamIdx] = sampleMax[m_beamIdx];
+
+  return Geometry::BoundingBox(maxPoint.X(), maxPoint.Y(), maxPoint.Z(),
+                               minPoint.X(), minPoint.Y(), minPoint.Z());
 }
 
 } // namespace Algorithms

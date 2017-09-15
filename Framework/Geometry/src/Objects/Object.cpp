@@ -1,27 +1,35 @@
 #include "MantidGeometry/Objects/Object.h"
+
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/Strings.h"
-
-#include "MantidGeometry/Surfaces/Cone.h"
-#include "MantidGeometry/Surfaces/Cylinder.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
-#include "MantidGeometry/Surfaces/Surface.h"
-
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include "MantidKernel/make_unique.h"
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/error_of_mean.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/ranlux.hpp>
+#include <boost/random/uniform_01.hpp>
 
 #include <array>
 #include <deque>
@@ -261,7 +269,6 @@ int Object::hasComplement() const {
 int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
   Rst.push_back(TopRule.get());
-  int Rcount(0);
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
@@ -273,7 +280,6 @@ int Object::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         auto mf = Smap.find(KV->getKeyN());
         if (mf != Smap.end()) {
           KV->setKey(mf->second);
-          Rcount++;
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
                                                  KV->getKeyN());
@@ -1476,6 +1482,153 @@ double Object::ConeSolidAngle(const V3D &observer,
 }
 
 /**
+ * For simple shapes, the volume is calculated exactly. For more
+ * complex cases, we fall back to Monte Carlo.
+ * @return The volume.
+ */
+double Object::volume() const {
+  int type;
+  double height;
+  double radius;
+  std::vector<Kernel::V3D> vectors;
+  this->GetObjectGeom(type, vectors, radius, height);
+  GluGeometryHandler::GeometryType gluType =
+      static_cast<GluGeometryHandler::GeometryType>(type);
+  switch (gluType) {
+  case GluGeometryHandler::GeometryType::CUBOID: {
+    // Here, the volume is calculated by the triangular method.
+    // We use one of the vertices (vectors[0]) as the reference
+    // point.
+    double volume = 0.0;
+    // Vertices. Name codes follow flb = front-left-bottom etc.
+    const Kernel::V3D &flb = vectors[0];
+    const Kernel::V3D &flt = vectors[1];
+    const Kernel::V3D &frb = vectors[3];
+    const Kernel::V3D frt = frb + flt - flb;
+    const Kernel::V3D &blb = vectors[2];
+    const Kernel::V3D blt = blb + flt - flb;
+    const Kernel::V3D brb = blb + frb - flb;
+    const Kernel::V3D brt = frt + blb - flb;
+    // Normals point out, follow right-handed rule when
+    // defining the triangle faces.
+    volume += flb.scalar_prod(flt.cross_prod(blb));
+    volume += blb.scalar_prod(flt.cross_prod(blt));
+    volume += flb.scalar_prod(frb.cross_prod(flt));
+    volume += frb.scalar_prod(frt.cross_prod(flt));
+    volume += flb.scalar_prod(blb.cross_prod(frb));
+    volume += blb.scalar_prod(brb.cross_prod(frb));
+    volume += frb.scalar_prod(brb.cross_prod(frt));
+    volume += brb.scalar_prod(brt.cross_prod(frt));
+    volume += flt.scalar_prod(frt.cross_prod(blt));
+    volume += frt.scalar_prod(brt.cross_prod(blt));
+    volume += blt.scalar_prod(brt.cross_prod(blb));
+    volume += brt.scalar_prod(brb.cross_prod(blb));
+    return volume / 6;
+  }
+  case GluGeometryHandler::GeometryType::SPHERE:
+    return 4.0 / 3.0 * M_PI * radius * radius * radius;
+  case GluGeometryHandler::GeometryType::CYLINDER:
+    return M_PI * radius * radius * height;
+  default:
+    // Fall back to Monte Carlo method.
+    return monteCarloVolume();
+  }
+}
+
+/**
+ * Calculates the volume of this object by the Monte Carlo method.
+ * This method manages singleShotMonteCarloVolume() and uses the
+ * standard error as the convergence criteria.
+ * @returns The simulated volume of this object.
+ */
+double Object::monteCarloVolume() const {
+  using namespace boost::accumulators;
+  const int singleShotIterations = 10000;
+  accumulator_set<double, features<tag::mean, tag::error_of<tag::mean>>>
+      accumulate;
+  // For seeding the single shot runs.
+  boost::random::ranlux48 rnEngine;
+  // Warm up statistics.
+  for (int i = 0; i < 10; ++i) {
+    const auto seed = rnEngine();
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+  }
+  const double relativeErrorTolerance = 1e-3;
+  double currentMean;
+  double currentError;
+  do {
+    const auto seed = rnEngine();
+    const double volume =
+        singleShotMonteCarloVolume(singleShotIterations, seed);
+    accumulate(volume);
+    currentMean = mean(accumulate);
+    currentError = error_of<tag::mean>(accumulate);
+    if (std::isnan(currentError)) {
+      currentError = 0;
+    }
+  } while (currentError / currentMean > relativeErrorTolerance);
+  return currentMean;
+}
+
+/**
+ * Calculates the volume using the Monte Carlo method.
+ * @param shotSize Number of iterations.
+ * @param seed A number to seed the random number generator.
+ * @returns The simulated volume of this object.
+ */
+double Object::singleShotMonteCarloVolume(const int shotSize,
+                                          const size_t seed) const {
+  const auto &boundingBox = getBoundingBox();
+  if (boundingBox.isNull()) {
+    throw std::runtime_error("Cannot calculate volume: invalid bounding box.");
+  }
+  int totalHits = 0;
+  const double boundingDx = boundingBox.xMax() - boundingBox.xMin();
+  const double boundingDy = boundingBox.yMax() - boundingBox.yMin();
+  const double boundingDz = boundingBox.zMax() - boundingBox.zMin();
+  PARALLEL {
+    const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
+    const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
+    size_t blocksize = shotSize / threadCount;
+    if (currentThreadNum == threadCount - 1) {
+      // Last thread may have to do threadCount extra iterations in
+      // the worst case.
+      blocksize = shotSize - (threadCount - 1) * blocksize;
+    }
+    boost::random::mt19937 rnEngine(
+        static_cast<boost::random::mt19937::result_type>(seed));
+    // All threads init their engine with the same seed.
+    // We discard the random numbers used by the other threads.
+    // This ensures reproducible results independent of the number
+    // of threads.
+    // We need three random numbers for each iteration.
+    rnEngine.discard(currentThreadNum * 3 * blocksize);
+    boost::random::uniform_01<double> rnDistribution;
+    int hits = 0;
+    for (int i = 0; i < static_cast<int>(blocksize); ++i) {
+      double rnd = rnDistribution(rnEngine);
+      const double x = boundingBox.xMin() + rnd * boundingDx;
+      rnd = rnDistribution(rnEngine);
+      const double y = boundingBox.yMin() + rnd * boundingDy;
+      rnd = rnDistribution(rnEngine);
+      const double z = boundingBox.zMin() + rnd * boundingDz;
+      if (isValid(V3D(x, y, z))) {
+        ++hits;
+      }
+    }
+    // Collect results.
+    PARALLEL_ATOMIC
+    totalHits += hits;
+  }
+  const double ratio =
+      static_cast<double>(totalHits) / static_cast<double>(shotSize);
+  const double boundingVolume = boundingDx * boundingDy * boundingDz;
+  return ratio * boundingVolume;
+}
+
+/**
 * Returns an axis-aligned bounding box that will fit the shape
 * @returns A reference to a bounding box for this shape.
 */
@@ -1821,6 +1974,54 @@ int Object::getPointInObject(Kernel::V3D &point) const {
   }
 
   return 0;
+}
+
+/**
+ * Generate a random point within the object. The method simply generates a
+ * point within the bounding box and tests if this is a valid point within
+ * the object: if so the point is return otherwise a new point is selected.
+ * @param rng  A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const size_t maxAttempts) const {
+  const auto &bbox = getBoundingBox();
+  if (bbox.isNull()) {
+    throw std::runtime_error("Object::generatePointInObject() - Invalid "
+                             "bounding box. Cannot generate new point.");
+  }
+  return generatePointInObject(rng, bbox, maxAttempts);
+}
+
+/**
+ * Generate a random point within the object that is also bound by the
+ * activeRegion box.
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @param activeRegion Restrict point generation to this sub-region of the
+ * object
+ * @param maxAttempts The maximum number of attempts at generating a point
+ * @return The newly generated point
+ */
+V3D Object::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                  const BoundingBox &activeRegion,
+                                  const size_t maxAttempts) const {
+  size_t attempts(0);
+  while (attempts < maxAttempts) {
+    const double r1 = rng.nextValue();
+    const double r2 = rng.nextValue();
+    const double r3 = rng.nextValue();
+    auto pt = activeRegion.generatePointInside(r1, r2, r3);
+    if (this->isValid(pt))
+      return pt;
+    else
+      ++attempts;
+  };
+  throw std::runtime_error("Object::generatePointInObject() - Unable to "
+                           "generate point in object after " +
+                           std::to_string(maxAttempts) + " attempts");
 }
 
 /**

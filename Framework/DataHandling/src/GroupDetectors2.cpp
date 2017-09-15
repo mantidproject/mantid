@@ -1,19 +1,26 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
 
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidHistogramData/HistogramMath.h"
+#include "MantidIndexing/Group.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidTypes/SpectrumDefinition.h"
+#include "MantidKernel/StringTokenizer.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,6 +31,146 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using std::size_t;
+
+namespace { // anonymous namespace
+/* The following functions are used to translate single operators into
+ * groups, just like the ones this algorithm loads from .map files.
+ *
+ * Each function takes a string, such as "3+4", or "6:10" and then adds
+ * the resulting groups of spectra to outGroups.
+ */
+
+// An add operation, i.e. "3+4" -> [3+4]
+void translateAdd(const std::string &instructions,
+                  std::vector<std::vector<int>> &outGroups) {
+  auto spectra = Kernel::StringTokenizer(
+      instructions, "+", Kernel::StringTokenizer::TOK_TRIM |
+                             Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+
+  std::vector<int> outSpectra;
+  outSpectra.reserve(spectra.count());
+  for (const auto &spectrum : spectra) {
+    // add this spectrum to the group we're about to add
+    outSpectra.push_back(boost::lexical_cast<int>(spectrum));
+  }
+  outGroups.push_back(std::move(outSpectra));
+}
+
+// A range summation, i.e. "3-6" -> [3+4+5+6]
+void translateSumRange(const std::string &instructions,
+                       std::vector<std::vector<int>> &outGroups) {
+  // add a group with the sum of the spectra in the range
+  auto spectra = Kernel::StringTokenizer(instructions, "-");
+  if (spectra.count() != 2)
+    throw std::runtime_error("Malformed range (-) operation.");
+  // fetch the start and stop spectra
+  int first = boost::lexical_cast<int>(spectra[0]);
+  int last = boost::lexical_cast<int>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to the output group
+  std::vector<int> outSpectra;
+  outSpectra.reserve(last - first + 1);
+  for (int i = first; i <= last; ++i)
+    outSpectra.push_back(i);
+  if (!outSpectra.empty())
+    outGroups.push_back(std::move(outSpectra));
+}
+
+// A range insertion, i.e. "3:6" -> [3,4,5,6]
+void translateRange(const std::string &instructions,
+                    std::vector<std::vector<int>> &outGroups) {
+  // add a group per spectra
+  auto spectra = Kernel::StringTokenizer(
+      instructions, ":", Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
+  if (spectra.count() != 2)
+    throw std::runtime_error("Malformed range (:) operation.");
+  // fetch the start and stop spectra
+  int first = boost::lexical_cast<int>(spectra[0]);
+  int last = boost::lexical_cast<int>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to separate output groups
+  for (int i = first; i <= last; ++i) {
+    // create group of size 1 with the spectrum and add it to output
+    outGroups.emplace_back(1, i);
+  }
+}
+
+/**
+ * Translate the PerformIndexOperations processing instructions into a vector
+ *
+ * @param instructions : Instructions to translate
+ * @return : A vector of groups, each group being a vector of its 0-based
+ * spectrum indices
+ */
+std::vector<std::vector<int>>
+translateInstructions(const std::string &instructions, unsigned options) {
+  std::vector<std::vector<int>> outGroups;
+
+  // split into comma separated groups, each group potentially containing
+  // an operation (+-:) that produces even more groups.
+  auto groups = Kernel::StringTokenizer(instructions, ",", options);
+  for (const auto &groupStr : groups) {
+    // Look for the various operators in the string. If one is found then
+    // do the necessary translation into groupings.
+    if (groupStr.find('+') != std::string::npos) {
+      // add a group with the given spectra
+      translateAdd(groupStr, outGroups);
+    } else if (groupStr.find('-') != std::string::npos) {
+      translateSumRange(groupStr, outGroups);
+    } else if (groupStr.find(':') != std::string::npos) {
+      translateRange(groupStr, outGroups);
+    } else if (!groupStr.empty()) {
+      // contains no instructions, just add this spectrum as a new group
+      // create group of size 1 with the spectrum in it and add it to output
+      outGroups.emplace_back(1, boost::lexical_cast<int>(groupStr));
+    }
+  }
+
+  return outGroups;
+}
+
+/**
+ * Translate the PerformIndexOperations processing instructions from a vector
+ * into a format usable by GroupDetectors.
+ *
+ * @param groups : A vector of groups, each group being a vector of its 0-based
+ * spectrum indices
+ * @param axis : The spectra axis of the workspace
+ * @param commands : A stringstream to be filled
+ */
+void convertGroupsToMapFile(std::vector<std::vector<int>> groups,
+                            const SpectraAxis *axis,
+                            std::stringstream &commands) {
+  // The input gives the groups as a vector of a vector of ints. Turn
+  // this into a string, just like the contents of a map file.
+  commands << groups.size() << "\n";
+  for (auto &group : groups) {
+    const int groupId = axis->spectraNo(group[0]);
+    const int groupSize = static_cast<int>(group.size());
+
+    // Comment the output for readability
+    commands << "# Group " << groupId;
+    commands << ", contains " << groupSize << " spectra.\n";
+
+    commands << groupId << "\n";
+    commands << groupSize << "\n";
+
+    // Group members
+    // The input is in 0-indexed workspace ids, but the mapfile syntax expects
+    // spectrum ids
+    for (size_t j = 0; j < group.size(); ++j) {
+      commands << (j > 0 ? " " : "") << axis->spectraNo(group[j]);
+    }
+    commands << "\n";
+  }
+}
+} // anonymous namespace
 
 // progress estimates
 const double GroupDetectors2::CHECKBINS = 0.10;
@@ -110,7 +257,7 @@ void GroupDetectors2::exec() {
   const size_t numInHists = inputWS->getNumberHistograms();
   // Bin boundaries need to be the same, so do the full check on whether they
   // actually are
-  if (!API::WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!API::WorkspaceHelpers::commonBoundaries(*inputWS)) {
     g_log.error()
         << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument(
@@ -143,8 +290,8 @@ void GroupDetectors2::exec() {
 
   auto outputWS = boost::dynamic_pointer_cast<Workspace2D>(
       WorkspaceFactory::Instance().create(
-          inputWS, m_GroupWsInds.size() + numUnGrouped,
-          inputWS->readX(0).size(), inputWS->blocksize()));
+          inputWS, m_GroupWsInds.size() + numUnGrouped, inputWS->x(0).size(),
+          inputWS->blocksize()));
   // The cast might fail if the input is a WorkspaceSingleValue. That does not
   // seem to make sense for this algorithm, so we throw.
   if (!outputWS)
@@ -163,13 +310,17 @@ void GroupDetectors2::exec() {
            : 1.);
 
   // Build a new map
-  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy);
+  auto indexInfo = Indexing::IndexInfo(0);
+  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy, keepAll,
+                                     unGroupedSet, indexInfo);
 
   // If we're keeping ungrouped spectra
   if (keepAll) {
     // copy them into the output workspace
     moveOthers(unGroupedSet, *inputWS, *outputWS, outIndex);
   }
+
+  outputWS->setIndexInfo(indexInfo);
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -215,9 +366,9 @@ void GroupDetectors2::execEvent() {
   EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create(
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
-          inputWS->readX(0).size(), inputWS->blocksize()));
+          inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
-  WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, true);
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by
@@ -240,8 +391,7 @@ void GroupDetectors2::execEvent() {
   }
 
   // Set all X bins on the output
-  auto XValues = HistogramData::BinEdges(inputWS->readX(0));
-  outputWS->setAllX(XValues);
+  outputWS->setAllX(inputWS->binEdges(0));
 
   g_log.information() << name() << " algorithm has finished\n";
 
@@ -270,11 +420,11 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
             groupingWS_sptr);
     if (groupWS) {
       g_log.debug() << "Extracting grouping from GroupingWorkspace ("
-                    << groupWS->name() << ")\n";
+                    << groupWS->getName() << ")\n";
       processGroupingWorkspace(groupWS, workspace, unUsedSpec);
     } else {
       g_log.debug() << "Extracting grouping from MatrixWorkspace ("
-                    << groupingWS_sptr->name() << ")\n";
+                    << groupingWS_sptr->getName() << ")\n";
       processMatrixWorkspace(groupingWS_sptr, workspace, unUsedSpec);
     }
     return;
@@ -312,9 +462,11 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     if (axis)
       specs2index = axis->getSpectraIndexMap();
 
-    std::stringstream commandsSS;
+    // Translate the instructions into a vector of groups
+    auto groups = translateInstructions(instructions, IGNORE_SPACES);
     // Fill commandsSS with the contents of a map file
-    translateInstructions(instructions, commandsSS);
+    std::stringstream commandsSS;
+    convertGroupsToMapFile(groups, axis, commandsSS);
     // readFile expects the first line to have already been removed, so we do
     // that, even though we don't use it.
     std::string firstLine;
@@ -541,13 +693,11 @@ void GroupDetectors2::processXMLFile(std::string fname,
   }   // for group
 
   // 5. Spectrum Nos
-  std::map<int, std::vector<int>>::iterator pit;
-  for (pit = mGroupSpectraMap.begin(); pit != mGroupSpectraMap.end(); ++pit) {
-    int groupid = pit->first;
-    std::vector<int> spectra = pit->second;
+  for (const auto &pit : mGroupSpectraMap) {
+    int groupid = pit.first;
+    const std::vector<int> &spectra = pit.second;
 
-    storage_map::iterator sit;
-    sit = m_GroupWsInds.find(groupid);
+    auto sit = m_GroupWsInds.find(groupid);
     if (sit == m_GroupWsInds.end())
       continue;
 
@@ -585,10 +735,11 @@ void GroupDetectors2::processGroupingWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
-    size_t groupid = static_cast<int>(groupWS->readY(i)[0]);
+    size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
     if (groupid > 0) {
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
@@ -597,31 +748,16 @@ void GroupDetectors2::processGroupingWorkspace(
       }
       // get a reference to the set
       std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
-
-      // translate to detectors
-      std::vector<detid_t> det_ids;
-      try {
-        const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-        Geometry::DetectorGroup_const_sptr detGroup =
-            boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-        if (detGroup) {
-          det_ids = detGroup->getDetectorIDs();
-
-        } else {
-          det_ids.push_back(det->getID());
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
-        }
-      } catch (Mantid::Kernel::Exception::NotFoundError) {
-        // the detector was not found - don't add it
       }
     }
   }
@@ -630,10 +766,9 @@ void GroupDetectors2::processGroupingWorkspace(
   for (auto &dit : group2WSIndexSetmap) {
     size_t groupid = dit.first;
     std::set<size_t> &targetWSIndexSet = dit.second;
-    std::vector<size_t> tempv;
-    tempv.assign(targetWSIndexSet.begin(), targetWSIndexSet.end());
-    m_GroupWsInds.insert(
-        std::make_pair(static_cast<specnum_t>(groupid), tempv));
+    m_GroupWsInds.emplace(
+        static_cast<specnum_t>(groupid),
+        std::vector<size_t>(targetWSIndexSet.begin(), targetWSIndexSet.end()));
   }
 }
 
@@ -653,8 +788,9 @@ void GroupDetectors2::processMatrixWorkspace(
   typedef std::map<size_t, std::set<size_t>> Group2SetMapType;
   Group2SetMapType group2WSIndexSetmap;
 
-  const size_t nspec = groupWS->getNumberHistograms();
-  for (size_t i = 0; i < nspec; ++i) {
+  const auto &spectrumInfo = groupWS->spectrumInfo();
+  const auto &detectorIDs = groupWS->detectorInfo().detectorIDs();
+  for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
 
@@ -665,29 +801,19 @@ void GroupDetectors2::processMatrixWorkspace(
     // get a reference to the set
     std::set<size_t> &targetWSIndexSet = group2WSIndexSetmap[groupid];
 
-    // translate to detectors
-    std::vector<detid_t> det_ids;
-    try {
-      const Geometry::IDetector_const_sptr det = groupWS->getDetector(i);
-
-      Geometry::DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const Geometry::DetectorGroup>(det);
-
-      if (detGroup) {
-        det_ids = detGroup->getDetectorIDs();
-
-        for (auto det_id : det_ids) {
-          // translate detectors to target det ws indexes
-          size_t targetWSIndex = detIdToWiMap[det_id];
-          targetWSIndexSet.insert(targetWSIndex);
-          // mark as used
-          if (unUsedSpec[targetWSIndex] != (USED)) {
-            unUsedSpec[targetWSIndex] = (USED);
-          }
+    // If the detector was not found or was not in a group, then ignore it.
+    if (spectrumInfo.spectrumDefinition(i).size() > 1) {
+      for (const auto &spectrumDefinition :
+           spectrumInfo.spectrumDefinition(i)) {
+        // translate detectors to target det ws indexes
+        size_t targetWSIndex =
+            detIdToWiMap[detectorIDs[spectrumDefinition.first]];
+        targetWSIndexSet.insert(targetWSIndex);
+        // mark as used
+        if (unUsedSpec[targetWSIndex] != (USED)) {
+          unUsedSpec[targetWSIndex] = (USED);
         }
       }
-    } catch (Mantid::Kernel::Exception::NotFoundError) {
-      // the detector was not found - don't add it
     }
   }
 
@@ -851,7 +977,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
       spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
       if (ind == specs2index.end()) {
         g_log.debug() << name() << ": spectrum number " << spectrumNum
-                      << " refered to in the input file was not found in the "
+                      << " referred to in the input file was not found in the "
                          "input workspace\n";
         throw std::invalid_argument("Spectrum number " +
                                     std::to_string(spectrumNum) + " not found");
@@ -901,11 +1027,17 @@ double GroupDetectors2::fileReadProg(
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param prog4Copy :: the amount of algorithm progress to attribute to moving a
 * single spectra
+*  @param keepAll :: whether or not to keep ungrouped spectra
+*  @param unGroupedSet :: the set of workspace indexes that are left ungrouped
+*  @param indexInfo :: an IndexInfo object that will contain the desired
+* indexing after grouping
 *  @return number of new grouped spectra
 */
 size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
                                    API::MatrixWorkspace_sptr outputWS,
-                                   const double prog4Copy) {
+                                   const double prog4Copy, const bool keepAll,
+                                   const std::set<int64_t> &unGroupedSet,
+                                   Indexing::IndexInfo &indexInfo) {
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;
@@ -924,58 +1056,52 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+
+  auto spectrumGroups = std::vector<std::vector<size_t>>();
+  auto spectrumNumbers = std::vector<Indexing::SpectrumNumber>();
+
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
     auto &outSpec = outputWS->getSpectrum(outIndex);
 
     // The spectrum number of the group is the key
-    outSpec.setSpectrumNo(it->first);
+    spectrumNumbers.push_back(it->first);
     // Start fresh with no detector IDs
     outSpec.clearDetectorIDs();
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra
     // are assumed to be the same here
-    outSpec.dataX() = inputWS->readX(0);
+    outSpec.setSharedX(inputWS->sharedX(0));
+    auto outputHistogram = outSpec.histogram();
 
-    // the Y values and errors from spectra being grouped are combined in the
-    // output spectrum
-    MantidVec &firstY = outSpec.dataY();
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    beh->dataX(outIndex)[0] = 0.0;
-    beh->dataE(outIndex)[0] = 0.0;
+    auto spectrumGroup = std::vector<size_t>();
+
     for (auto originalWI : it->second) {
       // detectors to add to firstSpecNum
-      const auto &fromSpectrum = inputWS->getSpectrum(originalWI);
+      const auto &inputSpectrum = inputWS->getSpectrum(originalWI);
 
-      // Add up all the Y spectra and store the result in the first one
-      auto fEit = outSpec.dataE().begin();
-      auto Yit = fromSpectrum.dataY().cbegin();
-      auto Eit = fromSpectrum.dataE().cbegin();
-      for (auto fYit = firstY.begin(); fYit != firstY.end();
-           ++fYit, ++fEit, ++Yit, ++Eit) {
-        *fYit += *Yit;
-        // Assume 'normal' (i.e. Gaussian) combination of errors
-        *fEit = std::sqrt((*fEit) * (*fEit) + (*Eit) * (*Eit));
-      }
+      outputHistogram += inputSpectrum.histogram();
+      outSpec.addDetectorIDs(inputSpectrum.getDetectorIDs());
 
-      // detectors to add to the output spectrum
-      outSpec.addDetectorIDs(fromSpectrum.getDetectorIDs());
-      try {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
-        if (!det->isMasked())
-          ++nonMaskedSpectra;
-      } catch (Exception::NotFoundError &) {
-        // If a detector cannot be found, it cannot be masked
+      if (!isMaskedDetector(spectrumInfo, originalWI))
         ++nonMaskedSpectra;
-      }
+
+      spectrumGroup.push_back(originalWI);
     }
+
+    spectrumGroups.push_back(spectrumGroup);
+
+    outSpec.setHistogram(outputHistogram);
+
     if (nonMaskedSpectra == 0)
       ++nonMaskedSpectra; // Avoid possible divide by zero
     if (!requireDivide)
       requireDivide = (nonMaskedSpectra > 1);
-    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+    beh->mutableY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
     if (outIndex % INTERVAL == 0) {
@@ -985,8 +1111,26 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
       progress(m_FracCompl);
       interruption_point();
     }
+
     outIndex++;
   }
+
+  // Add the ungrouped spectra to IndexInfo, if they are being kept
+  if (keepAll) {
+    for (const auto originalWI : unGroupedSet) {
+      // Negative WIs are intended to be invalid
+      if (originalWI < 0)
+        continue;
+
+      spectrumGroups.push_back(std::vector<size_t>(1, originalWI));
+
+      auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
+      spectrumNumbers.push_back(spectrumNumber);
+    }
+  }
+
+  indexInfo = Indexing::group(inputWS->indexInfo(), std::move(spectrumNumbers),
+                              spectrumGroups);
 
   if (bhv == 1 && requireDivide) {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
@@ -1016,6 +1160,10 @@ size_t
 GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
                                  DataObjects::EventWorkspace_sptr outputWS,
                                  const double prog4Copy) {
+  if (inputWS->detectorInfo().isScanning())
+    throw std::runtime_error("GroupDetectors does not currently support "
+                             "EventWorkspaces with detector scans.");
+
   // get "Behaviour" string
   const std::string behaviour = getProperty("Behaviour");
   int bhv = 0;
@@ -1034,6 +1182,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   // Only used for averaging behaviour. We may have a 1:1 map where a Divide
   // would be waste as it would be just dividing by 1
   bool requireDivide(false);
+  const auto &spectrumInfo = inputWS->spectrumInfo();
   for (storage_map::const_iterator it = m_GroupWsInds.begin();
        it != m_GroupWsInds.end(); ++it) {
     // This is the grouped spectrum
@@ -1048,8 +1197,8 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
     // output spectrum
     // Keep track of number of detectors required for masking
     size_t nonMaskedSpectra(0);
-    beh->dataX(outIndex)[0] = 0.0;
-    beh->dataE(outIndex)[0] = 0.0;
+    beh->mutableX(outIndex)[0] = 0.0;
+    beh->mutableE(outIndex)[0] = 0.0;
     for (auto originalWI : it->second) {
       const EventList &fromEL = inputWS->getSpectrum(originalWI);
       // Add the event lists with the operator
@@ -1057,12 +1206,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
 
       // detectors to add to the output spectrum
       outEL.addDetectorIDs(fromEL.getDetectorIDs());
-      try {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(originalWI);
-        if (!det->isMasked())
-          ++nonMaskedSpectra;
-      } catch (Exception::NotFoundError &) {
-        // If a detector cannot be found, it cannot be masked
+      if (!isMaskedDetector(spectrumInfo, originalWI)) {
         ++nonMaskedSpectra;
       }
     }
@@ -1070,7 +1214,7 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
       ++nonMaskedSpectra; // Avoid possible divide by zero
     if (!requireDivide)
       requireDivide = (nonMaskedSpectra > 1);
-    beh->dataY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
+    beh->mutableY(outIndex)[0] = static_cast<double>(nonMaskedSpectra);
 
     // make regular progress reports and check for cancelling the algorithm
     if (outIndex % INTERVAL == 0) {
@@ -1096,6 +1240,16 @@ GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
   g_log.debug() << name() << " created " << outIndex
                 << " new grouped spectra\n";
   return outIndex;
+}
+
+bool GroupDetectors2::isMaskedDetector(const API::SpectrumInfo &spectrum,
+                                       const size_t index) const {
+  if (spectrum.hasDetectors(index)) {
+    return spectrum.isMasked(index);
+  } else {
+    // Can't be masked if it doesn't exist
+    return false;
+  }
 }
 
 // RangeHelper
@@ -1172,79 +1326,6 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
   }
 }
 
-namespace {
-
-/* The following functions are used to translate single operators into
- * groups, just like the ones this algorithm loads from .map files.
- *
- * Each function takes a string, such as "3+4", or "6:10" and then adds
- * the resulting groups of spectra to outGroups.
- */
-
-// An add operation, i.e. "3+4" -> [3+4]
-void translateAdd(const std::string &instructions,
-                  std::vector<std::vector<int>> &outGroups) {
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("+"));
-
-  std::vector<int> outSpectra;
-  for (auto spectrum : spectra) {
-    // remove leading/trailing whitespace
-    boost::trim(spectrum);
-    // add this spectrum to the group we're about to add
-    outSpectra.push_back(boost::lexical_cast<int>(spectrum));
-  }
-  outGroups.push_back(outSpectra);
-}
-
-// A range summation, i.e. "3-6" -> [3+4+5+6]
-void translateSumRange(const std::string &instructions,
-                       std::vector<std::vector<int>> &outGroups) {
-  // add a group with the sum of the spectra in the range
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of("-"));
-  if (spectra.size() != 2)
-    throw std::runtime_error("Malformed range (-) operation.");
-  // fetch the start and stop spectra
-  int first = boost::lexical_cast<int>(spectra[0]);
-  int last = boost::lexical_cast<int>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to the output group
-  std::vector<int> outSpectra;
-  for (int i = first; i <= last; ++i)
-    outSpectra.push_back(i);
-  if (!outSpectra.empty())
-    outGroups.push_back(outSpectra);
-}
-
-// A range insertion, i.e. "3:6" -> [3,4,5,6]
-void translateRange(const std::string &instructions,
-                    std::vector<std::vector<int>> &outGroups) {
-  // add a group per spectra
-  std::vector<std::string> spectra;
-  boost::split(spectra, instructions, boost::is_any_of(":"));
-  if (spectra.size() != 2)
-    throw std::runtime_error("Malformed range (:) operation.");
-  // fetch the start and stop spectra
-  int first = boost::lexical_cast<int>(spectra[0]);
-  int last = boost::lexical_cast<int>(spectra[1]);
-  // swap if they're back to front
-  if (first > last)
-    std::swap(first, last);
-
-  // add all the spectra in the range to separate output groups
-  for (int i = first; i <= last; ++i) {
-    // create group of size 1 with the spectrum in it
-    std::vector<int> newGroup(1, i);
-    // and add it to output
-    outGroups.push_back(newGroup);
-  }
-}
-} // anonymous namespace
-
 /**
  * Used to validate the inputs for GroupDetectors2
  *
@@ -1257,75 +1338,25 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   boost::regex re(
       "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
-  if (!pattern.empty() && !boost::regex_match(pattern, re)) {
-    errors["GroupingPattern"] =
-        "GroupingPattern is not well formed: " + pattern;
+
+  try {
+    if (!pattern.empty() && !boost::regex_match(pattern, re)) {
+      errors["GroupingPattern"] =
+          "GroupingPattern is not well formed: " + pattern;
+    }
+  } catch (boost::exception &) {
+    // If the pattern is too large, split on comma and evaluate each piece.
+    auto groups = Kernel::StringTokenizer(pattern, ",", IGNORE_SPACES);
+    for (const auto &groupStr : groups) {
+      if (!pattern.empty() && !boost::regex_match(groupStr, re)) {
+        errors["GroupingPattern"] =
+            "GroupingPattern is not well formed: " + pattern;
+        break;
+      }
+    }
   }
 
   return errors;
 }
-
-/**
- * Translate the PerformIndexOperations processing instructions into a format
- * usable by GroupDetectors.
- *
- * @param instructions : Instructions to translate
- * @param commands : A stringstream to be filled
- */
-void GroupDetectors2::translateInstructions(const std::string &instructions,
-                                            std::stringstream &commands) {
-  // vector of groups, each group being a vector of its spectra
-  std::vector<std::vector<int>> outGroups;
-
-  // split into comma separated groups, each group potentially containing
-  // an operation (+-:) that produces even more groups.
-  std::vector<std::string> groups;
-  boost::split(groups, instructions, boost::is_any_of(","));
-
-  for (auto groupStr : groups) {
-    // remove leading/trailing whitespace
-    boost::trim(groupStr);
-
-    // Look for the various operators in the string. If one is found then
-    // do the necessary translation into groupings.
-    if (groupStr.find('+') != std::string::npos) {
-      // add a group with the given spectra
-      translateAdd(groupStr, outGroups);
-    } else if (groupStr.find('-') != std::string::npos) {
-      translateSumRange(groupStr, outGroups);
-    } else if (groupStr.find(':') != std::string::npos) {
-      translateRange(groupStr, outGroups);
-    } else if (!groupStr.empty()) {
-      // contains no instructions, just add this spectrum as a new group
-      // create group of size 1 with the spectrum in it
-      std::vector<int> newGroup(1, boost::lexical_cast<int>(groupStr));
-      // and add it to output
-      outGroups.push_back(newGroup);
-    }
-  }
-
-  // We now have the groups as a vector of a vector of ints. Turn this into a
-  // string, just like the contents of a map file.
-  commands << outGroups.size() << "\n";
-  for (auto &outGroup : outGroups) {
-    const int groupId = outGroup[0] + 1;
-    const int groupSize = static_cast<int>(outGroup.size());
-
-    // Comment the output for readability
-    commands << "# Group " << groupId;
-    commands << ", contains " << groupSize << " spectra.\n";
-
-    commands << groupId << "\n";
-    commands << groupSize << "\n";
-
-    // Group members
-    // So far we've been using 0-indexed ids, but the mapfile syntax expects
-    // 1-indexed ids, so we add 1 to the spectra ids here.
-    for (size_t j = 0; j < outGroup.size(); ++j)
-      commands << (j > 0 ? " " : "") << outGroup[j] + 1;
-    commands << "\n";
-  }
-}
-
 } // namespace DataHandling
 } // namespace Mantid

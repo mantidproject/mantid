@@ -81,15 +81,6 @@ public:
     TS_ASSERT_DELTA(m_detGroup->getDistance(m_origin), 4.24614987, 1e-08);
   }
 
-  void testMasked() { TS_ASSERT(!m_detGroup->isMasked()); }
-
-  void testIsMonitor() {
-    boost::shared_ptr<DetectorGroup> monitorGroup =
-        ComponentCreationHelper::createGroupOfTwoMonitors();
-    TS_ASSERT(!m_detGroup->isMonitor());
-    TS_ASSERT(monitorGroup->isMonitor());
-  }
-
   void testBoundingBox() {}
 
   void testAddDetector() {
@@ -97,9 +88,7 @@ public:
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
     auto d = boost::make_shared<Detector>("d", 6, nullptr);
     d->setPos(6.0, 3.0, 2.0);
-    TS_ASSERT(!detg->isMasked());
-    bool warn = true;
-    detg->addDetector(d, warn);
+    detg->addDetector(d);
     TS_ASSERT_EQUALS(detg->getID(), 1);
     TS_ASSERT_DELTA(detg->getPos()[0], 3.5, 1e-08);
     TS_ASSERT_DELTA(detg->getPos()[1], 2.16666667, 1e-08);
@@ -124,8 +113,7 @@ public:
     DetectorGroup cluster;
     Detector *det = new Detector("det", 0, 0);
     det->setPos(1, -1, 0);
-    bool warn = false;
-    cluster.addDetector(IDetector_const_sptr(det), warn);
+    cluster.addDetector(IDetector_const_sptr(det));
 
     V3D axis(1, 0, 0);
     V3D sample(0, 0, 0);

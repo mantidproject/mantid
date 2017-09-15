@@ -1,17 +1,14 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
-//-----------------------------------------------------------------------------
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -166,13 +163,12 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   if (lambda_unit.empty() || lambda_unit == "Angstrom")
     lambda_unit = "A";
 
-  const MantidVec &xdata = m_ws->readX(0);
-  const MantidVec &ydata = m_ws->readY(0);
-  const MantidVec &edata = m_ws->readE(0);
-  const bool isHistogram = m_ws->isHistogramData();
+  auto xdata = m_ws->points(0);
+  auto &ydata = m_ws->y(0);
+  auto &edata = m_ws->e(0);
   for (size_t j = 0; j < m_ws->blocksize(); ++j) {
     // x data is the Lambda in xml. If histogramdata take the mean
-    double lambda = isHistogram ? (xdata[j] + xdata[j + 1]) / 2 : xdata[j];
+    double lambda = xdata[j];
     // y data is the T in xml.
     double trans_value = ydata[j];
     // e data is the Tdev in xml.

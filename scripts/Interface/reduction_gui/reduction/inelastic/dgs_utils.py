@@ -1,6 +1,9 @@
+from __future__ import (absolute_import, division, print_function)
+import os
+
 IS_IN_MANTIDPLOT = False
 try:
-    import mantidplot
+    import mantidplot # noqa
     from mantid.kernel import config
     from mantid.api import AnalysisDataService
     from mantid.simpleapi import LoadEmptyInstrument
@@ -8,7 +11,6 @@ try:
 except:
     pass
 
-import os
 
 class InstrumentParameters(object):
     instrument_name = None
@@ -60,7 +62,6 @@ class InstrumentParameters(object):
             return val[0]
         except IndexError:
             return default
-
 
     def get_bool_param(self, parname):
         default = False

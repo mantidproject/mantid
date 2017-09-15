@@ -3,6 +3,7 @@
 
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 

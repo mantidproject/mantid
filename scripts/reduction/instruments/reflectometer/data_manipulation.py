@@ -1,6 +1,8 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
+
 
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
@@ -8,7 +10,7 @@ def tof_distribution(file_path, callback=None,
         Plot counts as a function of TOF for a given REF_L data file
     """
 
-    print 'entering tof_distribution'
+    print('entering tof_distribution')
 
     basename = os.path.basename(file_path)
     ws_raw = "__%s" % basename
@@ -89,7 +91,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                 NXentryName=entry)
 
             if ws.getNumberEvents()==0:
-                print 'No data in entry %s' % entry
+                print('No data in entry %s' % entry)
                 return
 
             instr_dir = config.getInstrumentDirectory()
@@ -137,13 +139,13 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_X.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,\
-                               MapFile=grouping_file)
+                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                                           MapFile=grouping_file)
             else:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_Y.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,\
-                               MapFile=grouping_file)
+                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                                           MapFile=grouping_file)
 
     if instrument=="REFM":
         for p in ['Off_Off', 'On_Off', 'Off_On', 'On_On']:
@@ -199,6 +201,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     mean = (min_id+max_id)/2.0
     return mean-2*sigma, mean+2*sigma
 
+
 def get_logs(instrument, run):
     sangle = 0
     dangle = 0
@@ -240,4 +243,3 @@ def get_logs(instrument, run):
             "DANGLE0":dangle0,
             "DIRPIX":direct_beam_pix,
             "DET_DISTANCE":det_distance}
-

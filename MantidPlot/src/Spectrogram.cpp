@@ -25,7 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>
 #include <QPen>
@@ -39,12 +39,13 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/QwtRasterDataMD.h"
-#include "MantidQtAPI/SignalRange.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/QwtRasterDataMD.h"
+#include "MantidQtWidgets/Common/SignalRange.h"
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <numeric>
 
@@ -969,8 +970,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
       double xmin, xmax;
       mantidFun->getRowXRange(row, xmin, xmax);
       int jmin = -1;
-      if (xmin != std::numeric_limits<double>::infinity() && xmin == xmin &&
-          xmax != std::numeric_limits<double>::infinity() && xmax == xmax) {
+      if (std::isfinite(xmin) && std::isfinite(xmax)) {
         jmin = xMap.transform(xmin) - rect.left();
       } else {
         continue;
@@ -979,7 +979,7 @@ QImage Spectrogram::renderImage(const QwtScaleMap &xMap,
         jmin = 0;
 
       unsigned char *line = image.scanLine(static_cast<int>(i)) + jmin;
-      const Mantid::MantidVec &X = mantidFun->getMantidVec(row);
+      const auto &X = mantidFun->getHistogramX(row);
       int col = 0;
       int nX = static_cast<int>(X.size()) - 1;
       for (int j = jmin; j < imageWidth; ++j) {
@@ -1023,6 +1023,7 @@ void Spectrogram::loadFromProject(const std::string &lines) {
     std::string policyStr = tsv.sections("ColorPolicy").front();
     int policy = 0;
     Strings::convert<int>(policyStr, policy);
+    // cppcheck-suppress knownConditionTrueFalse
     if (policy == GrayScale)
       setGrayScale();
     else if (policy == Default)

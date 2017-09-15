@@ -21,7 +21,7 @@ Usage
 
    def print_dims(ws):
        for i in range(ws.getNumDims()):
-           print 'Dimension %i is %s' % (i, ws.getDimension(i).getName())
+           print 'Dimension %i is %s' % (i, ws.getDimension(i).name)
 
    mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C',          Units='U,U,U')
    FakeMDEventData(InputWorkspace=mdws, PeakParams='500000,0,0,0,3')

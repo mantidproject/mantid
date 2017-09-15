@@ -7,34 +7,44 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include <nexus/NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
+
+#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using namespace Mantid::NeXus;
+using namespace Mantid::Geometry;
 using Mantid::HistogramData::HistogramDx;
 
 class SaveNexusProcessedTest : public CxxTest::TestSuite {
@@ -80,7 +90,7 @@ public:
     outputFile = doExec(outputFile, useXErrors);
 
     // Assert XError correctness
-    NeXus::File savedNexus(outputFile);
+    ::NeXus::File savedNexus(outputFile);
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("workspace", "NXdata");
 
@@ -246,7 +256,7 @@ public:
     groups[4].push_back(50);
 
     EventWorkspace_sptr WS =
-        WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 100, 1.0,
+        WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
                                                              1.0);
     WS->getSpectrum(3).clear(false);
     // Switch the event type
@@ -399,7 +409,7 @@ public:
     const int nBins = 1;
     const std::string stem = "test_group_ws";
     Mantid::API::WorkspaceGroup_sptr group_ws =
-        WorkspaceCreationHelper::CreateWorkspaceGroup(nEntries, nHist, nBins,
+        WorkspaceCreationHelper::createWorkspaceGroup(nEntries, nHist, nBins,
                                                       stem);
 
     SaveNexusProcessed alg;
@@ -458,7 +468,7 @@ public:
     outputFileName = alg.getPropertyValue("Filename");
 
     try {
-      NeXus::File savedNexus(outputFileName);
+      ::NeXus::File savedNexus(outputFileName);
 
       savedNexus.openGroup("mantid_workspace_1", "NXentry");
       savedNexus.openGroup("table_workspace", "NXdata");
@@ -467,7 +477,7 @@ public:
 
       savedNexus.openData("column_1");
 
-      NeXus::Info columnInfo1 = savedNexus.getInfo();
+      ::NeXus::Info columnInfo1 = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo1.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo1.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo1.dims[1], 4);
@@ -483,7 +493,7 @@ public:
       TS_ASSERT_EQUALS(data1[8], 4);
       TS_ASSERT_EQUALS(data1[11], 7);
 
-      std::vector<NeXus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
+      std::vector<::NeXus::AttrInfo> attrInfos1 = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos1.size(), 6);
 
       if (attrInfos1.size() == 6) {
@@ -505,7 +515,7 @@ public:
 
       savedNexus.openData("column_2");
 
-      NeXus::Info columnInfo2 = savedNexus.getInfo();
+      ::NeXus::Info columnInfo2 = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo2.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo2.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo2.dims[1], 2);
@@ -519,7 +529,7 @@ public:
       TS_ASSERT_EQUALS(data2[3], 2.5);
       TS_ASSERT_EQUALS(data2[5], 0.0);
 
-      std::vector<NeXus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
+      std::vector<::NeXus::AttrInfo> attrInfos2 = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos2.size(), 6);
 
       if (attrInfos2.size() == 6) {
@@ -629,7 +639,7 @@ public:
     // Get full output file path
     outputFileName = alg.getPropertyValue("Filename");
 
-    NeXus::File savedNexus(outputFileName);
+    ::NeXus::File savedNexus(outputFileName);
 
     savedNexus.openGroup("mantid_workspace_1", "NXentry");
     savedNexus.openGroup("table_workspace", "NXdata");
@@ -693,13 +703,13 @@ public:
     {
       savedNexus.openData("column_9");
 
-      NeXus::Info columnInfo = savedNexus.getInfo();
+      ::NeXus::Info columnInfo = savedNexus.getInfo();
       TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
       TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
       TS_ASSERT_EQUALS(columnInfo.dims[1], 9);
       TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
 
-      std::vector<NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
       TS_ASSERT_EQUALS(attrInfos.size(), 3);
 
       if (attrInfos.size() == 3) {
@@ -732,16 +742,151 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testSaveTableEmptyColumn() {
+    std::string outputFileName = "SaveNexusProcessedTest_testSaveTable.nxs";
+
+    // Create a table which we will save
+    auto table =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+            WorkspaceFactory::Instance().createTable());
+    table->setRowCount(3);
+    table->addColumn("int", "IntColumn");
+    {
+      auto &data = table->getColVector<int>("IntColumn");
+      data[0] = 5;
+      data[1] = 2;
+      data[2] = 3;
+    }
+    table->addColumn("str", "EmptyColumn");
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", table);
+    alg.setPropertyValue("Filename", outputFileName);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if (!alg.isExecuted())
+      return; // Nothing to check
+
+    // Get full output file path
+    outputFileName = alg.getPropertyValue("Filename");
+
+    ::NeXus::File savedNexus(outputFileName);
+
+    savedNexus.openGroup("mantid_workspace_1", "NXentry");
+    savedNexus.openGroup("table_workspace", "NXdata");
+
+    {
+      savedNexus.openData("column_1");
+      doTestColumnInfo(savedNexus, NX_INT32, "", "IntColumn");
+      int32_t expectedData[] = {5, 2, 3};
+      doTestColumnData("IntColumn", savedNexus, expectedData);
+    }
+
+    {
+      savedNexus.openData("column_2");
+
+      ::NeXus::Info columnInfo = savedNexus.getInfo();
+      TS_ASSERT_EQUALS(columnInfo.dims.size(), 2);
+      TS_ASSERT_EQUALS(columnInfo.dims[0], 3);
+      TS_ASSERT_EQUALS(columnInfo.dims[1], 1);
+      TS_ASSERT_EQUALS(columnInfo.type, NX_CHAR);
+
+      std::vector<::NeXus::AttrInfo> attrInfos = savedNexus.getAttrInfos();
+      TS_ASSERT_EQUALS(attrInfos.size(), 3);
+
+      if (attrInfos.size() == 3) {
+        TS_ASSERT_EQUALS(attrInfos[1].name, "interpret_as");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[1]), "A string");
+
+        TS_ASSERT_EQUALS(attrInfos[2].name, "name");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[2]), "EmptyColumn");
+
+        TS_ASSERT_EQUALS(attrInfos[0].name, "units");
+        TS_ASSERT_EQUALS(savedNexus.getStrAttr(attrInfos[0]), "N/A");
+      }
+
+      std::vector<char> data;
+      savedNexus.getData(data);
+      TS_ASSERT_EQUALS(data.size(), 3);
+      TS_ASSERT_EQUALS(data[0], ' ');
+      TS_ASSERT_EQUALS(data[1], ' ');
+      TS_ASSERT_EQUALS(data[2], ' ');
+    }
+
+    savedNexus.close();
+    Poco::File(outputFileName).remove();
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_masking() {
+    LoadEmptyInstrument createWorkspace;
+    createWorkspace.initialize();
+    createWorkspace.setPropertyValue(
+        "Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
+    createWorkspace.setPropertyValue("OutputWorkspace", "testSpace");
+    createWorkspace.execute();
+    auto ws = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpace"));
+    ws->mutableDetectorInfo().setMasked(1, true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(ws->detectorInfo().isMasked(2), false);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    saveAlg.setPropertyValue("InputWorkspace", "testSpace");
+    std::string file = "SaveNexusProcessedTest_test_masking.nxs";
+    if (Poco::File(file).exists())
+      Poco::File(file).remove();
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
+
+    LoadNexus loadAlg;
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", file);
+    loadAlg.setPropertyValue("OutputWorkspace", "testSpaceReloaded");
+    TS_ASSERT_THROWS_NOTHING(loadAlg.execute());
+    TS_ASSERT(loadAlg.isExecuted());
+    auto wsReloaded = boost::dynamic_pointer_cast<Workspace2D>(
+        AnalysisDataService::Instance().retrieve("testSpaceReloaded"));
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(0), false);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(1), true);
+    TS_ASSERT_EQUALS(wsReloaded->detectorInfo().isMasked(2), false);
+
+    if (clearfiles)
+      Poco::File(file).remove();
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
+  void test_nexus_spectraMap() {
+    NexusTestHelper th(true);
+    th.createFile("MatrixWorkspaceTest.nxs");
+    auto ws = makeWorkspaceWithDetectors(100, 50);
+    std::vector<int> spec;
+    for (int i = 0; i < 100; i++) {
+      // Give some funny numbers, so it is not the default
+      ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
+      ws->getSpectrum(size_t(i)).setDetectorID(99 - i);
+      spec.push_back(i);
+    }
+    SaveNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.saveSpectraMapNexus(*ws, th.file, spec););
+  }
+
 private:
-  void doTestColumnInfo(NeXus::File &file, int type,
+  void doTestColumnInfo(::NeXus::File &file, int type,
                         const std::string &interpret_as,
                         const std::string &name) {
-    NeXus::Info columnInfo = file.getInfo();
+    ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 1);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 3);
 
     if (attrInfos.size() == 3) {
@@ -756,16 +901,16 @@ private:
     }
   }
 
-  void doTestColumnInfo2(NeXus::File &file, int type,
+  void doTestColumnInfo2(::NeXus::File &file, int type,
                          const std::string &interpret_as,
                          const std::string &name, int dim1) {
-    NeXus::Info columnInfo = file.getInfo();
+    ::NeXus::Info columnInfo = file.getInfo();
     TSM_ASSERT_EQUALS(name, columnInfo.dims.size(), 2);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[0], 3);
     TSM_ASSERT_EQUALS(name, columnInfo.dims[1], dim1);
     TSM_ASSERT_EQUALS(name, columnInfo.type, type);
 
-    std::vector<NeXus::AttrInfo> attrInfos = file.getAttrInfos();
+    std::vector<::NeXus::AttrInfo> attrInfos = file.getAttrInfos();
     TSM_ASSERT_EQUALS(name, attrInfos.size(), 6);
 
     if (attrInfos.size() == 6) {
@@ -781,7 +926,7 @@ private:
   }
 
   template <typename T>
-  void doTestColumnData(const std::string &name, NeXus::File &file,
+  void doTestColumnData(const std::string &name, ::NeXus::File &file,
                         const T expectedData[], size_t len = 3) {
     std::vector<T> data;
     file.getData(data);
@@ -851,6 +996,34 @@ private:
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT(algToBeTested.isExecuted());
     return outputFile;
+  }
+
+  /** Create a workspace with numSpectra, with
+   * each spectrum having one detector, at id = workspace index.
+   * @param numSpectra
+   * @return
+   */
+  boost::shared_ptr<MatrixWorkspace>
+  makeWorkspaceWithDetectors(size_t numSpectra, size_t numBins) const {
+    boost::shared_ptr<MatrixWorkspace> ws2 =
+        boost::make_shared<WorkspaceTester>();
+    ws2->initialize(numSpectra, numBins, numBins);
+
+    auto inst = boost::make_shared<Instrument>("TestInstrument");
+    // We get a 1:1 map by default so the detector ID should match the spectrum
+    // number
+    for (size_t i = 0; i < ws2->getNumberHistograms(); ++i) {
+      // Create a detector for each spectra
+      Detector *det =
+          new Detector("pixel", static_cast<detid_t>(i), inst.get());
+      det->setShape(
+          ComponentCreationHelper::createSphere(0.01, V3D(0, 0, 0), "1"));
+      inst->add(det);
+      inst->markAsDetector(det);
+      ws2->getSpectrum(i).addDetectorID(static_cast<detid_t>(i));
+    }
+    ws2->setInstrument(inst);
+    return ws2;
   }
 
   std::string outputFile;

@@ -7,6 +7,7 @@
 
 namespace Mantid {
 namespace Geometry {
+class ReferenceFrame;
 class SampleEnvironment;
 }
 namespace DataHandling {
@@ -49,13 +50,18 @@ private:
 
   const Geometry::SampleEnvironment *
   setSampleEnvironment(API::MatrixWorkspace_sptr &workspace,
-                       const Kernel::PropertyManager &args);
+                       const Kernel::PropertyManager_const_sptr &args);
   void setSampleShape(API::MatrixWorkspace_sptr &workspace,
-                      const Kernel::PropertyManager_sptr &args,
+                      const Kernel::PropertyManager_const_sptr &args,
                       const Geometry::SampleEnvironment *sampleEnv);
-  std::string tryCreateXMLFromArgsOnly(const Kernel::PropertyManager_sptr args);
-  std::string createFlatPlateXML(const Kernel::PropertyManager &args) const;
+  std::string
+  tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
+                           const Geometry::ReferenceFrame &refFrame);
+  std::string
+  createFlatPlateXML(const Kernel::PropertyManager &args,
+                     const Geometry::ReferenceFrame &refFrame) const;
   std::string createCylinderLikeXML(const Kernel::PropertyManager &args,
+                                    const Geometry::ReferenceFrame &refFrame,
                                     bool hollow) const;
 
   void runSetSampleShape(API::MatrixWorkspace_sptr &workspace,

@@ -1,14 +1,12 @@
-﻿# pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
+# pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
 """
+from __future__ import (absolute_import, division, print_function)
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger
-
-sanslog = Logger("SANS")
-
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import *
@@ -21,17 +19,18 @@ import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
 
+sanslog = Logger("SANS")
+
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
-except (StandardError, Warning):
+except (Exception, Warning):
     mantidplot = None
     # this should happen when this is called from outside Mantidplot and only then,
     # the result is that attempting to plot will raise an exception
 
 try:
     from PyQt4.QtGui import qApp
-
 
     def appwidgets():
         return qApp.allWidgets()
@@ -45,15 +44,16 @@ LAST_SAMPLE = None
 
 def SetVerboseMode(state):
     # TODO: this needs to be on the reducer
-    _VERBOSE_ = state
+    # _VERBOSE_ = state # FIXME this does nothing
+    pass
 
 
 # Print a message and log it if the
 def _printMessage(msg, log=True, no_console=False):
-    if log == True and _VERBOSE_ == True:
+    if log and _VERBOSE_:
         sanslog.notice(msg)
     if not no_console:
-        print msg
+        print(msg)
 
 
 def issueWarning(msg):
@@ -91,7 +91,7 @@ def SANS2D(idf_path=None):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'SANS2D'
-    except (StandardError, Warning):
+    except (Exception, Warning):
         return False
     return True
 
@@ -102,6 +102,7 @@ def SANS2DTUBES():
     Simply pass the correct IDF to SANS2D().
     """
     return SANS2D("SANS2D_Definition_Tubes.xml")
+
 
 def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
     """
@@ -115,9 +116,10 @@ def LOQ(idf_path='LOQ_Definition_20020226-.xml'):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LOQ'
-    except(StandardError, Warning):
+    except(Exception, Warning):
         return False
     return True
+
 
 def LARMOR(idf_path = None):
     """
@@ -133,7 +135,7 @@ def LARMOR(idf_path = None):
             raise RuntimeError("The provided idf path seems to have been incorrect")
         ReductionSingleton().set_instrument(instrument)
         config['default.instrument'] = 'LARMOR'
-    except (StandardError, Warning):
+    except (Exception, Warning):
         return False
     return True
 
@@ -260,7 +262,7 @@ def _return_old_compatibility_assign_methods(ws_name):
     if isinstance(ReductionSingleton().instrument, isis_instrument.SANS2D):
         try:
             logs = ReductionSingleton().instrument.get_detector_log(ws_name)
-        except (StandardError, Warning):
+        except (Exception, Warning):
             pass
     return ws_name, logs
 
@@ -299,7 +301,7 @@ def TransmissionSample(sample, direct, reload=True, period_t=-1, period_d=-1):
     """
     _printMessage('TransmissionSample("' + str(sample) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_sample(sample, direct, reload, period_t, period_d)
-    return ReductionSingleton().samp_trans_load.execute( \
+    return ReductionSingleton().samp_trans_load.execute(
         ReductionSingleton(), None)
 
 
@@ -314,7 +316,7 @@ def TransmissionCan(can, direct, reload=True, period_t=-1, period_d=-1):
     """
     _printMessage('TransmissionCan("' + str(can) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_can(can, direct, reload, period_t, period_d)
-    return ReductionSingleton().can_trans_load.execute( \
+    return ReductionSingleton().can_trans_load.execute(
         ReductionSingleton(), None)
 
 
@@ -356,7 +358,7 @@ def SetCentre(xcoord, ycoord, bank='rear'):
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
-    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder( \
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
         float(xcoord) / XSF, float(ycoord) / YSF), bank)
 
 
@@ -410,7 +412,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         else:
             combineDet = 'rear'
 
-    if not full_trans_wav is None:
+    if full_trans_wav is not None:
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
@@ -464,8 +466,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
             if ReductionSingleton().instrument._NAME == 'LOQ' and \
-                            ReductionSingleton().get_beam_center('rear') != ReductionSingleton(). \
-                            get_beam_center('front'):
+                    ReductionSingleton().get_beam_center('rear') != ReductionSingleton(). \
+                    get_beam_center('front'):
 
                 # It is necessary to reload sample, transmission and can files.
                 # reload sample
@@ -615,7 +617,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # Depending on the given options, we may have rear, front and merged
     # workspaces to handle.  These may also be WorkspaceGroups.
     for ws_name in [retWSname_rear, retWSname_front, retWSname_merged]:
-        if not ws_name in mtd:
+        if ws_name not in mtd:
             continue
         ws = mtd[ws_name]
         if isinstance(ws, WorkspaceGroup):
@@ -642,7 +644,7 @@ def _WavRangeReduction(name_suffix=None):
         for trans in [ReductionSingleton().samp_trans_load, ReductionSingleton().can_trans_load]:
             if trans and trans.direct.periods_in_file > 1 and trans.trans.periods_in_file > 1:
                 trans.direct.move2ws(period)
-                trans.trans.move2next(period)
+                trans.trans.move2ws(period)
         return
 
     def _applySuffix(result, name_suffix):
@@ -704,15 +706,15 @@ def delete_workspaces(workspaces):
         a problem
         @param workspaces: the list to delete
     """
-    if type(workspaces) != type(list()):
-        if type(workspaces) != type(tuple()):
+    if not isinstance(workspaces, type(list())):
+        if not isinstance(workspaces, type(tuple())):
             workspaces = [workspaces]
 
     for wksp in workspaces:
         if wksp and wksp in mtd:
             try:
                 DeleteWorkspace(Workspace=wksp)
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
 
@@ -729,14 +731,8 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
 
     _printMessage('CompWavRanges( %s,plot=%s)' % (str(wavelens), plot))
 
-    # this only makes sense for 1D reductions
-    if ReductionSingleton().to_Q.output_type == '2D':
-        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
-        _printMessage('Set1D()')
-        ReductionSingleton().to_Q.output_type = '1D'
-
-    if type(wavelens) != type([]) or len(wavelens) < 2:
-        if type(wavelens) != type((1,)):
+    if not isinstance(wavelens, type([])) or len(wavelens) < 2:
+        if not isinstance(wavelens, type((1,))):
             raise RuntimeError(
                 'Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.')
 
@@ -889,7 +885,7 @@ def SetCorrectionFile(bank, filename):
 
 
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
-    if reducer == None:
+    if reducer is None:
         reducer = ReductionSingleton().reference()
 
     if not quiet:
@@ -963,7 +959,7 @@ def PlotResult(workspace, canvas=None):
     else:
         graph = mantidplot.importMatrixWorkspace(workspace.getName()).plotGraph2D()
 
-    if not canvas is None:
+    if canvas is not None:
         # we were given a handle to an existing graph, use it
         mantidplot.mergePlots(canvas, graph)
         graph = canvas
@@ -982,10 +978,6 @@ def DisplayMask(mask_worksp=None):
         @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
         @return the name of the workspace that was displayed
     """
-    # this will be copied from a sample work space if one exists
-    counts_data = None
-    _instrument = ReductionSingleton().instrument
-
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = LAST_SAMPLE
@@ -998,18 +990,12 @@ def DisplayMask(mask_worksp=None):
                 CloneWorkspace(InputWorkspace=samp + "_monitors",
                                OutputWorkspace=mask_worksp + "_monitors")
                 su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
-
-            counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=mask_worksp, OutputWorkspace=counts_data)
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log=True, no_console=False)
             return
 
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
-    if counts_data:
-        DeleteWorkspace(counts_data)
-
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
     return mask_worksp
 
 
@@ -1108,7 +1094,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder( \
+            isis_reduction_steps.BaseBeamFinder(
                 float(xstart), float(ystart)), det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1176,9 +1162,9 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
                 if not graph_handle:
                     # once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-                graph_handle.activeLayer().setTitle( \
+                graph_handle.activeLayer().setTitle(
                     beam_center_logger.get_status_message(it, COORD1NEW, COORD2NEW, resCoord1, resCoord2))
-            except (StandardError, Warning):
+            except (Exception, Warning):
                 # if plotting is not available it probably means we are running outside a GUI, in which case
                 # do everything but don't plot
                 pass
@@ -1263,7 +1249,7 @@ def check_if_event_workspace(file_name):
     @returns true if the workspace is an event workspace otherwise false
     '''
     result = su.can_load_as_event_workspace(filename=file_name)
-    print result
+    print(result)
     return result
 
 
@@ -1286,14 +1272,14 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts=''):
         except ValueError:
             message = ('Error: Elements of the time shift list cannot be ' +
                        'converted to a numeric value, e.g ' + time_shift_element)
-            print message
+            print(message)
             return message
 
     if number_of_files - 1 != len(time_shift_container):
         message = ('Error: Expected N-1 time shifts for N files, but read ' +
                    str(len(time_shift_container)) + ' time shifts for ' +
                    str(number_of_files) + ' files.')
-        print message
+        print(message)
         return message
 
 
@@ -1316,10 +1302,14 @@ def ConvertFromPythonStringList(to_convert):
 ###################### Accessor functions for Transmission
 def GetTransmissionMonitorSpectrum():
     """
-        Gets the transmission monitor spectrum
+        Gets the transmission monitor spectrum. In the case of 4 or 17788 (for LOQ)
+        the result is 4.
         @return: tranmission monitor spectrum
     """
-    return ReductionSingleton().transmission_calculator.trans_mon
+    transmission_monitor = ReductionSingleton().transmission_calculator.trans_mon
+    if ReductionSingleton().instrument._NAME == "LOQ" and transmission_monitor == 17788:
+        transmission_monitor = 4
+    return transmission_monitor
 
 
 def SetTransmissionMonitorSpectrum(trans_mon):
@@ -1328,7 +1318,10 @@ def SetTransmissionMonitorSpectrum(trans_mon):
         @param trans_mon :: The spectrum to set.
     """
     if su.is_convertible_to_int(trans_mon):
-        ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
+        transmission_monitor = int(trans_mon)
+        if transmission_monitor == 4:
+            transmission_monitor = ReductionSingleton().instrument.get_m4_monitor_det_ID()
+        ReductionSingleton().transmission_calculator.trans_mon = transmission_monitor
     else:
         sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
 
@@ -1482,9 +1475,9 @@ def get_q_resolution_moderator():
     @returns the moderator file path or nothing
     '''
     val = ReductionSingleton().to_Q.get_q_resolution_moderator()
-    if val == None:
+    if val is None:
         val = ''
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1495,7 +1488,7 @@ def set_q_resolution_moderator(file_name):
     '''
     try:
         ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
-    except RuntimeError, details:
+    except RuntimeError as details:
         sanslog.error("The specified moderator file could not be found. Please specify a file"
                       "which exists in the search directories. See details: %s" % str(details))
 
@@ -1507,7 +1500,7 @@ def get_q_resultution_use():
     @returns true if the resolution option is being used, else false
     '''
     val = ReductionSingleton().to_Q.get_use_q_resolution()
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1516,9 +1509,9 @@ def set_q_resolution_use(use):
     Sets if the q resolution option is being used
     @param use: use flag
     '''
-    if use == True:
+    if use:
         ReductionSingleton().to_Q.set_use_q_resolution(True)
-    elif use == False:
+    elif not use:
         ReductionSingleton().to_Q.set_use_q_resolution(False)
     else:
         sanslog.warning('Warning: Could could not set useage of QResolution')
@@ -1536,7 +1529,7 @@ def get_q_resolution_collimation_length():
         pass
     else:
         sanslog.warning('Warning: Could not convert %s to float.' % msg)
-    print str(element)
+    print(str(element))
     return element
 
 
@@ -1545,7 +1538,7 @@ def set_q_resolution_collimation_length(collimation_length):
     Sets the collimation length
     @param collimation_length: the collimation length
     '''
-    if collimation_length == None:
+    if collimation_length is None:
         return
     msg = "Collimation Length"
     if su.is_convertible_to_float(collimation_length):
@@ -1562,7 +1555,7 @@ def get_q_resolution_delta_r():
     @returns the delta r in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1581,7 +1574,7 @@ def get_q_resolution_a1():
     @returns the diameter for the first aperature in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1600,7 +1593,7 @@ def get_q_resolution_a2():
     @returns the diameter for the second aperature in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1619,7 +1612,7 @@ def get_q_resolution_h1():
     @returns the first height in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1638,7 +1631,7 @@ def get_q_resolution_h2():
     @returns the second height in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1657,7 +1650,7 @@ def get_q_resolution_w1():
     @returns the first width in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1676,7 +1669,7 @@ def get_q_resolution_w2():
     @returns the second width in mm
     '''
     val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
-    print str(val)
+    print(str(val))
     return val
 
 
@@ -1704,7 +1697,7 @@ def set_q_resolution_float(func, arg, msg):
     @param arg: the argument
     @param mgs: error message
     '''
-    if arg == None:
+    if arg is None:
         return
 
     if su.is_convertible_to_float(arg):
@@ -1739,7 +1732,7 @@ def are_settings_consistent():
     '''
     try:
         ReductionSingleton().perform_consistency_check()
-    except RuntimeError, details:
+    except RuntimeError as details:
         sanslog.error("There was an inconsistency issue with your settings. See details: %s" % str(details))
         raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
 
@@ -1753,18 +1746,18 @@ def is_current_workspace_an_angle_workspace():
     is_angle = False
     try:
         is_angle = is_workspace_which_requires_angle(reducer=ReductionSingleton())
-    except (StopIteration, StandardError, Warning):
+    except (StopIteration, Exception, Warning):
         is_angle = False
     return is_angle
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
 
+def _get_idf_path_for_run(file_name):
+    """
+    This method finds the full file location for a run number
+
+    :param file_name: the file name or run number
+    :return: the full path to the corresponding IDF
+    """
     # Get measurement time from file
     measurement_time = su.get_measurement_time_from_file(file_name)
 
@@ -1773,18 +1766,33 @@ def MatchIDFInReducerAndWorkspace(file_name):
 
     # Get the path to the instrument definition file
     idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
+    return os.path.normpath(idf_path_workspace)
+
+
+def get_idf_path_for_run(file_name):
+    idf_path_workspace = _get_idf_path_for_run(file_name)
+    print(idf_path_workspace)
+    return idf_path_workspace
+
+
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+
+    # Get the IDF path
+    idf_path_workspace = _get_idf_path_for_run(file_name)
 
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    if ((idf_path_reducer == idf_path_workspace) and
-            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
+    is_matched = ((idf_path_reducer == idf_path_workspace) and
+                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
+
 
 def has_user_file_valid_extension(file_name):
     '''
@@ -1793,8 +1801,9 @@ def has_user_file_valid_extension(file_name):
     @returns true if it is valid else false
     '''
     is_valid = su.is_valid_user_file_extension(file_name)
-    print str(is_valid)
+    print(str(is_valid))
     return is_valid
+
 
 def get_current_idf_path_in_reducer():
     '''
@@ -1804,7 +1813,7 @@ def get_current_idf_path_in_reducer():
     '''
     idf_path_reducer = ReductionSingleton().get_idf_file_path()
     idf_path_reducer = os.path.normpath(idf_path_reducer)
-    print str(idf_path_reducer)
+    print(str(idf_path_reducer))
     return idf_path_reducer
 
 
@@ -1883,7 +1892,7 @@ def get_background_correction(is_time, is_mon, component):
             value = convert_from_int_list_to_string(setting.mon_numbers)
         else:
             pass
-    print str(value)
+    print(str(value))
     return value
 
 
@@ -1946,15 +1955,15 @@ def SetFrontEfficiencyFile(filename):
 
 @deprecated
 def displayUserFile():
-    print '-- Mask file defaults --'
-    print ReductionSingleton().to_wavlen
-    print ReductionSingleton().Q_string()
+    print('-- Mask file defaults --')
+    print(ReductionSingleton().to_wavlen)
+    print(ReductionSingleton().Q_string())
     #    print correction_files()
-    print '    direct beam file rear:',
-    print ReductionSingleton().instrument.detector_file('rear')
-    print '    direct beam file front:',
-    print ReductionSingleton().instrument.detector_file('front')
-    print ReductionSingleton().mask
+    print('    direct beam file rear:', end=' ')
+    print(ReductionSingleton().instrument.detector_file('rear'))
+    print('    direct beam file front:', end=' ')
+    print(ReductionSingleton().instrument.detector_file('front'))
+    print(ReductionSingleton().mask)
 
 
 @deprecated
@@ -1965,8 +1974,8 @@ def displayMaskFile():
 @deprecated
 def displayGeometry():
     [x, y] = ReductionSingleton().get_beam_center()
-    print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
-    print ReductionSingleton().get_sample().geometry
+    print('Beam centre: [' + str(x) + ',' + str(y) + ']')
+    print(ReductionSingleton().get_sample().geometry)
 
 
 @deprecated
@@ -1978,7 +1987,7 @@ def LimitsQ(*args):
     # If given one argument it must be a rebin string
     if len(args) == 1:
         val = args[0]
-        if str == type(val):
+        if isinstance(val, str):
             _printMessage("LimitsQ(" + val + ")")
             settings.readLimitValues("L/Q " + val, ReductionSingleton())
         else:

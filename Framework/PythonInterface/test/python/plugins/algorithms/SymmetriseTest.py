@@ -1,4 +1,6 @@
+#pylint: disable=redefined-builtin
 from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 
 import unittest
 import numpy as np
@@ -15,7 +17,7 @@ def _generate_sample_ws(ws_name):
     data_y = _rayleigh(data_x, 1)
 
     # Create the workspace and give it some units
-    CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y,
+    CreateWorkspace(OutputWorkspace=ws_name, DataX=data_x, DataY=data_y,\
                     UnitX='MomentumTransfer', VerticalAxisUnit='QSquared', VerticalAxisValues='0.2')
     # Centre the peak over 0
     ScaleX(InputWorkspace=ws_name, Factor=-1, Operation="Add", OutputWorkspace=ws_name)
@@ -30,7 +32,7 @@ def _generate_big_sample_ws(ws_name, n_spec):
     data_x = np.empty(0)
     data_y = np.empty(0)
     v_axis = list()
-    for idx in xrange(0, n_spec):
+    for idx in range(0, n_spec):
         data_x = np.append(data_x, sample_data_x)
         data_y = np.append(data_y, sample_data_y)
         v_axis.append(str(0.1 * idx))
@@ -57,7 +59,7 @@ class SymmetriseTest(unittest.TestCase):
 
         # Test that each pair of points moving inwards are equal
         data_x = workspace.dataX(0)
-        for idx in xrange(0, int(len(data_x) / 2)):
+        for idx in range(0, int(len(data_x) / 2)):
             delta = abs(data_x[idx]) - abs(data_x[-(idx + 1)])
             self.assertTrue(abs(delta) < tolerance)
 
@@ -67,8 +69,8 @@ class SymmetriseTest(unittest.TestCase):
         test_x_axis = workspace.getAxis(0)
         test_v_axis = workspace.getAxis(1)
 
-        self.assertEquals(sample_x_axis.getUnit().unitID(), test_x_axis.getUnit().unitID())
-        self.assertEquals(sample_v_axis.getUnit().unitID(), test_v_axis.getUnit().unitID())
+        self.assertEqual(sample_x_axis.getUnit().unitID(), test_x_axis.getUnit().unitID())
+        self.assertEqual(sample_v_axis.getUnit().unitID(), test_v_axis.getUnit().unitID())
 
         if self._spec_range is None:
             self.assertTrue((sample_v_axis.extractValues() == test_v_axis.extractValues()).all())

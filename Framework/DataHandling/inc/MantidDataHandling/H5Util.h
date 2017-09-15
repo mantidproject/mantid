@@ -113,6 +113,9 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group,
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
 
+MANTID_DATAHANDLING_DLL std::vector<std::string>
+readStringVector(H5::Group &, const std::string &);
+
 template <typename LocationType>
 std::string readAttributeAsString(LocationType &dataset,
                                   const std::string &attributeName);

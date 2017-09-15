@@ -43,6 +43,8 @@ namespace CostFunctions {
 class DLLExport CostFuncFitting : public API::ICostFunction {
 public:
   CostFuncFitting();
+  /// Number of parameters
+  size_t nParams() const override;
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
@@ -51,8 +53,8 @@ public:
   /// @param i :: Index of a parameter
   /// @param value :: New value of the parameter
   void setParameter(size_t i, const double &value) override;
-  /// Number of parameters
-  size_t nParams() const override;
+  /// Get name of i-th parameter
+  std::string parameterName(size_t i) const;
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function,
@@ -74,6 +76,14 @@ public:
   API::FunctionDomain_sptr getDomain() const { return m_domain; }
   /// Get FunctionValues where function values are stored.
   API::FunctionValues_sptr getValues() const { return m_values; }
+  /// Apply ties in the fitting function
+  void applyTies();
+  /// Reset the fitting function (neccessary if parameters get fixed/unfixed)
+  void reset() const;
+  /// Set all parameters
+  void setParameters(const GSLVector &params);
+  /// Get values of all parameters
+  void getParameters(GSLVector &params) const;
 
 protected:
   /**
@@ -94,7 +104,9 @@ protected:
   /// Shared poinetr to the function values
   API::FunctionValues_sptr m_values;
   /// maps the cost function's parameters to the ones of the fitting function.
-  std::vector<size_t> m_indexMap;
+  mutable std::vector<size_t> m_indexMap;
+  /// Number of all parameters in the fitting function.
+  mutable size_t m_numberFunParams;
 
   mutable bool m_dirtyVal;     /// dirty value flag
   mutable bool m_dirtyDeriv;   /// dirty derivatives flag

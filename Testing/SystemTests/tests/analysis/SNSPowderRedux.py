@@ -5,6 +5,7 @@ from mantid.api import FileFinder
 
 import os
 
+
 def _skip_test():
     """Helper function to determine if we run the test"""
     import platform
@@ -12,14 +13,18 @@ def _skip_test():
     # Only runs on RHEL6 at the moment
     return "Linux" not in platform.platform()
 
+
 def getSaveDir():
     """determine where to save - the current working directory"""
     return os.path.abspath(os.path.curdir)
+
 
 def do_cleanup():
     Files = ["PG3_9829.getn",
              "PG3_9829.gsa",
              "PG3_9829.py",
+             'sum_PG3_9829.gsa',
+             'sum_PG3_9829.py',
              "PG3_9830.gsa",
              "PG3_9830.py",
              "PG3_4844-1.dat",
@@ -32,6 +37,7 @@ def do_cleanup():
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
+
 
 class PG3Analysis(stresstesting.MantidStressTest):
     ref_file  = 'PG3_4844_reference.gsa'
@@ -65,7 +71,6 @@ class PG3Analysis(stresstesting.MantidStressTest):
                            SaveAs="gsas and fullprof and pdfgetn", OutputDirectory=savedir,
                            FinalDataUnits="dSpacing")
 
-
         # load output gsas file and the golden one
         LoadGSS(Filename="PG3_4844.gsa", OutputWorkspace="PG3_4844")
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4844_golden")
@@ -77,6 +82,7 @@ class PG3Analysis(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 1.0e-2
         return ('PG3_4844','PG3_4844_golden')
+
 
 class PG3StripPeaks(stresstesting.MantidStressTest):
     ref_file = 'PG3_4866_reference.gsa'
@@ -183,6 +189,7 @@ class PG3StripPeaks(stresstesting.MantidStressTest):
         self.tolerance = 1.0e-2
         return ('PG3_4866','PG3_4866_golden')
 
+
 class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file  = "PG3_characterization_2012_02_23-HR-ILL.txt"
@@ -206,24 +213,13 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
     def runTest(self):
         savedir = getSaveDir()
 
-        # reduce a sum of runs - and drop it
-        SNSPowderReduction(Filename="PG3_9829,9830",
-                           Sum=True, # This is the difference with the next call
-                           PreserveEvents=True, VanadiumNumber=-1,
-                           CalibrationFile=self.cal_file,
-                           CharacterizationRunsFile=self.char_file,
-                           LowResRef=15000, RemovePromptPulseWidth=50,
-                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=True,
-                           SaveAs="gsas", OutputDirectory=savedir,
-                           FinalDataUnits="dSpacing")
-
         # reduce a series of runs
         SNSPowderReduction(Filename="PG3_9829,PG3_9830",
                            PreserveEvents=True, VanadiumNumber=-1,
                            CalibrationFile=self.cal_file,
                            CharacterizationRunsFile=self.char_file,
                            LowResRef=15000, RemovePromptPulseWidth=50,
-                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=True,
+                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=25,
                            SaveAs="gsas", OutputDirectory=savedir,
                            FinalDataUnits="dSpacing")
 
@@ -239,17 +235,64 @@ class SeriesAndConjoinFilesTest(stresstesting.MantidStressTest):
 
         # prepare for validation
         LoadGSS(Filename="PG3_9829.gsa", OutputWorkspace="PG3_9829")
-        LoadGSS(Filename=self.ref_files[0], OutputWorkspace="PG3_4844_golden")
+        LoadGSS(Filename=self.ref_files[0], OutputWorkspace="PG3_9829_golden")
         #LoadGSS("PG3_9830.gsa", "PG3_9830") # can only validate one workspace
         #LoadGSS(self.ref_file[1], "PG3_9830_golden")
 
     def validateMethod(self):
-        return None # it running is all that we need
+        self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1.0e-2
         return ('PG3_9829','PG3_9829_golden')
         #return ('PG3_9830','PG3_9830_golden') # can only validate one workspace
+
+
+class SumFilesTest(stresstesting.MantidStressTest):
+    cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    ref_file  = 'PG3_9829_sum_reference.gsa'
+    data_file = 'PG3_9829_event.nxs'
+
+    def cleanup(self):
+        do_cleanup()
+        return True
+
+    def requiredMemoryMB(self):
+        """Requires 3Gb"""
+        return 3000
+
+    def requiredFiles(self):
+        files = [self.cal_file, self.char_file,
+                 self.ref_file, self.data_file]
+        return files
+
+    def runTest(self):
+        savedir = getSaveDir()
+
+        # reduce a sum of runs - and drop it
+        SNSPowderReduction(Filename="PG3_9829,9830",
+                           Sum=True,
+                           OutputFilePrefix='sum_',
+                           PreserveEvents=True, VanadiumNumber=-1,
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=self.char_file,
+                           LowResRef=15000, RemovePromptPulseWidth=50,
+                           Binning=-0.0004, BinInDspace=True, FilterBadPulses=25,
+                           SaveAs="gsas", OutputDirectory=savedir,
+                           FinalDataUnits="dSpacing")
+
+        # prepare for validation
+        LoadGSS(Filename="sum_PG3_9829.gsa", OutputWorkspace="PG3_9829")
+        LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_9829_golden")
+
+    def validateMethod(self):
+        self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return ('PG3_9829','PG3_9829_golden')
+
 
 class ToPDFgetNTest(stresstesting.MantidStressTest):
     cal_file   = "PG3_FERNS_d4832_2011_08_24.cal"

@@ -13,7 +13,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
@@ -123,10 +123,10 @@ public:
 
     // The values are cleared at the start
     for (size_t i = 0; i < ws.getNPoints(); i++) {
-      TS_ASSERT(boost::math::isnan(ws.getSignalAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getErrorAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getSignalNormalizedAt(i)));
-      TS_ASSERT(boost::math::isnan(ws.getErrorNormalizedAt(i)));
+      TS_ASSERT(std::isnan(ws.getSignalAt(i)));
+      TS_ASSERT(std::isnan(ws.getErrorAt(i)));
+      TS_ASSERT(std::isnan(ws.getSignalNormalizedAt(i)));
+      TS_ASSERT(std::isnan(ws.getErrorNormalizedAt(i)));
       TS_ASSERT(!ws.getIsMaskedAt(i));
     }
 
@@ -511,10 +511,10 @@ public:
     TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(1.5, 1.5)), 11.0, 1e-6);
     TS_ASSERT_DELTA(iws->getSignalAtVMD(VMD(9.5, 9.5)), 99.0, 1e-6);
     // Out of range = NaN
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(-0.01, 2.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(-0.01, 2.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(3.5, -0.02))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(10.01, 2.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(3.5, 10.02))));
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -563,12 +563,12 @@ public:
     // when MDMaskValue is NaN.
     // TS_ASSERT_DELTA(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5)), MDMaskValue,
     // 1e-6);
-    TS_ASSERT(boost::math::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
-    TS_ASSERT(boost::math::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(std::isnan(iws->getSignalAtVMD(VMD(0.5, 0.5))));
+    TS_ASSERT(std::isnan(iws->getSignalWithMaskAtVMD(VMD(0.5, 0.5))));
 
-    TS_ASSERT(boost::math::isnan(
-        iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
-    TS_ASSERT(boost::math::isnan(
+    TS_ASSERT(
+        std::isnan(iws->getSignalAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
+    TS_ASSERT(std::isnan(
         iws->getSignalWithMaskAtVMD(VMD(3.5, 0.5), VolumeNormalization)));
   }
 
@@ -679,7 +679,7 @@ public:
 
     TS_ASSERT_EQUALS(line.y.size(), 10);
     // Masked value should be zero
-    TS_ASSERT(boost::math::isnan(line.y[2]));
+    TS_ASSERT(std::isnan(line.y[2]));
     // Unmasked value
     TS_ASSERT_DELTA(line.y[9], 9.0, 1e-5);
   }

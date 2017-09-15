@@ -6,6 +6,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
@@ -18,7 +19,6 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 namespace Mantid {
 namespace MDAlgorithms {
 
-//----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const {
   return "BinaryOperationMD";
@@ -32,7 +32,6 @@ const std::string BinaryOperationMD::category() const {
   return "MDAlgorithms\\MDArithmetic";
 }
 
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void BinaryOperationMD::init() {
@@ -55,7 +54,6 @@ void BinaryOperationMD::init() {
 /// Optional extra properties
 void BinaryOperationMD::initExtraProperties() {}
 
-//----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void BinaryOperationMD::exec() {

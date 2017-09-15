@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/LibraryManager.h"
@@ -339,7 +340,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
     } else if (i > 0) {
       desc.name = s.substr(0, i);
       std::string vers = s.substr(i + 1);
-      desc.version = vers.empty() ? 1 : atoi(vers.c_str());
+      desc.version = vers.empty() ? 1 : std::stoi(vers);
     } else
       continue;
 

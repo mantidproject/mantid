@@ -41,7 +41,7 @@ public:
      * 200 events; two in each bin, at time 0.5, 1.5, etc.
      * PulseTime = 1 second, 2 seconds, etc.
      */
-    input = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, 100, 100,
+    input = WorkspaceCreationHelper::createEventWorkspace(numPixels, 100, 100,
                                                           0.0, 1.0, 2);
     AnalysisDataService::Instance().addOrReplace(inputName, input);
     // Quick initial check

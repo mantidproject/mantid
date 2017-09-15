@@ -4,17 +4,16 @@ SaveILLCosmosAscii and SaveANSTOAscii export-only Acii-based save formats. It is
 based on a python script by Maximilian Skoda, written for the ISIS Reflectometry
 GUI
 */
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidDataHandling/AsciiPointBase.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-
+#include <boost/make_shared.hpp>
+#include <cmath>
 #include <fstream>
 
 namespace Mantid {
@@ -31,6 +30,7 @@ void AsciiPointBase::init() {
   declareProperty(Kernel::make_unique<FileProperty>("Filename", "",
                                                     FileProperty::Save, ext()),
                   "The filename of the output file.");
+
   extraProps();
 }
 
@@ -47,7 +47,14 @@ void AsciiPointBase::exec() {
   }
   m_ws = getProperty("InputWorkspace");
   g_log.information("FILENAME: " + filename);
-
+  std::string sepOption = getProperty("Separator");
+  if (sepOption == "comma") {
+    m_sep = ',';
+  } else if (sepOption == "space") {
+    m_sep = ' ';
+  } else {
+    m_sep = '\t';
+  }
   std::vector<double> XData = header(file);
   extraHeaders(file);
   data(file, XData);
@@ -60,7 +67,7 @@ void AsciiPointBase::exec() {
  */
 std::vector<double> AsciiPointBase::header(std::ofstream &file) {
   auto title = '#' + m_ws->getTitle();
-  const std::vector<double> &xTemp = m_ws->readX(0);
+  const auto &xTemp = m_ws->x(0);
   m_xlength = xTemp.size() - 1;
   std::vector<double> XData(m_xlength, 0);
   for (size_t i = 0; i < m_xlength; ++i) {
@@ -83,8 +90,8 @@ std::vector<double> AsciiPointBase::header(std::ofstream &file) {
 void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
                           bool exportDeltaQ) {
 
-  const std::vector<double> &yData = m_ws->readY(0);
-  const std::vector<double> &eData = m_ws->readE(0);
+  const auto &yData = m_ws->y(0);
+  const auto &eData = m_ws->e(0);
   if (exportDeltaQ) {
     for (size_t i = 0; i < m_xlength; ++i) {
       double dq = XData[i] * m_qres;
@@ -112,10 +119,10 @@ void AsciiPointBase::data(std::ofstream &file, const std::vector<double> &XData,
  */
 void AsciiPointBase::outputval(double val, std::ofstream &file,
                                bool leadingSep) {
-  bool nancheck = checkIfNan(val);
-  bool infcheck = checkIfInfinite(val);
+  bool nancheck = std::isnan(val);
+  bool infcheck = std::isinf(val);
   if (leadingSep) {
-    file << sep();
+    file << m_sep;
   }
   if (!nancheck && !infcheck) {
     file << val;
@@ -128,18 +135,16 @@ void AsciiPointBase::outputval(double val, std::ofstream &file,
   }
 }
 
-/** checks if a value is Not A Number
- *  @returns boolean true if the supplied value was Not a Number
+/** appends the separator property to the algorithm
  */
-bool AsciiPointBase::checkIfNan(const double &value) const {
-  return (boost::math::isnan(value));
-}
-
-/** checks if a value is Infinite
- *  @returns boolean true if the supplied value was Infinite
- */
-bool AsciiPointBase::checkIfInfinite(const double &value) const {
-  return (std::abs(value) == std::numeric_limits<double>::infinity());
+void AsciiPointBase::appendSeparatorProperty() {
+  std::vector<std::string> propOptions;
+  propOptions.push_back("comma");
+  propOptions.push_back("space");
+  propOptions.push_back("tab");
+  declareProperty("Separator", "tab",
+                  boost::make_shared<StringListValidator>(propOptions),
+                  "The separator used for splitting data columns.");
 }
 } // namespace DataHandling
 } // namespace Mantid

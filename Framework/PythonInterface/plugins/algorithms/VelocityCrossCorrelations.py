@@ -1,4 +1,5 @@
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -29,7 +30,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace','',direction=Direction.Output),doc="Output workspace name")
 
-
     def PyExec(self):
 
         # Get file path
@@ -46,7 +46,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Convert description object to string via for loop. The original object has strange formatting
         particleID = ''
         for i in description:
-            particleID += i
+            particleID += i.decode('UTF-8')
         # Extract particle id's from string using regular expressions
         p_atoms=re.findall(r"A\('[a-z]+\d+',\d+", particleID)
 
@@ -92,7 +92,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Transforming coordinates...")
         start_time=time.time()
 
@@ -116,11 +115,9 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                 for k in range(n_dimensions):
                     scaled_coords[i,j,k]=configuration_copy[i,j,k]/box_size_tensors[j,k,k]
 
-
         # # Transform particle trajectories (configuration array) to Cartesian coordinates at each time step
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         logger.information("Calculating velocities...")
         start_time=time.time()
@@ -128,24 +125,19 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Initialise velocity arrray. Note that the first dimension is 2 elements shorter than the coordinate array.
         # Use finite difference methods to evaluate the time-derivative to 1st order
         # Shape: (# of particles) x (timesteps-2) x (# of spatial dimensions)
-        velocities=np.zeros((n_particles,n_timesteps-1,n_dimensions))
 
-        for i in range(n_particles):
-            for j in range(n_timesteps-2):
-                # Unwrapping coordinates
-                v_temp1=scaled_coords[i,j+1]-scaled_coords[i,j]-np.round(scaled_coords[i,j+1]-scaled_coords[i,j])
-                v_temp2=scaled_coords[i,j+2]-scaled_coords[i,j+1]-np.round(scaled_coords[i,j+2]-scaled_coords[i,j+1])
-                velocities[i,j]=(v_temp1+v_temp2)/(2.0)
+        velocities=np.zeros((n_particles,n_timesteps-1,n_dimensions))
+        v1=scaled_coords[:,1:-1,:]-scaled_coords[:,:-2,:]-np.round(scaled_coords[:,1:-1,:]-scaled_coords[:,:-2,:])
+        v2=scaled_coords[:,2:,:]-scaled_coords[:,1:-1,:]-np.round(scaled_coords[:,2:,:]-scaled_coords[:,1:-1,:])
+        velocities[:,:-1,:]=(v1+v2)/2.
 
         # Transform velocities (configuration array) back to Cartesian coordinates at each time step
         velocities=np.array([[np.dot(box_size_tensors[j+1],np.transpose(velocities[i,j]))
                               for j in range(n_timesteps-1)] for i in range(n_particles)])
         logger.information(str(time.time()-start_time) + " s")
 
-
         logger.information("Calculating velocity cross-correlations (resource intensive calculation)...")
         start_time=time.time()
-
         correlation_length=n_timesteps-1
         correlations=np.zeros((n_species,n_species,correlation_length))
         # Array for counting particle pairings
@@ -169,7 +161,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                     correlation_count[l,k]+=1
 
         logger.information(str(time.time()-start_time) + " s")
-
 
         # Neutron coherent scattering lengths (femtometres)
         # Sources:
@@ -272,7 +263,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                'am':8.3,
                'cm':9.5}
 
-
         logger.information("Averaging correlation Fourier transforms & scaling with the coherent neutron scattering lenghts...")
         start_time=time.time()
 
@@ -283,7 +273,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         logger.information(str(time.time()-start_time) + " s")
 
-
         # Generate a list of row names according to the atomic species present in the simulation
         row_names=[]
         for i in range(n_species):
@@ -291,7 +280,7 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                 row_names.append(elements[i].capitalize()+' and '+elements[j].capitalize())
 
         # Initialise & populate the output_ws workspace
-        nrows=(n_species*n_species-n_species)/2+n_species
+        nrows=int((n_species*n_species-n_species)/2+n_species)
         #nbins=(np.shape(correlations)[2])
         yvals=np.empty(0)
         for i in range(n_species):
@@ -313,7 +302,6 @@ class VelocityCrossCorrelations(PythonAlgorithm):
         # Set output workspace to output_ws
         self.setProperty('OutputWorkspace',output_ws)
 
-
     def cross_correlation(self,u,v):
         # Returns cross-correlation of two 3-vectors
         n=np.shape(v)[0]
@@ -328,10 +316,9 @@ class VelocityCrossCorrelations(PythonAlgorithm):
 
         return C
 
-
     def fold_correlation(self,w):
         # Folds an array with symmetrical values into half by averaging values around the centre
-        right_half=w[len(w)/2:]
+        right_half=w[int(len(w)/2):]
         left_half=w[:int(np.ceil(len(w)/2.0))][::-1]
 
         return (left_half+right_half)/2.0

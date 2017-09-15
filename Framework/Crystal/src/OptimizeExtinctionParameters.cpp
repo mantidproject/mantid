@@ -1,5 +1,6 @@
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"

@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 import mantid
 import SANSUserFileParser as UserFileParser
 
@@ -106,11 +106,11 @@ class BackCommandParserTest(unittest.TestCase):
         # Act
         result = parser.parse_and_set(arguments)
         # Assert
-        self.assertEquals(result.mean, expected_mean)
-        self.assertEquals(result.time, expected_uniform)
-        self.assertEquals(result.mon, is_mon)
-        self.assertEquals(result.run_number, expected_run_number)
-        self.assertEquals(result.mon_number, expected_mon_number)
+        self.assertEqual(result.mean, expected_mean)
+        self.assertEqual(result.time, expected_uniform)
+        self.assertEqual(result.mon, is_mon)
+        self.assertEqual(result.run_number, expected_run_number)
+        self.assertEqual(result.mon_number, expected_mon_number)
 
     def do_test_parsing_fails(self, arguments):
         # Arrange

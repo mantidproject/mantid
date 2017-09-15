@@ -1,12 +1,11 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #include "MantidMDAlgorithms/LoadSQW2.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -34,9 +33,6 @@ using Kernel::DblMatrix;
 using Kernel::Matrix;
 using Kernel::V3D;
 
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
 namespace {
 /// Defines buffer size for reading the pixel data. It is assumed to be the
 /// number of pixels to read in a single call. A single pixel is 9 float
@@ -53,10 +49,6 @@ constexpr double INV_TWO_PI = 0.5 / M_PI;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSQW2)
-
-//------------------------------------------------------------------------------
-// Public methods
-//------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
 const std::string LoadSQW2::name() const { return "LoadSQW"; }
@@ -85,7 +77,7 @@ const std::string LoadSQW2::summary() const {
 int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
   // only .sqw can be considered
   const std::string &extn = descriptor.extension();
-  if (extn.compare(".sqw") != 0)
+  if (extn != ".sqw")
     return 0;
 
   if (descriptor.isAscii()) {
@@ -95,10 +87,6 @@ int LoadSQW2::confidence(Kernel::FileDescriptor &descriptor) const {
   // Beat v1
   return 81;
 }
-
-//------------------------------------------------------------------------------
-// Private methods
-//------------------------------------------------------------------------------
 
 /// Initialize the algorithm's properties.
 void LoadSQW2::init() {

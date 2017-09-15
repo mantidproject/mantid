@@ -1,0 +1,93 @@
+digraph IndirectFlatePlateAbsorption {
+  label="IndirectFlatePlateAbsorption Flowchart"
+  $global_style
+  
+  subgraph params  {
+    $param_style
+    SampleWorkspace1        [label="SampleWorkspace"]
+    SampleWorkspace2        [label="SampleWorkspace"]
+    SampleChemicalFormula
+    SampleDensity
+    SampleHeight
+    SampleRadius
+    SampleAngle
+    BeamHeight
+    BeamWidth
+    Events
+    NumberOfWavelengths
+    AbsWorkspace1           [label="AbsorptionWorkspace"]
+    AbsWorkspace2           [label="AbsorptionWorkspace"]
+    CanAbsorptionWorkspace
+    CanChemicalFormula
+    CanDensity
+    CanRadius
+    OutputWorkspace
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    GetEFixed
+    ConvertUnits1           [label="ConvertUnits"]
+    ConvertUnits2           [label="ConvertUnits"]
+    ConvertUnits3           [label="ConvertUnits"]
+    SetBeam
+    SetBeam1                [label="SetBeam"]
+    SetSample
+    SetSample1              [label="SetSample"]
+    MonteCarlo
+    MonteCarlo1             [label="MonteCarlo"]
+    Scale
+    Divide
+    Minus
+    AddSampleLogMultiple
+    GroupWorkspaces
+    Multiply
+  }
+  
+  subgraph decisions {
+    $decision_style
+    canGiven          [label="Container Workspace?"]
+    useCorrections    [label="Container Corrections?"]
+  }
+
+SampleWorkspace1                 -> GetEFixed
+GetEFixed                        -> ConvertUnits1                   [label="Convert input workspace to Wavelength"]
+ConvertUnits1                    -> SetBeam
+BeamHeight                       -> SetBeam 
+BeamWidth                        -> SetBeam
+SetBeam                          -> SetSample
+SampleRadius                     -> SetSample
+SampleHeight                     -> SetSample
+SampleAngle                      -> SetSample
+SampleChemicalFormula            -> SetSample
+SampleDensity                    -> SetSample
+SetSample                        -> MonteCarlo
+Events                           -> MonteCarlo
+NumberOfWavelengths              -> MonteCarlo
+MonteCarlo                       -> AbsWorkspace1
+MonteCarlo                       -> canGiven
+canGiven                            -> ConvertUnits2                 [label="Yes"]
+  ConvertUnits2                     -> Scale
+  ConvertUnits2                     -> Clone
+  Scale                             -> Clone
+  Clone                             -> Divide1
+  SampleWorkspace2                  -> Divide1
+  AbsWorkspace2                     -> Divide1
+  Divide1                           -> useCorrections
+  useCorrections                    -> SetBeam1                     [label="Yes"]
+    SetBeam1                            -> SetSample1
+    CanChemicalFormula                  -> SetSample1
+    CanDensity                          -> SetSample1
+    CanRadius                           -> SetSample1
+    SetSample1                          -> MonteCarlo1
+    MonteCarlo1                         -> Multiply
+  Multiply                          -> CanAbsorptionWorkspace
+  Multiply                          -> Divide
+  useCorrections                    -> Divide                   [label="No"]
+  Divide                            -> Minus
+  Minus                             -> ConvertUnits3            [label="Convert back to DeltaE"]
+canGiven                        -> ConvertUnits3                [label="No"]
+ConvertUnits3                   -> AddSampleLogMultiple
+AddSampleLogMultiple            -> GroupWorkspaces
+GroupWorkspaces                 -> OutputWorkspace
+}

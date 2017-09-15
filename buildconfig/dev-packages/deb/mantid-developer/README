@@ -1,6 +1,12 @@
-This directory contains the structure required to build the simple mantid-developer debian file.
+This directory contains an ns-control file designed to be interpreted with the
+`equivs-build` command from the `equivs` debian package. This will need to be
+install via apt:
+
+```
+apt-get install equivs
+```
 
 To build the package:
    * Switch to the directory containing this file
-   * Run "dpkg --build mantid-developer/mantid-developer-1.2.7"
-   * A file called mantid-developer-1.2.7.deb will appear in the mantid-developer directory.
+   * Run `equivs-build ns-control`
+   * A file called mantid-developer_x.y.z.deb will appear in this directory.

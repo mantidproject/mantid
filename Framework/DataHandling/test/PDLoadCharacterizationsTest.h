@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidDataHandling/PDLoadCharacterizations.h"
@@ -26,7 +27,7 @@ public:
     TS_ASSERT(alg.isInitialized());
 
     // run the algorithm
-    alg.setProperty("Filename", filename);
+    alg.setPropertyValue("Filename", filename);
     alg.setPropertyValue("OutputWorkspace", filename);
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -80,7 +81,7 @@ public:
   }
 
   void checkPG3(ITableWorkspace_sptr &wksp) {
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 14);
     TS_ASSERT_EQUALS(wksp->rowCount(), 6);
 
     // check all of the contents of row 0
@@ -88,24 +89,90 @@ public:
     TS_ASSERT_EQUALS(wksp->Double(0, 1), 0.900);
     TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
     TS_ASSERT_EQUALS(wksp->String(0, 3), "15030");
-    TS_ASSERT_EQUALS(wksp->String(0, 4), "15039");
-    TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 6), "0.20");
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "4.12");
-    TS_ASSERT_EQUALS(wksp->Double(0, 8), 4700.);
-    TS_ASSERT_EQUALS(wksp->Double(0, 9), 21200.);
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "15039");
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), "0.20");
+    TS_ASSERT_EQUALS(wksp->String(0, 9), "4.12");
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 4700.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 21200.);
 
     // check all of the contents of row 5
     TS_ASSERT_EQUALS(wksp->Double(5, 0), 10.);
     TS_ASSERT_EQUALS(wksp->Double(5, 1), 3.198);
     TS_ASSERT_EQUALS(wksp->Int(5, 2), 1);
     TS_ASSERT_EQUALS(wksp->String(5, 3), "15033");
-    TS_ASSERT_EQUALS(wksp->String(5, 4), "15042");
-    TS_ASSERT_EQUALS(wksp->String(5, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(5, 6), "0.05");
-    TS_ASSERT_EQUALS(wksp->String(5, 7), "15.40");
-    TS_ASSERT_EQUALS(wksp->Double(5, 8), 0.);
-    TS_ASSERT_EQUALS(wksp->Double(5, 9), 100000.);
+    TS_ASSERT_EQUALS(wksp->String(5, 4), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 5), "15042");
+    TS_ASSERT_EQUALS(wksp->String(5, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(5, 8), "0.05");
+    TS_ASSERT_EQUALS(wksp->String(5, 9), "15.40");
+    TS_ASSERT_EQUALS(wksp->Double(5, 10), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(5, 11), 100000.);
+  }
+
+  void checkPG3WithContainers(ITableWorkspace_sptr &wksp) {
+    TS_ASSERT_EQUALS(wksp->columnCount(), 17);
+    TS_ASSERT_EQUALS(wksp->rowCount(), 8);
+
+    // check all of the contents of row 0
+    TS_ASSERT_EQUALS(wksp->Double(0, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 1), 0.900);
+    TS_ASSERT_EQUALS(wksp->Int(0, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(0, 3), "15030");
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "15039");
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), "0.20");
+    TS_ASSERT_EQUALS(wksp->String(0, 9), "4.12");
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 4700.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 21200.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(0, 13), 0.);
+    TS_ASSERT_EQUALS(wksp->String(0, 14), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 15), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 16), "0");
+
+    // check all of the contents of row 4
+    TS_ASSERT_EQUALS(wksp->Double(4, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(4, 1), 4.797);
+    TS_ASSERT_EQUALS(wksp->Int(4, 2), 5);
+    TS_ASSERT_EQUALS(wksp->String(4, 3), "27061");
+    TS_ASSERT_EQUALS(wksp->String(4, 4), "27055");
+    TS_ASSERT_EQUALS(wksp->String(4, 5), "15085");
+    TS_ASSERT_EQUALS(wksp->String(4, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(4, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(4, 8), "2.00");
+    TS_ASSERT_EQUALS(wksp->String(4, 9), "15.35");
+    TS_ASSERT_EQUALS(wksp->Double(4, 10), 66666.67);
+    TS_ASSERT_EQUALS(wksp->Double(4, 11), 83333.67);
+    TS_ASSERT_EQUALS(wksp->Double(4, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(4, 13), 0.);
+    TS_ASSERT_EQUALS(wksp->String(4, 14), "27049");
+    TS_ASSERT_EQUALS(wksp->String(4, 15), "27037");
+    TS_ASSERT_EQUALS(wksp->String(4, 16), "27043");
+
+    // check all of the contents of row 7
+    TS_ASSERT_EQUALS(wksp->Double(7, 0), 60.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 1), 3.731);
+    TS_ASSERT_EQUALS(wksp->Int(7, 2), 1);
+    TS_ASSERT_EQUALS(wksp->String(7, 3), "27060");
+    TS_ASSERT_EQUALS(wksp->String(7, 4), "27054");
+    TS_ASSERT_EQUALS(wksp->String(7, 5), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 8), "0");
+    TS_ASSERT_EQUALS(wksp->String(7, 9), "0");
+    TS_ASSERT_EQUALS(wksp->Double(7, 10), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 11), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 12), 0.);
+    TS_ASSERT_EQUALS(wksp->Double(7, 13), 0.);
+    TS_ASSERT_EQUALS(wksp->String(7, 14), "27048");
+    TS_ASSERT_EQUALS(wksp->String(7, 15), "27036");
+    TS_ASSERT_EQUALS(wksp->String(7, 16), "27042");
   }
 
   void test_Init() {
@@ -161,7 +228,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 14);
     TS_ASSERT_EQUALS(wksp->rowCount(), 1);
 
     // check all of the contents of row 0
@@ -171,10 +238,14 @@ public:
     TS_ASSERT_EQUALS(wksp->String(0, 3), "0");
     TS_ASSERT_EQUALS(wksp->String(0, 4), "0");
     TS_ASSERT_EQUALS(wksp->String(0, 5), "0");
-    TS_ASSERT_EQUALS(wksp->String(0, 6), ".31,.25,.13,.13,.13,.42");
-    TS_ASSERT_EQUALS(wksp->String(0, 7), "13.66,5.83,3.93,2.09,1.57,31.42");
-    TS_ASSERT_EQUALS(wksp->Double(0, 8), 300.00);
-    TS_ASSERT_EQUALS(wksp->Double(0, 9), 16666.67);
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");
+    TS_ASSERT_EQUALS(wksp->String(0, 8), ".31,.25,.13,.13,.13,.42");
+    TS_ASSERT_EQUALS(wksp->String(0, 9), "13.66,5.83,3.93,2.09,1.57,31.42");
+    TS_ASSERT_EQUALS(wksp->Double(0, 10), 300.00);
+    TS_ASSERT_EQUALS(wksp->Double(0, 11), 16666.67);
+    TS_ASSERT_EQUALS(wksp->Double(0, 12), .1);
+    TS_ASSERT_EQUALS(wksp->Double(0, 13), 2.9);
 
     // test the other output properties
     checkNOMAD(alg);
@@ -189,7 +260,7 @@ public:
     runAlg(alg, wksp, CHAR_FILE);
 
     // test the table workspace
-    TS_ASSERT_EQUALS(wksp->columnCount(), 10);
+    TS_ASSERT_EQUALS(wksp->columnCount(), 14);
     TS_ASSERT_EQUALS(wksp->rowCount(), 0);
 
     // test the other output properties
@@ -248,8 +319,10 @@ public:
 
     TS_ASSERT_EQUALS(wksp->rowCount(), 1);
     TS_ASSERT_EQUALS(wksp->String(0, 3), "49258"); // vanadium
-    TS_ASSERT_EQUALS(wksp->String(0, 4), "49086"); // container
-    TS_ASSERT_EQUALS(wksp->String(0, 5), "49257"); // empty
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "49086"); // vanadium_background
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "49257"); // container
+    TS_ASSERT_EQUALS(wksp->String(0, 6), "0");     // empty_environment
+    TS_ASSERT_EQUALS(wksp->String(0, 7), "0");     // empty_instrument
   }
 
   void test_ExpIni_failing() {
@@ -268,6 +341,36 @@ public:
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
   }
+
+  void test_version2() {
+    const std::string CHAR_FILES("Test_characterizations_char.txt,"
+                                 "PG3_char_2016_02_15-PAC-single.txt");
+
+    // initialize and run the algorithm
+    ITableWorkspace_sptr wksp;
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILES);
+
+    checkPG3WithContainers(wksp);
+  }
+
+  void test_version2_wrongOrder() {
+    const std::string CHAR_FILES("PG3_char_2016_02_15-PAC-single.txt,"
+                                 "Test_characterizations_char.txt");
+    // initialize and run the algorithm
+    ITableWorkspace_sptr wksp;
+    PDLoadCharacterizations alg;
+    runAlg(alg, wksp, CHAR_FILES);
+
+    checkPG3WithContainers(wksp);
+  }
+
+  /* TODO this is for a later iteration
+  void xtest_version2_extras() {
+    const std::string CHAR_FILES("Test_characterizations_char.txt,"
+                                 "PG3_char_2016_02_15-PAC-extras.txt");
+  }
+  */
 };
 
 #endif /* MANTID_DATAHANDLING_LOADPDCHARACTERIZATIONSTEST_H_ */

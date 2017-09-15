@@ -81,6 +81,7 @@ public:
       off_diag += value;
   }
   double get(size_t, size_t) override { return 0.0; }
+  void zero() override {}
 };
 }
 
@@ -440,14 +441,55 @@ public:
   }
 
   void test_string_representation() {
-    const std::string expected =
-        "composite=MultiDomainFunction,NumDeriv=true;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=1,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=2,$domains=i;"
-        "name=MultiDomainFunctionTest_Function,A=0,B=3,$domains=i;ties=(f1.A="
-        "f0.A,f2.A=f0.A)";
+    const std::string expected = "composite=MultiDomainFunction,NumDeriv=true;"
+                                 "name=MultiDomainFunctionTest_Function,A=0,B="
+                                 "1,$domains=i;name=MultiDomainFunctionTest_"
+                                 "Function,A=0,B=2,$domains=i;name="
+                                 "MultiDomainFunctionTest_Function,A=0,B=3,$"
+                                 "domains=i;ties=(f1.A=f0.A,f2.A=f0.A)";
     TS_ASSERT_EQUALS(multi.asString(), expected);
     TS_ASSERT_EQUALS(multi.asString(), multi.clone()->asString());
+  }
+
+  void test_equivalent_functions() {
+    std::string ini =
+        "composite=MultiDomainFunction;"
+        "name=MultiDomainFunctionTest_Function,A=1,B=2,$domains=i;"
+        "name=MultiDomainFunctionTest_Function,A=3,B=4,$domains=i;ties=(f1.A="
+        "f0.B)";
+    auto mfun = boost::dynamic_pointer_cast<CompositeFunction>(
+        FunctionFactory::Instance().createInitialized(ini));
+
+    auto eqFuns = mfun->createEquivalentFunctions();
+    TS_ASSERT_EQUALS(eqFuns.size(), 2);
+    TS_ASSERT_EQUALS(eqFuns[0]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=1,B=2");
+    TS_ASSERT_EQUALS(eqFuns[1]->asString(),
+                     "name=MultiDomainFunctionTest_Function,A=2,B=4");
+  }
+
+  void test_string_nested_composite() {
+    std::string ini = "composite=MultiDomainFunction;"
+                      "(composite=CompositeFunction,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function; "
+                      "(name=MultiDomainFunctionTest_Function;name="
+                      "MultiDomainFunctionTest_Function));"
+                      "(composite=CompositeFunction,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function; "
+                      "(name=MultiDomainFunctionTest_Function;name="
+                      "MultiDomainFunctionTest_Function))";
+    auto f = FunctionFactory::Instance().createInitialized(ini);
+    auto g = FunctionFactory::Instance().createInitialized(f->asString());
+    TS_ASSERT_EQUALS(g->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=false;(composite="
+                     "CompositeFunction,NumDeriv=false,$domains=i;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0));(composite="
+                     "CompositeFunction,NumDeriv=false,$domains=i;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0))");
   }
 
 private:

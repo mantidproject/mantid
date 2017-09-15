@@ -28,35 +28,35 @@ class EnggCalibrateFullTest(unittest.TestCase):
                           Input='foo', Bank='1')
 
         # Wrong workspace name
-        self.assertRaises(RuntimeError,
+        self.assertRaises(ValueError,
                           EnggCalibrateFull,
-                          Input='this_ws_is_not_there.not', Bank='2')
+                          Workspace='this_ws_is_not_there.not', Bank='2')
 
         # mispelled ExpectedPeaks
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, Bank='2', Peaks='2')
+                          Workspace=self.__class__._data_ws, Bank='2', Peaks='2')
 
         # mispelled OutDetPosFilename
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull, OutDetPosFile='any.csv',
-                          InputWorkspace=self.__class__._data_ws, Bank='2', Peaks='2')
+                          Workspace=self.__class__._data_ws, Bank='2', Peaks='2')
 
-        # all fine, except missing DetectorPositions (output)
+        # all fine, except missing OutDetPosTable (output)
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, Bank='2')
+                          Workspace=self.__class__._data_ws, Bank='2')
 
         # all fine, except Bank should be a string
-        self.assertRaises(RuntimeError,
+        self.assertRaises(TypeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, DetectorPositions=[0.6, 0.9],
-                          Bank='2')
+                          Workspace=self.__class__._data_ws, OutDetPosTable='det_pos_tbl',
+                          Bank=2)
 
-        # all fine, except for the wrong rebin bin width
-        self.assertRaises(RuntimeError,
+        # all fine, except for the wrong rebin bin width type
+        self.assertRaises(TypeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, DetectorPositions=[0.6, 0.9],
+                          Workspace=self.__class__._data_ws, OutDetPosTable='det_pos_tbl',
                           RebinBinWidth=[0, 2, 3],
                           Bank='2')
 
@@ -69,8 +69,8 @@ class EnggCalibrateFullTest(unittest.TestCase):
         # warnings and finally raise after a 'some peaks not found' error
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.01], Bank='1',
-                          DetectorPositions='out_det_positions_table')
+                          Workspace=self.__class__._data_ws, ExpectedPeaks=[0.01], Bank='1',
+                          OutDetPosTable='out_det_positions_table')
 
 
     def test_run_ok_but_bad_data(self):
@@ -84,9 +84,9 @@ class EnggCalibrateFullTest(unittest.TestCase):
         tbl_name = 'det_peaks_tbl'
         self.assertRaises(RuntimeError,
                           EnggCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, Bank='2',
+                          Workspace=self.__class__._data_ws, Bank='2',
                           ExpectedPeaks='0.915, 1.257, 1.688',
-                          DetectorPositions=tbl_name)
+                          OutDetPosTable=tbl_name)
 
 
 

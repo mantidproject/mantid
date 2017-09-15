@@ -2,6 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
+
 class MuonKerenFittingTest(stresstesting.MantidStressTest):
     '''Tests the Keren fitting function on a real workspace, to check results vs. WiMDA'''
 
@@ -9,17 +10,17 @@ class MuonKerenFittingTest(stresstesting.MantidStressTest):
         # Load dataset
         LoadMuonNexus(Filename='MUT00053591.nxs', DetectorGroupingTable='gp', OutputWorkspace='MUT53591')
 
-	# Process like MuonAnalysis interface would
-        MuonProcess(InputWorkspace='MUT53591', Mode='Combined', SummedPeriodSet='1',\
-        ApplyDeadTimeCorrection=False, DetectorGroupingTable='gp', LoadedTimeZero=0, TimeZero=0,\
-        Xmin=0.08, Xmax=10.0, OutputType="PairAsymmetry", PairFirstIndex="0", PairSecondIndex="1",\
-        Alpha=1.0, OutputWorkspace='processed')
+        # Process like MuonAnalysis interface would
+        MuonProcess(InputWorkspace='MUT53591', Mode='Combined', SummedPeriodSet='1',
+                    ApplyDeadTimeCorrection=False, DetectorGroupingTable='gp', LoadedTimeZero=0, TimeZero=0,
+                    Xmin=0.08, Xmax=10.0, OutputType="PairAsymmetry", PairFirstIndex="0", PairSecondIndex="1",
+                    Alpha=1.0, OutputWorkspace='processed')
 
-	# Fit the Keren function to the data
+        # Fit the Keren function to the data
         func = "name=FlatBackground,A0=0.1;name=Keren,A=0.1,Delta=0.2,Field=18,Fluct=0.2"
         Fit(InputWorkspace='processed', Function=func, Output='out', CreateOutput=True)
 
-	# Get fitted parameters
+        # Get fitted parameters
         params = mtd['out_Parameters']
         Background = params.cell(0,1)
         Initial = params.cell(1,1)
@@ -28,12 +29,10 @@ class MuonKerenFittingTest(stresstesting.MantidStressTest):
         Fluct = params.cell(4,1)
         Chisq = params.cell(5,1)
 
-	# Check that params are within the errors of those obtained in WiMDA
+        # Check that params are within the errors of those obtained in WiMDA
         self.assertTrue(Chisq < 1.1, "Fitted chi-square too large")
         self.assertDelta(Background, 0.1623, 0.0046, "Fitted A0 outside errors")
         self.assertDelta(Initial, 0.0389, 0.0040, "Fitted A outside errors")
         self.assertDelta(Delta, 0.96, 0.11, "Fitted Delta outside errors")
         self.assertDelta(Field, 20.0, 1.0, "Fitted Field outside errors")
         self.assertDelta(Fluct, 0.1, 0.01, "Fitted Fluct outside errors")
-
-

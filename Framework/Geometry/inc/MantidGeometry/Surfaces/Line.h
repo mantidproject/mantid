@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include <complex>
+#include <list>
 
 namespace Mantid {
 

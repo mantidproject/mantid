@@ -1,4 +1,5 @@
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
@@ -10,6 +11,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <boost/python/str.hpp>
 
 using namespace Mantid::Kernel;
 namespace Registry = Mantid::PythonInterface::Registry;
@@ -28,11 +30,15 @@ namespace {
  */
 void setProperty(IPropertyManager &self, const std::string &name,
                  const boost::python::object &value) {
-  typedef extract<std::string> from_pystr;
-  // String values can be set directly
-  from_pystr cppstr(value);
+  extract<std::string> cppstr(value);
+
   if (cppstr.check()) {
     self.setPropertyValue(name, cppstr());
+#if PY_VERSION_HEX < 0x03000000
+  } else if (PyUnicode_Check(value.ptr())) {
+    self.setPropertyValue(name,
+                          extract<std::string>(str(value).encode("utf-8"))());
+#endif
   } else {
     try {
       Property *p = self.getProperty(name);

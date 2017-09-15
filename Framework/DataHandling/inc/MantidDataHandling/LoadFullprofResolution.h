@@ -156,6 +156,10 @@ private:
   /// Parse 1 bank of lines of profile 10
   void parseProfile10();
 
+  /// Parse a value and prints warning if something is wrong
+  double parseDoubleValue(const std::string &value,
+                          const std::string &label = std::string());
+
   /// Generate output workspace
   DataObjects::TableWorkspace_sptr
   genTableWorkspace(std::map<int, std::map<std::string, double>> bankparammap);

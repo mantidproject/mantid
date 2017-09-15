@@ -13,6 +13,7 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmHistory.cpp
   src/Exports/CatalogManager.cpp
   src/Exports/CatalogSession.cpp
+  src/Exports/DetectorInfo.cpp
   src/Exports/DeprecatedAlgorithmChecker.cpp
   src/Exports/Algorithm.cpp
   src/Exports/DataProcessorAlgorithm.cpp
@@ -61,6 +62,7 @@ set ( EXPORT_FILES
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp
+  src/Exports/SpectrumInfo.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
   src/Exports/IFunction.cpp
@@ -73,6 +75,7 @@ set ( EXPORT_FILES
   src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
+  src/Exports/MultiDomainFunction.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )

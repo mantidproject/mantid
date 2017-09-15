@@ -38,6 +38,11 @@ class ExperimentInfoTest(unittest.TestCase):
         emode = self._expt_ws.getEMode()
         self.assertEquals(emode, 0)
 
+    def test_detectorInfo(self):
+        detInfo = self._expt_ws.detectorInfo()
+        # No instrument in test workspace, so size is 0.
+        self.assertEquals(detInfo.size(), 0)
+
 #    def test_set_and_get_efixed(self):
 #      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
 #        ws.setEFixed(1, pi)

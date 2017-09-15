@@ -19,7 +19,7 @@ public:
 
   ConvertFromDistributionTest() : dist("dist") {
     MatrixWorkspace_sptr WS =
-        WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 0.5);
+        WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
     WS->setDistribution(true);
     AnalysisDataService::Instance().add(dist, WS);
   }

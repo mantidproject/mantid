@@ -1,4 +1,3 @@
-#include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -6,9 +5,14 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidHistogramData/LogarithmicGenerator.h"
+#include "MantidIndexing/Group.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <cfloat>
@@ -102,10 +106,10 @@ void DiffractionFocussing2::exec() {
   std::string unitid = axis->unit()->unitID();
   if (unitid != "dSpacing" && unitid != "MomentumTransfer" && unitid != "TOF") {
     g_log.error() << "UnitID " << unitid << " is not a supported spacing\n";
-    throw new std::invalid_argument("Workspace Invalid Spacing/UnitID");
+    throw std::invalid_argument("Workspace Invalid Spacing/UnitID");
   }
   // --- Do we need to read the grouping workspace? ----
-  if (groupingFileName != "") {
+  if (!groupingFileName.empty()) {
     progress(0.01, "Reading grouping file");
     IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty(
@@ -167,23 +171,20 @@ void DiffractionFocussing2::exec() {
   // is irrelevant
   MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
 
-  Progress *prog;
-  prog = new API::Progress(this, 0.2, 1.00,
-                           static_cast<int>(totalHistProcess) + nGroups);
-#ifndef __APPLE__
-  PARALLEL_FOR2(m_matrixInputW, out)
-#endif
+  std::unique_ptr<Progress> prog = make_unique<API::Progress>(
+      this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_matrixInputW, *out))
   for (int outWorkspaceIndex = 0;
        outWorkspaceIndex < static_cast<int>(m_validGroups.size());
        outWorkspaceIndex++) {
     PARALLEL_START_INTERUPT_REGION
-    int group = m_validGroups[outWorkspaceIndex];
+    int group = static_cast<int>(m_validGroups[outWorkspaceIndex]);
 
     // Get the group
     auto it = group2xvector.find(group);
-    group2vectormap::difference_type dif =
-        std::distance(group2xvector.begin(), it);
-    auto &Xout = (*it).second;
+    auto dif = std::distance(group2xvector.begin(), it);
+    auto &Xout = it->second;
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
@@ -191,10 +192,6 @@ void DiffractionFocussing2::exec() {
 
     // This is the output spectrum
     auto &outSpec = out->getSpectrum(outWorkspaceIndex);
-
-    // Also set the spectrum number to the group number
-    outSpec.setSpectrumNo(group);
-    outSpec.clearDetectorIDs();
 
     // Get the references to Y and E output and rebin
     // TODO can only be changed once rebin implemented in HistogramData
@@ -206,7 +203,7 @@ void DiffractionFocussing2::exec() {
     MantidVec groupWgt(nPoints, 0.0);
 
     // loop through the contributing histograms
-    std::vector<size_t> indices = m_wsIndices[group];
+    const std::vector<size_t> &indices = m_wsIndices[outWorkspaceIndex];
     const size_t groupSize = indices.size();
     for (size_t i = 0; i < groupSize; i++) {
       size_t inWorkspaceIndex = indices[i];
@@ -217,7 +214,6 @@ void DiffractionFocussing2::exec() {
       auto &Yin = inSpec.y();
       auto &Ein = inSpec.e();
 
-      outSpec.addDetectorIDs(inSpec.getDetectorIDs());
       try {
         // TODO This should be implemented in Histogram as rebin
         Mantid::Kernel::VectorHelper::rebinHistogram(
@@ -320,7 +316,9 @@ void DiffractionFocussing2::exec() {
   } // end of loop for groups
   PARALLEL_CHECK_INTERUPT_REGION
 
-  delete prog;
+  out->setIndexInfo(Indexing::group(m_matrixInputW->indexInfo(),
+                                    std::move(m_validGroups),
+                                    std::move(m_wsIndices)));
 
   setProperty("OutputWorkspace", out);
 
@@ -336,13 +334,8 @@ void DiffractionFocussing2::exec() {
  */
 void DiffractionFocussing2::execEvent() {
   // Create a new outputworkspace with not much in it
-  DataObjects::EventWorkspace_sptr out;
-  out = boost::dynamic_pointer_cast<EventWorkspace>(
-      API::WorkspaceFactory::Instance().create("EventWorkspace",
-                                               m_validGroups.size(), 2, 1));
-  // Copy required stuff from it
-  API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out,
-                                                         true);
+  auto out = create<EventWorkspace>(*m_matrixInputW, m_validGroups.size(),
+                                    m_matrixInputW->binEdges(0));
 
   MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
   bool inPlace = (m_matrixInputW == outputWS);
@@ -353,15 +346,14 @@ void DiffractionFocussing2::execEvent() {
 
   EventType eventWtype = m_eventW->getEventType();
 
-  Progress *prog;
-  prog = new Progress(this, 0.2, 0.25, nGroups);
+  std::unique_ptr<Progress> prog =
+      make_unique<Progress>(this, 0.2, 0.25, nGroups);
 
   // determine precount size
   vector<size_t> size_required(this->m_validGroups.size(), 0);
   int totalHistProcess = 0;
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = this->m_validGroups[iGroup];
-    const vector<size_t> &indices = this->m_wsIndices[group];
+    const vector<size_t> &indices = this->m_wsIndices[iGroup];
 
     totalHistProcess += static_cast<int>(indices.size());
     for (auto index : indices) {
@@ -371,12 +363,12 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ------------- Pre-allocate Event Lists ----------------------------
-  delete prog;
-  prog = new Progress(this, 0.25, 0.3, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.25, 0.3, totalHistProcess);
 
   // This creates and reserves the space required
   for (size_t iGroup = 0; iGroup < this->m_validGroups.size(); iGroup++) {
-    const int group = this->m_validGroups[iGroup];
+    const int group = static_cast<int>(m_validGroups[iGroup]);
     EventList &groupEL = out->getSpectrum(iGroup);
     groupEL.switchTo(eventWtype);
     groupEL.reserve(size_required[iGroup]);
@@ -386,15 +378,14 @@ void DiffractionFocussing2::execEvent() {
   }
 
   // ----------- Focus ---------------
-  delete prog;
-  prog = new Progress(this, 0.3, 0.9, totalHistProcess);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.3, 0.9, totalHistProcess);
 
   if (this->m_validGroups.size() == 1) {
     g_log.information() << "Performing focussing on a single group\n";
     // Special case of a single group - parallelize differently
     EventList &groupEL = out->getSpectrum(0);
-    const int group = m_validGroups[0];
-    const std::vector<size_t> &indices = this->m_wsIndices[group];
+    const std::vector<size_t> &indices = this->m_wsIndices[0];
 
     int chunkSize = 200;
 
@@ -433,11 +424,10 @@ void DiffractionFocussing2::execEvent() {
     // ------ PARALLELIZE BY GROUPS -------------------------
 
     int nValidGroups = static_cast<int>(this->m_validGroups.size());
-    PARALLEL_FOR1(m_eventW)
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_eventW))
     for (int iGroup = 0; iGroup < nValidGroups; iGroup++) {
       PARALLEL_START_INTERUPT_REGION
-      const int group = this->m_validGroups[iGroup];
-      const std::vector<size_t> &indices = this->m_wsIndices[group];
+      const std::vector<size_t> &indices = this->m_wsIndices[iGroup];
       for (auto wi : indices) {
         // In workspace index iGroup, put what was in the OLD workspace index wi
         out->getSpectrum(iGroup) += m_eventW->getSpectrum(wi);
@@ -459,11 +449,11 @@ void DiffractionFocussing2::execEvent() {
 
   // Now that the data is cleaned up, go through it and set the X vectors to the
   // input workspace we first talked about.
-  delete prog;
-  prog = new Progress(this, 0.9, 1.0, nGroups);
+  prog.reset();
+  prog = make_unique<Progress>(this, 0.9, 1.0, nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size();
        workspaceIndex++) {
-    const int group = this->m_validGroups[workspaceIndex];
+    const int group = static_cast<int>(m_validGroups[workspaceIndex]);
     // Now this is the workspace index of that group; simply 1 offset
     prog->reportIncrement(1, "Setting X");
 
@@ -489,9 +479,7 @@ void DiffractionFocussing2::execEvent() {
                          "groups. Histogram will be empty.\n";
   }
   out->clearMRU();
-  setProperty("OutputWorkspace",
-              boost::dynamic_pointer_cast<MatrixWorkspace>(out));
-  delete prog;
+  setProperty("OutputWorkspace", std::move(out));
 }
 
 //=============================================================================
@@ -561,6 +549,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     checkForMask = ((instrument->getSource() != nullptr) &&
                     (instrument->getSample() != nullptr));
   }
+  const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
 
   groupAtWorkspaceIndex.resize(nHist);
   for (int wi = 0; wi < nHist;
@@ -571,10 +560,8 @@ void DiffractionFocussing2::determineRebinParameters() {
     if (group == -1)
       continue;
 
-    // the spectrum is the real thing we want to work with
-    const auto &spec = m_matrixInputW->getSpectrum(wi);
     if (checkForMask) {
-      if (instrument->isDetectorMasked(spec.getDetectorIDs())) {
+      if (spectrumInfo.isMasked(wi)) {
         groupAtWorkspaceIndex[wi] = -1;
         continue;
       }
@@ -588,7 +575,7 @@ void DiffractionFocussing2::determineRebinParameters() {
     }
     const double min = (gpit->second).first;
     const double max = (gpit->second).second;
-    auto &X = spec.x();
+    auto &X = m_matrixInputW->x(wi);
     double temp = X.front();
     if (temp < (min)) // New Xmin found
       (gpit->second).first = temp;
@@ -673,6 +660,11 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
       totalHistProcess += this->m_wsIndices[i].size();
     }
   }
+
+  m_wsIndices.erase(
+      std::remove_if(m_wsIndices.begin(), m_wsIndices.end(),
+                     [](const std::vector<size_t> &v) { return v.empty(); }),
+      m_wsIndices.end());
 
   return totalHistProcess;
 }

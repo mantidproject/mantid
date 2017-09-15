@@ -134,9 +134,8 @@ std::string FileFinderImpl::getFullPath(const std::string &filename,
     if (fName.find("*") != std::string::npos) {
 #endif
       Poco::Path path(searchPath, fName);
-      Poco::Path pathPattern(path);
       std::set<std::string> files;
-      Kernel::Glob::glob(pathPattern, files, m_globOption);
+      Kernel::Glob::glob(path, files, m_globOption);
       if (!files.empty()) {
         Poco::File matchPath(*files.begin());
         if (ignoreDirs && matchPath.isDirectory()) {
@@ -683,6 +682,14 @@ std::string
 FileFinderImpl::getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
                                const std::set<std::string> &filenames,
                                const std::vector<std::string> &exts) const {
+  g_log.debug() << "getArchivePath([IArchiveSearch_sptr], [ ";
+  for (const auto &iter : filenames)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "], [ ";
+  for (const auto &iter : exts)
+    g_log.debug() << iter << " ";
+  g_log.debug() << "])\n";
+
   std::string path;
   for (const auto &arch : archs) {
     try {

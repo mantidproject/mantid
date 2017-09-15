@@ -1,21 +1,22 @@
-//---------------------------------------------------
-// Includes
-//---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/HistogramValidator.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Unit.h"
 
 #include "Poco/File.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-
-#include <cstdio>
 #include <cmath>
+
+#include <cmath>
+#include <cstdio>
 #include <stdexcept>
 
 namespace Mantid {
@@ -108,7 +109,7 @@ void SaveSPE::exec() {
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
+  if (!WorkspaceHelpers::commonBoundaries(*inputWS)) {
     throw std::invalid_argument("The input workspace must have common binning");
   }
 
@@ -181,8 +182,7 @@ void SaveSPE::writeSPEFile(FILE *outSPEFile,
 
   // Get the Energy Axis (X) of the first spectra (they are all the same -
   // checked above)
-  const MantidVec &X = inputWS->readX(0);
-
+  const auto &X = inputWS->x(0);
   // Write the energy grid
   FPRINTF_WITH_EXCEPTION(outSPEFile, "### Energy Grid\n");
   const size_t energyPoints = m_nBins + 1; // Validator enforces binned data
@@ -217,7 +217,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   bool isNumericAxis = WS->getAxis(1)->isNumeric();
   const size_t nHist = WS->getNumberHistograms();
   // Create a progress reporting object
-  Progress progress(this, 0, 1, 100);
+  Progress progress(this, 0.0, 1.0, 100);
   const int progStep = static_cast<int>(ceil(static_cast<int>(nHist) / 100.0));
 
   // there are very often spectra that are missing detectors, as this can be a
@@ -225,11 +225,11 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   std::vector<int> spuriousSpectra;
   // used only for debugging
   int nMasked = 0;
+  const auto &spectrumInfo = WS->spectrumInfo();
   // Loop over the spectra, writing out Y and then E values for each
   for (int i = 0; i < static_cast<int>(nHist); i++) {
-    try { // need to check if _all_ the detectors for the spectrum are masked,
-          // as we don't have output values for those
-      if (isNumericAxis || !WS->getDetector(i)->isMasked()) {
+    if (spectrumInfo.hasDetectors(i)) {
+      if (isNumericAxis || !spectrumInfo.isMasked(i)) {
         // there's no masking, write the data
         writeHist(WS, outFile, i);
       } else { // all the detectors are masked, write the masking value from the
@@ -238,11 +238,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
         writeMaskFlags(outFile);
         nMasked++;
       }
-    } catch (Exception::NotFoundError &) { // WS->getDetector(i) throws this if
-                                           // the detector isn't in the
-                                           // instrument definition file, write
-                                           // mask values and prepare to log
-                                           // what happened
+    } else { // if the detector isn't in the instrument definition file, write
+             // mask values and prepare to log what happened
       spuriousSpectra.push_back(i);
       writeMaskFlags(outFile);
     }
@@ -264,15 +261,16 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS,
   values in place of NaN-s and Inf-S of the correspondent signal
 
 */
-void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
-                                     const MantidVec &inErr, MantidVec &Signal,
-                                     MantidVec &Error) const {
+void SaveSPE::check_and_copy_spectra(const HistogramData::HistogramY &inSignal,
+                                     const HistogramData::HistogramE &inErr,
+                                     std::vector<double> &Signal,
+                                     std::vector<double> &Error) const {
   if (Signal.size() != inSignal.size()) {
     Signal.resize(inSignal.size());
     Error.resize(inSignal.size());
   }
   for (size_t i = 0; i < inSignal.size(); i++) {
-    if (boost::math::isnan(inSignal[i]) || boost::math::isinf(inSignal[i])) {
+    if (!std::isfinite(inSignal[i])) {
       Signal[i] = SaveSPE::MASK_FLAG;
       Error[i] = SaveSPE::MASK_ERROR;
     } else {
@@ -281,6 +279,7 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
     }
   }
 }
+
 /** Write the bin values and errors in a single histogram spectra to the file
 *  @param WS :: the workspace to being saved
 *  @param outFile :: the file object to write to
@@ -288,7 +287,7 @@ void SaveSPE::check_and_copy_spectra(const MantidVec &inSignal,
 */
 void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS,
                         FILE *const outFile, const int wsIn) const {
-  check_and_copy_spectra(WS->readY(wsIn), WS->readE(wsIn), m_tSignal, m_tError);
+  check_and_copy_spectra(WS->y(wsIn), WS->e(wsIn), m_tSignal, m_tError);
   FPRINTF_WITH_EXCEPTION(outFile, "%s", Y_HEADER);
   writeBins(m_tSignal, outFile);
 
@@ -309,7 +308,8 @@ void SaveSPE::writeMaskFlags(FILE *const outFile) const {
 *  @param Vs :: the array of values to write (must have length given by m_nbins)
 *  @param outFile :: the file object to write to
 */
-void SaveSPE::writeBins(const MantidVec &Vs, FILE *const outFile) const {
+void SaveSPE::writeBins(const std::vector<double> &Vs,
+                        FILE *const outFile) const {
 
   for (size_t j = NUM_PER_LINE - 1; j < m_nBins;
        j += NUM_PER_LINE) { // output a whole line of numbers at once

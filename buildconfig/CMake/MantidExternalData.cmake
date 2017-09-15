@@ -37,6 +37,9 @@ list(APPEND ExternalData_URL_TEMPLATES
 list(APPEND ExternalData_URL_TEMPLATES
      "file:///Users/builder/MantidExternalData-readonly/%(algo)/%(hash)" )
 list(APPEND ExternalData_URL_TEMPLATES
+     "http://mantidweb.nd.rl.ac.uk/externaldata/isis-readonly/%(algo)/%(hash)" )
+# This should always be last as it's the main read/write cache
+list(APPEND ExternalData_URL_TEMPLATES
      "http://198.74.56.37/ftp/external-data/%(algo)/%(hash)" )
 
 # Increase network timeout defaults to avoid our slow server connection but don't override what a user provides

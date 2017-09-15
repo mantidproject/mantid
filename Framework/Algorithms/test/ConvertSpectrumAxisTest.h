@@ -5,6 +5,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/Unit.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -164,6 +165,42 @@ public:
 
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
+  }
+};
+
+class ConvertSpectrumAxisTestPerformance : public CxxTest::TestSuite {
+private:
+  Workspace_sptr m_inputWorkspace;
+
+public:
+  static ConvertSpectrumAxisTestPerformance *createSuite() {
+    return new ConvertSpectrumAxisTestPerformance();
+  }
+  static void destroySuite(ConvertSpectrumAxisTestPerformance *suite) {
+    delete suite;
+  }
+
+  ConvertSpectrumAxisTestPerformance() {
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.setChild(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48127.raw");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.execute();
+    m_inputWorkspace = loader.getProperty("OutputWorkspace");
+  }
+  void test_exec_performance() {
+
+    Mantid::Algorithms::ConvertSpectrumAxis alg;
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_inputWorkspace);
+    alg.setProperty("Target", "theta");
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    for (int i = 0; i < 1000; ++i) {
+      alg.execute();
+    }
+    MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
   }
 };
 

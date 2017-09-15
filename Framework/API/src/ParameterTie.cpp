@@ -115,8 +115,8 @@ double ParameterTie::eval() {
       *(it->first) = it->second.getParameter();
     }
     res = m_parser->Eval();
-  } catch (...) {
-    throw std::runtime_error("Error in expresseion");
+  } catch (mu::ParserError &e) {
+    throw std::runtime_error("Error in expression: " + e.GetMsg());
   }
 
   setParameter(res);
@@ -177,11 +177,10 @@ std::string ParameterTie::asString(const IFunction *fun) const {
  */
 bool ParameterTie::findParametersOf(const IFunction *fun) const {
   for (const auto &varPair : m_varMap) {
-    if (varPair.second.getFunction() == fun) {
+    if (varPair.second.isParameterOf(fun)) {
       return true;
     }
   }
-
   return false;
 }
 

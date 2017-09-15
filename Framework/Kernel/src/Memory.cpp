@@ -1,7 +1,9 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
 #include <sstream>
+#include <stdio.h>
 
 #ifdef __linux__
 #include <unistd.h>

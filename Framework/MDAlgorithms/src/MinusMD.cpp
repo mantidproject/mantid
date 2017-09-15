@@ -1,9 +1,9 @@
 #include "MantidMDAlgorithms/MinusMD.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidDataObjects/MDBoxIterator.h"
-#include "MantidDataObjects/MDBox.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -51,8 +51,7 @@ void MinusMD::checkInputs() {
  * @param ws ::  MDEventWorkspace being added to
  */
 template <typename MDE, size_t nd>
-void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  typename MDEventWorkspace<MDE, nd>::sptr ws1 = ws;
+void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
       boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)
@@ -91,6 +90,9 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   } while (it2.next());
 
   this->progress(0.41, "Splitting Boxes");
+
+  // This is freed in the destructor of the ThreadPool class,
+  // it should not be a memory leak
   auto prog2 = new Progress(this, 0.4, 0.9, 100);
   ThreadScheduler *ts = new ThreadSchedulerFIFO();
   ThreadPool tp(ts, 0, prog2);
@@ -133,7 +135,7 @@ void MinusMD::execHistoHisto(
 void MinusMD::execHistoScalar(
     Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
-  out->subtract(scalar->dataY(0)[0], scalar->dataE(0)[0]);
+  out->subtract(scalar->y(0)[0], scalar->e(0)[0]);
 }
 
 } // namespace Mantid

@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -14,7 +15,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-//--------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void FindUBUsingLatticeParameters::init() {
@@ -46,9 +46,10 @@ void FindUBUsingLatticeParameters::init() {
                         "Number of Peaks to Use on First Pass(15)");
   this->declareProperty("Tolerance", 0.15, mustBePositive,
                         "Indexing Tolerance (0.15)");
+  this->declareProperty("FixParameters", false,
+                        "Do not optimise the UB after finding the orientation");
 }
 
-//--------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void FindUBUsingLatticeParameters::exec() {
@@ -60,6 +61,7 @@ void FindUBUsingLatticeParameters::exec() {
   double gamma = this->getProperty("gamma");
   int num_initial = this->getProperty("NumInitial");
   double tolerance = this->getProperty("Tolerance");
+  auto fixAll = this->getProperty("FixParameters");
 
   int base_index = -1; // these "could" be properties if need be
   double degrees_per_step = 1.5;
@@ -78,12 +80,13 @@ void FindUBUsingLatticeParameters::exec() {
     q_vectors.push_back(peaks[i].getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
-  double error = IndexingUtils::Find_UB(UB, q_vectors, a, b, c, alpha, beta,
-                                        gamma, tolerance, base_index,
-                                        num_initial, degrees_per_step);
+  OrientedLattice lattice(a, b, c, alpha, beta, gamma);
+  double error =
+      IndexingUtils::Find_UB(UB, q_vectors, lattice, tolerance, base_index,
+                             num_initial, degrees_per_step, fixAll);
 
-  std::cout << "Error = " << error << '\n';
-  std::cout << "UB = " << UB << '\n';
+  g_log.notice() << "Error = " << error << '\n';
+  g_log.notice() << "UB = " << UB << '\n';
 
   if (!IndexingUtils::CheckUB(UB)) // UB not found correctly
   {
@@ -92,18 +95,6 @@ void FindUBUsingLatticeParameters::exec() {
     g_log.notice(std::string("UB NOT SAVED."));
   } else // tell user how many would be indexed
   {      // and save the UB in the sample
-
-    std::vector<double> sigabc(7);
-    std::vector<V3D> miller_ind;
-    std::vector<V3D> indexed_qs;
-    double fit_error;
-    miller_ind.reserve(q_vectors.size());
-    indexed_qs.reserve(q_vectors.size());
-    IndexingUtils::GetIndexedPeaks(UB, q_vectors, tolerance, miller_ind,
-                                   indexed_qs, fit_error);
-
-    IndexingUtils::Optimize_UB(UB, miller_ind, indexed_qs, sigabc);
-
     char logInfo[200];
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     sprintf(logInfo,
@@ -113,27 +104,21 @@ void FindUBUsingLatticeParameters::exec() {
             num_indexed, n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-
-    o_lattice.setUB(UB);
-    double calc_a = o_lattice.a();
-    double calc_b = o_lattice.b();
-    double calc_c = o_lattice.c();
-    double calc_alpha = o_lattice.alpha();
-    double calc_beta = o_lattice.beta();
-    double calc_gamma = o_lattice.gamma();
+    double calc_a = lattice.a();
+    double calc_b = lattice.b();
+    double calc_c = lattice.c();
+    double calc_alpha = lattice.alpha();
+    double calc_beta = lattice.beta();
+    double calc_gamma = lattice.gamma();
     // Show the modified lattice parameters
-    g_log.notice() << o_lattice << "\n";
+    g_log.notice() << lattice << "\n";
 
     sprintf(logInfo, std::string("Lattice Parameters (Refined - Input): %11.6f "
                                  "%11.6f %11.6f %11.6f %11.6f %11.6f").c_str(),
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha,
             calc_beta - beta, calc_gamma - gamma);
     g_log.notice(std::string(logInfo));
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    ws->mutableSample().setOrientedLattice(&lattice);
   }
 }
 

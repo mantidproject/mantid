@@ -172,6 +172,44 @@ public:
     removeFile(FILENAME);
   }
 
+  void test_string_vector() {
+    std::vector<std::string> readout;
+    const std::string filename = "test_string_vec.h5";
+    const std::string dataname = "test_str_vec";
+    const hsize_t dims[1] = {5};
+    const char *wdata[5] = {"Lets", "see", "how", "it", "goes"};
+
+    // write a test file
+    H5File file(filename, H5F_ACC_TRUNC);
+    Group group = file.createGroup("entry");
+    DataSpace dataspace(1, dims);
+    StrType datatype(0, H5T_VARIABLE);
+    DataSet dataset = group.createDataSet(dataname, datatype, dataspace);
+    dataset.write(wdata, datatype);
+    dataset.close();
+    group.close();
+    file.close();
+
+    // check it exists
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // open and read the vector
+    H5File file_read(filename, H5F_ACC_RDONLY);
+    Group group_read = file_read.openGroup("entry");
+
+    readout = H5Util::readStringVector(group_read, dataname);
+
+    for (size_t i = 0; i < readout.size(); ++i) {
+      TS_ASSERT_EQUALS(readout[i], std::string(wdata[i]));
+    }
+
+    group_read.close();
+    file_read.close();
+
+    // remove the file
+    removeFile(filename);
+  }
+
 private:
   void do_assert_simple_string_data_set(
       const std::string &filename, const std::string &groupName,

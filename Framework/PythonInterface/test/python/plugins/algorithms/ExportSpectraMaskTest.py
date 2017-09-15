@@ -1,9 +1,12 @@
+from __future__ import (absolute_import, division, print_function)
+
 import os
 import sys
 import numpy as np
 import unittest
 import mantid
 from mantid.simpleapi import ExportSpectraMask,DeleteWorkspace
+from six.moves import range
 
 class ExportSpectraMaskTest(unittest.TestCase):
     def __init__(self,method_name):
@@ -11,7 +14,7 @@ class ExportSpectraMaskTest(unittest.TestCase):
 
         self.this_path = os.path.dirname(os.path.realpath(__file__))
         test_path = self.this_path;
-        for i in xrange(0,4):
+        for i in range(0,4):
             test_path,_ = os.path.split(test_path)
         self.test_mod_path = os.path.join(test_path,'plugins/algorithms')
         sys.path.append(self.test_mod_path)

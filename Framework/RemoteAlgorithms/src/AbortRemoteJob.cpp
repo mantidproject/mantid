@@ -1,4 +1,5 @@
 #include "MantidRemoteAlgorithms/AbortRemoteJob.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -18,6 +19,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 // A reference to the logger is provided by the base class, it is called g_log.
+
+/// Empty constructor
+AbortRemoteJob::AbortRemoteJob() { this->useAlgorithm("AbortRemoteJob", 2); }
 
 void AbortRemoteJob::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....

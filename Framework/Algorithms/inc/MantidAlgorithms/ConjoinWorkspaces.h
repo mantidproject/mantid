@@ -5,6 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/WorkspaceJoiners.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
+// Forward declarations
+namespace Mantid {
+namespace DataObjects {
+class EventWorkspace;
+}
+}
 
 namespace Mantid {
 namespace Algorithms {
@@ -62,13 +70,19 @@ private:
   void init() override;
   void exec() override;
 
-  void checkForOverlap(API::MatrixWorkspace_const_sptr ws1,
-                       API::MatrixWorkspace_const_sptr ws2,
+  void checkForOverlap(const API::MatrixWorkspace &ws1,
+                       const API::MatrixWorkspace &ws2,
                        bool checkSpectra) const;
-  void fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1,
-                          API::MatrixWorkspace_const_sptr ws2,
-                          API::MatrixWorkspace_sptr output) override;
+  API::MatrixWorkspace_sptr
+  conjoinEvents(const DataObjects::EventWorkspace &ws1,
+                const DataObjects::EventWorkspace &ws2);
+  API::MatrixWorkspace_sptr conjoinHistograms(const API::MatrixWorkspace &ws1,
+                                              const API::MatrixWorkspace &ws2);
+  void fixSpectrumNumbers(const API::MatrixWorkspace &ws1,
+                          const API::MatrixWorkspace &ws2,
+                          API::MatrixWorkspace &output) override;
   bool processGroups() override;
+  void setYUnitAndLabel(API::MatrixWorkspace &ws) const;
 
   /// True if spectra overlap
   bool m_overlapChecked = false;

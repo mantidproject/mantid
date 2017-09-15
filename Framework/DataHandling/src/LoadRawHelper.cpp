@@ -4,18 +4,19 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/RawFileInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadAscii.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -382,14 +383,12 @@ void LoadRawHelper::setWorkspaceData(
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
     return;
-  typedef double (*uf)(double);
-  uf dblSqrt = std::sqrt;
+
   // But note that the last (overflow) bin is kept
-  MantidVec &Y = newWorkspace->dataY(wsIndex);
+  auto &Y = newWorkspace->mutableY(wsIndex);
   Y.assign(isisRaw->dat1 + binStart, isisRaw->dat1 + lengthIn);
   // Fill the vector for the errors, containing sqrt(count)
-  MantidVec &E = newWorkspace->dataE(wsIndex);
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  newWorkspace->setCountVariances(wsIndex, Y.rawData());
 
   newWorkspace->getSpectrum(wsIndex).setSpectrumNo(nspecNum);
   // for loadrawbin0
@@ -560,7 +559,7 @@ void LoadRawHelper::runLoadInstrument(
     runLoadInstrumentFromRaw(fileName, localWorkspace);
   } else {
     // If requested update the instrument to positions in the raw file
-    const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
+    const auto &pmap = localWorkspace->constInstrumentParameters();
     if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                       "det-pos-source")) {
       boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
@@ -1259,7 +1258,6 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
 
   std::string str;
   std::string path;
-  std::string logFile;
   std::set<std::string> logfilesList;
   Poco::Path logpath(pathToRawFile);
   size_t pos = pathToRawFile.find_last_of('/');
@@ -1278,10 +1276,7 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
     pos = fileName.find("txt");
     if (pos == std::string::npos)
       continue;
-    logFile = path + "/" + fileName;
-    if (logFile.empty())
-      continue;
-    logfilesList.insert(logFile);
+    logfilesList.insert(std::string(path).append("/").append(fileName));
   }
   return (logfilesList);
 }

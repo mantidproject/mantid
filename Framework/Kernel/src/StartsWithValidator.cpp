@@ -1,10 +1,27 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidKernel/StartsWithValidator.h"
+#ifndef Q_MOC_RUN
+#include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
+#endif
 
 namespace Mantid {
 namespace Kernel {
+/**
+ * Constructor.
+ * @param values :: A vector with the allowed values.
+ */
+StartsWithValidator::StartsWithValidator(const std::vector<std::string> &values)
+    : Kernel::StringListValidator(values) {}
+/**
+ * Constructor.
+ * @param values :: A set with the allowed values.
+ */
+StartsWithValidator::StartsWithValidator(const std::set<std::string> &values)
+    : Kernel::StringListValidator(values) {}
+/// Clone the validator
+IValidator_sptr StartsWithValidator::clone() const {
+  return boost::make_shared<StartsWithValidator>(*this);
+}
 
 /** Checks if the string passed starts with one from the list
   *  @param value :: The value to test

@@ -5,6 +5,7 @@ Figure, Graph, etc. data), and proper handling (exception) of wrong
 input parameters. Tests plotting of normal arrays and workspaces with the following tools ('tool' kwarg): plot_spectrum, plot_bin, plot_
 
 """
+from __future__ import (absolute_import, division, print_function)
 import mantidplottests
 from mantidplottests import *
 import time
@@ -44,7 +45,7 @@ CreateWorkspace(OutputWorkspace=SecondWorkspaceName2D, DataX=list(sec_X), DataY=
 
 # plot_md needs an MD workspace with a single non-integrated dimension
 MDWWorkspaceName = 'mdw'
-mdSignal = np.sin(range(0,100,1))
+mdSignal = np.sin(list(range(0,100,1)))
 errInput = mdSignal/20.5
 CreateMDHistoWorkspace(Dimensionality="1", Names='x', Units='m', Extents='0,10', NumberOfBins=len(mdSignal), SignalInput=mdSignal, ErrorInput=errInput, OutputWorkspace=MDWWorkspaceName)
 
@@ -126,7 +127,7 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
     def test_lines_get_data(self):
         y = [0.2, 0.5, 0.1, 0.6]
         # note this assumes that plot will make a dummy workspace using 0,1,2... as X
-        x = range(0, len(y), 1)
+        x = list(range(0, len(y), 1))
 
         lines = plot(y)
         self.check_output_lines(lines, 1)

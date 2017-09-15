@@ -4,19 +4,19 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Object.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -25,7 +25,6 @@ using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
-using namespace BOOST_FUNCTION_STD_NS;
 using namespace std;
 
 // Subscription
@@ -56,11 +55,10 @@ VesuvioCalculateGammaBackground::VesuvioCalculateGammaBackground()
     : Algorithm(), m_inputWS(), m_indices(), m_profileFunction(), m_npeaks(0),
       m_reversed(), m_samplePos(), m_l1(0.0), m_foilRadius(0.0),
       m_foilUpMin(0.0), m_foilUpMax(0.0), m_foils0(), m_foils1(),
-      m_backgroundWS(), m_correctedWS(), m_progress(nullptr) {}
+      m_backgroundWS(), m_correctedWS() {}
 
 /// Destructor
 VesuvioCalculateGammaBackground::~VesuvioCalculateGammaBackground() {
-  delete m_progress;
   m_indices.clear();
 }
 
@@ -114,9 +112,10 @@ void VesuvioCalculateGammaBackground::exec() {
   const int64_t nhist = static_cast<int64_t>(m_indices.size());
   const int64_t nreports =
       10 + nhist * (m_npeaks + 2 * m_foils0.size() * NTHETA * NUP * m_npeaks);
-  m_progress = new Progress(this, 0.0, 1.0, nreports);
+  m_progress = make_unique<Progress>(this, 0.0, 1.0, nreports);
 
-  PARALLEL_FOR3(m_inputWS, m_correctedWS, m_backgroundWS)
+  PARALLEL_FOR_IF(
+      Kernel::threadSafe(*m_inputWS, *m_correctedWS, *m_backgroundWS))
   for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
     const size_t outputIndex = i;
@@ -148,10 +147,10 @@ void VesuvioCalculateGammaBackground::exec() {
 bool VesuvioCalculateGammaBackground::calculateBackground(
     const size_t inputIndex, const size_t outputIndex) {
   // Copy X values
-  m_backgroundWS->setX(outputIndex, m_inputWS->refX(inputIndex));
-  m_correctedWS->setX(outputIndex, m_inputWS->refX(inputIndex));
+  m_backgroundWS->setSharedX(outputIndex, m_inputWS->sharedX(inputIndex));
+  m_correctedWS->setSharedX(outputIndex, m_inputWS->sharedX(inputIndex));
   // Copy errors to corrected
-  m_correctedWS->dataE(outputIndex) = m_inputWS->readE(inputIndex);
+  m_correctedWS->setSharedE(outputIndex, m_inputWS->sharedE(inputIndex));
 
   try {
     const auto &inSpec = m_inputWS->getSpectrum(inputIndex);
@@ -166,7 +165,7 @@ bool VesuvioCalculateGammaBackground::calculateBackground(
       g_log.information("Spectrum " + std::to_string(spectrumNo) +
                         " not in forward scatter range. Skipping correction.");
       // Leave background at 0 and just copy data to corrected
-      m_correctedWS->dataY(outputIndex) = m_inputWS->readY(inputIndex);
+      m_correctedWS->setSharedY(outputIndex, m_inputWS->sharedY(inputIndex));
     }
     return true;
   } catch (Exception::NotFoundError &) {
@@ -196,11 +195,11 @@ void VesuvioCalculateGammaBackground::applyCorrection(
   // Compute total counts from input data, (detector-foil) contributions
   // assume constant binning
   const size_t nbins = m_correctedWS->blocksize();
-  const auto &inY = m_inputWS->readY(inputIndex);
-  auto &detY = m_correctedWS->dataY(outputIndex);
-  auto &foilY = m_backgroundWS->dataY(outputIndex);
-  const double deltaT = m_correctedWS->readX(outputIndex)[1] -
-                        m_correctedWS->readX(outputIndex)[0];
+  const auto &inY = m_inputWS->y(inputIndex);
+  auto &detY = m_correctedWS->mutableY(outputIndex);
+  auto &foilY = m_backgroundWS->mutableY(outputIndex);
+  const double deltaT =
+      m_correctedWS->x(outputIndex)[1] - m_correctedWS->x(outputIndex)[0];
 
   double dataCounts(0.0), simulCounts(0.0);
   for (size_t j = 0; j < nbins; ++j) {
@@ -241,9 +240,10 @@ void VesuvioCalculateGammaBackground::calculateSpectrumFromDetector(
   // Compute a time of flight spectrum convolved with a Voigt resolution
   // function for each mass
   // at the detector point & sum to a single spectrum
-  auto &ctdet = m_correctedWS->dataY(outputIndex);
+  auto &ctdet = m_correctedWS->mutableY(outputIndex);
   std::vector<double> tmpWork(ctdet.size());
-  calculateTofSpectrum(ctdet, tmpWork, outputIndex, detPar, detRes);
+  ctdet = calculateTofSpectrum(ctdet.rawData(), tmpWork, outputIndex, detPar,
+                               detRes);
   // Correct for distance to the detector: 0.5/l2^2
   const double detDistCorr = 0.5 / detPar.l2 / detPar.l2;
   std::transform(ctdet.begin(), ctdet.end(), ctdet.begin(),
@@ -268,7 +268,7 @@ void VesuvioCalculateGammaBackground::calculateBackgroundFromFoils(
 
   const size_t nxvalues = m_backgroundWS->blocksize();
   std::vector<double> foilSpectrum(nxvalues);
-  auto &ctfoil = m_backgroundWS->dataY(outputIndex);
+  auto &ctfoil = m_backgroundWS->mutableY(outputIndex);
 
   // Compute (C1 - C0) where C1 is counts in pos 1 and C0 counts in pos 0
   assert(m_foils0.size() == m_foils1.size());
@@ -351,7 +351,8 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 
       // Spectrum for this position
       singleElement.assign(nvalues, 0.0);
-      calculateTofSpectrum(singleElement, tmpWork, wsIndex, foilPar, foilRes);
+      singleElement = calculateTofSpectrum(singleElement, tmpWork, wsIndex,
+                                           foilPar, foilRes);
 
       // Correct for absorption & distance
       const double den = (elementPos.Z() * cos(thetaZeroRad) +
@@ -372,21 +373,21 @@ void VesuvioCalculateGammaBackground::calculateBackgroundSingleFoil(
 
 /**
 * Uses the compton profile functions to compute a particular mass spectrum
-* @param result [Out] The value of the computed spectrum
-* @param tmpWork [In] Pre-allocated working area that will be overwritten
+* @param inSpectrum The value of the computed spectrum
+* @param tmpWork Pre-allocated working area that will be overwritten
 * @param wsIndex Index on the output background workspace that gives the X
 * values to use
 * @param detpar Struct containing parameters about the detector
 * @param respar Struct containing parameters about the resolution
 */
-void VesuvioCalculateGammaBackground::calculateTofSpectrum(
-    std::vector<double> &result, std::vector<double> &tmpWork,
+std::vector<double> VesuvioCalculateGammaBackground::calculateTofSpectrum(
+    const std::vector<double> &inSpectrum, std::vector<double> &tmpWork,
     const size_t wsIndex, const DetectorParams &detpar,
     const ResolutionParams &respar) {
-  assert(result.size() == tmpWork.size());
+  assert(inSpectrum.size() == tmpWork.size());
 
   // Assumes the input is in seconds, transform it temporarily
-  auto &tseconds = m_backgroundWS->dataX(wsIndex);
+  auto &tseconds = m_backgroundWS->mutableX(wsIndex);
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
                  std::bind2nd(std::multiplies<double>(), 1e-6));
 
@@ -395,6 +396,8 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
   // we can't static_cast though due to the virtual inheritance with IFunction
   auto profileFunction = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createInitialized(m_profileFunction));
+
+  std::vector<double> correctedVals(inSpectrum);
 
   for (size_t i = 0; i < m_npeaks; ++i) {
     auto profile =
@@ -406,17 +409,19 @@ void VesuvioCalculateGammaBackground::calculateTofSpectrum(
     // Fix the Mass parameter
     profile->fix(0);
 
-    profile->cacheYSpaceValues(tseconds, false, detpar, respar);
+    profile->cacheYSpaceValues(m_backgroundWS->points(wsIndex), detpar, respar);
 
     profile->massProfile(tmpWork.data(), tmpWork.size());
     // Add to final result
-    std::transform(result.begin(), result.end(), tmpWork.begin(),
-                   result.begin(), std::plus<double>());
+
+    std::transform(correctedVals.begin(), correctedVals.end(), tmpWork.begin(),
+                   correctedVals.begin(), std::plus<double>());
     m_progress->report();
   }
   // Put X back microseconds
   std::transform(tseconds.begin(), tseconds.end(), tseconds.begin(),
                  std::bind2nd(std::multiplies<double>(), 1e6));
+  return correctedVals;
 }
 
 /**
@@ -540,9 +545,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng0.first;
     descr.thetaMax = thetaRng0.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil0, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil0, pmap, "sigma_gauss");
     m_foils0[i] = descr; // copy
 
     const auto &foil1 = foils1[i];
@@ -551,9 +556,9 @@ void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
     descr.thetaMin = thetaRng1.first;
     descr.thetaMax = thetaRng1.second;
     descr.lorentzWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "hwhm_lorentz");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "hwhm_lorentz");
     descr.gaussWidth =
-        ConvertToYSpace::getComponentParameter(foil1, pmap, "sigma_gauss");
+        ConvertToYSpace::getComponentParameter(*foil1, pmap, "sigma_gauss");
     m_foils1[i] = descr; // copy
   }
 

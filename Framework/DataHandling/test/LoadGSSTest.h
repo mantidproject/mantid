@@ -4,10 +4,13 @@
 #include "cxxtest/TestSuite.h"
 #include "MantidDataHandling/LoadGSS.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Unit.h"
 
 using namespace Mantid;
 using Mantid::DataHandling::LoadGSS;
@@ -26,13 +29,14 @@ public:
   void test_load_gss_txt() {
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", "gss.txt");
-    TS_ASSERT(loader->execute())
+    loader->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader->execute());
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
     // Check a few things in the workspace
     checkWorkspace(ws, 8, 816);
-    auto x1 = ws->readX(0)[99];
-    auto x2 = ws->readX(0)[100];
-    auto y = ws->readY(0)[99];
+    auto x1 = ws->x(0)[99];
+    auto x2 = ws->x(0)[100];
+    auto y = ws->y(0)[99];
     TS_ASSERT_DELTA((x1 + x2) / 2, 40844.0625, 1e-6);
     TS_ASSERT_DELTA(y, 145304004.625, 1e-6);
   }
@@ -67,34 +71,27 @@ public:
     ScopedFile file(gss, "gss_large_x.txt");
     API::IAlgorithm_sptr loader = createAlgorithm();
     loader->setPropertyValue("Filename", file.getFileName());
-    TS_ASSERT(loader->execute())
+    TS_ASSERT(loader->execute());
+    TS_ASSERT_EQUALS(loader->isExecuted(), true);
     API::MatrixWorkspace_const_sptr ws = loader->getProperty("OutputWorkspace");
-    auto x1 = ws->readX(0)[0];
-    auto x2 = ws->readX(0)[1];
+    auto x1 = ws->x(0)[0];
+    auto x2 = ws->x(0)[1];
     auto dx = x2 - x1;
-    auto y = ws->readY(0)[0] * dx;
+    auto y = ws->y(0)[0] * dx;
     TS_ASSERT_DELTA((x1 + x2) / 2, 115202.20029, 1e-6);
     TS_ASSERT_DELTA(y, 123456.00000002, 1e-10);
-    x1 = ws->readX(0)[3];
-    x2 = ws->readX(0)[4];
+    x1 = ws->x(0)[3];
+    x2 = ws->x(0)[4];
     dx = x2 - x1;
-    y = ws->readY(0)[3] * dx;
+    y = ws->y(0)[3] * dx;
     TS_ASSERT_DELTA(y, 123456789.00000005, 1e-10);
 
-    const auto source = ws->getInstrument()->getSource();
-    const auto sample = ws->getInstrument()->getSample();
-    TS_ASSERT_DELTA(sample->getDistance(*source), 40., 1e-4);
-
-    const auto det0 = ws->getDetector(0);
-    TS_ASSERT_DELTA(det0->getDistance(*sample), 2.2222, 1e-4);
-    TS_ASSERT_DELTA(det0->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
-                        180. / M_PI,
-                    58.308, 1e-4);
-    const auto det1 = ws->getDetector(1);
-    TS_ASSERT_DELTA(det1->getDistance(*sample), 2.060, 1e-4);
-    TS_ASSERT_DELTA(det1->getTwoTheta(V3D(0.0, 0.0, 0.0), V3D(0.0, 0.0, 1.0)) *
-                        180. / M_PI,
-                    154.257, 1e-4);
+    const auto &spectrumInfo = ws->spectrumInfo();
+    TS_ASSERT_DELTA(spectrumInfo.l1(), 40., 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.l2(0), 2.2222, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(0) * 180. / M_PI, 58.308, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.l2(1), 2.060, 1e-4);
+    TS_ASSERT_DELTA(spectrumInfo.twoTheta(1) * 180. / M_PI, 154.257, 1e-4);
   }
 
   void test_load_gss_ExtendedHeader_gsa() {
@@ -175,4 +172,43 @@ private:
   }
 };
 
+class LoadGSSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadGSSPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    API::AnalysisDataService::Instance().remove(outWsName);
+  }
+
+private:
+  std::vector<LoadGSS *> loadAlgPtrs;
+  const int numberOfIterations = 100;
+  const std::string outWsName = "TestWS";
+
+  LoadGSS *setupAlg() {
+    LoadGSS *loadAlg = new LoadGSS();
+    loadAlg->initialize();
+
+    loadAlg->setPropertyValue("Filename", "gss1.txt");
+    loadAlg->setProperty("OutputWorkspace", outWsName);
+    loadAlg->setProperty("UseBankIDasSpectrumNumber", true);
+
+    loadAlg->setRethrows(true);
+    return loadAlg;
+  }
+};
 #endif // LOADGSSTEST_H_

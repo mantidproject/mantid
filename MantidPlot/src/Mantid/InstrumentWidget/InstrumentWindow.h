@@ -3,8 +3,8 @@
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidQtAPI/GraphOptions.h>
-#include <MantidQtAPI/IProjectSerialisable.h>
+#include <MantidQtWidgets/Common/GraphOptions.h>
+#include <MantidQtWidgets/Common/IProjectSerialisable.h>
 
 #include <MdiSubWindow.h>
 #include <boost/shared_ptr.hpp>
@@ -32,6 +32,11 @@ public:
   static MantidQt::API::IProjectSerialisable *
   loadFromProject(const std::string &lines, ApplicationWindow *app,
                   const int fileVersion);
+  /// Returns a list of workspace names that are used by this window
+  std::vector<std::string> getWorkspaceNames() override;
+  /// Returns the user friendly name of the window
+  std::string getWindowName() override;
+
   /// Save the state of the instrument window to a Mantid project file
   std::string saveToProject(ApplicationWindow *app) override;
   void selectTab(int tab);
@@ -48,6 +53,8 @@ public:
   void selectComponent(const QString &);
   void setScaleType(GraphOptions::ScaleType);
   void setViewType(const QString &);
+  /// Get the window type as a string
+  std::string getWindowType() override { return "Instrument"; }
 
 public slots:
   void closeSafely();

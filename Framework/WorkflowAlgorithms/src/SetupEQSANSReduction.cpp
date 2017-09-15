@@ -54,8 +54,15 @@ void SetupEQSANSReduction::init() {
   declareProperty(
       "SampleDetectorDistance", EMPTY_DBL(),
       "Sample to detector distance to use (overrides meta data), in mm");
+
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(),
                   "Offset to the sample to detector distance (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("SampleOffset", EMPTY_DBL(),
+                  "Offset applies to the sample position (use only when "
+                  "using the detector distance found in the meta data), in mm");
+  declareProperty("DetectorOffset", EMPTY_DBL(),
+                  "Offset applies to the detector position (use only when "
                   "using the distance found in the meta data), in mm");
 
   declareProperty(
@@ -81,6 +88,8 @@ void SetupEQSANSReduction::init() {
   setPropertyGroup("SampleDetectorDistance", load_grp);
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
 
+  setPropertyGroup("SampleOffset", load_grp);
+  setPropertyGroup("DetectorOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
   setPropertyGroup("DetectorTubes", load_grp);
 
@@ -580,7 +589,7 @@ void SetupEQSANSReduction::init() {
 void SetupEQSANSReduction::exec() {
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  if (reductionManagerName.size() == 0) {
+  if (reductionManagerName.empty()) {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
@@ -619,7 +628,7 @@ void SetupEQSANSReduction::exec() {
     normAlg->setProperty("NormaliseToBeam", false);
   } else if (boost::contains(normalization, "Monitor")) {
     loadMonitors = true;
-    if (monitorRefFile.size() == 0) {
+    if (monitorRefFile.empty()) {
       g_log.error() << "ERROR: normalize-to-monitor was turned ON but no "
                        "reference data was selected\n";
     }
@@ -658,6 +667,10 @@ void SetupEQSANSReduction::exec() {
   loadAlg->setProperty("SampleDetectorDistance", sdd);
   const double sddOffset = getProperty("SampleDetectorDistanceOffset");
   loadAlg->setProperty("SampleDetectorDistanceOffset", sddOffset);
+  const double dOffset = getProperty("DetectorOffset");
+  loadAlg->setProperty("DetectorOffset", dOffset);
+  const double sOffset = getProperty("SampleOffset");
+  loadAlg->setProperty("SampleOffset", sOffset);
   const double wlStep = getProperty("WavelengthStep");
   loadAlg->setProperty("WavelengthStep", wlStep);
 
@@ -671,7 +684,7 @@ void SetupEQSANSReduction::exec() {
 
   // Store dark current algorithm
   const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
-  if (darkCurrentFile.size() > 0) {
+  if (!darkCurrentFile.empty()) {
     IAlgorithm_sptr darkAlg =
         createChildAlgorithm("EQSANSDarkCurrentSubtraction");
     darkAlg->setProperty("Filename", darkCurrentFile);
@@ -722,7 +735,7 @@ void SetupEQSANSReduction::exec() {
     if (!boost::iequals(centerMethod, "DirectBeam"))
       useDirectBeamMethod = false;
     const std::string beamCenterFile = getProperty("BeamCenterFile");
-    if (beamCenterFile.size() > 0) {
+    if (!beamCenterFile.empty()) {
       const double beamRadius = getProperty("BeamRadius");
 
       IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
@@ -853,7 +866,7 @@ void SetupEQSANSReduction::setupSensitivity(
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0) {
+  if (!sensitivityFile.empty()) {
     const bool useSampleDC = getProperty("UseDefaultDC");
     const std::string sensitivityDarkCurrentFile =
         getPropertyValue("SensitivityDarkCurrentFile");
@@ -887,7 +900,7 @@ void SetupEQSANSReduction::setupSensitivity(
       const double sensitivityBeamRadius =
           getProperty("SensitivityBeamCenterRadius");
       bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
@@ -975,7 +988,7 @@ void SetupEQSANSReduction::setupTransmission(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("TransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);
@@ -1004,7 +1017,7 @@ void SetupEQSANSReduction::setupBackground(
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
-  if (backgroundFile.size() > 0)
+  if (!backgroundFile.empty())
     reductionManager->declareProperty(
         Kernel::make_unique<PropertyWithValue<std::string>>("BackgroundFiles",
                                                             backgroundFile));
@@ -1066,7 +1079,7 @@ void SetupEQSANSReduction::setupBackground(
     } else if (boost::iequals(centerMethod, "DirectBeam")) {
       const std::string beamCenterFile =
           getProperty("BckTransmissionBeamCenterFile");
-      if (beamCenterFile.size() > 0) {
+      if (!beamCenterFile.empty()) {
         IAlgorithm_sptr ctrAlg = createChildAlgorithm("SANSBeamFinder");
         ctrAlg->setProperty("Filename", beamCenterFile);
         ctrAlg->setProperty("UseDirectBeamMethod", true);

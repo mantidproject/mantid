@@ -6,6 +6,7 @@ from mantid.kernel import *
 import numpy
 import sys
 
+
 class FilterLogByTime(PythonAlgorithm):
 
     def category(self):
@@ -76,5 +77,6 @@ class FilterLogByTime(PythonAlgorithm):
     def __statistics(self, values, operation):
         op = getattr(numpy, operation)
         return op(values)
+
 
 AlgorithmFactory.subscribe(FilterLogByTime)

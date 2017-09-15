@@ -89,9 +89,9 @@ private:
   /// Execute this version of the algorithm
   void doExec();
 
-  void loadData(const Mantid::NeXus::NXInt &counts,
-                const std::vector<double> &timeBins, int wsIndex, int period,
-                int spec, API::MatrixWorkspace_sptr localWorkspace);
+  HistogramData::Histogram
+  loadData(const Mantid::HistogramData::BinEdges &edges,
+           const Mantid::NeXus::NXInt &counts, int period, int spec);
   void loadLogs(API::MatrixWorkspace_sptr ws, Mantid::NeXus::NXEntry &entry,
                 int period);
   void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);

@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadILLSANS.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataHandling/LoadILLSANS.h"
 
 using Mantid::DataHandling::LoadILLSANS;
 using namespace Mantid::API;
@@ -86,6 +87,48 @@ public:
 private:
   std::string m_testFileTof;
   std::string m_testFileNonTof;
+};
+
+class LoadILLSANSTestPerformance : public CxxTest::TestSuite {
+public:
+  void setUp() override {
+    for (int i = 0; i < numberOfIterations; ++i) {
+      loadAlgPtrs.emplace_back(setupAlg());
+    }
+  }
+
+  void testLoadILLSANSPerformance() {
+    for (auto alg : loadAlgPtrs) {
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+    }
+  }
+
+  void tearDown() override {
+    for (int i = 0; i < numberOfIterations; i++) {
+      delete loadAlgPtrs[i];
+      loadAlgPtrs[i] = nullptr;
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  std::vector<LoadILLSANS *> loadAlgPtrs;
+
+  const int numberOfIterations = 2;
+
+  const std::string inFileName = "ILLD33_041714_NonTof.nxs";
+  const std::string outWSName = "LoadILLSANSWsOut";
+
+  LoadILLSANS *setupAlg() {
+    LoadILLSANS *loader = new LoadILLSANS;
+    loader->initialize();
+    loader->isInitialized();
+    loader->setPropertyValue("Filename", inFileName);
+    loader->setPropertyValue("OutputWorkspace", outWSName);
+
+    loader->setRethrows(true);
+    return loader;
+  }
 };
 
 #endif /* MANTID_DATAHANDLING_LOADILLSANSTEST_H_ */

@@ -118,8 +118,8 @@ public:
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f1.sig=f2.sig^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(), 5.8, 0.00001);
-    TS_ASSERT_EQUALS(tie.getFunction(), g1.get());
-    TS_ASSERT_EQUALS(tie.getIndex(), 2);
+    TS_ASSERT_EQUALS(tie.getLocalFunction(), g1.get());
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 2);
 
     TS_ASSERT_THROWS(mustThrow1(&mfun), std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow2(&mfun), std::invalid_argument);
@@ -144,8 +144,8 @@ public:
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f0.b=f3.sig^2+f1.a+1");
 
     TS_ASSERT_DELTA(tie.eval(), 2, 0.00001);
-    TS_ASSERT_EQUALS(tie.getFunction(), bk1.get());
-    TS_ASSERT_EQUALS(tie.getIndex(), 1);
+    TS_ASSERT_EQUALS(tie.getLocalFunction(), bk1.get());
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 1);
 
     mfun.removeFunction(2);
     TS_ASSERT_EQUALS(tie.asString(&mfun), "f0.b=f2.sig^2+f1.a+1");
@@ -213,13 +213,47 @@ public:
 
     ParameterTie tie(&bk, "b", "2*a-1");
 
-    TS_ASSERT_EQUALS(tie.getIndex(), 1);
+    TS_ASSERT_EQUALS(tie.getLocalIndex(), 1);
     TS_ASSERT_DELTA(tie.eval(), 0.6, 0.00001);
     TS_ASSERT_THROWS(mustThrow4(&bk), std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow5(&bk), std::invalid_argument);
     TS_ASSERT_THROWS(tie.set("q+p"), std::invalid_argument);
 
     TS_ASSERT_THROWS(tie.set(""), std::runtime_error);
+  }
+
+  void test_untie_fixed() {
+    ParameterTieTest_Linear bk;
+    bk.fix(0);
+    TS_ASSERT(bk.isFixed(0));
+    bk.removeTie("a");
+    TS_ASSERT(!bk.isFixed(0));
+    bk.fix(0);
+    bk.fix(1);
+    bk.clearTies();
+    TS_ASSERT(!bk.isFixed(0));
+    TS_ASSERT(!bk.isFixed(1));
+  }
+
+  void test_untie_fixed_composite() {
+    CompositeFunction_sptr mf = CompositeFunction_sptr(new CompositeFunction);
+    IFunction_sptr bk1 = IFunction_sptr(new ParameterTieTest_Linear());
+    IFunction_sptr bk2 = IFunction_sptr(new ParameterTieTest_Linear());
+    mf->addFunction(bk1);
+    mf->addFunction(bk2);
+    mf->fix(0);
+    mf->fix(3);
+    TS_ASSERT(mf->isFixed(0));
+    TS_ASSERT(mf->isFixed(3));
+    mf->removeTie("f0.a");
+    mf->removeTie("f1.b");
+    TS_ASSERT(!mf->isFixed(0));
+    TS_ASSERT(!mf->isFixed(3));
+    mf->fix(0);
+    mf->fix(3);
+    mf->clearTies();
+    TS_ASSERT(!mf->isFixed(0));
+    TS_ASSERT(!mf->isFixed(3));
   }
 
 private:

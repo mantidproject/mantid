@@ -1,10 +1,9 @@
-//-----------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V2D.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
+
 #include <limits>
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

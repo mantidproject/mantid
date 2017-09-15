@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/RebinParamsValidator.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 

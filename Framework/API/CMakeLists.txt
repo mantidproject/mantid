@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/DetectorSearcher.cpp
 	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/EqualBinSizesValidator.cpp
@@ -43,12 +44,14 @@ set ( SRC_FILES
 	src/FunctionDomainGeneral.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
+	src/FunctionGenerator.cpp
 	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
 	src/GroupingLoader.cpp
+	src/HistoWorkspace.cpp
 	src/HistogramValidator.cpp
 	src/HistoryItem.cpp
 	src/HistoryView.cpp
@@ -63,7 +66,6 @@ set ( SRC_FILES
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
 	src/ILatticeFunction.cpp
-	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
@@ -80,16 +82,19 @@ set ( SRC_FILES
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/IncreasingAxisValidator.cpp
+	src/IndexProperty.cpp
+	src/IndexTypeProperty.cpp
 	src/InstrumentDataService.cpp
 	src/InstrumentValidator.cpp
 	src/JointDomain.cpp
 	src/LatticeDomain.cpp
 	src/LinearScale.cpp
+	src/LiveListener.cpp
 	src/LiveListenerFactory.cpp
+	src/LogFilterGenerator.cpp
 	src/LogManager.cpp
 	src/LogarithmScale.cpp
 	src/MDGeometry.cpp
-	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
 	src/MatrixWorkspaceMDIterator.cpp
 	src/ModeratorModel.cpp
@@ -110,9 +115,11 @@ set ( SRC_FILES
 	src/PeakFunctionIntegrator.cpp
 	src/Progress.cpp
 	src/Projection.cpp
+	src/PropertyWithValue.cpp
 	src/RawCountValidator.cpp
 	src/RefAxis.cpp
 	src/RemoteJobManagerFactory.cpp
+	src/ResizeRectangularDetectorHelper.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleShapeValidator.cpp
@@ -132,6 +139,8 @@ set ( SRC_FILES
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
 	src/WorkspaceHistory.cpp
+	src/WorkspaceNearestNeighbourInfo.cpp
+	src/WorkspaceNearestNeighbours.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceUnitValidator.cpp
@@ -150,6 +159,7 @@ set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/ADSValidator.h
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/Algorithm.tcc
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
@@ -179,6 +189,7 @@ set ( INC_FILES
 	inc/MantidAPI/DataProcessorAlgorithm.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
+	inc/MantidAPI/DetectorSearcher.h
 	inc/MantidAPI/DllConfig.h
 	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
@@ -197,12 +208,14 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomainGeneral.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
+	inc/MantidAPI/FunctionGenerator.h
 	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
 	inc/MantidAPI/GridDomain1D.h
 	inc/MantidAPI/GroupingLoader.h
+	inc/MantidAPI/HistoWorkspace.h
 	inc/MantidAPI/HistogramValidator.h
 	inc/MantidAPI/HistoryItem.h
 	inc/MantidAPI/HistoryView.h
@@ -260,17 +273,20 @@ set ( INC_FILES
 	inc/MantidAPI/ImplicitFunctionParser.h
 	inc/MantidAPI/ImplicitFunctionParserFactory.h
 	inc/MantidAPI/IncreasingAxisValidator.h
+	inc/MantidAPI/IndexProperty.h
+	inc/MantidAPI/IndexTypeProperty.h
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/InstrumentValidator.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
+	inc/MantidAPI/LiveListener.h
 	inc/MantidAPI/LiveListenerFactory.h
+	inc/MantidAPI/LogFilterGenerator.h
 	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/MDGeometry.h
-	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MatrixWorkspaceValidator.h
@@ -296,6 +312,7 @@ set ( INC_FILES
 	inc/MantidAPI/RawCountValidator.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/RemoteJobManagerFactory.h
+	inc/MantidAPI/ResizeRectangularDetectorHelper.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleShapeValidator.h
@@ -320,8 +337,11 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
+	inc/MantidAPI/WorkspaceNearestNeighbourInfo.h
+	inc/MantidAPI/WorkspaceNearestNeighbours.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
+	inc/MantidAPI/WorkspaceProperty.tcc
 	inc/MantidAPI/WorkspaceUnitValidator.h
 	inc/MantidAPI/Workspace_fwd.h
 )
@@ -335,6 +355,7 @@ set ( TEST_FILES
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
+	AlgorithmMPITest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h
@@ -345,6 +366,8 @@ set ( TEST_FILES
 	CoordTransformTest.h
 	CostFunctionFactoryTest.h
 	DataProcessorAlgorithmTest.h
+	DetectorInfoTest.h
+	DetectorSearcherTest.h
 	EnabledWhenWorkspaceIsTypeTest.h
 	EqualBinSizesValidatorTest.h
 	ExperimentInfoTest.h
@@ -372,17 +395,20 @@ set ( TEST_FILES
 	IFunction1DTest.h
 	IFunctionMDTest.h
 	ILatticeFunctionTest.h
-	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
 	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
+	IndexPropertyTest.h
+	IndexTypePropertyTest.h
 	InstrumentDataServiceTest.h
 	InstrumentValidatorTest.h
 	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
+	LiveListenerTest.h
+	LogFilterGeneratorTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
@@ -401,9 +427,11 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
+	ProgressTest.h
 	ProjectionTest.h
 	RawCountValidatorTest.h
 	RemoteJobManagerFactoryTest.h
+	ResizeRectangularDetectorHelperTest.h
 	RunTest.h
 	SampleShapeValidatorTest.h
 	SampleTest.h
@@ -421,6 +449,8 @@ set ( TEST_FILES
 	WorkspaceGroupTest.h
 	WorkspaceHistoryIOTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceNearestNeighbourInfoTest.h
+	WorkspaceNearestNeighboursTest.h
 	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 	WorkspaceUnitValidatorTest.h

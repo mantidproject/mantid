@@ -1,4 +1,6 @@
 # pylint: disable=too-many-lines, invalid-name, too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+import six
 import math
 import time
 import sys
@@ -17,8 +19,12 @@ try:
     from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
     IS_IN_MANTIDPLOT = True
-except ImportError, e:
+except ImportError as e:
     logger.error(e.message())
+
+if six.PY3:
+    unicode = str
+
 
 class DataReflWidget(BaseWidget):
     """
@@ -228,7 +234,7 @@ class DataReflWidget(BaseWidget):
             self._summary.auto_reduce_check.hide()
 
     def _my_test(self):
-        print "I'm in my test"
+        print("I'm in my test")
 
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -242,7 +248,6 @@ class DataReflWidget(BaseWidget):
         self._edit_event(ctrl=self._summary.data_run_number_edit)
 
     def _edit_event(self, text=None, ctrl=None):
-        _text = text
         self._summary.edited_warning_label.show()
         util.set_edited(ctrl, True)
 
@@ -493,9 +498,9 @@ class DataReflWidget(BaseWidget):
                     f = open(file_path,'w')
                     f.write(content)
                     f.close()
-                    QtGui.QMessageBox.information(self, "Automated reduction script saved",\
-                                                        "The automated reduction script has been updated")
-                except IOError, fileError:
+                    QtGui.QMessageBox.information(self, "Automated reduction script saved",
+                                                  "The automated reduction script has been updated")
+                except IOError as fileError:
                     _report_error("Failed to open file: " + fileError.filename())
             else:
                 _report_error("You do not have permissions to write to %s." % sns_path)
@@ -647,10 +652,9 @@ class DataReflWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        _is_peak = is_peak
-        minimum, maximum = self._integrated_plot(True, self._summary.data_run_number_edit,\
-                                                self._summary.data_peak_from_pixel,\
-                                                self._summary.data_peak_to_pixel)
+        minimum, maximum = self._integrated_plot(True, self._summary.data_run_number_edit,
+                                                 self._summary.data_peak_from_pixel,
+                                                 self._summary.data_peak_to_pixel)
         self._summary.data_peak_from_pixel_estimate.setText(str(int(math.ceil(minimum))))
         self._summary.data_peak_to_pixel_estimate.setText(str(int(math.ceil( maximum))))
         self._summary.ref_pix_estimate.setText("%4.1f" % ((maximum+minimum)/2.0))
@@ -676,36 +680,36 @@ class DataReflWidget(BaseWidget):
             For REFM, this is Y
             For REFL, this is X
         """
-        minimum, maximum = self._integrated_plot(False,\
-                                         self._summary.data_run_number_edit,\
-                                         self._summary.x_min_edit,\
-                                         self._summary.x_max_edit)
+        minimum, maximum = self._integrated_plot(False,
+                                                 self._summary.data_run_number_edit,
+                                                 self._summary.x_min_edit,
+                                                 self._summary.x_max_edit)
         self._summary.x_min_estimate.setText(str(int(math.ceil(minimum))))
         self._summary.x_max_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.x_min_estimate)
         util.set_tiny(self._summary.x_max_estimate)
 
     def _norm_count_vs_y(self):
-        minimum, maximum = self._integrated_plot(True,\
-                                         self._summary.norm_run_number_edit,\
-                                         self._summary.norm_peak_from_pixel,\
-                                         self._summary.norm_peak_to_pixel)
+        minimum, maximum = self._integrated_plot(True,
+                                                 self._summary.norm_run_number_edit,
+                                                 self._summary.norm_peak_from_pixel,
+                                                 self._summary.norm_peak_to_pixel)
         self._summary.norm_peak_from_pixel_estimate.setText(str(int(math.ceil(minimum))))
         self._summary.norm_peak_to_pixel_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.norm_peak_from_pixel_estimate)
         util.set_tiny(self._summary.norm_peak_to_pixel_estimate)
 
     def _norm_count_vs_y_bck(self):
-        self._integrated_plot(True,\
-                              self._summary.norm_run_number_edit,\
-                              self._summary.norm_background_from_pixel1,\
+        self._integrated_plot(True,
+                              self._summary.norm_run_number_edit,
+                              self._summary.norm_background_from_pixel1,
                               self._summary.norm_background_to_pixel1)
 
     def _norm_count_vs_x(self):
-        minimum, maximum = self._integrated_plot(False,\
-                                         self._summary.norm_run_number_edit,\
-                                         self._summary.norm_x_min_edit,\
-                                         self._summary.norm_x_max_edit)
+        minimum, maximum = self._integrated_plot(False,
+                                                 self._summary.norm_run_number_edit,
+                                                 self._summary.norm_x_min_edit,
+                                                 self._summary.norm_x_max_edit)
         self._summary.norm_xmin_estimate.setText(str(int(math.ceil(minimum))))
         self._summary.norm_xmax_estimate.setText(str(int(math.ceil(maximum))))
         util.set_tiny(self._summary.norm_xmin_estimate)
@@ -1034,8 +1038,8 @@ class DataReflWidget(BaseWidget):
         m.DataPeakPixels = [int(self._summary.data_peak_from_pixel.text()),
                             int(self._summary.data_peak_to_pixel.text())]
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),\
-                     int(self._summary.x_max_edit.text())]
+        m.data_x_range = [int(self._summary.x_min_edit.text()),
+                          int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 
         m.norm_x_range = [int(self._summary.norm_x_min_edit.text()),

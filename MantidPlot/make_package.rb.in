@@ -18,9 +18,17 @@ def copyOptionalFile(file)
   end
 end
 
-def addPythonLibrary(directory)
-  p "copying directory #{directory}"
-  output = system("rsync -a -L --exclude=.pyc #{directory} Contents/MacOS/")
+def addPythonLibrary(input, output)
+  p "copying directory #{input} to #{output}"
+  output = system("rsync -a -L --exclude=.pyc #{input} #{output}")
+  if output != true
+    exit 1
+  end
+end
+
+def addPythonLibrariesInDirectory(input, output)
+  p "copying directory #{input} to #{output}"
+  output = system("rsync -a -L --exclude=.pyc #{input}/* #{output}")
   if output != true
     exit 1
   end
@@ -34,6 +42,9 @@ ParaView_dir = Pathname.new("@ParaView_DIR@")
 library_filenames = ["libboost_regex-mt.dylib",
                      "libboost_date_time-mt.dylib",
                      "libboost_python-mt.dylib",
+                     "libboost_serialization-mt.dylib",
+                     "libboost_filesystem-mt.dylib",
+                     "libboost_system-mt.dylib",
                      "libgsl.dylib",
                      "libgslcblas.dylib",
                      "libjsoncpp.dylib",
@@ -75,7 +86,9 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libcrypto.dylib",
                      "libtbb.dylib",
                      "libtbbmalloc.dylib",
-                     "libtbbmalloc_proxy.dylib"]
+                     "libtbbmalloc_proxy.dylib",
+                     "librdkafka.dylib",
+                     "librdkafka++.dylib"]
 
 poco_version = "@POCO_VERSION@".split(".").map(&:to_i)
 if(poco_version[0] > 1 || (poco_version[0] == 1 && poco_version[1] >= 6))
@@ -118,7 +131,14 @@ if( "@MAKE_VATES@" == "ON" )
   end
 
   `mkdir Contents/Libraries`
-  vatesfiles = ["Contents/MacOS/MantidPlot","Contents/MacOS/libMantidQtAPI.dylib","Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
+  `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
+  vatesfiles = ["Contents/MacOS/MantidPlot",
+                "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
+                "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
+                "Contents/MacOS/libMantidVatesAPI.dylib",
+                "plugins/libMantidVatesAlgorithms.dylib",
+                "pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]
+  vatesfiles += Dir["Contents/Libraries/*Python.so"] + Dir["pvplugins/pvplugins/*.dylib"]
   vatesfiles.each do |file|
     add_ParaView_Libraries(file)
   end
@@ -154,7 +174,7 @@ if( "@MAKE_VATES@" == "ON" )
 end
 
 #use install_name_tool to change dependencies from /usr/local to libraries in the package.
-search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
+search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
@@ -176,7 +196,22 @@ end
 #We'll use macdeployqt to fix qt dependencies.
 Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib -executable=Contents/MacOS/libqscintilla2.dylib"
 if( "@MAKE_VATES@" == "ON" )
-  Qt_Executables << " -executable=Contents/MacOS/VatesSimpleGui"
+  list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
+          "Contents/Libraries/vtkPVAnimationPython.so",
+          "Contents/Libraries/vtkPVCatalystPython.so",
+          "Contents/Libraries/vtkPVCinemaReaderPython.so",
+          "Contents/Libraries/vtkPVClientServerCoreDefaultPython.so",
+          "Contents/Libraries/vtkPVClientServerCoreRenderingPython.so",
+          "Contents/Libraries/vtkPVPythonCatalystPython.so",
+          "Contents/Libraries/vtkPVServerImplementationRenderingPython.so",
+          "Contents/Libraries/vtkPVServerManagerApplicationPython.so",
+          "Contents/Libraries/vtkPVServerManagerDefaultPython.so",
+          "Contents/Libraries/vtkPVServerManagerRenderingPython.so",
+          "Contents/Libraries/vtkPVVTKExtensionsDefaultPython.so",
+          "Contents/Libraries/vtkPVVTKExtensionsRenderingPython.so"]
+  list.each do |filename|
+    Qt_Executables << " -executable=#{filename}"
+   end
 end
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
@@ -265,11 +300,14 @@ end
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess","CifFile","yaml"]
 directories.each do |directory|
-  addPythonLibrary("#{path}/#{directory}")
+  addPythonLibrary("#{path}/#{directory}","Contents/MacOS/")
 end
 
+if( "@MAKE_VATES@" == "ON" )
+  addPythonLibrariesInDirectory("#{ParaView_dir}/lib/site-packages","Contents/Python/")
+end
 
 # ---------------------------------------------
 # H5Py section
@@ -277,7 +315,7 @@ end
 h5py_path = "/usr/local/lib/python2.7/site-packages"
 h5py_directories = ["h5py"]
 h5py_directories.each do |directory|
-  addPythonLibrary("#{h5py_path}/#{directory}")
+  addPythonLibrary("#{h5py_path}/#{directory}","Contents/MacOS/")
 end
 
 h5py_patterns = ["**/h5py/*.so"]
@@ -314,7 +352,7 @@ end
 copyOptionalFile("#{path}/mistune.so")
 
 `mkdir Contents/MacOS/bin`
-`cp /usr/local/bin/ipython Contents/MacOS/bin/`
+`cp /usr/local/bin/ipython@PYTHON_VERSION_MAJOR@ Contents/MacOS/bin/`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|

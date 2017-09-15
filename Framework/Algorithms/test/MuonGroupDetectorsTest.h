@@ -35,7 +35,7 @@ public:
     const std::string outWSName("MuonGroupDetectorsTest_OutputWS");
 
     MatrixWorkspace_sptr inWS =
-        WorkspaceCreationHelper::Create2DWorkspace123(5, 3);
+        WorkspaceCreationHelper::create2DWorkspace123(5, 3);
 
     for (size_t i = 0; i < inWS->getNumberHistograms(); ++i)
       inWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(

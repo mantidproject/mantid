@@ -1,10 +1,10 @@
 #ifndef SAVENISTDATTEST_H_
 #define SAVENISTDATTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/SaveNISTDAT.h"
 #include <Poco/File.h>
+#include <cxxtest/TestSuite.h>
 #include <fstream>
 
 using namespace Mantid::API;

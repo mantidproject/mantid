@@ -3,6 +3,7 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
+
 class REFLWithBackground(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
@@ -41,4 +42,3 @@ class REFLWithBackground(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity_119816", 'REFL_119816.nxs'
-

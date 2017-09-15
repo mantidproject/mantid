@@ -12,6 +12,7 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaks.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidCurveFitting/FortranDefs.h"
 
 using Mantid::CurveFitting::Functions::CrystalFieldPeaks;
 using namespace Mantid::CurveFitting::Algorithms;
@@ -27,6 +28,9 @@ public:
   }
   static void destroySuite(CrystalFieldPeaksTest *suite) { delete suite; }
 
+  // Conversion factor from barn to milibarn/steradian
+  const double c_mbsr = 79.5774715459;
+
   void test_calculation() {
     CrystalFieldPeaks fun;
     FunctionDomainGeneral domain;
@@ -38,16 +42,16 @@ public:
     fun.setParameter("B44", -0.12544);
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
-    fun.setAttributeValue("ToleranceIntensity", 0.001);
+    fun.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun.function(domain, values);
 
     TS_ASSERT_EQUALS(values.size(), 6);
     TS_ASSERT_DELTA(values[0], 0.0, 0.01);
     TS_ASSERT_DELTA(values[1], 29.33, 0.01);
     TS_ASSERT_DELTA(values[2], 44.34, 0.01);
-    TS_ASSERT_DELTA(values[3], 2.75, 0.01);
-    TS_ASSERT_DELTA(values[4], 0.72, 0.01);
-    TS_ASSERT_DELTA(values[5], 0.43, 0.01);
+    TS_ASSERT_DELTA(values[3], 2.75 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(values[4], 0.72 * c_mbsr, 0.001 * c_mbsr);
+    TS_ASSERT_DELTA(values[5], 0.43 * c_mbsr, 0.001 * c_mbsr);
   }
 
   void test_further_calculation() {
@@ -62,15 +66,15 @@ public:
     fun.setParameter("B44", -0.130124);
     fun.setAttributeValue("Ion", "Ce");
     fun.setAttributeValue("Temperature", 44.0);
-    fun.setAttributeValue("ToleranceIntensity", 0.001);
+    fun.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
     fun.function(domain, values);
 
     TS_ASSERT_DELTA(values[0], 0.0, 0.0001);
     TS_ASSERT_DELTA(values[1], 29.3261, 0.00005);
     TS_ASSERT_DELTA(values[2], 44.3412, 0.00005);
-    TS_ASSERT_DELTA(values[3], 2.74937, 0.000005);
-    TS_ASSERT_DELTA(values[4], 0.7204, 0.00005);
-    TS_ASSERT_DELTA(values[5], 0.429809, 0.000005);
+    TS_ASSERT_DELTA(values[3], 2.74937 * c_mbsr, 0.000005 * c_mbsr);
+    TS_ASSERT_DELTA(values[4], 0.7204 * c_mbsr, 0.00005 * c_mbsr);
+    TS_ASSERT_DELTA(values[5], 0.429809 * c_mbsr, 0.000005 * c_mbsr);
   }
 
   void test_factory() {
@@ -90,7 +94,36 @@ public:
     TS_ASSERT_EQUALS(fun->getAttribute("Ion").asString(), "Ce");
     TS_ASSERT_EQUALS(fun->getAttribute("Temperature").asDouble(), 25.0);
     TS_ASSERT_EQUALS(fun->getAttribute("ToleranceEnergy").asDouble(), 1e-10);
-    TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-3);
+    TS_ASSERT_EQUALS(fun->getAttribute("ToleranceIntensity").asDouble(), 1e-1);
+  }
+
+  void test_arbitrary_J() {
+    IFunction_sptr fun(new CrystalFieldPeaks);
+    Mantid::CurveFitting::DoubleFortranVector en;
+    Mantid::CurveFitting::ComplexFortranMatrix wf;
+    int nre = 1;
+    auto &peaks = dynamic_cast<CrystalFieldPeaks &>(*fun);
+    peaks.setParameter("B20", 0.37737);
+    peaks.setAttributeValue("Temperature", 44.0);
+    peaks.setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
+    peaks.setAttributeValue("Ion", "something");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.4");
+    TS_ASSERT_THROWS(peaks.calculateEigenSystem(en, wf, nre),
+                     std::runtime_error);
+    peaks.setAttributeValue("Ion", "S2.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -5);
+    peaks.setAttributeValue("Ion", "s1");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -2);
+    peaks.setAttributeValue("Ion", "j1.5");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -3);
+    peaks.setAttributeValue("Ion", "J2");
+    TS_ASSERT_THROWS_NOTHING(peaks.calculateEigenSystem(en, wf, nre));
+    TS_ASSERT_EQUALS(nre, -4);
   }
 
   void test_evaluate_alg_no_input_workspace() {
@@ -105,7 +138,7 @@ public:
     fun->setParameter("B44", -0.12544);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
 
     EvaluateFunction eval;
     eval.initialize();
@@ -128,9 +161,9 @@ public:
     TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.00005);
     TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.00005);
     column = output->getColumn("DataColumn_1");
-    TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.000005);
-    TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.00005);
-    TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0000005);
+    TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.000005 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.00005 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0000005 * c_mbsr);
 
     AnalysisDataService::Instance().clear();
   }
@@ -147,18 +180,18 @@ public:
     fun->setParameter("B44", -0.12);
     fun->setAttributeValue("Ion", "Ce");
     fun->setAttributeValue("Temperature", 44.0);
-    fun->setAttributeValue("ToleranceIntensity", 0.001);
+    fun->setAttributeValue("ToleranceIntensity", 0.001 * c_mbsr);
 
     auto data = TableWorkspace_sptr(new TableWorkspace);
     data->addColumn("double", "Energy");
     data->addColumn("double", "Intensity");
 
     TableRow row = data->appendRow();
-    row << 0.0 << 2.74937;
+    row << 0.0 << 2.74937 * c_mbsr;
     row = data->appendRow();
-    row << 29.3261 << 0.7204;
+    row << 29.3261 << 0.7204 * c_mbsr;
     row = data->appendRow();
-    row << 44.3412 << 0.429809;
+    row << 44.3412 << 0.429809 * c_mbsr;
 
     EvaluateFunction eval;
     eval.initialize();
@@ -179,17 +212,17 @@ public:
     TS_ASSERT_DELTA(column->toDouble(1), 29.3261, 0.00005);
     TS_ASSERT_DELTA(column->toDouble(2), 44.3412, 0.00005);
     column = output->getColumn("Intensity");
-    TS_ASSERT_DELTA(column->toDouble(0), 2.74937, 0.000005);
-    TS_ASSERT_DELTA(column->toDouble(1), 0.7204, 0.00005);
-    TS_ASSERT_DELTA(column->toDouble(2), 0.429809, 0.0000005);
+    TS_ASSERT_DELTA(column->toDouble(0), 2.74937 * c_mbsr, 0.000005 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(1), 0.7204 * c_mbsr, 0.00005 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(2), 0.429809 * c_mbsr, 0.0000005 * c_mbsr);
     column = output->getColumn("Energy_calc");
     TS_ASSERT_DELTA(column->toDouble(0), 0.0, 0.0001);
     TS_ASSERT_DELTA(column->toDouble(1), 28.7149, 0.0001);
     TS_ASSERT_DELTA(column->toDouble(2), 43.3162, 0.0001);
     column = output->getColumn("Intensity_calc");
-    TS_ASSERT_DELTA(column->toDouble(0), 2.7483, 0.0001);
-    TS_ASSERT_DELTA(column->toDouble(1), 0.7394, 0.0001);
-    TS_ASSERT_DELTA(column->toDouble(2), 0.4116, 0.0001);
+    TS_ASSERT_DELTA(column->toDouble(0), 2.7483 * c_mbsr, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(1), 0.7394 * c_mbsr, 0.0001 * c_mbsr);
+    TS_ASSERT_DELTA(column->toDouble(2), 0.4116 * c_mbsr, 0.0001 * c_mbsr);
 
     AnalysisDataService::Instance().clear();
   }
@@ -459,7 +492,7 @@ public:
     TS_ASSERT(isFixed(fun, "B43"));
     TS_ASSERT(isFixed(fun, "IB43"));
     auto i = fun.parameterIndex("B44");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB44"));
 
     TS_ASSERT(!isFixed(fun, "B60"));
@@ -470,7 +503,7 @@ public:
     TS_ASSERT(isFixed(fun, "B63"));
     TS_ASSERT(isFixed(fun, "IB63"));
     i = fun.parameterIndex("B64");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB64"));
     TS_ASSERT(isFixed(fun, "B65"));
     TS_ASSERT(isFixed(fun, "IB65"));

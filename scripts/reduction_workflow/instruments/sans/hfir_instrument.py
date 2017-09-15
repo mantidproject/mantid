@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name,too-many-arguments,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 import sys
 from mantid.kernel import Logger
 
@@ -126,6 +127,7 @@ def get_masked_ids(
             "get_masked_pixels not applied. Component not valid: %s of type %s." %
             (component.getName(), component.type()))
     return IDs
+
 
 def get_masked_pixels(
         nx_low,

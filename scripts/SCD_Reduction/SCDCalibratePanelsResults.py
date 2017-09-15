@@ -4,12 +4,13 @@ Plot data in SCDcalib.log file from Mantid SCD Calibration.
 A. J. Schultz, V. E. Lynch, August 2015
 """
 
+from __future__ import (absolute_import, division, print_function)
 import pylab
 import os
 import math
 import sys
 import numpy as np
-sys.path.append("/opt/mantidnightly/bin")
+sys.path.append("/opt/mantidnightly/bin") # noqa
 from mantid.simpleapi import *
 
 # Make a ./plots subdirectory for the plot files.
@@ -107,5 +108,4 @@ for i in range(WSROW.getNumberHistograms()):
     OUTPUT.write(' %2d  %8d  %8.2f  %8.2f  %8.2f\n' %
                  (IDnum, numPeaks, rmsd_col_mm, rmsd_row_mm, rmsd_combined_mm))
 
-print '\nAll done!'
-
+print('\nAll done!')

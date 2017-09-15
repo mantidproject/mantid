@@ -25,7 +25,9 @@ namespace Algorithms {
 MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
                                            const API::Sample &sample,
                                            size_t nevents)
-    : m_beamProfile(beamProfile), m_scatterVol(MCInteractionVolume(sample)),
+    : m_beamProfile(beamProfile),
+      m_scatterVol(
+          MCInteractionVolume(sample, beamProfile.defineActiveRegion(sample))),
       m_nevents(nevents), m_error(1.0 / std::sqrt(m_nevents)) {}
 
 /**
@@ -42,19 +44,15 @@ std::tuple<double, double>
 MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
                                 const Kernel::V3D &finalPos,
                                 double lambdaBefore, double lambdaAfter) const {
-  // The simulation consists of sampling the beam profile and then computing the
-  // absorption within the interacting volume defined by the sample (and
-  // environment. The final correction factor is computed as the simple average
-  // of m_nevents of this process.
   const auto scatterBounds = m_scatterVol.getBoundingBox();
   double factor(0.0);
   for (size_t i = 0; i < m_nevents; ++i) {
     size_t attempts(0);
     do {
       const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
+
       const double wgt = m_scatterVol.calculateAbsorption(
-          rng, neutron.startPos, neutron.unitDir, finalPos, lambdaBefore,
-          lambdaAfter);
+          rng, neutron.startPos, finalPos, lambdaBefore, lambdaAfter);
       if (wgt < 0.0) {
         ++attempts;
       } else {

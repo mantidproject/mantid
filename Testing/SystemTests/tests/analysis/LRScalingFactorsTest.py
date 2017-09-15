@@ -4,6 +4,7 @@ import os
 from mantid import *
 from mantid.simpleapi import *
 
+
 class LRPrimaryFractionTest(stresstesting.MantidStressTest):
     """
     #y=a+bx
@@ -16,6 +17,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
     #a=24.4210636894 b=0.00010609255313 error_a=0.390001391338 error_b=2.51447482677e-05
 
     """
+
     def runTest(self):
         self.cfg_file = os.path.join(config.getString('defaultsave.directory'),'scaling_factors.cfg')
         LRScalingFactors(DirectBeamRuns=[124168, 124169, 124170, 124171, 124172],
@@ -27,7 +29,7 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
 
     def validate(self):
         if not os.path.isfile(self.cfg_file):
-            raise RuntimeError, "Output file was not created"
+            raise RuntimeError("Output file was not created")
 
         reference = [[7.82, 3.20e-05, 0.054, 3.3e-06],
                      [24.42, 0.000105, 0.225, 1.45e-05]]
@@ -48,10 +50,10 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                     error_a = float(pair[1])
                 elif pair[0].strip() == 'error_b':
                     error_b = float(pair[1])
-            if not (abs(reference[item_number][0]- data_a ) < tolerances[item_number][0] \
-                and abs(reference[item_number][1] - data_b) < tolerances[item_number][1] \
-                and abs(reference[item_number][2]-error_a) < tolerances[item_number][2] \
-                and abs(reference[item_number][3] - error_b) < tolerances[item_number][3]):
+            if not (abs(reference[item_number][0]- data_a ) < tolerances[item_number][0]
+                    and abs(reference[item_number][1] - data_b) < tolerances[item_number][1]
+                    and abs(reference[item_number][2]-error_a) < tolerances[item_number][2]
+                    and abs(reference[item_number][3] - error_b) < tolerances[item_number][3]):
                 logger.error("Found    %5.3g %5.3g %5.3g %5.3g" % (data_a, data_b, error_a, error_b))
                 logger.error("Expected %5.3g %5.3g %5.3g %5.3g" % (reference[item_number][0], reference[item_number][1],
                                                                    reference[item_number][2], reference[item_number][3]))

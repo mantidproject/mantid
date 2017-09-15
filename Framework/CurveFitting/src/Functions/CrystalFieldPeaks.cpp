@@ -13,7 +13,7 @@ DECLARE_FUNCTION(CrystalFieldPeaks)
 
 /// Constructor
 CrystalFieldPeaks::CrystalFieldPeaks()
-    : CrystalFieldPeaksBase(), m_defaultDomainSize(0) {
+    : CrystalFieldPeaksBase(), API::IFunctionGeneral(), m_defaultDomainSize(0) {
 
   declareAttribute("Temperature", Attribute(1.0));
   declareParameter("IntensityScaling", 1.0,
