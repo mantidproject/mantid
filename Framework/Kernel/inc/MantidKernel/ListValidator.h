@@ -1,16 +1,16 @@
 #ifndef MANTID_KERNEL_LISTVALIDATOR_H_
 #define MANTID_KERNEL_LISTVALIDATOR_H_
 
-#include "MantidKernel/TypedValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TypedValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #endif
-#include <vector>
-#include <set>
 #include <map>
+#include <set>
 #include <unordered_set>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
@@ -76,25 +76,39 @@ public:
   }
 
   /** Constructor
-   *  @param values :: An array of values containing the valid values
+   *  @param values :: An array of the valid values
+   *  @param aliases :: Optional aliases for the valid values.
    *  @param allowMultiSelection :: True if the list allows multi selection
    */
   template <std::size_t SIZE>
   explicit ListValidator(const std::array<TYPE, SIZE> &values,
+                         const std::map<std::string, std::string> &aliases =
+                             std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
       : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
+        m_aliases(aliases.begin(), aliases.end()),
         m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
+    for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
+         ++aliasIt) {
+      if (values.end() ==
+          std::find(values.begin(), values.end(),
+                    boost::lexical_cast<TYPE>(aliasIt->second))) {
+        throw std::invalid_argument("Alias " + aliasIt->first +
+                                    " refers to invalid value " +
+                                    aliasIt->second);
+        if (m_allowMultiSelection) {
+          throw Kernel::Exception::NotImplementedError(
+              "The List Validator does not support multi selection yet");
+        }
+      }
     }
   }
 
   /** Constructor
-   *  @param values :: A vector of the valid values
-   *  @param aliases :: Optional aliases for the valid values.
-   *  @param allowMultiSelection :: True if the list allows multi selection
-   */
+    *  @param values :: A vector of the valid values
+    *  @param aliases :: Optional aliases for the valid values.
+    *  @param allowMultiSelection :: True if the list allows multi selection
+    */
   explicit ListValidator(const std::vector<TYPE> &values,
                          const std::map<std::string, std::string> &aliases =
                              std::map<std::string, std::string>(),
