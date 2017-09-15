@@ -22,32 +22,45 @@ EventLoader::EventLoader(const std::string &filename,
 EventLoader::~EventLoader() = default;
 
 void EventLoader::load() {
-  load(readDataType("event_time_zero"), readDataType("event_time_offset"));
+  load(readDataType("event_index"), readDataType("event_time_zero"),
+       readDataType("event_time_offset"));
 }
 
+void EventLoader::load(const H5::DataType &indexType,
+                       const H5::DataType &timeZeroType,
+                       const H5::DataType &timeOffsetType) {
+  // Translate from DataType to actual type. Done in three steps to avoid
+  // combinatoric explosion. Step 1: event_index.
+  if (indexType == H5::PredType::NATIVE_INT64)
+    return load<int64_t>(timeZeroType, timeOffsetType);
+  if (indexType == H5::PredType::NATIVE_DOUBLE)
+    return load<int32_t>(timeZeroType, timeOffsetType);
+  throw std::runtime_error("Unsupported H5::DataType of event_index");
+}
+
+template <class IndexType>
 void EventLoader::load(const H5::DataType &timeZeroType,
                        const H5::DataType &timeOffsetType) {
-  // Translate from DataType to actual type. Done in two steps to avoid
-  // combinatoric explosion. Step 1: event_time_zero.
+  // DataType translation step 2: event_time_zero.
   if (timeZeroType == H5::PredType::NATIVE_INT64)
-    return load<int64_t>(timeOffsetType);
+    return load<IndexType, int64_t>(timeOffsetType);
   if (timeZeroType == H5::PredType::NATIVE_DOUBLE)
-    return load<double>(timeOffsetType);
+    return load<IndexType, double>(timeOffsetType);
   throw std::runtime_error("Unsupported H5::DataType of event_time_zero");
 }
 
-template <class TimeZeroType>
+template <class IndexType, class TimeZeroType>
 void EventLoader::load(const H5::DataType &timeOffsetType) {
-  // Translate from DataType to actual type. Done in two steps to avoid
-  // combinatoric explosion. Step 2: event_time_offset.
+  // DataType translation step 3: event_time_offset.
   if (timeOffsetType == H5::PredType::NATIVE_INT32)
-    return load<TimeZeroType, int32_t>();
+    return load<IndexType, TimeZeroType, int32_t>();
   if (timeOffsetType == H5::PredType::NATIVE_FLOAT)
-    return load<TimeZeroType, float>();
+    return load<IndexType, TimeZeroType, float>();
   throw std::runtime_error("Unsupported H5::DataType of event_time_offset");
 }
 
-template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void EventLoader::load() {
   // TODO automatically(?) determine good chunk size
   // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
@@ -58,7 +71,8 @@ template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
   std::vector<int32_t> event_id(2 * chunkSize);
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 
-  std::unique_ptr<NXEventDataLoader<TimeZeroType, TimeOffsetType>> loader;
+  std::unique_ptr<NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>>
+      loader;
   // TODO Create parser. Constructor arguments:
   // - rankGroups (parser must insert events received from ranks within group
   //   always in that order, to preserve pulse time ordering)
@@ -69,9 +83,9 @@ template <class TimeZeroType, class TimeOffsetType> void EventLoader::load() {
   size_t previousBank = 0;
   for (const auto &range : ranges) {
     if (!loader || range.bankIndex != previousBank) {
-      loader =
-          Kernel::make_unique<NXEventDataLoader<TimeZeroType, TimeOffsetType>>(
-              *m_file, m_groupName + "/" + m_bankNames[range.bankIndex]);
+      loader = Kernel::make_unique<
+          NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>>(
+          *m_file, m_groupName + "/" + m_bankNames[range.bankIndex]);
       // TODO
       // parser.setEventIndex(loader->eventIndex());
       // parser.setEventTimeZero(loader->eventTimeZero());
@@ -98,14 +112,31 @@ H5::DataType EventLoader::readDataType(const std::string &name) const {
 }
 
 template MANTID_PARALLEL_DLL void
-EventLoader::load<int64_t>(const H5::DataType &timeOffsetType);
+EventLoader::load<int64_t>(const H5::DataType &timeZeroType,
+                           const H5::DataType &timeOffsetType);
 template MANTID_PARALLEL_DLL void
-EventLoader::load<double>(const H5::DataType &timeOffsetType);
+EventLoader::load<int32_t>(const H5::DataType &timeZeroType,
+                           const H5::DataType &timeOffsetType);
 
-template MANTID_PARALLEL_DLL void EventLoader::load<int64_t, int32_t>();
-template MANTID_PARALLEL_DLL void EventLoader::load<int64_t, float>();
-template MANTID_PARALLEL_DLL void EventLoader::load<double, int32_t>();
-template MANTID_PARALLEL_DLL void EventLoader::load<double, float>();
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int64_t, int64_t>(const H5::DataType &timeOffsetType);
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int64_t, double>(const H5::DataType &timeOffsetType);
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int32_t, int64_t>(const H5::DataType &timeOffsetType);
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int32_t, double>(const H5::DataType &timeOffsetType);
+
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int64_t, int64_t, int32_t>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int64_t, int64_t, float>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int64_t, double, int32_t>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int64_t, double, float>();
+template MANTID_PARALLEL_DLL void
+EventLoader::load<int32_t, int64_t, int32_t>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int32_t, int64_t, float>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int32_t, double, int32_t>();
+template MANTID_PARALLEL_DLL void EventLoader::load<int32_t, double, float>();
 
 } // namespace IO
 } // namespace Parallel

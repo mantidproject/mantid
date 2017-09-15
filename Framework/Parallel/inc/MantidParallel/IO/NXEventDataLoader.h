@@ -13,7 +13,7 @@ namespace IO {
 /** NXEventDataLoader is used to load entries from the the Nexus NXevent_data
   group, in particular event_index, event_time_zero, event_id, and
   event_time_offset. The class is templated such that the types of
-  event_time_zero and event_time_offset can be set as required.
+  event_index, event_time_zero, and event_time_offset can be set as required.
 
   @author Simon Heybrock
   @date 2017
@@ -39,12 +39,12 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class TimeZeroType, class TimeOffsetType>
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
 class MANTID_PARALLEL_DLL NXEventDataLoader {
 public:
   NXEventDataLoader(const H5::H5File &file, const std::string &nxEventDataPath);
 
-  const std::vector<int64_t> &eventIndex() const;
+  const std::vector<IndexType> &eventIndex() const;
   const std::vector<TimeZeroType> &eventTimeZero() const;
   void readEventID(int32_t *event_id, size_t start, size_t count) const;
   void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start,
@@ -55,7 +55,7 @@ private:
   const std::string m_rootPath;
   const std::string m_id_path;
   const std::string m_time_offset_path;
-  std::vector<int64_t> m_index;
+  std::vector<IndexType> m_index;
   std::vector<TimeZeroType> m_time_zero;
 };
 
@@ -94,44 +94,51 @@ void read(T *buffer, const H5::H5File &file, const std::string &dataSetName,
 }
 }
 
-/// Constructor from file and path to NXevent_data group to load from.
-template <class TimeZeroType, class TimeOffsetType>
-NXEventDataLoader<TimeZeroType, TimeOffsetType>::NXEventDataLoader(
+/** Constructor from file and path to NXevent_data group to load from.
+ *
+ * Template arguments are:
+ * - IndexType      -> type used for reading event_index
+ * - TimeZeroType   -> type used for reading event_time_zero
+ * - TimeOffsetType -> type used for reading event_time_offset */
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::NXEventDataLoader(
     const H5::H5File &file, const std::string &nxEventDataPath)
     : m_file(file), m_rootPath(nxEventDataPath),
       m_id_path(m_rootPath + "/event_id"),
       m_time_offset_path(m_rootPath + "/event_time_offset") {
-  m_index = detail::read<int64_t>(file, m_rootPath + "/event_index");
+  m_index = detail::read<IndexType>(file, m_rootPath + "/event_index");
   m_time_zero =
       detail::read<TimeZeroType>(file, m_rootPath + "/event_time_zero");
 }
 
 /// Returns a reference to the vector read from event_index.
-template <class TimeZeroType, class TimeOffsetType>
-const std::vector<int64_t> &
-NXEventDataLoader<TimeZeroType, TimeOffsetType>::eventIndex() const {
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+const std::vector<IndexType> &
+NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::eventIndex() const {
   return m_index;
 }
 
 /// Returns a reference to the vector read from event_time_zero.
-template <class TimeZeroType, class TimeOffsetType>
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
 const std::vector<TimeZeroType> &
-NXEventDataLoader<TimeZeroType, TimeOffsetType>::eventTimeZero() const {
+NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::eventTimeZero()
+    const {
   return m_time_zero;
 }
 
 /// Read subset given by start and count from event_id and write it into buffer.
-template <class TimeZeroType, class TimeOffsetType>
-void NXEventDataLoader<TimeZeroType, TimeOffsetType>::readEventID(
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::readEventID(
     int32_t *buffer, size_t start, size_t count) const {
   detail::read<int32_t>(buffer, m_file, m_id_path, start, count);
 }
 
 /// Read subset given by start and count from event_time_offset and write it
 /// into buffer.
-template <class TimeZeroType, class TimeOffsetType>
-void NXEventDataLoader<TimeZeroType, TimeOffsetType>::readEventTimeOffset(
-    TimeOffsetType *buffer, size_t start, size_t count) const {
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::
+    readEventTimeOffset(TimeOffsetType *buffer, size_t start,
+                        size_t count) const {
   detail::read<TimeOffsetType>(buffer, m_file, m_time_offset_path, start,
                                count);
 }

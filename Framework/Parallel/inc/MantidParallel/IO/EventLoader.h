@@ -55,10 +55,15 @@ public:
   void load();
 
 private:
+  void load(const H5::DataType &indexType, const H5::DataType &timeZeroType,
+            const H5::DataType &timeOffsetType);
+  template <class IndexType>
   void load(const H5::DataType &timeZeroType,
             const H5::DataType &timeOffsetType);
-  template <class TimeZeroType> void load(const H5::DataType &timeOffsetType);
-  template <class TimeZeroType, class TimeOffsetType> void load();
+  template <class IndexType, class TimeZeroType>
+  void load(const H5::DataType &timeOffsetType);
+  template <class IndexType, class TimeZeroType, class TimeOffsetType>
+  void load();
   H5::DataType readDataType(const std::string &name) const;
 
   std::unique_ptr<H5::H5File> m_file;
