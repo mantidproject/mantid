@@ -9,7 +9,25 @@ import numpy as np
 
 # -------------------------------------------------------------------------------
 
-def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
+def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=True, load_logs=True, load_opts=None):
+    """
+    Loads a set of files from specified file ranges and extracts just the spectra we
+    care about (i.e. detector range and monitor).
+
+    @param file_ranges List of data file ranges
+    @param ipf_filename File path/name for the instrument parameter file to load
+    @param spec_min Minimum spectra ID to load
+    @param spec_max Maximum spectra ID to load
+    @param sum_files Sum loaded files
+    @param load_logs Load log files when loading runs
+    @param load_opts Additional options to be passed to load algorithm
+
+    @return List of loaded workspace names and flag indicating chopped data
+    """
+
+    if not sum_files:
+        file_ranges = [file_range.replace('-', ':') for file_range in file_ranges]
+    return _load_files(file_ranges, ipf_filename, spec_min, spec_max, load_logs, load_opts)
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
@@ -21,6 +39,33 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
     @param sum_files Sum loaded files
+    @param load_logs Load log files when loading runs
+    @param load_opts Additional options to be passed to load algorithm
+
+    @return List of loaded workspace names and flag indicating chopped data
+    """
+    workspace_names, chopped_data = _load_files(data_files, ipf_filename, spec_min, spec_max, load_logs, load_opts)
+
+    # Sum files if needed
+    if sum_files and len(data_files) > 1:
+        if chopped_data:
+            workspace_names = sum_chopped_runs(workspace_names)
+        else:
+            workspace_names = sum_regular_runs(workspace_names)
+
+    logger.information('Summed workspace names: %s' % (str(workspace_names)))
+
+    return workspace_names, chopped_data
+
+
+def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=True, load_opts=None):
+    """
+    Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
+
+    @param file_specifiers List of data file specifiers
+    @param ipf_filename File path/name for the instrument parameter file to load
+    @param spec_min Minimum spectra ID to load
+    @param spec_max Maximum spectra ID to load
     @param load_logs Load log files when loading runs
     @param load_opts Additional options to be passed to load algorithm
 
@@ -39,13 +84,13 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     workspace_names = []
 
-    for filename in data_files:
+    for file_specifier in file_specifiers:
         # The filename without path and extension will be the workspace name
-        ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
+        ws_name = os.path.splitext(os.path.basename(str(file_specifier)))[0]
         workspace = mtd[ws_name]
-        logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
+        logger.debug('Loading file %s as workspace %s' % (file_specifier, ws_name))
 
-        do_load(filename, ws_name, ipf_filename, load_logs, load_opts)
+        do_load(file_specifier, ws_name, ipf_filename, load_logs, load_opts)
 
         # Add the workspace to the list of workspaces
         workspace_names.append(ws_name)
@@ -77,17 +122,8 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     logger.information('Loaded workspace names: %s' % (str(workspace_names)))
     logger.information('Chopped data: %s' % (str(chopped_data)))
 
-    # Sum files if needed
-    if sum_files and len(data_files) > 1:
-        if chopped_data:
-            workspace_names = sum_chopped_runs(workspace_names)
-        else:
-            workspace_names = sum_regular_runs(workspace_names)
-
     if delete_monitors:
         load_opts['DeleteMonitors'] = True
-
-    logger.information('Summed workspace names: %s' % (str(workspace_names)))
 
     return workspace_names, chopped_data
 
