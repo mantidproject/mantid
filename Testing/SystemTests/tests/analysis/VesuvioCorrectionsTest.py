@@ -636,7 +636,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
     self.assertTrue(abs_difference <= abs(tolerance_value))
-    self.assertTrue(abs(peak_bin - expected_bin) <= 1)
+    self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance)
 
 
 if __name__ == "__main__":
