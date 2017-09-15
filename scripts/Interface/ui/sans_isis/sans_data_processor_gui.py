@@ -1589,4 +1589,3 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         Re-emits 'runPytonScript' signal
         """
         mantidplot.runPythonScript(text, True)
-
