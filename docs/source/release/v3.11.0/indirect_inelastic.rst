@@ -44,6 +44,8 @@ Elwin
 Bugfixes
 --------
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+- In the Indirect Diffraction Reduction interface, sample runs are now summed correctly, when sum files is checked,
+  vanadium files are not summed. Summed sample runs each correspond to the respectively supplied vanadium run.
 
 ConvFit
 ~~~~~~~
