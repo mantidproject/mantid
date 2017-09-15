@@ -86,6 +86,7 @@ Bug fixes
 #########
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
+- Fix displayed type name for optional boolean properties.
 
 Improved
 ########
