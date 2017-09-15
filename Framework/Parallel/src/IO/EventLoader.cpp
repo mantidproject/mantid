@@ -67,7 +67,7 @@ void EventLoader::load() {
   Communicator comm;
   const Chunker chunker(comm, *m_file, m_groupName, m_bankNames, chunkSize);
   const auto &ranges = chunker.makeLoadRanges();
-  const auto &rankGroups = chunker.makeRankGroups();
+  // const auto &rankGroups = chunker.makeRankGroups();
   std::vector<int32_t> event_id(2 * chunkSize);
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 
