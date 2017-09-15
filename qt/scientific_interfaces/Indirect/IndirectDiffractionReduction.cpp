@@ -362,8 +362,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
   msgDiffReduction->setProperty(
-      "InputFiles",
-      m_uiForm.rfSampleFiles->getText().toStdString());
+      "InputFiles", m_uiForm.rfSampleFiles->getText().toStdString());
   msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("OutputWorkspace",
