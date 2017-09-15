@@ -33,6 +33,7 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
+        self.alg.setRun(self.view.getRunName())
         #do apodization and padding to real data
         preInputs=self.view.initAdvanced()
         self.view.ReAdvanced(preInputs)

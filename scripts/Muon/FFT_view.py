@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
 
+import mantid.simpleapi as mantid
+
 from Muon import table_utils
 
 
@@ -116,6 +118,13 @@ class FFTView(QtGui.QWidget):
 
     def changedHideUnTick(self,box,row ):
         self.FFTTable.setRowHidden(row, box.checkState() != QtCore.Qt.Checked)
+
+    def getRunName(self):
+        if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+        else:
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
+        return tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
 
     def initFFTInput(self):
         inputs={}

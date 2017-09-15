@@ -8,6 +8,9 @@ class FFTModel(object):
     def __init__(self):
         self.name="FFT"
 
+    def setRun(self,run):
+	    self.runName=run
+
     def preAlg(self,preInputs):
         preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
@@ -27,11 +30,9 @@ class FFTModel(object):
         mantid.AnalysisDataService.addOrReplace(FFTInputs["OutputWorkspace"],alg.getProperty("OutputWorkspace").value)
 
         ws=alg.getPropertyValue("OutputWorkspace")
-        if mantid.AnalysisDataService.doesExist("FFTMuon"):
-            FFTMuon=mantid.AnalysisDataService.retrieve("FFTMuon")
-            FFTMuon.add(ws)
-        else:
-            FFTMuon=mantid.GroupWorkspaces(InputWorkspaces=ws)
+        group = mantid.AnalysisDataService.retrieve(self.runName)
+        group.add(ws)
+
 
     def getName(self):
         return self.name
