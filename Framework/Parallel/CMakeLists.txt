@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
+    src/IO/EventParser.cpp
 )
 
 set ( INC_FILES
@@ -13,6 +14,7 @@ set ( INC_FILES
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
 	inc/MantidParallel/ThreadingBackend.h
+    inc/MantidParallel/IO/EventParser.h
 )
 
 set ( TEST_FILES
@@ -23,6 +25,7 @@ set ( TEST_FILES
 	RequestTest.h
 	StorageModeTest.h
 	ThreadingBackendTest.h
+    EventParserTest.h
 )
 
 if (COVERALLS)
