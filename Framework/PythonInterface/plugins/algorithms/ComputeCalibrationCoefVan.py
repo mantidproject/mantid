@@ -122,12 +122,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         # returns workspace instance
         self.vanaws = self.getProperty("VanadiumWorkspace").value
         # returns workspace name (string)
-        outws_name = self.getPropertyValue("OutputWorkspace")
         eppws = self.getProperty("EPPTable").value
         nhist = self.vanaws.getNumberHistograms()
         prog_reporter = Progress(self, start=0.8, end=1.0, nreports=3)
-
-
         integrate = self.createChildAlgorithm("IntegrateEPP", startProgress=0.0, endProgress=0.8, enableLogging=False)
         integrate.setProperty("InputWorkspace", self.vanaws)
         integrate.setProperty("OutputWorkspace", "__unused_for_child")
@@ -148,12 +145,6 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         prog_reporter.report("Done")
         self.setProperty("OutputWorkspace", outws)
 
-    def get_detID_offset(self):
-        """
-        returns ID of the first detector
-        """
-        return self.vanaws.getSpectrum(0).getDetectorIDs()[0]
-
     def calculate_dwf(self):
         """
         Calculates Debye-Waller factor according to
@@ -161,15 +152,10 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         """
         run = self.vanaws.getRun()
         nhist = self.vanaws.getNumberHistograms()
-        thetasort = np.zeros(nhist)  # theta in radians, not 2Theta
-
-        instrument = self.vanaws.getInstrument()
-        detID_offset = self.get_detID_offset()
-
+        thetasort = np.empty(nhist)  # half of the scattering angle, in radians
         for i in range(nhist):
-            det = instrument.getDetector(i + detID_offset)
-            thetasort[i] = 0.5 * np.sign(np.cos(det.getPhi())) * \
-                self.vanaws.detectorTwoTheta(det)
+            det = self.vanaws.getDetector(i)
+            thetasort[i] = 0.5 * self.vanaws.detectorTwoTheta(det)
 
         # T in K
         temperature = self.get_temperature()
