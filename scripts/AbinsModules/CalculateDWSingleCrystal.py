@@ -97,7 +97,7 @@ class CalculateDWSingleCrystal(object):
     def calculate_data(self):
         """
         Calculates Debye-Waller factors.
-        :return: object of type DwData with Debye-Waller factors.
+        :returns: object of type DwData with Debye-Waller factors.
         """
 
         data = self._calculate_dw()
