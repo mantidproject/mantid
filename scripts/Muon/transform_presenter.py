@@ -10,9 +10,9 @@ class transformPresenter(object):
 
     def __init__(self,view,model):
         self.view=view
-        load=load_utils.LoadUtils()
+        self.load=load_utils.LoadUtils()
         self.FFTPresenter=FFT_presenter.FFTPresenter(self.view.getView("FFT"))
-        self.MaxEntPresenter=MaxEnt_presenter.MaxEntPresenter(self.view.getView("MaxEnt"),model.getModel("MaxEnt"),load)
+        self.MaxEntPresenter=MaxEnt_presenter.MaxEntPresenter(self.view.getView("MaxEnt"),model.getModel("MaxEnt"),self.load)
         self.selectionPresenter=transform_selection_presenter.transformSelectionPresenter(self.view.selection)
         self.methodsList=self.view.getMethods()
         self.selectionPresenter.setMethodsCombo(self.methodsList)

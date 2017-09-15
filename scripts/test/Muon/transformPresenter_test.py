@@ -1,9 +1,13 @@
 import sys
 
+from  Muon import FFT_presenter
+from  Muon import load_utils
 from  Muon import transform_presenter
 from  Muon import transform_view
 from  Muon import transform_selection_view
+from  Muon import MaxEnt_presenter
 from  Muon import model_constructor
+
 import unittest
 if sys.version_info.major == 3:
     from unittest import mock
@@ -13,6 +17,9 @@ else:
 
 class FFTTransformTest(unittest.TestCase):
     def setUp(self):
+        load_utils.LoadUtils=mock.Mock()
+        FFT_presenter.FFTPresenter=mock.Mock()
+        MaxEnt_presenter.MaxEntPresenter=mock.Mock()
         self.view=mock.create_autospec(transform_view.transformView,spec_set=False)
         self.view.getView=mock.Mock()
         self.view.getMethods=mock.Mock(return_value=["FFT","MaxEnt"])
