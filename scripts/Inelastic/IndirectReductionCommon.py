@@ -15,8 +15,14 @@ def _create_file_range_parser(sum_files, instrument):
     def parser(file_range):
         if '-' in file_range:
             bounds = file_range.split('-')
-            special = '-' if sum_files else ':'
-            return instrument + bounds[0] + special + bounds[1]
+
+            try:
+                if sum_files:
+                    return instrument + bounds[0] + '-' + bounds[1]
+                else:
+                    return instrument + ",".join(range(bounds[0], bounds[1]))
+            except:
+                raise RuntimeError("Incorrectly formatted range supplied.")
         else:
             try:
                 int(file_range)
@@ -41,7 +47,9 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    file_range_parser = _create_file_range_parser(sum_files, ipf_filename.split('-')[0])
+    instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
+    instrument = instrument.split('_')[0]
+    file_range_parser = _create_file_range_parser(sum_files, instrument)
     file_ranges = [file_range_parser(file_range) for file_range in file_ranges]
     return _load_files(file_ranges, ipf_filename, spec_min, spec_max, load_logs, load_opts)
 
