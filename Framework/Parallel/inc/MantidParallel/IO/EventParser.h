@@ -12,16 +12,17 @@ class TofEvent;
 namespace Parallel {
 namespace IO {
 
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
 class EventParser { // TODO
 public:
   EventParser(std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> &&bankOffsets,
               std::vector<std::vector<Mantid::Types::TofEvent> *> &eventLists);
 
-  void setPulseInformation(std::vector<int32_t> event_index,
-                           std::vector<int64_t> event_time_zero);
+  void setPulseInformation(std::vector<IndexType> event_index,
+                           std::vector<TimeZeroType> event_time_zero);
 
-  void startParsing(int32_t *event_id_start, int32_t *event_time_offset_start,
+  void startParsing(int32_t *event_id_start, TimeOffsetType *event_time_offset_start,
                     size_t count);
   void wait();
   void finalize();
@@ -29,8 +30,8 @@ public:
 private:
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Mantid::Types::TofEvent> *> &m_eventLists;
-  std::vector<int32_t> m_event_index;
-  std::vector<int64_t> m_event_time_zero;
+  std::vector<IndexType> m_event_index;
+  std::vector<TimeZeroType> m_event_time_zero;
 };
 
 } // namespace IO
