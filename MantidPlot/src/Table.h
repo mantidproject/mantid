@@ -156,7 +156,8 @@ public slots:
 
   int colPlotDesignation(int col) { return col_plot_type[col]; };
   void setColPlotDesignation(int col, PlotDesignation pd);
-  void setPlotDesignation(PlotDesignation pd, bool rightColumns = false);
+  virtual void setPlotDesignation(PlotDesignation pd,
+                                  bool rightColumns = false);
   QList<int> plotDesignations() { return col_plot_type; };
 
   void setHeader(QStringList header);
