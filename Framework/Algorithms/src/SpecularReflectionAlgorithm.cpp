@@ -213,8 +213,9 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
   IComponent_const_sptr detector =
       this->getDetectorComponent(inWS, analysisMode == pointDetectorAnalysis);
 
-  const V3D detSample =
-      detector->getPos() - inWS->spectrumInfo().samplePosition();
+  IComponent_const_sptr sample = this->getSurfaceSampleComponent(instrument);
+
+  const V3D detSample = detector->getPos() - sample->getPos();
 
   boost::shared_ptr<const ReferenceFrame> refFrame =
       instrument->getReferenceFrame();
