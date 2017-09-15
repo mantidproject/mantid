@@ -13,7 +13,7 @@ class MaxEntPresenter(object):
         self.alg.started.connect(self.view.deactivateButton)
         self.alg.finished.connect(self.view.activateButton)
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
-    
+
     # only get ws that are groups or pairs
     # ignore raw
     # move the generating of the list to a helper?
