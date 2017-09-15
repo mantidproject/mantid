@@ -225,6 +225,48 @@ public:
     TS_ASSERT_EQUALS(result[1].first, 2);
     TS_ASSERT_EQUALS(result[1].second, (std::vector<size_t>{2, 1}));
   }
+
+  void test_large_and_small_banks_with_many_ranks() {
+    for (int workers = 1; workers < 100; ++workers) {
+      const std::vector<size_t> sizes{1234, 5678, 17, 3, 555};
+      const auto result = Chunker::makeBalancedPartitioning(workers, sizes);
+
+      // Maximum work a single worker has to do
+      size_t maxWork = 0;
+      for (const auto &item : result) {
+        size_t size = 0;
+        for (const auto bank : item.second)
+          size += sizes[bank];
+        const size_t work = (size + item.first - 1) / item.first;
+        maxWork = std::max(maxWork, work);
+      }
+
+      const size_t totalWork =
+          std::accumulate(sizes.begin(), sizes.end(), static_cast<size_t>(0));
+      const size_t wastedWork = maxWork * workers - totalWork;
+
+      // Fuzzy test to ensure that imbalance is not too large. This are by no
+      // means hard limits and may be subject to change. Current limit is: At
+      // most 30% and 3 of the workers may be `wasted` (whichever is less).
+      TS_ASSERT(static_cast<double>(wastedWork) /
+                    static_cast<double>(totalWork) <
+                std::min(0.3, 3.0 / workers));
+    }
+  }
+
+  void test_several_small_banks() {
+    const int workers = 2;
+    for (size_t banks = 2; banks < 10; ++banks) {
+      const std::vector<size_t> sizes(banks, 1);
+      const auto result = Chunker::makeBalancedPartitioning(workers, sizes);
+      TS_ASSERT_EQUALS(result.size(), workers);
+      TS_ASSERT_EQUALS(result[0].first, 1);
+      TS_ASSERT_EQUALS(result[1].first, 1);
+      TS_ASSERT_EQUALS(result[0].second.size(),
+                       (banks + workers - 1) / workers);
+      TS_ASSERT_EQUALS(result[1].second.size(), banks / workers);
+    }
+  }
 };
 
 #endif /* MANTID_PARALLEL_CHUNKERTEST_H_ */

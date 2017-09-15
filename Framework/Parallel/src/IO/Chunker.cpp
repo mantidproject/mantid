@@ -42,6 +42,7 @@ buildPartition(const int totalWorkers, const size_t totalSize,
   const int workers = static_cast<int>(
       (static_cast<size_t>(totalWorkers) * size + totalSize - 1) / totalSize);
   size_t remainder = workers * perWorkerSize - size;
+
   // 3. Fill remainder with next largest fitting size(s)
   for (auto &item : sortedSizes) {
     if (std::get<2>(item))
@@ -55,6 +56,28 @@ buildPartition(const int totalWorkers, const size_t totalSize,
     }
   }
   return {workers, itemsInPartition};
+}
+
+int numberOfWorkers(
+    const std::vector<std::pair<int, std::vector<size_t>>> &partitioning) {
+  int workers = 0;
+  for (const auto &item : partitioning)
+    workers += std::get<0>(item);
+  return workers;
+}
+
+size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
+                const std::vector<size_t> &tasks) {
+  const int workers = std::get<0>(partition);
+  if (workers == 0)
+    return UINT64_MAX;
+  const auto &indices = std::get<1>(partition);
+  size_t total = 0;
+  for (const auto index : indices)
+    total += tasks[index];
+  // Rounding *up*. Some workers in partition maybe have less work but we want
+  // the maximum.
+  return (total + workers - 1) / workers;
 }
 }
 
@@ -180,13 +203,36 @@ Chunker::makeBalancedPartitioning(const int workers,
               return std::get<0>(a) > std::get<0>(b);
             });
 
-  std::vector<std::pair<int, std::vector<size_t>>> result;
+  std::vector<std::pair<int, std::vector<size_t>>> partitioning;
   size_t numProcessed = 0;
   while (numProcessed != sizes.size()) {
-    result.emplace_back(buildPartition(workers, totalSize, sortedSizes));
-    numProcessed += result.back().second.size();
+    partitioning.emplace_back(buildPartition(workers, totalSize, sortedSizes));
+    numProcessed += partitioning.back().second.size();
   }
-  return result;
+
+  // buildPartition always rounds up when computing needed workers, so we have
+  // to reduce workers for some partitions such that we stay below given total
+  // workers.
+  int tooMany = numberOfWorkers(partitioning) - workers;
+  if (tooMany != 0) {
+    for (auto &item : partitioning)
+      std::get<0>(item)--;
+    std::vector<size_t> taskSizes;
+    for (const auto &partition : partitioning)
+      taskSizes.push_back(taskSize(partition, sizes));
+    for (int i = 0; i < tooMany; ++i) {
+      const auto itemWithSmallestIncrease =
+          std::distance(taskSizes.begin(),
+                        std::min_element(taskSizes.begin(), taskSizes.end()));
+      std::get<0>(partitioning[itemWithSmallestIncrease])--;
+      taskSizes[itemWithSmallestIncrease] =
+          taskSize(partitioning[itemWithSmallestIncrease], sizes);
+    }
+    for (auto &item : partitioning)
+      std::get<0>(item)++;
+  }
+
+  return partitioning;
 }
 
 } // namespace IO
