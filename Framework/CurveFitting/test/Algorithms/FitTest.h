@@ -2000,7 +2000,7 @@ public:
 
     // Create the workspace
     const size_t M = 1001;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
     auto &wsX = ws->mutableX(0);
     auto &wsY = ws->mutableY(0);
     auto &wsE = ws->mutableE(0);
@@ -2239,7 +2239,7 @@ public:
 
     // Create the workspace
     const size_t M = 1001;
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, M);
     auto &X = ws->mutableX(0);
     auto &Y = ws->mutableY(0);
     auto &E = ws->mutableE(0);
