@@ -614,12 +614,17 @@ void QDataProcessorWidget::transfer(const QList<QString> &runs) {
     QStringList map = (*it).split(",");
     for (auto jt = map.begin(); jt != map.end(); ++jt) {
       QStringList pair = (*jt).split(":");
-      if (pair.size() != 2) {
-        giveUserCritical("Could not transfer runs to processing table",
-                         "Transfer failed");
+
+      // The entry can be of the for "key:value" or of the form "key:" if nothing is to be set in the column.
+      if (pair.size() == 1) {
+        runsMap[row][pair[0]] = "";
+      } else if (pair.size() == 2) {
+        runsMap[row][pair[0]] = pair[1];
+      } else {
+          giveUserCritical("Could not transfer runs to processing table",
+                     "Transfer failed");
         return;
       }
-      runsMap[row][pair[0]] = pair[1];
     }
     row++;
   }
