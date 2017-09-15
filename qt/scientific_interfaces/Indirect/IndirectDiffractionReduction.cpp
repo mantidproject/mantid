@@ -487,7 +487,8 @@ void IndirectDiffractionReduction::addGrouping(
   msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
   createGroupingWorkspace(groupingWsName);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(deleteWorkspace()));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(deleteWorkspace()));
 }
 
 void IndirectDiffractionReduction::createGroupingWorkspace(
@@ -859,6 +860,5 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     return;
   }
 }
-
 }
 }
