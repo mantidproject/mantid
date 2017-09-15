@@ -1,4 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
+from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile, ChopData)
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -7,6 +8,8 @@ import numpy as np
 
 
 # -------------------------------------------------------------------------------
+
+def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
@@ -23,9 +26,8 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile,
-                                  ChopData, ExtractSingleSpectrum,
-                                  CropWorkspace, DeleteWorkspace)
+    from mantid.simpleapi import (ExtractSingleSpectrum, CropWorkspace,
+                                  DeleteWorkspace)
     delete_monitors = False
 
     if load_opts is None:
@@ -40,50 +42,20 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     for filename in data_files:
         # The filename without path and extension will be the workspace name
         ws_name = os.path.splitext(os.path.basename(str(filename)))[0]
+        workspace = mtd[ws_name]
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
-        if 'VESUVIO' in ipf_filename:
-            # Load all spectra. They are cropped later
-            LoadVesuvio(Filename=str(filename),
-                        OutputWorkspace=ws_name,
-                        SpectrumList='1-198',
-                        **load_opts)
-        else:
-            Load(Filename=filename,
-                 OutputWorkspace=ws_name,
-                 LoadLogFiles=load_logs,
-                 **load_opts)
-
-        # Load the instrument parameters
-        LoadParameterFile(Workspace=ws_name,
-                          Filename=ipf_filename)
+        do_load(filename, ws_name, ipf_filename, load_logs, load_opts)
 
         # Add the workspace to the list of workspaces
         workspace_names.append(ws_name)
 
         # Get the spectrum number for the monitor
-        instrument = mtd[ws_name].getInstrument()
+        instrument = workspace.getInstrument()
         monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
         logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
 
-        # Chop data if required
-        try:
-            chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
-            x_max = mtd[ws_name].readX(0)[-1]
-            chopped_data = x_max > chop_threshold
-        except IndexError:
-            chopped_data = False
-        logger.information('Workspace {0} need data chop: {1}'.format(ws_name, str(chopped_data)))
-
-        workspaces = [ws_name]
-        if chopped_data:
-            ChopData(InputWorkspace=ws_name,
-                     OutputWorkspace=ws_name,
-                     MonitorWorkspaceIndex=monitor_index,
-                     IntegrationRangeLower=5000.0,
-                     IntegrationRangeUpper=10000.0,
-                     NChops=5)
-            workspaces = mtd[ws_name].getNames()
+        workspaces, chopped_data = chop_workspace(workspace)
 
         for chop_ws_name in workspaces:
             # Get the monitor spectrum
@@ -118,6 +90,72 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 
     return workspace_names, chopped_data
+
+
+# -------------------------------------------------------------------------------
+
+
+def do_load(file_specifier, output_ws_name, ipf_filename, load_logs, load_opts):
+    """
+    Loads the files, passing the given file specifier in the load command.
+
+    :param file_specifier:  The file specifier (single file, range or sum)
+    :param output_ws_name:  The name of the output workspace to create
+    :param ipf_filename:    The instrument parameter file to load with
+    :param load_opts:       Additional loading options
+    :param load_logs:       If True, load logs
+    """
+
+    if 'VESUVIO' in ipf_filename:
+        # Load all spectra. They are cropped later
+        LoadVesuvio(Filename=str(filename),
+                    OutputWorkspace=ws_name,
+                    SpectrumList='1-198',
+                    **load_opts)
+    else:
+        Load(Filename=filename,
+             OutputWorkspace=ws_name,
+             LoadLogFiles=load_logs,
+             **load_opts)
+
+    # Load the instrument parameters
+    LoadParameterFile(Workspace=output_ws_name,
+                      Filename=ipf_filename)
+
+
+# -------------------------------------------------------------------------------
+
+
+def chop_workspace(workspace):
+    """
+    Chops the specified workspace if its maximum x-value exceeds its instrument
+    parameter, 'Workflow.ChopDataIfGreaterThan'.
+
+    :param workspace:   The workspace to chop
+    :return:            A tuple of the list of output workspace names and a boolean
+                        specifying whether the workspace was chopped.
+    """
+    workspace_name = workspace.getName()
+
+    # Chop data if required
+    try:
+        chop_threshold = workspace.getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
+        x_max = workspace.readX(0)[-1]
+        chopped_data = x_max > chop_threshold
+    except IndexError:
+        chopped_data = False
+    logger.information('Workspace {0} need data chop: {1}'.format(workspace, str(chopped_data)))
+
+    if chopped_data:
+        ChopData(InputWorkspace=workspace,
+                 OutputWorkspace=workspace_name,
+                 MonitorWorkspaceIndex=monitor_index,
+                 IntegrationRangeLower=5000.0,
+                 IntegrationRangeUpper=10000.0,
+                 NChops=5)
+        return workspace.getNames()
+    else:
+        return ([workspace_name], chopped_data)
 
 
 # -------------------------------------------------------------------------------
