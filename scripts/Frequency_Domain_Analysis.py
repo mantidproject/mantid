@@ -1,17 +1,19 @@
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from PyQt4 import QtGui
+
 import sys
 
-from Muon import view_constructor
+import PyQt4.QtGui as QtGui
+
 from Muon import model_constructor
-from Muon import transform_view
 from Muon import transform_presenter
+from Muon import transform_view
+from Muon import view_constructor
 
 
-class frequencyDomainAnalysisGui(QtGui.QMainWindow):
+class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
-        super(frequencyDomainAnalysisGui,self).__init__(parent)
+        super(FrequencyDomainAnalysisGui,self).__init__(parent)
         groupedViews = view_constructor.viewConstructor(True,self)
         groupedModels = model_constructor.modelConstructor(True)
         view =transform_view.transformView(groupedViews,self)
@@ -28,7 +30,7 @@ def qapp():
     return _app
 
 app = qapp()
-ex= frequencyDomainAnalysisGui()
+ex= FrequencyDomainAnalysisGui()
 ex.resize(700,700)
 ex.show()
 app.exec_()

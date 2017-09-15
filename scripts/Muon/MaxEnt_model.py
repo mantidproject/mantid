@@ -35,7 +35,10 @@ class MaxEntModel(object):
     def setInputs(self,inputs):
         self.inputs=inputs
         for name,value in iteritems(self.inputs):
-            self.alg.setProperty(name,value)
+            if name != "Run":
+                self.alg.setProperty(name,value)
+            else:
+                self.run=value
 
     def execute(self):
         self.alg.execute()
@@ -46,26 +49,12 @@ class MaxEntModel(object):
         mantid.AnalysisDataService.addOrReplace( self.inputs["ReconstructedImage"],self.alg.getProperty("ReconstructedImage").value)
         mantid.AnalysisDataService.addOrReplace( self.inputs["ReconstructedData"],self.alg.getProperty("ReconstructedData").value)
 
-        if mantid.AnalysisDataService.doesExist("EvolChiMuon"):
-            EvolChiMuon=mantid.AnalysisDataService.retrieve("EvolChiMuon")
-            EvolChiMuon.add(self.inputs["EvolChi"])
+        if mantid.AnalysisDataService.doesExist(self.run):
+            group=mantid.AnalysisDataService.retrieve(self.run)
         else:
-            mantid.GroupWorkspaces(InputWorkspaces=self.inputs["EvolChi"],OutputWorkspace="EvolChiMuon")
+            mantid.GroupWorkspaces(OutputWorkspace=self.run)
 
-        if mantid.AnalysisDataService.doesExist("EvolAngleMuon"):
-            EvolAngleMuon=mantid.AnalysisDataService.retrieve("EvolAngleMuon")
-            EvolAngleMuon.add(self.inputs["EvolAngle"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=self.inputs["EvolAngle"],OutputWorkspace="EvolAngleMuon")
-
-        if mantid.AnalysisDataService.doesExist("ReconstructedImageMuon"):
-            ReconstructedImageMuon=mantid.AnalysisDataService.retrieve("ReconstructedImageMuon")
-            ReconstructedImageMuon.add(self.inputs["ReconstructedImage"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=self.inputs["ReconstructedImage"],OutputWorkspace="ReconstructedImageMuon")
-
-        if mantid.AnalysisDataService.doesExist("ReconstructedDataMuon"):
-            ReconstructedMuon=mantid.AnalysisDataService.retrieve("ReconstructedDataMuon")
-            ReconstructedMuon.add(self.inputs["ReconstructedData"])
-        else:
-            mantid.GroupWorkspaces(InputWorkspaces=self.inputs["ReconstructedData"],OutputWorkspace="ReconstructedDataMuon")
+        group.add(self.inputs["EvolChi"])
+        group.add(self.inputs["EvolAngle"])
+        group.add(self.inputs["ReconstructedImage"])
+        group.add(self.inputs["ReconstructedData"])
