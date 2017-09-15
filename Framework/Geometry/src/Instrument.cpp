@@ -28,6 +28,13 @@ namespace Geometry {
 
 namespace {
 Kernel::Logger g_log("Instrument");
+
+void raiseDuplicateDetectorError(const size_t detectorId) {
+  std::stringstream sstream;
+  sstream << "Instrument Definition corrupt. Detector with ID " << detectorId
+          << " already exists.";
+  throw std::runtime_error(sstream.str());
+}
 }
 
 /// Default constructor
@@ -711,9 +718,7 @@ void Instrument::markAsDetector(const IDetector *det) {
   auto it = lower_bound(m_detectorCache, det->getID());
   // Duplicate detector ids are forbidden
   if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
-    std::stringstream sstream;
-    sstream << "Detector with ID " << det->getID() << " already exists";
-    throw std::runtime_error(sstream.str());
+    raiseDuplicateDetectorError(det->getID());
   }
   bool isMonitor = false;
   m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
@@ -735,20 +740,21 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 /// Sorts the detector cache. Called after all detectors have been marked via
 /// markAsDetectorIncomplete.
 void Instrument::markAsDetectorFinalize() {
-  // markAsDetector silently ignores detector IDs that are already marked as
-  // detectors, even if the actual detector is different. We mimic this behavior
-  // in this final sort by using stable_sort and removing duplicates. This will
-  // effectively favor the first detector with a certain ID that was added.
+  // Detectors (even when different objects) are NOT allowed to have duplicate
+  // ids. This method establishes the presence of duplicates.
   std::stable_sort(m_detectorCache.begin(), m_detectorCache.end(),
                    [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
                       const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
                        -> bool { return std::get<0>(a) < std::get<0>(b); });
-  m_detectorCache.erase(
-      std::unique(m_detectorCache.begin(), m_detectorCache.end(),
-                  [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-                     const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-                      -> bool { return std::get<0>(a) == std::get<0>(b); }),
-      m_detectorCache.end());
+
+  auto resultIt = std::adjacent_find(
+      m_detectorCache.begin(), m_detectorCache.end(),
+      [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+         const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+          -> bool { return std::get<0>(a) == std::get<0>(b); });
+  if (resultIt != m_detectorCache.end()) {
+    raiseDuplicateDetectorError(std::get<0>(*resultIt));
+  }
 }
 
 /** Mark a Component which has already been added to the Instrument class

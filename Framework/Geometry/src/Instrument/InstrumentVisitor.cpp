@@ -50,9 +50,8 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
 }
 
 /**
- * @brief InstrumentVisitor::registerComponentAssembly
+ * Constructor
  * @param instrument : Instrument being visited
- * @return Component index of this component
  */
 InstrumentVisitor::InstrumentVisitor(
     boost::shared_ptr<const Instrument> instrument)
