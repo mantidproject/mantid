@@ -4,26 +4,21 @@ import mantid.simpleapi as mantid
 
 class MaxEntPresenter(object):
 
-    def __init__(self,view,alg):
+    def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
+        self.load=load
         # set data
         self.getWorkspaceNames()
         #connect
         self.alg.started.connect(self.view.deactivateButton)
         self.alg.finished.connect(self.view.activateButton)
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
-
     # only get ws that are groups or pairs
     # ignore raw
     # move the generating of the list to a helper?
     def getWorkspaceNames(self):
-        options = mantid.AnalysisDataService.getObjectNames()
-        options = [item.replace(" ","") for item in options]
-        # for some reason this doesn't work
-        tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
-        runName=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
-
+        runName,options = self.load.getCurrentWS()
         final_options=[]
         for pick in options:
             if ";" in pick and "Raw" not in pick and runName in pick:

@@ -138,11 +138,12 @@ class MaxEntView(QtGui.QWidget):
 
         tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
         out=tmpWS.getInstrument().getName()+str(tmpWS.getRunNumber()).zfill(8)
+        inputs["Run"]=out
 
         # will remove this when sim maxent Works
         out=str( self.ws.currentText()).replace(";","; ")
 
-        inputs["Run"]=out
+
         inputs['EvolChi']=out+";EvolChi;MaxEnt"
         inputs['EvolAngle']=out+";EvolAngle;MaxEnt"
         inputs['ReconstructedImage']=out+";ReconstructedImage;MaxEnt"
