@@ -442,6 +442,13 @@ public:
     }
   }
 
+  void testEmptyWorkspace() {
+    WorkspaceTester ws;
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.blocksize(), 0);
+    TS_ASSERT_EQUALS(ws.size(), 0);
+  }
+
   void test_updateSpectraUsing() {
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);

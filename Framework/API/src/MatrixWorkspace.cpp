@@ -674,7 +674,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
   // determine the data range
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra;
        workspaceIndex++) {
-    const MantidVec &dataX = this->readX(workspaceIndex);
+    const auto &dataX = this->x(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
     if (std::isfinite(xfront) && std::isfinite(xback)) {
@@ -710,7 +710,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
        wksp_index++) {
     // Get Handle to data
     const Mantid::MantidVec &x = this->readX(wksp_index);
-    const Mantid::MantidVec &y = this->readY(wksp_index);
+    const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
@@ -937,7 +937,7 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  */
 bool MatrixWorkspace::isHistogramData() const {
   // all spectra *should* have the same behavior
-  bool isHist = (readX(0).size() != readY(0).size());
+  bool isHist = (x(0).size() != y(0).size());
   // TODOHIST temporary sanity check
   if (isHist) {
     if (getSpectrum(0).histogram().xMode() !=
@@ -966,9 +966,8 @@ bool MatrixWorkspace::isCommonBins() const {
     const size_t numHist = getNumberHistograms();
     bool oneNonEmpty = false;
     if (numHist > 1) {
-      !readY(0).empty();
-      for (size_t i = 1; i < numHist; ++i) {
-        if (!readY(0).empty()) {
+      for (size_t i = 0; i < numHist; ++i) {
+        if (!y(i).empty()) {
           oneNonEmpty = true;
           break;
         }
@@ -981,12 +980,11 @@ bool MatrixWorkspace::isCommonBins() const {
       // the first and the last
       const size_t lastSpec = numHist - 1;
       // Quickest check is to see if they are actually the same vector
-      if (&(readX(0)[0]) != &(readX(lastSpec)[0])) {
+      if (&(x(0)[0]) != &(x(lastSpec)[0])) {
         // Now check numerically
-        const double first =
-            std::accumulate(readX(0).begin(), readX(0).end(), 0.);
+        const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
         const double last =
-            std::accumulate(readX(lastSpec).begin(), readX(lastSpec).end(), 0.);
+            std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
         if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
           m_isCommonBinsFlag = false;
         }
@@ -1026,8 +1024,8 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
         workspaceIndex, this->getNumberHistograms(),
         "MatrixWorkspace::maskBin,workspaceIndex");
   // Then check the bin index
-  if (binIndex >= readY(workspaceIndex).size())
-    throw Kernel::Exception::IndexError(binIndex, readY(workspaceIndex).size(),
+  if (binIndex >= y(workspaceIndex).size())
+    throw Kernel::Exception::IndexError(binIndex, y(workspaceIndex).size(),
                                         "MatrixWorkspace::maskBin,binIndex");
 
   // this function is marked parallel critical
@@ -1524,7 +1522,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   const size_t nhist = this->getNumberHistograms();
-  const auto &yVals = this->readY(wi);
+  const auto &yVals = this->y(wi);
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
   if (normalization == VolumeNormalization && ax1->isNumeric()) {
     size_t uVI; // unused vertical index.
@@ -1725,14 +1723,14 @@ std::pair<size_t, size_t>
 MatrixWorkspace::getImageStartEndXIndices(size_t i, double startX,
                                           double endX) const {
   if (startX == EMPTY_DBL())
-    startX = readX(i).front();
+    startX = x(i).front();
   auto pStart = getXIndex(i, startX, true);
   if (pStart.second != 0.0) {
     throw std::runtime_error(
         "Start X value is required to be on bin boundary.");
   }
   if (endX == EMPTY_DBL())
-    endX = readX(i).back();
+    endX = x(i).back();
   auto pEnd = getXIndex(i, endX, false, pStart.first);
   if (pEnd.second != 0.0) {
     throw std::runtime_error("End X value is required to be on bin boundary.");
@@ -1787,7 +1785,7 @@ MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop,
 std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x,
                                                      bool isLeft,
                                                      size_t start) const {
-  auto &X = readX(i);
+  auto &X = this->x(i);
   auto nx = X.size();
 
   // if start out of range - search failed
