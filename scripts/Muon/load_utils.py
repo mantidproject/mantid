@@ -9,7 +9,7 @@ class LoadUtils(object):
         self.options = [item.replace(" ","") for item in self.options]
         # if periods get the info from the first period
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-	        tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
         else:
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
 
