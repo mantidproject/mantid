@@ -125,50 +125,27 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         outws_name = self.getPropertyValue("OutputWorkspace")
         eppws = self.getProperty("EPPTable").value
         nhist = self.vanaws.getNumberHistograms()
-        prog_reporter = Progress(self, start=0.0, end=1.0, nreports=nhist+1)
+        prog_reporter = Progress(self, start=0.8, end=1.0, nreports=3)
 
+
+        integrate = self.createChildAlgorithm("IntegrateEPP", startProgress=0.0, endProgress=0.8, enableLogging=False)
+        integrate.setProperty("InputWorkspace", self.vanaws)
+        integrate.setProperty("OutputWorkspace", "__unused_for_child")
+        integrate.setProperty("EPPWorkspace", eppws)
+        width = 3. * 2. * np.sqrt(2. * np.log(2.))
+        integrate.setProperty("HalfWidthInSigmas", width)
+        integrate.execute()
+        prog_reporter.report("Computing DWFs")
+        outws = integrate.getProperty("OutputWorkspace").value
         # calculate array of Debye-Waller factors
+        prog_reporter.report("Applying DWFs")
         dwf = self.calculate_dwf()
-
-        # for each detector: fit gaussian to get peak_centre and fwhm
-        # sum data in the range [peak_centre - 3*fwhm, peak_centre + 3*fwhm]
-        dataX = self.vanaws.readX(0)
-        coefY = np.zeros(nhist)
-        coefE = np.zeros(nhist)
-        peak_centre = eppws.column('PeakCentre')
-        sigma = eppws.column('Sigma')
-
-        specInfo = self.vanaws.spectrumInfo()
         for idx in range(nhist):
-            prog_reporter.report("Setting %dth spectrum" % idx)
-            dataY = self.vanaws.readY(idx)
-            if np.max(dataY) == 0 or specInfo.isMasked(idx):
-                coefY[idx] = 0.
-                coefE[idx] = 0.
-            else:
-                dataE = self.vanaws.readE(idx)
-                fwhm = sigma[idx]*2.*np.sqrt(2.*np.log(2.))
-                idxmin = (np.fabs(dataX-peak_centre[idx]+3.*fwhm)).argmin()
-                idxmax = (np.fabs(dataX-peak_centre[idx]-3.*fwhm)).argmin()
-                coefY[idx] = sum(dataY[idxmin:idxmax+1])/dwf[idx]
-                coefE[idx] = np.sqrt(sum(
-                    np.square(dataE[idxmin:idxmax+1])))/dwf[idx]
-
-        # create X array, X data are the same for all detectors, so
-        coefX = np.zeros(nhist)
-        coefX.fill(dataX[0])
-
-        create = self.createChildAlgorithm("CreateWorkspace")
-        create.setPropertyValue('OutputWorkspace', outws_name)
-        create.setProperty('ParentWorkspace', self.vanaws)
-        create.setProperty('DataX', coefX)
-        create.setProperty('DataY', coefY)
-        create.setProperty('DataE', coefE)
-        create.setProperty('NSpec', nhist)
-        create.setProperty('UnitX', 'TOF')
-        create.execute()
-        outws = create.getProperty('OutputWorkspace').value
-
+            ys = outws.dataY(idx)
+            ys /= dwf[idx]
+            es = outws.dataE(idx)
+            es /= dwf[idx]
+        prog_reporter.report("Done")
         self.setProperty("OutputWorkspace", outws)
 
     def get_detID_offset(self):

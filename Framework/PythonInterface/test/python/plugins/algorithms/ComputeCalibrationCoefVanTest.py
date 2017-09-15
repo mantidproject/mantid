@@ -53,10 +53,14 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
 
         # check whether sum is calculated correctly, for theta=0, dwf=1
-        y_sum = sum(self._input_ws.readY(0)[27:75])
-        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(0)[27:75])))
-        self.assertAlmostEqual(y_sum, wsoutput.readY(0)[0])
-        self.assertAlmostEqual(e_sum, wsoutput.readE(0)[0])
+        y_sumMin = np.sum(self._input_ws.readY(0)[28:73])
+        y_sumMax = np.sum(self._input_ws.readY(0)[27:74])
+        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[28:73])))
+        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[27:74])))
+        self.assertLess(y_sumMin, wsoutput.readY(0)[0])
+        self.assertGreater(y_sumMax, wsoutput.readY(0)[0])
+        self.assertLess(e_sumMin, wsoutput.readE(0)[0])
+        self.assertGreater(e_sumMax, wsoutput.readE(0)[0])
 
         DeleteWorkspace(wsoutput)
 
@@ -136,14 +140,18 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         else:
             raise RuntimeError("Unsupported temperature supplied to " +
                                "_checkDWF(). Use 0K or 293K only.")
-        y_sum = sum(self._input_ws.readY(1)[27:75])
-        e_sum = np.sqrt(sum(np.square(self._input_ws.readE(1)[27:75])))
+        y_sumMin = np.sum(self._input_ws.readY(1)[28:73])
+        y_sumMax = np.sum(self._input_ws.readY(1)[27:74])
+        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[28:73])))
+        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[27:74])))
         mvan = 0.001*50.942/N_A
         Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
         dwf = np.exp(
             -1.0*Bcoef*(4.0*np.pi*np.sin(0.5*np.radians(15.0))/4.0)**2)
-        self.assertAlmostEqual(y_sum/dwf, wsoutput.readY(1)[0])
-        self.assertAlmostEqual(e_sum/dwf, wsoutput.readE(1)[0])
+        self.assertLess(y_sumMin/dwf, wsoutput.readY(1)[0])
+        self.assertGreater(y_sumMax/dwf, wsoutput.readY(1)[0])
+        self.assertLess(e_sumMin/dwf, wsoutput.readE(1)[0])
+        self.assertGreater(e_sumMax/dwf, wsoutput.readE(1)[0])
 
 
 if __name__ == "__main__":
