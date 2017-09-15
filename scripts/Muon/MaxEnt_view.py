@@ -1,7 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import math
-
 from PyQt4 import QtCore, QtGui
 
 import mantid.simpleapi as mantid
