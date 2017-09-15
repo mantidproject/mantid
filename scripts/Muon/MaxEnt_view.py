@@ -142,7 +142,7 @@ class MaxEntView(QtGui.QWidget):
 
         # if periods get the info from the first period
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-	        tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
+            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
         else:
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
 
