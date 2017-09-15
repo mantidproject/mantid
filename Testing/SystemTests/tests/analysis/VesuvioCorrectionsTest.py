@@ -636,6 +636,7 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
     self.assertTrue(abs_difference <= abs(tolerance_value))
+    raise RuntimeError("Peak: " + str(peak_bin) + "Expected: " + str(expected_bin))
     self.assertTrue(abs(peak_bin - expected_bin) <= 1)
 
 
