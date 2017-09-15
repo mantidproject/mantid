@@ -45,6 +45,7 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
   pmap->clearParametersByName(ParameterMap::rotx(), &comp);
   pmap->clearParametersByName(ParameterMap::roty(), &comp);
   pmap->clearParametersByName(ParameterMap::rotz(), &comp);
+  pmap->clearParametersByName(ParameterMap::scale(), &comp);
   pmap->clearParametersByName(ParameterMap::isHidden(), &comp);
 }
 }
@@ -156,14 +157,14 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_rotations->emplace_back(Kernel::toQuaterniond(assembly.getRotation()));
   m_isVisible->push_back(assembly.isVisible());
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
-  clearLegacyParameters(m_pmap, assembly);
   // Now that we know what the index of the parent is we can apply it to the
   // children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
-  }
+  }  
   markAsSourceOrSample(componentID, componentIndex);
   m_shapes->emplace_back(m_nullShape);
+  clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
 }
 

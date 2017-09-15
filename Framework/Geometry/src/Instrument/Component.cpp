@@ -454,7 +454,10 @@ void Component::getBoundingBox(BoundingBox &boundingBox) const {
 */
 bool Component::isVisible() const {
   if (hasParameter(m_map->isHidden())) {
-    return getParameter<bool>(m_map->isHidden(), false)[0];
+	  const auto &isHiddenVec = getParameter<bool>(m_map->isHidden(), false);
+	  // By default, if we can't find the isHIdden parameter,
+	  // just assume it is visible
+	  return isHiddenVec.size() == 0 || !isHiddenVec[0];
   }
   return true;
 }
