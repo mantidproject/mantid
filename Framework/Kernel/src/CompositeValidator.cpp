@@ -1,4 +1,5 @@
 #include "MantidKernel/CompositeValidator.h"
+#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::Kernel;

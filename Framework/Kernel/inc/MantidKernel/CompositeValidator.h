@@ -7,7 +7,6 @@
 #include <boost/make_shared.hpp>
 
 #include <list>
-#include <sstream>
 #include <string>
 #include <vector>
 
