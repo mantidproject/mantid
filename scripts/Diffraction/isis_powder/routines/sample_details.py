@@ -108,6 +108,9 @@ class SampleDetails(object):
             self.material_object.print_material()
         print()  # Newline for visual spacing
 
+    def shape_type(self):
+        return self._shape_type
+
     def radius(self):
         if self._shape_type == "cylinder":
             return self._shape.radius

@@ -25,7 +25,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(sample_details_obj.center(), expected_center)
 
         # Check shape stype defaults to cylinder
-        self.assertEqual(sample_details_obj._shape_type, "cylinder")
+        self.assertEqual(sample_details_obj.shape_type(), "cylinder")
 
         # Does it handle ints correctly
         height_radius_int = 1
