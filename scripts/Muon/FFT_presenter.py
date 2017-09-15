@@ -5,9 +5,10 @@ import mantid.simpleapi as mantid
 
 class FFTPresenter(object):
 
-    def __init__(self,view,alg):
+    def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
+        self.load=load
         # set data
         self.getWorkspaceNames()
         #connect
@@ -17,11 +18,10 @@ class FFTPresenter(object):
     # only get ws that are groups or pairs
     # ignore raw
     def getWorkspaceNames(self):
-        options = mantid.AnalysisDataService.getObjectNames()
-        options = [item.replace(" ","") for item in options]
+        runName,options = self.load.getCurrentWS()
         final_options = []
         for pick in options:
-            if ";" in pick and "Raw" not in pick:
+            if ";" in pick and "Raw" not in pick and runName in pick:
                 final_options.append(pick)
         self.view.addItems(final_options)
 
