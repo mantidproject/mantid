@@ -1889,13 +1889,13 @@ QGroupBox::title {
   <customwidget>
    <class>SettingsDiagnosticTab</class>
    <extends>QWidget</extends>
-   <header>settings_diagnostic_tab.h</header>
+   <header>ui.sans_isis.settings_diagnostic_tab</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MaskingTable</class>
    <extends>QWidget</extends>
-   <header>masking_table.h</header>
+   <header>ui.sans_isis.masking_table</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
