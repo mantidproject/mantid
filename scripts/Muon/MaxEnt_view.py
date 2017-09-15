@@ -143,11 +143,10 @@ class MaxEntView(QtGui.QWidget):
         # will remove this when sim maxent Works
         out=str( self.ws.currentText()).replace(";","; ")
 
-
         inputs['EvolChi']=out+";EvolChi;MaxEnt"
         inputs['EvolAngle']=out+";EvolAngle;MaxEnt"
-        inputs['ReconstructedImage']=out+";ReconstructedImage;MaxEnt"
-        inputs['ReconstructedData']=out+";ReconstructedData;MaxEnt"
+        inputs['ReconstructedImage']=out+";FrequencyDomain;MaxEnt"
+        inputs['ReconstructedData']=out+";TimeDomain;MaxEnt"
 
         return inputs
 
