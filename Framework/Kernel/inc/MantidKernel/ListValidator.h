@@ -7,6 +7,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 #endif
+#include <iterator>
 #include <map>
 #include <set>
 #include <unordered_set>
@@ -43,6 +44,40 @@ namespace Kernel {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE> class ListValidator : public TypedValidator<TYPE> {
+private:
+	explicit ListValidator(
+		const std::iterator<std::forward_iterator_tag, TYPE> begin,
+		const std::iterator<std::forward_iterator_tag, TYPE> end,
+		const std::iterator<std::forward_iterator_tag,
+		                    std::pair<std::string, std::string>> aliasesBegin,
+		const std::iterator<std::foward_iterator_tag,
+		                    std::pair<std::string, std::string>> aliasesEnd,
+		const bool allowMultiSelection)
+		: m_aliases(aliasesBegin, aliasesEnd),
+		ListValidator<TYPE>(begin, end, allowMultiSelection) {
+		for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
+			++aliasIt) {
+			if (values.end() ==
+				std::find(values.begin(), values.end(),
+					boost::lexical_cast<TYPE>(aliasIt->second))) {
+				throw std::invalid_argument("Alias " + aliasIt->first +
+					" referes to invalid value " + aliasIt->second);
+			}
+		}
+	}
+		                 
+	explicit ListValidator(
+		const std::iterator<std::forward_iterator_tag, TYPE> begin, 
+		const std::iterator<std::forward_iterator_tag, TYPE> end,
+		const bool allowMultiSelection)
+		: TypedValidator<TYPE>(), m_allowedValues(begin, end),
+		m_allowMultiSelection(allowMultiSelection) {
+		if (m_allowMultiSelection) {
+			throw Kernel::Exception::NotImplementedError(
+				"The List Validator does not support multi selection yet");
+		}
+	}
+
 public:
   /// Default constructor. Sets up an empty list of valid values.
   ListValidator() : TypedValidator<TYPE>(), m_allowMultiSelection(false) {}
@@ -52,14 +87,8 @@ public:
    *  @param allowMultiSelection :: True if the list allows multi selection
    */
   explicit ListValidator(const std::set<TYPE> &values,
-                         const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
+	  const bool allowMultiSelection = false)
+	  : ListValidator<TYPE>(values.begin(), values.end(), allowMultiSelection) {}
 
   /** Constructor
    *  @param values :: An unordered set of values consisting of the valid values
@@ -67,13 +96,7 @@ public:
    */
   explicit ListValidator(const std::unordered_set<TYPE> &values,
                          const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    if (m_allowMultiSelection) {
-      throw Kernel::Exception::NotImplementedError(
-          "The List Validator does not support Multi selection yet");
-    }
-  }
+	:  ListValidator<TYPE>(values.begin(), values.end(), allowMultiSelection) {}
 
   /** Constructor
    *  @param values :: An array of the valid values
@@ -85,24 +108,8 @@ public:
                          const std::map<std::string, std::string> &aliases =
                              std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_aliases(aliases.begin(), aliases.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
-         ++aliasIt) {
-      if (values.end() ==
-          std::find(values.begin(), values.end(),
-                    boost::lexical_cast<TYPE>(aliasIt->second))) {
-        throw std::invalid_argument("Alias " + aliasIt->first +
-                                    " refers to invalid value " +
-                                    aliasIt->second);
-        if (m_allowMultiSelection) {
-          throw Kernel::Exception::NotImplementedError(
-              "The List Validator does not support multi selection yet");
-        }
-      }
-    }
-  }
+	    : ListValidator<TYPE>(values.begin(), values.end(), aliases.begin(),
+			                  aliases.end(), allowMultiSelection) {}
 
   /** Constructor
     *  @param values :: A vector of the valid values
@@ -113,28 +120,14 @@ public:
                          const std::map<std::string, std::string> &aliases =
                              std::map<std::string, std::string>(),
                          const bool allowMultiSelection = false)
-      : TypedValidator<TYPE>(), m_allowedValues(values.begin(), values.end()),
-        m_aliases(aliases.begin(), aliases.end()),
-        m_allowMultiSelection(allowMultiSelection) {
-    for (auto aliasIt = m_aliases.begin(); aliasIt != m_aliases.end();
-         ++aliasIt) {
-      if (values.end() ==
-          std::find(values.begin(), values.end(),
-                    boost::lexical_cast<TYPE>(aliasIt->second))) {
-        throw std::invalid_argument("Alias " + aliasIt->first +
-                                    " refers to invalid value " +
-                                    aliasIt->second);
-        if (m_allowMultiSelection) {
-          throw Kernel::Exception::NotImplementedError(
-              "The List Validator does not support Multi selection yet");
-        }
-      }
-    }
-  }
+	  : ListValidator<TYPE>(values.begin(), values.end(), aliases.begin(),
+		  aliases.end(), allowMultiSelection) {}
+
   /// Clone the validator
   IValidator_sptr clone() const override {
     return boost::make_shared<ListValidator<TYPE>>(*this);
   }
+
   /**
    * Returns the set of allowed values currently defined
    * @returns A set of allowed values that this validator will currently allow
@@ -249,7 +242,7 @@ protected:
   /// if the validator should allow multiple selection
   bool m_allowMultiSelection;
 };
-
+}
 /// ListValidator<std::string> is used heavily
 typedef ListValidator<std::string> StringListValidator;
 

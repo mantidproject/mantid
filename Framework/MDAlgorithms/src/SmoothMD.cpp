@@ -50,17 +50,6 @@ typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
 namespace {
 
 /**
- * @brief functions
- * @return Allowed smoothing functions
- */
-std::vector<std::string> functions() {
-  std::vector<std::string> propOptions;
-  propOptions.push_back("Hat");
-  propOptions.push_back("Gaussian");
-  return propOptions;
-}
-
-/**
  * Maps a function name to a smoothing function
  * @return function map
  */
@@ -414,7 +403,7 @@ void SmoothMD::init() {
       "dimension, or provide a single entry (n-pixels) for all "
       "dimensions. Must be odd integers if Hat function is chosen.");
 
-  const auto allFunctionTypes = functions();
+  const std::array<std::string, 2> allFunctionTypes = {{"Hat", "Gaussian"}};
   const std::string first = allFunctionTypes.front();
 
   std::stringstream docBuffer;

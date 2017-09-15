@@ -68,7 +68,8 @@ private:
   void writePaddingFITSHeaders(size_t count, std::ofstream &file);
 
   static const size_t g_maxBitDepth;
-  static const std::vector<int> g_bitDepths;
+  template<std::size_t SIZE>
+  static const std::array<int, SIZE> g_bitDepths;
   static const size_t g_maxBytesPP;
   // size of header entries in bytes
   static const size_t g_maxLenHdr;
