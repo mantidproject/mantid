@@ -91,7 +91,8 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert certain function calls
         self.assertTrue(view.get_user_file_path.call_count == 3)
         self.assertTrue(view.get_batch_file_path.call_count == 2)  # called twice for the sub presenter updates (masking table and settings diagnostic tab)  # noqa
-        self.assertTrue(view.get_cell.call_count == 36)
+        self.assertTrue(view.get_cell.call_count == 60)
+
         self.assertTrue(view.get_number_of_rows.call_count == 6)
 
         # clean up
@@ -127,10 +128,10 @@ class RunTabPresenterTest(unittest.TestCase):
 
         # Assert
         self.assertTrue(view.add_row.call_count == 2)
-        expected_first_row = "SampleScatter:1,SampleTransmission:2,SampleDirect:3," \
-                             "CanScatter:,CanTransmission:,CanDirect:,OutputName:test_file"
-        expected_second_row = "SampleScatter:1,SampleTransmission:,SampleDirect:," \
-                              "CanScatter:2,CanTransmission:,CanDirect:,OutputName:test_file2"
+        expected_first_row = "SampleScatter:1,ssp:,SampleTrans:2,stp:,SampleDirect:3,sdp:," \
+                             "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
+        expected_second_row = "SampleScatter:1,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
+                              "CanScatter:2,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2"
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
@@ -167,11 +168,11 @@ class RunTabPresenterTest(unittest.TestCase):
 
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
-
         presenter.on_user_file_load()
         presenter.on_batch_file_load()
 
         # Act
+
         states = presenter.get_states()
 
         # Assert
