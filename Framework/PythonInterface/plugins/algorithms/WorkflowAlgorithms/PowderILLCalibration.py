@@ -45,7 +45,7 @@ class PowderILLCalibration(PythonAlgorithm):
 
         self.declareProperty(name='CalibrationMethod',
                              defaultValue='Median',
-                             validator=StringListValidator(['Median', 'WeightedAverage', 'MaximumLikelihood']),
+                             validator=StringListValidator(['Median', 'Mean', 'MaximumLikelihood']),
                              doc='The method of how the calibration constant of a '
                                  'pixel relative to the neighbouring one is derived.')
 
@@ -87,7 +87,7 @@ class PowderILLCalibration(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        return dict()
+        return issues
 
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
         #TODO: take care of the optional output response
@@ -98,13 +98,13 @@ class PowderILLCalibration(PythonAlgorithm):
         ws_out = ref_ws + '_temp'
         ws_last = ref_ws + '_last'
 
-        if factor == 0. or str(factor) == 'nan':
+        if factor == 0.:
             CloneWorkspace(InputWorkspace=cropped_ws, OutputWorkspace=ws_out)
-        elif str(factor) == 'inf':
+        elif str(factor) == 'inf' or str(factor) == 'nan':
             CloneWorkspace(InputWorkspace=ref_ws, OutputWorkspace=ws_out)
         else:
-            #TODO: compute inverse error weighted average instead of mean
-            Mean(Workspaces=ref_ws + ',' + cropped_ws, OutputWorkspace=ws_out)
+            Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
+            WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ws_out)
 
         CreateWorkspace(DataX=ws_x, DataY=ws_y, DataE=ws_e, NSpec=self._bin_offset, OutputWorkspace=ws_last)
         AppendSpectra(InputWorkspace1=ws_out, InputWorkspace2=ws_last, OutputWorkspace=ws_out, ValidateInputs=False)
@@ -116,10 +116,15 @@ class PowderILLCalibration(PythonAlgorithm):
 
     def _compute_relative_factor(self, ratio):
         #TODO: implement the masking of regions to exclude
-        Transpose(InputWorkspace=ratio, OutputWorkspace=ratio)
+        ratios = mtd[ratio].extractY().flatten()
         factor = 1.
         if self._method == 'Median':
-            factor = np.median(mtd[ratio].readY(0))
+            factor = np.median(ratios)
+        elif self._method == 'Mean':
+            factor = np.mean(ratios)
+        elif self._method == 'MaximumLikelihood':
+            pass
+            #TODO: implement the maximum likelihood method
         DeleteWorkspace(ratio)
         return factor
 
@@ -230,16 +235,16 @@ class PowderILLCalibration(PythonAlgorithm):
             CreateWorkspace(DataX=det_x, DataY=det_y, DataE=det_e, NSpec=self._scan_points,
                             VerticalAxisValues=det_t, VerticalAxisUnit='Degrees', OutputWorkspace=ws)
 
-            if det is not 65:
+            if det != self._first_pixel:
                 ratio_ws = ws + '_ratio'
                 cropped_ws = ws + '_cropped'
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws,
                               EndWorkspaceIndex=self._scan_points - self._bin_offset - 1)
-                Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws)
+                Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
                 factor = self._compute_relative_factor(ratio_ws)
                 self._progress.report()
                 if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
-                    self.log().warning('Factor is inf or nan or 0 for pixel #' + str(det))
+                    self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det))
                 else:
                     self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
                     constants[det - 1] = factor
