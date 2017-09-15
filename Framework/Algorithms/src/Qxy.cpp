@@ -439,6 +439,9 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, nBins - 1, nBins, nBins - 1);
+  // Legacy compatibility. Setting detector IDs not actually meaningful.
+  for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i)
+    outputWorkspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   // ... but clear the masking from the parameter map as we don't want to carry
   // that over since this is essentially a 2D rebin
   outputWorkspace->mutableDetectorInfo().clearMaskFlags();
