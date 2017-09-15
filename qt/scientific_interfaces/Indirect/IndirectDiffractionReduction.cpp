@@ -487,9 +487,7 @@ void IndirectDiffractionReduction::addGrouping(
   msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
   createGroupingWorkspace(groupingWsName);
 
-  auto deleter = [&, this]() { this->deleteWorkspace(groupingWsName); };
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(deleter));
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(deleteWorkspace()));
 }
 
 void IndirectDiffractionReduction::createGroupingWorkspace(
@@ -510,12 +508,13 @@ void IndirectDiffractionReduction::createGroupingWorkspace(
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
 }
 
-void IndirectDiffractionReduction::deleteWorkspace(const std::string &wsName) {
+void IndirectDiffractionReduction::deleteWorkspace() {
   IAlgorithm_sptr deleteAlg =
       AlgorithmManager::Instance().create("CreateGroupingWorkspace");
   deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", wsName);
+  deleteAlg->setProperty("Workspace", m_groupingWorkspace);
   deleteAlg->executeAsync();
+  m_groupingWorkspace = "";
 }
 
 /**
@@ -860,5 +859,6 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     return;
   }
 }
+
 }
 }
