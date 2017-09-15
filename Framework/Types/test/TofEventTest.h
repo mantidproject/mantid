@@ -3,16 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidTypes/TofEvent.h"
-#include "MantidKernel/Timer.h"
-#include <cmath>
 
 using namespace Mantid;
-using namespace Mantid::Kernel;
-using namespace Mantid::Types
-
-using std::runtime_error;
-using std::size_t;
-using std::vector;
+using namespace Mantid::Types;
 
 //==========================================================================================
 class TofEventTest : public CxxTest::TestSuite {

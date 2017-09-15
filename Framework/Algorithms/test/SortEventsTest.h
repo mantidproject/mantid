@@ -15,6 +15,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
+using Mantid::Types::TofEvent;
 
 class SortEventsTest : public CxxTest::TestSuite {
 public:

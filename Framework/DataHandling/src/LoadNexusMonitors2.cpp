@@ -826,8 +826,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
     if (pulsetime < lastpulsetime)
       pulsetimesincreasing = false;
     lastpulsetime = pulsetime;
-    event_list.addEventQuickly(
-        DataObjects::TofEvent(time_of_flight[j], pulsetime));
+    event_list.addEventQuickly(Types::TofEvent(time_of_flight[j], pulsetime));
   }
   if (pulsetimesincreasing)
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);

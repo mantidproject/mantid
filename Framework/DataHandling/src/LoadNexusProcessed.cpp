@@ -39,6 +39,7 @@
 #include <vector>
 
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 
 namespace Mantid {
 namespace DataHandling {

@@ -17,6 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 
 
 using std::runtime_error;

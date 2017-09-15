@@ -30,6 +30,7 @@
 #include <functional>
 
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 using std::map;
 using std::string;
 using std::vector;

@@ -28,7 +28,7 @@ ProcessBankData::ProcessBankData(
 //----------------------------------------------------------------------------------------------
 /** Run the data processing
  * FIXME/TODO - split run() into readable methods
-*/
+ */
 void ProcessBankData::run() { // override {
   // Local tof limits
   double my_shortest_tof =
@@ -164,7 +164,7 @@ void ProcessBankData::run() { // override {
           }
         } else {
           // We have cached the vector of events for this detector ID
-          std::vector<Mantid::DataObjects::TofEvent> *eventVector =
+          std::vector<Mantid::Types::TofEvent> *eventVector =
               alg->eventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {
@@ -262,5 +262,5 @@ size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
   }
   return pixelID_to_wi_vector[offset_pixID];
 }
-} // namespace Mantid{
-} // namespace DataHandling{
+} // namespace DataHandling
+} // namespace Mantid

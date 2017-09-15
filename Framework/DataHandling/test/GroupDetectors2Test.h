@@ -36,6 +36,7 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::TofEvent;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:

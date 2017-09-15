@@ -2,6 +2,8 @@
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
+using Mantid::Types::TofEvent;
+
 namespace Mantid {
 namespace MDAlgorithms {
 /**function converts particular list of events of type T into MD workspace and
@@ -74,7 +76,7 @@ size_t ConvToMDEventsWS::conversionChunk(size_t workspaceIndex) {
 
   switch (m_EventWS->getSpectrum(workspaceIndex).getEventType()) {
   case Mantid::API::TOF:
-    return this->convertEventList<Mantid::DataObjects::TofEvent>(
+    return this->convertEventList<TofEvent>(
         workspaceIndex);
   case Mantid::API::WEIGHTED:
     return this->convertEventList<Mantid::DataObjects::WeightedEvent>(

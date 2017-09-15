@@ -57,7 +57,7 @@ using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using DataObjects::TofEvent;
+using Mantid::Types::TofEvent;
 using std::cout;
 using std::ifstream;
 using std::runtime_error;

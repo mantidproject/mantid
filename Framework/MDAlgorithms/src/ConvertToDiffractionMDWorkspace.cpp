@@ -31,6 +31,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::TofEvent;
 
 namespace Mantid {
 namespace MDAlgorithms {

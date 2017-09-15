@@ -22,6 +22,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::TofEvent;
 
 #if 0
 // Port numbers
@@ -528,7 +529,7 @@ void TOPAZLiveEventDataListener::appendEvent(
   auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
+    TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     // TODO: do we want to disable this warning?  Most of the time, we

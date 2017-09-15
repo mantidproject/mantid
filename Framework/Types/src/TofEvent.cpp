@@ -1,4 +1,6 @@
-#include "MantidTypes/TofEvents.h"
+#include "MantidTypes/TofEvent.h"
+
+using std::ostream;
 
 namespace Mantid {
 namespace Types {

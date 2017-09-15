@@ -3,12 +3,14 @@
 
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidTypes/TofEvent.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::TofEvent;
 
 using std::runtime_error;
 using std::size_t;

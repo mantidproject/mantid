@@ -23,6 +23,7 @@ namespace Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using Mantid::Types::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractSpectra)

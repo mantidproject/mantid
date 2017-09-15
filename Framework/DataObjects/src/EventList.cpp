@@ -30,6 +30,7 @@ namespace Mantid {
 namespace DataObjects {
 using Kernel::Exception::NotImplementedError;
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 using namespace Mantid::API;
 
 namespace {

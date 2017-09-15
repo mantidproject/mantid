@@ -38,6 +38,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 
 namespace { // anonymous namespace
 // Time we'll wait on a receive call (in seconds)
@@ -519,7 +520,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
           monitorBuffer->getSpectrum(it->second)
-              .addEventQuickly(DataObjects::TofEvent(tof / 10.0, pktTime));
+              .addEventQuickly(TofEvent(tof / 10.0, pktTime));
         }
       } else {
         g_log.error() << "Event from unknown monitor ID (" << monitorID
@@ -1349,7 +1350,7 @@ void SNSLiveEventDataListener::appendEvent(
   const auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     const std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
+    TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof

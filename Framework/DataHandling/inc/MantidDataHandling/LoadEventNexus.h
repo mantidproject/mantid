@@ -183,7 +183,7 @@ public:
   double compressTolerance;
 
   /// Pointer to the vector of events
-  typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
+  typedef std::vector<Mantid::Types::TofEvent> *EventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
@@ -219,8 +219,8 @@ public:
   bool m_haveWeights;
 
   /// Pointer to the vector of weighted events
-  typedef std::vector<Mantid::DataObjects::WeightedEvent> *
-      WeightedEventVector_pt;
+  typedef std::vector<Mantid::DataObjects::WeightedEvent>
+      *WeightedEventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
@@ -291,14 +291,14 @@ private:
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.
-*
-*  @param nexusfilename :: Used to pick the instrument.
-*  @param localWorkspace :: Templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the NXS file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *
+ *  @param nexusfilename :: Used to pick the instrument.
+ *  @param localWorkspace :: Templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the NXS file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
@@ -315,8 +315,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   try {
     nxfile.openData("name");
     instrument = nxfile.getStrData();
-    alg->getLogger().debug() << "Instrument name read from NeXus file is "
-                             << instrument << '\n';
+    alg->getLogger().debug()
+        << "Instrument name read from NeXus file is " << instrument << '\n';
   } catch (::NeXus::Exception &) {
     // Try to fall back to isis compatibility options
     nxfile.closeGroup();
@@ -546,15 +546,15 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
-*  specified by the info in the Nexus file
-*
-*  @param nexusfilename :: The Nexus file name
-*  @param localWorkspace :: templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the Nexus file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *  specified by the info in the Nexus file
+ *
+ *  @param nexusfilename :: The Nexus file name
+ *  @param localWorkspace :: templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                     T localWorkspace,
@@ -570,14 +570,14 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
-*
-*  @param nexusfilename :: The name of the nexus file being loaded
-*  @param localWorkspace :: templated workspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the Nexus file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
+ *
+ *  @param nexusfilename :: The name of the nexus file being loaded
+ *  @param localWorkspace :: templated workspace in which to put the instrument
+ *geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm
+ *  @return true if successful
+ */
 template <typename T>
 bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
                                          T localWorkspace,

@@ -78,7 +78,7 @@ public:
 
   EventList(const EventList &rhs);
 
-  EventList(const std::vector<TofEvent> &events);
+  EventList(const std::vector<Types::TofEvent> &events);
 
   EventList(const std::vector<WeightedEvent> &events);
 
@@ -91,9 +91,9 @@ public:
 
   EventList &operator=(const EventList &);
 
-  EventList &operator+=(const TofEvent &event);
+  EventList &operator+=(const Types::TofEvent &event);
 
-  EventList &operator+=(const std::vector<TofEvent> &more_events);
+  EventList &operator+=(const std::vector<Types::TofEvent> &more_events);
 
   EventList &operator+=(const WeightedEvent &event);
 
@@ -115,9 +115,9 @@ public:
    *faster.
    * NOTE: Only call this on a un-weighted event list!
    *
-   * @param event :: TofEvent to add at the end of the list.
+   * @param event :: Types::TofEvent to add at the end of the list.
    * */
-  inline void addEventQuickly(const TofEvent &event) {
+  inline void addEventQuickly(const Types::TofEvent &event) {
     this->events.push_back(event);
     this->order = UNSORTED;
   }
@@ -148,8 +148,8 @@ public:
 
   WeightedEvent getEvent(size_t event_number);
 
-  std::vector<TofEvent> &getEvents();
-  const std::vector<TofEvent> &getEvents() const;
+  std::vector<Types::TofEvent> &getEvents();
+  const std::vector<Types::TofEvent> &getEvents() const;
 
   std::vector<WeightedEvent> &getWeightedEvents();
   const std::vector<WeightedEvent> &getWeightedEvents() const;
@@ -372,8 +372,8 @@ private:
   /// Histogram object holding the histogram data. Currently only X.
   HistogramData::Histogram m_histogram;
 
-  /// List of TofEvent (no weights).
-  mutable std::vector<TofEvent> events;
+  /// List of Types::TofEvent (no weights).
+  mutable std::vector<Types::TofEvent> events;
 
   /// List of WeightedEvent's
   mutable std::vector<WeightedEvent> weightedEvents;
@@ -545,9 +545,10 @@ private:
 };
 
 // Methods overloaded to get event vectors.
-DLLExport void getEventsFrom(EventList &el, std::vector<TofEvent> *&events);
+DLLExport void getEventsFrom(EventList &el,
+                             std::vector<Types::TofEvent> *&events);
 DLLExport void getEventsFrom(const EventList &el,
-                             std::vector<TofEvent> const *&events);
+                             std::vector<Types::TofEvent> const *&events);
 DLLExport void getEventsFrom(EventList &el,
                              std::vector<WeightedEvent> *&events);
 DLLExport void getEventsFrom(const EventList &el,

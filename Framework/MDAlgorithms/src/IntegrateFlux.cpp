@@ -146,7 +146,7 @@ void IntegrateFlux::integrateSpectra(const API::MatrixWorkspace &inputWS,
       integrateSpectraEvents<DataObjects::WeightedEvent>(*eventWS, integrWS);
       return;
     case (API::TOF):
-      integrateSpectraEvents<DataObjects::TofEvent>(*eventWS, integrWS);
+      integrateSpectraEvents<Types::TofEvent>(*eventWS, integrWS);
       return;
     }
   } else {

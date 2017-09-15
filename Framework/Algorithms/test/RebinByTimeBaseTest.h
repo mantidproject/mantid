@@ -25,6 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Types::DateAndTime;
+using Mantid::Types::TofEvent;
 
 namespace {
 /**

@@ -9,6 +9,7 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::TofEvent;
 
 using std::runtime_error;
 using std::size_t;

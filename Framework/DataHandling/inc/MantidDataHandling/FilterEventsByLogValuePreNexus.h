@@ -141,7 +141,7 @@ private:
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                        std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                        std::vector<Types::TofEvent> **arrayOfVectors,
                         DasEvent *event_buffer,
                         size_t current_event_buffer_size, size_t fileOffset);
 
@@ -161,7 +161,7 @@ private:
   void filterEvents();
   ///
   void filterEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
-                          std::vector<DataObjects::TofEvent> **arrayOfVectors,
+                          std::vector<Types::TofEvent> **arrayOfVectors,
                           DasEvent *event_buffer,
                           size_t current_event_buffer_size, size_t fileOffset);
 
@@ -180,7 +180,7 @@ private:
   std::unique_ptr<Mantid::API::Progress> m_progress = nullptr;
 
   DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> m_spectraList;                ///<the list of Spectra
+  std::vector<int64_t> m_spectraList;                ///< the list of Spectra
 
   /// The times for each pulse.
   std::vector<Mantid::Types::DateAndTime> pulsetimes;
@@ -202,15 +202,16 @@ private:
   /// Handles loading from the event file
   Mantid::Kernel::BinaryFile<DasEvent> *m_eventFile;
   std::size_t m_numEvents; ///< The number of events in the file
-  std::size_t m_numPulses; ///<the number of pulses
-  uint32_t m_numPixel;     ///<the number of pixels
+  std::size_t m_numPulses; ///< the number of pulses
+  uint32_t m_numPixel;     ///< the number of pixels
 
   std::size_t m_numGoodEvents;  ///< The number of good events loaded
   std::size_t m_numErrorEvents; ///< The number of error events encountered
-  std::size_t m_numBadEvents; ///<The number of bad events. Part of error events
-  std::size_t m_numWrongdetidEvents; ///<The number of events with wrong
+  std::size_t m_numBadEvents;   ///< The number of bad events. Part of error
+                              ///< events
+  std::size_t m_numWrongdetidEvents; ///< The number of events with wrong
   /// detector IDs. Part of error events.
-  std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
+  std::set<PixelType> wrongdetids; ///< set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
   std::vector<std::vector<Mantid::Types::DateAndTime>> wrongdetid_pulsetimes;
   std::vector<std::vector<double>> wrongdetid_tofs;
@@ -284,6 +285,6 @@ private:
 
   bool m_corretctTOF;
 };
-}
-}
+} // namespace DataHandling
+} // namespace Mantid
 #endif /*FILTEREVENTSBYLOGVALUEPRENEXUS_H_*/

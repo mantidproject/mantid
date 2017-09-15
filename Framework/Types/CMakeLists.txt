@@ -1,16 +1,19 @@
 # This is not a module, there are no source files. Types in this folder must be header-only!
 set ( SRC_FILES
   src/DateAndTime.cpp
+  src/TofEvent.cpp
 )
 set ( INC_FILES
   inc/MantidTypes/DateAndTime.h
   inc/MantidTypes/DllConfig.h
   inc/MantidTypes/SpectrumDefinition.h
+  inc/MantidTypes/TofEvent.h
 )
 
 set ( TEST_FILES
   DateAndTimeTest.h
   SpectrumDefinitionTest.h
+  TofEventTest.h
 )
 
 if (COVERALLS)

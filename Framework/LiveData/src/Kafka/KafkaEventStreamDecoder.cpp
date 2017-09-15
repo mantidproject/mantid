@@ -102,7 +102,7 @@ void addSampleEnvLogs(
 
 namespace Mantid {
 namespace LiveData {
-using DataObjects::TofEvent;
+  using Mantid::Types::TofEvent;
 
 // -----------------------------------------------------------------------------
 // Public members
