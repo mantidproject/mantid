@@ -293,7 +293,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
                 Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
 
-            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
+            # MatchPeaks does not play nicely with the ws groups
+            for ws in mtd[calibration]:
+                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable = '')
+
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
             self._warn_negative_integral(calibration,'in calibration run.')
@@ -426,10 +429,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
 
         elif wings == 2:  # two wing
 
@@ -507,6 +510,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         DeleteWorkspace(ws)
         RenameWorkspace(InputWorkspace=outname,OutputWorkspace=ws)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)

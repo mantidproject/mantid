@@ -25,10 +25,15 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     """
     from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile,
                                   ChopData, ExtractSingleSpectrum,
-                                  CropWorkspace)
+                                  CropWorkspace, DeleteWorkspace)
+    delete_monitors = False
 
     if load_opts is None:
         load_opts = {}
+
+    if "DeleteMonitors" in load_opts:
+        delete_monitors = load_opts["DeleteMonitors"]
+        load_opts.pop("DeleteMonitors")
 
     workspace_names = []
 
@@ -87,6 +92,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
                                   OutputWorkspace=monitor_ws_name,
                                   WorkspaceIndex=monitor_index)
 
+            if delete_monitors:
+                DeleteWorkspace(Workspace=monitor_ws_name)
+
             # Crop to the detectors required
             chop_ws = mtd[chop_ws_name]
             CropWorkspace(InputWorkspace=chop_ws_name,
@@ -103,6 +111,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
             workspace_names = sum_chopped_runs(workspace_names)
         else:
             workspace_names = sum_regular_runs(workspace_names)
+
+    if delete_monitors:
+        load_opts['DeleteMonitors'] = True
 
     logger.information('Summed workspace names: %s' % (str(workspace_names)))
 

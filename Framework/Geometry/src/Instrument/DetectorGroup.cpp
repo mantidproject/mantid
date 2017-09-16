@@ -455,7 +455,7 @@ size_t DetectorGroup::index() const {
   throw std::runtime_error("A DetectorGroup cannot have an index");
 }
 
-void DetectorGroup::registerContents(class ComponentVisitor &) const {
+size_t DetectorGroup::registerContents(class ComponentVisitor &) const {
   throw std::runtime_error("DetectorGroup::registerContents. This should not "
                            "be called. DetectorGroups are not part of the "
                            "instrument. On-the-fly only.");

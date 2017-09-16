@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -275,7 +275,8 @@ void InelasticDiffSphere::setWorkspace(
       double efixed = workspace->getEFixed(detectorIDs[detectorIndex]);
       double usingTheta = 0.5 * spectrumInfo.twoTheta(idx);
 
-      double q = Mantid::Kernel::UnitConversion::run(usingTheta, efixed);
+      double q =
+          Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
       m_qValueCache.push_back(q);
     } catch (std::runtime_error &) {

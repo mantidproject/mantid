@@ -152,7 +152,7 @@ class SANSConvertToQ(DataProcessorAlgorithm):
         # Extract relevant settings
         convert_to_q = state.convert_to_q
         max_q_xy = convert_to_q.q_xy_max
-        delta_q_prefix = -1 if convert_to_q.q_xy_step_type is RangeStepType.Log else 1
+        delta_q_prefix = -1. if convert_to_q.q_xy_step_type is RangeStepType.Log else 1.
         delta_q = delta_q_prefix*convert_to_q.q_xy_step
         radius_cutoff = convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
         wavelength_cutoff = convert_to_q.wavelength_cutoff

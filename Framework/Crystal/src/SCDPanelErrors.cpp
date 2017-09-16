@@ -157,8 +157,9 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
         relscaley /= oldscaley[0];
       pmap.addDouble(rectDet.get(), "scalex", scalex);
       pmap.addDouble(rectDet.get(), "scaley", scaley);
-      applyRectangularDetectorScaleToDetectorInfo(
-          inputP->mutableDetectorInfo(), *rectDet, relscalex, relscaley);
+      applyRectangularDetectorScaleToComponentInfo(
+          inputP->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
+          relscaley);
     }
   }
 }
@@ -262,7 +263,7 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
     }
     FileValidator fval;
     std::string error = fval.isValid(fileName);
-    if (error == "") {
+    if (error.empty()) {
       storeAttributeValue(attName, Attribute(fileName, true));
       storeAttributeValue("Workspace", Attribute(""));
     } else {

@@ -14,8 +14,7 @@ The bulk of the work is done by pandoc, which is expected to be in the PATH. The
     the inline to normal format.
  3. Image links cannot have spaces in the filename in rst.
     The spaces are removed in the downloaded file names, but not the links in the rst files."""
-from __future__ import print_function
-
+from __future__ import (absolute_import, division, print_function)
 import argparse
 import json
 import os
@@ -87,7 +86,7 @@ class WikiURL(object):
                   "api.php?titles=File:{0}&action=query&prop=imageinfo&iiprop=url&format=json".format(name.replace(" ", "_"))
         try:
             json_str = urllib2.urlopen(apicall_url).read()
-        except urllib2.URLError, err:
+        except urllib2.URLError as err:
             raise RuntimeError("Failed to fetch JSON describing image page: {}".format(str(err)))
         apicall = json.loads(json_str)
         pages = apicall['query']['pages']
@@ -101,7 +100,7 @@ def fetch_wiki_markup(wiki_url):
     try:
         response = urllib2.urlopen(wiki_url.raw())
         return response.read()
-    except urllib2.URLError, err:
+    except urllib2.URLError as err:
         raise RuntimeError("Failed to fetch wiki page: {}".format(str(err)))
 
 # ------------------------------------------------------------------------------
@@ -126,7 +125,7 @@ def run_pandoc(wiki_markup_text):
     args = ["-f", "mediawiki", "-t", "rst", wiki_tmp_file.name]
     try:
         rst_text = execute_process(cmd, args)
-    except Exception, err:
+    except Exception as err:
         raise RuntimeError("Error executing pandoc: '{}'".format(str(err)))
     finally:
         wiki_tmp_file.close()
@@ -276,7 +275,7 @@ def download_image_from_wiki(wiki_url, name, img_dir):
     image_url = wiki_url.fileurl(name)
     try:
         response = urllib2.urlopen(image_url)
-    except urllib2.URLError, err:
+    except urllib2.URLError as err:
         raise RuntimeError("Failed to fetch image data: {}".format(str(err)))
     filename = os.path.join(img_dir, name)
     display_info("Downloading {0} to {1}".format(name, filename))
@@ -360,12 +359,13 @@ def main(argv):
             open(args.output_file, 'w').write(rst_text + "\n")
         else:
             display_info(rst_text)
-    except RuntimeError, exc:
+    except RuntimeError as exc:
         display_info(str(exc))
         return 1
     return 0
 
 # ------------------------------------------------------------------------------
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

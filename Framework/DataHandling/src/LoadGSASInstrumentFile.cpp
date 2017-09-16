@@ -151,7 +151,7 @@ void LoadGSASInstrumentFile::exec() {
   WorkspaceGroup_sptr wsg = getProperty("Workspace");
   // Generate output table workspace
   API::ITableWorkspace_sptr outTabWs = genTableWorkspace(bankparammap);
-  if (getPropertyValue("OutputTableWorkspace") != "") {
+  if (!getPropertyValue("OutputTableWorkspace").empty()) {
     // Output the output table workspace
     setProperty("OutputTableWorkspace", outTabWs);
   }
