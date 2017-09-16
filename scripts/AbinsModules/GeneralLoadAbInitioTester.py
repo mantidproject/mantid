@@ -68,7 +68,6 @@ class GeneralLoadAbInitioTester(object):
             self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension.upper()),
                              data["attributes"]["filename"])
 
-
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
