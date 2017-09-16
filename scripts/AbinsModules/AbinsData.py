@@ -4,7 +4,7 @@ import AbinsModules
 
 class AbinsData(AbinsModules.GeneralData):
     """
-    Class for storing input DFT data.
+    Class for storing input ab initio data.
     """
     def __init__(self, ):
 
@@ -46,4 +46,4 @@ class AbinsData(AbinsModules.GeneralData):
         return self._data
 
     def __str__(self):
-        return "DFT data"
+        return "Ab initio data"

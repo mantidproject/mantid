@@ -23,7 +23,7 @@ class GeneralAbInitioProgram(object):
         self._sample_form = None
         self._ab_initio_program = None
         self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
-                                            group_name=AbinsModules.AbinsParameters.dft_group)
+                                            group_name=AbinsModules.AbinsParameters.ab_initio_group)
 
     def read_vibrational_data(self):
         """
@@ -185,7 +185,7 @@ class GeneralAbInitioProgram(object):
 
         # try to load ab-initio data from *.hdf5 file
         try:
-            if self._ab_initio_program != self._clerk.get_previous_dft_program():
+            if self._ab_initio_program != self._clerk.get_previous_ab_initio_program():
                 raise ValueError("Different ab-initio program was used in the previous calculation. Data in the hdf file "
                                  "will be erased.")
 

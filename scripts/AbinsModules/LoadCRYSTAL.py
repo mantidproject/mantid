@@ -7,7 +7,8 @@ from mantid.kernel import Atom, logger
 
 class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading CRYSTAL DFT phonon data. Special thanks to Leonardo Bernasconi for contributing to this module.
+    Class for loading CRYSTAL ab initio vibrational data. Special thanks to Leonardo Bernasconi for contributing to
+    this module.
     """
     def __init__(self, input_ab_initio_filename=None):
         """

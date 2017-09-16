@@ -38,8 +38,8 @@ tosca_c = 2.5
 # Abins internal parameters ##########################
 # Parameters which can be changed by a user if necessary
 
-# name of the group in the hdf file in which extracted  data from DFT phonon calculations are stored
-dft_group = "PhononAB"
+# name of the group in the hdf file in which extracted  data from ab initio vibrational calculations are stored
+ab_initio_group = "VibrationalData"
 
 powder_data_group = "Powder"  # name of the group where PowderData is stored
 

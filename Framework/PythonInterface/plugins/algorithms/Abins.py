@@ -35,7 +35,7 @@ class Abins(PythonAlgorithm):
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
-    _extracted_dft_data = None
+    _extracted_ab_initio_data = None
 
     def category(self):
         return "Simulation"
@@ -129,9 +129,9 @@ class Abins(PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        dft_program = self.getProperty("AbInitioProgram").value
+        ab_initio_program = self.getProperty("AbInitioProgram").value
         phonon_filename = self.getProperty("VibrationalDataFile").value
-        output = input_file_validators[dft_program](filename_full_path=phonon_filename)
+        output = input_file_validators[ab_initio_program](filename_full_path=phonon_filename)
         if output["Invalid"]:
             issues["VibrationalDataFile"] = output["Comment"]
 
@@ -165,25 +165,26 @@ class Abins(PythonAlgorithm):
         self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
-        # 2) read DFT data
-        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                       "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        dft_reader = dft_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_data_file)
-        dft_data = dft_reader.get_formatted_data()
+        # 2) read ab initio data
+        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
+        ab_initio_reader = ab_initio_loaders[self._ab_initio_program](
+            input_ab_initio_filename=self._vibrational_data_file)
+        ab_initio_data = ab_initio_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
         s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_data_file, temperature=self._temperature,
-                                                    sample_form=self._sample_form, abins_data=dft_data,
+                                                    sample_form=self._sample_form, abins_data=ab_initio_data,
                                                     instrument=self._instrument,
                                                     quantum_order_num=self._num_quantum_order_events)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        self._extracted_dft_data = dft_data.get_atoms_data().extract()
-        num_atoms = len(self._extracted_dft_data)
-        all_atms_smbls = list(set([self._extracted_dft_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
+        self._extracted_ab_initio_data = ab_initio_data.get_atoms_data().extract()
+        num_atoms = len(self._extracted_ab_initio_data)
+        all_atms_smbls = list(set([self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
         all_atms_smbls.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
@@ -339,7 +340,7 @@ class Abins(PythonAlgorithm):
             s_atom_data.fill(0.0)
 
             for atom in range(num_atoms):
-                if self._extracted_dft_data["atom_%s" % atom]["symbol"] == atom_symbol:
+                if self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol:
 
                     temp_s_atom_data.fill(0.0)
 
@@ -413,8 +414,8 @@ class Abins(PythonAlgorithm):
         else:
 
             q = np.linspace(start=AbinsModules.AbinsConstants.Q_BEGIN,
-                                   stop=AbinsModules.AbinsConstants.Q_END,
-                                   num=AbinsModules.AbinsParameters.q_size)
+                            stop=AbinsModules.AbinsConstants.Q_END,
+                            num=AbinsModules.AbinsParameters.q_size)
 
             # only FUNDAMENTALS
             if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
@@ -705,10 +706,10 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         folder_names = []
-        dft_group = AbinsModules.AbinsParameters.dft_group
-        if not isinstance(dft_group, str) or dft_group == "":
-            raise RuntimeError("Invalid name for folder in which the DFT data should be stored.")
-        folder_names.append(dft_group)
+        ab_initio_group = AbinsModules.AbinsParameters.ab_initio_group
+        if not isinstance(ab_initio_group, str) or ab_initio_group == "":
+            raise RuntimeError("Invalid name for folder in which the ab initio data should be stored.")
+        folder_names.append(ab_initio_group)
 
         powder_data_group = AbinsModules.AbinsParameters.powder_data_group
         if not isinstance(powder_data_group, str) or powder_data_group == "":
@@ -791,22 +792,22 @@ class Abins(PythonAlgorithm):
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
-    def _validate_dft_file_extension(self, filename_full_path=None, expected_file_extension=None):
+    def _validate_ab_initio_file_extension(self, filename_full_path=None, expected_file_extension=None):
         """
-        Checks consistency between name of DFT program and extension.
-        :param dft_program: name of DFT program in the form of string
+        Checks consistency between name of ab initio program and extension.
+        :param filename_full_path: path to file
         :param expected_file_extension: file extension
         :returns: dictionary with error message
         """
-        dft_program = self.getProperty("AbInitioProgram").value
+        ab_initio_program = self.getProperty("AbInitioProgram").value
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
-        if found_filename_ext != expected_file_extension:
+        if found_filename_ext.lower() != expected_file_extension:
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        Comment=msg_err + "Output from ab initio program " + ab_initio_program + " is expected." +
                                           " The expected extension of file is ." + expected_file_extension +
                                           ".  Found: " + found_filename_ext + ". " + msg_rename)
         else:
@@ -814,33 +815,33 @@ class Abins(PythonAlgorithm):
 
     def _validate_dmol3_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for DMOL3 DFT program.
+        Method to validate input file for DMOL3 ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate DMOL3 phonon file: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".outmol")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".outmol")
 
     def _validate_gaussian_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for GAUSSIAN DFT program.
+        Method to validate input file for GAUSSIAN ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate GAUSSIAN file with vibration data: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".log")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".log")
 
     def _validate_crystal_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for CRYSTAL DFT program.
+        Method to validate input file for CRYSTAL ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate CRYSTAL phonon file: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".out")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".out")
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """
@@ -854,8 +855,8 @@ class Abins(PythonAlgorithm):
         """
         logger.information("Validate CASTEP phonon file: ")
         msg_err = "Invalid %s file. " % filename_full_path
-        output = self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                   expected_file_extension=".phonon")
+        output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                         expected_file_extension=".phonon")
         if output["Invalid"]:
             return output
 

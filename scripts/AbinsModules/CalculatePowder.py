@@ -16,8 +16,8 @@ class CalculatePowder(object):
     """
     def __init__(self, filename=None, abins_data=None):
         """
-        :param filename:  name of input DFT filename
-        :param abins_data: object of type AbinsData with data from input DFT file
+        :param filename:  name of input ab initio filename
+        :param abins_data: object of type AbinsData with data from input ab initio file
         """
         if not isinstance(abins_data, AbinsModules.AbinsData):
             raise ValueError("Object of AbinsData was expected.")

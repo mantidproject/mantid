@@ -7,7 +7,7 @@ from mantid.kernel import Atom
 
 class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading GAUSSIAN DFT vibrational data.
+    Class for loading GAUSSIAN ab initio vibrational data.
     """
     def __init__(self, input_ab_initio_filename):
         """

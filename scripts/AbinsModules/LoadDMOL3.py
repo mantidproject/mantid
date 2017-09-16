@@ -8,7 +8,7 @@ from mantid.kernel import Atom
 
 class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading DMOL3 DFT phonon data.
+    Class for loading DMOL3 ab initio data.
     """
     def __init__(self, input_ab_initio_filename):
         """

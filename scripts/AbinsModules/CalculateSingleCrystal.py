@@ -5,8 +5,8 @@ import AbinsModules
 class CalculateSingleCrystal(AbinsModules.IOmodule):
     def __init__(self, filename=None, abins_data=None, temperature=None):
         """
-        :param filename:  name of input DFT filename
-        :param abins_data: object of type AbinsData with data from phonon DFT file
+        :param filename:  name of input ab initio filename
+        :param abins_data: object of type AbinsData with data from phonon ab initio file
         :param temperature:  temperature in K
         """
         if not isinstance(abins_data, AbinsModules.AbinsData):

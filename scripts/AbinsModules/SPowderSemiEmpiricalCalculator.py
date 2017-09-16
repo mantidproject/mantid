@@ -36,7 +36,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
     def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None):
         """
-        :param filename: name of input DFT file (CASTEP: foo.phonon)
+        :param filename: name of input ab initio file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
         :param sample_form: form in which experimental sample is: Powder or SingleCrystal (str)
         :param abins_data: object of type AbinsData with data from phonon file
@@ -385,9 +385,9 @@ class SPowderSemiEmpiricalCalculator(object):
         self._a_traces = np.trace(a=self._a_tensors, axis1=1, axis2=2)
         self._b_traces = np.trace(a=self._b_tensors, axis1=2, axis2=3)
 
-        # load dft data for one k point
+        # load ab initio data for one k point
         clerk = AbinsModules.IOmodule(input_filename=self._input_filename,
-                                      group_name=AbinsModules.AbinsParameters.dft_group)
+                                      group_name=AbinsModules.AbinsParameters.ab_initio_group)
         dft_data = clerk.load(list_of_datasets=["frequencies", "weights"])
 
         frequencies = dft_data["datasets"]["frequencies"][int(k_point)]
@@ -579,20 +579,20 @@ class SPowderSemiEmpiricalCalculator(object):
                  (always) with rebined spectrum
         """
         # calculate discrete S for the given quantum order event
-        value_dft = self._calculate_order[order](q2=q2,
-                                                 frequencies=local_freq,
-                                                 indices=local_coeff,
-                                                 a_tensor=self._a_tensors[atom],
-                                                 a_trace=self._a_traces[atom],
-                                                 b_tensor=self._b_tensors[atom],
-                                                 b_trace=self._b_traces[atom])
+        value_ab_initio = self._calculate_order[order](q2=q2,
+                                                       frequencies=local_freq,
+                                                       indices=local_coeff,
+                                                       a_tensor=self._a_tensors[atom],
+                                                       a_trace=self._a_traces[atom],
+                                                       b_tensor=self._b_tensors[atom],
+                                                       b_trace=self._b_traces[atom])
 
         # rebin if necessary
-        rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_dft)
+        rebined_freq, rebined_spectrum = self._rebin_data_opt(array_x=local_freq, array_y=value_ab_initio)
 
         # convolve with instrumental resolution
         freq, broad_spectrum = self._instrument.convolve_with_resolution_function(frequencies=rebined_freq,
-                                                                                  s_dft=rebined_spectrum)
+                                                                                  s_ab_initio=rebined_spectrum)
         # rebin to the fixed size
         rebined_broad_spectrum = self._rebin_data_full(array_x=freq, array_y=broad_spectrum)
         rebined_broad_spectrum = self._fix_empty_array(array_y=rebined_broad_spectrum)
@@ -612,7 +612,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = temp_full_s[:-1]
 
         # calculate transition energies for construction of higher order quantum event
-        local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq,
+        local_freq, local_coeff = self._calculate_s_over_threshold(s=value_ab_initio, freq=local_freq,
                                                                    coeff=local_coeff, atom=atom, order=order)
 
         if return_freq:

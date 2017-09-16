@@ -6,7 +6,7 @@ import AbinsModules
 
 class GeneralAbInitioParser(object):
     """
-    Helper class which groups methods used by DFT Loaders for parsing files.
+    Helper class which groups methods used by ab initio loaders for parsing files.
     """
     def __init__(self):
         pass
