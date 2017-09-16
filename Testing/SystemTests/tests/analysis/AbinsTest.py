@@ -419,3 +419,32 @@ class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass
     def validate(self):
         self.tolerance = 1e-2
         return self._output_name, self.ref_result
+
+
+class AbinsDirectSpectrum(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from CASTEP for TwoDMap instrument
+    (direct geometry spectrometer)  and for 1 quantum order event is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Au-C2H"
+
+        self.ref_result = name + ".nxs"
+        self.set_ab_initio_program("CASTEP")
+        self.set_instrument_name("TwoDMap")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
