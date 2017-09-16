@@ -160,11 +160,12 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
         :param file_obj: file object from which we read
         :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
         """
-        sub_block_start = "Atom AN      X      Y      Z        X      Y      Z        X      Y      Z"
+        sub_block_start = "X      Y      Z        X      Y      Z        X      Y      Z"
         self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
 
         num_atom = 0
-        line_size = len(sub_block_start.split())
+        #   Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
+        line_size = len(sub_block_start.split()) + 2
         freq_per_line = sub_block_start.count("X")
 
         l = file_obj.readline().split()
