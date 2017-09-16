@@ -61,15 +61,26 @@ class GeneralLoadAbInitioTester(object):
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
-        self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
-                         data["attributes"]["filename"])
+        try:
+            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
+                             data["attributes"]["filename"])
+        except AssertionError:
+            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension.upper()),
+                             data["attributes"]["filename"])
+
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
     def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
-        ab_initio_loader = loader(
-            input_ab_initio_filename=AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension))
+
+        try:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension)
+            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
+        except ValueError:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension.upper())
+            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
+
         loaded_data = ab_initio_loader.load_formatted_data().extract()
 
         # k points
@@ -120,8 +131,12 @@ class GeneralLoadAbInitioTester(object):
         :returns: phonon data
         """
         # 1) Read data
-        filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
-        ab_initio_reader = loader(input_ab_initio_filename=filename)
+        try:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
+            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
+        except ValueError:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
+            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
 
         data = self._get_reader_data(ab_initio_reader=ab_initio_reader)
 
