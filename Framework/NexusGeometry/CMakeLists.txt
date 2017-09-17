@@ -38,7 +38,7 @@ include_directories (${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusGeometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS})
+target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory ( test )
