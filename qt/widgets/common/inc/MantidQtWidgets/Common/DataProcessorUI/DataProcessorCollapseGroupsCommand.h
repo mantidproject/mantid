@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLLAPSEGROUPSCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCollapseGroupsCommand : public DataProcessorCommandBase {
+class DataProcessorCollapseGroupsCommand : public TableModificationCommandBase {
 public:
-  DataProcessorCollapseGroupsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter) {}
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorCollapseGroupsCommand() {}
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CollapseAllGroupsFlag);
   };
-  QString name() override { return QString("Collapse All Groups"); }
-  QString icon() override { return QString("://collapse_all.png"); }
-  QString tooltip() override { return QString("Collapse all groups"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Collapse All Groups"); }
+  QString icon() const override { return QString("://collapse_all.png"); }
+  QString tooltip() const override { return QString("Collapse all groups"); }
+  QString whatsthis() const override {
     return QString(
         "If any groups in the table are currently expanded this will collapse "
         "all expanded groups, hiding their individual runs.");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

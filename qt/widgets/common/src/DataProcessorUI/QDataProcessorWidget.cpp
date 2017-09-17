@@ -1,11 +1,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <QWidget>
+#include <iterator>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -103,8 +104,9 @@ QDataProcessorWidget::QDataProcessorWidget(
               whitelist, preprocessMap.asMap(), algorithm, postprocessor),
           parent) {}
 
-/** Destructor
-*/
+/*
+ Destructor
+ */
 QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
@@ -130,17 +132,17 @@ void QDataProcessorWidget::createTable() {
   connect(ui.buttonProcess, SIGNAL(clicked()), this, SLOT(processClicked()));
 }
 
-/** Add actions to the toolbar
+/** Add actions to the toolbar and context menu
 * @param commands :: A vector of actions (commands)
 */
-void QDataProcessorWidget::addActions(
-    std::vector<std::unique_ptr<DataProcessorCommand>> commands) {
+void QDataProcessorWidget::addEditActions(
+    const std::vector<std::unique_ptr<DataProcessorCommand>>& commands) {
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
     m_commands.push_back(
         Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-            ui.rowToolBar, std::move(command)));
+            ui.rowToolBar, command.get()));
   }
 
   // Add actions to context menu
@@ -315,46 +317,80 @@ Select all rows/groups
 */
 void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 
-/**
-Handle interface when data reduction paused
-*/
-void QDataProcessorWidget::pause() {
-
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
-
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(false);
-  m_contextMenu->actions()[1]->setEnabled(false);
+void QDataProcessorWidget::disableSelectionAndEditing() {
+  ui.viewTable->clearSelection();
+  ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
-/**
-Handle interface when data reduction resumed
-*/
-void QDataProcessorWidget::resume() {
-
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(false);
-  m_contextMenu->actions()[0]->setEnabled(false);
-  ui.buttonProcess->setEnabled(false);
-
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(true);
-  m_contextMenu->actions()[1]->setEnabled(true);
+void QDataProcessorWidget::enableSelectionAndEditing() {
+  ui.viewTable->setSelectionMode(
+      QAbstractItemView::SelectionMode::ContiguousSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::AllEditTriggers);
 }
 
-/**
-Save settings
-@param options : map of user options to save
-*/
+void QDataProcessorWidget::enableProcessButton() { enable(*ui.buttonProcess); }
+
+void QDataProcessorWidget::disableProcessButton() {
+  disable(*ui.buttonProcess);
+}
+
+void QDataProcessorWidget::enableAction(int indexToEnable) {
+  enableActionOnToolbar(indexToEnable);
+  enableActionOnContextMenu(indexToEnable);
+}
+
+void QDataProcessorWidget::disableAction(int indexToDisable) {
+  disableActionOnToolbar(indexToDisable);
+  disableActionOnContextMenu(indexToDisable);
+}
+
+void QDataProcessorWidget::disableActionOnToolbar(int indexToDisable) {
+  disableActionOnWidget(*ui.rowToolBar, indexToDisable);
+}
+
+void QDataProcessorWidget::enableActionOnToolbar(int indexToEnable) {
+  enableActionOnWidget(*ui.rowToolBar, indexToEnable);
+}
+
+void QDataProcessorWidget::disableActionOnWidget(QWidget& widget, int indexToDisable) {
+  disable(*(widget.actions()[indexToDisable]));
+}
+
+void QDataProcessorWidget::enableActionOnWidget(QWidget& widget, int indexToEnable) {
+  enable(*(widget.actions()[indexToEnable]));
+}
+
+void QDataProcessorWidget::disableActionOnContextMenu(int indexToDisable) {
+  disableActionOnWidget(*m_contextMenu, indexToDisable);
+}
+
+void QDataProcessorWidget::enableActionOnContextMenu(int indexToEnable) {
+  enableActionOnWidget(*m_contextMenu, indexToEnable);
+}
+
+void QDataProcessorWidget::disable(QWidget &widget) {
+  widget.setEnabled(false);
+}
+
+void QDataProcessorWidget::disable(QAction &widget) {
+  widget.setEnabled(false);
+}
+
+void QDataProcessorWidget::enable(QWidget &widget) {
+  widget.setEnabled(true);
+}
+
+void QDataProcessorWidget::enable(QAction &widget) {
+  widget.setEnabled(true);
+}
+
 void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(it->first, it->second);
+  for (const auto &option : options)
+    settings.setValue(option.first, option.second);
   settings.endGroup();
 }
 
@@ -366,8 +402,8 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[*it] = settings.value(*it);
+  for (const auto &key : keys)
+    options[key] = settings.value(key);
   settings.endGroup();
 }
 
@@ -392,7 +428,7 @@ void QDataProcessorWidget::setProgress(int progress) {
 Get status of checkbox which determines whether an ipython notebook is produced
 @return true if a notebook should be output on process, false otherwise
 */
-bool QDataProcessorWidget::getEnableNotebook() {
+bool QDataProcessorWidget::isNotebookEnabled() {
   return ui.checkEnableNotebook->isChecked();
 }
 
@@ -405,8 +441,8 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto group = groups.begin(); group != groups.end(); ++group) {
-    selectionModel->select(ui.viewTable->model()->index((*group), 0),
+  for (const auto &group : groups) {
+    selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }

@@ -1,35 +1,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -67,60 +44,6 @@ DataProcessorTwoLevelTreeManager::DataProcessorTwoLevelTreeManager(
 * Destructor
 */
 DataProcessorTwoLevelTreeManager::~DataProcessorTwoLevelTreeManager() {}
-
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<DataProcessorCommand_uptr>
-DataProcessorTwoLevelTreeManager::publishCommands() {
-
-  std::vector<DataProcessorCommand_uptr> commands;
-
-  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorExpandCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExpandGroupsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCollapseGroupsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorAppendGroupCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorGroupRowsCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorDeleteGroupCommand>(m_presenter));
-  return commands;
-}
 
 /**
 Insert a row after the last selected row. If a group was selected, the new row
@@ -359,7 +282,7 @@ void DataProcessorTwoLevelTreeManager::pasteSelected(const QString &text) {
 
         // Paste as many columns as we can from this line
         for (int col = 0; col < m_model->columnCount() &&
-                              col < static_cast<int>(values.size());
+                          col < static_cast<int>(values.size());
              ++col)
           m_model->setData(
               m_model->index(*rowIt, col, m_model->index(groupId, 0)),

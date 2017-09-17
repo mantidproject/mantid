@@ -1,23 +1,26 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManagerFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/CommandProviderFactory.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <QSet>
 #include <queue>
@@ -30,7 +33,6 @@ namespace MantidWidgets {
 class ProgressableView;
 class DataProcessorView;
 class DataProcessorTreeManager;
-class GenericDataProcessorPresenterThread;
 
 using RowItem = std::pair<int, RowData>;
 using RowQueue = std::queue<RowItem>;
@@ -73,11 +75,23 @@ class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
   friend class GenericDataProcessorPresenterGroupReducerWorker;
 
 public:
+  using Options = std::map<QString, QVariant>;
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
+      const DataProcessorProcessingAlgorithm &processor,
+      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      std::unique_ptr<DataProcessorTreeManagerFactory> managerFactory,
+      std::unique_ptr<CommandProviderFactory> commandProviderFactory,
+      const std::map<QString, QString> &postprocessMap =
+          std::map<QString, QString>(),
+      const QString &loader = "Load");
+  GenericDataProcessorPresenter(
+      const DataProcessorWhiteList &whitelist,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -91,8 +105,8 @@ public:
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, DataProcessorPreprocessingAlgorithm>
+          &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(
@@ -111,25 +125,29 @@ public:
       const DataProcessorPreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
-  virtual ~GenericDataProcessorPresenter() override;
+  ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
-  const std::map<QString, QVariant> &options() const override;
-  void setOptions(const std::map<QString, QVariant> &options) override;
+  const Options &options() const override;
+  void setOptions(const Options &options) override;
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
-  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
+  const CommandVector &getTableCommands() override;
+  const CommandVector &getEditCommands() override;
+  int indexOfCommand(TableAction action) override;
+  int indexOfCommand(EditAction action) override;
   void acceptViews(DataProcessorView *tableView,
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(QString const &name) override;
-
   // The following methods are public only for testing purposes
   // Get the whitelist
   DataProcessorWhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
+  /// Call nextGroup() immediately
+  void callNextGroup() { nextGroup(); }
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
                                         const QString &prefix = "");
@@ -152,6 +170,8 @@ protected:
   DataProcessorMainPresenter *m_mainPresenter;
   // The tree manager, a proxy class to retrieve data from the model
   std::unique_ptr<DataProcessorTreeManager> m_manager;
+  // Owns and manages the collection of commands.
+  std::unique_ptr<DataProcessorCommandProvider> m_commandProvider;
   // Loader
   QString m_loader;
   // The list of selected items to reduce
@@ -185,8 +205,29 @@ protected slots:
   void threadFinished(const int exitCode);
   void issueNotFoundWarning(QString const &granule,
                             QSet<QString> const &missingWorkspaces);
+  void enableTableModification();
+  void disableTableModification();
+  void enablePauseActions();
+  void disablePauseActions();
+  void enableProcessActions();
+  void disableProcessActions();
+
+protected:
+  template <typename Container> void disableActions(Container actionIndices) {
+    for (auto index : actionIndices)
+      m_view->enableAction(index);
+  }
+
+  template <typename Container> void enableActions(Container actionIndices) {
+    for (auto index : actionIndices)
+      m_view->enableAction(index);
+  }
 
 private:
+  std::unique_ptr<DataProcessorTreeManager>
+  chooseTreeManager(DataProcessorTreeManagerFactory &chooser,
+                    const QString &postprocessorName,
+                    DataProcessorWhiteList whitelist);
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The whitelist
@@ -216,13 +257,13 @@ private:
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
-  std::map<QString, QVariant> m_options;
+  Options m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // A boolean indicating whether data reduction is confirmed paused
+  bool m_confirmReductionPaused;
   // A boolean that can be set to pause reduction of the current item
   bool m_pauseReduction;
-  // A boolean indicating whether data reduction is confirmed paused
-  bool m_reductionPaused;
   // Enumeration of the reduction actions that can be taken
   enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
   // A flag of the next action due to be carried out
@@ -275,9 +316,9 @@ private:
   // options
   void showOptionsDialog();
   void initOptions();
+  void setDefaultOptions();
 
-  // actions/commands
-  void addCommands();
+  void addActionsToEditMenu();
 
   // decide between processing next row or group
   void doNextAction();
@@ -293,10 +334,13 @@ private:
 
   // end reduction
   void endReduction();
+  bool wasSuccessful(const int exitCode) const;
+  void handleReductionErrorOnThreadCompletion();
 
   // pause/resume reduction
-  void pause();
-  void resume();
+  void requestReductionPause();
+  void resumeReduction();
+  void reductionPaused();
 
   // Check if run has been processed
   bool isProcessed(int position) const;

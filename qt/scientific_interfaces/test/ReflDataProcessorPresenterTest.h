@@ -182,7 +182,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -269,7 +269,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -367,7 +367,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -454,7 +454,7 @@ public:
     EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
         .Times(1)
         .WillOnce(Return(""));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
@@ -544,7 +544,7 @@ public:
     EXPECT_CALL(mockDataProcessorView, getProcessInstrument())
         .Times(2)
         .WillRepeatedly(Return("INTER"));
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);

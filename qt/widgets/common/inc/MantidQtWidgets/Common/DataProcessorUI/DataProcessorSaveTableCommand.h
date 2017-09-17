@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORSAVETABLECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORSAVETABLECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableQueryCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorSaveTableCommand : public DataProcessorCommandBase {
+class DataProcessorSaveTableCommand : public TableQueryCommandBase {
 public:
-  DataProcessorSaveTableCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorSaveTableCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableQueryCommandBase::TableQueryCommandBase;
   virtual ~DataProcessorSaveTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::SaveFlag);
   };
-  QString name() override { return QString("Save Table"); }
-  QString icon() override { return QString("://filesave.png"); }
-  QString tooltip() override { return QString("Save Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Save Table"); }
+  QString icon() const override { return QString("://filesave.png"); }
+  QString tooltip() const override { return QString("Save Table"); }
+  QString whatsthis() const override {
     return QString("Saves current table as a table workspace");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

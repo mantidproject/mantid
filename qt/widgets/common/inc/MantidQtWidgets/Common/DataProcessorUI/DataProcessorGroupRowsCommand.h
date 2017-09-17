@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORGROUPROWSCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORGROUPROWSCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorGroupRowsCommand : public DataProcessorCommandBase {
+class DataProcessorGroupRowsCommand : public TableModificationCommandBase {
 public:
-  DataProcessorGroupRowsCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorGroupRowsCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorGroupRowsCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::GroupRowsFlag);
   };
-  QString name() override { return QString("Group Selected"); }
-  QString icon() override { return QString("://drag_curves.png"); }
-  QString tooltip() override { return QString("Group selected rows"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Group Selected"); }
+  QString icon() const override { return QString("://drag_curves.png"); }
+  QString tooltip() const override { return QString("Group selected rows"); }
+  QString whatsthis() const override {
     return QString("Places all selected runs into the same group");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

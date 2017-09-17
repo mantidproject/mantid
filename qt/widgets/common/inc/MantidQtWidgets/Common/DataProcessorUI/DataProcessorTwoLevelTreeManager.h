@@ -51,8 +51,6 @@ public:
   /// Destructor
   ~DataProcessorTwoLevelTreeManager() override;
 
-  /// Publish commands
-  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   /// Append a row
   void appendRow() override;
   /// Append a group to the model
@@ -113,7 +111,6 @@ private:
   DataProcessorPresenter *m_presenter;
   /// The model
   boost::shared_ptr<QDataProcessorTwoLevelTreeModel> m_model;
-
   /// Insert a row in the model
   void insertRow(int groupIndex, int rowIndex);
   /// Insert a group in the model

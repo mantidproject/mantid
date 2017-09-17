@@ -8,7 +8,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-/** @class ReflCommandBase
+/** @class DataProcessorCommandBase
 
 ReflCommandBase is an interface which defines the functions any data processor
 action needs to support. Defines a IReflTablePresenter that will be notified.
@@ -44,7 +44,7 @@ public:
   };
   DataProcessorCommandBase(const QDataProcessorWidget &widget)
       : DataProcessorCommandBase(widget.getPresenter()) {}
-
+  virtual ~DataProcessorCommandBase() = default;
 protected:
   DataProcessorPresenter *const m_presenter;
 };

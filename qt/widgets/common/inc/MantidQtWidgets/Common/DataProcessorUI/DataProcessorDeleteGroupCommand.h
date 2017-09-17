@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEGROUPCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORDELETEGROUPCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -31,24 +31,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorDeleteGroupCommand : public DataProcessorCommandBase {
+class DataProcessorDeleteGroupCommand : public TableModificationCommandBase {
 public:
-  DataProcessorDeleteGroupCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorDeleteGroupCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorDeleteGroupCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::DeleteGroupFlag);
   };
-  QString name() override { return QString("Delete Group"); }
-  QString icon() override { return QString("://delete_group.png"); }
-  QString tooltip() override { return QString("Deletes selected group"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Delete Group"); }
+  QString icon() const override { return QString("://delete_group.png"); }
+  QString tooltip() const override { return QString("Deletes selected group"); }
+  QString whatsthis() const override {
     return QString("Deletes the selected groups");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

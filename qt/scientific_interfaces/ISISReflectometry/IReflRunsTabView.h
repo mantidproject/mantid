@@ -1,9 +1,12 @@
 #ifndef MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 #define MANTID_ISISREFLECTOMETRY_IREFLRUNSTABVIEW_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
+#include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <vector>
 
 namespace MantidQt {
 
@@ -17,6 +20,8 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
+using MantidWidgets::EditAction;
+using MantidWidgets::TableAction;
 using API::AlgorithmRunner;
 class IReflRunsTabPresenter;
 class ReflSearchModel;
@@ -60,14 +65,20 @@ public:
   virtual void setInstrumentList(const std::vector<std::string> &instruments,
                                  const std::string &defaultInstrument) = 0;
   virtual void setTransferMethods(const std::set<std::string> &methods) = 0;
-  virtual void setTableCommands(
-      std::vector<std::unique_ptr<DataProcessorCommand>> tableCommands) = 0;
-  virtual void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
+  using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
+  virtual void setReflectometryMenuCommands(const CommandVector &commands) = 0;
+  virtual void setEditMenuCommands(const CommandVector &rowCommands) = 0;
+
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
-  virtual void setRowActionEnabled(int index, bool enabled) = 0;
-  virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
+  virtual void enableEditMenuAction(int action) = 0;
+  virtual void disableEditMenuAction(int action) = 0;
+  virtual void enableReflectometryMenuAction(int action) = 0;
+  virtual void disableReflectometryMenuAction(int action) = 0;
+  virtual void enableTransfer() = 0;
+  virtual void disableTransfer() = 0;
+  virtual void enableAutoreduce() = 0;
+  virtual void disableAutoreduce() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;

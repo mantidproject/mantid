@@ -9,7 +9,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-class AbstractDataProcessorTreeModel;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,6 +16,7 @@ namespace MantidWidgets {
 class HintStrategy;
 class DataProcessorCommand;
 class DataProcessorPresenter;
+class AbstractDataProcessorTreeModel;
 
 /** @class DataProcessorView
 
@@ -51,9 +51,8 @@ public:
   DataProcessorView(){};
   virtual ~DataProcessorView(){};
 
-  // Add actions to the toolbar
   virtual void
-  addActions(std::vector<std::unique_ptr<DataProcessorCommand>> commands) = 0;
+  addEditActions(const std::vector<std::unique_ptr<DataProcessorCommand>>& actions) = 0;
 
   // Connect the model
   virtual void
@@ -75,7 +74,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  virtual bool getEnableNotebook() = 0;
+  virtual bool isNotebookEnabled() = 0;
 
   // Expand/Collapse all groups
   virtual void expandAll() = 0;
@@ -83,10 +82,6 @@ public:
 
   // Select all rows/groups
   virtual void selectAll() = 0;
-
-  // Handle pause/resume of data reduction
-  virtual void pause() = 0;
-  virtual void resume() = 0;
 
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;
@@ -105,8 +100,17 @@ public:
   virtual QString getWorkspaceToOpen() const = 0;
   virtual QString getClipboard() const = 0;
   virtual QString getProcessInstrument() const = 0;
-  virtual DataProcessorPresenter *getPresenter() const = 0;
   virtual QString getCurrentInstrument() const = 0;
+  virtual DataProcessorPresenter *getPresenter() const = 0;
+  
+  virtual void disableProcessButton() = 0;
+  virtual void enableProcessButton() = 0;
+
+  virtual void enableAction(int indexToEnable) = 0;
+  virtual void disableAction(int indexToDisable) = 0;
+
+  virtual void disableSelectionAndEditing() = 0;
+  virtual void enableSelectionAndEditing() = 0;
 
   // Force re-processing of rows
   virtual void setForcedReProcessing(bool forceReProcessing) = 0;

@@ -4,12 +4,15 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandProvider.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include <QStringList>
 #include <map>
 #include <memory>
 #include <set>
 #include <vector>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -49,12 +52,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorTreeManager {
 public:
   virtual ~DataProcessorTreeManager(){};
-
-  /// Actions/commands
-
-  /// Publish actions/commands
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
-  publishCommands() = 0;
+  
   /// Append a row
   virtual void appendRow() = 0;
   /// Append a group
@@ -107,19 +105,10 @@ public:
   virtual bool isValidModel(Mantid::API::Workspace_sptr ws,
                             size_t whitelistColumns) const = 0;
 
-  /// Return member variables
-
   /// Return the model
   virtual boost::shared_ptr<AbstractDataProcessorTreeModel> getModel() = 0;
   /// Return the table ws
   virtual Mantid::API::ITableWorkspace_sptr getTableWorkspace() = 0;
-
-protected:
-  /// Add a command to the list of available commands
-  void addCommand(std::vector<std::unique_ptr<DataProcessorCommand>> &commands,
-                  std::unique_ptr<DataProcessorCommand> command) {
-    commands.push_back(std::move(command));
-  }
 };
 }
 }

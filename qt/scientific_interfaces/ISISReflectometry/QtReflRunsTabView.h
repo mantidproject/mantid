@@ -1,10 +1,10 @@
 #ifndef MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
-#include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
+#include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
 #include "ui_ReflRunsTabWidget.h"
@@ -72,14 +72,18 @@ public:
   void setInstrumentList(const std::vector<std::string> &instruments,
                          const std::string &defaultInstrument) override;
   void setTransferMethods(const std::set<std::string> &methods) override;
-  void setTableCommands(std::vector<std::unique_ptr<DataProcessorCommand>>
-                            tableCommands) override;
-  void setRowCommands(
-      std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
+  void setReflectometryMenuCommands(const CommandVector &commands) override;
+  void setEditMenuCommands(const CommandVector &rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void setRowActionEnabled(int index, bool enabled) override;
-  void setAutoreduceButtonEnabled(bool enabled) override;
+  void enableEditMenuAction(int action) override;
+  void disableEditMenuAction(int action) override;
+  void enableReflectometryMenuAction(int action) override;
+  void disableReflectometryMenuAction(int action) override;
+  void enableTransfer() override;
+  void disableTransfer() override;
+  void enableAutoreduce() override;
+  void disableAutoreduce() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -101,7 +105,11 @@ private:
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
-  void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
+  void addToMenu(QMenu *menu, DataProcessorCommand *command);
+  void enable(QAction &toEnable);
+  void disable(QAction &toDisable);
+  void setTransferEnabled(bool enabled);
+  void setAutoreduceEnabled(bool enabled);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 

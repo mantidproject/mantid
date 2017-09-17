@@ -1,7 +1,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h"
@@ -20,7 +22,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h"
-#include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -42,7 +43,8 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
     DataProcessorPresenter *presenter, Mantid::API::ITableWorkspace_sptr table,
     const DataProcessorWhiteList &whitelist)
     : m_presenter(presenter),
-      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {}
+      m_model(new QDataProcessorOneLevelTreeModel(table, whitelist)) {
+}
 
 /**
 * Constructor (no table workspace given)
@@ -58,48 +60,6 @@ DataProcessorOneLevelTreeManager::DataProcessorOneLevelTreeManager(
 * Destructor
 */
 DataProcessorOneLevelTreeManager::~DataProcessorOneLevelTreeManager() {}
-
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<DataProcessorCommand_uptr>
-DataProcessorOneLevelTreeManager::publishCommands() {
-
-  std::vector<DataProcessorCommand_uptr> commands;
-
-  addCommand(commands, make_unique<DataProcessorOpenTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorNewTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorSaveTableAsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorExportTableCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorOptionsCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorProcessCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPauseCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorPlotRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorAppendRowCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorCutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorPasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<DataProcessorClearSelectedCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorSeparatorCommand>(m_presenter));
-  addCommand(commands, make_unique<DataProcessorDeleteRowCommand>(m_presenter));
-  return commands;
-}
 
 /**
 Insert a row after the last selected row. If nothing was selected, the new row

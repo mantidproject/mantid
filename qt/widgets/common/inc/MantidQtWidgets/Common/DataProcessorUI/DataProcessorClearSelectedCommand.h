@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLEARSELECTEDCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCLEARSELECTEDCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorClearSelectedCommand : public DataProcessorCommandBase {
+class DataProcessorClearSelectedCommand : public TableModificationCommandBase {
 public:
-  DataProcessorClearSelectedCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorClearSelectedCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorClearSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ClearSelectedFlag);
   };
-  QString name() override { return QString("Clear Selected"); }
-  QString icon() override { return QString("://erase.png"); }
-  QString tooltip() override { return QString("Clear selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Clear Selected"); }
+  QString icon() const override { return QString("://erase.png"); }
+  QString tooltip() const override { return QString("Clear selected"); }
+  QString whatsthis() const override {
     return QString("Clears the contents of the selected rows");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

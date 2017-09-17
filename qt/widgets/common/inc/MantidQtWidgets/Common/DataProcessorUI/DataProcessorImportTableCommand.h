@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORIMPORTTABLECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORIMPORTTABLECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorImportTableCommand : public DataProcessorCommandBase {
+class DataProcessorImportTableCommand : public TableModificationCommandBase {
 public:
-  DataProcessorImportTableCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorImportTableCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorImportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ImportTableFlag);
   };
-  QString name() override { return QString("Import .TBL"); }
-  QString icon() override { return QString("://open_template.png"); }
-  QString tooltip() override { return QString("Import .TBL file"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Import .TBL"); }
+  QString icon() const override { return QString("://open_template.png"); }
+  QString tooltip() const override { return QString("Import .TBL file"); }
+  QString whatsthis() const override {
     return QString("Opens a dialog to select a .TBL file to import");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

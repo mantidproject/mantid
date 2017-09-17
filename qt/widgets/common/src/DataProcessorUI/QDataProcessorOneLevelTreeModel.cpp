@@ -247,5 +247,6 @@ QDataProcessorOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
+
 } // namespace MantidWidgets
 } // namespace Mantid

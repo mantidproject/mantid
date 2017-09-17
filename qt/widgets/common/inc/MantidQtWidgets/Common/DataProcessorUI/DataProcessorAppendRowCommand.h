@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDROWCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORAPPENDROWCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 
 namespace MantidQt {
@@ -31,27 +31,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorAppendRowCommand : public DataProcessorCommandBase {
+class DataProcessorAppendRowCommand : public TableModificationCommandBase {
 public:
-  DataProcessorAppendRowCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorAppendRowCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorAppendRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::AppendRowFlag);
   };
-  QString name() override { return QString("Insert Row After"); }
-  QString icon() override { return QString("://insert_row.png"); }
-  QString tooltip() override { return QString("Inserts row after"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Insert Row After"); }
+  QString icon() const override { return QString("://insert_row.png"); }
+  QString tooltip()const override { return QString("Inserts row after"); }
+  QString whatsthis() const override {
     return QString("Inserts a new row after the last selected row. If "
                    "groups exist and a group is selected, the new row is "
                    "appended to the selected group. If nothing is selected "
                    "then a new row is added to the last group");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPLOTROWCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableQueryCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,25 +30,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorPlotRowCommand : public DataProcessorCommandBase {
+class DataProcessorPlotRowCommand : public TableQueryCommandBase {
 public:
-  DataProcessorPlotRowCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorPlotRowCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableQueryCommandBase::TableQueryCommandBase;
   virtual ~DataProcessorPlotRowCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::PlotRowFlag);
   };
-  QString name() override { return QString("Plot Selected Rows"); }
-  QString icon() override { return QString("://graph.png"); }
-  QString tooltip() override { return QString("Plot the selected runs"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Plot Selected Rows"); }
+  QString icon() const override { return QString("://graph.png"); }
+  QString tooltip() const override { return QString("Plot the selected runs"); }
+  QString whatsthis() const override {
     return QString("Creates a plot of the reduced workspaces produced by "
                    "the selected runs");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

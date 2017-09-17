@@ -37,15 +37,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DataProcessorCommand {
 public:
   DataProcessorCommand() : m_child(){};
+  DataProcessorCommand(const DataProcessorCommand &) = delete;
+  DataProcessorCommand &operator=(const DataProcessorCommand &) = delete;
   virtual ~DataProcessorCommand(){};
 
   virtual void execute() = 0;
-  virtual QString name() = 0;
-  virtual QString icon() = 0;
-  virtual QString tooltip() = 0;
-  virtual QString whatsthis() = 0;
-  virtual QString shortcut() = 0;
-  virtual bool hasChild() final { return !m_child.empty(); };
+  virtual QString name() const = 0;
+  virtual QString icon() const = 0;
+  virtual QString tooltip() const = 0;
+  virtual QString whatsthis() const = 0;
+  virtual QString shortcut() const = 0;
+  virtual bool modifiesTable() const = 0;
+  virtual bool hasChild() const final { return !m_child.empty(); };
   virtual void
   setChild(std::vector<std::unique_ptr<DataProcessorCommand>> child) final {
     m_child = std::move(child);
@@ -53,7 +56,7 @@ public:
   virtual std::vector<std::unique_ptr<DataProcessorCommand>> &getChild() final {
     return m_child;
   }
-  virtual bool isSeparator() final {
+  virtual bool isSeparator() const final {
     return name().isEmpty() && icon().isEmpty();
   }
 

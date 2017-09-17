@@ -30,26 +30,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCopySelectedCommand : public DataProcessorCommandBase {
+class DataProcessorCopySelectedCommand : public TableModificationCommandBase {
 public:
-  DataProcessorCopySelectedCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorCopySelectedCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorCopySelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CopySelectedFlag);
   };
-  QString name() override { return QString("Copy Selected"); }
-  QString icon() override { return QString("://copy.png"); }
-  QString tooltip() override { return QString("Copy selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Copy Selected"); }
+  QString icon() const override { return QString("://copy.png"); }
+  QString tooltip() const override { return QString("Copy selected"); }
+  QString whatsthis() const override {
     return QString("Copies the selected rows to the clipboard. Each row is "
                    "placed on a new line, and each cell is separated by a "
                    "tab");
   }
-  QString shortcut() override { return QString("Ctrl+C"); }
+  QString shortcut() const override { return QString("Ctrl+C"); }
 };
 }
 }

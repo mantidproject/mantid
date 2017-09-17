@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSOREXPORTTABLECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableQueryCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -32,24 +32,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorExportTableCommand : public DataProcessorCommandBase {
+class DataProcessorExportTableCommand : public TableQueryCommandBase {
 public:
   DataProcessorExportTableCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
+      : TableQueryCommandBase(tablePresenter){};
   DataProcessorExportTableCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+      : TableQueryCommandBase(widget){};
   virtual ~DataProcessorExportTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ExportTableFlag);
   };
-  QString name() override { return QString("Export .TBL"); }
-  QString icon() override { return QString("://save_template.png"); }
-  QString tooltip() override { return QString("Export .TBL file"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Export .TBL"); }
+  QString icon() const override { return QString("://save_template.png"); }
+  QString tooltip() const override { return QString("Export .TBL file"); }
+  QString whatsthis() const override {
     return QString("Opens a dialog to export a table as .TBL file");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

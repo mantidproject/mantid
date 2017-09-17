@@ -2,11 +2,12 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/ProgressableView.h"
 #include "ui_DataProcessorWidget.h"
 #include <QSignalMapper>
 
@@ -72,9 +73,9 @@ public:
                        QWidget *parent);
   ~QDataProcessorWidget() override;
 
-  // Add actions to the toolbar
-  void addActions(
-      std::vector<std::unique_ptr<DataProcessorCommand>> commands) override;
+  // Add actions to the toolbar and context menu
+  void addEditActions(
+      const std::vector<std::unique_ptr<DataProcessorCommand>>& commands) override;
 
   // Connect the model
   void
@@ -101,7 +102,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  bool getEnableNotebook() override;
+  bool isNotebookEnabled() override;
 
   // Expand/Collapse all groups
   void expandAll() override;
@@ -109,10 +110,6 @@ public:
 
   // Select all rows/groups
   void selectAll() override;
-
-  // Handle pause/resume of data reduction
-  void pause() override;
-  void resume() override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
@@ -143,6 +140,14 @@ public:
   // Force re-processing of rows
   void setForcedReProcessing(bool forceReProcessing) override;
 
+  void disableProcessButton() override;
+  void enableProcessButton() override;
+
+  void enableAction(int indexToEnable) override;
+  void disableAction(int indexToDisable) override;
+
+  void disableSelectionAndEditing() override;
+  void enableSelectionAndEditing() override;
   // Get value in a cell
   QString getCell(int row, int column, int parentRow = 0, int parentColumn = 0);
   // Set value in a cell
@@ -150,20 +155,22 @@ public:
                int parentColumn = 0);
   int getNumberOfRows();
   void clearTable();
-
-  // Methods to emit signals
-  void emitProcessClicked() override { emit processButtonClicked(); };
-
+  void setModel(QString const &name) override;
+  void emitProcessClicked() override { emit processClicked(); }
   void emitProcessingFinished() override { emit processingFinished(); }
-
-signals:
-  void processButtonClicked();
-  void processingFinished();
-  void instrumentHasChanged();
-
 private:
-  // initialise the interface
   void createTable();
+  void disableActionOnToolbar(int indexToDisable);
+  void disableActionOnContextMenu(int indexToDisable);
+  void enableActionOnToolbar(int indexToEnable);
+  void enableActionOnContextMenu(int indexToEnable);
+
+  static void disableActionOnWidget(QWidget &widget, int index);
+  static void enableActionOnWidget(QWidget &widget, int index);
+  static void disable(QWidget &widget);
+  static void disable(QAction &widget);
+  static void enable(QWidget &widget);
+  static void enable(QAction &widget);
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;
@@ -182,10 +189,12 @@ private:
 signals:
   void comboProcessInstrument_currentIndexChanged(int index);
   void ranPythonAlgorithm(const QString &pythonCode);
+  void processButtonClicked();
+  void processingFinished();
+  void instrumentHasChanged();
 
 public slots:
   void on_comboProcessInstrument_currentIndexChanged(int index);
-  void setModel(QString const &name) override;
 
 private slots:
   void rowsUpdated(const QModelIndex &parent, int first, int last);

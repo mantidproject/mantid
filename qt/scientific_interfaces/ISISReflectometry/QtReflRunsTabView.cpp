@@ -1,18 +1,18 @@
 #include "QtReflRunsTabView.h"
+#include "IReflRunsTabPresenter.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/FileDialogHandler.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
-#include "IReflRunsTabPresenter.h"
-#include "ReflGenericDataProcessorPresenterFactory.h"
-#include "ReflRunsTabPresenter.h"
-#include "ReflSearchModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
+#include "ReflGenericDataProcessorPresenterFactory.h"
+#include "ReflRunsTabPresenter.h"
+#include "ReflSearchModel.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -70,8 +70,9 @@ void QtReflRunsTabView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
-      this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */,
+      this /* main view */, this /* Currently this concrete view is also
+                                    responsible for prog reporting */
+      ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
@@ -113,11 +114,10 @@ void QtReflRunsTabView::initLayout() {
 * @param menu : [input] The menu where actions will be added
 * @param command : [input] The command (action) to add
 */
-void QtReflRunsTabView::addToMenu(QMenu *menu,
-                                  DataProcessorCommand_uptr command) {
+void QtReflRunsTabView::addToMenu(QMenu *menu, DataProcessorCommand *command) {
 
-  m_commands.push_back(Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(
-      menu, std::move(command)));
+  m_commands.push_back(
+      Mantid::Kernel::make_unique<DataProcessorCommandAdapter>(menu, command));
 }
 
 /**
@@ -125,12 +125,12 @@ void QtReflRunsTabView::addToMenu(QMenu *menu,
 * @param tableCommands : [input] The list of commands to add to the
 * "Reflectometry" menu
 */
-void QtReflRunsTabView::setTableCommands(
-    std::vector<DataProcessorCommand_uptr> tableCommands) {
+void QtReflRunsTabView::setReflectometryMenuCommands(
+    const CommandVector &commands) {
 
   ui.menuTable->clear();
-  for (auto &command : tableCommands) {
-    addToMenu(ui.menuTable, std::move(command));
+  for (const auto &command : commands) {
+    addToMenu(ui.menuTable, command.get());
   }
 
   // Slit calculator
@@ -144,12 +144,11 @@ void QtReflRunsTabView::setTableCommands(
 * Adds actions to the "Edit" menu
 * @param rowCommands : [input] The list of commands to add to the "Edit" menu
 */
-void QtReflRunsTabView::setRowCommands(
-    std::vector<DataProcessorCommand_uptr> rowCommands) {
+void QtReflRunsTabView::setEditMenuCommands(const CommandVector &commands) {
 
   ui.menuRows->clear();
-  for (auto &command : rowCommands) {
-    addToMenu(ui.menuRows, std::move(command));
+  for (const auto &command : commands) {
+    addToMenu(ui.menuRows, command.get());
   }
 }
 
@@ -166,22 +165,61 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
-/**
-* Sets a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
-*/
-void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+void QtReflRunsTabView::enable(QAction &toEnable) { toEnable.setEnabled(true); }
 
-  ui.menuRows->actions()[index]->setEnabled(enabled);
+void QtReflRunsTabView::disable(QAction &toDisable) {
+  toDisable.setEnabled(false);
 }
+
+/**
+* Enables a specific action in the "Reflectometry" menu.
+* @param action : The action in the "Reflectometry" menu to enable
+*/
+void QtReflRunsTabView::disableReflectometryMenuAction(int disableAtIndex) {
+  disable(*(ui.menuTable->actions()[disableAtIndex]));
+}
+
+/**
+* Enables a specific action in the "Reflectometry" menu.
+* @param action : The action in the "Reflectometry" menu to disable
+*/
+void QtReflRunsTabView::enableReflectometryMenuAction(int enableAtIndex) {
+  enable(*(ui.menuTable->actions()[enableAtIndex]));
+}
+
+/**
+* Disables a specific action in the "Edit" menu.
+* @param action : The action in the "Edit" menu to disable
+*/
+void QtReflRunsTabView::disableEditMenuAction(int disableAtIndex) {
+  disable(*(ui.menuRows->actions()[disableAtIndex]));
+}
+
+/**
+* Enables a specific action in the "Edit" menu.
+* @param action : The action in the "Edit" menu to enable
+*/
+void QtReflRunsTabView::enableEditMenuAction(int enableAtIndex) {
+  enable(*(ui.menuRows->actions()[enableAtIndex]));
+}
+
+void QtReflRunsTabView::disableAutoreduce() { setAutoreduceEnabled(false); }
+
+void QtReflRunsTabView::enableAutoreduce() { setAutoreduceEnabled(true); }
+
+void QtReflRunsTabView::setTransferEnabled(bool enabled) {
+  ui.buttonTransfer->setEnabled(enabled);
+}
+
+void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
+
+void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
 
 /**
 * Sets the "Autoreduce" button enabled or disabled
 * @param enabled : Whether to enable or disable the button
 */
-void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
-
+void QtReflRunsTabView::setAutoreduceEnabled(bool enabled) {
   ui.buttonAutoreduce->setEnabled(enabled);
 }
 
@@ -191,9 +229,8 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 */
 void QtReflRunsTabView::setTransferMethods(
     const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
+  for (const auto &method : methods)
+    ui.comboTransferMethod->addItem(method.c_str());
 }
 
 /**
@@ -207,8 +244,8 @@ void QtReflRunsTabView::setInstrumentList(
     const std::string &defaultInstrument) {
   ui.comboSearchInstrument->clear();
 
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
+  for (const auto &instrumentName : instruments) {
+    QString instrument = QString::fromStdString(instrumentName);
     ui.comboSearchInstrument->addItem(instrument);
   }
 

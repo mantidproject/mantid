@@ -6,6 +6,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "EditAction.h"
+#include "TableAction.h"
 
 using ParentItems = std::set<int>;
 using ChildItems = std::map<int, std::set<int>>;
@@ -84,8 +86,11 @@ public:
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   virtual void setInstrumentList(const QStringList &instruments,
                                  const QString &defaultInstrument) = 0;
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
-  publishCommands() = 0;
+  using CommandVector = std::vector<std::unique_ptr<DataProcessorCommand>>;
+  virtual const CommandVector& getEditCommands() = 0;
+  virtual const CommandVector& getTableCommands() = 0;
+  virtual int indexOfCommand(TableAction action) = 0;
+  virtual int indexOfCommand(EditAction action) = 0;
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;

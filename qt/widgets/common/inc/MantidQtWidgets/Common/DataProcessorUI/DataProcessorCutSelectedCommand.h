@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCUTSELECTEDCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCUTSELECTEDCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,26 +30,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorCutSelectedCommand : public DataProcessorCommandBase {
+class DataProcessorCutSelectedCommand : public TableModificationCommandBase {
 public:
-  DataProcessorCutSelectedCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorCutSelectedCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorCutSelectedCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::CutSelectedFlag);
   };
-  QString name() override { return QString("Cut Selected"); }
-  QString icon() override { return QString("://cut.png"); }
-  QString tooltip() override { return QString("Cut selected"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Cut Selected"); }
+  QString icon() const override { return QString("://cut.png"); }
+  QString tooltip() const override { return QString("Cut selected"); }
+  QString whatsthis() const override {
     return QString("Copies the selected rows to the clipboard, and then "
                    "deletes them. Each row is placed on a new line, and "
                    "each cell is separated by a tab");
   }
-  QString shortcut() override { return QString("Ctrl+X"); }
+  QString shortcut() const override { return QString("Ctrl+X"); }
 };
 }
 }

@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENTABLECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPENTABLECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,26 +30,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorOpenTableCommand : public DataProcessorCommandBase {
+class DataProcessorOpenTableCommand : public TableModificationCommandBase {
 public:
-  DataProcessorOpenTableCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorOpenTableCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorOpenTableCommand(){};
 
   void execute() override{
       // This action should do nothing
   };
-  QString name() override { return QString("Open Table"); }
-  QString icon() override { return QString("://multiload.png"); }
-  QString tooltip() override { return QString("Open Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Open Table"); }
+  QString icon() const override { return QString("://multiload.png"); }
+  QString tooltip() const override { return QString("Open Table"); }
+  QString whatsthis() const override {
     return QString("Loads a table into the interface. Table must exist in "
                    "the ADS and be compatible in terms of the number and "
                    "type of columns");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

@@ -15,9 +15,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericCommandProviderFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorTreeManagerFactory.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
@@ -119,14 +121,66 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
     const DataProcessorProcessingAlgorithm &processor,
     const DataProcessorPostprocessingAlgorithm &postprocessor,
+    std::unique_ptr<DataProcessorTreeManagerFactory> managerFactory,
+    std::unique_ptr<CommandProviderFactory> commandProviderFactory,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
+      m_mainPresenter(nullptr), m_manager(chooseTreeManager(
+                             *managerFactory, postprocessor.name(), whitelist)),
+      m_commandProvider(commandProviderFactory->fromPostprocessorName(
+          postprocessor.name(), *this)),
+      m_loader(loader), m_whitelist(whitelist), m_preprocessMap(preprocessMap),
+      m_processor(processor), m_postprocessor(postprocessor),
+      m_postprocessMap(postprocessMap), m_progressReporter(nullptr),
+      m_postprocess(true), m_promptUser(true), m_tableDirty(false),
+      m_confirmReductionPaused(true), m_pauseReduction(false),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+
+	assert(m_manager != nullptr);
+  // Column Options must be added to the whitelist
+  m_whitelist.addElement("Options", "Options",
+                         "<b>Override <samp>" + processor.name() +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm. "
+                             "Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
+  // Column Hidden Options must be added to the whitelist
+  m_whitelist.addElement("HiddenOptions", "HiddenOptions",
+                         "<b>Override <samp>" + processor.name() +
+                             "</samp> properties</b><br /><i>optional</i><br "
+                             "/>This column allows you to "
+                             "override the properties used when executing "
+                             "the main reduction algorithm in the same way"
+                             "as the Options column, but this column is hidden"
+                             "from the user. "
+                             "Hidden Options are given as "
+                             "key=value pairs, separated by commas. Values "
+                             "containing commas must be quoted. In case of "
+                             "conflict between options "
+                             "specified via this column and global options "
+                             "specified externally, the former prevail.");
+
+  m_columns = static_cast<int>(m_whitelist.size());
+}
+
+GenericDataProcessorPresenter::GenericDataProcessorPresenter(
+    const DataProcessorWhiteList &whitelist,
+    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
+    const DataProcessorProcessingAlgorithm &processor,
+    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const std::map<QString, QString> &postprocessMap, const QString &loader)
+    : GenericDataProcessorPresenter(
+          whitelist, preprocessMap, processor, postprocessor,
+          Mantid::Kernel::make_unique<GenericDataProcessorTreeManagerFactory>(),
+          Mantid::Kernel::make_unique<GenericCommandProviderFactory>(), postprocessMap,
+          loader) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -159,15 +213,17 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified externally, the former prevail.");
 
   m_columns = static_cast<int>(m_whitelist.size());
+}
 
-  if (m_postprocessor.name().isEmpty()) {
-    m_postprocess = false;
-    m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
-        this, m_whitelist);
-  } else {
-    m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-        this, m_whitelist);
-  }
+std::unique_ptr<DataProcessorTreeManager>
+GenericDataProcessorPresenter::chooseTreeManager(
+    DataProcessorTreeManagerFactory &chooser, QString const &postprocessorName,
+    DataProcessorWhiteList whitelist) {
+  auto choice =
+      chooser.fromPostProcessorName(*this, postprocessorName, whitelist);
+  m_postprocess =
+      (choice.second == DataProcessorTreeManagerFactory::PostProcessing::Yes);
+  return std::move(choice.first);
 }
 
 /**
@@ -223,17 +279,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           processor, DataProcessorPostprocessingAlgorithm()) {}
 
-/**
-* Destructor
-*/
-GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
-
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      std::begin(in), std::end(in), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -249,8 +300,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view = tableView;
   m_progressView = progressView;
 
-  // Add actions to toolbar
-  addCommands();
+  addActionsToEditMenu();
 
   // Initialise options
   // Load saved values from disk
@@ -289,8 +339,7 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // The view should currently be in the paused state
-  m_view->pause();
+  disablePauseActions();
 }
 
 /**
@@ -378,8 +427,13 @@ void GenericDataProcessorPresenter::process() {
   }
   // Start processing the first group
   m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
-  resume();
+  resumeReduction();
 }
+
+/**
+ * Destructor
+ */
+GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 /**
 Decide which processing action to take next
@@ -401,15 +455,21 @@ void GenericDataProcessorPresenter::doNextAction() {
   // a flag we aren't handling.
 }
 
+void GenericDataProcessorPresenter::reductionPaused() {
+  m_view->enableSelectionAndEditing();
+  m_view->enableProcessButton();
+
+  m_mainPresenter->confirmReductionPaused();
+  // m_confirmReductionPaused = true;
+}
 /**
 Process a new row
 */
 void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
-    m_reductionPaused = true;
+    // Notify presenter and view that reduction is paused
+    reductionPaused();
     return;
   }
 
@@ -453,9 +513,7 @@ Process a new group
 void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
-    m_mainPresenter->confirmReductionPaused();
-    m_reductionPaused = true;
+    reductionPaused();
     return;
   }
 
@@ -476,7 +534,7 @@ void GenericDataProcessorPresenter::nextGroup() {
       doNextAction();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
-    if (m_view->getEnableNotebook())
+    if (m_view->isNotebookEnabled())
       saveNotebook(m_selectedData);
     endReduction();
   }
@@ -511,9 +569,8 @@ End reduction
 */
 void GenericDataProcessorPresenter::endReduction() {
 
-  pause();
-  m_reductionPaused = true;
-  m_mainPresenter->confirmReductionPaused();
+  requestReductionPause();
+  reductionPaused();
 }
 
 /**
@@ -530,13 +587,21 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
   m_workerThread.release();
 
-  if (exitCode == 0) { // Success
+  if (wasSuccessful(exitCode)) {
     m_progressReporter->report();
     doNextAction();
-  } else { // Error
-    m_progressReporter->clear();
-    endReduction();
+  } else {
+    handleReductionErrorOnThreadCompletion();
   }
+}
+
+bool GenericDataProcessorPresenter::wasSuccessful(const int exitCode) const {
+  return exitCode == 0;
+}
+
+void GenericDataProcessorPresenter::handleReductionErrorOnThreadCompletion() {
+  m_progressReporter->clear();
+  endReduction();
 }
 
 /**
@@ -909,7 +974,6 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
  * @throws std::runtime_error if reduction fails
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
-
   /* Create the processing algorithm */
 
   IAlgorithm_sptr alg =
@@ -924,7 +988,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   if (!m_preprocessMap.empty())
     globalOptions = convertStringToMap(m_preprocessingOptions);
 
+  assert(m_mainPresenter != nullptr && "Main presenter must be injected with accept().");
   // Pre-processing properties
+ // std::cout << m_mainPresenter << std::endl;
   auto preProcessPropMap =
       convertStringToMapWithSet(m_mainPresenter->getPreprocessingProperties());
 
@@ -1059,8 +1125,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1189,7 +1256,7 @@ void GenericDataProcessorPresenter::notify(DataProcessorPresenter::Flag flag) {
     selectAll();
     break;
   case DataProcessorPresenter::PauseFlag:
-    pause();
+    requestReductionPause();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
@@ -1556,7 +1623,7 @@ void GenericDataProcessorPresenter::showOptionsDialog() {
 /** Gets the options used by the presenter
 @returns The options used by the presenter
 */
-const std::map<QString, QVariant> &
+const GenericDataProcessorPresenter::Options &
 GenericDataProcessorPresenter::options() const {
   return m_options;
 }
@@ -1564,65 +1631,83 @@ GenericDataProcessorPresenter::options() const {
 /** Sets the options used by the presenter
 @param options : The new options for the presenter to use
 */
-void GenericDataProcessorPresenter::setOptions(
-    const std::map<QString, QVariant> &options) {
+void GenericDataProcessorPresenter::setOptions(const Options &options) {
   // Overwrite the given options
-  for (auto it = options.begin(); it != options.end(); ++it)
-    m_options[it->first] = it->second;
+  for (const auto &optionKeyValue : options)
+    m_options[optionKeyValue.first] = optionKeyValue.second;
 
   // Save any changes to disk
   m_view->saveSettings(m_options);
 }
 
-/** Load options from disk if possible, or set to defaults */
-void GenericDataProcessorPresenter::initOptions() {
-  m_options.clear();
-
-  // Set defaults
+void GenericDataProcessorPresenter::setDefaultOptions() {
   m_options["WarnProcessAll"] = true;
   m_options["WarnDiscardChanges"] = true;
   m_options["WarnProcessPartialGroup"] = true;
   m_options["Round"] = false;
   m_options["RoundPrecision"] = 3;
+}
 
+/** Load options from disk if possible, or set to defaults */
+void GenericDataProcessorPresenter::initOptions() {
+  m_options.clear();
+  setDefaultOptions();
   // Load saved values from disk
   m_view->loadSettings(m_options);
 }
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addCommands() {
+void GenericDataProcessorPresenter::addActionsToEditMenu() {
+  m_view->addEditActions(m_commandProvider->getEditCommands());
+}
 
-  auto commands = m_manager->publishCommands();
-  std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
-  for (auto comm = 10u; comm < commands.size(); comm++)
-    commandsToShow.push_back(std::move(commands.at(comm)));
-  m_view->addActions(std::move(commandsToShow));
+void GenericDataProcessorPresenter::enableProcessActions() {
+  enableActions(m_commandProvider->getProcessingEditCommands());
+  m_view->enableProcessButton();
+}
+
+void GenericDataProcessorPresenter::disableProcessActions() {
+  disableActions(m_commandProvider->getProcessingEditCommands());
+  m_view->disableProcessButton();
+}
+
+void GenericDataProcessorPresenter::enablePauseActions() {
+  enableActions(m_commandProvider->getPausingEditCommands());
+}
+
+void GenericDataProcessorPresenter::disablePauseActions() {
+  disableActions(m_commandProvider->getPausingEditCommands());
+}
+
+void GenericDataProcessorPresenter::disableTableModification() {
+  disableActions(m_commandProvider->getModifyingEditCommands());
+}
+
+void GenericDataProcessorPresenter::enableTableModification() {
+  enableActions(m_commandProvider->getModifyingEditCommands());
 }
 
 /**
 Pauses reduction. If currently reducing runs, this does not take effect until
 the current thread for reducing a row or group has finished
 */
-void GenericDataProcessorPresenter::pause() {
-
-  m_view->pause();
+void GenericDataProcessorPresenter::requestReductionPause() {
+  disablePauseActions();
   m_mainPresenter->pause();
-
   m_pauseReduction = true;
 }
 
 /** Resumes reduction if currently paused
 */
-void GenericDataProcessorPresenter::resume() {
+void GenericDataProcessorPresenter::resumeReduction() {
+  m_view->disableSelectionAndEditing();
+  m_view->disableProcessButton();
 
-  m_view->resume();
   m_mainPresenter->resume();
 
   m_pauseReduction = false;
-  m_reductionPaused = false;
-  m_mainPresenter->confirmReductionResumed();
-
+  m_confirmReductionPaused = false;
   doNextAction();
 }
 
@@ -1642,20 +1727,26 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
   m_promptUser = allowPrompt;
 }
 
-/**
-* Publishes a list of available commands
-* @return : The list of available commands
-*/
-std::vector<std::unique_ptr<DataProcessorCommand>>
-GenericDataProcessorPresenter::publishCommands() {
-
-  auto commands = m_manager->publishCommands();
-
-  // "Open Table" needs the list of "child" commands, i.e. the list of
-  // available workspaces in the ADS
-  commands.at(0)->setChild(getTableList());
-
+const typename GenericDataProcessorPresenter::CommandVector &
+GenericDataProcessorPresenter::getTableCommands() {
+  auto &commands = m_commandProvider->getTableCommands();
+  // "Open Table" needs the the list of available workspaces in the ADS
+  commands.at(m_commandProvider->indexOfCommand(TableAction::OPEN_TABLE))
+      ->setChild(getTableList());
   return commands;
+}
+
+const typename GenericDataProcessorPresenter::CommandVector &
+GenericDataProcessorPresenter::getEditCommands() {
+  return m_commandProvider->getEditCommands();
+}
+
+int GenericDataProcessorPresenter::indexOfCommand(TableAction action) {
+  return m_commandProvider->indexOfCommand(action);
+}
+
+int GenericDataProcessorPresenter::indexOfCommand(EditAction action) {
+  return m_commandProvider->indexOfCommand(action);
 }
 
 /** Register a workspace receiver
@@ -1664,6 +1755,7 @@ GenericDataProcessorPresenter::publishCommands() {
 void GenericDataProcessorPresenter::accept(
     DataProcessorMainPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
+ // std::cout << m_mainPresenter << std::endl;
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);
@@ -1684,7 +1776,7 @@ GenericDataProcessorPresenter::getTableList() {
     workspaces.push_back(
         Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, name));
   }
-  return workspaces;
+  return std::move(workspaces);
 }
 
 /** Asks the view for selected parent items
@@ -1726,7 +1818,7 @@ void GenericDataProcessorPresenter::giveUserWarning(
 * @return :: the reduction state
 */
 bool GenericDataProcessorPresenter::isProcessing() const {
-  return !m_reductionPaused;
+  return !m_confirmReductionPaused;
 }
 
 /** Checks if a row in the table has been processed.

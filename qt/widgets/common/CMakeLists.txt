@@ -65,6 +65,7 @@
 	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
 	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
+    src/DataProcessorUI/EditAction.cpp
 	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
 	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
 	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
@@ -81,6 +82,13 @@
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
 	src/DataProcessorUI/DataProcessorVectorString.cpp
+    src/DataProcessorUI/TableQueryCommandBase.cpp
+    src/DataProcessorUI/TableModificationCommandBase.cpp
+    src/DataProcessorUI/GenericDataProcessorTreeManagerFactory.cpp
+    src/DataProcessorUI/GenericCommandProviderFactory.cpp
+    src/DataProcessorUI/GenericTwoLevelCommandProvider.cpp
+    src/DataProcessorUI/GenericOneLevelCommandProvider.cpp
+    src/DataProcessorUI/CommandProviderBase.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp

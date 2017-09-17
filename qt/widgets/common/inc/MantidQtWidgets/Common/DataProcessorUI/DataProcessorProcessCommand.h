@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPROCESSCOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,27 +30,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorProcessCommand : public DataProcessorCommandBase {
+class DataProcessorProcessCommand : public TableModificationCommandBase {
 public:
-  DataProcessorProcessCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorProcessCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorProcessCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::ProcessFlag);
   };
-  QString name() override { return QString("Process"); }
-  QString icon() override { return QString("://stat_rows.png"); }
-  QString tooltip() override { return QString("Processes selected runs"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("Process"); }
+  QString icon() const override { return QString("://stat_rows.png"); }
+  QString tooltip() const override { return QString("Processes selected runs"); }
+  QString whatsthis() const override {
     return QString("Processes the selected runs. Selected runs are reduced "
                    "sequentially and independently. If nothing is "
                    "selected, the behaviour is as if all "
                    "runs were selected.");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

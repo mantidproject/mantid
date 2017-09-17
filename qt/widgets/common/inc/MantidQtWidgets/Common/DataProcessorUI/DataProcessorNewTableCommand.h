@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORNEWTABLECOMMAND_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORNEWTABLECOMMAND_H
 
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableModificationCommandBase.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,24 +30,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DataProcessorNewTableCommand : public DataProcessorCommandBase {
+class DataProcessorNewTableCommand : public TableModificationCommandBase {
 public:
-  DataProcessorNewTableCommand(DataProcessorPresenter *tablePresenter)
-      : DataProcessorCommandBase(tablePresenter){};
-  DataProcessorNewTableCommand(const QDataProcessorWidget &widget)
-      : DataProcessorCommandBase(widget){};
+  using TableModificationCommandBase::TableModificationCommandBase;
   virtual ~DataProcessorNewTableCommand(){};
 
   void execute() override {
     m_presenter->notify(DataProcessorPresenter::NewTableFlag);
   };
-  QString name() override { return QString("New Table"); }
-  QString icon() override { return QString("://new.png"); }
-  QString tooltip() override { return QString("New Table"); }
-  QString whatsthis() override {
+  QString name() const override { return QString("New Table"); }
+  QString icon() const override { return QString("://new.png"); }
+  QString tooltip() const override { return QString("New Table"); }
+  QString whatsthis() const override {
     return QString("Loads a blank table into the interface");
   }
-  QString shortcut() override { return QString(); }
+  QString shortcut() const override { return QString(); }
 };
 }
 }

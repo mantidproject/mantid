@@ -42,15 +42,17 @@ public:
   GenericDataProcessorPresenterRowReducerWorker(
       GenericDataProcessorPresenter *presenter, RowItem *rowItem,
       int groupIndex)
-      : m_presenter(presenter), m_rowItem(rowItem), m_groupIndex(groupIndex) {}
+      : m_presenter(presenter), m_rowItem(*rowItem), m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
     try {
-      m_presenter->reduceRow(&m_rowItem->second);
-      m_presenter->m_manager->update(m_groupIndex, m_rowItem->first,
-                                     m_rowItem->second);
-      m_presenter->m_manager->setProcessed(true, m_rowItem->first,
+      m_presenter->reduceRow(&m_rowItem.second);
+	  auto rowItemFirst = m_rowItem.first;
+	  auto const& rowItemSecond = m_rowItem.second;
+      m_presenter->m_manager->update(m_groupIndex, rowItemFirst,
+                                     rowItemSecond);
+      m_presenter->m_manager->setProcessed(true, m_rowItem.first,
                                            m_groupIndex);
       emit finished(0);
     } catch (std::exception &ex) {
@@ -65,7 +67,7 @@ signals:
 
 private:
   GenericDataProcessorPresenter *m_presenter;
-  RowItem *m_rowItem;
+  RowItem m_rowItem;
   int m_groupIndex;
 };
 

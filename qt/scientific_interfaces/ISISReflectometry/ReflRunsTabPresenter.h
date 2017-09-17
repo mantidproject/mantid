@@ -2,6 +2,9 @@
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
 #include "MantidAPI/IAlgorithm.h"
+#include "ReflTransferStrategy.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/EditAction.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/TableAction.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -26,6 +29,8 @@ class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
+using MantidWidgets::TableAction;
+using MantidWidgets::EditAction;
 
 /** @class ReflRunsTabPresenter
 
@@ -62,7 +67,7 @@ public:
                        std::vector<DataProcessorPresenter *> tablePresenter,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-  ~ReflRunsTabPresenter() override;
+  ~ReflRunsTabPresenter() override = default;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
@@ -75,15 +80,17 @@ public:
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
   /// Handle data reduction paused/resumed
-  void pause() const override;
-  void resume() const override;
+  void pause() override;
+  void resume() override;
   /// Determine whether to start a new autoreduction
   bool startNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
-  void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
+  void confirmReductionPaused() override;
+  void confirmReductionResumed() override;
 
 private:
+  void pushTableCommands(DataProcessorPresenter &tablePresenter);
+  void pushEditCommands(DataProcessorPresenter &tablePresenter);
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
   /// The main view we're managing
@@ -102,6 +109,8 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
+  /// Reflectometry menu actions which should be disabled during processing
+  static const std::array<const TableAction, 5> disabledWhileProcessing;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
@@ -113,10 +122,21 @@ private:
   void autoreduce(bool startNew);
   void transfer();
   void pushCommands();
+  void enableAction(TableAction action);
+  void disableAction(TableAction action);
+  void enableAction(EditAction action);
+  void disableAction(EditAction action);
+  int indexOfCommand(TableAction action);
+  int indexOfCommand(EditAction action);
+  DataProcessorPresenter &tablePresenter();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  SearchResultMap
+  querySelectedRunsToTransfer(std::set<int> const &selectedRows) const;
+  void preventTableModification();
+  void allowTableModification();
 };
 }
 }

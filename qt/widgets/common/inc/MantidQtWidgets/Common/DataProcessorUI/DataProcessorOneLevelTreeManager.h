@@ -50,9 +50,6 @@ public:
                                    const DataProcessorWhiteList &whitelist);
   /// Destructor
   ~DataProcessorOneLevelTreeManager() override;
-
-  /// Publish commands
-  std::vector<std::unique_ptr<DataProcessorCommand>> publishCommands() override;
   /// Append a row
   void appendRow() override;
   /// Append a group to the model
