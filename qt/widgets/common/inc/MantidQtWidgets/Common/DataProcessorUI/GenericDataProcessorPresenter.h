@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -20,9 +20,9 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QSet>
+#include <QObject>
 #include <queue>
 
-#include <QObject>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -73,6 +73,7 @@ class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
   friend class GenericDataProcessorPresenterGroupReducerWorker;
 
 public:
+  using Options = std::map<QString, QVariant>;
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const DataProcessorWhiteList &whitelist,
@@ -111,10 +112,10 @@ public:
       const DataProcessorPreprocessMap &preprocessMap,
       const DataProcessorProcessingAlgorithm &processor,
       const DataProcessorPostprocessingAlgorithm &postprocessor);
-  virtual ~GenericDataProcessorPresenter() override;
+  ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
-  const std::map<QString, QVariant> &options() const override;
-  void setOptions(const std::map<QString, QVariant> &options) override;
+  const Options &options() const override;
+  void setOptions(const Options &options) override;
   void transfer(const std::vector<std::map<QString, QString>> &runs) override;
   void setInstrumentList(const QStringList &instruments,
                          const QString &defaultInstrument) override;
@@ -130,6 +131,8 @@ public:
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
+  /// Call nextGroup() immediately
+  void callNextGroup() { nextGroup(); }
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
                                         const QString &prefix = "");
@@ -216,13 +219,13 @@ private:
   // stores whether or not the table has changed since it was last saved
   bool m_tableDirty;
   // stores the user options for the presenter
-  std::map<QString, QVariant> m_options;
+  Options m_options;
   // Thread to run reducer worker in
   std::unique_ptr<GenericDataProcessorPresenterThread> m_workerThread;
+  // A boolean indicating whether data reduction is confirmed paused
+  bool m_confirmReductionPaused;
   // A boolean that can be set to pause reduction of the current item
   bool m_pauseReduction;
-  // A boolean indicating whether data reduction is confirmed paused
-  bool m_reductionPaused;
   // Enumeration of the reduction actions that can be taken
   enum class ReductionFlag { ReduceRowFlag, ReduceGroupFlag, StopReduceFlag };
   // A flag of the next action due to be carried out
@@ -275,9 +278,9 @@ private:
   // options
   void showOptionsDialog();
   void initOptions();
+  void setDefaultOptions();
 
-  // actions/commands
-  void addCommands();
+  void addActionsToReflectometryMenu();
 
   // decide between processing next row or group
   void doNextAction();
@@ -293,6 +296,8 @@ private:
 
   // end reduction
   void endReduction();
+  bool wasSuccessful(const int exitCode) const;
+  void handleReductionErrorOnThreadCompletion();
 
   // pause/resume reduction
   void pause();

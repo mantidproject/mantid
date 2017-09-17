@@ -14,6 +14,9 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 #include "MantidQtWidgets/Common/SlitCalculator.h"
 
+
+#include <iostream>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 using namespace Mantid::API;
@@ -24,23 +27,30 @@ using namespace MantidQt::MantidWidgets;
 * @param parent :: The parent of this view
 */
 QtReflRunsTabView::QtReflRunsTabView(QWidget *parent)
-    : m_presenter(), m_calculator(new SlitCalculator(this)) {
+    : m_presenter(), m_calculator(new SlitCalculator(this)),
+      m_pauseIcon(":/pause.png"), m_playIcon(":/play2.png") {
 
   UNUSED_ARG(parent);
   initLayout();
 }
+
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
 */
 QtReflRunsTabView::~QtReflRunsTabView() {}
 
+
+void QtReflRunsTabView::initState() {
+  autoreduceWillReduce();
+  disableEditMenuAction(DataProcessorAction::PAUSE);
+}
+
 /**
 Initialise the Interface
 */
 void QtReflRunsTabView::initLayout() {
   ui.setupUi(this);
-
   ui.buttonTransfer->setDefaultAction(ui.actionTransfer);
 
   // Expand the process runs column at the expense of the search column
@@ -70,8 +80,9 @@ void QtReflRunsTabView::initLayout() {
 
   // Create the presenter
   m_presenter = std::make_shared<ReflRunsTabPresenter>(
-      this /* main view */,
-      this /* Currently this concrete view is also responsible for prog reporting */,
+      this /* main view */, this /* Currently this concrete view is also
+                                    responsible for prog reporting */
+      ,
       processingWidgets /* The data processor presenters */);
   m_algoRunner = boost::make_shared<MantidQt::API::AlgorithmRunner>(this);
 
@@ -106,6 +117,8 @@ void QtReflRunsTabView::initLayout() {
   connect(qDataProcessorWidget_2,
           SIGNAL(comboProcessInstrument_currentIndexChanged(int)), this,
           SLOT(instrumentChanged(int)));
+
+  initState();
 }
 
 /**
@@ -166,23 +179,152 @@ void QtReflRunsTabView::setAllSearchRowsSelected() {
 */
 void QtReflRunsTabView::clearCommands() { m_commands.clear(); }
 
-/**
-* Sets a specific action in the "Edit" menu enabled or disabled
-* @param index : The index of the action in the "Edit" menu
-* @param enabled : Whether to enable or disable the action
-*/
-void QtReflRunsTabView::setRowActionEnabled(int index, bool enabled) {
+void QtReflRunsTabView::enable(QWidget &toEnable) {
+  toEnable.setEnabled(true);
+}
 
-  ui.menuRows->actions()[index]->setEnabled(enabled);
+void QtReflRunsTabView::disable(QWidget &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+void QtReflRunsTabView::enable(QAction &toEnable) { toEnable.setEnabled(true); }
+
+void QtReflRunsTabView::disable(QAction &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+int QtReflRunsTabView::toRowIndex(DataProcessorAction action) {
+  switch (action) {
+  case DataProcessorAction::PROCESS:
+    return 0;
+  case DataProcessorAction::PAUSE:
+    return 1;
+  case DataProcessorAction::SELECT_GROUP:
+    return 3;
+  case DataProcessorAction::EXPAND_GROUP:
+    return 4;
+  case DataProcessorAction::COLAPSE_GROUP:
+    return 5;
+  case DataProcessorAction::PLOT_RUNS:
+    return 7;
+  case DataProcessorAction::PLOT_GROUP:
+    return 8;
+  case DataProcessorAction::INSERT_ROW_AFTER:
+    return 10;
+  case DataProcessorAction::INSERT_GROUP_AFTER:
+    return 11;
+  case DataProcessorAction::GROUP_SELECTED:
+    return 13;
+  case DataProcessorAction::COPY_SELECTED:
+    return 14;
+  case DataProcessorAction::CUT_SELECTED:
+    return 15;
+  case DataProcessorAction::PASTE_SELECTED:
+    return 16;
+  case DataProcessorAction::CLEAR_SELECTED:
+    return 17;
+  case DataProcessorAction::DELETE_ROW:
+    return 19;
+  case DataProcessorAction::DELETE_GROUP:
+    return 20;
+  case DataProcessorAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
+}
+
+int QtReflRunsTabView::toMenuIndex(ReflectometryAction action) {
+  switch (action) {
+  case ReflectometryAction::OPEN_TABLE:
+    return 0;
+  case ReflectometryAction::NEW_TABLE:
+    return 1;
+  case ReflectometryAction::SAVE_TABLE:
+    return 2;
+  case ReflectometryAction::SAVE_TABLE_AS:
+    return 3;
+  case ReflectometryAction::IMPORT_TBL:
+    return 5;
+  case ReflectometryAction::EXPORT_TBL:
+    return 6;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
 }
 
 /**
-* Sets the "Autoreduce" button enabled or disabled
-* @param enabled : Whether to enable or disable the button
+* Enables a specific action in the "Reflectometry" menu.
+* @param action : The action in the "Reflectometry" menu to enable
 */
-void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
+void QtReflRunsTabView::disableReflectometryMenuAction(ReflectometryAction action) {
+  disable(*(ui.menuTable->actions()[toMenuIndex(action)]));
+}
 
-  ui.buttonAutoreduce->setEnabled(enabled);
+/**
+* Enables a specific action in the "Reflectometry" menu.
+* @param action : The action in the "Reflectometry" menu to disable
+*/
+void QtReflRunsTabView::enableReflectometryMenuAction(ReflectometryAction action) {
+  enable(*(ui.menuTable->actions()[toMenuIndex(action)]));
+}
+
+/**
+* Disables a specific action in the "Edit" menu.
+* @param action : The action in the "Edit" menu to disable
+*/
+void QtReflRunsTabView::disableEditMenuAction(DataProcessorAction action) {
+  disable(*(ui.menuRows->actions()[toRowIndex(action)]));
+}
+
+/**
+* Enables a specific action in the "Edit" menu.
+* @param action : The action in the "Edit" menu to enable
+*/
+void QtReflRunsTabView::enableEditMenuAction(DataProcessorAction action) {
+  enable(*(ui.menuRows->actions()[toRowIndex(action)]));
+}
+
+void QtReflRunsTabView::setTransferEnabled(bool enabled) {
+  ui.buttonTransfer->setEnabled(enabled);
+}
+
+void QtReflRunsTabView::disableTransfer() { setTransferEnabled(false); }
+
+void QtReflRunsTabView::enableTransfer() { setTransferEnabled(true); }
+
+void QtReflRunsTabView::autoreduceCannotBePressed() {
+  disable(autoreduceButton());
+}
+
+void QtReflRunsTabView::autoreduceWillReduce() {
+  setAutoreduceIcon(m_playIcon);
+  setAutoreduceText(playText);
+  m_autoreduceShouldPause = false;
+  enable(autoreduceButton());
+}
+
+
+QString const QtReflRunsTabView::pauseText = "Pause Autoreduction";
+QString const QtReflRunsTabView::playText = "Autoreduce";
+
+void QtReflRunsTabView::autoreduceWillPause() {
+  setAutoreduceIcon(m_pauseIcon);
+  setAutoreduceText(pauseText);
+  m_autoreduceShouldPause = true;
+  enable(autoreduceButton());
+}
+
+void QtReflRunsTabView::setAutoreduceIcon(QIcon &icon) {
+  autoreduceButton().setIcon(icon);
+}
+
+void QtReflRunsTabView::setAutoreduceText(QString const& text) {
+  autoreduceButton().setText(text);
+}
+
+QPushButton& QtReflRunsTabView::autoreduceButton() {
+  return *ui.buttonAutoreduce;
 }
 
 /**
@@ -191,9 +333,8 @@ void QtReflRunsTabView::setAutoreduceButtonEnabled(bool enabled) {
 */
 void QtReflRunsTabView::setTransferMethods(
     const std::set<std::string> &methods) {
-  for (auto method = methods.begin(); method != methods.end(); ++method) {
-    ui.comboTransferMethod->addItem((*method).c_str());
-  }
+  for (const auto &method : methods)
+    ui.comboTransferMethod->addItem(method.c_str());
 }
 
 /**
@@ -207,8 +348,8 @@ void QtReflRunsTabView::setInstrumentList(
     const std::string &defaultInstrument) {
   ui.comboSearchInstrument->clear();
 
-  for (auto it = instruments.begin(); it != instruments.end(); ++it) {
-    QString instrument = QString::fromStdString(*it);
+  for (const auto &instrumentName : instruments) {
+    QString instrument = QString::fromStdString(instrumentName);
     ui.comboSearchInstrument->addItem(instrument);
   }
 
@@ -266,13 +407,17 @@ void QtReflRunsTabView::on_actionSearch_triggered() {
           SLOT(icatSearchComplete()), Qt::UniqueConnection);
 }
 
-/**
-This slot conducts a search operation before notifying the presenter that the
-"autoreduce" button has been pressed
-*/
-void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+bool QtReflRunsTabView::autoreduceShouldPause() const {
+  return m_autoreduceShouldPause;
+}
+
+void QtReflRunsTabView::onAutoreduceWhenShouldPause() {
+  m_presenter->notify(IReflRunsTabPresenter::PauseAutoreductionFlag);
+}
+
+void QtReflRunsTabView::onAutoreduceWhenShouldNotPause() {
   // No need to search first if not starting a new autoreduction
-  if (m_presenter->startNewAutoreduction()) {
+  if (m_presenter->shouldStartNewAutoreduction()) {
     m_algoRunner.get()->disconnect(); // disconnect any other connections
     m_presenter->notify(IReflRunsTabPresenter::SearchFlag);
     connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
@@ -280,6 +425,17 @@ void QtReflRunsTabView::on_actionAutoreduce_triggered() {
   } else {
     m_presenter->notify(IReflRunsTabPresenter::ResumeAutoreductionFlag);
   }
+}
+
+/**
+This slot conducts a search operation before notifying the presenter that the
+"autoreduce" button has been pressed
+*/
+void QtReflRunsTabView::on_actionAutoreduce_triggered() {
+  if(autoreduceShouldPause())
+    onAutoreduceWhenShouldPause();
+  else
+    onAutoreduceWhenShouldNotPause();
 }
 
 /**

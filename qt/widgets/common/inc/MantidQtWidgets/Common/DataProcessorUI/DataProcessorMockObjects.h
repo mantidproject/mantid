@@ -46,12 +46,13 @@ public:
   MOCK_CONST_METHOD0(getSelectedParents, std::set<int>());
   MOCK_CONST_METHOD0(getClipboard, QString());
   MOCK_CONST_METHOD0(getProcessInstrument, QString());
-  MOCK_METHOD0(getEnableNotebook, bool());
+  MOCK_METHOD0(isNotebookEnabled, bool());
   MOCK_METHOD0(expandAll, void());
   MOCK_METHOD0(collapseAll, void());
   MOCK_METHOD0(selectAll, void());
   MOCK_METHOD0(pause, void());
   MOCK_METHOD0(resume, void());
+  MOCK_METHOD0(confirmReductionPaused, void());
   MOCK_METHOD1(setSelection, void(const std::set<int> &rows));
   MOCK_METHOD1(setClipboard, void(const QString &text));
 
@@ -118,19 +119,17 @@ public:
   MOCK_CONST_METHOD0(getTimeSlicingType, QString());
 
   // Data reduction paused/resumed handling
-  MOCK_CONST_METHOD0(pause, void());
-  MOCK_CONST_METHOD0(resume, void());
-
-  // Calls we don't care about
-  void confirmReductionPaused() const override{};
-  void confirmReductionResumed() const override{};
+  MOCK_METHOD0(pause, void());
+  MOCK_METHOD0(resume, void());
+  MOCK_METHOD0(confirmReductionPaused, void());
+  MOCK_METHOD0(confirmReductionResumed, void());
 };
 
 class MockDataProcessorPresenter : public DataProcessorPresenter {
 
 public:
   MockDataProcessorPresenter(){};
-  ~MockDataProcessorPresenter() override {}
+  ~MockDataProcessorPresenter() override = default;
 
   MOCK_METHOD1(notify, void(DataProcessorPresenter::Flag));
   MOCK_METHOD1(setModel, void(QString const &name));

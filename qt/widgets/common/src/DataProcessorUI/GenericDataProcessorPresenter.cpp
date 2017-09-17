@@ -125,8 +125,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
-      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_tableDirty(false), m_confirmReductionPaused(true),
+      m_pauseReduction(false), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -223,11 +223,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
           whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
           processor, DataProcessorPostprocessingAlgorithm()) {}
 
-/**
-* Destructor
-*/
-GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
-
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
@@ -249,8 +244,7 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view = tableView;
   m_progressView = progressView;
 
-  // Add actions to toolbar
-  addCommands();
+  addActionsToReflectometryMenu();
 
   // Initialise options
   // Load saved values from disk
@@ -289,7 +283,6 @@ void GenericDataProcessorPresenter::acceptViews(
   // Start with a blank table
   newTable();
 
-  // The view should currently be in the paused state
   m_view->pause();
 }
 
@@ -382,6 +375,11 @@ void GenericDataProcessorPresenter::process() {
 }
 
 /**
+ * Destructor
+ */
+GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
+
+/**
 Decide which processing action to take next
 */
 void GenericDataProcessorPresenter::doNextAction() {
@@ -407,9 +405,10 @@ Process a new row
 void GenericDataProcessorPresenter::nextRow() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
+    // Notify presenter and view that reduction is paused
     m_mainPresenter->confirmReductionPaused();
-    m_reductionPaused = true;
+    m_view->confirmReductionPaused();
+    m_confirmReductionPaused = true;
     return;
   }
 
@@ -453,9 +452,10 @@ Process a new group
 void GenericDataProcessorPresenter::nextGroup() {
 
   if (m_pauseReduction) {
-    // Notify presenter that reduction is paused
+    // Notify presenter and view that reduction is paused
     m_mainPresenter->confirmReductionPaused();
-    m_reductionPaused = true;
+    m_view->confirmReductionPaused();
+    m_confirmReductionPaused = true;
     return;
   }
 
@@ -476,7 +476,7 @@ void GenericDataProcessorPresenter::nextGroup() {
       doNextAction();
   } else {
     // If "Output Notebook" checkbox is checked then create an ipython notebook
-    if (m_view->getEnableNotebook())
+    if (m_view->isNotebookEnabled())
       saveNotebook(m_selectedData);
     endReduction();
   }
@@ -512,7 +512,8 @@ End reduction
 void GenericDataProcessorPresenter::endReduction() {
 
   pause();
-  m_reductionPaused = true;
+  m_confirmReductionPaused = true;
+  m_view->confirmReductionPaused();
   m_mainPresenter->confirmReductionPaused();
 }
 
@@ -530,13 +531,21 @@ void GenericDataProcessorPresenter::threadFinished(const int exitCode) {
 
   m_workerThread.release();
 
-  if (exitCode == 0) { // Success
+  if (wasSuccessful(exitCode)) {
     m_progressReporter->report();
     doNextAction();
-  } else { // Error
-    m_progressReporter->clear();
-    endReduction();
+  } else {
+    handleReductionErrorOnThreadCompletion();
   }
+}
+
+bool GenericDataProcessorPresenter::wasSuccessful(const int exitCode) const {
+  return exitCode == 0;
+}
+
+void GenericDataProcessorPresenter::handleReductionErrorOnThreadCompletion() {
+  m_progressReporter->clear();
+  endReduction();
 }
 
 /**
@@ -1556,7 +1565,7 @@ void GenericDataProcessorPresenter::showOptionsDialog() {
 /** Gets the options used by the presenter
 @returns The options used by the presenter
 */
-const std::map<QString, QVariant> &
+const GenericDataProcessorPresenter::Options &
 GenericDataProcessorPresenter::options() const {
   return m_options;
 }
@@ -1564,34 +1573,34 @@ GenericDataProcessorPresenter::options() const {
 /** Sets the options used by the presenter
 @param options : The new options for the presenter to use
 */
-void GenericDataProcessorPresenter::setOptions(
-    const std::map<QString, QVariant> &options) {
+void GenericDataProcessorPresenter::setOptions(const Options &options) {
   // Overwrite the given options
-  for (auto it = options.begin(); it != options.end(); ++it)
-    m_options[it->first] = it->second;
+  for (const auto &optionKeyValue : options)
+    m_options[optionKeyValue.first] = optionKeyValue.second;
 
   // Save any changes to disk
   m_view->saveSettings(m_options);
 }
 
-/** Load options from disk if possible, or set to defaults */
-void GenericDataProcessorPresenter::initOptions() {
-  m_options.clear();
-
-  // Set defaults
+void GenericDataProcessorPresenter::setDefaultOptions() {
   m_options["WarnProcessAll"] = true;
   m_options["WarnDiscardChanges"] = true;
   m_options["WarnProcessPartialGroup"] = true;
   m_options["Round"] = false;
   m_options["RoundPrecision"] = 3;
+}
 
+/** Load options from disk if possible, or set to defaults */
+void GenericDataProcessorPresenter::initOptions() {
+  m_options.clear();
+  setDefaultOptions();
   // Load saved values from disk
   m_view->loadSettings(m_options);
 }
 
 /** Tells the view which of the actions should be added to the toolbar
 */
-void GenericDataProcessorPresenter::addCommands() {
+void GenericDataProcessorPresenter::addActionsToReflectometryMenu() {
 
   auto commands = m_manager->publishCommands();
   std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
@@ -1620,9 +1629,7 @@ void GenericDataProcessorPresenter::resume() {
   m_mainPresenter->resume();
 
   m_pauseReduction = false;
-  m_reductionPaused = false;
-  m_mainPresenter->confirmReductionResumed();
-
+  m_confirmReductionPaused = false;
   doNextAction();
 }
 
@@ -1667,8 +1674,6 @@ void GenericDataProcessorPresenter::accept(
   // Notify workspace receiver with the list of valid workspaces as soon as it
   // is registered
   m_mainPresenter->notifyADSChanged(m_workspaceList);
-  // Presenter should initially be in the paused state
-  m_mainPresenter->pause();
 }
 
 /** Returs the list of valid workspaces currently in the ADS
@@ -1726,7 +1731,7 @@ void GenericDataProcessorPresenter::giveUserWarning(
 * @return :: the reduction state
 */
 bool GenericDataProcessorPresenter::isProcessing() const {
-  return !m_reductionPaused;
+  return !m_confirmReductionPaused;
 }
 
 /** Checks if a row in the table has been processed.

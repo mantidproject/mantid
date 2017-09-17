@@ -62,8 +62,15 @@ public:
   MOCK_METHOD0(clearCommands, void());
   MOCK_METHOD2(setInstrumentList,
                void(const std::vector<std::string> &, const std::string &));
-  MOCK_METHOD2(setRowActionEnabled, void(int, bool));
-  MOCK_METHOD1(setAutoreduceButtonEnabled, void(bool));
+  MOCK_METHOD1(enableEditMenuAction, void(DataProcessorAction));
+  MOCK_METHOD1(enableReflectometryMenuAction, void(ReflectometryAction));
+  MOCK_METHOD1(disableEditMenuAction, void(DataProcessorAction));
+  MOCK_METHOD1(disableReflectometryMenuAction, void(ReflectometryAction));
+  MOCK_METHOD0(enableTransfer, void());
+  MOCK_METHOD0(disableTransfer, void());
+  MOCK_METHOD0(autoreduceCannotBePressed, void());
+  MOCK_METHOD0(autoreduceWillPause, void());
+  MOCK_METHOD0(autoreduceWillReduce, void());
 
   // Calls we don't care about
   void showSearch(ReflSearchModel_sptr) override{};
@@ -165,7 +172,7 @@ public:
 
 class MockRunsTabPresenter : public IReflRunsTabPresenter {
 public:
-  MOCK_CONST_METHOD0(startNewAutoreduction, bool());
+  MOCK_CONST_METHOD0(shouldStartNewAutoreduction, bool());
   void notify(IReflRunsTabPresenter::Flag flag) override { UNUSED_ARG(flag); };
   void acceptMainPresenter(IReflMainWindowPresenter *presenter) override {
     UNUSED_ARG(presenter);

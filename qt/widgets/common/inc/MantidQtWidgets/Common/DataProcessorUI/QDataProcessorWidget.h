@@ -2,6 +2,7 @@
 #define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORWIDGET_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
@@ -101,7 +102,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  bool getEnableNotebook() override;
+  bool isNotebookEnabled() override;
 
   // Expand/Collapse all groups
   void expandAll() override;
@@ -113,6 +114,9 @@ public:
   // Handle pause/resume of data reduction
   void pause() override;
   void resume() override;
+
+  // Reduction paused confirmation handler
+  void confirmReductionPaused() override;
 
   // Setter methods
   void setSelection(const std::set<int> &groups) override;
@@ -164,6 +168,41 @@ signals:
 private:
   // initialise the interface
   void createTable();
+  void allowTableModification();
+  void preventTableModification();
+  void disablePauseButtons();
+  void enablePauseButtons();
+  void disableResumeButtons();
+  void enableResumeButtons();
+  void disableInsertButtons();
+  void enableInsertButtons();
+  void disableDeleteButtons();
+  void enableDeleteButtons();
+  void disableClipboardButtons();
+  void enableClipboardButtons();
+  void disableGroupingButtons();
+  void enableGroupingButtons();
+
+  void enableAction(DataProcessorAction toEnable);
+  void disableAction(DataProcessorAction toDisable);
+
+  void disableActionOnToolbar(DataProcessorAction toDisable);
+  void disableActionOnContextMenu(DataProcessorAction toDisable);
+  void enableActionOnToolbar(DataProcessorAction toEnable);
+  void enableActionOnContextMenu(DataProcessorAction toEnable);
+  void disableSelectionAndEditing();
+  void enableSelectionAndEditing();
+
+  static void disableActionOnWidget(QWidget &widget, int index);
+  static void enableActionOnWidget(QWidget &widget, int index);
+  static void disable(QWidget &widget);
+  static void disable(QAction &widget);
+  static void enable(QWidget &widget);
+  static void enable(QAction &widget);
+
+  static int toToolbarIndex(DataProcessorAction action);
+  static int toContextMenuIndex(DataProcessorAction);
+  static int toCommandIndex(DataProcessorAction action);
 
   // the presenter
   std::unique_ptr<DataProcessorPresenter> m_presenter;

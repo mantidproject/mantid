@@ -4,6 +4,8 @@
 #include <set>
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
+#include "ReflectometryAction.h"
 
 namespace MantidQt {
 
@@ -17,6 +19,7 @@ class AlgorithmRunner;
 namespace CustomInterfaces {
 
 using MantidWidgets::DataProcessorCommand;
+using MantidWidgets::DataProcessorAction;
 using API::AlgorithmRunner;
 class IReflRunsTabPresenter;
 class ReflSearchModel;
@@ -66,8 +69,12 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) = 0;
   virtual void setAllSearchRowsSelected() = 0;
   virtual void clearCommands() = 0;
-  virtual void setRowActionEnabled(int index, bool enabled) = 0;
-  virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
+  virtual void enableEditMenuAction(DataProcessorAction action) = 0;
+  virtual void enableReflectometryMenuAction(ReflectometryAction action) = 0;
+  virtual void disableEditMenuAction(DataProcessorAction action) = 0;
+  virtual void disableReflectometryMenuAction(ReflectometryAction action) = 0;
+  virtual void enableTransfer() = 0;
+  virtual void disableTransfer() = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
@@ -77,6 +84,9 @@ public:
   virtual int getSelectedGroup() const = 0;
 
   virtual IReflRunsTabPresenter *getPresenter() const = 0;
+  virtual void autoreduceCannotBePressed() = 0;
+  virtual void autoreduceWillReduce() = 0;
+  virtual void autoreduceWillPause() = 0;
   virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
 };

@@ -2,11 +2,12 @@
 #define MANTID_ISISREFLECTOMETRY_QTREFLRUNSTABVIEW_H_
 
 #include "MantidKernel/System.h"
+#include "ReflectometryAction.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include "DllConfig.h"
 #include "IReflRunsTabView.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-
 #include "ui_ReflRunsTabWidget.h"
 
 namespace MantidQt {
@@ -30,6 +31,7 @@ class ReflSearchModel;
 using MantidWidgets::DataProcessorCommand;
 using MantidWidgets::DataProcessorCommandAdapter;
 using MantidWidgets::SlitCalculator;
+using MantidWidgets::DataProcessorAction;
 
 /** QtReflRunsTabView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -78,8 +80,12 @@ public:
       std::vector<std::unique_ptr<DataProcessorCommand>> rowCommands) override;
   void setAllSearchRowsSelected() override;
   void clearCommands() override;
-  void setRowActionEnabled(int index, bool enabled) override;
-  void setAutoreduceButtonEnabled(bool enabled) override;
+  void enableEditMenuAction(DataProcessorAction action) override;
+  void enableReflectometryMenuAction(ReflectometryAction action) override;
+  void disableReflectometryMenuAction(ReflectometryAction action) override;
+  void disableEditMenuAction(DataProcessorAction action) override;
+  void enableTransfer() override;
+  void disableTransfer() override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -96,12 +102,32 @@ public:
   IReflRunsTabPresenter *getPresenter() const override;
   boost::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
-
+  
+  void autoreduceCannotBePressed() override;
+  void autoreduceWillReduce() override;
+  void autoreduceWillPause() override;
 private:
+  static QString const playText; 
+  static QString const pauseText;
+  bool autoreduceShouldPause() const;
+  void onAutoreduceWhenShouldPause();
+  void onAutoreduceWhenShouldNotPause();
+  void initState();
+
   /// initialise the interface
   void initLayout();
   // Adds an action (command) to a menu
   void addToMenu(QMenu *menu, std::unique_ptr<DataProcessorCommand> command);
+  QPushButton& autoreduceButton();
+  int toRowIndex(DataProcessorAction action);
+  int toMenuIndex(ReflectometryAction action);
+  void enable(QWidget &toEnable);
+  void disable(QWidget &toDisable);
+  void enable(QAction &toEnable);
+  void disable(QAction &toDisable);
+  void setTransferEnabled(bool enabled);
+  void setAutoreduceIcon(QIcon &icon);
+  void setAutoreduceText(const QString &icon);
 
   boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
 
@@ -115,6 +141,10 @@ private:
   SlitCalculator *m_calculator;
   // Command adapters
   std::vector<std::unique_ptr<DataProcessorCommandAdapter>> m_commands;
+
+  bool m_autoreduceShouldPause;
+  QIcon m_pauseIcon;
+  QIcon m_playIcon;
 
 private slots:
   void on_actionSearch_triggered();

@@ -4,7 +4,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
+#include "ReflTransferStrategy.h"
+#include "ReflectometryAction.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorAction.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt {
@@ -26,6 +29,7 @@ class ReflTransferStrategy;
 
 using MantidWidgets::DataProcessorPresenter;
 using MantidWidgets::ProgressableView;
+using MantidWidgets::DataProcessorAction;
 
 /** @class ReflRunsTabPresenter
 
@@ -62,7 +66,7 @@ public:
                        std::vector<DataProcessorPresenter *> tablePresenter,
                        boost::shared_ptr<IReflSearcher> searcher =
                            boost::shared_ptr<IReflSearcher>());
-  ~ReflRunsTabPresenter() override;
+  ~ReflRunsTabPresenter() override = default;
   void acceptMainPresenter(IReflMainWindowPresenter *mainPresenter) override;
   void notify(IReflRunsTabPresenter::Flag flag) override;
   void notifyADSChanged(const QSet<QString> &workspaceList) override;
@@ -75,13 +79,12 @@ public:
   QString getTimeSlicingValues() const override;
   QString getTimeSlicingType() const override;
   /// Handle data reduction paused/resumed
-  void pause() const override;
-  void resume() const override;
+  void pause() override;
+  void resume() override;
   /// Determine whether to start a new autoreduction
-  bool startNewAutoreduction() const override;
+  bool shouldStartNewAutoreduction() const override;
   /// Reduction paused/resumed confirmation handler
-  void confirmReductionPaused() const override;
-  void confirmReductionResumed() const override;
+  void confirmReductionPaused() override;
 
 private:
   /// The search model
@@ -102,6 +105,8 @@ private:
   static const std::string LegacyTransferMethod;
   /// Measure transfer method
   static const std::string MeasureTransferMethod;
+  /// Reflectometry menu actions which should be disabled during processing
+  static const std::array<ReflectometryAction, 5> disabledWhileProcessing;
   /// The current search string used for autoreduction
   std::string m_autoSearchString;
   /// Whether the instrument has been changed before a search was made with it
@@ -117,6 +122,10 @@ private:
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument
   void changeInstrument();
+  SearchResultMap
+  querySelectedRunsToTransfer(std::set<int> const &selectedRows) const;
+  void preventTableModification();
+  void allowTableModification();
 };
 }
 }

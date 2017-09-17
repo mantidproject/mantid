@@ -75,7 +75,7 @@ public:
 
   // Get status of the checkbox which dictates whether an ipython notebook is
   // produced
-  virtual bool getEnableNotebook() = 0;
+  virtual bool isNotebookEnabled() = 0;
 
   // Expand/Collapse all groups
   virtual void expandAll() = 0;
@@ -87,6 +87,9 @@ public:
   // Handle pause/resume of data reduction
   virtual void pause() = 0;
   virtual void resume() = 0;
+
+  // Reduction paused confirmation handler
+  virtual void confirmReductionPaused() = 0;
 
   // Setter methods
   virtual void setTableList(const QSet<QString> &tables) = 0;

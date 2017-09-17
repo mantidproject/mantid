@@ -6,6 +6,7 @@
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
 #include <QWidget>
+#include <iterator>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -103,8 +104,9 @@ QDataProcessorWidget::QDataProcessorWidget(
               whitelist, preprocessMap.asMap(), algorithm, postprocessor),
           parent) {}
 
-/** Destructor
-*/
+/*
+ Destructor
+ */
 QDataProcessorWidget::~QDataProcessorWidget() {}
 
 /**
@@ -318,31 +320,167 @@ void QDataProcessorWidget::selectAll() { ui.viewTable->selectAll(); }
 /**
 Handle interface when data reduction paused
 */
-void QDataProcessorWidget::pause() {
+void QDataProcessorWidget::pause() { disablePauseButtons(); }
 
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(true);
-  m_contextMenu->actions()[0]->setEnabled(true);
-  ui.buttonProcess->setEnabled(true);
+void QDataProcessorWidget::disablePauseButtons() {
+  disableAction(DataProcessorAction::PAUSE);
+}
 
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(false);
-  m_contextMenu->actions()[1]->setEnabled(false);
+void QDataProcessorWidget::disableActionOnToolbar(
+    DataProcessorAction toDisable) {
+  disableActionOnWidget(*ui.rowToolBar, toToolbarIndex(toDisable));
+}
+
+void QDataProcessorWidget::disableActionOnWidget(QWidget &widget, int index) {
+  disable(*(widget.actions()[index]));
+}
+
+void QDataProcessorWidget::disable(QAction &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+void QDataProcessorWidget::disable(QWidget &toDisable) {
+  toDisable.setEnabled(false);
+}
+
+void QDataProcessorWidget::enablePauseButtons() {
+  enableAction(DataProcessorAction::PAUSE);
+}
+
+void QDataProcessorWidget::enableActionOnWidget(QWidget &widget, int index) {
+  enable(*(widget.actions()[index]));
+}
+
+void QDataProcessorWidget::enableActionOnToolbar(DataProcessorAction toEnable) {
+  enableActionOnWidget(*ui.rowToolBar, toToolbarIndex(toEnable));
+}
+
+int QDataProcessorWidget::toToolbarIndex(DataProcessorAction action) {
+  return toCommandIndex(action);
+}
+
+void QDataProcessorWidget::enable(QAction &toEnable) {
+  toEnable.setEnabled(true);
+}
+
+void QDataProcessorWidget::enable(QWidget &toEnable) {
+  toEnable.setEnabled(true);
 }
 
 /**
 Handle interface when data reduction resumed
 */
 void QDataProcessorWidget::resume() {
+  disableResumeButtons();
+  preventTableModification();
+  enablePauseButtons();
+}
 
-  // Enable 'resume' buttons
-  ui.rowToolBar->actions()[0]->setEnabled(false);
-  m_contextMenu->actions()[0]->setEnabled(false);
-  ui.buttonProcess->setEnabled(false);
+void QDataProcessorWidget::preventTableModification() {
+  forEachTableModificationAction([this](DataProcessorAction action)
+                               -> void { this->disableAction(action); });
+  disableSelectionAndEditing();
+}
 
-  // Disable 'pause' buttons
-  ui.rowToolBar->actions()[1]->setEnabled(true);
-  m_contextMenu->actions()[1]->setEnabled(true);
+void QDataProcessorWidget::disableSelectionAndEditing() {
+  ui.viewTable->clearSelection();
+  ui.viewTable->setSelectionMode(QAbstractItemView::SelectionMode::NoSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+void QDataProcessorWidget::enableSelectionAndEditing() {
+  ui.viewTable->setSelectionMode(
+      QAbstractItemView::SelectionMode::ContiguousSelection);
+  ui.viewTable->setEditTriggers(QAbstractItemView::AllEditTriggers);
+}
+
+void QDataProcessorWidget::enableResumeButtons() {
+  enableAction(DataProcessorAction::PROCESS);
+  enable(*ui.buttonProcess);
+}
+
+void QDataProcessorWidget::disableResumeButtons() {
+  disableAction(DataProcessorAction::PROCESS);
+  disable(*ui.buttonProcess);
+}
+
+void QDataProcessorWidget::enableAction(DataProcessorAction toEnable) {
+  enableActionOnToolbar(toEnable);
+  enableActionOnContextMenu(toEnable);
+}
+
+void QDataProcessorWidget::disableAction(DataProcessorAction toDisable) {
+  disableActionOnToolbar(toDisable);
+  disableActionOnContextMenu(toDisable);
+}
+
+void QDataProcessorWidget::disableActionOnContextMenu(
+    DataProcessorAction toDisable) {
+  disableActionOnWidget(*m_contextMenu, toContextMenuIndex(toDisable));
+}
+
+void QDataProcessorWidget::enableActionOnContextMenu(
+    DataProcessorAction toEnable) {
+  enableActionOnWidget(*m_contextMenu, toContextMenuIndex(toEnable));
+}
+
+int QDataProcessorWidget::toContextMenuIndex(DataProcessorAction action) {
+  return toCommandIndex(action);
+}
+
+int QDataProcessorWidget::toCommandIndex(DataProcessorAction action) {
+  switch (action) {
+  case DataProcessorAction::PROCESS:
+    return 0;
+  case DataProcessorAction::PAUSE:
+    return 1;
+  case DataProcessorAction::SELECT_GROUP:
+    return 3;
+  case DataProcessorAction::EXPAND_GROUP:
+    return 4;
+  case DataProcessorAction::COLAPSE_GROUP:
+    return 5;
+  case DataProcessorAction::PLOT_RUNS:
+    return 7;
+  case DataProcessorAction::PLOT_GROUP:
+    return 8;
+  case DataProcessorAction::INSERT_ROW_AFTER:
+    return 10;
+  case DataProcessorAction::INSERT_GROUP_AFTER:
+    return 11;
+  case DataProcessorAction::GROUP_SELECTED:
+    return 13;
+  case DataProcessorAction::COPY_SELECTED:
+    return 14;
+  case DataProcessorAction::CUT_SELECTED:
+    return 15;
+  case DataProcessorAction::PASTE_SELECTED:
+    return 16;
+  case DataProcessorAction::CLEAR_SELECTED:
+    return 17;
+  case DataProcessorAction::DELETE_ROW:
+    return 19;
+  case DataProcessorAction::DELETE_GROUP:
+    return 20;
+  case DataProcessorAction::WHATS_THIS:
+    return 21;
+  default:
+    throw std::logic_error("Unknown action specified.");
+  }
+}
+
+/**
+Handle interface when data reduction confirmed to be paused
+*/
+void QDataProcessorWidget::confirmReductionPaused() {
+  enableResumeButtons();
+  allowTableModification();
+}
+
+void QDataProcessorWidget::allowTableModification() {
+  enableSelectionAndEditing();
+  forEachTableModificationAction([this](DataProcessorAction action)
+                              -> void { this->enableAction(action); });
 }
 
 /**
@@ -353,8 +491,8 @@ void QDataProcessorWidget::saveSettings(
     const std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
-  for (auto it = options.begin(); it != options.end(); ++it)
-    settings.setValue(it->first, it->second);
+  for (const auto &option : options)
+    settings.setValue(option.first, option.second);
   settings.endGroup();
 }
 
@@ -366,8 +504,8 @@ void QDataProcessorWidget::loadSettings(std::map<QString, QVariant> &options) {
   QSettings settings;
   settings.beginGroup(DataProcessorSettingsGroup);
   QStringList keys = settings.childKeys();
-  for (auto it = keys.begin(); it != keys.end(); ++it)
-    options[*it] = settings.value(*it);
+  for (const auto &key : keys)
+    options[key] = settings.value(key);
   settings.endGroup();
 }
 
@@ -392,7 +530,7 @@ void QDataProcessorWidget::setProgress(int progress) {
 Get status of checkbox which determines whether an ipython notebook is produced
 @return true if a notebook should be output on process, false otherwise
 */
-bool QDataProcessorWidget::getEnableNotebook() {
+bool QDataProcessorWidget::isNotebookEnabled() {
   return ui.checkEnableNotebook->isChecked();
 }
 
@@ -405,8 +543,8 @@ void QDataProcessorWidget::setSelection(const std::set<int> &groups) {
   ui.viewTable->clearSelection();
   auto selectionModel = ui.viewTable->selectionModel();
 
-  for (auto group = groups.begin(); group != groups.end(); ++group) {
-    selectionModel->select(ui.viewTable->model()->index((*group), 0),
+  for (const auto &group : groups) {
+    selectionModel->select(ui.viewTable->model()->index(group, 0),
                            QItemSelectionModel::Select |
                                QItemSelectionModel::Rows);
   }

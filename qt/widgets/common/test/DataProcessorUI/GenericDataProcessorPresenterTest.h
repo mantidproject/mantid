@@ -1091,7 +1091,7 @@ public:
         .WillOnce(Return(QString("Params = \"0.1\"")));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -1177,7 +1177,7 @@ public:
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -1274,7 +1274,7 @@ public:
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -1365,7 +1365,7 @@ public:
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -1449,7 +1449,7 @@ public:
         .WillRepeatedly(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(true));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(1);
@@ -3238,7 +3238,7 @@ public:
         .WillOnce(Return("Params = \"0.1\""));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -3433,7 +3433,7 @@ public:
         .WillOnce(Return("Params='-0.10'"));
     EXPECT_CALL(mockDataProcessorView, resume()).Times(1);
     EXPECT_CALL(mockMainPresenter, resume()).Times(1);
-    EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
+    EXPECT_CALL(mockDataProcessorView, isNotebookEnabled())
         .Times(1)
         .WillRepeatedly(Return(false));
     EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
@@ -3486,14 +3486,17 @@ public:
     presenter.acceptViews(&mockDataProcessorView, &mockProgress);
     presenter.accept(&mockMainPresenter);
 
-    // We should not receive any errors
-    EXPECT_CALL(mockMainPresenter, giveUserCritical(_, _)).Times(0);
-
     // User hits the 'pause' button
     EXPECT_CALL(mockDataProcessorView, pause()).Times(1);
     EXPECT_CALL(mockMainPresenter, pause()).Times(1);
 
     presenter.notify(DataProcessorPresenter::PauseFlag);
+
+    // When processing first group, it should confirm reduction has been paused
+    EXPECT_CALL(mockMainPresenter, confirmReductionPaused()).Times(1);
+    EXPECT_CALL(mockDataProcessorView, confirmReductionPaused()).Times(1);
+
+    presenter.callNextGroup();
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));

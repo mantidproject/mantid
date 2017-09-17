@@ -37,11 +37,6 @@ ReflDataProcessorPresenter::ReflDataProcessorPresenter(
                                     postprocessor, postprocessMap, loader) {}
 
 /**
-* Destructor
-*/
-ReflDataProcessorPresenter::~ReflDataProcessorPresenter() {}
-
-/**
  Process selected data
 */
 void ReflDataProcessorPresenter::process() {
@@ -107,7 +102,7 @@ void ReflDataProcessorPresenter::process() {
           errors = true;
 
         // Notebook not implemented yet
-        if (m_view->getEnableNotebook()) {
+        if (m_view->isNotebookEnabled()) {
           GenericDataProcessorPresenter::giveUserWarning(
               "Notebook not implemented for sliced data yet",
               "Notebook will not be generated");
