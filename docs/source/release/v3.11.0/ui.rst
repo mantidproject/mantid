@@ -14,6 +14,8 @@ Windows
 OS X
 ####
 
+- MantidPlot will now support smart scaling on high DPI (4K) screens on OS X.
+
 User Interface
 --------------
 
