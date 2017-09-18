@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
 
