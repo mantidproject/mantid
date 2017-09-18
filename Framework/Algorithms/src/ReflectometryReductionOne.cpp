@@ -364,8 +364,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   if (!thetaInDeg.is_initialized()) {
     g_log.debug("Calculating final theta.");
 
-    auto correctThetaAlg =
-        this->createChildAlgorithm("SpecularReflectionCalculateTheta");
+    auto correctThetaAlg = this->createChildAlgorithm(
+        "SpecularReflectionCalculateTheta", -1, -1, true, 1);
     correctThetaAlg->initialize();
     correctThetaAlg->setProperty("InputWorkspace", toConvert);
     const std::string analysisMode = this->getProperty("AnalysisMode");

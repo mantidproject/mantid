@@ -112,7 +112,7 @@ bool areIteratorsEqual(streamCharIter refStream, streamCharIter testStream,
     Mantid::Kernel::Logger g_log("FileComparisonHelper");
     g_log.error("Length of both files were not identical");
     areStreamsEqual = false;
-  } else if (numNewLines == 0 && seenChars.size() == 0) {
+  } else if (numNewLines == 0 && seenChars.empty()) {
     Mantid::Kernel::Logger g_log("FileComparisonHelper");
     g_log.error("No characters checked in FileComparisonHelper");
     areStreamsEqual = false;
@@ -190,7 +190,7 @@ bool isEqualToReferenceFile(const std::string &referenceFileName,
   const std::string referenceFilePath =
       Mantid::API::FileFinder::Instance().getFullPath(referenceFileName);
 
-  if (referenceFilePath == "") {
+  if (referenceFilePath.empty()) {
     throw std::invalid_argument("No reference file with the name: " +
                                 referenceFileName +
                                 " could be found by FileComparisonHelper");

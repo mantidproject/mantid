@@ -228,7 +228,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
     is_int_series = true;
   } else if (prop_number_type == autoTypeOption) {
     // auto type. by default
-    if (prop_value.size() == 0)
+    if (prop_value.empty())
       g_log.warning("For sample log in TimeSeriesProperty and values are given "
                     "by MarixWorkspace, the default data type "
                     "is double.");
@@ -248,8 +248,8 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // check using workspace or some specified start value
   std::string tsp_ws_name = getPropertyValue("TimeSeriesWorkspace");
-  bool use_ws = tsp_ws_name.size() > 0;
-  bool use_single_value = prop_value.size() > 0;
+  bool use_ws = !tsp_ws_name.empty();
+  bool use_single_value = !prop_value.empty();
   if (use_ws && use_single_value) {
     throw std::runtime_error("Both TimeSeries workspace and sing value are "
                              "specified.  It is not allowed.");

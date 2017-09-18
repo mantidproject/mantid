@@ -12,8 +12,8 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
     """
     def __init__(self, temperature=None, num_atoms=None):
         """
-        @param temperature:  temperature in K
-        @param num_atoms: number of atoms in the unit cell
+        :param temperature:  temperature in K
+        :param num_atoms: number of atoms in the unit cell
         """
         super(DWSingleCrystalData, self).__init__()
 
@@ -33,8 +33,8 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
         """
         Appends DW tensor for one atom.
 
-        @param item:  DW tensor for one atom.
-        @param num_atom: number of atom
+        :param item:  DW tensor for one atom.
+        :param num_atom: number of atom
 
         """
 
@@ -44,7 +44,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
     def set(self, items=None):
         """
         Sets a new value for DW factors.
-        @param items: new value of DW
+        :param items: new value of DW
         """
 
         self._check_items(items=items)
@@ -62,8 +62,8 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
     def _check_item(self, data=None, atom=None):
         """
         Checks if structure of Debye-Waller factor is valid.
-        @param data: Debye-Waller factor to check
-        @param atom:  number of atom
+        :param data: Debye-Waller factor to check
+        :param atom:  number of atom
         """
         if not isinstance(atom, six.integer_types):
             raise ValueError("Number of atom should be an integer.")
@@ -81,7 +81,7 @@ class DWSingleCrystalData(AbinsModules.GeneralData):
     def _check_items(self, items=None):
         """
         Checks if structure of Debye-Waller factor is valid.
-        @param items: Debye-Waller factor to check
+        :param items: Debye-Waller factor to check
         """
 
         if not isinstance(items, np.ndarray):
