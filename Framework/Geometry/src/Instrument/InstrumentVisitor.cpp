@@ -161,7 +161,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   // children
   for (const auto &child : children) {
     (*m_parentComponentIndices)[child] = componentIndex;
-  }  
+  }
   markAsSourceOrSample(componentID, componentIndex);
   m_shapes->emplace_back(m_nullShape);
   clearLegacyParameters(m_pmap, assembly);
