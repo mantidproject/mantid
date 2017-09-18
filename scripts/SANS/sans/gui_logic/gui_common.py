@@ -4,10 +4,24 @@ from sans.common.enums import SANSInstrument, ISISReductionMode
 # ----------------------------------------------------------------------------------------------------------------------
 # Option column globals
 # ----------------------------------------------------------------------------------------------------------------------
-OPTIONS_INDEX = 7
+SAMPLE_SCATTER_INDEX = 0
+SAMPLE_SCATTER_PERIOD_INDEX = 1
+SAMPLE_TRANSMISSION_INDEX = 2
+SAMPLE_TRANSMISSION_PERIOD_INDEX = 3
+SAMPLE_DIRECT_INDEX = 4
+SAMPLE_DIRECT_PERIOD_INDEX = 5
+CAN_SCATTER_INDEX = 6
+CAN_SCATTER_PERIOD_INDEX = 7
+CAN_TRANSMISSION_INDEX = 8
+CAN_TRANSMISSION_PERIOD_INDEX = 9
+CAN_DIRECT_INDEX = 10
+CAN_DIRECT_PERIOD_INDEX = 11
+OUTPUT_NAME_INDEX = 12
+OPTIONS_INDEX = 13
+HIDDEN_OPTIONS_INDEX = 14
+
 OPTIONS_SEPARATOR = ","
 OPTIONS_EQUAL = "="
-HIDDEN_OPTIONS_INDEX = 8
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Other Globals

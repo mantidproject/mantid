@@ -33,9 +33,9 @@ def get_cell_mock(row, column, convert_to=None):
         # all of hte sample data
         if column == 0:
             return "SANS2D00022024"
-        elif column == 1:
-            return "SANS2D00022048"
         elif column == 2:
+            return "SANS2D00022048"
+        elif column == 4:
             return "SANS2D00022048"
         else:
             return ""
