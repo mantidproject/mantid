@@ -415,7 +415,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         output_ws_name = self.getPropertyValue('CorrectionsWorkspace')
         self._ass_ws_name = output_ws_name + "_ass"
         self._acc_ws_name = output_ws_name + "_acc"
-        self._indirect_q_axis = None
+        self._transposed = False
+        self._indirect_elastic = False
 
     def validateInputs(self):
         issues = dict()
@@ -468,19 +469,18 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Converting to/from wavelength -------------------------------
 
     def _convert_to_wavelength(self, workspace):
-        self._indirect_q_axis = 'Y'
         x_unit = workspace.getAxis(0).getUnit().unitID()
         y_unit = workspace.getAxis(1).getUnit().unitID()
 
         if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
         elif y_unit == 'Wavelength':
-            self._indirect_q_axis = 'X'
+            self._transposed = True
             return self._tranpose_ws(workspace)
         elif x_unit == 'EnergyTransfer':
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         elif y_unit == 'EnergyTransfer':
-            self._indirect_q_axis = 'X'
+            self._transposed = True
             workspace = self._tranpose_ws(workspace)
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
@@ -489,7 +489,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             if y_unit == 'MomentumTransfer':
                 return self._create_waves_indirect_elastic(workspace)
             elif x_unit == 'MomentumTransfer':
-                self._indirect_q_axis = 'X'
+                self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         else:
@@ -497,30 +497,15 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def _convert_from_wavelength(self, workspace):
 
-        convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
-        convert_unit_alg.setProperty("Target", self._sample_unit)
+        if self._transposed == 'X':
+            workspace = self._tranpose_ws(workspace)
 
-        if self._sample_unit != 'Wavelength':
-
-            if self._emode == 'Indirect':
-
-                if self._indirect_q_axis is not None:
-
-                    if self._indirect_q_axis == 'X':
-                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-                        transpose_alg.setProperty("InputWorkspace", workspace)
-                        transpose_alg.execute()
-                        workspace = transpose_alg.getProperty("OutputWorkspace").value
-                        workspace.setX(0, self._q_values)
-                        workspace.getAxis(0).setUnit("MomentumTransfer")
-                        return workspace
-                    convert_unit_alg.setProperty("Target", "MomentumTransfer")
-                convert_unit_alg.setProperty("EFixed", self._efixed)
-
-            convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("EMode", self._emode)
-            convert_unit_alg.execute()
-            return convert_unit_alg.getProperty("OutputWorkspace").value
+        if self._indirect_elastic:
+            return self._convert_units(workspace, "MomentumTransfer", self._emode, self._efixed)
+        elif self._emode == "Indirect":
+            return self._convert_units(workspace, self._sample_unit, self._emode, self._efixed)
+        elif self._sample_unit != 'Wavelength':
+            return self._convert_units(workspace, self._sample_unit, self._emode)
         else:
             return workspace
 
@@ -535,6 +520,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The input workspace.
         :return:            The output wavelength workspace.
         """
+        self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
 
         # ---------- Load Elastic Instrument Definition File ----------
