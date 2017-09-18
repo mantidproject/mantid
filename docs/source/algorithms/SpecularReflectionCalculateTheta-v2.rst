@@ -9,16 +9,25 @@
 Description
 -----------
 
-Uses the Specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}` to calculate and return a corrected :math:`\theta_{In}`. 
+Uses the Specular reflection condition :math:`\theta_{In} \equiv \theta_{Out}`
+to calculate and return a corrected :math:`\theta_{In}`.
 
 .. math:: 
 
-   2\centerdot\theta = tan^{-1}\left(\frac{UpOffset}{BeamOffset}\right)
+   2\theta = \arctan\left(\frac{UpOffset}{BeamOffset}\right)
 
-The calculated theta value in degrees is returned by the algorithm.
+The calculated :math:`2\theta` value in degrees is returned by the algorithm.
 
 Also see
 :ref:`algm-SpecularReflectionPositionCorrect`
+
+Previous Versions
+-----------------
+
+For version 1 of the algorithm, please see
+`SpecularReflectionCalculateTheta-v1. <SpecularReflectionCalculateTheta-v1.html>`_. Note
+that version 1 worked with detectors at :math:`\theta` rather than
+:math:`2\theta` for historical reasons.
 
 Usage
 -----
@@ -39,14 +48,14 @@ Usage
    MoveInstrumentComponent(ws, 'some-surface-holder',RelativePosition=False,  X=0, Y= 0, Z=0)
 
    # Calculate the two theta.
-   two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis', Version=1)
-   print two_theta
+   two_theta = SpecularReflectionCalculateTheta(InputWorkspace=ws, DetectorComponentName='point-detector', AnalysisMode='PointDetectorAnalysis')
+   print(two_theta)
    
 Output:
 
 .. testoutput:: SpecularReflectionCalculateThetaPointDetectorExample 
  
-   90.0
+   45.0
   
 .. categories::
 

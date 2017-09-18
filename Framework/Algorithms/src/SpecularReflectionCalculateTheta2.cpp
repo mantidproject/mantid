@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/SpecularReflectionCalculateTheta.h"
+#include "MantidAlgorithms/SpecularReflectionCalculateTheta2.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidGeometry/IComponent.h"
@@ -21,19 +21,19 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SpecularReflectionCalculateTheta)
+DECLARE_ALGORITHM(SpecularReflectionCalculateTheta2)
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SpecularReflectionCalculateTheta::name() const {
+const std::string SpecularReflectionCalculateTheta2::name() const {
   return "SpecularReflectionCalculateTheta";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SpecularReflectionCalculateTheta::version() const { return 1; }
+int SpecularReflectionCalculateTheta2::version() const { return 2; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SpecularReflectionCalculateTheta::category() const {
+const std::string SpecularReflectionCalculateTheta2::category() const {
   return "Reflectometry";
 }
 
@@ -42,7 +42,7 @@ const std::string SpecularReflectionCalculateTheta::category() const {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void SpecularReflectionCalculateTheta::init() {
+void SpecularReflectionCalculateTheta2::init() {
   declareProperty(
       make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
                                                       Direction::Input),
@@ -56,17 +56,12 @@ void SpecularReflectionCalculateTheta::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void SpecularReflectionCalculateTheta::exec() {
+void SpecularReflectionCalculateTheta2::exec() {
 
-  // This algorithm expects detectors to actually be at theta rather than
-  // twoTheta (for historical reasons), so we need to multiply by 2 to get the
-  // real twoTheta. v2 of this algorithm works with detectors at twoTheta.
-  const double twoTheta = 2 * calculateTwoTheta();
+  const double twoTheta = calculateTwoTheta();
 
-  std::stringstream strstream;
-  strstream << "Recalculated two theta as: " << twoTheta;
-
-  this->g_log.information(strstream.str());
+  this->g_log.information("Recalculated two theta as: " +
+                          std::to_string(twoTheta));
 
   this->setProperty("TwoTheta", twoTheta);
 }
