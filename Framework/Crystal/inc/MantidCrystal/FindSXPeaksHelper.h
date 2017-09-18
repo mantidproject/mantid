@@ -56,10 +56,10 @@ public:
   void reduce();
 
   friend std::ostream &operator<<(std::ostream &os, const SXPeak &rhs) {
-    os << rhs._t << "," << rhs._th2 << "," << rhs._phi << "," << rhs._intensity
-       << "\n";
+    os << rhs.m_tof << "," << rhs.m_twoTheta << "," << rhs.m_phi << ","
+       << rhs.m_intensity << "\n";
     os << " Spectra";
-    std::copy(rhs._spectral.begin(), rhs._spectral.end(),
+    std::copy(rhs.m_spectra.begin(), rhs.m_spectra.end(),
               std::ostream_iterator<int>(os, ","));
     return os;
   }
@@ -69,30 +69,30 @@ public:
   detid_t getDetectorId() const;
 
 private:
-  /// TOF
-  double _t;
-  /// d-spacing
-  double _d_spacing;
-  /// 2 * theta
-  double _th2;
-  /// PSI angle
-  double _phi;
-  /// Measured intensity of SXPeak
-  double _intensity;
-  /// Contributing spectra
-  std::vector<int> _spectral;
+  /// TOF for the peak centre
+  double m_tof;
+  /// d-spacing at the peak centre
+  double m_dSpacing;
+  /// 2 * theta angle for then centre detector of the peak
+  double m_twoTheta;
+  /// Phi angle for the centre detector of the peak
+  double m_phi;
+  /// Measured intensity of centre of the peak
+  double m_intensity;
+  /// Contributing spectra to this peak
+  std::vector<int> m_spectra;
   /// Detector-sample distance
-  double _Ltot;
+  double m_LTotal;
   /// Detector workspace index
-  size_t _wsIndex;
+  size_t m_wsIndex;
   /// Detector ID
-  detid_t _detId;
+  detid_t m_detId;
   /// Number of contributing pixels
-  int npixels;
+  int m_nPixels;
   /// Unit vector in the direction of the wavevector
-  Kernel::V3D _unitWaveVector;
+  Kernel::V3D m_unitWaveVector;
   /// Q Convention
-  std::string _convention;
+  std::string m_qConvention;
 };
 
 using yIt = Mantid::HistogramData::HistogramY::const_iterator;
