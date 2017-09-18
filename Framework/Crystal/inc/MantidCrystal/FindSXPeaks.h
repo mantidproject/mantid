@@ -88,9 +88,8 @@ private:
   getPeakFindingStrategy(
       const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
       const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue,
-      const FindSXPeaksHelper::XAxisUnit tofUnits =
-          FindSXPeaksHelper::XAxisUnit::TOF) const;
+      const double maxValue, const FindSXPeaksHelper::XAxisUnit tofUnits =
+                                 FindSXPeaksHelper::XAxisUnit::TOF) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>
