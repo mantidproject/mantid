@@ -274,12 +274,6 @@ void EventWorkspaceCollection::updateSpectraUsing(
   }
 }
 
-void EventWorkspaceCollection::populateInstrumentParameters() {
-  for (auto &ws : m_WsVec) {
-    ws->populateInstrumentParameters();
-  }
-}
-
 void EventWorkspaceCollection::setGeometryFlag(const int flag) {
   for (auto &ws : m_WsVec) {
     ws->mutableSample().setGeometryFlag(flag);

@@ -102,7 +102,6 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  void populateInstrumentParameters();
   void setTitle(std::string title);
   void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
   virtual bool threadSafe() const;
