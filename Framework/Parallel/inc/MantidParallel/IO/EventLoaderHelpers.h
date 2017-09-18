@@ -60,9 +60,7 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(
     const Chunker &chunker,
     NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource) {
-  // TODO automatically(?) determine good chunk size
-  // TODO automatically(?) determine good number of ranks to use for load
-  const size_t chunkSize = 1024 * 1024;
+  const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
   // const auto &rankGroups = chunker.makeRankGroups();
   std::vector<int32_t> event_id(2 * chunkSize);
@@ -104,6 +102,8 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(const H5::Group &group, const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<TofEvent> *> eventLists) {
+  // TODO automatically(?) determine good chunk size
+  // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
   Communicator comm;
   const Chunker chunker(comm.size(), comm.rank(),

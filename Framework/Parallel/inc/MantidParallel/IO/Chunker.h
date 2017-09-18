@@ -46,6 +46,8 @@ public:
   Chunker(const int numRanks, const int rank,
           const std::vector<size_t> &bankSizes, const size_t chunkSize);
 
+  size_t chunkSize() const;
+
   std::vector<std::vector<int>> makeRankGroups() const;
   std::vector<LoadRange> makeLoadRanges() const;
 

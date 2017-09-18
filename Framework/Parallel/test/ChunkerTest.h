@@ -23,6 +23,12 @@ public:
   static ChunkerTest *createSuite() { return new ChunkerTest(); }
   static void destroySuite(ChunkerTest *suite) { delete suite; }
 
+  void test_chunkSize() {
+    const size_t chunkSize = 17;
+    const Chunker chunker(1, 0, {}, chunkSize);
+    TS_ASSERT_EQUALS(chunker.chunkSize(), chunkSize);
+  }
+
   void test_makeRankGroups_4_ranks() {
     const int ranks = 4;
     const int rank = 1;

@@ -77,6 +77,8 @@ Chunker::Chunker(const int numRanks, const int rank,
   m_partitioning = makeBalancedPartitioning(numRanks, m_chunkCounts);
 }
 
+size_t Chunker::chunkSize() const { return m_chunkSize; }
+
 std::vector<std::vector<int>> Chunker::makeRankGroups() const {
   int rank{0};
   std::vector<std::vector<int>> rankGroups;
