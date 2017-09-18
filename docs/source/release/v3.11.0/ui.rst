@@ -45,10 +45,13 @@ Custom Interfaces
 #################
 
 - General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
+- Indirect ILL calibration tab, deprecated since v3.9 is now dropped.
 - SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
 
 Bugs Resolved
 -------------
+- Fixed a bug causing table windows with string values to appear truncated if the string contained a space.
+- Fixed a bug where setting a table column's plot type would not be saved to the workspace correctly.
 
 SliceViewer Improvements
 ------------------------

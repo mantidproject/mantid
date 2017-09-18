@@ -1,12 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
 import stresstesting
 from mantid.simpleapi import Abins, mtd, DeleteWorkspace
 from AbinsModules import AbinsConstants, AbinsTestHelpers
-
-
-def skip_tests():
-    return not hasattr(np, "einsum")
 
 
 class HelperTestingClass(object):
@@ -18,7 +13,7 @@ class HelperTestingClass(object):
         self._atoms = ""
         self._sum_contributions = True
         self._cross_section_factor = "Incoherent"
-        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out"}
+        self._extension = {"CASTEP": ".phonon", "CRYSTAL": ".out", "DMOL3": ".outmol", "GAUSSIAN": ".log"}
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
         self._scale = 1.0
@@ -155,9 +150,6 @@ class AbinsCRYSTALTestScratch(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -188,9 +180,6 @@ class AbinsCRYSTALTestBiggerSystem(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -217,9 +206,6 @@ class AbinsCRYSTALTestT(stresstesting.MantidStressTest, HelperTestingClass):
     """
     tolerance = None
     ref_result = None
-
-    def skipTests(self):
-        return skip_tests()
 
     def runTest(self):
         HelperTestingClass.__init__(self)
@@ -251,9 +237,6 @@ class AbinsCRYSTALTestLargerOrder(stresstesting.MantidStressTest, HelperTestingC
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -284,9 +267,6 @@ class AbinsCRYSTALTestSmallerOrder(stresstesting.MantidStressTest, HelperTesting
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -310,9 +290,6 @@ class AbinsCRYSTALTestScale(stresstesting.MantidStressTest, HelperTestingClass):
     _wrk_1 = None
     _ref_result = None
     tolerance = None
-
-    def skipTests(self):
-        return skip_tests()
 
     def runTest(self):
         HelperTestingClass.__init__(self)
@@ -341,13 +318,10 @@ class AbinsCASTEPNoH(stresstesting.MantidStressTest, HelperTestingClass):
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
-        name = "Na2SiF6"
+        name = "Na2SiF6_CASTEP"
         self.ref_result = name + ".nxs"
         self.set_dft_program("CASTEP")
         self.set_name(name)
@@ -369,9 +343,6 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
     tolerance = None
     ref_result = None
 
-    def skipTests(self):
-        return skip_tests()
-
     def runTest(self):
         HelperTestingClass.__init__(self)
 
@@ -386,4 +357,60 @@ class AbinsCASTEP1DDispersion(stresstesting.MantidStressTest, HelperTestingClass
     def validate(self):
 
         self.tolerance = 1e-1
+        return self._output_name, self.ref_result
+
+
+class AbinsDMOL3TestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from DMOL3 and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "Na2SiF6_DMOL3"
+
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("DMOL3")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Total")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation from scratch with input data from GAUSSIAN and for 1-4 quantum
+    order events is correct.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+
+        name = "C6H5Cl-Gaussian"
+
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("GAUSSIAN")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_cross_section(cross_section="Incoherent")
+        self.case_from_scratch()
+
+    def excludeInPullRequests(self):
+        return True
+
+    def validate(self):
+        self.tolerance = 1e-2
         return self._output_name, self.ref_result

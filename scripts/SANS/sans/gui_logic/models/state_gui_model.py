@@ -751,24 +751,6 @@ class StateGuiModel(object):
         self._user_file_items.update({element_id: new_settings})
 
     @property
-    def q_1d_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="min")
-
-    @q_1d_min.setter
-    def q_1d_min(self, value):
-        self._set_q_1d_limits(min_value=value)
-
-    @property
-    def q_1d_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="max")
-
-    @q_1d_max.setter
-    def q_1d_max(self, value):
-        self._set_q_1d_limits(max_value=value)
-
-    @property
     def q_1d_rebin_string(self):
         return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
                                                       attribute="rebin_string")

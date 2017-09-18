@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Main view for the ISIS SANS reduction interface.
 """
 
@@ -45,6 +46,7 @@ def open_file_dialog(line_edit, filter_text, directory):
 class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_SansDataProcessorWindow):
     data_processor_table = None
     INSTRUMENTS = None
+    VARIABLE = "Variable"
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
         """
@@ -115,7 +117,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def add_listener(self, listener):
         if not isinstance(listener, SANSDataProcessorGui.RunTabListener):
-            raise ValueError("The listener ist not of type RunTabListener but rather {}".format(type(listener)))
+            raise ValueError("The listener is not of type RunTabListener but rather {}".format(type(listener)))
         self._settings_listeners.append(listener)
 
     def clear_listeners(self):
@@ -155,7 +157,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Algorithm setup
         # --------------------------------------------------------------------------------------------------------------
         # Setup white list
-        white_list = MantidQt.MantidWidgets.DataProcessorWhiteList()
+        white_list = MantidQt.MantidWidgets.DataProcessor.WhiteList()
         for entry in self._white_list_entries:
             # If there is a column name specified, then it is a white list entry.
             if entry.column_name:
@@ -165,13 +167,13 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Setup the black list, ie the properties which should not appear in the Options column
 
         # Processing algorithm (mandatory)
-        alg = MantidQt.MantidWidgets.DataProcessorProcessingAlgorithm(self._gui_algorithm_name, 'unused_',
-                                                                      self._black_list)
+        alg = MantidQt.MantidWidgets.DataProcessor.ProcessingAlgorithm(self._gui_algorithm_name,
+                                                                       'unused_', self._black_list)
 
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
-        self.data_processor_table = MantidQt.MantidWidgets.QDataProcessorWidget(white_list, alg, self)
+        self.data_processor_table = MantidQt.MantidWidgets.DataProcessor.QDataProcessorWidget(white_list, alg, self)
         self.data_processor_table.setForcedReProcessing(True)
         self._setup_main_tab()
 
@@ -191,6 +193,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Mask file input settings
         self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
         self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
+        # Set the q step type settings
+        self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
+        self._on_q_1d_step_type_has_changed()
 
         # Set the q resolution aperture shape settings
         self.q_resolution_shape_combo_box.currentIndexChanged.connect(self._on_q_resolution_shape_has_changed)
@@ -369,6 +375,30 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.q_resolution_sample_h_label.setEnabled(enable_rectangular)
         self.q_resolution_source_w_label.setEnabled(enable_rectangular)
         self.q_resolution_sample_w_label.setEnabled(enable_rectangular)
+
+    def _on_q_1d_step_type_has_changed(self):
+        selection = self.q_1d_step_type_combo_box.currentText()
+        is_variable = selection == self.VARIABLE
+        self.q_1d_max_line_edit.setEnabled(not is_variable)
+        self.q_1d_step_line_edit.setEnabled(not is_variable)
+        if is_variable:
+            comma_separated_floats_regex_string = "^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
+            reg_ex = QtCore.QRegExp(comma_separated_floats_regex_string)
+            validator = QtGui.QRegExpValidator(reg_ex)
+            self.q_1d_min_line_edit.setValidator(validator)
+
+            self.q_min_label.setText("Rebin String")
+        else:
+            # If rebin string data
+            data_q_min = str(self.q_1d_min_line_edit.text())
+            if "," in data_q_min:
+                self.q_1d_min_line_edit.setText("")
+            validator = QtGui.QDoubleValidator()
+            validator.setBottom(0.0)
+            self.q_1d_min_line_edit.setValidator(validator)
+
+            label = u"Min [\u00c5^-1]"
+            self.q_min_label.setText(label)
 
     def set_q_resolution_shape_to_rectangular(self, is_rectangular):
         index = 1 if is_rectangular else 0
@@ -1063,11 +1093,19 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # Q limit
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def q_1d_min(self):
-        return self.get_simple_line_edit_field(line_edit="q_1d_min_line_edit", expected_type=float)
+    def q_1d_min_or_rebin_string(self):
+        gui_element = self.q_1d_min_line_edit
+        value_as_string = gui_element.text()
+        if not value_as_string:
+            return None
+        try:
+            value = float(value_as_string)
+        except ValueError:
+            value = value_as_string.encode('utf-8')
+        return value
 
-    @q_1d_min.setter
-    def q_1d_min(self, value):
+    @q_1d_min_or_rebin_string.setter
+    def q_1d_min_or_rebin_string(self, value):
         self.update_simple_line_edit_field(line_edit="q_1d_min_line_edit", value=value)
 
     @property
@@ -1089,7 +1127,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     @property
     def q_1d_step_type(self):
         q_1d_step_type_as_string = self.q_1d_step_type_combo_box.currentText().encode('utf-8')
-        # Either the selection is something that can be converted to a SampleShape or we need to read from file
+        # Hedge for trying to read out
         try:
             return RangeStepType.from_string(q_1d_step_type_as_string)
         except RuntimeError:
@@ -1102,6 +1140,23 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             self.q_1d_step_type_combo_box.setCurrentIndex(0)
         else:
             self.update_gui_combo_box(value=value, expected_type=RangeStepType, combo_box="q_1d_step_type_combo_box")
+            # Set the list
+            if isinstance(value, list):
+                gui_element = self.q_1d_step_type_combo_box
+                gui_element.clear()
+                value.append(self.VARIABLE)
+                for element in value:
+                    self._add_list_element_to_combo_box(gui_element=gui_element, element=element,
+                                                        expected_type=RangeStepType)
+            else:
+                gui_element = getattr(self, "q_1d_step_type_combo_box")
+                if issubclass(value, RangeStepType):
+                    self._set_enum_as_element_in_combo_box(gui_element=gui_element, element=value,
+                                                           expected_type=RangeStepType)
+                else:
+                    index = gui_element.findText(value)
+                    if index != -1:
+                        gui_element.setCurrentIndex(index)
 
     @property
     def q_xy_max(self):
@@ -1481,43 +1536,43 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.menuFile.clear()
 
         # Actions that go in the 'Edit' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessorProcessCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ProcessCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorPlotRowCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorAppendRowCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorAppendRowCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorCopySelectedCommand(self.data_processor_table
-                                                                                    ), self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorCutSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorCopySelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorPasteSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorCutSelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorClearSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorDeleteRowCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorClearSelectedCommand(self.data_processor_table),
+                            self.menuEdit)
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorDeleteRowCommand(self.data_processor_table),
                             self.menuEdit)
 
         # Actions that go in the 'File' menu
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOpenTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.OpenTableCommand(self.data_processor_table),
                             self.menuFile, workspace_list)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorNewTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.NewTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorSaveTableAsCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.SaveTableAsCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorImportTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorExportTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorExportTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessorOptionsCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
                             self.menuFile)
 
     def _create_action(self, command, menu, workspace_list=None):
         """
         Create an action from a given DataProcessorCommand and add it to a given menu
-        A 'workspace_list' can be provided but it is only intended to be used with DataProcessorOpenTableCommand.
+        A 'workspace_list' can be provided but it is only intended to be used with OpenTableCommand.
         It refers to the list of table workspaces in the ADS that could be loaded into the widget. Note that only
         table workspaces with an appropriate number of columns and column types can be loaded.
         """
@@ -1526,7 +1581,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             submenu.setIcon(QtGui.QIcon(command.icon()))
 
             for ws in workspace_list:
-                ws_command = MantidQt.MantidWidgets.DataProcessorWorkspaceCommand(self.data_processor_table, ws)
+                ws_command = MantidQt.MantidWidgets.DataProcessor.WorkspaceCommand(self.data_processor_table, ws)
                 action = QtGui.QAction(QtGui.QIcon(ws_command.icon()), ws_command.name(), self)
                 action.triggered.connect(lambda: self._connect_action(ws_command))
                 submenu.addAction(action)

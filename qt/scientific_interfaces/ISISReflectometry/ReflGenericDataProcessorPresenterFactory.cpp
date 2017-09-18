@@ -21,7 +21,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // 'dq/Q' column will be linked to 'MomentumTransferStep'
   // 'Scale' column will be linked to 'ScaleFactor'
   // Descriptions can also be added
-  DataProcessorWhiteList whitelist;
+  WhiteList whitelist;
   whitelist.addElement("Run(s)", "InputWorkspace",
                        "<b>Sample runs to be processed.</b><br "
                        "/><i>required</i><br />Runs may be given as run "
@@ -68,7 +68,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
       "the value of this column. <br /><br /><b>Example:</b> <samp>1</samp>");
 
   // The data processor algorithm
-  DataProcessorProcessingAlgorithm processor(
+  ProcessingAlgorithm processor(
       /*The name of the algorithm */
       "ReflectometryReductionOneAuto",
       /*Prefixes to the output workspaces*/
@@ -84,22 +84,22 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // Pre-processing instructions as a map:
   // Keys are the column names
   // Values are the pre-processing algorithms that will be applied to columns
-  std::map<QString, DataProcessorPreprocessingAlgorithm> preprocessMap = {
+  std::map<QString, PreprocessingAlgorithm> preprocessMap = {
       /* 'Plus' will be applied to column 'Run(s)'*/
       {"Run(s)",
-       DataProcessorPreprocessingAlgorithm(
-           "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
-                                             "OutputWorkspace"})},
+       PreprocessingAlgorithm("Plus", "TOF_",
+                              std::set<QString>{"LHSWorkspace", "RHSWorkspace",
+                                                "OutputWorkspace"})},
       /* 'CreateTransmissionWorkspaceAuto' will be applied to column
          'Transmission Run(s)'*/
       {"Transmission Run(s)",
-       DataProcessorPreprocessingAlgorithm(
-           "CreateTransmissionWorkspaceAuto", "TRANS_",
-           std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                             "OutputWorkspace"})}};
+       PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                              std::set<QString>{"FirstTransmissionRun",
+                                                "SecondTransmissionRun",
+                                                "OutputWorkspace"})}};
 
   // The post-processing algorithm
-  DataProcessorPostprocessingAlgorithm postprocessor(
+  PostprocessingAlgorithm postprocessor(
       "Stitch1DMany", "IvsQ_",
       std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
 
