@@ -124,7 +124,6 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
         # The filename without path and extension will be the workspace name
         ws_name = os.path.splitext(os.path.basename(str(file_specifier)))[0]
         logger.debug('Loading file %s as workspace %s' % (file_specifier, ws_name))
-
         do_load(file_specifier, ws_name, ipf_filename, load_logs, load_opts)
         workspace = mtd[ws_name]
 
