@@ -9,7 +9,12 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
-/** NXEventDataSource : TODO: DESCRIPTION
+/** Abstract base class for sources of NXevent_data. For files this is
+  subclassed in NXEventDataLoader. The base class exists for testing purposes
+  and potentially for supporting event streams in the future.
+
+  @author Simon Heybrock
+  @date 2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -37,7 +42,6 @@ class NXEventDataSource {
 public:
   virtual ~NXEventDataSource() = default;
 
-  // Construct NXEVentDataLoader with list of bank names
   virtual void setBankIndex(const size_t bank) = 0;
 
   virtual const std::vector<IndexType> &eventIndex() const = 0;
