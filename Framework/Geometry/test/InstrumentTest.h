@@ -551,7 +551,7 @@ public:
     TS_ASSERT_EQUALS(
         compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
         bankScale);
-
+	TS_ASSERT(!compInfo.isVisible(compInfo.indexOf(bank3->getComponentID())));
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
     const V3D detAxis{0.2, 0.4, 13.3};
