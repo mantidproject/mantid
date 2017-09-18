@@ -637,16 +637,5 @@ public:
     // Read-back
     TS_ASSERT_EQUALS(compInfo.scaleFactor(0), newFactor);
   }
-
-  void test_is_visible() {
-    typedef std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> infos_t;
-    std::unique_ptr<infos_t> infos_p;
-    TS_ASSERT_THROWS_NOTHING(infos_p =
-                                 std::make_unique<infos_t>(makeTreeExample()))
-    ComponentInfo compInfo;
-    boost::shared_ptr<DetectorInfo> detInfo;
-    // std::tie(compInfo, detInfo) = *infos_p.get();
-    // TS_ASSERT(compInfo.isVisible(0))
-  }
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */
