@@ -143,15 +143,15 @@ class FunctionWrapper(object):
       y = x_list[:]
       ws = self._execute_algorithm('CreateWorkspace', DataX=x_list, DataY=y)
       out = self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=ws)
-      
+      # Create a copy of the calculated spectrum
+      output_array = np.array(out.readY(1))
       if numpy_input:
-         oa = np.array(out.readY(1))
-         return oa.reshape(x_shape, order='C')
-         
+         return output_array.reshape(x_shape, order='C')
+
       if list_input:
-        return out.readY(1)
+        return output_array
       else:
-        return out.readY(1)[0]
+        return output_array[0]
          
   def tie (self, *args, **kwargs):
     """ Add ties.
