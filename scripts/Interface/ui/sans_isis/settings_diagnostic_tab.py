@@ -9,11 +9,12 @@ from __future__ import (absolute_import, division, print_function)
 import six
 
 from abc import ABCMeta, abstractmethod
+import os
 
 from six import with_metaclass
 from PyQt4 import QtGui
 
-from sans.gui_logic.gui_common import (GENERIC_SETTINGS, load_file)
+from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 import ui_settings_diagnostic_tab
 
 if six.PY3:
@@ -89,8 +90,19 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_save_state_to_file())
 
     def on_browse_save_location(self):
-        load_file(self.save_state_line_edit, "*.*", self.__generic_settings, self.__save_location_path_key,
+        load_file(self.save_state_line_edit, "*.json", self.__generic_settings, self.__save_location_path_key,
                   self.get_save_location)
+
+        # Correct the file extension. The output file has to be a json type file. If the user has added a different
+        # file extension then change it to .json
+        save_location = self.get_save_location()
+        path_dir = os.path.dirname(save_location)
+        if not path_dir:
+            return
+
+        file_name, _ = os.path.splitext(save_location)
+        full_file_path = file_name + JSON_SUFFIX
+        self.save_state_line_edit.setText(full_file_path)
 
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
@@ -167,3 +179,6 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
 
     def get_save_location(self):
         return str(self.save_state_line_edit.text())
+
+    def set_save_location(self, full_file_path):
+        self.save_state_line_edit.setText(full_file_path)

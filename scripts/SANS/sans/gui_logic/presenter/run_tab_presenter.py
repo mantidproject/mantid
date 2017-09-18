@@ -181,7 +181,8 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
+                                   "to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
@@ -217,7 +218,8 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except RuntimeError as e:
-            self.sans_logger.error("Loading of the batch file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
+                                   " to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_processed_clicked(self):
         """
@@ -812,9 +814,12 @@ class RunTabPresenter(object):
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
                 except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))  # noqa
-                    raise RuntimeError("There was a bad entry for row {}. "
-                                       "See here for more details: {}".format(row, str(e)))
+                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
+                                           "been added to the Mantid search directories! See here for more "
+                                           "details: {}".format(row, str(e)))
+                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                                       "been added to the Mantid search directories! See here for more "
+                                       "details: {}".format(row, str(e)))
         return states
 
     def _populate_row_in_table(self, row):

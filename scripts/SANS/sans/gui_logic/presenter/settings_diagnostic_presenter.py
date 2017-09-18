@@ -1,10 +1,14 @@
 """ The settings diagnostic tab which visualizes the SANS state object. """
 from __future__ import (absolute_import, division, print_function)
 
-from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+
 import os
 import json
+
 from mantid.kernel import Logger
+
+from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from sans.gui_logic.gui_common import JSON_SUFFIX
 
 
 class SettingsDiagnosticPresenter(object):
@@ -104,7 +108,7 @@ class SettingsDiagnosticPresenter(object):
             return
 
         file_name, _ = os.path.splitext(save_location)
-        full_file_path = file_name + ".json"
+        full_file_path = file_name + JSON_SUFFIX
 
         row_index = self._view.get_current_row()
         state = self.get_state(row_index)
@@ -112,3 +116,7 @@ class SettingsDiagnosticPresenter(object):
         with open(full_file_path, 'w') as f:
             json.dump(serialized_state, f, sort_keys=True, indent=4)
         self.gui_logger.information("The state for row {} has been saved to: {} ".format(row_index, full_file_path))
+
+        # Update the file name in the UI
+        self._view.set_save_location(full_file_path)
+

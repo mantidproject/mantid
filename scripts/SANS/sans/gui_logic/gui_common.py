@@ -42,6 +42,8 @@ ALL = "All"
 
 GENERIC_SETTINGS = "Mantid/ISISSANS"
 
+JSON_SUFFIX = ".json"
+
 
 def get_reduction_mode_strings_for_gui(instrument=None):
     if instrument is SANSInstrument.SANS2D:
