@@ -324,6 +324,8 @@ protected:
   Kernel::V3D m_pos;
   //! Orientation
   Kernel::Quat m_rot;
+  //! Visibility
+  bool m_isVisible;
 
   /**
   *  Get a parameter from the parameter map
