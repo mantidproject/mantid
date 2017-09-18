@@ -406,22 +406,26 @@ public:
     DetectorInfo a(PosVec(2), RotVec(2));
     a.setScanInterval({0, 10});
     auto b(a);
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
     b = a;
     b.setScanInterval({-1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
     b.setScanInterval({1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
     b.setScanInterval({1, 11});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
   }
 
   void test_merge_identical_interval_failures() {
