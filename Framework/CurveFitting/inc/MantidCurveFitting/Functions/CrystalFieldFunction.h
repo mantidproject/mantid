@@ -210,10 +210,10 @@ private:
 
   /// Make maps between parameter names and indices
   void makeMaps() const;
-  void makeMapsSS() const;
-  void makeMapsSM() const;
-  void makeMapsMS() const;
-  void makeMapsMM() const;
+  void makeMapsSingleSiteSingleSpectrum() const;
+  void makeMapsSingleSiteMultiSpectrum() const;
+  void makeMapsMultiSiteSingleSpectrum() const;
+  void makeMapsMultiSiteMultiSpectrum() const;
   size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
                              const std::string &prefix) const;
 

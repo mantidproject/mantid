@@ -37,7 +37,7 @@ class MANTID_CURVEFITTING_DLL CrystalFieldControl
     : public API::CompositeFunction {
 public:
   CrystalFieldControl();
-  /// Set a value to attribute attName
+  /// Set a value to attribute
   void setAttribute(const std::string &name, const Attribute &) override;
   /// Build control functions for individual spectra.
   void buildControls();

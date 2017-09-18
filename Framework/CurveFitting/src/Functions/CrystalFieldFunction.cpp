@@ -1127,15 +1127,15 @@ void CrystalFieldFunction::makeMaps() const {
   m_mapIndices2Names.resize(nParams());
   if (isMultiSite()) {
     if (isMultiSpectrum()) {
-      makeMapsMM();
+      makeMapsMultiSiteMultiSpectrum();
     } else {
-      makeMapsMS();
+      makeMapsMultiSiteSingleSpectrum();
     }
   } else {
     if (isMultiSpectrum()) {
-      makeMapsSM();
+      makeMapsSingleSiteMultiSpectrum();
     } else {
-      makeMapsSS();
+      makeMapsSingleSiteSingleSpectrum();
     }
   }
 }
@@ -1159,7 +1159,7 @@ CrystalFieldFunction::makeMapsForFunction(const IFunction &fun, size_t iFirst,
 }
 
 /// Parameter-index map for single-site single-spectrum
-void CrystalFieldFunction::makeMapsSS() const {
+void CrystalFieldFunction::makeMapsSingleSiteSingleSpectrum() const {
   size_t i = makeMapsForFunction(*m_source, 0, "");
 
   size_t peakIndex = 0;
@@ -1178,7 +1178,7 @@ void CrystalFieldFunction::makeMapsSS() const {
 }
 
 /// Parameter-index map for single-site multi-spectrum
-void CrystalFieldFunction::makeMapsSM() const {
+void CrystalFieldFunction::makeMapsSingleSiteMultiSpectrum() const {
   size_t i = 0;
   // Intensity scalings for each spectrum
   for (size_t j = 0; j < m_control.nFunctions(); ++j) {
@@ -1221,7 +1221,7 @@ void CrystalFieldFunction::makeMapsSM() const {
 }
 
 /// Parameter-index map for multi-site single-spectrum
-void CrystalFieldFunction::makeMapsMS() const {
+void CrystalFieldFunction::makeMapsMultiSiteSingleSpectrum() const {
   size_t i = 0;
   // Intensity scalings for each ion
   auto &crystalField = compositeSource();
@@ -1255,7 +1255,7 @@ void CrystalFieldFunction::makeMapsMS() const {
 }
 
 /// Parameter-index map for multi-site multi-spectrum
-void CrystalFieldFunction::makeMapsMM() const {
+void CrystalFieldFunction::makeMapsMultiSiteMultiSpectrum() const {
   size_t i = 0;
   // Intensity scalings for each spectrum
   for (size_t j = 0; j < m_control.nFunctions(); ++j) {
