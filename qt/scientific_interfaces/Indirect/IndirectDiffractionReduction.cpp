@@ -486,7 +486,7 @@ void IndirectDiffractionReduction::addGrouping(
     const std::string &groupingWsName, IAlgorithm_sptr msgDiffReduction) {
   msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
   createGroupingWorkspace(groupingWsName);
-  m_groupingWsName = groupingWsName;
+  m_groupingWorkspace = groupingWsName;
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(deleteWorkspace()));
