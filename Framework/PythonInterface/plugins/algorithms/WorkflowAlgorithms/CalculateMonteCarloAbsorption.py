@@ -470,23 +470,24 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     def _convert_to_wavelength(self, workspace):
         self._indirect_q_axis = 'Y'
         x_unit = workspace.getAxis(0).getUnit().unitID()
+        y_unit = workspace.getAxis(1).getUnit().unitID()
 
         if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
+        elif y_unit == 'Wavelength':
+            return self._tranpose_ws(workspace)
         elif x_unit == 'EnergyTransfer':
-            return self._create_waves_indirect_elastic(workspace)
-        elif x_unit == 'MomentumTransfer':
-            self._indirect_q_axis = 'X'
-            logger.information('X-Axis of the input workspace is Q')
-            y_unit = workspace.getAxis(1).getUnit().unitID()
-
-            if y_unit == 'Wavelength':
-                return self._tranpose_ws(workspace)
-            elif y_unit == 'EnergyTransfer':
-                workspace = self._tranpose_ws(workspace)
-                return self._create_waves_indirect_elastic(workspace)
+            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
+        elif y_unit == 'EnergyTransfer':
+            workspace = self._tranpose_ws(workspace)
+            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
         if self._emode == "Indirect":
+
+            if y_unit == 'MomentumTransfer':
+                return self._create_waves_indirect_elastic(workspace)
+            elif x_unit == 'MomentumTransfer':
+                return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         else:
             return self._convert_units(workspace, "Wavelength", self._emode)
@@ -552,10 +553,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         workspace.replaceAxis(1, SpectraAxis.create(workspace))
         e_fixed = float(self._efixed)
         logger.information('Efixed = %f' % e_fixed)
-
-        # Convert spectra axis to Q, if not already in Q
-        if y_axis != "MomentumTransfer":
-            workspace = self._convert_spectra_axis(workspace, "ElasticQ", self._emode, e_fixed)
         self._q_values = y_axis.extractValues()
 
         # ---------- Set Instrument Parameters ----------
