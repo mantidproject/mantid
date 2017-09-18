@@ -72,15 +72,15 @@ void CompositeValidator::add(Kernel::IValidator_sptr child) {
 std::string CompositeValidator::check(const boost::any &value) const {
   switch (m_relation) {
   case CompositeRelation::AND:
-    return checkLogicalAnd(value);
+    return checkAll(value);
   case CompositeRelation::OR:
-    return checkLogicalOr(value);
+    return checkAny(value);
   default:
     throw std::runtime_error("Unimplemented composite validator relation");
   }
 }
 
-std::string CompositeValidator::checkLogicalAnd(const boost::any &value) const {
+std::string CompositeValidator::checkAll(const boost::any &value) const {
   for (const auto validator : m_children) {
     const auto error = validator->check(value);
     // exit on the first error, to avoid passing doing more tests on invalid
@@ -92,7 +92,7 @@ std::string CompositeValidator::checkLogicalAnd(const boost::any &value) const {
   return "";
 }
 
-std::string CompositeValidator::checkLogicalOr(const boost::any &value) const {
+std::string CompositeValidator::checkAny(const boost::any &value) const {
   std::stringstream errorStream;
 
   // Lambda to check if a validator is valid. If it is not valid then
