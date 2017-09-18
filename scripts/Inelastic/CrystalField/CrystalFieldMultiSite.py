@@ -1,6 +1,7 @@
 import numpy as np
 from six import string_types
 
+from CrystalField import CrystalField, Function
 
 def makeWorkspace(xArray, yArray):
     """Create a workspace that doesn't appear in the ADS"""
@@ -14,14 +15,27 @@ def makeWorkspace(xArray, yArray):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
+def get_parameters_for_add(cf, new_ion_index):
+    # get params from crystalField object to append
+    params = {}
+    ion_prefix = 'ion%s.' % new_ion_index
+    for bparam in CrystalField.field_parameter_names:
+        params[ion_prefix + bparam] = cf[bparam]
+    return params
+
+def get_parameters_for_add_from_multisite(cfms, new_ion_index):
+    params = {}
+    for i in range(len(cfms.Ions)):
+        ion_prefix = 'ion%s.' % (new_ion_index + i)
+        if cfms._isMultiSite():
+            existing_prefix = 'ion%s.' % i
+        else:
+            existing_prefix = ''
+        for bparam in CrystalField.field_parameter_names:
+            params[ion_prefix + bparam] = cfms[existing_prefix + bparam]
+        return params
 
 class CrystalFieldMultiSite(object):
-
-    field_parameter_names = ['BmolX', 'BmolY', 'BmolZ', 'BextX', 'BextY', 'BextZ',
-                             'B20', 'B21', 'B22', 'B40', 'B41', 'B42', 'B43', 'B44', 'B60', 'B61', 'B62', 'B63', 'B64',
-                             'B65', 'B66',
-                             'IB21', 'IB22', 'IB41', 'IB42', 'IB43', 'IB44', 'IB61', 'IB62', 'IB63', 'IB64', 'IB65',
-                             'IB66']
 
     def __init__(self, Ions, Symmetries, **kwargs):
 
@@ -64,6 +78,15 @@ class CrystalFieldMultiSite(object):
                 del kwargs['ResolutionModel']
             else:
                 raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
+
+            self._abundances = {}
+            if 'abundances' in kwargs:
+                abundances = kwargs['abundances']
+                del kwargs['abundances']
+            else:
+                abundances = None
+            self._makeAbundances(abundances)
+
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
@@ -183,6 +206,23 @@ class CrystalFieldMultiSite(object):
             funs = self.function.createEquivalentFunctions()
             return str(funs[i])
 
+    def _makeAbundances(self, abundances):
+        if abundances is not None:
+            for ion_index in range(len(self.Ions)):
+                self._abundances['ion%s' % ion_index]  = abundances[ion_index]
+            max_ion = max(self._abundances, key=lambda key: self._abundances[key])
+            ties = {}
+            for ion in self._abundances.keys():
+                if ion is not max_ion:
+                    factor = self._abundances[ion] / self._abundances[max_ion]
+                    tie_key = ion + '.IntensityScaling'
+                    tie_value = str(factor) + '*' + max_ion + ".IntensityScaling"
+                    ties[tie_key] = tie_value
+                    self.ties(ties)
+        else:
+            for ion_index in range(len(self.Ions)):
+                self._abundances['ion%s' % ion_index]  = 1.0
+
     def update(self, func):
         """
         Update values of the fitting parameters.
@@ -193,7 +233,6 @@ class CrystalFieldMultiSite(object):
     def fix(self, *args):
         for a in args:
             self.function.fixParameter(a)
-
 
     def ties(self, *args, **kwargs):
         """Set ties on the field parameters.
@@ -277,7 +316,6 @@ class CrystalFieldMultiSite(object):
         @param background: A function passed as the background. Can be a string or FunctionWrapper e.g.
                 'name=LinearBackground,A0=1' or LinearBackground(A0=1)
         """
-        from CrystalField.function import Function
         from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 
         self._background = Function(self.function, prefix='bg.')
@@ -315,6 +353,16 @@ class CrystalFieldMultiSite(object):
             self._background.background = Function(self.function, prefix='bg.f1.')
             self.function.setAttributeValue('Background', '%s;%s' % (peak, background))
 
+    def _combine_multisite(self, other):
+        ions = self.Ions + other.Ions
+        symmetries = self.Symmetries + other.Symmetries
+        abundances = self._abundances.values() + other._abundances.values()
+        params = get_parameters_for_add_from_multisite(self, 0)
+        params.update(get_parameters_for_add_from_multisite(other, len(self.Ions)))
+        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
+                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+        return new_cf
+
     def __getitem__(self, item):
         if self.function.hasAttribute(item):
             return self.function.getAttributeValue(item)
@@ -323,6 +371,40 @@ class CrystalFieldMultiSite(object):
 
     def __setitem__(self, key, value):
         self.function.setParameter(key, value)
+
+    def __add__(self, other):
+        scale_factor = 1.0
+        if hasattr(other, 'abundance'): # is CrystalFieldSite
+            scale_factor = other.abundance
+            other = other.crystalField
+        elif isinstance(other, CrystalFieldMultiSite):
+            return self._combine_multisite(other)
+        if not isinstance(other, CrystalField):
+            raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
+        ions = self.Ions + [other.Ion]
+        symmetries = self.Symmetries + [other.Symmetry]
+        abundances = self._abundances.values() + [scale_factor]
+        params = get_parameters_for_add_from_multisite(self, 0)
+        params.update(get_parameters_for_add(other, len(self.Ions)))
+        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
+                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+        return new_cf
+
+    def __radd__(self, other):
+        scale_factor = 1.0
+        if hasattr(other, 'abundance'):  # is CrystalFieldSite
+            scale_factor = other.abundance
+            other = other.crystalField
+        if not isinstance(other, CrystalField):
+            raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
+        ions = [other.Ion] + self.Ions
+        symmetries = [other.Symmetry] + self.Symmetries
+        abundances = [scale_factor] + self._abundances.values()
+        params = get_parameters_for_add(other, 0)
+        params.update(get_parameters_for_add_from_multisite(self, 1))
+        new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
+                                       FWHMs=self.FWHMs, parameters=params, abundances=abundances)
+        return new_cf
 
     @property
     def background(self):

@@ -6,14 +6,14 @@ c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
 class CrystalFieldMultiSiteTests(unittest.TestCase):
 
-    def xtest_init_single_ion(self):
+    def test_init_single_ion(self):
         cfms = CrystalFieldMultiSite(Ions='Pm', Symmetries='D2', Temperatures=[20, 52], FWHMs=[1.0, 1.0])
         self.assertEqual(cfms.Ions, ['Pm'])
         self.assertEqual(cfms.Symmetries, ['D2'])
         self.assertEqual(cfms.Temperatures, [20, 52])
         self.assertEqual(cfms.FWHMs, [1.0, 1.0])
 
-    def xtest_init_multi_ions(self):
+    def test_init_multi_ions(self):
         cfms = CrystalFieldMultiSite(Ions=('Pm', 'Eu'), Symmetries=('D2', 'C3v'), Temperatures=[20, 52],
                                      FWHMs=[1.0, 1.0])
         self.assertEqual(cfms.Ions, ['Pm', 'Eu'])
@@ -21,37 +21,37 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEqual(cfms.Temperatures, [20, 52])
         self.assertEqual(cfms.FWHMs, [1.0, 1.0])
 
-    def xtest_toleranceEnergy_property(self):
+    def test_toleranceEnergy_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), ToleranceEnergy=1.0)
         self.assertEqual(cfms.ToleranceEnergy, 1.0)
 
-    def xtest_toleranceIntensity_property(self):
+    def test_toleranceIntensity_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), ToleranceIntensity=6.0)
         self.assertEqual(cfms.ToleranceIntensity, 6.0)
 
-    def xtest_NPeaks_property(self):
+    def test_NPeaks_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), NPeaks=11)
         self.assertEqual(cfms.NPeaks, 11)
 
-    def xtest_fixAllPeaks_property(self):
+    def test_fixAllPeaks_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), FixAllPeaks=True)
         self.assertTrue(cfms.FixAllPeaks)
 
-    def xtest_peakShape_property(self):
+    def test_peakShape_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), PeakShape='Gaussian')
         self.assertEqual(cfms.PeakShape, 'Gaussian')
 
-    def xtest_FWHM_variation_property(self):
+    def test_FWHM_variation_property(self):
         cfms = CrystalFieldMultiSite(('Pm', 'Eu'), ('D2', 'C3v'), FWHMVariation=0.3)
         self.assertEqual(cfms.FWHMVariation, 0.3)
 
-    def xtest_init_parameters(self):
+    def test_init_parameters(self):
         cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[15], FWHMs=[1.0],
                                      parameters={'BmolX': 1.0, 'B40': -0.02})
         self.assertEqual(cfms.function.getParameterValue('BmolX'), 1.0)
         self.assertEqual(cfms.function.getParameterValue('B40'), -0.02)
 
-    def xtest_init_parameters_multi_ions(self):
+    def test_init_parameters_multi_ions(self):
         cfms = CrystalFieldMultiSite(Ions=('Pm', 'Eu'), Symmetries=('D2', 'C3v'), Temperatures=[20, 52],
                                      FWHMs=[1.0, 1.0], parameters={'ion0.B40': -0.02, 'ion0.B42': -0.11,
                                                                    'ion1.B42': -0.12})
@@ -59,21 +59,21 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEqual(cfms.function.getParameterValue('ion0.B40'), -0.02)
         self.assertEqual(cfms.function.getParameterValue('ion1.B42'), -0.12)
 
-    def xtest_peak_values(self):
+    def test_peak_values(self):
         cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.5],
                                      BmolX=1.0, B40=-0.02)
         self.assertEqual(int(cfms.function.getParameterValue('pk0.Amplitude')), 48)
         self.assertEqual(cfms.function.getParameterValue('pk0.FWHM'), 1.5)
         self.assertEqual(cfms.function.getParameterValue('pk0.PeakCentre'), 0)
 
-    def xtest_peak_values_gaussian(self):
+    def test_peak_values_gaussian(self):
         cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
                                      BmolX=1.0, B40=-0.02)
         self.assertEqual(int(cfms.function.getParameterValue('pk0.Height')), 45)
         self.assertAlmostEqual(cfms.function.getParameterValue('pk0.Sigma'), 0.42, 2)
         self.assertEqual(cfms.function.getParameterValue('pk0.PeakCentre'), 0)
 
-    def xtest_peak_values_multi_ions(self):
+    def test_peak_values_multi_ions(self):
         cfms = CrystalFieldMultiSite(Ions=('Pr', 'Nd'), Symmetries=('D2', 'C3v'), Temperatures=[20],
                                      FWHMs=[1.5], parameters={'ion0.B60': -0.02, 'ion1.B62': -0.12})
         self.assertEqual(int(cfms.function.getParameterValue('ion0.pk0.Amplitude')), 278)
@@ -83,7 +83,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEqual(cfms.function.getParameterValue('ion1.pk0.FWHM'), 1.5)
         self.assertAlmostEqual(cfms.function.getParameterValue('ion1.pk1.PeakCentre'), 1749.981919, 6)
 
-    def xtest_peak_values_multi_ions_and_spectra(self):
+    def test_peak_values_multi_ions_and_spectra(self):
         cfms = CrystalFieldMultiSite(Ions=('Pm', 'Ce'), Symmetries=('D2', 'C3v'), Temperatures=[20, 52],
                                      FWHMs=[1.0, 1.0], parameters={'ion0.B40': -0.02, 'ion1.B42': -0.12})
         self.assertEqual(int(cfms.function.getParameterValue('ion0.sp0.pk0.Amplitude')), 308)
@@ -93,7 +93,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEqual(cfms.function.getParameterValue('ion1.sp1.pk0.FWHM'), 1.0)
         self.assertAlmostEqual(cfms.function.getParameterValue('ion1.sp0.pk1.PeakCentre'), 8.519155, 6)
 
-    def xtest_peak_values_multi_gaussian(self):
+    def test_peak_values_multi_gaussian(self):
         cfms = CrystalFieldMultiSite(Ions=('Pm', 'Dy'), Symmetries=('D2', 'C3v'), Temperatures=[20, 52],
                                      FWHMs=[1.0, 1.5], parameters={'ion0.B40': -0.02, 'ion1.B42': -0.12},
                                      PeakShape='Gaussian')
@@ -104,7 +104,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertAlmostEqual(cfms.function.getParameterValue('ion1.sp1.pk0.Sigma'), 0.64, 2)
         self.assertAlmostEqual(cfms.function.getParameterValue('ion1.sp0.pk1.PeakCentre'), 40.957515, 6)
 
-    def xtest_get_spectrum_from_list(self):
+    def test_get_spectrum_from_list(self):
         cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[4.0], FWHMs=[0.1],
                                      B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                                      ToleranceIntensity=0.001*c_mbsr)
@@ -115,7 +115,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         np.testing.assert_equal(x, r)
         np.testing.assert_almost_equal(y, expected_y, 6)
 
-    def xtest_get_spectrum_ws(self):
+    def test_get_spectrum_ws(self):
         from mantid.simpleapi import CreateWorkspace
         cfms = CrystalFieldMultiSite(['Ce'], ['C2v'], B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025,
                                      B66=0.0068, Temperatures=[4.0], FWHMs=[0.1], ToleranceIntensity=0.001*c_mbsr)
@@ -143,7 +143,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertAlmostEqual(y[0], 0.050130, 6)
         self.assertAlmostEqual(y[1], 0.054428, 6)
 
-    def xtest_get_spectrum_from_list_multi_spectra(self):
+    def test_get_spectrum_from_list_multi_spectra(self):
         cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[4.0, 50.0], FWHMs=[0.1, 0.2],
                                      B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068)
         r = [0.0, 1.45, 2.4, 3.0, 3.85]
@@ -159,7 +159,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         np.testing.assert_equal(x, r)
         np.testing.assert_almost_equal(y, expected_y, 6)
 
-    def xtest_get_spectrum_ws_multi_spectra(self):
+    def test_get_spectrum_ws_multi_spectra(self):
         from mantid.simpleapi import CreateWorkspace
         cfms = CrystalFieldMultiSite(['Ce'], ['C2v'], B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
                           Temperatures=[4.0, 50.0], FWHMs=[0.1, 0.2])
@@ -194,7 +194,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertAlmostEqual(y[0], 0.050129858433581413, 6)
         self.assertAlmostEqual(y[1], 0.054427788297191478, 6)
 
-    def xtest_get_spectrum_list_multi_ion_and_spectra(self):
+    def test_get_spectrum_list_multi_ion_and_spectra(self):
         params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
                   'ion0.B44': -0.12544, 'ion1.B20': 0.37737, 'ion1.B22': 3.9770, 'ion1.B40': -0.031787,
                   'ion1.B42': -0.11611, 'ion1.B44': -0.12544}
@@ -213,7 +213,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         np.testing.assert_equal(x, r)
         np.testing.assert_almost_equal(y, expected_y, 6)
 
-    def xtest_fit_multi_ion_single_spectrum(self):
+    def test_fit_multi_ion_single_spectrum(self):
 
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
@@ -224,7 +224,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        x, y = cf.getSpectrum()
+        r = [0.0, 1.45, 2.4, 3.0, 3.85]
+        x, y = cf.getSpectrum(r)
         ws = makeWorkspace(x, y)
 
         params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
@@ -252,7 +253,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
-    def xtest_fit_multi_ion_and_spectra(self):
+    def test_fit_multi_ion_and_spectra(self):
         from CrystalField.fitting import makeWorkspace
         from CrystalField import CrystalField, CrystalFieldFit
         from mantid.simpleapi import CalculateChiSquared
@@ -262,8 +263,9 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        ws1 = makeWorkspace(*cf.getSpectrum(0))
-        ws2 = makeWorkspace(*cf.getSpectrum(1))
+        r = [0.0, 1.45, 2.4, 3.0, 3.85]
+        ws1 = makeWorkspace(*cf.getSpectrum(0, r))
+        ws2 = makeWorkspace(*cf.getSpectrum(1, r))
 
         params = {'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion0.B40': -0.031787, 'ion0.B42': -0.11611,
                   'ion0.B44': -0.12544, 'ion1.B20': 0.37737, 'ion1.B22': 3.9770, 'ion1.B40': -0.031787,
@@ -344,7 +346,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEquals(cf.background.param['f1.A0'], 1)
 
     def test_constraints_single_spectrum(self):
-        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         from mantid.fitfunctions import Gaussian, LinearBackground
         from mantid.simpleapi import FunctionFactory
 
@@ -379,7 +380,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
     def test_constraints_multi_spectrum(self):
         from mantid.fitfunctions import FlatBackground, Gaussian
-        from mantid.simpleapi import FunctionFactory
 
         cf = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
                                    Background=FlatBackground(), BackgroundPeak=Gaussian(Height=10, Sigma=0.3),
@@ -441,3 +441,139 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion0.sp1.pk2.FWHM=2*ion0.sp1.pk1.FWHM' in s)
         self.assertTrue('ion1.sp1.pk3.FWHM=2*ion1.sp1.pk2.FWHM' in s)
 
+    def test_add_CrystalField(self):
+        from CrystalField import CrystalField
+
+        cfms = CrystalFieldMultiSite(Ions=['Pr'], Symmetries=['C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                     B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.15)
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544}
+        cf = CrystalField('Ce', 'C2v', **params)
+
+        cf2 = cfms + cf
+        self.assertEqual(cf2['ion0.B20'], 0.37737)
+        self.assertEqual(cf2['ion1.B20'], 0.37737)
+        self.assertEqual(cf2['ion0.B44'], -0.15)
+        self.assertEqual(cf2['ion1.B44'], -0.12544)
+        self.assertEqual(len(cf2.Ions), 2)
+        self.assertTrue('Ce' in cf2.Ions)
+        self.assertTrue('Pr' in cf2.Ions)
+        self.assertEqual(len(cf2.Symmetries), 2)
+        s = str(cf2.function)
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s)
+
+
+    def test_add_CrystalFieldSite(self):
+        from CrystalField import CrystalField
+
+        cfms = CrystalFieldMultiSite(Ions=['Pr'], Symmetries=['C2v'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                     B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.15)
+
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544}
+        cf = CrystalField('Ce', 'C2v', **params)
+        cf = cf * 8
+        cf2 = cfms + cf
+        self.assertEqual(cf2['ion0.B20'], 0.37737)
+        self.assertEqual(cf2['ion1.B20'], 0.37737)
+        self.assertEqual(cf2['ion0.B44'], -0.15)
+        self.assertEqual(cf2['ion1.B44'], -0.12544)
+        self.assertEqual(len(cf2.Ions), 2)
+        self.assertTrue('Ce' in cf2.Ions)
+        self.assertTrue('Pr' in cf2.Ions)
+        self.assertEqual(len(cf2.Symmetries), 2)
+        s = str(cf2.function)
+        self.assertTrue('ion0.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+
+    def test_multi_ion_intensity_scaling(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': 44.0, 'FWHM': 1.1}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        s = str(cf.function)
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2 * 8
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2
+        s = str(cf.function)
+        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in s)
+
+        cf3 = CrystalField('Tb', 'C2v', **params)
+        cf = 2 * cf1 + cf2 * 8 + cf3
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2 * 8 + 10 * cf3
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
+        s = str(cf.function)
+        print s
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf = cf1 + (cf2 * 8 + 10 * cf3)
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf4 = CrystalField('Yb', 'C2v', **params)
+        cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in s)
+
+    def test_multi_ion_intensity_scaling_multi_spectrum(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
+                  'Temperature': [44.0, 50], 'FWHM': [1.1, 1.6]}
+        cf1 = CrystalField('Ce', 'C2v', **params)
+        cf2 = CrystalField('Pr', 'C2v', **params)
+        cf = cf1 + cf2
+        s = str(cf.function)
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2 * 8
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2
+        s = str(cf.function)
+        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in s)
+
+        cf3 = CrystalField('Tb', 'C2v', **params)
+        cf = 2 * cf1 + cf2 * 8 + cf3
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+
+        cf = 2 * cf1 + cf2 * 8 + 10 * cf3
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
+        s = str(cf.function)
+        print s
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf = cf1 + (cf2 * 8 + 10 * cf3)
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+
+        cf4 = CrystalField('Yb', 'C2v', **params)
+        cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
+        s = str(cf.function)
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in s)

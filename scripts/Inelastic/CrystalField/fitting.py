@@ -889,9 +889,20 @@ class CrystalField(object):
         return x_min, x_max
 
     def __add__(self, other):
-        if isinstance(other, CrystalFieldMulti):
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
-        return CrystalFieldMulti(CrystalFieldSite(self, 1.0), other)
+        if isinstance(other, CrystalField):
+            ions = [self.Ion, other.Ion]
+            symmetries = [self.Symmetry, other.Symmetry]
+            params = {}
+            temperatures = [self._getTemperature(x) for x in range(self.NumberOfSpectra)]
+            fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
+            for bparam in CrystalField.field_parameter_names:
+                params['ion0.' + bparam] = self[bparam]
+                params['ion1.' + bparam] = other[bparam]
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                         FWHMs = fwhms, parameters=params, abundances=[1.0, 1.0])
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1053,13 +1064,28 @@ class CrystalFieldSite(object):
         self.abundance = abundance
 
     def __add__(self, other):
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         if isinstance(other, CrystalField):
-            return CrystalFieldMulti(self, CrystalFieldSite(other, 1))
+            abundances = [self.abundance, 1.0]
         elif isinstance(other, CrystalFieldSite):
-            return CrystalFieldMulti(self, other)
-        elif isinstance(other, CrystalFieldMulti):
+            abundances = [self.abundance, other.abundance]
+            other = other.crystalField
+        elif isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
-        raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
+        else:
+            raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
+
+        ions = [self.crystalField.Ion, other.Ion]
+        symmetries = [self.crystalField.Symmetry, other.Symmetry]
+        temperatures = [self.crystalField._getTemperature(x) for x in range(self.crystalField.NumberOfSpectra)]
+        FWHMs = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
+        params = {}
+        for bparam in CrystalField.field_parameter_names:
+            params['ion0.' + bparam] = self.crystalField[bparam]
+            params['ion1.' + bparam] = other[bparam]
+        return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHMs = FWHMs,
+                                     abundances=abundances, parameters=params)
+
 
 
 class CrystalFieldMulti(object):
