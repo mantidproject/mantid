@@ -232,6 +232,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.user_file_button.clicked.connect(self._on_user_file_load)
         self.batch_button.clicked.connect(self._on_batch_file_load)
 
+        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
+        self.user_file_line_edit.setDisabled(True)
+        self.batch_line_edit.setDisabled(True)
+
         # --------------------------------------------------------------------------------------------------------------
         # Table setup
         # --------------------------------------------------------------------------------------------------------------
