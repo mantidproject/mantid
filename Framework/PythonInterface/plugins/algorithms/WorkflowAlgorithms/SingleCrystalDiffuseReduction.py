@@ -12,7 +12,7 @@ from mantid.simpleapi import (LoadIsawUB, MaskDetectors, ConvertUnits,
                               CreateSingleValuedWorkspace, LoadNexus,
                               MultiplyMD, LoadIsawDetCal, LoadMask)
 from mantid.geometry import SpaceGroupFactory, SymmetryOperationFactory
-from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction
+from mantid.kernel import VisibleWhenProperty, PropertyCriterion, FloatArrayLengthValidator, FloatArrayProperty, Direction, Property
 from mantid import logger
 import numpy as np
 
@@ -55,6 +55,10 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="Flux",defaultValue="",action=FileAction.Load,
                                           extensions=[".nxs"]),
                              "An input workspace containing momentum dependent flux. See :ref:`MDnormSCD <algm-MDnormSCD>` for details")
+        self.declareProperty('MomentumMin', Property.EMPTY_DBL,
+                             doc="Minimum value in momentum. The max of this value and the flux momentum minimum will be used.")
+        self.declareProperty('MomentumMax', Property.EMPTY_DBL,
+                             doc="Maximum value in momentum. The min of this value and the flux momentum maximum will be used.")
 
         # UBMatrix
         self.declareProperty(FileProperty(name="UBMatrix",defaultValue="",action=FileAction.Load,
@@ -114,6 +118,8 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         # Vanadium
         self.setPropertyGroup("SolidAngle","Vanadium")
         self.setPropertyGroup("Flux","Vanadium")
+        self.setPropertyGroup("MomentumMin","Vanadium")
+        self.setPropertyGroup("MomentumMax","Vanadium")
 
         # Goniometer
         self.setPropertyGroup("SetGoniometer","Goniometer")
@@ -184,6 +190,19 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
 
         XMin = mtd['__sa'].getXDimension().getMinimum()
         XMax = mtd['__sa'].getXDimension().getMaximum()
+
+        newXMin = self.getProperty("MomentumMin").value
+        newXMax = self.getProperty("MomentumMax").value
+        if newXMin != Property.EMPTY_DBL or newXMax != Property.EMPTY_DBL:
+            if newXMin != Property.EMPTY_DBL:
+                XMin = max(XMin, newXMin)
+            if newXMax != Property.EMPTY_DBL:
+                XMax = min(XMax, newXMax)
+            logger.notice("Using momentum range {} to {} A^-1".format(XMin, XMax))
+            CropWorkspace(InputWorkspace='__flux',OutputWorkspace='__flux',XMin=XMin,XMax=XMax)
+            for spectrumNumber in range(mtd['__flux'].getNumberHistograms()):
+                Y = mtd['__flux'].readY(spectrumNumber)
+                mtd['__flux'].setY(spectrumNumber,(Y-Y.min())/(Y.max()-Y.min()))
 
         if _background:
             Load(Filename=self.getProperty("Background").value,

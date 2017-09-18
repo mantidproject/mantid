@@ -35,9 +35,9 @@ public:
                vtkGeometryRepresentation);
   void PrintSelf(ostream &os, vtkIndent indent) VTK_OVERRIDE;
 
-  virtual int ProcessViewRequest(vtkInformationRequestKey *request_type,
-                                 vtkInformation *inInfo,
-                                 vtkInformation *outInfo) VTK_OVERRIDE;
+  int ProcessViewRequest(vtkInformationRequestKey *request_type,
+                         vtkInformation *inInfo,
+                         vtkInformation *outInfo) VTK_OVERRIDE;
 
   enum { X_SLICE_ONLY, Y_SLICE_ONLY, Z_SLICE_ONLY, ALL_SLICES };
   vtkSetClampMacro(Mode, int, X_SLICE_ONLY, ALL_SLICES);
@@ -53,15 +53,14 @@ public:
 
 protected:
   vtkAlignedGeometrySliceRepresentation();
-  ~vtkAlignedGeometrySliceRepresentation();
+  ~vtkAlignedGeometrySliceRepresentation() override;
 
-  virtual void SetupDefaults() VTK_OVERRIDE;
-  virtual int RequestData(vtkInformation *request,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector) VTK_OVERRIDE;
+  void SetupDefaults() VTK_OVERRIDE;
+  int RequestData(vtkInformation *request, vtkInformationVector **inputVector,
+                  vtkInformationVector *outputVector) VTK_OVERRIDE;
 
-  virtual bool AddToView(vtkView *view) VTK_OVERRIDE;
-  virtual bool RemoveFromView(vtkView *view) VTK_OVERRIDE;
+  bool AddToView(vtkView *view) VTK_OVERRIDE;
+  bool RemoveFromView(vtkView *view) VTK_OVERRIDE;
 
 private:
   vtkAlignedGeometrySliceRepresentation(

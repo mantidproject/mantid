@@ -66,13 +66,16 @@ void SaveSESANS::init() {
                       "Filename", "", API::FileProperty::Save, fileExtensions),
                   "The name to use when saving the file");
 
-  declareProperty("ThetaZMax", EMPTY_DBL(), "Theta_zmax",
+  declareProperty("ThetaZMax", EMPTY_DBL(),
+                  "The angular acceptance in the encoding direction",
                   Kernel::Direction::Input);
   declareProperty("ThetaZMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("ThetaYMax", EMPTY_DBL(), "Theta_ymax",
+  declareProperty("ThetaYMax", EMPTY_DBL(),
+                  "The angular acceptance in the non-encoding direction",
                   Kernel::Direction::Input);
   declareProperty("ThetaYMaxUnit", "radians", Kernel::Direction::Input);
-  declareProperty("EchoConstant", EMPTY_DBL(), "Echo_constant",
+  declareProperty("EchoConstant", EMPTY_DBL(),
+                  "The spin echo length, in nanometers, probed by a 1A neutron",
                   Kernel::Direction::Input);
 
   declareProperty<std::string>("Sample", "", "Sample name",

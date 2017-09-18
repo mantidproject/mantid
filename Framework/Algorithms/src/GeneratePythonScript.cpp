@@ -79,8 +79,8 @@ void GeneratePythonScript::exec() {
   }
 
   // Need at least a start time to do time filter
-  if (startTime != "") {
-    if (endTime == "") {
+  if (!startTime.empty()) {
+    if (endTime.empty()) {
       // If no end time was given then filter up to now
       view->filterBetweenExecDate(DateAndTime(startTime));
     } else {

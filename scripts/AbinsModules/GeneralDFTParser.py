@@ -52,7 +52,7 @@ class GeneralDFTParser(object):
         """
         Checks end of the text file.
         :param file_obj: file object which was open in "r" mode
-        :return: True if end of file, otherwise False
+        :returns: True if end of file, otherwise False
         """
         n = AbinsModules.AbinsConstants.ONE_CHARACTER
         pos = file_obj.tell()
@@ -68,7 +68,7 @@ class GeneralDFTParser(object):
         Checks for msg which terminates block.
         :param file_obj: file object from which we read
         :param msg: list with messages which end kpoint block.
-        :return: True if end of block otherwise False
+        :returns: True if end of block otherwise False
         """
         for item in msg:
             pos = file_obj.tell()
