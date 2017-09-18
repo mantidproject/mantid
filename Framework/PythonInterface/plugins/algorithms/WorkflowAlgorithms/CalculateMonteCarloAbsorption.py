@@ -468,39 +468,28 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Converting to/from wavelength -------------------------------
 
     def _convert_to_wavelength(self, workspace):
+        self._indirect_q_axis = 'Y'
+        x_unit = workspace.getAxis(0).getUnit().unitID()
 
-        if self._sample_unit == 'Wavelength':
+        if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
+        elif x_unit == 'EnergyTransfer':
+            return self._create_waves_indirect_elastic(workspace)
+        elif x_unit == 'MomentumTransfer':
+            self._indirect_q_axis = 'X'
+            logger.information('X-Axis of the input workspace is Q')
+            y_unit = workspace.getAxis(1).getUnit().unitID()
+
+            if y_unit == 'Wavelength':
+                return self._tranpose_ws(workspace)
+            elif y_unit == 'EnergyTransfer':
+                workspace = self._tranpose_ws(workspace)
+                return self._create_waves_indirect_elastic(workspace)
+
+        if self._emode == "Indirect":
+            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         else:
-            convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=True)
-
-            if self._emode == 'Indirect':
-                x_unit = workspace.getAxis(0).getUnit().unitID()
-                y_unit = workspace.getAxis(1).getUnit().unitID()
-
-                # Check whether to create wavelength workspace for Indirect Elastic
-                if (x_unit == 'MomentumTransfer' and not y_unit == 'EnergyTransfer') \
-                        or (y_unit == 'MomentumTransfer' and not x_unit == 'EnergyTransfer'):
-                    self._indirect_q_axis = 'Y'
-
-                    if x_unit == 'MomentumTransfer':
-                        self._indirect_q_axis = 'X'
-                        logger.information('X-Axis of the input workspace is Q')
-                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-                        transpose_alg.setProperty("InputWorkspace", workspace)
-                        transpose_alg.execute()
-                        workspace = transpose_alg.getProperty("OutputWorkspace").value
-                    return self._create_waves_indirect_elastic(workspace)
-                else:
-                    convert_unit_alg.setProperty("EFixed", self._efixed)
-
-            convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("Target", 'Wavelength')
-            convert_unit_alg.setProperty("EMode", self._emode)
-
-            convert_unit_alg.execute()
-
-            return convert_unit_alg.getProperty("OutputWorkspace").value
+            return self._convert_units(workspace, "Wavelength", self._emode)
 
     def _convert_from_wavelength(self, workspace):
 
@@ -528,7 +517,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             convert_unit_alg.setProperty("EMode", self._emode)
             convert_unit_alg.execute()
             return convert_unit_alg.getProperty("OutputWorkspace").value
-
         else:
             return workspace
 
@@ -543,7 +531,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The input workspace.
         :return:            The output wavelength workspace.
         """
-        self._q_values = workspace.getAxis(1).extractValues()
+        y_axis = workspace.getAxis(1)
 
         # ---------- Load Elastic Instrument Definition File ----------
 
@@ -558,10 +546,17 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         load_alg.setProperty("RewriteSpectraMap", True)
         load_alg.execute()
 
+        # ---------- Extraction of Q-Values -----------
+
         # Replace y-axis with spectra axis
         workspace.replaceAxis(1, SpectraAxis.create(workspace))
         e_fixed = float(self._efixed)
         logger.information('Efixed = %f' % e_fixed)
+
+        # Convert spectra axis to Q, if not already in Q
+        if y_axis != "MomentumTransfer":
+            workspace = self._convert_spectra_axis(workspace, "ElasticQ", self._emode, e_fixed)
+        self._q_values = y_axis.extractValues()
 
         # ---------- Set Instrument Parameters ----------
 
@@ -658,6 +653,31 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_log_mult_alg.setProperty("LogNames", log_names)
         sample_log_mult_alg.setProperty("LogValues", log_values)
         sample_log_mult_alg.execute()
+
+    def _convert_units(self, workspace, target_unit, emode, efixed=None):
+        convert_units_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
+        convert_units_alg.setProperty("InputWorkspace", workspace)
+        convert_units_alg.setProperty("Target", target_unit)
+        convert_units_alg.setProperty("EMode", emode)
+        if efixed is not None:
+            convert_units_alg.setProperty("EFixed", efixed)
+        convert_units_alg.execute()
+        return convert_units_alg.getProperty("OutputWorkspace").value
+
+    def _convert_spectra_axis(self, workspace, target, emode, efixed):
+        convert_axis_alg = self.createChildAlgorithm("ConvertSpectraAxis", enableLogging=False)
+        convert_axis_alg.setProperty("InputWorkspace", workspace)
+        convert_axis_alg.setProperty("EMode", emode)
+        convert_axis_alg.setProperty("Target", target)
+        convert_axis_alg.setProperty("EFixed", efixed)
+        convert_axis_alg.execute()
+        return convert_axis_alg.getProperty("OutputWorkspace").value
+
+    def _tranpose_ws(self, workspace):
+        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+        transpose_alg.setProperty("InputWorkspace", workspace)
+        transpose_alg.execute()
+        return transpose_alg.getProperty("OutputWorkspace").value
 
     # ------------------------------- Utility algorithms -------------------------------
     def _set_algorithm_properties(self, algorithm, properties):
