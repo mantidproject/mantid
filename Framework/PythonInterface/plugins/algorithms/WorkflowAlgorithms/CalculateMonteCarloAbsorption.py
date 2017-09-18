@@ -469,8 +469,17 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Converting to/from wavelength -------------------------------
 
     def _convert_to_wavelength(self, workspace):
+        """
+        Converts the specified workspace to units of wavelength.
+
+        :param workspace:   The workspace to convert.
+        :return:
+        """
+
         x_unit = workspace.getAxis(0).getUnit().unitID()
         y_unit = workspace.getAxis(1).getUnit().unitID()
+
+        # ----- Quick Conversions (Wavelength and DeltaE) -----
 
         if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
@@ -484,18 +493,30 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             workspace = self._tranpose_ws(workspace)
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
+        # ----- Indirect Conversions -----
+
         if self._emode == "Indirect":
 
+            # Check for Indirect Elastic (units of Q)
             if y_unit == 'MomentumTransfer':
                 return self._create_waves_indirect_elastic(workspace)
             elif x_unit == 'MomentumTransfer':
                 self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
-        else:
-            return self._convert_units(workspace, "Wavelength", self._emode)
+
+        # ----- Direct Conversions -----
+
+        return self._convert_units(workspace, "Wavelength", self._emode)
 
     def _convert_from_wavelength(self, workspace):
+        """
+        Converts the specified workspace into units of wavelength.
+
+        :param workspace:   The workspace whose units to convert.
+        :return:            A workspace with units of wavelength, created from
+                            converting the specified workspace.
+        """
 
         if self._transposed == 'X':
             workspace = self._tranpose_ws(workspace)
@@ -573,11 +594,20 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
-        self._change_angles(workspace, self._q_values, wave)
+        self._update_instrument_angles(workspace, self._q_values, wave)
 
         return workspace
 
-    def _change_angles(self, workspace, q_values, wave):
+    def _update_instrument_angles(self, workspace, q_values, wave):
+        """
+        Updates the instrument angles in the specified workspace, using the specified wavelength
+        and the specified Q-Values. This is required when calculating absorption corrections for
+        indirect elastic.
+
+        :param workspace:   The workspace whose instrument angles to update.
+        :param q_values:    The extracted Q-Values (MomentumTransfer)
+        :param wave:        The wavelength
+        """
         work_dir = config['defaultsave.directory']
         k0 = 4.0 * math.pi / wave
         theta = 2.0 * np.degrees(np.arcsin(q_values / k0))  # convert to angle
@@ -601,6 +631,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         update_alg.setProperty("SkipFirstNLines", 1)
 
     def _crop_ws(self, workspace):
+        """
+        Crops the specified workspace to the XMin and XMax values specified in
+        it's first and last X-Values.
+
+        :param workspace:   The workspace to crop.
+        :return:            The cropped workspace.
+        """
         x = workspace.dataX(0)
         xmin = x[0]
         xmax = x[1]
@@ -614,25 +651,52 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Child algorithms -------------------------------
 
     def _clone_ws(self, input_ws):
+        """
+        Clones the specified input workspace.
+
+        :param input_ws:    The workspace to clone.
+        :return:            A clone of the specified workspace.
+        """
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
         clone_alg.setProperty("InputWorkspace", input_ws)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
     def _multiply(self, lhs_ws, rhs_ws):
+        """
+        Multiplies the specified workspaces together.
+
+        :param lhs_ws:  The left hand workspace multiplicand.
+        :param rhs_ws:  The right hand workspace multiplicand.
+        :return:        The product of the specified workspaces.
+        """
         multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
         multiply_alg.setProperty("LHSWorkspace", lhs_ws)
         multiply_alg.setProperty("RHSWorkspace", rhs_ws)
         multiply_alg.execute()
         return multiply_alg.getProperty('OutputWorkspace').value
 
-    def _group_ws(self, input_ws):
+    def _group_ws(self, workspaces):
+        """
+        Groups the specified input workspaces.
+
+        :param input_ws:    A list of the workspaces to group together.
+        :return:            A WorkspaceGroup containing the specified workspaces.
+        """
         group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
-        group_alg.setProperty("InputWorkspaces", input_ws)
+        group_alg.setProperty("InputWorkspaces", workspaces)
         group_alg.execute()
         return group_alg.getProperty("OutputWorkspace").value
 
     def _add_sample_log_multiple(self, input_ws, log_names, log_values):
+        """
+        Adds sample logs to the specified input workspace using the specified
+        log names and values.
+
+        :param input_ws:    The workspace to add sample logs to.
+        :param log_names:   The names of each sample log to add (ordered).
+        :param log_values:  The values of each sample log to add (ordered).
+        """
         sample_log_mult_alg = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
         sample_log_mult_alg.setProperty("Workspace", input_ws)
         sample_log_mult_alg.setProperty("LogNames", log_names)
@@ -640,16 +704,40 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_log_mult_alg.execute()
 
     def _convert_units(self, workspace, target_unit, emode, efixed=None):
+        """
+        Converts the units of the specified workspace to the target unit, given
+        the specified EMode, and potentially EFixed value.
+
+        :param workspace:   The workspace whose units to convert.
+        :param target_unit: The unit to convert to.
+        :param emode:       The EMode to use in conversion.
+        :param efixed:      The EFixed value to use in conversion.
+        :return:            A workspace created from converting the units of the
+                            specified workspace to the specified target unit.
+        """
         convert_units_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
         convert_units_alg.setProperty("InputWorkspace", workspace)
         convert_units_alg.setProperty("Target", target_unit)
         convert_units_alg.setProperty("EMode", emode)
+        # Check if EFixed was defined
         if efixed is not None:
             convert_units_alg.setProperty("EFixed", efixed)
         convert_units_alg.execute()
         return convert_units_alg.getProperty("OutputWorkspace").value
 
     def _convert_spectra_axis(self, workspace, target, emode, efixed):
+        """
+        Convert the units of the spectra axis of the specified workspace to the
+        specified target unit, given the specified EMode and EFixed value.
+
+        :param workspace:   The workspace whose spectra axis to convert.
+        :param target:      The target unit to convert to.
+        :param emode:       The EMode to use in conversion.
+        :param efixed:      The EFixed value to use in conversion.
+        :return:            A workspace created from converting the units of the
+                            spectra axis of the specified workspace to the specified
+                            target unit.
+        """
         convert_axis_alg = self.createChildAlgorithm("ConvertSpectraAxis", enableLogging=False)
         convert_axis_alg.setProperty("InputWorkspace", workspace)
         convert_axis_alg.setProperty("EMode", emode)
@@ -659,6 +747,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         return convert_axis_alg.getProperty("OutputWorkspace").value
 
     def _tranpose_ws(self, workspace):
+        """
+        Tranposes the specified workspace.
+
+        :param workspace:   The workspace to transpose.
+        :return:            The transpose of the specified workspace.
+        """
         transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
         transpose_alg.setProperty("InputWorkspace", workspace)
         transpose_alg.execute()
@@ -666,6 +760,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     # ------------------------------- Utility algorithms -------------------------------
     def _set_algorithm_properties(self, algorithm, properties):
+        """
+        Sets the specified algorithm's properties using the given properties.
+
+        :param algorithm:   The algorithm whose properties to set.
+        :param properties:  The dictionary of properties to set.
+        """
 
         for key, value in properties.items():
             algorithm.setProperty(key, value)
