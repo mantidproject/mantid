@@ -16,6 +16,8 @@ namespace Mantid {
 class TofEvent;
 namespace Parallel {
 namespace IO {
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+class NXEventDataSource;
 
 /** Loader for event data from Nexus files with parallelism based on multiple
   processes (MPI) for performance.
@@ -44,10 +46,25 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_PARALLEL_DLL EventLoader {
+namespace EventLoader {
+MANTID_PARALLEL_DLL void load(const std::string &filename,
+                              const std::string &groupName,
+                              const std::vector<std::string> &bankNames,
+                              const std::vector<int32_t> &bankOffsets,
+                              std::vector<std::vector<TofEvent> *> eventLists);
+}
+
+/*
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+class EventLoader {
 public:
   EventLoader(const std::string &filename, const std::string &groupName,
               const std::vector<std::string> &bankNames,
+              const std::vector<int32_t> &bankOffsets,
+              std::vector<std::vector<TofEvent> *> eventLists);
+  EventLoader(const Chunker &chunker,
+              const NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &
+                  dataSource,
               const std::vector<int32_t> &bankOffsets,
               std::vector<std::vector<TofEvent> *> eventLists);
   ~EventLoader();
@@ -55,23 +72,23 @@ public:
   void load();
 
 private:
-  void load(const H5::DataType &indexType, const H5::DataType &timeZeroType,
-            const H5::DataType &timeOffsetType);
-  template <class IndexType>
-  void load(const H5::DataType &timeZeroType,
-            const H5::DataType &timeOffsetType);
-  template <class IndexType, class TimeZeroType>
-  void load(const H5::DataType &timeOffsetType);
-  template <class IndexType, class TimeZeroType, class TimeOffsetType>
-  void load();
-  H5::DataType readDataType(const std::string &name) const;
 
-  std::unique_ptr<H5::H5File> m_file;
-  const std::string m_groupName;
-  const std::vector<std::string> m_bankNames;
+  const Chunker &m_chunker;
+  // TODO does not work, must be templated -> template EventLoader, make free load function that are not templated
+  const NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &
+      m_dataSource;
+  //std::unique_ptr<H5::H5File> m_file;
+  //const std::string m_groupName;
+  //const std::vector<std::string> m_bankNames;
   const std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<TofEvent> *> m_eventLists;
 };
+
+void load(const std::string &filename, const std::string &groupName,
+          const std::vector<std::string> &bankNames,
+          const std::vector<int32_t> &bankOffsets,
+          std::vector<std::vector<TofEvent> *> eventLists);
+          */
 
 } // namespace IO
 } // namespace Parallel

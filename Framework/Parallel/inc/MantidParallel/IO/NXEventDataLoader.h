@@ -5,6 +5,7 @@
 #include <H5Cpp.h>
 
 #include "MantidParallel/DllConfig.h"
+#include "MantidParallel/IO/NXEventDataSource.h"
 
 namespace Mantid {
 namespace Parallel {
@@ -40,19 +41,24 @@ namespace IO {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-class MANTID_PARALLEL_DLL NXEventDataLoader {
+class NXEventDataLoader
+    : public NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> {
 public:
-  NXEventDataLoader(const H5::H5File &file, const std::string &nxEventDataPath);
+  NXEventDataLoader(const H5::Group &group, std::vector<std::string> bankNames);
 
-  const std::vector<IndexType> &eventIndex() const;
-  const std::vector<TimeZeroType> &eventTimeZero() const;
-  void readEventID(int32_t *event_id, size_t start, size_t count) const;
+  void setBankIndex(const size_t bank) override;
+
+  const std::vector<IndexType> &eventIndex() const override;
+  const std::vector<TimeZeroType> &eventTimeZero() const override;
+  void readEventID(int32_t *event_id, size_t start,
+                   size_t count) const override;
   void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start,
-                           size_t count) const;
+                           size_t count) const override;
 
 private:
-  const H5::H5File &m_file;
-  const std::string m_rootPath;
+  const H5::Group m_root;
+  H5::Group m_group;
+  const std::vector<std::string> m_bankNames;
   const std::string m_id_path;
   const std::string m_time_offset_path;
   std::vector<IndexType> m_index;
@@ -60,10 +66,10 @@ private:
 };
 
 namespace detail {
-/// Read complete data set from file and return the contents as a vector.
+/// Read complete data set from group and return the contents as a vector.
 template <class T>
-std::vector<T> read(const H5::H5File &file, const std::string &dataSetName) {
-  H5::DataSet dataSet = file.openDataSet(dataSetName);
+std::vector<T> read(const H5::Group &group, const std::string &dataSetName) {
+  H5::DataSet dataSet = group.openDataSet(dataSetName);
   H5::DataType dataType = dataSet.getDataType();
   H5::DataSpace dataSpace = dataSet.getSpace();
   std::vector<T> result;
@@ -72,15 +78,15 @@ std::vector<T> read(const H5::H5File &file, const std::string &dataSetName) {
   return result;
 }
 
-/** Read subset of data set from file and write the result into buffer.
+/** Read subset of data set from group and write the result into buffer.
  *
  * The subset is given by a start index and a count. */
 template <class T>
-void read(T *buffer, const H5::H5File &file, const std::string &dataSetName,
+void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
           size_t start, size_t count) {
   auto hstart = static_cast<hsize_t>(start);
   auto hcount = static_cast<hsize_t>(count);
-  H5::DataSet dataSet = file.openDataSet(dataSetName);
+  H5::DataSet dataSet = group.openDataSet(dataSetName);
   H5::DataType dataType = dataSet.getDataType();
   H5::DataSpace dataSpace = dataSet.getSpace();
   if ((static_cast<int64_t>(dataSpace.getSelectNpoints()) -
@@ -94,7 +100,7 @@ void read(T *buffer, const H5::H5File &file, const std::string &dataSetName,
 }
 }
 
-/** Constructor from file and path to NXevent_data group to load from.
+/** Constructor from group and bank names in group to load from.
  *
  * Template arguments are:
  * - IndexType      -> type used for reading event_index
@@ -102,13 +108,15 @@ void read(T *buffer, const H5::H5File &file, const std::string &dataSetName,
  * - TimeOffsetType -> type used for reading event_time_offset */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::NXEventDataLoader(
-    const H5::H5File &file, const std::string &nxEventDataPath)
-    : m_file(file), m_rootPath(nxEventDataPath),
-      m_id_path(m_rootPath + "/event_id"),
-      m_time_offset_path(m_rootPath + "/event_time_offset") {
-  m_index = detail::read<IndexType>(file, m_rootPath + "/event_index");
-  m_time_zero =
-      detail::read<TimeZeroType>(file, m_rootPath + "/event_time_zero");
+    const H5::Group &group, std::vector<std::string> bankNames)
+    : m_root(group), m_bankNames(std::move(bankNames)) {}
+
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::setBankIndex(
+    const size_t bank) {
+  m_group = m_root.openGroup(m_bankNames[bank]);
+  m_index = detail::read<IndexType>(m_group, "event_index");
+  m_time_zero = detail::read<TimeZeroType>(m_group, "event_time_zero");
 }
 
 /// Returns a reference to the vector read from event_index.
@@ -130,7 +138,7 @@ NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::eventTimeZero()
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::readEventID(
     int32_t *buffer, size_t start, size_t count) const {
-  detail::read<int32_t>(buffer, m_file, m_id_path, start, count);
+  detail::read<int32_t>(buffer, m_group, "event_id", start, count);
 }
 
 /// Read subset given by start and count from event_time_offset and write it
@@ -139,7 +147,7 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::
     readEventTimeOffset(TimeOffsetType *buffer, size_t start,
                         size_t count) const {
-  detail::read<TimeOffsetType>(buffer, m_file, m_time_offset_path, start,
+  detail::read<TimeOffsetType>(buffer, m_group, "event_time_offset", start,
                                count);
 }
 
