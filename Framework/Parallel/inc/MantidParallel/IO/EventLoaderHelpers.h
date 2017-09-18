@@ -78,8 +78,8 @@ void load(
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
       dataSource.setBankIndex(range.bankIndex);
       // TODO
-      // parser.setEventIndex(loader->eventIndex());
-      // parser.setEventTimeZero(loader->eventTimeZero());
+      // parser.setEventIndex(dataSource->eventIndex());
+      // parser.setEventTimeZero(dataSource->eventTimeZero());
     }
     // TODO use double buffer or something
     // parser.wait()
