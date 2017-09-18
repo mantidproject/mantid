@@ -5,11 +5,14 @@
 
 #include <H5Cpp.h>
 
+#include "MantidParallel/IO/Chunker.h"
+#include "MantidParallel/IO/EventLoader.h"
+#include "MantidParallel/IO/NXEventDataSource.h"
+
 namespace Mantid {
 namespace Parallel {
 namespace IO {
 namespace EventLoader {
-namespace detail {
 template <class T> void load() { throw std::runtime_error("unknown"); }
 template <> void load<int32_t>() { throw std::runtime_error("int32_t"); }
 template <> void load<int64_t>() { throw std::runtime_error("int64_t"); }
@@ -21,11 +24,45 @@ template <> void load<double>() { throw std::runtime_error("double"); }
 }
 }
 }
-}
 
-#include "MantidParallel/IO/EventLoader.h"
+#include "MantidParallel/IO/EventLoaderHelpers.h"
 
 using namespace Mantid::Parallel::IO;
+
+namespace detail {
+class FakeDataSource : public NXEventDataSource<int64_t, int64_t, int32_t> {
+public:
+  void setBankIndex(const size_t bank) override {
+    m_bank = bank;
+    m_index = std::vector<int64_t>{0, 2, 4, 8};
+    m_time_zero.clear();
+    for (size_t i = 0; i < m_index.size(); ++i)
+      m_time_zero.push_back(static_cast<int64_t>(1000 * i + bank));
+  }
+
+  const std::vector<int64_t> &eventIndex() const override { return m_index; }
+  const std::vector<int64_t> &eventTimeZero() const override {
+    return m_time_zero;
+  }
+  void readEventID(int32_t *event_id, size_t start,
+                   size_t count) const override {
+    for (size_t i = 0; i < count; ++i)
+      event_id[i] = static_cast<int32_t>(m_bank * m_bankSize +
+                                         (start + count) % m_bankSize);
+  }
+  void readEventTimeOffset(int32_t *event_time_offset, size_t start,
+                           size_t count) const override {
+    for (size_t i = 0; i < count; ++i)
+      event_time_offset[i] = static_cast<int32_t>(start + count);
+  }
+
+private:
+  const size_t m_bankSize{10};
+  size_t m_bank;
+  std::vector<int64_t> m_index;
+  std::vector<int64_t> m_time_zero;
+};
+}
 
 class EventLoaderTest : public CxxTest::TestSuite {
 public:
@@ -40,36 +77,39 @@ public:
   }
 
   void test_H5DataType_parameter_pack_conversion() {
+    using EventLoader::load;
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT32),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "int32_t");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_INT64),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "int64_t");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT32),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "uint32_t");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT64),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "uint64_t");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_FLOAT),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "float");
+    TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_DOUBLE),
+                            const std::runtime_error &e, std::string(e.what()),
+                            "double");
     TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_INT32),
-        const std::runtime_error &e, std::string(e.what()), "int32_t");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_INT64),
-        const std::runtime_error &e, std::string(e.what()), "int64_t");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_UINT32),
-        const std::runtime_error &e, std::string(e.what()), "uint32_t");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_UINT64),
-        const std::runtime_error &e, std::string(e.what()), "uint64_t");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_FLOAT),
-        const std::runtime_error &e, std::string(e.what()), "float");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_DOUBLE),
-        const std::runtime_error &e, std::string(e.what()), "double");
-    TS_ASSERT_THROWS_EQUALS(
-        EventLoader::detail::load(H5::PredType::NATIVE_CHAR),
-        const std::runtime_error &e, std::string(e.what()),
+        load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
+        std::string(e.what()),
         "Unsupported H5::DataType for entry in NXevent_data");
   }
 
-  void test_tmp() {
-    EventLoader::load("/home/simon/mantid/nexus/load-performance/sample-files/"
-                      "PG3_4871_event.nxs",
-                      "entry", {"bank102_events"}, {0}, {nullptr});
-    // EventLoader::load("/mnt/extra/simon/neutron-data/realistic_NXEvent_data/events-100000_banks-7_pixels-10000_chunk-262144_compress-None.hdf5",
-    //                  "entry/instrument", {"events-0"}, {0}, {nullptr});
+  void test_load() {
+    const std::vector<size_t> bankSizes{10, 100, 1000};
+    const size_t chunkSize{37};
+    Chunker chunker(1, 0, bankSizes, chunkSize);
+    ::detail::FakeDataSource dataSource;
+    TS_ASSERT_THROWS_NOTHING(
+        (EventLoader::load<int64_t, int64_t, int32_t>(chunker, dataSource)));
+    // TODO cannot test anything useful before we have the parser.
   }
 };
 

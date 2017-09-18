@@ -14,6 +14,7 @@ set ( INC_FILES
 	inc/MantidParallel/ExecutionMode.h
 	inc/MantidParallel/IO/Chunker.h
 	inc/MantidParallel/IO/EventLoader.h
+	inc/MantidParallel/IO/EventLoaderHelpers.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/Request.h
