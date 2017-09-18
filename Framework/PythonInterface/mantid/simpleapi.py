@@ -885,7 +885,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                                        "algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
         elif _is_function_property(prop):
-            retvals[name] = FunctionWrapper(prop)
+            retvals[name] = FunctionWrapper(prop.value)
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value
