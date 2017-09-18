@@ -28,7 +28,10 @@ H5::DataType readDataType(const H5::Group &group,
                           const std::string &name) {
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
+}
 
+namespace EventLoader {
+namespace detail {
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(
     const Chunker &chunker,
@@ -88,44 +91,18 @@ void load(const H5::Group &group, const std::vector<std::string> &bankNames,
   static_cast<void>(eventLists);
   load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader);
 }
-
-template <class... T1, class... T2>
-void load(const H5::DataType &type, T2 &&... args) {
-  // Translate from H5::DataType to actual type. Done step by step to avoid
-  // combinatoric explosion. The T1 parameter pack holds the final template
-  // arguments we want. The T2 parameter pack represents the remaining
-  // H5::DataType arguments and any other arguments. In every call we peel off
-  // the first entry from the T2 pack and append it to T1. This stops once the
-  // next argument in args is not of type H5::DataType anymore, allowing us to
-  // pass arbitrary extra arguments in the second part of args.
-  if (type == H5::PredType::NATIVE_INT32)
-    return load<T1..., int32_t>(args...);
-  if (type == H5::PredType::NATIVE_INT64)
-    return load<T1..., int64_t>(args...);
-  if (type == H5::PredType::NATIVE_UINT32)
-    return load<T1..., uint32_t>(args...);
-  if (type == H5::PredType::NATIVE_UINT64)
-    return load<T1..., uint64_t>(args...);
-  if (type == H5::PredType::NATIVE_FLOAT)
-    return load<T1..., float>(args...);
-  if (type == H5::PredType::NATIVE_DOUBLE)
-    return load<T1..., double>(args...);
-  throw std::runtime_error(
-      "Unsupported H5::DataType for entry in NXevent_data");
-}
 }
 
-namespace EventLoader {
 void load(const std::string &filename, const std::string &groupName,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<TofEvent> *> eventLists) {
   H5::H5File file(filename, H5F_ACC_RDONLY);
   H5::Group group = file.openGroup(groupName);
-  IO::load(readDataType(group, bankNames, "event_index"),
-           readDataType(group, bankNames, "event_time_zero"),
-           readDataType(group, bankNames, "event_time_offset"), group,
-           bankNames, bankOffsets, eventLists);
+  detail::load(readDataType(group, bankNames, "event_index"),
+               readDataType(group, bankNames, "event_time_zero"),
+               readDataType(group, bankNames, "event_time_offset"), group,
+               bankNames, bankOffsets, eventLists);
 }
 }
 
