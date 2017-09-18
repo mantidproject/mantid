@@ -1,5 +1,5 @@
-#include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
+#include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 #include "MantidCurveFitting/Functions/CrystalFieldMoment.h"
@@ -374,7 +374,7 @@ void CrystalFieldFunction::setUpForFit() {
 void CrystalFieldFunction::declareParameter(const std::string &, double,
                                             const std::string &) {
   throw Kernel::Exception::NotImplementedError(
-      "CrystalFieldFunction cannot not have its own parameters.");
+      "CrystalFieldFunction cannot have its own parameters.");
 }
 
 /// Build and cache the attribute names
@@ -424,9 +424,8 @@ void CrystalFieldFunction::buildAttributeNames() const {
     }
     m_attributeNames.insert(m_attributeNames.end(), names.begin(), names.end());
   }
-  auto nSpec = nSpectra();
   // Attributes of physical properties
-  for (size_t iSpec = nSpec; iSpec < m_target->nFunctions(); ++iSpec) {
+  for (size_t iSpec = nSpectra(); iSpec < m_target->nFunctions(); ++iSpec) {
     auto fun = m_target->getFunction(iSpec).get();
     auto compositePhysProp = dynamic_cast<CompositeFunction *>(fun);
     if (compositePhysProp) {
@@ -709,14 +708,14 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   auto fun = new MultiDomainFunction;
   m_target.reset(fun);
 
-  DoubleFortranVector en;
-  ComplexFortranMatrix wf;
-  ComplexFortranMatrix ham;
-  ComplexFortranMatrix hz;
+  DoubleFortranVector energies;
+  ComplexFortranMatrix waveFunctions;
+  ComplexFortranMatrix hamiltonian;
+  ComplexFortranMatrix hamiltonianZeeman;
   int nre = 0;
   auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
-  peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
-  ham += hz;
+  peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
+  hamiltonian += hamiltonianZeeman;
 
   const auto nSpec = nSpectra();
   auto &temperatures = m_control.temperatures();
@@ -725,14 +724,14 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   for (size_t i = 0; i < nSpec; ++i) {
     auto intensityScaling =
         m_control.getFunction(i)->getParameter("IntensityScaling");
-    fun->addFunction(buildSpectrum(nre, en, wf, temperatures[i], FWHMs[i], i,
+    fun->addFunction(buildSpectrum(nre, energies, waveFunctions, temperatures[i], FWHMs[i], i,
                                    addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
   }
   auto &physProps = m_control.physProps();
   size_t i = nSpec;
   for (auto &prop : physProps) {
-    auto physPropFun = buildPhysprop(nre, en, wf, ham, prop);
+    auto physPropFun = buildPhysprop(nre, energies, waveFunctions, hamiltonian, prop);
     fun->addFunction(physPropFun);
     fun->setDomainIndex(i, i);
     m_mapPrefixes2PhysProps[prop] = physPropFun;
@@ -806,15 +805,15 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
 
   auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
-    DoubleFortranVector en;
-    ComplexFortranMatrix wf;
-    ComplexFortranMatrix ham;
-    ComplexFortranMatrix hz;
+    DoubleFortranVector energies;
+    ComplexFortranMatrix waveFunctions;
+    ComplexFortranMatrix hamiltonian;
+    ComplexFortranMatrix hamiltonianZeeman;
     int nre = 0;
     auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(
         *compSource.getFunction(ionIndex));
-    peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
-    ham += hz;
+    peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
+    hamiltonian += hamiltonianZeeman;
 
     auto &temperatures = m_control.temperatures();
     auto &FWHMs = m_control.FWHMs();
@@ -825,13 +824,13 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
       auto spectrumIntensityScaling =
           m_control.getFunction(i)->getParameter("IntensityScaling");
       spectra[i]->addFunction(buildSpectrum(
-          nre, en, wf, temperatures[i], FWHMs[i], i, addBackground,
+          nre, energies, waveFunctions, temperatures[i], FWHMs[i], i, addBackground,
           ionIntensityScaling * spectrumIntensityScaling));
     }
 
     size_t i = 0;
     for (auto &prop : physProps) {
-      auto physPropFun = buildPhysprop(nre, en, wf, ham, prop);
+      auto physPropFun = buildPhysprop(nre, energies, waveFunctions, hamiltonian, prop);
       compositePhysProps[i]->addFunction(physPropFun);
       std::string propName = "ion";
       propName.append(std::to_string(ionIndex)).append(".").append(prop);
@@ -848,20 +847,26 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
   }
 }
 
-/// Calculate excitations at given temperature
+/// Calculate excitations at given temperature.
+/// @param nre :: An id of the ion.
+/// @param energies :: A vector with energies.
+/// @param waveFunctions :: A matrix with wave functions.
+/// @param temperature :: A temperature of the spectrum.
+/// @param value :: An object to receive computed exciteations.
+/// @param intensityScaling :: A scaling factor for the intensities.
 void CrystalFieldFunction::calcExcitations(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    int nre, const DoubleFortranVector &energies, const ComplexFortranMatrix &waveFunctions,
     double temperature, FunctionValues &values, double intensityScaling) const {
   IntFortranVector degeneration;
   DoubleFortranVector eEnergies;
   DoubleFortranMatrix iEnergies;
-  const double de = getAttribute("ToleranceEnergy").asDouble();
-  const double di = getAttribute("ToleranceIntensity").asDouble();
+  const double toleranceEnergy = getAttribute("ToleranceEnergy").asDouble();
+  const double toleranceIntensity = getAttribute("ToleranceIntensity").asDouble();
   DoubleFortranVector eExcitations;
   DoubleFortranVector iExcitations;
-  calculateIntensities(nre, en, wf, temperature, de, degeneration, eEnergies,
+  calculateIntensities(nre, energies, waveFunctions, temperature, toleranceEnergy, degeneration, eEnergies,
                        iEnergies);
-  calculateExcitations(eEnergies, iEnergies, de, di, eExcitations,
+  calculateExcitations(eEnergies, iEnergies, toleranceEnergy, toleranceIntensity, eExcitations,
                        iExcitations);
   const auto nPeaks = eExcitations.size();
   values.expand(2 * nPeaks);
@@ -872,12 +877,20 @@ void CrystalFieldFunction::calcExcitations(
 }
 
 /// Build a function for a single spectrum.
+/// @param nre :: An id of the ion.
+/// @param energies :: A vector with energies.
+/// @param waveFunctions :: A matrix with wave functions.
+/// @param temperature :: A temperature of the spectrum.
+/// @param fwhm :: A full width at half maximum to set to each peak.
+/// @param iSpec :: An index of the created spectrum in m_target composite function.
+/// @param addBackground :: An option to add a background to the spectrum.
+/// @param intensityScaling :: A scaling factor for the peak intensities.
 API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    int nre, const DoubleFortranVector &energies, const ComplexFortranMatrix &waveFunctions,
     double temperature, double fwhm, size_t iSpec, bool addBackground,
     double intensityScaling) const {
   FunctionValues values;
-  calcExcitations(nre, en, wf, temperature, values, intensityScaling);
+  calcExcitations(nre, energies, waveFunctions, temperature, values, intensityScaling);
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   const auto peakShape = getAttribute("PeakShape").asString();
   auto bkgdShape = getAttribute("Background").asUnquotedString();
@@ -903,28 +916,34 @@ API::IFunction_sptr CrystalFieldFunction::buildSpectrum(
   return IFunction_sptr(spectrum);
 }
 
+/// Build a physical property function.
+/// @param nre :: An id of the ion.
+/// @param energies :: A vector with energies.
+/// @param waveFunctions :: A matrix with wave functions.
+/// @param hamiltonian :: A matrix with the hamiltonian.
+/// @param propName :: the name of the physical property.
 API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
-    int nre, const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
-    const ComplexFortranMatrix &ham, const std::string &propName) const {
+    int nre, const DoubleFortranVector &energies, const ComplexFortranMatrix &waveFunctions,
+    const ComplexFortranMatrix &hamiltonian, const std::string &propName) const {
 
   if (propName == "cv") { // HeatCapacity
     auto propFun = boost::make_shared<CrystalFieldHeatCapacityCalculation>();
-    propFun->setEnergy(en);
+    propFun->setEnergy(energies);
     return propFun;
   }
   if (propName == "chi") { // Susceptibility
     auto propFun = boost::make_shared<CrystalFieldSusceptibilityCalculation>();
-    propFun->setEigensystem(en, wf, nre);
+    propFun->setEigensystem(energies, waveFunctions, nre);
     return propFun;
   }
   if (propName == "mh") { // Magnetisation
     auto propFun = boost::make_shared<CrystalFieldMagnetisationCalculation>();
-    propFun->setHamiltonian(ham, nre);
+    propFun->setHamiltonian(hamiltonian, nre);
     return propFun;
   }
   if (propName == "mt") { // MagneticMoment
     auto propFun = boost::make_shared<CrystalFieldMomentCalculation>();
-    propFun->setHamiltonian(ham, nre);
+    propFun->setHamiltonian(hamiltonian, nre);
     return propFun;
   }
 
@@ -933,26 +952,31 @@ API::IFunction_sptr CrystalFieldFunction::buildPhysprop(
 }
 
 /// Update a physical property function.
+/// @param nre :: An id of the ion.
+/// @param energies :: A vector with energies.
+/// @param waveFunctions :: A matrix with wave functions.
+/// @param hamiltonian :: A matrix with the hamiltonian.
+/// @param function :: A function to update.
 void CrystalFieldFunction::updatePhysprop(int nre,
-                                          const DoubleFortranVector &en,
-                                          const ComplexFortranMatrix &wf,
-                                          const ComplexFortranMatrix &ham,
-                                          API::IFunction &fun) const {
+                                          const DoubleFortranVector &energies,
+                                          const ComplexFortranMatrix &waveFunctions,
+                                          const ComplexFortranMatrix &hamiltonian,
+                                          API::IFunction &function) const {
 
-  auto propName = fun.name();
+  auto propName = function.name();
 
   if (propName == "cv") { // HeatCapacity
-    auto &propFun = dynamic_cast<CrystalFieldHeatCapacityCalculation &>(fun);
-    propFun.setEnergy(en);
+    auto &propFun = dynamic_cast<CrystalFieldHeatCapacityCalculation &>(function);
+    propFun.setEnergy(energies);
   } else if (propName == "chi") { // Susceptibility
-    auto &propFun = dynamic_cast<CrystalFieldSusceptibilityCalculation &>(fun);
-    propFun.setEigensystem(en, wf, nre);
+    auto &propFun = dynamic_cast<CrystalFieldSusceptibilityCalculation &>(function);
+    propFun.setEigensystem(energies, waveFunctions, nre);
   } else if (propName == "mh") { // Magnetisation
-    auto &propFun = dynamic_cast<CrystalFieldMagnetisationCalculation &>(fun);
-    propFun.setHamiltonian(ham, nre);
+    auto &propFun = dynamic_cast<CrystalFieldMagnetisationCalculation &>(function);
+    propFun.setHamiltonian(hamiltonian, nre);
   } else if (propName == "mt") { // MagneticMoment
-    auto &propFun = dynamic_cast<CrystalFieldMomentCalculation &>(fun);
-    propFun.setHamiltonian(ham, nre);
+    auto &propFun = dynamic_cast<CrystalFieldMomentCalculation &>(function);
+    propFun.setHamiltonian(hamiltonian, nre);
   } else {
     throw std::runtime_error("Physical property type not understood: " +
                              propName);
@@ -1015,26 +1039,26 @@ void CrystalFieldFunction::updateSingleSiteSingleSpectrum() const {
 
 /// Update the target function in a single site - multi spectrum case.
 void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
-  DoubleFortranVector en;
-  ComplexFortranMatrix wf;
-  ComplexFortranMatrix ham;
-  ComplexFortranMatrix hz;
+  DoubleFortranVector energies;
+  ComplexFortranMatrix waveFunctions;
+  ComplexFortranMatrix hamiltonian;
+  ComplexFortranMatrix hamiltonianZeeman;
   int nre = 0;
   auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(*m_source);
-  peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
-  ham += hz;
+  peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
+  hamiltonian += hamiltonianZeeman;
   size_t iFirst = hasBackground() ? 1 : 0;
 
   auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
   auto &temperatures = m_control.temperatures();
   auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
-    updateSpectrum(*fun.getFunction(iSpec), nre, en, wf, temperatures[iSpec],
+    updateSpectrum(*fun.getFunction(iSpec), nre, energies, waveFunctions, temperatures[iSpec],
                    FWHMs[iSpec], iSpec, iFirst);
   }
 
   for (auto &prop : m_mapPrefixes2PhysProps) {
-    updatePhysprop(nre, en, wf, ham, *prop.second);
+    updatePhysprop(nre, energies, waveFunctions, hamiltonian, *prop.second);
   }
 }
 
@@ -1067,15 +1091,15 @@ void CrystalFieldFunction::updateMultiSiteSingleSpectrum() const {
 void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
   auto &compSource = compositeSource();
   for (size_t ionIndex = 0; ionIndex < compSource.nFunctions(); ++ionIndex) {
-    DoubleFortranVector en;
-    ComplexFortranMatrix wf;
-    ComplexFortranMatrix ham;
-    ComplexFortranMatrix hz;
+    DoubleFortranVector energies;
+    ComplexFortranMatrix waveFunctions;
+    ComplexFortranMatrix hamiltonian;
+    ComplexFortranMatrix hamiltonianZeeman;
     int nre = 0;
     auto &peakCalculator = dynamic_cast<CrystalFieldPeaksBase &>(
         *compSource.getFunction(ionIndex));
-    peakCalculator.calculateEigenSystem(en, wf, ham, hz, nre);
-    ham += hz;
+    peakCalculator.calculateEigenSystem(energies, waveFunctions, hamiltonian, hamiltonianZeeman, nre);
+    hamiltonian += hamiltonianZeeman;
     size_t iFirst = ionIndex == 0 && hasBackground() ? 1 : 0;
 
     auto &temperatures = m_control.temperatures();
@@ -1085,7 +1109,7 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
           dynamic_cast<CompositeFunction &>(*m_target->getFunction(iSpec));
       auto &ionSpectrum =
           dynamic_cast<CompositeFunction &>(*spectrum.getFunction(ionIndex));
-      updateSpectrum(ionSpectrum, nre, en, wf, temperatures[iSpec],
+      updateSpectrum(ionSpectrum, nre, energies, waveFunctions, temperatures[iSpec],
                      FWHMs[iSpec], iSpec, iFirst);
     }
 
@@ -1094,16 +1118,24 @@ void CrystalFieldFunction::updateMultiSiteMultiSpectrum() const {
     auto prefixSize = prefix.size();
     for (auto prop : m_mapPrefixes2PhysProps) {
       if (prop.first.substr(0, prefixSize) == prefix) {
-        updatePhysprop(nre, en, wf, ham, *prop.second);
+        updatePhysprop(nre, energies, waveFunctions, hamiltonian, *prop.second);
       }
     }
   }
 }
 
 /// Update a function for a single spectrum.
+/// @param spectrum :: A Spectrum function to update.
+/// @param nre :: An id of the ion.
+/// @param energies :: A vector with energies.
+/// @param waveFunctions :: A matrix with wave functions.
+/// @param temperature :: A temperature of the spectrum.
+/// @param fwhm :: A full width at half maximum to set to each peak.
+/// @param iSpec :: An index of the created spectrum in m_target composite function.
+/// @param iFirst :: An index of the first peak in spectrum composite function.
 void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
-                                          const DoubleFortranVector &en,
-                                          const ComplexFortranMatrix &wf,
+                                          const DoubleFortranVector &energies,
+                                          const ComplexFortranMatrix &waveFunctions,
                                           double temperature, double fwhm,
                                           size_t iSpec, size_t iFirst) const {
   const auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
@@ -1114,7 +1146,7 @@ void CrystalFieldFunction::updateSpectrum(API::IFunction &spectrum, int nre,
   auto intensityScaling =
       m_control.getFunction(iSpec)->getParameter("IntensityScaling");
   FunctionValues values;
-  calcExcitations(nre, en, wf, temperature, values, intensityScaling);
+  calcExcitations(nre, energies, waveFunctions, temperature, values, intensityScaling);
   auto &composite = dynamic_cast<API::CompositeFunction &>(spectrum);
   CrystalFieldUtils::updateSpectrumFunction(composite, peakShape, values,
                                             iFirst, xVec, yVec, fwhmVariation,
