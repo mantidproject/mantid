@@ -100,16 +100,6 @@ maintainability and performance.
 
 This new implementation of the SANS data reduction uses a simple state object
 which stores the reduction-relevant information centrally and is immutable.
-This *SANSState* approach is the corner stone of the new design.
-The *SANSState* is:
-
-- self-validating
-- immmutable
-- typed
-- serializabvle
-- easy to reason about
-- modular (sub-states for units of work)
-
 
 Overview
 --------
@@ -118,7 +108,7 @@ The reduction back-end consists of three components:
 
 - the *SANSState* approach to centrally store the state of the reduction
 - a set of work-flow algorithms which perform the individual reduction steps
-- a algorithm which orchestrates the work-flow algorithms.
+- an algorithm which orchestrates the work-flow algorithms.
 
 
 *SANSState*
@@ -171,14 +161,14 @@ Due to the nature of the *PropertyManagerProperty* of algorithms it serializes
 the state object to a Python dictionary and receives a Mantid *PropertyManager*
 object.
 
-States which want to fulfil the *StateBase* contract must override the
+States which want to fulfill the *StateBase* contract must override the
 *validate* method. This method is used to ensure internal consistency
 of the *TypedParameters* on the state. It is important to have comprehensive
 and tight checks here.
 
 The entries on the state objects are all of type *TypedParameter* which allows
 for type checking, ensuring consistency early on. It is easy to
-build custom types. The currently list of types are:
+build custom types. The current list of types are:
 
 - *StringParameter*
 - *BoolParameter*
@@ -312,25 +302,25 @@ a new instrument, this will be most likely one of the main areas to add new code
 The *StateReductionMode* class contains general settings about the reduction, e.g. if we are dealing with a merged
 reduction. It contains the following parameters:
 
-=============================== =================================================== ============================================== ========= =============== ===========================================
-Name                            Comment                                             Type                                           Optional? Auto-generated? Default value
-=============================== =================================================== ============================================== ========= =============== ===========================================
-reduction_mode                  The type of reduction, ie LAB, HAB, merged or both  *ClassTypeParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
-reduction_dimensionality        If 1D or 2D reduction                               *ClassTypeParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
-merge_fit_mode                  The fit mode for merging                            *ClassTypeParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
-merge_shift                     The shift value for merging                         *FloatParameter*                               Y         N               0.0
-merge_scale                     The scale value for merging                         *FloatParameter*                               Y         N               1.0
-merge_range_min                 The min q value for merging                         *FloatWithNoneParameter*                       Y         N               *None*
-merge_range_max                 The max q value for merging                         *FloatWithNoneParameter*                       Y         N               *None*
-detector_names                  A dict from detector type to detector name          *DictParameter*                                N         Y               -
-=============================== =================================================== ============================================== ========= =============== ===========================================
+=============================== ===================================================== ============================================== ========= =============== ===========================================
+Name                            Comment                                               Type                                           Optional? Auto-generated? Default value
+=============================== ===================================================== ============================================== ========= =============== ===========================================
+reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *ClassTypeParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
+reduction_dimensionality        If 1D or 2D reduction                                 *ClassTypeParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
+merge_fit_mode                  The fit mode for merging                              *ClassTypeParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
+merge_shift                     The shift value for merging                           *FloatParameter*                               Y         N               0.0
+merge_scale                     The scale value for merging                           *FloatParameter*                               Y         N               1.0
+merge_range_min                 The min q value for merging                           *FloatWithNoneParameter*                       Y         N               *None*
+merge_range_max                 The max q value for merging                           *FloatWithNoneParameter*                       Y         N               *None*
+detector_names                  A dict from detector type to detector name            *DictParameter*                                N         Y               -
+=============================== ===================================================== ============================================== ========= =============== ===========================================
 
 
 *slice.py*
 **********
 
 The *StateSliceEvent* class is only relevant when we are dealing with event-type
-data and the user decides to perform an event-sliced reduction, ie one reduction per event slice.
+data and the user decides to perform an event-sliced reduction, i.e. one reduction per event slice.
 
 =========== ======================================= ========================= ========= ===============
 Name        Comment                                 Type                      Optional? Auto-generated?
@@ -465,9 +455,9 @@ height_from_file      The file-extracted sample height         *PositiveFloatPar
 Adjustment workspaces are generated to be consumed in the momentum transfer conversion step.
 There are three types of adjustments
 
-- Pure wavelength adjustments, ie adjustments which only affect the bins
-- Pure pixel adjustments, ie adjustments which only affect the spectra
-- Pixel-and-wavelength adjustments, ie adjustments which affect both the bins and spectra
+- Pure wavelength adjustments, i.e. adjustments which only affect the bins
+- Pure pixel adjustments, i.e. adjustments which only affect the spectra
+- Pixel-and-wavelength adjustments, i.e. adjustments which affect both the bins and spectra
 
 The *StateAdjustment* class is a composite state which is made of information
 relating to the different types of adjustments
@@ -510,11 +500,11 @@ incident_monitor                 The incident monitor                           
 prompt_peak_correction_min       The start time of a prompt peak correction                                                       *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_max       The stop time of a prompt peak correction                                                        *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_enabled   If the prompt peak correction should occur                                                       *BoolParameter*                 Y         N               True
-rebin_type                       The type of wavelength rebinning, ie standard or interpolating                                   *ClassTypeParameter(RebinType)* Y         N               -
+rebin_type                       The type of wavelength rebinning, i.e. standard or interpolating                                 *ClassTypeParameter(RebinType)* Y         N               -
 wavelength_low                   The lower wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_high                  The upper wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_step                  The wavelength step                                                                              *PositiveFloatParameter*        Y         N               -
-wavelength_step_type             The wavelength step type, ie lin or log                                                          *ClassTypeParameter(RebinType)* Y         N               -
+wavelength_step_type             The wavelength step type, i.e. lin or log                                                        *ClassTypeParameter(RebinType)* Y         N               -
 use_full_wavelength_range        If the full wavelength range of the instrument should be used                                    *BoolParameter*                 Y         N               -
 wavelength_full_range_low        The lower wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
 wavelength_full_range_high       The upper wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
@@ -541,7 +531,7 @@ fit information. The set of parameters describing this fit are:
 ================= ================================================================= ================================ ========= =============== ========================
 Name              Comment                                                           Type                             Optional? Auto-generated? Default
 ================= ================================================================= ================================ ========= =============== ========================
-fit_type          The type of fitting, ie lin, log or poly                          *ClassTypeParameter(FitType)*    Y         N               *FitType.Log* enum value
+fit_type          The type of fitting, i.e. lin, log or poly                        *ClassTypeParameter(FitType)*    Y         N               *FitType.Log* enum value
 polynomial_order  Polynomial order when poly fit type has been selected             *PositiveIntegerParameter*       Y         N               0
 wavelength_low    Lower wavelength bound for fitting (*None* means no lower bound)  *PositiveFloatWithNoneParameter* Y         N               -
 wavelength_high   Upper wavelength bound for fitting (*None* means no upper bound)  *PositiveFloatWithNoneParameter* Y         N               -
@@ -566,11 +556,11 @@ incident_monitor                The incident monitor                            
 prompt_peak_correction_min      The start time of a prompt peak correction                                          *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_max      The stop time of a prompt peak correction                                           *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_enabled  If the prompt peak correction should occur                                          *BoolParameter*                     Y         N               False
-rebin_type                      The type of wavelength rebinning, ie standard or interpolating                      *ClassTypeParameter(RebinType)*     Y         N               *RebinType.Rebin* enum value
+rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *ClassTypeParameter(RebinType)*     Y         N               *RebinType.Rebin* enum value
 wavelength_low                  The lower wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_high                 The upper wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_step                 The wavelength step                                                                 *PositiveFloatParameter*            Y         N               -
-wavelength_step_type            The wavelength step type, ie lin or log                                             *ClassTypeParameter(RangeStepType)* Y         N               -
+wavelength_step_type            The wavelength step type, i.e. lin or log                                           *ClassTypeParameter(RangeStepType)* Y         N               -
 background_TOF_general_start    General lower boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_general_stop     General upper boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_monitor_start    Monitor specific lower boundary for background correction (monitor vs. start value) *DictParameter*                     Y         N               -
@@ -591,12 +581,12 @@ Name                   Comment                                                  
 wavelength_low         The lower bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_high        The upper bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_step        The wavelength step                                                        *PositiveFloatParameter*            N         N
-wavelength_step_type   The wavelength step type, ie lin or log                                    *ClassTypeParameter(RangeStepType)* N         N
+wavelength_step_type   The wavelength step type, i.e. lin or log                                  *ClassTypeParameter(RangeStepType)* N         N
 adjustment_files       Dict to adjustment files; detector type vs *StateAdjustmentFiles* object   *DictParamter*                      N         Y
 idf_path               Path to the IDF file                                                       *StringParameter*                   N         Y
 ====================== ========================================================================== =================================== ========= ===============
 
-Per detector type (ie LAB and HAB) there can be one pixel adjustment file and
+Per detector type (i.e. LAB and HAB) there can be one pixel adjustment file and
 one wavelength file. The values are stored in the *StateAdjustmentFiles* class and its parameters are:
 
 =========================== =========================================== ================== ========= ===============
@@ -630,7 +620,7 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, ie lin or log                  *ClassTypeParameter(RangeStepType)*           N,                              if 2D  N         -
+q_xy_step_type                   The step type, i.e. lin or log                *ClassTypeParameter(RangeStepType)*           N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -
@@ -653,7 +643,7 @@ for the circular or the rectangular cases needs to be specified.
 The *StateCompatibility* class is not directly part of the reduction, but it will
 convert event-mode workspaces early on to histogram-mode workspaces in order to
 emulate the old reduction work-flow. This allows for a direct comparison between
-results of the new and old reduction framework. The name compatibility mode has
+results of the new and old reduction framework. The name *compatibility* has
 been chosen in order to indicate that we are testing for compatibility with the
 results of the old reduction framework.
 
@@ -696,7 +686,7 @@ settings will override settings specified in the user file.
 
 
 An example dictionary entry for the fit parameters during the transmission
-calculation for a Can data set could be:
+calculation for a *Can* data set could be:
 
 .. code-block:: python
 
@@ -706,7 +696,7 @@ calculation for a Can data set could be:
                               data_type=DataType.Can,
                               polynomial_order=2)
 
-This entry is added to the general user input dictionary. Note that for some ofthe
+This entry is added to the general user input dictionary. Note that for some of the
 inputs enums from *enums.py* are used, e.g. *FitType.Polynomial*. This approach is
 used throughout the reduction-backend.
 
@@ -774,7 +764,7 @@ This director is used by other directors which are responsible for creating the 
 dictionary for the CLI and GUI case. These directors don't know anything about the builders or
 the state, but are only responsible for providing the user input. An exception to this
 is the *StateData* object, since it is used indirectly to choose the correct builders
-for the other sub states. Hence the role of the outer level directors is to provide the
+for the other sub-states. Hence the role of the outer level directors is to provide the
 *StateDirectorISIS* object with general user input information and information about the data.
 
 
@@ -796,7 +786,8 @@ Director for *ISISCommandInterface*
 
 The *ISISCommandInterface* is used by some of the power users among the instrument scientists. It is
 an effective way to customize reductions which require small tweaks between different reductions.
-Documentation for the *ISISCommandInterface* can be found on the Mantid Wiki pages.
+Please consult the `documentation <https://www.mantidproject.org/Scripting_SANS_Reductions/>`_
+for the *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is *CommandInterfaceStateDirector*. It has to deal
 with the complication that we are only able to setup the reduction state after all information has been provided, hence
@@ -903,7 +894,7 @@ The algorithm performs the following steps:
    b. Execute :ref:`CalculateTransmission <algm-CalculateTransmission>`
    c. Get the fitted and unfitted workspace
 
-6. Set the fitted and unfitted workspaces on the output of the algorithm
+6. Set the fitted and unfitted workspaces on the output of the algorithm.
 
 
 ``SANSConvertToQ``
@@ -1142,7 +1133,7 @@ The sub-steps of this algorithm are:
 The ``SANSSliceEvent`` algorithm creates a sliced workspaces from an event-based
 SANS input workspace according to the settings in the state object. The algorithm
 will extract a slice based on a start and end time which are set in the state
-object. In addition the data type, ie if the slice is to be taken from a sample
+object. In addition the data type, i.e. if the slice is to be taken from a sample
 or a can workspace can be specified. Note that the monitor workspace is not
 being sliced but scaled by the ratio of the proton charge of the sliced
 workspace to the full workspace.
@@ -1150,7 +1141,7 @@ workspace to the full workspace.
 The sub=states of this algorithm are:
 
 1. Get the start time and the end time of the time slice
-2. If the data set is from a Can measurement, then don't perform a slice
+2. If the data set is from a *Can* measurement, then don't perform a slice
 3. Slice the scatter workspace using the start and end time and :ref:`FilterByTime <algm-FilterByTime>`
 4. Get the partial charge for the sliced data and calculate the slice factor which is *(partial charge) / (total charge)*
 5. Multiply the monitor workspace with the scale factor
