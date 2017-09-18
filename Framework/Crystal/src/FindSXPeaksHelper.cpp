@@ -124,10 +124,10 @@ bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
 
 bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
                      const double phiTolerance, const double thetaTolerance,
-                     bool tofUnits) const {
+                     const XAxisUnit units) const {
 
-  const auto x_1 = (tofUnits) ? _t : _d_spacing;
-  const auto x_2 = (tofUnits) ? rhs._t : rhs._d_spacing;
+  const auto x_1 = (units == XAxisUnit::TOF) ? _t : _d_spacing;
+  const auto x_2 = (units == XAxisUnit::TOF) ? rhs._t : rhs._d_spacing;
 
   if (std::abs(x_1 - x_2) > xTolerance) {
     return false;
@@ -267,10 +267,9 @@ bool PerSpectrumBackgroundStrategy::isBelowBackground(
 PeakFindingStrategy::PeakFindingStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue, const bool tofUnits)
+    const double maxValue, const XAxisUnit units)
     : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue),
-      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_tofUnits(tofUnits) {
-}
+      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_units(units) {}
 
 PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
                                           const HistogramData::HistogramY &y,
@@ -355,7 +354,7 @@ double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x,
 
 double PeakFindingStrategy::convertToTOF(const double xValue,
                                          const size_t workspaceIndex) const {
-  if (m_tofUnits) {
+  if (m_units == XAxisUnit::TOF) {
     // we're already using TOF units
     return xValue;
   } else {
@@ -370,9 +369,9 @@ double PeakFindingStrategy::convertToTOF(const double xValue,
 StrongestPeaksStrategy::StrongestPeaksStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue, const bool tofUnits)
+    const double maxValue, const XAxisUnit units)
     : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
-                          tofUnits) {}
+                          units) {}
 
 PeakList StrongestPeaksStrategy::dofindSXPeaks(
     const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
@@ -406,9 +405,9 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
 AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                                    const API::SpectrumInfo &spectrumInfo,
                                    const double minValue, const double maxValue,
-                                   const bool tofUnits)
+                                   const XAxisUnit units)
     : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
-                          tofUnits) {
+                          units) {
   // We only allow the AbsoluteBackgroundStrategy for now
   if (!dynamic_cast<const AbsoluteBackgroundStrategy *>(m_backgroundStrategy)) {
     throw std::invalid_argument("The AllPeaksStrategy has to be initialized "
@@ -712,9 +711,9 @@ bool RelativeCompareStrategy::compare(const SXPeak &lhs,
 
 AbsoluteCompareStrategy::AbsoluteCompareStrategy(
     const double xUnitResolution, const double phiResolution,
-    const double twoThetaResolution, const bool tofUnits)
+    const double twoThetaResolution, const XAxisUnit units)
     : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution),
-      m_twoThetaResolution(twoThetaResolution), m_tofUnits(tofUnits) {
+      m_twoThetaResolution(twoThetaResolution), m_units(units) {
   // Convert the input from degree to radians
   constexpr double rad2deg = M_PI / 180.;
   m_phiResolution *= rad2deg;
@@ -724,7 +723,7 @@ AbsoluteCompareStrategy::AbsoluteCompareStrategy(
 bool AbsoluteCompareStrategy::compare(const SXPeak &lhs,
                                       const SXPeak &rhs) const {
   return lhs.compare(rhs, m_xUnitResolution, m_phiResolution,
-                     m_twoThetaResolution, m_tofUnits);
+                     m_twoThetaResolution, m_units);
 }
 
 } // namespace FindSXPeaksHelper

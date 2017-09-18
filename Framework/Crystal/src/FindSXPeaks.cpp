@@ -333,11 +333,16 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   }
 }
 
-bool FindSXPeaks::workspaceHasTOFUnits(
-    MatrixWorkspace_const_sptr workspace) const {
+XAxisUnit
+FindSXPeaks::workspaceHasTOFUnits(MatrixWorkspace_const_sptr workspace) const {
   const auto xAxis = workspace->getAxis(0);
   const auto unitID = xAxis->unit()->unitID();
-  return unitID == "TOF";
+
+  if (unitID == "TOF") {
+    return XAxisUnit::TOF;
+  } else {
+    return XAxisUnit::DSPACING;
+  }
 }
 
 std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
@@ -359,7 +364,7 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy>
 FindSXPeaks::getPeakFindingStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue, const bool tofUnits) const {
+    const double maxValue, const XAxisUnit tofUnits) const {
   // Get the peak finding stratgy
   std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   if (peakFindingStrategy == strongestPeakStrategy) {
@@ -401,12 +406,12 @@ FindSXPeaks::getCompareStrategy() const {
     double xUnitResolution = getProperty("XUnitResolution");
     double phiResolution = getProperty("PhiResolution");
     double twoThetaResolution = getProperty("TwoThetaResolution");
-    bool tofUnits = workspaceHasTOFUnits(getProperty("InputWorkspace"));
+    const auto tofUnits = workspaceHasTOFUnits(getProperty("InputWorkspace"));
     return Mantid::Kernel::make_unique<
         FindSXPeaksHelper::AbsoluteCompareStrategy>(
         xUnitResolution, phiResolution, twoThetaResolution, tofUnits);
   }
 }
 
-} // namespace Algorithms
+} // namespace Crystal
 } // namespace Mantid

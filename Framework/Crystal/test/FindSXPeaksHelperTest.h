@@ -376,7 +376,7 @@ public:
     const auto thetaResolution = 1.;
     const auto phiResolution = 1.;
     auto compareStrategy = Mantid::Kernel::make_unique<AbsoluteCompareStrategy>(
-        dResolution, thetaResolution, phiResolution, false);
+        dResolution, thetaResolution, phiResolution, XAxisUnit::DSPACING);
 
     // WHEN
     auto result12 = compareStrategy->compare(peak1, peak2);

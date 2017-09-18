@@ -88,7 +88,9 @@ private:
   getPeakFindingStrategy(
       const FindSXPeaksHelper::BackgroundStrategy *backgroundStrategy,
       const API::SpectrumInfo &spectrumInfo, const double minValue,
-      const double maxValue, const bool tofUnits = true) const;
+      const double maxValue,
+      const FindSXPeaksHelper::XAxisUnit tofUnits =
+          FindSXPeaksHelper::XAxisUnit::TOF) const;
 
   /// Selects a peak finding strategy
   std::unique_ptr<FindSXPeaksHelper::ReducePeakListStrategy>
@@ -103,7 +105,7 @@ private:
   void reducePeakList(const peakvector &, Mantid::API::Progress &progress);
 
   // Check if this workspace has units of TOF
-  bool
+  FindSXPeaksHelper::XAxisUnit
   workspaceHasTOFUnits(Mantid::API::MatrixWorkspace_const_sptr workspace) const;
 
   /// The value in X to start the search from

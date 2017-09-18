@@ -23,6 +23,9 @@ namespace Mantid {
 namespace Crystal {
 namespace FindSXPeaksHelper {
 
+/// enum to determine the units of the workspaces X axis we are searching in
+enum class XAxisUnit { TOF, DSPACING };
+
 /* ------------------------------------------------------------------------------------------
  * Single Crystal peak representation
  * ------------------------------------------------------------------------------------------
@@ -41,7 +44,7 @@ public:
   /// per trait.
   bool compare(const SXPeak &rhs, const double xTolerance,
                const double phiTolerance, const double thetaTolerance,
-               const bool tofUnits = true) const;
+               const XAxisUnit tofUnits = XAxisUnit::TOF) const;
 
   /// Getter for LabQ
   Mantid::Kernel::V3D getQ() const;
@@ -151,7 +154,7 @@ public:
                       const API::SpectrumInfo &spectrumInfo,
                       const double minValue = EMPTY_DBL(),
                       const double maxValue = EMPTY_DBL(),
-                      const bool tofUnits = true);
+                      const XAxisUnit units = XAxisUnit::TOF);
   PeakList findSXPeaks(const HistogramData::HistogramX &x,
                        const HistogramData::HistogramY &y,
                        const int workspaceIndex) const;
@@ -171,7 +174,7 @@ protected:
   const double m_minValue = EMPTY_DBL();
   const double m_maxValue = EMPTY_DBL();
   const API::SpectrumInfo &m_spectrumInfo;
-  const bool m_tofUnits;
+  const XAxisUnit m_units;
 };
 
 class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {
@@ -180,7 +183,7 @@ public:
                          const API::SpectrumInfo &spectrumInfo,
                          const double minValue = EMPTY_DBL(),
                          const double maxValue = EMPTY_DBL(),
-                         const bool tofUnits = true);
+                         const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -192,7 +195,7 @@ public:
                    const API::SpectrumInfo &spectrumInfo,
                    const double minValue = EMPTY_DBL(),
                    const double maxValue = EMPTY_DBL(),
-                   const bool tofUnits = true);
+                   const XAxisUnit units = XAxisUnit::TOF);
   PeakList dofindSXPeaks(const HistogramData::HistogramX &x,
                          const HistogramData::HistogramY &y, Bound low,
                          Bound high, const int workspaceIndex) const override;
@@ -233,14 +236,14 @@ public:
   AbsoluteCompareStrategy(const double tofResolution,
                           const double phiResolution,
                           const double twoThetaResolution,
-                          const bool tofUnits = true);
+                          const XAxisUnit units = XAxisUnit::TOF);
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
 
 private:
   const double m_xUnitResolution;
   double m_phiResolution;
   double m_twoThetaResolution;
-  const bool m_tofUnits;
+  const XAxisUnit m_units;
 };
 
 /* ------------------------------------------------------------------------------------------
