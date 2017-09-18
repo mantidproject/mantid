@@ -31,34 +31,34 @@ set ( SIP_HDRS
   ${WIDGETS_SRC_DIR}/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefIVConnections.h
   ${WIDGETS_SRC_DIR}/refdetectorview/inc/MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h
   ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/FitPropertyBrowser.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h
   ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSeparatorCommand.h
-  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h
+  ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
   ${WIDGETS_SRC_DIR}/common/inc/MantidQtWidgets/Common/SlitCalculator.h
   ${WIDGETS_SRC_DIR}/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
   ${WIDGETS_SRC_DIR}/instrumentview/inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
