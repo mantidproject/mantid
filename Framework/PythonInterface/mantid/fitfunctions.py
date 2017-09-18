@@ -235,7 +235,7 @@ class FunctionWrapper(object):
       return self.fun.name()
 
   def _execute_algorithm(self, name, **kwargs):
-    alg = AlgorithmManager.create(name)
+    alg = AlgorithmManager.createUnmanaged(name)
     alg.setChild(True)
     alg.initialize()
     for param in kwargs:
