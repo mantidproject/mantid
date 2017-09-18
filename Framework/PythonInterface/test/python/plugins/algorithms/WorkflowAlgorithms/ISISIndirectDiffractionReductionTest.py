@@ -74,7 +74,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Test summing multiple runs.
         """
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
+        wks = ISISIndirectDiffractionReduction(InputFiles=['26176-26173'],
                                                SumFiles=True,
                                                Instrument='IRIS',
                                                Mode='diffspec',

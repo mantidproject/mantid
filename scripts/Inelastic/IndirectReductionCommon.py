@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import Load, LoadVesuvio
+from mantid.simpleapi import Load
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -63,8 +63,8 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     """
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split('_')[0]
-    file_range_parser = _create_file_range_parser(sum_files, instrument)
-    file_ranges = [file_range_parser(file_range) for file_range in file_ranges]
+    parse_file_range = _create_file_range_parser(sum_files, instrument)
+    file_ranges = [parse_file_range(file_range) for file_range in file_ranges]
     return _load_files(file_ranges, ipf_filename, spec_min, spec_max, load_logs, load_opts)
 
 
@@ -161,7 +161,7 @@ def do_load(file_specifier, output_ws_name, ipf_filename, load_logs, load_opts):
     :param load_opts:       Additional loading options
     :param load_logs:       If True, load logs
     """
-    from mantid.simpleapi import LoadParameterFile
+    from mantid.simpleapi import LoadVesuvio, LoadParameterFile
 
     if 'VESUVIO' in ipf_filename:
         # Load all spectra. They are cropped later
