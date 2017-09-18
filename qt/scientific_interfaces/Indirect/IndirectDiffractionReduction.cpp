@@ -113,7 +113,7 @@ void IndirectDiffractionReduction::run() {
     return;
   }
 
-  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() && 
+  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() &&
       m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
     showInformationBox("Use Vanadium File checked but no vanadium files "
                        "have been supplied.");
