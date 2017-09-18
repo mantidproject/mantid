@@ -18,7 +18,7 @@ class PresenterEnum(object):
         pass
 
 
-class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
+class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter):
     """
     Comments below are from Raquel:
 
@@ -36,7 +36,7 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessorMainPresenter):
     """
 
     def __init__(self, facility):
-        super(MantidQt.MantidWidgets.DataProcessorMainPresenter, self).__init__()
+        super(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresenter, self).__init__()
 
         self._view = None
 

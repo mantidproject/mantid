@@ -182,5 +182,6 @@ class PDToGUDRUN(DataProcessorAlgorithm):
 
         self.setProperty("OutputWorkspace", wksp)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDToGUDRUN)

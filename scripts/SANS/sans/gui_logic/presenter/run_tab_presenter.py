@@ -22,12 +22,20 @@ from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiag
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
 from sans.gui_logic.sans_data_processor_gui_algorithm import SANS_DUMMY_INPUT_ALGORITHM_PROPERTY_NAME
 from sans.gui_logic.presenter.property_manager_service import PropertyManagerService
-from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui, OPTIONS_SEPARATOR, OPTIONS_INDEX,
+from sans.gui_logic.gui_common import (get_reduction_mode_strings_for_gui,
+                                       SAMPLE_SCATTER_INDEX, SAMPLE_SCATTER_PERIOD_INDEX,
+                                       SAMPLE_TRANSMISSION_INDEX, SAMPLE_TRANSMISSION_PERIOD_INDEX,
+                                       SAMPLE_DIRECT_INDEX, SAMPLE_DIRECT_PERIOD_INDEX,
+                                       CAN_SCATTER_INDEX, CAN_SCATTER_PERIOD_INDEX,
+                                       CAN_TRANSMISSION_INDEX, CAN_TRANSMISSION_PERIOD_INDEX,
+                                       CAN_DIRECT_INDEX, CAN_DIRECT_PERIOD_INDEX, OUTPUT_NAME_INDEX,
+                                       OPTIONS_SEPARATOR, OPTIONS_INDEX,
                                        OPTIONS_EQUAL, HIDDEN_OPTIONS_INDEX)
 from sans.common.enums import (BatchReductionEntry, OutputMode, SANSInstrument, RangeStepType, SampleShape, FitType)
 from sans.common.file_information import (SANSFileInformationFactory)
 from sans.user_file.user_file_reader import UserFileReader
 from sans.command_interface.batch_csv_file_parser import BatchCsvParser
+from sans.common.constants import ALL_PERIODS
 
 
 class RunTabPresenter(object):
@@ -454,8 +462,6 @@ class RunTabPresenter(object):
         self._set_on_view("wavelength_adjustment_det_2")
 
         # Q tab
-        self._set_on_view("q_1d_min")
-        self._set_on_view("q_1d_max")
         self._set_on_view_q_rebin_string()
         self._set_on_view("q_xy_max")
         self._set_on_view("q_xy_step")
@@ -552,14 +558,21 @@ class RunTabPresenter(object):
         rebin_string = self._state_model.q_1d_rebin_string
         # Extract the min, max and step and step type from the rebin string
         elements = rebin_string.split(",")
+        # If we have three elements then we want to set only the
         if len(elements) == 3:
             step_element = float(elements[1])
             step = abs(step_element)
             step_type = RangeStepType.Lin if step_element >= 0 else RangeStepType.Log
 
             # Set on the view
+            self._view.q_1d_min_or_rebin_string = float(elements[0])
+            self._view.q_1d_max = float(elements[2])
             self._view.q_1d_step = step
             self._view.q_1d_step_type = step_type
+        else:
+            # Set the rebin string
+            self._view.q_1d_min_or_rebin_string = rebin_string
+            self._view.q_1d_step_type = self._view.VARIABLE
 
     def _set_on_view(self, attribute_name):
         attribute = getattr(self._state_model, attribute_name)
@@ -628,8 +641,6 @@ class RunTabPresenter(object):
         self._set_on_state_model("wavelength_adjustment_det_2", state_model)
 
         # Q tab
-        self._set_on_state_model("q_1d_min", state_model)
-        self._set_on_state_model("q_1d_max", state_model)
         self._set_on_state_model_q_1d_rebin_string(state_model)
         self._set_on_state_model("q_xy_max", state_model)
         self._set_on_state_model("q_xy_step", state_model)
@@ -707,16 +718,21 @@ class RunTabPresenter(object):
                 state_model.transmission_can_wavelength_max = wavelength_max
 
     def _set_on_state_model_q_1d_rebin_string(self, state_model):
-        q_1d_min = self._view.q_1d_min
-        q_1d_max = self._view.q_1d_max
-        q_1d_step = self._view.q_1d_step
         q_1d_step_type = self._view.q_1d_step_type
-        if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
-            q_1d_rebin_string = str(q_1d_min) + ","
-            q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
-            q_1d_rebin_string += str(q_1d_step_type_factor*q_1d_step) + ","
-            q_1d_rebin_string += str(q_1d_max)
-            state_model.q_1d_rebin_string = q_1d_rebin_string
+
+        # If we are dealing with a simple rebin string then the step type is None
+        if self._view.q_1d_step_type is None:
+            state_model.q_1d_rebin_string = self._view.q_1d_min_or_rebin_string
+        else:
+            q_1d_min = self._view.q_1d_min_or_rebin_string
+            q_1d_max = self._view.q_1d_max
+            q_1d_step = self._view.q_1d_step
+            if q_1d_min and q_1d_max and q_1d_step and q_1d_step_type:
+                q_1d_rebin_string = str(q_1d_min) + ","
+                q_1d_step_type_factor = -1. if q_1d_step_type is RangeStepType.Log else 1.
+                q_1d_rebin_string += str(q_1d_step_type_factor*q_1d_step) + ","
+                q_1d_rebin_string += str(q_1d_max)
+                state_model.q_1d_rebin_string = q_1d_rebin_string
 
     def _set_on_state_model(self, attribute_name, state_model):
         attribute = getattr(self._view, attribute_name)
@@ -735,21 +751,39 @@ class RunTabPresenter(object):
         # 2. Iterate over each row, create a table row model and insert it
         number_of_rows = self._view.get_number_of_rows()
         for row in range(number_of_rows):
-            sample_scatter = self._view.get_cell(row=row, column=0, convert_to=str)
-            sample_transmission = self._view.get_cell(row=row, column=1, convert_to=str)
-            sample_direct = self._view.get_cell(row=row, column=2, convert_to=str)
-            can_scatter = self._view.get_cell(row=row, column=3, convert_to=str)
-            can_transmission = self._view.get_cell(row=row, column=4, convert_to=str)
-            can_direct = self._view.get_cell(row=row, column=5, convert_to=str)
-            output_name = self._view.get_cell(row=row, column=6, convert_to=str)
+            sample_scatter = self._view.get_cell(row=row, column=SAMPLE_SCATTER_INDEX, convert_to=str)
+            sample_scatter_period = self._view.get_cell(row=row, column=SAMPLE_SCATTER_PERIOD_INDEX, convert_to=str)
+            sample_transmission = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_INDEX, convert_to=str)
+            sample_transmission_period = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_PERIOD_INDEX, convert_to=str)  # noqa
+            sample_direct = self._view.get_cell(row=row, column=SAMPLE_DIRECT_INDEX, convert_to=str)
+            sample_direct_period = self._view.get_cell(row=row, column=SAMPLE_DIRECT_PERIOD_INDEX, convert_to=str)
+            can_scatter = self._view.get_cell(row=row, column=CAN_SCATTER_INDEX, convert_to=str)
+            can_scatter_period = self._view.get_cell(row=row, column=CAN_SCATTER_PERIOD_INDEX, convert_to=str)
+            can_transmission = self._view.get_cell(row=row, column=CAN_TRANSMISSION_INDEX, convert_to=str)
+            can_transmission_period = self._view.get_cell(row=row, column=CAN_TRANSMISSION_PERIOD_INDEX, convert_to=str)
+            can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
+            can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
+            output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
 
             # Get the options string
             # We don't have to add the hidden column here, since it only contains information for the SANS
             # workflow to operate properly. It however does not contain information for the
             options_string = self._get_options(row)
 
-            table_index_model = TableIndexModel(row, sample_scatter, sample_transmission, sample_direct,
-                                                can_scatter, can_transmission, can_direct, output_name=output_name,
+            table_index_model = TableIndexModel(index=row,
+                                                sample_scatter=sample_scatter,
+                                                sample_scatter_period=sample_scatter_period,
+                                                sample_transmission=sample_transmission,
+                                                sample_transmission_period=sample_transmission_period,
+                                                sample_direct=sample_direct,
+                                                sample_direct_period=sample_direct_period,
+                                                can_scatter=can_scatter,
+                                                can_scatter_period=can_scatter_period,
+                                                can_transmission=can_transmission,
+                                                can_transmission_period=can_transmission_period,
+                                                can_direct=can_direct,
+                                                can_direct_period=can_direct_period,
+                                                output_name=output_name,
                                                 options_column_string=options_string)
             table_model.add_table_entry(row, table_index_model)
         return table_model
@@ -793,24 +827,41 @@ class RunTabPresenter(object):
                 _element = _row[_tag]
             return _element
 
+        def get_string_period(_tag):
+            return "" if _tag == ALL_PERIODS else str(_tag)
+
         # 1. Pull out the entries
         sample_scatter = get_string_entry(BatchReductionEntry.SampleScatter, row)
+        sample_scatter_period = get_string_entry(BatchReductionEntry.SampleScatterPeriod, row)
         sample_transmission = get_string_entry(BatchReductionEntry.SampleTransmission, row)
+        sample_transmission_period = get_string_entry(BatchReductionEntry.SampleTransmissionPeriod, row)
         sample_direct = get_string_entry(BatchReductionEntry.SampleDirect, row)
+        sample_direct_period = get_string_entry(BatchReductionEntry.SampleDirectPeriod, row)
         can_scatter = get_string_entry(BatchReductionEntry.CanScatter, row)
+        can_scatter_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
         can_transmission = get_string_entry(BatchReductionEntry.CanTransmission, row)
+        can_transmission_period = get_string_entry(BatchReductionEntry.CanScatterPeriod, row)
         can_direct = get_string_entry(BatchReductionEntry.CanDirect, row)
+        can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # 2. Create entry that can be understood by table
-        row_entry = "SampleScatter:{0},SampleTransmission:{1},SampleDirect:{2}," \
-                    "CanScatter:{3},CanTransmission:{4},CanDirect:{5},OutputName:{6}".format(sample_scatter,
-                                                                                             sample_transmission,
-                                                                                             sample_direct,
-                                                                                             can_scatter,
-                                                                                             can_transmission,
-                                                                                             can_direct,
-                                                                                             output_name)
+        row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+                    "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+                    "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
+                                                               get_string_period(sample_scatter_period),
+                                                               sample_transmission,
+                                                               get_string_period(sample_transmission_period),
+                                                               sample_direct,
+                                                               get_string_period(sample_direct_period),
+                                                               can_scatter,
+                                                               get_string_period(can_scatter_period),
+                                                               can_transmission,
+                                                               get_string_period(can_transmission_period),
+                                                               can_direct,
+                                                               get_string_period(can_direct_period),
+                                                               output_name)
+
         self._view.add_row(row_entry)
 
     # ------------------------------------------------------------------------------------------------------------------

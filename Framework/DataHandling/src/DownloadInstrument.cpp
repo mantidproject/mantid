@@ -204,7 +204,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
     if ((sha != installSha) && (sha != localSha)) {
       fileMap.emplace(htmlUrl,
                       filePath.toString()); // ACTION - DOWNLOAD to localPath
-    } else if ((localSha != "") && (sha == installSha) &&
+    } else if ((!localSha.empty()) && (sha == installSha) &&
                (sha != localSha)) // matches install, but different local
     {
       fileMap.emplace(
