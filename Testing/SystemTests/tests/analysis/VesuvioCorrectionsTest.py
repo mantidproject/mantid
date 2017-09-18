@@ -484,13 +484,15 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_ts_peak = 0.131359579675
         corrections_ms_peak = 0.00117365595751
-        corrections_ts_bin  = 704
+        corrections_ts_bin  = 701
         corrections_ms_bin = 693
         if _is_old_boost_version():
             corrections_ms_bin = 691
 
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin)
-        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(1), corrections_ts_peak, corrections_ts_bin,
+                                     bin_tolerance=3)
+        _validate_matrix_peak_height(self, corrections_wsg.getItem(2), corrections_ms_peak, corrections_ms_bin,
+                                     bin_tolerance=3)
 
         # Test Corrected Workspaces
         corrected_wsg = self._algorithm.getProperty("CorrectedWorkspaces").value
@@ -500,8 +502,10 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         corrected_ts_bin = 17
         correction_ms_bin = 17
 
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin)
-        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin,
+                                    bin_tolerance=3)
+        _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin,
+                                    bin_tolerance=3)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
@@ -635,8 +639,10 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
     peak_bin = np.argmax(y_data)
     tolerance_value = expected_height * tolerance
     abs_difference = abs(expected_height - peak_height)
-    self.assertTrue(abs_difference <= abs(tolerance_value))
-    self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance)
+    self.assertTrue(abs_difference <= abs(tolerance_value),
+                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
+    self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
+                    msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
 
 
 if __name__ == "__main__":
