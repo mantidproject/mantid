@@ -1,4 +1,4 @@
-#include <algorithm>
+#include <numeric>
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/IO/Chunker.h"
