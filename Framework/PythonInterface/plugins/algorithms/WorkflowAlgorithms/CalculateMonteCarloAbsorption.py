@@ -475,10 +475,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
         elif y_unit == 'Wavelength':
+            self._indirect_q_axis = 'X'
             return self._tranpose_ws(workspace)
         elif x_unit == 'EnergyTransfer':
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         elif y_unit == 'EnergyTransfer':
+            self._indirect_q_axis = 'X'
             workspace = self._tranpose_ws(workspace)
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
@@ -487,6 +489,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             if y_unit == 'MomentumTransfer':
                 return self._create_waves_indirect_elastic(workspace)
             elif x_unit == 'MomentumTransfer':
+                self._indirect_q_axis = 'X'
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
         else:
@@ -532,7 +535,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The input workspace.
         :return:            The output wavelength workspace.
         """
-        y_axis = workspace.getAxis(1)
+        self._q_values = workspace.getAxis(1).extractValues()
 
         # ---------- Load Elastic Instrument Definition File ----------
 
@@ -553,7 +556,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         workspace.replaceAxis(1, SpectraAxis.create(workspace))
         e_fixed = float(self._efixed)
         logger.information('Efixed = %f' % e_fixed)
-        self._q_values = y_axis.extractValues()
 
         # ---------- Set Instrument Parameters ----------
 
