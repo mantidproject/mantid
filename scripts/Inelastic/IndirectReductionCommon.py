@@ -24,13 +24,13 @@ def _create_file_range_parser(sum_files, instrument):
 
         # Check whether this is a range or single file
         if '-' in file_range:
-            bounds = file_range.split('-')
+            lower, upper = file_range.split('-')
 
             try:
                 if sum_files:
-                    return instrument + bounds[0] + '-' + bounds[1]
+                    return instrument + lower + '-' + upper
                 else:
-                    run_numbers = range(int(bounds[0]), int(bounds[1]))
+                    run_numbers = range(int(lower), int(upper))
                     run_numbers = [str(run_number) for run_number in run_numbers]
                     return instrument + ",".join(run_numbers)
             except Exception as exc:
