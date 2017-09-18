@@ -964,35 +964,37 @@ bool MatrixWorkspace::isCommonBins() const {
     m_isCommonBinsFlag = true;
 
     const size_t numHist = getNumberHistograms();
-    bool oneNonEmpty = false;
+    // there being only one or zero histograms is accepted as not being an error
     if (numHist > 1) {
-      for (size_t i = 0; i < numHist; ++i) {
-        if (!y(i).empty()) {
-          oneNonEmpty = true;
+      const size_t numBins = x(0).size();
+      for (size_t i = 1; i < numHist; ++i) {
+        if (x(i).size() != numBins) {
+          m_isCommonBinsFlag = false;
           break;
         }
       }
-    }
 
-    // there being only one or zero histograms is accepted as not being an error
-    if (oneNonEmpty || numHist > 1) {
-      // otherwise will compare some of the data, to save time just check two
-      // the first and the last
-      const size_t lastSpec = numHist - 1;
-      // Quickest check is to see if they are actually the same vector
-      if (&(x(0)[0]) != &(x(lastSpec)[0])) {
-        // Now check numerically
-        const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
-        const double last =
-            std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
-        if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
-          m_isCommonBinsFlag = false;
-        }
+      // there being only one or zero histograms is accepted as not being an
+      // error
+      if (m_isCommonBinsFlag) {
+        // otherwise will compare some of the data, to save time just check two
+        // the first and the last
+        const size_t lastSpec = numHist - 1;
+        // Quickest check is to see if they are actually the same vector
+        if (&(x(0)[0]) != &(x(lastSpec)[0])) {
+          // Now check numerically
+          const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
+          const double last =
+              std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
+          if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
+            m_isCommonBinsFlag = false;
+          }
 
-        // handle Nan's and inf's
-        if ((std::isinf(first) != std::isinf(last)) ||
-            (std::isnan(first) != std::isnan(last))) {
-          m_isCommonBinsFlag = false;
+          // handle Nan's and inf's
+          if ((std::isinf(first) != std::isinf(last)) ||
+              (std::isnan(first) != std::isnan(last))) {
+            m_isCommonBinsFlag = false;
+          }
         }
       }
     }
