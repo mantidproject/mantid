@@ -94,8 +94,7 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         raise RuntimeError("Reduction mode selection is not valid.")
 
 
-def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func,
-              search_for_directory=False):
+def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
     # Get the last location of the user file
     settings = QtCore.QSettings()
     settings.beginGroup(q_settings_group_key)
@@ -103,10 +102,7 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
     settings.endGroup()
 
     # Open the dialog
-    if search_for_directory:
-        open_file_dialog(line_edit_field, filter_for_dialog, last_path, QtGui.QFileDialog.Directory)
-    else:
-        open_file_dialog(line_edit_field, filter_for_dialog, last_path, QtGui.QFileDialog.AnyFile)
+    open_file_dialog(line_edit_field, filter_for_dialog, last_path)
 
     # Save the new location
     new_path, _ = os.path.split(func())
@@ -117,12 +113,7 @@ def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settin
         settings.endGroup()
 
 
-def open_file_dialog(line_edit, filter_text, directory, dialog_type):
-    dlg = QtGui.QFileDialog()
-    dlg.setFileMode(dialog_type)
-    dlg.setFilter(filter_text)
-    dlg.setDirectory(directory)
-    if dlg.exec_():
-        file_names = dlg.selectedFiles()
-        if file_names:
-            line_edit.setText(file_names[0])
+def open_file_dialog(line_edit, filter_text, directory):
+    file_name = QtGui.QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
+    if file_name:
+        line_edit.setText(file_name)
