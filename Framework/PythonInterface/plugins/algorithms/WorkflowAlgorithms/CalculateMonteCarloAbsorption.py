@@ -52,9 +52,26 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
     def summary(self):
-        return "Calculates indirect absorption corrections for a given sample shape."
+        return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
 
     def PyInit(self):
+        # Sample options
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
+                             doc='Sample Workspace')
+        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+                             doc='Chemical formula for the sample material')
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Sample density type')
+        self.declareProperty(name='SampleDensity', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample density')
+
+        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
+        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
+        self.setPropertyGroup('SampleDensityType', 'Sample Options')
+        self.setPropertyGroup('SampleDensity', 'Sample Options')
+
         # Beam Options
         self.declareProperty(name='BeamHeight', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
@@ -81,23 +98,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
         self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
         self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
-
-        # Sample options
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                             doc='Sample Workspace')
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
-                             doc='Chemical formula for the sample material')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Sample density type')
-        self.declareProperty(name='SampleDensity', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample density')
-
-        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
-        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
-        self.setPropertyGroup('SampleDensityType', 'Sample Options')
-        self.setPropertyGroup('SampleDensity', 'Sample Options')
 
         # Container options
         self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
