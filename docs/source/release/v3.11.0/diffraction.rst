@@ -9,6 +9,7 @@ Crystal Improvements
 --------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now adjusts the sample offsets and has an option to optimize the initial time-of-flight for better calibration of single crystal data.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has CalibrateSnapPanels option to calibrate 3X3 banks of SNAP instrument for single crystal data.
 - :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` has not correctly aligned the detectors for SNAP since release 3.9. This bug that only impacted SNAP has been fixed.
 
 Engineering Diffraction

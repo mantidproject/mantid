@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1072</width>
+    <width>1211</width>
     <height>897</height>
    </rect>
   </property>
@@ -1867,7 +1867,7 @@ QGroupBox::title {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1072</width>
+     <width>1211</width>
      <height>22</height>
     </rect>
    </property>
@@ -1889,13 +1889,13 @@ QGroupBox::title {
   <customwidget>
    <class>SettingsDiagnosticTab</class>
    <extends>QWidget</extends>
-   <header>settings_diagnostic_tab.h</header>
+   <header>ui.sans_isis.settings_diagnostic_tab</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>MaskingTable</class>
    <extends>QWidget</extends>
-   <header>masking_table.h</header>
+   <header>ui.sans_isis.masking_table</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
