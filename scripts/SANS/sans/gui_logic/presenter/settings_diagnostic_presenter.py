@@ -119,4 +119,3 @@ class SettingsDiagnosticPresenter(object):
 
         # Update the file name in the UI
         self._view.set_save_location(full_file_path)
-
