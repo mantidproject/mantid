@@ -298,7 +298,7 @@ void MantidTable::cellEdited(int row, int col) {
   int index = row;
   std::istringstream textStream(text);
   const auto localName = locale().name().toStdString();
-  std::locale applicationLocale(localName);
+  std::locale applicationLocale(localName.c_str());
   textStream.imbue(applicationLocale);
   c->read(index, textStream);
 
