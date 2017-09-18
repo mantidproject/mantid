@@ -368,7 +368,7 @@ void GroupDetectors2::execEvent() {
           "EventWorkspace", m_GroupWsInds.size() + numUnGrouped,
           inputWS->x(0).size(), inputWS->blocksize()));
   // Copy geometry over.
-  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS, true);
+  WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS);
 
   // prepare to move the requested histograms into groups, first estimate how
   // long for progress reporting. +1 in the demonator gets rid of any divide by

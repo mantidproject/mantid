@@ -184,7 +184,7 @@ boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData() {
 
     // Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[i],
-                                                           *temp, false);
+                                                           *temp);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
@@ -363,8 +363,8 @@ void ISISLiveEventDataListener::initEventBuffer(
                   1));
 
       // Copy geometry over.
-      API::WorkspaceFactory::Instance().initializeFromParent(
-          *m_eventBuffer[0], *m_eventBuffer[i], false);
+      API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer[0],
+                                                             *m_eventBuffer[i]);
     }
   }
 }

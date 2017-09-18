@@ -106,8 +106,7 @@ void FindCenterOfMassPosition2::exec() {
     algo->execute();
 
     inputWS = algo->getProperty("OutputWorkspace");
-    WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS,
-                                                      false);
+    WorkspaceFactory::Instance().initializeFromParent(*inputWSWvl, *inputWS);
   } else {
     // Sum up all the wavelength bins
     IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
