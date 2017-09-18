@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 from Muon import MaxEnt_model
 from Muon import FFT_model
-
+from Muon import ThreadModel
 """
  simple class to create a single object
  containing all of the models.
@@ -17,9 +17,9 @@ class modelConstructor(object):
         if includeTransform:
             self.transformModels={}
             MaxEnt =MaxEnt_model.MaxEntModel()
-            self.transformModels["MaxEnt"]=MaxEnt_model.MaxEntThread(MaxEnt)
+            self.transformModels["MaxEnt"]=ThreadModel.ThreadModel(MaxEnt)
             FFT =FFT_model.FFTModel()
-            self.transformModels[FFT.getName()]=FFT
+            self.transformModels[FFT.getName()]=ThreadModel.ThreadModel(FFT)
 
     def getModel(self,name):
         return self.transformModels[name]

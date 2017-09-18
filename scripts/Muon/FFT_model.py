@@ -5,6 +5,7 @@ import math
 
 import mantid.simpleapi as mantid
 
+
 class FFTModel(object):
 
     def __init__(self):
@@ -18,7 +19,6 @@ class FFTModel(object):
         preAlg.initialize()
         preAlg.setChild(True)
         for name,value in iteritems(preInputs):
-            mantid.logger.warning(name+str(value))
             preAlg.setProperty(name,value)
         preAlg.execute()
         mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)

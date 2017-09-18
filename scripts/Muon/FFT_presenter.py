@@ -1,5 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
+import mantid.simpleapi as mantid
+
 
 class FFTPresenter(object):
 
@@ -27,6 +29,9 @@ class FFTPresenter(object):
     #functions
     def phaseCheck(self):
         self.view.phaseQuadChanged()
+        #check if a phase table exists
+        if mantid.AnalysisDataService.doesExist("PhaseTable"):
+           self.view.setPhaseBox() 
 
     def tableClicked(self,row,col):
         if row == self.view.getImBoxRow() and col == 1:
@@ -34,37 +39,46 @@ class FFTPresenter(object):
         elif  row == self.view.getShiftBoxRow() and col == 1:
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
-    def handleButton(self):        
-        self.alg.setRun(self.load.getRunName())
+    def handleButton(self):
+        self.alg.model.setRun(self.load.getRunName())
 
         #do apodization and padding to real data
 
         preInputs=self.view.initAdvanced()
 
         if self.view.getWS() == "PhaseQuad":
-            axis=self.view.getAxis()
-            self.alg.makePhaseQuadTable(axis,self.load.getInstrument())
-            self.alg.PhaseQuad()
+            if self.view.isNewPhaseTable()==True:
+                axis=self.view.getAxis()
+                self.alg.model.makePhaseQuadTable(axis,self.load.getInstrument())
+                self.alg.model.PhaseQuad()
             self.view.RePhaseAdvanced(preInputs)
         else:
             self.view.ReAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
             tmp=1
-        self.alg.preAlg(preInputs)
+        self.alg.model.preAlg(preInputs)
 
         #do apodization and padding to complex data
-        if self.view.isComplex():
+        if self.view.isComplex() and self.view.getWS()!="PhaseQuad":
             self.view.ImAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
-            self.alg.preAlg(preInputs)
+            self.alg.model.preAlg(preInputs)
 
         #do FFT to transformed data
         FFTInputs = self.get_FFT_input()
-        if self.view.isRaw():
-            self.view.addRaw(FFTInputs,"OutputWorkspace")
-        self.alg.FFTAlg(FFTInputs)
+        if self.view.getWS()=="PhaseQuad":
+            self.view.getFFTRePhase(FFTInputs)
+            if self.view.isComplex():
+                self.view.getFFTImPhase(FFTInputs)
+        else:
+            if self.view.isRaw():
+                self.view.addRaw(FFTInputs,"OutputWorkspace")
+        self.alg.model.FFTAlg(FFTInputs)
+
+        self.view.setPhaseBox()
+
 
     def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()

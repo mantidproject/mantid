@@ -20,7 +20,7 @@ class FFTView(QtGui.QWidget):
         #make table
         self.FFTTable = QtGui.QTableWidget(self)
         self.FFTTable.resize(800, 800)
-        self.FFTTable.setRowCount(7)
+        self.FFTTable.setRowCount(8)
         self.FFTTable.setColumnCount(2)
         self.FFTTable.setColumnWidth(0,300)
         self.FFTTable.setColumnWidth(1,300)
@@ -53,6 +53,10 @@ class FFTView(QtGui.QWidget):
         options=['x','y','z']
         table_utils.setRowName(self.FFTTable,6,"Axis")
         self.axis= table_utils.addComboToTable(self.FFTTable,6,options)
+
+        table_utils.setRowName(self.FFTTable,7,"Construct Phase Table")
+        self.phaseTable_box= table_utils.addCheckBoxToTable(self.FFTTable,True,7)
+        self.FFTTable.hideRow(7)
 
         self.FFTTable.resizeRowsToContents()
         #make advanced table options
@@ -124,6 +128,9 @@ class FFTView(QtGui.QWidget):
         self.buttonSignal.emit()
 
     #functions
+    def setPhaseBox(self):
+        self.FFTTable.setRowHidden(7,self.getWS()!="PhaseQuad")
+
     def changed(self,box,row ):
         self.FFTTable.setRowHidden(row,box.checkState() == QtCore.Qt.Checked)
 
@@ -163,6 +170,14 @@ class FFTView(QtGui.QWidget):
     def addRaw(self,inputs,key):
         inputs[key] += "_Raw"
 
+    def getFFTRePhase(self,inputs):
+        inputs['InputWorkspace']="__ReTmp__"
+        inputs['Real']= 0 # always zero
+
+    def getFFTImPhase(self,inputs):
+        inputs['InputImagWorkspace']="__ReTmp__"
+        inputs['Imaginary']= 1
+
     def initAdvanced(self):
         inputs={}
         inputs["ApodizationFunction"]=str(self.apodization.currentText())
@@ -182,10 +197,6 @@ class FFTView(QtGui.QWidget):
     def RePhaseAdvanced(self,inputs):
         inputs['InputWorkspace']="__phaseQuad__"
         inputs['OutputWorkspace']="__ReTmp__"
-
-    #def ImPhaseAdvanced(self,inputs):
-    #    inputs['InputWorkspace']="__phaseQuad__"
-    #    inputs['OutputWorkspace']="__ImTmp__"
 
     # get methods
     def getWS(self):
@@ -214,3 +225,9 @@ class FFTView(QtGui.QWidget):
 
     def getAxis(self):
         return str( self.axis.currentText())
+
+    def isNewPhaseTable(self):
+        return self.phaseTable_box.checkState() == QtCore.Qt.Checked
+		
+    def isPhaseBoxShown(self):
+		return self.FFTTable.isRowHidden(7)
