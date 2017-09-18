@@ -1101,16 +1101,14 @@ void LoadEventNexus::createSpectraMapping(
                                  " Try unchecking SingleBankPixelsOnly.");
       allDets.insert(allDets.end(), dets.begin(), dets.end());
     }
-    if (!allDets.empty()) {
-      m_ws->resizeTo(allDets.size());
-      // Make an event list for each.
-      for (size_t wi = 0; wi < allDets.size(); wi++) {
-        const detid_t detID = allDets[wi]->getID();
-        m_ws->setDetectorIdsForAllPeriods(wi, detID);
-      }
-      spectramap = true;
-      g_log.debug() << "Populated spectra map for select banks\n";
+    m_ws->resizeTo(allDets.size());
+    // Make an event list for each.
+    for (size_t wi = 0; wi < allDets.size(); wi++) {
+      const detid_t detID = allDets[wi]->getID();
+      m_ws->setDetectorIdsForAllPeriods(wi, detID);
     }
+    spectramap = true;
+    g_log.debug() << "Populated spectra map for select banks\n";
 
   } else {
     spectramap =
