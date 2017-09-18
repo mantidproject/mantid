@@ -1577,17 +1577,23 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
 
   // Hop to the right point
   m_cppFile->openPath(mtd_entry.path());
-  local_workspace->loadExperimentInfoNexus(getPropertyValue("Filename"),
-                                           m_cppFile,
-                                           parameterStr); // REQUIRED PER PERIOD
+  try {
+    // This loads logs, sample, and instrument.
+    local_workspace->loadExperimentInfoNexus(
+        getPropertyValue("Filename"), m_cppFile,
+        parameterStr); // REQUIRED PER PERIOD
+
+    // Parameter map parsing only if instrument loaded OK.
+    progress(progressStart + 0.11 * progressRange,
+             "Reading the parameter maps...");
+    local_workspace->readParameterMap(parameterStr);
+  } catch (std::exception &e) {
+    g_log.information("Error loading Instrument section of nxs file");
+    g_log.information(e.what());
+  }
 
   // Now assign the spectra-detector map
   readInstrumentGroup(mtd_entry, local_workspace);
-
-  // Parameter map parsing
-  progress(progressStart + 0.11 * progressRange,
-           "Reading the parameter maps...");
-  local_workspace->readParameterMap(parameterStr);
 
   if (!local_workspace->getAxis(1)
            ->isSpectra()) { // If not a spectra axis, load the axis data into
