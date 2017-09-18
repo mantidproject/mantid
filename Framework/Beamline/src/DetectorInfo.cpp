@@ -412,8 +412,8 @@ DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
 }
 
 void DetectorInfo::checkIdentitcalIntervals(const DetectorInfo &other,
-                                             const size_t linearIndex1,
-                                             const size_t linearIndex2) const {
+                                            const size_t linearIndex1,
+                                            const size_t linearIndex2) const {
   if ((*m_isMasked)[linearIndex2] != (*other.m_isMasked)[linearIndex1])
     failMerge("matching scan interval but mask flags differ");
   if ((*m_positions)[linearIndex2] != (*other.m_positions)[linearIndex1])
