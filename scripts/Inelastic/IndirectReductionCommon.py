@@ -24,7 +24,7 @@ def _create_file_range_parser(sum_files, instrument):
 
         # Check whether this is a range or single file
         if '-' in file_range:
-            lower, upper = file_range.split('-')
+            lower, upper = file_range.split('-', 1)
 
             try:
                 if sum_files:
