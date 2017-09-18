@@ -9,6 +9,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 class DataProcessorView;
 class DataProcessorPresenter;
@@ -62,7 +63,8 @@ protected:
   std::map<QString, QString> m_bindings;
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace DataProcessor
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif /* MANTIDQTMANTIDWIDGETS_QTDATAPROCESSOROPTIONSDIALOG_H */

@@ -444,8 +444,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
-    osirisDiffReduction->setProperty(
-        "DRange", static_cast<long>(m_uiForm.spDRange->value()));
+    osirisDiffReduction->setProperty("DRange",
+                                     m_uiForm.spDRange->text().toStdString());
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
@@ -592,12 +592,22 @@ void IndirectDiffractionReduction::instrumentSelected(
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
+    m_uiForm.ckManualDRange->setToolTip(
+        "D-Ranges corresponding to numeric values can be found in the"
+        " OSIRIS user guide: "
+        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
+    m_uiForm.spDRange->setToolTip(
+        "D-Ranges corresponding to numeric values can be found in the"
+        " OSIRIS user guide: "
+        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");
+    m_uiForm.ckManualDRange->setToolTip("");
+    m_uiForm.spDRange->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
 

@@ -17,7 +17,7 @@ Counts::Counts(Frequencies &&frequencies, const BinEdges &edges) {
     throw std::logic_error(
         "Counts: Cannot construct from Frequencies -- BinEdges are NULL.");
   if ((frequencies.size() + 1) != edges.size())
-    if (frequencies.size() != 0 || edges.size() != 0)
+    if (!frequencies.empty() || !edges.empty())
       throw std::logic_error("Counts: Cannot construct from Frequencies -- "
                              "BinEdges size does not match.");
   // Cannot move frequencies private data since it is of different type.

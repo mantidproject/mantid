@@ -11,7 +11,9 @@ Algorithms
 - The following bugs have been fixed in the summation in Q functionality in :ref:`algm-ReflectometryReductionOne`:
   - the incorrect angle was being used in the final conversion to Q in the divergent beam case
   - the input was being cropped, causing loss of counts
+  - summation in Q was giving incorrect results for a point detector
 - A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
+- A new version of :ref:`algm-SpecularReflectionCalculateTheta` (version 2) has been added which works with detectors at :math:`2\theta`. Version 1 works with detectors at :math:`\theta`.
 - A new property, ``ThetaLogName``, has been added to :ref:`algm-ReflectometryReductionOneAuto` which allows you to specify the name of a log value to use for ``theta``.
 - A new property, ``CorrectDetectors``, has been added to :ref:`algm-ReflectometryReductionOneAuto` which specifies whether detector positions should be corrected when ``ThetaIn`` or ``ThetaLogName`` is provided. If true (default), detectors will be moved to the specified ``theta`` using :ref:`algm-SpecularReflectionPositionCorrect`. Otherwise, ``theta`` will still be overridden but without detector positions being changed.
 

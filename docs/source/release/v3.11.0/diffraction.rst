@@ -9,6 +9,7 @@ Crystal Improvements
 --------------------
 
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` now adjusts the sample offsets and has an option to optimize the initial time-of-flight for better calibration of single crystal data.
+- :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has CalibrateSnapPanels option to calibrate 3X3 banks of SNAP instrument for single crystal data.
 - :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` has not correctly aligned the detectors for SNAP since release 3.9. This bug that only impacted SNAP has been fixed.
 
 Engineering Diffraction
@@ -22,8 +23,8 @@ Powder Diffraction
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports loading D2B data with detector scans. The D2B IDF has been updated, as previously it contained some errors in the positions of the tubes and size of the pixels.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now correctly supports overloading the grouping file in the presence of a masking workspace.
 - :ref:`PDCalibration <algm-PDCalibration>` has changed how it calculates constants from peak positions to use a simplex optimization rather than Gauss-Markov method.
+- :ref:`ResampleX <algm-ResampleX>` has a bug fix in how it automatically determines the data range for a workspace with multiple spectra.
 - The powder diffraction GUI has had numerous bugfixes and now has an option to override the detector grouping.
-
 
 Single Crystal Diffraction
 --------------------------
