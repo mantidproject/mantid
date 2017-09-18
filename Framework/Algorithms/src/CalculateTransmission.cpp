@@ -186,12 +186,14 @@ void CalculateTransmission::exec() {
     beamMonitorIndex = getIndexFromDetectorID(*sampleWS, beamMonitorID);
     logIfNotMonitor(sampleWS, directWS, beamMonitorIndex);
 
-    for (auto transmissionIndex : transmissionIndices)
-      if (transmissionIndex == beamMonitorIndex)
-        throw std::invalid_argument("The IncidentBeamMonitor UDET (" +
-                                    std::to_string(transmissionIndex) +
-                                    ") matches a UDET given in " +
-                                    transPropName + ".");
+    const auto transmissionIndex =
+        std::find(transmissionIndices.begin(), transmissionIndices.end(),
+                  beamMonitorIndex);
+    if (transmissionIndex != transmissionIndices.end())
+      throw std::invalid_argument("The IncidentBeamMonitor UDET (" +
+                                  std::to_string(*transmissionIndex) +
+                                  ") matches a UDET given in " + transPropName +
+                                  ".");
   }
 
   MatrixWorkspace_sptr sampleInc;

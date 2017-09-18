@@ -227,8 +227,9 @@ void RadiusSum::inputValidationSanityCheck() {
 
   const std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
   std::stringstream s;
-  for (const auto &value : boundary_limits)
-    s << value << " , ";
+  std::copy(boundary_limits.begin(), std::prev(boundary_limits.end()),
+            std::ostream_iterator<double>(s, ", "));
+  s << boundary_limits.back();
   g_log.information() << "Boundary limits are: " << s.str() << '\n';
 
   g_log.debug() << "Check: centre is defined inside the region defined by the "
