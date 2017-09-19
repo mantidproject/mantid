@@ -511,7 +511,7 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.226039019062
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17, 
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17,
                                      tolerance=0.2, bin_tolerance=0.3)
 
         # Test Linear fit Result Workspace
