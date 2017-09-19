@@ -279,24 +279,6 @@ class BASISReduction(PythonAlgorithm):
             if self._normalizeToFirst:
                 self._ScaleY(self._samSqwWs)
 
-            # Output NXSPE file (must be done before transforming the
-            # vertical axis to point data)
-            if self._nsxpe_do:
-                extension = "_divided_sqw.nxspe" if self._doNorm else "_sqw.nxspe"
-                run = mtd[self._samSqwWs].getRun()
-                if run.hasProperty(self._nxspe_psi_angle_log):
-                    psi_angle_logproperty = run.getProperty(self._nxspe_psi_angle_log)
-                    psi_angle = np.average(psi_angle_logproperty.value)
-                    psi_angle += self._nxspe_offset
-                    nxspe_filename = self._makeRunName(self._samWsRun, False) + extension
-                    sapi.SaveNXSPE(InputWorkspace=self._samSqwWs,
-                                   Filename=nxspe_filename,
-                                   Efixed=self._reflection['default_energy'],
-                                   Psi=psi_angle, KiOverKfScaling=1)
-                else:
-                    error_message = 'Runs have no log entry named {}'.format(self._reflection)
-                    self.log().error(error_message)
-
             # Transform the vertical axis (Q) to point data
             sapi.Transpose(InputWorkspace=self._samSqwWs,
                            OutputWorkspace=self._samSqwWs)  # Q-values are in X-axis now
@@ -451,7 +433,28 @@ class BASISReduction(PythonAlgorithm):
             if self._overrideMask:
                 config.appendDataSearchDir(DEFAULT_MASK_GROUP_DIR)
                 sapi.GroupDetectors(InputWorkspace=wsName, OutputWorkspace=wsName, MapFile=grp_file, Behaviour="Sum")
-        wsSqwName = wsName+'_divided_sqw' if isSample and self._doNorm else wsName+'_sqw'
+
+        # Output NXSPE file (must be done before transforming the
+        # vertical axis to point data)
+        if isSample and self._nsxpe_do:
+            #extension = '_divided_sqw.nxspe' if self._doNorm else '_sqw.nxspe'
+            extension = '_sqw.nxspe'
+            run = mtd[wsName].getRun()
+            if run.hasProperty(self._nxspe_psi_angle_log):
+                psi_angle_logproperty = run.getProperty(self._nxspe_psi_angle_log)
+                psi_angle = np.average(psi_angle_logproperty.value)
+                psi_angle += self._nxspe_offset
+                nxspe_filename = wsName + extension
+                print('wsName',wsName)
+                sapi.SaveNXSPE(InputWorkspace=wsName,
+                               Filename=nxspe_filename,
+                               Efixed=self._reflection['default_energy'],
+                               Psi=psi_angle, KiOverKfScaling=1)
+            else:
+                error_message = 'Runs have no log entry named {}'.format(self._reflection)
+                self.log().error(error_message)
+
+        wsSqwName = wsName + '_divided_sqw' if isSample and self._doNorm else wsName + '_sqw'
         sapi.SofQW3(InputWorkspace=wsName, QAxisBinning=self._qBins, EMode='Indirect',
                     EFixed=self._reflection["default_energy"], OutputWorkspace=wsSqwName)
         # Rebin the vanadium within the elastic line
