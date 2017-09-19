@@ -89,7 +89,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertTrue('multi_run_numbers' in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26176,26173')
+        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26173,26176')
 
     def test_grouping_individual(self):
         """

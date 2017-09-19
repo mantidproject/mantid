@@ -10,40 +10,14 @@ import numpy as np
 # -------------------------------------------------------------------------------
 
 
-def _create_file_range_parser(sum_files, instrument):
-    """
-    Creates a parser for parsing file ranges in the format 'a-b' where a and
-    b are run numbers.
+def _parse_file_range(file_range):
 
-    :param sum_files:   Whether a sum across each range will be taken
-    :param instrument:  The name of the instrument
-    :return:            A file range parse
-    """
-
-    def parser(file_range):
-
-        # Check whether this is a range or single file
-        if '-' in file_range:
-            lower, upper = file_range.split('-', 1)
-
-            try:
-                if sum_files:
-                    return instrument + lower + '-' + upper
-                else:
-                    run_numbers = range(int(lower), int(upper))
-                    run_numbers = [str(run_number) for run_number in run_numbers]
-                    return instrument + ",".join(run_numbers)
-            except Exception as exc:
-                raise RuntimeError("Incorrectly formatted range supplied:\n" + str(exc))
-        else:
-            try:
-                # If a run number, add an instrument name to the front, for loading,
-                # else return (e.g. if a file path is given)
-                int(file_range)
-                return instrument + file_range
-            except ValueError:
-                return file_range
-    return parser
+# Check whether this is a range or single file
+    if '-' in file_range:
+        lower, upper = file_range.split('-', 1)
+        return range(int(lower), int(upper))
+    else:
+        return [file_range]
 
 
 def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=True, load_logs=True, load_opts=None):
@@ -61,11 +35,17 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
-    instrument = instrument.split('_')[0]
-    parse_file_range = _create_file_range_parser(sum_files, instrument)
-    file_ranges = [parse_file_range(file_range) for file_range in file_ranges]
-    return _load_files(file_ranges, ipf_filename, spec_min, spec_max, load_logs, load_opts)
+    file_groups = [_parse_file_range(file_range) for file_range in file_ranges]
+
+    workspace_names = []
+    chopped_data = False
+
+    for file_group in file_groups:
+        created_workspaces, chopped_data = _load_files(file_group, ipf_filename, spec_min,
+                                                       spec_max, load_logs, load_opts)
+        workspace_names.extend(created_workspaces)
+
+    return workspace_names, chopped_data
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
