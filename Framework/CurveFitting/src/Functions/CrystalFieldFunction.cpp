@@ -857,7 +857,7 @@ void CrystalFieldFunction::buildMultiSiteMultiSpectrum() const {
 /// @param energies :: A vector with energies.
 /// @param waveFunctions :: A matrix with wave functions.
 /// @param temperature :: A temperature of the spectrum.
-/// @param value :: An object to receive computed exciteations.
+/// @param values :: An object to receive computed excitations.
 /// @param intensityScaling :: A scaling factor for the intensities.
 void CrystalFieldFunction::calcExcitations(
     int nre, const DoubleFortranVector &energies,

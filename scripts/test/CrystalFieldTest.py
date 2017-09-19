@@ -1316,6 +1316,7 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=44.0, FWHM=1.0, ResolutionModel=rm)
         sp = cf.getSpectrum()
+        self.assertAlmostEqual(cf.peaks.param[1]['PeakCentre'], 29.0507341109, 8)
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
         self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101468, 8)
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
