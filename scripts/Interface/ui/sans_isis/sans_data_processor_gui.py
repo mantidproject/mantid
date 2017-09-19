@@ -98,7 +98,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         SANSDataProcessorGui.INSTRUMENTS = ",".join([SANSInstrument.to_string(item)
                                                      for item in [SANSInstrument.SANS2D,
                                                                   SANSInstrument.LOQ,
-                                                                  SANSInstrument.LARMOR]])
+                                                                  SANSInstrument.LARMOR,
+                                                                  SANSInstrument.ZOOM]])
         settings = QtCore.QSettings()
         settings.beginGroup(self.__generic_settings)
         instrument_name = settings.value(self.__instrument_name,
