@@ -289,9 +289,10 @@ class BASISReduction(PythonAlgorithm):
                     psi_angle = np.average(psi_angle_logproperty.value)
                     psi_angle += self._nxspe_offset
                     nxspe_filename = self._makeRunName(self._samWsRun, False) + extension
-                    SaveNXSPE(InputWorkspace=self._samSqwWs, Filename=nxspe_filename,
-                              Efixed=self._reflection['default_energy'],
-                              Psi=psi_angle, KiOverKfScaling=1)
+                    sapi.SaveNXSPE(InputWorkspace=self._samSqwWs,
+                                   Filename=nxspe_filename,
+                                   Efixed=self._reflection['default_energy'],
+                                   Psi=psi_angle, KiOverKfScaling=1)
                 else:
                     error_message = 'Runs have no log entry named {}'.format(self._reflection)
                     self.log().error(error_message)
@@ -310,7 +311,6 @@ class BASISReduction(PythonAlgorithm):
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
-
 
             # additional output
             if self.getProperty("OutputSusceptibility").value:
