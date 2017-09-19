@@ -633,7 +633,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   for (auto const &prop : m_postprocessMap) {
     auto const propName = prop.second;
     auto const propValueStr =
-        groupData.begin()->second[m_whitelist.colIndexFromColName(prop.first)];
+        groupData.begin()->second[m_whitelist.indexFromName(prop.first)];
     if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in
       // Reflectometry this property refers to the rebin step, and they want a
@@ -757,19 +757,18 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
   // Temporary vector of strings to construct the name
   QStringList names;
 
-  for (int col = 0; col < m_columns; col++) {
-
+  auto columnIt = m_whitelist.cbegin();
+  auto runNumbersIt = data.constBegin();
+  for (; columnIt != m_whitelist.end(); ++columnIt, ++runNumbersIt) {
+    auto column = *columnIt;
     // Do we want to use this column to generate the name of the output ws?
-    if (m_whitelist.showValue(col)) {
+    if (column.isShown()) {
+      auto const runNumbers = *runNumbersIt;
 
-      // Get what's in the column
-      auto const valueStr = data.at(col);
-
-      // If it's not empty, use it
-      if (!valueStr.isEmpty()) {
+      if (!runNumbers.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
-        auto value = valueStr.split("+", QString::SkipEmptyParts);
-        names.append(m_whitelist.prefix(col) + value.join("_"));
+        auto value = runNumbers.split("+", QString::SkipEmptyParts);
+        names.append(column.prefix() + value.join("_"));
       }
     }
   } // Columns
@@ -903,6 +902,13 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
   return outputName;
 }
 
+IAlgorithm_sptr GenericDataProcessorPresenter::createProcessingAlgorithm() const {
+  auto alg =
+      AlgorithmManager::Instance().create(m_processor.name().toStdString());
+  alg->initialize();
+  return alg;
+}
+
 /** Reduce a row
  *
  * @param data :: [input] The data in this row as a vector where elements
@@ -911,11 +917,7 @@ QString GenericDataProcessorPresenter::loadRun(const QString &run,
  */
 void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
-  /* Create the processing algorithm */
-
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create(m_processor.name().toStdString());
-  alg->initialize();
+  auto alg = createProcessingAlgorithm();
 
   /* Read input properties from the table */
   /* excluding 'Group' and 'Options' */
@@ -934,12 +936,12 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Loop over all columns in the whitelist except 'Options' and 'Hidden
   // Options'
-  for (int i = 0; i < m_columns - 2; i++) {
-
-    // The algorithm's property linked to this column
-    auto propertyName = m_whitelist.algPropFromColIndex(i);
-    // The column's name
-    auto columnName = m_whitelist.colNameFromColIndex(i);
+  auto columnIt = m_whitelist.cbegin();
+  auto runNumbersIt = data->constBegin();
+  for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++runNumbersIt) {
+    auto column = *columnIt;
+    auto propertyName = column.algorithmProperty();
+    auto columnName = column.name();
 
     // The value for which preprocessing can be conducted on
     QString preProcessValue;
@@ -953,8 +955,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
         valueList.append(QString::fromStdString(optionMapEntry.second));
       }
       preProcessValue = valueList.join(",");
-    } else if (!data->at(i).isEmpty()) {
-      preProcessValue = data->at(i);
+    } else if (!(*runNumbersIt).isEmpty()) {
+      preProcessValue = (*runNumbersIt);
     } else {
       continue;
     }
@@ -984,7 +986,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                            runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data->at(i);
+      auto propertyValue = *runNumbersIt;
       if (!propertyValue.isEmpty())
         alg->setPropertyValue(propertyName.toStdString(),
                               propertyValue.toStdString());
@@ -1044,16 +1046,19 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   auto newData = data;
   if (alg->isExecuted()) {
+    auto runNumbersIt = data->constBegin();
 
     /* The reduction is complete, try to populate the columns */
-    for (int i = 0; i < m_columns - 2; i++) {
+    for (; columnIt != m_whitelist.end() ; columnIt++, runNumbersIt++) {
 
-      auto columnName = m_whitelist.colNameFromColIndex(i);
+      auto column = *columnIt;
+      auto columnName = column.name();
+      auto runNumbers = *runNumbersIt;
 
-      if (data->at(i).isEmpty() && !m_preprocessMap.count(columnName)) {
+      if (runNumbers.isEmpty() && !m_preprocessMap.count(columnName)) {
 
         QString propValue = QString::fromStdString(alg->getPropertyValue(
-            m_whitelist.algPropFromColIndex(i).toStdString()));
+           (*columnIt).algorithmProperty().toStdString()));
 
         if (m_options["Round"].toBool()) {
           QString exp = (propValue.indexOf("e") != -1)
@@ -1065,7 +1070,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
               exp;
         }
 
-        (*newData)[i] = propValue;
+        // (*newData)[i] = propValue;
       }
     }
   }

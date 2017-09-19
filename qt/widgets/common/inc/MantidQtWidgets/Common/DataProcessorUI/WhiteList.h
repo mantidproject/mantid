@@ -37,30 +37,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class Column {
+public:
+  Column(QString const &name, QString const &algorithmProperty, bool isShown,
+         QString const &prefix, QString const &description);
+  QString const &name() const;
+  QString const &algorithmProperty() const;
+  bool isShown() const;
+  QString const &prefix() const;
+  QString const &description() const;
+
+private:
+  QString const &m_name;
+  QString const &m_algorithmProperty;
+  bool m_isShown;
+  QString const &m_prefix;
+  QString const &m_description;
+};
+
+class ConstColumnIterator {
+  using QStringIterator = std::vector<QString>::const_iterator;
+  using BoolIterator = std::vector<bool>::const_iterator;
+
+public:
+  using iterator_category = std::forward_iterator_tag;
+  using reference = const Column;
+  using pointer = const Column *;
+  using value_type = const Column;
+  using difference_type = typename QStringIterator::difference_type;
+  ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
+                      QStringIterator algorithmProperties, BoolIterator isShown,
+                      QStringIterator prefixes);
+
+  ConstColumnIterator &operator++();
+  ConstColumnIterator operator++(int);
+  reference operator*() const;
+  bool operator==(const ConstColumnIterator &other) const;
+  bool operator!=(const ConstColumnIterator &other) const;
+  ConstColumnIterator &operator+=(difference_type n);
+  ConstColumnIterator &operator-=(difference_type n);
+
+private:
+  QStringIterator m_names;
+  QStringIterator m_descriptions;
+  QStringIterator m_algorithmProperties;
+  BoolIterator m_isShown;
+  QStringIterator m_prefixes;
+};
+
+ConstColumnIterator operator+(const ConstColumnIterator &lhs,
+                              ConstColumnIterator::difference_type n);
+ConstColumnIterator operator+(ConstColumnIterator::difference_type n,
+                              const ConstColumnIterator &rhs);
+ConstColumnIterator operator-(const ConstColumnIterator &lhs,
+                              ConstColumnIterator::difference_type n);
+ConstColumnIterator operator-(ConstColumnIterator::difference_type n,
+                              const ConstColumnIterator &rhs);
+
 class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:
-  WhiteList() : m_lastIndex(0){};
+  using const_iterator = ConstColumnIterator;
   virtual ~WhiteList(){};
 
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,
                   const QString &prefix = "");
-  int colIndexFromColName(const QString &colName) const;
-  QString colNameFromColIndex(int index) const;
-  QString algPropFromColIndex(int index) const;
+  int indexFromName(const QString &colName) const;
+  QString name(int index) const;
+  QString algorithmProperty(int index) const;
   QString description(int index) const;
   QString prefix(int index) const;
-  bool showValue(int index) const;
-  size_t size() const;
+  bool isShown(int index) const;
+  std::size_t size() const;
+  const_iterator cbegin() const;
+  const_iterator begin() const;
+  const_iterator cend() const;
+  const_iterator end() const;
+  std::vector<QString> const &names() const;
 
 private:
-  int m_lastIndex;
-  std::map<QString, int> m_colNameToColIndex;
-  std::vector<QString> m_colIndexToColName;
-  std::vector<QString> m_colIndexToAlgProp;
-  std::vector<bool> m_showValue;
-  std::vector<QString> m_prefix;
-  std::vector<QString> m_description;
+  std::vector<QString> m_names;
+  std::vector<QString> m_algorithmProperties;
+  std::vector<bool> m_isShown;
+  std::vector<QString> m_prefixes;
+  std::vector<QString> m_descriptions;
 };
 }
 }

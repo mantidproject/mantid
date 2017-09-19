@@ -151,7 +151,7 @@ private:
 
     for (int col = 0; col < ncols; col++) {
       auto column = ws->addColumn(
-          "str", whitelist.colNameFromColIndex(col).toStdString());
+          "str", whitelist.name(col).toStdString());
       column->setPlotType(0);
     }
 
@@ -410,9 +410,9 @@ public:
     // 'Options'
     auto whitelist = presenter.getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Run(s)");
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Options");
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(8), "HiddenOptions");
+    TS_ASSERT_EQUALS(whitelist.name(0), "Run(s)");
+    TS_ASSERT_EQUALS(whitelist.name(7), "Options");
+    TS_ASSERT_EQUALS(whitelist.name(8), "HiddenOptions");
   }
 
   void testPresenterAcceptsViews() {
@@ -3185,8 +3185,8 @@ public:
     // and 'Options'
     auto whitelist = presenter.getWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 9);
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Run(s)");
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(7), "Options");
+    TS_ASSERT_EQUALS(whitelist.name(0), "Run(s)");
+    TS_ASSERT_EQUALS(whitelist.name(7), "Options");
 
     // When the presenter accepts the views, expect the following:
     // Expect that the list of settings is populated

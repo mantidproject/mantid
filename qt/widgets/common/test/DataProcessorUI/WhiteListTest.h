@@ -35,12 +35,12 @@ public:
 
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Column indices
-    TS_ASSERT_EQUALS(whitelist.colIndexFromColName("Column1"), 0);
-    TS_ASSERT_EQUALS(whitelist.colIndexFromColName("Column3"), 2);
-    TS_ASSERT_EQUALS(whitelist.colIndexFromColName("Column5"), 4);
+    TS_ASSERT_EQUALS(whitelist.indexFromName("Column1"), 0);
+    TS_ASSERT_EQUALS(whitelist.indexFromName("Column3"), 2);
+    TS_ASSERT_EQUALS(whitelist.indexFromName("Column5"), 4);
     // Algorithm properties
-    TS_ASSERT_EQUALS(whitelist.algPropFromColIndex(1), "Property2");
-    TS_ASSERT_EQUALS(whitelist.algPropFromColIndex(3), "Property4");
+    TS_ASSERT_EQUALS(whitelist.algorithmProperty(1), "Property2");
+    TS_ASSERT_EQUALS(whitelist.algorithmProperty(3), "Property4");
     // Descriptions
     TS_ASSERT_EQUALS(whitelist.description(2), "Description3");
     TS_ASSERT_EQUALS(whitelist.description(4), "Description5");
@@ -56,9 +56,9 @@ public:
 
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Column indices
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(0), "Column1");
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(3), "Column4");
-    TS_ASSERT_EQUALS(whitelist.colNameFromColIndex(4), "Column5");
+    TS_ASSERT_EQUALS(whitelist.name(0), "Column1");
+    TS_ASSERT_EQUALS(whitelist.name(3), "Column4");
+    TS_ASSERT_EQUALS(whitelist.name(4), "Column5");
   }
 
   void test_column_property() {
@@ -71,8 +71,8 @@ public:
 
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Algorithm properties
-    TS_ASSERT_EQUALS(whitelist.algPropFromColIndex(1), "Property2");
-    TS_ASSERT_EQUALS(whitelist.algPropFromColIndex(3), "Property4");
+    TS_ASSERT_EQUALS(whitelist.algorithmProperty(1), "Property2");
+    TS_ASSERT_EQUALS(whitelist.algorithmProperty(3), "Property4");
   }
 
   void test_column_description() {
@@ -97,8 +97,8 @@ public:
 
     TS_ASSERT_EQUALS(whitelist.size(), 2);
     // Descriptions
-    TS_ASSERT_EQUALS(whitelist.showValue(0), false);
-    TS_ASSERT_EQUALS(whitelist.showValue(1), true);
+    TS_ASSERT_EQUALS(whitelist.isShown(0), false);
+    TS_ASSERT_EQUALS(whitelist.isShown(1), true);
   }
 
   void test_column_prefix() {

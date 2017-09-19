@@ -84,7 +84,7 @@ QVariant QTwoLevelTreeModel::headerData(
     int section, Qt::Orientation orientation, int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    return m_whitelist.colNameFromColIndex(section);
+    return m_whitelist.name(section);
 
   if (orientation == Qt::Horizontal && role == Qt::WhatsThisRole)
     return m_whitelist.description(section);

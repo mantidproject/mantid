@@ -2,6 +2,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h"
@@ -16,11 +17,10 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/SeparatorCommand.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h"
-#include "MantidKernel/make_unique.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -50,10 +50,10 @@ OneLevelTreeManager::OneLevelTreeManager(
 * @param presenter :: [input] The DataProcessor presenter
 * @param whitelist :: [input] A whitelist containing the number of columns
 */
-OneLevelTreeManager::OneLevelTreeManager(
-    DataProcessorPresenter *presenter, const WhiteList &whitelist)
-    : OneLevelTreeManager(
-          presenter, createDefaultWorkspace(whitelist), whitelist) {}
+OneLevelTreeManager::OneLevelTreeManager(DataProcessorPresenter *presenter,
+                                         const WhiteList &whitelist)
+    : OneLevelTreeManager(presenter, createDefaultWorkspace(whitelist),
+                          whitelist) {}
 
 /**
 * Destructor
@@ -64,21 +64,17 @@ OneLevelTreeManager::~OneLevelTreeManager() {}
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<Command_uptr>
-OneLevelTreeManager::publishCommands() {
+std::vector<Command_uptr> OneLevelTreeManager::publishCommands() {
 
   std::vector<Command_uptr> commands;
 
   addCommand(commands, make_unique<OpenTableCommand>(m_presenter));
   addCommand(commands, make_unique<NewTableCommand>(m_presenter));
   addCommand(commands, make_unique<SaveTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<SaveTableAsCommand>(m_presenter));
+  addCommand(commands, make_unique<SaveTableAsCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ImportTableCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ExportTableCommand>(m_presenter));
+  addCommand(commands, make_unique<ImportTableCommand>(m_presenter));
+  addCommand(commands, make_unique<ExportTableCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<OptionsCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
@@ -89,14 +85,10 @@ OneLevelTreeManager::publishCommands() {
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<AppendRowCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<CopySelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<CutSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<PasteSelectedCommand>(m_presenter));
-  addCommand(commands,
-             make_unique<ClearSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<CopySelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<CutSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<PasteSelectedCommand>(m_presenter));
+  addCommand(commands, make_unique<ClearSelectedCommand>(m_presenter));
   addCommand(commands, make_unique<SeparatorCommand>(m_presenter));
   addCommand(commands, make_unique<DeleteRowCommand>(m_presenter));
   return commands;
@@ -131,7 +123,7 @@ Delete row(s) from the model
 */
 void OneLevelTreeManager::deleteRow() {
   auto selectedRows = m_presenter->selectedParents();
-  while(!selectedRows.empty()) {
+  while (!selectedRows.empty()) {
     // Remove a row
     auto row = *selectedRows.begin();
     m_model->removeRow(row);
@@ -174,10 +166,6 @@ std::set<int> OneLevelTreeManager::expandSelection() {
 void OneLevelTreeManager::clearSelected() {
 
   const auto selectedRows = m_presenter->selectedParents();
-
-  if (selectedRows.empty())
-    return;
-
   for (const auto &row : selectedRows) {
     for (int column = 0; column < m_model->columnCount(); column++)
       m_model->setData(m_model->index(row, column), QString());
@@ -240,19 +228,18 @@ void OneLevelTreeManager::pasteSelected(const QString &text) {
 /** Opens a blank table
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void OneLevelTreeManager::newTable(
-    const WhiteList &whitelist) {
+void OneLevelTreeManager::newTable(const WhiteList &whitelist) {
 
-  m_model.reset(new QOneLevelTreeModel(
-      createDefaultWorkspace(whitelist), whitelist));
+  m_model.reset(
+      new QOneLevelTreeModel(createDefaultWorkspace(whitelist), whitelist));
 }
 
 /** Opens a given table
 * @param table :: A table to open
 * @param whitelist :: A whitelist with the columns for the new table
 */
-void OneLevelTreeManager::newTable(
-    ITableWorkspace_sptr table, const WhiteList &whitelist) {
+void OneLevelTreeManager::newTable(ITableWorkspace_sptr table,
+                                   const WhiteList &whitelist) {
 
   if (isValidModel(table, whitelist.size())) {
     m_model.reset(new QOneLevelTreeModel(table, whitelist));
@@ -270,6 +257,53 @@ void OneLevelTreeManager::insertRow(int rowIndex) {
   m_model->insertRow(rowIndex);
 }
 
+TreeData OneLevelTreeManager::handleEmptyTable(bool prompt) {
+  if (prompt)
+    m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
+  return TreeData();
+}
+
+bool OneLevelTreeManager::isEmptyTable() const {
+  return m_model->rowCount() == 0;
+}
+
+bool OneLevelTreeManager::askUserIfShouldProcessAll() const {
+  return m_presenter->askUserYesNo(
+      "This will process all rows in the table. Continue?",
+      "Process all rows?");
+}
+
+bool OneLevelTreeManager::shouldProcessAll() const {
+  auto askBeforeProcessingAll =
+      m_presenter->options().find("WarnProcessAll")->second;
+  if (askBeforeProcessingAll.toBool()) {
+    return askUserIfShouldProcessAll();
+  } else {
+    return true;
+  }
+}
+
+std::set<int> OneLevelTreeManager::allRows() const {
+  std::set<int> allRows;
+  for (int row = 0; row < m_model->rowCount(); row++) {
+    allRows.insert(row);
+  }
+  return allRows;
+}
+
+std::set<int> OneLevelTreeManager::noRows() const { return std::set<int>(); }
+
+std::set<int> OneLevelTreeManager::getRowsToProcess(bool shouldPrompt) const {
+  auto rows = m_presenter->selectedParents();
+  if (rows.empty()) {
+    if (shouldPrompt && !shouldProcessAll())
+      return noRows();
+    else
+      return allRows();
+  } else {
+    return rows;
+  }
+}
 /**
 * Returns selected data in a format that the presenter can understand and use
 * @param prompt :: True if warning messages should be displayed. False othewise
@@ -277,48 +311,25 @@ void OneLevelTreeManager::insertRow(int rowIndex) {
 * values are
 */
 TreeData OneLevelTreeManager::selectedData(bool prompt) {
+  if (isEmptyTable()) {
+    return handleEmptyTable(prompt);
+  } else {
+    auto rows = getRowsToProcess(prompt);
 
-  TreeData selectedData;
+    // Return selected data in the format: map<int, set<vector<string>>>, where:
+    // int -> row index
+    // set<vector<string>> -> set of vectors storing the data. Each set is a row
+    // and each element in the vector is a column
+    TreeData selectedData;
+    for (const auto &row : rows) {
 
-  auto options = m_presenter->options();
-
-  if (m_model->rowCount() == 0 && prompt) {
-    m_presenter->giveUserWarning("Cannot process an empty Table", "Warning");
+      QStringList data;
+      for (int i = 0; i < m_model->columnCount(); i++)
+        data.append(m_model->data(m_model->index(row, i)).toString());
+      selectedData[row][row] = data;
+    }
     return selectedData;
   }
-
-  // Selected rows
-  auto rows = m_presenter->selectedParents();
-
-  if (rows.empty()) {
-
-    if (options["WarnProcessAll"].toBool() && prompt) {
-      if (!m_presenter->askUserYesNo(
-              "This will process all rows in the table. Continue?",
-              "Process all rows?"))
-        return selectedData;
-    }
-
-    // They want to process everything
-    // Populate all groups with all rows
-
-    for (int row = 0; row < m_model->rowCount(); row++) {
-      rows.insert(row);
-    }
-  }
-
-  // Return selected data in the format: map<int, set<vector<string>>>, where:
-  // int -> row index
-  // set<vector<string>> -> set of vectors storing the data. Each set is a row
-  // and each element in the vector is a column
-  for (const auto &row : rows) {
-
-    QStringList data;
-    for (int i = 0; i < m_model->columnCount(); i++)
-      data.append(m_model->data(m_model->index(row, i)).toString());
-    selectedData[row][row] = data;
-  }
-  return selectedData;
 }
 
 /** Transfer data to the model
@@ -329,7 +340,7 @@ void OneLevelTreeManager::transfer(
     const std::vector<std::map<QString, QString>> &runs,
     const WhiteList &whitelist) {
 
-  ITableWorkspace_sptr ws = m_model->getTableWorkspace();
+  auto ws = m_model->getTableWorkspace();
 
   if (ws->rowCount() == 1) {
     // If the table only has one row, check if it is empty and if so, remove it.
@@ -350,8 +361,7 @@ void OneLevelTreeManager::transfer(
 
     TableRow newRow = ws->appendRow();
 
-    for (auto i = 0; i < static_cast<int>(whitelist.size()); i++) {
-      const QString columnName = whitelist.colNameFromColIndex(i);
+    for (auto const &columnName : whitelist.names()) {
       if (row.count(columnName)) {
         newRow << (row.at(columnName)).toStdString();
       } else {
@@ -369,7 +379,7 @@ void OneLevelTreeManager::transfer(
 * @param data :: the data
 */
 void OneLevelTreeManager::update(int parent, int child,
-                                              const QStringList &data) {
+                                 const QStringList &data) {
 
   UNUSED_ARG(child);
 
@@ -383,9 +393,7 @@ void OneLevelTreeManager::update(int parent, int child,
 /** Gets the number of rows in the table
 * @return : Number of rows
 */
-int OneLevelTreeManager::rowCount() const {
-  return m_model->rowCount();
-}
+int OneLevelTreeManager::rowCount() const { return m_model->rowCount(); }
 
 /** Gets the number of rows in the table
 * @param parent : The parent of the row
@@ -409,8 +417,7 @@ bool OneLevelTreeManager::isProcessed(int position) const {
 * @param parent : The parent of the row
 * @return : 'process' status
 */
-bool OneLevelTreeManager::isProcessed(int position,
-                                                   int parent) const {
+bool OneLevelTreeManager::isProcessed(int position, int parent) const {
   UNUSED_ARG(parent);
   return m_model->isProcessed(position);
 }
@@ -419,8 +426,7 @@ bool OneLevelTreeManager::isProcessed(int position,
 * @param processed : True to set row as processed, false to set unprocessed
 * @param position : The index of the row to be set
 */
-void OneLevelTreeManager::setProcessed(bool processed,
-                                                    int position) {
+void OneLevelTreeManager::setProcessed(bool processed, int position) {
   m_model->setProcessed(processed, position);
 }
 
@@ -429,8 +435,8 @@ void OneLevelTreeManager::setProcessed(bool processed,
 * @param position : The index of the row to be set
 * @param parent : The parent of the row
 */
-void OneLevelTreeManager::setProcessed(bool processed,
-                                                    int position, int parent) {
+void OneLevelTreeManager::setProcessed(bool processed, int position,
+                                       int parent) {
   UNUSED_ARG(parent);
   m_model->setProcessed(processed, position);
 }
@@ -438,8 +444,7 @@ void OneLevelTreeManager::setProcessed(bool processed,
 /** Return a shared ptr to the model
 * @return :: A shared ptr to the model
 */
-boost::shared_ptr<AbstractTreeModel>
-OneLevelTreeManager::getModel() {
+boost::shared_ptr<AbstractTreeModel> OneLevelTreeManager::getModel() {
   return m_model;
 }
 
@@ -456,15 +461,14 @@ ITableWorkspace_sptr OneLevelTreeManager::getTableWorkspace() {
 * @param whitelist :: The whitelist that will be used to create a new table
 * @return : A default table
 */
-ITableWorkspace_sptr OneLevelTreeManager::createDefaultWorkspace(
-    const WhiteList &whitelist) {
+ITableWorkspace_sptr
+OneLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
   ITableWorkspace_sptr ws =
       Mantid::API::WorkspaceFactory::Instance().createTable();
 
-  for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
+  for (auto const &columnName : whitelist.names()) {
     // The columns provided to this presenter
-    auto column =
-        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+    auto column = ws->addColumn("str", columnName.toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();
@@ -475,8 +479,8 @@ ITableWorkspace_sptr OneLevelTreeManager::createDefaultWorkspace(
 * @param ws :: the table workspace
 * @param whitelistColumns :: the number of columns as specified in a whitelist
 */
-void OneLevelTreeManager::validateModel(
-    ITableWorkspace_sptr ws, size_t whitelistColumns) const {
+void OneLevelTreeManager::validateModel(ITableWorkspace_sptr ws,
+                                        size_t whitelistColumns) const {
 
   if (!ws)
     throw std::runtime_error("Null pointer");
@@ -503,8 +507,8 @@ void OneLevelTreeManager::validateModel(
 * @param whitelistColumns : [input] The number of columns in the whitelist
 * @throws std::runtime_error if the number of columns in the table is incorrect
 */
-bool OneLevelTreeManager::isValidModel(
-    Workspace_sptr ws, size_t whitelistColumns) const {
+bool OneLevelTreeManager::isValidModel(Workspace_sptr ws,
+                                       size_t whitelistColumns) const {
 
   try {
     validateModel(boost::dynamic_pointer_cast<ITableWorkspace>(ws),
@@ -523,9 +527,8 @@ bool OneLevelTreeManager::isValidModel(
  * @param parentColumn : the column index of the parent item (unused)
  * @param value : the new value to populate the cell with
 */
-void OneLevelTreeManager::setCell(int row, int column,
-                                               int parentRow, int parentColumn,
-                                               const std::string &value) {
+void OneLevelTreeManager::setCell(int row, int column, int parentRow,
+                                  int parentColumn, const std::string &value) {
 
   UNUSED_ARG(parentRow);
   UNUSED_ARG(parentColumn);
@@ -542,9 +545,8 @@ void OneLevelTreeManager::setCell(int row, int column,
  * @param parentColumn : the column index of the parent item (unused)
  * @return : the value in the cell as a string
 */
-std::string OneLevelTreeManager::getCell(int row, int column,
-                                                      int parentRow,
-                                                      int parentColumn) {
+std::string OneLevelTreeManager::getCell(int row, int column, int parentRow,
+                                         int parentColumn) {
   UNUSED_ARG(parentRow);
   UNUSED_ARG(parentColumn);
 
@@ -555,9 +557,7 @@ std::string OneLevelTreeManager::getCell(int row, int column,
  * Gets the number of rows.
  * @return : the number of rows.
  */
-int OneLevelTreeManager::getNumberOfRows() {
-  return m_model->rowCount();
-}
+int OneLevelTreeManager::getNumberOfRows() { return m_model->rowCount(); }
 }
 }
 }

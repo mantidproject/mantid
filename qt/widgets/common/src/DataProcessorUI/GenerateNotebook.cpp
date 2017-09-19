@@ -242,10 +242,10 @@ QString tableString(const TreeData &treeData,
 
   tableString += "Group | ";
   for (int i = 0; i < ncols - 1; i++) {
-    tableString += whitelist.colNameFromColIndex(i);
+    tableString += whitelist.name(i);
     tableString += " | ";
   }
-  tableString += whitelist.colNameFromColIndex(ncols - 1);
+  tableString += whitelist.name(ncols - 1);
   tableString += "\n";
   for (int i = 0; i < ncols - 1; i++) {
     tableString += "---";
@@ -365,7 +365,7 @@ QString getReducedWorkspaceName(const RowData &data,
 
   for (int col = 0; col < ncols - 1; col++) {
     // Do we want to use this column to generate the name of the output ws?
-    if (whitelist.showValue(col)) {
+    if (whitelist.isShown(col)) {
       // Get what's in the column
       const QString valueStr = data.at(col);
       if (!valueStr.isEmpty()) {
@@ -428,9 +428,9 @@ boost::tuple<QString, QString> reduceRowString(
   // Run through columns, excluding 'Options'
   for (int col = 0; col < ncols - 2; col++) {
     // The column's name
-    const QString colName = whitelist.colNameFromColIndex(col);
+    const QString colName = whitelist.name(col);
     // The algorithm property linked to this column
-    const QString algProp = whitelist.algPropFromColIndex(col);
+    const QString algProp = whitelist.algorithmProperty(col);
 
     if (preprocessMap.count(colName)) {
       // This column was pre-processed, we need to print pre-processing
