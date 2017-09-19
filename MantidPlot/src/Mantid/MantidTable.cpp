@@ -296,12 +296,13 @@ void MantidTable::cellEdited(int row, int col) {
   std::istringstream textStream(text);
   const std::locale systemLocale("");
   textStream.imbue(systemLocale);
-  c->read(index, textStream);
+  c->read(index, textStream.str());
 
   // Set the table view to be the same text after editing.
   // That way, if the string was stupid, it will be reset to the old value.
   std::ostringstream s;
   s.imbue(systemLocale);
+
   // Avoid losing precision for numeric data
   if (c->type() == "double") {
     s.precision(std::numeric_limits<double>::max_digits10);
@@ -309,6 +310,12 @@ void MantidTable::cellEdited(int row, int col) {
   c->print(index, s);
 
   d_table->setText(row, col, QString::fromStdString(s.str()));
+}
+
+void MantidTable::setPlotDesignation(Table::PlotDesignation pd,
+                                     bool rightColumns) {
+  Table::setPlotDesignation(pd, rightColumns);
+  setPlotTypeForSelectedColumns(pd);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -419,6 +426,19 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
   } else {
     // Fall-back to the default sorting of the table
     Table::sortColumns(s, type, order, leadCol);
+  }
+}
+
+/** Set the plot type on the workspace for each selected column
+ *
+ * @param plotType :: the plot type to set the selected columns to.
+ */
+void MantidTable::setPlotTypeForSelectedColumns(int plotType) {
+  const auto list = selectedColumns();
+  for (const auto &name : list) {
+    const auto col = colIndex(name);
+    const auto column = m_ws->getColumn(col);
+    column->setPlotType(plotType);
   }
 }
 

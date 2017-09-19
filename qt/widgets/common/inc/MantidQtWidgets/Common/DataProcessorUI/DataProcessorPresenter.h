@@ -12,11 +12,12 @@ using ChildItems = std::map<int, std::set<int>>;
 
 namespace MantidQt {
 namespace MantidWidgets {
+class ProgressableView;
+namespace DataProcessor {
 // Forward decs
-class DataProcessorCommand;
+class Command;
 class DataProcessorMainPresenter;
 class DataProcessorView;
-class ProgressableView;
 
 /** @class DataProcessorPresenter
 
@@ -84,7 +85,7 @@ public:
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   virtual void setInstrumentList(const QStringList &instruments,
                                  const QString &defaultInstrument) = 0;
-  virtual std::vector<std::unique_ptr<DataProcessorCommand>>
+  virtual std::vector<std::unique_ptr<Command>>
   publishCommands() = 0;
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
@@ -105,6 +106,7 @@ public:
   virtual int getNumberOfRows() = 0;
   virtual void clearTable() = 0;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPRESENTER_H*/

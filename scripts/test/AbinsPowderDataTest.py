@@ -5,32 +5,6 @@ import numpy as np
 from AbinsModules import PowderData, AbinsTestHelpers
 
 
-def old_modules():
-    """" Check if there are proper versions of  Python and numpy."""
-    is_numpy_old = AbinsTestHelpers.is_numpy_valid(np.__version__)
-    if is_numpy_old:
-        logger.warning("Skipping AbinsPowderDataTest because numpy is too old.")
-
-    return is_numpy_old
-
-
-def skip_if(skipping_criteria):
-    """
-    Skip all tests if the supplied function returns true.
-    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
-    """
-
-    def decorate(cls):
-        if skipping_criteria():
-            for attr in cls.__dict__.keys():
-                if callable(getattr(cls, attr)) and 'test' in attr:
-                    delattr(cls, attr)
-        return cls
-
-    return decorate
-
-
-@skip_if(old_modules)
 class AbinsPowderDataTest(unittest.TestCase):
 
     def test_input(self):

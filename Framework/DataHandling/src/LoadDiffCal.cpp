@@ -347,10 +347,11 @@ void LoadDiffCal::runLoadCalFile() {
   bool makeCalWS = getProperty("MakeCalWorkspace");
   bool makeMaskWS = getProperty("MakeMaskWorkspace");
   bool makeGroupWS = getProperty("MakeGroupingWorkspace");
+  API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
-  alg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+  alg->setProperty("InputWorkspace", inputWs);
   alg->setPropertyValue("InstrumentName", getPropertyValue("InstrumentName"));
   alg->setPropertyValue("InstrumentFilename",
                         getPropertyValue("InstrumentFilename"));
