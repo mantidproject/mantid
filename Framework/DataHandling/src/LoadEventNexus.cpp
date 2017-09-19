@@ -9,6 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -18,6 +19,8 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/function.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -1086,27 +1089,29 @@ void LoadEventNexus::createSpectraMapping(
   m_specMax = getProperty("SpectrumMax");
   m_specList = getProperty("SpectrumList");
 
+  std::vector<SpectrumDefinition> spectrumDefinitions;
+
   // set up the
   if (!monitorsOnly && !bankNames.empty()) {
-    std::vector<IDetector_const_sptr> allDets;
-
+    const auto &componentInfo = m_ws->getSingleHeldWorkspace()->componentInfo();
     for (const auto &bankName : bankNames) {
-      // Only build the map for the single bank
-      std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
+      const auto &bank = m_ws->getInstrument()->getComponentByName(bankName);
+      std::vector<size_t> dets;
+      if (bank) {
+        const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
+        dets = componentInfo.detectorsInSubtree(bankIndex);
+        for (const auto detIndex : dets)
+          spectrumDefinitions.emplace_back(detIndex);
+      }
       if (dets.empty())
         throw std::runtime_error("Could not find the bank named '" + bankName +
                                  "' as a component assembly in the instrument "
                                  "tree; or it did not contain any detectors."
                                  " Try unchecking SingleBankPixelsOnly.");
-      allDets.insert(allDets.end(), dets.begin(), dets.end());
     }
-    m_ws->resizeTo(allDets.size());
-    // Make an event list for each.
-    for (size_t wi = 0; wi < allDets.size(); wi++) {
-      const detid_t detID = allDets[wi]->getID();
-      m_ws->setDetectorIdsForAllPeriods(wi, detID);
-    }
+    Indexing::IndexInfo indexInfo(spectrumDefinitions.size());
+    indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+    m_ws->setIndexInfo(indexInfo);
     spectramap = true;
     g_log.debug() << "Populated spectra map for select banks\n";
 
