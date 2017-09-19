@@ -226,36 +226,6 @@ size_t EventWorkspaceCollection::getNumberEvents() const {
   return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
 }
 
-void EventWorkspaceCollection::resizeTo(const size_t size) {
-  for (auto &ws : m_WsVec) {
-    auto tmp = createWorkspace<DataObjects::EventWorkspace>(size, 2, 1);
-    WorkspaceFactory::Instance().initializeFromParent(*ws, *tmp, true);
-    ws = std::move(tmp);
-    for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
-      ws->getSpectrum(i).setSpectrumNo(static_cast<specnum_t>(i + 1));
-  }
-}
-
-void EventWorkspaceCollection::padSpectra(const std::vector<int32_t> &padding) {
-  if (padding.empty()) {
-    const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
-    resizeTo(pixelIDs.size());
-    for (auto &ws : m_WsVec)
-      for (size_t i = 0; i < pixelIDs.size(); ++i)
-        ws->getSpectrum(i).setDetectorID(pixelIDs[i]);
-  } else {
-    resizeTo(padding.size());
-    for (auto &ws : m_WsVec) {
-      for (size_t i = 0; i < padding.size(); ++i) {
-        // specList ranges from 1, ..., N
-        // detector ranges from 0, ..., N-1
-        ws->getSpectrum(i).setDetectorID(padding[i] - 1);
-        ws->getSpectrum(i).setSpectrumNo(padding[i]);
-      }
-    }
-  }
-}
-
 void EventWorkspaceCollection::setIndexInfo(
     const Indexing::IndexInfo &indexInfo) {
   for (auto &ws : m_WsVec)
