@@ -6,6 +6,7 @@ from  Muon import load_utils
 from  Muon import MaxEnt_presenter
 from  Muon import MaxEnt_view
 from  Muon import MaxEnt_model
+from  Muon import ThreadModel
 
 import unittest
 if sys.version_info.major == 3:
@@ -18,11 +19,10 @@ class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
         self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
         self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
-        self.alg=mock.create_autospec(MaxEnt_model.MaxEntThread,spec_set=True)
+        self.alg=mock.create_autospec(ThreadModel.ThreadModel,spec_set=True)
         self.alg.start=mock.Mock()
         self.alg.started=mock.Mock()
         self.alg.finished=mock.Mock()
- #       self.alg.started.connect=mock.Mock()
         self.alg.setInputs=mock.Mock()
 
         self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)

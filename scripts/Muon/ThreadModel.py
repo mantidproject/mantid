@@ -21,3 +21,6 @@ class ThreadModel(QThread):
 
     def setInputs(self,inputs,runName):
         self.model.setInputs(inputs,runName)
+
+    def getAlg(self):
+        return self.model

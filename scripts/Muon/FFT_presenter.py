@@ -40,7 +40,7 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
-        self.alg.model.setRun(self.load.getRunName())
+        self.alg.getAlg.setRun(self.load.getRunName())
 
         #do apodization and padding to real data
 
@@ -49,22 +49,22 @@ class FFTPresenter(object):
         if self.view.getWS() == "PhaseQuad":
             if self.view.isNewPhaseTable()==True:
                 axis=self.view.getAxis()
-                self.alg.model.makePhaseQuadTable(axis,self.load.getInstrument())
-                self.alg.model.PhaseQuad()
+                self.alg.getAlg.makePhaseQuadTable(axis,self.load.getInstrument())
+            self.alg.getAlg.PhaseQuad()
             self.view.RePhaseAdvanced(preInputs)
         else:
             self.view.ReAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
             tmp=1
-        self.alg.model.preAlg(preInputs)
+        self.alg.getAlg.preAlg(preInputs)
 
         #do apodization and padding to complex data
         if self.view.isComplex() and self.view.getWS()!="PhaseQuad":
             self.view.ImAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
-            self.alg.model.preAlg(preInputs)
+            self.alg.getAlg.preAlg(preInputs)
 
         #do FFT to transformed data
         FFTInputs = self.get_FFT_input()
@@ -75,7 +75,7 @@ class FFTPresenter(object):
         else:
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
-        self.alg.model.FFTAlg(FFTInputs)
+        self.alg.getAlg.FFTAlg(FFTInputs)
 
         self.view.setPhaseBox()
 
