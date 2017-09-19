@@ -1022,7 +1022,8 @@ on the scatter workspaces. There are several types of masking which are currentl
 - Time/Bin masking.
 - Radius masking.
 - Mask files.
-- Spectrum masking which includes individual spectra, spectra ranges, spectra blocks and spectra cross blocks. These masks are partially specified on a detector level (see below).
+- Spectrum masking which includes individual spectra, spectra ranges, spectra blocks and spectra cross blocks.
+  These masks are partially specified on a detector level (see below).
 - Angle masking.
 - Beam stop masking.
 
@@ -1072,10 +1073,10 @@ and in fact data-dependent. Currently the move mechanism is implemented for
 **SANS2D**, **LOQ**, **LARMOR** and **ZOOM**.
 
 The main purpose is to shift a freshly loaded data set into its default position.
-The sub-steps to achieve this are:
-
-TODO
-
+Note that each instrument has its own way of displacing the instrument. In general
+this is achieved by a combination of translations and rotations using
+:ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>` and
+:ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`.
 
 
 ``SANSNormalizeToMonitor``
@@ -1159,7 +1160,7 @@ reduction, but rather only reduces either the sample or the can dataself.
 For this the ``SANSSingleReduction`` algorithm was developed. It runs ``SANSReductionCore``
 with the appropriate data (sample or can) and performs the required post processing, e.g. stitching.
 This algorithm will produce a fully reduced output. However it will not produce it in the desired form,
-eg correct name of the output workspaces, grouping of mult-period reduced data etc. This is achieved with
+e.g. correct name of the output workspaces, grouping of mult-period reduced data etc. This is achieved with
 an instance of ``SANSBatchReduction`` (not a work-flow algorithm!) in module ``sans_batch.py``. This
 is the entry point for any reduction.
 
@@ -1169,8 +1170,8 @@ is the entry point for any reduction.
 
 This class is the entry point for any reduction and takes three important inputs:
 
-- A list of sans state objects. Each state object defines a reduction. In fact if the state object contains
-  period data with :math:`N` periods and :math:`M` time slices it will in fact define :math:`N \cross M` reductions.
+- A list of SANS state objects. Each state object defines a reduction. In fact if the state object contains
+  period data with :math:`N` periods and :math:`M` time slices it will in fact define :math:`N \times M` reductions.
 - A ``use_optimizations`` boolean flag. If true the data loading mechanism will check the ADS first if
   the required data is available from there and only load the data if it is not present. It will place newly
   loaded data into the ADS. The ADS is also checked for can reductions.
@@ -1187,7 +1188,7 @@ handle each state object are:
 
 1. Load the data which is relevant for the particular reduction (make use of optimizations if applicable)
 2. If the state object contains multi-period data with :math:`N` periods and/or :math:`M` time slices
-   then generate :math:`N \cross M` state objects
+   then generate :math:`N \times M` state objects
 3. For each state object run the ``SANSSingleReduction`` algorithm
 4. Group the output workspaces if required, e.g. for reduced multi-period data
 5. Provide workspaces to the selected output channel, i.e. ADS, files or both.
@@ -1202,8 +1203,63 @@ to perform the reduction.
 ``SANSSingleReduction``
 -----------------------
 
-# The ``SANSSingleReduction`` algorithm defines a single complete reduction of a data set, i.e.
-# it contains
+The ``SANSSingleReduction`` algorithm defines a single complete reduction of
+a data set, i.e. it will run the reduction for the *Sample* and *Can* and perform
+the subtraction of these results provided that the reduction has been set up
+to do this. In particular this algorithm stitches the reduced workspaces of the
+different detectors using :ref:`SANSStitch <algm-SANSStitch>`,
+again provided that the reduction has been set up to do this.
+
+
+``SANSReductionCore``
+---------------------
+
+This work-flow algorithm actually defines the order of the reduction steps and is the
+inner core of the orchestration mechanism. The inputs to this algorithm are
+
+- A SANS state object
+- Several input workspaces
+- A selection which detector type we are dealing with, i.e. *LAB* or *HAB*
+- A selection which data type we are dealing with, i.e. *Sample* or *Can*
+
+The sub-steps of this algorithm are:
+
+1. Get the cropped input *ScatterWorkspace*. The cropping is defined by the selected dector type.
+   The underlying algorithm is :ref:`SANSCrop <algm-SANSCrop>`.
+2. Create an event slice of the input workspace using :ref:`SANSSliceEvent <algm-SANSSliceEvent>`.
+   Note that event slicing is only applied to event-mode workspaces and only when it has been
+   specified by the user. During this step the scatter workspace is sliced and the associated
+   monitor workspace is scaled. The scaling factor is the ratio of the charge of the sliced data set
+   and the charge of the entire data set. Also note that this factor is retuned and used later on.
+3. If we are dealing with an even-mode workspace and the compatibility mode has been chosen then
+   either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
+   :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
+4. Both the data and the monitor workspace perform an initial move operation
+   using :ref:`SANSMove <algm-SANSMove>`. The algorithm is applied twice. The first time using
+   the *SetToZero* mode in case the algorithm had been loaded and moved already previously. This
+   resets the instrument position of the workspace to the positions of the base instrument. The second
+   time the move algorithm is operated in *InitialMove* mode.
+5. The data workspace is masked using :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>`. Note that
+   only the general masks and the masks for the selected component are applied.
+   Note that all steps up until now were performed in the time-of-flight domain.
+6. Convert the data from the time-of-flight to the wavelength domain using
+   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
+7. Scale the data set using :ref:`SANSScale <algm-SANSScale>`. This will multiply the data set
+   with the absolute scale and divide by the sample volume.
+8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
+   This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
+   they are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
+   algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment worspace and a wavelength-and-pixel adjustment
+   workspace. Note that the creation is optional.
+9. Convert the data workspace into histogram-mode using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`.
+   This is only relevant for event-mode workspaces where the compatibility mode has not been used. Up until
+   now the event-mode workspace could be used as an event workspace, but the momentum transfer conversion (the next step)
+   requires a histogram-mode workspace.
+10. The final step, the conversion to momentum transfer units, either uses :ref:`Q1D <algm-Q1D>`
+    or :ref:`Qxy <algm-Qxy>` depending what the setting of the reduction dimensionality is. This step
+    uses the data workspace as well as all of the adjustment workspaces which have been provided earlier
+    on. The resulting *OutputWorkspace* and the *SumOfCounts* as well as *SumOfNormFactors* counts
+    are provided as outputs.
 
 
 .. rubric:: Footnotes
