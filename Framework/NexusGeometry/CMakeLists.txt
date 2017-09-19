@@ -22,6 +22,8 @@ if (COVERALLS)
     endforeach(loop_var)
 endif()
 
+find_package(HDF5 COMPONENTS CXX HL REQUIRED)
+
 # Add the target for this directory
 add_library ( NexusGeometry ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
@@ -38,7 +40,7 @@ include_directories (${HDF5_INCLUDE_DIRS})
 # Add to the 'Framework' group in VS
 set_property ( TARGET NexusGeometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+target_link_libraries( NexusGeometry LINK_PRIVATE ${MANTIDLIBS} ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${HDF5_CXX_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory ( test )

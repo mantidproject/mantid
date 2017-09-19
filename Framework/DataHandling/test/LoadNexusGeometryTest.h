@@ -1,115 +1,57 @@
-﻿#ifndef LOAD_NEXUS_GEOMETRY_TEST_H_
-#define LOAD_NEXUS_GEOMETRY_TEST_H_
+#ifndef MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_
+#define MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidBeamline/ComponentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
+
 #include "MantidDataHandling/LoadNexusGeometry.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/InstrumentVisitor.h"
 
-#include "Eigen/Core"
-
-using namespace Mantid;
-using namespace DataHandling;
-
-typedef boost::shared_ptr<Beamline::ComponentInfo> ComponentInfo_sptr;
+using Mantid::DataHandling::LoadNexusGeometry;
 
 class LoadNexusGeometryTest : public CxxTest::TestSuite {
 public:
-  void testInit() {
-    LoadNexusGeometry loader;
-    loader.setChild(true);
-    TS_ASSERT(!loader.isInitialized());
-    loader.initialize();
-    TS_ASSERT(loader.isInitialized());
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadNexusGeometryTest *createSuite() { return new LoadNexusGeometryTest(); }
+  static void destroySuite( LoadNexusGeometryTest *suite ) { delete suite; }
 
-    TS_ASSERT_THROWS_NOTHING(
-        loader.setProperty("InstrumentName", "testInstName"));
-    TS_ASSERT(loader.getPropertyValue("InstrumentName") == "testInstName");
+
+  void test_Init()
+  {
+    LoadNexusGeometry alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
   }
 
-  void testExec() {
-    LoadNexusGeometry loader;
-    loader.initialize();
-    loader.setProperty("InstrumentName", "testInstrument");
+  void test_exec()
+  {
+    // Create test input if necessary
+    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
 
-    TS_ASSERT(!loader.isExecuted());
-    TS_ASSERT(loader.execute());
-    TS_ASSERT(loader.isExecuted());
+    LoadNexusGeometry alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
 
-    // Get instrument from data service
-    Geometry::Instrument_sptr testInst1;
-    TS_ASSERT_THROWS_NOTHING(
-        testInst1 =
-            API::InstrumentDataService::Instance().retrieve("testInstrument"));
+    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
+    // be the type using in declareProperty for the "OutputWorkspace" type.
+    // We can't use auto as it's an implicit conversion.
+    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+    TS_FAIL("TODO: Check the results and remove this line");
+  }
+  
+  void test_Something()
+  {
+    TS_FAIL( "You forgot to write a test!");
   }
 
-  void testMemberFunctions() {
-    LoadNexusGeometry loader;
-    std::string instName = "testInst1";
-    Geometry::Instrument_sptr instrument(new Geometry::Instrument(instName));
 
-    setUpAddDetectorWithParent(loader, instrument);
-    setUpAddSource(loader, instrument);
-    setUpAddSample(loader, instrument);
-
-    // Convert to instrument_2 interface for testing
-    Geometry::InstrumentVisitor inst2 = Geometry::InstrumentVisitor(instrument);
-    TS_ASSERT(!inst2.isEmpty());
-    inst2.walkInstrument();
-
-    ComponentInfo_sptr compInfo = inst2.componentInfo();
-
-    checkSource(compInfo);
-    checkSample(compInfo);
-
-    checkDetectorWithParent(inst2, compInfo);
-  }
-
-private:
-  void setUpAddDetectorWithParent(LoadNexusGeometry &loader,
-                                  Geometry::Instrument_sptr instrument) {
-    std::string detName("testDetector");
-    Eigen::Vector3d detPos(1.0, 1.0, 0.5);
-    int id(5);
-    TS_ASSERT_THROWS_NOTHING(
-        loader.addDetector(detName, detPos, id, instrument));
-  }
-  void setUpAddSource(LoadNexusGeometry &loader,
-                      Geometry::Instrument_sptr instrument) {
-    std::string name = "testSource";
-    Eigen::Vector3d pos(0.0, 0.0, -1.0);
-    TS_ASSERT_THROWS_NOTHING(loader.addSource(name, pos, instrument));
-  }
-  void setUpAddSample(LoadNexusGeometry &loader,
-                      Geometry::Instrument_sptr instrument) {
-    std::string name = "testSample";
-    Eigen::Vector3d pos(1.0, 0.0, 2.0);
-    TS_ASSERT_THROWS_NOTHING(loader.addSample(name, pos, instrument));
-  }
-
-  void checkDetectorWithParent(Geometry::InstrumentVisitor &inst,
-                               ComponentInfo_sptr compInfo) {
-    // Get index of sole detector
-    auto detIndexMap = inst.detectorIdToIndexMap();
-    TS_ASSERT(!detIndexMap->empty());
-    TS_ASSERT(detIndexMap->begin()->first == 5);
-    auto detIndex(detIndexMap->begin()->second);
-
-    TS_ASSERT(compInfo->isDetector(detIndex));
-    TS_ASSERT(inst.detectorInfo()->position(detIndex) ==
-              Eigen::Vector3d(1.0, 1.0, 0.5));
-  }
-  void checkSource(ComponentInfo_sptr compInfo) {
-    TS_ASSERT(compInfo->hasSource());
-    TS_ASSERT(compInfo->sourcePosition() == Eigen::Vector3d(0.0, 0.0, -1.0));
-  }
-  void checkSample(ComponentInfo_sptr compInfo) {
-    TS_ASSERT(compInfo->hasSample());
-    TS_ASSERT(compInfo->samplePosition() == Eigen::Vector3d(1.0, 0.0, 2.0));
-  }
 };
 
-#endif // LOAD_NEXUS_GEOMETRY_TEST_H_
+
+#endif /* MANTID_DATAHANDLING_LOADNEXUSGEOMETRYTEST_H_ */

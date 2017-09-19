@@ -1,3 +1,5 @@
+#include <string>
+#include <vector>
 //
 // Created by michael on 23/08/17.
 //
@@ -23,6 +25,7 @@ namespace {
     const H5std_string NX_ENTRY = "NXentry";
     const H5std_string NX_INSTRUMENT = "NXinstrument";
     const H5std_string NX_DETECTOR = "NXdetector";
+    const H5std_string DETECTOR_IDS = "detector_number";
     const H5std_string X_PIXEL_OFFSET = "x_pixel_offset";
     const H5std_string Y_PIXEL_OFFSET = "y_pixel_offset";
     const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
@@ -40,13 +43,14 @@ namespace {
 
 /// Constructor opens the nexus file
 NexusGeometryParser::NexusGeometryParser(
-    const H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr ) {
+    H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr ) {
     
     // Disable automatic printing, so Load algorithm can deal with errors
     // appropriately
     Exception::dontPrint();
     try {
-        this->nexusFile.openFile(fileName, H5F_ACC_RDONLY);
+        H5File file(fileName, H5F_ACC_RDONLY);
+        this->nexusFile = file;
         this->rootGroup = this->nexusFile.openGroup("/");
     } catch (FileIException e) {
         this->exitStatus = OPENING_FILE_ERROR;
@@ -66,6 +70,51 @@ ParsingErrors NexusGeometryParser::ParseNexusGeometry()
         default:
             return this->exitStatus;
     }
+    
+    //TODO - try-catch error handling
+    // Get path to all detector groups
+    try{
+    std::vector<Group> detectorGroups = this->openDetectorGroups();
+    for(std::vector<Group>::iterator iter = detectorGroups.begin(); iter < detectorGroups.end(); ++iter)
+    {
+        //Get the pixel offsets
+        Pixels pixelOffsets = this->getPixelOffsets(*iter);
+        //Get the transformations
+        Eigen::Transform<double, 3, 2> transforms = this->getTransformations(*iter);
+        //Calculate pixel positions
+        Pixels detectorPixels = transforms * pixelOffsets;
+        //Get the pixel detIds
+        std::vector<int> detectorIds = this->getDetectorIds(*iter);
+
+        //TODO - parse shape
+        //Add detector to instrument
+        for(size_t i = 0; i < detectorIds.size(); ++i)
+        {
+            int index = static_cast<int>(i);
+            std::string name = std::to_string(index);
+            Eigen::Vector3d detPos = detectorPixels.col(index);
+            this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos);
+        }
+        //Sort the detectors
+        this->iBuilder_sptr->sortDetectors();
+    }
+    //Sort the detectors
+    this->iBuilder_sptr->sortDetectors();
+
+    //Source and sample
+    // TODO - parse source and sample
+    auto sourcePos = Eigen::Vector3d(0.0,0.0,0.0);
+    auto samplePos = Eigen::Vector3d(1.0,0.0,0.0);
+    std::string sourceName = "source";
+    std::string sampleName = "sample";
+    this->iBuilder_sptr->addSource(sourceName, sourcePos);
+    this->iBuilder_sptr->addSample(sampleName, samplePos);
+
+    } catch (...) {
+        this->exitStatus = UNKNOWN_ERROR;
+    }
+
+    return this->exitStatus;
 }
 
 /// Open subgroups of parent group
@@ -123,6 +172,24 @@ std::vector<Group> NexusGeometryParser::openDetectorGroups ()
     }
     //Return the detector groups
     return detectorGroupPaths;
+}
+
+//Function to return the detector ids in the same order as the opffsets
+std::vector<int> NexusGeometryParser::getDetectorIds ( Group &detectorGroup)
+{
+    H5std_string detectorName = detectorGroup.getObjName();
+    std::vector<int> detIds;
+
+    for (int i = 0; i < detectorGroup.getNumObjs (); ++i)
+    {
+        H5std_string objName = detectorGroup.getObjnameByIdx (i);
+        H5std_string objPath = detectorName + "/" + objName;
+        if(objName == DETECTOR_IDS)
+        {
+            detIds = this->get1DDataset<int> (objPath);
+        }
+    }
+    return detIds;
 }
 
 //Function to return the (x,y,z) offsets of pixels in the chosen detectorGroup
@@ -249,14 +316,13 @@ Eigen::Transform<double, 3, Eigen::Affine> NexusGeometryParser::getTransformatio
     {
         //Open the transformation data set
         DataSet transformation = this->nexusFile.openDataSet (dependency);
-
+        
         //Get magnitude of current transformation
         double magnitude = this->get1DDataset<double>(dependency)[0];
         //Container for unit vector of transformation
         Eigen::Vector3d transformVector;
         //Container for transformation type
         H5std_string transformType;
-
         for(int i = 0; i < transformation.getNumAttrs (); i++)
         {
             //Open attribute at current index
@@ -309,7 +375,6 @@ Eigen::Transform<double, 3, Eigen::Affine> NexusGeometryParser::getTransformatio
             Eigen::AngleAxisd rotation(angle, transformVector);
             transforms *= rotation;
         }
-
     }
     return transforms;
 }

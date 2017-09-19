@@ -13,7 +13,7 @@ namespace NexusGeometry{
  * @param pError
  * @return suggested error message
  */
-std::string ParsingErrorMessages(ParsingErrors pError){
+std::string ParseErrors::ParsingErrorMessages(ParsingErrors pError){
     switch (pError){
         case NO_ERROR:
             return "Parsing Completed";

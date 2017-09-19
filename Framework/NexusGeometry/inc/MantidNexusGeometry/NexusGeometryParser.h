@@ -31,7 +31,7 @@ class DLLExport NexusGeometryParser
 {
 public:
     /// Constructor // , std::weak_ptr<InstrumentHandler> iHandler
-    explicit NexusGeometryParser(const H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr);
+    explicit NexusGeometryParser(H5std_string &fileName, iAbstractBuilder_sptr iAbsBuilder_sptr);
     
     /// Destructor
     ~NexusGeometryParser() = default;
@@ -49,6 +49,8 @@ private:
     std::vector<H5::Group> openSubGroups(H5::Group &parentGroup, H5std_string CLASS_TYPE);
     /// Opens all detector groups in a file
     std::vector<H5::Group> openDetectorGroups ();
+    /// Stores detectorGroup detIds in vector of ints
+    std::vector<int> getDetectorIds(H5::Group &detectorGroup);
     /// Stores detectorGroup pixel offsets as Eigen 3xN matrix
     Eigen::Matrix<double, 3, Eigen::Dynamic> getPixelOffsets(H5::Group &detectorGroup);
     ///Gets the transformations applied to the detector's pixelOffsets
@@ -57,6 +59,7 @@ private:
     H5std_string get1DStringDataset(H5std_string &dataset);
     ///Read dataset into vector
     template<typename valueType> std::vector<valueType> get1DDataset(H5std_string &dataset);
+    Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> parsePixelShape(H5::Group &detectorGroup);
 };
 
 }

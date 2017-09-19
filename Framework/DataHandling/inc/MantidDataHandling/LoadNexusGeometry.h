@@ -1,59 +1,48 @@
-﻿#ifndef LOAD_NEXUS_GEOMETRY_H_
-#define LOAD_NEXUS_GEOMETRY_H_
+#ifndef MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_
+#define MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_
 
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFileLoader.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument_fwd.h"
-
-#include "Eigen/Core"
 
 namespace Mantid {
 namespace DataHandling {
 
-class DLLExport LoadNexusGeometry
-    : public API::IFileLoader<Kernel::NexusDescriptor> {
+/** LoadNexusGeometry : TODO: DESCRIPTION
 
+  Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  National Laboratory & European Spallation Source
+
+  This file is part of Mantid.
+
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://github.com/mantidproject/mantid>
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport LoadNexusGeometry : public API::Algorithm {
 public:
-  /// Default constructor
-  LoadNexusGeometry() = default;
-  /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadNexusGeometry"; }
-  /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return 1; }
-  /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "DataHandling\\Nexus"; }
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "Loads Instrument Geometry from a NeXus file.";
-  }
-
-  /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
-
-  /// Add component to instrument
-  Geometry::IComponent *addComponent(const std::string &name,
-                                     const Eigen::Vector3d &position,
-                                     Geometry::Instrument_sptr instrument);
-  /// Add source to instrument
-  void addSource(const std::string &name, const Eigen::Vector3d &position,
-                 Geometry::Instrument_sptr instrument);
-  /// Add sample to instrument
-  void addSample(const std::string &name, const Eigen::Vector3d &position,
-                 Geometry::Instrument_sptr instrument);
-  /// Add detector to instrument
-  void addDetector(const std::string &name, const Eigen::Vector3d &position, const int detId,
-                   Geometry::Instrument_sptr instrument);
+  const std::string name() const override;
+  int version() const override;
+  const std::string category() const override;
+  const std::string summary() const override;
 
 private:
-  /// Overwrites Algorithm method.
   void init() override;
-  /// Overwrites Algorithm method
   void exec() override;
-  // Instrument pointer
-  std::string defaultName = "defaultInstrumentName";
 };
-}
-}
 
-#endif // LOAD_NEXUS_GEOMETRY_H_
+} // namespace DataHandling
+} // namespace Mantid
+
+#endif /* MANTID_DATAHANDLING_LOADNEXUSGEOMETRY_H_ */

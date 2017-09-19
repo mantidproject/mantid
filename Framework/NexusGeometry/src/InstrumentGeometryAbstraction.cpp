@@ -3,8 +3,11 @@
 //--------------------
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+
+#include <boost/make_shared.hpp>
 
 namespace Mantid{
 namespace NexusGeometry{
@@ -13,6 +16,16 @@ namespace NexusGeometry{
 InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(const std::string &instrumentName){
     Geometry::Instrument_sptr inst_sptr(new Geometry::Instrument(instrumentName));
     this->instrument_sptr = inst_sptr;
+
+    //Default view
+    std::string defaultViewAxis = "z-";
+    Geometry::PointingAlong pointingUp(Geometry::Y), alongBeam(Geometry::Z), thetaSign(Geometry::X);
+    Geometry::Handedness handedness(Geometry::Right);
+    std::string origin;
+    this->instrument_sptr->setDefaultViewAxis(defaultViewAxis);
+    this->instrument_sptr->setReferenceFrame(boost::make_shared<Geometry::ReferenceFrame>(
+        pointingUp, alongBeam, thetaSign, handedness, origin
+    ));
 }
 
 ///Adds component to instrument
@@ -29,6 +42,7 @@ void InstrumentGeometryAbstraction::addDetector(std::string &detName, int detId,
       detName, detId,
       const_cast<Geometry::IComponent *>(this->instrument_sptr->getBaseComponent())));
   detector->setPos(position(0), position(1), position(2));
+
   this->instrument_sptr->add(detector);
   this->instrument_sptr->markAsDetectorIncomplete(detector);
 }

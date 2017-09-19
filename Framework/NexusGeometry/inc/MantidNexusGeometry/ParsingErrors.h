@@ -7,7 +7,7 @@
 //--------------------------------
 // Includes
 //--------------------------------
-
+#include "MantidNexusGeometry/DllConfig.h"
 #include <string>
 
 namespace Mantid{
@@ -16,11 +16,17 @@ namespace NexusGeometry{
 enum ParsingErrors{
     NO_ERROR,
     OPENING_FILE_ERROR,
-    OPENING_ROOT_GROUP_ERROR
+    OPENING_ROOT_GROUP_ERROR,
+    UNKNOWN_ERROR
 };
 
-std::string ParsingErrorMessages(ParsingErrors pError);
-
+class DLLExport ParseErrors
+{
+public:
+    ParseErrors() = default;
+    ~ParseErrors() = default;
+    std::string ParsingErrorMessages(ParsingErrors pError);
+};
 }
 }
 
