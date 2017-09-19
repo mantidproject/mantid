@@ -534,7 +534,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                             converting the specified workspace.
         """
 
-        if self._transposed == True:
+        if self._transposed:
             workspace = self._tranpose_ws(workspace)
 
         if self._indirect_elastic:
