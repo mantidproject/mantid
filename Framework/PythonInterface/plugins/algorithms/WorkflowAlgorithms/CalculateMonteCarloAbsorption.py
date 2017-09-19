@@ -559,21 +559,24 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         """
         self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
+        instrument_name = workspace.getInstrument().getName()
+        isis_instrument = instrument_name == "ISIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------
 
-        idf_name = workspace.getInstrument().getName() + '_elastic_Definition.xml'
+        if isis_instrument:
+            idf_name = instrument_name + '_elastic_Definition.xml'
 
-        idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
-        logger.information('IDF = %s' % idf_path)
+            idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
+            logger.information('IDF = %s' % idf_path)
 
-        load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=True)
-        load_alg.setProperty("Workspace", workspace)
-        load_alg.setProperty("Filename", idf_path)
-        load_alg.setProperty("RewriteSpectraMap", True)
-        load_alg.execute()
+            load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=True)
+            load_alg.setProperty("Workspace", workspace)
+            load_alg.setProperty("Filename", idf_path)
+            load_alg.setProperty("RewriteSpectraMap", True)
+            load_alg.execute()
 
-        # ---------- Extraction of Q-Values -----------
+        # ---------- Create Spectra Axis -----------
 
         # Replace y-axis with spectra axis
         workspace.replaceAxis(1, SpectraAxis.create(workspace))
@@ -610,7 +613,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
-        self._update_instrument_angles(workspace, self._q_values, wave)
+
+        if isis_instrument:
+            self._update_instrument_angles(workspace, self._q_values, wave)
 
         return workspace
 
