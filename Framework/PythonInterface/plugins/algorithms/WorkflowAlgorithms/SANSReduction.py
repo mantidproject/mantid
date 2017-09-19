@@ -237,8 +237,6 @@ class SANSReduction(PythonAlgorithm):
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
-            #if len(output_dir)==0:
-            #    output_dir = os.path.dirname(filename)
             if os.path.isdir(output_dir):
                 # Check whether we were in frame-skipping mode
                 if iq_output is not None \
