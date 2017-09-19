@@ -15,6 +15,7 @@ Algorithms
   - summation in Q was giving incorrect results for a point detector
 
 - A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
+- :ref:`algm-LoadILLReflectometry` has been fixed to correctly load D17 files acquired in the TOF mode.
 
 - A new version of :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>` (version 2) has been added which works with detectors at :math:`2\theta`. Version 1 works with detectors at :math:`\theta`.
 
