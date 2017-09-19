@@ -10,14 +10,25 @@ import numpy as np
 # -------------------------------------------------------------------------------
 
 
-def _parse_file_range(file_range):
+def create_file_range_parser(instrument):
+    """
+    Creates a parser which takes a specified file range string of the
+    format A-B, and returns a list of the files in that range preceded
+    by the specified instrument name.
 
-# Check whether this is a range or single file
-    if '-' in file_range:
-        lower, upper = file_range.split('-', 1)
-        return range(int(lower), int(upper))
-    else:
-        return [file_range]
+    :param instrument:  The instrument name.
+    :return:            A file range parser.
+    """
+
+    def parser(file_range):
+        # Check whether this is a range or single file
+        if '-' in file_range:
+            lower, upper = file_range.split('-', 1)
+            run_numbers = range(int(lower), int(upper)+1)
+            return [instrument + str(run) for run in run_numbers]
+        else:
+            return [file_range]
+    return parser
 
 
 def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=True, load_logs=True, load_opts=None):
@@ -35,7 +46,10 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    file_groups = [_parse_file_range(file_range) for file_range in file_ranges]
+    instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
+    instrument = instrument.split('_')[0]
+    parse_file_range = create_file_range_parser(instrument)
+    file_groups = [parse_file_range(file_range) for file_range in file_ranges]
 
     workspace_names = []
     chopped_data = False
