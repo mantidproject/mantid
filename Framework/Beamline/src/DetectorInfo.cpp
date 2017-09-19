@@ -243,10 +243,10 @@ getIndex(const Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> &indices,
  * index in `other` is identical to a corresponding interval in `this`, it is
  * ignored, i.e., no time index is added. */
 void DetectorInfo::merge(const DetectorInfo &other) {
-  const auto &merge = buildMergeIndices(other);
   if (!m_scanCounts)
     initScanCounts();
   if (m_isSyncScan) {
+    const auto &merge = buildMergeSyncScanIndices(other);
     for (size_t timeIndex = 0; timeIndex < other.m_scanIntervals->size();
          ++timeIndex) {
       if (!merge[timeIndex])
@@ -256,10 +256,8 @@ void DetectorInfo::merge(const DetectorInfo &other) {
       auto &positions = m_positions.access();
       auto &rotations = m_rotations.access();
       m_scanCounts.access()[0]++;
-      scanIntervals.insert(scanIntervals.end(),
-                           other.m_scanIntervals->begin() + timeIndex,
-                           other.m_scanIntervals->begin() + timeIndex + 1);
-      const size_t indexStart = linearIndex({0, timeIndex});
+      scanIntervals.push_back((*other.m_scanIntervals)[timeIndex]);
+      const size_t indexStart = other.linearIndex({0, timeIndex});
       size_t indexEnd = indexStart + size();
       isMasked.insert(isMasked.end(), other.m_isMasked->begin() + indexStart,
                       other.m_isMasked->begin() + indexEnd);
@@ -270,6 +268,7 @@ void DetectorInfo::merge(const DetectorInfo &other) {
     }
     return;
   }
+  const auto &merge = buildMergeIndices(other);
   if (!m_indexMap)
     initIndices();
   // Temporary to accumulate scan counts (need original for index offset).
@@ -354,42 +353,10 @@ void DetectorInfo::initIndices() {
   }
 }
 
+// Indices returned here are the list of linear indexes not to merge
 std::vector<bool>
 DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
-  if (size() != other.size())
-    failMerge("size mismatch");
-  if (!m_scanIntervals || !other.m_scanIntervals)
-    failMerge("scan intervals not defined");
-  if (m_isSyncScan != other.m_isSyncScan)
-    failMerge("both or none of the scans must be synchronous");
-  if (!(m_isMonitor == other.m_isMonitor) &&
-      (*m_isMonitor != *other.m_isMonitor))
-    failMerge("monitor flags mismatch");
-  // TODO If we make masking time-independent we need to check masking here.
-
-  if (m_isSyncScan) {
-    std::vector<bool> merge(other.m_scanIntervals->size(), true);
-
-    for (size_t t1 = 0; t1 < other.m_scanIntervals->size(); ++t1) {
-      for (size_t t2 = 0; t2 < m_scanIntervals->size(); ++t2) {
-        if ((*other.m_scanIntervals)[t1] == (*m_scanIntervals)[t2]) {
-          for (size_t detIndex = 0; detIndex < size(); ++detIndex) {
-            const size_t linearIndex1 = linearIndex({detIndex, t1});
-            const size_t linearIndex2 = linearIndex({detIndex, t2});
-            checkIdentitcalIntervals(other, linearIndex1, linearIndex2);
-          }
-          merge[t1] = false;
-        } else if (!(((*other.m_scanIntervals)[t1].second <=
-                      (*m_scanIntervals)[t2].first) ||
-                     ((*other.m_scanIntervals)[t1].first >=
-                      (*m_scanIntervals)[t2].second))) {
-          failMerge("sync scan intervals overlap but not identical");
-        }
-      }
-    }
-    return merge;
-  }
-
+  checkSizes(other);
   std::vector<bool> merge(other.m_positions->size(), true);
 
   for (size_t linearIndex1 = 0; linearIndex1 < other.m_positions->size();
@@ -400,7 +367,7 @@ DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
       const auto linearIndex2 = linearIndex({detIndex, timeIndex});
       const auto &interval2 = (*m_scanIntervals)[linearIndex2];
       if (interval1 == interval2) {
-        checkIdentitcalIntervals(other, linearIndex1, linearIndex2);
+        checkIdenticalIntervals(other, linearIndex1, linearIndex2);
         merge[linearIndex1] = false;
       } else if ((interval1.first < interval2.second) &&
                  (interval1.second > interval2.first)) {
@@ -411,15 +378,54 @@ DetectorInfo::buildMergeIndices(const DetectorInfo &other) const {
   return merge;
 }
 
-void DetectorInfo::checkIdentitcalIntervals(const DetectorInfo &other,
-                                            const size_t linearIndex1,
-                                            const size_t linearIndex2) const {
-  if ((*m_isMasked)[linearIndex2] != (*other.m_isMasked)[linearIndex1])
+// Indices returned here are the list of time indexes not to merge
+std::vector<bool>
+DetectorInfo::buildMergeSyncScanIndices(const DetectorInfo &other) const {
+  checkSizes(other);
+  std::vector<bool> merge(other.m_scanIntervals->size(), true);
+
+  for (size_t t1 = 0; t1 < other.m_scanIntervals->size(); ++t1) {
+    for (size_t t2 = 0; t2 < m_scanIntervals->size(); ++t2) {
+      const auto &interval1 = (*other.m_scanIntervals)[t1];
+      const auto &interval2 = (*m_scanIntervals)[t2];
+      if (interval1 == interval2) {
+        for (size_t detIndex = 0; detIndex < size(); ++detIndex) {
+          const size_t linearIndex1 = other.linearIndex({detIndex, t1});
+          const size_t linearIndex2 = linearIndex({detIndex, t2});
+          checkIdenticalIntervals(other, linearIndex1, linearIndex2);
+        }
+        merge[t1] = false;
+      } else if ((interval1.first < interval2.second) &&
+                 (interval1.second > interval2.first)) {
+        failMerge("sync scan intervals overlap but not identical");
+      }
+    }
+  }
+  return merge;
+}
+
+void DetectorInfo::checkSizes(const DetectorInfo &other) const {
+  if (size() != other.size())
+    failMerge("size mismatch");
+  if (!m_scanIntervals || !other.m_scanIntervals)
+    failMerge("scan intervals not defined");
+  if (m_isSyncScan != other.m_isSyncScan)
+    failMerge("both or none of the scans must be synchronous");
+  if (!(m_isMonitor == other.m_isMonitor) &&
+      (*m_isMonitor != *other.m_isMonitor))
+    failMerge("monitor flags mismatch");
+  // TODO If we make masking time-independent we need to check masking here.
+}
+
+void DetectorInfo::checkIdenticalIntervals(const DetectorInfo &other,
+                                           const size_t linearIndexOther,
+                                           const size_t linearIndexThis) const {
+  if ((*m_isMasked)[linearIndexThis] != (*other.m_isMasked)[linearIndexOther])
     failMerge("matching scan interval but mask flags differ");
-  if ((*m_positions)[linearIndex2] != (*other.m_positions)[linearIndex1])
+  if ((*m_positions)[linearIndexThis] != (*other.m_positions)[linearIndexOther])
     failMerge("matching scan interval but positions differ");
-  if ((*m_rotations)[linearIndex2].coeffs() !=
-      (*other.m_rotations)[linearIndex1].coeffs())
+  if ((*m_rotations)[linearIndexThis].coeffs() !=
+      (*other.m_rotations)[linearIndexOther].coeffs())
     failMerge("matching scan interval but rotations differ");
 }
 
