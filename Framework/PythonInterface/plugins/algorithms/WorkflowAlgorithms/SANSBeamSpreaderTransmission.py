@@ -94,8 +94,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
             alg.setProperty("OutputWorkspace", output_ws)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             msg = ''
             if alg.existsProperty("OutputMessage"):
@@ -138,8 +137,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                     alg=Algorithm.fromString(p.valueAsStr)
                     alg.setProperty("InputWorkspace", workspace)
                     alg.setProperty("OutputWorkspace", workspace)
-                    if alg.existsProperty("ReductionProperties"):
-                        alg.setProperty("ReductionProperties", property_manager_name)
+                    self.set_property_if_exists("ReductionProperties", property_manager_name)
                     alg.execute()
                     msg = ''
                     if alg.existsProperty("OutputMessage"):
@@ -197,6 +195,10 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         output_ws = AnalysisDataService.retrieve(workspace)
         self.setProperty("OutputWorkspace", output_ws)
         self.setPropertyValue("OutputMessage", output_msg)
+
+    def set_property_if_exists(self, property_manager, name, value):
+        if property_manager.existsProperty(name):
+            property_manager.setProperty(name, value)
 
     def _apply_transmission(self, workspace, trans_workspace):
         """
