@@ -1,3 +1,4 @@
+
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
@@ -13,6 +14,7 @@ from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, 
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
+
 if sys.version_info.major == 3:
     from unittest import mock
 else:

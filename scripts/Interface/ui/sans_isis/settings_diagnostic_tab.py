@@ -9,10 +9,12 @@ from __future__ import (absolute_import, division, print_function)
 import six
 
 from abc import ABCMeta, abstractmethod
+import os
 
 from six import with_metaclass
 from PyQt4 import QtGui
 
+from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 import ui_settings_diagnostic_tab
 
 if six.PY3:
@@ -40,6 +42,10 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         def on_expand(self):
             pass
 
+        @abstractmethod
+        def on_save_state_to_file(self):
+            pass
+
     def __init__(self):
         super(SettingsDiagnosticTab, self).__init__()
         self.setupUi(self)
@@ -51,6 +57,10 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         # Excluded settings entries
         self.excluded = ["state_module", "state_name"]
         self.class_type_id = "ClassTypeParameter"
+
+        # Q Settings
+        self.__generic_settings = GENERIC_SETTINGS
+        self.__save_location_path_key = "save_state_location"
 
     def add_listener(self, listener):
         if not isinstance(listener, SettingsDiagnosticTab.SettingsDiagnosticTabListener):
@@ -76,11 +86,31 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
     def on_update_rows(self):
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_update_rows())
 
+    def on_save_state(self):
+        self._call_settings_diagnostic_listeners(lambda listener: listener.on_save_state_to_file())
+
+    def on_browse_save_location(self):
+        load_file(self.save_state_line_edit, "*.json", self.__generic_settings, self.__save_location_path_key,
+                  self.get_save_location)
+
+        # Correct the file extension. The output file has to be a json type file. If the user has added a different
+        # file extension then change it to .json
+        save_location = self.get_save_location()
+        path_dir = os.path.dirname(save_location)
+        if not path_dir:
+            return
+
+        file_name, _ = os.path.splitext(save_location)
+        full_file_path = file_name + JSON_SUFFIX
+        self.save_state_line_edit.setText(full_file_path)
+
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
         self.select_row_push_button.clicked.connect(self.on_update_rows)
         self.collapse_button.clicked.connect(self.on_collapse)
         self.expand_button.clicked.connect(self.on_expand)
+        self.save_state_save_push_button.clicked.connect(self.on_save_state)
+        self.save_state_browse_push_button.clicked.connect(self.on_browse_save_location)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -146,3 +176,9 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         for index in range(self.tree_widget.topLevelItemCount()):
             top_level_item = self.tree_widget.topLevelItem(index)
             self.tree_widget.expandItem(top_level_item)
+
+    def get_save_location(self):
+        return str(self.save_state_line_edit.text())
+
+    def set_save_location(self, full_file_path):
+        self.save_state_line_edit.setText(full_file_path)
