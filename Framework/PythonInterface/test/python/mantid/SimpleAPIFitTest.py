@@ -90,7 +90,7 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(isinstance(retvals.OutputNormalisedCovarianceMatrix, ITableWorkspace))
         self.assertTrue(isinstance(retvals.OutputParameters, ITableWorkspace))
         self.assertTrue(isinstance(retvals.OutputWorkspace, MatrixWorkspace))
-        self.assertTrue(isinstance(retvals.Function, IFunction))
+        self.assertTrue(isinstance(retvals.Function, FunctionWrapper))
         self.assertTrue(isinstance(retvals.CostFunction, str))
 
     def test_that_dialog_call_raises_runtime_error(self):
