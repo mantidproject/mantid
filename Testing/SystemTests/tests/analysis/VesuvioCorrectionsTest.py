@@ -503,15 +503,16 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         correction_ms_bin = 17
 
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin,
-                                     bin_tolerance=3)
+                                     tolerance=0.2, bin_tolerance=3)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin,
-                                     bin_tolerance=3)
+                                     tolerance=0.2, bin_tolerance=3)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
         _validate_matrix_structure(self, output_ws, 1, self._input_bins)
         output_expected_peak = 0.226039019062
-        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17)
+        _validate_matrix_peak_height(self, output_ws, output_expected_peak, 17, 
+                                     tolerance=0.2, bin_tolerance=0.3)
 
         # Test Linear fit Result Workspace
         linear_params = self._algorithm.getProperty("LinearFitResult").value
@@ -586,8 +587,12 @@ def _validate_matrix_structure(self, matrix_ws, expected_hist, expected_bins):
     self.assertTrue(isinstance(matrix_ws, MatrixWorkspace))
     num_hists = matrix_ws.getNumberHistograms()
     num_bins = matrix_ws.blocksize()
-    self.assertEqual(num_hists, expected_hist)
-    self.assertEqual(num_bins, expected_bins)
+    self.assertEqual(num_hists, expected_hist,
+                     msg="Expected Number of Histograms: " + str(expected_hist) +
+                         "\nActual Number of Histograms: " + str(num_hists))
+    self.assertEqual(num_bins, expected_bins,
+                     msg="Expected Number of Bins: " + str(expected_bins) +
+                         "\nActual Number of Bins: " + str(num_bins))
 
 
 def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
@@ -600,8 +605,12 @@ def _validate_table_workspace(self, table_ws, expected_rows, expected_columns):
     self.assertTrue(isinstance(table_ws, ITableWorkspace))
     num_rows = table_ws.rowCount()
     num_columns = table_ws.columnCount()
-    self.assertEqual(num_rows, expected_rows)
-    self.assertEqual(num_columns, expected_columns)
+    self.assertEqual(num_rows, expected_rows,
+                     msg="Expected Number of Rows: " + str(expected_rows) +
+                         "\nActual Number of Rows: " + str(num_rows))
+    self.assertEqual(num_columns, expected_columns,
+                     msg="Expected Number of Columns: " + str(expected_columns) +
+                         "\nActual Number of Columns: " + str(num_columns))
 
 
 # =======================================Values===========================================
@@ -619,7 +628,9 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
         if expected_values[i] != 'skip':
             tolerance_value = expected_values[i] * tolerance
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
-            self.assertTrue(abs_difference <= abs(tolerance_value))
+            self.assertTrue(abs_difference <= abs(tolerance_value),
+                            msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
+                                "\nActual Value in Cell " + str(i) + ": " + str(num_hists))
 
 
 # pylint: disable=too-many-arguments
