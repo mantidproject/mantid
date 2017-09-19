@@ -249,10 +249,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # data runs
         for i, (runs, cmnt) in enumerate(self.dataRuns):
-            if not runs:
-                _ScriptHelpers.error('missing data runs value')
-            if not cmnt:
-                _ScriptHelpers.error('missing data runs comment')
+            _ScriptHelpers.check_runs(runs, cmnt)
 
             postfix = str(i + 1)
 
@@ -269,8 +266,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{}.setComment('{}')"      .format(wsData, cmnt))
             l()
 
-            if i == 0:
-                wsData0 = wsData
+        wsData0 = self.prefix + "Data1"
 
         gPrefix = 'g' + self.prefix
         gDataRuns    = gPrefix + 'DataRuns'
@@ -478,6 +474,13 @@ class _ScriptHelpers(object):
     def check_bin_params(start, step, end):
         if not (start < end and step > 0 and start + step <= end):
             _ScriptHelpers.error("incorrect binning parameters")
+
+    @staticmethod
+    def check_runs(runs, comment):
+        if not runs:
+            _ScriptHelpers.error('missing data runs value')
+        if not comment:
+            _ScriptHelpers.error('missing data runs comment')
 
     @staticmethod
     def get_log(workspace, tag):
