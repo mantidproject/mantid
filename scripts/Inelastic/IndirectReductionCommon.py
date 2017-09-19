@@ -26,6 +26,8 @@ def create_file_range_parser(instrument):
             lower, upper = file_range.split('-', 1)
             run_numbers = range(int(lower), int(upper)+1)
             return [instrument + str(run) for run in run_numbers]
+        elif '+' in file_range:
+            return file_range.split('+')
         else:
             return [file_range]
     return parser

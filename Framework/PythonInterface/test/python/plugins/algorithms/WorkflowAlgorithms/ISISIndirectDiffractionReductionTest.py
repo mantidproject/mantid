@@ -74,7 +74,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         Test summing multiple runs.
         """
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=['26173-26176'],
+        wks = ISISIndirectDiffractionReduction(InputFiles=['26173,26176'],
                                                SumFiles=True,
                                                Instrument='IRIS',
                                                Mode='diffspec',
@@ -89,7 +89,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertTrue('multi_run_numbers' in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26173,26176')
+        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26173,26174,26175,26176')
 
     def test_grouping_individual(self):
         """
