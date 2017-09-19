@@ -1378,11 +1378,9 @@ bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
     std::vector<SpectrumDefinition> spectrumDefinitions;
     // Find the det_ids in the udet array.
-    for (size_t i = 0; i < monitors.size(); ++i) {
+    for (const auto id : monitors) {
       // Find the index in the udet array
-      const detid_t &id = monitors[i];
-      std::vector<int32_t>::const_iterator it =
-          std::find(udet.begin(), udet.end(), id);
+      auto it = std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
         const specnum_t &specNo = spec[it - udet.begin()];
         spectrumNumbers.emplace_back(specNo);
