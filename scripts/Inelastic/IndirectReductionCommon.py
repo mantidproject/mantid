@@ -31,7 +31,7 @@ def create_file_range_parser(instrument):
             return [instrument + run for run in file_range.split('+')]
         else:
             try:
-                return [instrument + int(file_range)]
+                return [instrument + str(int(file_range))]
             except ValueError:
                 return [file_range]
     return parser
