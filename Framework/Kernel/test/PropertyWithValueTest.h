@@ -648,7 +648,7 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
