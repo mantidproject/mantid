@@ -364,14 +364,14 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_is_group = isinstance(sample_workspace, WorkspaceGroup)
         container_is_group = isinstance(container_workspace, WorkspaceGroup)
 
-        if sample_is_group != container_is_group:
+        if container_workspace and sample_is_group != container_is_group:
             sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
             container_type = "WorkspaceGroup" if container_is_group else "MatrixWorkspace"
             raise RuntimeError("Mismatch between SampleWorkspace (" + sample_type + ") and"
                                " ContainerWorkspace (" + container_type + ").")
-        elif sample_is_group and container_is_group:
+        elif sample_is_group and (container_is_group or not container_workspace):
 
-            if len(sample_workspace) != len(container_workspace):
+            if container_workspace and len(sample_workspace) != len(container_workspace):
                 raise RuntimeError("SampleWorkspace group and ContainerWorkspace group do not"
                                    " have the same number of workspaces.")
             return
