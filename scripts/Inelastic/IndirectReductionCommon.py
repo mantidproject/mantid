@@ -32,7 +32,7 @@ def create_file_range_parser(instrument):
         else:
             try:
                 return [instrument + int(file_range)]
-            except RuntimeError:
+            except ValueError:
                 return [file_range]
     return parser
 
