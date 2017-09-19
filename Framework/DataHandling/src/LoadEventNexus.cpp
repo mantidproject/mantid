@@ -1693,9 +1693,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
  * Parallel::StorageMode of `indexInfo` is `Cloned`. */
 Indexing::IndexInfo
 LoadEventNexus::filterIndexInfo(const Indexing::IndexInfo &indexInfo) {
-  // Spectrum numbers in indexInfo must be sorted.
-  // StorageMode must be cloned
-
   if (m_specMin != EMPTY_INT() || m_specMax != EMPTY_INT()) {
     // check if range [SpectrumMin, SpectrumMax] was supplied
     if (m_specMax == EMPTY_INT())
