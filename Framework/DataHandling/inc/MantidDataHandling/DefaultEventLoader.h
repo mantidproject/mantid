@@ -11,7 +11,7 @@ namespace Mantid {
 namespace DataHandling {
 class LoadEventNexus;
 
-/** Code extracted from LoadEventNexus that is specific to the current default
+/** Helper class for LoadEventNexus that is specific to the current default
   loading code for NXevent_data entries in Nexus files, in particular
   LoadBankFromDiskTask and ProcessBankData.
 
