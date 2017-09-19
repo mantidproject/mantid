@@ -1086,16 +1086,13 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 void LoadEventNexus::createSpectraMapping(
     const std::string &nxsfile, const bool monitorsOnly,
     const std::vector<std::string> &bankNames) {
-  bool spectramap = false;
   m_specMin = getProperty("SpectrumMin");
   m_specMax = getProperty("SpectrumMax");
   m_specList = getProperty("SpectrumList");
 
-  std::vector<SpectrumDefinition> spectrumDefinitions;
-
-  // set up the
   if (!monitorsOnly && !bankNames.empty()) {
     const auto &componentInfo = m_ws->getSingleHeldWorkspace()->componentInfo();
+    std::vector<SpectrumDefinition> spectrumDefinitions;
     for (const auto &bankName : bankNames) {
       const auto &bank = m_ws->getInstrument()->getComponentByName(bankName);
       std::vector<size_t> dets;
@@ -1114,32 +1111,27 @@ void LoadEventNexus::createSpectraMapping(
     Indexing::IndexInfo indexInfo(spectrumDefinitions.size());
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
     m_ws->setIndexInfo(indexInfo);
-    spectramap = true;
     g_log.debug() << "Populated spectra map for select banks\n";
-
   } else {
-    spectramap =
-        loadISISVMSSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
-    // Did we load one? If so then the event ID is the spectrum number and not
-    // det ID
-    if (spectramap)
+    if (loadISISVMSSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name)) {
+      // If mapping loaded the event ID is the spectrum number and not det ID
       this->event_id_is_spec = true;
-  }
-
-  if (!spectramap) {
-    g_log.debug() << "No custom spectra mapping found, continuing with default "
-                     "1:1 mapping of spectrum:detectorID\n";
-    // The default 1:1 will suffice but exclude the monitors as they are always
-    // in a separate workspace
-    auto detIDs = m_ws->getInstrument()->getDetectorIDs(true);
-    const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
-    std::vector<SpectrumDefinition> specDefs;
-    for (const auto detID : detIDs)
-      specDefs.emplace_back(detectorInfo.indexOf(detID));
-    Indexing::IndexInfo indexInfo(detIDs.size());
-    indexInfo.setSpectrumDefinitions(specDefs);
-    m_ws->setIndexInfo(createSpectraList(indexInfo));
-    g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
+    } else {
+      g_log.debug()
+          << "No custom spectra mapping found, continuing with default "
+             "1:1 mapping of spectrum:detectorID\n";
+      // The default 1:1 will suffice but exclude the monitors as they are
+      // always in a separate workspace
+      auto detIDs = m_ws->getInstrument()->getDetectorIDs(true);
+      const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
+      std::vector<SpectrumDefinition> specDefs;
+      for (const auto detID : detIDs)
+        specDefs.emplace_back(detectorInfo.indexOf(detID));
+      Indexing::IndexInfo indexInfo(detIDs.size());
+      indexInfo.setSpectrumDefinitions(specDefs);
+      m_ws->setIndexInfo(filterIndexInfo(indexInfo));
+      g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
+    }
   }
 }
 
@@ -1416,7 +1408,7 @@ bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
         uniqueSpectra.begin(), uniqueSpectra.end()));
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
 
-    m_ws->setIndexInfo(createSpectraList(indexInfo));
+    m_ws->setIndexInfo(filterIndexInfo(indexInfo));
   }
   return true;
 }
@@ -1694,16 +1686,13 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
   file.closeGroup();
 }
 
-/**
-* Check the validity of the optional spectrum range/list provided and identify
-*if partial data should be loaded.
-*
-* @param min :: The minimum spectrum number read from file
-* @param max :: The maximum spectrum number read from file
-*/
-
+/** Filter IndexInfo based on optional spectrum range/list provided.
+ *
+ * Checks the validity of user provided spectrum range/list. This method assumes
+ * that spectrum numbers in `indexInfo` argument are sorted and that the
+ * Parallel::StorageMode of `indexInfo` is `Cloned`. */
 Indexing::IndexInfo
-LoadEventNexus::createSpectraList(const Indexing::IndexInfo &indexInfo) {
+LoadEventNexus::filterIndexInfo(const Indexing::IndexInfo &indexInfo) {
   // Spectrum numbers in indexInfo must be sorted.
   // StorageMode must be cloned
 
