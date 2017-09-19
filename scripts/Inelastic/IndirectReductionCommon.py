@@ -28,6 +28,8 @@ def create_file_range_parser(instrument):
             return [instrument + str(run) for run in run_numbers]
         elif '+' in file_range:
             return file_range.split('+')
+        elif ',' in file_range:
+            return file_range.split(',')
         else:
             return [file_range]
     return parser
