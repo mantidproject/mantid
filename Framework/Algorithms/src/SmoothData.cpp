@@ -1,6 +1,3 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -15,6 +12,7 @@ DECLARE_ALGORITHM(SmoothData)
 
 using namespace Kernel;
 using namespace API;
+using HistogramData::Histogram;
 
 void SmoothData::init() {
   declareProperty(
@@ -88,68 +86,10 @@ void SmoothData::exec() {
                         "always be odd");
       ++npts;
     }
-    int halfWidth = (npts - 1) / 2;
 
-    // Copy the X data over. Preserves data sharing if present in input
-    // workspace.
-    outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
+    outputWorkspace->setHistogram(i,
+                                  smooth(inputWorkspace->histogram(i), npts));
 
-    // Now get references to the Y & E vectors in the input and output
-    // workspaces
-    if (npts == 0) {
-      outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
-      outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
-      continue;
-    }
-    const auto &Y = inputWorkspace->y(i);
-    const auto &E = inputWorkspace->e(i);
-    auto &newY = outputWorkspace->mutableY(i);
-    auto &newE = outputWorkspace->mutableE(i);
-    // Use total to help hold our moving average
-    double total = 0.0, totalE = 0.0;
-    // First push the values ahead of the current point onto total
-    for (int k = 0; k < halfWidth; ++k) {
-      if (Y[k] == Y[k])
-        total += Y[k]; // Exclude if NaN
-      totalE += E[k] * E[k];
-    }
-    // Now calculate the smoothed values for the 'end' points, where the number
-    // contributing
-    // to the smoothing will be less than NPoints
-    for (int j = 0; j <= halfWidth; ++j) {
-      const int index = j + halfWidth;
-      if (Y[index] == Y[index])
-        total += Y[index]; // Exclude if NaN
-      newY[j] = total / (index + 1);
-      totalE += E[index] * E[index];
-      newE[j] = sqrt(totalE) / (index + 1);
-    }
-    // This is the main part, where each data point is the average of NPoints
-    // points centred on the
-    // current point. Note that the statistical error will be reduced by
-    // sqrt(npts) because more
-    // data is now contributing to each point.
-    for (int k = halfWidth + 1; k < vecSize - halfWidth; ++k) {
-      const int kp = k + halfWidth;
-      const int km = k - halfWidth - 1;
-      total += (Y[kp] != Y[kp] ? 0.0 : Y[kp]) -
-               (Y[km] != Y[km] ? 0.0 : Y[km]); // Exclude if NaN
-      newY[k] = total / npts;
-      totalE += E[kp] * E[kp] - E[km] * E[km];
-      // Use of a moving average can lead to rounding error where what should be
-      // zero actually comes out as a tiny negative number - bad news for sqrt
-      // so protect
-      newE[k] = std::sqrt(std::abs(totalE)) / npts;
-    }
-    // This deals with the 'end' at the tail of each spectrum
-    for (int l = vecSize - halfWidth; l < vecSize; ++l) {
-      const int index = l - halfWidth;
-      total -=
-          (Y[index - 1] != Y[index - 1] ? 0.0 : Y[index - 1]); // Exclude if NaN
-      newY[l] = total / (vecSize - index);
-      totalE -= E[index - 1] * E[index - 1];
-      newE[l] = std::sqrt(std::abs(totalE)) / (vecSize - index);
-    }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   } // Loop over spectra
@@ -192,5 +132,67 @@ int SmoothData::validateSpectrumInGroup(size_t wi) {
 
   return -1;
 }
+
+/// Returns a smoothed version of histogram. npts must be odd.
+Histogram smooth(const Histogram &histogram, int npts) {
+  if (npts == 0)
+    return histogram;
+  int halfWidth = (npts - 1) / 2;
+
+  Histogram smoothed(histogram);
+
+  const auto &Y = histogram.y();
+  const auto &E = histogram.e();
+  auto &newY = smoothed.mutableY();
+  auto &newE = smoothed.mutableE();
+  // Use total to help hold our moving average
+  double total = 0.0, totalE = 0.0;
+  // First push the values ahead of the current point onto total
+  for (int k = 0; k < halfWidth; ++k) {
+    if (Y[k] == Y[k])
+      total += Y[k]; // Exclude if NaN
+    totalE += E[k] * E[k];
+  }
+  // Now calculate the smoothed values for the 'end' points, where the number
+  // contributing
+  // to the smoothing will be less than NPoints
+  for (int j = 0; j <= halfWidth; ++j) {
+    const int index = j + halfWidth;
+    if (Y[index] == Y[index])
+      total += Y[index]; // Exclude if NaN
+    newY[j] = total / (index + 1);
+    totalE += E[index] * E[index];
+    newE[j] = sqrt(totalE) / (index + 1);
+  }
+  // This is the main part, where each data point is the average of NPoints
+  // points centred on the
+  // current point. Note that the statistical error will be reduced by
+  // sqrt(npts) because more
+  // data is now contributing to each point.
+  const int vecSize = static_cast<int>(histogram.size());
+  for (int k = halfWidth + 1; k < vecSize - halfWidth; ++k) {
+    const int kp = k + halfWidth;
+    const int km = k - halfWidth - 1;
+    total += (Y[kp] != Y[kp] ? 0.0 : Y[kp]) -
+             (Y[km] != Y[km] ? 0.0 : Y[km]); // Exclude if NaN
+    newY[k] = total / npts;
+    totalE += E[kp] * E[kp] - E[km] * E[km];
+    // Use of a moving average can lead to rounding error where what should be
+    // zero actually comes out as a tiny negative number - bad news for sqrt
+    // so protect
+    newE[k] = std::sqrt(std::abs(totalE)) / npts;
+  }
+  // This deals with the 'end' at the tail of each spectrum
+  for (int l = vecSize - halfWidth; l < vecSize; ++l) {
+    const int index = l - halfWidth;
+    total -=
+        (Y[index - 1] != Y[index - 1] ? 0.0 : Y[index - 1]); // Exclude if NaN
+    newY[l] = total / (vecSize - index);
+    totalE -= E[index - 1] * E[index - 1];
+    newE[l] = std::sqrt(std::abs(totalE)) / (vecSize - index);
+  }
+  return smoothed;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

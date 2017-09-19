@@ -254,7 +254,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
 
         # Setup polarisation options with default assigned
         self.comboPolarCorrect.clear()
-        self.comboPolarCorrect.addItems(self.polarisation_options.keys())
+        self.comboPolarCorrect.addItems(list(self.polarisation_options.keys()))
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
         self.current_polarisation_method = self.polarisation_options['None']
         self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)

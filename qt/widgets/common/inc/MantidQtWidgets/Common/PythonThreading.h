@@ -5,6 +5,15 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 //------------------------------------------------------------------------------
+// Python Interpreter
+//------------------------------------------------------------------------------
+class EXPORT_OPT_MANTIDQT_COMMON PythonInterpreter {
+public:
+  static void initialize();
+  static void finalize();
+};
+
+//------------------------------------------------------------------------------
 // PythonGIL
 //------------------------------------------------------------------------------
 /**
@@ -13,18 +22,20 @@
  *
  */
 class EXPORT_OPT_MANTIDQT_COMMON PythonGIL {
+
+public:
+  static bool locked();
+
 public:
   PythonGIL();
+  PythonGIL(const PythonGIL &) = delete;
+  PythonGIL &operator=(const PythonGIL &) = delete;
 
-  inline bool locked() const { return m_acquired; }
   void acquire();
   void release();
 
 private:
-  PythonGIL(const PythonGIL &);
-  /// Current GIL state
   PyGILState_STATE m_state;
-  bool m_acquired;
 };
 
 //------------------------------------------------------------------------------
