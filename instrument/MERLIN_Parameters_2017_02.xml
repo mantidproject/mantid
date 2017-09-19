@@ -63,7 +63,7 @@
 
 <!-- Monitor used to estimate total current on the sample while normalizing by monitor 1.  -->
 <parameter name="norm-mon1-spec"   >
-  <value val="69633"/>
+  <value val="71681"/>
 </parameter>
 
 <!-- Time interval used for integration to estimate current on the sample 
@@ -80,7 +80,7 @@
 
 <!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
 <parameter name="norm-mon2-spec"  type="int">
-    <value val="69634"/>
+    <value val="71682"/>
 </parameter>
 <!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
      calculate monitor-2 current occurs   -->
@@ -99,7 +99,7 @@
 
 <!-- -->
 <parameter name="ei-mon1-spec"  type="string">
-  <value val="69634,69635,69636,69637"/>
+  <value val="71682,71683,71684,71685"/>
   <description is="First spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
      Should be spectra with well defined energy peak or monitor's spectra.
@@ -109,7 +109,7 @@
 </parameter>
 <!-- -->
 <parameter name="ei-mon2-spec"  type="string">
-  <value val="69638,69639,69640,69641"/>
+  <value val="71686,71687,71688,71689"/>
   <description is="Second spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
      Should be spectra with well defined energy peak or monitor's spectra.
@@ -137,7 +137,7 @@
 
 <!-- -->
 <parameter name="multirep_tof_specta_list"  type="string">
-    <value val="382,68353"/>
+    <value val="20860,20480"/>
     <description is="List of two spectra corresponding to the detectors which are closest and furthest from the sample.
     These detectors locations are used to identify TOF range, contributing into each energy range
      in multirep mode"/>
@@ -176,7 +176,7 @@
 </parameter>
 
 
-<!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
+<!--  detector_van_range- integration in E(mev) for detector(white beam) vanadium data [20,100] -->
 <parameter name="wb-integr-min">
   <value val="20"/>
 </parameter>
@@ -189,7 +189,7 @@
 
 
 <!-- integration range for background tests  (in TOF) - composite property 
-  Used in test to reject high backgound (FlatBackground) and in High Background tests integration in Diagnostics
+  Used in test to reject high background (FlatBackground) and in High Background tests integration in Diagnostics
   if diag_background_test_range is not set -->
 <parameter name="bkgd-range-min"> 
   <value val="12000"/>
@@ -351,12 +351,12 @@
 <parameter name="vanadium-mass">
   <value val="7.85"/>
 </parameter>
-<!-- if this value set to true, modo-vanadium run is not analyzed and masks obtained for arbitrary units are used for mono-vanadium -->
+<!-- if this value set to true, modo-vanadium run is not analysed and masks obtained for arbitrary units are used for mono-vanadium -->
 <parameter name="use_sam_msk_on_monovan" type = "bool">
   <value val="False"/>
 </parameter>
 
-<!-- if this value is provided (not None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
+<!-- if this value is provided (not None) it is string representation of the number used instead of calculating mono-vanadium based normalization factor 
    one does not need to provide mono-vanadium run if this value is provided as it will be used instead
   -->
 <parameter name="mono_correction_factor" type="string">
@@ -373,8 +373,8 @@
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
-    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
-     Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
+    Three values are currently supported, namely .spe, .nxspe, and nexus (Mantid workspace) (.nxs)
+     Three possible values for this are defined in DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
    <value val="None"/>
@@ -414,13 +414,13 @@
    <value val="False"/>
 </parameter>
 
-<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
-     First found log will be used togethere with motor_offset to identify crystal rotation 
+<!-- The semicolon separated list of possible log names, containing information on crystal rotation.
+     First found log will be used together with motor_offset to identify crystal rotation 
      (psi in Horace) -->
 <parameter name="motor_log_names"  type="string">
    <value val="CCR_ROT;wccr"/>
 </parameter>
-<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<!-- Initial value used to identify crystal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
 <parameter name="motor_offset">
    <value val="None"/>
 </parameter>
