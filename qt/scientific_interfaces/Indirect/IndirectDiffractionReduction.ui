@@ -97,7 +97,7 @@
        <item row="2" column="2">
         <widget class="QCheckBox" name="ckSumFiles">
          <property name="text">
-          <string>Sum Files</string>
+          <string>Sum Sample Files</string>
          </property>
         </widget>
        </item>
@@ -201,7 +201,7 @@
            <item row="5" column="0">
             <widget class="QCheckBox" name="ckManualDRange">
              <property name="text">
-              <string>Manual dRange:</string>
+              <string>Manual dRange (Vanadium):</string>
              </property>
             </widget>
            </item>
