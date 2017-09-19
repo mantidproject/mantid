@@ -1537,7 +1537,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
         // coordinate, if the value is in range.
         auto deltaX = (xVals[1] - xVals[0]) / 2.0;
         if ((i == 0 && xCoord > xVals[0] - deltaX) ||
-            (xVals[i] - xCoord < xCoord - xVals[i - 1]))
+            (i != 0 && xVals[i] - xCoord < xCoord - xVals[i - 1]))
           ++i;
       }
       if (i > 0) {
