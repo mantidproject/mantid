@@ -41,8 +41,8 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     chopped_data = False
 
     for file_group in file_groups:
-        created_workspaces, chopped_data = _load_files(file_group, ipf_filename, spec_min,
-                                                       spec_max, sum_files, load_logs, load_opts)
+        created_workspaces, chopped_data = load_files(file_group, ipf_filename, spec_min,
+                                                      spec_max, sum_files, load_logs, load_opts)
         workspace_names.extend(created_workspaces)
 
     return workspace_names, chopped_data
