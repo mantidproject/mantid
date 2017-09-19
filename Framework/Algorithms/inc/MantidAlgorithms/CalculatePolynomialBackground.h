@@ -7,7 +7,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculatePolynomialBackground : TODO: DESCRIPTION
+/** CalculatePolynomialBackground : This algorithm fits a polynomial
+  background to an input workspace and returns the evaluated background as
+  the output workspace.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
