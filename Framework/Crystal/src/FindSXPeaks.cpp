@@ -257,9 +257,9 @@ void FindSXPeaks::exec() {
   auto backgroundStrategy = getBackgroundStrategy();
 
   // Get the peak finding strategy
-  const auto tofUnits = workspaceHasTOFUnits(localworkspace);
+  const auto xUnit = getWorkspaceXAxisUnit(localworkspace);
   auto peakFindingStrategy = getPeakFindingStrategy(
-      backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange, tofUnits);
+      backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange, xUnit);
 
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
@@ -333,8 +333,16 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   }
 }
 
+/** Get the x-axis units of the workspace
+ *
+ * This will return either TOF or DSPACING depending on unit ID of
+ * the workspace.
+ *
+ * @param workspace :: the workspace to check x-axis units on
+ * @return enum of type XAxisUnit with the value of TOF or DSPACING
+ */
 XAxisUnit
-FindSXPeaks::workspaceHasTOFUnits(MatrixWorkspace_const_sptr workspace) const {
+FindSXPeaks::getWorkspaceXAxisUnit(MatrixWorkspace_const_sptr workspace) const {
   const auto xAxis = workspace->getAxis(0);
   const auto unitID = xAxis->unit()->unitID();
 
@@ -406,7 +414,7 @@ FindSXPeaks::getCompareStrategy() const {
     double xUnitResolution = getProperty("XUnitResolution");
     double phiResolution = getProperty("PhiResolution");
     double twoThetaResolution = getProperty("TwoThetaResolution");
-    const auto tofUnits = workspaceHasTOFUnits(getProperty("InputWorkspace"));
+    const auto tofUnits = getWorkspaceXAxisUnit(getProperty("InputWorkspace"));
     return Mantid::Kernel::make_unique<
         FindSXPeaksHelper::AbsoluteCompareStrategy>(
         xUnitResolution, phiResolution, twoThetaResolution, tofUnits);
