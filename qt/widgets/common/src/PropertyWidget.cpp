@@ -39,6 +39,7 @@ double stringToRoundedNumber(const std::string &s) {
   const bool containsComma = s.find(",") != std::string::npos;
   if (containsComma)
     throw std::runtime_error("string contains a comma");
+
   return std::stod(s);
 }
 
@@ -63,9 +64,10 @@ bool isValidPropertyValue(Mantid::Kernel::Property *prop,
  * class the other *_MAX macros as "empty" macros, too.
  *
  * @param value :: the string value to check
+ * @param value_d :: the double value to check
  * @returns     :: true if the value is one of the macros, else false
  */
-bool isEmptyNumMacro(const std::string &value) {
+bool isEmptyNumMacro(const std::string &value, const double value_d) {
   using namespace Mantid;
 
   // Catch instances of Python's "sys.maxint" which otherwise seem to fall
@@ -73,20 +75,13 @@ bool isEmptyNumMacro(const std::string &value) {
   if (value == "2.14748e+09")
     return true;
 
-  double roundedNumber;
-  try {
-    roundedNumber = stringToRoundedNumber(value);
-  } catch (std::runtime_error &) {
-    return false;
-  }
-
   static const std::vector<double> EMPTY_NUM_MACROS = {
       EMPTY_DBL(), -DBL_MAX, DBL_MAX, static_cast<double>(EMPTY_INT()),
       static_cast<double>(EMPTY_LONG()), static_cast<double>(-INT_MAX),
       static_cast<double>(-LONG_MAX)};
 
-  return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(),
-                   roundedNumber) != EMPTY_NUM_MACROS.end();
+  return std::find(EMPTY_NUM_MACROS.begin(), EMPTY_NUM_MACROS.end(), value_d) !=
+         EMPTY_NUM_MACROS.end();
 }
 
 /**
@@ -116,8 +111,7 @@ std::string createFieldPlaceholderText(Mantid::Kernel::Property *prop) {
   if (defaultValue.empty())
     return "";
 
-  if (!isValidPropertyValue(prop, defaultValue) ||
-      isEmptyNumMacro(prop->getDefault()))
+  if (!isValidPropertyValue(prop, defaultValue))
     return "";
 
   // It seems likely that any instance of "-0" or "-0.0" should be replaced with
@@ -126,18 +120,22 @@ std::string createFieldPlaceholderText(Mantid::Kernel::Property *prop) {
   if (defaultValue == "-0" || defaultValue == "-0.0")
     return "0";
 
+  // If it can't be converted to a double, there is no reason to give
+  // it special handling
   double roundedNumber;
   try {
     roundedNumber = stringToRoundedNumber(defaultValue);
-  } catch (std::runtime_error &) {
+  } catch (std::exception &) {
     return defaultValue;
   }
 
+  if (isEmptyNumMacro(prop->getDefault(), roundedNumber))
+    return "";
+
   // We'd like to round off any instances of "2.7999999999999998",
-  // "0.050000000000000003",
-  // or similar, but we want to keep the decimal point in values like "0.0" or
-  // "1.0" since
-  // they can be a visual clue that a double is expected.
+  // "0.050000000000000003", or similar, but we want to keep the
+  // decimal point in values like "0.0" or "1.0" since they can be a
+  // visual clue that a double is expected.
   static const std::size_t STRING_ROUNDING_LENGTH = 15;
   if (defaultValue.length() >= STRING_ROUNDING_LENGTH) {
     std::stringstream roundedValue;
