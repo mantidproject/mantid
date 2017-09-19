@@ -30,7 +30,10 @@ def create_file_range_parser(instrument):
         elif '+' in file_range:
             return [instrument + run for run in file_range.split('+')]
         else:
-            return [instrument + file_range]
+            try:
+                return [instrument + int(file_range)]
+            except RuntimeError:
+                return [file_range]
     return parser
 
 
