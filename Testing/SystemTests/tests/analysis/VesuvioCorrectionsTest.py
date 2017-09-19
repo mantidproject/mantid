@@ -630,7 +630,7 @@ def _validate_table_values_top_to_bottom(self, table_ws, expected_values, tolera
             abs_difference = abs(expected_values[i] - table_ws.cell(i, 1))
             self.assertTrue(abs_difference <= abs(tolerance_value),
                             msg="Expected Value in Cell " + str(i) + ": " + str(expected_values[i]) +
-                                "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1))
+                                "\nActual Value in Cell " + str(i) + ": " + str(table_ws.cell(i, 1)))
 
 
 # pylint: disable=too-many-arguments
