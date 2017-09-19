@@ -357,8 +357,8 @@ public:
     auto outWs2 =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
 
-    TSM_ASSERT("The number of spectra in the workspace should be 12",
-               outWs->getNumberHistograms() == 12);
+    TSM_ASSERT_EQUALS("The number of spectra in the workspace should be 12",
+                      outWs->getNumberHistograms(), 12);
 
     TSM_ASSERT_EQUALS("The number of events in the precount and not precount "
                       "workspaces do not match",

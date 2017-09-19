@@ -208,7 +208,7 @@ private:
   template <typename T> void filterDuringPause(T workspace);
 
   // Validate the optional spectra input properties and initialize m_specList
-  void createSpectraList(int32_t min, int32_t max);
+  Indexing::IndexInfo createSpectraList(const Indexing::IndexInfo &indexInfo);
 
   /// Set the top entry field name
   void setTopEntryName();
