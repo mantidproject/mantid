@@ -366,12 +366,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
         y = self.y1
 
         bLinear = self.linear.isChecked()
-
-        if bLinear:
-            _line, = axes.plot(x, y, color='black')
-        else:
-            _line, = axes.semilogy(x, y, color='black')
-
         ymax=max(y)
 
         if bLinear:
@@ -434,12 +428,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         x = self.x2
         y = self.y2
-
-        ymax=max(y)
-        if bLinear:
-            ymin=0
-        else:
-            ymin = 1
 
         #low resolution range
         peakx1 = self._lowresFromValue
