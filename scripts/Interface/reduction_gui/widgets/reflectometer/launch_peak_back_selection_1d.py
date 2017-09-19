@@ -435,11 +435,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
         x = self.x2
         y = self.y2
 
-        if bLinear:
-            _line2, = axes2.plot(x,y,color='black')
-        else:
-            _line2, = axes2.semilogy(x,y,color='black')
-
         ymax=max(y)
         if bLinear:
             ymin=0
