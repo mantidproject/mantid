@@ -503,9 +503,9 @@ class TestCorrectionsInBackScatteringSpectra(stresstesting.MantidStressTest):
         correction_ms_bin = 17
 
         _validate_matrix_peak_height(self, corrected_wsg.getItem(1), corrected_ts_peak, corrected_ts_bin,
-                                    bin_tolerance=3)
+                                     bin_tolerance=3)
         _validate_matrix_peak_height(self, corrected_wsg.getItem(2), corrected_ms_peak, correction_ms_bin,
-                                    bin_tolerance=3)
+                                     bin_tolerance=3)
 
         # Test OutputWorkspace
         output_ws = self._algorithm.getProperty("OutputWorkspace").value
