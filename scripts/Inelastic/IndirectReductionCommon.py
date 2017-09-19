@@ -29,7 +29,7 @@ def create_file_range_parser(instrument):
         elif '+' in file_range:
             return file_range.split('+')
         elif ',' in file_range:
-            return file_range.split(',')
+            return [[file_range] for file_range in file_range.split(',')]
         else:
             return [file_range]
     return parser
