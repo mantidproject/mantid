@@ -61,6 +61,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             pass
 
         @abstractmethod
+        def on_mask_file_add(self):
+            pass
+
+        @abstractmethod
         def on_processed_clicked(self):
             pass
 
@@ -90,6 +94,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.__generic_settings = "Mantid/ISISSANS"
         self.__path_key = "sans_path"
         self.__instrument_name = "sans_instrument"
+        self.__mask_file_input_path_key = "mask_files"
 
         # Logger
         self.gui_logger = Logger("SANS GUI LOGGER")
@@ -186,6 +191,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.reduction_mode_combo_box.currentIndexChanged.connect(self._on_reduction_mode_selection_has_changed)
         self._on_reduction_mode_selection_has_changed()  # Disable the merge settings initially
 
+        # Mask file input settings
+        self.mask_file_browse_push_button.clicked.connect(self._on_load_mask_file)
+        self.mask_file_add_push_button.clicked.connect(self._on_mask_file_add)
+
         # Set the q step type settings
         self.q_1d_step_type_combo_box.currentIndexChanged.connect(self._on_q_1d_step_type_has_changed)
         self._on_q_1d_step_type_has_changed()
@@ -223,6 +232,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # --------------------------------------------------------------------------------------------------------------
         self.user_file_button.clicked.connect(self._on_user_file_load)
         self.batch_button.clicked.connect(self._on_batch_file_load)
+
+        # Disable the line edit fields. The user should not edit the paths manually. They have to use the button.
+        self.user_file_line_edit.setDisabled(True)
+        self.batch_line_edit.setDisabled(True)
 
         # --------------------------------------------------------------------------------------------------------------
         # Table setup
@@ -438,10 +451,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         use_roi = not use_monitor
 
         self.transmission_monitor_label.setEnabled(use_monitor)
-        self.transmission_m3_radio_button.setEnabled(use_monitor)
-        self.transmission_m4_radio_button.setEnabled(use_monitor)
-        self.transmission_m4_shift_label.setEnabled(use_monitor)
-        self.transmission_m4_shift_line_edit.setEnabled(use_monitor)
+        self.transmission_monitor_line_edit.setEnabled(use_monitor)
+        self.transmission_mn_shift_label.setEnabled(use_monitor)
+        self.transmission_mn_shift_line_edit.setEnabled(use_monitor)
 
         self.transmission_radius_label.setEnabled(use_roi)
         self.transmission_radius_line_edit.setEnabled(use_roi)
@@ -472,6 +484,16 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def _on_load_moderator_file(self):
         self._load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
                         self.__path_key,  self.get_moderator_file)
+
+    def get_mask_file(self):
+        return str(self.mask_file_input_line_edit.text())
+
+    def _on_load_mask_file(self):
+        self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
+                        self.__mask_file_input_path_key,  self.get_mask_file)
+
+    def _on_mask_file_add(self):
+        self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
 
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
@@ -901,22 +923,19 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     @property
     def transmission_monitor(self):
-        return 3 if self.transmission_m3_radio_button.isChecked() else 4
+        return self.get_simple_line_edit_field(line_edit="transmission_monitor_line_edit", expected_type=int)
 
     @transmission_monitor.setter
     def transmission_monitor(self, value):
-        if value == 3:
-            self.transmission_m3_radio_button.setChecked(True)
-        else:
-            self.transmission_m4_radio_button.setChecked(True)
+        self.update_simple_line_edit_field(line_edit="transmission_monitor_line_edit", value=value)
 
     @property
-    def transmission_m4_shift(self):
-        return self.get_simple_line_edit_field(line_edit="transmission_m4_shift_line_edit", expected_type=float)
+    def transmission_mn_shift(self):
+        return self.get_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit", expected_type=float)
 
-    @transmission_m4_shift.setter
-    def transmission_m4_shift(self, value):
-        self.update_simple_line_edit_field(line_edit="transmission_m4_shift_line_edit", value=value)
+    @transmission_mn_shift.setter
+    def transmission_mn_shift(self, value):
+        self.update_simple_line_edit_field(line_edit="transmission_mn_shift_line_edit", value=value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission fit
@@ -1376,8 +1395,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # --------------------------------
         self.monitor_normalization_line_edit.setValidator(positive_integer_validator)
         self.transmission_line_edit.setValidator(positive_integer_validator)
+        self.transmission_monitor_line_edit.setValidator(positive_integer_validator)
         self.transmission_radius_line_edit.setValidator(positive_double_validator)
-        self.transmission_m4_shift_line_edit.setValidator(double_validator)
+        self.transmission_mn_shift_line_edit.setValidator(double_validator)
 
         self.fit_sample_wavelength_min_line_edit.setValidator(positive_double_validator)
         self.fit_sample_wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1442,8 +1462,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.transmission_line_edit.setText("")
         self.transmission_interpolating_rebin_check_box.setChecked(False)
         self.transmission_target_combo_box.setCurrentIndex(0)
-        self.transmission_m3_radio_button.setChecked(True)
-        self.transmission_m4_shift_line_edit.setText("")
+        self.transmission_monitor_line_edit.setText("")
+        self.transmission_mn_shift_line_edit.setText("")
         self.transmission_radius_line_edit.setText("")
         self.transmission_roi_files_line_edit.setText("")
         self.transmission_mask_files_line_edit.setText("")

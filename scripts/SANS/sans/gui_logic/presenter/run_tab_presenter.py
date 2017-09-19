@@ -47,6 +47,9 @@ class RunTabPresenter(object):
         def on_user_file_load(self):
             self._presenter.on_user_file_load()
 
+        def on_mask_file_add(self):
+            self._presenter.on_mask_file_add()
+
         def on_batch_file_load(self):
             self._presenter.on_batch_file_load()
 
@@ -251,6 +254,27 @@ class RunTabPresenter(object):
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
 
+    def on_mask_file_add(self):
+        """
+        We get the added mask file name and add it to the list of masks
+        """
+        new_mask_file = self._view.get_mask_file()
+        if not new_mask_file:
+            return
+        new_mask_file_full_path = FileFinder.getFullPath(new_mask_file)
+        if not new_mask_file_full_path:
+            return
+
+        # Add the new mask file to state model
+        mask_files = self._state_model.mask_files
+
+        mask_files.append(new_mask_file)
+        self._state_model.mask_files = mask_files
+
+        # Make sure that the sub-presenters are up to date with this change
+        self._masking_table_presenter.on_update_rows()
+        self._settings_diagnostic_tab_presenter.on_update_rows()
+
     def _add_to_hidden_options(self, row, property_name, property_value):
         """
         Adds a new property to the Hidden Options column
@@ -452,7 +476,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_mask_files")
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
-        self._set_on_view("transmission_m4_shift")
+        self._set_on_view("transmission_mn_shift")
 
         self._set_on_view_transmission_fit()
 
@@ -631,7 +655,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_mask_files", state_model)
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
-        self._set_on_state_model("transmission_m4_shift", state_model)
+        self._set_on_state_model("transmission_mn_shift", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 
