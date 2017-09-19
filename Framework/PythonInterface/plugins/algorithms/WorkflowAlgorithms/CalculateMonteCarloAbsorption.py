@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis)
+                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis, WorkspaceGroup)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
 
@@ -359,6 +359,22 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # The beam properties and monte carlo properties are simply passed straight on to the
         # SimpleShapeMonteCarloAbsorptionCorrection algorithm so they are being put into
         # a dictionary for simplicity
+        sample_workspace = self.getProperty("SampleWorkspace").value
+        container_workspace = self.getProperty("ContainerWorkspace").value
+        sample_is_group = isinstance(sample_workspace, WorkspaceGroup)
+        container_is_group = isinstance(container_workspace, WorkspaceGroup)
+
+        if sample_is_group != container_is_group:
+            sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
+            container_type = "WorkspaceGroup" if container_is_group else "MatrixWorkspace"
+            raise RuntimeError("Mismatch between SampleWorkspace (" + sample_type + ") and"
+                               " ContainerWorkspace (" + container_type + ").")
+        elif sample_is_group and container_is_group:
+
+            if len(sample_workspace) != len(container_workspace):
+                raise RuntimeError("SampleWorkspace group and ContainerWorkspace group do not"
+                                   " have the same number of workspaces.")
+            return
 
         self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
                                 'BeamWidth': self.getProperty('BeamWidth').value,
@@ -366,8 +382,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                 'EventsPerPoint': self.getProperty('EventsPerPoint').value,
                                 'Interpolation': self.getProperty('Interpolation').value}
 
-        self._sample_ws = self.getProperty("SampleWorkspace").value
-        self._container_ws = self.getProperty('ContainerWorkspace').value
+        self._sample_ws = sample_workspace
+        self._container_ws = container_workspace
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
 
