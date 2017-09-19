@@ -28,8 +28,6 @@ def create_file_range_parser(instrument):
             return [instrument + str(run) for run in run_numbers]
         elif '+' in file_range:
             return file_range.split('+')
-        elif ',' in file_range:
-            return [[run] for run in file_range.split(',')]
         else:
             return [file_range]
     return parser
@@ -53,6 +51,7 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split('_')[0]
     parse_file_range = create_file_range_parser(instrument)
+    file_ranges = [file_range for range_list in file_ranges for file_range in range_list.split(',')]
     file_groups = [parse_file_range(file_range) for file_range in file_ranges]
 
     workspace_names = []
@@ -117,6 +116,7 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
         load_opts.pop("DeleteMonitors")
 
     workspace_names = []
+    chopped_data = False
 
     for file_specifier in file_specifiers:
         # The filename without path and extension will be the workspace name
@@ -130,11 +130,14 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
 
         # Get the spectrum number for the monitor
         instrument = workspace.getInstrument()
-        monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
-        logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
+        monitor_param = instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')
 
-        workspaces, chopped_data = chop_workspace(workspace, monitor_index)
-        crop_workspaces(workspace_names, spec_min, spec_max, not delete_monitors, monitor_index)
+        if monitor_param:
+            monitor_index = int(monitor_param[0])
+            logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
+
+            workspaces, chopped_data = chop_workspace(workspace, monitor_index)
+            crop_workspaces(workspace_names, spec_min, spec_max, not delete_monitors, monitor_index)
 
     logger.information('Loaded workspace names: %s' % (str(workspace_names)))
     logger.information('Chopped data: %s' % (str(chopped_data)))
