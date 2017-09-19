@@ -370,11 +370,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             l("{} = GroupWorkspaces({}list({}.getNames()))"
               .format(gData, _ScriptHelpers.group_list([wsVanNorm], ' + '), gDataSource))
-        else:
-            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
-        l()
-
-        if self.vanRuns:
+            l()
             gDataCorr = gData + 'Corr'
             detCoeffs = self.prefix + 'DetCoeffs'
             eppTable  = self.prefix + 'EppTable'
@@ -384,7 +380,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
             l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
             l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
-            l()
+        else:
+            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
+        l()
 
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
