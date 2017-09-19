@@ -357,6 +357,108 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 rect._refresh()
             return
 
+        class DraggableRectangle:
+
+            def __init__(self, rect, type, super, parent):
+                self.rect = rect
+                self.xpress = None
+                self.type = type  # peak_from, peak_to, back_from, back_to...
+                self.super = super
+                self.parent = parent
+
+            def connect(self):
+                'connect to all the events we need'
+                self.cidpress = self.rect.figure.canvas.mpl_connect(
+                    'button_press_event', self.on_press)
+                self.cidrelease = self.rect.figure.canvas.mpl_connect(
+                    'button_release_event', self.on_release)
+                self.cidmotion = self.rect.figure.canvas.mpl_connect(
+                    'motion_notify_event', self.on_motion)
+
+            def on_press(self, event):
+                'on button press we will see if the mouse is over us and store some data'
+                if event.inaxes != self.rect.axes:
+                    return
+
+                contains, _attrd = self.rect.contains(event)
+                if not contains:
+                    return
+                self.xpress = event.xdata
+
+            def on_motion(self, event):
+                """on motion we will move the rect if the mouse is over us"""
+                if self.xpress is None:
+                    return
+                if event.inaxes != self.rect.axes:
+                    return
+                x0 = event.xdata
+                _x0_format = '{0:.2f}'.format(x0)
+                _x0_parent_format = str(int(round(x0)))
+                _summary = self.parent._summary
+                if self.super.dataType == 'data':
+                    parent_data_peak_from = _summary.data_peak_from_pixel
+                    parent_data_peak_to = _summary.data_peak_to_pixel
+                    parent_back_peak_from = _summary.data_background_from_pixel1
+                    parent_back_peak_to = _summary.data_background_to_pixel1
+                    parent_x_min = _summary.x_min_edit
+                    parent_x_max = _summary.x_max_edit
+                else:
+                    parent_data_peak_from = _summary.norm_peak_from_pixel
+                    parent_data_peak_to = _summary.norm_peak_to_pixel
+                    parent_back_peak_from = _summary.norm_background_from_pixel1
+                    parent_back_peak_to = _summary.norm_background_to_pixel1
+                    parent_x_min = _summary.norm_x_min_edit
+                    parent_x_max = _summary.norm_x_max_edit
+
+                if self.type == 'peak_from':
+                    self.super.peakFrom.setText(_x0_format)
+                    parent_data_peak_from.setText(_x0_parent_format)
+                elif self.type == 'peak_to':
+                    self.super.peakTo.setText(_x0_format)
+                    parent_data_peak_to.setText(_x0_parent_format)
+                elif self.type == 'back_from':
+                    self.super.backFrom.setText(_x0_format)
+                    parent_back_peak_from.setText(_x0_parent_format)
+                elif self.type == 'back_to':
+                    self.super.backTo.setText(_x0_format)
+                    parent_back_peak_to.setText(_x0_parent_format)
+                elif self.type == 'lowres_from':
+                    self.super.lowresFrom.setText(_x0_format)
+                    parent_x_min.setText(_x0_parent_format)
+                elif self.type == 'lowres_to':
+                    self.super.lowresTo.setText(_x0_format)
+                    parent_x_max.setText(_x0_parent_format)
+
+                self.rect.set_xdata(x0)
+                self.rect.figure.canvas.draw()
+
+            def _refresh(self):
+                if self.type == 'peak_from':
+                    x0 = self.super.peakFrom.text()
+                elif self.type == 'peak_to':
+                    x0 = self.super.peakTo.text()
+                elif self.type == 'back_from':
+                    x0 = self.super.backFrom.text()
+                elif self.type == 'back_to':
+                    x0 = self.super.backTo.text()
+                elif self.type == 'lowres_from':
+                    x0 = self.super.lowresFrom.text()
+                elif self.type == 'lowres_to':
+                    x0 = self.super.lowresTo.text()
+                self.rect.set_xdata(x0)
+                self.rect.figure.canvas.draw()
+
+            def on_release(self, event):
+                """on release we reset the press data"""
+                self.xpress = None
+                self.rect.figure.canvas.draw()
+
+            def disconnect(self):
+                'disconnect all the stored connection ids'
+                self.rect.figure.canvas.mpl_disconnect(self.cidpress)
+                self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
+                self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
+
         parent = self.parent
 
         # top plot will be for peak and background selection
@@ -366,10 +468,16 @@ class DesignerMainWindow(QtGui.QMainWindow):
         y = self.y1
 
         bLinear = self.linear.isChecked()
-        ymax=max(y)
 
         if bLinear:
-            ymin=0
+            _line, = axes.plot(x, y, color='black')
+        else:
+            _line, = axes.semilogy(x, y, color='black')
+
+        ymax = max(y)
+
+        if bLinear:
+            ymin = 0
         else:
             ymin = 1
 
@@ -384,7 +492,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectpeakx1 = axes.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='blue')
 
         for rect in rectpeakx1:
-            dr = _DraggableRectangle(rect, 'peak_from', self, parent)
+            dr = DraggableRectangle(rect, 'peak_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -394,7 +502,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectpeakx2 = axes.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='blue')
 
         for rect in rectpeakx2:
-            dr = _DraggableRectangle(rect, 'peak_to', self, parent)
+            dr = DraggableRectangle(rect, 'peak_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -409,7 +517,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectbackx1 = axes.semilogy([backx1,backx1],[ymin,ymax], '--', color='red')
 
         for rect in rectbackx1:
-            dr = _DraggableRectangle(rect, 'back_from', self, parent)
+            dr = DraggableRectangle(rect, 'back_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -419,7 +527,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectbackx2 = axes.semilogy([backx2,backx2],[ymin,ymax], '--', color='red')
 
         for rect in rectbackx2:
-            dr = _DraggableRectangle(rect, 'back_to', self, parent)
+            dr = DraggableRectangle(rect, 'back_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -428,6 +536,13 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         x = self.x2
         y = self.y2
+
+        if bLinear:
+            _line2, = axes2.plot(x, y, color='black')
+        else:
+            _line2, = axes2.semilogy(x, y, color='black')
+
+        ymax = max(y)
 
         #low resolution range
         peakx1 = self._lowresFromValue
@@ -441,14 +556,13 @@ class DesignerMainWindow(QtGui.QMainWindow):
             rectpeakx1 = axes2.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='green')
             rectpeakx2 = axes2.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='green')
 
-#        self.drs2 = []
         for rect in rectpeakx1:
-            dr = _DraggableRectangle(rect, 'lowres_from', self, parent)
+            dr = DraggableRectangle(rect, 'lowres_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
         for rect in rectpeakx2:
-            dr = _DraggableRectangle(rect, 'lowres_to', self, parent)
+            dr = DraggableRectangle(rect, 'lowres_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -457,105 +571,3 @@ class DesignerMainWindow(QtGui.QMainWindow):
         #set the x-axes range visible
         axes.set_xlim(self.peak_back_xlim)
         axes2.set_xlim(self.low_res_xlim)
-
-
-class _DraggableRectangle:
-    def __init__(self, rect, type, super, parent):
-        self.rect = rect
-        self.xpress = None
-        self.type = type  # peak_from, peak_to, back_from, back_to...
-        self.super = super
-        self.parent = parent
-
-    def connect(self):
-        'connect to all the events we need'
-        self.cidpress = self.rect.figure.canvas.mpl_connect(
-        'button_press_event', self.on_press)
-        self.cidrelease = self.rect.figure.canvas.mpl_connect(
-        'button_release_event', self.on_release)
-        self.cidmotion = self.rect.figure.canvas.mpl_connect(
-        'motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-        'on button press we will see if the mouse is over us and store some data'
-        if event.inaxes != self.rect.axes:
-            return
-
-        contains, _attrd = self.rect.contains(event)
-        if not contains:
-            return
-        self.xpress = event.xdata
-
-    def on_motion(self, event):
-        """on motion we will move the rect if the mouse is over us"""
-        if self.xpress is None:
-            return
-        if event.inaxes != self.rect.axes:
-            return
-        x0 = event.xdata
-        _x0_format = '{0:.2f}'.format(x0)
-        _x0_parent_format = str(int(round(x0)))
-        _summary = self.parent._summary
-        if self.super.dataType == 'data':
-            parent_data_peak_from = _summary.data_peak_from_pixel
-            parent_data_peak_to = _summary.data_peak_to_pixel
-            parent_back_peak_from = _summary.data_background_from_pixel1
-            parent_back_peak_to = _summary.data_background_to_pixel1
-            parent_x_min = _summary.x_min_edit
-            parent_x_max = _summary.x_max_edit
-        else:
-            parent_data_peak_from = _summary.norm_peak_from_pixel
-            parent_data_peak_to = _summary.norm_peak_to_pixel
-            parent_back_peak_from = _summary.norm_background_from_pixel1
-            parent_back_peak_to = _summary.norm_background_to_pixel1
-            parent_x_min = _summary.norm_x_min_edit
-            parent_x_max = _summary.norm_x_max_edit
-
-        if self.type == 'peak_from':
-            self.super.peakFrom.setText(_x0_format)
-            parent_data_peak_from.setText(_x0_parent_format)
-        elif self.type == 'peak_to':
-            self.super.peakTo.setText(_x0_format)
-            parent_data_peak_to.setText(_x0_parent_format)
-        elif self.type == 'back_from':
-            self.super.backFrom.setText(_x0_format)
-            parent_back_peak_from.setText(_x0_parent_format)
-        elif self.type == 'back_to':
-            self.super.backTo.setText(_x0_format)
-            parent_back_peak_to.setText(_x0_parent_format)
-        elif self.type == 'lowres_from':
-            self.super.lowresFrom.setText(_x0_format)
-            parent_x_min.setText(_x0_parent_format)
-        elif self.type == 'lowres_to':
-            self.super.lowresTo.setText(_x0_format)
-            parent_x_max.setText(_x0_parent_format)
-
-        self.rect.set_xdata(x0)
-        self.rect.figure.canvas.draw()
-
-    def _refresh(self):
-        if self.type == 'peak_from':
-            x0 = self.super.peakFrom.text()
-        elif self.type == 'peak_to':
-            x0 = self.super.peakTo.text()
-        elif self.type == 'back_from':
-            x0 = self.super.backFrom.text()
-        elif self.type == 'back_to':
-            x0 = self.super.backTo.text()
-        elif self.type == 'lowres_from':
-            x0 = self.super.lowresFrom.text()
-        elif self.type == 'lowres_to':
-            x0 = self.super.lowresTo.text()
-        self.rect.set_xdata(x0)
-        self.rect.figure.canvas.draw()
-
-    def on_release(self, event):
-        """on release we reset the press data"""
-        self.xpress = None
-        self.rect.figure.canvas.draw()
-
-    def disconnect(self):
-        'disconnect all the stored connection ids'
-        self.rect.figure.canvas.mpl_disconnect(self.cidpress)
-        self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
