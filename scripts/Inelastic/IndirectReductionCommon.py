@@ -42,7 +42,7 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     for file_group in file_groups:
         created_workspaces, chopped_data = _load_files(file_group, ipf_filename, spec_min,
-                                                       spec_max, load_logs, load_opts)
+                                                       spec_max, sum_files, load_logs, load_opts)
         workspace_names.extend(created_workspaces)
 
     return workspace_names, chopped_data
