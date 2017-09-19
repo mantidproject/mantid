@@ -149,7 +149,6 @@ private:
 
 class CalculatePolynomialBackgroundTestPerformance : public CxxTest::TestSuite {
 public:
-
   void setUp() {
     Mantid::API::FrameworkManager::Instance();
     const size_t nBins = 1000;
@@ -160,7 +159,8 @@ public:
     std::iota(x.begin(), x.end(), 0.0);
     const Mantid::HistogramData::BinEdges edges(x);
     const Mantid::HistogramData::Histogram h(edges, counts);
-    m_ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(nHisto, h);
+    m_ws = Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(nHisto,
+                                                                         h);
     // The histograms in m_ws share the same Y and E values. We want unshared
     // histograms to performance-test possible cache trashing issues.
     for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {

@@ -92,8 +92,7 @@ includedRanges(const std::vector<double> &ranges,
     return p1.first < p2.first;
   });
   // If an 'end' edge is followed by a 'start', we have a new range. Everything
-  // else
-  // can be merged.
+  // else can be merged.
   std::vector<double> mergedRanges;
   mergedRanges.reserve(ranges.size());
   auto edgeIt = edges.begin();
@@ -118,12 +117,14 @@ includedRanges(const std::vector<double> &ranges,
 }
 
 /** Constrains given ranges within a histogram.
- * @param ranges a vector of start-end pairs to process
- * @param ws a workspace
- * @param wsIndex a workspace index identifying a histogram in ws
- * @return a ranges-like vector of processed ranges
+ *  @param ranges a vector of start-end pairs to process
+ *  @param ws a workspace
+ *  @param wsIndex a workspace index identifying a histogram in ws
+ *  @return a ranges-like vector of processed ranges
  */
-std::vector<double> histogramRanges(const std::vector<double> &ranges, const Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+std::vector<double> histogramRanges(const std::vector<double> &ranges,
+                                    const Mantid::API::MatrixWorkspace &ws,
+                                    const size_t wsIndex) {
   const auto filteredRanges = filterRangesOutsideX(ranges, ws, wsIndex);
   if (!ranges.empty() && filteredRanges.empty()) {
     throw std::runtime_error(
@@ -154,7 +155,11 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @param ranges a vector defining the fitting intervals
  *  @return a vector of final fitted parameters
  */
-std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &function, Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex, const std::vector<double> &ranges) {
+std::vector<double> executeFit(Mantid::API::Algorithm &fit,
+                               const std::string &function,
+                               Mantid::API::MatrixWorkspace_sptr &ws,
+                               const size_t wsIndex,
+                               const std::vector<double> &ranges) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -165,7 +170,8 @@ std::vector<double> executeFit(Mantid::API::Algorithm &fit, const std::string &f
   fit.setProperty("Exclude", excludedRanges);
   fit.setProperty("CreateOutput", true);
   fit.executeAsChildAlg();
-  Mantid::API::ITableWorkspace_sptr fitResult = fit.getProperty("OutputParameters");
+  Mantid::API::ITableWorkspace_sptr fitResult =
+      fit.getProperty("OutputParameters");
   std::vector<double> parameters(fitResult->rowCount());
   for (size_t row = 0; row < parameters.size(); ++row) {
     parameters[row] = fitResult->cell<double>(row, 1);
@@ -200,11 +206,12 @@ std::string makeFunctionString(const std::vector<double> &parameters) {
 }
 
 /** Evaluates the given function directly on a histogram
- * @param function a string representing function to evaluate
- * @param ws an output workspace
- * @param wsIndex a workspace index identifying a histogram
+ *  @param function a string representing function to evaluate
+ *  @param ws an output workspace
+ *  @param wsIndex a workspace index identifying a histogram
  */
-void evaluateInPlace(const std::string &function, Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
+void evaluateInPlace(const std::string &function,
+                     Mantid::API::MatrixWorkspace &ws, const size_t wsIndex) {
   auto bkg = boost::dynamic_pointer_cast<Mantid::API::IFunction1D>(
       Mantid::API::FunctionFactory::Instance().createInitialized(function));
   // We want to write directly to the workspace.
