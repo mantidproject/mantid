@@ -272,18 +272,15 @@ class TOFTOFScriptElement(BaseScriptElement):
             if i == 0:
                 wsData0 = wsData
 
-        def group_list(listVal, postfix=''):
-            return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
-
         gPrefix = 'g' + self.prefix
         gDataRuns    = gPrefix + 'DataRuns'
         gDataRawRuns = gPrefix + 'DataRawRuns'
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(data_raw_group)))
-        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(data_group)))
-        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(all_group)))
+        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, _ScriptHelpers.group_list(data_raw_group)))
+        l("{} = GroupWorkspaces({})" .format(gDataRuns,    _ScriptHelpers.group_list(data_group)))
+        l("{} = GroupWorkspaces({})" .format(gAll,         _ScriptHelpers.group_list(all_group)))
         l()
 
         l("# Ei")
@@ -350,10 +347,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         else:  # none, simply use the not normalised workspaces
             gDataNorm = gDataRuns
 
-            if self.vanRuns:
-                wsVanNorm = wsVan
-            if self.ecRuns:
-                wsECNorm = wsEC
+            wsVanNorm = wsVan
+            wsECNorm = wsEC
 
         if self.ecRuns:
             gDataSubEC = gPrefix + 'DataSubEC'
@@ -374,7 +369,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             l("{} = GroupWorkspaces({}list({}.getNames()))"
-              .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+              .format(gData, _ScriptHelpers.group_list([wsVanNorm], ' + '), gDataSource))
         else:
             l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
@@ -440,6 +435,15 @@ class TOFTOFScriptElement(BaseScriptElement):
             l()
             gLast = gDataBinE
 
+            l("# make nice workspace names")
+            l("for ws in {}:".format(gDataS))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+              .format(self.prefix))
+
+            l("for ws in {}:" .format(gDataBinE))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
+              .format(self.prefix))
+
         if self.binQon:
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
@@ -449,15 +453,11 @@ class TOFTOFScriptElement(BaseScriptElement):
               .format(gDataBinQ, gLast))
             l()
 
-        l("# make nice workspace names")
-        l("for ws in {}:" .format(gDataS))
-        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
-          .format(self.prefix))
-        if self.binEon:
-            l("for ws in {}:" .format(gDataBinE))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
+            l("# make nice workspace names")
+            l("for ws in {}:".format(gDataS))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
               .format(self.prefix))
-        if self.binQon:
+
             l("for ws in {}:" .format(gDataBinQ))
             l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())"
               .format(self.prefix))
@@ -492,3 +492,7 @@ class _ScriptHelpers(object):
     @staticmethod
     def get_time(workspace):
         return _ScriptHelpers.get_log(workspace, 'duration')
+
+    @staticmethod
+    def group_list(listVal, postfix=''):
+        return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
