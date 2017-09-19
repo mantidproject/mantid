@@ -1524,9 +1524,10 @@ signal_t MatrixWorkspace::getSignalAtCoord(
     auto it = std::lower_bound(xVals.cbegin(), xVals.cend(), xCoord);
     if (it == xVals.end()) {
       if (!isHistogramData()) {
-        auto deltaX = (xVals[xVals.size() - 1] - xVals[xVals.size() - 2]) / 2.0;
-        if (xCoord < xVals[xVals.size() - 1] + deltaX)
-          return yVals[xVals.size() - 1];
+        auto binEnd =
+            xVals.back() + 0.5 * (xVals.back() - *std::next(xVals.rbegin()));
+        if (xCoord < binEnd)
+          return yVals.back();
       }
       // Out of range
       return std::numeric_limits<double>::quiet_NaN();
@@ -1535,7 +1536,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
       if (!isHistogramData()) {
         // In this case we have point data. Find the closest index to our x
         // coordinate, if the value is in range.
-        auto deltaX = (xVals[1] - xVals[0]) / 2.0;
+        auto deltaX = (xVals[1] - xVals[0]) * 0.5;
         if ((i == 0 && xCoord > xVals[0] - deltaX) ||
             (i != 0 && xVals[i] - xCoord < xCoord - xVals[i - 1]))
           ++i;
