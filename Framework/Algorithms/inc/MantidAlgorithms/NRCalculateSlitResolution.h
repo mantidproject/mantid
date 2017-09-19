@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CALCULATERESOLUTION_H_
-#define MANTID_ALGORITHMS_CALCULATERESOLUTION_H_
+#ifndef MANTID_ALGORITHMS_NRCALCULATESLITRESOLUTION_H_
+#define MANTID_ALGORITHMS_NRCALCULATESLITRESOLUTION_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculateResolution
+/** NRCalculateSlitResolution
 
 Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -33,7 +33,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport CalculateResolution : public API::DataProcessorAlgorithm {
+class DLLExport NRCalculateSlitResolution : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -48,4 +48,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CALCULATERESOLUTION_H_ */
+#endif /* MANTID_ALGORITHMS_NRCALCULATESLITRESOLUTION_H_ */

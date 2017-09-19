@@ -9,11 +9,22 @@ Algorithms
 ----------
 
 - The following bugs have been fixed in the summation in Q functionality in :ref:`algm-ReflectometryReductionOne`:
+
   - the incorrect angle was being used in the final conversion to Q in the divergent beam case
   - the input was being cropped, causing loss of counts
   - summation in Q was giving incorrect results for a point detector
+
 - A new property, ``Diagnostics``, has been added to :ref:`algm-ReflectometryReductionOne` to allow the output of additional interim workspaces for debug purposes.
-- A new version of :ref:`algm-SpecularReflectionCalculateTheta` (version 2) has been added which works with detectors at :math:`2\theta`. Version 1 works with detectors at :math:`\theta`.
+
+- A new version of :ref:`SpecularReflectionCalculateTheta <algm-SpecularReflectionCalculateTheta>` (version 2) has been added which works with detectors at :math:`2\theta`. Version 1 works with detectors at :math:`\theta`.
+
+- The following changes have been made to :ref:`CalculateResolution <algm-NRCalculateSlitResolution>`:
+
+  - The algorithm has been renamed to :ref:`algm-NRCalculateSlitResolution` as this algorithm is specific to neutron reflectometry, and the resolution it calculates is the slit resolution.
+  - Some errors in the resolution calculation have been fixed. Note that this affects the Q binning in the results of :ref:`ReflectometryReductonOneAuto <algm-ReflectometryReductionOneAuto>` (versions 1 and 2) and :ref:`ReflectometryReductionOne <algm-ReflectometryReductionOne>` (version 1 only).
+  - The ``TwoThetaLogName`` property has been replaced by ``ThetaLogName``. This still takes ``Theta`` as the default log name, which was causing confusion before because it was being used as two theta. Is is now being used as theta, as the new property name suggests.
+  - The output property ``TwoThetaOut`` has been removed because it is not useful. The algorithm now returns a single value which is the resolution.
+
 
 Reflectometry Reduction Interface
 ---------------------------------
