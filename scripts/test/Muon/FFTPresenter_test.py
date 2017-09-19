@@ -288,7 +288,6 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.alg.getAlg.makePhaseQuadTable.call_count==0)
         assert(self.alg.getAlg.PhaseQuad.call_count==1)
 
-       
 
 if __name__ == '__main__':
     unittest.main()

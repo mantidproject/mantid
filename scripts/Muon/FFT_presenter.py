@@ -1,14 +1,19 @@
 from __future__ import (absolute_import, division, print_function)
 
+from six import iteritems
+
+
 import mantid.simpleapi as mantid
 
 
 class FFTPresenter(object):
 
+  
     def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
         self.load=load
+
         # set data
         self.getWorkspaceNames()
         #connect
@@ -79,7 +84,6 @@ class FFTPresenter(object):
 
         self.view.setPhaseBox()
 
-
     def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()
         if  self.view.isAutoShift():
@@ -89,3 +93,4 @@ class FFTPresenter(object):
         if self.view.isComplex():
             self.view.addFFTComplex(FFTInputs)
         return FFTInputs
+

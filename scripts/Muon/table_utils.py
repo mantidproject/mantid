@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtCore, QtGui
 import os
 
+
 """
 This module contains the methods for
 adding information to tables.
@@ -72,3 +73,4 @@ def setTableHeaders(table):
                 +"}"
             table.setStyleSheet(styleSheet)
         return styleSheet
+
