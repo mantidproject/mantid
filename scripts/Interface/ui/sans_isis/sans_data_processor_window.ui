@@ -64,7 +64,7 @@ QGroupBox::title {
       <item>
        <widget class="QStackedWidget" name="main_stacked_widget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="run_page">
          <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -339,7 +339,7 @@ QGroupBox::title {
           <item>
            <widget class="QTabWidget" name="settings_tab_widget">
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="general_tab">
              <attribute name="title">
@@ -876,6 +876,32 @@ QGroupBox::title {
                  </widget>
                 </item>
                 <item>
+                 <widget class="QGroupBox" name="mask_file_input_group_box">
+                  <property name="title">
+                   <string>Mask File Input</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_7">
+                   <item row="0" column="0">
+                    <widget class="QLineEdit" name="mask_file_input_line_edit"/>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QPushButton" name="mask_file_browse_push_button">
+                     <property name="text">
+                      <string>Browse</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QPushButton" name="mask_file_add_push_button">
+                     <property name="text">
+                      <string>Add</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
                  <spacer name="verticalSpacer_4">
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
@@ -1056,7 +1082,7 @@ QGroupBox::title {
                       </widget>
                      </item>
                      <item row="4" column="2">
-                      <widget class="QLineEdit" name="transmission_m4_shift_line_edit">
+                      <widget class="QLineEdit" name="transmission_mn_shift_line_edit">
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
@@ -1070,12 +1096,12 @@ QGroupBox::title {
                       </widget>
                      </item>
                      <item row="4" column="0">
-                      <widget class="QLabel" name="transmission_m4_shift_label">
+                      <widget class="QLabel" name="transmission_mn_shift_label">
                        <property name="toolTip">
                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                        </property>
                        <property name="text">
-                        <string>M4 Shift [m]</string>
+                        <string>Monitor Shift [mm]</string>
                        </property>
                       </widget>
                      </item>
@@ -1088,30 +1114,6 @@ QGroupBox::title {
                         <string>Transmission monitor</string>
                        </property>
                       </widget>
-                     </item>
-                     <item row="3" column="2">
-                      <layout class="QGridLayout" name="gridLayout_14">
-                       <item row="1" column="0">
-                        <widget class="QRadioButton" name="transmission_m3_radio_button">
-                         <property name="toolTip">
-                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this is selected then the standard transmission monitor is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                         </property>
-                         <property name="text">
-                          <string>M3</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QRadioButton" name="transmission_m4_radio_button">
-                         <property name="toolTip">
-                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this is selected then the M4 transmission monitor is used for transmission calculation. This is the monitor which is located just before the detector. The name of this monitor might be different for some instruments (e.g. in ZOOM it is M5).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                         </property>
-                         <property name="text">
-                          <string>M4</string>
-                         </property>
-                        </widget>
-                       </item>
-                      </layout>
                      </item>
                      <item row="8" column="0" colspan="4">
                       <widget class="QGroupBox" name="fit_combo_box">
@@ -1321,6 +1323,9 @@ QGroupBox::title {
                         </item>
                        </layout>
                       </widget>
+                     </item>
+                     <item row="3" column="2">
+                      <widget class="QLineEdit" name="transmission_monitor_line_edit"/>
                      </item>
                     </layout>
                    </widget>

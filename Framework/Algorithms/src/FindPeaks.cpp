@@ -145,9 +145,7 @@ void FindPeaks::init() {
       "this peak will not be fit.  It is designed for EventWorkspace with "
       "integer counts.");
 
-  std::vector<std::string> costFuncOptions;
-  costFuncOptions.emplace_back("Chi-Square");
-  costFuncOptions.emplace_back("Rwp");
+  std::array<std::string, 2> costFuncOptions = {{"Chi-Square", "Rwp"}};
   declareProperty("CostFunction", "Chi-Square",
                   Kernel::IValidator_sptr(
                       new Kernel::ListValidator<std::string>(costFuncOptions)),
