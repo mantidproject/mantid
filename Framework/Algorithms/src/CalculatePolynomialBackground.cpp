@@ -209,7 +209,7 @@ void evaluateInPlace(const std::string &function, Mantid::API::MatrixWorkspace &
       Mantid::API::FunctionFactory::Instance().createInitialized(function));
   // We want to write directly to the workspace.
   double *y = const_cast<double *>(ws.mutableY(wsIndex).rawData().data());
-  bkg->function1D(y, ws.points(wsIndex).rawData().data(), ws.blocksize());
+  bkg->function1D(y, ws.points(wsIndex).rawData().data(), ws.y(wsIndex).size());
 }
 }
 
