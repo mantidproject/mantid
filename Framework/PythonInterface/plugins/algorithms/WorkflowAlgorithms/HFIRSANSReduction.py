@@ -277,11 +277,13 @@ class HFIRSANSReduction(PythonAlgorithm):
 
         self.setProperty("OutputMessage", output_msg)
 
-    def set_property_if_exists(self, property_manager, name, value):
+    @staticmethod
+    def set_property_if_exists(property_manager, name, value):
         if property_manager.existsProperty(name):
             property_manager.setProperty(name, value)
 
-    def copy_property_value_if_exists(self, old_property_manager, new_property_manager, new_property_name,
+    @staticmethod
+    def copy_property_value_if_exists(old_property_manager, new_property_manager, new_property_name,
                                       old_property_name):
         if old_property_manager.existsProperty(old_property_name):
             value = old_property_manager.getProperty(old_property_name).value
