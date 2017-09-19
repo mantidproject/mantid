@@ -41,7 +41,7 @@ public:
     specDefs[1].add(20);
     specDefs[2].add(30);
     source.setSpectrumDefinitions(specDefs);
-    std::vector<SpectrumNumber> indices{{0, 2}};
+    std::vector<SpectrumNumber> indices{{1, 3}};
     const auto indexSet = source.makeIndexSet(indices);
     auto result = extract(source, indexSet);
     TS_ASSERT_EQUALS(result.size(), 2);
