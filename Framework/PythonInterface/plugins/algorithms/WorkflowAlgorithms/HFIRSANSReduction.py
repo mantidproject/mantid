@@ -145,16 +145,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", output_ws)
 
-            if alg.existsProperty("BeamCenterX") \
-                    and alg.existsProperty("BeamCenterY") \
-                    and beam_center_x is not None \
-                    and beam_center_y is not None:
-                alg.setProperty("BeamCenterX", beam_center_x)
-                alg.setProperty("BeamCenterY", beam_center_y)
-
+            self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
-
             self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredTransmission",
                                                "MeasuredTransmissionValue")
             self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredError",
@@ -195,13 +188,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", background_ws)
                 alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
 
-                if alg.existsProperty("BeamCenterX") \
-                        and alg.existsProperty("BeamCenterY") \
-                        and trans_beam_center_x is not None \
-                        and trans_beam_center_y is not None:
-                    alg.setProperty("BeamCenterX", trans_beam_center_x)
-                    alg.setProperty("BeamCenterY", trans_beam_center_y)
-
+                self.set_beam_center_if_exists(alg, trans_beam_center_x, trans_beam_center_y)
                 self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
                 alg.execute()
 
@@ -276,6 +263,12 @@ class HFIRSANSReduction(PythonAlgorithm):
             Logger("HFIRSANSReduction").error(msg)
 
         self.setProperty("OutputMessage", output_msg)
+
+    def set_beam_center_if_exists(self, alg, x, y):
+        if alg.existsProperty("BeamCenterX") and alg.existsProperty("BeamCenterY") \
+            and x is not None and y is not None:
+        alg.setProperty("BeamCenterX", x)
+        alg.setProperty("BeamCenterY", y)
 
     def set_property_if_exists(self, property_manager, name, value):
         if property_manager.existsProperty(name):
