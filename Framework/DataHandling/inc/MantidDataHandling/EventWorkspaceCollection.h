@@ -13,6 +13,9 @@
 #include <memory>
 
 namespace Mantid {
+namespace Indexing {
+class IndexInfo;
+}
 namespace DataHandling {
 
 /** EventWorkspaceCollection : Collection of EventWorspaces to give
@@ -98,6 +101,7 @@ public:
   size_t getNumberEvents() const;
   void resizeTo(const size_t size);
   void padSpectra(const std::vector<int32_t> &padding);
+  void setIndexInfo(const Indexing::IndexInfo &indexInfo);
   void setInstrument(const Geometry::Instrument_const_sptr &inst);
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);

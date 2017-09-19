@@ -1,11 +1,13 @@
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <vector>
 #include <set>
@@ -252,6 +254,12 @@ void EventWorkspaceCollection::padSpectra(const std::vector<int32_t> &padding) {
       }
     }
   }
+}
+
+void EventWorkspaceCollection::setIndexInfo(
+    const Indexing::IndexInfo &indexInfo) {
+  for (auto &ws : m_WsVec)
+    ws = create<EventWorkspace>(*ws, indexInfo, HistogramData::BinEdges(2));
 }
 
 void EventWorkspaceCollection::setInstrument(
