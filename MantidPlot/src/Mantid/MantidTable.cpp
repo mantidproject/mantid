@@ -295,26 +295,26 @@ void MantidTable::cellEdited(int row, int col) {
   }
 
   if (c->type() == "str" || c->type() == "V3D") {
-      std::istringstream textStream(oldText.toStdString());
-      c->read(index, textStream);
+    std::istringstream textStream(oldText.toStdString());
+    c->read(index, textStream);
   } else {
-      // We must be dealing with numerical data. Since there semms to be no way
-      // convert between QLocale and std::locale, get the number out 
-      // of the Qt locale and put it into default std::locale format.
-      // so we can pass it to the workspace.
-      
-      // First convert locale formatted string to native type
-      QTextStream qstream(&oldText);
-      qstream.setLocale(locale());
-      double number;
-      qstream >> number;
+    // We must be dealing with numerical data. Since there semms to be no way
+    // convert between QLocale and std::locale, get the number out
+    // of the Qt locale and put it into default std::locale format.
+    // so we can pass it to the workspace.
 
-      // Put it back in the stream and let the column deduce the correct
-      // type of the number.
-      std::stringstream textStream;
-      textStream << number;
-      std::istringstream stream(textStream.str());
-      c->read(index, stream);
+    // First convert locale formatted string to native type
+    QTextStream qstream(&oldText);
+    qstream.setLocale(locale());
+    double number;
+    qstream >> number;
+
+    // Put it back in the stream and let the column deduce the correct
+    // type of the number.
+    std::stringstream textStream;
+    textStream << number;
+    std::istringstream stream(textStream.str());
+    c->read(index, stream);
   }
 }
 
