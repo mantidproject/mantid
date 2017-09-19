@@ -123,18 +123,16 @@ class FunctionWrapper(object):
           # If the input is a workspace, simply return the output workspace.
           return self._execute_algorithm('EvaluateFunction', Function=self.fun, InputWorkspace=x)
        
-      list_input = False
-      numpy_input = False       
-      if isinstance(x, np.ndarray):
+      list_input =  isinstance(x, list)
+      numpy_input = isinstance(x, np.ndarray)      
+      if numpy_input:
           # If the input is a numpy array reshape into 1D array, saving
           # original shape to reshape output back to it.
           x_list = x.reshape(-1, order='C')
-          x_shape = x.shape
-          numpy_input = True          
-      elif isinstance(x, list):
+          x_shape = x.shape         
+      elif list_input:
           # If the input isn't a list, wrap it in one so we can iterate easily
           x_list = x
-          list_input = True
       else:
           x_list = [x]
       
