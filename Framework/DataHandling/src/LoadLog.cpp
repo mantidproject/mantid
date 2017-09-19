@@ -409,7 +409,7 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
     return LoadLog::string;
   }
 
-  const auto isNumber = [](const std::string& str) {
+  const auto isNumber = [](const std::string &str) {
     // try and get stringstream to parse a number out of the string
     // if this fails it will not set the eof character
     long double ld;
