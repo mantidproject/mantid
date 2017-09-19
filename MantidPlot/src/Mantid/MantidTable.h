@@ -35,6 +35,8 @@ signals:
 public slots:
   void deleteRows(int startRow, int endRow) override;
   void cellEdited(int, int col) override;
+  void setPlotDesignation(PlotDesignation pd,
+                          bool rightColumns = false) override;
 
 protected slots:
   void closeTable();
@@ -57,6 +59,9 @@ protected:
                    const QString &leadCol = QString()) override;
 
 private:
+  /// Set the plot type on the workspace for each selected column
+  void setPlotTypeForSelectedColumns(int plotType);
+
   /// ITableWorkspace being displayed
   Mantid::API::ITableWorkspace_sptr m_ws;
   /// Name of the TableWorkspace being displayed

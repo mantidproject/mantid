@@ -68,7 +68,7 @@ void pqCameraToolbarNonOrthogonalAxes::constructor() {
 
   this->ZoomToDataAction = ui.actionZoomToData;
   this->ZoomToDataAction->setEnabled(
-      pqActiveObjects::instance().activeSource() != 0);
+      pqActiveObjects::instance().activeSource() != nullptr);
 
   QObject::connect(&pqActiveObjects::instance(), SIGNAL(viewChanged(pqView *)),
                    this, SLOT(updateEnabledState()));

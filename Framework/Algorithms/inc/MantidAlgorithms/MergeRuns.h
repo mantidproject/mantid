@@ -141,6 +141,9 @@ private:
   API::MatrixWorkspace_sptr
   rebinInput(const API::MatrixWorkspace_sptr &workspace,
              const std::vector<double> &params);
+  API::MatrixWorkspace_sptr
+  buildScanningOutputWorkspace(const API::MatrixWorkspace_sptr &outWS,
+                               const API::MatrixWorkspace_sptr &addee);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress;
 

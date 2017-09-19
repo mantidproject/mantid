@@ -39,13 +39,14 @@ void ConvertSpectrumAxis2::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions(6);
+  std::vector<std::string> targetOptions(7);
   targetOptions[0] = "Theta";
   targetOptions[1] = "SignedTheta";
   targetOptions[2] = "ElasticQ";
   targetOptions[3] = "ElasticQSquared";
   targetOptions[4] = "theta";
   targetOptions[5] = "signed_theta";
+  targetOptions[6] = "ElasticDSpacing";
 
   declareProperty(
       "Target", "", boost::make_shared<StringListValidator>(targetOptions),
@@ -97,7 +98,8 @@ void ConvertSpectrumAxis2::exec() {
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
     createThetaMap(progress, unitTarget, inputWS);
-  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
+  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
+             unitTarget == "ElasticDSpacing") {
     createElasticQMap(progress, unitTarget, inputWS);
   }
 
@@ -182,7 +184,7 @@ void ConvertSpectrumAxis2::createElasticQMap(
       efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
                          emode); // get efixed
     } else {
-      theta = 0.0;
+      theta = DBL_MIN;
       efixed = DBL_MIN;
     }
 
@@ -198,9 +200,12 @@ void ConvertSpectrumAxis2::createElasticQMap(
           elasticQInAngstroms * elasticQInAngstroms;
 
       emplaceIndexMap(elasticQSquaredInAngstroms, i);
+    } else if (targetUnit == "ElasticDSpacing") {
+      double elasticDSpacing = 2 * M_PI / elasticQInAngstroms;
+      emplaceIndexMap(elasticDSpacing, i);
     }
 
-    progress.report("Converting to Elastic Q...");
+    progress.report("Converting to " + targetUnit);
   }
 }
 
@@ -217,12 +222,10 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
 
   MatrixWorkspace_sptr outputWorkspace = nullptr;
   NumericAxis *newAxis = nullptr;
-  size_t size;
   if (m_toOrder) {
     // Can not re-use the input one because the spectra are re-ordered.
-    size = m_indexMap.size();
     outputWorkspace = WorkspaceFactory::Instance().create(
-        inputWS, size, inputWS->x(0).size(), inputWS->y(0).size());
+        inputWS, m_indexMap.size(), inputWS->x(0).size(), inputWS->y(0).size());
     std::vector<double> axis;
     axis.reserve(m_indexMap.size());
     for (const auto &it : m_indexMap) {
@@ -231,7 +234,6 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis = new NumericAxis(std::move(axis));
   } else {
     // If there is no reordering we can simply clone.
-    size = m_axis.size();
     outputWorkspace = inputWS->clone();
     newAxis = new NumericAxis(m_axis);
   }
@@ -245,12 +247,13 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {
     newAxis->unit() = UnitFactory::Instance().create("QSquared");
+  } else if (targetUnit == "ElasticDSpacing") {
+    newAxis->unit() = UnitFactory::Instance().create("dSpacing");
   }
-
-  size_t currentIndex = 0;
 
   // Note that this is needed only for ordered case
   if (m_toOrder) {
+    size_t currentIndex = 0;
     std::multimap<double, size_t>::const_iterator it;
     for (it = m_indexMap.begin(); it != m_indexMap.end(); ++it) {
       // Copy over the data.

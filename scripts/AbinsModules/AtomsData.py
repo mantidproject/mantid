@@ -20,7 +20,7 @@ class AtomsDaTa(AbinsModules.GeneralData):
     def _append(self, item=None):
         """
         Adds one elements to the collection of atoms data.
-        @param item: element to be added
+        :param item: element to be added
         """
 
         if not isinstance(item, dict):
