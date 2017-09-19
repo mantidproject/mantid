@@ -1,6 +1,5 @@
 #include "MantidAlgorithms/CalculatePolynomialBackground.h"
 
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IncreasingAxisValidator.h"
@@ -257,16 +256,6 @@ void CalculatePolynomialBackground::exec() {
     // We want bkg to directly write to the output workspace.
     double *bkgY = const_cast<double *>(outWS->mutableY(i).rawData().data());
     bkg->function1D(bkgY, outWS->points(i).rawData().data(), nBins);
-    // Calculate the errors using partial derivatives.
-    API::BasicJacobian jacobian{nBins, polyDegree + 1};
-    bkg->functionDeriv1D(&jacobian, outWS->points(i).rawData().data(), nBins);
-    for (size_t j = 0; j < nBins; ++j) {
-      double uncertainty{0.0};
-      for (size_t k = 0; k < paramErrors.size(); ++k) {
-        uncertainty += std::abs(jacobian.get(j, k)) * paramErrors[k];
-      }
-      outWS->mutableE(i)[j] = uncertainty;
-    }
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }

@@ -170,7 +170,6 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
-	inc/MantidAPI/BasicJacobian.h
 	inc/MantidAPI/BinEdgeAxis.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h

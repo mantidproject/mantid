@@ -63,15 +63,13 @@ public:
     TS_ASSERT(outWS)
     for (size_t histI = 0; histI < nHist; ++histI) {
       const auto &ys = ws->y(histI);
-      const auto &es = ws->e(histI);
       const auto &xs = ws->x(histI);
       const auto &bkgYs = outWS->y(histI);
       const auto &bkgEs = outWS->e(histI);
       const auto &bkgXs = outWS->x(histI);
       for (size_t binI = 0; binI < nBin; ++binI) {
         TS_ASSERT_DELTA(bkgYs[binI], ys[binI], 1e-12)
-        TS_ASSERT_DELTA(bkgEs[binI],
-                        es[binI] / std::sqrt(static_cast<double>(nBin)), 1e-12)
+        TS_ASSERT_EQUALS(bkgEs[binI], 0)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
@@ -101,7 +99,7 @@ public:
       const auto &bkgXs = outWS->x(histI);
       for (size_t binI = 0; binI < nBin; ++binI) {
         TS_ASSERT_DELTA(bkgYs[binI], ys[binI], 1e-12)
-        TS_ASSERT_LESS_THAN(0, bkgEs[binI])
+        TS_ASSERT_EQUALS(bkgEs[binI], 0)
         TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
       }
     }
@@ -133,7 +131,7 @@ public:
     const std::vector<double> expected{1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
     for (size_t binI = 0; binI < nBin; ++binI) {
       TS_ASSERT_DELTA(bkgYs[binI], expected[binI], 1e-12)
-      TS_ASSERT_LESS_THAN(0, bkgEs[binI])
+      TS_ASSERT_EQUALS(bkgEs[binI], 0)
       TS_ASSERT_EQUALS(bkgXs[binI], xs[binI])
     }
   }

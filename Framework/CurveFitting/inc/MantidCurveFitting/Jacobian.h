@@ -1,12 +1,12 @@
-#ifndef MANTID_API_BASICJACOBIAN_H_
-#define MANTID_API_BASICJACOBIAN_H_
+#ifndef MANTID_CURVEFITTING_Jacobian_H_
+#define MANTID_CURVEFITTING_Jacobian_H_
 
 #include "MantidAPI/Jacobian.h"
 
 #include <vector>
 
 namespace Mantid {
-namespace API {
+namespace CurveFitting {
 /**
 An implementation of Jacobian using std::vector.
 
@@ -34,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class BasicJacobian : public API::Jacobian {
+class Jacobian : public API::Jacobian {
   /// Number of data points
   size_t m_ny;
   /// Number of parameters in a function (== IFunction::nParams())
@@ -46,7 +46,7 @@ public:
   /// Constructor.
   /// @param ny :: Number of data points
   /// @param np :: Number of parameters
-  BasicJacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) {
+  Jacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) {
     m_data.resize(ny * np, 0.0);
   }
   /// overwrite base method
@@ -93,4 +93,4 @@ public:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_API_BASICJACOBIAN_H_*/
+#endif /*MANTID_CURVEFITTING_Jacobian_H_*/
