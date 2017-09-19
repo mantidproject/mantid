@@ -175,11 +175,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
 
-    # Helper function - check binning parameters
-    def _check_bin_params(self, start, step, end):
-        if not (start < end and step > 0 and start + step <= end):
-            _ScriptHelpers.error("incorrect binning parameters")
-
     def _validate_user_input(self):
         # must have vanadium for TOF correction and subtracting EC from van
         if not self.vanRuns and (self.CORR_TOF_VAN == self.correctTof or self.subtractECVan):
@@ -190,9 +185,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             raise _ScriptHelpers.error("missing empty can runs")
 
         if self.binEon:
-            self._check_bin_params(self.binEstart, self.binEstep, self.binEend)
+            _ScriptHelpers.check_bin_params(self.binEstart, self.binEstep, self.binEend)
         if self.binQon:
-            self._check_bin_params(self.binQstart, self.binQstep, self.binQend)
+            _ScriptHelpers.check_bin_params(self.binQstart, self.binQstep, self.binQend)
 
         # must have some data runs
         if not self.dataRuns:
@@ -215,16 +210,6 @@ class TOFTOFScriptElement(BaseScriptElement):
         def l(line=''):
             script[0] += line + '\n'
 
-        # helpers
-        def get_log(workspace, tag):
-            return "{}.getRun().getLogData('{}').value".format(workspace, tag)
-
-        def get_ei(workspace):
-            return get_log(workspace, 'Ei')
-
-        def get_time(workspace):
-            return get_log(workspace, 'duration')
-
         l("import numpy as np")
         l()
         l("config['default.facility'] = '{}'"   .format(self.facility_name))
@@ -233,9 +218,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("config.appendDataSearchDir(r'{}')"   .format(self.dataDir))
         l()
 
-        dataRawGroup = []
-        dataGroup    = []
-        allGroup     = []
+        data_raw_group = []
+        data_group = []
+        all_group = []
 
         # vanadium runs
         if self.vanRuns:
@@ -248,7 +233,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{}.setComment('{}')"      .format(wsVan, self.vanCmnt))
             l()
 
-            allGroup.append(wsVan)
+            all_group.append(wsVan)
 
         # empty can runs
         if self.ecRuns:
@@ -260,23 +245,23 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
             l()
 
-            allGroup.append(wsEC)
+            all_group.append(wsEC)
 
         # data runs
         for i, (runs, cmnt) in enumerate(self.dataRuns):
             if not runs:
-                error('missing data runs value')
+                _ScriptHelpers.error('missing data runs value')
             if not cmnt:
-                error('missing data runs comment')
+                _ScriptHelpers.error('missing data runs comment')
 
             postfix = str(i + 1)
 
             wsRawData = self.prefix + 'RawData' + postfix
             wsData    = self.prefix + 'Data'    + postfix
 
-            dataRawGroup.append(wsRawData)
-            dataGroup.append(wsData)
-            allGroup.append(wsData)
+            data_raw_group.append(wsRawData)
+            data_group.append(wsData)
+            all_group.append(wsData)
 
             l("# data runs {}"           .format(postfix))
             l("{} = Load(Filename='{}')" .format(wsRawData, runs))
@@ -296,18 +281,18 @@ class TOFTOFScriptElement(BaseScriptElement):
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
-        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(dataGroup)))
-        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(allGroup)))
+        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(data_raw_group)))
+        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(data_group)))
+        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(all_group)))
         l()
 
         l("# Ei")
-        if len(allGroup) > 1:
+        if len(all_group) > 1:
             l("if CompareSampleLogs({}, 'Ei', 0.001):" .format(gAll))
             l("    raise RuntimeError('Ei values do not match')")
             l()
 
-        l("Ei = {}" .format(get_ei(wsData0)))
+        l("Ei = {}" .format(_ScriptHelpers.get_ei(wsData0)))
         l()
 
         gDetectorsToMask = gPrefix + 'DetectorsToMask'
@@ -344,19 +329,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsVanNorm, wsVan, get_time(wsVan)))
+                  .format(wsVanNorm, wsVan, _ScriptHelpers.get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsECNorm, wsEC, get_time(wsEC)))
+                  .format(wsECNorm, wsEC, _ScriptHelpers.get_time(wsEC)))
 
             l("names = []")
             l("for ws in {}:" .format(gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
             l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
-              .format(get_time('ws')))
+              .format(_ScriptHelpers.get_time('ws')))
             l()
             l("{} = GroupWorkspaces(names)" .format(gDataNorm))
 
@@ -491,3 +476,19 @@ class _ScriptHelpers(object):
     def error(message):
         raise RuntimeError("TOFTOF reductor error: {0}".format(message))
 
+    @staticmethod
+    def check_bin_params(start, step, end):
+        if not (start < end and step > 0 and start + step <= end):
+            _ScriptHelpers.error("incorrect binning parameters")
+
+    @staticmethod
+    def get_log(workspace, tag):
+        return "{}.getRun().getLogData('{}').value".format(workspace, tag)
+
+    @staticmethod
+    def get_ei(workspace):
+        return _ScriptHelpers.get_log(workspace, 'Ei')
+
+    @staticmethod
+    def get_time(workspace):
+        return _ScriptHelpers.get_log(workspace, 'duration')

@@ -413,19 +413,19 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 if self.type == 'peak_from':
                     self.super.peakFrom.setText(_x0_format)
                     parent_data_peak_from.setText(_x0_parent_format)
-                if self.type == 'peak_to':
+                elif self.type == 'peak_to':
                     self.super.peakTo.setText(_x0_format)
                     parent_data_peak_to.setText(_x0_parent_format)
-                if self.type == 'back_from':
+                elif self.type == 'back_from':
                     self.super.backFrom.setText(_x0_format)
                     parent_back_peak_from.setText(_x0_parent_format)
-                if self.type == 'back_to':
+                elif self.type == 'back_to':
                     self.super.backTo.setText(_x0_format)
                     parent_back_peak_to.setText(_x0_parent_format)
-                if self.type == 'lowres_from':
+                elif self.type == 'lowres_from':
                     self.super.lowresFrom.setText(_x0_format)
                     parent_x_min.setText(_x0_parent_format)
-                if self.type == 'lowres_to':
+                elif self.type == 'lowres_to':
                     self.super.lowresTo.setText(_x0_format)
                     parent_x_max.setText(_x0_parent_format)
 
@@ -435,15 +435,15 @@ class DesignerMainWindow(QtGui.QMainWindow):
             def _refresh(self):
                 if self.type == 'peak_from':
                     x0 = self.super.peakFrom.text()
-                if self.type == 'peak_to':
+                elif self.type == 'peak_to':
                     x0 = self.super.peakTo.text()
-                if self.type == 'back_from':
+                elif self.type == 'back_from':
                     x0 = self.super.backFrom.text()
-                if self.type == 'back_to':
+                elif self.type == 'back_to':
                     x0 = self.super.backTo.text()
-                if self.type == 'lowres_from':
+                elif self.type == 'lowres_from':
                     x0 = self.super.lowresFrom.text()
-                if self.type == 'lowres_to':
+                elif self.type == 'lowres_to':
                     x0 = self.super.lowresTo.text()
                 self.rect.set_xdata(x0)
                 self.rect.figure.canvas.draw()
