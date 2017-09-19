@@ -21,15 +21,16 @@ def create_file_range_parser(instrument):
     """
 
     def parser(file_range):
+        file_range = file_range.strip()
         # Check whether this is a range or single file
         if '-' in file_range:
             lower, upper = file_range.split('-', 1)
             run_numbers = range(int(lower), int(upper)+1)
             return [instrument + str(run) for run in run_numbers]
         elif '+' in file_range:
-            return file_range.split('+')
+            return [instrument + run for run in file_range.split('+')]
         else:
-            return [file_range]
+            return [instrument + file_range]
     return parser
 
 
