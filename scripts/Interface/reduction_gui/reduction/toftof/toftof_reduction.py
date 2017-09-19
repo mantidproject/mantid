@@ -175,42 +175,38 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
 
-    def to_script(self):
+    # Helper function - check binning parameters
+    def _check_bin_params(self, start, step, end):
+        if not (start < end and step > 0 and start + step <= end):
+            _ScriptHelpers.error("incorrect binning parameters")
 
-        def error(message):
-            raise RuntimeError('TOFTOF reduction error: ' + message)
+    def _validate_user_input(self):
+        # must have vanadium for TOF correction and subtracting EC from van
+        if not self.vanRuns and (self.CORR_TOF_VAN == self.correctTof or self.subtractECVan):
+            raise _ScriptHelpers.error("missing vanadium runs")
 
-        # sanity checks
-
-        # must have vanadium for TOF correction
-        if self.CORR_TOF_VAN == self.correctTof:
-            if not self.vanRuns:
-                error('missing vanadium runs')
-
-        # must have vanadium and empty can for subtracting EC from van
-        if self.subtractECVan:
-            if not self.vanRuns:
-                error('missing vanadium runs')
-            if not self.ecRuns:
-                error('missing empty can runs')
-
-        # binning parameters
-        def check_bin_params(start, step, end):
-            if not (start < end and step > 0 and start + step <= end):
-                error('incorrect binning parameters')
+        # must have empty can for subtracting EC from van
+        if self.subtractECVan and not self.ecruns:
+            raise _ScriptHelpers.error("missing empty can runs")
 
         if self.binEon:
-            check_bin_params(self.binEstart, self.binEstep, self.binEend)
+            self._check_bin_params(self.binEstart, self.binEstep, self.binEend)
         if self.binQon:
-            check_bin_params(self.binQstart, self.binQstep, self.binQend)
+            self._check_bin_params(self.binQstart, self.binQstep, self.binQend)
 
         # must have some data runs
         if not self.dataRuns:
-            error('missing data runs')
+            _ScriptHelpers.error("missing data runs")
 
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
-            error('missing vanadium comment')
+            _ScriptHelpers.error("missing vanadium comment")
+
+        # At this point we're all good, so return
+
+    def to_script(self):
+        # First, perform sanity checks
+        self._validate_user_input()
 
         # generated script
         script = ['']
@@ -483,13 +479,15 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         return script[0]
 
-# -------------------------------------------------------------------------------
-
 
 class TOFTOFReductionScripter(BaseReductionScripter):
 
     def __init__(self, name, facility):
         BaseReductionScripter.__init__(self, name, facility)
 
-# -------------------------------------------------------------------------------
-# eof
+
+class _ScriptHelpers(object):
+    @staticmethod
+    def error(message):
+        raise RuntimeError("TOFTOF reductor error: {0}".format(message))
+
