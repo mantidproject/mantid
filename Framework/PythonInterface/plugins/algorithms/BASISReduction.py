@@ -1,6 +1,8 @@
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
+import numpy as np
+
 import mantid.simpleapi as sapi
 from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
 from mantid.kernel import IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty,\
@@ -73,6 +75,11 @@ class BASISReduction(PythonAlgorithm):
         self._norm_run_list = None
         self._normWs = None
         self._normMonWs = None
+
+        # properties related to saving NSXPE file
+        self._nsxpe_do = False
+        self._nxspe_psi_angle_log = None
+        self._nxspe_offset = 0.0
 
     def category(self):
         return "Inelastic\\Reduction"
@@ -149,6 +156,22 @@ class BASISReduction(PythonAlgorithm):
         self.setPropertySettings("NormWavelengthRange", ifDivideByVanadium)
         self.setPropertyGroup("NormWavelengthRange", titleDivideByVanadium)
 
+        # Properties setting the saving of NSXPE file
+        title_nxspe= 'Save to NXSPE'
+        self.declareProperty('SaveNXSPE', False, direction=Direction.Input,
+                             doc='Do we save to NXSPE format?')
+        nxspe_enabled = EnabledWhenProperty('SaveNXSPE',
+                                            PropertyCriterion.IsNotDefault)
+        self.setPropertyGroup('SaveNXSPE', title_nxspe)
+        self.declareProperty('PsiAngleLog', 'SE50Rot', direction=Direction.Input,
+                             doc='name of entry in the logs storing the psi angle')
+        self.setPropertySettings('PsiAngleLog', nxspe_enabled)
+        self.setPropertyGroup('PsiAngleLog', title_nxspe)
+        self.declareProperty('PsiOffset', 0.0, direction=Direction.Input,
+                             doc='add this quantity to the psi angle stored in the log')
+        self.setPropertySettings('PsiOffset', nxspe_enabled)
+        self.setPropertyGroup('PsiOffset', title_nxspe)
+
         # Aditional output properties
         titleAddionalOutput = "Additional Output"
         self.declareProperty("OutputSusceptibility", False, direction=Direction.Input,
@@ -173,6 +196,12 @@ class BASISReduction(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
         self._normalizeToFirst = self.getProperty("NormalizeToFirst").value
         self._doNorm = self.getProperty("DivideByVanadium").value
+
+        # retrieve properties pertaining to saving to NXSPE file
+        self._nsxpe_do = self.getProperty('SaveNXSPE').value
+        if self._nsxpe_do:
+            self._nxspe_psi_angle_log = self.getProperty('PsiAngleLog').value
+            self._nxspe_offset = self.getProperty('PsiOffset').value
 
         datasearch = config["datasearch.searcharchive"]
         if datasearch != "On":
@@ -249,7 +278,25 @@ class BASISReduction(PythonAlgorithm):
             # Scale so that elastic line has Y-values ~ 1
             if self._normalizeToFirst:
                 self._ScaleY(self._samSqwWs)
-            # Transform the vertical axis to point data
+
+            # Output NXSPE file (must be done before transforming the
+            # vertical axis to point data)
+            if self._nsxpe_do:
+                extension = "_divided_sqw.nxspe" if self._doNorm else "_sqw.nxspe"
+                run = mtd[self._samSqwWs].getRun()
+                if run.hasProperty(self._nxspe_psi_angle_log):
+                    psi_angle_logproperty = run.getProperty(self._nxspe_psi_angle_log)
+                    psi_angle = np.average(psi_angle_logproperty.value)
+                    psi_angle += self._nxspe_offset
+                    nxspe_filename = self._makeRunName(self._samWsRun, False) + extension
+                    SaveNXSPE(InputWorkspace=self._samSqwWs, Filename=nxspe_filename,
+                              Efixed=self._reflection['default_energy'],
+                              Psi=psi_angle, KiOverKfScaling=1)
+                else:
+                    error_message = 'Runs have no log entry named {}'.format(self._reflection)
+                    self.log().error(error_message)
+
+            # Transform the vertical axis (Q) to point data
             sapi.Transpose(InputWorkspace=self._samSqwWs,
                            OutputWorkspace=self._samSqwWs)  # Q-values are in X-axis now
             sapi.ConvertToPointData(InputWorkspace=self._samSqwWs,
@@ -263,6 +310,7 @@ class BASISReduction(PythonAlgorithm):
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) + extension
             sapi.SaveNexus(Filename=processed_filename, InputWorkspace=self._samSqwWs)
+
 
             # additional output
             if self.getProperty("OutputSusceptibility").value:

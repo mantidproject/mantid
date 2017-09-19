@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
+
 Bayes
 #####
 - Removed fit option from plot options drop-down menu.
