@@ -265,10 +265,9 @@ class HFIRSANSReduction(PythonAlgorithm):
         self.setProperty("OutputMessage", output_msg)
 
     def set_beam_center_if_exists(self, alg, x, y):
-        if alg.existsProperty("BeamCenterX") and alg.existsProperty("BeamCenterY") \
-            and x is not None and y is not None:
-        alg.setProperty("BeamCenterX", x)
-        alg.setProperty("BeamCenterY", y)
+        if alg.existsProperty("BeamCenterX") and alg.existsProperty("BeamCenterY") and x is not None and y is not None:
+            alg.setProperty("BeamCenterX", x)
+            alg.setProperty("BeamCenterY", y)
 
     def set_property_if_exists(self, property_manager, name, value):
         if property_manager.existsProperty(name):

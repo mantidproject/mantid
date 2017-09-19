@@ -134,12 +134,7 @@ class BayesQuasi(PythonAlgorithm):
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
 
-        # Check for platform support
-        if not is_supported_f2py_platform():
-            unsupported_msg = "This algorithm can only be run on valid platforms." \
-                              + " please view the algorithm documentation to see" \
-                              + " what platforms are currently supported"
-            raise RuntimeError(unsupported_msg)
+        self.check_platform_support()
 
         from IndirectBayes import (CalcErange, GetXYE)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
@@ -153,15 +148,7 @@ class BayesQuasi(PythonAlgorithm):
         o_w1 = int(self._width)
         o_res = int(self._res_norm)
 
-        # fortran code uses background choices defined using the following numbers
-        setup_prog.report('Encoding input options')
-        if self._background == 'Sloping':
-            o_bgd = 2
-        elif self._background == 'Flat':
-            o_bgd = 1
-        elif self._background == 'Zero':
-            o_bgd = 0
-
+        o_bgd = self.fortran_background_encoding(setup_prog)
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
         setup_prog.report('Establishing save path')
@@ -182,14 +169,7 @@ class BayesQuasi(PythonAlgorithm):
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
         first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
-        if first_data_point > self._e_min:
-            logger.warning("Sample workspace contains leading zeros within the energy range.")
-            logger.warning("Updating eMin: eMin = " + str(first_data_point))
-            self._e_min = first_data_point
-        if last_data_point < self._e_max:
-            logger.warning("Sample workspace contains trailing zeros within the energy range.")
-            logger.warning("Updating eMax: eMax = " + str(last_data_point))
-            self._e_max = last_data_point
+        self.check_enery_range_for_zeroes(first_data_point, last_data_point)
 
         # update erange with new values
         erange = [self._e_min, self._e_max]
@@ -385,6 +365,33 @@ class BayesQuasi(PythonAlgorithm):
         if self._program == 'QL':
             s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
             self.setProperty('OutputWorkspaceProb', probWS)
+
+    def check_platform_support(self):
+        if not is_supported_f2py_platform():
+            unsupported_msg = "This algorithm can only be run on valid platforms." \
+                              + " please view the algorithm documentation to see" \
+                              + " what platforms are currently supported"
+            raise RuntimeError(unsupported_msg)
+
+    def fortran_background_encoding(self, setup_prog):
+        # fortran code uses background choices defined using the following numbers
+        setup_prog.report('Encoding input options')
+        if self._background == 'Sloping':
+            return 2
+        if self._background == 'Flat':
+            return 1
+        if self._background == 'Zero':
+            return 0
+
+    def check_enery_range_for_zeroes(self, first_data_point, last_data_point):
+        if first_data_point > self._e_min:
+            logger.warning("Sample workspace contains leading zeros within the energy range.")
+            logger.warning("Updating eMin: eMin = " + str(first_data_point))
+            self._e_min = first_data_point
+        if last_data_point < self._e_max:
+            logger.warning("Sample workspace contains trailing zeros within the energy range.")
+            logger.warning("Updating eMax: eMax = " + str(last_data_point))
+            self._e_max = last_data_point
 
     def _add_sample_logs(self, workspace, fit_program, e_range, binning):
 
