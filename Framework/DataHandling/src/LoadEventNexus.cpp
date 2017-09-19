@@ -1380,37 +1380,40 @@ bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
   }
   // Monitor filtering/selection
   const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
-  const size_t nmons(monitors.size());
+  const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
   if (monitorsOnly) {
     g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
+    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+    std::vector<SpectrumDefinition> spectrumDefinitions;
     // Find the det_ids in the udet array.
-    m_ws->resizeTo(nmons);
-    for (size_t i = 0; i < nmons; ++i) {
+    for (size_t i = 0; i < monitors.size(); ++i) {
       // Find the index in the udet array
       const detid_t &id = monitors[i];
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
         const specnum_t &specNo = spec[it - udet.begin()];
-        m_ws->setSpectrumNumberForAllPeriods(i, specNo);
-        m_ws->setDetectorIdsForAllPeriods(i, id);
+        spectrumNumbers.emplace_back(specNo);
+        spectrumDefinitions.emplace_back(detectorInfo.indexOf(id));
       }
     }
+    Indexing::IndexInfo indexInfo(spectrumNumbers);
+    indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+    m_ws->setIndexInfo(indexInfo);
   } else {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
 
     SpectrumDetectorMapping mapping(spec, udet, monitors);
     auto uniqueSpectra = mapping.getSpectrumNumbers();
-    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(
-        uniqueSpectra.begin(), uniqueSpectra.end()));
     std::vector<SpectrumDefinition> spectrumDefinitions;
-    const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
     for (const auto spec : uniqueSpectra) {
       spectrumDefinitions.emplace_back();
       for (const auto detID : mapping.getDetectorIDsForSpectrumNo(spec)) {
         spectrumDefinitions.back().add(detectorInfo.indexOf(detID));
       }
     }
+    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(
+        uniqueSpectra.begin(), uniqueSpectra.end()));
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
 
     m_ws->setIndexInfo(createSpectraList(indexInfo));
