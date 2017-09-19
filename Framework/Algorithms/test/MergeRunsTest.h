@@ -1634,9 +1634,10 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: sync scan intervals overlap but not identical")
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
@@ -1686,9 +1687,10 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("InputWorkspaces", "a, b");
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: sync scan intervals overlap but not identical")
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_failure_case() {
