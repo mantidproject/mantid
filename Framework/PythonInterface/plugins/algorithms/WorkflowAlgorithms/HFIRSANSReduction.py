@@ -112,7 +112,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         if "SANSBeamFinderAlgorithm" in property_list:
             p=property_manager.getProperty("SANSBeamFinderAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
-            self.set_property_if_exists("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
@@ -202,7 +202,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                     alg.setProperty("BeamCenterX", trans_beam_center_x)
                     alg.setProperty("BeamCenterY", trans_beam_center_y)
 
-                self.set_property_if_exists("ReductionProperties", property_manager_name)
+                self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
                 alg.execute()
 
                 self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredTransmission",
@@ -255,7 +255,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output_name)
-            self.set_property_if_exists("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
