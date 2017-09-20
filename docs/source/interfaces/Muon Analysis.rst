@@ -14,7 +14,10 @@ Interface Overview
 
 This interface is used to analyse the data collected on Muon instruments. The interface can be
 accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis*. For sample
-datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
+datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.#
+
+If the :ref:`Frequency_Domain_Analysis-ref` interfaces is opened it will import all of the data available for the current run in Muon Analysis.
+This will include any custom groupings/pairs. 
 
 Home
 ----

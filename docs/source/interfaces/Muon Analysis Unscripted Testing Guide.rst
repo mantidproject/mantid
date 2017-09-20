@@ -15,7 +15,7 @@ Testing here mostly focuses on the changes for Mantid 3.11, but includes other f
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
 As changes are made to the interface and features added, anything for which it is not possible to write an automated test should have a manual test added to this list.
 
-.. note:: The tests here are grouped into five sections. The test groups should be run in order and, within each test group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on previous tests having been run first.
+.. note:: The tests here are grouped into four sections. The test groups should be run in order and, within each test group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on previous tests having been run first.
 
 Common setup
 ^^^^^^^^^^^^

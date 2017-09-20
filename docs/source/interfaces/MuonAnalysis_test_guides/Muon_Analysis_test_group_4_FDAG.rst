@@ -10,7 +10,7 @@ Introduction
 ^^^^^^^^^^^^
 
 These are unscripted tests for the :program:`Frequency Domain Analysis` interface.
-In this case, runs from test group 2 are used, so those tests need to be run before these ones.
+Load "MUSR00062260" into Muon analysis and plot each of the available groups **before** opening Frequency Domain Analysis. 
 
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
@@ -22,7 +22,7 @@ Ensure that you have first run all the tests in group 2, then open the Frequency
 Test 1: Basic FFT
 -----------------
 - Set the workspace to "MUSR00062260;Group;bkwd;Asym;#1" 
-- Click the calculate FFT button and a workspace should appear "FFTMuon" 
+- Click the calculate FFT button and a workspace should appear in the "MUSR00062260" group
 - Then plot spectrum 2 (there should be a total of 3 spectrums)
 - You will see a few sharp peaks. 
 - Untick the Imaginary Data and the a row should disappear
@@ -42,7 +42,21 @@ Test 2: Advanced FFT
 - Click the Calculate FFT Button
 - The peak should not be very clear
 
-Test 3: MaxEnt
+Test 3: PhaseQuad
+-----------------
+- Change the workspace to "PhaseQuad"
+- You should not be able to select the workspace for the imaginary part, but it is possible to turn the imaginary component on and off. 
+- An extra row will appear labeled "axis"
+- Click the Calculate FFT button
+- A new table workspace will appear (PhaseTable) and the output added to the grouped worksapce
+- Open PhaseTable and with it open change the axis in the GUI and make sure that generate new phase table is  unticked
+- Click the Calculate FFT button
+- PhaseTable should not have changed
+- Make sure that generate new phase table is ticked
+- Click the Calculate FFT button
+- PhaseTable should change
+
+Test 4: MaxEnt
 --------------
 - Change the drop-down menu at the top of the interface to "MaxEnt"
 - The interface should look different

@@ -18,6 +18,9 @@ accessed from the main menu of MantidPlot, in *Interfaces → Muon → Frequency
 datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
 
 This interface is currently still in development. The data needs to be loaded and prepared using :ref:`Muon_Analysis-ref`.
+When Frequency Domain Analysis is opened it will import the groups/pairs from the current run in Muon Analysis, 
+** if no data has been loaded into Muon Analysis then Frequency Domain Analysis will not open**.
+
 Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 As the interfaces is developed the features from Muon Analysis will be replicated. 
 
@@ -33,11 +36,15 @@ Default: Fast Fourier Transforms
 
 .. image::  ../images/FDAG_FFT.png
    :align: center
-   :height: 400px
+   :height: 500px
 
 In this mode the interface displays two tables, FFT and Advanced options. The FFT table contains 
 all of the information required to produce a forward FFT. The Advanced Options table contains the information
 for adding padding and apodization functions to the data. 
+
+Selecting the workspace to be ``PhaseQuad`` will cause the :ref:`PhaseQuad <algm-PhaseQuad>` algortihm to be called first. If no phase table is available then
+the interface will generate one and output the result as ``PhaseTable``. It is possible to select the direction of the axis when generating the table and it is
+possoble to use a pre-existing ``PhaseTable``. **Note that the PhaseQuad option requires the data archieve to be in the search directory. 
 
 The Calculate button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algortihms. The output workspace will be added to
 ``FFTMuon``. 
@@ -55,7 +62,7 @@ For large calculations this interface can be slow, therefore the Calculate butto
 
 .. image::  ../images/FDAG_MaxEnt.png
    :align: center
-   :height: 400px
+   :height: 500px
 
 Feedback & Comments
 -------------------
