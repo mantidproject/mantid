@@ -11,7 +11,6 @@ from Muon import transform_view
 from Muon import view_constructor
 
 
-
 class FrequencyDomainAnalysisGui(QtGui.QMainWindow):
     def __init__(self,parent=None):
         super(FrequencyDomainAnalysisGui,self).__init__(parent)

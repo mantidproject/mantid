@@ -12,41 +12,42 @@ class FFTWrapper(object):
         self.model=FFT
 
     def loadData(self,inputs):
-        if inputs.has_key("phaseTable"):
+        if "phaseTable" in inputs:
             self.phaseTable=inputs["phaseTable"]
         else:
             self.phaseTable=None
-        if inputs.has_key("preRe"):
+        if "preRe" in inputs:
             self.preRe=inputs["preRe"]
         else:
             self.preRe=None
-        if inputs.has_key("preIm"):
+        if "preIm" in inputs:
             self.preIm=inputs["preIm"]
         else:
             self.preIm=None
-        if inputs.has_key("FFT"):
+        if "FFT" in inputs:
             self.FFT=inputs["FFT"]
         else:
             self.FFT=None
         self.model.setRun(inputs["Run"])
 
     def execute(self):
-        if self.phaseTable != None:
+        if self.phaseTable is not None:
             if self.phaseTable["newTable"] == True:
                 self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
             self.model.PhaseQuad()
 
-        if self.preRe != None:
+        if self.preRe is not None:
             self.model.preAlg(self.preRe)
 
-        if self.preIm != None:
+        if self.preIm is not None:
             self.model.preAlg(self.preIm)
 
-        if self.FFT != None:
+        if self.FFT is not None:
             self.model.FFTAlg(self.FFT)
 
     def output(self):
         return
+
 
 class FFTModel(object):
 

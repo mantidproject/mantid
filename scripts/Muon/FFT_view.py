@@ -85,7 +85,6 @@ class FFTView(QtGui.QWidget):
         self.padding= table_utils.addSpinBoxToTable(self.FFTTableA,1,3)
         self.FFTTableA.resizeRowsToContents()
 
-
         #make button
         self.button = QtGui.QPushButton('Calculate FFT', self)
         self.button.setStyleSheet("background-color:lightgrey")
@@ -131,7 +130,7 @@ class FFTView(QtGui.QWidget):
     #functions
     def activateButton(self):
         self.button.setEnabled(True)
- 
+
     def deactivateButton(self):
         self.button.setEnabled(False)
 
@@ -208,6 +207,7 @@ class FFTView(QtGui.QWidget):
     # get methods
     def getWS(self):
         return str( self.ws.currentText()).replace(";","; ")
+
     def isAutoShift(self):
         return self.shift_box.checkState() == QtCore.Qt.Checked
 
@@ -234,7 +234,6 @@ class FFTView(QtGui.QWidget):
 
     def isNewPhaseTable(self):
         return self.phaseTable_box.checkState() == QtCore.Qt.Checked
-		
-    def isPhaseBoxShown(self):
-		return self.FFTTable.isRowHidden(7)
 
+    def isPhaseBoxShown(self):
+        return self.FFTTable.isRowHidden(7)

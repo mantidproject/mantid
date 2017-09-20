@@ -2,8 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from PyQt4 import QtCore, QtGui
 
-import mantid.simpleapi as mantid
-
 from Muon import table_utils
 
 

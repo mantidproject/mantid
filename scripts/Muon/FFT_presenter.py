@@ -1,14 +1,11 @@
 from __future__ import (absolute_import, division, print_function)
 
-from six import iteritems
-
 
 import mantid.simpleapi as mantid
 
 
 class FFTPresenter(object):
 
-  
     def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
@@ -44,7 +41,7 @@ class FFTPresenter(object):
         self.view.phaseQuadChanged()
         #check if a phase table exists
         if mantid.AnalysisDataService.doesExist("PhaseTable"):
-           self.view.setPhaseBox() 
+           self.view.setPhaseBox()
 
     def tableClicked(self,row,col):
         if row == self.view.getImBoxRow() and col == 1 and self.view.getWS() !="PhaseQuad":
@@ -73,7 +70,6 @@ class FFTPresenter(object):
             self.view.ReAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
-            tmp=1
         inputs["preRe"]=preInputs
         #model.preAlg(preInputs)
 
