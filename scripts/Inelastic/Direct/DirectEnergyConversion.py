@@ -400,14 +400,14 @@ class DirectEnergyConversion(object):
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
         # E.g.  detector number have changed
-        oldChanges = self.prop_man.getChangedProperties()
-        allChanges = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
-        workspace_defined_prop = allChanges.difference(oldChanges)
+        old_changes = self.prop_man.getChangedProperties()
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")
             prop_man.log('*** Sample run {0} properties change default reduction properties: '.
                          format(PropertyManager.sample_run.get_workspace().name()))
-            prop_man.log_changed_values('notice',False,oldChanges)
+            prop_man.log_changed_values('notice',False,old_changes)
             prop_man.log("****************************************************************")
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
