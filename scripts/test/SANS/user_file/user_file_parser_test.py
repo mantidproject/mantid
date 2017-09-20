@@ -739,19 +739,19 @@ class GravityParserTest(unittest.TestCase):
         do_test(gravity_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
-    class CompatibilityParserTest(unittest.TestCase):
-        def test_that_gets_type(self):
-            self.assertTrue(CompatibilityParser.get_type(), "COMPATIBILITY")
+class CompatibilityParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(CompatibilityParser.get_type(), "COMPATIBILITY")
 
-        def test_that_compatibility_on_off_is_parsed_correctly(self):
-            valid_settings = {"COMPATIBILITY on ": {GravityId.on_off: True},
-                              "COMPATIBILITY   OFF ": {GravityId.on_off: False}}
+    def test_that_compatibility_on_off_is_parsed_correctly(self):
+        valid_settings = {"COMPATIBILITY on ": {GravityId.on_off: True},
+                          "COMPATIBILITY   OFF ": {GravityId.on_off: False}}
 
-            invalid_settings = {"COMPATIBILITY ": RuntimeError,
-                                "COMPATIBILITY ONN": RuntimeError}
+        invalid_settings = {"COMPATIBILITY ": RuntimeError,
+                            "COMPATIBILITY ONN": RuntimeError}
 
-            compatibility_parser = GravityParser()
-            do_test(compatibility_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+        compatibility_parser = GravityParser()
+        do_test(compatibility_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
 class MaskFileParserTest(unittest.TestCase):
