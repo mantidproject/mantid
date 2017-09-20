@@ -194,8 +194,7 @@ class DirectEnergyConversion(object):
         """
         # output workspace name.
         try:
-#pylint: disable=unused-variable
-            n,r = funcinspect.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
