@@ -445,13 +445,12 @@ class BASISReduction(PythonAlgorithm):
                 psi_angle = np.average(psi_angle_logproperty.value)
                 psi_angle += self._nxspe_offset
                 nxspe_filename = wsName + extension
-                print('wsName',wsName)
                 sapi.SaveNXSPE(InputWorkspace=wsName,
                                Filename=nxspe_filename,
                                Efixed=self._reflection['default_energy'],
                                Psi=psi_angle, KiOverKfScaling=1)
             else:
-                error_message = 'Runs have no log entry named {}'.format(self._reflection)
+                error_message = 'Runs have no log entry named {}'.format(self._nxspe_psi_angle_log)
                 self.log().error(error_message)
 
         wsSqwName = wsName + '_divided_sqw' if isSample and self._doNorm else wsName + '_sqw'
