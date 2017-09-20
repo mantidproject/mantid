@@ -236,7 +236,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
-        self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W)'), self.TIP_chkReplaceNaNs)
+        self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)

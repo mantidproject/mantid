@@ -482,7 +482,7 @@ class TOFTOFScriptElement(BaseScriptElement):
               .format(self.prefix))
         if self.binQon:
             l("for ws in {}:" .format(gDataBinQ))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())"
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_' + ws.getComment() + '_sqw')"
               .format(self.prefix))
 
         return script[0]
