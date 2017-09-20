@@ -149,7 +149,7 @@ void FindSXPeaks::init() {
       "XResolution", 5000., mustBePositiveDouble,
       "Absolute tolerance in time-of-flight or d-spacing needed to avoid peak "
       "duplication in number of pixels. The values are specified "
-      "in microseconds.");
+      "in either microseconds or angstroms.");
 
   declareProperty("PhiResolution", 1., mustBePositiveDouble,
                   "Absolute tolerance in the phi "
