@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 
@@ -1086,53 +1087,25 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 void LoadEventNexus::createSpectraMapping(
     const std::string &nxsfile, const bool monitorsOnly,
     const std::vector<std::string> &bankNames) {
-  m_specMin = getProperty("SpectrumMin");
-  m_specMax = getProperty("SpectrumMax");
-  m_specList = getProperty("SpectrumList");
-
+  LoadEventNexusIndexSetup indexSetup(
+      m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
+      getProperty("SpectrumMax"), getProperty("SpectrumList"));
   if (!monitorsOnly && !bankNames.empty()) {
-    const auto &componentInfo = m_ws->getSingleHeldWorkspace()->componentInfo();
-    std::vector<SpectrumDefinition> spectrumDefinitions;
-    for (const auto &bankName : bankNames) {
-      const auto &bank = m_ws->getInstrument()->getComponentByName(bankName);
-      std::vector<size_t> dets;
-      if (bank) {
-        const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
-        dets = componentInfo.detectorsInSubtree(bankIndex);
-        for (const auto detIndex : dets)
-          spectrumDefinitions.emplace_back(detIndex);
-      }
-      if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + bankName +
-                                 "' as a component assembly in the instrument "
-                                 "tree; or it did not contain any detectors."
-                                 " Try unchecking SingleBankPixelsOnly.");
-    }
-    Indexing::IndexInfo indexInfo(spectrumDefinitions.size());
-    indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    m_ws->setIndexInfo(indexInfo);
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
     g_log.debug() << "Populated spectra map for select banks\n";
   } else {
-    if (loadISISVMSSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name)) {
-      // If mapping loaded the event ID is the spectrum number and not det ID
-      this->event_id_is_spec = true;
+    if (auto mapping = loadISISVMSSpectraMapping(nxsfile, monitorsOnly,
+                                                 m_top_entry_name)) {
+      m_ws->setIndexInfo(indexSetup.makeIndexInfo(*mapping, monitorsOnly));
     } else {
       g_log.debug()
           << "No custom spectra mapping found, continuing with default "
              "1:1 mapping of spectrum:detectorID\n";
-      // The default 1:1 will suffice but exclude the monitors as they are
-      // always in a separate workspace
-      auto detIDs = m_ws->getInstrument()->getDetectorIDs(true);
-      const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
-      std::vector<SpectrumDefinition> specDefs;
-      for (const auto detID : detIDs)
-        specDefs.emplace_back(detectorInfo.indexOf(detID));
-      Indexing::IndexInfo indexInfo(detIDs.size());
-      indexInfo.setSpectrumDefinitions(specDefs);
-      m_ws->setIndexInfo(filterIndexInfo(indexInfo));
+      m_ws->setIndexInfo(indexSetup.makeIndexInfo());
       g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
     }
   }
+  std::tie(m_specMin, m_specMax) = indexSetup.eventIDLimits();
 }
 
 //-----------------------------------------------------------------------------
@@ -1317,16 +1290,17 @@ void LoadEventNexus::runLoadMonitors() {
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
-bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
-                                               const bool monitorsOnly,
-                                               const std::string &entry_name) {
+std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
+                                          const bool monitorsOnly,
+                                          const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
                   << entry_name << vms_str << "'.\n";
     m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
-    return false; // Doesn't exist
+    return nullptr; // Doesn't exist
   }
 
   // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
@@ -1370,45 +1344,16 @@ bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
        << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  // Monitor filtering/selection
-  const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
-  const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
   if (monitorsOnly) {
     g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
-    std::vector<Indexing::SpectrumNumber> spectrumNumbers;
-    std::vector<SpectrumDefinition> spectrumDefinitions;
-    // Find the det_ids in the udet array.
-    for (const auto id : monitors) {
-      // Find the index in the udet array
-      auto it = std::find(udet.begin(), udet.end(), id);
-      if (it != udet.end()) {
-        const specnum_t &specNo = spec[it - udet.begin()];
-        spectrumNumbers.emplace_back(specNo);
-        spectrumDefinitions.emplace_back(detectorInfo.indexOf(id));
-      }
-    }
-    Indexing::IndexInfo indexInfo(spectrumNumbers);
-    indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    m_ws->setIndexInfo(indexInfo);
   } else {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-
-    SpectrumDetectorMapping mapping(spec, udet, monitors);
-    auto uniqueSpectra = mapping.getSpectrumNumbers();
-    std::vector<SpectrumDefinition> spectrumDefinitions;
-    for (const auto spec : uniqueSpectra) {
-      spectrumDefinitions.emplace_back();
-      for (const auto detID : mapping.getDetectorIDsForSpectrumNo(spec)) {
-        spectrumDefinitions.back().add(detectorInfo.indexOf(detID));
-      }
-    }
-    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(
-        uniqueSpectra.begin(), uniqueSpectra.end()));
-    indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-
-    m_ws->setIndexInfo(filterIndexInfo(indexInfo));
   }
-  return true;
+  // If mapping loaded the event ID is the spectrum number and not det ID
+  this->event_id_is_spec = true;
+  return Kernel::make_unique<
+      std::pair<std::vector<int32_t>, std::vector<int32_t>>>(std::move(spec),
+                                                             std::move(udet));
 }
 
 /**

@@ -192,9 +192,10 @@ private:
   void setTimeFilters(const bool monitors);
 
   /// Load a spectra mapping from the given file
-  bool loadISISVMSSpectraMapping(const std::string &filename,
-                                 const bool monitorsOnly,
-                                 const std::string &entry_name);
+  std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+  loadISISVMSSpectraMapping(const std::string &filename,
+                            const bool monitorsOnly,
+                            const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
   void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,

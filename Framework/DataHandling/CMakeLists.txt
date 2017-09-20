@@ -45,6 +45,7 @@ set ( SRC_FILES
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
+	src/LoadEventNexusIndexSetup.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadFITS.cpp
 	src/LoadFullprofResolution.cpp
@@ -221,6 +222,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
+	inc/MantidDataHandling/LoadEventNexusIndexSetup.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFITS.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
@@ -390,6 +392,7 @@ set ( TEST_FILES
 	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
+	LoadEventNexusIndexSetupTest.h
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadFITSTest.h
