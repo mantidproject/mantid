@@ -79,8 +79,7 @@ class GeneralLoadDFTTester(object):
             dft_loader = loader(input_dft_filename=read_filename)
         except ValueError:
             read_filename = AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension.upper())
-
-        dft_loader = loader(input_dft_filename=read_filename)
+            dft_loader = loader(input_dft_filename=read_filename)
 
         loaded_data = dft_loader.load_formatted_data().extract()
 
