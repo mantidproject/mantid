@@ -12,6 +12,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Unit.h"
@@ -58,6 +59,12 @@ void BinDetectorScan::init() {
       "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
       "workspaces.");
+  auto toleranceValidator =
+      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+  toleranceValidator->clearUpper();
+  declareProperty("ScatteringAngleTolerance", 0.1, toleranceValidator,
+                  "The relative tolerance for the scattering angles before the "
+                  "counts are split.");
 }
 
 std::map<std::string, std::string> BinDetectorScan::validateInputs() {
@@ -186,6 +193,9 @@ void BinDetectorScan::getHeightAxis() {
 }
 
 void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
+  const double scatteringAngleTolerance =
+      getProperty("ScatteringAngleTolerance");
+
   // loop over spectra
   for (auto &ws : m_workspaceList) {
     const auto &specInfo = ws->spectrumInfo();
@@ -202,25 +212,47 @@ void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
           fabs(m_heightAxis[index] - y) < fabs(m_heightAxis[index - 1] - y)
               ? index
               : index - 1;
+
+      // TODO: theta < 0
       size_t thetaIndex = size_t(
           (theta - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
-      if (fabs(m_startScatteringAngle +
-               double(thetaIndex) * m_stepScatteringAngle - theta) >
-          m_stepScatteringAngle * 0.15) {
-        g_log.warning() << "Detector outside expected range " << thetaIndex
-                        << " " << theta << " "
-                        << fabs(m_startScatteringAngle +
-                                double(thetaIndex) * m_stepScatteringAngle -
-                                theta) << " "
-                        << m_startScatteringAngle +
-                               double(thetaIndex) * m_stepScatteringAngle
-                        << "\n";
-      }
+      const double deltaX =
+          fabs(m_startScatteringAngle +
+               double(thetaIndex) * m_stepScatteringAngle - theta);
+
       if (yIndex >= m_numHistograms || thetaIndex >= m_numPoints)
         continue;
-      auto counts = ws->histogram(i).y()[0];
-      auto &yData = outputWS->mutableY(yIndex);
-      yData[thetaIndex] += counts;
+      if (deltaX > m_stepScatteringAngle * scatteringAngleTolerance) {
+        const double deltaXPlus =
+            fabs(m_startScatteringAngle +
+                 double(thetaIndex + 1) * m_stepScatteringAngle - theta);
+        const double deltaXMinus =
+            fabs(m_startScatteringAngle +
+                 double(thetaIndex - 1) * m_stepScatteringAngle - theta);
+        size_t n;
+        double deltaXOther = 0.0;
+        if (deltaXMinus < deltaXPlus) {
+          n = thetaIndex - 1;
+          deltaXOther = deltaXMinus;
+        } else {
+          n = thetaIndex + 1;
+          deltaXOther = deltaXPlus;
+        }
+
+        auto counts = ws->histogram(i).y()[0];
+        auto &yData = outputWS->mutableY(yIndex);
+        yData[n] += counts * deltaX / m_stepScatteringAngle;
+        yData[thetaIndex] += counts * deltaXOther / m_stepScatteringAngle;
+        g_log.error() << theta << "''" << deltaXPlus << "''" << deltaXMinus
+                      << std::endl;
+        g_log.error() << deltaXOther / m_stepScatteringAngle << std::endl;
+        g_log.error() << deltaX / m_stepScatteringAngle << std::endl;
+        g_log.error() << yData[n] << "++" << yData[thetaIndex] << std::endl;
+      } else {
+        auto counts = ws->histogram(i).y()[0];
+        auto &yData = outputWS->mutableY(yIndex);
+        yData[thetaIndex] += counts;
+      }
     }
   }
 }
