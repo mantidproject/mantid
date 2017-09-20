@@ -175,33 +175,42 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
 
-    def _validate_user_input(self):
-        # must have vanadium for TOF correction and subtracting EC from van
-        if not self.vanRuns and (self.CORR_TOF_VAN == self.correctTof or self.subtractECVan):
-            raise _ScriptHelpers.error("missing vanadium runs")
+    def to_script(self):
 
-        # must have empty can for subtracting EC from van
-        if self.subtractECVan and not self.ecruns:
-            raise _ScriptHelpers.error("missing empty can runs")
+        def error(message):
+            raise RuntimeError('TOFTOF reduction error: ' + message)
+
+        # sanity checks
+
+        # must have vanadium for TOF correction
+        if self.CORR_TOF_VAN == self.correctTof:
+            if not self.vanRuns:
+                error('missing vanadium runs')
+
+        # must have vanadium and empty can for subtracting EC from van
+        if self.subtractECVan:
+            if not self.vanRuns:
+                error('missing vanadium runs')
+            if not self.ecRuns:
+                error('missing empty can runs')
+
+        # binning parameters
+        def check_bin_params(start, step, end):
+            if not (start < end and step > 0 and start + step <= end):
+                error('incorrect binning parameters')
 
         if self.binEon:
-            _ScriptHelpers.check_bin_params(self.binEstart, self.binEstep, self.binEend)
+            check_bin_params(self.binEstart, self.binEstep, self.binEend)
         if self.binQon:
-            _ScriptHelpers.check_bin_params(self.binQstart, self.binQstep, self.binQend)
+            check_bin_params(self.binQstart, self.binQstep, self.binQend)
 
         # must have some data runs
         if not self.dataRuns:
-            _ScriptHelpers.error("missing data runs")
+            error('missing data runs')
 
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
-            _ScriptHelpers.error("missing vanadium comment")
-
-        # At this point we're all good, so return
-
-    def to_script(self):
-        # First, perform sanity checks
-        self._validate_user_input()
+            error('missing vanadium comment')
 
         # generated script
         script = ['']
@@ -209,6 +218,16 @@ class TOFTOFScriptElement(BaseScriptElement):
         # helper: add a line to the script
         def l(line=''):
             script[0] += line + '\n'
+
+        # helpers
+        def get_log(workspace, tag):
+            return "{}.getRun().getLogData('{}').value".format(workspace, tag)
+
+        def get_ei(workspace):
+            return get_log(workspace, 'Ei')
+
+        def get_time(workspace):
+            return get_log(workspace, 'duration')
 
         l("import numpy as np")
         l()
@@ -218,9 +237,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("config.appendDataSearchDir(r'{}')"   .format(self.dataDir))
         l()
 
-        data_raw_group = []
-        data_group = []
-        all_group = []
+        dataRawGroup = []
+        dataGroup    = []
+        allGroup     = []
 
         # vanadium runs
         if self.vanRuns:
@@ -233,7 +252,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{}.setComment('{}')"      .format(wsVan, self.vanCmnt))
             l()
 
-            all_group.append(wsVan)
+            allGroup.append(wsVan)
 
         # empty can runs
         if self.ecRuns:
@@ -245,20 +264,23 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
             l()
 
-            all_group.append(wsEC)
+            allGroup.append(wsEC)
 
         # data runs
         for i, (runs, cmnt) in enumerate(self.dataRuns):
-            _ScriptHelpers.check_runs(runs, cmnt)
+            if not runs:
+                error('missing data runs value')
+            if not cmnt:
+                error('missing data runs comment')
 
             postfix = str(i + 1)
 
             wsRawData = self.prefix + 'RawData' + postfix
             wsData    = self.prefix + 'Data'    + postfix
 
-            data_raw_group.append(wsRawData)
-            data_group.append(wsData)
-            all_group.append(wsData)
+            dataRawGroup.append(wsRawData)
+            dataGroup.append(wsData)
+            allGroup.append(wsData)
 
             l("# data runs {}"           .format(postfix))
             l("{} = Load(Filename='{}')" .format(wsRawData, runs))
@@ -266,7 +288,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{}.setComment('{}')"      .format(wsData, cmnt))
             l()
 
-        wsData0 = self.prefix + "Data1"
+            if i == 0:
+                wsData0 = wsData
+
+        def group_list(listVal, postfix=''):
+            return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
 
         gPrefix = 'g' + self.prefix
         gDataRuns    = gPrefix + 'DataRuns'
@@ -274,18 +300,18 @@ class TOFTOFScriptElement(BaseScriptElement):
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, _ScriptHelpers.group_list(data_raw_group)))
-        l("{} = GroupWorkspaces({})" .format(gDataRuns,    _ScriptHelpers.group_list(data_group)))
-        l("{} = GroupWorkspaces({})" .format(gAll,         _ScriptHelpers.group_list(all_group)))
+        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
+        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(dataGroup)))
+        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(allGroup)))
         l()
 
         l("# Ei")
-        if len(all_group) > 1:
+        if len(allGroup) > 1:
             l("if CompareSampleLogs({}, 'Ei', 0.001):" .format(gAll))
             l("    raise RuntimeError('Ei values do not match')")
             l()
 
-        l("Ei = {}" .format(_ScriptHelpers.get_ei(wsData0)))
+        l("Ei = {}" .format(get_ei(wsData0)))
         l()
 
         gDetectorsToMask = gPrefix + 'DetectorsToMask'
@@ -322,19 +348,19 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.vanRuns:
                 wsVanNorm = wsVan + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsVanNorm, wsVan, _ScriptHelpers.get_time(wsVan)))
+                  .format(wsVanNorm, wsVan, get_time(wsVan)))
 
             if self.ecRuns:
                 wsECNorm = wsEC + 'Norm'
                 l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsECNorm, wsEC, _ScriptHelpers.get_time(wsEC)))
+                  .format(wsECNorm, wsEC, get_time(wsEC)))
 
             l("names = []")
             l("for ws in {}:" .format(gDataRuns))
             l("    name = ws.getName() + 'Norm'")
             l("    names.append(name)")
             l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
-              .format(_ScriptHelpers.get_time('ws')))
+              .format(get_time('ws')))
             l()
             l("{} = GroupWorkspaces(names)" .format(gDataNorm))
 
@@ -343,8 +369,10 @@ class TOFTOFScriptElement(BaseScriptElement):
         else:  # none, simply use the not normalised workspaces
             gDataNorm = gDataRuns
 
-            wsVanNorm = wsVan
-            wsECNorm = wsEC
+            if self.vanRuns:
+                wsVanNorm = wsVan
+            if self.ecRuns:
+                wsECNorm = wsEC
 
         if self.ecRuns:
             gDataSubEC = gPrefix + 'DataSubEC'
@@ -365,8 +393,12 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             l("{} = GroupWorkspaces({}list({}.getNames()))"
-              .format(gData, _ScriptHelpers.group_list([wsVanNorm], ' + '), gDataSource))
-            l()
+              .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+        else:
+            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
+        l()
+
+        if self.vanRuns:
             gDataCorr = gData + 'Corr'
             detCoeffs = self.prefix + 'DetCoeffs'
             eppTable  = self.prefix + 'EppTable'
@@ -376,9 +408,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
             l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
             l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
-        else:
-            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
-        l()
+            l()
 
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
@@ -429,15 +459,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             l()
             gLast = gDataBinE
 
-            l("# make nice workspace names")
-            l("for ws in {}:".format(gDataS))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
-              .format(self.prefix))
-
-            l("for ws in {}:" .format(gDataBinE))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
-              .format(self.prefix))
-
         if self.binQon:
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
@@ -447,16 +468,22 @@ class TOFTOFScriptElement(BaseScriptElement):
               .format(gDataBinQ, gLast))
             l()
 
-            l("# make nice workspace names")
-            l("for ws in {}:".format(gDataS))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+        l("# make nice workspace names")
+        l("for ws in {}:" .format(gDataS))
+        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+          .format(self.prefix))
+        if self.binEon:
+            l("for ws in {}:" .format(gDataBinE))
+            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
               .format(self.prefix))
-
+        if self.binQon:
             l("for ws in {}:" .format(gDataBinQ))
             l("    RenameWorkspace(ws, OutputWorkspace='{}_SQW_' + ws.getComment())"
               .format(self.prefix))
 
         return script[0]
+
+# -------------------------------------------------------------------------------
 
 
 class TOFTOFReductionScripter(BaseReductionScripter):
@@ -464,36 +491,5 @@ class TOFTOFReductionScripter(BaseReductionScripter):
     def __init__(self, name, facility):
         BaseReductionScripter.__init__(self, name, facility)
 
-
-class _ScriptHelpers(object):
-    @staticmethod
-    def error(message):
-        raise RuntimeError("TOFTOF reductor error: {0}".format(message))
-
-    @staticmethod
-    def check_bin_params(start, step, end):
-        if not (start < end and step > 0 and start + step <= end):
-            _ScriptHelpers.error("incorrect binning parameters")
-
-    @staticmethod
-    def check_runs(runs, comment):
-        if not runs:
-            _ScriptHelpers.error('missing data runs value')
-        if not comment:
-            _ScriptHelpers.error('missing data runs comment')
-
-    @staticmethod
-    def get_log(workspace, tag):
-        return "{}.getRun().getLogData('{}').value".format(workspace, tag)
-
-    @staticmethod
-    def get_ei(workspace):
-        return _ScriptHelpers.get_log(workspace, 'Ei')
-
-    @staticmethod
-    def get_time(workspace):
-        return _ScriptHelpers.get_log(workspace, 'duration')
-
-    @staticmethod
-    def group_list(listVal, postfix=''):
-        return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
+# -------------------------------------------------------------------------------
+# eof
