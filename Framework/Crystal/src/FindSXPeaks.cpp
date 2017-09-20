@@ -10,6 +10,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <vector>
 
@@ -146,7 +147,7 @@ void FindSXPeaks::init() {
       "Tolerance needed to avoid peak duplication in number of pixels");
 
   declareProperty(
-      "XResolution", 5000., mustBePositiveDouble,
+      "XResolution", 0., mustBePositiveDouble,
       "Absolute tolerance in time-of-flight or d-spacing needed to avoid peak "
       "duplication in number of pixels. The values are specified "
       "in either microseconds or angstroms.");
@@ -202,6 +203,28 @@ void FindSXPeaks::init() {
 
   // Create the output peaks workspace
   m_peaks.reset(new PeaksWorkspace);
+}
+
+/*
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
+std::map<std::string, std::string> FindSXPeaks::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+  const std::string resolutionStrategy = getProperty("ResolutionStrategy");
+  const auto xResolutionProperty = getPointerToProperty("XResolution");
+
+  // Check that the user has set a valid value for the x resolution when
+  // in absolute resolution mode.
+  if (resolutionStrategy == FindSXPeaks::absoluteResolutionPeaksStrategy &&
+      xResolutionProperty->isDefault()) {
+    validationOutput["XResolution"] =
+        "XResolution must be set to a value greater than 0";
+  }
+
+  return validationOutput;
 }
 
 /** Executes the algorithm

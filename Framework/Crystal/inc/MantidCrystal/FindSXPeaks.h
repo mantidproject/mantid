@@ -78,6 +78,7 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
   /// Selects a background strategy
   std::unique_ptr<FindSXPeaksHelper::BackgroundStrategy>
