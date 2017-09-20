@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
+from mantid.kernel import config
 
 
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):
@@ -73,12 +74,13 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test summing multiple runs.
         """
-
+        config['filefinder.casesensitive'] = 'Off'
         wks = ISISIndirectDiffractionReduction(InputFiles=['26173-26176'],
                                                SumFiles=True,
                                                Instrument='IRIS',
                                                Mode='diffspec',
                                                SpectraRange=[105, 112])
+        config['filefinder.casesensitive'] = 'On'
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
