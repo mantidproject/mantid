@@ -109,7 +109,6 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         DeleteWorkspace(ws_last)
         CropWorkspace(InputWorkspace=ws_out, OutputWorkspace=ws_out, StartWorkspaceIndex=self._bin_offset)
         RenameWorkspace(InputWorkspace=ws_out, OutputWorkspace=ref_ws)
-        DeleteWorkspace(ws)
         DeleteWorkspace(cropped_ws)
 
     def _compute_relative_factor(self, ratio):
@@ -265,21 +264,29 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
                     constants[det - 1] = factor
 
+                # here it comes the mixing-in
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
             else:
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
-                DeleteWorkspace(ws)
 
             if self._out_response:
                 end = self._bin_offset
                 if det == self._last_pixel:
                     end = self._scan_points - self._bin_offset
-                    #TODO: take care of last self._bin_offset elements
+                    for scan_point in range(0, self._bin_offset):
+                        index = comb_response_size - self._bin_offset + scan_point
+                        ws_index = self._scan_points - self._bin_offset + scan_point
+                        comb_response[index] = mtd[ws].readY(ws_index)[0]
+                        comb_response_err[index] = mtd[ws].readE(ws_index)[0]
+                        comb_response_theta[index] = det_t[ws_index]
+
                 for scan_point in range(0, end):
                     index = (det - 1) * self._bin_offset + scan_point
                     comb_response[index] = mtd[ref_ws].readY(scan_point)[0]
                     comb_response_err[index] = mtd[ref_ws].readE(scan_point)[0]
                     comb_response_theta[index] = det_t[scan_point]
+
+            DeleteWorkspace(ws)
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspace(raw_ws)
