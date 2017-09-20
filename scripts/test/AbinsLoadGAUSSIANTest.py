@@ -11,12 +11,29 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester
 
         #  *************************** USE CASES ********************************************
     # ===================================================================================
-    # | Use cases: molecular calculation for GAUSSIAN                                    |
+    # | Use cases: molecular calculation for GAUSSIAN03 Hartree Fock, Unix              |
     # ===================================================================================
-    _molecule_gaussian = "C6H5Cl-LoadGAUSSIAN"
+    _gaussian_system1 = "C6H5Cl_LoadGAUSSIAN"
 
-    def test_molecule_gaussian(self):
-        self._check(name=self._molecule_gaussian, loader=AbinsModules.LoadGAUSSIAN)
+    def test_gaussian_1(self):
+        self.check(name=self._gaussian_system1, loader=AbinsModules.LoadGAUSSIAN)
+
+    # ===================================================================================
+    # | Use cases: molecular calculation for GAUSSIAN03 DFT, Win                        |
+    # ===================================================================================
+    _gaussian_system2 = "BENZENE4_g03_win_LoadGAUSSIAN"
+
+    def test_gaussian_2(self):
+        self.check(name=self._gaussian_system2, loader=AbinsModules.LoadGAUSSIAN)
+
+    # ===================================================================================
+    # | Use cases: molecular calculation for GAUSSIAN09 DFT, Win                        |
+    # ===================================================================================
+    _gaussian_system3 = "BENZENE4_g09_win_LoadGAUSSIAN"
+
+    def test_gaussian_3(self):
+        self.check(name=self._gaussian_system3, loader=AbinsModules.LoadGAUSSIAN)
+
 
 if __name__ == '__main__':
     unittest.main()
