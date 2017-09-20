@@ -48,8 +48,7 @@ class SANSReduction(PythonAlgorithm):
         else:
             alg.setProperty('Filename', filename)
         alg.setProperty('OutputWorkspace', output_ws)
-        if alg.existsProperty('ReductionProperties'):
-            alg.setProperty('ReductionProperties', property_manager_name)
+        self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
         alg.execute()
         msg = 'Loaded %s\n' % filename
         if alg.existsProperty('OutputMessage'):
@@ -132,7 +131,7 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", output_ws)
 
-            self.set_beam_center_if_exists(beam_center_x, beam_center_y)
+            self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
 
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
@@ -175,7 +174,7 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", background_ws)
                 alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
 
-                self.set_beam_center_if_exists(trans_beam_center_x, trans_beam_center_y)
+                self.set_beam_center_if_exists(alg, trans_beam_center_x, trans_beam_center_y)
                 self.set_property_if_exists("ReductionProperties", property_manager_name)
                 alg.execute()
                 self.copy_property_value_if_exists(alg, property_manager, "MeasuredTransmission",
@@ -306,8 +305,7 @@ class SANSReduction(PythonAlgorithm):
                 # center for the transmission calculation
                 p=property_manager.getProperty("SensitivityBeamCenterAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
-                if alg.existsProperty("ReductionProperties"):
-                    alg.setProperty("ReductionProperties", property_manager_name)
+                self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
                 alg.execute()
                 beam_center_x = alg.getProperty("FoundBeamCenterX").value
                 beam_center_y = alg.getProperty("FoundBeamCenterY").value
@@ -317,15 +315,9 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", workspace)
             alg.setProperty("OutputWorkspace", workspace)
 
-            if alg.existsProperty("BeamCenterX") \
-                    and alg.existsProperty("BeamCenterY") \
-                    and beam_center_x is not None \
-                    and beam_center_y is not None:
-                alg.setProperty("BeamCenterX", beam_center_x)
-                alg.setProperty("BeamCenterY", beam_center_y)
+            self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
 
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
@@ -359,12 +351,10 @@ class SANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             if alg.existsProperty("InputWorkspace"):
                 alg.setProperty("InputWorkspace", workspace)
-                if alg.existsProperty("OutputWorkspace"):
-                    alg.setProperty("OutputWorkspace", output_workspace)
+                self.set_property_if_exists(alg, "OutputWorkspace", output_workspace)
             else:
                 alg.setProperty("Workspace", workspace)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg = alg.getProperty("OutputMessage").value+'\n'

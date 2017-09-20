@@ -148,10 +148,9 @@ class HFIRSANSReduction(PythonAlgorithm):
             self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
-            self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredTransmission",
+            self.copy_property_value_if_exists(alg, property_manager, "MeasuredTransmission",
                                                "MeasuredTransmissionValue")
-            self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredError",
-                                               "MeasuredTransmissionError")
+            self.copy_property_value_if_exists(alg, property_manager, "MeasuredError", "MeasuredTransmissionError")
 
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
@@ -192,9 +191,9 @@ class HFIRSANSReduction(PythonAlgorithm):
                 self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
                 alg.execute()
 
-                self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredTransmission",
+                self.copy_property_value_if_exists(alg, property_manager, "MeasuredTransmission",
                                                    "MeasuredBckTransmissionValue")
-                self.copy_property_value_if_exists(self, alg, property_manager, "MeasuredError",
+                self.copy_property_value_if_exists(alg, property_manager, "MeasuredError",
                                                    "MeasuredBckTransmissionError")
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
