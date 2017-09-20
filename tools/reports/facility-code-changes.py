@@ -174,9 +174,8 @@ if __name__ == '__main__':
             email_changes = ''
             email_commits = ''
             # Don't go past the current month
-            if current_year == year:
-                if month > current_month:
-                    continue
+            if current_year == year and month > current_month:
+                continue
 
             print("Getting stats for {0}-{1:02d}".format(str(year), month))
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
@@ -204,14 +203,9 @@ if __name__ == '__main__':
                 removed = 0
 
                 # Is the line blank (or None)
-                if line is None or len(line) is 0:
+                if line is None or len(line.strip().replace("\n", "")) == 0:
                     # print("BLANK:'{0}'".format(str(line)))
                     continue
-                if len(line.strip().replace('\n', '')) == 0:
-                    # print("BLANK:'{0}'".format(str(line)))
-                    continue
-
-                # print(line)
 
                 # Is the line an email address ?
                 if "@" in line:
@@ -223,10 +217,10 @@ if __name__ == '__main__':
                     if 'files changed' in item:
                         changed = item.strip().split(' ')[0]
                         # print("FILES CHANGED:{0}".format(changed))
-                    if 'insertions(+)' in item:
+                    elif 'insertions(+)' in item:
                         added = item.strip().split(' ')[0]
                         # print ("INSERTIONS:{0}".format(added))
-                    if 'deletions(-)' in item:
+                    elif 'deletions(-)' in item:
                         removed = item.strip().split(' ')[0]
                         # print ("DELETIONS:{0}".format(removed))
 
