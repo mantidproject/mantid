@@ -8,10 +8,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -21,9 +18,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTypes/SpectrumDefinition.h"
 
 #include <boost/function.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -1627,47 +1622,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
   }
 
   file.closeGroup();
-}
-
-/** Filter IndexInfo based on optional spectrum range/list provided.
- *
- * Checks the validity of user provided spectrum range/list. This method assumes
- * that spectrum numbers in `indexInfo` argument are sorted and that the
- * Parallel::StorageMode of `indexInfo` is `Cloned`. */
-Indexing::IndexInfo
-LoadEventNexus::filterIndexInfo(const Indexing::IndexInfo &indexInfo) {
-  if (m_specMin != EMPTY_INT() || m_specMax != EMPTY_INT()) {
-    // check if range [SpectrumMin, SpectrumMax] was supplied
-    if (m_specMax == EMPTY_INT())
-      m_specMax = static_cast<specnum_t>(
-          indexInfo.spectrumNumber(indexInfo.size() - 1));
-    if (m_specMin == EMPTY_INT())
-      m_specMin = static_cast<specnum_t>(indexInfo.spectrumNumber(0));
-    for (int32_t i = m_specMin; i <= m_specMax; i++)
-      m_specList.push_back(i);
-  }
-  if (!m_specList.empty()) {
-    // Check if SpectrumList was supplied (or filled via min/max above)
-    const auto indices =
-        indexInfo.makeIndexSet(std::vector<Indexing::SpectrumNumber>(
-            m_specList.begin(), m_specList.end()));
-    m_specMin =
-        static_cast<specnum_t>(indexInfo.spectrumNumber(*indices.begin()));
-    m_specMax =
-        static_cast<specnum_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
-    const auto filteredIndexInfo = Indexing::extract(indexInfo, indices);
-    // Check that spectra supplied by user do not correspond to monitors
-    const auto &detectorInfo = m_ws->getSingleHeldWorkspace()->detectorInfo();
-    for (const auto &specDef : *filteredIndexInfo.spectrumDefinitions()) {
-      for (const auto &det : specDef)
-        if (detectorInfo.isMonitor(det))
-          throw std::invalid_argument(
-              "Inconsistent range property: some of the "
-              "selected spectra correspond to monitors.");
-    }
-    return filteredIndexInfo;
-  }
-  return indexInfo;
 }
 
 /**

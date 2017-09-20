@@ -208,8 +208,6 @@ private:
                             size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
 
-  Indexing::IndexInfo filterIndexInfo(const Indexing::IndexInfo &indexInfo);
-
   /// Set the top entry field name
   void setTopEntryName();
 

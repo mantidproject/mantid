@@ -44,13 +44,14 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   // If there is no actual filter, spectrum numbers are contiguous and start at
   // 1. Otherwise spectrum numbers are detector IDs. This is legacy behavior
   // adopted from EventWorkspaceCollection.
-  if(filtered.size() == indexInfo.size())
-    filtered.setSpectrumNumbers(1, filtered.size());
+  if (filtered.size() == indexInfo.size())
+    filtered.setSpectrumNumbers(1, static_cast<int32_t>(filtered.size()));
 
   return filtered;
 }
 
-IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string> &bankNames) {
+IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
+    const std::vector<std::string> &bankNames) {
   const auto &componentInfo = m_instrumentWorkspace->componentInfo();
   std::vector<SpectrumDefinition> spectrumDefinitions;
   const auto &instrument = m_instrumentWorkspace->getInstrument();
@@ -121,6 +122,11 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
   }
 }
 
+/** Filter IndexInfo based on optional spectrum range/list provided.
+ *
+ * Checks the validity of user provided spectrum range/list. This method assumes
+ * that spectrum numbers in `indexInfo` argument are sorted and that the
+ * Parallel::StorageMode of `indexInfo` is `Cloned`. */
 IndexInfo
 LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   if (m_min != EMPTY_INT() || m_max != EMPTY_INT()) {
@@ -154,7 +160,6 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   }
   return indexInfo;
 }
-  
 
 } // namespace DataHandling
 } // namespace Mantid
