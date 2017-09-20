@@ -8,7 +8,7 @@ from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
 from mantid.simpleapi import *
 
 
-class PowderILLReduction(PythonAlgorithm):
+class PowderDiffILLReduction(PythonAlgorithm):
 
     _calibration_file = None
     _normalise_option = None
@@ -199,4 +199,4 @@ class PowderILLReduction(PythonAlgorithm):
         return result[:-1]
 
 #Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderILLReduction)
+AlgorithmFactory.subscribe(PowderDiffILLReduction)

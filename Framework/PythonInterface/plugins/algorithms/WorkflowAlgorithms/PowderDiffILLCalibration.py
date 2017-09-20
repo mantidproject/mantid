@@ -9,7 +9,7 @@ from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, Matr
 from mantid.simpleapi import *
 
 
-class PowderILLCalibration(PythonAlgorithm):
+class PowderDiffILLCalibration(PythonAlgorithm):
 
     _out_name = None
     _input_file = None
@@ -31,7 +31,7 @@ class PowderILLCalibration(PythonAlgorithm):
         return "ILL\\Diffraction;Diffraction\\Reduction;Diffraction\\Calibration"
 
     def summary(self):
-        return "Performs detector efficiency correction calculation for powder diffraction data for ILL instrument D20."
+        return "Performs detector efficiency correction calculation for powder diffraction instrument D20 at ILL."
 
     def name(self):
         return "PowderILLCalibration"
@@ -90,8 +90,6 @@ class PowderILLCalibration(PythonAlgorithm):
         return issues
 
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
-        #TODO: take care of the optional output response
-
         ws_y = mtd[ws].extractY().flatten()[-self._bin_offset]
         ws_e = mtd[ws].extractE().flatten()[-self._bin_offset]
         ws_x = np.zeros(self._bin_offset)
@@ -152,16 +150,15 @@ class PowderILLCalibration(PythonAlgorithm):
         CreateWorkspace(DataX=xaxis, DataY=constants, DataE=errors,
                         NSpec=self._scan_points * self._n_det, OutputWorkspace=calib_ws)
         Multiply(LHSWorkspace=raw_ws, RHSWorkspace=calib_ws, OutputWorkspace=raw_ws)
-        DeleteWorkspace(calib_ws)
 
     def _normalise_to_monitor(self, raw_ws, mon_ws):
         mon_counts = mtd[mon_ws].extractY().flatten()
         mon_errors = mtd[mon_ws].extractE().flatten()
         xaxis = np.zeros(self._scan_points)
 
-        mon_counts = np.tile(mon_counts, self._n_det)
-        mon_errors = np.tile(mon_errors, self._n_det)
-        xaxis = np.tile(xaxis, self._n_det)
+        mon_counts = np.tile(mon_counts, [self._n_det])
+        mon_errors = np.tile(mon_errors, [self._n_det])
+        xaxis = np.tile(xaxis, [self._n_det])
 
         CreateWorkspace(DataX=xaxis, DataY=mon_counts, DataE=mon_errors,
                         NSpec=self._scan_points * self._n_det, OutputWorkspace=mon_ws)
@@ -170,17 +167,15 @@ class PowderILLCalibration(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=raw_ws, OutputWorkspace=raw_ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
 
-    #TODO: think about ROI normalisation, time?
-
     def PyExec(self):
         self._input_file = self.getPropertyValue('CalibrationRun')
         self._calib_file = self.getPropertyValue('CalibrationFile')
-        self._out_name = self.getPropertyValue('OutputWorkspace')
         self._method = self.getPropertyValue('CalibrationMethod')
         self._normalise_to = self.getPropertyValue('NormaliseTo')
-        self._out_response = self.getPropertyValue('OutputResponseWorkspace')
         self._first_pixel = self.getProperty('PixelRange').value[0]
         self._last_pixel = self.getProperty('PixelRange').value[1]
+        self._out_response = self.getPropertyValue('OutputResponseWorkspace')
+        self._out_name = self.getPropertyValue('OutputWorkspace')
 
         raw_ws = self._hide('raw')
         ref_ws = self._hide('ref')
@@ -188,13 +183,16 @@ class PowderILLCalibration(PythonAlgorithm):
 
         LoadILLDiffraction(Filename=self._input_file, OutputWorkspace=raw_ws)
         self._validate_scan(raw_ws)
-        ExtractMonitors(InputWorkspace=raw_ws, DetectorWorkspace=raw_ws, MonitorWorkspace=mon_ws)
-        ConvertSpectrumAxis(InputWorkspace=raw_ws, OutputWorkspace=raw_ws, Target='SignedTheta', OrderAxis=False)
 
         self._scan_points = mtd[raw_ws].getRun().getLogData('ScanSteps').value
         self.log().information('Number of scan steps is: ' + str(self._scan_points))
         self._n_det = mtd[raw_ws].detectorInfo().size() - 1
         self.log().information('Number of detector pixels is: ' + str(self._n_det))
+
+        self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_det)
+
+        ExtractMonitors(InputWorkspace=raw_ws, DetectorWorkspace=raw_ws, MonitorWorkspace=mon_ws)
+        ConvertSpectrumAxis(InputWorkspace=raw_ws, OutputWorkspace=raw_ws, Target='SignedTheta', OrderAxis=False)
 
         if self._last_pixel > self._n_det:
             self.log().warning('Last pixel number provided is larger than total number of pixels. '
@@ -221,7 +219,25 @@ class PowderILLCalibration(PythonAlgorithm):
         zeros = np.zeros(self._n_det)
         constants = np.ones(self._n_det)
 
-        self._progress = Progress(self, start=0.0, end=1.0, nreports=self._n_det)
+        comb_response_size = (self._n_det - 1) * self._bin_offset + self._scan_points
+        comb_response = np.zeros(comb_response_size)
+        comb_response_err = np.zeros(comb_response_size)
+        comb_response_theta = np.zeros(comb_response_size)
+        comb_response_zeros = np.zeros(comb_response_size)
+
+        if self._out_response:
+            for pixel in range(1, self._first_pixel):
+                for scan_point in range(0, self._bin_offset):
+                    comb_response_theta[(pixel - 1) * self._bin_offset + scan_point] = \
+                        raw_t[(pixel - 1) * self._scan_points + scan_point]
+
+            for pixel in range(self._last_pixel + 1, self._n_det + 1):
+                end = self._bin_offset
+                if pixel == self._n_det:
+                    end = self._scan_points
+                for scan_point in range(0, end):
+                    comb_response_theta[(pixel - 1) * self._bin_offset + scan_point] = \
+                        raw_t[(pixel - 1) * self._scan_points + scan_point]
 
         for det in range(self._first_pixel, self._last_pixel + 1):
             ws = '__det_' + str(det)
@@ -240,9 +256,9 @@ class PowderILLCalibration(PythonAlgorithm):
                 cropped_ws = ws + '_cropped'
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws,
                               EndWorkspaceIndex=self._scan_points - self._bin_offset - 1)
+                self._progress.report('Computing the relative calibration factor for pixel #' + str(det))
                 Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
                 factor = self._compute_relative_factor(ratio_ws)
-                self._progress.report()
                 if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
                     self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det))
                 else:
@@ -252,8 +268,18 @@ class PowderILLCalibration(PythonAlgorithm):
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
             else:
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
-                #TODO: set first item of the optional response output
                 DeleteWorkspace(ws)
+
+            if self._out_response:
+                end = self._bin_offset
+                if det == self._last_pixel:
+                    end = self._scan_points - self._bin_offset
+                    #TODO: take care of last self._bin_offset elements
+                for scan_point in range(0, end):
+                    index = (det - 1) * self._bin_offset + scan_point
+                    comb_response[index] = mtd[ref_ws].readY(scan_point)[0]
+                    comb_response_err[index] = mtd[ref_ws].readE(scan_point)[0]
+                    comb_response_theta[index] = det_t[scan_point]
 
         DeleteWorkspace(ref_ws)
         DeleteWorkspace(raw_ws)
@@ -263,10 +289,18 @@ class PowderILLCalibration(PythonAlgorithm):
         out_temp = '__' + self._out_name
         CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=out_temp)
         Scale(InputWorkspace=out_temp, OutputWorkspace=out_temp, Factor=1./absolute_norm)
+
+        if self._calib_file:
+            Multiply(LHSWorkspace=self._calib_ws, RHSWorkspace=out_temp, OutputWorkspace=out_temp)
+
         RenameWorkspace(InputWorkspace=out_temp, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
-        #TODO: set the optional response output
+        if self._out_response:
+            CreateWorkspace(DataX=comb_response_zeros, DataY=comb_response, DataE=comb_response_err,
+                            NSpec=comb_response_size, VerticalAxisUnit='Degrees', VerticalAxisValues=comb_response_theta,
+                            OutputWorkspace = self._out_response)
+            self.setProperty('OutputResponseWorkspace', self._out_response)
 
 #Register the algorithm with Mantid
-AlgorithmFactory.subscribe(PowderILLCalibration)
+AlgorithmFactory.subscribe(PowderDiffILLCalibration)
