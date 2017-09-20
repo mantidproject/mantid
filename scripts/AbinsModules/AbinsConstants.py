@@ -43,7 +43,7 @@ ATOMIC_LENGTH_2_ANGSTROM = constants.codata.value(
 
 M_2_HARTREE = constants.codata.value("atomic mass unit-hartree relationship")  # amu * m2_hartree =  Hartree
 
-ALL_INSTRUMENTS = ["TOSCA"]  # supported instruments
+ALL_INSTRUMENTS = ["TOSCA", "TwoDMap"]  # supported instruments
 
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
@@ -128,9 +128,10 @@ NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
+ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
+TWO_DIMENSIONAL_INSTRUMENTS = ["TwoDMap"]
 ONE_DIMENSIONAL_SPECTRUM = 1
 
 FIRST_BIN_INDEX = 1
@@ -140,7 +141,8 @@ BUF = 65536
 
 CRYSTAL = False
 
-# definition of momentum transfer range
+Q_BEGIN = 0.7
+Q_END = 30.0
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1
 
 # indentations in messages
@@ -169,6 +171,36 @@ SMALL_S = 1e-6
 MAX_THRESHOLD = 0.3
 
 ONE_CHARACTER = 1
+
+DIGITS_NUM = 5
+S_PLOT_SPACING = 4.0
+ENERGY_PLOT_STEP = 500.0
+Q_PLOT_STEP = 6.0
+S_PLOT_THRESHOLD = 1e-7
+
+# from https://matplotlib.org/examples/images_contours_and_fields/interpolation_methods.html
+ALL_INTERPOLATIONS = [
+    None, "none", "nearest", "bilinear", "bicubic", "spline16", "spline36", "hanning", "hamming", "hermite", "kaiser",
+    "quadric", "catrom", "gaussian", "bessel", "mitchell", "sinc", "lanczos"]
+
+# from https://matplotlib.org/examples/color/colormaps_reference.html
+ALL_COLORMAPS = [
+    "viridis", "plasma", "inferno", "magma", "Greys", "Purples", "Blues", "Greens", "Oranges", "Reds", "YlOrBr",
+    "YlOrRd", "OrRd", "PuRd", "RdPu", "BuPu", "GnBu", "PuBu", "YlGnBu", "PuBuGn", "BuGn", "YlGn", "binary", "gist_yarg",
+    "gist_gray", "gray", "bone", "pink", "spring", "summer", "autumn", "winter", "cool", "Wistia", "hot", "afmhot",
+    "gist_heat", "copper", "PiYG", "PRGn", "BrBG", "PuOr", "RdGy", "RdBu", "RdYlBu", "RdYlGn", "Spectral", "coolwarm",
+    "bwr", "seismic", "Pastel1", "Pastel2", "Paired", "Accent", "Dark2", "Set1", "Set2", "Set3", "tab10", "tab20",
+    "tab20b", "tab20c", "flag", "prism", "ocean", "gist_earth", "terrain", "gist_stern", "gnuplot", "gnuplot2",
+    "CMRmap", "cubehelix", "brg", "hsv", "gist_rainbow", "rainbow", "jet", "nipy_spectral", "gist_ncar"]
+
+# from https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.savefig.html
+ALL_FIG_FORMATS = ["png", "pdf", "ps", "eps", "svg"]
+
+# from https://matplotlib.org/devdocs/api/_as_gen/matplotlib.pyplot.savefig.html
+DPI = 600
+BBOX = "tight"
+BACKGROUND = "white"
+
 EOF = b""
 
 ROTATIONS_AND_TRANSLATIONS = 6

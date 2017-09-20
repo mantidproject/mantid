@@ -26,8 +26,8 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
         filename = self._si2 + ".phonon"
         full_path_filename = AbinsTestHelpers.find_file(filename=filename)
 
-        castep_reader = LoadCASTEP(input_dft_filename=full_path_filename)
-        good_data = castep_reader.read_phonon_file()
+        castep_reader = LoadCASTEP(input_ab_initio_filename=full_path_filename)
+        good_data = castep_reader.read_vibrational_data()
 
         # wrong filename
         self.assertRaises(ValueError, CalculateSingleCrystal, filename=1,
@@ -70,10 +70,10 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
+        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
         crystal = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_crystal_DW.txt"))
 
-        return {"DFT": castep_reader.read_phonon_file(), "dw_crystal_data": crystal}
+        return {"DFT": castep_reader.read_vibrational_data(), "dw_crystal_data": crystal}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

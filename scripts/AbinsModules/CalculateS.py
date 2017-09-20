@@ -14,7 +14,7 @@ class CalculateS(object):
     def init(filename=None, temperature=None, sample_form=None, abins_data=None, instrument=None,
              quantum_order_num=None):
         """
-        :param filename: name of input DFT file (CASTEP: foo.phonon)
+        :param filename: name of input ab initio file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
         :param sample_form: form in which experimental sample is: Powder or SingleCrystal (str)
         :param abins_data: object of type AbinsData with data from phonon file

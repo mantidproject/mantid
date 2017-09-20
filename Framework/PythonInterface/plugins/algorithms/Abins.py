@@ -8,34 +8,34 @@ except ImportError:
 import numpy as np
 import six
 import os
+import pylab as plt
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, Progress, WorkspaceProperty, mtd
-from mantid.api import WorkspaceFactory, AnalysisDataService
+from mantid.api import WorkspaceFactory, AnalysisDataService, NumericAxis
 
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load
-from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
+from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom, ConfigService
 import AbinsModules
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
 class Abins(PythonAlgorithm):
 
-    _dft_program = None
-    _phonon_file = None
+    _ab_initio_program = None
+    _vibrational_data_file = None
     _experimental_file = None
     _temperature = None
     _scale = None
     _sample_form = None
-    _instrument_name = None
     _atoms = None
     _sum_contributions = None
     _scale_by_cross_section = None
     _calc_partial = None
     _out_ws_name = None
     _num_quantum_order_events = None
-    _extracted_dft_data = None
+    _extracted_ab_initio_data = None
 
     def category(self):
         return "Simulation"
@@ -49,13 +49,13 @@ class Abins(PythonAlgorithm):
     def PyInit(self):
 
         # Declare all properties
-        self.declareProperty(name="DFTprogram",
+        self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
                              validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
-                             doc="DFT program which was used for a phonon calculation.")
+                             doc="Ab-initio program which was used for a phonon calculation.")
 
-        self.declareProperty(FileProperty("PhononFile", "",
+        self.declareProperty(FileProperty("VibrationalDataFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
                              extensions=["phonon", "out", "outmol", "log"]),
@@ -85,8 +85,7 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue="TOSCA",
-                             # validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS)
-                             validator=StringListValidator(["TOSCA"]),
+                             validator=StringListValidator(AbinsModules.AbinsConstants.ALL_INSTRUMENTS),
                              doc="Name of an instrument for which analysis should be performed.")
 
         self.declareProperty(StringArrayProperty("Atoms", Direction.Input),
@@ -130,11 +129,11 @@ class Abins(PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        dft_program = self.getProperty("DFTprogram").value
-        phonon_filename = self.getProperty("PhononFile").value
-        output = input_file_validators[dft_program](filename_full_path=phonon_filename)
+        ab_initio_program = self.getProperty("AbInitioProgram").value
+        phonon_filename = self.getProperty("VibrationalDataFile").value
+        output = input_file_validators[ab_initio_program](filename_full_path=phonon_filename)
         if output["Invalid"]:
-            issues["PhononFile"] = output["Comment"]
+            issues["VibrationalDataFile"] = output["Comment"]
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         # list of special keywords which cannot be used in the name of workspace
@@ -166,25 +165,26 @@ class Abins(PythonAlgorithm):
         self._get_properties()
         prog_reporter.report("Input data from the user has been collected.")
 
-        # 2) read DFT data
-        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
-                       "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
-        dft_data = dft_reader.get_formatted_data()
+        # 2) read ab initio data
+        ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                             "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
+        ab_initio_reader = ab_initio_loaders[self._ab_initio_program](
+            input_ab_initio_filename=self._vibrational_data_file)
+        ab_initio_data = ab_initio_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = AbinsModules.CalculateS.init(filename=self._phonon_file, temperature=self._temperature,
-                                                    sample_form=self._sample_form, abins_data=dft_data,
+        s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_data_file, temperature=self._temperature,
+                                                    sample_form=self._sample_form, abins_data=ab_initio_data,
                                                     instrument=self._instrument,
                                                     quantum_order_num=self._num_quantum_order_events)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
 
         # 4) get atoms for which S should be plotted
-        self._extracted_dft_data = dft_data.get_atoms_data().extract()
-        num_atoms = len(self._extracted_dft_data)
-        all_atms_smbls = list(set([self._extracted_dft_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
+        self._extracted_ab_initio_data = ab_initio_data.get_atoms_data().extract()
+        num_atoms = len(self._extracted_ab_initio_data)
+        all_atms_smbls = list(set([self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
         all_atms_smbls.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
@@ -230,9 +230,88 @@ class Abins(PythonAlgorithm):
             SaveAscii(InputWorkspace=wrk, Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
-        # 9) set  OutputWorkspace
+        # 9) save workspaces to matplotlib figures
+        if self._instrument.get_name() in AbinsModules.AbinsConstants.TWO_DIMENSIONAL_INSTRUMENTS:
+            self._make_matplotlib_figs()
+            prog_reporter.report("Figures of all workspaces have been saved.")
+
+        # 10) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+
+    def _make_matplotlib_figs(self):
+        """
+        Makes nice pictures for 2D map using matplotlib.
+        """
+        # default path for saving
+        path = ConfigService.getString("defaultsave.directory")
+
+        figure_format = AbinsModules.AbinsParameters.figure_format
+
+        # switch on latex
+        plt.rc('font', family='serif')
+        plt.rc('text', usetex=True)
+
+        begin_energy = self._bins[0]
+        end_energy = self._bins[-1]
+        step_energy = AbinsModules.AbinsConstants.ENERGY_PLOT_STEP
+        x_ticks = np.arange(begin_energy, end_energy, step_energy)
+        x_ticks_labels = [str(i).split(".")[0] for i in x_ticks]
+
+        begin_q = 0
+        end_q = AbinsModules.AbinsParameters.q_size
+        step_q = AbinsModules.AbinsParameters.q_size / AbinsModules.AbinsConstants.Q_PLOT_STEP
+        y_ticks = np.arange(begin_q, end_q, step_q)
+        y_ticks_labels = [str(i * (AbinsModules.AbinsConstants.Q_PLOT_STEP - 1)).split(".")[0]
+                          for i in range(len(y_ticks))]
+
+        cmap = plt.get_cmap(AbinsModules.AbinsParameters.colormap)
+        cmap.set_under(color=AbinsModules.AbinsConstants.BACKGROUND)
+        interpolation = AbinsModules.AbinsParameters.interpolation
+
+        num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
+        for wrk_num in range(num_workspaces):
+
+            wrk = mtd[self._out_ws_name].getItem(wrk_num)
+            y_val = wrk.extractY()
+            wrk_name = wrk.name()
+            im = plt.imshow(y_val, cmap=cmap, aspect="auto", origin='lower', interpolation=interpolation,
+                            vmin=AbinsModules.AbinsConstants.S_PLOT_THRESHOLD)
+
+            plt.ylabel(r' \textbf{Momentum transfer ($\AA^{-1}$)}')
+            plt.xlabel(r'\textbf{Energy transfer [cm$^{-1}$]}')
+
+            axes = im.axes
+            axes.set_xticks(x_ticks)
+            axes.set_xticklabels(x_ticks_labels)
+            axes.set_yticks(y_ticks)
+            axes.set_yticklabels(y_ticks_labels)
+
+            # colorbar
+            max_s = np.max(y_val)
+            min_s = np.min(y_val)
+            cbar_ticks = np.linspace(min_s, max_s, AbinsModules.AbinsConstants.S_PLOT_SPACING)
+            cbar = plt.colorbar(im, ticks=cbar_ticks)
+
+            plt.savefig(os.path.join(path, wrk_name + "." + figure_format),
+                        bbox_inches=AbinsModules.AbinsConstants.BBOX,
+                        dpi=AbinsModules.AbinsConstants.DPI)
+            cbar.remove()
+            del im
+
+    def _round(self, number):
+        """
+        Nicely rounds number which is in the scientific notation.
+        :param number: number to round
+        :return: rounded number
+        """
+        number_str = str(number)
+        parts = number_str.split("e")
+        if len(parts) == 1:
+            result = str(round(float(parts[0]), AbinsModules.AbinsConstants.DIGITS_NUM))
+        else:
+            result = str(round(float(parts[0]), AbinsModules.AbinsConstants.DIGITS_NUM)) + "e" + parts[1]
+        return result
 
     def _create_workspaces(self, atoms_symbols=None, s_data=None):
         """
@@ -261,7 +340,7 @@ class Abins(PythonAlgorithm):
             s_atom_data.fill(0.0)
 
             for atom in range(num_atoms):
-                if self._extracted_dft_data["atom_%s" % atom]["symbol"] == atom_symbol:
+                if self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol:
 
                     temp_s_atom_data.fill(0.0)
 
@@ -331,6 +410,38 @@ class Abins(PythonAlgorithm):
                     self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
+        # 2D S map
+        else:
+
+            q = np.linspace(start=AbinsModules.AbinsConstants.Q_BEGIN,
+                            stop=AbinsModules.AbinsConstants.Q_END,
+                            num=AbinsModules.AbinsParameters.q_size)
+
+            # only FUNDAMENTALS
+            if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
+
+                self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, atom_name=atom_name, q=q)
+
+            # total workspaces
+            elif s_points.shape[0] == AbinsModules.AbinsParameters.q_size and len(s_points.shape) == 2:
+
+                self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, atom_name=atom_name, q=q)
+
+            # quantum order events (fundamentals  or  overtones + combinations for the given order)
+            else:
+
+                dim = s_points.shape[0]
+                partial_wrk_names = []
+
+                for n in range(dim):
+                    seed = "quantum_event_%s" % (n + 1)
+                    wrk_name = workspace + "_" + seed
+                    partial_wrk_names.append(wrk_name)
+
+                    self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name, q=q)
+
+                group = ','.join(partial_wrk_names)
+                GroupWorkspaces(group, OutputWorkspace=workspace)
 
     def _fill_s_1d_workspace(self, s_points=None, workspace=None, atom_name=None):
         """
@@ -351,6 +462,40 @@ class Abins(PythonAlgorithm):
         AnalysisDataService.addOrReplace(workspace, wrk)
 
         # Set correct units on workspace
+        self._set_workspace_units(wrk=workspace)
+
+    def _fill_s_2d_workspace(self, s_points=None, workspace=None, atom_name=None, q=None):
+        """
+        Puts 2D S into workspace.
+        :param s_points: dynamical factor for the given atom
+        :param workspace:  workspace to be filled with S
+        :param atom_name: name of atom (for example H for hydrogen)
+        :param q: momentum transfer
+        """
+        if atom_name is not None:
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
+
+        # create "Workspace2D"
+        length = s_points[0].size
+        dim = q.size
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
+
+        # set VerticalAxisValues for workspace
+        y_axis = NumericAxis.create(dim)
+        y_axis.setUnit("MomentumTransfer")
+        for idx in range(dim):
+            y_axis.setValue(idx, q[idx])
+        wrk.replaceAxis(1, y_axis)
+
+        # fill workspace
+        for i in range(dim):
+            wrk.setX(i, self._bins)
+            wrk.setY(i, s_points[i])
+
+        # make workspace accessible from outside function
+        AnalysisDataService.addOrReplace(workspace, wrk)
+
+        # set correct units on workspace
         self._set_workspace_units(wrk=workspace)
 
     def _get_cross_section(self, atom_name=None):
@@ -384,23 +529,37 @@ class Abins(PythonAlgorithm):
         else:
             local_partial_workspaces = partial_workspaces
 
+        # num_freq - number of frequencies
+        # num_q - number of q points
+
         if len(local_partial_workspaces) > 1:
 
             # get frequencies
             ws = mtd[local_partial_workspaces[0]]
 
+            # dim = num_q
+            dim = ws.getNumberHistograms()
+
             # initialize S
-            s_atoms = np.zeros_like(ws.dataY(0))
+            if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
+                s_atoms = np.zeros_like(ws.dataY(0))
+            else:
+                # s_atoms[num_freq, q]
+                shape = (dim, ws.blocksize())
+                s_atoms = np.zeros(shape=shape, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
             # collect all S
             for partial_ws in local_partial_workspaces:
                 if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
                     s_atoms += mtd[partial_ws].dataY(0)
+                else:
+                    for i in range(dim):
+                        s_atoms[i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
             self._fill_s_workspace(s_atoms, total_workspace)
 
-        # # Otherwise just repackage the workspace we have as the total
+        # Otherwise just repackage the workspace we have as the total
         else:
             CloneWorkspace(InputWorkspace=local_partial_workspaces[0], OutputWorkspace=total_workspace)
 
@@ -453,6 +612,7 @@ class Abins(PythonAlgorithm):
         message = " in AbinsParameters.py. "
 
         self._check_general_resolution(message)
+        self._check_2d_parameters(message)
         self._check_tosca_parameters(message)
         self._check_folder_names(message)
         self._check_rebining(message)
@@ -470,10 +630,45 @@ class Abins(PythonAlgorithm):
         if not (isinstance(fwhm, float) and 0.0 < fwhm < 10.0):
             raise RuntimeError("Invalid value of fwhm" + message_end)
 
-        # check delta_width
-        delta_width = AbinsModules.AbinsParameters.delta_width
-        if not (isinstance(delta_width, float) and 0.0 < delta_width < 1.0):
-            raise RuntimeError("Invalid value of delta_width" + message_end)
+    def _check_2d_parameters(self, message_end=None):
+        """
+        Checks if parameters for 2D instruments have valid values.
+        :param message_end: closing part of the error message.
+        """
+        # check direct instrument resolution
+        direct_instrument_resolution = AbinsModules.AbinsParameters.direct_instrument_resolution
+        min_res = AbinsModules.AbinsConstants.MIN_DIRECT_RESOLUTION
+        max_res = AbinsModules.AbinsConstants.MAX_DIRECT_RESOLUTION
+        if not (isinstance(direct_instrument_resolution, float) and min_res <= direct_instrument_resolution <= max_res):
+            raise RuntimeError("Invalid value of direct_instrument_resolution" + message_end)
+
+        # angles -- numpy array in which all elements are floats
+        angles = AbinsModules.AbinsParameters.angles
+        if not (isinstance(angles, np.ndarray) and angles.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+            raise ValueError("Invalid value of angles" + message_end)
+
+        # e_init -- list in which all elements are floats
+        e_init = AbinsModules.AbinsParameters.e_init
+        if not (isinstance(e_init, list) and all([isinstance(i, float) for i in e_init])):
+            raise ValueError("Invalid value of incident energies" + message_end)
+
+        # q_size -- this is int
+        q_size = AbinsModules.AbinsParameters.q_size
+        if not isinstance(q_size, int):
+            raise ValueError("Invalid number of q slices" + message_end)
+
+        # interpolation
+        interpolation = AbinsModules.AbinsParameters.interpolation
+        if interpolation not in AbinsModules.AbinsConstants.ALL_INTERPOLATIONS:
+            raise ValueError("Invalid interpolation.")
+
+        colormap = AbinsModules.AbinsParameters.colormap
+        if colormap not in AbinsModules.AbinsConstants.ALL_COLORMAPS:
+            raise ValueError("Invalid colormap.")
+
+        figure_format = AbinsModules.AbinsParameters.figure_format
+        if figure_format not in AbinsModules.AbinsConstants.ALL_FIG_FORMATS:
+            raise ValueError("Invalid format of figure.")
 
     def _check_tosca_parameters(self, message_end=None):
         """
@@ -511,10 +706,10 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         folder_names = []
-        dft_group = AbinsModules.AbinsParameters.dft_group
-        if not isinstance(dft_group, str) or dft_group == "":
-            raise RuntimeError("Invalid name for folder in which the DFT data should be stored.")
-        folder_names.append(dft_group)
+        ab_initio_group = AbinsModules.AbinsParameters.ab_initio_group
+        if not isinstance(ab_initio_group, str) or ab_initio_group == "":
+            raise RuntimeError("Invalid name for folder in which the ab initio data should be stored.")
+        folder_names.append(ab_initio_group)
 
         powder_data_group = AbinsModules.AbinsParameters.powder_data_group
         if not isinstance(powder_data_group, str) or powder_data_group == "":
@@ -597,22 +792,22 @@ class Abins(PythonAlgorithm):
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
-    def _validate_dft_file_extension(self, filename_full_path=None, expected_file_extension=None):
+    def _validate_ab_initio_file_extension(self, filename_full_path=None, expected_file_extension=None):
         """
-        Checks consistency between name of DFT program and extension.
-        :param dft_program: name of DFT program in the form of string
+        Checks consistency between name of ab initio program and extension.
+        :param filename_full_path: path to file
         :param expected_file_extension: file extension
         :returns: dictionary with error message
         """
-        dft_program = self.getProperty("DFTprogram").value
+        ab_initio_program = self.getProperty("AbInitioProgram").value
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
-        if found_filename_ext != expected_file_extension:
+        if found_filename_ext.lower() != expected_file_extension:
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                        Comment=msg_err + "Output from ab initio program " + ab_initio_program + " is expected." +
                                           " The expected extension of file is ." + expected_file_extension +
                                           ".  Found: " + found_filename_ext + ". " + msg_rename)
         else:
@@ -620,33 +815,33 @@ class Abins(PythonAlgorithm):
 
     def _validate_dmol3_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for DMOL3 DFT program.
+        Method to validate input file for DMOL3 ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate DMOL3 phonon file: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".outmol")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".outmol")
 
     def _validate_gaussian_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for GAUSSIAN DFT program.
+        Method to validate input file for GAUSSIAN ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate GAUSSIAN file with vibration data: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".log")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".log")
 
     def _validate_crystal_input_file(self, filename_full_path=None):
         """
-        Method to validate input file for CRYSTAL DFT program.
+        Method to validate input file for CRYSTAL ab initio program.
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
         logger.information("Validate CRYSTAL phonon file: ")
-        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                 expected_file_extension=".out")
+        return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                       expected_file_extension=".out")
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """
@@ -660,8 +855,8 @@ class Abins(PythonAlgorithm):
         """
         logger.information("Validate CASTEP phonon file: ")
         msg_err = "Invalid %s file. " % filename_full_path
-        output = self._validate_dft_file_extension(filename_full_path=filename_full_path,
-                                                   expected_file_extension=".phonon")
+        output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                         expected_file_extension=".phonon")
         if output["Invalid"]:
             return output
 
@@ -720,20 +915,16 @@ class Abins(PythonAlgorithm):
         Loads all properties to object's attributes.
         """
 
-        self._dft_program = self.getProperty("DFTprogram").value
-        self._phonon_file = self.getProperty("PhononFile").value
+        self._ab_initio_program = self.getProperty("AbInitioProgram").value
+        self._vibrational_data_file = self.getProperty("VibrationalDataFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._temperature = self.getProperty("Temperature").value
         self._scale = self.getProperty("Scale").value
         self._sample_form = self.getProperty("SampleForm").value
 
         instrument_name = self.getProperty("Instrument").value
-        if instrument_name in AbinsModules.AbinsConstants.ALL_INSTRUMENTS:
-            self._instrument_name = instrument_name
-            instrument_producer = AbinsModules.InstrumentProducer()
-            self._instrument = instrument_producer.produce_instrument(name=self._instrument_name)
-        else:
-            raise ValueError("Unknown instrument %s" % instrument_name)
+        instrument_producer = AbinsModules.InstrumentProducer()
+        self._instrument = instrument_producer.produce_instrument(name=instrument_name)
 
         self._atoms = self.getProperty("Atoms").value
         self._sum_contributions = self.getProperty("SumContributions").value

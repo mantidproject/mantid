@@ -68,7 +68,7 @@ Output:
 
 .. testcode:: AbinsCrystalSimple
 
-    wrk=Abins(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
+    wrk=Abins(AbInitioProgram="CRYSTAL", VibrationalDataFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
         print name
@@ -92,7 +92,7 @@ Output:
 
 .. testcode:: AbinsexplicitParameters
 
-    wrk_verbose=Abins(DFTprogram="CASTEP", PhononFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
+    wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalDataFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
                     Temperature=10, SampleForm="Powder", Instrument="TOSCA", Atoms="H", SumContributions=True,
                     QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
 

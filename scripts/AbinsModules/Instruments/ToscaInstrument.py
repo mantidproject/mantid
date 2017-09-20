@@ -25,16 +25,17 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
         result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * AbinsParameters.tosca_cos_scattering_angle
         return result
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
+    def convolve_with_resolution_function(self, frequencies=None, s_ab_initio=None):
         """
-        Convolves discrete DFT spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
-        :param frequencies:   DFT frequencies for which resolution function should be calculated (frequencies in cm^-1)
-        :param s_dft:  discrete S calculated directly from DFT
+        Convolves discrete ab initio spectrum with the  resolution function for the TOSCA instrument (and TOSCA-like).
+        :param frequencies:   ab initio frequencies for which resolution function should be calculated
+                             (frequencies in cm^-1)
+        :param s_ab_initio:  discrete S calculated directly from ab initio
         """
         if AbinsParameters.pkt_per_peak == 1:
 
             points_freq = frequencies
-            broadened_spectrum = s_dft
+            broadened_spectrum = s_ab_initio
 
         else:
 
@@ -48,7 +49,7 @@ class ToscaInstrument(Instrument, FrequencyPowderGenerator):
 
             pkt_per_peak = AbinsParameters.pkt_per_peak
             points_freq, broadened_spectrum = self._convolve_with_resolution_function_helper(frequencies=frequencies,
-                                                                                             s_dft=s_dft,
+                                                                                             s_ab_initio=s_ab_initio,
                                                                                              sigma=sigma,
                                                                                              pkt_per_peak=pkt_per_peak,
                                                                                              gaussian=self._gaussian)

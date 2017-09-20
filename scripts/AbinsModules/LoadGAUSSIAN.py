@@ -5,21 +5,21 @@ import numpy as np
 from mantid.kernel import Atom
 
 
-class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
+class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading GAUSSIAN DFT vibrational data.
+    Class for loading GAUSSIAN ab initio vibrational data.
     """
-    def __init__(self, input_dft_filename):
+    def __init__(self, input_ab_initio_filename):
         """
-        :param input_dft_filename: name of file with phonon data (foo.log)
+        :param input_ab_initio_filename: name of file with phonon data (foo.log)
         """
-        super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
-        self._dft_program = "GAUSSIAN"
-        self._parser = AbinsModules.GeneralDFTParser()
+        super(LoadGAUSSIAN, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        self._ab_initio_program = "GAUSSIAN"
+        self._parser = AbinsModules.GeneralAbInitioParser()
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_phonon_file(self):
+    def read_vibrational_data(self):
         """
         Reads phonon data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of the phonon  file (hash) to <>.hdf5.
@@ -43,7 +43,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
             self._read_modes(file_obj=gaussian_file, data=data)
 
             # save data to hdf file
-            self.save_dft_data(data=data)
+            self.save_ab_initio_data(data=data)
 
             # return AbinsData object
             return self._rearrange_data(data=data)
@@ -160,11 +160,12 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         :param file_obj: file object from which we read
         :param disp: list with x coordinates which we update [num_freq, num_atoms, dim]
         """
-        sub_block_start = "Atom AN      X      Y      Z        X      Y      Z        X      Y      Z"
+        sub_block_start = "X      Y      Z        X      Y      Z        X      Y      Z"
         self._parser.find_first(file_obj=file_obj, msg=sub_block_start)
 
         num_atom = 0
-        line_size = len(sub_block_start.split())
+        #   Atom  AN      X      Y      Z        X      Y      Z        X      Y      Z
+        line_size = len(sub_block_start.split()) + 2
         freq_per_line = sub_block_start.count("X")
 
         l = file_obj.readline().split()

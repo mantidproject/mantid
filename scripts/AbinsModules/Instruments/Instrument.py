@@ -19,19 +19,19 @@ class Instrument(object):
 
         return None
 
-    def convolve_with_resolution_function(self, frequencies=None, s_dft=None):
+    def convolve_with_resolution_function(self, frequencies=None, s_ab_initio=None):
         """
         Convolves discrete spectrum with the  resolution function for the particular instrument.
 
         :param frequencies: frequencies for which resolution function should be calculated (frequencies in cm-1)
-        :param s_dft:  discrete S calculated directly from DFT
+        :param s_ab_initio:  discrete S calculated directly from ab initio
 
        """
         return None
 
     # should be treated as a protected function
-    def _convolve_with_resolution_function_helper(self, frequencies=None, s_dft=None, sigma=None, pkt_per_peak=None,
-                                                  gaussian=None):
+    def _convolve_with_resolution_function_helper(self, frequencies=None, s_ab_initio=None, sigma=None,
+                                                  pkt_per_peak=None, gaussian=None):
         """
         :param frequencies: discrete frequencies in cm^-1
         :parameter s_dft: discrete values of S
@@ -71,11 +71,11 @@ class Instrument(object):
         # gaussian_val[freq_num, pkt_per_peak]
         dirac_val = gaussian(sigma=sigma_matrix, points=broad_freq, center=frequencies_matrix)
 
-        # s_dft_matrix[freq_num, pkt_per_peak]
-        s_dft_matrix = np.array([s_dft, ] * pkt_per_peak).transpose()
+        # s_ab_initio__matrix[freq_num, pkt_per_peak]
+        s_ab_initio_matrix = np.array([s_ab_initio, ] * pkt_per_peak).transpose()
 
         # temp_spectrum[freq_num, pkt_per_peak]
-        temp_spectrum = s_dft_matrix * dirac_val
+        temp_spectrum = s_ab_initio_matrix * dirac_val
 
         points_freq = np.ravel(broad_freq)
         broadened_spectrum = np.ravel(temp_spectrum)

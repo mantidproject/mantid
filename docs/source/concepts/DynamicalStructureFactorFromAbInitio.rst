@@ -17,14 +17,16 @@ most successful theoretical method in predicting phonon spectrum is ab-initio me
 .. image:: ../images/dft_phonon_scheme.png
     :align: center
 
-Usual approach in calculating phonon spectra within DFT is presented in the figure above. First, one defines initial
+Usual approach in calculating phonon spectra within DFT or other ab initio methods like, for example,Hartree Fock is
+presented in the figure above. First, one defines initial
 guess for the structure in interest. The initial guess should be as close as possible to an experimental structure.
 Then, one optimise structure within DFT. By optimising structure one should understand finding the closest to the
 initial guess local minimum of energy within accuracy of DFT method. At the closest minimum there
 should be no effective force on atoms. For that structure the dynamical matrix, e.g, second derivative of system Hamiltonian with respect to
 atomic displacements is calculated. Eigenvectors obtained from diagonalisation of this matrix are atomic displacements
 and eigenvalues are squared frequencies of vibrations. Those vibrations are sometime called *modes* or *fundamentals*.
-Using atomic displacements and frequencies obtained by DFT method one can calculate theoretical :math:`S(\mathbf{Q}, \omega)`. :math:`S(\mathbf{Q}, \omega)`
+Using atomic displacements and frequencies obtained by DFT method one can
+calculate theoretical :math:`S(\mathbf{Q}, \omega)`. :math:`S(\mathbf{Q}, \omega)`
 is calculated for each atom separately. Total S is sum over all partial atomic contributions.
 
 
