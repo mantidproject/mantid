@@ -23,10 +23,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
-    if len(runs) < 1 :
+    if len(runs) < 1:
         return
 
-    if not defType.startswith('.') :
+    if not defType.startswith('.'):
         defType = '.'+defType
 
     # Create the correct format of adding files
@@ -35,9 +35,9 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     adder = AddOperation(isOverlay, time_shifts)
 
   #these input arguments need to be arrays of strings, enforce this
-    if isinstance(runs, str) :
+    if isinstance(runs, str):
         runs = (runs, )
-    if isinstance(rawTypes, str) :
+    if isinstance(rawTypes, str):
         rawTypes = (rawTypes, )
 
     if lowMem:

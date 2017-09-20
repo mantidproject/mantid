@@ -178,6 +178,137 @@ def get_geometry_properties(reducer):
     return geometry_properties
 
 
+def read_CSV_file(filename):
+    """
+        Helper for BatchReduce
+        @param filename Name of the file to load
+        @return run information in IN_FORMAT
+    """
+    run_info = []
+    file_handle = open(filename, 'r')
+
+    for line in file_handle:
+        # See how many pieces of information have been provided
+        # Brackets delineate the field separator (nothing for space-delimited, ',' for comma-separated)
+        parts = line.rstrip().split(',')
+        if addRunToStore(parts, run_info) > 0:
+            issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line +
+                         '"\nEntry skipped\n')
+
+    file_handle.close()
+    return run_info
+
+
+def convert_names(combineDet, ins_name, final_name, reduced):
+    if combineDet == 'rear':
+        return [su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)]
+    if combineDet == 'front':
+        return [su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)]
+    if combineDet == 'both':
+        if ins_name == 'SANS2D':
+            rear_reduced = reduced.replace('front', 'rear')
+        else:  # if ins_name == 'lOQ':
+            rear_reduced = reduced.replace('HAB', 'main')
+        new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
+        new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+        return [new_name_HAB, new_name_LAB]
+    if combineDet == 'merged':
+        if ins_name == 'SANS2D':
+            rear_reduced = reduced.replace('merged', 'rear')
+            front_reduced = reduced.replace('merged', 'front')
+        else:
+            rear_reduced = reduced.replace('_merged', '')
+            front_reduced = rear_reduced.replace('main', 'HAB')
+        new_name_Merged = su.rename_workspace_correctly(ins_name, su.ReducedType.Merged, final_name, reduced)
+        new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
+        new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, front_reduced)
+        return [new_name_Merged, new_name_LAB, new_name_HAB]
+    return None
+
+
+# Helper for BatchReduce - set the user file, if it is required
+def do_set_user_file_in_batch_mode(run, current_user_file, original_user_file, settings, prop_man_settings,
+                                   combineDet, original_combine_det, ins_name):
+    try:
+        current_user_file = setUserFileInBatchMode(new_user_file=run['user_file'],
+                                                   current_user_file=current_user_file,
+                                                   original_user_file=original_user_file,
+                                                   original_settings=settings,
+                                                   original_prop_man_settings=prop_man_settings)
+
+        if current_user_file == original_user_file:
+            combineDet = original_combine_det
+        else:
+            # When we set a new user file, that means that the combineDet feature could be invalid,
+            # ie if the detector under investigation changed in the user file. We need to change this
+            # here too. But only if it is not None.
+            if combineDet is not None:
+                new_combineDet = ReductionSingleton().instrument.get_detector_selection()
+                combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
+    except (RuntimeError, ValueError) as e:
+        sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" % (
+            str(run['user_file']), str(e)))
+    return combineDet
+
+
+# Helper for BatchReduce - save a single workspace
+def save_batched_workspace(alg, workspace_name, ext, geometry_properties, save_names_dict, detnames):
+    # add the file extension, important when saving different types of file so they don't over-write each other
+    if not ext.startswith('.'):
+        ext = '.' + ext
+    if alg == "SaveCanSAS1D":
+        # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
+        # reduced data. The name of workspaces of the Transmission are available at the
+        # sample logs.
+        _ws = mtd[workspace_name]
+        transmission_properties = get_transmission_properties(_ws)
+
+        # Add the geometry properties if they exist
+        if geometry_properties:
+            transmission_properties.update(geometry_properties)
+
+        # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
+        # available
+        SaveCanSAS1D(save_names_dict[workspace_name], workspace_name + ext, DetectorNames=detnames,
+                     **transmission_properties)
+    elif alg == "SaveNXcanSAS":
+        _ws = mtd[workspace_name]
+        transmission_properties = get_transmission_properties(_ws)
+        # Call the SaveNXcanSAS with the Transmission and TransmissionCan if they are
+        # available
+        SaveNXcanSAS(save_names_dict[workspace_name], workspace_name + ext, DetectorNames=detnames,
+                     **transmission_properties)
+    elif alg == "SaveRKH":
+        SaveRKH(save_names_dict[workspace_name], workspace_name + ext, Append=False)
+    else:
+        exec (alg + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
+
+
+# Helper for BatchReduce - save the batch of resultant workspaces
+def save_workspaces_batch(names, save_as_zero_error_free, saveAlgs, geometry_properties, detnames):
+    save_names = []
+    for n in names:
+        w = mtd[n]
+        if isinstance(w, WorkspaceGroup):
+            save_names.extend(w.getNames())
+        else:
+            save_names.append(n)
+
+    # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone,
+    # else we map it to itself.
+    save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
+
+    for algor in list(saveAlgs.keys()):
+        for workspace_name in save_names:
+            save_batched_workspace(alg=algor, workspace_name=workspace_name, ext=saveAlgs[algor],
+                                   geometry_properties=geometry_properties, save_names_dict=save_names_dict,
+                                   detnames=detnames)
+
+    # If we performed a zero-error correction, then we should get rid of the cloned workspaces
+    if save_as_zero_error_free:
+        delete_cloned_workspaces(save_names_dict)
+
+
 def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
@@ -196,16 +327,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     if not format.startswith('.'):
         format = '.' + format
 
-    # Read CSV file and store information in runinfo using format IN_FORMAT
-    file_handle = open(filename, 'r')
-    runinfo = []
-    for line in file_handle:
-        # See how many pieces of information have been provided;
-        # brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
-        parts = line.rstrip().split(',')
-        if addRunToStore(parts, runinfo) > 0:
-            issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
-    file_handle.close()
+    runinfo = read_CSV_file(filename)
 
     if reducer:
         ReductionSingleton().replace(reducer)
@@ -232,26 +354,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
     # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
-        # Set the user file, if it is required
-        try:
-            current_user_file = setUserFileInBatchMode(new_user_file=run['user_file'],
-                                                       current_user_file=current_user_file,
-                                                       original_user_file=original_user_file,
-                                                       original_settings = settings,
-                                                       original_prop_man_settings = prop_man_settings)
-
-            if current_user_file == original_user_file:
-                combineDet = original_combine_det
-            else:
-                # When we set a new user file, that means that the combineDet feature could be invalid,
-                # ie if the detector under investigation changed in the user file. We need to change this
-                # here too. But only if it is not None.
-                if combineDet is not None:
-                    new_combineDet = ReductionSingleton().instrument.get_detector_selection()
-                    combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
-        except (RuntimeError, ValueError) as e:
-            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
-                str(run['user_file']), str(e)))
+        combineDet = do_set_user_file_in_batch_mode(run, current_user_file, original_user_file, settings,
+                                                    prop_man_settings, combineDet, original_combine_det, ins_name)
 
         local_settings = copy.deepcopy(ReductionSingleton().reference())
         local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
@@ -271,9 +375,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
             #Transmission runs for the can
             raw_workspaces += read_trans_runs(run, 'can', format)
 
-            if centreit == 1:
-                if verbose == 1:
-                    FindBeamCentre(50.,170.,12)
+            if centreit == 1 and verbose == 1:
+                FindBeamCentre(50., 170., 12)
 
             try:
                 geometry_properties = get_geometry_properties(ReductionSingleton())
@@ -320,86 +423,16 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         # | both           |    +_rear      |    +_front   |     -        |
         # | merged         |    +_rear      |    +_front   |     +_merged |
         # This is not great since it uses SANS2D terminology for all instruments
-
-        names = [final_name]
-        if combineDet == 'rear':
-            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, reduced)
-            names = [new_name]
-        elif combineDet == 'front':
-            new_name = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
-            names = [new_name]
-        elif combineDet == 'both':
-            if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('front', 'rear')
-            else: #if ins_name == 'lOQ':
-                rear_reduced = reduced.replace('HAB', 'main')
-            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, reduced)
-            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
-            names = [new_name_HAB, new_name_LAB]
-        elif combineDet == 'merged':
-            if ins_name == 'SANS2D':
-                rear_reduced = reduced.replace('merged', 'rear')
-                front_reduced = reduced.replace('merged', 'front')
-            else:
-                rear_reduced = reduced.replace('_merged', '')
-                front_reduced = rear_reduced.replace('main', 'HAB')
-            new_name_Merged = su.rename_workspace_correctly(ins_name, su.ReducedType.Merged, final_name, reduced)
-            new_name_LAB = su.rename_workspace_correctly(ins_name, su.ReducedType.LAB, final_name, rear_reduced)
-            new_name_HAB = su.rename_workspace_correctly(ins_name, su.ReducedType.HAB, final_name, front_reduced)
-            names = [new_name_Merged, new_name_LAB, new_name_HAB]
-        else:
+        names = convert_names(combineDet, ins_name, final_name, reduced)
+        if names is None:
+            names = [final_name]
             RenameWorkspace(InputWorkspace=reduced, OutputWorkspace=final_name)
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
         if file:
-            save_names = []
-            for n in names:
-                w = mtd[n]
-                if isinstance(w,WorkspaceGroup):
-                    save_names.extend(w.getNames())
-                else:
-                    save_names.append(n)
-
-            # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone,
-            # else we map it to itself.
-            save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
-
-            for algor in list(saveAlgs.keys()):
-                for workspace_name in save_names:
-                    #add the file extension, important when saving different types of file so they don't over-write each other
-                    ext = saveAlgs[algor]
-                    if not ext.startswith('.'):
-                        ext = '.' + ext
-                    if algor == "SaveCanSAS1D":
-                        # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
-                        # reduced data. The name of workspaces of the Transmission are available at the
-                        # sample logs.
-                        _ws = mtd[workspace_name]
-                        transmission_properties = get_transmission_properties(_ws)
-
-                        # Add the geometry properties if they exist
-                        if geometry_properties:
-                            transmission_properties.update(geometry_properties)
-
-                        # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
-                        # available
-                        SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
-                                     **transmission_properties)
-                    elif algor == "SaveNXcanSAS":
-                        _ws = mtd[workspace_name]
-                        transmission_properties = get_transmission_properties(_ws)
-                        # Call the SaveNXcanSAS with the Transmission and TransmissionCan if they are
-                        # available
-                        SaveNXcanSAS(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
-                                     **transmission_properties)
-                    elif algor == "SaveRKH":
-                        SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
-                    else:
-                        exec(algor+"('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
-            # If we performed a zero-error correction, then we should get rid of the cloned workspaces
-            if save_as_zero_error_free:
-                delete_cloned_workspaces(save_names_dict)
+            save_workspaces_batch(names=names, save_as_zero_error_free=save_as_zero_error_free, saveAlgs=saveAlgs,
+                                  geometry_properties=geometry_properties, detnames=detnames)
 
         if plotresults == 1:
             for final_name in names:
