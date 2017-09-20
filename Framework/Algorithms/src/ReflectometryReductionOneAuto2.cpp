@@ -523,7 +523,7 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 
     IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
-    calcRes->setProperty("TwoTheta", theta);
+    calcRes->setProperty("TwoTheta", 2*theta);
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
