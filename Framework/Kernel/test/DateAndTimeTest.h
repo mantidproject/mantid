@@ -8,20 +8,20 @@
 #ifndef DATEANDTIMETEST_H_
 #define DATEANDTIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
+#include <cxxtest/TestSuite.h>
+#include <sstream>
 #include <sys/stat.h>
 #include <time.h>
-#include <sstream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
+using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 class DateAndTimeTest : public CxxTest::TestSuite {
@@ -305,8 +305,7 @@ public:
     timeinfo->tm_min = 0;
     timeinfo->tm_sec = 0;
     // Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t utc_time_t =
-        Mantid::Kernel::DateAndTimeHelpers::utc_mktime(timeinfo);
+    std::time_t utc_time_t = Mantid::Kernel::DateAndTime::utc_mktime(timeinfo);
     // This will be the local time
     std::time_t local_time_t = std::mktime(timeinfo);
 
@@ -448,19 +447,6 @@ public:
     TS_ASSERT_EQUALS(times[1], DateAndTime("1990-01-02 03:04:07.000"));
     TS_ASSERT_EQUALS(times[2], DateAndTime("1990-01-02 03:04:05.500"));
     TS_ASSERT_EQUALS(times[3], DateAndTime("1990-01-02 03:04:02.000"));
-  }
-
-  void test_stringIsISO8601() {
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02 03:04:02.000"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000+05:30"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02 03:04"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1822-01-02"));
-
-    TS_ASSERT(!DateAndTime::stringIsISO8601("January 1, 2345"));
-    TS_ASSERT(!DateAndTime::stringIsISO8601("2010-31-56"));
-    TS_ASSERT(!DateAndTime::stringIsISO8601("1990-01-02 45:92:22"));
   }
 };
 

@@ -1,17 +1,12 @@
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
 
-#include <Poco/DateTime.h>
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeParser.h>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/date_time/time.hpp>
 #include <boost/date_time/date.hpp>
+#include <boost/date_time/time.hpp>
+#include <boost/lexical_cast.hpp>
 
-#include <math.h>
 #include <exception>
 #include <limits>
+#include <math.h>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -20,9 +15,6 @@ namespace Mantid {
 namespace Kernel {
 
 namespace {
-// Initialize the logger
-Logger g_log("DateAndTime");
-
 /// Max allowed nanoseconds in the time; 2^62-1
 const int64_t MAX_NANOSECONDS = 4611686018427387903LL;
 
@@ -37,9 +29,6 @@ const int64_t MIN_SECONDS = -4611686017LL;
 
 /// Number of nanoseconds in one second
 const int64_t NANO_PER_SEC = 1000000000LL;
-}
-
-namespace DateAndTimeHelpers {
 
 //-----------------------------------------------------------------------------------------------
 /** Convert time_t to tm as UTC time.
@@ -64,6 +53,7 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
   return gmtime_r(clock, result);
 #endif
 }
+} // namespace
 
 //-----------------------------------------------------------------------------------------------
 /// utc_mktime() converts a struct tm that contains
@@ -88,7 +78,7 @@ std::tm *gmtime_r_portable(const std::time_t *clock, struct std::tm *result) {
 ///    Copyright (C) 2010, Chris Frey <cdfrey@foursquare.net>, To God be the
 ///    glory
 ///    Released to the public domain.
-time_t utc_mktime(struct tm *utctime) {
+time_t DateAndTime::utc_mktime(struct tm *utctime) {
   time_t result;
   struct tm tmp, check;
 
@@ -131,8 +121,6 @@ time_t utc_mktime(struct tm *utctime) {
   }
   return result;
 }
-
-} // namespace DateAndTimeHelpers
 
 //------------------------------------------------------------------------------------------------
 /** Default, empty constructor */
@@ -237,7 +225,7 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
  * @return a boost::posix_time::ptime.
  */
 boost::posix_time::ptime DateAndTime::to_ptime() const {
-  return DateAndTimeHelpers::GPS_EPOCH + durationFromNanoseconds(_nanoseconds);
+  return GPS_EPOCH + durationFromNanoseconds(_nanoseconds);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -255,8 +243,7 @@ void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime) {
     if (_ptime.is_not_a_date_time())
       _nanoseconds = MIN_NANOSECONDS;
   } else {
-    _nanoseconds =
-        nanosecondsFromDuration(_ptime - DateAndTimeHelpers::GPS_EPOCH);
+    _nanoseconds = nanosecondsFromDuration(_ptime - GPS_EPOCH);
 
     // Check for overflow
     if (_nanoseconds < 0) {
@@ -294,7 +281,7 @@ void DateAndTime::set_from_time_t(std::time_t _timet) {
  */
 std::time_t DateAndTime::to_time_t() const {
   std::tm as_tm = boost::posix_time::to_tm(this->to_ptime());
-  std::time_t to_time_t = DateAndTimeHelpers::utc_mktime(&as_tm);
+  std::time_t to_time_t = utc_mktime(&as_tm);
   return to_time_t;
 }
 
@@ -384,27 +371,6 @@ const DateAndTime &DateAndTime::defaultTime() {
 void DateAndTime::setFromISO8601(const std::string &str, bool displayLogs) {
   // Make a copy
   std::string time = str;
-  // Some ARGUS files have an invalid date with a space instead of zero.
-  // To enable such files to be loaded we correct the date and issue a warning
-  // (ticket #4017).
-  std::string date = time.substr(
-      0, 10); // just take the date not the time or any date-time separator
-  const size_t nSpace = date.find(' ');
-  if (nSpace != std::string::npos) {
-    if (displayLogs) {
-      g_log.warning() << "Invalid ISO8601 date " << time;
-    }
-    time[nSpace] = '0'; // replace space with 0
-
-    // Do again in case of second space
-    date[nSpace] = '0';
-    const size_t nSecondSpace = date.find(' ');
-    if (nSecondSpace != std::string::npos)
-      time[nSecondSpace] = '0';
-    if (displayLogs) {
-      g_log.warning() << " corrected to " << time << '\n';
-    }
-  }
 
   // Default of no timezone offset
   bool positive_offset = true;
@@ -889,19 +855,6 @@ void DateAndTime::createVector(const DateAndTime start,
         startnano + static_cast<int64_t>(second * 1000000000.0);
     i++;
   }
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Check if a string is iso8601 format.
- *
- * @param str :: string to check
- * @return true if the string conforms to ISO 860I, false otherwise.
- */
-bool DateAndTime::stringIsISO8601(const std::string &str) {
-  Poco::DateTime dt;
-  int tz_diff;
-  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT,
-                                        str, dt, tz_diff);
 }
 
 std::ostream &operator<<(std::ostream &stream, const DateAndTime &t) {
