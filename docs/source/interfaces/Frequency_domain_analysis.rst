@@ -42,9 +42,9 @@ In this mode the interface displays two tables, FFT and Advanced options. The FF
 all of the information required to produce a forward FFT. The Advanced Options table contains the information
 for adding padding and apodization functions to the data. 
 
-Selecting the workspace to be ``PhaseQuad`` will cause the :ref:`PhaseQuad <algm-PhaseQuad>` algortihm to be called first. If no phase table is available then
+Selecting the workspace to be ``PhaseQuad`` will cause the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm to be called first. If no phase table is available then
 the interface will generate one and output the result as ``PhaseTable``. It is possible to select the direction of the axis when generating the table and it is
-possoble to use a pre-existing ``PhaseTable``. **Note that the PhaseQuad option requires the data archieve to be in the search directory. 
+possible to use a pre-existing ``PhaseTable``. **Note that the PhaseQuad option requires the data archieve to be in the search directory**. 
 
 The Calculate button will execute the :ref:`Padding and Apodization <algm-PaddingAndApodization>`  and then :ref:`FFT <algm-FFT>` algortihms. The output workspace will be added to
 ``FFTMuon``. 
