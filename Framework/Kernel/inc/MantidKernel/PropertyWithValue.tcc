@@ -271,7 +271,7 @@ TYPE &PropertyWithValue<TYPE>::operator=(const TYPE &value) {
     m_value = value;
   }
   std::string problem = this->isValid();
-  if (problem == "") {
+  if (problem.empty()) {
     return m_value;
   } else if (problem == "_alias") {
     m_value = getValueForAlias(value);

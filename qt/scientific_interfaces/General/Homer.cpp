@@ -728,9 +728,9 @@ void Homer::setIDFValues(const QString &) {
                        "bkg_rane = prop_man.bkgd_range\n";
   param_defs = param_defs.arg(prefix);
 
-  param_defs += "print '{0}\\n{1}\\n{2}\\n{3}\\n{4}\\n{5}\\n'"
+  param_defs += "print('{0}\\n{1}\\n{2}\\n{3}\\n{4}\\n{5}\\n'"
                 ".format(int_range[0],int_range[1],prop_man.van_mass,"
-                "bkg_rane[0],bkg_rane[1],str(prop_man.check_background))\n";
+                "bkg_rane[0],bkg_rane[1],str(prop_man.check_background)))\n";
 
   QString pyOutput = runPythonCode(param_defs).trimmed();
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);

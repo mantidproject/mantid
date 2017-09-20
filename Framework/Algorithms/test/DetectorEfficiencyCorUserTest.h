@@ -74,12 +74,15 @@ public:
     if (!inWS)
       return;
 
-    const auto eff0 = efficiency(m_Ei);
-    for (size_t i = 0; i != outWS->getNumberHistograms(); ++i) {
+    const auto nHisto = outWS->getNumberHistograms();
+    for (size_t i = 0; i != nHisto; ++i) {
+      auto eff0 =
+          i < nHisto / 2 ? efficiencyBank1(m_Ei) : efficiencyBank2(m_Ei);
       const auto &ys = outWS->counts(i);
       const auto &es = outWS->countStandardDeviations(i);
       for (size_t j = 0; j != ys.size(); ++j) {
-        const auto eff = efficiency(m_Efs[j]);
+        const auto eff = i < nHisto / 2 ? efficiencyBank1(m_Efs[j])
+                                        : efficiencyBank2(m_Efs[j]);
         // By default, input workspace has y = 2, e = sqrt(2).
         TS_ASSERT_DELTA(ys[j], 2 * eff0 / eff, 1e-6);
         TS_ASSERT_DELTA(es[j], std::sqrt(2) * eff0 / eff, 1e-6);
@@ -95,9 +98,14 @@ private:
   static constexpr double m_Ei = 3.27;
   static const int m_numBins = 20;
 
-  static double efficiency(double e) {
+  static double efficiencyBank1(const double e) {
     return std::exp(-1.0 / std::sqrt(e)) *
            (1.0 - std::exp(-1.0 / std::sqrt(e)));
+  }
+
+  static double efficiencyBank2(const double e) {
+    return std::exp(-2.0 / std::sqrt(e)) *
+           (1.0 - std::exp(-2.0 / std::sqrt(e)));
   }
 
   // Final energies.
@@ -105,7 +113,7 @@ private:
   const std::string m_inWSName, m_outWSName;
 
   void createInputWorkSpace() const {
-    int numBanks = 1;
+    int numBanks = 2;
     int numPixels = 10;
 
     DataObjects::Workspace2D_sptr dataws =
@@ -125,10 +133,13 @@ private:
     dataws->getAxis(0)->setUnit("DeltaE");
     dataws->mutableRun().addProperty("Ei", double(m_Ei));
     // Efficiency formula should be the same as in efficiency().
+    const auto instrument = dataws->getInstrument();
+    auto bank = instrument->getComponentByName("bank1");
     dataws->instrumentParameters().addString(
-        dataws->getInstrument()->getChild(0).get(), "formula_eff",
-        "exp(-1.0/sqrt(e))*(1.0-exp(-1.0/sqrt(e)))");
-
+        bank.get(), "formula_eff", "exp(-1/sqrt(e))*(1-exp(-1/sqrt(e)))");
+    bank = instrument->getComponentByName("bank2");
+    dataws->instrumentParameters().addString(
+        bank.get(), "formula_eff", "exp(-2/sqrt(e))*(1-exp(-2/sqrt(e)))");
     API::AnalysisDataService::Instance().addOrReplace(m_inWSName, dataws);
   }
 };

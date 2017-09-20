@@ -134,11 +134,11 @@ typedef double (*fptr)(const double time, const double decayConstant);
 */
 fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
   if (method == "None") {
-    return none;
+    return ApodizationFunctions::none;
   } else if (method == "Lorentz") {
-    return lorentz;
+    return ApodizationFunctions::lorentz;
   } else if (method == "Gaussian") {
-    return gaussian;
+    return ApodizationFunctions::gaussian;
   }
   throw std::invalid_argument("The apodization function selected " + method +
                               " is not a valid option");

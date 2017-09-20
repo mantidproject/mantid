@@ -1,4 +1,5 @@
 #include "MantidHistogramData/Histogram.h"
+#include <sstream>
 
 namespace Mantid {
 namespace HistogramData {
@@ -251,8 +252,12 @@ template <> void Histogram::checkSize(const BinEdges &binEdges) const {
   // 0 points -> 0 edges, otherwise edges are 1 more than points.
   if (xMode() == XMode::Points && target > 0)
     target++;
-  if (target != binEdges.size())
-    throw std::logic_error("Histogram: size mismatch of BinEdges\n");
+  if (target != binEdges.size()) {
+    std::stringstream msg;
+    msg << "Histogram: size mismatch of BinEdges: (" << target
+        << " != " << binEdges.size() << ")";
+    throw std::logic_error(msg.str());
+  }
 }
 
 /** Resets the size of the internal x, dx, y, and e data structures

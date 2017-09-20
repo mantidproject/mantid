@@ -331,7 +331,7 @@ bool ChangeTimeZero::checkForDateTime(const std::string &val) const {
   // Hedge for bad lexical casts in the DateTimeValidator
   try {
     DateTimeValidator validator = DateTimeValidator();
-    isDateTime = validator.isValid(val) == "";
+    isDateTime = validator.isValid(val).empty();
   } catch (...) {
     isDateTime = false;
   }

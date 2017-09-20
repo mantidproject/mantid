@@ -792,7 +792,7 @@ void FilterEvents::convertSplittersWorkspaceToVectors() {
     Kernel::SplittingInterval splitter = m_splitters[i_splitter];
     int64_t start_time_i64 = splitter.start().totalNanoseconds();
     int64_t stop_time_i64 = splitter.stop().totalNanoseconds();
-    if (m_vecSplitterTime.size() == 0) {
+    if (m_vecSplitterTime.empty()) {
       // first entry: add
       m_vecSplitterTime.push_back(start_time_i64);
       m_vecSplitterTime.push_back(stop_time_i64);
@@ -949,7 +949,7 @@ void FilterEvents::processTableSplittersWorkspace() {
     int64_t stop_64 =
         filter_shift_time + static_cast<int64_t>(stop_time * 1.E9);
 
-    if (m_vecSplitterTime.size() == 0) {
+    if (m_vecSplitterTime.empty()) {
       // first splitter: push the start time to vector
       m_vecSplitterTime.push_back(start_64);
     } else if (start_64 - m_vecSplitterTime.back() > TOLERANCE) {
@@ -973,7 +973,7 @@ void FilterEvents::processTableSplittersWorkspace() {
     // convert string-target to integer target
     bool addnew = false;
     int int_target(-1);
-    if (m_targetIndexMap.size() == 0) {
+    if (m_targetIndexMap.empty()) {
       addnew = true;
     } else {
       std::map<std::string, int>::iterator mapiter =
