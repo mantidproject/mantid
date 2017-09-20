@@ -18,27 +18,46 @@ ADD_FILES_NEW_TEMPORARY = "AddFilesNewTempory"
 ADD_FILES_NEW_TEMPORARY_MONITORS = "AddFilesNewTempory_monitors"
 
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False,
-             binning='Monitors', saveAsEvent=False, isOverlay = False, time_shifts=None):
+def cleanup_temporary_workspaces(workspaces):
+    for workspace in workspaces:
+        if workspace in mtd:
+            DeleteWorkspace(workspace)
+
+
+def get_path_out(out_file):
+    # this adds the path to the filename
+    path, base = os.path.split(out_file)
+    if path == '' or base not in os.listdir(path):
+        # Try the default save directory
+        path = config['defaultsave.directory'] + path
+        # If the path is still an empty string check in the current working directory
+        if path == '':
+            path = os.getcwd()
+        assert base in os.listdir(path)
+    return path
+
+
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add', '.RAW'), lowMem=False,
+             binning='Monitors', saveAsEvent=False, isOverlay=False, time_shifts=None):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
-  #check if there is at least one file in the list
+    # check if there is at least one file in the list
     if len(runs) < 1:
         return
 
     if not defType.startswith('.'):
-        defType = '.'+defType
+        defType = '.' + defType
 
     # Create the correct format of adding files
     if time_shifts is None:
         time_shifts = []
     adder = AddOperation(isOverlay, time_shifts)
 
-  #these input arguments need to be arrays of strings, enforce this
+    # these input arguments need to be arrays of strings, enforce this
     if isinstance(runs, str):
         runs = (runs, )
     if isinstance(rawTypes, str):
-        rawTypes = (rawTypes, )
+        rawTypes = (rawTypes,)
 
     if lowMem:
         lowMem = _can_load_periods(runs, defType, rawTypes)
@@ -47,130 +66,102 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     else:
         period = _NO_INDIVIDUAL_PERIODS
 
-    userEntry = runs[0]
+    user_entry = runs[0]
 
     counter_run = 0
 
     while True:
 
-        isFirstDataSetEvent = False
+        is_first_data_set_event = False
         is_first_data_set_group_workspace = False
-    #we need to catch all exceptions to ensure that a dialog box is raised with the error
-        try :
-            lastPath, lastFile, logFile, num_periods, isFirstDataSetEvent = _loadWS(
-                userEntry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
+        # we need to catch all exceptions to ensure that a dialog box is raised with the error
+        try:
+            last_path, last_file, log_file, num_periods, is_first_data_set_event = _loadWS(
+                user_entry, defType, inst, ADD_FILES_SUM_TEMPORARY, rawTypes, period)
 
             is_not_allowed_instrument = inst.upper() != 'SANS2D' and inst.upper() != 'LARMOR'
-            if is_not_allowed_instrument and isFirstDataSetEvent:
+            if is_not_allowed_instrument and is_first_data_set_event:
                 error = 'Adding event data not supported for ' + inst + ' for now'
                 print(error)
                 logger.notice(error)
-                for workspaceName in (ADD_FILES_SUM_TEMPORARY,ADD_FILES_SUM_TEMPORARY_MONITORS):
-                    if workspaceName in mtd:
-                        DeleteWorkspace(workspaceName)
+                cleanup_temporary_workspaces((ADD_FILES_SUM_TEMPORARY,ADD_FILES_SUM_TEMPORARY_MONITORS))
                 return ""
 
             for i in range(len(runs)-1):
-                userEntry = runs[i+1]
-                lastPath, lastFile, logFile, dummy, isDataSetEvent = _loadWS(
-                    userEntry, defType, inst, ADD_FILES_NEW_TEMPORARY, rawTypes, period)
+                user_entry = runs[i+1]
+                last_path, last_file, log_file, dummy, is_data_set_event = _loadWS(
+                    user_entry, defType, inst, ADD_FILES_NEW_TEMPORARY, rawTypes, period)
 
-                if isDataSetEvent != isFirstDataSetEvent:
+                if is_data_set_event != is_first_data_set_event:
                     error = 'Datasets added must be either ALL histogram data or ALL event data'
                     print(error)
                     logger.notice(error)
-                    for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS,
-                                          ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS):
-                        if workspaceName in mtd:
-                            DeleteWorkspace(workspaceName)
+                    cleanup_temporary_workspaces((ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS,
+                                                  ADD_FILES_NEW_TEMPORARY, ADD_FILES_NEW_TEMPORARY_MONITORS))
                     return ""
 
                 adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY,RHS_workspace=ADD_FILES_NEW_TEMPORARY,
                           output_workspace=ADD_FILES_SUM_TEMPORARY, run_to_add=counter_run)
 
-                if isFirstDataSetEvent:
+                if is_first_data_set_event:
                     adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
                               RHS_workspace= ADD_FILES_NEW_TEMPORARY_MONITORS,
                               output_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
                               run_to_add = counter_run)
                 DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
-                if isFirstDataSetEvent:
+                if is_first_data_set_event:
                     DeleteWorkspace(ADD_FILES_NEW_TEMPORARY_MONITORS)
                 # Increment the run number
-                counter_run +=1
+                counter_run += 1
         except ValueError as e:
-            error = 'Error opening file ' + userEntry+': ' + str(e)
+            error = 'Error opening file ' + user_entry+': ' + str(e)
             print(error)
             logger.notice(error)
-            if ADD_FILES_SUM_TEMPORARY in mtd :
-                DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
+            cleanup_temporary_workspaces((ADD_FILES_SUM_TEMPORARY,))
             return ""
         except Exception as e:
             error = 'Error finding files: ' + str(e)
             print(error)
             logger.notice(error)
-            for workspaceName in (ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY):
-                if workspaceName in mtd:
-                    DeleteWorkspace(workspaceName)
+            cleanup_temporary_workspaces((ADD_FILES_SUM_TEMPORARY, ADD_FILES_NEW_TEMPORARY))
             return ""
-    # in case of event file force it into a histogram workspace if this is requested
-        if isFirstDataSetEvent and not saveAsEvent:
+        # in case of event file force it into a histogram workspace if this is requested
+        if is_first_data_set_event and not saveAsEvent:
             handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace,
                                                                    runs, defType, inst)
 
-        lastFile = os.path.splitext(lastFile)[0]
-    # now save the added file
-        outFile = lastFile+'-add.'+'nxs'
-        outFile_monitors = lastFile+'-add_monitors.'+'nxs'
-        logger.notice('writing file:   '+outFile)
+        last_file = os.path.splitext(last_file)[0]
+        # now save the added file
+        out_file = last_file+'-add.'+'nxs'
+        out_file_monitors = last_file+'-add_monitors.'+'nxs'
+        logger.notice('writing file:   '+out_file)
 
-        if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
-        #replace the file the first time around
-            SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY,
-                               Filename=outFile, Append=False)
-            # If we are saving event data, then we need to save also the monitor file
-            if isFirstDataSetEvent and saveAsEvent:
-                SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
-                                   Filename=outFile_monitors, Append=False)
-
-        else:
-      #then append
-            SaveNexusProcessed(ADD_FILES_SUM_TEMPORARY, outFile, Append=True)
-            if isFirstDataSetEvent and saveAsEvent:
-                SaveNexusProcessed(ADD_FILES_SUM_TEMPORARY_MONITORS, outFile_monitors , Append=True)
+        append = period != 1 and period != _NO_INDIVIDUAL_PERIODS
+        SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY, Filename=out_file, Append=append)
+        if is_first_data_set_event and saveAsEvent:
+            SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, FIlename=out_file_monitors,
+                               Append=append)
 
         DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
-        if isFirstDataSetEvent:
+        if is_first_data_set_event:
             DeleteWorkspace(ADD_FILES_SUM_TEMPORARY_MONITORS)
 
-        if period == num_periods:
-            break
-
-        if period == _NO_INDIVIDUAL_PERIODS:
+        if period == num_periods or period == _NO_INDIVIDUAL_PERIODS:
             break
         else:
             period += 1
 
-    if isFirstDataSetEvent and saveAsEvent:
+    if is_first_data_set_event and saveAsEvent:
         filename, ext = _makeFilename(runs[0], defType, inst)
         workspace_type = get_workspace_type(filename)
-        is_multi_period = True if workspace_type is WorkspaceType.MultiperiodEvent else False
-        outFile = bundle_added_event_data_as_group(outFile, outFile_monitors, is_multi_period)
+        is_multi_period = workspace_type is WorkspaceType.MultiperiodEvent
+        out_file = bundle_added_event_data_as_group(out_file, out_file_monitors, is_multi_period)
 
-  #this adds the path to the filename
-    path,base = os.path.split(outFile)
-    if path == '' or base not in os.listdir(path):
-        # Try the default save directory
-        path = config['defaultsave.directory'] + path
-        # If the path is still an empty string check in the current working directory
-        if path == '':
-            path = os.getcwd()
-        assert base in os.listdir(path)
-    pathout = path
-    if logFile:
-        _copyLog(lastPath, logFile, pathout)
+    pathout = get_path_out(out_file)
+    if log_file:
+        _copyLog(last_path, log_file, pathout)
 
-    return 'The following file has been created:\n'+outFile
+    return 'The following file has been created:\n'+out_file
 
 
 def handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace, runs, defType, inst):
