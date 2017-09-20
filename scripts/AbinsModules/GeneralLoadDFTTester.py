@@ -131,13 +131,17 @@ class GeneralLoadDFTTester(object):
         :returns: phonon data
         """
         # 1) Read data
-        filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
-        dft_reader = loader(input_dft_filename=filename)
+        try:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
+            ab_initio_reader = loader(input_dft_filename=read_filename)
+        except ValueError:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
+            ab_initio_reader = loader(input_dft_filename=read_filename)
 
-        data = self._get_reader_data(dft_reader=dft_reader)
+        data = self._get_reader_data(dft_reader=ab_initio_reader)
 
         # test validData method
-        self.assertEqual(True, dft_reader._clerk._valid_hash())
+        self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
 
         return data
 
