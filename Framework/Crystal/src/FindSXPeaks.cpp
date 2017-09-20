@@ -128,26 +128,25 @@ void FindSXPeaks::init() {
   // Declare
   std::vector<std::string> resolutionStrategy = {
       relativeResolutionStrategy, absoluteResolutionPeaksStrategy};
-  declareProperty(
-      "ResolutionStrategy", relativeResolutionStrategy,
-      boost::make_shared<StringListValidator>(resolutionStrategy),
-      "Different options for the resolution."
-      "1. RelativeResolution: This defines a relative tolerance "
-      "needed to avoid peak duplication in number of pixels. "
-      "This selection will enable the Resolution property and "
-      "disable the XUnitResolution, PhiResolution, ThetaResolution.\n"
-      "1. AbsoluteResolution: This defines an absolute tolerance "
-      "needed to avoid peak duplication in number of pixels. "
-      "This selection will disable the Resolution property and "
-      "enable the XUnitResolution, PhiResolution, "
-      "ThetaResolution.\n");
+  declareProperty("ResolutionStrategy", relativeResolutionStrategy,
+                  boost::make_shared<StringListValidator>(resolutionStrategy),
+                  "Different options for the resolution."
+                  "1. RelativeResolution: This defines a relative tolerance "
+                  "needed to avoid peak duplication in number of pixels. "
+                  "This selection will enable the Resolution property and "
+                  "disable the XResolution, PhiResolution, ThetaResolution.\n"
+                  "1. AbsoluteResolution: This defines an absolute tolerance "
+                  "needed to avoid peak duplication in number of pixels. "
+                  "This selection will disable the Resolution property and "
+                  "enable the XResolution, PhiResolution, "
+                  "ThetaResolution.\n");
 
   declareProperty(
       "Resolution", 0.01, mustBePositiveDouble,
       "Tolerance needed to avoid peak duplication in number of pixels");
 
   declareProperty(
-      "XUnitResolution", 5000., mustBePositiveDouble,
+      "XResolution", 5000., mustBePositiveDouble,
       "Absolute tolerance in time-of-flight or d-spacing needed to avoid peak "
       "duplication in number of pixels. The values are specified "
       "in microseconds.");
@@ -170,7 +169,7 @@ void FindSXPeaks::init() {
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           relativeResolutionStrategy));
 
-  setPropertySettings("XUnitResolution",
+  setPropertySettings("XResolution",
                       make_unique<EnabledWhenProperty>(
                           "ResolutionStrategy",
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
@@ -197,7 +196,7 @@ void FindSXPeaks::init() {
   const std::string resolutionGroup = "Resolution Settings";
   setPropertyGroup("ResolutionStrategy", resolutionGroup);
   setPropertyGroup("Resolution", resolutionGroup);
-  setPropertyGroup("XUnitResolution", resolutionGroup);
+  setPropertyGroup("XResolution", resolutionGroup);
   setPropertyGroup("PhiResolution", resolutionGroup);
   setPropertyGroup("TwoThetaResolution", resolutionGroup);
 
@@ -411,7 +410,7 @@ FindSXPeaks::getCompareStrategy() const {
     return Mantid::Kernel::make_unique<
         FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
   } else {
-    double xUnitResolution = getProperty("XUnitResolution");
+    double xUnitResolution = getProperty("XResolution");
     double phiResolution = getProperty("PhiResolution");
     double twoThetaResolution = getProperty("TwoThetaResolution");
     const auto tofUnits = getWorkspaceXAxisUnit(getProperty("InputWorkspace"));
