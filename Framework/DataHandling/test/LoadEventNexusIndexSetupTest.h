@@ -2,26 +2,96 @@
 #define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/FakeObjects.h"
 
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidIndexing/SpectrumNumber.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
-using Mantid::DataHandling::LoadEventNexusIndexSetup;
+using namespace Mantid;
+using namespace API;
+using namespace Geometry;
+using namespace DataObjects;
+using namespace DataHandling;
+using namespace Indexing;
 
 class LoadEventNexusIndexSetupTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadEventNexusIndexSetupTest *createSuite() { return new LoadEventNexusIndexSetupTest(); }
-  static void destroySuite( LoadEventNexusIndexSetupTest *suite ) { delete suite; }
-
-
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  static LoadEventNexusIndexSetupTest *createSuite() {
+    return new LoadEventNexusIndexSetupTest();
+  }
+  static void destroySuite(LoadEventNexusIndexSetupTest *suite) {
+    delete suite;
   }
 
+  LoadEventNexusIndexSetupTest() {
+    auto instrument = boost::make_shared<Instrument>();
+    // Create instrument with gap in detector ID range
+    for (auto detID : {1, 2, 11, 12}) {
+      auto *det = new Detector("det-" + std::to_string(detID), detID, nullptr);
+      instrument->add(det);
+      instrument->markAsDetector(det);
+    }
+    m_ws = create<WorkspaceTester>(instrument, 1, HistogramData::BinEdges(2));
+  }
 
+  void test_construct() {
+    LoadEventNexusIndexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+  }
+
+  void test_makeIndexInfo_no_filter() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 4);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(3));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(3), SpectrumNumber(4));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(3), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_min() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 11, EMPTY_INT(), {});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    // Note that spectrum numbers are now detector IDs. This is not consistent
+    // with the load without filter, but it is the old behavior. Can we change
+    // this to be more sensible?
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(11));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(12));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    // Old behavior would have given detector indices 1 and 2 (instead of 2 and
+    // 3), mapping to detector IDs 2 and 11, instead of the requested 11 and 12.
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_min_crossing_gap() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, EMPTY_INT(), {});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    // Note that we are NOT creating spectra for the gap between IDs 2 and 11,
+    // contrary to the old behavior.
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(12));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(3));
+  }
+
+private:
+  MatrixWorkspace_sptr m_ws;
 };
-
 
 #endif /* MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUPTEST_H_ */

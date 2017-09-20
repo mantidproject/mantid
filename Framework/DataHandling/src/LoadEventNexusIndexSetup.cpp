@@ -136,8 +136,11 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
           indexInfo.spectrumNumber(indexInfo.size() - 1));
     if (m_min == EMPTY_INT())
       m_min = static_cast<specnum_t>(indexInfo.spectrumNumber(0));
-    for (int32_t i = m_min; i <= m_max; i++)
-      m_range.push_back(i);
+    // Avoid adding non-existing indices (can happen if instrument has gaps in
+    // its detector IDs). IndexInfo does the filtering for use.
+    const auto indices = indexInfo.makeIndexSet(m_min, m_max);
+    for (const auto &index : indices)
+      m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   if (!m_range.empty()) {
     // Check if SpectrumList was supplied (or filled via min/max above)
