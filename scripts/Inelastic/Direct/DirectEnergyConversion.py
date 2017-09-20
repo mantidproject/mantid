@@ -394,26 +394,8 @@ class DirectEnergyConversion(object):
 
         PropertyManager.sample_run.set_action_suffix('')
         sample_ws = PropertyManager.sample_run.get_workspace()
-        # Check auto-ei mode and calculate incident energies if necessary
-        if PropertyManager.incident_energy.autoEi_mode():
-            mon_ws = PropertyManager.sample_run.get_monitors_ws()
-            # sum monitor spectra if this is requested
-            ei_mon_spec = self.ei_mon_spectra
-            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
-                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
-                sample_ws.setMonitorWorkspace(mon_ws)
-            else:
-                pass
 
-            try:
-                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
-                EiToProcessAvailible = True
-            except RuntimeError as er:
-                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.
-                             format(str(er)))
-                EiToProcessAvailible = False
-        else:
-            EiToProcessAvailible = True
+        ei_to_process_available = self.calc_incident_energies(PropertyManager, prop_man, sample_ws)
 
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
@@ -430,7 +412,7 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
-        if not EiToProcessAvailible:
+        if not ei_to_process_available:
             prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
             prop_man.log("*** NOTHING TO REDUCE ******************************************")
             prop_man.log("****************************************************************")
@@ -576,23 +558,54 @@ class DirectEnergyConversion(object):
 # END Main loop over incident energies
 #------------------------------------------------------------------------------------------
 
+        self.clean_up_convert_to_energy(start_time)
+        return result
+
+
+#------------------------------------------------------------------------------------------
+    # Handles cleanup of the convert_to_energy method
+
+    def clean_up_convert_to_energy(self, start_time):
+
         #Must! clear background ws (if present in multirep) to calculate background
         #source for next workspace
         if 'bkgr_ws_source' in mtd:
             DeleteWorkspace('bkgr_ws_source')
 
-        # CLEAR existing workspaces only if it is not run within loop
-
-        #prop_man.monovan_run = None
-        #prop_man.wb_run = None
         # clear combined mask
         self.spectra_masks = None
         end_time = time.time()
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
-        prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".
-                     format(end_time - start_time),'notice')
-        prop_man.log("****************************************************************")
-        return result
+        self.prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
+        self.prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".
+                          format(end_time - start_time),'notice')
+        self.prop_man.log("****************************************************************")
+
+#------------------------------------------------------------------------------------------
+    # Check auto-ei mode and calculate incident energies if necessary
+    # Returns if there is a processible Ei
+
+    def calc_incident_energies(self, PropertyManager, prop_man, sample_ws):
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            # sum monitor spectra if this is requested
+            ei_mon_spec = self.ei_mon_spectra
+            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
+                sample_ws.setMonitorWorkspace(mon_ws)
+            else:
+                pass
+
+            try:
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
+                return True
+            except RuntimeError as er:
+                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.
+                             format(str(er)))
+                return False
+        else:
+            return True
+
+#------------------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,
