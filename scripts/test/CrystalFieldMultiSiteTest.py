@@ -485,7 +485,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion0.IntensityScaling=0.125*ion1.IntensityScaling' in s)
 
     def test_multi_ion_intensity_scaling(self):
-        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField import CrystalField
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
                   'Temperature': 44.0, 'FWHM': 1.1}
         cf1 = CrystalField('Ce', 'C2v', **params)
@@ -532,7 +532,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in s)
 
     def test_multi_ion_intensity_scaling_multi_spectrum(self):
-        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField import CrystalField
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
                   'Temperature': [44.0, 50], 'FWHM': [1.1, 1.6]}
         cf1 = CrystalField('Ce', 'C2v', **params)
