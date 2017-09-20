@@ -22,6 +22,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -376,6 +377,33 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
       *space, includeMonitors, startYNegative, instrumentName);
 
   return space;
+}
+
+//================================================================================================================
+/*
+ * startTime is in seconds
+ */
+MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime,
+    size_t firstInterval, bool includeMonitors, bool startYNegative,
+    bool isHistogram, const std::string &instrumentName) {
+
+  auto baseWS = create2DWorkspaceWithFullInstrument(
+      nhist, nbins, includeMonitors, startYNegative, isHistogram,
+      instrumentName);
+
+  auto builder =
+      ScanningWorkspaceBuilder(baseWS->getInstrument(), nTimeIndexes, nbins);
+
+  std::vector<double> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i) {
+    timeRanges.push_back(double(i + firstInterval));
+  }
+
+  builder.setTimeRanges(Mantid::Kernel::DateAndTime(int(startTime), 0),
+                        timeRanges);
+
+  return builder.buildWorkspace();
 }
 
 //================================================================================================================

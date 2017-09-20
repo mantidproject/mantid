@@ -8,6 +8,12 @@ set ( TEST_PY_FILES
   BayesQuasiTest.py
   BayesStretchTest.py
   DetectorFloodWeightingTest.py
+  DirectILLApplySelfShieldingTest.py
+  DirectILLCollectDataTest.py
+  DirectILLDiagnosticsTest.py
+  DirectILLIntegrateVanadiumTest.py
+  DirectILLReductionTest.py
+  DirectILLSelfShieldingTest.py
   EnergyWindowScanTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   IndirectAnnulusAbsorptionTest.py

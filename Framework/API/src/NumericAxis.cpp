@@ -32,57 +32,29 @@ namespace Mantid {
 namespace API {
 
 //------------------------------------------------------------------------------
-// static members
-//------------------------------------------------------------------------------
-
-/**
- * @param value A value to find in a bin
- * @param edges A list of edges that define the bins
- * @return The index of the bin holding the value
- */
-size_t NumericAxis::indexOfValue(const double value,
-                                 const std::vector<double> &edges) {
-  if (value < edges.front()) {
-    throw std::out_of_range(
-        "NumericAxis::indexOfValue() - Input lower than first value.");
-  }
-  auto it = std::lower_bound(edges.begin(), edges.end(), value);
-  if (it == edges.end()) {
-    // Out of range
-    throw std::out_of_range(
-        "NumericAxis::indexOfValue() - Input value out of range");
-  }
-  // index of closest edge above value is distance of iterator from start
-  size_t edgeIndex = std::distance(edges.begin(), it);
-  // index of bin centre is one less since the first boundary offsets the whole
-  // range
-  // need to protect for case where value equals lowest bin boundary as that
-  // will return &
-  // not 1
-  if (edgeIndex > 0)
-    return edgeIndex - 1;
-  else
-    return edgeIndex;
-}
-
-//------------------------------------------------------------------------------
 // public members
 //------------------------------------------------------------------------------
+
+/** Returns the index of the value wrt bin edge representation of the axis
+ * @param value A value to find in a bin
+ * @return The index of the bin holding the value
+ */
+size_t NumericAxis::indexOfValue(const double value) const {
+  return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(m_values, value);
+}
 
 /** Constructor
  * @param length size of the numeric axis
  */
 NumericAxis::NumericAxis(const std::size_t &length)
-    : Axis(), m_values(length), m_edges(length + 1) {}
+    : Axis(), m_values(length) {}
 
 /**
  * Constructor taking a set of centre point values
  * @param centres A vector of values to assign to the axis
  */
 NumericAxis::NumericAxis(const std::vector<double> &centres)
-    : Axis(), m_values(centres), m_edges(centres.size() + 1) {
-  Kernel::VectorHelper::convertToBinBoundary(m_values, m_edges);
-}
+    : Axis(), m_values(centres) {}
 
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
@@ -100,8 +72,6 @@ Axis *NumericAxis::clone(const std::size_t length,
   auto newAxis = new NumericAxis(*this);
   newAxis->m_values.clear();
   newAxis->m_values.resize(length);
-  newAxis->m_edges.clear();
-  newAxis->m_edges.resize(length + 1);
   return newAxis;
 }
 
@@ -135,20 +105,6 @@ void NumericAxis::setValue(const std::size_t &index, const double &value) {
   }
 
   m_values[index] = value;
-  // Recompute edges. Inefficient but we want this method to disappear in favour
-  // of passing all values to the constructor
-  Kernel::VectorHelper::convertToBinBoundary(m_values, m_edges);
-}
-
-/**
- * Treats values as bin centres and computes bin widths from the surrounding
- * values. The index returned is the index of the bin
- * @param value A value on the axis
- * @return The index closest to given value
- * @throws std::out_of_range if the value is out of range of the axis
- */
-size_t NumericAxis::indexOfValue(const double value) const {
-  return this->indexOfValue(value, m_edges);
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent
@@ -208,7 +164,10 @@ std::string NumericAxis::label(const std::size_t &index) const {
  * @returns A vector of bin boundaries
  */
 std::vector<double> NumericAxis::createBinBoundaries() const {
-  return this->m_edges;
+  std::vector<double> result;
+  result.reserve(m_values.size());
+  Kernel::VectorHelper::convertToBinBoundary(m_values, result);
+  return result;
 }
 
 /** Get a const reference to the vector of values in this axis
@@ -222,7 +181,7 @@ const std::vector<double> &NumericAxis::getValues() const { return m_values; }
 //------------------------------------------------------------------------------
 
 /**
- * Sets both values & edges vectors to zero size
+ * Sets values vectors to zero size
  */
 NumericAxis::NumericAxis() {}
 

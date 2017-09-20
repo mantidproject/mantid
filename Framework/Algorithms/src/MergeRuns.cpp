@@ -5,14 +5,19 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 using Mantid::HistogramData::HistogramX;
 
@@ -27,6 +32,42 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 using namespace RunCombinationOptions;
+
+namespace {
+/*
+ * Here we build up the correct time indexes for the workspace being added. If
+ *the scan times for the addee workspace and output workspace are the same this
+ *builds the same indexing as the workspace had before. Otherwise, the correct
+ *time indexes are set here.
+ */
+std::vector<SpectrumDefinition>
+buildScanIntervals(const std::vector<SpectrumDefinition> &addeeSpecDefs,
+                   const DetectorInfo &addeeDetInfo,
+                   const DetectorInfo &outDetInfo,
+                   const DetectorInfo &newOutDetInfo) {
+  std::vector<SpectrumDefinition> newAddeeSpecDefs;
+
+  for (auto &specDef : addeeSpecDefs) {
+    for (auto &index : specDef) {
+      SpectrumDefinition newSpecDef;
+      if (addeeDetInfo.scanInterval(index) == outDetInfo.scanInterval(index)) {
+        newSpecDef.add(index.first, index.second);
+      } else {
+        // Find the correct time index for this entry
+        for (size_t i = 0; i < newOutDetInfo.scanCount(index.first); i++) {
+          if (addeeDetInfo.scanInterval(index) ==
+              newOutDetInfo.scanInterval({index.first, i})) {
+            newSpecDef.add(index.first, i);
+          }
+        }
+      }
+      newAddeeSpecDefs.push_back(newSpecDef);
+    }
+  }
+
+  return newAddeeSpecDefs;
+}
+}
 
 /// Initialisation method
 void MergeRuns::init() {
@@ -134,6 +175,8 @@ void MergeRuns::exec() {
         sampleLogsWarn, sampleLogsWarnTolerances, sampleLogsFail,
         sampleLogsFailTolerances);
 
+    auto isScanning = outWS->detectorInfo().isScanning();
+
     m_progress = Kernel::make_unique<Progress>(this, 0.0, 1.0, numberOfWSs - 1);
     // Note that the iterator is incremented before first pass so that 1st
     // workspace isn't added to itself
@@ -169,7 +212,10 @@ void MergeRuns::exec() {
       try {
         sampleLogsBehaviour.mergeSampleLogs(**it, *outWS);
         sampleLogsBehaviour.removeSampleLogsFromWorkspace(*addee);
-        outWS = outWS + addee;
+        if (isScanning)
+          outWS = buildScanningOutputWorkspace(outWS, addee);
+        else
+          outWS = outWS + addee;
         sampleLogsBehaviour.setUpdatedSampleLogs(*outWS);
         sampleLogsBehaviour.readdSampleLogToWorkspace(*addee);
       } catch (std::invalid_argument &e) {
@@ -189,6 +235,58 @@ void MergeRuns::exec() {
     // Set the final workspace to the output property
     setProperty("OutputWorkspace", outWS);
   }
+}
+
+MatrixWorkspace_sptr
+MergeRuns::buildScanningOutputWorkspace(const MatrixWorkspace_sptr &outWS,
+                                        const MatrixWorkspace_sptr &addeeWS) {
+  const auto numOutputSpectra =
+      outWS->getNumberHistograms() + addeeWS->getNumberHistograms();
+
+  MatrixWorkspace_sptr newOutWS = DataObjects::create<MatrixWorkspace>(
+      *outWS, numOutputSpectra, outWS->histogram(0).binEdges());
+
+  newOutWS->mutableDetectorInfo().merge(addeeWS->detectorInfo());
+
+  if (newOutWS->detectorInfo().scanSize() == outWS->detectorInfo().scanSize()) {
+    // In this case the detector info objects were identical. We just add the
+    // workspaces as we normally would for MergeRuns.
+    g_log.information()
+        << "Workspaces had identical detector scan information and were "
+           "merged.";
+    return outWS + addeeWS;
+  } else if (newOutWS->detectorInfo().scanSize() != numOutputSpectra) {
+    throw std::runtime_error("Unexpected DetectorInfo size. Merging workspaces "
+                             "with some, but not all overlapping scan "
+                             "intervals is not currently supported.");
+  }
+
+  g_log.information()
+      << "Workspaces had different, non-overlapping scan intervals "
+         "so spectra will be appended.";
+
+  auto outSpecDefs = *(outWS->indexInfo().spectrumDefinitions());
+  const auto &addeeSpecDefs = *(addeeWS->indexInfo().spectrumDefinitions());
+
+  const auto newAddeeSpecDefs =
+      buildScanIntervals(addeeSpecDefs, addeeWS->detectorInfo(),
+                         outWS->detectorInfo(), newOutWS->detectorInfo());
+
+  outSpecDefs.insert(outSpecDefs.end(), newAddeeSpecDefs.begin(),
+                     newAddeeSpecDefs.end());
+
+  auto newIndexInfo = Indexing::IndexInfo(numOutputSpectra);
+  newIndexInfo.setSpectrumDefinitions(std::move(outSpecDefs));
+  newOutWS->setIndexInfo(newIndexInfo);
+
+  for (size_t i = 0; i < outWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i, outWS->histogram(i));
+
+  for (size_t i = 0; i < addeeWS->getNumberHistograms(); ++i)
+    newOutWS->setHistogram(i + outWS->getNumberHistograms(),
+                           addeeWS->histogram(i));
+
+  return newOutWS;
 }
 
 /** Build up addition tables for merging eventlists together.

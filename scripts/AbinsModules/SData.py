@@ -62,7 +62,7 @@ class SData(AbinsModules.GeneralData):
     def extract(self):
         """
         Returns the data.
-        @return: data
+        :returns: data
         """
         return self._data
 

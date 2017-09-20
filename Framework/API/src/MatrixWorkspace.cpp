@@ -19,6 +19,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -1521,51 +1522,40 @@ signal_t MatrixWorkspace::getSignalAtCoord(
 
   if (wi < nhist) {
     const auto &xVals = x(wi);
-    auto it = std::lower_bound(xVals.cbegin(), xVals.cend(), xCoord);
-    if (it == xVals.end()) {
-      if (!isHistogramData()) {
-        auto deltaX = (xVals[xVals.size() - 1] - xVals[xVals.size() - 2]) / 2.0;
-        if (xCoord < xVals[xVals.size() - 1] + deltaX)
-          return yVals[xVals.size() - 1];
-      }
-      // Out of range
+    size_t i;
+    try {
+      if (isHistogramData())
+        i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(),
+                                                        xCoord);
+      else
+        i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(),
+                                                          xCoord);
+    } catch (std::out_of_range &e) {
       return std::numeric_limits<double>::quiet_NaN();
-    } else {
-      size_t i = (it - xVals.begin());
-      if (!isHistogramData()) {
-        // In this case we have point data. Find the closest index to our x
-        // coordinate, if the value is in range.
-        auto deltaX = (xVals[1] - xVals[0]) / 2.0;
-        if ((i == 0 && xCoord > xVals[0] - deltaX) ||
-            (xVals[i] - xCoord < xCoord - xVals[i - 1]))
-          ++i;
-      }
-      if (i > 0) {
-        double y = yVals[i - 1];
-        // What is our normalization factor?
-        switch (normalization) {
-        case NoNormalization:
-          return y;
-        case VolumeNormalization: {
-          // Divide the signal by the area
-          auto volume = yBinSize * (xVals[i] - xVals[i - 1]);
-          if (volume == 0.0) {
-            return std::numeric_limits<double>::quiet_NaN();
-          }
-          return y / volume;
-        }
-        case NumEventsNormalization:
-          // Not yet implemented, may not make sense
-          return y;
-        }
-        // This won't happen
-        return y;
-      } else
-        return std::numeric_limits<double>::quiet_NaN();
     }
-  } else
-    // Out of range
+
+    double y = yVals[i];
+    // What is our normalization factor?
+    switch (normalization) {
+    case NoNormalization:
+      return y;
+    case VolumeNormalization: {
+      // Divide the signal by the area
+      auto volume = yBinSize * (xVals[i + 1] - xVals[i]);
+      if (volume == 0.0) {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+      return y / volume;
+    }
+    case NumEventsNormalization:
+      // Not yet implemented, may not make sense
+      return y;
+    }
+    // This won't happen
+    return y;
+  } else {
     return std::numeric_limits<double>::quiet_NaN();
+  }
 }
 
 /** Returns the (normalized) signal at a given coordinates

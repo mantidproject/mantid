@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
@@ -46,10 +47,12 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
  */
 void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   m_numberSpectra = ref->getNumberHistograms();
+  m_numberDetectors = ref->detectorInfo().size();
   m_xUnit = ref->getAxis(0)->unit()->unitID();
   m_spectrumAxisUnit = ref->getAxis(1)->unit()->unitID();
   m_yUnit = ref->YUnit();
   m_isHistogramData = ref->isHistogramData();
+  m_isScanning = ref->detectorInfo().isScanning();
   m_instrumentName = ref->getInstrument()->getName();
 }
 
@@ -62,7 +65,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
 std::string
 RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
                                          bool checkNumberHistograms) {
-  std::string errors;
+  std::string errors = "";
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)
     errors += "different number of histograms; ";
   if (ws->getAxis(0)->unit()->unitID() != m_xUnit)
@@ -73,6 +76,11 @@ RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
     errors += "different Y units; ";
   if (ws->isHistogramData() != m_isHistogramData)
     errors += "different distribution or histogram type; ";
+  if (ws->detectorInfo().isScanning() != m_isScanning)
+    errors += "a mix of workspaces with and without detector scans; ";
+  if (m_isScanning && ws->detectorInfo().size() != m_numberDetectors)
+    errors += "workspaces with detectors scans have different number of "
+              "detectors; ";
   if (ws->getInstrument()->getName() != m_instrumentName)
     errors += "different instrument names; ";
   return errors;
