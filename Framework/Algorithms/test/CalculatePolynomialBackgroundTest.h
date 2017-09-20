@@ -149,7 +149,7 @@ private:
 
 class CalculatePolynomialBackgroundTestPerformance : public CxxTest::TestSuite {
 public:
-  void setUp() {
+  void setUp() override {
     Mantid::API::FrameworkManager::Instance();
     const size_t nBins = 1000;
     const size_t nHisto = 50000;
