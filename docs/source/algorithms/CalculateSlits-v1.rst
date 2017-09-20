@@ -10,7 +10,7 @@ Description
 -----------
 
 This algorithm can be used to calculate the slit dimensions to use for
-reflectometry instruments. It is effectively the inverse of :ref:`algm-CalculateResolution`.
+reflectometry instruments. It is effectively the inverse of :ref:`algm-NRCalculateSlitResolution`.
 
 CalculateSlits uses nothing but the input properties to calculate the output, specifically:
 

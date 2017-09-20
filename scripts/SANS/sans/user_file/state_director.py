@@ -458,15 +458,15 @@ class StateDirectorISIS(object):
         # Monitor 4 offset; for now this is only SANS2D
         # ---------------------------
         if TransId.spec_shift in user_file_items:
-            monitor_4_shift = user_file_items[TransId.spec_shift]
+            monitor_n_shift = user_file_items[TransId.spec_shift]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(monitor_4_shift, TransId.spec_shift)
-            monitor_4_shift = monitor_4_shift[-1]
-            set_monitor_4_offset = getattr(self._move_builder, "set_monitor_4_offset", None)
-            if isinstance(set_monitor_4_offset, collections.Callable):
-                self._move_builder.set_monitor_4_offset(convert_mm_to_m(monitor_4_shift))
+            check_if_contains_only_one_element(monitor_n_shift, TransId.spec_shift)
+            monitor_n_shift = monitor_n_shift[-1]
+            set_monitor_n_offset = getattr(self._move_builder, "set_monitor_n_offset", None)
+            if isinstance(set_monitor_n_offset, collections.Callable):
+                self._move_builder.set_monitor_n_offset(convert_mm_to_m(monitor_n_shift))
             else:
-                log_non_existing_field("set_monitor_4_offset")
+                log_non_existing_field("set_monitor_n_offset")
 
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB

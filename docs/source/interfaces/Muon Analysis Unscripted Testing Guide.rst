@@ -1,26 +1,26 @@
 .. _Muon_Analysis_TestGuide-ref:
 
-Muon Analysis Unscripted Testing
-=================================
+Muon Interfaces Unscripted Testing
+==================================
 
 .. contents:: Table of Contents
     :local:
     
 Preamble
 ^^^^^^^^^
-This document is intended for developers to use for unscripted testing of the :program:`Muon Analysis` GUI.
-User documentation for this interface can be found at :ref:`Muon_Analysis-ref`.
+This document is intended for developers to use for unscripted testing of :program:`Muon Analysis` and :program:`Frequency Domain Analysis` GUI.
+User documentation for this interface can be found at :ref:`Muon_Analysis-ref` and :ref:`Frequency_Domain_Analysis-ref` .
 
-Testing here mostly focuses on the changes for Mantid 3.8, but includes other functionality as well.
+Testing here mostly focuses on the changes for Mantid 3.11, but includes other functionality as well.
 The tests follow real use cases provided by scientists and are intended to exercise all the interface's functionality.
 As changes are made to the interface and features added, anything for which it is not possible to write an automated test should have a manual test added to this list.
 
-.. note:: The tests here are grouped in three sections. The test groups should be run in order and, within each test group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on previous tests having been run first.
+.. note:: The tests here are grouped into four sections. The test groups should be run in order and, within each test group, the individual tests should also be run in order. This is because, to avoid duplication, some tests rely on previous tests having been run first.
 
 Common setup
 ^^^^^^^^^^^^
 - Set your facility to ISIS
-- Ensure the files ``EMU00020918-20`` and ``MUSR00015189`` are in Mantid's path
+- Ensure the files ``EMU00020918-20``, ``MUSR00015189`` and ``MUSR00062260-1`` are in Mantid's path
 - Open :menuselection:`Interfaces --> Muon --> Muon Analysis`
 - At this point, before loading any data, the *Grouping Options* and *Data Analysis* tabs should be disabled.
 
@@ -42,5 +42,12 @@ Group 3: Results table tests
 
 Test instructions for group 3 can be found at :ref:`Muon_Analysis_TestGuide_3_Results-ref`.
 These test the generation of results tables from the fits performed in the tests in group 2.
+
+Group 4: Frequequency Domain Analysis tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Test instructions for group 4 can be found at :ref:`Muon_Analysis_TestGuide_4_FDAG-ref`.
+These test the Frequency Domain Analysis GUI and use data loaded from the tests in group 2.
+
 
 .. categories:: Interfaces Muon

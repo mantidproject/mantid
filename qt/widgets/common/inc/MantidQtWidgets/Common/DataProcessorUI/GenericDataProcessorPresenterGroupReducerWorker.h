@@ -7,6 +7,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 Worker to run the reduction process for each group of the
@@ -69,8 +70,7 @@ private:
   const GroupData m_groupData;
   int m_groupIndex;
 };
-
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
 #endif // MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_GENERICDATAPROCESSORPRESENTERGROUPREDUCERWORKER_H
