@@ -1286,6 +1286,11 @@ public:
       return m_axis.length();
   }
 
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override {
+      return m_axis.length();
+  }
+
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
@@ -1368,6 +1373,11 @@ public:
   /// along dimension would have getNBins+1 axis points.
   size_t getNBins() const override {
     return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
+  }
+
+  /// number of axis points (bin boundaries)
+  size_t getNBoundaries() const override {
+      return m_X.size();
   }
 
   /// Change the extents and number of bins
