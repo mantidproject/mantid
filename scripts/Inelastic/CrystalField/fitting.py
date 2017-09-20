@@ -1087,7 +1087,6 @@ class CrystalFieldSite(object):
                                      abundances=abundances, parameters=params)
 
 
-
 class CrystalFieldMulti(object):
     """CrystalFieldMulti represents crystal field of multiple ions."""
 

@@ -1,7 +1,7 @@
 import numpy as np
-from six import string_types
 
 from CrystalField import CrystalField, Function
+
 
 def makeWorkspace(xArray, yArray):
     """Create a workspace that doesn't appear in the ADS"""
@@ -15,15 +15,18 @@ def makeWorkspace(xArray, yArray):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
+
 def get_parameters_for_add(cf, new_ion_index):
-    # get params from crystalField object to append
+    """get params from crystalField object to append"""
     params = {}
     ion_prefix = 'ion%s.' % new_ion_index
     for bparam in CrystalField.field_parameter_names:
         params[ion_prefix + bparam] = cf[bparam]
     return params
 
+
 def get_parameters_for_add_from_multisite(cfms, new_ion_index):
+    """get params from crystalFieldMultiSite object to append"""
     params = {}
     for i in range(len(cfms.Ions)):
         ion_prefix = 'ion%s.' % (new_ion_index + i)
@@ -34,6 +37,15 @@ def get_parameters_for_add_from_multisite(cfms, new_ion_index):
         for bparam in CrystalField.field_parameter_names:
             params[ion_prefix + bparam] = cfms[existing_prefix + bparam]
         return params
+
+def iterable_to_string(iterable):
+    values_as_string = ""
+    for element in iterable:
+        values_as_string += ","
+        values_as_string += element
+    values_as_string = values_as_string[1:]
+    return values_as_string
+
 
 class CrystalFieldMultiSite(object):
 
@@ -113,15 +125,6 @@ class CrystalFieldMultiSite(object):
         if parameter_dict is not None:
             for name, value in parameter_dict.items():
                 self.function.setParameter(name, value)
-
-    @staticmethod
-    def iterable_to_string(iterable):
-        values_as_string = ""
-        for element in iterable:
-            values_as_string += ","
-            values_as_string += element
-        values_as_string = values_as_string[1:]
-        return values_as_string
 
     def _isMultiSite(self):
         return len(self.Ions) > 1
@@ -207,6 +210,7 @@ class CrystalFieldMultiSite(object):
             return str(funs[i])
 
     def _makeAbundances(self, abundances):
+        """Create dict for ion intensity scalings"""
         if abundances is not None:
             for ion_index in range(len(self.Ions)):
                 self._abundances['ion%s' % ion_index]  = abundances[ion_index]
@@ -295,7 +299,6 @@ class CrystalFieldMultiSite(object):
             createWS.execute()
             plotSpectrum(ws_name, 0)
 
-
     def _setBackground(self, peak=None, background=None):
         """
         Set background function(s).
@@ -354,6 +357,7 @@ class CrystalFieldMultiSite(object):
             self.function.setAttributeValue('Background', '%s;%s' % (peak, background))
 
     def _combine_multisite(self, other):
+        """Used to add two CrystalFieldMultiSite"""
         ions = self.Ions + other.Ions
         symmetries = self.Symmetries + other.Symmetries
         abundances = self._abundances.values() + other._abundances.values()
@@ -421,7 +425,7 @@ class CrystalFieldMultiSite(object):
         if isinstance(value, basestring):
             self.function.setAttributeValue('Ions', value)
         else:
-            self.function.setAttributeValue('Ions', self.iterable_to_string(value))
+            self.function.setAttributeValue('Ions', iterable_to_string(value))
 
     @property
     def Symmetries(self):
@@ -434,7 +438,7 @@ class CrystalFieldMultiSite(object):
         if isinstance(value, basestring):
             self.function.setAttributeValue('Symmetries', value)
         else:
-            self.function.setAttributeValue('Symmetries', self.iterable_to_string(value))
+            self.function.setAttributeValue('Symmetries', iterable_to_string(value))
 
     @property
     def ToleranceEnergy(self):
