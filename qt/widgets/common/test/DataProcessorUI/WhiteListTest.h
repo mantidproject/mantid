@@ -24,15 +24,21 @@ public:
     return new WhiteListTest();
   }
   static void destroySuite(WhiteListTest *suite) { delete suite; }
+  
 
-  void test_column_index() {
-    WhiteList whitelist;
+  WhiteList makeTestWhiteList() {
+    auto whitelist = WhiteList();
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column2", "Property2", "Description2");
     whitelist.addElement("Column3", "Property3", "Description3");
     whitelist.addElement("Column4", "Property4", "Description4");
     whitelist.addElement("Column5", "Property5", "Description5");
+    return whitelist;
+  }
 
+  void test_column_index() {
+    auto whitelist = makeTestWhiteList();
+    
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Column indices
     TS_ASSERT_EQUALS(whitelist.indexFromName("Column1"), 0);
@@ -47,12 +53,7 @@ public:
   }
 
   void test_column_name() {
-    WhiteList whitelist;
-    whitelist.addElement("Column1", "Property1", "Description1");
-    whitelist.addElement("Column2", "Property2", "Description2");
-    whitelist.addElement("Column3", "Property3", "Description3");
-    whitelist.addElement("Column4", "Property4", "Description4");
-    whitelist.addElement("Column5", "Property5", "Description5");
+    auto whitelist = makeTestWhiteList();
 
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Column indices
@@ -62,12 +63,7 @@ public:
   }
   
   void test_column_iterator() {
-    WhiteList whitelist;
-    whitelist.addElement("Column1", "Property1", "Description1");
-    whitelist.addElement("Column2", "Property2", "Description2");
-    whitelist.addElement("Column3", "Property3", "Description3");
-    whitelist.addElement("Column4", "Property4", "Description4");
-    whitelist.addElement("Column5", "Property5", "Description5");
+    auto whitelist = makeTestWhiteList();
 
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Column indices
@@ -82,13 +78,7 @@ public:
   }
 
   void test_column_property() {
-    WhiteList whitelist;
-    whitelist.addElement("Column1", "Property1", "Description1");
-    whitelist.addElement("Column2", "Property2", "Description2");
-    whitelist.addElement("Column3", "Property3", "Description3");
-    whitelist.addElement("Column4", "Property4", "Description4");
-    whitelist.addElement("Column5", "Property5", "Description5");
-
+    auto whitelist = makeTestWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Algorithm properties
     TS_ASSERT_EQUALS(whitelist.algorithmProperty(1), "Property2");
@@ -96,13 +86,7 @@ public:
   }
 
   void test_column_description() {
-    WhiteList whitelist;
-    whitelist.addElement("Column1", "Property1", "Description1");
-    whitelist.addElement("Column2", "Property2", "Description2");
-    whitelist.addElement("Column3", "Property3", "Description3");
-    whitelist.addElement("Column4", "Property4", "Description4");
-    whitelist.addElement("Column5", "Property5", "Description5");
-
+    auto whitelist = makeTestWhiteList();
     TS_ASSERT_EQUALS(whitelist.size(), 5);
     // Descriptions
     TS_ASSERT_EQUALS(whitelist.description(0), "Description1");
@@ -110,7 +94,7 @@ public:
     TS_ASSERT_EQUALS(whitelist.description(4), "Description5");
   }
 
-  void test_column_showValue() {
+  void test_column_isShown() {
     WhiteList whitelist;
     whitelist.addElement("Column1", "Property1", "Description1");
     whitelist.addElement("Column3", "Property3", "Description3", true);

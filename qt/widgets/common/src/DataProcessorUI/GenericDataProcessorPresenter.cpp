@@ -993,12 +993,15 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
     }
   }
 
+  auto isUnrestrictedProperty = [&restrictedProps](QString const& propertyName) -> bool {
+    return std::find(restrictedProps.begin(), restrictedProps.end(), propertyName) != restrictedProps.end();
+  };
+
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(m_processingOptions.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      if (restrictedProps.find(QString::fromStdString(kvp->first)) ==
-          restrictedProps.end())
+      if (isUnrestrictedProperty(QString::fromStdString(kvp->first)))
         setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
@@ -1573,9 +1576,8 @@ GenericDataProcessorPresenter::options() const {
 */
 void GenericDataProcessorPresenter::setOptions(
     const std::map<QString, QVariant> &options) {
-  // Overwrite the given options
-  for (auto it = options.begin(); it != options.end(); ++it)
-    m_options[it->first] = it->second;
+  for (auto option : options)
+    m_options[option.first] = option.second;
 
   // Save any changes to disk
   m_view->saveSettings(m_options);
@@ -1584,17 +1586,20 @@ void GenericDataProcessorPresenter::setOptions(
 /** Load options from disk if possible, or set to defaults */
 void GenericDataProcessorPresenter::initOptions() {
   m_options.clear();
-
-  // Set defaults
-  m_options["WarnProcessAll"] = true;
-  m_options["WarnDiscardChanges"] = true;
-  m_options["WarnProcessPartialGroup"] = true;
-  m_options["Round"] = false;
-  m_options["RoundPrecision"] = 3;
-
+  applyDefaultOptions(m_options);
+  
   // Load saved values from disk
   m_view->loadSettings(m_options);
 }
+
+void GenericDataProcessorPresenter::applyDefaultOptions(std::map<QString, QVariant>& options) {
+  options["WarnProcessAll"] = true;
+  options["WarnDiscardChanges"] = true;
+  options["WarnProcessPartialGroup"] = true;
+  options["Round"] = false;
+  options["RoundPrecision"] = 3;
+}
+
 
 /** Tells the view which of the actions should be added to the toolbar
 */

@@ -183,6 +183,7 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
+  void applyDefaultOptions(std::map<QString, QVariant>& options);
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
