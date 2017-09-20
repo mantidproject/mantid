@@ -130,7 +130,8 @@ class CrystalField(object):
         self._resolutionModel = None
         self._physprop = None
 
-        free_parameters = []
+        free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
+
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
@@ -150,13 +151,13 @@ class CrystalField(object):
                 self.FixAllPeaks = kwargs[key]
             elif key == 'PhysicalProperty':
                 self.PhysicalProperty = kwargs[key]
-            else:
-                # Crystal field parameters
-                self.function.setParameter(key, kwargs[key])
-                free_parameters.append(key)
+            elif key not in free_parameters:
+                raise RuntimeError('Unknown attribute/parameters %s' % key)
 
         for param in CrystalField.field_parameter_names:
-            if param not in free_parameters:
+            if param in free_parameters:
+                self.function.setParameter(param, free_parameters[param])
+            else:
                 self.function.fixParameter(param)
 
         self._setPeaks()
