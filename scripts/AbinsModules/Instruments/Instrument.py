@@ -14,7 +14,7 @@ class Instrument(object):
 
 
         :param  input_data: data from which Q2 should be calculated
-        :return:  numpy array with Q2 data
+        :returns:  numpy array with Q2 data
         """
 
         return None
@@ -38,7 +38,7 @@ class Instrument(object):
         :param sigma: width of resolution function
         :param pkt_per_peak: number of points per peak
         :param gaussian: gaussian-like function used to broaden peaks
-        :return: frequencies for which peaks have been broadened, corresponding S
+        :returns: frequencies for which peaks have been broadened, corresponding S
         """
         fwhm = AbinsModules.AbinsParameters.fwhm
 
@@ -88,7 +88,7 @@ class Instrument(object):
         :param sigma: sigma defines width of Gaussian
         :param points: points for which Gaussian should be evaluated
         :param center: center of Gaussian
-        :return: numpy array with calculated Gaussian values
+        :returns: numpy array with calculated Gaussian values
         """
         sigma_factor = 2.0 * sigma * sigma
         norm = AbinsModules.AbinsParameters.pkt_per_peak / (2 * AbinsModules.AbinsParameters.fwhm * sigma)

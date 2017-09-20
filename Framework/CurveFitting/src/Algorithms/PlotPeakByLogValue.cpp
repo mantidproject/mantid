@@ -137,7 +137,7 @@ void PlotPeakByLogValue::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(

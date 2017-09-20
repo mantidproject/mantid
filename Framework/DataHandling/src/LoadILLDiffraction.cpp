@@ -252,8 +252,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String()
-                << "\n";
+                       .toISO8601String() << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
@@ -286,7 +285,7 @@ V3D LoadILLDiffraction::getReferenceComponentPosition(
     const MatrixWorkspace_sptr &instrumentWorkspace) {
   if (m_instName == "D2B") {
     return instrumentWorkspace->getInstrument()
-        ->getComponentByName("tube_1")
+        ->getComponentByName("tube_128")
         ->getPos();
   }
 
@@ -317,6 +316,11 @@ void LoadILLDiffraction::calculateRelativeRotations(
     // this is the magical formula to treat the offset of the 2theta0 decoder.
     firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE -
                               D20_PIXEL_SIZE / (m_resolutionMode * 2);
+  } else if (m_instName == "D2B") {
+    firstTubeRotationAngle = -firstTubeRotationAngle;
+    std::transform(tubeRotations.begin(), tubeRotations.end(),
+                   tubeRotations.begin(),
+                   [&](double angle) { return (-angle); });
   }
 
   g_log.debug() << "First tube rotation:" << firstTubeRotationAngle << "\n";

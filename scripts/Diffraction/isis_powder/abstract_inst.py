@@ -70,14 +70,13 @@ class AbstractInst(object):
         """
         raise NotImplementedError("get_run_details must be implemented per instrument")
 
-    @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(self, run_number):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        raise NotImplementedError("generate_input_file_name must be implemented per instrument")
+        return self._generate_inst_filename(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
@@ -95,7 +94,7 @@ class AbstractInst(object):
         :param run_number_string: The run string to uniquely identify the run
         :return: The file name which identifies the run and appropriate parameter settings
         """
-        raise NotImplementedError("generate_output_file_name must be implemented per instrument")
+        return self._generate_input_file_name(run_number=run_number_string)
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         """
@@ -230,3 +229,11 @@ class AbstractInst(object):
                           "output_folder": output_directory}
 
         return out_file_names
+
+    def _generate_inst_filename(self, run_number):
+        if isinstance(run_number, list):
+            # Multiple entries
+            return [self._generate_inst_filename(run) for run in run_number]
+        else:
+            # Individual entry
+            return self._inst_prefix + str(run_number)

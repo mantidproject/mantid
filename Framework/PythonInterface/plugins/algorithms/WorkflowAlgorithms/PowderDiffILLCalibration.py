@@ -297,8 +297,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=out_temp)
         Scale(InputWorkspace=out_temp, OutputWorkspace=out_temp, Factor=1./absolute_norm)
 
-        if self._calib_file:
-            Multiply(LHSWorkspace=self._calib_ws, RHSWorkspace=out_temp, OutputWorkspace=out_temp)
+        #if self._calib_file:
+        #   Multiply(LHSWorkspace=self._calib_ws, RHSWorkspace=out_temp, OutputWorkspace=out_temp)
 
         RenameWorkspace(InputWorkspace=out_temp, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)

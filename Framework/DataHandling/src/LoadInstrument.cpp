@@ -74,14 +74,21 @@ void LoadInstrument::init() {
       make_unique<PropertyWithValue<OptionalBool>>(
           "RewriteSpectraMap", OptionalBool::Unset,
           boost::make_shared<MandatoryValidator<OptionalBool>>()),
-      "If true then a 1:1 map between the spectrum numbers and "
-      "detector/monitor IDs is set up as follows: the detector/monitor IDs in "
+      "If set to True then a 1:1 map between the spectrum numbers and "
+      "detector/monitor IDs is set up such that the detector/monitor IDs in "
       "the IDF are ordered from smallest to largest number and then assigned "
       "in that order to the spectra in the workspace. For example if the IDF "
-      "has defined detectors/monitors with ID = 1, 5 and 10 and the workspace "
-      "contains 3 spectra with numbers 1,2,3 (and workspace indices 0,1, and "
-      "2) then spectrum number 1 is associated with det ID=1, spectrum number "
-      "2 with det ID=5 and spectrum number 3 with det ID=10");
+      "has defined detectors/monitors with IDs 1, 5, 10 and the workspace "
+      "contains 3 spectra with numbers 1, 2, 3 (and workspace indices 0, 1, 2) "
+      "then spectrum number 1 is associated with detector ID 1, spectrum "
+      "number 2 with detector ID 5 and spectrum number 3 with detector ID 10."
+      "If the number of spectra and detectors do not match then the operation "
+      "is performed until the maximum number of either is reached. For example "
+      "if there are 12 spectra and 50 detectors then the first 12 detectors "
+      "are assigned to the 12 spectra in the workspace."
+      "If set to False then the spectrum numbers and detector IDs of the "
+      "workspace are not modified."
+      "This property must be set to either True or False.");
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
