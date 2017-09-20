@@ -365,13 +365,10 @@ class PropertyManager(NonIDF_Properties):
                             of all properties changed when applying this method
 
         """
-        if self.instr_name != pInstrument.getName():
-            self.log("*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
-                     "*** This only works if both instruments have the same reduction properties!"
-                     .format(self.instr_name,pInstrument.getName()),'warning')
+        self.reduction_instrument_warning(pInstrument)
 
         # Retrieve the properties, changed from interface earlier
-        old_changes_list  = self.getChangedProperties()
+        old_changes_list = self.getChangedProperties()
         # record all changes, present in the old changes list
         old_changes=OrderedDict()
         for prop_name in old_changes_list:
@@ -497,7 +494,25 @@ class PropertyManager(NonIDF_Properties):
                 del sorted_param[dep_name]
         #end
 
-        new_changes_list  = self.getChangedProperties()
+        all_changes = self.retrieve_all_changes(old_changes, ignore_changes, old_changes_list)
+
+        num_changes = funcinspect.lhs_info('nreturns')
+        if num_changes > 0:
+            return all_changes
+        else:
+            return None
+    #end
+
+#--------------------------------------------------------------------------------------------
+
+    def reduction_instrument_warning(self, pInstrument):
+        if self.instr_name != pInstrument.getName():
+            self.log("*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
+                     "*** This only works if both instruments have the same reduction properties!"
+                     .format(self.instr_name,pInstrument.getName()),'warning')
+
+    def retrieve_all_changes(self, old_changes, ignore_changes, old_changes_list):
+        new_changes_list = self.getChangedProperties()
         self.setChangedProperties(set())
         # set back all changes stored earlier and may be overwritten by new IDF
         # (this is just to be sure -- should not change anything as we do not set properties changed)
@@ -512,13 +527,9 @@ class PropertyManager(NonIDF_Properties):
             new_changes_list=new_changes_list.union(old_changes_list)
             all_changes = old_changes_list.union(new_changes_list)
             self.setChangedProperties(all_changes)
+        return all_changes
 
-        n=funcinspect.lhs_info('nreturns')
-        if n>0:
-            return all_changes
-        else:
-            return None
-    #end
+#----------------------------------------------------------------------------------------------
 
     def _get_properties_with_files(self):
         """ Method returns list of properties, which may have
