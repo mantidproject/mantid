@@ -248,6 +248,7 @@ class DirectEnergyConversion(object):
         diag_params = self.prop_man.get_diagnostics_parameters()
 
         # Get the background/total counts from the sample run if present
+        name_to_clean = None
         if diag_sample is not None:
             diag_sample = self.get_run_descriptor(diag_sample)
             sample_mask = diag_sample.get_masking(1)
@@ -270,7 +271,6 @@ class DirectEnergyConversion(object):
                     name_to_clean = result_ws.name()
                 else:
                     result_ws = self.normalise(diag_sample, self.normalise_method)
-                    name_to_clean = None
 
                 #>>>here result workspace is being processed
                 #-- not touching result ws
@@ -288,8 +288,6 @@ class DirectEnergyConversion(object):
                                                  diag_params.get('second_white',None))
                 diag_params['background_int'] = background_int
                 diag_params['sample_counts'] = total_counts
-        else: # diag_sample is None
-            name_to_clean = None
 
         # extract existing white mask if one is defined and provide it for
         # diagnose to use instead of constantly diagnosing the same vanadium
