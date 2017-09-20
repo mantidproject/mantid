@@ -39,8 +39,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
             alg.setProperty("OutputWorkspace", output_ws)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
+            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
             msg = "Loaded %s\n" % filename
             if alg.existsProperty("OutputMessage"):
