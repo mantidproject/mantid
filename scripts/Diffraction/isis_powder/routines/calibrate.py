@@ -28,11 +28,12 @@ def create_van(instrument, run_details, absorb):
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
+    if absorb:
+        corrected_van_ws = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                ws_to_correct=corrected_van_ws)
+
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                        CalibrationFile=run_details.offset_file_path)
-    if absorb:
-        aligned_ws = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=aligned_ws)
-
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 

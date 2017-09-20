@@ -601,21 +601,25 @@ void LoadAscii2::init() {
                   "filled with the read-in data and stored in the [[Analysis "
                   "Data Service]].");
 
-  std::string spacers[7][2] = {{"Automatic", ",\t:; "},
-                               {"CSV", ","},
-                               {"Tab", "\t"},
-                               {"Space", " "},
-                               {"Colon", ":"},
-                               {"SemiColon", ";"},
-                               {"UserDefined", "UserDefined"}};
+  const int numSpacers = 7;
+  std::string spacers[numSpacers][2] = {{"Automatic", ",\t:; "},
+                                        {"CSV", ","},
+                                        {"Tab", "\t"},
+                                        {"Space", " "},
+                                        {"Colon", ":"},
+                                        {"SemiColon", ";"},
+                                        {"UserDefined", "UserDefined"}};
   // For the ListValidator
-  std::vector<std::string> sepOptions;
-  for (auto &spacer : spacers) {
-    std::string option = spacer[0];
+  std::array<std::string, numSpacers> sepOptions;
+  int sepOptionsIndex = 0;
+
+  for (const auto &spacer : spacers) {
+    const auto &option = spacer[0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacer[1]));
-    sepOptions.push_back(option);
+    sepOptions[sepOptionsIndex++] = option;
   }
+
   declareProperty("Separator", "Automatic",
                   boost::make_shared<StringListValidator>(sepOptions),
                   "The separator between data columns in the data file. The "

@@ -547,14 +547,15 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
           "this algorithm.");
     }
 
-    IAlgorithm_sptr calcRes = createChildAlgorithm("CalculateResolution");
+    IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
     calcRes->setProperty("TwoTheta", theta);
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
-      g_log.error("CalculateResolution failed. Workspace in Q will not be "
-                  "rebinned. Please provide dQ/Q.");
+      g_log.error(
+          "NRCalculateSlitResolution failed. Workspace in Q will not be "
+          "rebinned. Please provide dQ/Q.");
       return inputWS;
     }
     qstep = calcRes->getProperty("Resolution");
