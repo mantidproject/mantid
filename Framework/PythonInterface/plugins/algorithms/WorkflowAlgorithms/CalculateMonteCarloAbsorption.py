@@ -509,17 +509,15 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             workspace = self._tranpose_ws(workspace)
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
-        # ----- Indirect Conversions -----
+        # ----- Indirect Elastic Conversions -----
 
         if self._emode == "Indirect":
 
-            # Check for Indirect Elastic (units of Q)
-            if y_unit == 'MomentumTransfer':
-                return self._create_waves_indirect_elastic(workspace)
-            elif x_unit == 'MomentumTransfer':
+            if x_unit == 'MomentumTransfer':
                 self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
-            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
+            else:
+                return self._create_waves_indirect_elastic(workspace)
 
         # ----- Direct Conversions -----
 
