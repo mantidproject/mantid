@@ -206,6 +206,120 @@ public:
     TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
   }
 
+  void test_makeIndexInfo_from_isis_spec_udet() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    auto spec = {4, 3, 2, 1};
+    auto udet = {2, 1, 12, 11};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 4);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(3));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(3), SpectrumNumber(4));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
+    TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(0));
+    TS_ASSERT_EQUALS(specDefs->at(3), SpectrumDefinition(1));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_grouped() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    auto spec = {1, 2, 1, 2};
+    auto udet = {1, 2, 11, 12};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    SpectrumDefinition group_1_11;
+    group_1_11.add(0);
+    group_1_11.add(2);
+    TS_ASSERT_EQUALS(specDefs->at(0), group_1_11);
+    SpectrumDefinition group_2_12;
+    group_2_12.add(1);
+    group_2_12.add(3);
+    TS_ASSERT_EQUALS(specDefs->at(1), group_2_12);
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_unknown_detector_ids() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    auto spec = {1, 2};
+    auto udet = {1, 100};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
+    // ID 100 does not exist so SpectrumDefinition is empty
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition());
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_min() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 3, EMPTY_INT(), {});
+    auto spec = {4, 3, 2, 1};
+    auto udet = {2, 1, 12, 11};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 3);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 4);
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(3));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(4));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(1));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_min_max() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, 3, {});
+    auto spec = {4, 3, 2, 1};
+    auto udet = {2, 1, 12, 11};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 3);
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(3));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(3));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(0));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {1});
+    auto spec = {4, 3, 2, 1};
+    auto udet = {2, 1, 12, 11};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 1);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 1);
+    TS_ASSERT_EQUALS(indexInfo.size(), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(2));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_min_max_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, 2, {1});
+    auto spec = {4, 3, 2, 1};
+    auto udet = {2, 1, 12, 11};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, false);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 1);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 2);
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
+  }
+
 private:
   MatrixWorkspace_sptr m_ws;
 };
