@@ -129,8 +129,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
  * Parallel::StorageMode of `indexInfo` is `Cloned`. */
 IndexInfo
 LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
+  // Check if range [SpectrumMin, SpectrumMax] was supplied
   if (m_min != EMPTY_INT() || m_max != EMPTY_INT()) {
-    // check if range [SpectrumMin, SpectrumMax] was supplied
     if (m_max == EMPTY_INT())
       m_max =
           static_cast<int32_t>(indexInfo.spectrumNumber(indexInfo.size() - 1));
@@ -142,24 +142,14 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     for (const auto &index : indices)
       m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
+  // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {
-    // Check if SpectrumList was supplied (or filled via min/max above)
     const auto indices = indexInfo.makeIndexSet(
         std::vector<Indexing::SpectrumNumber>(m_range.begin(), m_range.end()));
     m_min = static_cast<int32_t>(indexInfo.spectrumNumber(*indices.begin()));
     m_max =
         static_cast<int32_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
-    const auto filteredIndexInfo = Indexing::extract(indexInfo, indices);
-    // Check that spectra supplied by user do not correspond to monitors
-    const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
-    for (const auto &specDef : *filteredIndexInfo.spectrumDefinitions()) {
-      for (const auto &det : specDef)
-        if (detectorInfo.isMonitor(det))
-          throw std::invalid_argument(
-              "Inconsistent range property: some of the "
-              "selected spectra correspond to monitors.");
-    }
-    return filteredIndexInfo;
+    return Indexing::extract(indexInfo, indices);
   }
   return indexInfo;
 }

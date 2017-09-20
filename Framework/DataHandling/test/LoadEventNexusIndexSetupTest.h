@@ -37,6 +37,10 @@ public:
       instrument->add(det);
       instrument->markAsDetector(det);
     }
+    auto *mon = new Detector("monitor", 666, nullptr);
+    instrument->add(mon);
+    instrument->markAsDetector(mon);
+    instrument->markAsMonitor(mon);
     m_ws = create<WorkspaceTester>(instrument, 1, HistogramData::BinEdges(2));
   }
 
@@ -80,6 +84,11 @@ public:
       LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {i});
       TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
     }
+  }
+
+  void test_makeIndexInfo_range_includes_monitor() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {666});
+    TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
   }
 
   void test_makeIndexInfo_min() {
@@ -318,6 +327,40 @@ public:
     const auto specDefs = indexInfo.spectrumDefinitions();
     TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(2));
     TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_range_includes_monitor() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {1});
+    auto spec = {1};
+    auto udet = {666};
+    TS_ASSERT_THROWS(indexSetup.makeIndexInfo({spec, udet}, false),
+                     std::out_of_range);
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_monitors() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    auto spec = {1, 2, 3, 4, 5};
+    auto udet = {1, 2, 11, 12, 666};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, true);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(5));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(4));
+  }
+
+  void test_makeIndexInfo_from_isis_spec_udet_monitors_ignores_min_max_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, 3, {4});
+    auto spec = {1, 2, 3, 4, 5};
+    auto udet = {1, 2, 11, 12, 666};
+    const auto indexInfo = indexSetup.makeIndexInfo({spec, udet}, true);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 3);
+    TS_ASSERT_EQUALS(indexInfo.size(), 1);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(5));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(4));
   }
 
 private:
