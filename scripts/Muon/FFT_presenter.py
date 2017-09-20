@@ -41,7 +41,7 @@ class FFTPresenter(object):
         self.view.phaseQuadChanged()
         #check if a phase table exists
         if mantid.AnalysisDataService.doesExist("PhaseTable"):
-           self.view.setPhaseBox()
+            self.view.setPhaseBox()
 
     def tableClicked(self,row,col):
         if row == self.view.getImBoxRow() and col == 1 and self.view.getWS() !="PhaseQuad":
@@ -106,4 +106,3 @@ class FFTPresenter(object):
         if self.view.isComplex():
             self.view.addFFTComplex(FFTInputs)
         return FFTInputs
-

@@ -21,6 +21,7 @@ def addComboToTable(table,row,options):
     table.setCellWidget(row,1,combo)
     return combo
 
+
 def addDoubleToTable(table,value,row):
     numberWidget = QtGui.QTableWidgetItem(str(value))
     table.setItem(row,1, numberWidget)

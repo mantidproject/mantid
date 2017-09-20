@@ -56,7 +56,7 @@ class FFTModel(object):
 
     def setRun(self,run):
         self.runName=run
-        print("Run Name", self.runName)
+
     def preAlg(self,preInputs):
         preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
