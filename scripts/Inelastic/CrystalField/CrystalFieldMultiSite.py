@@ -38,6 +38,15 @@ def get_parameters_for_add_from_multisite(cfms, new_ion_index):
             params[ion_prefix + bparam] = cfms[existing_prefix + bparam]
         return params
 
+
+def read_and_del(key, dict):
+    value = None
+    if key in dict:
+        value = dict[key]
+        del dict[key]
+    return value, dict
+
+
 def iterable_to_string(iterable):
     values_as_string = ""
     for element in iterable:
@@ -52,16 +61,9 @@ class CrystalFieldMultiSite(object):
     def __init__(self, Ions, Symmetries, **kwargs):
 
         self._makeFunction()
-        if 'Background' not in kwargs:
-            background = None
-        else:
-            background = kwargs['Background']
-            del kwargs['Background']
-        if 'BackgroundPeak' not in kwargs:
-            backgroundPeak = None
-        else:
-            backgroundPeak = kwargs['BackgroundPeak']
-            del kwargs['BackgroundPeak']
+
+        backgroundPeak, kwargs = read_and_del('BackgroundPeak', kwargs)
+        background, kwargs = read_and_del('Background', kwargs)
         if background is not None or backgroundPeak is not None:
             self._setBackground(backgroundPeak, background)
 
@@ -69,16 +71,26 @@ class CrystalFieldMultiSite(object):
         self.Symmetries = Symmetries
         self._plot_window = {}
         self.chi2 = None
-        parameter_dict = None
-        attribute_dict = None
 
-        free_parameters = []
-        if 'parameters' in kwargs:
-            parameter_dict = kwargs['parameters']
-            del kwargs['parameters']
-        if 'attributes' in kwargs:
-            attribute_dict = kwargs['attributes']
-            del kwargs['attributes']
+        parameter_dict, kwargs = read_and_del('parameters', kwargs)
+        attribute_dict, kwargs = read_and_del('attributes', kwargs)
+
+        kwargs = self._setMandatoryArguments(kwargs)
+
+        self._abundances = {}
+        abundances, kwargs = read_and_del('abundances', kwargs)
+        self._makeAbundances(abundances)
+
+        self._setRemainingArguments(kwargs)
+
+        if attribute_dict is not None:
+            for name, value in attribute_dict.items():
+                self.function.setAttributeValue(name, value)
+        if parameter_dict is not None:
+            for name, value in parameter_dict.items():
+                self.function.setParameter(name, value)
+
+    def _setMandatoryArguments(self, kwargs):
         if 'Temperatures' in kwargs:
             self.Temperatures = kwargs['Temperatures']
             del kwargs['Temperatures']
@@ -90,15 +102,9 @@ class CrystalFieldMultiSite(object):
                 del kwargs['ResolutionModel']
             else:
                 raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
+        return kwargs
 
-            self._abundances = {}
-            if 'abundances' in kwargs:
-                abundances = kwargs['abundances']
-                del kwargs['abundances']
-            else:
-                abundances = None
-            self._makeAbundances(abundances)
-
+    def _setRemainingArguments(self, kwargs):
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
@@ -117,14 +123,6 @@ class CrystalFieldMultiSite(object):
             else:
                 # Crystal field parameters
                 self.function.setParameter(key, kwargs[key])
-                free_parameters.append(key)
-
-        if attribute_dict is not None:
-            for name, value in attribute_dict.items():
-                self.function.setAttributeValue(name, value)
-        if parameter_dict is not None:
-            for name, value in parameter_dict.items():
-                self.function.setParameter(name, value)
 
     def _isMultiSite(self):
         return len(self.Ions) > 1

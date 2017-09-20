@@ -4,6 +4,7 @@ from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
+
 class CrystalFieldMultiSiteTests(unittest.TestCase):
 
     def test_init_single_ion(self):
