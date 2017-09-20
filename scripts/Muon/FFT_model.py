@@ -6,6 +6,48 @@ import math
 import mantid.simpleapi as mantid
 
 
+class FFTWrapper(object):
+    def __init__(self,FFT):
+        self.name="FFT"
+        self.model=FFT
+
+    def loadData(self,inputs):
+        if inputs.has_key("phaseTable"):
+            self.phaseTable=inputs["phaseTable"]
+        else:
+            self.phaseTable=None
+        if inputs.has_key("preRe"):
+            self.preRe=inputs["preRe"]
+        else:
+            self.preRe=None
+        if inputs.has_key("preIm"):
+            self.preIm=inputs["preIm"]
+        else:
+            self.preIm=None
+        if inputs.has_key("FFT"):
+            self.FFT=inputs["FFT"]
+        else:
+            self.FFT=None
+        self.model.setRun(inputs["Run"])
+
+    def execute(self):
+        if self.phaseTable != None:
+            if self.phaseTable["newTable"] == True:
+                self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
+            self.model.PhaseQuad()
+
+        if self.preRe != None:
+            self.model.preAlg(self.preRe)
+
+        if self.preIm != None:
+            self.model.preAlg(self.preIm)
+
+        if self.FFT != None:
+            self.model.FFTAlg(self.FFT)
+
+    def output(self):
+        return
+
 class FFTModel(object):
 
     def __init__(self):
@@ -13,7 +55,7 @@ class FFTModel(object):
 
     def setRun(self,run):
         self.runName=run
-
+        print("Run Name", self.runName)
     def preAlg(self,preInputs):
         preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()

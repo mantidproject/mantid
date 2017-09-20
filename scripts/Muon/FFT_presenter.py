@@ -45,31 +45,38 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
-        self.alg.getAlg.setRun(self.load.getRunName())
+        inputs={}
+        inputs["Run"]=self.load.getRunName()
 
         #do apodization and padding to real data
 
         preInputs=self.view.initAdvanced()
 
         if self.view.getWS() == "PhaseQuad":
-            if self.view.isNewPhaseTable()==True:
-                axis=self.view.getAxis()
-                self.alg.getAlg.makePhaseQuadTable(axis,self.load.getInstrument())
-            self.alg.getAlg.PhaseQuad()
+            phaseTable={}
+            phaseTable["newTable"]= self.view.isNewPhaseTable()
+            phaseTable["axis"]=self.view.getAxis()
+            phaseTable["Instrument"]=self.load.getInstrument()
+            inputs["phaseTable"]=phaseTable
+            #model.makePhaseQuadTable(axis,self.load.getInstrument())
+            #self.model.PhaseQuad()
             self.view.RePhaseAdvanced(preInputs)
         else:
             self.view.ReAdvanced(preInputs)
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
             tmp=1
-        self.alg.getAlg.preAlg(preInputs)
+        inputs["preRe"]=preInputs
+        #model.preAlg(preInputs)
 
         #do apodization and padding to complex data
         if self.view.isComplex() and self.view.getWS()!="PhaseQuad":
-            self.view.ImAdvanced(preInputs)
+            ImPreInputs=self.view.initAdvanced()
+            self.view.ImAdvanced(ImPreInputs)
             if self.view.isRaw():
-                self.view.addRaw(preInputs,"InputWorkspace")
-            self.alg.getAlg.preAlg(preInputs)
+                self.view.addRaw(ImPreInputs,"InputWorkspace")
+            #model.preAlg(preInputs)
+            inputs["preIm"]=ImPreInputs
 
         #do FFT to transformed data
         FFTInputs = self.get_FFT_input()
@@ -80,8 +87,10 @@ class FFTPresenter(object):
         else:
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
-        self.alg.getAlg.FFTAlg(FFTInputs)
-
+        #model.FFTAlg(FFTInputs)
+        inputs["FFT"]=FFTInputs
+        self.alg.loadData(inputs)
+        self.alg.start()
         self.view.setPhaseBox()
 
     def get_FFT_input(self):

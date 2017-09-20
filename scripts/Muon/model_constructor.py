@@ -19,7 +19,8 @@ class modelConstructor(object):
             MaxEnt =MaxEnt_model.MaxEntModel()
             self.transformModels["MaxEnt"]=ThreadModel.ThreadModel(MaxEnt)
             FFT =FFT_model.FFTModel()
-            self.transformModels[FFT.getName()]=ThreadModel.ThreadModel(FFT)
+            FFTWrapper=FFT_model.FFTWrapper(FFT)
+            self.transformModels[FFT.getName()]=ThreadModel.ThreadModel(FFTWrapper)
 
     def getModel(self,name):
         return self.transformModels[name]
