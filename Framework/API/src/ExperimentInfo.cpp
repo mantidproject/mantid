@@ -1004,7 +1004,8 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     // find the first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
+
+      if (!Poco::Path(dir_itr->path()).isFile())
         continue;
 
       std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
