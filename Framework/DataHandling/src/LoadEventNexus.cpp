@@ -1088,17 +1088,18 @@ void LoadEventNexus::createSpectraMapping(
   if (!monitorsOnly && !bankNames.empty()) {
     m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
     g_log.debug() << "Populated spectra map for select banks\n";
-  } else {
-    if (auto mapping = loadISISVMSSpectraMapping(nxsfile, monitorsOnly,
-                                                 m_top_entry_name)) {
-      m_ws->setIndexInfo(indexSetup.makeIndexInfo(*mapping, monitorsOnly));
+  } else if (auto mapping = loadISISVMSSpectraMapping(m_top_entry_name)) {
+    if (monitorsOnly) {
+      g_log.debug() << "Loading only monitor spectra from " << nxsfile << "\n";
     } else {
-      g_log.debug()
-          << "No custom spectra mapping found, continuing with default "
-             "1:1 mapping of spectrum:detectorID\n";
-      m_ws->setIndexInfo(indexSetup.makeIndexInfo());
-      g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
+      g_log.debug() << "Loading only detector spectra from " << nxsfile << "\n";
     }
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(*mapping, monitorsOnly));
+  } else {
+    g_log.debug() << "No custom spectra mapping found, continuing with default "
+                     "1:1 mapping of spectrum:detectorID\n";
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo());
+    g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
   }
   std::tie(m_specMin, m_specMax) = indexSetup.eventIDLimits();
 }
@@ -1280,15 +1281,11 @@ void LoadEventNexus::runLoadMonitors() {
 * existence of
 * an isis_vms_compat block in the file, if it exists it pulls out the spectra
 * mapping listed there
-* @param filename :: A filename
-* @param monitorsOnly :: If true then only the monitor spectra are loaded
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
 std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
-LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
-                                          const bool monitorsOnly,
-                                          const std::string &entry_name) {
+LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
@@ -1338,11 +1335,6 @@ LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
     os << "UDET/SPEC list size mismatch. UDET=" << udet.size()
        << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
-  }
-  if (monitorsOnly) {
-    g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
-  } else {
-    g_log.debug() << "Loading only detector spectra from " << filename << "\n";
   }
   // If mapping loaded the event ID is the spectrum number and not det ID
   this->event_id_is_spec = true;
