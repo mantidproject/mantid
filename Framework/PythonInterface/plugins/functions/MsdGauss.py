@@ -48,7 +48,7 @@ class MsdGauss(IFunction1D):
         msd = self.getParameterValue("Msd")
 
         xvals = np.array(xvals)
-        intensity = height * np.exp(-msd * xvals * xvals)
+        intensity = height * np.exp(-msd * xvals**2)
 
         return intensity
 
@@ -56,11 +56,10 @@ class MsdGauss(IFunction1D):
         height = self.getParameterValue("Height")
         msd = self.getParameterValue("Msd")
 
-        i = 0
-        for x in xvals:
-            e = math.exp(-msd * x * x)
+        for i, x in enumerate(xvals):
+            e = math.exp(-msd * x**2)
             jacobian.set(i, 0, e)
-            jacobian.set(i, 1, -x * x * e * height)
+            jacobian.set(i, 1, -x**2 * e * height)
             i += 1
 
 

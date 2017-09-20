@@ -51,7 +51,7 @@ class MsdPeters(IFunction1D):
         beta = self.getParameterValue("Beta")
 
         xvals = np.array(xvals)
-        i1 = 1.0 + (msd * xvals * xvals / (6.0 * beta))
+        i1 = 1.0 + (msd * xvals**2 / (6.0 * beta))
         i2 = np.power(i1, beta)
         intensity = height / i2
         return intensity
@@ -62,12 +62,13 @@ class MsdPeters(IFunction1D):
         beta = self.getParameterValue("Beta")
 
         for i, x in enumerate(xvals):
-            q = msd * x * x
+            x_sq = x**2
+            q = msd * x_sq
             q6 = q / 6
             a1 = 1.0 + q6 / beta
             a = 1.0 / math.pow(a1, beta)
             b1 = q6 * x / beta + 1
-            b = -(x * x / 6) * math.pow(b1, (-beta - 1))
+            b = -(x_sq / 6) * math.pow(b1, (-beta - 1))
             cqx = q6 + beta
             c1 = math.pow((cqx / beta), -beta)
             c2 = q6 - cqx * math.log(cqx / beta)
