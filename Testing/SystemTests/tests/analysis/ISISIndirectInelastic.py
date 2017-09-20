@@ -949,7 +949,7 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 
     def get_reference_files(self):
         self.tolerance = 1e-3
-        return ['II.OSIRISIqt.nxs',
+        return ['II.OSIRISFury.nxs',
                 'II.OSIRISIqtFitMulti.nxs']
 
 #------------------------- IRIS tests -----------------------------------------
