@@ -19,7 +19,7 @@ class LoadUtils(object):
         return self.runName, self.options
 
     def getRunName(self):
-	    return self.runName
+        return self.runName
 
     def getInstrument(self):
         return self.instrument
