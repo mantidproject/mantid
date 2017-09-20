@@ -81,10 +81,9 @@ public:
                                         bankIndex);
     const auto &specIndex = parser.globalSpectrumIndex();
 
-    parser.extractEventsForRanks(specIndex, event_time_offset.data() + offset,
-                                 offset);
-
-    const auto &rankData = parser.rankData();
+    std::vector<std::vector<Event>> rankData(1);
+    parser.extractEventsForRanks(rankData, specIndex,
+                                 event_time_offset.data() + offset, offset);
 
     TS_ASSERT_EQUALS(rankData[0].size(), numEvents);
 
@@ -185,5 +184,5 @@ private:
   }
 };
 
-//TODO Add performance Tests
+// TODO Add performance Tests
 #endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */

@@ -36,7 +36,8 @@ public:
                     TimeOffsetType *event_time_offset_start,
                     const LoadRange &range);
 
-  void extractEventsForRanks(const std::vector<int32_t> &globalSpectrumIndex,
+  void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
+                             const std::vector<int32_t> &globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
                              size_t offset);
 
@@ -67,6 +68,7 @@ private:
   mutable std::vector<int32_t> m_globalSpectrumIndex;
   std::size_t m_posInEventIndex;
   std::vector<std::vector<Event>> m_allRankData;
+  std::vector<Event> m_thisRankData;
 };
 
 } // namespace IO
