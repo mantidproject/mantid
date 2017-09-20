@@ -38,7 +38,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(hab.rotation_correction == 0.0)
 
         # SANS2D-specific
-        self.assertTrue(move.monitor_4_offset == -70.0/1000.)
+        self.assertTrue(move.monitor_n_offset == -70.0/1000.)
 
     def _assert_mask(self, state):
         mask = state.mask

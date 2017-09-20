@@ -15,8 +15,6 @@
 
 #include "MantidHistogramData/LinearGenerator.h"
 
-#include <boost/foreach.hpp>
-
 #include <array>
 #include <cmath>
 #include <limits>
@@ -227,10 +225,11 @@ void RadiusSum::inputValidationSanityCheck() {
     throw std::invalid_argument(s.str());
   }
 
-  std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
+  const std::vector<double> boundary_limits = getBoundariesOfInputWorkspace();
   std::stringstream s;
-  BOOST_FOREACH (auto &value, boundary_limits)
-    s << value << " , ";
+  std::copy(boundary_limits.begin(), std::prev(boundary_limits.end()),
+            std::ostream_iterator<double>(s, ", "));
+  s << boundary_limits.back();
   g_log.information() << "Boundary limits are: " << s.str() << '\n';
 
   g_log.debug() << "Check: centre is defined inside the region defined by the "
