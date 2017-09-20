@@ -41,7 +41,7 @@ public:
   DateAndTime(const double seconds, const double nanoseconds);
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
-  DateAndTime(const std::string &ISO8601_string, bool displayLogs = true);
+  DateAndTime(const std::string &ISO8601_string);
   DateAndTime(const boost::posix_time::ptime _ptime);
 
   void set_from_ptime(boost::posix_time::ptime _ptime);
@@ -53,7 +53,7 @@ public:
   std::time_t to_localtime_t() const;
   std::tm to_tm() const;
 
-  void setFromISO8601(const std::string &str, bool displayLogs = true);
+  void setFromISO8601(const std::string &str);
   std::string toSimpleString() const;
   std::string
   toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
@@ -131,14 +131,6 @@ private:
   int64_t _nanoseconds;
 };
 #pragma pack(pop)
-
-/// The epoch for GPS times.
-const boost::posix_time::ptime
-    DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
-
-/// Const of one second time duration
-const time_duration DateAndTime::oneSecond =
-    boost::posix_time::time_duration(0, 0, 1, 0);
 
 /** Represents a time interval.
 

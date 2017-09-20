@@ -7,9 +7,9 @@ namespace Mantid {
 namespace Kernel {
 namespace DateAndTimeHelpers {
 
-static bool stringIsISO8601(const std::string &date);
-static std::string verifyISO8601(const std::string &date,
-                                 bool displayWarnings = true);
+MANTID_KERNEL_DLL bool stringIsISO8601(const std::string &date);
+MANTID_KERNEL_DLL std::string verifyISO8601(const std::string &date,
+                                            bool displayWarnings = true);
 
 } // namespace DateAndTimeHelpers
 } // namespace Kernel

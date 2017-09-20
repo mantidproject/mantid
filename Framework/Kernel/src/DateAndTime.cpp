@@ -14,6 +14,14 @@
 namespace Mantid {
 namespace Kernel {
 
+/// The epoch for GPS times.
+const boost::posix_time::ptime
+    DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+
+/// Const of one second time duration
+const time_duration DateAndTime::oneSecond =
+    boost::posix_time::time_duration(0, 0, 1, 0);
+
 namespace {
 /// Max allowed nanoseconds in the time; 2^62-1
 const int64_t MAX_NANOSECONDS = 4611686018427387903LL;
@@ -150,9 +158,8 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *@param displayLogs :: if the logs should be dsiplayed during the execution of
  *the constructor
  */
-DateAndTime::DateAndTime(const std::string &ISO8601_string, bool displayLogs)
-    : _nanoseconds(0) {
-  this->setFromISO8601(ISO8601_string, displayLogs);
+DateAndTime::DateAndTime(const std::string &ISO8601_string) : _nanoseconds(0) {
+  this->setFromISO8601(ISO8601_string);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -368,7 +375,7 @@ const DateAndTime &DateAndTime::defaultTime() {
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
  * @param displayLogs :: flag to indiciate if the logs should be displayed
  */
-void DateAndTime::setFromISO8601(const std::string &str, bool displayLogs) {
+void DateAndTime::setFromISO8601(const std::string &str) {
   // Make a copy
   std::string time = str;
 
