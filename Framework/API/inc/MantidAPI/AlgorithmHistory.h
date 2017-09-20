@@ -27,7 +27,7 @@ namespace Detail {
 // needing to know the implementation of CompareHistory.
 template <class T> struct CompareHistory {
   bool operator()(const boost::shared_ptr<T> &lhs,
-                  const boost::shared_ptr<T> &rhs) {
+                  const boost::shared_ptr<T> &rhs) const {
     return (*lhs) < (*rhs);
   }
 };

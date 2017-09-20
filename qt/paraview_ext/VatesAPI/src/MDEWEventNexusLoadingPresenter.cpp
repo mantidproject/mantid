@@ -43,19 +43,19 @@ is attempted to be loaded.
 bool MDEWEventNexusLoadingPresenter::canReadFile() const {
   // Quick check based on extension.
   if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
-    return 0;
+    return false;
   }
 
   auto file = Kernel::make_unique<::NeXus::File>(this->m_filename);
   // MDEventWorkspace file has a different name for the entry
   try {
     file->openGroup("MDEventWorkspace", "NXentry");
-    return 1;
+    return true;
   } catch (::NeXus::Exception &) {
     // If the entry name does not match, then it can't read the file.
-    return 0;
+    return false;
   }
-  return 0;
+  return false;
 }
 
 /*

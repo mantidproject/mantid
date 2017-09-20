@@ -7,7 +7,7 @@ are not available in the model associated with the data table.
 from __future__ import (absolute_import, division, print_function)
 
 from sans.user_file.settings_tags import (OtherId, DetectorId, LimitsId, SetId, SampleId, MonId, TransId, GravityId,
-                                          QResolutionId, FitId, event_binning_string_values, set_scales_entry,
+                                          QResolutionId, FitId, MaskId, event_binning_string_values, set_scales_entry,
                                           monitor_spectrum, simple_range, monitor_file, det_fit_range,
                                           q_rebin_values, fit_general, mask_angle_entry, range_entry)
 from sans.common.enums import (ReductionDimensionality, ISISReductionMode, RangeStepType, SaveType,
@@ -500,12 +500,12 @@ class StateGuiModel(object):
         self.set_simple_element(element_id=TransId.spec, value=value)
 
     @property
-    def transmission_m4_shift(self):
+    def transmission_mn_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         return self.get_simple_element(element_id=TransId.spec_shift, default_value="")
 
-    @transmission_m4_shift.setter
-    def transmission_m4_shift(self, value):
+    @transmission_mn_shift.setter
+    def transmission_mn_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         self.set_simple_element(element_id=TransId.spec_shift, value=value)
 
@@ -751,24 +751,6 @@ class StateGuiModel(object):
         self._user_file_items.update({element_id: new_settings})
 
     @property
-    def q_1d_min(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="min")
-
-    @q_1d_min.setter
-    def q_1d_min(self, value):
-        self._set_q_1d_limits(min_value=value)
-
-    @property
-    def q_1d_max(self):
-        return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
-                                                      attribute="max")
-
-    @q_1d_max.setter
-    def q_1d_max(self, value):
-        self._set_q_1d_limits(max_value=value)
-
-    @property
     def q_1d_rebin_string(self):
         return self.get_simple_element_with_attribute(element_id=LimitsId.q, default_value="",
                                                       attribute="rebin_string")
@@ -984,6 +966,24 @@ class StateGuiModel(object):
     @radius_limit_max.setter
     def radius_limit_max(self, value):
         self._set_radius_limit(max_value=value)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Mask files
+    # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def mask_files(self):
+        if MaskId.file in self._user_file_items:
+            return self._user_file_items[MaskId.file]
+        return []
+
+    @mask_files.setter
+    def mask_files(self, value):
+        if value is None:
+            return
+        if MaskId.file in self._user_file_items:
+            del self._user_file_items[MaskId.file]
+        new_state_entries = {MaskId.file: value}
+        self._user_file_items.update(new_state_entries)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Output name

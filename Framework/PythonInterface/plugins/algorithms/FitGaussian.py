@@ -96,4 +96,5 @@ class FitGaussian(PythonAlgorithm):
         fitParams = paramTable.column(1)
         self._setOutput(fitParams[1],fitParams[2]) # [peakCentre,sigma]
 
+
 AlgorithmFactory.subscribe(FitGaussian)
