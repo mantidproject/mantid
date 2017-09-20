@@ -1634,9 +1634,10 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("InputWorkspaces", ws->getName());
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap but not identical")
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
@@ -1676,7 +1677,7 @@ public:
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::
         create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, 2, 0);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::
-        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, 2, 1, 2);
+        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, 2, 0, 2);
 
     AnalysisDataService::Instance().addOrReplace("a", a);
     AnalysisDataService::Instance().addOrReplace("b", b);
@@ -1686,10 +1687,10 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("InputWorkspaces", "a, b");
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    TS_ASSERT_THROWS_EQUALS(
-        alg.execute(), const std::runtime_error &e, std::string(e.what()),
-        "Unexpected DetectorInfo size. Merging workspaces with some, but not "
-        "all overlapping scan intervals is not currently supported.")
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
   }
 
   void test_merging_detector_scan_workspaces_failure_case() {
