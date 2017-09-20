@@ -132,10 +132,10 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
   if (m_min != EMPTY_INT() || m_max != EMPTY_INT()) {
     // check if range [SpectrumMin, SpectrumMax] was supplied
     if (m_max == EMPTY_INT())
-      m_max = static_cast<specnum_t>(
-          indexInfo.spectrumNumber(indexInfo.size() - 1));
+      m_max =
+          static_cast<int32_t>(indexInfo.spectrumNumber(indexInfo.size() - 1));
     if (m_min == EMPTY_INT())
-      m_min = static_cast<specnum_t>(indexInfo.spectrumNumber(0));
+      m_min = static_cast<int32_t>(indexInfo.spectrumNumber(0));
     // Avoid adding non-existing indices (can happen if instrument has gaps in
     // its detector IDs). IndexInfo does the filtering for use.
     const auto indices = indexInfo.makeIndexSet(m_min, m_max);
@@ -146,9 +146,9 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     // Check if SpectrumList was supplied (or filled via min/max above)
     const auto indices = indexInfo.makeIndexSet(
         std::vector<Indexing::SpectrumNumber>(m_range.begin(), m_range.end()));
-    m_min = static_cast<specnum_t>(indexInfo.spectrumNumber(*indices.begin()));
+    m_min = static_cast<int32_t>(indexInfo.spectrumNumber(*indices.begin()));
     m_max =
-        static_cast<specnum_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
+        static_cast<int32_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
     const auto filteredIndexInfo = Indexing::extract(indexInfo, indices);
     // Check that spectra supplied by user do not correspond to monitors
     const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();

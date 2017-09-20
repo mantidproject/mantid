@@ -47,6 +47,8 @@ public:
   void test_makeIndexInfo_no_filter() {
     LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
     const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
     TS_ASSERT_EQUALS(indexInfo.size(), 4);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
@@ -59,9 +61,32 @@ public:
     TS_ASSERT_EQUALS(specDefs->at(3), SpectrumDefinition(3));
   }
 
+  void test_makeIndexInfo_min_out_of_range() {
+    for (const auto min : {0, 3, 13}) {
+      LoadEventNexusIndexSetup indexSetup(m_ws, min, EMPTY_INT(), {});
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+    }
+  }
+
+  void test_makeIndexInfo_max_out_of_range() {
+    for (const auto max : {0, 3, 13}) {
+      LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), max, {});
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+    }
+  }
+
+  void test_makeIndexInfo_range_out_of_range() {
+    for (const auto i : {0, 3, 13}) {
+      LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {i});
+      TS_ASSERT_THROWS(indexSetup.makeIndexInfo(), std::out_of_range);
+    }
+  }
+
   void test_makeIndexInfo_min() {
     LoadEventNexusIndexSetup indexSetup(m_ws, 11, EMPTY_INT(), {});
     const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 11);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
     // Note that spectrum numbers are now detector IDs. This is not consistent
     // with the load without filter, but it is the old behavior. Can we change
@@ -78,6 +103,8 @@ public:
   void test_makeIndexInfo_min_crossing_gap() {
     LoadEventNexusIndexSetup indexSetup(m_ws, 2, EMPTY_INT(), {});
     const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
     // Note that we are NOT creating spectra for the gap between IDs 2 and 11,
     // contrary to the old behavior.
     TS_ASSERT_EQUALS(indexInfo.size(), 3);
@@ -88,6 +115,95 @@ public:
     TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
     TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(2));
     TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_min_max() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, 11, {});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(2));
+  }
+
+  void test_makeIndexInfo_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(),
+                                        {2, 11});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(2));
+  }
+
+  void test_makeIndexInfo_min_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 11, EMPTY_INT(), {1});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 1);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(12));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(2));
+    TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_min_max_range() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 2, 11, {1});
+    const auto indexInfo = indexSetup.makeIndexInfo();
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 1);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
+    TS_ASSERT_EQUALS(indexInfo.size(), 3);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(11));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(2), SpectrumDefinition(2));
+  }
+
+  void test_makeIndexInfo_from_bank() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    const auto indexInfo = indexSetup.makeIndexInfo({"det-2", "det-12"});
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    // Note that spectrum numbers are simply starting at 1, i.e., are not the
+    // same as without bank-filtering. This is consistent with the old behavior.
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
+  }
+
+  void test_makeIndexInfo_from_bank_filter_ignored() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, 12, EMPTY_INT(), {1});
+    // This variant ignores any filter in the index/workspace setup phase,
+    // consistent with old behavior. Note that a filter for min/max does however
+    // apply when loading actual events in ProcessBankData (range is still
+    // ignored though).
+    const auto indexInfo = indexSetup.makeIndexInfo({"det-2", "det-12"});
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 12);
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
   }
 
 private:
