@@ -922,6 +922,8 @@ public:
 
     // Get signal at coordinates
     std::vector<coord_t> coords = {-1.0, 1.0};
+    coords[0] = -0.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
     coords[0] = -0.25;
     TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
     coords[0] = 0.0;
@@ -934,6 +936,8 @@ public:
     TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 1.0, 1e-5);
     coords[0] = 4.25;
     TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 4.0, 1e-5);
+    coords[0] = 4.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
   }
 
   void test_getCoordAtSignal_regression() {
