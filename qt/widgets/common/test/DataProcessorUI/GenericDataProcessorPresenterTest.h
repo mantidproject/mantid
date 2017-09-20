@@ -9,8 +9,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -34,8 +34,7 @@ public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
       const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -46,12 +45,11 @@ public:
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor,
+      const WhiteList &whitelist, const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist, std::map<QString, PreprocessingAlgorithm>(),
-            processor, postprocessor) {}
+            whitelist, std::map<QString, PreprocessingAlgorithm>(), processor,
+            postprocessor) {}
 
   // Destructor
   ~GenericDataProcessorPresenterNoThread() override {}
@@ -107,8 +105,7 @@ private:
     return whitelist;
   }
 
-  std::map<QString, PreprocessingAlgorithm>
-  createReflectometryPreprocessMap() {
+  std::map<QString, PreprocessingAlgorithm> createReflectometryPreprocessMap() {
 
     return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
@@ -116,10 +113,10 @@ private:
              "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                "OutputWorkspace"})},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm(
-             "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                               "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                std::set<QString>{"FirstTransmissionRun",
+                                                  "SecondTransmissionRun",
+                                                  "OutputWorkspace"})}};
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
@@ -139,9 +136,8 @@ private:
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const WhiteList &whitelist) {
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -150,8 +146,7 @@ private:
     colGroup->setPlotType(0);
 
     for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn(
-          "str", whitelist.name(col).toStdString());
+      auto column = ws->addColumn("str", whitelist.name(col).toStdString());
       column->setPlotType(0);
     }
 
@@ -204,9 +199,8 @@ private:
     AnalysisDataService::Instance().addOrReplace(stdWorkspaceName, group);
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const WhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -486,7 +480,8 @@ public:
     presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
     EXPECT_CALL(mockDataProcessorView,
-                askUserString(_, _, QString("Workspace"))).Times(0);
+                askUserString(_, _, QString("Workspace")))
+        .Times(0);
     presenter.notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -3510,7 +3505,8 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER"))).Times(1);
+                    QString::fromStdString("INTER")))
+        .Times(1);
     presenter.setInstrumentList(
         QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 

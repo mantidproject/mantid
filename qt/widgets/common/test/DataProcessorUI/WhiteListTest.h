@@ -60,6 +60,26 @@ public:
     TS_ASSERT_EQUALS(whitelist.name(3), "Column4");
     TS_ASSERT_EQUALS(whitelist.name(4), "Column5");
   }
+  
+  void test_column_iterator() {
+    WhiteList whitelist;
+    whitelist.addElement("Column1", "Property1", "Description1");
+    whitelist.addElement("Column2", "Property2", "Description2");
+    whitelist.addElement("Column3", "Property3", "Description3");
+    whitelist.addElement("Column4", "Property4", "Description4");
+    whitelist.addElement("Column5", "Property5", "Description5");
+
+    TS_ASSERT_EQUALS(whitelist.size(), 5);
+    // Column indices
+    auto it = whitelist.begin();
+    TS_ASSERT_EQUALS((*it).name(), "Column1");
+    it += 3;
+    TS_ASSERT_EQUALS((*it).name(), "Column4");
+    ++it;
+    TS_ASSERT_EQUALS((*it).name(), "Column5");
+    ++it;
+    TS_ASSERT_EQUALS(it, whitelist.end());
+  }
 
   void test_column_property() {
     WhiteList whitelist;

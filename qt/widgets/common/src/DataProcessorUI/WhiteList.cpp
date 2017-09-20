@@ -173,7 +173,7 @@ ConstColumnIterator operator+(typename ConstColumnIterator::difference_type n,
 ConstColumnIterator operator-(const ConstColumnIterator &lhs,
                               typename ConstColumnIterator::difference_type n) {
   auto result = lhs;
-  result += n;
+  result -= n;
   return result;
 
 }
@@ -181,7 +181,7 @@ ConstColumnIterator operator-(const ConstColumnIterator &lhs,
 ConstColumnIterator operator-(typename ConstColumnIterator::difference_type n,
                               const ConstColumnIterator &rhs) {
   auto result = rhs;
-  result += n;
+  result -= n;
   return result;
 }
 }

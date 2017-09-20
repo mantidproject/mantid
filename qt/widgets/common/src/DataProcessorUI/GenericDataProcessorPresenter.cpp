@@ -759,7 +759,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
 
   auto columnIt = m_whitelist.cbegin();
   auto runNumbersIt = data.constBegin();
-  for (; columnIt != m_whitelist.end(); ++columnIt, ++runNumbersIt) {
+  for (; columnIt != m_whitelist.cend(); ++columnIt, ++runNumbersIt) {
     auto column = *columnIt;
     // Do we want to use this column to generate the name of the output ws?
     if (column.isShown()) {
@@ -1046,19 +1046,20 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   auto newData = data;
   if (alg->isExecuted()) {
-    auto runNumbersIt = data->constBegin();
+    auto runNumbersIt2 = data->constBegin();
+    auto newDataIt = newData->begin();
+    auto columnIt2 = m_whitelist.cbegin();
 
     /* The reduction is complete, try to populate the columns */
-    for (; columnIt != m_whitelist.end() ; columnIt++, runNumbersIt++) {
+    for (; columnIt2 != m_whitelist.cend() - 2; ++columnIt2, ++runNumbersIt2, ++newDataIt) {
 
-      auto column = *columnIt;
-      auto columnName = column.name();
-      auto runNumbers = *runNumbersIt;
+      auto column = *columnIt2;
+      auto runNumbers = *runNumbersIt2;
 
-      if (runNumbers.isEmpty() && !m_preprocessMap.count(columnName)) {
+      if (runNumbers.isEmpty() && !m_preprocessMap.count(column.name())) {
 
         QString propValue = QString::fromStdString(alg->getPropertyValue(
-           (*columnIt).algorithmProperty().toStdString()));
+           column.algorithmProperty().toStdString()));
 
         if (m_options["Round"].toBool()) {
           QString exp = (propValue.indexOf("e") != -1)
@@ -1070,7 +1071,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
               exp;
         }
 
-        // (*newData)[i] = propValue;
+        (*newDataIt) = propValue;
       }
     }
   }

@@ -79,7 +79,6 @@ public:
 
   /// Return selected data
   TreeData selectedData(bool prompt) override;
-  TreeData selectedData(bool prompt, bool warnProcessAll);
   /// Transfer new data to model
   void transfer(const std::vector<std::map<QString, QString>> &runs,
                 const WhiteList &whitelist) override;
