@@ -1287,9 +1287,7 @@ public:
   }
 
   /// number of bin boundaries (axis points)
-  size_t getNBoundaries() const override {
-      return m_axis.length();
-  }
+  size_t getNBoundaries() const override { return m_axis.length(); }
 
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
@@ -1376,9 +1374,7 @@ public:
   }
 
   /// number of axis points (bin boundaries)
-  size_t getNBoundaries() const override {
-      return m_X.size();
-  }
+  size_t getNBoundaries() const override { return m_X.size(); }
 
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {

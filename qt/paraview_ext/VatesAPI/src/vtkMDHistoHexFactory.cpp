@@ -218,9 +218,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   progress.eventRaised(0.33);
 
   vtkNew<vtkPoints> points;
-  const vtkIdType nPointsX = static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
-  const vtkIdType nPointsY = static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
-  const vtkIdType nPointsZ = static_cast<int>(m_workspace->getZDimension()->getNBoundaries());
+  const vtkIdType nPointsX =
+      static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
+  const vtkIdType nPointsY =
+      static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
+  const vtkIdType nPointsZ =
+      static_cast<int>(m_workspace->getZDimension()->getNBoundaries());
   points->SetNumberOfPoints(nPointsX * nPointsY * nPointsZ);
 
   PointsWorker ptsfunc(*m_workspace, points.GetPointer());

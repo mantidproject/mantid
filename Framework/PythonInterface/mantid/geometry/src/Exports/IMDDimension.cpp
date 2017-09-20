@@ -69,7 +69,8 @@ void export_IMDDimension() {
            "Return the number of bins dimension have (an integrated has one). "
            "A axis directed along dimension would have getNBins+1 axis points.")
       .def("getNBoundaries", &IMDDimension::getNBoundaries, arg("self"),
-           "Return the number of bins boundaries (axis points) dimension have (an integrated has two). "
+           "Return the number of bins boundaries (axis points) dimension have "
+           "(an integrated has two). "
            "A axis directed along dimension would have getNBins+1 axis points.")
       .def("getX", &IMDDimension::getX, (arg("self"), arg("ind")),
            "Return coordinate of the axis at the given index")
