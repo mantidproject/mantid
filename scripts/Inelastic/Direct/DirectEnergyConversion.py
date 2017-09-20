@@ -334,7 +334,15 @@ class DirectEnergyConversion(object):
                 diag_mask, _ = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
         else:
             diag_mask = None
-        # Clean up
+
+        self.clean_up(diag_params, name_to_clean, whiteintegrals)
+
+        return diag_mask
+
+#-------------------------------------------------------------------------------
+    # Clean up unrequired workspaces
+
+    def clean_up(self, diag_params, name_to_clean, whiteintegrals):
         if 'sample_counts' in diag_params:
             DeleteWorkspace(Workspace='background_int')
             DeleteWorkspace(Workspace='total_counts')
@@ -346,7 +354,6 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace(name_to_clean+'_monitors')
         DeleteWorkspace(Workspace=whiteintegrals)
 
-        return diag_mask
 #-------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-branches
