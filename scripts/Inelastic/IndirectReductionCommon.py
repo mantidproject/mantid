@@ -141,7 +141,7 @@ def _load_files(file_specifiers, ipf_filename, spec_min, spec_max, load_logs=Tru
             logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
 
             workspaces, chopped_data = chop_workspace(workspace, monitor_index)
-            crop_workspaces(workspace_names, spec_min, spec_max, not delete_monitors, monitor_index)
+            crop_workspaces(workspaces, spec_min, spec_max, not delete_monitors, monitor_index)
 
     logger.information('Loaded workspace names: %s' % (str(workspace_names)))
     logger.information('Chopped data: %s' % (str(chopped_data)))
@@ -207,8 +207,9 @@ def chop_workspace(workspace, monitor_index):
         x_max = workspace.readX(0)[-1]
         chopped_data = x_max > chop_threshold
     except IndexError:
+        logger.warning("Chop threshold not found in instrument parameters")
         chopped_data = False
-    logger.information('Workspace {0} need data chop: {1}'.format(workspace, str(chopped_data)))
+    logger.information('Workspace {0} need data chop: {1}'.format(workspace_name, str(chopped_data)))
 
     if chopped_data:
         ChopData(InputWorkspace=workspace,
@@ -217,9 +218,9 @@ def chop_workspace(workspace, monitor_index):
                  IntegrationRangeLower=5000.0,
                  IntegrationRangeUpper=10000.0,
                  NChops=5)
-        return workspace.getNames()
+        return workspace.getNames(), True
     else:
-        return [workspace_name], chopped_data
+        return [workspace_name], False
 
 # -------------------------------------------------------------------------------
 
