@@ -30,7 +30,7 @@ subgraph algorithms {
   convertToMT       [label="ConvertUnits\n(Momentum-transfer)"]
   rotateSource      [label="RotateSource"]
   rotateSourceBack  [label="RotateSource"]
-  calcResolution    [label="CalculateResolution"]
+  calcResolution    [label="NRCalculateSlitResolution"]
   rebin             [label="Rebin"]
   scale             [label="Scale"]
 }

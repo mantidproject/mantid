@@ -21,8 +21,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqResetCamera.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqResetCamera.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCamera.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCamera.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Reset</string>
@@ -39,8 +39,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXPlus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqXPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqXPlus.png</iconset>
    </property>
    <property name="text">
     <string>+U</string>
@@ -60,8 +60,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqXMinus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqXMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqXMinus.png</iconset>
    </property>
    <property name="text">
     <string>-U</string>
@@ -81,8 +81,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYPlus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqYPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqYPlus.png</iconset>
    </property>
    <property name="text">
     <string>+V</string>
@@ -102,8 +102,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqYMinus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqYMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqYMinus.png</iconset>
    </property>
    <property name="text">
     <string>-V</string>
@@ -123,8 +123,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZPlus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZPlus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZPlus.png</iconset>
    </property>
    <property name="text">
     <string>+W</string>
@@ -144,8 +144,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZMinus.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZMinus.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZMinus.png</iconset>
    </property>
    <property name="text">
     <string>-W</string>
@@ -165,8 +165,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCW.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqRotateCameraCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqRotateCameraCW.png</iconset>
    </property>
    <property name="text">
     <string/>
@@ -186,8 +186,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqRotateCameraCCW.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqRotateCameraCCW.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqRotateCameraCCW.png</iconset>
    </property>
    <property name="text">
     <string/>
@@ -207,8 +207,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToSelection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToSelection.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZoomToSelection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZoomToSelection.png</iconset>
    </property>
    <property name="text">
     <string>Zoom to Box</string>
@@ -219,8 +219,8 @@
   </action>
   <action name="actionZoomToData">
    <property name="icon">
-    <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToData.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqWidgets/Icons/pqZoomToData.png</iconset>
+    <iconset resource="../../../../../resources/icons/ViewWidgetsIcons.qrc">
+     <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZoomToData.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqZoomToData.png</iconset>
    </property>
    <property name="text">
     <string>ZTD</string>
@@ -242,7 +242,7 @@
   <addaction name="actionRotate90degCCW"/>
  </widget>
  <resources>
-  <include location="../../icons/ViewWidgetsIcons.qrc"/>
+  <include location="../../../../../resources/icons/ViewWidgetsIcons.qrc"/>
  </resources>
  <connections/>
 </ui>
