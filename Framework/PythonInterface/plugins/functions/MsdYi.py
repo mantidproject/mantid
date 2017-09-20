@@ -51,7 +51,7 @@ class MsdYi(IFunction1D):
         sigma = self.getParameterValue("Sigma")
 
         xvals = np.array(xvals)
-        i1 = np.exp(-1.0 / (6.0 * xvals * xvals * msd))
+        i1 = np.exp(-1.0 / (6.0 * xvals**2 * msd))
         i2 = 1.0 + (np.power(xvals, 4) * sigma / 72.0)
         intensity = height * i1 * i2
 
@@ -63,7 +63,7 @@ class MsdYi(IFunction1D):
         sigma = self.getParameterValue("Sigma")
 
         for i, x in enumerate(xvals):
-            q = msd * x * x
+            q = msd * x**2
             f1 = math.exp(-1.0 / (6.0 * q))
             df1 = f1 / (6.0 * x * q)
             x4 = math.pow(x, 4)
