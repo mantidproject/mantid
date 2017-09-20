@@ -19,7 +19,7 @@ datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muon
 
 This interface is currently still in development. The data needs to be loaded and prepared using :ref:`Muon_Analysis-ref`.
 When Frequency Domain Analysis is opened it will import the groups/pairs from the current run in Muon Analysis, 
-** if no data has been loaded into Muon Analysis then Frequency Domain Analysis will not open**.
+**if no data has been loaded into Muon Analysis then Frequency Domain Analysis will not open**.
 
 Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 As the interfaces is developed the features from Muon Analysis will be replicated. 
