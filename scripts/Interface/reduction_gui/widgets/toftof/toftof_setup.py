@@ -168,7 +168,8 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_dataRunsView = ''
 
     TIP_chkSubtractECVan = ''
-    TIP_chkReplaceNaNs = ''
+    TIP_chkReplaceNaNs = 'Replace NaNs with 0'
+    TIP_chkCreateDiff = ''
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -237,6 +238,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
         self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
+        self.chkCreateDiff       = tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -297,6 +299,7 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
         grid.addWidget(self.rbtCorrectTOFSample,2, 3)
         grid.addWidget(self.chkReplaceNaNs,   3, 0, 1, 4)
+        grid.addWidget(self.chkCreateDiff,   4, 0, 1, 4)
         grid.setColumnStretch(4, 1)
 
         gbOptions.setLayout(grid)
@@ -362,11 +365,11 @@ class TOFTOFSetupWidget(BaseWidget):
             self.dataDir.setText(dirname)
 
     def _onBinEon(self, onVal):
-        for widget in (self.binEstart, self.binEstep, self.binEend):
+        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff):
             widget.setEnabled(onVal)
 
     def _onBinQon(self, onVal):
-        for widget in (self.binQstart, self.binQstep, self.binQend):
+        for widget in (self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs):
             widget.setEnabled(onVal)
 
     def _onSelectedCell(self, index):
@@ -407,6 +410,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.subtractECVan = self.chkSubtractECVan.isChecked()
         elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
+        elem.createDiff   = self.chkCreateDiff.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -451,6 +455,7 @@ class TOFTOFSetupWidget(BaseWidget):
 
         self.chkSubtractECVan.setChecked(elem.subtractECVan)
         self.chkReplaceNaNs.setChecked(elem.replaceNaNs)
+        self.chkCreateDiff.setChecked(elem.createDiff)
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)

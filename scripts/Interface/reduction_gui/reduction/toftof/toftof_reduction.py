@@ -41,6 +41,7 @@ class TOFTOFScriptElement(BaseScriptElement):
 
     DEF_subECVan   = False
     DEF_replaceNaNs   = False
+    DEF_createDiff   = False
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
@@ -85,6 +86,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.normalise     = self.DEF_normalise
         self.correctTof    = self.DEF_correctTof
         self.replaceNaNs   = self.DEF_replaceNaNs
+        self.createDiff    = self.DEF_createDiff
 
     def to_xml(self):
         res = ['']
@@ -121,6 +123,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
         put('replace_nans', self.replaceNaNs)
+        put('create_diff', self.createDiff)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -178,6 +181,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
             self.replaceNaNs   = get_bol('replace_nans', self.DEF_replaceNaNs)
+            self.createDiff    = get_bol('create_diff', self.DEF_createDiff)
 
     def to_script(self):
 
@@ -462,6 +466,20 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = Rebin({}, Params=rebinEnergy, IgnoreBinErrors=True)" .format(gDataBinE, gLast))
             l()
             gLast = gDataBinE
+
+        if self.binEon and self.createDiff:
+            gDataD = gData + 'D'
+            l("# create diffractograms")
+            l("for ws in {}:" .format(gLast))
+            l("    step1 = RemoveMaskedSpectra(ws)")
+            l("    step2 = IntegrateByComponent(step1)")
+            l("    step3 = ConvertSpectrumAxis(step2, Target='Theta', EMode='Direct', EFixed=Ei, OrderAxis=True)")
+            l("    Transpose(step3, OutputWorkspace='{}_D_' + ws.getComment())"
+              .format(self.prefix))
+            l("{} = GroupWorkspaces(['{}_D_'+ ws.getComment() for ws in {}])"
+              .format(gDataD, self.prefix, gLast))
+            l("DeleteWorkspaces('step1,step2,step3')")
+            l()
 
         if self.binQon:
             gDataBinQ = gData + 'SQW'
