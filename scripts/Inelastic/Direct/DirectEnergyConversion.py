@@ -205,9 +205,6 @@ class DirectEnergyConversion(object):
         # something else
         white = self.get_run_descriptor(white)
 
-        # return all diagnostics parameters
-        diag_params = self.prop_man.get_diagnostics_parameters()
-
         if self.use_hard_mask_only:
             # build hard mask
             diag_mask = white.get_masking(1)
@@ -246,6 +243,9 @@ class DirectEnergyConversion(object):
             other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
 #pylint: disable=attribute-defined-outside-init
             self.second_white = other_whiteintegrals
+
+        # return all diagnostics parameters
+        diag_params = self.prop_man.get_diagnostics_parameters()
 
         # Get the background/total counts from the sample run if present
         if diag_sample is not None:
