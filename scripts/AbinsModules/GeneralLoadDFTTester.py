@@ -107,7 +107,7 @@ class GeneralLoadDFTTester(object):
             self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
                                                atoms["atom_%s" % item]["coord"]))
 
-    def _check(self, name=None, loader=None):
+    def check(self, name=None, loader=None):
 
         extension = self._loaders_extensions[str(loader)]
 
