@@ -5,21 +5,21 @@ import numpy as np
 from mantid.kernel import Atom
 
 
-class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
+class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
     """
     Class for loading GAUSSIAN ab initio vibrational data.
     """
-    def __init__(self, input_ab_initio_filename):
+    def __init__(self, input_dft_filename):
         """
-        :param input_ab_initio_filename: name of file with phonon data (foo.log)
+        :param input_dft_filename: name of file with phonon data (foo.log)
         """
-        super(LoadGAUSSIAN, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "GAUSSIAN"
-        self._parser = AbinsModules.GeneralAbInitioParser()
+        super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
+        self._dft_program = "GAUSSIAN"
+        self._parser = AbinsModules.GeneralDFTParser()
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_vibrational_data(self):
+    def read_phonon_file(self):
         """
         Reads phonon data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of the phonon  file (hash) to <>.hdf5.
@@ -43,7 +43,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
             self._read_modes(file_obj=gaussian_file, data=data)
 
             # save data to hdf file
-            self.save_ab_initio_data(data=data)
+            self.save_dft_data(data=data)
 
             # return AbinsData object
             return self._rearrange_data(data=data)
