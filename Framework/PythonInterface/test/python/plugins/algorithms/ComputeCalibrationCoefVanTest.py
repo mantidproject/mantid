@@ -22,6 +22,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self._table = FindEPP(input_ws, OutputWorkspace="table")
         AddSampleLog(self._input_ws, LogName='wavelength', LogText='4.0',
                      LogType='Number', LogUnit='Angstrom')
+        # These ranges correspond to 6*FWHM of the gaussian above,
+        # the integration ranges of ComputeCalibrationCoefVan.
+        self._lowerBoundRange = slice(28, 73)
+        self._upperBoundRange = slice(27, 74)
 
     def test_output(self):
         outputWorkspaceName = "output_ws"
@@ -52,11 +56,12 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         wsoutput = AnalysisDataService.retrieve(outputWorkspaceName)
 
-        # check whether sum is calculated correctly, for theta=0, dwf=1
-        y_sumMin = np.sum(self._input_ws.readY(0)[28:73])
-        y_sumMax = np.sum(self._input_ws.readY(0)[27:74])
-        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[28:73])))
-        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[27:74])))
+        # Check whether the sum is calculated correctly, for theta=0, dwf=1
+        # The result should be somewhere between the full bin sums.
+        y_sumMin = np.sum(self._input_ws.readY(0)[self._lowerBoundRange])
+        y_sumMax = np.sum(self._input_ws.readY(0)[self._upperBoundRange])
+        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[self._lowerBoundRange])))
+        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(0)[self._upperBoundRange])))
         self.assertLess(y_sumMin, wsoutput.readY(0)[0])
         self.assertGreater(y_sumMax, wsoutput.readY(0)[0])
         self.assertLess(e_sumMin, wsoutput.readE(0)[0])
@@ -140,10 +145,10 @@ class ComputeCalibrationCoefVanTest(unittest.TestCase):
         else:
             raise RuntimeError("Unsupported temperature supplied to " +
                                "_checkDWF(). Use 0K or 293K only.")
-        y_sumMin = np.sum(self._input_ws.readY(1)[28:73])
-        y_sumMax = np.sum(self._input_ws.readY(1)[27:74])
-        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[28:73])))
-        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[27:74])))
+        y_sumMin = np.sum(self._input_ws.readY(1)[self._lowerBoundRange])
+        y_sumMax = np.sum(self._input_ws.readY(1)[self._upperBoundRange])
+        e_sumMin = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[self._lowerBoundRange])))
+        e_sumMax = np.sqrt(np.sum(np.square(self._input_ws.readE(1)[self._upperBoundRange])))
         mvan = 0.001*50.942/N_A
         Bcoef = 3.0*integral*1e+20*hbar*hbar/(2.0*mvan*k*389.0)
         dwf = np.exp(
