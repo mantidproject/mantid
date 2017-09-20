@@ -106,7 +106,7 @@ size_t FunctionGenerator::parameterIndex(const std::string &name) const {
 /// Returns the name of parameter i
 std::string FunctionGenerator::parameterName(size_t i) const {
   if (i < m_nOwnParams) {
-    return  m_source->parameterName(i);
+    return m_source->parameterName(i);
   } else {
     checkTargetFunction();
     return m_target->parameterName(i - m_nOwnParams);
@@ -116,7 +116,7 @@ std::string FunctionGenerator::parameterName(size_t i) const {
 /// Returns the description of parameter i
 std::string FunctionGenerator::parameterDescription(size_t i) const {
   if (i < m_nOwnParams) {
-    return  m_source->parameterDescription(i);
+    return m_source->parameterDescription(i);
   } else {
     checkTargetFunction();
     return m_target->parameterDescription(i - m_nOwnParams);
@@ -126,7 +126,7 @@ std::string FunctionGenerator::parameterDescription(size_t i) const {
 /// Checks if a parameter has been set explicitly
 bool FunctionGenerator::isExplicitlySet(size_t i) const {
   if (i < m_nOwnParams) {
-    return  m_source->isExplicitlySet(i);
+    return m_source->isExplicitlySet(i);
   } else {
     checkTargetFunction();
     return m_target->isExplicitlySet(i - m_nOwnParams);
@@ -136,7 +136,7 @@ bool FunctionGenerator::isExplicitlySet(size_t i) const {
 /// Get the fitting error for a parameter
 double FunctionGenerator::getError(size_t i) const {
   if (i < m_nOwnParams) {
-    return  m_source->getError(i);
+    return m_source->getError(i);
   } else {
     checkTargetFunction();
     return m_target->getError(i - m_nOwnParams);
