@@ -15,6 +15,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -196,65 +197,58 @@ void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
   const double scatteringAngleTolerance =
       getProperty("ScatteringAngleTolerance");
 
-  // loop over spectra
+  // loop over all workspaces
   for (auto &ws : m_workspaceList) {
+    // loop over spectra
     const auto &specInfo = ws->spectrumInfo();
     for (size_t i = 0; i < specInfo.size(); ++i) {
       if (specInfo.isMonitor(i))
         continue;
+
       const auto &pos = specInfo.position(i);
       const auto y = pos.Y();
-      auto theta = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
-
-      auto it = std::lower_bound(m_heightAxis.begin(), m_heightAxis.end(), y);
-      size_t index = std::distance(m_heightAxis.begin(), it);
       size_t yIndex =
-          fabs(m_heightAxis[index] - y) < fabs(m_heightAxis[index - 1] - y)
-              ? index
-              : index - 1;
+          Kernel::VectorHelper::indexOfValueFromCenters(m_heightAxis, y);
 
-      // TODO: theta < 0
-      size_t thetaIndex = size_t(
-          (theta - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
-      const double deltaX =
-          fabs(m_startScatteringAngle +
-               double(thetaIndex) * m_stepScatteringAngle - theta);
+      auto angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      size_t angleIndex = size_t(
+          (angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
 
-      if (yIndex >= m_numHistograms || thetaIndex >= m_numPoints)
+      // point is out of range, a warning should have been generated already for
+      // the theta index
+      if (yIndex >= m_numHistograms || angleIndex >= m_numPoints)
         continue;
-      if (deltaX > m_stepScatteringAngle * scatteringAngleTolerance) {
-        const double deltaXPlus =
-            fabs(m_startScatteringAngle +
-                 double(thetaIndex + 1) * m_stepScatteringAngle - theta);
-        const double deltaXMinus =
-            fabs(m_startScatteringAngle +
-                 double(thetaIndex - 1) * m_stepScatteringAngle - theta);
-        size_t n;
-        double deltaXOther = 0.0;
-        if (deltaXMinus < deltaXPlus) {
-          n = thetaIndex - 1;
-          deltaXOther = deltaXMinus;
-        } else {
-          n = thetaIndex + 1;
-          deltaXOther = deltaXPlus;
-        }
 
-        auto counts = ws->histogram(i).y()[0];
-        auto &yData = outputWS->mutableY(yIndex);
-        yData[n] += counts * deltaX / m_stepScatteringAngle;
-        yData[thetaIndex] += counts * deltaXOther / m_stepScatteringAngle;
-        g_log.error() << theta << "''" << deltaXPlus << "''" << deltaXMinus
-                      << std::endl;
-        g_log.error() << deltaXOther / m_stepScatteringAngle << std::endl;
-        g_log.error() << deltaX / m_stepScatteringAngle << std::endl;
-        g_log.error() << yData[n] << "++" << yData[thetaIndex] << std::endl;
+      const double deltaAngle = distanceFromAngle(angleIndex, angle);
+      auto counts = ws->histogram(i).y()[0];
+      auto &yData = outputWS->mutableY(yIndex);
+
+      if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
+        // counts are split between bins if outside this tolerance
+
+        size_t angleIndexNextClosest = angleIndex;
+        if (distanceFromAngle(angleIndex - 1, angle) <
+            distanceFromAngle(angleIndex + 1, angle))
+          angleIndexNextClosest = angleIndex - 1;
+        else
+          angleIndexNextClosest = angleIndex + 1;
+
+        yData[angleIndex] += counts *
+                             distanceFromAngle(angleIndexNextClosest, angle) /
+                             m_stepScatteringAngle;
+        yData[angleIndexNextClosest] +=
+            counts * deltaAngle / m_stepScatteringAngle;
       } else {
-        auto counts = ws->histogram(i).y()[0];
-        auto &yData = outputWS->mutableY(yIndex);
-        yData[thetaIndex] += counts;
+        yData[angleIndex] += counts;
       }
     }
   }
+}
+
+double BinDetectorScan::distanceFromAngle(const size_t thetaIndex,
+                                          const double theta) const {
+  return fabs(m_startScatteringAngle +
+              double(thetaIndex) * m_stepScatteringAngle - theta);
 }
 
 } // namespace Algorithms

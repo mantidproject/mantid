@@ -58,6 +58,8 @@ private:
   void getScatteringAngleBinning();
   void getHeightAxis();
   void performBinning(API::MatrixWorkspace_sptr &outputWS);
+
+  double distanceFromAngle(const size_t thetaIndex, const double theta) const;
 };
 
 } // namespace Algorithms
