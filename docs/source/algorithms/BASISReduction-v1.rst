@@ -100,6 +100,8 @@ sure you select the *inverse* geometry.
    :width: 50%
    :alt: Wavelength spectrum.
 
+Also, make sure that the sample rotation angle is stored in the logs of the run,
+since this is a required property of the algorithm.
 
 Dynamic Susceptibility
 ======================
