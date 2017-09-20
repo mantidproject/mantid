@@ -100,8 +100,7 @@ class SANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+            output_msg += self.output_message_if_exists(alg) + "\n"
 
         # Load the sample data
         msg = self._multiple_load(filename, output_ws,
@@ -140,8 +139,7 @@ class SANSReduction(PythonAlgorithm):
                                                "MeasuredTransmissionValue")
             self.copy_property_value_if_exists(alg, property_manager, "MeasuredError",
                                                "MeasuredTransmissionError")
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+            output_msg += self.output_message_if_exists(alg) + "\n"
 
         # Process background data
         if "BackgroundFiles" in property_list:
@@ -216,8 +214,7 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", iq_output)
             alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+            output_msg += self.output_message_if_exists(alg) + "\n"
 
         # Compute I(qx,qy)
         iqxy_output = None
@@ -230,8 +227,7 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", iq_output_name)
             self.set_property_if_exists("ReductionProperties", property_manager_name)
             alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+            output_msg += self.output_message_if_exists(alg) + "\n"
 
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
@@ -257,6 +253,11 @@ class SANSReduction(PythonAlgorithm):
                 Logger("SANSReduction").error(msg)
 
         self.setProperty("OutputMessage", output_msg)
+
+    def output_message_if_exists(self, alg):
+        if alg.existsProperty("OutputMessage"):
+            return alg.getProperty("OutputMessage").value
+        return ""
 
     def set_beam_center_if_exists(self, alg, x, y):
         if alg.existsProperty("BeamCenterX") and alg.existsProperty("BeamCenterY") and x is not None and y is not None:
@@ -319,8 +320,7 @@ class SANSReduction(PythonAlgorithm):
 
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+            output_msg += self.output_message_if_exists(alg) + "\n"
 
             # Store sensitivity beam center so that we can access it later
             if beam_center_x is not None and beam_center_y is not None:
@@ -356,8 +356,8 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("Workspace", workspace)
             self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
             alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg = alg.getProperty("OutputMessage").value+'\n'
+            output_msg = self.output_message_if_exists(alg) + "\n"
+
         return output_msg
 
     def _save_output(self, iq_output, iqxy_output, output_dir, property_manager):
