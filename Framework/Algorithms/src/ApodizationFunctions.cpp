@@ -45,4 +45,3 @@ double none(const double, const double) { return 1.; }
 }
 }
 }
-

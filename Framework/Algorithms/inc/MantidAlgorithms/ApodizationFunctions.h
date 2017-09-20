@@ -45,5 +45,4 @@ double none(const double, const double);
 }
 }
 
-
 #endif /*MANTID_APODIZATIONFUNCTIONS_H_*/
