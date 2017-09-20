@@ -129,6 +129,12 @@ class FFTView(QtGui.QWidget):
         self.buttonSignal.emit()
 
     #functions
+    def activateButton(self):
+        self.button.setEnabled(True)
+ 
+    def deactivateButton(self):
+        self.button.setEnabled(False)
+
     def setPhaseBox(self):
         self.FFTTable.setRowHidden(7,self.getWS()!="PhaseQuad")
 

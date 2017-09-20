@@ -20,6 +20,14 @@ class FFTPresenter(object):
         self.view.tableClickSignal.connect(self.tableClicked)
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
+        self.alg.started.connect(self.deactivate)
+        self.alg.finished.connect(self.activate)
+
+    def activate(self):
+        self.view.activateButton()
+
+    def deactivate(self):
+        self.view.deactivateButton()
 
     # only get ws that are groups or pairs
     # ignore raw
@@ -39,7 +47,7 @@ class FFTPresenter(object):
            self.view.setPhaseBox() 
 
     def tableClicked(self,row,col):
-        if row == self.view.getImBoxRow() and col == 1:
+        if row == self.view.getImBoxRow() and col == 1 and self.view.getWS() !="PhaseQuad":
             self.view.changedHideUnTick(self.view.getImBox(),self.view.getImBoxRow()+1)
         elif  row == self.view.getShiftBoxRow() and col == 1:
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
