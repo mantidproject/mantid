@@ -4,13 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ProductFunction.h"
+#include "MantidAPI/BasicJacobian.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidCurveFitting/Jacobian.h"
-
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;
@@ -252,7 +251,7 @@ public:
 
     TS_ASSERT_EQUALS(out.getCalculated(0), 105.0);
 
-    Mantid::CurveFitting::Jacobian jacobian(1, 4);
+    Mantid::API::BasicJacobian jacobian(1, 4);
     prodF.functionDeriv(domain, jacobian);
 
     TS_ASSERT_DELTA(jacobian.get(0, 0), 15, 1e-9);

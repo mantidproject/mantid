@@ -1,22 +1,19 @@
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+#ifndef MANTID_API_BASICJACOBIAN_H_
+#define MANTID_API_BASICJACOBIAN_H_
 
 #include "MantidAPI/Jacobian.h"
-#include "MantidKernel/Exception.h"
-#include <gsl/gsl_matrix.h>
 
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
-namespace CurveFitting {
+namespace API {
 /**
 An implementation of Jacobian using std::vector.
 
 @author Roman Tolchenov
 @date 17/02/2012
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2010-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -37,7 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class Jacobian : public API::Jacobian {
+class BasicJacobian : public API::Jacobian {
   /// Number of data points
   size_t m_ny;
   /// Number of parameters in a function (== IFunction::nParams())
@@ -49,7 +46,7 @@ public:
   /// Constructor.
   /// @param ny :: Number of data points
   /// @param np :: Number of parameters
-  Jacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) {
+  BasicJacobian(size_t ny, size_t np) : m_ny(ny), m_np(np) {
     m_data.resize(ny * np, 0.0);
   }
   /// overwrite base method
@@ -96,4 +93,4 @@ public:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/
+#endif /*MANTID_API_BASICJACOBIAN_H_*/

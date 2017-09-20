@@ -1,12 +1,12 @@
 #ifndef MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTIONTEST_H_
 #define MANTID_SINQ_POLDISPECTRUMDOMAINFUNCTIONTEST_H_
 
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
+#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidCurveFitting/Jacobian.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gtest/gtest.h>
@@ -144,7 +144,7 @@ public:
     std::vector<double> xvalues(500, 1.0);
     FunctionDomain1DSpectrum domain(342, xvalues);
     TS_ASSERT_EQUALS(domain.getWorkspaceIndex(), 342);
-    Mantid::CurveFitting::Jacobian jacobian(500, 3);
+    Mantid::API::BasicJacobian jacobian(500, 3);
 
     function.functionDeriv(domain, jacobian);
 

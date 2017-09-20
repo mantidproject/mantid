@@ -3,14 +3,14 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidCurveFitting/Functions/PseudoVoigt.h"
-#include "MantidCurveFitting/Jacobian.h"
-#include <boost/make_shared.hpp>
-
+#include "MantidAPI/BasicJacobian.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidKernel/MersenneTwister.h"
+
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -180,7 +180,7 @@ public:
     IFunction_sptr pv = getInitializedPV(1.0, 4.78, 0.05, 0.7);
 
     FunctionDomain1DVector domain(m_xValues);
-    Mantid::CurveFitting::Jacobian jacobian(domain.size(), 4);
+    Mantid::API::BasicJacobian jacobian(domain.size(), 4);
 
     pv->functionDeriv(domain, jacobian);
 
