@@ -158,7 +158,7 @@ protected:
   QString m_processingOptions;
   // Post-processing options
   QString m_postprocessingOptions;
-
+  void updateProcessedStatus(const std::pair<int, GroupData> & group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -183,6 +183,7 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
+  bool areOptionsUpdated();
   void applyDefaultOptions(std::map<QString, QVariant>& options);
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
@@ -198,7 +199,7 @@ private:
   // Post-processing map
   std::map<QString, QString> m_postprocessMap;
   // The current queue of groups to be reduced
-  GroupQueue m_gqueue;
+  GroupQueue m_group_queue;
   // The current group we are reducing row data for
   GroupData m_groupData;
   // The current row item being reduced

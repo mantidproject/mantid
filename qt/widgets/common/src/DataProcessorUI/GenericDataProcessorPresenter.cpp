@@ -232,7 +232,7 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(std::begin(in), std::end(in), std::inserter(out, out.begin()),
+  std::transform(std::cbegin(in), std::cend(in), std::inserter(out, out.begin()),
                  [](QString const &inStr)
                      -> std::string { return inStr.toStdString(); });
   return out;
@@ -294,6 +294,25 @@ void GenericDataProcessorPresenter::acceptViews(
   m_view->pause();
 }
 
+bool GenericDataProcessorPresenter::areOptionsUpdated() {
+  auto newPreprocessingOptions =
+      m_mainPresenter->getPreprocessingOptionsAsString();
+  auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
+  auto newPostprocessingOptions =
+      m_mainPresenter->getPostprocessingOptions();
+
+  auto settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
+                         m_processingOptions != newProcessingOptions ||
+                         m_postprocessingOptions != newPostprocessingOptions;
+
+  m_preprocessingOptions = newPreprocessingOptions;
+  m_processingOptions = newProcessingOptions;
+  m_postprocessingOptions = newPostprocessingOptions;
+
+  return settingsChanged;
+}
+
+
 /**
 Process selected data
 */
@@ -309,66 +328,49 @@ void GenericDataProcessorPresenter::process() {
 
   // Set the global settings. If any have been changed, set all groups and rows
   // as unprocessed
-  QString newPreprocessingOptions =
-      m_mainPresenter->getPreprocessingOptionsAsString();
-  QString newProcessingOptions = m_mainPresenter->getProcessingOptions();
-  QString newPostprocessingOptions =
-      m_mainPresenter->getPostprocessingOptions();
-
-  bool settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
-                         m_processingOptions != newProcessingOptions ||
-                         m_postprocessingOptions != newPostprocessingOptions;
-
-  m_preprocessingOptions = newPreprocessingOptions;
-  m_processingOptions = newProcessingOptions;
-  m_postprocessingOptions = newPostprocessingOptions;
-
+  auto settingsHaveChanged = areOptionsUpdated();
+  
   // Clear the group queue
-  m_gqueue = GroupQueue();
+  m_group_queue = GroupQueue();
 
   // Progress: each group and each row within count as a progress step.
   int maxProgress = 0;
 
-  for (const auto &item : m_selectedData) {
-    // Loop over each group
+  for (const auto &group : m_selectedData) {
+    auto groupOutputNotFound = !workspaceExists(getPostprocessedWorkspaceName(group.second, m_postprocessor.prefix()));
 
-    // Set group as unprocessed if settings have changed or the expected output
-    // workspace cannot be found
-    bool groupWSFound = workspaceExists(
-        getPostprocessedWorkspaceName(item.second, m_postprocessor.prefix()));
-
-    if (settingsChanged || !groupWSFound)
-      m_manager->setProcessed(false, item.first);
-
+    if (settingsHaveChanged || groupOutputNotFound)
+      m_manager->setProcessed(false, group.first);
+    
     // Groups that are already processed or cannot be post-processed (only 1
     // child row selected) do not count in progress
-    if (!isProcessed(item.first) && item.second.size() > 1)
+    if (!isProcessed(group.first) && group.second.size() > 1)
       maxProgress++;
 
     RowQueue rowQueue;
 
-    for (const auto &data : item.second) {
+    for (const auto &row : group.second) {
 
       // Add all row items to queue
-      rowQueue.push(data);
+      rowQueue.push(row);
 
-      // Set row as unprocessed if settings have changed or the expected output
+      // Set group as unprocessed if settings have changed or the expected output
       // workspaces cannot be found
-      bool rowWSFound = true;
+      bool rowOutputFound = true;
       for (auto i = 0u;
-           i < m_processor.numberOfOutputProperties() && rowWSFound; i++) {
-        rowWSFound = workspaceExists(
-            getReducedWorkspaceName(data.second, m_processor.prefix(i)));
+           i < m_processor.numberOfOutputProperties() && rowOutputFound; i++) {
+        rowOutputFound = workspaceExists(
+            getReducedWorkspaceName(row.second, m_processor.prefix(i)));
       }
 
-      if (settingsChanged || !rowWSFound)
-        m_manager->setProcessed(false, data.first, item.first);
+      if (settingsHaveChanged || !rowOutputFound)
+        m_manager->setProcessed(false, row.first, group.first);
 
       // Rows that are already processed do not count in progress
-      if (!isProcessed(data.first, item.first))
+      if (!isProcessed(row.first, group.first))
         maxProgress++;
     }
-    m_gqueue.emplace(item.first, rowQueue);
+    m_group_queue.emplace(group.first, rowQueue);
   }
 
   // Create progress reporter bar
@@ -417,8 +419,8 @@ void GenericDataProcessorPresenter::nextRow() {
   // Add processed row data to the group
   int rowIndex = m_rowItem.first;
   m_groupData[rowIndex] = m_rowItem.second;
-  int groupIndex = m_gqueue.front().first;
-  auto &rqueue = m_gqueue.front().second;
+  int groupIndex = m_group_queue.front().first;
+  auto &rqueue = m_group_queue.front().second;
 
   if (!rqueue.empty()) {
     // Set next action flag
@@ -432,7 +434,7 @@ void GenericDataProcessorPresenter::nextRow() {
       return;
     }
   } else {
-    m_gqueue.pop();
+    m_group_queue.pop();
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceGroupFlag;
 
@@ -463,16 +465,16 @@ void GenericDataProcessorPresenter::nextGroup() {
   // Clear group data from any previously processed groups
   m_groupData.clear();
 
-  if (!m_gqueue.empty()) {
+  if (!m_group_queue.empty()) {
     // Set next action flag
     m_nextActionFlag = ReductionFlag::ReduceRowFlag;
     // Reduce first row
-    auto &rqueue = m_gqueue.front().second;
+    auto &rqueue = m_group_queue.front().second;
     m_rowItem = rqueue.front();
     rqueue.pop();
     // Skip reducing rows that are already processed
-    if (!isProcessed(m_rowItem.first, m_gqueue.front().first))
-      startAsyncRowReduceThread(&m_rowItem, m_gqueue.front().first);
+    if (!isProcessed(m_rowItem.first, m_group_queue.front().first))
+      startAsyncRowReduceThread(&m_rowItem, m_group_queue.front().first);
     else
       doNextAction();
   } else {
