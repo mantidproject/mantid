@@ -502,9 +502,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         elif y_unit == 'Wavelength':
             self._transposed = True
             return self._tranpose_ws(workspace)
-        elif x_unit == 'EnergyTransfer':
+        elif x_unit == 'DeltaE':
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
-        elif y_unit == 'EnergyTransfer':
+        elif y_unit == 'DeltaE':
             self._transposed = True
             workspace = self._tranpose_ws(workspace)
             return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
