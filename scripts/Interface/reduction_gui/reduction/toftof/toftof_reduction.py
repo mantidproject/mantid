@@ -40,6 +40,7 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_binQend    = 0.0
 
     DEF_subECVan   = False
+    DEF_replaceNaNs   = False
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
@@ -83,6 +84,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.subtractECVan = self.DEF_subECVan
         self.normalise     = self.DEF_normalise
         self.correctTof    = self.DEF_correctTof
+        self.replaceNaNs   = self.DEF_replaceNaNs
 
     def to_xml(self):
         res = ['']
@@ -118,6 +120,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('subtract_ecvan', self.subtractECVan)
         put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
+        put('replace_nans', self.replaceNaNs)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -174,6 +177,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.subtractECVan = get_bol('subtract_ecvan', self.DEF_subECVan)
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
+            self.replaceNaNs   = get_bol('replace_nans', self.DEF_replaceNaNs)
 
     def to_script(self):
 
@@ -464,8 +468,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# calculate momentum transfer Q for sample data")
             l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
               .format(self.binQstart, self.binQstep, self.binQend))
-            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei)"
-              .format(gDataBinQ, gLast))
+            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
+              .format(gDataBinQ, gLast, self.replaceNaNs))
             l()
 
         l("# make nice workspace names")

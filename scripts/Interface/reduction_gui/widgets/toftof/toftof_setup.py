@@ -168,6 +168,7 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_dataRunsView = ''
 
     TIP_chkSubtractECVan = ''
+    TIP_chkReplaceNaNs = ''
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -235,6 +236,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
+        self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W)'), self.TIP_chkReplaceNaNs)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -294,6 +296,7 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.rbtCorrectTOFNone,  2, 1)
         grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
         grid.addWidget(self.rbtCorrectTOFSample,2, 3)
+        grid.addWidget(self.chkReplaceNaNs,   3, 0, 1, 4)
         grid.setColumnStretch(4, 1)
 
         gbOptions.setLayout(grid)
@@ -403,6 +406,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.maskDetectors = line_text(self.maskDetectors)
 
         elem.subtractECVan = self.chkSubtractECVan.isChecked()
+        elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -446,6 +450,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.maskDetectors.setText(elem.maskDetectors)
 
         self.chkSubtractECVan.setChecked(elem.subtractECVan)
+        self.chkReplaceNaNs.setChecked(elem.replaceNaNs)
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)
