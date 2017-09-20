@@ -558,7 +558,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
         instrument_name = workspace.getInstrument().getName()
-        isis_instrument = instrument_name == "ISIS" or instrument_name == "OSIRIS"
+        isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------
 
