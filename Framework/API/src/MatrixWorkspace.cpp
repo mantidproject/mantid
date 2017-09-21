@@ -176,7 +176,7 @@ const std::string MatrixWorkspace::toString() const {
 
   try {
     os << "Bins: " << blocksize() << "\n";
-  } catch (std::length_error) {
+  } catch (std::length_error &) {
     os << "Bins: variable\n"; // TODO shouldn't use try/catch
   }
 
