@@ -9,7 +9,7 @@ from Muon import MaxEnt_model
 """
 
 
-class modelConstructor(object):
+class ModelConstructor(object):
 
     def __init__(self,includeTransform):
         # construct transformation memebers

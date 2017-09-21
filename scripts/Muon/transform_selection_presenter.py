@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 
-class transformSelectionPresenter(object):
+class TransformSelectionPresenter(object):
 
     def __init__(self,view):
         self.view=view

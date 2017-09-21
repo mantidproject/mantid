@@ -3,9 +3,9 @@ from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui
 
 
-class transformView(QtGui.QWidget):
+class TransformView(QtGui.QWidget):
     def __init__(self,groupedViews,parent=None):
-        super(transformView,self).__init__(parent)
+        super(TransformView,self).__init__(parent)
         self.methods = groupedViews.getTransformMethods()
         self.selection = groupedViews.getTransformSelection()
         self.Layout = QtGui.QGridLayout()

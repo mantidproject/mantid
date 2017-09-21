@@ -22,7 +22,6 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.alg.start=mock.Mock()
         self.alg.started=mock.Mock()
         self.alg.finished=mock.Mock()
- #       self.alg.started.connect=mock.Mock()
         self.alg.setInputs=mock.Mock()
 
         self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)
