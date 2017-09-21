@@ -138,6 +138,7 @@ set ( SRC_FILES
 	src/FindPeakBackground.cpp
 	src/FindPeaks.cpp
 	src/FitPeak.cpp
+	src/FitPeaks.cpp
 	src/FixGSASInstrumentFile.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
@@ -461,6 +462,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindPeakBackground.h
 	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FitPeak.h
+	inc/MantidAlgorithms/FitPeaks.h
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
@@ -796,6 +798,7 @@ set ( TEST_FILES
 	FindPeakBackgroundTest.h
 	FindPeaksTest.h
 	FitPeakTest.h
+	FitPeaksTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
 	GeneralisedSecondDifferenceTest.h
