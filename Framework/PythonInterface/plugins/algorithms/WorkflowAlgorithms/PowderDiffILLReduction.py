@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import numpy as np
-from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator
+from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
+    VisibleWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
@@ -60,6 +61,9 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='ROI', values=[0, 153.6], validator=thetaRangeValidator),
                              doc='Regions of interest for normalisation [in scattering angle in degrees].')
+
+        normaliseToROI = VisibleWhenProperty('NormaliseTo', PropertyCriterion.IsEqualTo, 'ROI')
+        self.setPropertySettings('ROI', normaliseToROI)
 
         self.declareProperty(name='Observable',
                              defaultValue='sample.temperature',

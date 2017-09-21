@@ -4,7 +4,7 @@ import math
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
     CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
-    FloatArrayProperty
+    FloatArrayProperty, VisibleWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
 
@@ -23,6 +23,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
     _normalise_to = None
     _first_pixel = None
     _last_pixel = None
+    _excluded_ranges = []
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -59,7 +60,10 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='ROI', values=[0,153.6], validator=thetaRangeValidator),
                              doc='Regions of interest for normalisation [in scattering angle in degrees].')
 
-        self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[-3.2,0], validator=thetaRangeValidator),
+        normaliseToROI = VisibleWhenProperty('NormaliseTo', PropertyCriterion.IsEqualTo, 'ROI')
+        self.setPropertySettings('ROI', normaliseToROI)
+
+        self.declareProperty(FloatArrayProperty(name='ExcludedRange', values=[], validator=thetaRangeValidator),
                              doc='2theta regions to exclude from the computation of relative calibration constants '
                                  '[in scattering angle in degrees]. ')
 
@@ -71,7 +75,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         orderedPairsValidator = IntArrayOrderedPairsValidator()
         pixelRangeValidator.add(greaterThanOne)
         pixelRangeValidator.add(lengthTwo)
-        pixelRangeValidator.add(orderedPairsValidator )
+        pixelRangeValidator.add(orderedPairsValidator)
 
         self.declareProperty(IntArrayProperty(name='PixelRange', values=[1,3072], validator=pixelRangeValidator),
                              doc='Range of the pixel numbers to compute the calibration factors for. '
@@ -90,8 +94,9 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         return issues
 
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
-        ws_y = mtd[ws].extractY().flatten()[-self._bin_offset]
-        ws_e = mtd[ws].extractE().flatten()[-self._bin_offset]
+        ws_y = mtd[ws].extractY().flatten()[-self._bin_offset:]
+        ws_e = mtd[ws].extractE().flatten()[-self._bin_offset:]
+        ws_t = mtd[ws].getAxis(1).extractValues().flatten()[-self._bin_offset:]
         ws_x = np.zeros(self._bin_offset)
         ws_out = ref_ws + '_temp'
         ws_last = ref_ws + '_last'
@@ -104,16 +109,31 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ws_out)
 
-        CreateWorkspace(DataX=ws_x, DataY=ws_y, DataE=ws_e, NSpec=self._bin_offset, OutputWorkspace=ws_last)
+        CreateWorkspace(DataX=ws_x, DataY=ws_y, DataE=ws_e, NSpec=self._bin_offset, OutputWorkspace=ws_last,
+                        VerticalAxisValues=ws_t, VerticalAxisUnit='Degrees')
         AppendSpectra(InputWorkspace1=ws_out, InputWorkspace2=ws_last, OutputWorkspace=ws_out, ValidateInputs=False)
         DeleteWorkspace(ws_last)
         CropWorkspace(InputWorkspace=ws_out, OutputWorkspace=ws_out, StartWorkspaceIndex=self._bin_offset)
         RenameWorkspace(InputWorkspace=ws_out, OutputWorkspace=ref_ws)
         DeleteWorkspace(cropped_ws)
 
+    def _exclude_ranges(self, ratios, errors, angles):
+        for range in np.split(self._excluded_ranges, len(self._excluded_ranges) / 2):
+            cond = (angles < range[0]) | (angles > range[1])
+            ratios = ratios[cond]
+            errors = errors[cond]
+            angles = angles[cond]
+        return [ratios, errors, angles]
+
     def _compute_relative_factor(self, ratio):
-        #TODO: implement the masking of regions to exclude
-        ratios = mtd[ratio].extractY().flatten()
+        ratios = mtd[ratio].extractY()
+        errors = mtd[ratio].extractE()
+        angles = mtd[ratio].getAxis(1).extractValues().flatten()
+
+        if self._excluded_ranges is not None:
+            if len(self._excluded_ranges) is not 0:
+                [ratios, errors, angles] = self._exclude_ranges(ratios, errors, angles)
+
         factor = 1.
         if self._method == 'Median':
             factor = np.median(ratios)
@@ -171,6 +191,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         self._calib_file = self.getPropertyValue('CalibrationFile')
         self._method = self.getPropertyValue('CalibrationMethod')
         self._normalise_to = self.getPropertyValue('NormaliseTo')
+        self._excluded_ranges = self.getProperty('ExcludedRange').value
         self._first_pixel = self.getProperty('PixelRange').value[0]
         self._last_pixel = self.getProperty('PixelRange').value[1]
         self._out_response = self.getPropertyValue('OutputResponseWorkspace')
@@ -213,7 +234,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         raw_y = mtd[raw_ws].extractY().flatten()
         raw_e = mtd[raw_ws].extractE().flatten()
         raw_x = mtd[raw_ws].extractX().flatten()
-        raw_t = mtd[raw_ws].getAxis(1).extractValues()
+        raw_t = mtd[raw_ws].getAxis(1).extractValues().flatten()
 
         zeros = np.zeros(self._n_det)
         constants = np.ones(self._n_det)
@@ -264,7 +285,6 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     self.log().debug('Factor derived for detector pixel #' + str(det) + ' is ' + str(factor))
                     constants[det - 1] = factor
 
-                # here it comes the mixing-in
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
             else:
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
@@ -296,9 +316,6 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         out_temp = '__' + self._out_name
         CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=out_temp)
         Scale(InputWorkspace=out_temp, OutputWorkspace=out_temp, Factor=1./absolute_norm)
-
-        #if self._calib_file:
-        #   Multiply(LHSWorkspace=self._calib_ws, RHSWorkspace=out_temp, OutputWorkspace=out_temp)
 
         RenameWorkspace(InputWorkspace=out_temp, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
