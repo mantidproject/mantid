@@ -72,7 +72,6 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
     while True:
 
-        is_first_data_set_event = False
         is_first_data_set_group_workspace = False
         # we need to catch all exceptions to ensure that a dialog box is raised with the error
         try:
@@ -105,16 +104,16 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
                 if is_first_data_set_event:
                     adder.add(LHS_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
-                              RHS_workspace= ADD_FILES_NEW_TEMPORARY_MONITORS,
+                              RHS_workspace=ADD_FILES_NEW_TEMPORARY_MONITORS,
                               output_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
-                              run_to_add = counter_run)
+                              run_to_add=counter_run)
                 DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
                 if is_first_data_set_event:
                     DeleteWorkspace(ADD_FILES_NEW_TEMPORARY_MONITORS)
                 # Increment the run number
                 counter_run += 1
         except ValueError as e:
-            error = 'Error opening file ' + user_entry+': ' + str(e)
+            error = 'Error opening file ' + user_entry + ': ' + str(e)
             print(error)
             logger.notice(error)
             cleanup_temporary_workspaces((ADD_FILES_SUM_TEMPORARY,))
@@ -127,8 +126,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             return ""
         # in case of event file force it into a histogram workspace if this is requested
         if is_first_data_set_event and not saveAsEvent:
-            handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace,
-                                                                   runs, defType, inst)
+            handle_saving_event_workspace_when_saving_as_histogram(binning, is_first_data_set_group_workspace, runs,
+                                                                   defType, inst)
 
         last_file = os.path.splitext(last_file)[0]
         # now save the added file
@@ -139,7 +138,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         append = period != 1 and period != _NO_INDIVIDUAL_PERIODS
         SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY, Filename=out_file, Append=append)
         if is_first_data_set_event and saveAsEvent:
-            SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, FIlename=out_file_monitors,
+            SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, Filename=out_file_monitors,
                                Append=append)
 
         DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
