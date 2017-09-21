@@ -1259,5 +1259,6 @@ class SpectraToFoilPeriodMap(object):
 
 #########################################################################################
 
+
 # Registration
 AlgorithmFactory.subscribe(LoadVesuvio)

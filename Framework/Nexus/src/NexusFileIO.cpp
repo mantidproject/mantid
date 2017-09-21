@@ -264,7 +264,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
   m_filehandle->makeGroup(noteName, "NXnote", true);
 
   std::vector<std::string> attributes, avalues;
-  if (date != "") {
+  if (!date.empty()) {
     attributes.emplace_back("date");
     avalues.push_back(date);
   }

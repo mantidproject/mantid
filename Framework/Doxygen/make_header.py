@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range #pylint: disable=redefined-builtin
 import sys
 
 tracking = """<script>
@@ -12,14 +14,14 @@ tracking = """<script>
 </script>
 """
 
-inFile = file(sys.argv[1], 'r')
-content = inFile.readlines()
-inFile.close()
+with open(sys.argv[1], 'r') as inFile:
+    content = inFile.readlines()
+    inFile.close()
 
-for i in xrange(len(content)):
+for i in range(len(content)):
     if r"</head>" in content[i]:
         content[i] = tracking + content[i]
 
-outFile = file(sys.argv[1][:-3], 'w')
-outFile.write(''.join(content))
-outFile.close()
+with open(sys.argv[1][:-3], 'w') as outFile:
+    outFile.write(''.join(content))
+    outFile.close()

@@ -864,7 +864,7 @@ class DirectEnergyConversion(object):
         if separate_monitors:
             # copy incident energy obtained on monitor workspace to detectors
             # workspace
-            AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
+            AddSampleLog(Workspace=data_ws,LogName='Ei',LogText='{0:.10f}'.format(ei),LogType='Number')
 
         resultws_name = data_ws.name()
         # Adjust the TOF such that the first monitor peak is at t=0
@@ -1914,6 +1914,8 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
 
     n_spectra = len(sp_list)
     return n_spectra
+
+
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass
