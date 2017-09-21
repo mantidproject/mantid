@@ -13,7 +13,7 @@ The Peters model for Mean-squared displacement fitting is defined as:
 
 .. math::
 
-    \frac{Height}{\power{1 + \frac{MSD \times x^2}{6 \times \beta}}{\beta}}
+    \frac{Height}{\power{1 + \frac{MSD x^2}{6 \beta}}{\beta}}
 
 where:
 -   .. math::`MSD` is the mean-squared displacement
