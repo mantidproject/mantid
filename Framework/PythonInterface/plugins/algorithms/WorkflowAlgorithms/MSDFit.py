@@ -106,9 +106,9 @@ class MSDFit(DataProcessorAlgorithm):
         # Fit line to each of the spectra
         if self._model == 'Gauss':
             logger.information('Model : Gaussian approximation')
-            function = 'name=GausDecay, A=1.0, sigma=' + str(math.sqrt(0.1))
-            function += ',constraint=(A>0.0, sigma>0.0)'
-            params_list = ['A', 'sigma']
+            function = 'name=MsdGauss, Height=1.0, MSD=0.1'
+            function += ',constraint=(Height>0.0, MSD>0.0)'
+            params_list = ['Height', 'MSD']
         elif self._model == 'Peters':
             logger.information('Model : Peters & Kneller')
             function = 'name=MsdPeters, Height=1.0, MSD=1.0, Beta=1.0'
