@@ -59,10 +59,6 @@ class Pearl(AbstractInst):
 
     # Params #
 
-    @staticmethod
-    def _generate_input_file_name(run_number):
-        return _generate_inst_padding(run_number=run_number)
-
     def _generate_output_file_name(self, run_number_string):
         inst = self._inst_settings
         return pearl_algs.generate_out_name(run_number_string=run_number_string,
@@ -145,16 +141,3 @@ class Pearl(AbstractInst):
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(advanced_config=pearl_advanced_config.get_long_mode_dict(long_mode_on),
                                               suppress_warnings=True)
-
-
-def _generate_inst_padding(run_number):
-    digit = len(str(run_number))
-
-    number_of_digits = 8
-    filename = "PEARL"
-
-    for i in range(0, number_of_digits - digit):
-        filename += "0"
-
-    filename += str(run_number)
-    return filename

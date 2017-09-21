@@ -20,6 +20,12 @@ public:
     TS_ASSERT_EQUALS(v.allowedValues().size(), 3)
   }
 
+  void testArrayConstructor() {
+    std::array<std::string, 3> arr = {{"one", "two", "three"}};
+    StartsWithValidator v(arr);
+    TS_ASSERT_EQUALS(v.allowedValues().size(), 3);
+  }
+
   void testIsValid() {
     StartsWithValidator v;
     TS_ASSERT_EQUALS(v.isValid(""), "Select a value")

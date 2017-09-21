@@ -21,13 +21,17 @@ New
 ###
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
-- :ref:`LoadSESANS <algm-LoadSESANS-v1>` Loading SESANS data to a MatrixWorkspace is now supported.
-- :ref:`SaveSESANS <algm-SaveSESANS-v1>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
+- :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`PaddingAndApodization <algm-PaddingAndApodization-v1>` a new algorithm for padding data and adding an apodization function.
 - :ref:`algm-IntegrateEPP` integrates a workspace around the elastic peak positions given in an EPP table.
 
 Improved
 
-
+- :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` is extended to support conversion to elastic d-spacing.
+- :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
+- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
@@ -85,9 +89,12 @@ Bug fixes
 #########
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
+- Fix displayed type name for optional boolean properties.
 
 Improved
 ########
+
+- `:ref:`Fit` Outputs a function object containing the optimized parameter values.
 
 Python
 ------
