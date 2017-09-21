@@ -40,8 +40,9 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_binQend    = 0.0
 
     DEF_subECVan   = False
-    DEF_replaceNaNs   = False
-    DEF_createDiff   = False
+    DEF_replaceNaNs = False
+    DEF_createDiff  = False
+    DEF_keepSteps   = False
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
@@ -87,6 +88,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.correctTof    = self.DEF_correctTof
         self.replaceNaNs   = self.DEF_replaceNaNs
         self.createDiff    = self.DEF_createDiff
+        self.keepSteps     = self.DEF_keepSteps
 
     def to_xml(self):
         res = ['']
@@ -122,8 +124,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('subtract_ecvan', self.subtractECVan)
         put('normalise',      self.normalise)
         put('correct_tof',    self.correctTof)
-        put('replace_nans', self.replaceNaNs)
-        put('create_diff', self.createDiff)
+        put('replace_nans',   self.replaceNaNs)
+        put('create_diff',    self.createDiff)
+        put('keep_steps',     self.keepSteps)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -180,8 +183,9 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.subtractECVan = get_bol('subtract_ecvan', self.DEF_subECVan)
             self.normalise     = get_int('normalise',      self.DEF_normalise)
             self.correctTof    = get_int('correct_tof',    self.DEF_correctTof)
-            self.replaceNaNs   = get_bol('replace_nans', self.DEF_replaceNaNs)
-            self.createDiff    = get_bol('create_diff', self.DEF_createDiff)
+            self.replaceNaNs   = get_bol('replace_nans',   self.DEF_replaceNaNs)
+            self.createDiff    = get_bol('create_diff',    self.DEF_createDiff)
+            self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
     def to_script(self):
 
@@ -249,6 +253,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         dataGroup    = []
         allGroup     = []
 
+        # if not self.keepSteps, delete the workspaces imediately, to free the memory
         # vanadium runs
         if self.vanRuns:
             wsRawVan = self.prefix + 'RawVan'
@@ -258,6 +263,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = Load(Filename='{}')" .format(wsRawVan, self.vanRuns))
             l("{} = TOFTOFMergeRuns({})" .format(wsVan, wsRawVan))
             l("{}.setComment('{}')"      .format(wsVan, self.vanCmnt))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(wsRawVan))
             l()
 
             allGroup.append(wsVan)
@@ -270,6 +277,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# empty can runs")
             l("{} = Load(Filename='{}')" .format(wsRawEC, self.ecRuns))
             l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(wsRawEC))
             l()
 
             allGroup.append(wsEC)
@@ -294,6 +303,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = Load(Filename='{}')" .format(wsRawData, runs))
             l("{} = TOFTOFMergeRuns({})" .format(wsData, wsRawData))
             l("{}.setComment('{}')"      .format(wsData, cmnt))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(wsRawData))
             l()
 
             if i == 0:
@@ -308,7 +319,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         gAll         = gPrefix + 'All'
 
         l("# grouping")
-        l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
+        if self.keepSteps:
+            l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
         l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(dataGroup)))
         l("{} = GroupWorkspaces({})" .format(gAll,         group_list(allGroup)))
         l()
@@ -326,6 +338,8 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("# mask detectors")
         l("({}, numberOfFailures) = FindDetectorsOutsideLimits({})" .format(gDetectorsToMask, gAll))
         l("MaskDetectors({}, MaskedWorkspace={})" .format(gAll, gDetectorsToMask))
+        if not self.keepSteps:
+            l("DeleteWorkspace({})" .format(gDetectorsToMask))
 
         if self.maskDetectors:
             l("MaskDetectors({}, DetectorList='{}')" .format(gAll, self.maskDetectors))
@@ -346,6 +360,8 @@ class TOFTOFScriptElement(BaseScriptElement):
                 l("{} = MonitorEfficiencyCorUser({})" .format(wsECNorm, wsEC))
 
             l("{} = MonitorEfficiencyCorUser({})"     .format(gDataNorm, gDataRuns))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(gAll))
             l()
 
         elif self.NORM_TIME == self.normalise:
@@ -371,7 +387,8 @@ class TOFTOFScriptElement(BaseScriptElement):
               .format(get_time('ws')))
             l()
             l("{} = GroupWorkspaces(names)" .format(gDataNorm))
-
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(gAll))
             l()
 
         else:  # none, simply use the not normalised workspaces
@@ -393,6 +410,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
                 l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(scaledEC))
             l()
 
         l("# group data for processing")  # without empty can
@@ -416,18 +435,24 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
             l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
             l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(detCoeffs))
             l()
 
         gDataCleanFrame = gData + 'CleanFrame'
         l("# remove half-filled time bins (clean frame)")
         l("{} = TOFTOFCropWorkspace({})"
           .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
+        if self.vanRuns and not self.keepSteps:
+            l("DeleteWorkspace({})" .format(gDataCorr))
         l()
 
         gData2 = gData + 'TofCorr'
         if self.CORR_TOF_VAN == self.correctTof:
             l("# apply vanadium TOF correction")
             l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTable))
+            if not self.keepSteps:
+                l("DeleteWorkspaces([{}, {}, {}])" .format(gDataCleanFrame, eppTable, gData))
             l()
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
@@ -435,26 +460,38 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# apply sample TOF correction")
             l("{} = FindEPP({})" .format(eppTables, gData))
             l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTables))
+            if not self.keepSteps:
+                l("DeleteWorkspaces([{}, {}, {}])" .format(gDataCleanFrame, eppTables, gData))
             l()
 
         else:
             gData2 = gDataCleanFrame
+            if self.vanRuns and not self.keepSteps:
+                l("DeleteWorkspaces([{}, {}])" .format(eppTable, gData))
+            elif not self.keepSteps:
+                l("DeleteWorkspace({})" .format(gData))
 
         gDataDeltaE = gData + 'DeltaE'
         l("# convert units")
         l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)"
           .format(gDataDeltaE, gData2))
         l("ConvertToDistribution({})" .format(gDataDeltaE))
+        if not self.keepSteps:
+            l("DeleteWorkspace({})" .format(gData2))
         l()
 
         gDataCorrDeltaE = gData + 'CorrDeltaE'
         l("# correct for energy dependent detector efficiency")
         l("{} = DetectorEfficiencyCorUser({})" .format(gDataCorrDeltaE, gDataDeltaE))
+        if not self.keepSteps:
+            l("DeleteWorkspace({})" .format(gDataDeltaE))
         l()
 
         gDataS = gData + 'S'
         l("# calculate S (Ki/kF correction)")
         l("{} = CorrectKiKf({})" .format(gDataS, gDataCorrDeltaE))
+        if not self.keepSteps:
+            l("DeleteWorkspace({})" .format(gDataCorrDeltaE))
         l()
 
         gLast = gDataS

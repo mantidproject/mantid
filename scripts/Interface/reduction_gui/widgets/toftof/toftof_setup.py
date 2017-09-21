@@ -170,6 +170,7 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_chkSubtractECVan = ''
     TIP_chkReplaceNaNs = 'Replace NaNs with 0'
     TIP_chkCreateDiff = ''
+    TIP_chkKeepSteps = ''
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -239,6 +240,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
         self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
         self.chkCreateDiff       = tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff)
+        self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -299,7 +301,8 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
         grid.addWidget(self.rbtCorrectTOFSample,2, 3)
         grid.addWidget(self.chkReplaceNaNs,   3, 0, 1, 4)
-        grid.addWidget(self.chkCreateDiff,   4, 0, 1, 4)
+        grid.addWidget(self.chkCreateDiff,    4, 0, 1, 4)
+        grid.addWidget(self.chkKeepSteps,     5, 0, 1, 4)
         grid.setColumnStretch(4, 1)
 
         gbOptions.setLayout(grid)
@@ -410,7 +413,8 @@ class TOFTOFSetupWidget(BaseWidget):
 
         elem.subtractECVan = self.chkSubtractECVan.isChecked()
         elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
-        elem.createDiff   = self.chkCreateDiff.isChecked()
+        elem.createDiff    = self.chkCreateDiff.isChecked()
+        elem.keepSteps     = self.chkKeepSteps.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -456,6 +460,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self.chkSubtractECVan.setChecked(elem.subtractECVan)
         self.chkReplaceNaNs.setChecked(elem.replaceNaNs)
         self.chkCreateDiff.setChecked(elem.createDiff)
+        self.chkKeepSteps.setChecked(elem.keepSteps)
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)
