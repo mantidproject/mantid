@@ -503,11 +503,7 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
-            mask_detectors = AlgorithmManager.create("MaskDetectors")
-            mask_detectors.setChild(True)
-            mask_detectors.setProperty("Workspace", workspace)
-            mask_detectors.setProperty("WorkspaceIndexList", masked_detectors)
-            mask_detectors.execute()
+            _mask_detectors(workspace, masked_detectors)
 
         # Apply the grouping
         group_detectors.setProperty("MapFile", grouping_file)
@@ -709,12 +705,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Changed to version 2 to enable re-loading of files into mantid
-            save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
-            save_ascii_alg.initialize()
-            save_ascii_alg.setProperty('InputWorkspace', workspace_name)
-            save_ascii_alg.setProperty('Filename', workspace_name + '.dat')
-            save_ascii_alg.execute()
+            _save_ascii(workspace_name, workspace_name + ".dat")
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
@@ -811,3 +802,36 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
             logger.warning('Rebinning failed, will try to continue anyway.')
 
 # -------------------------------------------------------------------------------
+
+# ========== Child Algorithms ==========
+
+def _mask_detectors(workspace, masked_indices):
+    """
+    Masks the detectors at the specified indices in the specified
+    workspace.
+
+    :param workspace:       The workspace whose detectors to mask.
+    :param masked_indices:  The indices of the detectors to mask.
+    """
+    mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
+    mask_detectors.setChild(True)
+    mask_detectors.initialize()
+    mask_detectors.setProperty("Workspace", workspace)
+    mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
+    mask_detectors.execute()
+
+def _save_ascii(workspace, file_name):
+    """
+    Saves the specified workspace into a file with the specified name,
+    in ASCII-format.
+
+    :param workspace:   The workspace to save.
+    :param file_name:   The name of the file to save the workspace into.
+    """
+    # Changed to version 2 to enable re-loading of files into mantid
+    save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+    save_ascii_alg.setChild(True)
+    save_ascii_alg.initialize()
+    save_ascii_alg.setProperty('InputWorkspace', workspace)
+    save_ascii_alg.setProperty('Filename', file_name + '.dat')
+    save_ascii_alg.execute()
