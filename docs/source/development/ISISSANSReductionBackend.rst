@@ -784,14 +784,14 @@ interface method (*parse_line* which takes a single line to parse)
 needs to be provided.
 
 For an overview of the user file commands, please see the
-`documentation <https://www.mantidproject.org/SANS_User_File_Commands>`_ .
+`user file documentation <https://www.mantidproject.org/SANS_User_File_Commands>`_ .
 
 Director for *ISISCommandInterface* (CLI)
 *****************************************
 
 The *ISISCommandInterface* is used by some of the power users among the instrument scientists. It is
 an efficient way to customize reductions which require small tweaks between different reductions.
-Please consult the `documentation <https://www.mantidproject.org/Scripting_SANS_Reductions>`_
+Please consult the `scripting documentation <https://www.mantidproject.org/Scripting_SANS_Reductions>`_
 for the *ISISCommandInterface* for more information.
 
 The principal component which sets up the state behind the scene is *CommandInterfaceStateDirector*. It has to deal
@@ -841,8 +841,8 @@ The dedicated work-flow algorithms for the SANS reduction are:
 - :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 - :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-- *SANSCrop*
-- *SANSLoad*
+- :ref:`SANSCrop <algm-SANSCrop>`
+- :ref:`SANSLoad <algm-SANSLoad>`
 - *SANSMaskWorkspace*
 - *SANSMove*
 - *SANSNormalizeToMonitor*
@@ -855,9 +855,8 @@ an input.
 
 The individual algorithms are superficially discussed below.
 
-There are two further algorithms which coordinate these algorithms, they are
-:ref:`SANSReductionCore <algm-SANSReductionCore>` and
-:ref:`SANSSingleReduction <algm-SANSSingleReduction>` which are discussed further down.
+There are two further algorithms which coordinate these algorithms, they are *SANSReductionCore* and
+*SANSSingleReduction* which are discussed further down.
 
 
 *SANSCalculateTransmission*
@@ -1172,13 +1171,13 @@ The sub-states of this algorithm are:
 Work-flow algorithm orchestration
 #################################
 
-The orchestration of the work-flow algorithms is mainly handled by the :ref:`SANSReductionCore <algm-SANSReductionCore>`
+The orchestration of the work-flow algorithms is mainly handled by the *SANSReductionCore*
 class in *sans_reduction_core.py*. It defines the sequence of work-flow algorithms and how data is
-passed between them. However, executing the algorithm :ref:`SANSReductionCore <algm-SANSReductionCore>` does
+passed between them. However, executing the algorithm *SANSReductionCore* does
 not run a full reduction, but rather only reduces either the sample or the can data.
 
-For this the :ref:`SANSSingleReduction <algm-SANSSingleReduction>`algorithm was developed.
-It runs :ref:`SANSReductionCore <algm-SANSReductionCore>` with the appropriate
+For this the *SANSSingleReduction* algorithm was developed.
+It runs *SANSReductionCore* with the appropriate
 data (sample or can) and performs the required post processing, e.g. stitching.
 This algorithm will produce a fully reduced output. However it will not produce it in the desired form,
 e.g. correct name of the output workspaces, grouping of multi-period reduced data etc. This is achieved with
