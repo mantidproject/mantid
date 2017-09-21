@@ -39,7 +39,8 @@ void export_FileFinder() {
            "If no instrument prefix is given then the current default is used.")
       .def("getCaseSensitive", &FileFinderImpl::getCaseSensitive, (arg("self")),
            "Option to get if file finder should be case sensitive.")
-      .def("setCaseSensitive", &FileFinderImpl::setCaseSensitive, (arg("self"), arg("cs")),
+      .def("setCaseSensitive", &FileFinderImpl::setCaseSensitive,
+           (arg("self"), arg("cs")),
            "Option to set if file finder should be case sensitive.")
       .def("Instance", &FileFinder::Instance,
            return_value_policy<reference_existing_object>(),
