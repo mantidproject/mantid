@@ -2784,7 +2784,7 @@ void SANSRunWindow::handleRunFindCentre() {
   } else {
     coordinates_python_code =
         "print(i.ReductionSingleton().get_beam_center('front')[0]);print("
-        "i.ReductionSingleton().get_beam_center('front')[1]";
+        "i.ReductionSingleton().get_beam_center('front')[1])";
     m_uiForm.detbank_sel->setCurrentIndex(
         1); // FRONT selected -> detbank_sel <- FRONT
     beam_x = m_uiForm.front_beam_x;
