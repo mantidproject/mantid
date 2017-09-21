@@ -1084,7 +1084,7 @@ void LoadEventNexus::createSpectraMapping(
     const std::vector<std::string> &bankNames) {
   LoadEventNexusIndexSetup indexSetup(
       m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
-      getProperty("SpectrumMax"), getProperty("SpectrumList"));
+      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
   if (!monitorsOnly && !bankNames.empty()) {
     if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") ||
         !isDefault("SpectrumList"))

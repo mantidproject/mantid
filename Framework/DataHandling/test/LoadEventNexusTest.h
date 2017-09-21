@@ -12,13 +12,44 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidParallel/Collectives.h"
+#include "MantidParallel/Communicator.h"
+#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidTestHelpers/ParallelRunner.h"
+
 #include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+
+namespace {
+void run_MPI_load(const Parallel::Communicator &comm) {
+  auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
+  alg->setProperty("Filename", "CNCS_7860_event.nxs");
+  alg->setProperty("LoadLogs", false);
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
+  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  const auto eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
+  const size_t localSize = eventWS->getNumberHistograms();
+  auto localEventCount = eventWS->getNumberEvents();
+  std::vector<size_t> localSizes;
+  std::vector<size_t> localEventCounts;
+  Parallel::gather(comm, localSize, localSizes, 0);
+  Parallel::gather(comm, localEventCount, localEventCounts, 0);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(), 0),
+                     51200);
+    TS_ASSERT_EQUALS(
+        std::accumulate(localEventCounts.begin(), localEventCounts.end(), 0),
+        112266);
+  }
+}
+}
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -748,6 +779,10 @@ public:
 
       isFirstChildWorkspace = false;
     }
+  }
+
+  void test_MPI_load() {
+    ParallelTestHelpers::runParallel(run_MPI_load);
   }
 
 private:

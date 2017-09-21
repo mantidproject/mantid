@@ -36,9 +36,10 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
 
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(
     MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-    const int32_t max, const std::vector<int32_t> range)
+    const int32_t max, const std::vector<int32_t> range,
+    const Parallel::Communicator &communicator)
     : m_instrumentWorkspace(instrumentWorkspace), m_min(min), m_max(max),
-      m_range(range) {}
+      m_range(range), m_communicator(communicator) {}
 
 std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const {
   return {m_min, m_max};
@@ -55,8 +56,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
   // We need to filter based on detector IDs, but use IndexInfo for filtering
   // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
   // spectrum numbers.
-  IndexInfo indexInfo(
-      std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()));
+  IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()),
+                      Parallel::StorageMode::Cloned, m_communicator);
   indexInfo.setSpectrumDefinitions(specDefs);
 
   auto filtered = filterIndexInfo(indexInfo);
@@ -98,7 +99,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
                                "tree; or it did not contain any detectors. Try "
                                "unchecking SingleBankPixelsOnly.");
   }
-  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers));
+  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers),
+                                Parallel::StorageMode::Cloned, m_communicator);
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
   setupConsistentSpectrumNumbers(indexInfo, instrument->getDetectorIDs(true));
   // Filters are ignored when selecting bank names. Reset min/max to avoid
@@ -131,7 +133,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         spectrumDefinitions.emplace_back(detectorInfo.indexOf(id));
       }
     }
-    Indexing::IndexInfo indexInfo(spectrumNumbers);
+    Indexing::IndexInfo indexInfo(
+        spectrumNumbers, Parallel::StorageMode::Cloned, m_communicator);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
     return scatter(indexInfo);
   } else {
@@ -148,8 +151,10 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
         }
       }
     }
-    Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(
-        uniqueSpectra.begin(), uniqueSpectra.end()));
+    Indexing::IndexInfo indexInfo(
+        std::vector<Indexing::SpectrumNumber>(uniqueSpectra.begin(),
+                                              uniqueSpectra.end()),
+        Parallel::StorageMode::Cloned, m_communicator);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
     return scatter(filterIndexInfo(indexInfo));
   }
