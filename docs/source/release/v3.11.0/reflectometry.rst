@@ -61,7 +61,7 @@ ISIS Reflectometry
 ISIS Reflectometry (Old)
 ########################
 
-- The calculation of :math:`\frac{dQ}{Q}` has been fixed in line with the changes to the :ref:`algm-NRCalculateSlitResolution` algorithm. An additional bug as been fixed where :math:`\theta` was being passed to this algorithm instead of :math:`2\theta`.
+- The calculation of :math:`\frac{dQ}{Q}` has been fixed in line with the changes to the :ref:`algm-NRCalculateSlitResolution` algorithm. An additional bug has been fixed where :math:`\theta` was being passed to this algorithm instead of :math:`2\theta`.
 
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Reflectometry%22>`__
