@@ -37,6 +37,12 @@ def get_path_out(out_file):
     return path
 
 
+def enforce_str_tuple(string):
+    if isinstance(string, str):
+        return (string,)
+    return string
+
+
 def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add', '.RAW'), lowMem=False,
              binning='Monitors', saveAsEvent=False, isOverlay=False, time_shifts=None):
     if inst.upper() == "SANS2DTUBES":
@@ -54,10 +60,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     adder = AddOperation(isOverlay, time_shifts)
 
     # these input arguments need to be arrays of strings, enforce this
-    if isinstance(runs, str):
-        runs = (runs, )
-    if isinstance(rawTypes, str):
-        rawTypes = (rawTypes,)
+    runs = enforce_str_tuple(runs)
+    rawTypes = enforce_str_tuple(rawTypes)
 
     if lowMem:
         lowMem = _can_load_periods(runs, defType, rawTypes)
@@ -107,9 +111,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                               RHS_workspace=ADD_FILES_NEW_TEMPORARY_MONITORS,
                               output_workspace=ADD_FILES_SUM_TEMPORARY_MONITORS,
                               run_to_add=counter_run)
-                DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
-                if is_first_data_set_event:
                     DeleteWorkspace(ADD_FILES_NEW_TEMPORARY_MONITORS)
+
+                DeleteWorkspace(ADD_FILES_NEW_TEMPORARY)
+
                 # Increment the run number
                 counter_run += 1
         except ValueError as e:
@@ -141,9 +146,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             SaveNexusProcessed(InputWorkspace=ADD_FILES_SUM_TEMPORARY_MONITORS, Filename=out_file_monitors,
                                Append=append)
 
-        DeleteWorkspace(ADD_FILES_SUM_TEMPORARY)
-        if is_first_data_set_event:
-            DeleteWorkspace(ADD_FILES_SUM_TEMPORARY_MONITORS)
+        cleanup_temporary_workspaces(ADD_FILES_SUM_TEMPORARY, ADD_FILES_SUM_TEMPORARY_MONITORS)
 
         if period == num_periods or period == _NO_INDIVIDUAL_PERIODS:
             break
