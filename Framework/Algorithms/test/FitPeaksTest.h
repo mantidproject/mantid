@@ -73,10 +73,13 @@ public:
         fitpeaks.setProperty("StartWorkspaceIndex", 19014));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 19015));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
 
     fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
     fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
@@ -271,8 +274,10 @@ public:
    * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
    * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
    * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
-   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14', PeakRange='1.06,1.09',
-   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1, PeakPositionTolerance=0.02)
+   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
+   * PeakRange='1.06,1.09',
+   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
+   * PeakPositionTolerance=0.02)
     */
   void gen_PeakParameters(vector<string> &parnames, vector<double> &parvalues) {
     parnames.clear();
@@ -311,8 +316,9 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Diamond2Peaks"));
 
-    API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-                AnalysisDataService::Instance().retrieve("Diamond2Peaks"));
+    API::MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("Diamond2Peaks"));
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 24900);
 
     return "Diamond2Peaks";
