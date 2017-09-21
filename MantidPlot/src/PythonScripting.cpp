@@ -69,7 +69,7 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
     : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL), m_gil() {}
+      m_sys(NULL), m_mainThreadState(NULL) {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -77,7 +77,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);
@@ -138,7 +138,7 @@ bool PythonScripting::start() {
   PyImport_AppendInittab("_qti", &init_qti);
 #endif
   PythonInterpreter::initialize();
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   // Keep a hold of the globals, math and sys dictionary objects
   PyObject *mainmod = PyImport_AddModule("__main__");
