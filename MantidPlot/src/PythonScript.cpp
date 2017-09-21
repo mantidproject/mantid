@@ -81,7 +81,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
     : Script(env, name, interact, context), m_interp(env), localDict(NULL),
       stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL),
       m_threadID(-1), isFunction(false), m_isInitialized(false),
-      m_pathHolder(name, *this), m_recursiveAsyncGIL() {
+      m_pathHolder(name), m_recursiveAsyncGIL() {
   initialize(name, context);
 }
 

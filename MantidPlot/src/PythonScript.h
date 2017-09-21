@@ -105,8 +105,7 @@ private:
   /// Helper class to ensure the sys.path variable is updated correctly
   struct PythonPathHolder {
     /// Update the path with the given entry
-    explicit PythonPathHolder(const QString &entry, const PythonScript &script)
-        : m_path(entry), m_script(script) {
+    explicit PythonPathHolder(const QString &entry) : m_path(entry) {
       const QFileInfo filePath(m_path);
       if (filePath.exists()) {
         QDir directory = filePath.absoluteDir();
@@ -142,7 +141,6 @@ private:
 
   private:
     QString m_path;
-    const PythonScript &m_script;
   };
 
   inline PythonScripting *interp() const { return m_interp; }
