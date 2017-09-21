@@ -382,6 +382,7 @@ Usage
 
 .. testcode:: ExFitPeak
 
+   from __future__ import print_function
    # create a workspace with a gaussian peak sitting on top of a linear (here flat) background
    ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
       A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
@@ -401,16 +402,17 @@ Usage
    #myFunc = 'name=LinearBackground, A0=0.3;name=Gaussian, Height='+height+', PeakCentre='+tryCentre+', Sigma='+sigma
 
    # Do the fitting
-   fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit(InputWorkspace='ws', \
-      WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
+   fit_output = Fit(InputWorkspace='ws', WorkspaceIndex=0, StartX = startX, EndX=endX, Output='fit', Function=myFunc)
+   paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+   fitWorkspace = fit_output.OutputWorkspace
 
-   print "The fit was: " + fitStatus
-   print("chi-squared of fit is: %.2f" % chiSq)
+   print("The fit was: " + fit_output.OutputStatus)
+   print("chi-squared of fit is: %.2f" % fit_output.OutputChi2overDoF)
    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
    print("Fitted centre value is: %.2f" % paramTable.column(1)[1])
    print("Fitted sigma value is: %.2f" % paramTable.column(1)[2])
    # fitWorkspace contains the data, the calculated and the difference patterns
-   print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
+   print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
    print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
 
 Output:
@@ -429,121 +431,124 @@ Output:
 
 .. testcode:: simFit
 
-	import math
-	import numpy as np
+    from __future__ import print_function
+    import math
+    import numpy as np
 
-	# create data
-	xData=np.linspace(start=0,stop=10,num=22)
-	yData=[]
-	for x in xData:
-		yData.append(2.0)
-	yData2=[]
-	for x in xData:
-		yData2.append(5.0)
-	# create workspaces
-	input = CreateWorkspace(xData,yData)
-	input2 = CreateWorkspace(xData,yData2)
-	# create function
-	myFunc=';name=FlatBackground,$domains=i,A0=0'
-	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+";"
-	# do fit
-	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
-				InputWorkspace=input, WorkspaceIndex=0, \
-				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
-				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
-	# print results	
-	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
-	print "Constant 2: {0:.2f}".format(paramTable.column(1)[1])
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=FlatBackground,$domains=i,A0=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+";"
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
 
 
 Output:
 
 .. testoutput:: simFit
 
-	Constant 1: 2.00
-	Constant 2: 5.00
+    Constant 1: 2.00
+    Constant 2: 5.00
    
 **Example - Fit to two data sets with shared parameter:**
 
 .. testcode:: shareFit
-   
-	import math
-	import numpy as np
 
-	# create data
-	xData=np.linspace(start=0,stop=10,num=22)
-	yData=[]
-	for x in xData:
-		yData.append(2.0)
-	yData2=[]
-	for x in xData:
-		yData2.append(5.0)
-	# create workspaces
-	input = CreateWorkspace(xData,yData)
-	input2 = CreateWorkspace(xData,yData2)
-	# create function
-	myFunc=';name=FlatBackground,$domains=i,A0=0'
-	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A0=f1.A0)'
-	# do fit
-	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
-				InputWorkspace=input, WorkspaceIndex=0, \
-				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
-				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
-	# print results
-	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
-	print "Constant 2: {0:.2f}".format(paramTable.column(1)[1])
+    from __future__ import print_function
+    import math
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=FlatBackground,$domains=i,A0=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A0=f1.A0)'
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[1]))
    
 Output:
 
 .. testoutput:: shareFit
 
-	Constant 1: 3.50
-	Constant 2: 3.50
-	
+    Constant 1: 3.50
+    Constant 2: 3.50
+
 **Example - Fit to two data sets with one shared parameter:**
 
 .. testcode:: shareFit2
-	
-	import math
-	import numpy as np
 
-	# create data
-	xData=np.linspace(start=0,stop=10,num=22)
-	yData=[]
-	for x in xData:
-		yData.append(2.0*x+10.)
-	yData2=[]
-	for x in xData:
-		yData2.append(5.0*x+7.)
-	# create workspaces
-	input = CreateWorkspace(xData,yData)
-	input2 = CreateWorkspace(xData,yData2)
-	# create function
-	myFunc=';name=LinearBackground,$domains=i,A0=0,A1=0'
-	multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A1=f1.A1)'
-	# do fit
-	fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace = Fit( Function=multiFunc,\
-				InputWorkspace=input, WorkspaceIndex=0, \
-				InputWorkspace_1=input2, WorkspaceIndex_1=0, \
-				StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit' )
-	# print results
-	print 'Gradients (shared):'
-	print "Gradient 1: {0:.2f}".format(paramTable.column(1)[3])
-	print "Gradient 2: {0:.2f}".format(paramTable.column(1)[1])
-	print 'offsets:'
-	print "Constant 1: {0:.2f}".format(paramTable.column(1)[0])
-	print "Constant 2: {0:.2f}".format(paramTable.column(1)[2])
-	   
+    from __future__ import print_function
+    import math
+    import numpy as np
+
+    # create data
+    xData=np.linspace(start=0,stop=10,num=22)
+    yData=[]
+    for x in xData:
+        yData.append(2.0*x+10.)
+    yData2=[]
+    for x in xData:
+        yData2.append(5.0*x+7.)
+    # create workspaces
+    input = CreateWorkspace(xData,yData)
+    input2 = CreateWorkspace(xData,yData2)
+    # create function
+    myFunc=';name=LinearBackground,$domains=i,A0=0,A1=0'
+    multiFunc='composite=MultiDomainFunction,NumDeriv=1'+myFunc+myFunc+';ties=(f0.A1=f1.A1)'
+    # do fit
+    fit_output = Fit(Function=multiFunc, InputWorkspace=input, WorkspaceIndex=0, \
+                     InputWorkspace_1=input2, WorkspaceIndex_1=0, \
+                     StartX = 0.1, EndX=9.5, StartX_1 = 0.1, EndX_1=9.5,Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    # print results
+    print('Gradients (shared):')
+    print("Gradient 1: {0:.2f}".format(paramTable.column(1)[3]))
+    print("Gradient 2: {0:.2f}".format(paramTable.column(1)[1]))
+    print('offsets:')
+    print("Constant 1: {0:.2f}".format(paramTable.column(1)[0]))
+    print("Constant 2: {0:.2f}".format(paramTable.column(1)[2]))
+
 Output:
 
 .. testoutput:: shareFit2
 
-	Gradients (shared):
-	Gradient 1: 3.50
-	Gradient 2: 3.50
-	offsets:
-	Constant 1: 2.86
-	Constant 2: 14.14
+    Gradients (shared):
+    Gradient 1: 3.50
+    Gradient 2: 3.50
+    offsets:
+    Constant 1: 2.86
+    Constant 2: 14.14
 
 .. categories::
 

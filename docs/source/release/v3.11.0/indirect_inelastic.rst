@@ -11,6 +11,13 @@ New features
 Algorithms
 ##########
 
+Vesuvio
+#######
+- Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
+- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O for oxygen
+- Gamma Corrections are no longer done for back-scattering spectra
+- Multiple scattering corrections for back-scattering spectra now approximate hydrogen peak, this peak can be constrained with masses specified by symbol
+
 Bayes
 #####
 - Removed fit option from plot options drop-down menu.
@@ -29,6 +36,21 @@ Bugfixes
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
 - Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
   convolution fitting into their own workspaces.
+
+ConvFit
+~~~~~~~
+
+Bugfixes
+--------
+- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
+- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
+
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
 
 ConvFit
 ~~~~~~~

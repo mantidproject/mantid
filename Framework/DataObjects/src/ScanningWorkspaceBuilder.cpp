@@ -192,6 +192,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
+  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
 
   buildOutputDetectorInfo(outputDetectorInfo);
 
@@ -222,7 +223,6 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
     Geometry::DetectorInfo &outputDetectorInfo) const {
-  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
   auto mergeWorkspace =
       create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {

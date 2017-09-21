@@ -32,8 +32,10 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 std::map<std::string, std::string> EXPORT_OPT_MANTIDQT_COMMON
 toStdStringMap(std::map<QString, QString> const &inMap);
+}
 }
 }
 #endif // MANTID_MANTIDWIDGETS_DATAPROCESSORTOSTDSTRINGMAP_H

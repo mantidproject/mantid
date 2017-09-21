@@ -266,7 +266,7 @@ void CrystalFieldMultiSpectrum::calcExcitations(
   // using an index instead of a name for performance reasons
   auto &source = dynamic_cast<Peaks &>(*m_source);
   double intensityScaling;
-  if (source.m_IntensityScalingIdx.size() == 0) {
+  if (source.m_IntensityScalingIdx.empty()) {
     intensityScaling = getParameter(m_nOwnParams - nSpec + iSpec);
   } else {
     intensityScaling = getParameter(source.m_IntensityScalingIdx[iSpec]);

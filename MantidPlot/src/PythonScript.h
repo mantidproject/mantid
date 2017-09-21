@@ -172,8 +172,8 @@ private:
   // are used for this purpose and are NOT used by the general executeAsync
   // methods where the GILState API functions can cope and there is no
   // recursion.
-  virtual void recursiveAsyncSetup() override;
-  virtual void recursiveAsyncTeardown() override;
+  virtual bool recursiveAsyncSetup() override;
+  virtual void recursiveAsyncTeardown(bool relock) override;
 
   /// Compile the code, returning true if it was successful, false otherwise
   bool compileImpl() override;
