@@ -1548,7 +1548,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
       else
         i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(),
                                                           xCoord);
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
       return std::numeric_limits<double>::quiet_NaN();
     }
 
