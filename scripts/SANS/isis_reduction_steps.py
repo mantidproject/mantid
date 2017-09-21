@@ -3442,40 +3442,42 @@ class UserFile(ReductionStep):
 
         reducer._corr_and_scale.rescale = 100.0
 
-    def _invalid_limits(self, limits, reducer):
+    def _limit_line_invalidity(self, limits, limit_line, reducer):
+        if len(limits) != 2:
+            return (limits, "Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+        limits = limits[1]
+
         if limits.startswith('SP '):
             # We don't use the L/SP line
-            return "L/SP lines are ignored"
+            return (limits, "L/SP lines are ignored")
 
         if limits.upper().startswith('Q/RCUT'):
             limits = limits.upper().split('RCUT')
             if len(limits) != 2:
-                return "Badly formed L/Q/RCUT line"
+                return (limits, "Badly formed L/Q/RCUT line")
             else:
                 # When read from user file the unit is in mm but stored here it units of meters
                 reducer.to_Q.r_cut = float(limits[1]) / 1000.0
-                return " "
+                return (limits, " ")
         if limits.upper().startswith('Q/WCUT'):
             limits = limits.upper().split('WCUT')
             if len(limits) != 2:
-                return "Badly formed L/Q/WCUT line"
+                return (limits, "Badly formed L/Q/WCUT line")
             else:
                 reducer.to_Q.w_cut = float(limits[1])
-                return " "
+                return (limits, " ")
 
-        return False
+        return (limits, False)
 
     # Read a limit line of a mask file
     def readLimitValues(self, limit_line, reducer):
         limits = limit_line.split('L/')
-        if len(limits) != 2:
-            _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
-            return
-        limits = limits[1]
 
-        invalid_limits = self._invalid_limits(limits, reducer)
-        if invalid_limits:
-            return invalid_limits
+        (limits, limit_invalidity) = self._limit_line_invalidity(limits, limit_line, reducer)
+        if limit_invalidity:
+            if limit_invalidity != " ":
+                _issueWarning(limit_invalidity)
+            return
 
         rebin_str = None
         if ',' not in limit_line:
