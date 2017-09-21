@@ -111,9 +111,9 @@ class MSDFit(DataProcessorAlgorithm):
             params_list = ['Height', 'Msd']
         elif self._model == 'Peters':
             logger.information('Model : Peters & Kneller')
-            function = 'name=MsdPeters, Height=1.0, Msd=1.0, Beta=1.0'
-            function += ',constraint=(Height>0.0, Msd>0.0, 100.0>Beta>0.3)'
-            params_list = ['Height', 'Msd', 'Beta']
+            function = 'name=MsdPeters, Height=1.0, MSD=1.0, Beta=1.0'
+            function += ',constraint=(Height>0.0, MSD>0.0, 100.0>Beta>0.3)'
+            params_list = ['Height', 'MSD', 'Beta']
         elif self._model == 'Yi':
             logger.information('Model : Yi et al')
             function = 'name=MsdYi, Height=1.0, Msd=1.0, Sigma=0.1'
