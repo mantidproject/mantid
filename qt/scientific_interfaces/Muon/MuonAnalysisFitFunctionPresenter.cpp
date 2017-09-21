@@ -172,7 +172,6 @@ void MuonAnalysisFitFunctionPresenter::handleErrorsEnabled(bool enabled) {
   m_funcBrowser->setErrorsEnabled(enabled);
 }
 
-
 /**
  * Called when the number of datasets to fit is changed in the model.
  * Update the view with the new number of datasets.
