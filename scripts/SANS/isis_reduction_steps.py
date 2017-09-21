@@ -3541,38 +3541,27 @@ class UserFile(ReductionStep):
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
-    def _read_mon_line(self, details, reducer):
+    def _parse_mon_line_spectrum(self, details, reducer, interpolate):
+        reducer.set_monitor_spectrum(int(details.split('=')[1]), interpolate, override=False)
+        self._incid_monitor_lckd = True
 
-        # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
-        interpolate = False
-        interPlace = details.upper().find('/INTERPOLATE')
-        if interPlace != -1:
-            interpolate = True
-            details = details[0:interPlace]
+    def _parse_mon_line_length(self, details, reducer, interpolate):
+        details = details.split('=')[1]
+        options = details.split()
+        spectrum = int(options[1])
 
-        if details.upper().startswith('SPECTRUM'):
+        # the settings here are overriden by MON/SPECTRUM
+        if not self._incid_monitor_lckd:
             reducer.set_monitor_spectrum(
-                int(details.split('=')[1]), interpolate, override=False)
-            self._incid_monitor_lckd = True
+                spectrum, interpolate, override=False)
 
-        elif details.upper().startswith('LENGTH'):
-            details = details.split('=')[1]
-            options = details.split()
-            spectrum = int(options[1])
-            #            reducer.instrument.monitor_zs[spectrum] = options[0]
-
-            # the settings here are overriden by MON/SPECTRUM
-            if not self._incid_monitor_lckd:
-                reducer.set_monitor_spectrum(
-                    spectrum, interpolate, override=False)
-
-        elif details.upper().startswith('TRANS'):
+    def _parse_mon_line_trans(self, details, reducer, interpolate):
             parts = details.split('=')
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM':
                 return 'Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=... not: '
             reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
 
-        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
+    def _parse_mon_line_direct_flat(self, details, reducer):
             parts = details.split("=")
             if len(parts) == 2:
                 filepath = parts[1].rstrip()
@@ -3591,41 +3580,56 @@ class UserFile(ReductionStep):
                 parts = _type.split("/")
                 if len(parts) == 1:
                     if parts[0].upper() == 'DIRECT':
-                        reducer.instrument.cur_detector().correction_file \
-                            = filepath
-                        reducer.instrument.other_detector().correction_file \
-                            = filepath
+                        reducer.instrument.cur_detector().correction_file = filepath
+                        reducer.instrument.other_detector().correction_file = filepath
                     elif parts[0].upper() == 'HAB':
                         try:
-                            reducer.instrument.getDetector('HAB').correction_file \
-                                = filepath
+                            reducer.instrument.getDetector('HAB').correction_file = filepath
                         except AttributeError:
                             raise AttributeError(
                                 'Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
                     elif parts[0].upper() == 'FLAT':
                         reducer.prep_normalize.setPixelCorrFile(filepath, 'REAR')
-                    else:
-                        pass
                 elif len(parts) == 2:
                     detname = parts[1]
                     if detname.upper() == 'REAR':
                         if parts[0].upper() == "FLAT":
                             reducer.prep_normalize.setPixelCorrFile(filepath, 'REAR')
                         else:
-                            reducer.instrument.getDetector('REAR').correction_file \
-                                = filepath
+                            reducer.instrument.getDetector('REAR').correction_file = filepath
                     elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
                         if parts[0].upper() == "FLAT":
                             reducer.prep_normalize.setPixelCorrFile(filepath, 'FRONT')
                         else:
-                            reducer.instrument.getDetector('FRONT').correction_file \
-                                = filepath
+                            reducer.instrument.getDetector('FRONT').correction_file = filepath
                     else:
                         return 'Incorrect detector specified for efficiency file: '
                 else:
                     return 'Unable to parse monitor line: '
             else:
                 return 'Unable to parse monitor line: '
+
+    def _read_mon_line(self, details, reducer):
+
+        # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
+        interpolate = False
+        inter_place = details.upper().find('/INTERPOLATE')
+        if inter_place != -1:
+            interpolate = True
+            details = details[0:inter_place]
+
+        if details.upper().startswith('SPECTRUM'):
+            return self._parse_mon_line_spectrum(details, reducer, interpolate)
+
+        elif details.upper().startswith('LENGTH'):
+            return self._parse_mon_line_length(details, reducer, interpolate)
+
+        elif details.upper().startswith('TRANS'):
+            return self._parse_mon_line_trans(details, reducer, interpolate)
+
+        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
+            return self._parse_mon_line_direct_flat(details, reducer)
+
         else:
             return 'Unable to parse monitor line: '
 
