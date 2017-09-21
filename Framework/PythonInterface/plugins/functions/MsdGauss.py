@@ -59,7 +59,7 @@ class MsdGauss(IFunction1D):
         for i, x in enumerate(xvals):
             e = math.exp(-msd * x**2)
             jacobian.set(i, 0, e)
-            jacobian.set(i, 1, -x**2 * e * height)
+            jacobian.set(i, 1, -(x**2) * e * height)
             i += 1
 
 
