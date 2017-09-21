@@ -66,6 +66,12 @@ void BinDetectorScan::init() {
   declareProperty("ScatteringAngleTolerance", 0.1, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
+      "If true normalise to the number of entries added for a particular "
+      "scattering angle. If the maximum entries accross all the scattering "
+      "angles is N_MAX, and the number of entries for a scattering angle is N, "
+      "the normalisation is performed as N_MAX / N.");
 }
 
 std::map<std::string, std::string> BinDetectorScan::validateInputs() {
@@ -102,7 +108,14 @@ void BinDetectorScan::exec() {
   newAxis->unit() = lblUnit;
   outputWS->replaceAxis(1, newAxis);
 
-  performBinning(outputWS);
+  const auto normalisation = performBinning(outputWS);
+
+  const auto maxEntry =
+      *std::max_element(normalisation.begin(), normalisation.end());
+  if (getProperty("Normalise"))
+    for (size_t i = 0; i < outputWS->spectrumInfo().size(); ++i)
+      for (size_t j = 0; j < outputWS->histogram(i).size(); ++j)
+        outputWS->mutableY(i)[j] *= maxEntry / normalisation[j];
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -193,9 +206,12 @@ void BinDetectorScan::getHeightAxis() {
                       << m_heightAxis[m_numHistograms] << "\n";
 }
 
-void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
+std::vector<double>
+BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
   const double scatteringAngleTolerance =
       getProperty("ScatteringAngleTolerance");
+
+  std::vector<double> normalisation(m_numPoints, 0.0);
 
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
@@ -207,7 +223,7 @@ void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       const auto &pos = specInfo.position(i);
       const auto y = pos.Y();
-      size_t yIndex =
+      size_t heightIndex =
           Kernel::VectorHelper::indexOfValueFromCenters(m_heightAxis, y);
 
       auto angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
@@ -216,33 +232,46 @@ void BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       // point is out of range, a warning should have been generated already for
       // the theta index
-      if (yIndex >= m_numHistograms || angleIndex >= m_numPoints)
+      if (heightIndex >= m_numHistograms || angleIndex >= m_numPoints)
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
       auto counts = ws->histogram(i).y()[0];
-      auto &yData = outputWS->mutableY(yIndex);
+      auto &yData = outputWS->mutableY(heightIndex);
 
       if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
         // counts are split between bins if outside this tolerance
 
-        size_t angleIndexNextClosest = angleIndex;
+        size_t angleIndexNextClosest;
         if (distanceFromAngle(angleIndex - 1, angle) <
             distanceFromAngle(angleIndex + 1, angle))
           angleIndexNextClosest = angleIndex - 1;
         else
           angleIndexNextClosest = angleIndex + 1;
 
-        yData[angleIndex] += counts *
-                             distanceFromAngle(angleIndexNextClosest, angle) /
-                             m_stepScatteringAngle;
+        double deltaAngleNextClosest =
+            distanceFromAngle(angleIndexNextClosest, angle);
+
+        yData[angleIndex] +=
+            counts * deltaAngleNextClosest / m_stepScatteringAngle;
         yData[angleIndexNextClosest] +=
             counts * deltaAngle / m_stepScatteringAngle;
+
+        if (heightIndex == 0) {
+          normalisation[angleIndex] +=
+              (deltaAngleNextClosest / m_stepScatteringAngle);
+          normalisation[angleIndexNextClosest] +=
+              (deltaAngle / m_stepScatteringAngle);
+        }
       } else {
         yData[angleIndex] += counts;
+        if (heightIndex == 0)
+          normalisation[angleIndex]++;
       }
     }
   }
+
+  return normalisation;
 }
 
 double BinDetectorScan::distanceFromAngle(const size_t thetaIndex,

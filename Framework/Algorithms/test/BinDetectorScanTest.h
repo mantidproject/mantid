@@ -212,6 +212,7 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("ComponentForHeightAxis", "tube-1");
+    alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -266,6 +267,7 @@ public:
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
     alg.setProperty("ComponentForHeightAxis", "tube-1");
+    alg.setProperty("Normalise", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
@@ -304,6 +306,100 @@ public:
     bin = 6;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.5, 1e-6)
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void
+  test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_large_tolerance() {
+    std::vector<double> rotations = {0, -22.5, -45};
+    auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
+
+    BinDetectorScan alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    alg.setProperty("ScatteringAngleTolerance", "0.3");
+    alg.setProperty("Normalise", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outWS"));
+
+    // Check x-axis goes from -90 -> 0 with 180 bins
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 7)
+    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
+    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
+    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
+
+    // Check y-axis goes from 0 to 0.027 with 10 points
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
+    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
+    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
+
+    size_t bin = 0;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+
+    bin = 1;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+
+    for (size_t i = 2; i < 5; ++i)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
+
+    bin = 5;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+
+    bin = 6;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void
+  test_with_scanning_workspaces_detectors_rotated_in_non_overlapping_scan_with_normalisation() {
+    std::vector<double> rotations = {0, -28.125, -45};
+    auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
+
+    BinDetectorScan alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outWS"));
+
+    // Check x-axis goes from -90 -> 0 with 180 bins
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), 7)
+    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
+    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
+    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
+
+    // Check y-axis goes from 0 to 0.027 with 10 points
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
+    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
+    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
+
+    for (size_t i = 0; i < 6; ++i)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
