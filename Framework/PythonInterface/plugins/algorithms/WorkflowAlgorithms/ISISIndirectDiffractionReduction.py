@@ -135,6 +135,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             issues['InputFiles'] = run_num_mismatch
             issues['VanadiumFiles'] = run_num_mismatch
 
+        if self._grouping_method == 'Workspace' and self._grouping_workspace is None:
+            issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
+
         return issues
 
     # ------------------------------------------------------------------------------
@@ -271,8 +274,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
                 # Group spectra
                 group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method,
+                              masked_detectors=masked_detectors,
+                              method=self._grouping_method,
                               group_ws=self._grouping_workspace)
 
             if is_multi_frame:
@@ -317,7 +320,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_string = self.getPropertyValue('RebinParam')
         self._grouping_method = self.getPropertyValue('GroupingPolicy')
-        self._grouping_workspace = self.getProperty('GroupingWorkspace').value
+        grouping_ws_name = self.getPropertyValue("GroupingWorkspace")
+        self._grouping_workspace = mtd[grouping_ws_name] if grouping_ws_name else None
 
         if self._rebin_string == '':
             self._rebin_string = None

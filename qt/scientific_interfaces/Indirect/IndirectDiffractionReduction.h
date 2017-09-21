@@ -39,7 +39,7 @@ public slots:
   void runFilesFound();
   void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
-  void deleteWorkspace();
+  void deleteGroupingWorkspace();
 
 private:
   void initLayout() override;
@@ -59,8 +59,6 @@ private:
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
   void createGroupingWorkspace(const std::string &outputWsName);
-  void addGrouping(const std::string &groupingWsName,
-                   Mantid::API::IAlgorithm_sptr msgDiffReduction);
 
 private:
   Ui::IndirectDiffractionReduction
@@ -69,7 +67,7 @@ private:
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
-  std::string m_groupingWorkspace;
+  std::string m_groupingWsName;
 };
 }
 }

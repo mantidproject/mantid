@@ -767,7 +767,6 @@
   <tabstop>leRebinEnd_CalibOnly</tabstop>
   <tabstop>ckManualDRange</tabstop>
   <tabstop>spDRange</tabstop>
-  <tabstop>ckIndividualGrouping</tabstop>
   <tabstop>cbPlotType</tabstop>
   <tabstop>ckGSS</tabstop>
   <tabstop>ckNexus</tabstop>
@@ -878,18 +877,31 @@
    <sender>ckManualGrouping</sender>
    <signal>toggled(bool)</signal>
    <receiver>lbNoGroups</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>427</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>194</x>
+     <y>427</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>ckManualDRange</sender>
-   <signal>clicked(bool)</signal>
+   <signal>toggled(bool)</signal>
    <receiver>spDRange</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>70</x>
-     <y>427</y>
+     <x>66</x>
+     <y>371</y>
     </hint>
     <hint type="destinationlabel">
-     <x>173</x>
-     <y>427</y>
+     <x>303</x>
+     <y>371</y>
     </hint>
    </hints>
   </connection>

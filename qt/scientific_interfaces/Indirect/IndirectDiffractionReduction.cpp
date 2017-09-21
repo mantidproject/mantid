@@ -145,6 +145,8 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
 
+  deleteGroupingWorkspace();
+
   if (error) {
     showInformationBox(
         "Error running diffraction reduction.\nSee Results Log for details.");
@@ -303,7 +305,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
-  bool useManualGrouping = m_uiForm.ckManualDRange->isChecked();
+  bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -379,11 +381,12 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   }
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps diffRuntimeProps;
-  std::string groupingWsName = "__Grouping";
+  m_groupingWsName = "__Grouping";
   // Add the property for grouping policy if needed
   if (useManualGrouping) {
-    addGrouping(groupingWsName, msgDiffReduction);
-    diffRuntimeProps["GroupingWorkspace"] = groupingWsName;
+    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
+    createGroupingWorkspace(m_groupingWsName);
+    diffRuntimeProps["GroupingWorkspace"] = m_groupingWsName;
   }
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction, diffRuntimeProps);
 
@@ -482,16 +485,6 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void IndirectDiffractionReduction::addGrouping(
-    const std::string &groupingWsName, IAlgorithm_sptr msgDiffReduction) {
-  msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
-  createGroupingWorkspace(groupingWsName);
-  m_groupingWorkspace = groupingWsName;
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(deleteWorkspace()));
-}
-
 void IndirectDiffractionReduction::createGroupingWorkspace(
     const std::string &outputWsName) {
   IAlgorithm_sptr groupingAlg =
@@ -510,13 +503,13 @@ void IndirectDiffractionReduction::createGroupingWorkspace(
   m_batchAlgoRunner->addAlgorithm(groupingAlg);
 }
 
-void IndirectDiffractionReduction::deleteWorkspace() {
+void IndirectDiffractionReduction::deleteGroupingWorkspace() {
   IAlgorithm_sptr deleteAlg =
-      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+      AlgorithmManager::Instance().create("DeleteWorkspace");
   deleteAlg->initialize();
-  deleteAlg->setProperty("Workspace", m_groupingWorkspace);
+  deleteAlg->setProperty("Workspace", m_groupingWsName);
   deleteAlg->executeAsync();
-  m_groupingWorkspace = "";
+  m_groupingWsName = "";
 }
 
 /**
