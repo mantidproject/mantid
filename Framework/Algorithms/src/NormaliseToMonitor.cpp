@@ -277,16 +277,11 @@ void NormaliseToMonitor::exec() {
 std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
   std::map<std::string, std::string> issues;
   // Check where the monitor spectrum should come from
-  Property *monSpec = getProperty("MonitorSpectrum");
-  Property *monID = getProperty("MonitorID");
-  // Is the monitor spectrum within the main input workspace
-  const bool inWS = !monSpec->isDefault();
-  // Or is it in a separate workspace
-  MatrixWorkspace_sptr monWS = getProperty("MonitorWorkspace");
-  // or monitor ID
-  bool monIDs = !monID->isDefault();
+  const Property *monSpecProp = getProperty("MonitorSpectrum");
+  const Property *monIDProp = getProperty("MonitorID");
+  MatrixWorkspace_const_sptr monWS = getProperty("MonitorWorkspace");
   // something has to be set
-  if (!inWS && !monWS && !monIDs) {
+  if (monSpecProp->isDefault() && !monWS && monIDProp->isDefault()) {
     const std::string mess("Either MonitorSpectrum, MonitorID or "
                            "MonitorWorkspace has to be provided.");
     issues["MonitorSpectrum"] = mess;
@@ -303,6 +298,21 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
     }
   }
 
+  if (monWS) {
+    const int monIndex = getProperty("MonitorWorkspaceIndex");
+    if (monIndex < 0) {
+      issues["MonitorWorkspaceIndex"] = "A workspace index cannot be negative.";
+    } else if (monWS->getNumberHistograms() <= static_cast<size_t>(monIndex)) {
+      issues["MonitorWorkspaceIndex"] = "The MonitorWorkspace must contain the MonitorWorkspaceIndex.";
+    }
+    MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+    if (monWS->getInstrument()->getName() != inWS->getInstrument()->getName()) {
+      issues["MonitorWorkspace"] = "The Input and Monitor workspaces must come from the same instrument.";
+    }
+    if (monWS->getAxis(0)->unit()->unitID() != inWS->getAxis(0)->unit()->unitID()) {
+      issues["MonitorWorkspace"] = "The Input and Monitor workspaces must have the same unit";
+    }
+  }
 
   return issues;
 }
@@ -423,38 +433,16 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
  *  @param inputWorkspace The input workspace.
  *  @param wsID The workspace ID.
  *  @returns A workspace containing the monitor spectrum only
- *  @throw std::runtime_error If the properties are invalid
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
     const API::MatrixWorkspace_sptr &inputWorkspace, int &wsID) {
-  // Get the workspace from the ADS. Will throw if it's not there.
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
   wsID = getProperty("MonitorWorkspaceIndex");
-  // Check that it's a single spectrum workspace
-  if (static_cast<int>(monitorWS->getNumberHistograms()) < wsID) {
-    throw std::runtime_error(
-        "The MonitorWorkspace must contain the MonitorWorkspaceIndex");
-  }
-  // Check that the two workspace come from the same instrument
-  if (monitorWS->getInstrument()->getName() !=
-      inputWorkspace->getInstrument()->getName()) {
-    throw std::runtime_error(
-        "The Input and Monitor workspaces must come from the same instrument");
-  }
-  // Check that they're in the same units
-  if (monitorWS->getAxis(0)->unit()->unitID() !=
-      inputWorkspace->getAxis(0)->unit()->unitID()) {
-    throw std::runtime_error(
-        "The Input and Monitor workspaces must have the same unit");
-  }
-
   // In this case we need to test whether the bins in the monitor workspace
   // match
   m_commonBins = (m_commonBins && API::WorkspaceHelpers::matchingBins(
                                       *inputWorkspace, *monitorWS, true));
-
-  // If the workspace passes all these tests, make a local copy because it will
-  // get changed
+  // Copy the monitor spectrum because it will get changed
   return this->extractMonitorSpectrum(monitorWS, wsID);
 }
 
