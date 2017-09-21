@@ -17,6 +17,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -40,14 +41,15 @@ void SumOverlappingTubes::init() {
                   "Name of the output workspace.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
-          "ScatteringAngleBinning", boost::make_shared<RebinParamsValidator>()),
+          "ScatteringAngleBinning", "0.05",
+          boost::make_shared<RebinParamsValidator>(), Direction::Input),
       "A comma separated list of the first scattering angle, the scattering "
       "angle step size and the final scattering angle. Optionally this can "
       "also be a single number, which is the angle step size. In this case, "
       "the boundary of binning will be determined by minimum and maximum "
       "scattering angle present in the workspaces.");
   declareProperty(make_unique<PropertyWithValue<std::string>>(
-                      "ComponentForHeightAxis", "", Direction::Input),
+                      "ComponentForHeightAxis", "tube_1", Direction::Input),
                   "The name of the component to use for the height axis, that "
                   "is the name of a PSD tube to be used. If specifying this "
                   "then there is no need to give a value for the HeightBinning "
@@ -102,11 +104,18 @@ void SumOverlappingTubes::exec() {
 
   const auto newAxis = new NumericAxis(m_heightAxis);
   newAxis->setUnit("Label");
-  auto lblUnit =
+  auto yLabelUnit =
       boost::dynamic_pointer_cast<Kernel::Units::Label>(newAxis->unit());
-  lblUnit->setLabel("Height", "m");
-  newAxis->unit() = lblUnit;
+  yLabelUnit->setLabel("Height", "m");
+  newAxis->unit() = yLabelUnit;
   outputWS->replaceAxis(1, newAxis);
+
+  outputWS->getAxis(0)->unit() =
+      Kernel::UnitFactory::Instance().create("Label");
+  Unit_sptr xUnit = outputWS->getAxis(0)->unit();
+  boost::shared_ptr<Units::Label> xLabel =
+      boost::dynamic_pointer_cast<Units::Label>(xUnit);
+  xLabel->setLabel("Tube Angle", "degrees");
 
   const auto normalisation = performBinning(outputWS);
 
@@ -286,7 +295,7 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 }
 
 double SumOverlappingTubes::distanceFromAngle(const size_t thetaIndex,
-                                          const double theta) const {
+                                              const double theta) const {
   return fabs(m_startScatteringAngle +
               double(thetaIndex) * m_stepScatteringAngle - theta);
 }
