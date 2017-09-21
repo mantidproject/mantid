@@ -132,8 +132,8 @@ void BinDetectorScan::getInputParameters() {
 }
 
 void BinDetectorScan::getScatteringAngleBinning() {
-  m_startScatteringAngle = 0;
-  m_endScatteringAngle = 0;
+  m_startScatteringAngle = 180.0;
+  m_endScatteringAngle = 0.0;
 
   // Loop to check minimum and maximum extents for workspace
   for (auto &ws : m_workspaceList) {
@@ -151,6 +151,13 @@ void BinDetectorScan::getScatteringAngleBinning() {
   std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
+    //    const auto roundingFactor = 1.0 / m_stepScatteringAngle;
+    //    m_startScatteringAngle =
+    //        std::round(m_startScatteringAngle * roundingFactor) /
+    //        roundingFactor;
+    //    m_endScatteringAngle =
+    //        std::round(m_endScatteringAngle * roundingFactor) /
+    //        roundingFactor;
   } else if (scatteringBinning.size() == 3) {
     if (scatteringBinning[0] > m_startScatteringAngle ||
         scatteringBinning[2] < m_endScatteringAngle)
@@ -201,9 +208,9 @@ void BinDetectorScan::getHeightAxis() {
   m_numHistograms = m_heightAxis.size();
 
   g_log.information() << "Number of histograms in output workspace:"
-                      << m_numHistograms << std::endl;
-  g_log.information() << "Height binning:" << m_heightAxis[0] << ", "
-                      << m_heightAxis[m_numHistograms] << "\n";
+                      << m_numHistograms << ".\n";
+  g_log.information() << "Height axis:" << m_heightAxis[0] << " to "
+                      << m_heightAxis[m_numHistograms - 1] << "\n";
 }
 
 std::vector<double>
@@ -241,6 +248,10 @@ BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
         // counts are split between bins if outside this tolerance
+
+        g_log.debug() << "Splitting counts for workspace " << ws->getName()
+                      << " at spectrum " << i << " for angle " << angle
+                      << ".\n";
 
         size_t angleIndexNextClosest;
         if (distanceFromAngle(angleIndex - 1, angle) <
