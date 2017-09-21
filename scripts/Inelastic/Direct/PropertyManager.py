@@ -442,28 +442,12 @@ class PropertyManager(NonIDF_Properties):
         # Walk through the complex properties first and then through simple properties
         for key,val in iteritems(sorted_param.copy()):
             # complex properties may change through their dependencies so we are setting them first
-            if isinstance(val,prop_helpers.ComplexProperty):
-                public_name = key[1:]
-            else:
-                # no complex properties left so we have simple key-value pairs
-                public_name = key
+            public_name = self.is_complex_property(key, val)
+
             if public_name not in old_changes_list:
-                if isinstance(val,prop_helpers.ComplexProperty):
-                    prop_idf_val = val.__get__(param_list)
-                else:
-                    prop_idf_val = val
-
-                try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
-                    # properties, not present in recent IDF.
-                    cur_val = getattr(self,public_name)
-#pylint: disable=bare-except
-                except:
-                    self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"
-                             .format(public_name),'warning')
+                exception_raised = self.update_property_value(val, public_name, param_list)
+                if exception_raised:
                     continue
-
-                if prop_idf_val !=cur_val :
-                    setattr(self,public_name,prop_idf_val)
             else:
                 pass
             # Dependencies removed either properties are equal or not.
@@ -515,6 +499,31 @@ class PropertyManager(NonIDF_Properties):
                 if not modified:
                     del old_changes[prop_name]
         return old_changes
+
+    def is_complex_property(self, key, val):
+        if isinstance(val,prop_helpers.ComplexProperty):
+            return key[1:]
+        else:
+            # no complex properties left so we have simple key-value pairs
+            return key
+
+    def update_property_value(self, val, public_name, param_list):
+        if isinstance(val,prop_helpers.ComplexProperty):
+            prop_idf_val = val.__get__(param_list)
+        else:
+            prop_idf_val = val
+
+        try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
+            # properties, not present in recent IDF.
+            cur_val = getattr(self,public_name)
+#pylint: disable=bare-except
+        except:
+            self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"
+                     .format(public_name),'warning')
+            return True
+
+        if prop_idf_val !=cur_val :
+            setattr(self,public_name,prop_idf_val)
 
     def retrieve_all_changes(self, old_changes, ignore_changes, old_changes_list):
         new_changes_list = self.getChangedProperties()
