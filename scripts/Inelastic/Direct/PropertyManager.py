@@ -375,24 +375,9 @@ class PropertyManager(NonIDF_Properties):
             old_changes[prop_name] = getattr(self,prop_name)
 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
+
         # remove old changes which are not related to IDF (not to reapply it again)
-        for prop_name in old_changes.copy():
-            if prop_name not in param_list:
-                try:
-                    dependencies = getattr(PropertyManager,prop_name).dependencies()
-#pylint: disable=bare-except
-                except:
-                    dependencies = []
-                modified = False
-                for name in dependencies:
-                    if name in param_list:
-                        modified = True
-                        # old parameter have been modified through compound parameter.
-                        #its old value is irrelevant
-                        param_list[name] = getattr(self,name)
-                if not modified:
-                    del old_changes[prop_name]
-        #end
+        old_changes = self.remove_non_IDF_changes(old_changes, param_list)
 
         param_list,descr_dict =  self._convert_params_to_properties(param_list,False,self.__descriptors)
         # clear record about previous changes
@@ -510,6 +495,26 @@ class PropertyManager(NonIDF_Properties):
             self.log("*** WARNING: Setting reduction properties of the instrument {0} from the instrument {1}.\n"
                      "*** This only works if both instruments have the same reduction properties!"
                      .format(self.instr_name,pInstrument.getName()),'warning')
+
+    # Loops over the old changes and removes any properties that do NOT relate to the IDF
+    def remove_non_IDF_changes(self, old_changes, param_list):
+        for prop_name in old_changes.copy():
+            if prop_name not in param_list:
+                try:
+                    dependencies = getattr(PropertyManager,prop_name).dependencies()
+#pylint: disable=bare-except
+                except:
+                    dependencies = []
+                modified = False
+                for name in dependencies:
+                    if name in param_list:
+                        modified = True
+                        # old parameter have been modified through compound parameter.
+                        #its old value is irrelevant
+                        param_list[name] = getattr(self,name)
+                if not modified:
+                    del old_changes[prop_name]
+        return old_changes
 
     def retrieve_all_changes(self, old_changes, ignore_changes, old_changes_list):
         new_changes_list = self.getChangedProperties()
