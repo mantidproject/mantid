@@ -65,10 +65,6 @@ private:
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
   void updateParameters(int specNo);
-  void updateParameters(const QString &functionName, const QString &prefix,
-                        const QStringList &paramNames,
-                        const QMap<QString, double> &paramValues,
-                        int startOffset = 0, int endOffset = 0);
   void updatePlotOptions();
   void plotOutput(std::string const &outputWs, int specNo);
   void addParametersToTree(const QStringList &parameters,

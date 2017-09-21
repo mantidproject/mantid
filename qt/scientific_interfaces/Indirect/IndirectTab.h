@@ -129,6 +129,13 @@ protected:
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
 
+  /// Updates the parameters in the m_dblManager
+  void updateParameters(const QString &functionName,
+                        const QString &prefix,
+                        const QStringList &paramNames,
+                        const QMap<QString, double> &paramValues,
+                        int startOffset, int endOffset);
+
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,
                             QtProperty *min, QtProperty *max,

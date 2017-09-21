@@ -439,6 +439,39 @@ void IndirectTab::plotTimeBin(const QString &workspaceName, int binIndex) {
   plotTimeBin(workspaceNames, binIndex);
 }
 
+/*
+* Updates the values of the function parameters for the function with the
+* specified name, in the parameters table.
+*
+* @param functionName  The name of the function whose parameters to update in
+*                      the parameters table.
+* @param prefix        The prefixes of the names of the parameters, to be used
+*                      to find the correct parameter in the specified parameter
+*                      values map.
+* @param paramNames    The names of the function parameters to update.
+* @param paramValues   The updated parameter values stored in a map from the
+*                      name of the function parameter (preceded by prefix) to
+*                      the updated value of that parameter.
+* @param startOffset   The start offset, if set to N, the first N parameters
+*                      won't be updated.
+* @param endOffset     The end offset, if set to N, the last N parameters won't
+*                      be updated.
+*/
+void IndirectTab::updateParameters(const QString &functionName,
+                                   const QString &prefix,
+                                   const QStringList &paramNames,
+                                   const QMap<QString, double> &paramValues,
+                                   int startOffset, int endOffset) {
+
+  for (auto it = paramNames.begin() + startOffset;
+    it != paramNames.end() - endOffset; ++it) {
+    const QString functionParam = functionName + "." + *it;
+    const QString paramValue = prefix + *it;
+    double value = paramValues[paramValue];
+    m_dblManager->setValue(m_properties[functionParam], value);
+  }
+}
+
 /**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
