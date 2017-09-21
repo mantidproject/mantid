@@ -369,10 +369,8 @@ class PropertyManager(NonIDF_Properties):
 
         # Retrieve the properties, changed from interface earlier
         old_changes_list = self.getChangedProperties()
-        # record all changes, present in the old changes list
-        old_changes=OrderedDict()
-        for prop_name in old_changes_list:
-            old_changes[prop_name] = getattr(self,prop_name)
+
+        old_changes = self.create_old_changes_dict(old_changes_list)
 
         param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
 
@@ -406,16 +404,9 @@ class PropertyManager(NonIDF_Properties):
                     self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"
                              .format(key,cur_val),'warning')
                     continue
-                if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
-                # do simplified workspace comparison which is appropriate here
-                    if new_val.name() == cur_val.name() and \
-                            new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
-                            new_val.getNEvents() == cur_val.getNEvents() and \
-                            new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
-                        new_val = 1
-                        cur_val = 1
-                   #
-                #end
+
+                new_val, cur_val = self.perform_simplfied_ws_comparison(new_val, cur_val)
+
                 if new_val != cur_val:
                     changed_descriptors.add(key)
                     changed_throug_main = True
@@ -480,8 +471,15 @@ class PropertyManager(NonIDF_Properties):
                      "*** This only works if both instruments have the same reduction properties!"
                      .format(self.instr_name,pInstrument.getName()),'warning')
 
-    # Loops over the old changes and removes any properties that do NOT relate to the IDF
+    def create_old_changes_dict(self, old_changes_list):
+        # record all changes, present in the old changes list
+        old_changes = OrderedDict()
+        for prop_name in old_changes_list:
+            old_changes[prop_name] = getattr(self,prop_name)
+        return old_changes
+
     def remove_non_IDF_changes(self, old_changes, param_list):
+        # Loops over the old changes and removes any properties that do NOT relate to the IDF
         for prop_name in old_changes.copy():
             if prop_name not in param_list:
                 try:
@@ -499,6 +497,17 @@ class PropertyManager(NonIDF_Properties):
                 if not modified:
                     del old_changes[prop_name]
         return old_changes
+
+    def perform_simplfied_ws_comparison(self, new_val, cur_val):
+        if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
+        # do simplified workspace comparison which is appropriate here
+            if new_val.name() == cur_val.name() and \
+                    new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
+                    new_val.getNEvents() == cur_val.getNEvents() and \
+                    new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
+                new_val = 1
+                cur_val = 1
+        return new_val, cur_val
 
     def is_complex_property(self, key, val):
         if isinstance(val,prop_helpers.ComplexProperty):
