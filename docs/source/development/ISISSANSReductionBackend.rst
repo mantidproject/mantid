@@ -836,11 +836,11 @@ avoid large scripts sizes.
 
 The dedicated work-flow algorithms for the SANS reduction are:
 
-- *SANSCalculateTransmission*
-- *SANSConvertToQ*
-- *SANSConvertToWavelength*
-- *SANSConvertToWavelengthAndRebin*
-- *SANSCreateWavelengthAndPixelAdjustment*
+- :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
+- :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
+- :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
+- :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+- :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
 - *SANSCrop*
 - *SANSLoad*
 - *SANSMaskWorkspace*
@@ -855,14 +855,15 @@ an input.
 
 The individual algorithms are superficially discussed below.
 
-There are two further algorithms which coordinate these algorithms, they are *SANSReductionCore*
-and *SANSSingleReduction* which are discussed further down.
+There are two further algorithms which coordinate these algorithms, they are
+:ref:`SANSReductionCore <algm-SANSReductionCore>` and
+:ref:`SANSSingleReduction <algm-SANSSingleReduction>` which are discussed further down.
 
 
 *SANSCalculateTransmission*
 ------------------------------
 
-The *SANSCalculateTransmission* algorithm is one of the more complex algorithms
+The :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>` algorithm is one of the more complex algorithms
 in the reduction chain with many sub-steps and a wide variety of parameters which
 can be set by the users.
 
@@ -907,7 +908,7 @@ The algorithm performs the following steps:
 *SANSConvertToQ*
 ------------------
 
-The *SANSConvertToQ* algorithm is the most essential algorithm in the reduction chain.
+The :ref:`SANSConvertToQ <algm-SANSConvertToQ>` algorithm is the most essential algorithm in the reduction chain.
 It coordinates the final conversion from wavelength units to momentum transfer units.
 
 If a 1D reduction has been selected then the algorithm will perform the follow sub-steps:
@@ -933,8 +934,9 @@ If a 2D reduction has been selected then the algorithm will perform the followin
 *SANSConvertToWavelength*
 ----------------------------
 
-The *SANSConvertToWavelength* algorithm acts as a wrapper around
-*SANSConvertToWavelengthAndRebin*. Unlike *SANSConvertToWavelengthAndRebin*
+The :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>` algorithm acts as a wrapper around
+:ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
+Unlike :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 it takes a *SANSState* object as its input. This algorithm is used for the
 wavelength conversion of the scatter workspace.
 
@@ -942,8 +944,8 @@ wavelength conversion of the scatter workspace.
 *SANSConvertToWavelengthAndRebin*
 -----------------------------------
 
-The *SANSConvertToWavelengthAndRebin* algorithm is one of the few which does
-not take a *SANSState* object as an input.
+The :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+algorithm is one of the few which does not take a *SANSState* object as an input.
 
 The algorithm performs the following steps:
 
@@ -954,16 +956,17 @@ The algorithm performs the following steps:
 *SANSCreateWavelengthAndPixelAdjustment*
 -------------------------------------------
 
-The *SANSCreateWavelengthAndPixelAdjustment* algorithm combines the output of the
-*SANSCalculateTransmission* algorithm, the output of the *SANSNormalizeToMonitor* algorithm
+The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
+algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
+algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
 and flood and direct files to produce the correction workspaces which are required
-for *SANSConvertToQ*.
+for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
 
 The sub-steps of the algorithm are:
 
 1. Create the wavelength-adjustment workspace. The sub-steps are:
 
-   a. Load the calculate-transmission workspace
+   a. Get the calculate-transmission workspace from the input
    b. Get the normalization-to-monitor workspace from the input
    c. Load the wavelength-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
    d. Provide all of the above workspaces with the same binning using :ref:`Rebin <algm-Rebin>`
@@ -972,20 +975,20 @@ The sub-steps of the algorithm are:
 2. Create the pixel-adjustment workspace. The sub-states are:
 
    a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
-   b. Crop the pixel-adjustment workspace to the desired detector
+   b. Crop the pixel-adjustment workspace to the desired detector using :ref:`SANSCrop <algm-SANSCrop>`
 
 3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
 
 *SANSCrop*
 ------------
 
-The *SANSCrop* algorithm crops the input workspace to a specified component using the
+The :ref:`SANSCrop <algm-SANSCrop>` algorithm crops the input workspace to a specified component using
 :ref:`CropToComponent <algm-CropToComponent>`.
 
 *SANSLoad*
 ------------
 
-The *SANSLoad* algorithm is responsible for loading data and apply the calibration
+The :ref:`SANSLoad <algm-SANSLoad>` algorithm is responsible for loading data and applying the calibration
 where required. This algorithm loads SANS data sets. The loading can handle nexus
 and raw files which can be plain or multi-period data. In addition the algorithm
 has to be able to handle added files. The SANS data sets which can be loaded
@@ -995,20 +998,20 @@ with this algorithm are:
   loads the corresponding monitor workspace separately
 * sample transmission data
 * sample direct data
-* can scatter data. The algorithm also loads the corresponding monitor workspace
+* can scatter data. The algorithm also loads the corresponding monitor workspace separately
 * can transmission data
 * can direct data
 
 In addition a calibration file which is applied after the data has been loaded
-can be specified.
+can be specified. The calibration performs micro-adjustments to the detectors.
 
 The algorithm sub-steps are:
 
 1. Based on the input data a loading strategy is selected.
-2. For each workspace in the *StateData* state object we load the data. The sub-states are:
+2. For each workspace in the *StateData* state object we load the data (with the loading strategy from step 1). The sub-states are:
 
    a. If optimizations are enabled check if the desired workspace already exists
-      on the ADS. If so fetch it and return it. We are done with loading this data set.
+      on the ADS. If so, fetch it and return it. We are done with loading this data set.
    b. Else get the correct loader strategy (e.g. for event-mode files) and load
       the data. This will load either all periods or just the specified period
       where applicable. If scatter data is loaded, then the monitor data is loaded
@@ -1024,19 +1027,20 @@ The algorithm sub-steps are:
 *SANSMaskWorkspace*
 ---------------------
 
-The *SANSMaskWorkspace* algorithm is responsible for masking detectors and time bins
-on the scatter workspaces. There are several types of masking which are currently supported:
+The :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>` algorithm is responsible
+for masking detectors and time bins on the scatter workspaces. There are several
+types of masking which are currently supported:
 
 - Time/Bin masking.
 - Radius masking.
 - Mask files.
-- Spectrum masking which includes individual spectra, spectra ranges, spectra blocks and spectra cross blocks.
-  These masks are partially specified on a detector level (see below).
+- Spectrum masking which includes individual spectra, spectra ranges, spectra
+  blocks and spectra cross blocks. These masks are partially specified on a detector level (see below).
 - Angle masking.
 - Beam stop masking.
 
 Note that only those of the following steps are executed where the user has specified
-settings to perform the specific masking type. The algorithm sub-steps are:
+a particular masking instruction. The algorithm sub-steps are:
 
 1. Select the correct masking strategy (currently only ISIS)
 2. Apply time bin masking. The sub-steps are:
@@ -1045,8 +1049,8 @@ settings to perform the specific masking type. The algorithm sub-steps are:
    b. Apply detector specific time bin masks using :ref:`MaskBins <algm-MaskBins>`
 
 3. Apply cylinder masking. This generates a hollow cylinder which masks the
-   the beam stop (defined by an inner radius) and anything outside of the beam
-   area (defined by an outer radius). The sub-steps are:
+   beam stop (defined by an inner radius) and anything outside of an area of
+   interest (defined by an outer radius). The sub-steps are:
 
    a. Set up the inner and the outer radius of the cylinder mask.
    b. Mask everything outside of the hollow cylinder using :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
@@ -1058,22 +1062,26 @@ settings to perform the specific masking type. The algorithm sub-steps are:
 
 5. Apply spectrum masks. The sub-steps are:
 
-   a. Get the spectra to mask for single spectra, spectrum ranges,
+   a. Get the spectra masks for single spectra, spectrum ranges,
       single horizontal spectrum strips, single vertical spectrum strips,
       horizontal spectrum range (several strips next to each other),
       vertical spectrum range (several strips next to each other),
       block masks and block cross masks
    b. Mask the selected spectra using :ref:`MaskDetectors <algm-MaskDetectors>`
 
-6. Apply angle masking. This is used for pizza-slice masking. The sub-steps are:
+6. Apply angle masking. This is used for pizza-slice masking and uses
+   :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
 
-   a. Mask a pizza slice using :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
+7. Apply beam stop masking. The beam stop consists of a disc where the beam is located
+   and a connection arm (rod) which holds the disc. The disc has at this point
+   already been masked by a cylinder mask. This step masks the connection arm using
+   :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
 
 
 *SANSMove*
 ------------
 
-The *SANSMove* algorithm moves a SANS workspace according to the settings in
+The :ref:`SANSMove <algm-SANSMove>`algorithm moves a SANS workspace according to the settings in
 the state object. Additionally the user can specify the beam centre.
 Note that if the beam centre is also specified in the state object, then the
 manual selection takes precedence. The way we perform a move is highly-instrument
@@ -1090,11 +1098,11 @@ this is achieved by a combination of translations and rotations using
 *SANSNormalizeToMonitor*
 --------------------------
 
-The  *SANSNormalizeToMonitor* algorithm provides a monitor normalization
-workspace for subsequent wavelength correction in :ref:`algm-Q1D` or
-:ref:`algm-Qxy`. The settings of the algorithm are provided by the state object.
-The user can provide a *ScaleFactor* which is normally obtained during
-event slicing.
+The :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
+provides a monitor normalization workspace for subsequent wavelength correction
+in :ref:`algm-Q1D` or :ref:`algm-Qxy`. The settings of the algorithm are
+provided by the state object. The user can provide a *ScaleFactor* which is
+normally obtained during event slicing.
 
 The sub-steps of this algorithm are:
 
@@ -1103,22 +1111,26 @@ The sub-steps of this algorithm are:
 3. Apply the scale factor to the monitor workspace using :ref:`Scale <algm-Scale>`
 4. Perform a prompt peak correction (if applicable) using :ref:`RemoveBins <algm-RemoveBins>`
 5. Perform a flat background correction (if applicable) using :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>`
-6. Convert to wavelength and rebin using :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
+6. Convert to wavelength units and rebin using
+   :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
 
 
 *SANSSave*
 ------------
 
-The *SANSSave* algorithm performs two steps:
+The :ref:`SANSSave <algm-SANSSave>`  algorithm performs two steps:
 
 1. Create a cloned workspace where the zero-error values are inflated (if this is requested)
 2. Save the workspace into each specified file format.
 
+Zero-error inflation is useful for data points where the error is 0. When performing
+any form of regression of this the zero-valued error will fix the model at this point.
+If we inflate the error at this point then it does not contribute to the regression.
 
 *SANSScale*
 -------------
 
-The *SANSScale* algorithm scales a SANS workspace according to the settings
+The :ref:`SANSScale <algm-SANSScale>` algorithm scales a SANS workspace according to the settings
 in the state object. The scaling includes division by the volume of the sample and
 multiplication by an absolute scale.
 
@@ -1126,28 +1138,28 @@ The sub-steps of this algorithm are:
 
 1. Multiply by the absolute scale. The sub-steps are:
 
-   a. If a scale is specified multiply the scale by 100, else set the scale to 100
+   a. If a scale is specified, multiply the scale by 100, else set the scale to 100
    b. If the instrument is LOQ divide by :math:`\pi`
    c. Multiply the scatter workspace by the scale using :ref:`Multiply <algm-Multiply>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
 
 2. Divide by the sample volume. The sub-steps are:
 
-   a. Calculate the sample volume based either on the user settings or on the sample information from the file.
+   a. Calculate the sample volume based either on the user settings or the sample information from the file.
    b. Divide by the scatter workspace by the sample volume using :ref:`Divide <algm-Divide>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
 
 
 *SANSSliceEvent*
 ------------------
 
-The *SANSSliceEvent* algorithm creates a sliced workspaces from an event-based
+The :ref:`SANSSliceEvent <algm-SANSSliceEvent>` algorithm creates a sliced workspaces from an event-based
 SANS input workspace according to the settings in the state object. The algorithm
 will extract a slice based on a start and end time which are set in the state
-object. In addition the data type, i.e. if the slice is to be taken from a sample
-or a can workspace can be specified. Note that the monitor workspace is not
+object. In addition, the data type, i.e. if the slice is to be taken from a sample
+or a can workspace, can be specified. Note that the monitor workspace is not
 being sliced but scaled by the ratio of the proton charge of the sliced
-workspace to the full workspace.
+workspace to the proton charnge of the full workspace.
 
-The sub=states of this algorithm are:
+The sub-states of this algorithm are:
 
 1. Get the start time and the end time of the time slice
 2. If the data set is from a *Can* measurement, then don't perform a slice
@@ -1160,13 +1172,14 @@ The sub=states of this algorithm are:
 Work-flow algorithm orchestration
 #################################
 
-The orchestration of the work-flow algorithms is mainly handled by the *SANSReductionCore*
+The orchestration of the work-flow algorithms is mainly handled by the :ref:`SANSReductionCore <algm-SANSReductionCore>`
 class in *sans_reduction_core.py*. It defines the sequence of work-flow algorithms and how data is
-passed between them. However, executing the algorithm *SANSReductionCore* does not run a full
-reduction, but rather only reduces either the sample or the can dataself.
+passed between them. However, executing the algorithm :ref:`SANSReductionCore <algm-SANSReductionCore>` does
+not run a full reduction, but rather only reduces either the sample or the can data.
 
-For this the *SANSSingleReduction* algorithm was developed. It runs *SANSReductionCore*
-with the appropriate data (sample or can) and performs the required post processing, e.g. stitching.
+For this the :ref:`SANSSingleReduction <algm-SANSSingleReduction>`algorithm was developed.
+It runs :ref:`SANSReductionCore <algm-SANSReductionCore>` with the appropriate
+data (sample or can) and performs the required post processing, e.g. stitching.
 This algorithm will produce a fully reduced output. However it will not produce it in the desired form,
 e.g. correct name of the output workspaces, grouping of multi-period reduced data etc. This is achieved with
 an instance of *SANSBatchReduction* (not a work-flow algorithm!) in module *sans_batch.py*. This
@@ -1176,11 +1189,12 @@ is the entry point for any reduction.
 *SANSBatchReduction*
 ----------------------
 
-This class is the entry point for any reduction and takes three important inputs:
+This class is the entry point for any reduction and is not an algorithm but rather
+a script. It takes three important inputs:
 
 - A list of SANS state objects. Each state object defines a reduction. In fact if the state object contains
   period data with :math:`N` periods and :math:`M` time slices it will in fact define :math:`N \times M` reductions.
-- A *use_optimizations* boolean flag. If true the data loading mechanism will check the ADS first if
+- A *use_optimizations* boolean flag. If true, the data loading mechanism will check the ADS first if
   the required data is available from there and only load the data if it is not present. It will place newly
   loaded data into the ADS. The ADS is also checked for can reductions.
 - An *output_mode* enum, which can be:
@@ -1191,7 +1205,8 @@ This class is the entry point for any reduction and takes three important inputs
 
 
 *SANSBatchReduction* reduces the list of states sequentially. The for-loop in
-the *execute* method lends it self for parallelization via *MPI*. The sub-steps for
+the *execute* method lends itself to parallelization via *MPI*, hence this could be
+a potential future optimization if this should be required. The sub-steps to
 handle each state object are:
 
 1. Load the data which is relevant for the particular reduction (make use of optimizations if applicable)
@@ -1213,10 +1228,10 @@ to perform the reduction.
 
 The *SANSSingleReduction* algorithm defines a single complete reduction of
 a data set, i.e. it will run the reduction for the *Sample* and *Can* and perform
-the subtraction of these results provided that the reduction has been set up
+the subtraction of these results if the reduction has been set up
 to do this. In particular this algorithm stitches the reduced workspaces of the
 different detectors using :ref:`SANSStitch <algm-SANSStitch>`,
-again provided that the reduction has been set up to do this.
+again only if the reduction has been set up to do this.
 
 
 *SANSReductionCore*
@@ -1227,8 +1242,8 @@ inner core of the orchestration mechanism. The inputs to this algorithm are
 
 - A SANS state object
 - Several input workspaces
-- A selection which detector type we are dealing with, i.e. *LAB* or *HAB*
-- A selection which data type we are dealing with, i.e. *Sample* or *Can*
+- A detector type selection, i.e. *LAB* or *HAB*
+- A data type selection, i.e. *Sample* or *Can*
 
 The sub-steps of this algorithm are:
 
@@ -1238,7 +1253,7 @@ The sub-steps of this algorithm are:
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
    monitor workspace is scaled. The scaling factor is the ratio of the charge of the sliced data set
-   and the charge of the entire data set. Also note that this factor is retuned and used later on.
+   and the charge of the entire data set. Also note that this factor is returned and used later on in .
 3. If we are dealing with an even-mode workspace and the compatibility mode has been chosen then
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
@@ -1257,7 +1272,7 @@ The sub-steps of this algorithm are:
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
    they are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
-   algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment worspace and a wavelength-and-pixel adjustment
+   algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment
    workspace. Note that the creation is optional.
 9. Convert the data workspace into histogram-mode using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`.
    This is only relevant for event-mode workspaces where the compatibility mode has not been used. Up until
