@@ -432,7 +432,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", monitors))
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "unused_because_child"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_because_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorWorkspace", monitors))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())

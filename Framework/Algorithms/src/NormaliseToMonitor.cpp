@@ -303,14 +303,18 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
     if (monIndex < 0) {
       issues["MonitorWorkspaceIndex"] = "A workspace index cannot be negative.";
     } else if (monWS->getNumberHistograms() <= static_cast<size_t>(monIndex)) {
-      issues["MonitorWorkspaceIndex"] = "The MonitorWorkspace must contain the MonitorWorkspaceIndex.";
+      issues["MonitorWorkspaceIndex"] =
+          "The MonitorWorkspace must contain the MonitorWorkspaceIndex.";
     }
     MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
     if (monWS->getInstrument()->getName() != inWS->getInstrument()->getName()) {
-      issues["MonitorWorkspace"] = "The Input and Monitor workspaces must come from the same instrument.";
+      issues["MonitorWorkspace"] = "The Input and Monitor workspaces must come "
+                                   "from the same instrument.";
     }
-    if (monWS->getAxis(0)->unit()->unitID() != inWS->getAxis(0)->unit()->unitID()) {
-      issues["MonitorWorkspace"] = "The Input and Monitor workspaces must have the same unit";
+    if (monWS->getAxis(0)->unit()->unitID() !=
+        inWS->getAxis(0)->unit()->unitID()) {
+      issues["MonitorWorkspace"] =
+          "The Input and Monitor workspaces must have the same unit";
     }
   }
 
