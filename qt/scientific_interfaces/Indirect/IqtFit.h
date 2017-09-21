@@ -16,6 +16,7 @@ class CompositeFunction;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+
 class DLLExport IqtFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
@@ -39,9 +40,9 @@ private slots:
   void backgroundSelected(double val);
   void propertyChanged(QtProperty *, double);
   void checkBoxUpdate(QtProperty *prop, bool checked);
-  void plotGuessChanged(bool);
   void updateCurrentPlotOption(QString newOption);
   void singleFit();
+  void updateGuessPlot();
   void plotGuess(QtProperty *);
   void fitContextMenu(const QPoint &);
   void fixItem();
@@ -64,8 +65,13 @@ private:
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
   std::string constructBaseName(const std::string &inputName,
-                                const std::string &fitType, const bool &multi,
-                                const long &specMin, const long &specMax);
+                                const std::string &fitType, 
+                                const bool &multi, const size_t &specMin, 
+                                const size_t &specMax);
+  Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
+                                               const size_t &specMax);
+  void plotResult(const std::string& groupName, const size_t &specNo);
+  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -73,7 +79,6 @@ private:
   QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   Mantid::API::MatrixWorkspace_sptr m_iqtFInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_iqtFOutputWS;
   Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   QString m_iqtFInputWSName;
   QString m_ties;
@@ -81,6 +86,8 @@ private:
   QString m_singleFitOutputName;
   std::string m_plotOption;
   std::string m_baseName;
+  size_t m_runMin;
+  size_t m_runMax;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
