@@ -247,8 +247,7 @@ void NormaliseToMonitor::exec() {
   // First check the inputs
   this->checkProperties(inputWS);
 
-  // See if the normalization with integration properties are set,
-  // throws std::runtime_error if a property is invalid
+  // See if the normalization with integration properties are set.
   const bool integrate = this->setIntegrationProps();
 
   if (integrate) {
@@ -294,12 +293,22 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
     issues["MonitorID"] = mess;
     issues["MonitorWorkspace"] = mess;
   }
+
+  const double intMin = getProperty("IntegrationRangeMin");
+  const double intMax = getProperty("IntegrationRangeMax");
+  if (!isEmpty(intMin) && !isEmpty(intMax)) {
+    if (intMin > intMax) {
+      issues["IntegrationRangeMin"] =
+          "Integration minimum set to larger value than maximum.";
+    }
+  }
+
+
   return issues;
 }
 
 /** Makes sure that the input properties are set correctly
  *  @param inputWorkspace The input workspace
- *  @throw std::runtime_error If the properties are invalid
  */
 void NormaliseToMonitor::checkProperties(
     const API::MatrixWorkspace_sptr &inputWorkspace) {
@@ -475,7 +484,6 @@ NormaliseToMonitor::extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
 /** Sets the maximum and minimum X values of the monitor spectrum to use for
  * integration
  *  @return True if the maximum or minimum values are set
- *  @throw std::runtime_error If the minimum was set higher than the maximum
  */
 bool NormaliseToMonitor::setIntegrationProps() {
   m_integrationMin = getProperty("IntegrationRangeMin");
@@ -489,14 +497,6 @@ bool NormaliseToMonitor::setIntegrationProps() {
     return false;
   }
   // Yes integration is going to be used...
-
-  // There is only one set of values that is unacceptable let's check for that
-  if (!isEmpty(m_integrationMin) && !isEmpty(m_integrationMax)) {
-    if (m_integrationMin > m_integrationMax) {
-      throw std::runtime_error(
-          "Integration minimum set to larger value than maximum!");
-    }
-  }
 
   // Now check the end X values are within the X value range of the workspace
   if (isEmpty(m_integrationMin) || m_integrationMin < m_monitor->x(0).front()) {
