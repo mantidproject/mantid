@@ -106,9 +106,9 @@ class MSDFit(DataProcessorAlgorithm):
         # Fit line to each of the spectra
         if self._model == 'Gauss':
             logger.information('Model : Gaussian approximation')
-            function = 'name=GausDecay, Height=1.0, Msd=' + str(math.sqrt(0.1))
-            function += ',constraint=(Height>0.0, Msd>0.0)'
-            params_list = ['Height', 'Msd']
+            function = 'name=GausDecay, A=1.0, sigma=' + str(math.sqrt(0.1))
+            function += ',constraint=(A>0.0, sigma>0.0)'
+            params_list = ['A', 'sigma']
         elif self._model == 'Peters':
             logger.information('Model : Peters & Kneller')
             function = 'name=MsdPeters, Height=1.0, MSD=1.0, Beta=1.0'
@@ -116,9 +116,9 @@ class MSDFit(DataProcessorAlgorithm):
             params_list = ['Height', 'MSD', 'Beta']
         elif self._model == 'Yi':
             logger.information('Model : Yi et al')
-            function = 'name=MsdYi, Height=1.0, Msd=1.0, Sigma=0.1'
-            function += ',constraint=(Height>0.0, Msd>0.0, Sigma>0.0)'
-            params_list = ['Height', 'Msd', 'Sigma']
+            function = 'name=MsdYi, Height=1.0, MSD=1.0, Sigma=0.1'
+            function += ',constraint=(Height>0.0, MSD>0.0, Sigma>0.0)'
+            params_list = ['Height', 'MSD', 'Sigma']
         else:
             raise ValueError('No Model defined')
 

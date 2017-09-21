@@ -42,12 +42,12 @@ class MsdYi(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter("Height", 1.0, 'Height')
-        self.declareParameter("Msd", 0.05, 'Mean square displacement')
+        self.declareParameter("MSD", 0.05, 'Mean square displacement')
         self.declareParameter("Sigma", 1.0, 'Sigma')
 
     def function1D(self, xvals):
         height = self.getParameterValue("Height")
-        msd = self.getParameterValue("Msd")
+        msd = self.getParameterValue("MSD")
         sigma = self.getParameterValue("Sigma")
 
         xvals = np.array(xvals)
@@ -59,7 +59,7 @@ class MsdYi(IFunction1D):
 
     def functionDeriv1D(self, xvals, jacobian):
         height = self.getParameterValue("Height")
-        msd = self.getParameterValue("Msd")
+        msd = self.getParameterValue("MSD")
         sigma = self.getParameterValue("Sigma")
 
         for i, x in enumerate(xvals):
