@@ -3371,16 +3371,16 @@ class UserFile(ReductionStep):
                 det_specif = 'MERGED'
             reducer.instrument.setDetector(det_specif)
         else:
-            _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
+            return 'Incorrectly formatted DET line, %s, line ignored' % upper_line
 
     def read_line(self, line, reducer):
         # This is so that I can be sure all EOL characters have been removed
         line = line.lstrip().rstrip()
         upper_line = line.upper()
 
-        recognised_command_found = self._handle_read_line(line, upper_line, reducer)
-        if not recognised_command_found:
-            _issueWarning(recognised_command_found)
+        no_recognised_command_found = self._handle_read_line(line, upper_line, reducer)
+        if no_recognised_command_found:
+            _issueWarning(no_recognised_command_found)
             return
 
         if upper_line.startswith('L/'):
