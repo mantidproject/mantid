@@ -188,6 +188,8 @@ void FitPeaks::processInputs() {
 }
 
 void FitPeaks::fitPeaks() {
+
+    // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (size_t wi = m_startWorkspaceIndex; wi < m_stopWorkspaceIndex; ++wi) {
 
