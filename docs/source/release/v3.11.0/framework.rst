@@ -95,6 +95,8 @@ Bug fixes
 Improved
 ########
 
+- `:ref:`Fit` Outputs a function object containing the optimized parameter values.
+
 Python
 ------
 
