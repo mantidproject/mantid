@@ -3,7 +3,8 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range  # pylint: disable=redefined-builtin
+from six.moves import range  # pylint: disable=redefined-builti
+import math
 
 
 class MSDFit(DataProcessorAlgorithm):
@@ -105,7 +106,7 @@ class MSDFit(DataProcessorAlgorithm):
         # Fit line to each of the spectra
         if self._model == 'Gauss':
             logger.information('Model : Gaussian approximation')
-            function = 'name=MsdGauss, Height=1.0, Msd=0.1'
+            function = 'name=GausDecay, Height=1.0, Msd=' + str(math.sqrt(0.1))
             function += ',constraint=(Height>0.0, Msd>0.0)'
             params_list = ['Height', 'Msd']
         elif self._model == 'Peters':
