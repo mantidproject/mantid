@@ -189,7 +189,6 @@ void FitPeaks::processInputs() {
 
 void FitPeaks::fitPeaks() {
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
-
     for (size_t wi = m_startWorkspaceIndex; wi < m_stopWorkspaceIndex; ++wi) {
 
       PARALLEL_START_INTERUPT_REGION
