@@ -283,6 +283,31 @@ void NormaliseToMonitor::exec() {
   }
 }
 
+/** Validates input properties.
+ *  @return A map of input properties as keys and (error) messages as values.
+ */
+std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
+  std::map<std::string, std::string> issues;
+  // Check where the monitor spectrum should come from
+  Property *monSpec = getProperty("MonitorSpectrum");
+  Property *monID = getProperty("MonitorID");
+  // Is the monitor spectrum within the main input workspace
+  const bool inWS = !monSpec->isDefault();
+  // Or is it in a separate workspace
+  MatrixWorkspace_sptr monWS = getProperty("MonitorWorkspace");
+  // or monitor ID
+  bool monIDs = !monID->isDefault();
+  // something has to be set
+  if (!inWS && !monWS && !monIDs) {
+    const std::string mess("Either MonitorSpectrum, MonitorID or "
+                           "MonitorWorkspace has to be provided.");
+    issues["MonitorSpectrum"] = mess;
+    issues["MonitorID"] = mess;
+    issues["MonitorWorkspace"] = mess;
+  }
+  return issues;
+}
+
 /** Makes sure that the input properties are set correctly
  *  @param inputWorkspace The input workspace
  *  @throw std::runtime_error If the properties are invalid
@@ -292,21 +317,15 @@ void NormaliseToMonitor::checkProperties(
 
   // Check where the monitor spectrum should come from
   Property *monSpec = getProperty("MonitorSpectrum");
-  Property *monWS = getProperty("MonitorWorkspace");
+  MatrixWorkspace_sptr monWS = getProperty("MonitorWorkspace");
   Property *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
   // Or is it in a separate workspace
-  bool sepWS = !monWS->isDefault();
+  bool sepWS{monWS};
   // or monitor ID
   bool monIDs = !monID->isDefault();
   // something has to be set
-  if (!inWS && !sepWS && !monIDs) {
-    const std::string mess("Neither the MonitorSpectrum, nor the MonitorID or "
-                           "the MonitorWorkspace property has been set");
-    g_log.error() << mess << '\n';
-    throw std::runtime_error(mess);
-  }
   // One and only one of these properties should have been set
   // input from separate workspace is overwritten by monitor spectrum
   if (inWS && sepWS) {
