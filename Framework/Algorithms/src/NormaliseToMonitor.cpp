@@ -36,7 +36,6 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager *algo) const {
     return false;
   } else {
     is_enabled = true;
-    ;
   }
 
   // is there the ws property, which describes monitors ws. It also disables the
@@ -57,16 +56,12 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   // is enabled is based on other properties:
   if (!is_enabled)
     return false;
-
   // read monitors list from the input workspace
   API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
   bool monitors_changed = monitorIdReader(inputWS);
-
-  //       std::cout << "MonIDPropChanger::isConditionChanged() called  ";
-  //       std::cout << monitors_changed << '\n';
-
   return monitors_changed;
 }
+
 // function which modifies the allowed values for the list of monitors.
 void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
                                     Kernel::Property *const pProp) {
@@ -76,12 +71,13 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
     throw(std::invalid_argument(
         "modify allowed value has been called on wrong property"));
   }
-  //
+
   if (iExistingAllowedValues.empty()) {
     API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
     int spectra_max(-1);
-    if (inputWS) { // let's assume that detectors IDs correspond to spectraID --
-                   // not always the case but often. TODO: should be fixed
+    if (inputWS) {
+      // let's assume that detectors IDs correspond to spectraID --
+      // not always the case but often. TODO: should be fixed
       spectra_max = static_cast<int>(inputWS->getNumberHistograms()) + 1;
     }
     piProp->replaceValidator(
@@ -170,18 +166,11 @@ void NormaliseToMonitor::init() {
                                        val),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
-  //
-  // declareProperty("NofmalizeByAnySpectra",false,
-  //   "Allows you to normalize the workspace by any spectra, not just by the
-  //   monitor one");
-  // Can either set a spectrum within the workspace to be the monitor
-  // spectrum.....
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "Name to use for the output workspace");
   // should be any spectrum number, but named this property MonitorSpectrum to
-  // keep
-  // compatibility with previous scripts
+  // keep compatibility with previous scripts
   // Can either set a spectrum within the workspace to be the monitor
   // spectrum.....
   declareProperty("MonitorSpectrum", -1,
@@ -255,7 +244,7 @@ void NormaliseToMonitor::exec() {
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  // First check the inputs, throws std::runtime_error if a property is invalid
+  // First check the inputs
   this->checkProperties(inputWS);
 
   // See if the normalization with integration properties are set,
@@ -620,13 +609,11 @@ void NormaliseToMonitor::normaliseBinByBin(
     }
 
     if (inputEvent) {
-      // ----------------------------------- EventWorkspace
-      // ---------------------------------------
+      // --- EventWorkspace ---
       EventList &outEL = outputEvent->getSpectrum(i);
       outEL.divide(X.rawData(), Y.mutableRawData(), E.mutableRawData());
     } else {
-      // ----------------------------------- Workspace2D
-      // ---------------------------------------
+      // --- Workspace2D ---
       auto &YOut = outputWorkspace->mutableY(i);
       auto &EOut = outputWorkspace->mutableE(i);
       const auto &inY = inputWorkspace->y(i);
@@ -644,8 +631,7 @@ void NormaliseToMonitor::normaliseBinByBin(
         }
 
         // Calculate result and store in local variable to avoid overwriting
-        // original data if
-        // output workspace is same as one of the input ones
+        // original data if output workspace is same as one of the input ones
         const double newY = leftY / rightY;
 
         if (fabs(rightY) > 1.0e-12 && fabs(newY) > 1.0e-12) {
