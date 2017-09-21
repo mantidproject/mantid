@@ -12,7 +12,7 @@ class TransformPresenter(object):
         self.view=view
         self.load=load_utils.LoadUtils()
         if self.load.MuonAnalysisExists() == False:
-           return
+            return
         self.FFTPresenter=FFT_presenter.FFTPresenter(self.view.getView("FFT"))
         self.MaxEntPresenter=MaxEnt_presenter.MaxEntPresenter(self.view.getView("MaxEnt"),model.getModel("MaxEnt"),self.load)
         self.selectionPresenter=transform_selection_presenter.TransformSelectionPresenter(self.view.selection)

@@ -14,12 +14,11 @@ class LoadUtils(object):
         else:
             mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
 
-
     def getCurrentWS(self):
         return self.runName, self.options
 
     def MuonAnalysisExists(self):
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-           return True
+            return True
         else:
             return mantid.AnalysisDataService.doesExist("MuonAnalysis")
