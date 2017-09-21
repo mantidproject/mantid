@@ -78,27 +78,60 @@ public:
     return testWS;
   }
 
-  void verifyHappyPathCase(double expectedCounts = 2.0) {
+  void verifySuccessCase(double expectedCounts = 2.0) {
     MatrixWorkspace_sptr outWS =
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
+    verifyScatteringAngleAxis(outWS, N_TUBES);
+    verifyHeightAxis(outWS);
+    verifySpectraHaveSameCounts(outWS, expectedCounts);
+  }
+
+  void verifyScatteringAngleAxis(const MatrixWorkspace_sptr &outWS,
+                                 const size_t nEntries) {
     // Check x-axis goes from -90 -> 0 with 180 bins
     const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), N_TUBES)
-    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(N_TUBES - 1), 0.0, 1e-6)
+    TS_ASSERT_EQUALS(xAxis->length(), nEntries)
+    for (size_t i = 0; i < N_TUBES; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), -90.0 + 22.5 * double(i), 1e-6)
+  }
 
+  void verifyHeightAxis(const MatrixWorkspace_sptr &outWS) {
     // Check y-axis goes from 0 to 0.027 with 10 points
     const auto &yAxis = outWS->getAxis(1);
     TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
-    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
-    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
+    for (size_t i = 0; i < N_PIXELS_PER_TUBE; ++i)
+      TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
+  }
 
+  void verifySpectraHaveSameCounts(MatrixWorkspace_sptr outWS,
+                                   double expectedCounts = 2.0) {
     for (size_t i = 0; i < N_TUBES; ++i)
       for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
         TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], expectedCounts, 1e-6)
+  }
+
+  void verifySpectraCountsForScan(MatrixWorkspace_sptr outWS) {
+    size_t bin = 0;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+
+    bin = 1;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+
+    for (size_t i = 2; i < 5; ++i)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
+
+    bin = 5;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+
+    bin = 6;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
   }
 
   void test_normal_operation_with_component_specified() {
@@ -112,7 +145,7 @@ public:
     alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    verifyHappyPathCase();
+    verifySuccessCase();
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -129,7 +162,7 @@ public:
     alg.setProperty("HeightBinning", "0.0, 0.003, 0.027");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    verifyHappyPathCase();
+    verifySuccessCase();
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -146,7 +179,7 @@ public:
     alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    verifyHappyPathCase();
+    verifySuccessCase();
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -196,7 +229,7 @@ public:
     alg.setProperty("ComponentForHeightAxis", "tube-1");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    verifyHappyPathCase(6.0);
+    verifySuccessCase(6.0);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -219,38 +252,9 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from -90 -> 0 with 180 bins
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 7)
-    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
-
-    // Check y-axis goes from 0 to 0.027 with 10 points
-    const auto &yAxis = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
-    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
-    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
-
-    size_t bin = 0;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
-
-    bin = 1;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
-
-    for (size_t i = 2; i < 5; ++i)
-      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
-
-    bin = 5;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
-
-    bin = 6;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+    verifyScatteringAngleAxis(outWS, N_TUBES + 2);
+    verifyHeightAxis(outWS);
+    verifySpectraCountsForScan(outWS);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -274,18 +278,8 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from -90 -> 0 with 180 bins
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 7)
-    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
-
-    // Check y-axis goes from 0 to 0.027 with 10 points
-    const auto &yAxis = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
-    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
-    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
+    verifyScatteringAngleAxis(outWS, N_TUBES + 2);
+    verifyHeightAxis(outWS);
 
     size_t bin = 0;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
@@ -330,38 +324,9 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from -90 -> 0 with 180 bins
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 7)
-    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
-
-    // Check y-axis goes from 0 to 0.027 with 10 points
-    const auto &yAxis = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
-    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
-    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
-
-    size_t bin = 0;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
-
-    bin = 1;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
-
-    for (size_t i = 2; i < 5; ++i)
-      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
-
-    bin = 5;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
-
-    bin = 6;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+    verifyScatteringAngleAxis(outWS, N_TUBES + 2);
+    verifyHeightAxis(outWS);
+    verifySpectraCountsForScan(outWS);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
@@ -384,22 +349,10 @@ public:
         boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
-    // Check x-axis goes from -90 -> 0 with 180 bins
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 7)
-    TS_ASSERT_DELTA(xAxis->getValue(0), -90.0, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(1), -67.5, 1e-6)
-    TS_ASSERT_DELTA(xAxis->getValue(7 - 1), 45.0, 1e-6)
+    verifyScatteringAngleAxis(outWS, N_TUBES + 2);
+    verifyHeightAxis(outWS);
 
-    // Check y-axis goes from 0 to 0.027 with 10 points
-    const auto &yAxis = outWS->getAxis(1);
-    TS_ASSERT_EQUALS(yAxis->length(), N_PIXELS_PER_TUBE)
-    TS_ASSERT_DELTA(yAxis->getValue(0), 0.0, 1e-6)
-    TS_ASSERT_DELTA(yAxis->getValue(N_PIXELS_PER_TUBE - 1), 0.027, 1e-6)
-
-    for (size_t i = 0; i < 6; ++i)
-      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
-        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
+    verifySpectraHaveSameCounts(outWS, 6.0);
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
