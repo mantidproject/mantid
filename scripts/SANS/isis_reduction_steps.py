@@ -3442,6 +3442,29 @@ class UserFile(ReductionStep):
 
         reducer._corr_and_scale.rescale = 100.0
 
+    def _invalid_limits(self, limits, reducer):
+        if limits.startswith('SP '):
+            # We don't use the L/SP line
+            return "L/SP lines are ignored"
+
+        if limits.upper().startswith('Q/RCUT'):
+            limits = limits.upper().split('RCUT')
+            if len(limits) != 2:
+                return "Badly formed L/Q/RCUT line"
+            else:
+                # When read from user file the unit is in mm but stored here it units of meters
+                reducer.to_Q.r_cut = float(limits[1]) / 1000.0
+                return " "
+        if limits.upper().startswith('Q/WCUT'):
+            limits = limits.upper().split('WCUT')
+            if len(limits) != 2:
+                return "Badly formed L/Q/WCUT line"
+            else:
+                reducer.to_Q.w_cut = float(limits[1])
+                return " "
+
+        return False
+
     # Read a limit line of a mask file
     def readLimitValues(self, limit_line, reducer):
         limits = limit_line.split('L/')
@@ -3449,28 +3472,10 @@ class UserFile(ReductionStep):
             _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
             return
         limits = limits[1]
-        limit_type = ''
 
-        if limits.startswith('SP '):
-            # We don't use the L/SP line
-            _issueWarning("L/SP lines are ignored")
-            return
-
-        if limits.upper().startswith('Q/RCUT'):
-            limits = limits.upper().split('RCUT')
-            if len(limits) != 2:
-                _issueWarning("Badly formed L/Q/RCUT line")
-            else:
-                # When read from user file the unit is in mm but stored here it units of meters
-                reducer.to_Q.r_cut = float(limits[1]) / 1000.0
-            return
-        if limits.upper().startswith('Q/WCUT'):
-            limits = limits.upper().split('WCUT')
-            if len(limits) != 2:
-                _issueWarning("Badly formed L/Q/WCUT line")
-            else:
-                reducer.to_Q.w_cut = float(limits[1])
-            return
+        invalid_limits = self._invalid_limits(limits, reducer)
+        if invalid_limits:
+            return invalid_limits
 
         rebin_str = None
         if ',' not in limit_line:
@@ -3531,8 +3536,7 @@ class UserFile(ReductionStep):
             if maxval.endswith('/NOMIRROR'):
                 maxval = maxval.split('/NOMIRROR')[0]
                 mirror = False
-            reducer.mask.set_phi_limit(
-                float(minval), float(maxval), mirror, override=False)
+            reducer.mask.set_phi_limit(float(minval), float(maxval), mirror, override=False)
         elif limit_type.upper() == 'EVENTSTIME':
             if rebin_str:
                 reducer.settings["events.binning"] = rebin_str
