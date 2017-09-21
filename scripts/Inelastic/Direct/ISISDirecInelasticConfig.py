@@ -247,7 +247,7 @@ class UserProperties(object):
         self.validate_instrument(instrument)
 
         # Checks if the date is valid and raises a RuntimeError if not
-        self.validate_date(start_date)
+        start_date = self.validate_date(start_date)
 
         def convert_cycle_int(cycle_int):
             if cycle_int > 999:  # Full cycle format 20151
@@ -320,6 +320,7 @@ class UserProperties(object):
         if error:
             raise RuntimeError("Experiment start date should be defined as"
                                " a sting in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date))
+        return start_date
 
     def get_all_instruments(self):
         """ Return list of all instruments, user is working on during this cycle"""
