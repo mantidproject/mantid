@@ -53,7 +53,8 @@ const boost::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
 const boost::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for physical properties
 // Example: cv.ScaleFactor
-const boost::regex PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
+const boost::regex
+    PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
 
 /// Define the source function for CrystalFieldFunction.
 /// Its function() method is not needed.
