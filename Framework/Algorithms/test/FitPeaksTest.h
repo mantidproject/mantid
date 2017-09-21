@@ -3,14 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/FitPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::FitPeaks;
 
@@ -40,7 +43,9 @@ public:
 
   void test_Init() {
     // Generate input workspace
-    m_inputWorkspaceName = loadVulcanHighAngleData();
+    // m_inputWorkspaceName = loadVulcanHighAngleData();
+    m_inputWorkspaceName = "temp_workspace";
+    createTestData(m_inputWorkspaceName);
 
     // Initialize FitPeak
     FitPeaks fitpeaks;
@@ -50,9 +55,42 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  void test_multiPeaksMultiSpectra() {
+    // set up parameters with starting value
+    std::vector<string> peakparnames;
+    std::vector<double> peakparvalues;
+    createTestParameters(peakparnames, peakparvalues);
+
+    // initialize algorithm to test
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StartWorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 2));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "10.0, 5.0"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "8.0, 2.5"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "12.0, 6.5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS");
+
+    fitpeaks.execute();
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void test_singlePeakSpectrum() {
+  void Ntest_singlePeakSpectrum() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -99,7 +137,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on single peak on multiple spectra
     */
-  void test_singlePeakMultiSpectra() {
+  void Ntest_singlePeakMultiSpectra() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -156,7 +194,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on init and setup
     */
-  void test_SingleSpectrum3Peaks() {
+  void Ntest_SingleSpectrum3Peaks() {
     // Generate input workspace
     // std::string input_ws_name = loadVulcanHighAngleData();
 
@@ -297,6 +335,68 @@ public:
 
     parnames.emplace_back("S");
     parvalues.push_back(0.000355);
+
+    return;
+  }
+
+  void createTestData(const std::string &workspacename) {
+    // ---- Create the simple workspace -------
+    MatrixWorkspace_sptr WS =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 300);
+    WS->getAxis(0)->unit() =
+        Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+
+    // change the resolution of the binning
+    for (size_t i = 0; i < 3; ++i)
+      WS->mutableX(i) *= 0.05;
+
+    auto xvals = WS->points(0);
+    std::transform(xvals.cbegin(), xvals.cend(), WS->mutableY(0).begin(),
+                   [](const double x) {
+                     return exp(-0.5 * pow((x - 10) / 0.1, 2)) +
+                            2.0 * exp(-0.5 * pow((x - 5) / 0.15, 2));
+                   });
+
+    auto xvals1 = WS->points(1);
+    std::transform(xvals1.cbegin(), xvals1.cend(), WS->mutableY(1).begin(),
+                   [](const double x) {
+                     return 2. * exp(-0.5 * pow((x - 9.98) / 0.12, 2)) +
+                            4.0 * exp(-0.5 * pow((x - 5.01) / 0.17, 2));
+                   });
+
+    auto xvals2 = WS->points(2);
+    std::transform(xvals2.cbegin(), xvals2.cend(), WS->mutableY(2).begin(),
+                   [](const double x) {
+                     return 10 * exp(-0.5 * pow((x - 10.02) / 0.14, 2)) +
+                            3.0 * exp(-0.5 * pow((x - 5.03) / 0.19, 2));
+                   });
+
+    auto &E = WS->mutableE(0);
+    E.assign(E.size(), 0.001);
+
+    AnalysisDataService::Instance().addOrReplace(workspacename, WS);
+
+    auto vecx = WS->x(2);
+    auto vecy = WS->y(2);
+    for (size_t i = 0; i < vecx.size(); ++i)
+      std::cout << vecx[i] << "\t" << vecy[i] << "\n";
+
+    return;
+  }
+
+  void createTestParameters(vector<string> &parnames,
+                            vector<double> &parvalues) {
+    parnames.clear();
+    parvalues.clear();
+
+    parnames.emplace_back("I");
+    parvalues.push_back(2.5e+06);
+
+    parnames.emplace_back("S");
+    parvalues.push_back(0.1);
+
+    parnames.emplace_back("X0");
+    parvalues.push_back(10.0);
 
     return;
   }
