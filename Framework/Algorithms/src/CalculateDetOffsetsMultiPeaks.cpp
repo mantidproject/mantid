@@ -414,6 +414,7 @@ FitPeakOffsetResult CalculateDetOffsetsMultiPeaks::calculatePeakOffset(
     // fr.dev_resolution = devresolution;
 
     // Fit offset
+    throw std::runtime_error("nparams is not set up yet.");
     if (nparams > 0 && fr.numpeaksindrange > 0) {
       fitPeaksOffset(nparams, minD, maxD, vec_peakPosRef, vec_peakPosFitted,
                      vec_peakHeights, fr);
