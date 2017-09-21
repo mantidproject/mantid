@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_BINDETECTORSCANTEST_H_
-#define MANTID_ALGORITHMS_BINDETECTORSCANTEST_H_
+#ifndef MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_
+#define MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/BinDetectorScan.h"
+#include "MantidAlgorithms/SumOverlappingTubes.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
@@ -12,21 +12,21 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::BinDetectorScan;
+using Mantid::Algorithms::SumOverlappingTubes;
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
-class BinDetectorScanTest : public CxxTest::TestSuite {
+class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static BinDetectorScanTest *createSuite() {
-    return new BinDetectorScanTest();
+  static SumOverlappingTubesTest *createSuite() {
+    return new SumOverlappingTubesTest();
   }
-  static void destroySuite(BinDetectorScanTest *suite) { delete suite; }
+  static void destroySuite(SumOverlappingTubesTest *suite) { delete suite; }
 
   const size_t N_TUBES = 5;
   const size_t N_PIXELS_PER_TUBE = 10;
@@ -137,7 +137,7 @@ public:
   void test_normal_operation_with_component_specified() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -154,7 +154,7 @@ public:
   void test_normal_operation_explicit_height_axis() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -171,7 +171,7 @@ public:
   void test_normal_operation_manual_scattering_angle_bins() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -188,7 +188,7 @@ public:
   void test_non_existent_component() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
@@ -204,7 +204,7 @@ public:
   void test_non_incomplete_height_bins_component() {
     auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspaces", "testWS");
@@ -221,7 +221,7 @@ public:
     std::vector<double> rotations = {0, 0, 0};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -239,7 +239,7 @@ public:
     std::vector<double> rotations = {0, -22.5, -45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -265,7 +265,7 @@ public:
     std::vector<double> rotations = {0, -28.125, -45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -310,7 +310,7 @@ public:
     std::vector<double> rotations = {0, -22.5, -45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -337,7 +337,7 @@ public:
     std::vector<double> rotations = {0, -28.125, -45};
     auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
 
-    BinDetectorScan alg;
+    SumOverlappingTubes alg;
     alg.initialize();
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
@@ -359,4 +359,4 @@ public:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_BINDETECTORSCANTEST_H_ */
+#endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */

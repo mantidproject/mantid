@@ -17,7 +17,6 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
 	src/AverageLogData.cpp
-	src/BinDetectorScan.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
@@ -296,6 +295,7 @@ set ( SRC_FILES
 	src/StripVanadiumPeaks2.cpp
 	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
+	src/SumOverlappingTubes.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
@@ -340,7 +340,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
 	inc/MantidAlgorithms/AverageLogData.h
-	inc/MantidAlgorithms/BinDetectorScan.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
@@ -625,6 +624,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
 	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
+	inc/MantidAlgorithms/SumOverlappingTubes.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
@@ -680,7 +680,6 @@ set ( TEST_FILES
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h
 	AverageLogDataTest.h
-	BinDetectorScanTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
@@ -939,6 +938,7 @@ set ( TEST_FILES
 	StripVanadiumPeaksTest.h
 	SumEventsByLogValueTest.h
 	SumNeighboursTest.h
+	SumOverlappingTubesTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h

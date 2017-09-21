@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/BinDetectorScan.h"
+#include "MantidAlgorithms/SumOverlappingTubes.h"
 
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 #include "MantidAPI/ADSValidator.h"
@@ -21,7 +21,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(BinDetectorScan)
+DECLARE_ALGORITHM(SumOverlappingTubes)
 
 using namespace API;
 using namespace Geometry;
@@ -29,7 +29,7 @@ using namespace HistogramData;
 using namespace DataObjects;
 using namespace Kernel;
 
-void BinDetectorScan::init() {
+void SumOverlappingTubes::init() {
   declareProperty(make_unique<ArrayProperty<std::string>>(
                       "InputWorkspaces", boost::make_shared<ADSValidator>()),
                   "The names of the input workspaces as a list. You may also "
@@ -74,7 +74,7 @@ void BinDetectorScan::init() {
       "the normalisation is performed as N_MAX / N.");
 }
 
-std::map<std::string, std::string> BinDetectorScan::validateInputs() {
+std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
   std::map<std::string, std::string> result;
 
   const std::string componentForHeightAxis =
@@ -92,7 +92,7 @@ std::map<std::string, std::string> BinDetectorScan::validateInputs() {
   return result;
 }
 
-void BinDetectorScan::exec() {
+void SumOverlappingTubes::exec() {
   getInputParameters();
 
   HistogramData::Points x(m_numPoints, LinearGenerator(m_startScatteringAngle,
@@ -120,7 +120,7 @@ void BinDetectorScan::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-void BinDetectorScan::getInputParameters() {
+void SumOverlappingTubes::getInputParameters() {
   const std::vector<std::string> inputWorkspaces =
       getProperty("InputWorkspaces");
   auto workspaces = RunCombinationHelper::unWrapGroups(inputWorkspaces);
@@ -131,7 +131,7 @@ void BinDetectorScan::getInputParameters() {
   getHeightAxis();
 }
 
-void BinDetectorScan::getScatteringAngleBinning() {
+void SumOverlappingTubes::getScatteringAngleBinning() {
   m_startScatteringAngle = 180.0;
   m_endScatteringAngle = 0.0;
 
@@ -177,7 +177,7 @@ void BinDetectorScan::getScatteringAngleBinning() {
                       << m_endScatteringAngle << "\n";
 }
 
-void BinDetectorScan::getHeightAxis() {
+void SumOverlappingTubes::getHeightAxis() {
   std::string componentName = getProperty("ComponentForHeightAxis");
   if (componentName.length() > 0) {
     // Try to get the component. It should be a tube with pixels in the
@@ -214,7 +214,7 @@ void BinDetectorScan::getHeightAxis() {
 }
 
 std::vector<double>
-BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
+SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   const double scatteringAngleTolerance =
       getProperty("ScatteringAngleTolerance");
 
@@ -285,7 +285,7 @@ BinDetectorScan::performBinning(MatrixWorkspace_sptr &outputWS) {
   return normalisation;
 }
 
-double BinDetectorScan::distanceFromAngle(const size_t thetaIndex,
+double SumOverlappingTubes::distanceFromAngle(const size_t thetaIndex,
                                           const double theta) const {
   return fabs(m_startScatteringAngle +
               double(thetaIndex) * m_stepScatteringAngle - theta);

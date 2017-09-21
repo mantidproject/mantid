@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_BINDETECTORSCAN_H_
-#define MANTID_ALGORITHMS_BINDETECTORSCAN_H_
+#ifndef MANTID_ALGORITHMS_SUMOVERLAPPINGTUBES_H_
+#define MANTID_ALGORITHMS_SUMOVERLAPPINGTUBES_H_
 
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** BinDetectorScan : TODO: DESCRIPTION
+/** SumOverlappingTubes : TODO: DESCRIPTION
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,9 +32,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL BinDetectorScan : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SumOverlappingTubes : public API::Algorithm {
 public:
-  const std::string name() const override { return "BinDetectorScan"; }
+  const std::string name() const override { return "SumOverlappingTubes"; }
   const std::string summary() const override { return "TODO: fill this out."; }
   std::map<std::string, std::string> validateInputs() override;
   int version() const override { return 1; }
@@ -65,4 +65,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_BINDETECTORSCAN_H_ */
+#endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBES_H_ */
