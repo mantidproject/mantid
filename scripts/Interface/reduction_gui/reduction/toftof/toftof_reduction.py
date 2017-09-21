@@ -277,6 +277,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# empty can runs")
             l("{} = Load(Filename='{}')" .format(wsRawEC, self.ecRuns))
             l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
+            l("{}.setComment('EC')".format(wsEC))
             if not self.keepSteps:
                 l("DeleteWorkspace({})" .format(wsRawEC))
             l()
@@ -417,12 +418,24 @@ class TOFTOFScriptElement(BaseScriptElement):
         l("# group data for processing")  # without empty can
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
         gData = gPrefix + 'Data'
+        if self.ecRuns:
+            wsECNorm2 = wsECNorm + '2'
+            l("{} = CloneWorkspace({})".format(wsECNorm2, wsECNorm))
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
-            l("{} = GroupWorkspaces({}list({}.getNames()))"
-              .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+            if self.ecRuns:
+                l("{} = GroupWorkspaces({}list({}.getNames()) + [{}])"
+                    .format(gData, group_list([wsVanNorm], ' + '), gDataSource, wsECNorm2))
+            else:
+                l("{} = GroupWorkspaces({}list({}.getNames()))"
+                    .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
         else:
-            l("{} = CloneWorkspace({})" .format(gData, gDataSource))
+            if self.ecRuns:
+                l("{} = GroupWorkspaces({}list({}.getNames()))"
+                  .format(gData, group_list([wsECNorm2], ' + '), gDataSource))
+                #l("{} = GroupWorkspaces({})" .format(gData, group_list(gDataSource, wsECNorm2))
+            else:
+                l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
 
         if self.vanRuns:
@@ -452,7 +465,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("# apply vanadium TOF correction")
             l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTable))
             if not self.keepSteps:
-                l("DeleteWorkspaces([{}, {}, {}])" .format(gDataCleanFrame, eppTable, gData))
+                l("DeleteWorkspaces([{}, {}])" .format(gDataCleanFrame, eppTable))
             l()
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
@@ -461,13 +474,13 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = FindEPP({})" .format(eppTables, gData))
             l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTables))
             if not self.keepSteps:
-                l("DeleteWorkspaces([{}, {}, {}])" .format(gDataCleanFrame, eppTables, gData))
+                l("DeleteWorkspaces([{}, {}])" .format(gDataCleanFrame, eppTables))
             l()
 
         else:
             gData2 = gDataCleanFrame
             if self.vanRuns and not self.keepSteps:
-                l("DeleteWorkspaces([{}, {}])" .format(eppTable, gData))
+                l("DeleteWorkspace({})" .format(eppTable))
             elif not self.keepSteps:
                 l("DeleteWorkspace({})" .format(gData))
 
