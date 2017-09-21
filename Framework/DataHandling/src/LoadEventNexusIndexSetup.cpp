@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidIndexing/Extract.h"
+#include "MantidIndexing/Scatter.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -68,7 +69,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
     setupConsistentSpectrumNumbers(filtered, detIDs);
   }
 
-  return filtered;
+  return scatter(filtered);
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
@@ -104,7 +105,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
   // unintended dropping of events in the loader.
   m_min = EMPTY_INT();
   m_max = EMPTY_INT();
-  return indexInfo;
+  return scatter(indexInfo);
 }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
@@ -132,7 +133,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
     }
     Indexing::IndexInfo indexInfo(spectrumNumbers);
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    return indexInfo;
+    return scatter(indexInfo);
   } else {
     SpectrumDetectorMapping mapping(spec, udet, monitors);
     auto uniqueSpectra = mapping.getSpectrumNumbers();
@@ -150,7 +151,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
     Indexing::IndexInfo indexInfo(std::vector<Indexing::SpectrumNumber>(
         uniqueSpectra.begin(), uniqueSpectra.end()));
     indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
-    return filterIndexInfo(indexInfo);
+    return scatter(filterIndexInfo(indexInfo));
   }
 }
 
@@ -170,18 +171,19 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
       m_min = static_cast<int32_t>(indexInfo.spectrumNumber(0));
     // Avoid adding non-existing indices (can happen if instrument has gaps in
     // its detector IDs). IndexInfo does the filtering for use.
-    const auto indices = indexInfo.makeIndexSet(m_min, m_max);
+    const auto indices = indexInfo.makeIndexSet(
+        static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
     for (const auto &index : indices)
       m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {
     const auto indices = indexInfo.makeIndexSet(
-        std::vector<Indexing::SpectrumNumber>(m_range.begin(), m_range.end()));
+        std::vector<SpectrumNumber>(m_range.begin(), m_range.end()));
     m_min = static_cast<int32_t>(indexInfo.spectrumNumber(*indices.begin()));
     m_max =
         static_cast<int32_t>(indexInfo.spectrumNumber(*(indices.end() - 1)));
-    return Indexing::extract(indexInfo, indices);
+    return extract(indexInfo, indices);
   }
   return indexInfo;
 }

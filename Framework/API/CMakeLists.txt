@@ -135,6 +135,7 @@ set ( SRC_FILES
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
+	src/TriviallyParallelAlgorithm.cpp
 	src/Workspace.cpp
 	src/WorkspaceFactory.cpp
 	src/WorkspaceGroup.cpp
@@ -330,6 +331,7 @@ set ( INC_FILES
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
+	inc/MantidAPI/TriviallyParallelAlgorithm.h
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
@@ -352,10 +354,10 @@ set ( TEST_FILES
 	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
+	AlgorithmMPITest.h
 	AlgorithmManagerTest.h
 	AlgorithmPropertyTest.h
 	AlgorithmProxyTest.h
-	AlgorithmMPITest.h
 	AlgorithmTest.h
 	AnalysisDataServiceTest.h
 	AsynchronousTest.h

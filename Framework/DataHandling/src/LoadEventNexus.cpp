@@ -1642,5 +1642,11 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
   }
 }
 
+Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Distributed;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

@@ -42,10 +42,6 @@ using namespace Geometry;
 
 std::recursive_mutex LoadInstrument::m_mutex;
 
-/// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm() {}
-
-//------------------------------------------------------------------------------------------------------------------------------
 /// Initialisation method.
 void LoadInstrument::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
