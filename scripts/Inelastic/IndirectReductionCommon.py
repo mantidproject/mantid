@@ -801,6 +801,7 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 
+
 # -------------------------------------------------------------------------------
 
 # ========== Child Algorithms ==========
@@ -819,6 +820,7 @@ def _mask_detectors(workspace, masked_indices):
     mask_detectors.setProperty("Workspace", workspace)
     mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
     mask_detectors.execute()
+
 
 def _save_ascii(workspace, file_name):
     """
