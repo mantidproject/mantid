@@ -18,7 +18,7 @@ class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string=""):
         table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
-                                            "", "", "", "", option_string)
+                                            "", "", "", "", "", option_string)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         return table_model
