@@ -527,12 +527,13 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # merge them
     # the only special case where reduce rear is not required is
     # if the user chose to reduce front and does not require fit
-    reduce_rear_flag = com_det_option == 'front' and not fitRequired
+    reduce_rear_flag = not (com_det_option == 'front' and not fitRequired)
     reduce_front_flag = com_det_option != 'rear'
     merge_flag = com_det_option == 'merged'
 
     # The shift and scale is always on the front detector.
-    fitRequired = fitRequired and not reduce_front_flag
+    if not reduce_rear_flag:
+        fitRequired = False
 
     # To backup value of singleton which are temporarily modified in this method
     toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
