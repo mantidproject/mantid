@@ -1005,13 +1005,13 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
 
-      const auto filePath = dir_itr.path();
+      const auto &filePath = dir_itr.path();
       if (!filePath.isFile())
         continue;
 
       std::string l_filenamePart = filePath.getFileName();
       if (regex_match(l_filenamePart, regex)) {
-        const auto pathName = dir_itr->path();
+        const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";
         std::string validFrom, validTo;
         getValidFromTo(pathName, validFrom, validTo);
