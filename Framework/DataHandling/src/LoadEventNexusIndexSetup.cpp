@@ -14,6 +14,25 @@ using namespace Mantid::Indexing;
 namespace Mantid {
 namespace DataHandling {
 
+namespace {
+void setupConsistentSpectrumNumbers(IndexInfo &filtered,
+                                    const std::vector<detid_t> &detIDs) {
+  std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+  // Temporary spectrum number in `filtered` was detector ID, now translate
+  // to spectrum number, starting at 1. Note that we use detIDs and not
+  // DetectorInfo for translation since we need to match the unfiltered
+  // spectrum numbers, which are based on skipping monitors (which would be
+  // included in DetectorInfo).
+  for (int32_t i = 0; i < static_cast<int32_t>(detIDs.size()); ++i) {
+    if (filtered.spectrumNumber(spectrumNumbers.size()) == detIDs[i])
+      spectrumNumbers.push_back(i + 1);
+    if (filtered.size() == spectrumNumbers.size())
+      break;
+  }
+  filtered.setSpectrumNumbers(std::move(spectrumNumbers));
+}
+}
+
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(
     MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
     const int32_t max, const std::vector<int32_t> range)
@@ -41,11 +60,13 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
 
   auto filtered = filterIndexInfo(indexInfo);
 
-  // If there is no actual filter, spectrum numbers are contiguous and start at
-  // 1. Otherwise spectrum numbers are detector IDs. This is legacy behavior
-  // adopted from EventWorkspaceCollection.
-  if (filtered.size() == indexInfo.size())
+  // Spectrum numbers are continuous and start at 1. If there is a filter,
+  // spectrum numbers are set up to be consistent with the unfiltered case.
+  if (filtered.size() == indexInfo.size()) {
     filtered.setSpectrumNumbers(1, static_cast<int32_t>(filtered.size()));
+  } else {
+    setupConsistentSpectrumNumbers(filtered, detIDs);
+  }
 
   return filtered;
 }
@@ -53,7 +74,11 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
     const std::vector<std::string> &bankNames) {
   const auto &componentInfo = m_instrumentWorkspace->componentInfo();
+  const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> spectrumDefinitions;
+  // Temporary spectrum numbers setup up to be detector IDs, used for finding
+  // correct spectrum number to be consistent with unfiltered case.
+  std::vector<SpectrumNumber> spectrumNumbers;
   const auto &instrument = m_instrumentWorkspace->getInstrument();
   for (const auto &bankName : bankNames) {
     const auto &bank = instrument->getComponentByName(bankName);
@@ -61,8 +86,10 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
     if (bank) {
       const auto bankIndex = componentInfo.indexOf(bank->getComponentID());
       dets = componentInfo.detectorsInSubtree(bankIndex);
-      for (const auto detIndex : dets)
+      for (const auto detIndex : dets) {
         spectrumDefinitions.emplace_back(detIndex);
+        spectrumNumbers.emplace_back(detectorInfo.detectorIDs()[detIndex]);
+      }
     }
     if (dets.empty())
       throw std::runtime_error("Could not find the bank named '" + bankName +
@@ -70,8 +97,9 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
                                "tree; or it did not contain any detectors. Try "
                                "unchecking SingleBankPixelsOnly.");
   }
-  Indexing::IndexInfo indexInfo(spectrumDefinitions.size());
+  Indexing::IndexInfo indexInfo(std::move(spectrumNumbers));
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+  setupConsistentSpectrumNumbers(indexInfo, instrument->getDetectorIDs(true));
   // Filters are ignored when selecting bank names. Reset min/max to avoid
   // unintended dropping of events in the loader.
   m_min = EMPTY_INT();
