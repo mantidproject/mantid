@@ -15,7 +15,7 @@ using Mantid::API::WorkspaceHistory;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 
-GET_POINTER_SPECIALIZATION(WorkspaceHistory)
+//GET_POINTER_SPECIALIZATION(WorkspaceHistory)
 
 /**
  * Return a Python list of history objects from the workspace history as this is

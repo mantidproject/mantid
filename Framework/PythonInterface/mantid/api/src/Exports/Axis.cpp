@@ -24,7 +24,7 @@ using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(Axis)
+//GET_POINTER_SPECIALIZATION(Axis)
 
 namespace {
 namespace bpl = boost::python;

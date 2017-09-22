@@ -11,7 +11,6 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-namespace {
 class IFT_Funct : public ParamFunction, public IFunction1D {
 public:
   IFT_Funct() {
@@ -35,7 +34,6 @@ public:
 
 DECLARE_FUNCTION(IFT_Funct)
 
-} // namespace
 
 class FunctionAttributeTest : public CxxTest::TestSuite {
 public:

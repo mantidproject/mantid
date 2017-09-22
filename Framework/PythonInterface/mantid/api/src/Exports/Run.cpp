@@ -16,7 +16,7 @@ using Mantid::Kernel::Property;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Goniometer)
-GET_POINTER_SPECIALIZATION(Run)
+//GET_POINTER_SPECIALIZATION(Run)
 
 namespace {
 namespace bpl = boost::python;

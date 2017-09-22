@@ -32,7 +32,6 @@ using namespace Mantid::DataObjects;
 
 using Mantid::TestHelpers::MultiDomainFunctionTest_Function;
 
-namespace {
 class TestMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor setting a value for the relative error acceptance
@@ -75,7 +74,7 @@ private:
 };
 
 DECLARE_FUNCMINIMIZER(TestMinimizer, TestMinimizer)
-}
+
 
 class FitTest : public CxxTest::TestSuite {
 public:
