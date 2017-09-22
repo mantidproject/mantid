@@ -17,7 +17,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "DMOL3"
         self._norm = 0
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
 
     def read_phonon_file(self):
         """

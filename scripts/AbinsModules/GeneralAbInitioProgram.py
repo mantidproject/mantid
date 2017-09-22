@@ -4,14 +4,14 @@ import AbinsModules
 import six
 
 
-class GeneralDFTProgramName(type):
+class GeneralAbInitioProgramName(type):
     def __str__(self):
         return self.__name__
 
 
 # noinspection PyMethodMayBeStatic
-@six.add_metaclass(GeneralDFTProgramName)
-class GeneralDFTProgram(object):
+@six.add_metaclass(GeneralAbInitioProgramName)
+class GeneralAbInitioProgram(object):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
     in INS analysis.

@@ -4,7 +4,7 @@ import six
 import AbinsModules
 
 
-class GeneralDFTParser(object):
+class GeneralAbInitioParser(object):
     """
     Helper class which groups methods used by DFT Loaders for parsing files.
     """

@@ -15,7 +15,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralDFTProgram):
         """
         super(LoadGAUSSIAN, self).__init__(input_dft_filename=input_dft_filename)
         self._dft_program = "GAUSSIAN"
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
         self._num_atoms = None
         self._num_read_freq = 0
 

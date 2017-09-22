@@ -23,7 +23,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
         self._inv_expansion_matrix = np.eye(3, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
 
         self._dft_program = "CRYSTAL"
 
