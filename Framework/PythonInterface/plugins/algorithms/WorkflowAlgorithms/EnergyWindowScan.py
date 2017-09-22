@@ -195,8 +195,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         delete_alg.setProperty("Workspace", self._scan_ws + '_inel_elf')
         delete_alg.execute()
 
-        x_values = mtd[self._scan_ws + '_el_eq2'].readX(0)
-        num_hist = mtd[self._scan_ws + '_el_eq2'].getNumberHistograms()
+        x_values = mtd[self._scan_ws + '_el_eq1'].readX(0)
+        num_hist = mtd[self._scan_ws + '_el_eq1'].getNumberHistograms()
         if len(x_values) < 2 and self._msdfit:
             logger.warning("Unable to perform MSDFit")
             self._msdfit = False
@@ -204,8 +204,8 @@ class EnergyWindowScan(DataProcessorAlgorithm):
         if self._msdfit:
             msdfit_prog = Progress(self, start=0.9, end=1.0, nreports=4)
             msdfit_prog.report('msdFit')
-            msd_alg = self.createChildAlgorithm("MSDFit", enableLogging=False)
-            msd_alg.setProperty("InputWorkspace", self._scan_ws + '_el_eq2')
+            msd_alg = self.createChildAlgorithm("MSDFit", enableLogging=True)
+            msd_alg.setProperty("InputWorkspace", self._scan_ws + '_el_eq1')
             msd_alg.setProperty("Xstart", x_values[0])
             msd_alg.setProperty("XEnd", x_values[len(x_values) - 1])
             msd_alg.setProperty("SpecMin", 0)

@@ -45,23 +45,21 @@ Bugfixes
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
 - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
-Elwin
-~~~~~
 
-Bugfixes
---------
-- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+MSDFit
+~~~~~~
 
-ConvFit
-~~~~~~~
+Improvements
+------------
+- Added model selection to MSDFit, with three current models: MsdPeters, MsdYi and MsdPeters. New models now
+  work with workspaces in Q not Q^2 (e.g. _eq workspaces 'Elastic Q')
 
-Bugfixes
---------
-- Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
-- Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
 Jump Fit
 ~~~~~~~~
+
+General
+~~~~~~~
 
 Improvements
 ------------
