@@ -142,7 +142,7 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
       for (const auto detID : mapping.getDetectorIDsForSpectrumNo(spec)) {
         try {
           spectrumDefinitions.back().add(detectorInfo.indexOf(detID));
-        } catch (std::out_of_range &e) {
+        } catch (std::out_of_range &) {
           // Discarding detector IDs that do not exist in the instrument.
         }
       }
