@@ -62,11 +62,16 @@ size_t findXIndex(const HistogramX &vecx, double x) {
   return index;
 }
 
+//----------------------------------------------------------------------------------------------
 /** constructor
  * @brief FitPeaks::FitPeaks
  */
 FitPeaks::FitPeaks() : m_minPeakMaxValue(20.) {}
 
+//----------------------------------------------------------------------------------------------
+/** initialize the properties
+ * @brief FitPeaks::init
+ */
 void FitPeaks::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -81,12 +86,20 @@ void FitPeaks::init() {
       "It has 1 value of each spectrum, standing for the number of events of "
       "the corresponding spectrum.");
 
+  std::vector<std::string> peakNames =
+      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
+  declareProperty("PeakFunction", "Gaussian",
+                  boost::make_shared<StringListValidator>(peakNames));
+
   declareProperty("StartWorkspaceIndex", 0, "Starting workspace index for fit");
   declareProperty("StopWorkspaceIndex", 0,
                   "Last workspace index to fit (not included)");
   declareProperty(
+        Kernel::make_unique<ArrayProperty<std::string>>("PeakParameterNames"),
+        "List of peak parameters' names");
+  declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
-      "List of (back-to-back exponential) peak parameters' value");
+      "List of peak parameters' value");
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
                   "List of peak centers to fit against.");
@@ -148,6 +161,8 @@ void FitPeaks::processInputs() {
   else
     m_eventNumberWS = 0;
 
+  mPeakProfile = getPropertyValue("PeakFunction");
+
   int start_wi = getProperty("StartWorkspaceIndex");
   int stop_wi = getProperty("StopWorkspaceIndex");
   m_startWorkspaceIndex = static_cast<size_t>(start_wi);
@@ -160,6 +175,7 @@ void FitPeaks::processInputs() {
   m_peakWindowRight = getProperty("FitWindowRightBoundary");
   m_numPeaksToFit = m_peakCenters.size();
 
+  m_peakParamNames = getProperty("PeakParameterNames");
   m_initParamValues = getProperty("PeakParameterValues");
 
   std::vector<double> vecPeakRange = getProperty("PeakRanges");
@@ -201,18 +217,10 @@ void FitPeaks::fitPeaks() {
       std::vector<std::vector<double>> fitted_peaks_windows;
       std::vector<double> peak_chi2_vec;
 
-      fitSpectraPeaks(wi, peak_positions, peak_parameters, peak_chi2_vec,
+      fitSpectrumPeaks(wi, peak_positions, peak_parameters, peak_chi2_vec,
                       fitted_peaks, fitted_peaks_windows);
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-        //        g_log.notice() << "[DB....Outer Most] " <<
-        //        peak_positions.size() << ", "
-        //                       << peak_parameters.size() << ", " <<
-        //                       fitted_peaks.size()
-        //                       << "\n"
-        //                       << "Size of peak parameters vector = " <<
-        //                       peak_parameters.size()
-        //                       << "\n";
 
         // set the fitted peaks' value to output workspace
         for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
@@ -284,7 +292,8 @@ void FitPeaks::fitPeaks() {
     PARALLEL_CHECK_INTERUPT_REGION
 }
 
-/**
+//----------------------------------------------------------------------------------------------
+/** Fit peaks in a same spectrum
  * @brief FitPeaks::fitSpectraPeaks
  * @param wi
  * @param peak_pos
@@ -292,7 +301,7 @@ void FitPeaks::fitPeaks() {
  * @param fitted_functions
  * @param fitted_peak_windows
  */
-void FitPeaks::fitSpectraPeaks(
+void FitPeaks::fitSpectrumPeaks(
     size_t wi, std::vector<double> &peak_pos,
     std::vector<std::vector<double>> &peak_params,
     std::vector<double> &peak_chi2_vec,
@@ -337,9 +346,6 @@ void FitPeaks::fitSpectraPeaks(
       lastPeakParameters[X0] = peak_center;
       lastPeakParameters[HEIGHT] = max_value;
     }
-
-    //    g_log.warning() << "[DB-TRACE] ipeak_faile = " << ipeak_fail << ", "
-    //                    << "real max = " << real_max << "\n";
 
     // call Fit to fit peak and background
     std::vector<double> fitted_params_values(7, 0.0);
@@ -477,29 +483,14 @@ double FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
   namess << "_param";
   std::string paramwsname = namess.str();
 
-  //  g_log.notice() << "[DB] wsindex " << wsindex << ", peak index " <<
-  //  peakindex
-  //                 << "\n";
-  //  g_log.notice() << "[DB] Init peak parameters values: ";
-  //  for (auto iter = init_peak_values.begin(); iter != init_peak_values.end();
-  //       ++iter)
-  //    g_log.notice() << *iter << ", ";
-  //  g_log.notice() << "\n[DB] Init background values: ";
-  //  for (auto iter = init_bkgd_values.begin(); iter != init_bkgd_values.end();
-  //       ++iter)
-  //    g_log.notice() << *iter << ", ";
-  //  g_log.notice() << "\n[DB] Fit window: " << fit_window[0] << ", "
-  //                 << fit_window[1] << "\n";
-  //  g_log.notice() << "[DB] Peak range: " << peak_range[0] << ", "
-  //                 << peak_range[1];
-  //  g_log.notice() << "... ... ||\n";
-
   fit_peak->setPropertyValue("InputWorkspace", m_inputWS->getName());
   fit_peak->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
   fit_peak->setPropertyValue("OutputWorkspace", outwsname);
   fit_peak->setPropertyValue("ParameterTableWorkspace", paramwsname);
-  fit_peak->setProperty("PeakFunctionType", "BackToBackExponential");
-  fit_peak->setProperty("PeakParameterNames", "I,A,B,X0,S");
+  // fit_peak->setProperty("PeakFunctionType", "BackToBackExponential");
+  fit_peak->setProperty("PeakFunctionType", mPeakProfile);
+  // TODO/FIXME - from here! fit_peak->setProperty("PeakParameterNames", );
+  // fit_peak->setProperty("PeakParameterNames", "I,A,B,X0,S");
   fit_peak->setProperty("PeakParameterValues", init_peak_values);
   fit_peak->setProperty("BackgroundParameterNames", "A0, A1");
   fit_peak->setProperty("BackgroundParameterValues", init_bkgd_values);
@@ -509,9 +500,6 @@ double FitPeaks::fitSinglePeak(size_t wsindex, size_t peakindex,
   fit_peak->setProperty("MaxGuessedPeakWidth", 20);
   fit_peak->setProperty("GuessedPeakWidthStep", 1);
   fit_peak->setProperty("PeakPositionTolerance", 0.02);
-
-  //  // Execute fit and get result of fitting background
-  //  // m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
 
   fit_peak->executeAsChildAlg();
 
