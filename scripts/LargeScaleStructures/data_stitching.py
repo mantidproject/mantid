@@ -563,6 +563,55 @@ class Stitcher(object):
         return ws_combined
 
 
+def _check_all_or_no_q_values(q_min, q_max):
+    if (q_min is None) != (q_max is None):
+        error_msg = "Both q_min and q_max parameters should be provided, not just one"
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+
+def _check_data_list(data_list, scale):
+    if not isinstance(data_list, list):
+        error_msg = "The data_list parameter should be a list"
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+    if len(data_list) < 2:
+        error_msg = "The data_list parameter should contain at least two data sets"
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+    if isinstance(scale, list) and len(scale) != len(data_list):
+        error_msg = "If the scale parameter is provided as a list, it should have the same length as data_list"
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+
+def _validate_q_value(q, n_data_sets, which_q):
+    if type(q) in [int, float]:
+        q = [q]
+
+    if not isinstance(q, list):
+        error_msg = "The q_{0} parameter must be a list".format(which_q)
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+    if len(q) != n_data_sets - 1:
+        error_msg = "The length of q_{0} must be 1 shorter than the length of data_list: q_{1}={2}".format(which_q,
+                                                                                                           which_q, q)
+        Logger("data_stitching").error(error_msg)
+        raise RuntimeError(error_msg)
+
+    for i in range(n_data_sets - 1):
+        try:
+            eq[i] = float(q[i])
+        except:
+            error_msg = "The Q range parameters are invalid: q_{0}={1}".format(which_q, q)
+            Logger("data_stitching").error(error_msg)
+            raise RuntimeError(error_msg)
+    return q
+
+
 def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
     """
@@ -576,65 +625,19 @@ def stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
 
     # Sanity check: q_min and q_max can either both be None or both be
     # of length N-1 where N is the length of data_list
-    if (q_min is not None and q_max is None) or \
-       (q_max is not None and q_min is None):
-        error_msg = "Both q_min and q_max parameters should be provided, not just one"
-        Logger("data_stitching").error(error_msg)
-        raise RuntimeError(error_msg)
-
-    if not isinstance(data_list, list):
-        error_msg = "The data_list parameter should be a list"
-        Logger("data_stitching").error(error_msg)
-        raise RuntimeError(error_msg)
+    _check_all_or_no_q_values(q_min, q_max)
+    _check_data_list(data_list, scale)
 
     n_data_sets = len(data_list)
-    if n_data_sets < 2:
-        error_msg = "The data_list parameter should contain at least two data sets"
-        Logger("data_stitching").error(error_msg)
-        raise RuntimeError(error_msg)
-
     # Check whether we just need to scale the data sets using the provided
     # scaling factors
-    has_scale_factors = False
-    if isinstance(scale, list):
-        if len(scale) == n_data_sets:
-            has_scale_factors = True
-        else:
-            error_msg = "If the scale parameter is provided as a list, it should have the same length as data_list"
-            Logger("data_stitching").error(error_msg)
-            raise RuntimeError(error_msg)
+    has_scale_factors = isinstance(scale, list) and len(scale) == n_data_sets
 
     is_q_range_limited = False
     if q_min is not None and q_max is not None:
         is_q_range_limited = True
-        if type(q_min) in [int, float]:
-            q_min = [q_min]
-        if type(q_max) in [int, float]:
-            q_max = [q_max]
-
-        if not isinstance(q_min, list) or not isinstance(q_max, list):
-            error_msg = "The q_min and q_max parameters must be lists"
-            Logger("data_stitching").error(error_msg)
-            raise RuntimeError(error_msg)
-
-        if not len(q_min) == n_data_sets-1:
-            error_msg = "The length of q_min must be 1 shorter than the length of data_list: q_min=%s" % str(q_min)
-            Logger("data_stitching").error(error_msg)
-            raise RuntimeError(error_msg)
-        if not len(q_max) == n_data_sets-1:
-            error_msg = "The length of q_max must be 1 shorter than the length of data_list: q_max=%s" % str(q_max)
-            Logger("data_stitching").error(error_msg)
-            raise RuntimeError(error_msg)
-
-        # Sanity check
-        for i in range(n_data_sets-1):
-            try:
-                q_min[i] = float(q_min[i])
-                q_max[i] = float(q_max[i])
-            except:
-                error_msg = "The Q range parameters are invalid: q_min=%s   q_max=%s" % (str(q_min), str(q_max))
-                Logger("data_stitching").error(error_msg)
-                raise RuntimeError(error_msg)
+        q_min = _validate_q_value(q_min, n_data_sets, "min")
+        q_max = _validate_q_value(q_max, n_data_sets, "max")
     else:
         q_min = (n_data_sets-1)*[None]
         q_max = (n_data_sets-1)*[None]
