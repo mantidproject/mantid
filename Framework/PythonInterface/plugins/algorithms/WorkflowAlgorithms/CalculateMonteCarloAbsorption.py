@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
-                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis)
+                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis, WorkspaceGroup)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
 
@@ -52,9 +52,26 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
     def summary(self):
-        return "Calculates indirect absorption corrections for a given sample shape."
+        return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
 
     def PyInit(self):
+        # Sample options
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
+                             doc='Sample Workspace')
+        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
+                             doc='Chemical formula for the sample material')
+        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
+                             validator=StringListValidator(['Mass Density', 'Number Density']),
+                             doc='Sample density type')
+        self.declareProperty(name='SampleDensity', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Sample density')
+
+        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
+        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
+        self.setPropertyGroup('SampleDensityType', 'Sample Options')
+        self.setPropertyGroup('SampleDensity', 'Sample Options')
+
         # Beam Options
         self.declareProperty(name='BeamHeight', defaultValue=1.0,
                              validator=FloatBoundedValidator(0.0),
@@ -81,23 +98,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
         self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
         self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
-
-        # Sample options
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
-                             doc='Sample Workspace')
-        self.declareProperty(name='SampleChemicalFormula', defaultValue='',
-                             doc='Chemical formula for the sample material')
-        self.declareProperty(name='SampleDensityType', defaultValue='Mass Density',
-                             validator=StringListValidator(['Mass Density', 'Number Density']),
-                             doc='Sample density type')
-        self.declareProperty(name='SampleDensity', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Sample density')
-
-        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
-        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
-        self.setPropertyGroup('SampleDensityType', 'Sample Options')
-        self.setPropertyGroup('SampleDensity', 'Sample Options')
 
         # Container options
         self.declareProperty(MatrixWorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
@@ -359,6 +359,22 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         # The beam properties and monte carlo properties are simply passed straight on to the
         # SimpleShapeMonteCarloAbsorptionCorrection algorithm so they are being put into
         # a dictionary for simplicity
+        sample_workspace = self.getProperty("SampleWorkspace").value
+        container_workspace = self.getProperty("ContainerWorkspace").value
+        sample_is_group = isinstance(sample_workspace, WorkspaceGroup)
+        container_is_group = isinstance(container_workspace, WorkspaceGroup)
+
+        if container_workspace and sample_is_group != container_is_group:
+            sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
+            container_type = "WorkspaceGroup" if container_is_group else "MatrixWorkspace"
+            raise RuntimeError("Mismatch between SampleWorkspace (" + sample_type + ") and"
+                               " ContainerWorkspace (" + container_type + ").")
+        elif sample_is_group and (container_is_group or not container_workspace):
+
+            if container_workspace and len(sample_workspace) != len(container_workspace):
+                raise RuntimeError("SampleWorkspace group and ContainerWorkspace group do not"
+                                   " have the same number of workspaces.")
+            return
 
         self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
                                 'BeamWidth': self.getProperty('BeamWidth').value,
@@ -366,8 +382,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                                 'EventsPerPoint': self.getProperty('EventsPerPoint').value,
                                 'Interpolation': self.getProperty('Interpolation').value}
 
-        self._sample_ws = self.getProperty("SampleWorkspace").value
-        self._container_ws = self.getProperty('ContainerWorkspace').value
+        self._sample_ws = sample_workspace
+        self._container_ws = container_workspace
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
 
@@ -415,7 +431,8 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         output_ws_name = self.getPropertyValue('CorrectionsWorkspace')
         self._ass_ws_name = output_ws_name + "_ass"
         self._acc_ws_name = output_ws_name + "_acc"
-        self._indirect_q_axis = None
+        self._transposed = False
+        self._indirect_elastic = False
 
     def validateInputs(self):
         issues = dict()
@@ -468,67 +485,62 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Converting to/from wavelength -------------------------------
 
     def _convert_to_wavelength(self, workspace):
+        """
+        Converts the specified workspace to units of wavelength.
 
-        if self._sample_unit == 'Wavelength':
+        :param workspace:   The workspace to convert.
+        :return:
+        """
+
+        x_unit = workspace.getAxis(0).getUnit().unitID()
+        y_unit = workspace.getAxis(1).getUnit().unitID()
+
+        # ----- Quick Conversions (Wavelength and DeltaE) -----
+
+        if x_unit == 'Wavelength':
             return self._clone_ws(workspace)
-        else:
-            convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=True)
+        elif y_unit == 'Wavelength':
+            self._transposed = True
+            return self._tranpose_ws(workspace)
+        elif x_unit == 'DeltaE':
+            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
+        elif y_unit == 'DeltaE':
+            self._transposed = True
+            workspace = self._tranpose_ws(workspace)
+            return self._convert_units(workspace, "Wavelength", self._emode, self._efixed)
 
-            if self._emode == 'Indirect':
-                x_unit = workspace.getAxis(0).getUnit().unitID()
-                y_unit = workspace.getAxis(1).getUnit().unitID()
+        # ----- Indirect Elastic Conversions -----
 
-                # Check whether to create wavelength workspace for Indirect Elastic
-                if (x_unit == 'MomentumTransfer' and not y_unit == 'EnergyTransfer') \
-                        or (y_unit == 'MomentumTransfer' and not x_unit == 'EnergyTransfer'):
-                    self._indirect_q_axis = 'Y'
+        if self._emode == "Indirect":
 
-                    if x_unit == 'MomentumTransfer':
-                        self._indirect_q_axis = 'X'
-                        logger.information('X-Axis of the input workspace is Q')
-                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-                        transpose_alg.setProperty("InputWorkspace", workspace)
-                        transpose_alg.execute()
-                        workspace = transpose_alg.getProperty("OutputWorkspace").value
-                    return self._create_waves_indirect_elastic(workspace)
-                else:
-                    convert_unit_alg.setProperty("EFixed", self._efixed)
+            if x_unit == 'MomentumTransfer':
+                self._transposed = True
+                return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
+            else:
+                return self._create_waves_indirect_elastic(workspace)
 
-            convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("Target", 'Wavelength')
-            convert_unit_alg.setProperty("EMode", self._emode)
+        # ----- Direct Conversions -----
 
-            convert_unit_alg.execute()
-
-            return convert_unit_alg.getProperty("OutputWorkspace").value
+        return self._convert_units(workspace, "Wavelength", self._emode)
 
     def _convert_from_wavelength(self, workspace):
+        """
+        Converts the specified workspace into units of wavelength.
 
-        convert_unit_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
-        convert_unit_alg.setProperty("Target", self._sample_unit)
+        :param workspace:   The workspace whose units to convert.
+        :return:            A workspace with units of wavelength, created from
+                            converting the specified workspace.
+        """
 
-        if self._sample_unit != 'Wavelength':
+        if self._transposed:
+            workspace = self._tranpose_ws(workspace)
 
-            if self._emode == 'Indirect':
-
-                if self._indirect_q_axis is not None:
-
-                    if self._indirect_q_axis == 'X':
-                        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
-                        transpose_alg.setProperty("InputWorkspace", workspace)
-                        transpose_alg.execute()
-                        workspace = transpose_alg.getProperty("OutputWorkspace").value
-                        workspace.setX(0, self._q_values)
-                        workspace.getAxis(0).setUnit("MomentumTransfer")
-                        return workspace
-                    convert_unit_alg.setProperty("Target", "MomentumTransfer")
-                convert_unit_alg.setProperty("EFixed", self._efixed)
-
-            convert_unit_alg.setProperty("InputWorkspace", workspace)
-            convert_unit_alg.setProperty("EMode", self._emode)
-            convert_unit_alg.execute()
-            return convert_unit_alg.getProperty("OutputWorkspace").value
-
+        if self._indirect_elastic:
+            return self._convert_units(workspace, "MomentumTransfer", self._emode, self._efixed)
+        elif self._emode == "Indirect":
+            return self._convert_units(workspace, self._sample_unit, self._emode, self._efixed)
+        elif self._sample_unit != 'Wavelength':
+            return self._convert_units(workspace, self._sample_unit, self._emode)
         else:
             return workspace
 
@@ -543,20 +555,26 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         :param workspace:   The input workspace.
         :return:            The output wavelength workspace.
         """
+        self._indirect_elastic = True
         self._q_values = workspace.getAxis(1).extractValues()
+        instrument_name = workspace.getInstrument().getName()
+        isis_instrument = instrument_name == "IRIS" or instrument_name == "OSIRIS"
 
         # ---------- Load Elastic Instrument Definition File ----------
 
-        idf_name = workspace.getInstrument().getName() + '_elastic_Definition.xml'
+        if isis_instrument:
+            idf_name = instrument_name + '_elastic_Definition.xml'
 
-        idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
-        logger.information('IDF = %s' % idf_path)
+            idf_path = os.path.join(config.getInstrumentDirectory(), idf_name)
+            logger.information('IDF = %s' % idf_path)
 
-        load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=True)
-        load_alg.setProperty("Workspace", workspace)
-        load_alg.setProperty("Filename", idf_path)
-        load_alg.setProperty("RewriteSpectraMap", True)
-        load_alg.execute()
+            load_alg = self.createChildAlgorithm("LoadInstrument", enableLogging=True)
+            load_alg.setProperty("Workspace", workspace)
+            load_alg.setProperty("Filename", idf_path)
+            load_alg.setProperty("RewriteSpectraMap", True)
+            load_alg.execute()
+
+        # ---------- Create Spectra Axis -----------
 
         # Replace y-axis with spectra axis
         workspace.replaceAxis(1, SpectraAxis.create(workspace))
@@ -593,11 +611,22 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         nhist = workspace.getNumberHistograms()
         for idx in range(nhist):
             workspace.setX(idx, waves)
-        self._change_angles(workspace, self._q_values, wave)
+
+        if isis_instrument:
+            self._update_instrument_angles(workspace, self._q_values, wave)
 
         return workspace
 
-    def _change_angles(self, workspace, q_values, wave):
+    def _update_instrument_angles(self, workspace, q_values, wave):
+        """
+        Updates the instrument angles in the specified workspace, using the specified wavelength
+        and the specified Q-Values. This is required when calculating absorption corrections for
+        indirect elastic.
+
+        :param workspace:   The workspace whose instrument angles to update.
+        :param q_values:    The extracted Q-Values (MomentumTransfer)
+        :param wave:        The wavelength
+        """
         work_dir = config['defaultsave.directory']
         k0 = 4.0 * math.pi / wave
         theta = 2.0 * np.degrees(np.arcsin(q_values / k0))  # convert to angle
@@ -621,6 +650,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         update_alg.setProperty("SkipFirstNLines", 1)
 
     def _crop_ws(self, workspace):
+        """
+        Crops the specified workspace to the XMin and XMax values specified in
+        it's first and last X-Values.
+
+        :param workspace:   The workspace to crop.
+        :return:            The cropped workspace.
+        """
         x = workspace.dataX(0)
         xmin = x[0]
         xmax = x[1]
@@ -634,33 +670,121 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     # ------------------------------- Child algorithms -------------------------------
 
     def _clone_ws(self, input_ws):
+        """
+        Clones the specified input workspace.
+
+        :param input_ws:    The workspace to clone.
+        :return:            A clone of the specified workspace.
+        """
         clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
         clone_alg.setProperty("InputWorkspace", input_ws)
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
     def _multiply(self, lhs_ws, rhs_ws):
+        """
+        Multiplies the specified workspaces together.
+
+        :param lhs_ws:  The left hand workspace multiplicand.
+        :param rhs_ws:  The right hand workspace multiplicand.
+        :return:        The product of the specified workspaces.
+        """
         multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
         multiply_alg.setProperty("LHSWorkspace", lhs_ws)
         multiply_alg.setProperty("RHSWorkspace", rhs_ws)
         multiply_alg.execute()
         return multiply_alg.getProperty('OutputWorkspace').value
 
-    def _group_ws(self, input_ws):
+    def _group_ws(self, workspaces):
+        """
+        Groups the specified input workspaces.
+
+        :param input_ws:    A list of the workspaces to group together.
+        :return:            A WorkspaceGroup containing the specified workspaces.
+        """
         group_alg = self.createChildAlgorithm("GroupWorkspaces", enableLogging=False)
-        group_alg.setProperty("InputWorkspaces", input_ws)
+        group_alg.setProperty("InputWorkspaces", workspaces)
         group_alg.execute()
         return group_alg.getProperty("OutputWorkspace").value
 
     def _add_sample_log_multiple(self, input_ws, log_names, log_values):
+        """
+        Adds sample logs to the specified input workspace using the specified
+        log names and values.
+
+        :param input_ws:    The workspace to add sample logs to.
+        :param log_names:   The names of each sample log to add (ordered).
+        :param log_values:  The values of each sample log to add (ordered).
+        """
         sample_log_mult_alg = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
         sample_log_mult_alg.setProperty("Workspace", input_ws)
         sample_log_mult_alg.setProperty("LogNames", log_names)
         sample_log_mult_alg.setProperty("LogValues", log_values)
         sample_log_mult_alg.execute()
 
+    def _convert_units(self, workspace, target_unit, emode, efixed=None):
+        """
+        Converts the units of the specified workspace to the target unit, given
+        the specified EMode, and potentially EFixed value.
+
+        :param workspace:   The workspace whose units to convert.
+        :param target_unit: The unit to convert to.
+        :param emode:       The EMode to use in conversion.
+        :param efixed:      The EFixed value to use in conversion.
+        :return:            A workspace created from converting the units of the
+                            specified workspace to the specified target unit.
+        """
+        convert_units_alg = self.createChildAlgorithm("ConvertUnits", enableLogging=False)
+        convert_units_alg.setProperty("InputWorkspace", workspace)
+        convert_units_alg.setProperty("Target", target_unit)
+        convert_units_alg.setProperty("EMode", emode)
+        # Check if EFixed was defined
+        if efixed is not None:
+            convert_units_alg.setProperty("EFixed", efixed)
+        convert_units_alg.execute()
+        return convert_units_alg.getProperty("OutputWorkspace").value
+
+    def _convert_spectra_axis(self, workspace, target, emode, efixed):
+        """
+        Convert the units of the spectra axis of the specified workspace to the
+        specified target unit, given the specified EMode and EFixed value.
+
+        :param workspace:   The workspace whose spectra axis to convert.
+        :param target:      The target unit to convert to.
+        :param emode:       The EMode to use in conversion.
+        :param efixed:      The EFixed value to use in conversion.
+        :return:            A workspace created from converting the units of the
+                            spectra axis of the specified workspace to the specified
+                            target unit.
+        """
+        convert_axis_alg = self.createChildAlgorithm("ConvertSpectraAxis", enableLogging=False)
+        convert_axis_alg.setProperty("InputWorkspace", workspace)
+        convert_axis_alg.setProperty("EMode", emode)
+        convert_axis_alg.setProperty("Target", target)
+        convert_axis_alg.setProperty("EFixed", efixed)
+        convert_axis_alg.execute()
+        return convert_axis_alg.getProperty("OutputWorkspace").value
+
+    def _tranpose_ws(self, workspace):
+        """
+        Tranposes the specified workspace.
+
+        :param workspace:   The workspace to transpose.
+        :return:            The transpose of the specified workspace.
+        """
+        transpose_alg = self.createChildAlgorithm("Transpose", enableLogging=False)
+        transpose_alg.setProperty("InputWorkspace", workspace)
+        transpose_alg.execute()
+        return transpose_alg.getProperty("OutputWorkspace").value
+
     # ------------------------------- Utility algorithms -------------------------------
     def _set_algorithm_properties(self, algorithm, properties):
+        """
+        Sets the specified algorithm's properties using the given properties.
+
+        :param algorithm:   The algorithm whose properties to set.
+        :param properties:  The dictionary of properties to set.
+        """
 
         for key, value in properties.items():
             algorithm.setProperty(key, value)

@@ -12,7 +12,11 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     def setUp(self):
         red_ws = Load('irs26176_graphite002_red.nxs')
+        container_ws = Load('irs26173_graphite002_red.nxs')
+        indirect_elastic_ws = Load('osi104367_elf.nxs')
         self._red_ws = red_ws
+        self._container_ws = container_ws
+        self._indirect_elastic_ws = indirect_elastic_ws
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
         self._expected_blocksize = 1905
@@ -24,6 +28,11 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
                            'BeamHeight': 3.5,
                            'BeamWidth': 4.0,
                            'Height': 2.0 }
+
+        self._container_args = {'ContainerWorkspace':self._container_ws,
+                                'ContainerChemicalFormula':'Al',
+                                'ContainerDensityType':'Mass Density',
+                                'ContainerDensity':1.0 }
         self._test_arguments = dict()
 
     def tearDown(self):
@@ -34,23 +43,11 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         if self._indirect_elastic_ws is not None:
             DeleteWorkspace(self._indirect_elastic_ws)
 
-    def _setup_container(self):
-        container_ws = Load('irs26173_graphite002_red.nxs')
-        self._container_ws = container_ws
-
-        container_args = {'ContainerWorkspace':self._container_ws,
-                          'ContainerChemicalFormula':'Al',
-                          'ContainerDensityType':'Mass Density',
-                          'ContainerDensity':1.0 }
-        self._arguments.update(container_args)
-
     def _setup_flat_plate_container(self):
-        self._setup_container()
         self._test_arguments['ContainerFrontThickness'] = 1.5
         self._test_arguments['ContainerBackThickness'] = 1.5
 
     def _setup_annulus_container(self):
-        self._setup_container()
         self._test_arguments['ContainerInnerRadius'] = 1.0
         self._test_arguments['ContainerOuterRadius'] = 2.0
 
@@ -73,15 +70,20 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         for workspace in workspaces:
             self._test_corrections_workspace(workspace)
 
-    def _run_correction_and_test(self, shape):
+    def _run_correction_and_test(self, shape, sample_ws=None):
+
+        if sample_ws is None:
+            sample_ws = self._red_ws
+
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = CalculateMonteCarloAbsorption(SampleWorkspace=self._red_ws,
+        corrected = CalculateMonteCarloAbsorption(SampleWorkspace=sample_ws,
                                                   Shape=shape,
                                                   **arguments)
         self._test_corrections_workspaces(corrected)
 
     def _run_correction_with_container_test(self, shape):
+        self._test_arguments.update(self._container_args)
 
         if shape == 'FlatPlate':
             self._setup_flat_plate_container()
@@ -91,12 +93,10 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         self._run_correction_and_test(shape)
 
     def _run_indirect_elastic_test(self, shape):
-        red_ws = Load('osi104367_elf.nxs')
-        self._red_ws = red_ws
         self._expected_unit = "MomentumTransfer"
         self._expected_hist = 17
         self._expected_blocksize = 1
-        self._run_correction_and_test(shape)
+        self._run_correction_and_test(shape, self._indirect_elastic_ws)
 
     def _flat_plate_test(self, test_func):
         self._test_arguments['SampleWidth'] = 2.0
@@ -104,7 +104,6 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
         test_func('FlatPlate')
 
     def _annulus_test(self, test_func):
-        self._test_arguments.clear()
         self._test_arguments['SampleInnerRadius'] = 1.2
         self._test_arguments['SampleOuterRadius'] = 1.8
         test_func('Annulus')
