@@ -83,8 +83,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Rebin parameters.')
 
         self.declareProperty(name='GroupingPolicy', defaultValue='All',
-                             validator=StringListValidator(['All', 'Individual', 'IPF']),
+                             validator=StringListValidator(['All', 'Individual', 'Workspace', 'IPF']),
                              doc='Selects the type of detector grouping to be used.')
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
+                             doc='Workspace containing spectra grouping.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -263,8 +267,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
                 # Group spectra
                 group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method)
+                              masked_detectors=masked_detectors,
+                              method=self._grouping_method,
+                              group_ws=self._grouping_workspace)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -307,6 +312,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._spectra_range = self.getProperty('SpectraRange').value
         self._rebin_string = self.getPropertyValue('RebinParam')
         self._grouping_method = self.getPropertyValue('GroupingPolicy')
+        grouping_ws_name = self.getPropertyValue("GroupingWorkspace")
+        self._grouping_workspace = mtd[grouping_ws_name] if grouping_ws_name else None
 
         if self._rebin_string == '':
             self._rebin_string = None

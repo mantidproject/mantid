@@ -2193,6 +2193,7 @@ void MuonAnalysis::handleGroupBox() {
     updateLabels(names[0]);
   }
   m_fitDataPresenter->handleSelectedDataChanged(true);
+  m_dataSelector->checkForMultiGroupPeriodSelection();
 }
 /**
 * Handle"periods" selected/deselected

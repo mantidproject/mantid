@@ -38,6 +38,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
         # Hook up signal and slots
         self.connect_signals()
         self._masking_tab_listeners = []
+        self.masking_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
     def add_listener(self, listener):
         if not isinstance(listener, MaskingTable.MaskingTableListener):

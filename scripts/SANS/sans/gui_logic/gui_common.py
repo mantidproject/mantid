@@ -1,5 +1,6 @@
 from sans.common.enums import SANSInstrument, ISISReductionMode
-
+from PyQt4 import QtGui, QtCore
+import os
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Option column globals
@@ -34,10 +35,16 @@ LOQ_HAB = "Hab"
 
 LARMOR_LAB = "DetectorBench"
 
+ZOOM_LAB = "rear-detector"
+
 DEFAULT_LAB = ISISReductionMode.to_string(ISISReductionMode.LAB)
 DEFAULT_HAB = ISISReductionMode.to_string(ISISReductionMode.HAB)
 MERGED = "Merged"
 ALL = "All"
+
+GENERIC_SETTINGS = "Mantid/ISISSANS"
+
+JSON_SUFFIX = ".json"
 
 
 def get_reduction_mode_strings_for_gui(instrument=None):
@@ -47,6 +54,8 @@ def get_reduction_mode_strings_for_gui(instrument=None):
         return [LOQ_LAB, LOQ_HAB, MERGED, ALL]
     elif instrument is SANSInstrument.LARMOR:
         return [LARMOR_LAB]
+    elif instrument is SANSInstrument.ZOOM:
+        return [ZOOM_LAB]
     else:
         return [DEFAULT_LAB, DEFAULT_HAB, MERGED, ALL]
 
@@ -62,6 +71,8 @@ def get_reduction_selection(instrument):
                           ISISReductionMode.HAB: LOQ_HAB})
     elif instrument is SANSInstrument.LARMOR:
         selection = {ISISReductionMode.LAB: LARMOR_LAB}
+    elif instrument is SANSInstrument.ZOOM:
+        selection = {ISISReductionMode.LAB: ZOOM_LAB}
     else:
         selection.update({ISISReductionMode.LAB: DEFAULT_LAB,
                           ISISReductionMode.HAB: DEFAULT_HAB})
@@ -81,9 +92,34 @@ def get_reduction_mode_from_gui_selection(gui_selection):
         return ISISReductionMode.Merged
     elif gui_selection == ALL:
         return ISISReductionMode.All
-    elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or gui_selection == LARMOR_LAB or gui_selection == DEFAULT_LAB:  # noqa
+    elif gui_selection == SANS2D_LAB or gui_selection == LOQ_LAB or gui_selection == LARMOR_LAB or gui_selection == ZOOM_LAB or gui_selection == DEFAULT_LAB:  # noqa
         return ISISReductionMode.LAB
     elif gui_selection == SANS2D_HAB or gui_selection == LOQ_HAB:
         return ISISReductionMode.HAB
     else:
         raise RuntimeError("Reduction mode selection is not valid.")
+
+
+def load_file(line_edit_field, filter_for_dialog, q_settings_group_key, q_settings_key, func):
+    # Get the last location of the user file
+    settings = QtCore.QSettings()
+    settings.beginGroup(q_settings_group_key)
+    last_path = settings.value(q_settings_key, "", type=str)
+    settings.endGroup()
+
+    # Open the dialog
+    open_file_dialog(line_edit_field, filter_for_dialog, last_path)
+
+    # Save the new location
+    new_path, _ = os.path.split(func())
+    if new_path:
+        settings = QtCore.QSettings()
+        settings.beginGroup(q_settings_group_key)
+        settings.setValue(q_settings_key, new_path)
+        settings.endGroup()
+
+
+def open_file_dialog(line_edit, filter_text, directory):
+    file_name = QtGui.QFileDialog.getOpenFileName(None, 'Open', directory, filter_text)
+    if file_name:
+        line_edit.setText(file_name)

@@ -628,15 +628,17 @@ void ReflectometryReductionOne::exec() {
     momentumTransferMaximum = calculateQ(IvsLam->x(0).front(), theta.get());
   if (isDefault("MomentumTransferStep")) {
     // if the DQQ is not given for this run.
-    // we will use CalculateResoltion to produce this value
+    // we will use NRCalculateSlitResolution to produce this value
     // for us.
-    IAlgorithm_sptr calcResAlg = createChildAlgorithm("CalculateResolution");
+    IAlgorithm_sptr calcResAlg =
+        createChildAlgorithm("NRCalculateSlitResolution");
     calcResAlg->setProperty("Workspace", runWS);
     calcResAlg->setProperty("TwoTheta", theta.get());
     calcResAlg->execute();
     if (!calcResAlg->isExecuted())
-      throw std::runtime_error("CalculateResolution failed. Please manually "
-                               "enter a value for MomentumTransferStep.");
+      throw std::runtime_error(
+          "NRCalculateSlitResolution failed. Please manually "
+          "enter a value for MomentumTransferStep.");
     momentumTransferStep = calcResAlg->getProperty("Resolution");
   }
   if (momentumTransferMinimum > momentumTransferMaximum)
