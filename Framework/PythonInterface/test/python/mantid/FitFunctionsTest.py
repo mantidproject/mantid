@@ -402,21 +402,21 @@ class FitFunctionsTest(unittest.TestCase):
         
         self.assertTrue( isinstance( c, CompositeFunctionWrapper) )
         c_str = str(c)
-        # self.assertEqual(c_str.count("("),0)
+        self.assertEqual(c_str.count("("),0)
         self.assertEqual(c_str.count("LinearBackground"),1)
         self.assertEqual(c_str.count("Gaussian"),2)
         
-        #lb_str = str(lb)
-        #c0_str = str(c[0])
-        #self.assertEqual(c0_str, lb_str)
+        lb_str = str(lb)
+        c0_str = str(c[0])
+        self.assertEqual(c0_str, lb_str)
            
-        #g0_str = str(g0)
-        #c1_str = str(c[1])
-        #self.assertEqual(c1_str, g0_str)
+        g0_str = str(g0)
+        c1_str = str(c[1])
+        self.assertEqual(c1_str, g0_str)
         
-        #g1_str = str(g1)
-        #c2_str = str(c[2])
-        #self.assertEqual(c2_str, g1_str)
+        g1_str = str(g1)
+        c2_str = str(c[2])
+        self.assertEqual(c2_str, g1_str)
         
     def test_incremental_add(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
@@ -527,7 +527,7 @@ class FitFunctionsTest(unittest.TestCase):
         s = lb + g
         self.assertTrue( isinstance( s, CompositeFunctionWrapper) )
     
-    def test_evaluation(self):
+    def test_direct_evaluation(self):
         l0 = FunctionWrapper( "LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper( "LinearBackground", A0=5, A1=-1)
 
@@ -574,8 +574,54 @@ class FitFunctionsTest(unittest.TestCase):
         s2ws = EvaluateFunction(s2,"ws", OutputWorkspace='out')
         s2vals = s2ws.readY(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
-
         
+    def test_evaluation_by_single_value(self):
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        self.assertAlmostEqual(p(0),1.0)
+        self.assertAlmostEqual(p(1),5.0)
+        self.assertAlmostEqual(p(2),31.0)
+        
+    def test_evaluation_by_list_of_values(self):
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p([0,1,3]) 
+        self.assertAlmostEqual(result[0],1.0)
+        self.assertAlmostEqual(result[1],5.0)
+        self.assertAlmostEqual(result[2],121.0)   
+
+    def test_evaluation_by_workspace(self):    
+        ws = CreateWorkspace(DataX=[0,1,2,3], DataY=[5,5,5])
+        sq = Polynomial(n=2, A0=0, A1=0, A2=1)
+        outWs = sq(ws)
+        sqvals = outWs.readY(1) 
+        self.assertAlmostEqual(sqvals[0], 0.25)
+        self.assertAlmostEqual(sqvals[1], 2.25)
+        self.assertAlmostEqual(sqvals[2], 6.25) 
+
+    def test_evaluation_by_1D_numpy_array(self):
+        import numpy as np
+        a = np.array([0, 1, 3])
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p(a)
+        self.assertAlmostEqual(result[0],1.0)
+        self.assertAlmostEqual(result[1],5.0)
+        self.assertAlmostEqual(result[2],121.0) 
+
+    def test_evaluation_by_2D_numpy_array(self):
+        import numpy as np
+        a = np.array([[0, 1],[2, 3]])
+        p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+        result = p(a)
+        self.assertAlmostEqual(result[0][0],1.0)
+        self.assertAlmostEqual(result[0][1],5.0)
+        self.assertAlmostEqual(result[1][0],31.0)
+        self.assertAlmostEqual(result[1][1],121.0)  
+
+    def test_evaluation_with_parameters_set(self):
+        p = Polynomial(n=2)
+        result = p([0,1,2],0.0,0.5,0.5)   
+        self.assertAlmostEqual(result[0],0.0)
+        self.assertAlmostEqual(result[1],1.0)
+        self.assertAlmostEqual(result[2],3.0)         
        
 if __name__ == '__main__':
     unittest.main()

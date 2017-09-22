@@ -35,7 +35,6 @@
 #include <Poco/Message.h>
 #include <Poco/StringTokenizer.h>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -2139,7 +2138,7 @@ bool SANSRunWindow::handleLoadButtonClick() {
       // Populate the sample geometry fields, but replace any zero values with
       // 1.0, and
       // warn the user where this has occured.
-      BOOST_FOREACH (auto info, sampleInfoList) {
+      for (auto info : sampleInfoList) {
         const auto value = info.get<1>()(&sample);
         if (value == 0.0)
           g_log.warning("The sample geometry " + info.get<2>() +
@@ -2785,7 +2784,7 @@ void SANSRunWindow::handleRunFindCentre() {
   } else {
     coordinates_python_code =
         "print(i.ReductionSingleton().get_beam_center('front')[0]);print("
-        "i.ReductionSingleton().get_beam_center('front')[1]";
+        "i.ReductionSingleton().get_beam_center('front')[1])";
     m_uiForm.detbank_sel->setCurrentIndex(
         1); // FRONT selected -> detbank_sel <- FRONT
     beam_x = m_uiForm.front_beam_x;

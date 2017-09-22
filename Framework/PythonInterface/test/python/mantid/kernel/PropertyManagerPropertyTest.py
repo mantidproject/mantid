@@ -87,9 +87,28 @@ class PropertyManagerPropertyTest(unittest.TestCase):
             has_raised = True
         self.assertTrue(has_raised)
 
+    def test_create_with_dictionary_as_default_value(self):
+        default = { 'A' : {}, 'B' : 1 }
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", default)
+        prop = fake.getProperty("Args").value
+        self._check_values(prop, **default)
+
     def _check_object_attributes(self, prop, name, direction):
         self.assertEquals(prop.name, name)
         self.assertEquals(prop.direction, direction)
+
+    def _check_values(self, prop, **kwargs):
+
+        for key, value in kwargs.items():
+            propValue = prop.getProperty(key).value
+
+            if(isinstance(propValue, PropertyManager)):
+                self.assertTrue(isinstance(value, dict))
+                self._check_values(propValue, **value)
+            else:
+                self.assertEqual(propValue, value)
 
 if __name__ == "__main__":
     unittest.main()
