@@ -1235,16 +1235,9 @@ void ConvFit::updateParameters(int specNo) {
   // Check parameter table workspace has been created
   if (!m_paramWs)
     return;
-
+  
   size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
-
-  std::vector<std::string> columnNames = m_paramWs->getColumnNames();
-  QMap<QString, double> parameters;
-
-  for (size_t column = 0; column < columnNames.size(); ++column) {
-    double value = m_paramWs->Double(row, column);
-    parameters.insert(QString::fromStdString(columnNames[column]), value);
-  }
+  QMap<QString, double> parameters = IndirectTab::extractRowFromTable(m_paramWs, row);
 
   QString functionName = m_uiForm.cbFitType->currentText();
 
@@ -1314,7 +1307,7 @@ void ConvFit::updateParameters(int specNo) {
       functionName = "Lorentzian 1";
     }
 
-    IndirectTab::updateParameters(functionName, pref, params, parameters);
+    IndirectTab::updateParameters(functionName, pref, params, parameters, 0, 0);
   }
 }
 

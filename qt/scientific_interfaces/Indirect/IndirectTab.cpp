@@ -472,6 +472,27 @@ void IndirectTab::updateParameters(const QString &functionName,
   }
 }
 
+/*
+ * Extracts the row at the specified index in the specified table workspace, as a map
+ * from the column name to the value in that column in the extracted row.
+ *
+ * @param tableWs The table workspace to extract a row from.
+ * @param wsIndex The index of the row to extract.
+ * @return        A map from the name of a column to the value in that column in the
+ *                extracted row.
+ */
+QMap<QString, double> IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs, size_t wsIndex) {
+  std::vector<std::string> columnNames = tableWs->getColumnNames();
+  QMap<QString, double> parameters;
+
+  for (size_t column = 0; column < columnNames.size(); ++column) {
+    double value = tableWs->Double(wsIndex, column);
+    parameters.insert(QString::fromStdString(columnNames[column]), value);
+  }
+
+  return parameters;
+}
+
 /**
  * Sets the edge bounds of plot to prevent the user inputting invalid values
  * Also sets limits for range selector movement
