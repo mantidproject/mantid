@@ -687,7 +687,7 @@ std::map<std::string, std::string> IqtFit::createParameterToPropertyMap(const st
   int functionNumber = 1;
 
   for (auto &functionName : functionNames) {
-    std::string prefix = "f." + std::to_string(functionNumber);
+    std::string prefix = "f" + std::to_string(functionNumber) + ".";
     extendParameterToPropertyMap(functionName, prefix, parameterToProperty);
   }
 
