@@ -511,7 +511,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         folder_names = []
-        dft_group = AbinsModules.AbinsParameters.dft_group
+        dft_group = AbinsModules.AbinsParameters.ab_initio_group
         if not isinstance(dft_group, str) or dft_group == "":
             raise RuntimeError("Invalid name for folder in which the DFT data should be stored.")
         folder_names.append(dft_group)

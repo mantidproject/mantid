@@ -30,7 +30,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.tosca_a = 0.0000001
         AbinsParameters.tosca_b = 0.005
         AbinsParameters.tosca_c = 2.5
-        AbinsParameters.dft_group = "PhononAB"
+        AbinsParameters.ab_initio_group = "PhononAB"
         AbinsParameters.powder_data_group = "Powder"
         AbinsParameters.crystal_data_group = "Crystal"
         AbinsParameters.s_data_group = "S"
@@ -119,11 +119,11 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
     # tests for folders
     def test_wrong_dft_group(self):
         # name should be of type str
-        AbinsParameters.dft_group = 2
+        AbinsParameters.ab_initio_group = 2
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
         # name of group cannot be an empty string
-        AbinsParameters.dft_group = ""
+        AbinsParameters.ab_initio_group = ""
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
     def test_wrong_powder_data_group(self):
@@ -155,7 +155,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
 
     def test_doubled_name(self):
         # Wrong scenario: two groups with the same name
-        AbinsParameters.dft_group = "NiceName"
+        AbinsParameters.ab_initio_group = "NiceName"
         AbinsParameters.powder_data_group = "NiceName"
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 

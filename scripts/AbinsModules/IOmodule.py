@@ -81,7 +81,7 @@ class IOmodule(object):
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
         return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
 
-    def get_previous_dft_program(self):
+    def get_previous_ab_initio_program(self):
         """
         :returns: name of DFT program which  was used in the previous calculation.
         """

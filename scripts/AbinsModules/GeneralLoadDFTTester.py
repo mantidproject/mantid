@@ -150,7 +150,7 @@ class GeneralLoadDFTTester(object):
         :param dft_reader: object of type  GeneralDFTProgram
         :returns: read data
         """
-        abins_type_data = dft_reader.read_phonon_file()
+        abins_type_data = dft_reader.read_vibrational_data_file()
         data = {"datasets": abins_type_data.extract(),
                 "attributes": dft_reader._clerk._attributes
                 }
