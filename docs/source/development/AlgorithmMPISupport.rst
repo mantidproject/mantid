@@ -455,7 +455,7 @@ Supported Algorithms
 Algorithm         Supported modes Comments
 ================= =============== ========
 CreateWorkspace   all
-LoadEventNexus    Distributed     storage mode of output cannot be changed via a parameter currently
+LoadEventNexus    Distributed     storage mode of output cannot be changed via a parameter currently, min and max bin boundary are not globally the same
 LoadInstrument    all
 LoadNexusLogs     all
 LoadParameterFile all
