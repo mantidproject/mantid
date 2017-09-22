@@ -1087,6 +1087,8 @@ void LoadEventNexus::createSpectraMapping(
       getProperty("SpectrumMax"), getProperty("SpectrumList"));
   if (!monitorsOnly && !bankNames.empty()) {
     m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
+    g_log.notice()
+        << "Selecting banks will ignore spectrum min/max/list selection\n";
     g_log.debug() << "Populated spectra map for select banks\n";
   } else if (auto mapping = loadISISVMSSpectraMapping(m_top_entry_name)) {
     if (monitorsOnly) {
