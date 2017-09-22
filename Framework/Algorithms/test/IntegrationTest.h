@@ -21,7 +21,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
-using Mantid::MantidVec;
 using Mantid::specnum_t;
 
 class IntegrationTest : public CxxTest::TestSuite {
@@ -849,9 +848,9 @@ private:
     const double yy[3] = {52., 74., 96.};
     const double ee[3] = {6.899, 8.240, 9.391};
     for (size_t i = 0; i < max; ++i) {
-      Mantid::MantidVec &x = output2D->x(i);
-      Mantid::MantidVec &y = output2D->y(i);
-      Mantid::MantidVec &e = output2D->e(i);
+      auto &x = output2D->x(i);
+      auto &y = output2D->y(i);
+      auto &e = output2D->e(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);
