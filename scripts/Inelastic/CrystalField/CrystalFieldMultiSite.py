@@ -132,7 +132,6 @@ class CrystalFieldMultiSite(object):
         self.function = FunctionFactory.createFunction('CrystalFieldFunction')
 
     def getParameter(self, param):
-        print self.function.numParams()
         self.function.getParameterValue(param)
 
     def getSpectrum(self, workspace, i=0, ws_index=None):
