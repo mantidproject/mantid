@@ -52,6 +52,7 @@ private slots:
   void plotWorkspace();
   void saveResult();
   void plotCurrentPreview();
+  void updateProperties(int specNo);
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -70,7 +71,6 @@ private:
                                 const size_t &specMax);
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
                                                const size_t &specMax);
-  void updateProperties(int specNo);
   void readParametersFromTable(std::string const& tableWsName);
   void updateFitFunctions();
   void plotResult(const std::string& groupName, const size_t &specNo);
