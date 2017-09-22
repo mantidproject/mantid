@@ -203,20 +203,6 @@ void Integration::exec() {
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
     if (incPartBins) {
-<<<<<<< HEAD
-      outSpec.mutableX()[0] = minRange;
-      outSpec.mutableX()[1] = maxRange;
-    }
-
-    // Find the range [min,max]
-    auto lowit = X.begin(), highit = X.end();
-    if (minRange != EMPTY_DBL()) {
-      lowit = std::lower_bound(X.begin(), X.end(), minRange, tolerant_less());
-    }
-
-    if (maxRange != EMPTY_DBL()) {
-      highit = std::upper_bound(lowit, X.end(), maxRange, tolerant_less());
-=======
       outSpec.dataX()[0] = lowerLimit;
       outSpec.dataX()[1] = upperLimit;
     }
@@ -240,7 +226,6 @@ void Integration::exec() {
       highit = X.end();
     } else {
       highit = std::upper_bound(lowit, X.end(), upperLimit, tolerant_less());
->>>>>>> master
     }
 
     // If range specified doesn't overlap with this spectrum then bail out
