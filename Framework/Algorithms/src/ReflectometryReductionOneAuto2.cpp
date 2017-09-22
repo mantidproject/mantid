@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -135,6 +136,16 @@ void ReflectometryReductionOneAuto2::init() {
   declareProperty("ThetaIn", Mantid::EMPTY_DBL(), "Angle in degrees",
                   Direction::Input);
 
+  // ThetaLogName
+  declareProperty("ThetaLogName", "",
+                  "The name ThetaIn can be found in the run log as");
+
+  // Whether to correct detectors
+  declareProperty(
+      make_unique<PropertyWithValue<bool>>("CorrectDetectors", true,
+                                           Direction::Input),
+      "Moves detectors to twoTheta if ThetaIn or ThetaLogName is given");
+
   // Detector position correction type
   const std::vector<std::string> correctionType{"VerticalShift",
                                                 "RotateAroundSample"};
@@ -145,9 +156,12 @@ void ReflectometryReductionOneAuto2::init() {
       boost::make_shared<StringListValidator>(correctionType));
   declareProperty(
       "DetectorCorrectionType", correctionType[0], correctionTypeValidator,
-      "Whether detectors should be shifted vertically or rotated around the "
-      "sample position.",
+      "When correcting detector positions, this determines whether detectors"
+      "should be shifted vertically or rotated around the sample position.",
       Direction::Input);
+  setPropertySettings("DetectorCorrectionType",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "CorrectDetectors", IS_EQUAL_TO, "1"));
 
   // Wavelength limits
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
@@ -250,15 +264,26 @@ void ReflectometryReductionOneAuto2::exec() {
   // Now that we know the detectors of interest, we can move them if necessary
   // (i.e. if theta is given). If not, we calculate theta from the current
   // detector positions
+  bool correctDetectors = getProperty("CorrectDetectors");
   double theta;
   if (!getPointerToProperty("ThetaIn")->isDefault()) {
     theta = getProperty("ThetaIn");
-    inputWS = correctDetectorPositions(instructions, inputWS);
+  } else if (!getPropertyValue("ThetaLogName").empty()) {
+    theta = getThetaFromLogs(inputWS, getPropertyValue("ThetaLogName"));
   } else {
-    // Calculate theta
+    // Calculate theta from detector positions
     theta = calculateTheta(instructions, inputWS);
+    // Never correct detector positions if ThetaIn or ThetaLogName is not
+    // specified
+    correctDetectors = false;
   }
+
+  // Pass theta to the child algorithm
   alg->setProperty("ThetaIn", theta);
+
+  if (correctDetectors) {
+    inputWS = correctDetectorPositions(instructions, inputWS, 2 * theta);
+  }
 
   // Optional properties
 
@@ -349,10 +374,12 @@ std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
 * @param instructions :: processing instructions defining the detectors of
 * interest
 * @param inputWS :: the input workspace
+* @param twoTheta :: the angle to move detectors to
 * @return :: the corrected workspace
 */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
-    const std::string &instructions, MatrixWorkspace_sptr inputWS) {
+    const std::string &instructions, MatrixWorkspace_sptr inputWS,
+    const double twoTheta) {
 
   auto detectorsOfInterest = getDetectorNames(instructions, inputWS);
 
@@ -365,7 +392,6 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
   const std::set<std::string> detectorSet(detectorsOfInterest.begin(),
                                           detectorsOfInterest.end());
 
-  const double theta = getProperty("ThetaIn");
   const std::string correctionType = getProperty("DetectorCorrectionType");
 
   MatrixWorkspace_sptr corrected = inputWS;
@@ -374,7 +400,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
     IAlgorithm_sptr alg =
         createChildAlgorithm("SpecularReflectionPositionCorrect");
     alg->setProperty("InputWorkspace", corrected);
-    alg->setProperty("TwoTheta", theta * 2);
+    alg->setProperty("TwoTheta", twoTheta);
     alg->setProperty("DetectorCorrectionType", correctionType);
     alg->setProperty("DetectorComponentName", detector);
     alg->execute();
@@ -521,14 +547,15 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
           "this algorithm.");
     }
 
-    IAlgorithm_sptr calcRes = createChildAlgorithm("CalculateResolution");
+    IAlgorithm_sptr calcRes = createChildAlgorithm("NRCalculateSlitResolution");
     calcRes->setProperty("Workspace", inputWS);
-    calcRes->setProperty("TwoTheta", theta);
+    calcRes->setProperty("TwoTheta", 2 * theta);
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
-      g_log.error("CalculateResolution failed. Workspace in Q will not be "
-                  "rebinned. Please provide dQ/Q.");
+      g_log.error(
+          "NRCalculateSlitResolution failed. Workspace in Q will not be "
+          "rebinned. Please provide dQ/Q.");
       return inputWS;
     }
     qstep = calcRes->getProperty("Resolution");

@@ -58,6 +58,7 @@ public:
   coord_t getMaximum() const override { return 10; }
   coord_t getMinimum() const override { return 0; };
   size_t getNBins() const override { return m_nbins; };
+  size_t getNBoundaries() const override { return m_nbins + 1; };
   std::string toXMLString() const override {
     throw std::runtime_error("Not implemented");
   };

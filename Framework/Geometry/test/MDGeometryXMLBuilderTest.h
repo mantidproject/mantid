@@ -41,6 +41,7 @@ private:
     MOCK_CONST_METHOD0(getMaximum, coord_t());
     MOCK_CONST_METHOD0(getMinimum, coord_t());
     MOCK_CONST_METHOD0(getNBins, size_t());
+    MOCK_CONST_METHOD0(getNBoundaries, size_t());
     MOCK_CONST_METHOD0(toXMLString, std::string());
     MOCK_CONST_METHOD0(getIsIntegrated, bool());
     MOCK_CONST_METHOD1(getX, coord_t(size_t ind));

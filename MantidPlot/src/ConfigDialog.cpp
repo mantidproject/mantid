@@ -2591,9 +2591,10 @@ void ConfigDialog::apply() {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach (MdiSubWindow *w, windows) {
+      auto oldLocale = w->locale();
       w->setLocale(locale);
       if (auto table = dynamic_cast<Table *>(w))
-        table->updateDecimalSeparators();
+        table->updateDecimalSeparators(oldLocale);
       else if (auto matrix = dynamic_cast<Matrix *>(w))
         matrix->resetView();
     }

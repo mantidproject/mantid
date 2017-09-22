@@ -90,6 +90,9 @@ protected:
       Mantid::API::MatrixWorkspace_sptr inputWS) const;
   /// Populate transmission properties
   bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
+  /// Find theta from a named log value
+  double getThetaFromLogs(Mantid::API::MatrixWorkspace_sptr inputWs,
+                          const std::string &logName);
 };
 } // namespace Algorithms
 } // namespace Mantid

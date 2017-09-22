@@ -38,26 +38,31 @@ public:
   void testConstructor() {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT(!iProp->name().compare("intProp"));
+    TS_ASSERT(!iProp->type().compare("number"));
     TS_ASSERT(!iProp->documentation().compare(""));
     TS_ASSERT(typeid(int) == *iProp->type_info());
     TS_ASSERT(iProp->isDefault());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"));
+    TS_ASSERT(!dProp->type().compare("number"));
     TS_ASSERT(!dProp->documentation().compare(""));
     TS_ASSERT(typeid(double) == *dProp->type_info());
     TS_ASSERT(dProp->isDefault());
 
     TS_ASSERT(!sProp->name().compare("stringProp"));
+    TS_ASSERT(!sProp->type().compare("string"));
     TS_ASSERT(!sProp->documentation().compare(""));
     TS_ASSERT(typeid(std::string) == *sProp->type_info());
     TS_ASSERT(sProp->isDefault());
 
     TS_ASSERT(!lProp->name().compare("int64Prop"));
+    TS_ASSERT(!lProp->type().compare("number"));
     TS_ASSERT(!lProp->documentation().compare(""));
     TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
 
     TS_ASSERT(!bProp->name().compare("boolProp"));
+    TS_ASSERT(!bProp->type().compare("optional boolean"));
     TS_ASSERT(!bProp->documentation().compare(""));
     TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
     TS_ASSERT(bProp->isDefault());
@@ -643,7 +648,7 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
