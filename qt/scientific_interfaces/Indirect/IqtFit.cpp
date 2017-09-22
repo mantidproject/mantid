@@ -132,6 +132,8 @@ void IqtFit::setup() {
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
     SLOT(updatePlot()));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+    SLOT(updateProperties(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
     SLOT(specMinChanged(int)));
@@ -163,6 +165,7 @@ void IqtFit::run() {
   m_runMin = boost::numeric_cast<size_t>(m_uiForm.spSpectraMin->value());
   m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
 
+  updateFitFunctions();
   IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(m_runMin, m_runMax);
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
@@ -291,8 +294,17 @@ void IqtFit::plotCurrentPreview() {
 void IqtFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
     SLOT(algorithmComplete(bool)));
-  if (error)
+
+  if (error) {
+    QString msg =
+      "There was an error executing the fitting algorithm. Please see the "
+      "Results Log pane for more details.";
+    showMessageBox(msg);
     return;
+  }
+
+  readParametersFromTable(m_baseName + "_Parameters");
+  updateProperties(m_uiForm.spPlotSpectrum->value());
 
   updatePlot();
   m_uiForm.pbPlot->setEnabled(true);
@@ -670,6 +682,34 @@ void IqtFit::setDefaultParameters(const QString &name) {
   m_dblManager->setValue(m_properties[name + ".Beta"], 1.0);
 }
 
+std::map<std::string, std::string> IqtFit::createParameterToPropertyMap(const std::vector<std::string>& functionNames) {
+  std::map<std::string, std::string> parameterToProperty;
+  int functionNumber = 1;
+
+  for (auto &functionName : functionNames) {
+    std::string prefix = "f" + std::to_string(functionNumber);
+    extendParameterToPropertyMap(functionName, prefix, parameterToProperty);
+  }
+
+  return parameterToProperty;
+}
+
+void IqtFit::extendParameterToPropertyMap(const std::string& functionName, const std::string& prefix, std::map<std::string, std::string>& parameterToProperty) {
+  bool isExponential = functionName == "Exponential" || functionName == "StretchedExp";
+
+  if (isExponential) {
+    std::string intensityName = prefix + "Height";
+    parameterToProperty[intensityName] = functionName + ".Intensity";
+    std::string tauName = prefix + "Lifetime";
+    parameterToProperty[tauName] = functionName + ".Tau";
+
+    if (functionName == "StretchedExp") {
+      std::string betaName = prefix + "Stretching";
+      parameterToProperty[betaName] = functionName + ".Beta";
+    }
+  }
+}
+
 /**
 * Handles the user entering a new minimum spectrum index.
 *
@@ -835,8 +875,6 @@ void IqtFit::singleFit() {
     SLOT(plotGuess(QtProperty *)));
 
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
-  m_runMax, m_runMin = specNo, specNo;
-
   m_singleFitAlg = iqtFitAlgorithm(specNo, specNo);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -850,70 +888,11 @@ void IqtFit::singleFitComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
     SLOT(singleFitComplete(bool)));
 
-  if (error) {
-    QString msg =
-      "There was an error executing the fitting algorithm. Please see the "
-      "Results Log pane for more details.";
-    showMessageBox(msg);
-    return;
-  }
-
-  IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
-
-  // Get params.
-  QMap<QString, double> parameters;
-  std::vector<std::string> parNames = outputFunc->getParameterNames();
-  std::vector<double> parVals;
-
-  for (size_t i = 0; i < parNames.size(); ++i)
-    parVals.push_back(outputFunc->getParameter(parNames[i]));
-
-  for (size_t i = 0; i < parNames.size(); ++i)
-    parameters[QString(parNames[i].c_str())] = parVals[i];
-
-  m_iqtFRangeManager->setValue(m_properties["BackgroundA0"],
-    parameters["f0.A0"]);
-
-  const int fitType = m_uiForm.cbFitType->currentIndex();
-  if (fitType != 2) {
-    // Exp 1
-    m_dblManager->setValue(m_properties["Exponential1.Intensity"],
-      parameters["f1.Height"]);
-    m_dblManager->setValue(m_properties["Exponential1.Tau"],
-      parameters["f1.Lifetime"]);
-
-    if (fitType == 1) {
-      // Exp 2
-      m_dblManager->setValue(m_properties["Exponential2.Intensity"],
-        parameters["f2.Height"]);
-      m_dblManager->setValue(m_properties["Exponential2.Tau"],
-        parameters["f2.Lifetime"]);
-    }
-  }
-
-  if (fitType > 1) {
-    // Str
-    QString fval;
-    if (fitType == 2) {
-      fval = "f1.";
-    }
-    else {
-      fval = "f2.";
-    }
-
-    m_dblManager->setValue(m_properties["StretchedExp.Intensity"],
-      parameters[fval + "Height"]);
-    m_dblManager->setValue(m_properties["StretchedExp.Tau"],
-      parameters[fval + "Lifetime"]);
-    m_dblManager->setValue(m_properties["StretchedExp.Beta"],
-      parameters[fval + "Stretching"]);
-  }
+  algorithmComplete(error);
 
   // Can start updating the guess curve again
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
     SLOT(plotGuess(QtProperty *)));
-
-  updatePlot();
 }
 
 void IqtFit::updateGuessPlot() {
@@ -967,6 +946,85 @@ void IqtFit::plotGuess(QtProperty *) {
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
   m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+}
+
+/*
+ * Updates the properties in the property table using the stored parameter values
+ * for the specified spectrum.
+ *
+ * @param specNo  The index of the parameter values to update the properties in the
+ *                property table with.
+ */
+void IqtFit::updateProperties(int specNo) {
+
+  // Check whether parameter values exist for the specified spectrum number
+  if (specNo < m_parameterValues.size()) {
+    QMap<QString, double> paramMap = m_parameterValues[specNo];
+    
+    for (auto &paramName : paramMap.keys()) {
+      m_dblManager->setValue(m_properties[paramName], paramMap[paramName]);
+    }
+  }
+  else {
+    setDefaultParameters("Exponential1");
+    setDefaultParameters("Exponential2");
+    setDefaultParameters("StretchedExp");
+  }
+}
+
+/*
+ * Reads the parameters from the table workspace with the specified name
+ * and stores them in the parameter values map. If no table workspace with
+ * the specified name exists in the ADS, simply returns.
+ *
+ * @param tableWsName The name of the table to read the parameter values from.
+ */
+void IqtFit::readParametersFromTable(std::string const& tableWsName) {
+
+  // Check if a table with the specified name exists in the ADS
+  if (AnalysisDataService::Instance().doesExist(tableWsName)) {
+    auto tableWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(tableWsName);
+    auto parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
+    m_parameterValues.reserve(tableWs->rowCount());
+
+    // Initialize parameter values vector with maps for storing
+    // values at each spectrum.
+    for (size_t i = 0; i < tableWs->rowCount(); ++i) {
+      m_parameterValues.push_back(QMap<QString, double>());
+    }
+
+    for (auto &columnName : tableWs->getColumnNames()) {
+      auto endPos = columnName.find_last_of('[');
+      columnName = columnName.substr(0, endPos);
+      auto it = parameterToProperty.find(columnName);
+
+      // Check whether the parameter of the current column, is
+      // within the property table.
+      if (it != parameterToProperty.end()) {
+        auto const column = tableWs->getColumn(columnName);
+
+        for (size_t i = 0; i < column->size(); ++i) {
+          m_parameterValues[i][QString::fromStdString(columnName)] = column->toDouble(i);
+        }
+      }
+    }
+  }
+}
+
+/*
+ * Updates a vector storing which functions were last used in a fitting.
+ */
+void IqtFit::updateFitFunctions() {
+  const int fitType = m_uiForm.cbFitType->currentIndex();
+
+  if (fitType == 0)
+    m_fitFunctions = { "Exponential" };
+  else if (fitType == 1)
+    m_fitFunctions = { "Exponential", "Exponential" };
+  else if (fitType == 2)
+    m_fitFunctions = { "StretchedExp" };
+  else if (fitType == 3)
+    m_fitFunctions = { "Exponential", "StretchedExp" };
 }
 
 void IqtFit::fitContextMenu(const QPoint &) {

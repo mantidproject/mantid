@@ -70,8 +70,13 @@ private:
                                 const size_t &specMax);
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
                                                const size_t &specMax);
+  void updateProperties(int specNo);
+  void readParametersFromTable(std::string const& tableWsName);
+  void updateFitFunctions();
   void plotResult(const std::string& groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
+  std::map<std::string, std::string> createParameterToPropertyMap(const std::vector<std::string>& functionName);
+  void IqtFit::extendParameterToPropertyMap(const std::string& functionName, const std::string& prefix, std::map<std::string, std::string>& parameterToProperty);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -88,6 +93,8 @@ private:
   std::string m_baseName;
   size_t m_runMin;
   size_t m_runMax;
+  std::vector<std::string> m_fitFunctions;
+  std::vector<QMap<QString, double>> m_parameterValues;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
