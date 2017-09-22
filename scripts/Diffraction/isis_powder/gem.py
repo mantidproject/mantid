@@ -52,9 +52,6 @@ class Gem(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
 
-    def _generate_auto_vanadium_calibration(self, run_details):
-        raise NotImplementedError()
-
     def _generate_output_file_name(self, run_number_string):
         return self._generate_input_file_name(run_number_string)
 
@@ -65,7 +62,8 @@ class Gem(AbstractInst):
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         if self._is_vanadium:
             return gem_algs.calculate_van_absorb_corrections(
-                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering)
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                is_vanadium=self._is_vanadium)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,

@@ -30,7 +30,7 @@
 #define MdiSubWindow_H
 
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "WindowFactory.h"
 #include <QDockWidget>
 #include <QFrame>

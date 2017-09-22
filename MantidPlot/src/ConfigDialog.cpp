@@ -32,12 +32,12 @@ Description          : Preferences dialog
 #include "ColorButton.h"
 #include "Graph.h"
 #include "Mantid/MantidUI.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "Matrix.h"
 #include "MultiLayer.h"
 #include "SendToProgramDialog.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QComboBox>
@@ -76,10 +76,10 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
 
 #include <limits>
 
@@ -2591,9 +2591,10 @@ void ConfigDialog::apply() {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach (MdiSubWindow *w, windows) {
+      auto oldLocale = w->locale();
       w->setLocale(locale);
       if (auto table = dynamic_cast<Table *>(w))
-        table->updateDecimalSeparators();
+        table->updateDecimalSeparators(oldLocale);
       else if (auto matrix = dynamic_cast<Matrix *>(w))
         matrix->resetView();
     }

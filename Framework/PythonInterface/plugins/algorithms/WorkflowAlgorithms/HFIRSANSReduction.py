@@ -476,4 +476,5 @@ class HFIRSANSReduction(PythonAlgorithm):
 
 #############################################################################################
 
+
 AlgorithmFactory.subscribe(HFIRSANSReduction)

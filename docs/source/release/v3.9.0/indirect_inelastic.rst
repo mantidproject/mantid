@@ -26,7 +26,7 @@ Data Reduction
 - New :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm performs initial data reduction steps for IN16B instrument data at ILL.
 - New :ref:`IndirectILLReductionQENS <algm-IndirectILLReductionQENS>` algorithm performs complete multiple file reduction for Quasi-Elastic Neutron Scattering (QENS) data from IN16B instrument at ILL.
 - New :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` algorithm performs complete multiple file reduction for the elastic and inelastic fixed-window scan data from IN16B instrument at ILL.
-- Deprecated :ref:`IndirectILLReduction <algm-IndirectILLReduction>` and :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>` algorithms.
+- Deprecated `IndirectILLReduction <http://docs.mantidproject.org/v3.9.0/algorithms/IndirectILLReduction-v1.html>`_ and `ILLIN16BCalibration <http://docs.mantidproject.org/v3.9.0/algorithms/ILLIN16BCalibration-v1.html>`_ algorithms.
 - When plotting *ConvFit* results "Two Lorentzians" will produce plots for both lorentzians
 
 Data Analysis

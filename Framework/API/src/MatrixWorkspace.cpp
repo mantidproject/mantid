@@ -19,6 +19,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -239,7 +240,7 @@ void MatrixWorkspace::initialize(const std::size_t &NVectors,
 void MatrixWorkspace::initialize(const std::size_t &NVectors,
                                  const HistogramData::Histogram &histogram) {
   // Check validity of arguments
-  if (NVectors == 0 || histogram.x().size() == 0) {
+  if (NVectors == 0 || histogram.x().empty()) {
     throw std::out_of_range(
         "All arguments to init must be positive and non-zero");
   }
@@ -1286,6 +1287,9 @@ public:
       return m_axis.length();
   }
 
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override { return m_axis.length(); }
+
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
@@ -1369,6 +1373,9 @@ public:
   size_t getNBins() const override {
     return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
   }
+
+  /// number of axis points (bin boundaries)
+  size_t getNBoundaries() const override { return m_X.size(); }
 
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
@@ -1494,19 +1501,19 @@ signal_t MatrixWorkspace::getSignalAtCoord(
                                 "Workspace can only have 2 axes, found " +
                                 std::to_string(this->axes()));
 
-  coord_t x = coords[0];
-  coord_t y = coords[1];
+  coord_t xCoord = coords[0];
+  coord_t yCoord = coords[1];
   // First, find the workspace index
   Axis *ax1 = this->getAxis(1);
   size_t wi(-1);
   try {
-    wi = ax1->indexOfValue(y);
+    wi = ax1->indexOfValue(yCoord);
   } catch (std::out_of_range &) {
     return std::numeric_limits<double>::quiet_NaN();
   }
 
   const size_t nhist = this->getNumberHistograms();
-  const auto &yVals = this->readY(wi);
+  const auto &yVals = this->y(wi);
   double yBinSize(1.0); // only applies for volume normalization & numeric axis
   if (normalization == VolumeNormalization && ax1->isNumeric()) {
     size_t uVI; // unused vertical index.
@@ -1520,39 +1527,41 @@ signal_t MatrixWorkspace::getSignalAtCoord(
   }
 
   if (wi < nhist) {
-    const auto &X = this->binEdges(wi);
-    auto it = std::lower_bound(X.cbegin(), X.cend(), x);
-    if (it == X.end()) {
-      // Out of range
+    const auto &xVals = x(wi);
+    size_t i;
+    try {
+      if (isHistogramData())
+        i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(),
+                                                        xCoord);
+      else
+        i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(),
+                                                          xCoord);
+    } catch (std::out_of_range &) {
       return std::numeric_limits<double>::quiet_NaN();
-    } else {
-      size_t i = (it - X.begin());
-      if (i > 0) {
-        double y = yVals[i - 1];
-        // What is our normalization factor?
-        switch (normalization) {
-        case NoNormalization:
-          return y;
-        case VolumeNormalization: {
-          // Divide the signal by the area
-          auto volume = yBinSize * (X[i] - X[i - 1]);
-          if (volume == 0.0) {
-            return std::numeric_limits<double>::quiet_NaN();
-          }
-          return y / volume;
-        }
-        case NumEventsNormalization:
-          // Not yet implemented, may not make sense
-          return y;
-        }
-        // This won't happen
-        return y;
-      } else
-        return std::numeric_limits<double>::quiet_NaN();
     }
-  } else
-    // Out of range
+
+    double y = yVals[i];
+    // What is our normalization factor?
+    switch (normalization) {
+    case NoNormalization:
+      return y;
+    case VolumeNormalization: {
+      // Divide the signal by the area
+      auto volume = yBinSize * (xVals[i + 1] - xVals[i]);
+      if (volume == 0.0) {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+      return y / volume;
+    }
+    case NumEventsNormalization:
+      // Not yet implemented, may not make sense
+      return y;
+    }
+    // This won't happen
+    return y;
+  } else {
     return std::numeric_limits<double>::quiet_NaN();
+  }
 }
 
 /** Returns the (normalized) signal at a given coordinates

@@ -139,6 +139,8 @@ private:
   PyObject *m_sys;
   /// Pointer to the main threads state
   PyThreadState *m_mainThreadState;
+  /// Wrap's acquisition of the GIL
+  PythonGIL m_gil;
 };
 
 #endif

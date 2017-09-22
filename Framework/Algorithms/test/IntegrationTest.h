@@ -3,24 +3,22 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/Integration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAlgorithms/Integration.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <MantidHistogramData/LinearGenerator.h>
-#include <MantidHistogramData/Points.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using namespace Mantid::HistogramData;
+using Mantid::MantidVec;
 using Mantid::specnum_t;
 
 class IntegrationTest : public CxxTest::TestSuite {
@@ -99,9 +97,9 @@ public:
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
     double yy[3] = {36, 51, 66};
     for (size_t i = 0; i < max; ++i) {
-      const auto &x = output2D->x(i);
-      const auto &y = output2D->y(i);
-      const auto &e = output2D->e(i);
+      Mantid::MantidVec &x = output2D->dataX(i);
+      Mantid::MantidVec &y = output2D->dataY(i);
+      Mantid::MantidVec &e = output2D->dataE(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);
@@ -139,38 +137,16 @@ public:
     Workspace2D_sptr output2D =
         boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 5);
-    TS_ASSERT_EQUALS(output2D->x(0)[0], 0);
-    TS_ASSERT_EQUALS(output2D->x(0)[1], 5);
-    TS_ASSERT_EQUALS(output2D->y(0)[0], 10);
-    TS_ASSERT_EQUALS(output2D->y(4)[0], 110);
-    TS_ASSERT_DELTA(output2D->e(2)[0], 7.746, 0.001);
+    TS_ASSERT_EQUALS(output2D->dataX(0)[0], 0);
+    TS_ASSERT_EQUALS(output2D->dataX(0)[1], 5);
+    TS_ASSERT_EQUALS(output2D->dataY(0)[0], 10);
+    TS_ASSERT_EQUALS(output2D->dataY(4)[0], 110);
+    TS_ASSERT_DELTA(output2D->dataE(2)[0], 7.746, 0.001);
   }
 
   void testRangeWithPartialBins() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve("out3"));
-
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
-    size_t max = 0;
-    TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    const double yy[3] = {52., 74., 96.};
-    const double ee[3] = {6.899, 8.240, 9.391};
-    for (size_t i = 0; i < max; ++i) {
-      const auto &x = output2D->x(i);
-      const auto &y = output2D->y(i);
-      const auto &e = output2D->e(i);
-
-      TS_ASSERT_EQUALS(x.size(), 2);
-      TS_ASSERT_EQUALS(y.size(), 1);
-      TS_ASSERT_EQUALS(e.size(), 1);
-
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
-      TS_ASSERT_EQUALS(y[0], yy[i]);
-      TS_ASSERT_DELTA(e[0], ee[i], 0.001);
-    }
         input = boost::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     assertRangeWithPartialBins(input);
@@ -179,28 +155,10 @@ public:
   void testRangeWithPartialBinsAndDistributionData() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        output = AnalysisDataService::Instance().retrieve("out3"));
-
-    output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
-    for (size_t i = 0; i < max; ++i) {
-      const auto &x = output2D->x(i);
-      const auto &y = output2D->y(i);
-      const auto &e = output2D->e(i);
-
-      TS_ASSERT_EQUALS(x.size(), 2);
-      TS_ASSERT_EQUALS(y.size(), 1);
-      TS_ASSERT_EQUALS(e.size(), 1);
-
-      TS_ASSERT_EQUALS(x[0], 0.1);
-      TS_ASSERT_EQUALS(x[1], 4.5);
-      TS_ASSERT_EQUALS(y[0], yy[i]);
-      TS_ASSERT_DELTA(e[0], ee[i], 0.001);
-    }
         input = boost::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
-        assertRangeWithPartialBins(input);
+    assertRangeWithPartialBins(input);
   }
 
   void doTestEvent(std::string inName, std::string outName,
@@ -239,9 +197,9 @@ public:
                      EndWorkspaceIndex - StartWorkspaceIndex + 1);
 
     for (size_t i = 0; i < output2D->getNumberHistograms(); i++) {
-      const auto &X = output2D->x(i);
-      const auto &Y = output2D->y(i);
-      const auto &E = output2D->e(i);
+      MantidVec X = output2D->readX(i);
+      MantidVec Y = output2D->readY(i);
+      MantidVec E = output2D->readE(i);
       TS_ASSERT_EQUALS(X.size(), 2);
       TS_ASSERT_EQUALS(Y.size(), 1);
       TS_ASSERT_DELTA(Y[0], 20.0, 1e-6);
@@ -300,8 +258,8 @@ public:
 
     double tol = 1.e-5;
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), expectedNumHists);
-    TS_ASSERT_DELTA(outputWS->y(1)[0], expectedVals[0], tol);
-    TS_ASSERT_DELTA(outputWS->e(1)[0], expectedVals[1], tol);
+    TS_ASSERT_DELTA(outputWS->dataY(1)[0], expectedVals[0], tol);
+    TS_ASSERT_DELTA(outputWS->dataE(1)[0], expectedVals[1], tol);
 
     AnalysisDataService::Instance().remove(inName);
     AnalysisDataService::Instance().remove(outName);
@@ -328,18 +286,16 @@ public:
   }
 
   void makeRealBinBoundariesWorkspace(const std::string inWsName) {
-    const unsigned int lenX = 11, lenY = 10;
+    const unsigned int lenX = 11, lenY = 10, lenE = lenY;
 
-    // 1 difference, so it's holding BinEdges
     Workspace_sptr wsAsWs =
         WorkspaceFactory::Instance().create("Workspace2D", 1, lenX, lenY);
     Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(wsAsWs);
 
-    BinEdges x = {-1,  -0.8, -0.6, -0.4, -0.2, -2.22045e-16,
-                  0.2, 0.4,  0.6,  0.8,  1};
-    auto &xData = ws->mutableX(0);
+    double x[lenX] = {-1,  -0.8, -0.6, -0.4, -0.2, -2.22045e-16,
+                      0.2, 0.4,  0.6,  0.8,  1};
     for (unsigned int i = 0; i < lenX; i++) {
-      xData[i] = x[i];
+      ws->dataX(0)[i] = x[i];
       // Generate some rounding errors. Note: if you increase errors by making
       // this more complicated,
       // you'll eventually make Integration "fail".
@@ -349,18 +305,19 @@ public:
       // different from the
       // initial -0.2 that Integration will fail to catch one bin and because of
       // that some tests will fail.
-      xData[i] /= 2.5671;
-      xData[i] *= 13.3;
-      xData[i] /= 13.3;
-      xData[i] *= 2.5671;
+      ws->dataX(0)[i] /= 2.5671;
+      ws->dataX(0)[i] *= 13.3;
+      ws->dataX(0)[i] /= 13.3;
+      ws->dataX(0)[i] *= 2.5671;
     }
-
-    Counts y = {0, 0, 0, 2, 2, 2, 2, 0, 0, 0};
-    ws->setCounts(0, y);
-
-    auto &e = ws->mutableE(0);
-    e.assign(e.size(), 0.0);
-
+    double y[lenY] = {0, 0, 0, 2, 2, 2, 2, 0, 0, 0};
+    for (unsigned int i = 0; i < lenY; i++) {
+      ws->dataY(0)[i] = y[i];
+    }
+    double e[lenE] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    for (unsigned int i = 0; i < lenE; i++) {
+      ws->dataE(0)[i] = e[i];
+    }
     AnalysisDataService::Instance().add(inWsName, ws);
   }
 
@@ -393,12 +350,13 @@ public:
     TS_ASSERT_EQUALS(inWs->getNumberHistograms(), outWs->getNumberHistograms());
 
     if (checkRanges) {
-      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower), outWs->x(0).front());
+      TS_ASSERT_LESS_THAN_EQUALS(std::stod(rangeLower),
+                                 outWs->dataX(0).front());
 
-      TS_ASSERT_LESS_THAN_EQUALS(outWs->x(0).back(), std::stod(rangeUpper));
+      TS_ASSERT_LESS_THAN_EQUALS(outWs->dataX(0).back(), std::stod(rangeUpper));
     }
     // At last, check numerical results
-    TS_ASSERT_DELTA(outWs->mutableY(0)[0], expectedVal, 1e-8);
+    TS_ASSERT_DELTA(outWs->dataY(0)[0], expectedVal, 1e-8);
   }
 
   void testProperHandlingOfIntegrationBoundaries() {
@@ -433,10 +391,11 @@ public:
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
     for (int j = 0; j < 5; ++j) {
-      auto &e = space2D->mutableE(j);
-      space2D->setPoints(j, 5, LinearGenerator(0, 0.9));       // assign X
-      space2D->setCounts(j, 5, LinearGenerator(double(j), 2)); // assign Y
-      e.assign(e.size(), 1.0);
+      for (int k = 0; k < 5; ++k) {
+        space2D->dataX(j)[k] = 0.9 * k;
+        space2D->dataY(j)[k] = 2 * k + double(j);
+        space2D->dataE(j)[k] = 1.0;
+      }
     }
 
     const std::string outWsName = "IntegrationTest_PointData";
@@ -460,14 +419,14 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 1);
     TS_ASSERT(output->isHistogramData());
 
-    TS_ASSERT_DELTA(output->x(0).front(), -0.5 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->x(0).back(), 4.5 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readX(0).front(), -0.5 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readX(0).back(), 4.5 * 0.9, 1e-14);
 
-    TS_ASSERT_DELTA(output->y(0)[0], 20 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->y(1)[0], 25 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->y(2)[0], 30 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->y(3)[0], 35 * 0.9, 1e-14);
-    TS_ASSERT_DELTA(output->y(4)[0], 40 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readY(0)[0], 20 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readY(1)[0], 25 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readY(2)[0], 30 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readY(3)[0], 35 * 0.9, 1e-14);
+    TS_ASSERT_DELTA(output->readY(4)[0], 40 * 0.9, 1e-14);
 
     AnalysisDataService::Instance().remove(outWsName);
   }
@@ -480,14 +439,11 @@ public:
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
 
     for (int j = 0; j < 5; ++j) {
-      auto &x = space2D->mutableX(j);
-      auto &e = space2D->mutableE(j);
-
       for (int k = 0; k < 5; ++k) {
-        x[k] = k * (1.0 + 1.0 * k);
+        space2D->dataX(j)[k] = k * (1.0 + 1.0 * k);
+        space2D->dataY(j)[k] = 2 * k + double(j);
+        space2D->dataE(j)[k] = 1.0;
       }
-      space2D->setCounts(j, 5, LinearGenerator(double(j), 2)); // assign Y
-      e.assign(e.size(), 1.0);
     }
 
     const std::string outWsName = "IntegrationTest_PointData";
@@ -511,14 +467,14 @@ public:
     TS_ASSERT_EQUALS(output->blocksize(), 1);
     TS_ASSERT(output->isHistogramData());
 
-    TS_ASSERT_EQUALS(output->x(0).front(), -1.0);
-    TS_ASSERT_EQUALS(output->x(0).back(), 24.0);
+    TS_ASSERT_EQUALS(output->readX(0).front(), -1.0);
+    TS_ASSERT_EQUALS(output->readX(0).back(), 24.0);
 
-    TS_ASSERT_EQUALS(output->y(0)[0], 132.0);
-    TS_ASSERT_EQUALS(output->y(1)[0], 157.0);
-    TS_ASSERT_EQUALS(output->y(2)[0], 182.0);
-    TS_ASSERT_EQUALS(output->y(3)[0], 207.0);
-    TS_ASSERT_EQUALS(output->y(4)[0], 232.0);
+    TS_ASSERT_EQUALS(output->readY(0)[0], 132.0);
+    TS_ASSERT_EQUALS(output->readY(1)[0], 157.0);
+    TS_ASSERT_EQUALS(output->readY(2)[0], 182.0);
+    TS_ASSERT_EQUALS(output->readY(3)[0], 207.0);
+    TS_ASSERT_EQUALS(output->readY(4)[0], 232.0);
 
     AnalysisDataService::Instance().remove(outWsName);
   }
@@ -848,9 +804,9 @@ private:
     const double yy[3] = {52., 74., 96.};
     const double ee[3] = {6.899, 8.240, 9.391};
     for (size_t i = 0; i < max; ++i) {
-      auto &x = output2D->x(i);
-      auto &y = output2D->y(i);
-      auto &e = output2D->e(i);
+      Mantid::MantidVec &x = output2D->dataX(i);
+      Mantid::MantidVec &y = output2D->dataY(i);
+      Mantid::MantidVec &e = output2D->dataE(i);
 
       TS_ASSERT_EQUALS(x.size(), 2);
       TS_ASSERT_EQUALS(y.size(), 1);

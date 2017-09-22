@@ -391,7 +391,12 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     if scale_factor:
         empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
                                     Operation="Multiply")
-    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    try:
+        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    except ValueError:
+        raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                         " the empty and sample match?")
+
     remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
