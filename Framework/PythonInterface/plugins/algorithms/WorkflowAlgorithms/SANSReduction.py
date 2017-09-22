@@ -265,7 +265,7 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output_name)
             if alg.existsProperty("ReductionProperties"):
-                self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
