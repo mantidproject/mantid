@@ -618,10 +618,6 @@ void IqtFit::updatePlot() {
     m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
                                  range.second);
 
-    setDefaultParameters("Exponential1");
-    setDefaultParameters("Exponential2");
-    setDefaultParameters("StretchedExp");
-
     resizePlotRange(m_uiForm.ppPlot);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
