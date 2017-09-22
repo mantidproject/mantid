@@ -365,19 +365,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def _check_match(inpstr, patternstr, qtde_nums):
-    exception_pattern = 'Invalid input for Slicer: %s'
-    match = re.match(patternstr, inpstr)
-    if match:
-        answer = match.groups()
-        if len(match.groups()) != qtde_nums:
-            raise SyntaxError(exception_pattern %(inpstr))
-        return [float(answer[i]) for i in range(qtde_nums)]
-    else:
-        return False
-
-
-def sliceParser(str_to_parser):
+def sliceParser(str_to_parser): # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:
@@ -399,7 +387,18 @@ def sliceParser(str_to_parser):
     lowbound = '>'+num_pat
     upbound = '<'+num_pat
     sss_pat = num_pat+r':'+num_pat+r':'+num_pat
+    exception_pattern = 'Invalid input for Slicer: %s'
     MARK = -1
+
+    def _check_match(inpstr, patternstr, qtde_nums):
+        match = re.match(patternstr, inpstr)
+        if match:
+            answer = match.groups()
+            if len(answer) != qtde_nums:
+                raise SyntaxError(exception_pattern %(inpstr))
+            return [float(answer[i]) for i in range(qtde_nums)]
+        else:
+            return False
 
     def _parse_slice(inpstr):
         return _check_match(inpstr, slice_pat, 2)
@@ -435,7 +434,8 @@ def sliceParser(str_to_parser):
                 return vallist
             else:
                 vallist.append([curr_value, next_value])
-                curr_value = next_value
+
+            curr_value = next_value
 
     def _extract_simple_input(inpstr):
         for fun in _parse_slice, _parse_lower, _parse_upper:

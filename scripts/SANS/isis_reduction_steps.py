@@ -710,7 +710,7 @@ class Mask_ISIS(ReductionStep):
 
         return bank
 
-    def parse_instruction(self, instName, details):
+    def parse_instruction(self, instName, details): # noqa: C901
         """
             Parse an instruction line from an ISIS mask file
             @param instName Instrument name. Used for MASK Ssp command to tell what bank it refer to
@@ -3270,7 +3270,11 @@ class UserFile(ReductionStep):
         self.executed = True
         return self.executed
 
-    def _handle_read_line(self, line, upper_line, reducer):
+    def read_line(self, line, reducer): # noqa: C901
+        # This is so that I can be sure all EOL characters have been removed
+        line = line.lstrip().rstrip()
+        upper_line = line.upper()
+
         # check for a recognised command
         for keyword in list(self.key_functions.keys()):
             if upper_line.startswith(keyword):
@@ -3280,139 +3284,116 @@ class UserFile(ReductionStep):
                 error = self.key_functions[keyword](params, reducer)
 
                 if error:
-                    return error + line
+                    _issueWarning(error + line)
 
-    def _parse_and_set_beam_finder(self, upper_line, reducer):
-        # SET CENTRE accepts the following properties:
-        # SET CENTRE X Y
-        # SET CENTRE/MAIN X Y
-        # SET CENTRE/HAB X Y
-        main_str_pos = upper_line.find('MAIN')
-        hab_str_pos = upper_line.find('HAB')
-
-        # use the scale factors supplied in the parameter file
-        XSF = reducer.inst.beam_centre_scale_factor1
-        YSF = reducer.inst.beam_centre_scale_factor2
-
-        if main_str_pos > 0:
-            values = upper_line[main_str_pos + 5:].split()  # remov the SET CENTRE/MAIN
-            x_pos = float(values[0]) / XSF
-            y_pos = float(values[1]) / YSF
-        elif hab_str_pos > 0:
-            values = upper_line[hab_str_pos + 4:].split()  # remove the SET CENTRE/HAB
-            print(' convert values ', values)
-            x_pos = float(values[0]) / XSF
-            y_pos = float(values[1]) / YSF
-        else:
-            values = upper_line.split()
-            x_pos = float(values[2]) / XSF
-            y_pos = float(values[3]) / YSF
-        if hab_str_pos > 0:
-            print('Front values = ', x_pos, y_pos)
-            reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos), 'front')
-        else:
-            reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
-
-    def _set_gravity(self, grav, reducer):
-        if grav == 'ON' or grav == 'TRUE':
-            reducer.to_Q.set_gravity(True, override=False)
-        elif grav == 'OFF' or grav == 'FALSE':
-            reducer.to_Q.set_gravity(False, override=False)
-        elif grav.startswith('LEXTRA'):
-            extra_length = grav[7:].strip()
-            reducer.to_Q.set_extra_length(float(extra_length), override=False)
-        else:
-            _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
-            reducer.to_Q.set_gravity(False, override=False)
-            reducer.to_Q.set_extra_length(0.0, override=False)
-
-    def _parse_trans_fit(self, upper_line):
-        # check if the selector is passed:
-        selector = 'BOTH'
-        if 'SAMPLE' in upper_line:
-            selector = 'SAMPLE'
-            params = upper_line[17:].split()  # remove FIT/TRANS/SAMPLE/
-        elif 'CAN' in upper_line:
-            selector = 'CAN'
-            params = upper_line[14:].split()  # remove FIT/TRANS/CAN/
-        else:
-            params = upper_line[10:].split()  # remove FIT/TRANS/
-        return (selector, params)
-
-    def _set_trans_fit(self, params, reducer, selector):
-        nparams = len(params)
-        if nparams == 1:
-            fit_type = params[0]
-            lambdamin = lambdamax = None
-        elif nparams == 3:
-            fit_type, lambdamin, lambdamax = params
-        else:
-            raise IOError
-        reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax, fit_method=fit_type,
-                                                      override=True, selector=selector)
-
-    def _set_reducer_mask(self, upper_line, reducer):
-        if len(upper_line[5:].strip().split()) == 4:
-            _issueInfo('Box masks can only be defined using the V and H syntax, not "mask x1 y1 x2 y2"')
-        else:
-            reducer.mask.parse_instruction(reducer.instrument.name(), upper_line)
-
-    def _handle_det_line(self, upper_line, reducer):
-        det_specif = upper_line[4:]
-        if det_specif.startswith('CORR'):
-            self._readDetectorCorrections(upper_line[8:], reducer)
-        elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
-            self._readFrontRescaleShiftSetup(det_specif, reducer)
-        elif any(it == det_specif.strip() for it in ['FRONT', 'REAR', 'BOTH', 'MERGE', 'MERGED', 'MAIN', 'HAB']):
-            # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
-            # we also accomodate DET/MAIN and DET/HAB here which are specificially for LOQ
-            det_specif = det_specif.strip()
-            if det_specif == 'MERGE':
-                det_specif = 'MERGED'
-            reducer.instrument.setDetector(det_specif)
-        else:
-            return 'Incorrectly formatted DET line, %s, line ignored' % upper_line
-
-    def read_line(self, line, reducer):
-        # This is so that I can be sure all EOL characters have been removed
-        line = line.lstrip().rstrip()
-        upper_line = line.upper()
-
-        no_recognised_command_found = self._handle_read_line(line, upper_line, reducer)
-        if no_recognised_command_found:
-            _issueWarning(no_recognised_command_found)
-            return
+                return
 
         if upper_line.startswith('L/'):
             self.readLimitValues(line, reducer)
 
         elif upper_line.startswith('MASK'):
-            self._set_reducer_mask(upper_line, reducer)
+            if len(upper_line[5:].strip().split()) == 4:
+                _issueInfo('Box masks can only be defined using the V and H syntax, not "mask x1 y1 x2 y2"')
+            else:
+                reducer.mask.parse_instruction(reducer.instrument.name(), upper_line)
 
         elif upper_line.startswith('SET CENTRE'):
-            self._parse_and_set_beam_finder(upper_line, reducer)
+            # SET CENTRE accepts the following properties:
+            # SET CENTRE X Y
+            # SET CENTRE/MAIN X Y
+            # SET CENTRE/HAB X Y
+            main_str_pos = upper_line.find('MAIN')
+            hab_str_pos = upper_line.find('HAB')
+            x_pos = 0.0
+            y_pos = 0.0
+            # use the scale factors supplied in the parameter file
+            XSF = reducer.inst.beam_centre_scale_factor1
+            YSF = reducer.inst.beam_centre_scale_factor2
+
+            if main_str_pos > 0:
+                values = upper_line[main_str_pos + 5:].split()  # remov the SET CENTRE/MAIN
+                x_pos = float(values[0]) / XSF
+                y_pos = float(values[1]) / YSF
+            elif hab_str_pos > 0:
+                values = upper_line[hab_str_pos + 4:].split()  # remove the SET CENTRE/HAB
+                print(' convert values ', values)
+                x_pos = float(values[0]) / XSF
+                y_pos = float(values[1]) / YSF
+            else:
+                values = upper_line.split()
+                x_pos = float(values[2]) / XSF
+                y_pos = float(values[3]) / YSF
+            if hab_str_pos > 0:
+                print('Front values = ', x_pos, y_pos)
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos), 'front')
+            else:
+                reducer.set_beam_finder(BaseBeamFinder(x_pos, y_pos))
 
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
-            reducer._corr_and_scale.rescale = float(values[2]) * reducer._corr_and_scale.DEFAULT_SCALING
+            reducer._corr_and_scale.rescale = \
+                float(values[2]) * reducer._corr_and_scale.DEFAULT_SCALING
 
         elif upper_line.startswith('SAMPLE/OFFSET'):
             values = upper_line.split()
             reducer.instrument.set_sample_offset(values[1])
 
         elif upper_line.startswith('DET/'):
-            self._handle_det_line(upper_line, reducer)
+            det_specif = upper_line[4:]
+            if det_specif.startswith('CORR'):
+                self._readDetectorCorrections(upper_line[8:], reducer)
+            elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
+                self._readFrontRescaleShiftSetup(det_specif, reducer)
+            elif any(it == det_specif.strip() for it in ['FRONT', 'REAR', 'BOTH', 'MERGE', 'MERGED', 'MAIN', 'HAB']):
+                # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
+                # we also accomodate DET/MAIN and DET/HAB here which are specificially for LOQ
+                det_specif = det_specif.strip()
+                if det_specif == 'MERGE':
+                    det_specif = 'MERGED'
+                reducer.instrument.setDetector(det_specif)
+            else:
+                _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
         # There are two entries for Gravity: 1. ON/OFF (TRUE/FALSE)
         #                                    2. LEXTRA=xx.xx
         elif upper_line.startswith('GRAVITY'):
             grav = upper_line[8:].strip()
-            self._set_gravity(grav, reducer)
+            if grav == 'ON' or grav == 'TRUE':
+                reducer.to_Q.set_gravity(True, override=False)
+            elif grav == 'OFF' or grav == 'FALSE':
+                reducer.to_Q.set_gravity(False, override=False)
+            elif grav.startswith('LEXTRA'):
+                extra_length = grav[7:].strip()
+                reducer.to_Q.set_extra_length(float(extra_length), override=False)
+            else:
+                _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
+                reducer.to_Q.set_gravity(False, override=False)
+                reducer.to_Q.set_extra_length(0.0, override=False)
 
         elif upper_line.startswith('FIT/TRANS/'):
-            selector, params = self._parse_trans_fit(upper_line)
+            # check if the selector is passed:
+            selector = 'BOTH'
+            if 'SAMPLE' in upper_line:
+                selector = 'SAMPLE'
+                params = upper_line[17:].split()  # remove FIT/TRANS/SAMPLE/
+            elif 'CAN' in upper_line:
+                selector = 'CAN'
+                params = upper_line[14:].split()  # remove FIT/TRANS/CAN/
+            else:
+                params = upper_line[10:].split()  # remove FIT/TRANS/
+
             try:
-                self._set_trans_fit(params, reducer, selector)
+                nparams = len(params)
+                if nparams == 1:
+                    fit_type = params[0]
+                    lambdamin = lambdamax = None
+                elif nparams == 3:
+                    fit_type, lambdamin, lambdamax = params
+                else:
+                    raise IOError
+                reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
+                                                              fit_method=fit_type, override=True,
+                                                              selector=selector)
             except IOError:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
@@ -3422,10 +3403,11 @@ class UserFile(ReductionStep):
             if nparams == 3 and is_prompt_peak_instrument(reducer):
                 reducer.transmission_calculator.removePromptPeakMin = float(params[1])
                 reducer.transmission_calculator.removePromptPeakMax = float(params[2])
-            elif reducer.instrument.name() == 'LOQ':
-                _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
             else:
-                _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
+                if reducer.instrument.name() == 'LOQ':
+                    _issueWarning('Incorrectly formatted FIT/MONITOR line, %s, line ignored' % upper_line)
+                else:
+                    _issueWarning('FIT/MONITOR line specific to LOQ instrument. Line ignored')
 
         elif upper_line == 'SANS2D' or upper_line == 'LOQ' or upper_line == 'LARMOR':
             self._check_instrument(upper_line, reducer)
@@ -3435,7 +3417,10 @@ class UserFile(ReductionStep):
 
         elif upper_line.startswith('SAMPLE/PATH'):
             flag = upper_line[12:].strip()
-            reducer.wide_angle_correction = flag == 'ON' or flag == 'TRUE'
+            if flag == 'ON' or flag == 'TRUE':
+                reducer.wide_angle_correction = True
+            else:
+                reducer.wide_angle_correction = False
 
         elif line.startswith('!') or not line:
             # this is a comment or empty line, these are allowed
@@ -3457,41 +3442,34 @@ class UserFile(ReductionStep):
 
         reducer._corr_and_scale.rescale = 100.0
 
-    def _limit_line_invalidity(self, limits, limit_line, reducer):
+    # Read a limit line of a mask file
+    def readLimitValues(self, limit_line, reducer): # noqa: C901
+        limits = limit_line.split('L/')
         if len(limits) != 2:
-            return (limits, "Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+            _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+            return
         limits = limits[1]
+        limit_type = ''
 
         if limits.startswith('SP '):
             # We don't use the L/SP line
-            return (limits, "L/SP lines are ignored")
+            _issueWarning("L/SP lines are ignored")
+            return
 
         if limits.upper().startswith('Q/RCUT'):
             limits = limits.upper().split('RCUT')
             if len(limits) != 2:
-                return (limits, "Badly formed L/Q/RCUT line")
+                _issueWarning("Badly formed L/Q/RCUT line")
             else:
                 # When read from user file the unit is in mm but stored here it units of meters
                 reducer.to_Q.r_cut = float(limits[1]) / 1000.0
-                return (limits, " ")
+            return
         if limits.upper().startswith('Q/WCUT'):
             limits = limits.upper().split('WCUT')
             if len(limits) != 2:
-                return (limits, "Badly formed L/Q/WCUT line")
+                _issueWarning("Badly formed L/Q/WCUT line")
             else:
                 reducer.to_Q.w_cut = float(limits[1])
-                return (limits, " ")
-
-        return (limits, False)
-
-    # Read a limit line of a mask file
-    def readLimitValues(self, limit_line, reducer):
-        limits = limit_line.split('L/')
-
-        (limits, limit_invalidity) = self._limit_line_invalidity(limits, limit_line, reducer)
-        if limit_invalidity:
-            if limit_invalidity != " ":
-                _issueWarning(limit_invalidity)
             return
 
         rebin_str = None
@@ -3553,7 +3531,8 @@ class UserFile(ReductionStep):
             if maxval.endswith('/NOMIRROR'):
                 maxval = maxval.split('/NOMIRROR')[0]
                 mirror = False
-            reducer.mask.set_phi_limit(float(minval), float(maxval), mirror, override=False)
+            reducer.mask.set_phi_limit(
+                float(minval), float(maxval), mirror, override=False)
         elif limit_type.upper() == 'EVENTSTIME':
             if rebin_str:
                 reducer.settings["events.binning"] = rebin_str
@@ -3562,27 +3541,38 @@ class UserFile(ReductionStep):
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
-    def _parse_mon_line_spectrum(self, details, reducer, interpolate):
-        reducer.set_monitor_spectrum(int(details.split('=')[1]), interpolate, override=False)
-        self._incid_monitor_lckd = True
+    def _read_mon_line(self, details, reducer): # noqa: C901
 
-    def _parse_mon_line_length(self, details, reducer, interpolate):
-        details = details.split('=')[1]
-        options = details.split()
-        spectrum = int(options[1])
+        # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
+        interpolate = False
+        interPlace = details.upper().find('/INTERPOLATE')
+        if interPlace != -1:
+            interpolate = True
+            details = details[0:interPlace]
 
-        # the settings here are overriden by MON/SPECTRUM
-        if not self._incid_monitor_lckd:
+        if details.upper().startswith('SPECTRUM'):
             reducer.set_monitor_spectrum(
-                spectrum, interpolate, override=False)
+                int(details.split('=')[1]), interpolate, override=False)
+            self._incid_monitor_lckd = True
 
-    def _parse_mon_line_trans(self, details, reducer, interpolate):
+        elif details.upper().startswith('LENGTH'):
+            details = details.split('=')[1]
+            options = details.split()
+            spectrum = int(options[1])
+            #            reducer.instrument.monitor_zs[spectrum] = options[0]
+
+            # the settings here are overriden by MON/SPECTRUM
+            if not self._incid_monitor_lckd:
+                reducer.set_monitor_spectrum(
+                    spectrum, interpolate, override=False)
+
+        elif details.upper().startswith('TRANS'):
             parts = details.split('=')
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM':
                 return 'Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=... not: '
             reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
 
-    def _parse_mon_line_direct_flat(self, details, reducer):
+        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
             parts = details.split("=")
             if len(parts) == 2:
                 filepath = parts[1].rstrip()
@@ -3601,56 +3591,41 @@ class UserFile(ReductionStep):
                 parts = _type.split("/")
                 if len(parts) == 1:
                     if parts[0].upper() == 'DIRECT':
-                        reducer.instrument.cur_detector().correction_file = filepath
-                        reducer.instrument.other_detector().correction_file = filepath
+                        reducer.instrument.cur_detector().correction_file \
+                            = filepath
+                        reducer.instrument.other_detector().correction_file \
+                            = filepath
                     elif parts[0].upper() == 'HAB':
                         try:
-                            reducer.instrument.getDetector('HAB').correction_file = filepath
+                            reducer.instrument.getDetector('HAB').correction_file \
+                                = filepath
                         except AttributeError:
                             raise AttributeError(
                                 'Detector HAB does not exist for the current instrument, set the instrument to LOQ first')
                     elif parts[0].upper() == 'FLAT':
                         reducer.prep_normalize.setPixelCorrFile(filepath, 'REAR')
+                    else:
+                        pass
                 elif len(parts) == 2:
                     detname = parts[1]
                     if detname.upper() == 'REAR':
                         if parts[0].upper() == "FLAT":
                             reducer.prep_normalize.setPixelCorrFile(filepath, 'REAR')
                         else:
-                            reducer.instrument.getDetector('REAR').correction_file = filepath
+                            reducer.instrument.getDetector('REAR').correction_file \
+                                = filepath
                     elif detname.upper() == 'FRONT' or detname.upper() == 'HAB':
                         if parts[0].upper() == "FLAT":
                             reducer.prep_normalize.setPixelCorrFile(filepath, 'FRONT')
                         else:
-                            reducer.instrument.getDetector('FRONT').correction_file = filepath
+                            reducer.instrument.getDetector('FRONT').correction_file \
+                                = filepath
                     else:
                         return 'Incorrect detector specified for efficiency file: '
                 else:
                     return 'Unable to parse monitor line: '
             else:
                 return 'Unable to parse monitor line: '
-
-    def _read_mon_line(self, details, reducer):
-
-        # MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
-        interpolate = False
-        inter_place = details.upper().find('/INTERPOLATE')
-        if inter_place != -1:
-            interpolate = True
-            details = details[0:inter_place]
-
-        if details.upper().startswith('SPECTRUM'):
-            return self._parse_mon_line_spectrum(details, reducer, interpolate)
-
-        elif details.upper().startswith('LENGTH'):
-            return self._parse_mon_line_length(details, reducer, interpolate)
-
-        elif details.upper().startswith('TRANS'):
-            return self._parse_mon_line_trans(details, reducer, interpolate)
-
-        elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
-            return self._parse_mon_line_direct_flat(details, reducer)
-
         else:
             return 'Unable to parse monitor line: '
 
