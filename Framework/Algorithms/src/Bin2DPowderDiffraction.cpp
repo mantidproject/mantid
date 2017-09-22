@@ -81,9 +81,9 @@ void Bin2DPowderDiffraction::init() {
   declareProperty(
       make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);
-  declareProperty(
-      make_unique<ArrayProperty<double>>("dPerpendicularBinning", rebinValidator),
-      docString);
+  declareProperty(make_unique<ArrayProperty<double>>("dPerpendicularBinning",
+                                                     rebinValidator),
+                  docString);
 
   const std::vector<std::string> exts{".txt", ".dat"};
   declareProperty(
@@ -124,7 +124,8 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
 
   const auto useBinFile = !getPointerToProperty("BinEdgesFile")->isDefault();
   const auto useBinning1 = !getPointerToProperty("dSpaceBinning")->isDefault();
-  const auto useBinning2 = !getPointerToProperty("dPerpendicularBinning")->isDefault();
+  const auto useBinning2 =
+      !getPointerToProperty("dPerpendicularBinning")->isDefault();
   if (!useBinFile && !useBinning1 && !useBinning2) {
     const std::string msg = "You must specify either dSpaceBinning and "
                             "dPerpendicularBinning, or a BinEdgesFile.";
@@ -132,8 +133,9 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
     result["dPerpendicularBinning"] = msg;
     result["BinEdgesFile"] = msg;
   } else if (useBinFile && (useBinning1 || useBinning2)) {
-    const std::string msg = "You must specify either dSpaceBinning and "
-                            "dPerpendicularBinning, or a BinEdgesFile, but not both.";
+    const std::string msg =
+        "You must specify either dSpaceBinning and "
+        "dPerpendicularBinning, or a BinEdgesFile, but not both.";
     result["BinEdgesFile"] = msg;
   }
 
@@ -192,7 +194,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     static_cast<void>(createAxisFromRebinParams(getProperty("dSpaceBinning"),
                                                 dBins.mutableRawData()));
     HistogramData::BinEdges binEdges(dBins);
-    dPerpSize = createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
+    dPerpSize =
+        createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
     dSize = binEdges.size();
     outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1,
                                                    dSize, dSize - 1);
@@ -230,8 +233,9 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
       double theta = 0.5 * spectrumInfo.twoTheta(snum);
       double sin_theta = sin(theta);
       if (sin_theta == 0) {
-        throw std::runtime_error("Spectrum " + std::to_string(snum) +
-                                 " has sin(theta)=0. Cannot calculate d-Spacing!");
+        throw std::runtime_error(
+            "Spectrum " + std::to_string(snum) +
+            " has sin(theta)=0. Cannot calculate d-Spacing!");
       }
       if (cos(theta) <= 0) {
         throw std::runtime_error(
@@ -251,11 +255,13 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
         auto d = calcD(ev.tof(), sin_theta);
         auto dp = calcDPerp(ev.tof(), log_cos_theta);
         const auto lowy = std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
-        if ((lowy == dp_vec.end()) || (lowy == dp_vec.begin())) continue;
+        if ((lowy == dp_vec.end()) || (lowy == dp_vec.begin()))
+          continue;
         int64_t dp_index = std::distance(dp_vec.begin(), lowy) - 1;
         auto xs = binsFromFile ? fileXbins[dp_index] : dBins.rawData();
         const auto lowx = std::lower_bound(xs.begin(), xs.end(), d);
-        if ((lowx == xs.end()) || lowx == xs.begin()) continue;
+        if ((lowx == xs.end()) || lowx == xs.begin())
+          continue;
         int64_t d_index = std::distance(xs.begin(), lowx) - 1;
         // writing to the same vectors is not thread-safe
         PARALLEL_CRITICAL(newValues) {
@@ -372,12 +378,12 @@ void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
   }
 }
 
-double calcD(double wavelength, double sintheta){
-    return wavelength * 0.5 / sintheta;
+double calcD(double wavelength, double sintheta) {
+  return wavelength * 0.5 / sintheta;
 }
 
-double calcDPerp(double wavelength, double logcostheta){
-    return sqrt(wavelength * wavelength - 2.0 * logcostheta);
+double calcDPerp(double wavelength, double logcostheta) {
+  return sqrt(wavelength * wavelength - 2.0 * logcostheta);
 }
 
 } // namespace Algorithms

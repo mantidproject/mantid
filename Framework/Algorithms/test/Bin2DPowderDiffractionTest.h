@@ -57,7 +57,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -104,7 +105,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_bin2d_test1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
@@ -213,7 +215,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_bin2d_test3"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dSpaceBinning", "2,2,6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("dPerpendicularBinning", "1,2,5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("NormalizeByBinArea", "0"));
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
     TS_ASSERT(!alg.isExecuted());
