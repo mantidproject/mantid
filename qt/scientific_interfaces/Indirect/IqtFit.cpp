@@ -965,7 +965,7 @@ void IqtFit::updateProperties(int specNo) {
     
     for (auto &paramName : paramMap.keys()) {
       QString propertyName = m_parameterToProperty[paramName];
-      m_dblManager->setValue(m_properties[paramName], paramMap[paramName]);
+      m_dblManager->setValue(m_properties[propertyName], paramMap[paramName]);
     }
   }
   else {
