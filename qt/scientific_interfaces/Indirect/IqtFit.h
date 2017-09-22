@@ -74,11 +74,11 @@ private:
   void updateFitFunctions();
   void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
-  QMap<QString, QString>
+  QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
   void IqtFit::extendParameterToPropertyMap(
       const QString &functionName, const QString &prefix,
-      QMap<QString, QString> &parameterToProperty);
+      QHash<QString, QString> &parameterToProperty);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -96,8 +96,8 @@ private:
   size_t m_runMin;
   size_t m_runMax;
   QVector<QString> m_fitFunctions;
-  QVector<QMap<QString, double>> m_parameterValues;
-  QMap<QString, QString> m_parameterToProperty;
+  QHash<size_t, QMap<QString, double>> m_parameterValues;
+  QHash<QString, QString> m_parameterToProperty;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
