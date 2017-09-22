@@ -8,6 +8,7 @@
 namespace Mantid {
 namespace Indexing {
 
+/// Returns a scattered copy of `indexInfo` with storage mode `Distributed`.
 IndexInfo scatter(const Indexing::IndexInfo &indexInfo) {
   using namespace Parallel;
   if (indexInfo.communicator().size() == 1 ||

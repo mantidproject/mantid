@@ -10,6 +10,9 @@ class IndexInfo;
 /** Scattering for IndexInfo, in particular changing its storage mode to
   Parallel::StorageMode::Distributed.
 
+  @author Simon Heybrock
+  @date 2017
+
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
