@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     # simple tests
     def test_non_existing_file(self):

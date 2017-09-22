@@ -50,4 +50,4 @@ from . import AbinsParameters
 from . import AbinsConstants
 from . import AbinsTestHelpers
 
-from .GeneralLoadDFTTester import GeneralLoadDFTTester
+from .GeneralLoadAbInitioTester import GeneralLoadAbInitioTester

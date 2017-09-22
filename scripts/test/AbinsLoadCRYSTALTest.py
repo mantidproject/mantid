@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
