@@ -22,6 +22,8 @@ class CrystalFieldFunctionTest : public CxxTest::TestSuite {
 public:
   void test_names_ss() {
     CrystalFieldFunction cf;
+    TS_ASSERT_EQUALS(cf.nParams(), 0);
+
     cf.setAttributeValue("Ions", "Ce");
     cf.setAttributeValue("Symmetries", "C2v");
     cf.setAttributeValue("Temperatures", std::vector<double>({44}));
@@ -34,6 +36,7 @@ public:
     TS_ASSERT_EQUALS(attributeNames[1], "Symmetries");
     TS_ASSERT_EQUALS(attributeNames[2], "Temperatures");
 
+    TS_ASSERT_EQUALS(cf.nParams(), 40);
     TS_ASSERT_EQUALS(cf.parameterName(0), "BmolX");
     TS_ASSERT_EQUALS(cf.parameterName(6), "B20");
     TS_ASSERT_EQUALS(cf.parameterName(26), "IB44");
