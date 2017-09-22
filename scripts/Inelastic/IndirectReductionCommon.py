@@ -23,17 +23,21 @@ def create_file_range_parser(instrument):
     def parser(file_range):
         file_range = file_range.strip()
         # Check whether this is a range or single file
-        if '-' in file_range:
+        if '-' in file_range or ':' in file_range:
             lower, upper = file_range.split('-', 1)
             run_numbers = range(int(lower), int(upper)+1)
-            return [instrument + str(run) for run in run_numbers]
+
+            if '-' in file_range:
+                return [[instrument + str(run) for run in run_numbers]]
+            else:
+                return [[instrument + str(run)] for run in run_numbers]
         elif '+' in file_range:
-            return [instrument + run for run in file_range.split('+')]
+            return [[instrument + run for run in file_range.split('+')]]
         else:
             try:
-                return [instrument + str(int(file_range))]
+                return [[instrument + str(int(file_range))]]
             except ValueError:
-                return [file_range]
+                return [[file_range]]
     return parser
 
 
@@ -55,8 +59,8 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split('_')[0]
     parse_file_range = create_file_range_parser(instrument)
-    file_ranges = [file_range for range_list in file_ranges for file_range in range_list.split(',')]
-    file_groups = [parse_file_range(file_range) for file_range in file_ranges]
+    file_ranges = [file_range for range_str in file_ranges for file_range in range_str.split(',')]
+    file_groups = [file_group for file_range in file_ranges for file_group in parse_file_range(file_range)]
 
     workspace_names = []
     chopped_data = False
@@ -218,7 +222,7 @@ def chop_workspace(workspace, monitor_index):
                  IntegrationRangeLower=5000.0,
                  IntegrationRangeUpper=10000.0,
                  NChops=5)
-        return workspace.getNames(), True
+        return mtd[workspace_name].getNames(), True
     else:
         return [workspace_name], False
 
