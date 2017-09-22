@@ -31,7 +31,7 @@ class FFTTransformTest(unittest.TestCase):
         self.model.getModel=mock.Mock()
  
         #set presenter
-        self.presenter=transform_presenter.transformPresenter(self.view,self.model)
+        self.presenter=transform_presenter.TransformPresenter(self.view,self.model)
 
     def test_changeDisplay(self):
         self.presenter.updateDisplay(1)
