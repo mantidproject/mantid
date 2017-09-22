@@ -278,14 +278,25 @@ class TOFTOFScriptElement(BaseScriptElement):
         def get_time(workspace):
             return get_log(workspace, 'duration')
 
+        def merge_runs(ws_raw, raw_runs, outws, comment):
+            l("{} = Load(Filename='{}')" .format(ws_raw, raw_runs))
+            l("{} = MergeRuns({})" .format(outws, ws_raw))
+            l("{}.setComment('{}')" .format(outws, comment))
+            l("temperature = np.mean({})".format(get_log(outws,'temperature')))
+            l("AddSampleLog({}, LogName='temperature', LogText=str(temperature), LogType='Number', LogUnit='K')"
+              .format(outws))
+            if not self.keepSteps:
+                l("DeleteWorkspace({})" .format(ws_raw))
+            l()
+
         def save_wsgroup(wsgroup, suffix):
             l("# save {}".format(wsgroup))
             l("for ws in {}:".format(wsgroup))
             l("    name = ws.getComment() + {}".format(suffix))
             if self.saveNXSPE:
-                l("    SaveNXSPE(ws, join('{}',name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
+                l("    SaveNXSPE(ws, join('{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
             if self.saveNexus:
-                l("    SaveNexus(ws, join('{}',name + '.nxs'))".format(self.saveDir))
+                l("    SaveNexus(ws, join('{}', name + '.nxs'))".format(self.saveDir))
             l()
 
 
@@ -309,13 +320,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsVan    = self.prefix + 'Van'
 
             l("# vanadium runs")
-            l("{} = Load(Filename='{}')" .format(wsRawVan, self.vanRuns))
-            l("{} = TOFTOFMergeRuns({})" .format(wsVan, wsRawVan))
-            l("{}.setComment('{}')"      .format(wsVan, self.vanCmnt))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(wsRawVan))
-            l()
-
+            merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt)
             allGroup.append(wsVan)
 
         # empty can runs
@@ -324,13 +329,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsEC    = self.prefix + 'EC'
 
             l("# empty can runs")
-            l("{} = Load(Filename='{}')" .format(wsRawEC, self.ecRuns))
-            l("{} = TOFTOFMergeRuns({})" .format(wsEC, wsRawEC))
-            l("{}.setComment('EC')".format(wsEC))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(wsRawEC))
-            l()
-
+            merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC')
             allGroup.append(wsEC)
 
         # data runs
@@ -350,12 +349,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             allGroup.append(wsData)
 
             l("# data runs {}"           .format(postfix))
-            l("{} = Load(Filename='{}')" .format(wsRawData, runs))
-            l("{} = TOFTOFMergeRuns({})" .format(wsData, wsRawData))
-            l("{}.setComment('{}')"      .format(wsData, cmnt))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(wsRawData))
-            l()
+            merge_runs(wsRawData, runs, wsData, cmnt)
 
             if i == 0:
                 wsData0 = wsData
@@ -482,7 +476,6 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.ecRuns:
                 l("{} = GroupWorkspaces({}list({}.getNames()))"
                   .format(gData, group_list([wsECNorm2], ' + '), gDataSource))
-                #l("{} = GroupWorkspaces({})" .format(gData, group_list(gDataSource, wsECNorm2))
             else:
                 l("{} = CloneWorkspace({})" .format(gData, gDataSource))
         l()
