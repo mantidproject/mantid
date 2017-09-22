@@ -781,9 +781,7 @@ public:
     }
   }
 
-  void test_MPI_load() {
-    ParallelTestHelpers::runParallel(run_MPI_load);
-  }
+  void test_MPI_load() { ParallelTestHelpers::runParallel(run_MPI_load); }
 
 private:
   std::string wsSpecFilterAndEventMonitors;
