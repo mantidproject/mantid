@@ -32,11 +32,12 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <QStringList>
+#include <boost/tuple/tuple.hpp>
 #include <map>
 #include <set>
 #include <sstream>
@@ -50,59 +51,54 @@ QStringList DLLExport splitByCommas(const QString &namesString);
 
 QString DLLExport plot1DString(const QStringList &ws_names);
 
-QString DLLExport
-tableString(const TreeData &treeData, const WhiteList &whitelist);
+QString DLLExport tableString(const TreeData &treeData,
+                              const WhiteList &whitelist);
 
 QString DLLExport titleString(const QString &wsName);
 
-boost::tuple<QString, QString> DLLExport postprocessGroupString(
-    const GroupData &rowMap, const WhiteList &whitelist,
-    const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
-    const QString &postprocessingOptions);
+boost::tuple<QString, QString> DLLExport
+postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
+                       const ProcessingAlgorithm &processor,
+                       const PostprocessingAlgorithm &postprocessor,
+                       const QString &postprocessingOptions);
 
-QString DLLExport
-plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
-            const ProcessingAlgorithm &processor);
+QString DLLExport plotsString(const QStringList &output_ws,
+                              const QString &stitched_wsStr,
+                              const ProcessingAlgorithm &processor);
 
-QString DLLExport
-getReducedWorkspaceName(const RowData &data,
-                        const WhiteList &whitelist,
-                        const QString &prefix = "");
+QString DLLExport getReducedWorkspaceName(const RowData &data,
+                                          const WhiteList &whitelist,
+                                          const QString &prefix = "");
 
 boost::tuple<QString, QString> DLLExport reduceRowString(
-    const RowData &data, const QString &instrument,
-    const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const RowData &data, const QString &instrument, const WhiteList &whitelist,
+    boost::optional<PreprocessingStep> preprocessingStep,
     const ProcessingAlgorithm &processor,
     const std::map<QString, QString> &preprocessOoptionsMap,
     const QString &processingOptions);
 
-boost::tuple<QString, QString> DLLExport
-loadWorkspaceString(const QString &runStr, const QString &instrument,
-                    const PreprocessingAlgorithm &preprocessor,
-                    const QString &options);
+boost::tuple<QString, QString> DLLExport loadWorkspaceString(
+    const QString &runStr, const QString &instrument,
+    const PreprocessingAlgorithm &preprocessor, const QString &options);
 
-QString DLLExport
-plusString(const QString &input_name, const QString &output_name,
-           const PreprocessingAlgorithm &preprocessor,
-           const QString &options);
+QString DLLExport plusString(const QString &input_name,
+                             const QString &output_name,
+                             const PreprocessingAlgorithm &preprocessor,
+                             const QString &options);
 
-boost::tuple<QString, QString> DLLExport
-loadRunString(const QString &run, const QString &instrument,
-              const QString &prefix);
+boost::tuple<QString, QString>
+    DLLExport loadRunString(const QString &run, const QString &instrument,
+                            const QString &prefix);
 
-QString DLLExport
-completeOutputProperties(const QString &algName, size_t currentProperties);
+QString DLLExport completeOutputProperties(const QString &algName,
+                                           size_t currentProperties);
 
 class DLLExport GenerateNotebook {
 
 public:
   GenerateNotebook(
-      QString name, const QString instrument,
-      const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      QString name, const QString instrument, const WhiteList &whitelist,
+      boost::optional<PreprocessingStep> preprocessingStep,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> preprocessingInstructionsMap,
@@ -122,7 +118,7 @@ private:
   WhiteList m_whitelist;
   // The map indicating the columns that were pre-processed and their
   // corresponding pre-processing algorithms
-  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
+  boost::optional<PreprocessingStep> m_preprocessingStep;
   // The processing (reduction) algorithm
   ProcessingAlgorithm m_processor;
   // The post-processing algorithm

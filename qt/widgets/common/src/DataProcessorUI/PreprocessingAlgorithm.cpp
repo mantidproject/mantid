@@ -35,6 +35,8 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(
   m_outProperty = outputWsProperties.at(0);
 }
 
+const PreprocessingAlgorithm PreprocessingAlgorithm::DO_NOTHING = PreprocessingAlgorithm();
+
 /** Delegating constructor
 *
 * @param name : The name of the pre-processing algorithm

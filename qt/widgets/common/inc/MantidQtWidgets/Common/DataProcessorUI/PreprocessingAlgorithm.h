@@ -60,7 +60,11 @@ public:
   // The prefix to add to the output property
   QString prefix() const;
 
+  inline static const PreprocessingAlgorithm& doNothing() {
+    return DO_NOTHING;
+  }
 private:
+  static const PreprocessingAlgorithm DO_NOTHING;
   // A prefix to the name of the pre-processed output ws
   QString m_prefix;
   // The name of the LHS input property
