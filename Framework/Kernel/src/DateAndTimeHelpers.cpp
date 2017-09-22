@@ -12,7 +12,7 @@ std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
   // just take the date not the time or any date-time separator
   std::string strippedDate = date.substr(0, 10);
   const size_t nSpace = strippedDate.find(' ');
-  return {nSpace != std::string::npos, nSpace, strippedDate};
+  return std::make_tuple(nSpace != std::string::npos, nSpace, strippedDate);
 }
 } // namespace
 
