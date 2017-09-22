@@ -98,8 +98,9 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
     // Note that spectrum numbers are now detector IDs. This is not consistent
-    // with the load without filter, but it is the old behavior. Can we change
-    // this to be more sensible?
+    // with the load without filter, but it is the behavior of the old index
+    // setup code. This should probably be changed to give spectrum numbers
+    // consistent with loading the full range, namely 3 and 4.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(11));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(12));
     const auto specDefs = indexInfo.spectrumDefinitions();
@@ -115,9 +116,10 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 2);
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
     // Note that we are NOT creating spectra for the gap between IDs 2 and 11,
-    // contrary to the old behavior.
+    // contrary to the behavior of the old index setup code.
     TS_ASSERT_EQUALS(indexInfo.size(), 3);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    // Should be 3 and 4 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(12));
     const auto specDefs = indexInfo.spectrumDefinitions();
@@ -133,6 +135,7 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    // Should be 3 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
     const auto specDefs = indexInfo.spectrumDefinitions();
     TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
@@ -147,6 +150,7 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 11);
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    // Should be 3 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
     const auto specDefs = indexInfo.spectrumDefinitions();
     TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(1));
@@ -160,6 +164,7 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, 12);
     TS_ASSERT_EQUALS(indexInfo.size(), 3);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
+    // Should be 3 and 4 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(11));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(12));
     const auto specDefs = indexInfo.spectrumDefinitions();
@@ -176,6 +181,7 @@ public:
     TS_ASSERT_EQUALS(indexInfo.size(), 3);
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
+    // Should be 3 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(2), SpectrumNumber(11));
     const auto specDefs = indexInfo.spectrumDefinitions();
     TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(0));
@@ -190,7 +196,8 @@ public:
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
     // Note that spectrum numbers are simply starting at 1, i.e., are not the
-    // same as without bank-filtering. This is consistent with the old behavior.
+    // same as without bank-filtering. To be consistent with the load without
+    // bank filter this should be 2 and 4 when fixing legacy behavior.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
     const auto specDefs = indexInfo.spectrumDefinitions();
@@ -205,9 +212,11 @@ public:
     // apply when loading actual events in ProcessBankData (range is still
     // ignored though).
     const auto indexInfo = indexSetup.makeIndexInfo({"det-2", "det-12"});
-    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, 12);
+    // Filter ignored, make sure also limits are set correctly.
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
     TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
     TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    // Should be 2 and 4 if inconsistent legacy behavior is fixed.
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(1));
     TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(2));
     const auto specDefs = indexInfo.spectrumDefinitions();

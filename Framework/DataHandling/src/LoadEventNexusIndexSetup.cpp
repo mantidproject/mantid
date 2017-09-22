@@ -72,6 +72,10 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(
   }
   Indexing::IndexInfo indexInfo(spectrumDefinitions.size());
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
+  // Filters are ignored when selecting bank names. Reset min/max to avoid
+  // unintended dropping of events in the loader.
+  m_min = EMPTY_INT();
+  m_max = EMPTY_INT();
   return indexInfo;
 }
 
