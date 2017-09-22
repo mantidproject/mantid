@@ -1610,10 +1610,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     g_log.warning() << "The shortest TOF was negative! At least 1 event has an "
                        "invalid time-of-flight.\n";
   if (bad_tofs > 0)
-    g_log.warning() << "Found " << bad_tofs
-                    << " events with TOF > 2e8. This "
-                       "may indicate errors in the raw "
-                       "TOF data.\n";
+    g_log.warning() << "Found " << bad_tofs << " events with TOF > 2e8. This "
+                                               "may indicate errors in the raw "
+                                               "TOF data.\n";
 
   // Use T0 offset from TOPAZ Parameter file if it exists
   if (m_ws->getInstrument()->hasParameter("T0")) {

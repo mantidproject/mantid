@@ -258,7 +258,7 @@ public:
    *  @throw range_error if the indeces point outside the buffer.
    *  @return A reference to the value
    */
-  T &operator()(int i, int j) const { return this->operator[](i *dim1() + j); }
+  T &operator()(int i, int j) const { return this->operator[](i * dim1() + j); }
   /** Returns a value assuming the data is a tree-dimensional array
    *  @param i :: The index along dim0()
    *  @param j :: The index along dim1()
