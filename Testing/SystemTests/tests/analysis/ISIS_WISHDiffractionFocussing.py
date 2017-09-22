@@ -64,6 +64,7 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
         self.focused = self._focused_workspaces[0]
 
     def validate(self):
+        self.disableChecking.append("ParameterMap")
         self.assertEqual(len(self._focused_workspaces), 1)
         ws = self.focused
 

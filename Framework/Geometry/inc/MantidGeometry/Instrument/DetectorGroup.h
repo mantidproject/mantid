@@ -240,7 +240,7 @@ protected:
 
   void getBoundingBox(double &, double &, double &, double &, double &,
                       double &) const {}
-
+  bool isVisible() const override;
   void draw() const override {}
   void drawObject() const override {}
   void initDraw() const override {}

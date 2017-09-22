@@ -127,6 +127,10 @@ bool ComponentInfo::hasParent(const size_t componentIndex) const {
   return m_componentInfo->hasParent(componentIndex);
 }
 
+bool ComponentInfo::isVisible(const size_t componentIndex) const {
+  return m_componentInfo->isVisible(componentIndex);
+}
+
 Kernel::V3D ComponentInfo::sourcePosition() const {
   return Kernel::toV3D(m_componentInfo->sourcePosition());
 }

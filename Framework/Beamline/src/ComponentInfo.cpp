@@ -21,6 +21,7 @@ ComponentInfo::ComponentInfo(
     boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
     boost::shared_ptr<const std::vector<size_t>> parentIndices,
+    boost::shared_ptr<const std::vector<bool>> isVisible,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
     boost::shared_ptr<std::vector<Eigen::Quaterniond>> rotations,
     boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
@@ -31,7 +32,8 @@ ComponentInfo::ComponentInfo(
       m_detectorRanges(std::move(detectorRanges)),
       m_componentRanges(std::move(componentRanges)),
       m_parentIndices(std::move(parentIndices)),
-      m_positions(std::move(positions)), m_rotations(std::move(rotations)),
+      m_isVisible(std::move(isVisible)), m_positions(std::move(positions)),
+      m_rotations(std::move(rotations)),
       m_scaleFactors(std::move(scaleFactors)),
       m_size(m_assemblySortedDetectorIndices->size() +
              m_detectorRanges->size()),
@@ -62,6 +64,10 @@ ComponentInfo::ComponentInfo(
     throw std::invalid_argument(
         "ComponentInfo should have been provided same "
         "number of scale factors as number of components");
+  }
+  if (m_isVisible->size() != m_size) {
+    throw std::invalid_argument("ComponentInfo should have been provided with "
+                                "'isVisible' flag for every component");
   }
 }
 
@@ -263,6 +269,10 @@ void ComponentInfo::failIfScanning() const {
 
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return (*m_parentIndices)[componentIndex];
+}
+
+bool ComponentInfo::isVisible(const size_t componentIndex) const {
+  return (*m_isVisible)[componentIndex];
 }
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const {

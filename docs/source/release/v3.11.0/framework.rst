@@ -8,6 +8,7 @@ Framework Changes
 Concepts
 --------
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
+- A flag can be added to components in the :ref:`IDF <InstrumentDefinitionFile>` to stop them being rendered in the InstrumentView.
 
 Properties
 ----------

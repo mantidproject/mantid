@@ -45,6 +45,7 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
       std::vector<size_t>{3, 3, 4, 4, 4});
 
+  auto isVisible = boost::make_shared<std::vector<bool>>(5, true);
   std::vector<std::pair<size_t, size_t>> detectorRanges;
   detectorRanges.push_back(
       std::make_pair(0, 2)); // sub-assembly (registered first)
@@ -78,8 +79,8 @@ makeTreeExampleAndReturnGeometricArguments() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, compPositions, compRotations, scaleFactors, -1, -1);
-
+      parentIndices, isVisible, compPositions, compRotations, scaleFactors, -1,
+      -1);
   compInfo.setDetectorInfo(detectorInfo.get());
 
   return std::make_tuple(compInfo, detPositions, detRotations, *compPositions,
@@ -118,6 +119,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
   componentRanges.push_back(std::make_pair(
       0, 2)); // instrument assembly (with 1 sub-component and self)
 
+  auto isVisible = boost::make_shared<std::vector<bool>>(5, true);
   auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
       2, Eigen::Vector3d{0, 0, 0}); // 2 positions provided. 2 non-detectors
   auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -137,7 +139,7 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, positions, rotations, scaleFactors, -1, -1);
+      parentIndices, isVisible, positions, rotations, scaleFactors, -1, -1);
 
   componentInfo.setDetectorInfo(detectorInfo.get());
 
@@ -180,12 +182,13 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{});
+    auto isVisible = boost::make_shared<std::vector<bool>>(3, true);
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(3);
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
-                                parentIndices, positions, rotations,
+                                parentIndices, isVisible, positions, rotations,
                                 scaleFactors, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
@@ -213,6 +216,7 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::move(innerComponentRanges));
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
         1); // 1 position provided
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -221,8 +225,8 @@ public:
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
-                                   parentIndices, positions, rotations,
-                                   scaleFactors, -1, -1),
+                                   parentIndices, isVisible, positions,
+                                   rotations, scaleFactors, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -246,6 +250,8 @@ public:
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
         std::vector<size_t>{9, 9, 9}); // These indices are invalid, but that's
                                        // ok as not being tested here
+
+    auto isVisible = boost::make_shared<std::vector<bool>>();
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>(
         1); // 1 position provided
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>(
@@ -259,8 +265,8 @@ public:
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
-                                   parentIndices, positions, rotations,
-                                   scaleFactors, -1, -1),
+                                   parentIndices, isVisible, positions,
+                                   rotations, scaleFactors, -1, -1),
                      std::invalid_argument &);
   }
 

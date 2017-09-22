@@ -84,6 +84,9 @@ private:
   boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
       m_componentIdToIndexMap;
 
+  /// Whether component is visible
+  boost::shared_ptr<std::vector<bool>> m_isVisible;
+
   /// Counter for dropped detectors
   size_t m_droppedDetectors = 0;
 

@@ -8,6 +8,8 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 
@@ -37,11 +39,7 @@ bool isComponentFinite(const Mantid::Geometry::ComponentID &compID) {
   // on one of its axis. Check all to make sure it is not greater
   // than 1000 units in length.
   const double maximumSize = 999;
-  if (x > maximumSize || y > maximumSize || z > maximumSize) {
-    return false;
-  } else {
-    return true;
-  }
+  return std::max({x, y, z}) <= maximumSize;
 }
 }
 
@@ -50,14 +48,24 @@ namespace MantidWidgets {
 
 ObjComponentActor::ObjComponentActor(const InstrumentActor &instrActor,
                                      Mantid::Geometry::ComponentID compID)
-    : ComponentActor(instrActor, compID) {
+    : ComponentActor(instrActor, compID), m_log("ObjComponentActor"),
+      g_log(m_log) {
   // set the displayed colour
   setColors();
 
-  if (!isComponentFinite(compID)) {
-    // If the component does not have finite length we set it always
-    // hidden so scale is not messed up and it is not displayed.
+  if (!compID->isVisible()) {
+    // If the user has explicitly stated that this component should be hidden,
+    // then hide it;
     setAlwaysHidden();
+  } else if (!isComponentFinite(compID)) {
+    // If the component is too large, we hide it so that the scale is not messed
+    // up, and warn the user
+    setAlwaysHidden();
+    g_log.warning("Component \"" + compID->getName() +
+                  "\" was not rendered, as it is larger than the maximum size. "
+                  "\nIs the component defined correctly in the IDF? If the "
+                  "component does not have finite size, set "
+                  "\"HiddenInInstrumentView\" to True in the IDF");
   }
 
   // register the component with InstrumentActor and set the pick colour

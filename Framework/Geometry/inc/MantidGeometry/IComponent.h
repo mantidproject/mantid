@@ -128,6 +128,8 @@ public:
   virtual double getDistance(const IComponent &) const = 0;
   /// Get the bounding box for this component and store it in the given argument
   virtual void getBoundingBox(BoundingBox &boundingBox) const = 0;
+  /// Get whether this component should be rendered in the instrument view
+  virtual bool isVisible() const = 0;
 
   /** Gets the scaling factor of the object for the Object Component.
     * @return a vector with 1 in all 3 directions.

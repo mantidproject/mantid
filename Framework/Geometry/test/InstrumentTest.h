@@ -526,6 +526,7 @@ public:
     pmap->addV3D(bank2->getComponentID(), ParameterMap::pos(), bankEpsilon);
     pmap->addQuat(bank3->getComponentID(), ParameterMap::rot(), bankRot);
     pmap->addV3D(bank3->getComponentID(), ParameterMap::scale(), bankScale);
+    pmap->addBool(bank1->getComponentID(), ParameterMap::isHidden(), true);
 
     // Set instrument in ParameterMap to create DetectorInfo
     pmap->setInstrument(baseInstrument.get());
@@ -550,7 +551,7 @@ public:
     TS_ASSERT_EQUALS(
         compInfo.scaleFactor(compInfo.indexOf(bank3->getComponentID())),
         bankScale);
-
+	TS_ASSERT(!compInfo.isVisible(compInfo.indexOf(bank3->getComponentID())));
     const V3D detOffset{0.2, 0.3, 0.4};
     const V3D detEpsilon{5e-10, 5e-10, 5e-10};
     const V3D detAxis{0.2, 0.4, 13.3};
@@ -595,6 +596,7 @@ public:
     TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
                              ->getScaleFactor())
                   .isApprox(toVector3d(newScaleFactor), 1e-10));
+    TS_ASSERT(!legacyInstrument.getComponentByName("bank1")->isVisible());
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {

@@ -1249,7 +1249,7 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 }
 
 /// Returns a legacy ParameterMap, containing information that is now stored in
-/// DetectorInfo (masking, positions, rotations, scale factors).
+/// DetectorInfo (masking, positions, rotations, scale factors, isVisible).
 boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
   // Instrument is only needed for DetectorInfo access so it is not needed. This
@@ -1348,6 +1348,11 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
             .vec()
             .norm() >= imag_norm_max) {
       pmap->addQuat(componentId, ParameterMap::rot(), Kernel::toQuat(relRot));
+    }
+    const bool isVisible = componentId->isVisible();
+    if (!isVisible) {
+      // Only bother adding it if hidden, as the default is visible
+      pmap->addBool(componentId, ParameterMap::isHidden(), false);
     }
   }
 
