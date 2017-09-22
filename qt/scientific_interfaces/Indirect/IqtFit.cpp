@@ -303,6 +303,7 @@ void IqtFit::algorithmComplete(bool error) {
     return;
   }
 
+  m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
   readParametersFromTable(m_baseName + "_Parameters");
   updateProperties(m_uiForm.spPlotSpectrum->value());
 
@@ -682,29 +683,29 @@ void IqtFit::setDefaultParameters(const QString &name) {
   m_dblManager->setValue(m_properties[name + ".Beta"], 1.0);
 }
 
-std::map<std::string, std::string> IqtFit::createParameterToPropertyMap(const std::vector<std::string>& functionNames) {
-  std::map<std::string, std::string> parameterToProperty;
+QMap<QString, QString> IqtFit::createParameterToPropertyMap(const QVector<QString>& functionNames) {
+  QMap<QString, QString> parameterToProperty;
   int functionNumber = 1;
 
   for (auto &functionName : functionNames) {
-    std::string prefix = "f" + std::to_string(functionNumber) + ".";
+    QString prefix = "f" + QString::number(functionNumber) + ".";
     extendParameterToPropertyMap(functionName, prefix, parameterToProperty);
   }
 
   return parameterToProperty;
 }
 
-void IqtFit::extendParameterToPropertyMap(const std::string& functionName, const std::string& prefix, std::map<std::string, std::string>& parameterToProperty) {
-  bool isExponential = functionName == "Exponential" || functionName == "StretchedExp";
+void IqtFit::extendParameterToPropertyMap(const QString& functionName, const QString& prefix, QMap<QString, QString>& parameterToProperty) {
+  bool isExponential = boost::starts_with(functionName, "Exponential") || functionName == "StretchedExp";
 
   if (isExponential) {
-    std::string intensityName = prefix + "Height";
+    QString intensityName = prefix + "Height";
     parameterToProperty[intensityName] = functionName + ".Intensity";
-    std::string tauName = prefix + "Lifetime";
+    QString tauName = prefix + "Lifetime";
     parameterToProperty[tauName] = functionName + ".Tau";
 
     if (functionName == "StretchedExp") {
-      std::string betaName = prefix + "Stretching";
+      QString betaName = prefix + "Stretching";
       parameterToProperty[betaName] = functionName + ".Beta";
     }
   }
@@ -874,6 +875,7 @@ void IqtFit::singleFit() {
   disconnect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
     SLOT(plotGuess(QtProperty *)));
 
+  updateFitFunctions();
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
   m_singleFitAlg = iqtFitAlgorithm(specNo, specNo);
 
@@ -962,6 +964,7 @@ void IqtFit::updateProperties(int specNo) {
     QMap<QString, double> paramMap = m_parameterValues[specNo];
     
     for (auto &paramName : paramMap.keys()) {
+      QString propertyName = m_parameterToProperty[paramName];
       m_dblManager->setValue(m_properties[paramName], paramMap[paramName]);
     }
   }
@@ -984,8 +987,7 @@ void IqtFit::readParametersFromTable(std::string const& tableWsName) {
   // Check if a table with the specified name exists in the ADS
   if (AnalysisDataService::Instance().doesExist(tableWsName)) {
     auto tableWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(tableWsName);
-    auto parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
-    m_parameterValues.reserve(tableWs->rowCount());
+    m_parameterValues.reserve(boost::numeric_cast<int>(tableWs->rowCount()));
 
     // Initialize parameter values vector with maps for storing
     // values at each spectrum.
@@ -993,18 +995,17 @@ void IqtFit::readParametersFromTable(std::string const& tableWsName) {
       m_parameterValues.push_back(QMap<QString, double>());
     }
 
-    for (auto &columnName : tableWs->getColumnNames()) {
-      auto endPos = columnName.find_last_of('[');
-      columnName = columnName.substr(0, endPos);
-      auto it = parameterToProperty.find(columnName);
+    for (auto &name : tableWs->getColumnNames()) {
+      QString columnName = QString::fromStdString(name);
+      auto it = m_parameterToProperty.find(columnName);
 
       // Check whether the parameter of the current column, is
       // within the property table.
-      if (it != parameterToProperty.end()) {
-        auto const column = tableWs->getColumn(columnName);
+      if (it != m_parameterToProperty.end()) {
+        auto const column = tableWs->getColumn(name);
 
         for (size_t i = 0; i < column->size(); ++i) {
-          m_parameterValues[i][QString::fromStdString(columnName)] = column->toDouble(i);
+          m_parameterValues[boost::numeric_cast<int>(i)][columnName] = column->toDouble(i);
         }
       }
     }
@@ -1018,13 +1019,13 @@ void IqtFit::updateFitFunctions() {
   const int fitType = m_uiForm.cbFitType->currentIndex();
 
   if (fitType == 0)
-    m_fitFunctions = { "Exponential" };
+    m_fitFunctions = { "Exponential1" };
   else if (fitType == 1)
-    m_fitFunctions = { "Exponential", "Exponential" };
+    m_fitFunctions = { "Exponential1", "Exponential2" };
   else if (fitType == 2)
     m_fitFunctions = { "StretchedExp" };
   else if (fitType == 3)
-    m_fitFunctions = { "Exponential", "StretchedExp" };
+    m_fitFunctions = { "Exponential1", "StretchedExp" };
 }
 
 void IqtFit::fitContextMenu(const QPoint &) {

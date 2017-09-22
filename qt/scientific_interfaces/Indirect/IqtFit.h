@@ -71,12 +71,12 @@ private:
                                 const size_t &specMax);
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
                                                const size_t &specMax);
-  void readParametersFromTable(std::string const& tableWsName);
+  void readParametersFromTable(const std::string& tableWsName);
   void updateFitFunctions();
   void plotResult(const std::string& groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
-  std::map<std::string, std::string> createParameterToPropertyMap(const std::vector<std::string>& functionName);
-  void IqtFit::extendParameterToPropertyMap(const std::string& functionName, const std::string& prefix, std::map<std::string, std::string>& parameterToProperty);
+  QMap<QString, QString> createParameterToPropertyMap(const QVector<QString>& functionNames);
+  void IqtFit::extendParameterToPropertyMap(const QString& functionName, const QString& prefix, QMap<QString, QString>& parameterToProperty);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -93,8 +93,9 @@ private:
   std::string m_baseName;
   size_t m_runMin;
   size_t m_runMax;
-  std::vector<std::string> m_fitFunctions;
-  std::vector<QMap<QString, double>> m_parameterValues;
+  QVector<QString> m_fitFunctions;
+  QVector<QMap<QString, double>> m_parameterValues;
+  QMap<QString, QString> m_parameterToProperty;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
