@@ -12,6 +12,9 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
+#include "MantidIndexing/SpectrumNumber.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
@@ -27,9 +30,26 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
 namespace {
+boost::shared_ptr<const EventWorkspace>
+load_reference_workspace(const std::string &filename) {
+  // Construct default communicator *without* threading backend. In non-MPI run
+  // (such as when running unit tests) this will thus just be a communicator
+  // containing a single rank, independently on all ranks, which is what we want
+  // for default loading bhavior.
+  Parallel::Communicator comm;
+  auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
+  alg->setProperty("Filename", filename);
+  alg->setProperty("LoadLogs", false);
+  TS_ASSERT_THROWS_NOTHING(alg->execute());
+  TS_ASSERT(alg->isExecuted());
+  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<const EventWorkspace>(out);
+}
+
 void run_MPI_load(const Parallel::Communicator &comm) {
   auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
-  alg->setProperty("Filename", "CNCS_7860_event.nxs");
+  const std::string filename("CNCS_7860_event.nxs");
+  alg->setProperty("Filename", filename);
   alg->setProperty("LoadLogs", false);
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
@@ -47,6 +67,26 @@ void run_MPI_load(const Parallel::Communicator &comm) {
     TS_ASSERT_EQUALS(
         std::accumulate(localEventCounts.begin(), localEventCounts.end(), 0),
         112266);
+  }
+
+  const auto &reference = load_reference_workspace(filename);
+  const auto &indexInfo = eventWS->indexInfo();
+  size_t localCompared = 0;
+  for (size_t i = 0; i < reference->getNumberHistograms(); ++i) {
+    for (const auto &index :
+         indexInfo.makeIndexSet({static_cast<Indexing::SpectrumNumber>(
+             reference->getSpectrum(i).getSpectrumNo())})) {
+      TS_ASSERT_EQUALS(eventWS->getSpectrum(index), reference->getSpectrum(i));
+      ++localCompared;
+    }
+  }
+  // Consistency check: Make sure we really compared all spectra (protects
+  // against missing spectrum numbers or inconsistent mapping in IndexInfo).
+  std::vector<size_t> compared;
+  Parallel::gather(comm, localCompared, compared, 0);
+  if (comm.rank() == 0) {
+    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(), 0),
+                     reference->getNumberHistograms());
   }
 }
 }
@@ -781,7 +821,11 @@ public:
     }
   }
 
-  void test_MPI_load() { ParallelTestHelpers::runParallel(run_MPI_load); }
+  void test_MPI_load() {
+    int threads = 3; // Limited number of threads to avoid long running test.
+    ParallelTestHelpers::ParallelRunner runner(threads);
+    runner.run(run_MPI_load);
+  }
 
 private:
   std::string wsSpecFilterAndEventMonitors;
