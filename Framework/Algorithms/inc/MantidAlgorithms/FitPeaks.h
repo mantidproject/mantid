@@ -43,7 +43,7 @@ private:
 
   void fitPeaks();
 
-  void fitSpectraPeaks(size_t wi, std::vector<double> &peak_pos,
+  void fitSpectrumPeaks(size_t wi, std::vector<double> &peak_pos,
                        std::vector<std::vector<double>> &peak_params,
                        std::vector<double> &peak_chi2_vec,
                        std::vector<std::vector<double>> &fitted_functions,
@@ -88,6 +88,9 @@ private:
   std::vector<std::vector<double>> m_peakWindows;
   std::vector<std::vector<double>> m_peakRangeVec;
 
+  /// input peak parameters' names
+  std::vector<std::string> m_peakParamNames;
+  /// input peak parameters' starting values corresponding to above peak parameter names
   std::vector<double> m_initParamValues;
 
   size_t m_numPeaksToFit;
@@ -100,6 +103,9 @@ private:
 
   size_t m_startWorkspaceIndex;
   size_t m_stopWorkspaceIndex;
+
+  /// peak profile name
+  std::string mPeakProfile;
 };
 
 } // namespace Algorithms
