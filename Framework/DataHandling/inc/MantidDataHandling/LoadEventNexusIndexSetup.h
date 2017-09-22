@@ -11,6 +11,13 @@ namespace DataHandling {
 /** Helper for LoadEventNexus dealing with setting up indices (spectrum numbers
   an detector ID mapping) for workspaces.
 
+  Filters set via `min`, `max`, and `range` are used by LoadEventNexus for
+  selecting from the `event_id` entry in Nexus files. This may either correspond
+  to a spectrum number (ISIS) or a detector ID. Throughout this class IndexInfo
+  is used for filtering and thus the spectrum number is set to the requested
+  event_id ranges. The final returned IndexInfo will however have spectrum
+  numbers that, in general, are not the event_ids (except for ISIS).
+
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
