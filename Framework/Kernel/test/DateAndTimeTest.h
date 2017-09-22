@@ -58,6 +58,10 @@ public:
     TS_ASSERT_EQUALS(d, expected);
   }
 
+  void test_constructor_fails_invalid_string() {
+    TS_ASSERT_THROWS(DateAndTime("invalid time string"), std::invalid_argument);
+  }
+
   void test_limits_on_construction() {
     // direct nanoseconds constructor
     DateAndTime a, b, c;
