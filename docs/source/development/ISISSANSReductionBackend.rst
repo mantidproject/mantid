@@ -1080,7 +1080,7 @@ a particular masking instruction. The algorithm sub-steps are:
 *SANSMove*
 ------------
 
-The :ref:`SANSMove <algm-SANSMove>`algorithm moves a SANS workspace according to the settings in
+The :ref:`SANSMove <algm-SANSMove>` algorithm moves a SANS workspace according to the settings in
 the state object. Additionally the user can specify the beam centre.
 Note that if the beam centre is also specified in the state object, then the
 manual selection takes precedence. The way we perform a move is highly-instrument
