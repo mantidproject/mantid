@@ -48,7 +48,8 @@ class SANSReduction(PythonAlgorithm):
         else:
             alg.setProperty('Filename', filename)
         alg.setProperty('OutputWorkspace', output_ws)
-        self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+        if alg.existsProperty('ReductionProperties'):
+            alg.setProperty('ReductionProperties', property_manager_name)
         alg.execute()
         msg = 'Loaded %s\n' % filename
         if alg.existsProperty('OutputMessage'):
@@ -85,7 +86,7 @@ class SANSReduction(PythonAlgorithm):
         return output_str
 
     #pylint: disable=too-many-locals,too-many-branches
-    def _py_exec(self):
+    def _py_exec(self): # noqa: C901
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -98,9 +99,11 @@ class SANSReduction(PythonAlgorithm):
         if "SANSBeamFinderAlgorithm" in property_list:
             p=property_manager.getProperty("SANSBeamFinderAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
-            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            output_msg += self.output_message_if_exists(alg) + "\n"
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Load the sample data
         msg = self._multiple_load(filename, output_ws,
@@ -119,7 +122,8 @@ class SANSReduction(PythonAlgorithm):
             # center for the transmission calculation
             p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
-            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
             beam_center_x = alg.getProperty("FoundBeamCenterX").value
             beam_center_y = alg.getProperty("FoundBeamCenterY").value
@@ -130,16 +134,32 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", output_ws)
 
-            self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
+            if alg.existsProperty("BeamCenterX") \
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
+                alg.setProperty("BeamCenterX", beam_center_x)
+                alg.setProperty("BeamCenterY", beam_center_y)
 
-            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
 
-            self.copy_property_value_if_exists(alg, property_manager, "MeasuredTransmission",
-                                               "MeasuredTransmissionValue")
-            self.copy_property_value_if_exists(alg, property_manager, "MeasuredError",
-                                               "MeasuredTransmissionError")
-            output_msg += self.output_message_if_exists(alg) + "\n"
+            if alg.existsProperty("MeasuredTransmission"):
+                meas_trans = alg.getProperty("MeasuredTransmission").value
+                if property_manager.existsProperty("MeasuredTransmissionValue"):
+                    property_manager.setProperty("MeasuredTransmissionValue", meas_trans)
+                else:
+                    property_manager.declareProperty("MeasuredTransmissionValue", meas_trans)
+            if alg.existsProperty("MeasuredError"):
+                meas_err = alg.getProperty("MeasuredError").value
+                if property_manager.existsProperty("MeasuredTransmissionError"):
+                    property_manager.setProperty("MeasuredTransmissionError", meas_err)
+                else:
+                    property_manager.declareProperty("MeasuredTransmissionError", meas_err)
+
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Process background data
         if "BackgroundFiles" in property_list:
@@ -160,7 +180,8 @@ class SANSReduction(PythonAlgorithm):
                 # center for the transmission calculation
                 p=property_manager.getProperty("BckTransmissionBeamCenterAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
-                self.set_property_if_exists("ReductionProperties", property_manager_name)
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
                 trans_beam_center_x = alg.getProperty("FoundBeamCenterX").value
                 trans_beam_center_y = alg.getProperty("FoundBeamCenterY").value
@@ -172,13 +193,30 @@ class SANSReduction(PythonAlgorithm):
                 alg.setProperty("InputWorkspace", background_ws)
                 alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
 
-                self.set_beam_center_if_exists(alg, trans_beam_center_x, trans_beam_center_y)
-                self.set_property_if_exists("ReductionProperties", property_manager_name)
+                if alg.existsProperty("BeamCenterX") \
+                        and alg.existsProperty("BeamCenterY") \
+                        and trans_beam_center_x is not None \
+                        and trans_beam_center_y is not None:
+                    alg.setProperty("BeamCenterX", trans_beam_center_x)
+                    alg.setProperty("BeamCenterY", trans_beam_center_y)
+
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
-                self.copy_property_value_if_exists(alg, property_manager, "MeasuredTransmission",
-                                                   "MeasuredBckTranmissionValue")
-                self.copy_property_value_if_exists(alg, property_manager, "MeasuredError",
-                                                   "MeasuredBckTransmissionError")
+
+                if alg.existsProperty("MeasuredTransmission"):
+                    meas_trans = alg.getProperty("MeasuredTransmission").value
+                    if property_manager.existsProperty("MeasuredBckTransmissionValue"):
+                        property_manager.setProperty("MeasuredBckTransmissionValue", meas_trans)
+                    else:
+                        property_manager.declareProperty("MeasuredBckTransmissionValue", meas_trans)
+                if alg.existsProperty("MeasuredError"):
+                    meas_err = alg.getProperty("MeasuredError").value
+                    if property_manager.existsProperty("MeasuredBckTransmissionError"):
+                        property_manager.setProperty("MeasuredBckTransmissionError", meas_err)
+                    else:
+                        property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)
+
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
                 else:
@@ -214,7 +252,8 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("OutputWorkspace", iq_output)
             alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            output_msg += self.output_message_if_exists(alg) + "\n"
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Compute I(qx,qy)
         iqxy_output = None
@@ -225,13 +264,17 @@ class SANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", iq_output_name)
-            self.set_property_if_exists("ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            output_msg += self.output_message_if_exists(alg) + "\n"
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
+            #if len(output_dir)==0:
+            #    output_dir = os.path.dirname(filename)
             if os.path.isdir(output_dir):
                 # Check whether we were in frame-skipping mode
                 if iq_output is not None \
@@ -253,30 +296,6 @@ class SANSReduction(PythonAlgorithm):
                 Logger("SANSReduction").error(msg)
 
         self.setProperty("OutputMessage", output_msg)
-
-    def output_message_if_exists(self, alg):
-        if alg.existsProperty("OutputMessage"):
-            return alg.getProperty("OutputMessage").value
-        return ""
-
-    def set_beam_center_if_exists(self, alg, x, y):
-        if alg.existsProperty("BeamCenterX") and alg.existsProperty("BeamCenterY") and x is not None and y is not None:
-            alg.setProperty("BeamCenterX", x)
-            alg.setProperty("BeamCenterY", y)
-
-    def set_property_if_exists(self, property_manager, name, value):
-        if property_manager.existsProperty(name):
-            property_manager.setProperty(name, value)
-
-    def copy_property_value_if_exists(self, old_property_manager, new_property_manager, new_property_name,
-                                      old_property_name):
-        if old_property_manager.existsProperty(old_property_name):
-            value = old_property_manager.getProperty(old_property_name).value
-
-            if new_property_manager.existsProperty(new_property_name):
-                new_property_manager.setProperty(new_property_name, value)
-            else:
-                new_property_manager.declareProperty(new_property_name, value)
 
     def process_data_file(self, workspace):
         output_msg = ""
@@ -306,7 +325,8 @@ class SANSReduction(PythonAlgorithm):
                 # center for the transmission calculation
                 p=property_manager.getProperty("SensitivityBeamCenterAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
-                self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
                 beam_center_x = alg.getProperty("FoundBeamCenterX").value
                 beam_center_y = alg.getProperty("FoundBeamCenterY").value
@@ -316,11 +336,18 @@ class SANSReduction(PythonAlgorithm):
             alg.setProperty("InputWorkspace", workspace)
             alg.setProperty("OutputWorkspace", workspace)
 
-            self.set_beam_center_if_exists(alg, beam_center_x, beam_center_y)
+            if alg.existsProperty("BeamCenterX") \
+                    and alg.existsProperty("BeamCenterY") \
+                    and beam_center_x is not None \
+                    and beam_center_y is not None:
+                alg.setProperty("BeamCenterX", beam_center_x)
+                alg.setProperty("BeamCenterY", beam_center_y)
 
-            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            output_msg += self.output_message_if_exists(alg) + "\n"
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
 
             # Store sensitivity beam center so that we can access it later
             if beam_center_x is not None and beam_center_y is not None:
@@ -351,13 +378,15 @@ class SANSReduction(PythonAlgorithm):
             alg=Algorithm.fromString(p.valueAsStr)
             if alg.existsProperty("InputWorkspace"):
                 alg.setProperty("InputWorkspace", workspace)
-                self.set_property_if_exists(alg, "OutputWorkspace", output_workspace)
+                if alg.existsProperty("OutputWorkspace"):
+                    alg.setProperty("OutputWorkspace", output_workspace)
             else:
                 alg.setProperty("Workspace", workspace)
-            self.set_property_if_exists(alg, "ReductionProperties", property_manager_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()
-            output_msg = self.output_message_if_exists(alg) + "\n"
-
+            if alg.existsProperty("OutputMessage"):
+                output_msg = alg.getProperty("OutputMessage").value+'\n'
         return output_msg
 
     def _save_output(self, iq_output, iqxy_output, output_dir, property_manager):
