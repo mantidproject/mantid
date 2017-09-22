@@ -59,7 +59,8 @@ ReflGenericDataProcessorPresenterFactory::create() {
   whitelist.addElement(
       "dQ/Q", "MomentumTransferStep",
       "<b>Resolution used when rebinning</b><br /><i>optional</i><br />If "
-      "left blank, this is calculated for you using the CalculateResolution "
+      "left blank, this is calculated for you using the "
+      "NRCalculateSlitResolution "
       "algorithm. <br /><br /><b>Example:</b> <samp>0.9</samp>");
   whitelist.addElement(
       "Scale", "ScaleFactor",
