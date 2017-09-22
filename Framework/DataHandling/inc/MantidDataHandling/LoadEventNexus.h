@@ -134,8 +134,6 @@ public:
   /// Filter by a maximum time-of-flight
   double filter_tof_max;
 
-  /// Spectra list to load
-  std::vector<int32_t> m_specList;
   /// Minimum spectrum to load
   int32_t m_specMin;
   /// Maximum spectrum to load
