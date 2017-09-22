@@ -2076,11 +2076,46 @@ void FitPropertyBrowser::deleteTie() {
   PropertyHandler *h = getHandler()->findHandler(paramProp);
   if (!h)
     return;
+  // get name from composite function
+  if (ci->property()->propertyName() == "Tie") {
+	  auto ties = h->getTies();
+	  QString QparName = ties.key(ci->property(), "");
+	  std::string parName = QparName.toStdString();
+	  QStringList fnNames;
 
-  if (ci->property()->propertyName() != "Tie") {
-    h->removeTie(ci->property()->propertyName());
-  } else {
-    h->removeTie(ci->property());
+	  int iPar = -1;
+	  for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
+		  Mantid::API::ParameterReference ref(m_compositeFunction.get(), i);
+		  Mantid::API::IFunction *fun = ref.getLocalFunction();
+
+		  // Pick out parameters with the same name as the one we're tying from
+		  if (fun->parameterName(static_cast<int>(ref.getLocalIndex())) == parName) {
+			  if (iPar == -1 &&
+				  fun ==
+				  h->function()
+				  .get()) // If this is the 'tied from' parameter, remember it
+			  {
+				  iPar = (int)i;
+			  }
+			  else // Otherwise add it to the list of potential 'tyees'
+			  {
+				  fnNames << QString::fromStdString(
+					  m_compositeFunction->parameterName(i));
+			  }
+		  }
+	  }
+	  if (fnNames.empty() || iPar < 0) {
+		  QMessageBox::information(this, "Mantid - information",
+			  "Cannot find a parameter with this tie");
+		  return;
+	  }
+
+	  QString tieExpr =
+		  QString::fromStdString(m_compositeFunction->parameterName(iPar));
+	  h->removeTie(ci->property(), tieExpr.toStdString());
+  }
+  else {
+	  h->removeTie(ci->property()->propertyName());
   }
 }
 
