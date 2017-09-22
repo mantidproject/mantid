@@ -571,13 +571,8 @@ def _create_profile_strs_and_mass_list(profile_flags):
     mass_values, profiles = [], []
     all_mass_values, all_profiles = [], []
     for idx, mass_prop in enumerate(profile_flags):
+        function_name = ("function=%s," % mass_prop.pop('function'))
         function_props = ["{0}={1}".format(key, value) for key, value in mass_prop.items()]
-        # Ensure function_props starts with "function=...,"
-        function_index = [index for index, val in enumerate(function_props) if 'function' in val]
-        if len(function_index) != 1:
-            raise ValueError("Only one function can be defined per mass profile. Found %d functions."
-                             % len(function_index))
-        function_name = function_props.pop(function_index[0])
         function_props = ("%s,%s" % (function_name, (','.join(function_props))))
 
         mass_value = mass_prop.pop('value', None)
