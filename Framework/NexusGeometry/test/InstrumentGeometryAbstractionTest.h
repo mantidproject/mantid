@@ -37,8 +37,8 @@ public:
 
     void testAddDetector_and_testSortDetectors(){
         InstrumentGeometryAbstraction iGeoAbstract(this->iTestName);
-        TS_ASSERT_THROWS_NOTHING(iGeoAbstract.addDetector(this->dTestName, 2, this->testPos2));
-        iGeoAbstract.addDetector(this->dTestName, 1, this->testPos1);
+        TS_ASSERT_THROWS_NOTHING(iGeoAbstract.addDetector(this->dTestName, 2, this->testPos2, this->shape));
+        iGeoAbstract.addDetector(this->dTestName, 1, this->testPos1, this->shape);
         for (int i = 0; i < 2; ++i){
             auto iVisitor = Geometry::InstrumentVisitor(iGeoAbstract._unAbstractInstrument());
             iVisitor.walkInstrument();
@@ -72,6 +72,8 @@ private:
     std::string sampleName = "testSample";
     Eigen::Vector3d testPos1 = Eigen::Vector3d(1.0,-0.5,2.9);
     Eigen::Vector3d testPos2 = Eigen::Vector3d(-1.2,0.5,1.9);
+    //Placeholder empty shape
+    objectHolder shape = objectHolder();
 };
 
 #endif// INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_

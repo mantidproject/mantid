@@ -1,5 +1,4 @@
-#include <string>
-#include <vector>
+#include <iostream>
 //
 // Created by michael on 23/08/17.
 //
@@ -9,6 +8,9 @@
 //----------------------
 
 #include "MantidNexusGeometry/NexusGeometryParser.h"
+
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -31,14 +33,19 @@ namespace {
     const H5std_string Z_PIXEL_OFFSET = "z_pixel_offset";
     const H5std_string DEPENDS_ON = "depends_on";
     const H5std_string NO_DEPENDENCY = ".";
+    const H5std_string PIXEL_SHAPE = "pixel_shape";
     //Transformation types
     const H5std_string TRANSFORMATION_TYPE = "transformation_type";
     const H5std_string TRANSLATION = "translation";
     const H5std_string ROTATION =  "rotation";
     const H5std_string VECTOR = "vector";
-    //Radians
+    const H5std_string UNITS = "units";
+    //Radians and degrees
+    const H5std_string DEGREES = "degrees";
     const static double PI = 3.1415926535;
-    const static double DEGREES_IN_CIRCLE = 360;
+    const static double DEGREES_IN_SEMICIRCLE = 180;
+    //Nexus shape types
+    const H5std_string NX_CYLINDER = "NXcylindrical_geometry";
 }
 
 /// Constructor opens the nexus file
@@ -71,7 +78,6 @@ ParsingErrors NexusGeometryParser::ParseNexusGeometry()
             return this->exitStatus;
     }
     
-    //TODO - try-catch error handling
     // Get path to all detector groups
     try{
     std::vector<Group> detectorGroups = this->openDetectorGroups();
@@ -85,30 +91,23 @@ ParsingErrors NexusGeometryParser::ParseNexusGeometry()
         Pixels detectorPixels = transforms * pixelOffsets;
         //Get the pixel detIds
         std::vector<int> detectorIds = this->getDetectorIds(*iter);
+        // Force call of shape
+        this->parseNexusShape(*iter);
 
-        //TODO - parse shape
-        //Add detector to instrument
         for(size_t i = 0; i < detectorIds.size(); ++i)
         {
             int index = static_cast<int>(i);
             std::string name = std::to_string(index);
             Eigen::Vector3d detPos = detectorPixels.col(index);
-            this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos);
+            this->iBuilder_sptr->addDetector(name, detectorIds[index], detPos, this->shape);
         }
-        //Sort the detectors
-        this->iBuilder_sptr->sortDetectors();
     }
     //Sort the detectors
     this->iBuilder_sptr->sortDetectors();
 
-    //Source and sample
-    // TODO - parse source and sample
-    auto sourcePos = Eigen::Vector3d(0.0,0.0,0.0);
-    auto samplePos = Eigen::Vector3d(1.0,0.0,0.0);
-    std::string sourceName = "source";
-    std::string sampleName = "sample";
-    this->iBuilder_sptr->addSource(sourceName, sourcePos);
-    this->iBuilder_sptr->addSample(sampleName, samplePos);
+    //Parse source and sample and add to instrument
+    this->parseAndAddSource();
+    this->parseAndAddSample();
 
     } catch (...) {
         this->exitStatus = UNKNOWN_ERROR;
@@ -180,7 +179,7 @@ std::vector<int> NexusGeometryParser::getDetectorIds ( Group &detectorGroup)
     H5std_string detectorName = detectorGroup.getObjName();
     std::vector<int> detIds;
 
-    for (int i = 0; i < detectorGroup.getNumObjs (); ++i)
+    for (unsigned int i = 0; i < detectorGroup.getNumObjs (); ++i)
     {
         H5std_string objName = detectorGroup.getObjnameByIdx (i);
         H5std_string objPath = detectorName + "/" + objName;
@@ -200,7 +199,7 @@ Pixels NexusGeometryParser::getPixelOffsets (Group &detectorGroup)
     //Initialise matrix
     Pixels offsetData;
     std::vector<double> xValues, yValues, zValues;
-    for (int i = 0; i < detectorGroup.getNumObjs (); i++)
+    for (unsigned int i = 0; i < detectorGroup.getNumObjs (); i++)
     {
         H5std_string objName = detectorGroup.getObjnameByIdx (i);
         H5std_string objPath = detectorName + "/" + objName;
@@ -319,29 +318,29 @@ Eigen::Transform<double, 3, Eigen::Affine> NexusGeometryParser::getTransformatio
         
         //Get magnitude of current transformation
         double magnitude = this->get1DDataset<double>(dependency)[0];
-        //Container for unit vector of transformation
-        Eigen::Vector3d transformVector;
-        //Container for transformation type
+        //Containers for transformation data
+        Eigen::Vector3d transformVector(0.0,0.0,0.0);
         H5std_string transformType;
+        H5std_string transformUnits;
         for(int i = 0; i < transformation.getNumAttrs (); i++)
         {
             //Open attribute at current index
             Attribute attribute = transformation.openAttribute (i);
-
+            H5std_string attributeName = attribute.getName();
             //Get next dependency
-            if(attribute.getName () == DEPENDS_ON)
+            if(attributeName == DEPENDS_ON)
             {
                 DataType dataType = attribute.getDataType ();
                 attribute.read(dataType, dependency);
             }
             //Get transform type
-            if(attribute.getName () == TRANSFORMATION_TYPE)
+            else if(attributeName == TRANSFORMATION_TYPE)
             {
                 DataType dataType = attribute.getDataType ();
                 attribute.read(dataType, transformType);
             }
             //Get unit vector for transformation
-            if(attribute.getName () == VECTOR)
+            else if(attributeName == VECTOR)
             {
                 std::vector<double> unitVector;
                 DataType dataType = attribute.getDataType ();
@@ -358,6 +357,11 @@ Eigen::Transform<double, 3, Eigen::Affine> NexusGeometryParser::getTransformatio
                 transformVector(1) = unitVector[1];
                 transformVector(2) = unitVector[2];
             }
+            else if (attributeName == UNITS)
+            {
+                DataType dataType = attribute.getDataType ();
+                attribute.read(dataType, transformUnits);
+            }
         }
         //Transform_type = translation
         if(transformType == TRANSLATION)
@@ -369,15 +373,81 @@ Eigen::Transform<double, 3, Eigen::Affine> NexusGeometryParser::getTransformatio
         }
         else if(transformType == ROTATION)
         {
-            //Convert angle from degrees to radians
-            double angle = magnitude * 2*PI/DEGREES_IN_CIRCLE;
-
+            double angle = magnitude;
+            if (transformUnits == DEGREES){
+                //Convert angle from degrees to radians
+                angle *= PI/DEGREES_IN_SEMICIRCLE;
+            }
             Eigen::AngleAxisd rotation(angle, transformVector);
-            transforms *= rotation;
+            transforms *=rotation;
         }
     }
     return transforms;
 }
 
+///Choose what shape type to parse
+void NexusGeometryParser::parseNexusShape(Group &detectorGroup)
+{
+    Group shapeGroup;
+    try{
+        shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
+    } catch(...){
+        //Placeholder - no group pixel_shape
+        int i;
+    }
+
+    H5std_string shapeType;
+    for (int i = 0; i < shapeGroup.getNumAttrs(); ++i)
+    {
+        Attribute attribute = shapeGroup.openAttribute(i);
+        H5std_string attributeName = attribute.getName();
+        if(attributeName == NX_CLASS)
+        {
+            attribute.read(attribute.getDataType(), shapeType);
+        }
+    }
+    //Give shape group to correct shape parser
+    if(shapeType == NX_CYLINDER)
+    {
+        this->parseNexusCylinder(shapeGroup);
+    }
+}
+
+//Parse cylinder nexus geometry
+void NexusGeometryParser::parseNexusCylinder(Group &shapeGroup){
+    H5std_string pointsToVertices = shapeGroup.getObjName() + "/cylinder";
+    std::vector<int> cPoints = this->get1DDataset<int>(pointsToVertices);
+    
+    H5std_string verticesData = shapeGroup.getObjName() + "/vertices";
+    // 1D reads row first, then columns
+    std::vector<double> vPoints = this->get1DDataset<double>(verticesData);
+    Eigen::Map<Eigen::Matrix<double, 3, 3>> vertices(vPoints.data());
+    //Read points into matrix, sorted by cPoints ordering
+    Eigen::Matrix<double, 3, 3> vSorted;
+    for(int i = 0; i < 3; ++i){
+        vSorted.col(cPoints[i]) = vertices.col(i);
+    }
+    this->shape = this->sAbsCreator.createCylinder(vSorted);
+}
+
+//Parse source and add to instrument
+void NexusGeometryParser::parseAndAddSource()
+{
+    H5std_string sourcePath = "raw_data_1/instrument/source";
+    Group sourceGroup = this->rootGroup.openGroup(sourcePath);
+    auto sourceName = this->get1DStringDataset("/name");
+    auto defaultPos = Eigen::Vector3d(0.0,0.0,0.0);
+}
+//Parse sample and add to instrument
+void NexusGeometryParser::parseAndAddSample()
+{
+    std::string sampleName = "sample";
+    H5std_string samplePath = "raw_data_1/sample";
+    Group sampleGroup = this->rootGroup.openGroup(samplePath);
+    auto sampleTransforms = this->getTransformations(sampleGroup);
+    auto samplePos = sampleTransforms*Eigen::Vector3d(0.0,0.0,0.0);
+
+    this->iBuilder_sptr->addSample(sampleName, samplePos);
+}
 }
 }

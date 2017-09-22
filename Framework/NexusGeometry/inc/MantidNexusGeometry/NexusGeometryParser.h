@@ -5,13 +5,11 @@
 #ifndef MANTID_NEXUS_GEOMETRY_PARSER_H_
 #define MANTID_NEXUS_GEOMETRY_PARSER_H_
 
-//---------------------------------
-// Includes
-//---------------------------------
-
 #include "MantidNexusGeometry/ParsingErrors.h"
 // All possible derived classes from InstrumentAbstractBuilder
 #include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+//All possible derived classes from ShapeAbstractCreator
+#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
 
 #include <Eigen/Core> 
 #include <Eigen/Geometry>
@@ -26,6 +24,7 @@ namespace NexusGeometry {
 //Choose which derived instrumentAbstraction to use
 typedef InstrumentGeometryAbstraction iAbstractBuilder;
 typedef std::shared_ptr<iAbstractBuilder> iAbstractBuilder_sptr;
+typedef ShapeGeometryAbstraction shapeAbsCreator;
 
 class DLLExport NexusGeometryParser
 {
@@ -40,6 +39,8 @@ public:
     ParsingErrors ParseNexusGeometry();
     
 private:
+    objectHolder shape = objectHolder();
+    shapeAbsCreator sAbsCreator = shapeAbsCreator();
     H5::H5File nexusFile;
     H5::Group rootGroup;
     ParsingErrors exitStatus = NO_ERROR;
@@ -60,6 +61,14 @@ private:
     ///Read dataset into vector
     template<typename valueType> std::vector<valueType> get1DDataset(H5std_string &dataset);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> parsePixelShape(H5::Group &detectorGroup);
+    ///Parse shape - choose what type shape
+    void parseNexusShape(H5::Group &detectorGroup);   
+    ///Parse cylinder nexus geometry
+    void parseNexusCylinder(H5::Group &shapeGroup);
+    ///Parse source
+    void parseAndAddSource();
+    ///Parse sample
+    void parseAndAddSample();
 };
 
 }

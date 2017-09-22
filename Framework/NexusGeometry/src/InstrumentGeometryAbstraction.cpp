@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidNexusGeometry/InstrumentGeometryAbstraction.h"
+#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
 
 #include <boost/make_shared.hpp>
 
@@ -18,7 +19,7 @@ InstrumentGeometryAbstraction::InstrumentGeometryAbstraction(const std::string &
     this->instrument_sptr = inst_sptr;
 
     //Default view
-    std::string defaultViewAxis = "z-";
+    std::string defaultViewAxis = "z";
     Geometry::PointingAlong pointingUp(Geometry::Y), alongBeam(Geometry::Z), thetaSign(Geometry::X);
     Geometry::Handedness handedness(Geometry::Right);
     std::string origin;
@@ -37,12 +38,14 @@ Geometry::IComponent* InstrumentGeometryAbstraction::addComponent(std::string &c
 }
 
 ///Adds detector to instrument
-void InstrumentGeometryAbstraction::addDetector(std::string &detName, int detId, Eigen::Vector3d &position){
+void InstrumentGeometryAbstraction::addDetector(std::string &detName, int detId, Eigen::Vector3d &position, objectHolder &shape){
   auto *detector(new Geometry::Detector(
       detName, detId,
       const_cast<Geometry::IComponent *>(this->instrument_sptr->getBaseComponent())));
   detector->setPos(position(0), position(1), position(2));
-
+    
+  detector->setShape(shape);
+    
   this->instrument_sptr->add(detector);
   this->instrument_sptr->markAsDetectorIncomplete(detector);
 }
@@ -62,5 +65,6 @@ void InstrumentGeometryAbstraction::addSource(std::string &sourceName, Eigen::Ve
     auto *source(this->addComponent(sourceName, position));
     this->instrument_sptr->markAsSource(source);
 }
+
 }
 }

@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidNexusGeometry/InstrumentAbstractBuilder.h"
+#include "MantidNexusGeometry/ShapeGeometryAbstraction.h"
 
 #include "Eigen/Core"
 #include <string>
@@ -22,7 +23,7 @@ class DLLExport InstrumentGeometryAbstraction : public NexusGeometry::Instrument
         ///Adds component to instrument
         Geometry::IComponent *addComponent(std::string &compName, Eigen::Vector3d &position);
         ///Adds detector to instrument
-        void addDetector(std::string &detName, int detId, Eigen::Vector3d &position);
+        void addDetector(std::string &detName, int detId, Eigen::Vector3d &position, objectHolder &shape);
         ///Sorts detectors
         void sortDetectors();
         ///Add sample
