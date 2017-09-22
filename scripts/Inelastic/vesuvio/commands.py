@@ -143,7 +143,6 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
              final fit parameters, chi^2 values)
     """
     # Transform inputs into something the algorithm can understand
-    print("In TOF iteration")
     if isinstance(flags['masses'][0], list):
         mass_values, _, all_mass_values, _ = \
             _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))
