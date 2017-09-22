@@ -116,36 +116,19 @@ namespace DataProcessor {
 * @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const WhiteList &whitelist, PreprocessingStep preprocessingStep,
+    const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
-    : WorkspaceObserver(), m_preprocessingStep(preprocessingStep),
-      m_view(nullptr), m_progressView(nullptr), m_mainPresenter(),
-      m_loader(loader), m_whitelist(whitelist), m_processor(processor),
+    : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
+      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
+      m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
       m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
-  m_columns = static_cast<int>(m_whitelist.size());
-  initializeWhitelist(m_processor);
-  initializePostprocessor();
-}
-
-void GenericDataProcessorPresenter::initializePostprocessor() {
-  if (m_postprocessor.name().isEmpty()) {
-    m_postprocess = false;
-    m_manager =
-        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
-  } else {
-    m_manager =
-        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
-  }
-}
-
-void GenericDataProcessorPresenter::initializeWhitelist(
-    ProcessingAlgorithm const &processor) {
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
                          "<b>Override <samp>" + processor.name() +
@@ -175,6 +158,17 @@ void GenericDataProcessorPresenter::initializeWhitelist(
                              "conflict between options "
                              "specified via this column and global options "
                              "specified externally, the former prevail.");
+
+  m_columns = static_cast<int>(m_whitelist.size());
+
+  if (m_postprocessor.name().isEmpty()) {
+    m_postprocess = false;
+    m_manager =
+        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
+  } else {
+    m_manager =
+        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
+  }
 }
 
 /**
@@ -187,14 +181,9 @@ void GenericDataProcessorPresenter::initializeWhitelist(
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const WhiteList &whitelist, const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor)
-    : WorkspaceObserver(), m_preprocessingStep(), m_view(nullptr),
-      m_progressView(nullptr), m_mainPresenter(), m_loader("Load"),
-      m_whitelist(whitelist), m_processor(processor),
-      m_postprocessor(postprocessor),
-      m_postprocessMap(std::map<QString, QString>()),
-      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
-      m_nextActionFlag(ReductionFlag::StopReduceFlag) {}
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, postprocessor) {}
 
 /**
  * Delegating constructor (only whitelist specified)
@@ -202,13 +191,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const WhiteList &whitelist)
-    : WorkspaceObserver(), m_preprocessingStep(), m_view(nullptr),
-      m_progressView(nullptr), m_mainPresenter(), m_loader("Load"),
-      m_whitelist(whitelist), m_processor(), m_postprocessor(),
-      m_postprocessMap(std::map<QString, QString>()),
-      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
-      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
-      m_nextActionFlag(ReductionFlag::StopReduceFlag) {}
+    : GenericDataProcessorPresenter(
+          whitelist, std::map<QString, PreprocessingAlgorithm>(),
+          ProcessingAlgorithm(), PostprocessingAlgorithm()) {}
 
 /**
 * Delegating constructor (no post-processing needed)
@@ -218,9 +203,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const WhiteList &whitelist, PreprocessingStep preprocessingStep,
+    const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor)
-    : GenericDataProcessorPresenter(whitelist, preprocessingStep, processor,
+    : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     PostprocessingAlgorithm()) {}
 
 /**
@@ -231,8 +217,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const WhiteList &whitelist, const ProcessingAlgorithm &processor)
-    : GenericDataProcessorPresenter(whitelist, processor,
-                                    PostprocessingAlgorithm()) {}
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, PostprocessingAlgorithm()) {}
 
 /**
 * Destructor
@@ -567,9 +554,9 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
         convertStringToMap(m_preprocessingOptions);
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
-        m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessingStep, m_processor, m_postprocessor,
-        preprocessingOptionsMap, m_processingOptions, m_postprocessingOptions);
+        m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
+        m_processor, m_postprocessor, preprocessingOptionsMap,
+        m_processingOptions, m_postprocessingOptions);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 
@@ -630,8 +617,16 @@ void GenericDataProcessorPresenter::postProcessGroup(
                        inputWSNames);
   setAlgorithmProperty(alg.get(), m_postprocessor.outputProperty(),
                        outputWSName);
-  setPropertiesFromKeyValueString(alg, m_postprocessingOptions.toStdString(),
-                                  "options");
+
+  auto optionsMap = parseKeyValueString(m_postprocessingOptions.toStdString());
+  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    try {
+      setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
+    }
+  }
 
   // Options specified via post-process map
   for (auto const &prop : m_postprocessMap) {
@@ -744,9 +739,8 @@ QString
 GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
                                                        const QString &prefix) {
 
-  if (data.size() != static_cast<int>(m_whitelist.size()))
-    throw std::invalid_argument("Can't find reduced workspace name, row data "
-                                "has incorrect number of columns.");
+  if (static_cast<int>(data.size()) != m_columns)
+    throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output (processed)
   * workspace. This is done using the white list, which contains information
@@ -956,7 +950,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Global pre-processing options as a map
   std::map<QString, QString> globalOptions;
-  if (!m_preprocessingStep)
+  if (!m_preprocessMap.empty())
     globalOptions = convertStringToMap(m_preprocessingOptions);
 
   // Pre-processing properties
@@ -993,7 +987,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       continue;
     }
 
-    if (m_preprocessingStep) {
+    if (m_preprocessMap.count(columnName)) {
       // This column needs pre-processing
 
       // We do not want the associated properties to be set again in
@@ -1004,7 +998,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
         }
       }
 
-      auto preprocessor = m_preprocessingStep.value().algorithmFor(columnName);
+      auto preprocessor = m_preprocessMap.at(columnName);
 
       auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
                                               ? globalOptions.at(columnName)
@@ -1034,11 +1028,11 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
       alg, m_processingOptions.toStdString(), "options",
-      [&](Mantid::API::IAlgorithm *const alg, std::string key,
-          std::string value) -> void {
-        if (isUnrestrictedProperty(QString::fromStdString(key)))
-          ::setAlgorithmProperty(alg, key, value);
-      });
+      [&](Mantid::API::IAlgorithm *const alg, std::string key, std::string value)
+          -> void { 
+          if(isUnrestrictedProperty(QString::fromStdString(key)))
+            ::setAlgorithmProperty(alg, key, value); 
+          });
 
   const auto userOptions = data->at(m_columns - 2);
   setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
@@ -1069,26 +1063,23 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       auto column = *columnIt2;
       auto runNumbers = *runNumbersIt2;
 
-      if (m_preprocessingStep) {
-        if (runNumbers.isEmpty() &&
-            !m_preprocessingStep.value().hasAlgorithmFor(column.name())) {
+      if (runNumbers.isEmpty() && !m_preprocessMap.count(column.name())) {
 
-          QString propValue = QString::fromStdString(
-              alg->getPropertyValue(column.algorithmProperty().toStdString()));
+        QString propValue = QString::fromStdString(
+            alg->getPropertyValue(column.algorithmProperty().toStdString()));
 
-          if (m_options["Round"].toBool()) {
-            QString exp = (propValue.indexOf("e") != -1)
-                              ? propValue.right(propValue.indexOf("e"))
-                              : "";
-            propValue =
-                propValue.mid(0,
-                              propValue.indexOf(".") +
-                                  m_options["RoundPrecision"].toInt() + 1) +
-                exp;
-          }
-
-          (*newDataIt) = propValue;
+        if (m_options["Round"].toBool()) {
+          QString exp = (propValue.indexOf("e") != -1)
+                            ? propValue.right(propValue.indexOf("e"))
+                            : "";
+          propValue =
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
+              exp;
         }
+
+        (*newDataIt) = propValue;
       }
     }
   }

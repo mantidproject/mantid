@@ -30,11 +30,11 @@ namespace CustomInterfaces {
 */
 ReflDataProcessorPresenter::ReflDataProcessorPresenter(
     const WhiteList &whitelist,
-    PreprocessingStep preprocessingStep,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
-    : GenericDataProcessorPresenter(whitelist, std::move(preprocessingStep), processor,
+    : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
                                     postprocessor, postprocessMap, loader) {}
 
 /**

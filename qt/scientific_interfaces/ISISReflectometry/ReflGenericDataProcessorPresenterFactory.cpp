@@ -84,7 +84,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   // Pre-processing instructions as a map:
   // Keys are the column names
   // Values are the pre-processing algorithms that will be applied to columns
-  auto preprocessingStep = PreprocessingStep({
+  std::map<QString, PreprocessingAlgorithm> preprocessMap = {
       /* 'Plus' will be applied to column 'Run(s)'*/
       {"Run(s)",
        PreprocessingAlgorithm("Plus", "TOF_",
@@ -96,7 +96,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
        PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
                               std::set<QString>{"FirstTransmissionRun",
                                                 "SecondTransmissionRun",
-                                                "OutputWorkspace"})}});
+                                                "OutputWorkspace"})}};
 
   // The post-processing algorithm
   PostprocessingAlgorithm postprocessor(
@@ -110,7 +110,7 @@ ReflGenericDataProcessorPresenterFactory::create() {
   std::map<QString, QString> postprocessMap = {{"dQ/Q", "Params"}};
 
   return Mantid::Kernel::make_unique<ReflDataProcessorPresenter>(
-      whitelist, preprocessingStep, processor, postprocessor, postprocessMap,
+      whitelist, preprocessMap, processor, postprocessor, postprocessMap,
       "LoadISISNexus");
 }
 }

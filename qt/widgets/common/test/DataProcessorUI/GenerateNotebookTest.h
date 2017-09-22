@@ -22,17 +22,18 @@ class GenerateNotebookTest : public CxxTest::TestSuite {
 
 private:
   // Creates a map with pre-processing instruction for reflectometry
-  PreprocessingStep reflPreprocessingStep(const QString &plusPrefix = "") {
+  std::map<QString, PreprocessingAlgorithm>
+  reflPreprocessMap(const QString &plusPrefix = "") {
 
     // Reflectometry pre-process map
-    return PreprocessingStep(
-        {{"Run(s)",
-          PreprocessingAlgorithm("Plus", plusPrefix, std::set<QString>())},
-         {"Transmission Run(s)",
-          PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
-                                 std::set<QString>{"FirstTransmissionRun",
-                                                   "SecondTransmissionRun",
-                                                   "OutputWorkspace"})}});
+    return std::map<QString, PreprocessingAlgorithm>{
+        {"Run(s)", PreprocessingAlgorithm("Plus", plusPrefix,
+                                                       std::set<QString>())},
+        {"Transmission Run(s)",
+         PreprocessingAlgorithm(
+             "CreateTransmissionWorkspaceAuto", "TRANS_",
+             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
+                               "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -97,7 +98,9 @@ public:
   static GenerateNotebookTest *createSuite() {
     return new GenerateNotebookTest();
   }
-  static void destroySuite(GenerateNotebookTest *suite) { delete suite; }
+  static void destroySuite(GenerateNotebookTest *suite) {
+    delete suite;
+  }
 
   static QStringList splitIntoLines(QString const &notebook) {
     return notebook.split("\n");
@@ -136,24 +139,18 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
-        boost::optional<PreprocessingStep>(), reflProcessor(),
-        reflPostprocessor(), std::map<QString, QString>(), "", "");
+        std::map<QString, PreprocessingAlgorithm>(),
+        reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
+        "");
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
     auto notebookLines = splitIntoLines(generatedNotebook);
     const QString result[] = {
-        "{",
-        "   \"metadata\" : {",
-        "      \"name\" : \"Mantid Notebook\"",
-        "   },",
-        "   \"nbformat\" : 3,",
-        "   \"nbformat_minor\" : 0,",
-        "   \"worksheets\" : [",
-        "      {",
-        "         \"cells\" : [",
-        "            {",
-        "               \"cell_type\" : \"markdown\",",
+        "{", "   \"metadata\" : {", "      \"name\" : \"Mantid Notebook\"",
+        "   },", "   \"nbformat\" : 3,", "   \"nbformat_minor\" : 0,",
+        "   \"worksheets\" : [", "      {", "         \"cells\" : [",
+        "            {", "               \"cell_type\" : \"markdown\",",
     };
 
     // Check that the first 10 lines are output as expected
@@ -216,8 +213,7 @@ public:
         "0 | 12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
         "0 | 12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
         "1 | 24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 |  | ",
-        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ",
-        ""};
+        "1 | 24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 |  | ", ""};
 
     assertContainsMatchingLines(result, output);
   }
@@ -231,9 +227,9 @@ public:
 
   void testPlusString() {
 
-    auto preprocessingStep = reflPreprocessingStep();
+    auto reflectometryPreprocessMap = reflPreprocessMap();
     auto output = plusString("INPUT_WS", "OUTPUT_WS",
-                             preprocessingStep.algorithmFor("Run(s)"), "");
+                             reflectometryPreprocessMap["Run(s)"], "");
     auto const result = QString("OUTPUT_WS = Plus(LHSWorkspace = 'OUTPUT_WS', "
                                 "RHSWorkspace = 'INPUT_WS')\n");
     TS_ASSERT_EQUALS(output, result)
@@ -241,8 +237,8 @@ public:
 
   void testPlusStringWithOptions() {
 
-    auto preprocessingStep = reflPreprocessingStep();
-    auto transProcessor = preprocessingStep.algorithmFor("Transmission Run(s)");
+    auto preprocessMap = reflPreprocessMap();
+    auto transProcessor = preprocessMap["Transmission Run(s)"];
     auto output = plusString("INPUT_WS", "OUTPUT_WS", transProcessor,
                              "WavelengthMin = 0.5, WavelengthMax = 5.0");
     auto result = QString(
@@ -254,7 +250,7 @@ public:
 
   void testLoadWorkspaceStringOneRun() {
 
-    auto processor = reflPreprocessingStep().algorithmFor("Transmission Run(s)");
+    auto processor = reflPreprocessMap()["Transmission Run(s)"];
     auto output = loadWorkspaceString("RUN", "INST_", processor, "");
     TS_ASSERT_EQUALS(boost::get<1>(output), "TRANS_RUN");
     TS_ASSERT_EQUALS(boost::get<0>(output),
@@ -269,8 +265,7 @@ public:
 
     // The python code that does the loading
     const QString result[] = {
-        "RUN1 = Load(Filename = 'INST_RUN1')",
-        "RUN1_RUN2_RUN3 = RUN1",
+        "RUN1 = Load(Filename = 'INST_RUN1')", "RUN1_RUN2_RUN3 = RUN1",
         "RUN2 = Load(Filename = 'INST_RUN2')",
         "RUN1_RUN2_RUN3 = WeightedMean(InputWorkspace1 = 'RUN1_RUN2_RUN3', "
         "InputWorkspace2 = 'RUN2', Property1 = 1, Property2 = 2)",
@@ -291,7 +286,7 @@ public:
     RowData rowData = {"12345", "1.5"};
 
     TS_ASSERT_THROWS_ANYTHING(reduceRowString(
-        rowData, m_instrument, reflWhitelist(), reflPreprocessingStep("TOF_"),
+        rowData, m_instrument, reflWhitelist(), reflPreprocessMap("TOF_"),
         reflProcessor(), std::map<QString, QString>(), ""));
   }
 
@@ -305,9 +300,9 @@ public:
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
-    auto output = reduceRowString(
-        data, m_instrument, reflWhitelist(), reflPreprocessingStep("TOF_"),
-        reflProcessor(), userPreProcessingOptions, "");
+    auto output = reduceRowString(data, m_instrument, reflWhitelist(),
+                                  reflPreprocessMap("TOF_"), reflProcessor(),
+                                  userPreProcessingOptions, "");
 
     const QString result[] = {
         "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -334,8 +329,10 @@ public:
     whitelist.addElement("Scale", "ScaleFactor", "");
     whitelist.addElement("Options", "Options", "");
 
-    PreprocessingStep preprocessingStep = PreprocessingStep(
-        {{"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}});
+    // Create a pre-process map
+    std::map<QString, PreprocessingAlgorithm> preprocessMap = {
+        {"Run", PreprocessingAlgorithm("Plus", "RUN_",
+                                                    std::set<QString>())}};
     // Specify some pre-processing options
     std::map<QString, QString> userPreProcessingOptions = {
         {"Run", "Property=prop"}};
@@ -344,12 +341,11 @@ public:
     const RowData data = {"1000+1001", "0.5", "", "", "", "", "", ""};
 
     auto output =
-        reduceRowString(data, "INST", whitelist, preprocessingStep,
-                        reflProcessor(), userPreProcessingOptions, "");
+        reduceRowString(data, "INST", whitelist, preprocessMap, reflProcessor(),
+                        userPreProcessingOptions, "");
 
     const QString result[] = {
-        "RUN_1000 = Load(Filename = 'INST1000')",
-        "RUN_1000_1001 = RUN_1000",
+        "RUN_1000 = Load(Filename = 'INST1000')", "RUN_1000_1001 = RUN_1000",
         "RUN_1001 = Load(Filename = 'INST1001')",
         "RUN_1000_1001 = Plus(LHSWorkspace = 'RUN_1000_1001', RHSWorkspace = "
         "'RUN_1001', Property=prop)",
@@ -374,13 +370,14 @@ public:
     // Reduce a run without pre-processing algorithm specified (i.e. empty
     // pre-process map)
 
+    std::map<QString, PreprocessingAlgorithm> emptyPreProcessMap;
     std::map<QString, QString> emptyPreProcessingOptions;
 
     const RowData data = {"12346", "1.5", "", "1.4", "2.9",
                           "0.04",  "1",   "", ""};
 
     auto output =
-        reduceRowString(data, m_instrument, reflWhitelist(), boost::optional<PreprocessingStep>(), 
+        reduceRowString(data, m_instrument, reflWhitelist(), emptyPreProcessMap,
                         reflProcessor(), emptyPreProcessingOptions, "");
 
     const QString result[] = {
@@ -618,7 +615,7 @@ public:
     // A reflectometry case
 
     auto whitelist = reflWhitelist();
-    auto preprocessingStep = reflPreprocessingStep();
+    auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
     auto preprocessingOptions =
@@ -628,7 +625,7 @@ public:
     auto postprocessingOptions = "Params=0.04";
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
-        "TableName", "INTER", whitelist, preprocessingStep, processor,
+        "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 
@@ -715,7 +712,7 @@ public:
   void testGenerateNotebookReflectometryNoPostProcessing() {
 
     auto whitelist = reflWhitelist();
-    auto preprocessingStep = reflPreprocessingStep();
+    auto preprocessMap = reflPreprocessMap();
     auto processor = reflProcessor();
     auto postProcessor = reflPostprocessor();
     auto preprocessingOptions =
@@ -725,7 +722,7 @@ public:
     auto postprocessingOptions = "Params=0.04";
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
-        "TableName", "INTER", whitelist, preprocessingStep, processor,
+        "TableName", "INTER", whitelist, preprocessMap, processor,
         postProcessor, preprocessingOptions, processingOptions,
         postprocessingOptions);
 

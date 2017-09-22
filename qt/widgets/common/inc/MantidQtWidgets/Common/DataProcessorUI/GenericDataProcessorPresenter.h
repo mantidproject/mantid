@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -24,7 +24,6 @@
 #include <queue>
 
 #include <QObject>
-#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -65,26 +64,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-class PreprocessingStep {
-public:
-  explicit PreprocessingStep(std::map<QString, PreprocessingAlgorithm> propertyMap)
-      : m_map(std::move(propertyMap)) {}
-  PreprocessingAlgorithm const& algorithmFor(const QString &property) const {
-    auto algorithmIt = m_map.find(property);
-    if (algorithmIt == m_map.cend())
-      return PreprocessingAlgorithm::doNothing();
-    else
-      return algorithmIt->second;
-  }
-
-  bool hasAlgorithmFor(const QString& property) const {
-    return m_map.find(property) != m_map.end();
-  }
-private:
-  std::map<QString, PreprocessingAlgorithm> m_map;
-};
-
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
       public DataProcessorPresenter,
@@ -98,7 +77,8 @@ class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
 public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
-      const WhiteList &whitelist, PreprocessingStep preprocessingStep,
+      const WhiteList &whitelist,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -109,9 +89,10 @@ public:
                                 const ProcessingAlgorithm &processor,
                                 const PostprocessingAlgorithm &postprocessor);
   // Constructor: pre-processing, no post-processing
-  GenericDataProcessorPresenter(const WhiteList &whitelist,
-                                PreprocessingStep preprocessingStep,
-                                const ProcessingAlgorithm &processor);
+  GenericDataProcessorPresenter(
+      const WhiteList &whitelist,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+      const ProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(const WhiteList &whitelist,
                                 const ProcessingAlgorithm &processor);
@@ -159,8 +140,6 @@ public:
 
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
-
-  boost::optional<PreprocessingStep> m_preprocessingStep;
   // The table view we're managing
   DataProcessorView *m_view;
   // The progress view
@@ -179,7 +158,7 @@ protected:
   QString m_processingOptions;
   // Post-processing options
   QString m_postprocessingOptions;
-  void updateProcessedStatus(const std::pair<int, GroupData> &group);
+  void updateProcessedStatus(const std::pair<int, GroupData> & group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -204,18 +183,16 @@ protected slots:
                             QSet<QString> const &missingWorkspaces);
 
 private:
-  void initializeWhitelist(ProcessingAlgorithm const& processor);
-  void initializePostprocessor();
   bool areOptionsUpdated();
-  void applyDefaultOptions(std::map<QString, QVariant> &options);
-  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
-                                       const std::string &hiddenOptions,
-                                       const std::string &columnName);
+  void applyDefaultOptions(std::map<QString, QVariant>& options);
+  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg, const std::string& hiddenOptions, const std::string& columnName);
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
   // The whitelist
   WhiteList m_whitelist;
+  // The pre-processing instructions
+  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
   ProcessingAlgorithm m_processor;
   // Post-processing algorithm
