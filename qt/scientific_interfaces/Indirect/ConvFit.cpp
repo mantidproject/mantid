@@ -1235,9 +1235,10 @@ void ConvFit::updateParameters(int specNo) {
   // Check parameter table workspace has been created
   if (!m_paramWs)
     return;
-  
+
   size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
-  QMap<QString, double> parameters = IndirectTab::extractRowFromTable(m_paramWs, row);
+  QMap<QString, double> parameters =
+      IndirectTab::extractRowFromTable(m_paramWs, row);
 
   QString functionName = m_uiForm.cbFitType->currentText();
 

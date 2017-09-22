@@ -66,17 +66,19 @@ private:
   void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
   QString minimizerString(QString outputName) const;
   std::string constructBaseName(const std::string &inputName,
-                                const std::string &fitType, 
-                                const bool &multi, const size_t &specMin, 
-                                const size_t &specMax);
+                                const std::string &fitType, const bool &multi,
+                                const size_t &specMin, const size_t &specMax);
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
                                                const size_t &specMax);
-  void readParametersFromTable(const std::string& tableWsName);
+  void readParametersFromTable(const std::string &tableWsName);
   void updateFitFunctions();
-  void plotResult(const std::string& groupName, const size_t &specNo);
+  void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
-  QMap<QString, QString> createParameterToPropertyMap(const QVector<QString>& functionNames);
-  void IqtFit::extendParameterToPropertyMap(const QString& functionName, const QString& prefix, QMap<QString, QString>& parameterToProperty);
+  QMap<QString, QString>
+  createParameterToPropertyMap(const QVector<QString> &functionNames);
+  void IqtFit::extendParameterToPropertyMap(
+      const QString &functionName, const QString &prefix,
+      QMap<QString, QString> &parameterToProperty);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;

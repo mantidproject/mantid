@@ -131,15 +131,16 @@ protected:
   void plot2D(const QString &workspaceName);
 
   /// Updates the parameters in the m_dblManager
-  void updateParameters(const QString &functionName,
-                        const QString &prefix,
+  void updateParameters(const QString &functionName, const QString &prefix,
                         const QStringList &paramNames,
                         const QMap<QString, double> &paramValues,
                         int startOffset, int endOffset);
 
   /// Extracts a map of column name to value in the specified spectra from the
   /// specified table workspace
-  QMap<QString, double> extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs, size_t wsIndex);
+  QMap<QString, double>
+  extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
+                      size_t wsIndex);
 
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,

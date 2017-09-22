@@ -464,7 +464,7 @@ void IndirectTab::updateParameters(const QString &functionName,
                                    int startOffset, int endOffset) {
 
   for (auto it = paramNames.begin() + startOffset;
-    it != paramNames.end() - endOffset; ++it) {
+       it != paramNames.end() - endOffset; ++it) {
     const QString functionParam = functionName + "." + *it;
     const QString paramValue = prefix + *it;
     double value = paramValues[paramValue];
@@ -473,15 +473,18 @@ void IndirectTab::updateParameters(const QString &functionName,
 }
 
 /*
- * Extracts the row at the specified index in the specified table workspace, as a map
+ * Extracts the row at the specified index in the specified table workspace, as
+ *a map
  * from the column name to the value in that column in the extracted row.
  *
  * @param tableWs The table workspace to extract a row from.
  * @param wsIndex The index of the row to extract.
- * @return        A map from the name of a column to the value in that column in the
+ * @return        A map from the name of a column to the value in that column in
+ *the
  *                extracted row.
  */
-QMap<QString, double> IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs, size_t wsIndex) {
+QMap<QString, double>
+IndirectTab::extractRowFromTable(ITableWorkspace_sptr tableWs, size_t wsIndex) {
   std::vector<std::string> columnNames = tableWs->getColumnNames();
   QMap<QString, double> parameters;
 
