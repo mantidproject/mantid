@@ -143,6 +143,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
              final fit parameters, chi^2 values)
     """
     # Transform inputs into something the algorithm can understand
+    print("In TOF iteration")
     if isinstance(flags['masses'][0], list):
         mass_values, _, all_mass_values, _ = \
             _create_profile_strs_and_mass_list(copy.deepcopy(flags['masses'][0]))
@@ -570,10 +571,15 @@ def _create_profile_strs_and_mass_list(profile_flags):
     material_builder = MaterialBuilder()
     mass_values, profiles = [], []
     all_mass_values, all_profiles = [], []
-
     for idx, mass_prop in enumerate(profile_flags):
         function_props = ["{0}={1}".format(key, value) for key, value in mass_prop.items()]
-        function_props = ','.join(function_props)
+        # Ensure function_props starts with "function=...,"
+        function_index = [index for index, val in enumerate(function_props) if 'function' in val]
+        if len(function_index) != 1:
+            raise ValueError("Only one function can be defined per mass profile. Found %d functions."
+                             % len(function_index))
+        function_name = function_props.pop(function_index[0])
+        function_props = ("%s,%s" % (function_name, (','.join(function_props))))
 
         mass_value = mass_prop.pop('value', None)
         if mass_value is None:
