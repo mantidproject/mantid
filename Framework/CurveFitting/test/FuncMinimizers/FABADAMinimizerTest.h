@@ -32,7 +32,7 @@ API::MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
 
     auto &x = ws2->mutableX(is);
     auto &y = ws2->mutableY(is);
-    for (size_t i = 0; i < ws2->blocksize(); ++i) {
+    for (size_t i = 0; i < y.size(); ++i) {
       x[i] = 0.1 * double(i);
       y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
     }
