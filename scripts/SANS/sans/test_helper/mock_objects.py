@@ -27,26 +27,6 @@ def create_mock_masking_table():
     return view
 
 
-# def get_cell_mock(row, column, convert_to=None):
-#     _ = convert_to  # noqa
-#     if row == 0:
-#         # For the first row we return the
-#         # all of hte sample data
-#         if column == 0:
-#             return "SANS2D00022024"
-#         elif column == 2:
-#             return "SANS2D00022048"
-#         elif column == 4:
-#             return "SANS2D00022048"
-#         else:
-#             return ""
-#     else:
-#         # For the other rows, we only return sample scatter
-#         if column == 0:
-#             return "SANS2D00022024"
-#         else:
-#             return ""
-
 def get_cell_mock(row, column, convert_to=None, user_file_path = ""):
     _ = convert_to  # noqa
     if row == 0:
