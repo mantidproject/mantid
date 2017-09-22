@@ -22,13 +22,6 @@ error message, since no reasonable :math:`d` or :math:`d_{\perp}` value can be c
 whether detector positions are correct and to mask the problem detectors.
 
 
-More details on the multidimensional TOF powder diffraction data reduction can be found in:
-
-[1]  *J. Appl. Cryst.* (2015) **48**, pp. 1627-1636
-
-[2]  *J. Appl. Cryst.* (2017) **50**, pp. 866-875.
-
-
 .. warning::
 
    The information about correspondence of spectra to detectors is lost in the produced **OutputWorkspace**.
@@ -85,6 +78,7 @@ In this example the following bin edges are specified for the :math:`d_{\perp}`-
 the bin edges 2.0, 4.0, 5.15, 6.0.
 
 
+
 Usage
 -----
 
@@ -100,10 +94,10 @@ Usage
    MoveInstrumentComponent(wsIn, 'bank1', X=1,Y=0,Z=1, RelativePosition=False)
 
    # Do binning
-   wsOut = Bin2DPowderDiffraction(wsIn, Axis1Binning="2,2,6", Axis2Binning="1,2,5", NormalizeByBinArea=False)
+   wsOut = Bin2DPowderDiffraction(wsIn, dSpaceBinning="2,2,6", dPerpendicularBinning="1,2,5", NormalizeByBinArea=False)
 
    # Do binning and normalize the result by bin area
-   wsOutNorm = Bin2DPowderDiffraction(wsIn, Axis1Binning="2,2,6", Axis2Binning="1,2,5", NormalizeByBinArea=True)
+   wsOutNorm = Bin2DPowderDiffraction(wsIn, dSpaceBinning="2,2,6", dPerpendicularBinning="1,2,5", NormalizeByBinArea=True)
 
    # Print the result
    print "Y values without normalization:"
@@ -121,6 +115,20 @@ Output:
     Y values with normalization by bin area:
     [[ 69.5    0.  ]
      [  3.5   36.25]]
+
+
+References
+----------
+
+More details on the multidimensional TOF powder diffraction data reduction can be found in the following papers.
+
+#. P. Jacobs, A. Houben, W. Schweika, A. L. Tchougréeff and R. Dronskowski, *A Rietveld refinement method
+   for angular- and wavelength-dispersive neutron time-of-flight powder diffraction data*, J. Appl. Cryst. (2015) 48, 1627-1636
+   `doi: 10.1107/S1600576715016520 <https://doi.org/10.1107/S1600576715016520>`_
+#. P. Jacobs, A. Houben, W. Schweika, A. L. Tchougréeff and R. Dronskowski, *Instrumental resolution as a function
+   of scattering angle and wavelength as exemplified for the POWGEN instrument*, J. Appl. Cryst. (2017) 50, 866-875.
+   `doi: 10.1107/S1600576717005398 <https://doi.org/10.1107/S1600576717005398>`_
+
 
 .. categories::
 

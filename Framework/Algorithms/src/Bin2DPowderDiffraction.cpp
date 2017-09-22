@@ -79,10 +79,10 @@ void Bin2DPowderDiffraction::init() {
       "Negative width values indicate logarithmic binning.";
   auto rebinValidator = boost::make_shared<RebinParamsValidator>(true);
   declareProperty(
-      make_unique<ArrayProperty<double>>("Axis1Binning", rebinValidator),
+      make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);
   declareProperty(
-      make_unique<ArrayProperty<double>>("Axis2Binning", rebinValidator),
+      make_unique<ArrayProperty<double>>("dPerpendicularBinning", rebinValidator),
       docString);
 
   const std::vector<std::string> exts{".txt", ".dat"};
@@ -90,7 +90,7 @@ void Bin2DPowderDiffraction::init() {
       make_unique<FileProperty>("BinEdgesFile", "", FileProperty::OptionalLoad,
                                 exts),
       "Optional: The ascii file containing the list of bin edges. "
-      "Either this or Axis1- and Axis2Binning need to be specified.");
+      "Either this or Axis1- and dPerpendicularBinning need to be specified.");
 
   declareProperty(
       Kernel::make_unique<PropertyWithValue<bool>>("NormalizeByBinArea", true),
@@ -123,17 +123,17 @@ std::map<std::string, std::string> Bin2DPowderDiffraction::validateInputs() {
   std::map<std::string, std::string> result;
 
   const auto useBinFile = !getPointerToProperty("BinEdgesFile")->isDefault();
-  const auto useBinning1 = !getPointerToProperty("Axis1Binning")->isDefault();
-  const auto useBinning2 = !getPointerToProperty("Axis2Binning")->isDefault();
+  const auto useBinning1 = !getPointerToProperty("dSpaceBinning")->isDefault();
+  const auto useBinning2 = !getPointerToProperty("dPerpendicularBinning")->isDefault();
   if (!useBinFile && !useBinning1 && !useBinning2) {
-    const std::string msg = "You must specify either Axis1Binning and "
-                            "Axis2Binning, or a BinEdgesFile.";
-    result["Axis1Binning"] = msg;
-    result["Axis2Binning"] = msg;
+    const std::string msg = "You must specify either dSpaceBinning and "
+                            "dPerpendicularBinning, or a BinEdgesFile.";
+    result["dSpaceBinning"] = msg;
+    result["dPerpendicularBinning"] = msg;
     result["BinEdgesFile"] = msg;
   } else if (useBinFile && (useBinning1 || useBinning2)) {
-    const std::string msg = "You must specify either Axis1Binning and "
-                            "Axis2Binning, or a BinEdgesFile, but not both.";
+    const std::string msg = "You must specify either dSpaceBinning and "
+                            "dPerpendicularBinning, or a BinEdgesFile, but not both.";
     result["BinEdgesFile"] = msg;
   }
 
@@ -150,8 +150,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
 
   using VectorHelper::createAxisFromRebinParams;
   bool binsFromFile(false);
-  size_t newYSize = 0;
-  size_t newXSize = 0;
+  size_t dPerpSize = 0;
+  size_t dSize = 0;
   MatrixWorkspace_sptr outputWS;
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
@@ -160,22 +160,22 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     binsFromFile = true;
 
   const auto &oldXEdges = m_inputWS->x(0);
-  BinEdges newXBins(oldXEdges.size());
-  BinEdges newYBins(oldXEdges.size());
+  BinEdges dBins(oldXEdges.size());
+  BinEdges dPerpBins(oldXEdges.size());
 
-  auto &newY = newYBins.mutableRawData();
+  auto &dPerp = dPerpBins.mutableRawData();
   std::vector<std::vector<double>> fileXbins;
 
   // First create the output Workspace filled with zeros
   if (binsFromFile) {
-    newY.clear();
-    ReadBinsFromFile(newY, fileXbins);
-    newYSize = newY.size();
+    dPerp.clear();
+    ReadBinsFromFile(dPerp, fileXbins);
+    dPerpSize = dPerp.size();
     // unify xbins
-    newXSize = UnifyXBins(fileXbins);
-    g_log.debug() << "Maximal size of Xbins = " << newXSize;
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, newYSize - 1,
-                                                   newXSize, newXSize - 1);
+    dSize = UnifyXBins(fileXbins);
+    g_log.debug() << "Maximal size of Xbins = " << dSize;
+    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1,
+                                                   dSize, dSize - 1);
     g_log.debug() << "Outws has " << outputWS->getNumberHistograms()
                   << " histograms and " << outputWS->blocksize() << " bins."
                   << std::endl;
@@ -189,22 +189,22 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     }
 
   } else {
-    static_cast<void>(createAxisFromRebinParams(getProperty("Axis1Binning"),
-                                                newXBins.mutableRawData()));
-    HistogramData::BinEdges binEdges(newXBins);
-    newYSize = createAxisFromRebinParams(getProperty("Axis2Binning"), newY);
-    newXSize = binEdges.size();
-    outputWS = WorkspaceFactory::Instance().create(m_inputWS, newYSize - 1,
-                                                   newXSize, newXSize - 1);
-    for (size_t idx = 0; idx < newYSize - 1; idx++)
+    static_cast<void>(createAxisFromRebinParams(getProperty("dSpaceBinning"),
+                                                dBins.mutableRawData()));
+    HistogramData::BinEdges binEdges(dBins);
+    dPerpSize = createAxisFromRebinParams(getProperty("dPerpendicularBinning"), dPerp);
+    dSize = binEdges.size();
+    outputWS = WorkspaceFactory::Instance().create(m_inputWS, dPerpSize - 1,
+                                                   dSize, dSize - 1);
+    for (size_t idx = 0; idx < dPerpSize - 1; idx++)
       outputWS->setBinEdges(idx, binEdges);
-    NumericAxis *const abscissa = new BinEdgeAxis(newXBins.mutableRawData());
+    NumericAxis *const abscissa = new BinEdgeAxis(dBins.mutableRawData());
     outputWS->replaceAxis(0, abscissa);
   }
 
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
-  NumericAxis *const verticalAxis = new BinEdgeAxis(newY);
+  NumericAxis *const verticalAxis = new BinEdgeAxis(dPerp);
   // Meta data
   verticalAxis->unit() =
       UnitFactory::Instance().create("dSpacingPerpendicular");
@@ -214,13 +214,13 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
   int64_t numSpectra = static_cast<int64_t>(m_numberOfSpectra);
   std::vector<std::vector<double>> newYValues(
-      newYSize - 1, std::vector<double>(newXSize - 1, 0.0));
+      dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
   std::vector<std::vector<double>> newEValues(
-      newYSize - 1, std::vector<double>(newXSize - 1, 0.0));
+      dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
 
   // fill the workspace with data
-  g_log.debug() << "newYSize = " << newYSize << std::endl;
-  g_log.debug() << "newXSize = " << newXSize << std::endl;
+  g_log.debug() << "newYSize = " << dPerpSize << std::endl;
+  g_log.debug() << "newXSize = " << dSize << std::endl;
   std::vector<double> dp_vec(verticalAxis->getValues());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
@@ -228,15 +228,17 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     PARALLEL_START_INTERUPT_REGION
     if (!spectrumInfo.isMasked(snum)) {
       double theta = 0.5 * spectrumInfo.twoTheta(snum);
-      if (theta == 0) {
+      double sin_theta = sin(theta);
+      if (sin_theta == 0) {
         throw std::runtime_error("Spectrum " + std::to_string(snum) +
-                                 " has theta=0. Cannot calculate d-Spacing!");
+                                 " has sin(theta)=0. Cannot calculate d-Spacing!");
       }
       if (cos(theta) <= 0) {
         throw std::runtime_error(
             "Spectrum " + std::to_string(snum) +
             " has cos(theta) <= 0. Cannot calculate d-SpacingPerpendicular!");
       }
+      double log_cos_theta = log(cos(theta));
       EventList &evList = m_inputWS->getSpectrum(snum);
 
       // Switch to weighted if needed.
@@ -246,25 +248,19 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
       std::vector<WeightedEvent> events = evList.getWeightedEvents();
 
       for (const auto &ev : events) {
-        double d, dp;
-        convertToDSpacing(ev.tof(), theta, &d, &dp);
-        std::vector<double>::iterator upy =
-            std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
-        int64_t h_index = std::distance(dp_vec.begin(), upy) - 1;
-        if ((h_index < static_cast<int>(newYSize) - 1) && h_index > -1) {
-          if (h_index == static_cast<int>(newYSize) - 1)
-            g_log.error("h_index is equal to the size of the Y axis!");
-          auto xs = binsFromFile ? fileXbins[h_index] : newXBins.rawData();
-          std::vector<double>::iterator lowx =
-              std::lower_bound(xs.begin(), xs.end(), d);
-          int64_t index = std::distance(xs.begin(), lowx) - 1;
-          if ((index < static_cast<int>(newXSize - 1)) && (index > -1)) {
-            // writing to the same vectors is not thread-safe
-            PARALLEL_CRITICAL(newValues) {
-              newYValues[h_index][index] += ev.weight();
-              newEValues[h_index][index] += ev.errorSquared();
-            }
-          }
+        auto d = calcD(ev.tof(), sin_theta);
+        auto dp = calcDPerp(ev.tof(), log_cos_theta);
+        const auto lowy = std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
+        if ((lowy == dp_vec.end()) || (lowy == dp_vec.begin())) continue;
+        int64_t dp_index = std::distance(dp_vec.begin(), lowy) - 1;
+        auto xs = binsFromFile ? fileXbins[dp_index] : dBins.rawData();
+        const auto lowx = std::lower_bound(xs.begin(), xs.end(), d);
+        if ((lowx == xs.end()) || lowx == xs.begin()) continue;
+        int64_t d_index = std::distance(xs.begin(), lowx) - 1;
+        // writing to the same vectors is not thread-safe
+        PARALLEL_CRITICAL(newValues) {
+          newYValues[dp_index][d_index] += ev.weight();
+          newEValues[dp_index][d_index] += ev.errorSquared();
         }
       }
     }
@@ -376,9 +372,12 @@ void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
   }
 }
 
-void convertToDSpacing(double wavelength, double theta, double *d, double *dp) {
-  *d = wavelength * 0.5 / sin(theta);
-  *dp = sqrt(wavelength * wavelength - 2.0 * log(cos(theta)));
+double calcD(double wavelength, double sintheta){
+    return wavelength * 0.5 / sintheta;
+}
+
+double calcDPerp(double wavelength, double logcostheta){
+    return sqrt(wavelength * wavelength - 2.0 * logcostheta);
 }
 
 } // namespace Algorithms

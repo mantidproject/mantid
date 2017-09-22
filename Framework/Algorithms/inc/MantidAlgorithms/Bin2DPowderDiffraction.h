@@ -64,7 +64,8 @@ private:
   void normalizeToBinArea(API::MatrixWorkspace_sptr outWS);
 };
 
-void convertToDSpacing(double wavelength, double theta, double *d, double *dp);
+double calcD(double wavelength, double sintheta);
+double calcDPerp(double wavelength, double logcostheta);
 
 } // namespace Algorithms
 } // namespace Mantid
