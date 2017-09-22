@@ -517,7 +517,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))
             else:
-                return self._create_waves_indirect_elastic(workspace)
+                return self._create_waves_indirect_elastic(self._clone_ws(workspace))
 
         # ----- Direct Conversions -----
 
