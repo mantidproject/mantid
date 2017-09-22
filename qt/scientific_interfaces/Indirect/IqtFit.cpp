@@ -982,7 +982,7 @@ void IqtFit::updateProperties(int specNo) {
  *
  * @param tableWsName The name of the table to read the parameter values from.
  */
-void IqtFit::readParametersFromTable(std::string const& tableWsName) {
+void IqtFit::readParametersFromTable(const std::string& tableWsName) {
 
   // Check if a table with the specified name exists in the ADS
   if (AnalysisDataService::Instance().doesExist(tableWsName)) {
