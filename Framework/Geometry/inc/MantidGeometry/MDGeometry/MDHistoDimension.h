@@ -83,6 +83,9 @@ public:
   /// along dimension would have getNBins+1 axis points.
   size_t getNBins() const override { return m_numBins; }
 
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override { return m_numBins + 1; }
+
   /// Dimensions must be xml serializable.
   std::string toXMLString() const override;
 

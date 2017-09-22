@@ -710,7 +710,7 @@ public:
     fun->setParameter("B40", 0.031787);
     fun->setParameter("B42", -0.11611);
 
-    TS_ASSERT_EQUALS(fun->nParams(), 58);
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
     TS_ASSERT_DELTA(fun->getParameter(34), 203.87, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
@@ -735,7 +735,7 @@ public:
     fun->setParameter("B40", 0);
     fun->setParameter("B42", 0);
 
-    TS_ASSERT_EQUALS(fun->nParams(), 67);
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
     TS_ASSERT_DELTA(fun->getParameter(34), 310.38, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
@@ -769,7 +769,7 @@ public:
 
     fun->fix(39);
 
-    TS_ASSERT_EQUALS(fun->nParams(), 58);
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));
     TS_ASSERT(fun->isActive(42));
@@ -814,7 +814,7 @@ public:
 
     fun->tie("f1.FWHM", "f0.FWHM");
 
-    TS_ASSERT_EQUALS(fun->nParams(), 58);
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));
     TS_ASSERT(fun->isActive(42));

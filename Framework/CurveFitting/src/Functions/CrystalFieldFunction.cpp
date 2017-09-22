@@ -18,9 +18,9 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/optional.hpp>
+#include <boost/regex.hpp>
 #include <iostream>
 #include <limits>
-#include <regex>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,19 +41,20 @@ const std::string PEAK_PREFIX("pk");
 
 // Regex for names of attributes/parameters for a particular spectrum
 // Example: sp1.FWHMX
-const std::regex SPECTRUM_ATTR_REGEX(SPECTRUM_PREFIX + "([0-9]+)\\.(.+)");
+const boost::regex SPECTRUM_ATTR_REGEX(SPECTRUM_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for a background
 // Example: bg.A1
-const std::regex BACKGROUND_ATTR_REGEX(BACKGROUND_PREFIX + "\\.(.+)");
+const boost::regex BACKGROUND_ATTR_REGEX(BACKGROUND_PREFIX + "\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: pk1.PeakCentre
-const std::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
+const boost::regex PEAK_ATTR_REGEX(PEAK_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for peaks
 // Example: ion1.pk0.PeakCentre
-const std::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
+const boost::regex ION_ATTR_REGEX(ION_PREFIX + "([0-9]+)\\.(.+)");
 // Regex for names of attributes/parameters for physical properties
 // Example: cv.ScaleFactor
-const std::regex PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
+const boost::regex
+    PHYS_PROP_ATTR_REGEX("((ion[0-9]+\\.)?(cv|chi|mh|mt))\\.(.+)");
 
 /// Define the source function for CrystalFieldFunction.
 /// Its function() method is not needed.
@@ -206,8 +207,8 @@ void CrystalFieldFunction::setParameter(const std::string &name,
     setParameter(index, value, explicitlySet);
   } catch (std::invalid_argument &) {
     // Allow ignoring peak parameters: the peak may not exist.
-    std::smatch match;
-    if (!std::regex_search(name, match, PEAK_ATTR_REGEX)) {
+    boost::smatch match;
+    if (!boost::regex_search(name, match, PEAK_ATTR_REGEX)) {
       throw;
     }
   }
@@ -228,6 +229,13 @@ double CrystalFieldFunction::getParameter(const std::string &name) const {
 
 /// Total number of parameters
 size_t CrystalFieldFunction::nParams() const {
+  if (!m_source) {
+    // This method can be called on an uninitialised function (by tests for
+    // example).
+    // Return 0 so no exception is thrown an it should prevent attemts to access
+    // parameters.
+    return 0;
+  }
   checkSourceFunction();
   checkTargetFunction();
   return m_nControlSourceParams + m_target->nParams();
@@ -502,8 +510,8 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
 /// name that the IFunction has.
 std::pair<API::IFunction *, std::string>
 CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
-  std::smatch match;
-  if (std::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
+  boost::smatch match;
+  if (boost::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
     auto i = std::stoul(match[1]);
     auto name = match[2].str();
     if (m_control.nFunctions() == 0) {
@@ -517,7 +525,7 @@ CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
       }
     }
     return std::make_pair(nullptr, "");
-  } else if (std::regex_match(attName, match, PHYS_PROP_ATTR_REGEX)) {
+  } else if (boost::regex_match(attName, match, PHYS_PROP_ATTR_REGEX)) {
     auto prop = match[1].str();
     auto name = match[4].str();
     auto propIt = m_mapPrefixes2PhysProps.find(prop);

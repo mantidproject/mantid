@@ -29,6 +29,7 @@ private slots:
   void updatePlot();
   void plotGuess();
   void singleFit();
+  void plotSpecChanged(int value);
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void minChanged(double);
@@ -63,7 +64,13 @@ private:
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
+  void updateParameters(int specNo);
+  void updateParameters(const QString &functionName, const QString &prefix,
+                        const QStringList &paramNames,
+                        const QMap<QString, double> &paramValues,
+                        int startOffset = 0, int endOffset = 0);
   void updatePlotOptions();
+  void plotOutput(std::string const &outputWs, int specNo);
   void addParametersToTree(const QStringList &parameters,
                            const QString &currentFitFunction);
   void addSampleLogsToWorkspace(const std::string &workspaceName,
@@ -85,9 +92,10 @@ private:
   // Pointer to sample workspace object
   Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
   Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
+  Mantid::API::ITableWorkspace_sptr m_paramWs;
   QString m_cfInputWSName;
+  int m_fittedIndex;
   bool m_confitResFileType;
-  Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
   QString m_previousFit;
   QString m_baseName;

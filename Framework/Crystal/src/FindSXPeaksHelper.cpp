@@ -1,11 +1,13 @@
 #include "MantidCrystal/FindSXPeaksHelper.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidAPI/Progress.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 #include <boost/graph/adjacency_list.hpp>
@@ -35,6 +37,7 @@ bool isDifferenceLargerThanTolerance(const double angle1, const double angle2,
 }
 
 using namespace boost;
+using Mantid::Kernel::UnitFactory;
 
 namespace Mantid {
 namespace Crystal {
@@ -59,8 +62,8 @@ Constructor
 SXPeak::SXPeak(double t, double phi, double intensity,
                const std::vector<int> &spectral, const size_t wsIndex,
                const API::SpectrumInfo &spectrumInfo)
-    : _t(t), _phi(phi), _intensity(intensity), _spectral(spectral),
-      _wsIndex(wsIndex) {
+    : m_tof(t), m_phi(phi), m_intensity(intensity), m_spectra(spectral),
+      m_wsIndex(wsIndex) {
   // Sanity checks
   if (intensity < 0) {
     throw std::invalid_argument("SXPeak: Cannot have an intensity < 0");
@@ -68,30 +71,38 @@ SXPeak::SXPeak(double t, double phi, double intensity,
   if (spectral.empty()) {
     throw std::invalid_argument("SXPeak: Cannot have zero sized spectral list");
   }
-  if (!spectrumInfo.hasDetectors(_wsIndex)) {
+  if (!spectrumInfo.hasDetectors(m_wsIndex)) {
     throw std::invalid_argument("SXPeak: Spectrum at ws index " +
                                 std::to_string(wsIndex) +
                                 " doesn't have detectors");
   }
-  _th2 = spectrumInfo.twoTheta(_wsIndex);
-  _Ltot = spectrumInfo.l1() + spectrumInfo.l2(_wsIndex);
-  if (_Ltot < 0) {
+
+  const auto l1 = spectrumInfo.l1();
+  const auto l2 = spectrumInfo.l2(m_wsIndex);
+
+  m_twoTheta = spectrumInfo.twoTheta(m_wsIndex);
+  m_LTotal = l1 + l2;
+  if (m_LTotal < 0) {
     throw std::invalid_argument("SXPeak: Cannot have detector distance < 0");
   }
-  _detId = spectrumInfo.detector(_wsIndex).getID();
-  npixels = 1;
+  m_detId = spectrumInfo.detector(m_wsIndex).getID();
+  m_nPixels = 1;
+
+  const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+  unit->initialize(l1, l2, m_twoTheta, 0, 0, 0);
+  m_dSpacing = unit->singleFromTOF(m_tof);
 
   const auto samplePos = spectrumInfo.samplePosition();
   const auto sourcePos = spectrumInfo.sourcePosition();
-  const auto detPos = spectrumInfo.position(_wsIndex);
+  const auto detPos = spectrumInfo.position(m_wsIndex);
   // Normalized beam direction
   auto beamDir = samplePos - sourcePos;
   beamDir.normalize();
   // Normalized detector direction
   auto detDir = (detPos - samplePos);
   detDir.normalize();
-  _unitWaveVector = beamDir - detDir;
-  _convention = Kernel::ConfigService::Instance().getString("Q.convention");
+  m_unitWaveVector = beamDir - detDir;
+  m_qConvention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
 /**
@@ -100,28 +111,34 @@ Object comparision
 @param tolerance : tolerance
 */
 bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
-  if (std::abs(_t / npixels - rhs._t / rhs.npixels) > tolerance * _t / npixels)
+  if (std::abs(m_tof / m_nPixels - rhs.m_tof / rhs.m_nPixels) >
+      tolerance * m_tof / m_nPixels)
     return false;
-  if (std::abs(_phi / npixels - rhs._phi / rhs.npixels) >
-      tolerance * _phi / npixels)
+  if (std::abs(m_phi / m_nPixels - rhs.m_phi / rhs.m_nPixels) >
+      tolerance * m_phi / m_nPixels)
     return false;
-  if (std::abs(_th2 / npixels - rhs._th2 / rhs.npixels) >
-      tolerance * _th2 / npixels)
+  if (std::abs(m_twoTheta / m_nPixels - rhs.m_twoTheta / rhs.m_nPixels) >
+      tolerance * m_twoTheta / m_nPixels)
     return false;
   return true;
 }
 
-bool SXPeak::compare(const SXPeak &rhs, const double tofTolerance,
-                     const double phiTolerance,
-                     const double thetaTolerance) const {
-  if (std::abs(_t - rhs._t) > tofTolerance) {
+bool SXPeak::compare(const SXPeak &rhs, const double xTolerance,
+                     const double phiTolerance, const double thetaTolerance,
+                     const XAxisUnit units) const {
+
+  const auto x_1 = (units == XAxisUnit::TOF) ? m_tof : m_dSpacing;
+  const auto x_2 = (units == XAxisUnit::TOF) ? rhs.m_tof : rhs.m_dSpacing;
+
+  if (std::abs(x_1 - x_2) > xTolerance) {
     return false;
   }
 
-  if (isDifferenceLargerThanTolerance(_phi, rhs._phi, phiTolerance)) {
+  if (isDifferenceLargerThanTolerance(m_phi, rhs.m_phi, phiTolerance)) {
     return false;
   }
-  if (isDifferenceLargerThanTolerance(_th2, rhs._th2, thetaTolerance)) {
+  if (isDifferenceLargerThanTolerance(m_twoTheta, rhs.m_twoTheta,
+                                      thetaTolerance)) {
     return false;
   }
   return true;
@@ -133,10 +150,10 @@ Getter for LabQ
 */
 Mantid::Kernel::V3D SXPeak::getQ() const {
   double qSign = 1.0;
-  if (_convention == "Crystallography") {
+  if (m_qConvention == "Crystallography") {
     qSign = -1.0;
   }
-  double vi = _Ltot / (_t * 1e-6);
+  double vi = m_LTotal / (m_tof * 1e-6);
   // wavenumber = h_bar / mv
   double wi = PhysicalConstants::h_bar / (PhysicalConstants::NeutronMass * vi);
   // in angstroms
@@ -144,7 +161,7 @@ Mantid::Kernel::V3D SXPeak::getQ() const {
   // wavevector=1/wavenumber = 2pi/wavelength
   double wvi = 1.0 / wi;
   // Now calculate the wavevector of the scattered neutron
-  return _unitWaveVector * wvi * qSign;
+  return m_unitWaveVector * wvi * qSign;
 }
 
 /**
@@ -152,36 +169,36 @@ Operator addition overload
 @param rhs : Right hand slide peak for addition.
 */
 SXPeak &SXPeak::operator+=(const SXPeak &rhs) {
-  _t += rhs._t;
-  _phi += rhs._phi;
-  _th2 += rhs._th2;
-  _intensity += rhs._intensity;
-  _Ltot += rhs._Ltot;
-  npixels += 1;
-  _spectral.insert(_spectral.end(), rhs._spectral.cbegin(),
-                   rhs._spectral.cend());
+  m_tof += rhs.m_tof;
+  m_phi += rhs.m_phi;
+  m_twoTheta += rhs.m_twoTheta;
+  m_intensity += rhs.m_intensity;
+  m_LTotal += rhs.m_LTotal;
+  m_nPixels += 1;
+  m_spectra.insert(m_spectra.end(), rhs.m_spectra.cbegin(),
+                   rhs.m_spectra.cend());
   return *this;
 }
 
 /// Normalise by number of pixels
 void SXPeak::reduce() {
-  _t /= npixels;
-  _phi /= npixels;
-  _th2 /= npixels;
-  _intensity /= npixels;
-  _Ltot /= npixels;
-  npixels = 1;
+  m_tof /= m_nPixels;
+  m_phi /= m_nPixels;
+  m_twoTheta /= m_nPixels;
+  m_intensity /= m_nPixels;
+  m_LTotal /= m_nPixels;
+  m_nPixels = 1;
 }
 
 /**
 Getter for the intensity.
 */
-const double &SXPeak::getIntensity() const { return _intensity; }
+const double &SXPeak::getIntensity() const { return m_intensity; }
 
 /**
 Getter for the detector Id.
 */
-detid_t SXPeak::getDetectorId() const { return _detId; }
+detid_t SXPeak::getDetectorId() const { return m_detId; }
 
 PeakContainer::PeakContainer(const HistogramData::HistogramY &y)
     : m_y(y), m_startIndex(0), m_stopIndex(m_y.size() - 1), m_maxIndex(0) {}
@@ -252,9 +269,9 @@ bool PerSpectrumBackgroundStrategy::isBelowBackground(
 PeakFindingStrategy::PeakFindingStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue)
+    const double maxValue, const XAxisUnit units)
     : m_backgroundStrategy(backgroundStrategy), m_minValue(minValue),
-      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo) {}
+      m_maxValue(maxValue), m_spectrumInfo(spectrumInfo), m_units(units) {}
 
 PeakList PeakFindingStrategy::findSXPeaks(const HistogramData::HistogramX &x,
                                           const HistogramData::HistogramY &y,
@@ -329,20 +346,34 @@ double PeakFindingStrategy::calculatePhi(size_t workspaceIndex) const {
   return phi;
 }
 
-double PeakFindingStrategy::getTof(const HistogramData::HistogramX &x,
-                                   const size_t peakLocation) const {
+double PeakFindingStrategy::getXValue(const HistogramData::HistogramX &x,
+                                      const size_t peakLocation) const {
   auto leftBinPosition = x.begin() + peakLocation;
   const double leftBinEdge = *leftBinPosition;
   const double rightBinEdge = *std::next(leftBinPosition);
   return 0.5 * (leftBinEdge + rightBinEdge);
 }
 
+double PeakFindingStrategy::convertToTOF(const double xValue,
+                                         const size_t workspaceIndex) const {
+  if (m_units == XAxisUnit::TOF) {
+    // we're already using TOF units
+    return xValue;
+  } else {
+    const auto unit = UnitFactory::Instance().create("dSpacing");
+    // we're using d-spacing, convert the point to TOF
+    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
+                     m_spectrumInfo.twoTheta(workspaceIndex), 0, 0, 0);
+    return unit->singleToTOF(xValue);
+  }
+}
+
 StrongestPeaksStrategy::StrongestPeaksStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue,
-                          maxValue) {}
+    const double maxValue, const XAxisUnit units)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
+                          units) {}
 
 PeakList StrongestPeaksStrategy::dofindSXPeaks(
     const HistogramData::HistogramX &x, const HistogramData::HistogramY &y,
@@ -363,7 +394,8 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
 
   // Create the SXPeak information
   const auto distance = std::distance(y.begin(), maxY);
-  const auto tof = getTof(x, distance);
+  const auto xValue = getXValue(x, distance);
+  const auto tof = convertToTOF(xValue, workspaceIndex);
   const double phi = calculatePhi(workspaceIndex);
 
   std::vector<int> specs(1, workspaceIndex);
@@ -374,9 +406,10 @@ PeakList StrongestPeaksStrategy::dofindSXPeaks(
 
 AllPeaksStrategy::AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                                    const API::SpectrumInfo &spectrumInfo,
-                                   const double minValue, const double maxValue)
-    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue,
-                          maxValue) {
+                                   const double minValue, const double maxValue,
+                                   const XAxisUnit units)
+    : PeakFindingStrategy(backgroundStrategy, spectrumInfo, minValue, maxValue,
+                          units) {
   // We only allow the AbsoluteBackgroundStrategy for now
   if (!dynamic_cast<const AbsoluteBackgroundStrategy *>(m_backgroundStrategy)) {
     throw std::invalid_argument("The AllPeaksStrategy has to be initialized "
@@ -481,7 +514,8 @@ PeakList AllPeaksStrategy::convertToSXPeaks(
     // Get the index of the bin
     auto maxY = peak->getMaxIterator();
     const auto distance = std::distance(y.begin(), maxY);
-    const auto tof = getTof(x, distance);
+    const auto xValue = getXValue(x, distance);
+    const auto tof = convertToTOF(xValue, workspaceIndex);
     const double phi = calculatePhi(workspaceIndex);
 
     std::vector<int> specs(1, workspaceIndex);
@@ -678,10 +712,10 @@ bool RelativeCompareStrategy::compare(const SXPeak &lhs,
 }
 
 AbsoluteCompareStrategy::AbsoluteCompareStrategy(
-    const double tofResolution, const double phiResolution,
-    const double twoThetaResolution)
-    : m_tofResolution(tofResolution), m_phiResolution(phiResolution),
-      m_twoThetaResolution(twoThetaResolution) {
+    const double xUnitResolution, const double phiResolution,
+    const double twoThetaResolution, const XAxisUnit units)
+    : m_xUnitResolution(xUnitResolution), m_phiResolution(phiResolution),
+      m_twoThetaResolution(twoThetaResolution), m_units(units) {
   // Convert the input from degree to radians
   constexpr double rad2deg = M_PI / 180.;
   m_phiResolution *= rad2deg;
@@ -690,8 +724,8 @@ AbsoluteCompareStrategy::AbsoluteCompareStrategy(
 
 bool AbsoluteCompareStrategy::compare(const SXPeak &lhs,
                                       const SXPeak &rhs) const {
-  return lhs.compare(rhs, m_tofResolution, m_phiResolution,
-                     m_twoThetaResolution);
+  return lhs.compare(rhs, m_xUnitResolution, m_phiResolution,
+                     m_twoThetaResolution, m_units);
 }
 
 } // namespace FindSXPeaksHelper

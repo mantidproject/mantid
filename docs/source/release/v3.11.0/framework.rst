@@ -23,10 +23,15 @@ New
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
 - :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
 - :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`PaddingAndApodization <algm-PaddingAndApodization-v1>` a new algorithm for padding data and adding an apodization function.
+- :ref:`algm-IntegrateEPP` integrates a workspace around the elastic peak positions given in an EPP table.
 
 Improved
 
-
+- :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` is extended to support conversion to elastic d-spacing.
+- :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
+- :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
+- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
@@ -43,12 +48,13 @@ Improved
 - :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
+- :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
 - :ref:`LoadBBY <algm-LoadBBY-v1>`: Fixed bug where the logManager did not work with sample_name, sample_aperture and source_aperture. Also added more information regarding the sample and the selected choppers.
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>`: Added an option to disable the sorting of the resulting axis making it useful especially for scanning workspaces. Also reduced the complexity of the operation for the default (ordered axis) case from *Nˆ2* to *N*.
-
+- :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
 
 Deprecated
 ##########
@@ -83,9 +89,12 @@ Bug fixes
 #########
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
+- Fix displayed type name for optional boolean properties.
 
 Improved
 ########
+
+- `:ref:`Fit` Outputs a function object containing the optimized parameter values.
 
 Python
 ------

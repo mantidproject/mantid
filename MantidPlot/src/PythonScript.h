@@ -105,8 +105,7 @@ private:
   /// Helper class to ensure the sys.path variable is updated correctly
   struct PythonPathHolder {
     /// Update the path with the given entry
-    explicit PythonPathHolder(const QString &entry, const PythonScript &script)
-        : m_path(entry), m_script(script) {
+    explicit PythonPathHolder(const QString &entry) : m_path(entry) {
       const QFileInfo filePath(m_path);
       if (filePath.exists()) {
         QDir directory = filePath.absoluteDir();
@@ -126,14 +125,14 @@ private:
     }
 
     void appendPath(const QString &path) {
-      ScopedPythonGIL lock(m_script.gil());
+      ScopedPythonGIL lock;
       QString code = "if r'%1' not in sys.path:\n"
                      "    sys.path.append(r'%1')";
       code = code.arg(path);
       PyRun_SimpleString(code.toAscii().constData());
     }
     void removePath(const QString &path) {
-      ScopedPythonGIL lock(m_script.gil());
+      ScopedPythonGIL lock;
       QString code = "if r'%1' in sys.path:\n"
                      "    sys.path.remove(r'%1')";
       code = code.arg(path);
@@ -142,7 +141,6 @@ private:
 
   private:
     QString m_path;
-    const PythonScript &m_script;
   };
 
   inline PythonScripting *interp() const { return m_interp; }
@@ -172,8 +170,8 @@ private:
   // are used for this purpose and are NOT used by the general executeAsync
   // methods where the GILState API functions can cope and there is no
   // recursion.
-  virtual void recursiveAsyncSetup() override;
-  virtual void recursiveAsyncTeardown() override;
+  virtual bool recursiveAsyncSetup() override;
+  virtual void recursiveAsyncTeardown(bool relock) override;
 
   /// Compile the code, returning true if it was successful, false otherwise
   bool compileImpl() override;
@@ -208,8 +206,9 @@ private:
   QString fileName;
   bool m_isInitialized;
   PythonPathHolder m_pathHolder;
-  /// Set of current python variables that point to workspace handles
-  std::set<std::string> m_workspaceHandles;
+  /// This must only be used by the recursiveAsync* methods
+  /// as they need to store state between calls.
+  PythonGIL m_recursiveAsyncGIL;
 };
 
 #endif
