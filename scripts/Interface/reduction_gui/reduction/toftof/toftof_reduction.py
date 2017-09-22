@@ -46,6 +46,13 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
+    DEF_saveDir    = ''
+    DEF_saveSofQW  = False
+    DEF_saveSofTW  = False
+    DEF_saveNXSPE  = False
+    DEF_saveNexus  = False
+    DEF_saveAscii  = False
+
     XML_TAG = 'TOFTOFReduction'
 
     def reset(self):
@@ -90,6 +97,14 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.createDiff    = self.DEF_createDiff
         self.keepSteps     = self.DEF_keepSteps
 
+        # save data
+        self.saveDir      = self.DEF_saveDir
+        self.saveSofQW    = self.DEF_saveSofQW
+        self.saveSofTW    = self.DEF_saveSofTW
+        self.saveNXSPE    = self.DEF_saveNXSPE
+        self.saveNexus    = self.DEF_saveNexus
+        self.saveAscii    = self.DEF_saveAscii
+
     def to_xml(self):
         res = ['']
 
@@ -127,6 +142,13 @@ class TOFTOFScriptElement(BaseScriptElement):
         put('replace_nans',   self.replaceNaNs)
         put('create_diff',    self.createDiff)
         put('keep_steps',     self.keepSteps)
+
+        put('save_dir',      self.saveDir)
+        put('save_sofqw',    self.saveSofQW)
+        put('save_softw',    self.saveSofTW)
+        put('save_nxspe',    self.saveNXSPE)
+        put('save_nexus',    self.saveNexus)
+        put('save_ascii',    self.saveAscii)
 
         return '<{0}>\n{1}</{0}>\n'.format(self.XML_TAG, res[0])
 
@@ -187,6 +209,13 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.createDiff    = get_bol('create_diff',    self.DEF_createDiff)
             self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
+            self.saveDir     = get_str('save_dir',     self.DEF_saveDir)
+            self.saveSofQW   = get_bol('save_sofqw',   self.DEF_saveSofQW)
+            self.saveSofTW   = get_bol('save_softw',   self.DEF_saveSofTW)
+            self.saveNXSPE   = get_bol('save_nxspe',   self.DEF_saveNXSPE)
+            self.saveNexus   = get_bol('save_nexus',   self.DEF_saveNexus)
+            self.saveAscii   = get_bol('save_ascii',   self.DEF_saveAscii)
+
     def to_script(self):
 
         def error(message):
@@ -223,6 +252,15 @@ class TOFTOFScriptElement(BaseScriptElement):
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
             error('missing vanadium comment')
+
+        # saving settings must be consistent
+        if self.saveNXSPE or self.saveNexus or self.saveAscii:
+            if not self.saveDir:
+                error('missing directory to save the data')
+            elif not (self.saveSofQW or self.saveSofTW):
+                error('you must select workspaces to save')
+        elif self.saveDir or self.saveSofQW or self.saveSofTW:
+            error('missing data format to save')
 
         # generated script
         script = ['']
