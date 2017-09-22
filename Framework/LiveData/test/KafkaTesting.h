@@ -135,7 +135,7 @@ public:
     assert(buffer);
 
     // Convert date to time_t
-    auto mantidTime = Mantid::Kernel::DateAndTime(m_startTime, false);
+    auto mantidTime = Mantid::Kernel::DateAndTime(m_startTime);
     auto tmb = mantidTime.to_tm();
     uint64_t startTime = static_cast<uint64_t>(std::mktime(&tmb));
 

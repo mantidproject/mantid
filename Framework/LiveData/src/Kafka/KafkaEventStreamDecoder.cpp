@@ -96,7 +96,7 @@ void addSampleEnvLogs(
     }
   }
 }
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
@@ -211,7 +211,7 @@ bool KafkaEventStreamDecoder::hasReachedEndOfRun() noexcept {
  */
 API::Workspace_sptr KafkaEventStreamDecoder::extractData() {
   if (m_exception) {
-    throw * m_exception;
+    throw *m_exception;
   }
 
   m_extractWaiting = true;
@@ -384,7 +384,8 @@ void KafkaEventStreamDecoder::initLocalCaches() {
     std::ostringstream os;
     os << "KafkaEventStreamDecoder::initLocalEventBuffer() - Invalid "
           "spectra/detector mapping. Expected matched length arrays but "
-          "found nspec=" << nspec << ", ndet=" << nudet;
+          "found nspec="
+       << nspec << ", ndet=" << nudet;
     throw std::runtime_error(os.str());
   }
   // Create buffer
@@ -415,7 +416,7 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   auto runStartTime = static_cast<time_t>(runMsg->start_time());
   char timeString[32];
   strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
-  m_runStart.setFromISO8601(timeString, false);
+  m_runStart.setFromISO8601(timeString);
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
   m_runNumber = runMsg->run_number();
@@ -533,6 +534,6 @@ void KafkaEventStreamDecoder::loadInstrument(
                     << "': " << exc.what() << "\n";
   }
 }
-}
+} // namespace LiveData
 
 } // namespace Mantid

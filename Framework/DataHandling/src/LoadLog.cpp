@@ -1,25 +1,26 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/LoadLog.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
+#include <MantidKernel/DateAndTimeHelpers.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
 
@@ -29,10 +30,10 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadLog)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
+using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
-using API::FileProperty;
+using API::WorkspaceProperty;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
@@ -200,7 +201,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
       dMap;
   std::map<std::string,
-           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>> sMap;
+           std::unique_ptr<Kernel::TimeSeriesProperty<std::string>>>
+      sMap;
   kind l_kind(LoadLog::empty);
   bool isNumeric(false);
 
@@ -471,7 +473,7 @@ bool LoadLog::isAscii(const std::string &filename) {
  * @returns true if the strings format matched the expected date format
  */
 bool LoadLog::isDateTimeString(const std::string &str) const {
-  return DateAndTime::stringIsISO8601(str.substr(0, 19));
+  return Kernel::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
 }
 
 /**

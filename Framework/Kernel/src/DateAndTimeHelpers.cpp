@@ -22,6 +22,15 @@ namespace DateAndTimeHelpers {
 // Initialize the logger
 Logger g_log("DateAndTime");
 
+/** Creates a DateAndTime object from a date string even if the string does not
+ *exactly conform to ISO8601 (ARGUS File)
+ *@param date Date used to create DateAndTime object. May be sanitized first.
+ *
+ */
+DateAndTime createFromSanitizedISO8601(const std::string &date) {
+  return DateAndTime(verifyAndSanitizeISO8601(date));
+}
+
 /** Check if a string is iso8601 format.
  *
  * @param str :: string to check
@@ -41,8 +50,8 @@ bool stringIsISO8601(const std::string &date) {
  *@param displayWarning display warning messages in the log if the date is non
  *conforming.
  */
-std::string verifyAndCorrectToISO8601(const std::string &date,
-                                      bool displayWarnings) {
+std::string verifyAndSanitizeISO8601(const std::string &date,
+                                     bool displayWarnings) {
   auto res = isARGUSDateTime(date);
 
   if (std::get<0>(res)) {
