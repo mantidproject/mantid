@@ -3,6 +3,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -343,6 +344,8 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
     typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
                         string("list of str lists"));
+    typestrings.emplace(typeid(OptionalBool).name(),
+                        string("optional boolean"));
 
     // Workspaces
     typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),

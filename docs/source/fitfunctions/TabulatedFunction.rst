@@ -32,6 +32,7 @@ Usage
 
 .. testcode:: Ex
 
+    from __future__ import print_function
     ws1=LoadNexus('tabulatedFunctionExample.nxs')
     
     # Clone the workspace by rescaling and shift 
@@ -41,14 +42,15 @@ Usage
     
     # Call the Fit algorithm and perform the fit
     myFunc='name=TabulatedFunction,Workspace=ws1,WorkspaceIndex=0,Scaling=1.0,Shift=0.0'
-    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
-    Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')
+    fit_output = Fit(Function=myFunc, InputWorkspace=ws2, Output='fit')
+    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
+    fitWorkspace = fit_output.OutputWorkspace
 
-    print "The fit was: " + fitStatus
+    print("The fit was: " + fit_output.OutputStatus)
     print("Fitted Scaling value is: %.2f" % paramTable.column(1)[0])
     print("Fitted Shift value is: %.3f" % abs(paramTable.column(1)[1]))
     # fitWorkspace contains the data, the calculated and the difference patterns
-    print "Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms())
+    print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
 
 Output:
 

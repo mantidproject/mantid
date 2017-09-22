@@ -61,6 +61,8 @@ Restrictions for *EPPTable*:
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example**
 
 .. testcode:: ExComputeCalibrationCoefVan
@@ -82,9 +84,9 @@ Output:
 
 .. testoutput:: ExComputeCalibrationCoefVan
 
-    Spectrum 4 of the output workspace is filled with:  6897.0
+    Spectrum 4 of the output workspace is filled with:  6895.0
     Spectrum 4 of the input workspace is filled with:  1.0
-    Spectrum 4 of the corrected workspace is filled with:  0.00014
+    Spectrum 4 of the corrected workspace is filled with:  0.00015
 
 .. categories::
 

@@ -3,7 +3,7 @@
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/ISpectrum.h"

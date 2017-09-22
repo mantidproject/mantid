@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/AlphaCalc.cpp
 	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
+	src/ApodizationFunctions.cpp
 	src/AppendSpectra.cpp
 	src/ApplyCalibration.cpp
 	src/ApplyDeadTimeCorr.cpp
@@ -25,7 +26,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateMuonAsymmetry.cpp
-	src/CalculateResolution.cpp
+	src/NRCalculateSlitResolution.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -33,6 +34,7 @@ set ( SRC_FILES
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
+	src/ChangePulsetime2.cpp
 	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
@@ -149,6 +151,7 @@ set ( SRC_FILES
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetEiMonDet2.cpp
+	src/GetQsInQENSData.cpp
 	src/GetTimeSeriesLogInformation.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
@@ -157,6 +160,7 @@ set ( SRC_FILES
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/IntegrateByComponent.cpp
+	src/IntegrateEPP.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InterpolationOption.cpp
@@ -199,6 +203,7 @@ set ( SRC_FILES
 	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
 	src/PDFFourierTransform.cpp
+	src/PaddingAndApodization.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
 	src/PhaseQuadMuon.cpp
@@ -279,6 +284,7 @@ set ( SRC_FILES
 	src/SpectrumAlgorithm.cpp
 	src/SpecularReflectionAlgorithm.cpp
 	src/SpecularReflectionCalculateTheta.cpp
+	src/SpecularReflectionCalculateTheta2.cpp
 	src/SpecularReflectionPositionCorrect.cpp
 	src/SpecularReflectionPositionCorrect2.cpp
 	src/SphericalAbsorption.cpp
@@ -326,6 +332,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/AppendSpectra.h
+    inc/MantidAlgorithms/ApodizationFunctions.h
 	inc/MantidAlgorithms/ApplyCalibration.h
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
@@ -342,7 +349,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
-	inc/MantidAlgorithms/CalculateResolution.h
+	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -350,6 +357,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
+	inc/MantidAlgorithms/ChangePulsetime2.h
 	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
@@ -467,6 +475,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetEi.h
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEiMonDet2.h
+	inc/MantidAlgorithms/GetQsInQENSData.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
@@ -475,6 +484,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/IntegrateByComponent.h
+	inc/MantidAlgorithms/IntegrateEPP.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
@@ -517,6 +527,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
+	inc/MantidAlgorithms/PaddingAndApodization.h
 	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
@@ -601,6 +612,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SpectrumAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionAlgorithm.h
 	inc/MantidAlgorithms/SpecularReflectionCalculateTheta.h
+	inc/MantidAlgorithms/SpecularReflectionCalculateTheta2.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect.h
 	inc/MantidAlgorithms/SpecularReflectionPositionCorrect2.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
@@ -675,7 +687,7 @@ set ( TEST_FILES
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateMuonAsymmetryTest.h
-	CalculateResolutionTest.h
+	NRCalculateSlitResolutionTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
@@ -684,6 +696,7 @@ set ( TEST_FILES
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
 	ChangePulsetimeTest.h
+	ChangePulsetime2Test.h
 	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
@@ -796,6 +809,7 @@ set ( TEST_FILES
 	GetEiMonDet2Test.h
 	GetEiTest.h
 	GetEiV1Test.h
+	GetQsInQENSDataTest.h
 	GetTimeSeriesLogInformationTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
@@ -803,10 +817,11 @@ set ( TEST_FILES
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
 	IntegrateByComponentTest.h
+	IntegrateEPPTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InterpolationOptionTest.h
-        InvertMaskTest.h
+    InvertMaskTest.h
 	LineProfileTest.h
 	LogarithmTest.h
 	LorentzCorrectionTest.h
@@ -841,6 +856,7 @@ set ( TEST_FILES
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
 	OneMinusExponentialCorTest.h
+	PaddingAndApodizationTest.h
 	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h
 	PDFFourierTransformTest.h
@@ -909,6 +925,7 @@ set ( TEST_FILES
 	SparseInstrumentTest.h
 	SpatialGroupingTest.h
 	SpecularReflectionCalculateThetaTest.h
+	SpecularReflectionCalculateTheta2Test.h
 	SpecularReflectionPositionCorrect2Test.h
 	SpecularReflectionPositionCorrectTest.h
 	SphericalAbsorptionTest.h

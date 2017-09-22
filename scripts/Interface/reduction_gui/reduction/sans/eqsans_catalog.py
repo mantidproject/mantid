@@ -2,9 +2,9 @@
 """
     Data catalog for EQSANS
 """
+from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
-from reduction_gui.reduction.sans.data_cat import DataSet
-from data_cat import DataType
+from reduction_gui.reduction.sans.data_cat import DataSet,  DataType
 import re
 import datetime
 
@@ -52,9 +52,12 @@ class EQSANSDataSet(DataSet):
     def handle(cls, file_path):
         """
             Return a DB handle for the given file, such as a run number
+            This will handle file formats in two formats:
+            EQSANS_([0-9]+)_event
+            EQSANS_([0-9]+).nxs
         """
         file_path = file_path.strip()
-        r_re = re.search("EQSANS_([0-9]+)_event", file_path)
+        r_re = re.search("EQSANS_([0-9]+)(_event|\.nxs)", file_path)
         if r_re is not None:
             return r_re.group(1)
         else:
@@ -112,7 +115,7 @@ class EQSANSDataSet(DataSet):
 
 
 class DataCatalog(BaseCatalog):
-    extension = "nxs"
+    extension = ["nxs", "nxs.h5"]
     data_set_cls = EQSANSDataSet
 
     def __init__(self, replace_db=False):

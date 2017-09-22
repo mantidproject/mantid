@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -89,7 +90,7 @@ class SANSCatalogWidget(BaseWidget):
                     #TODO: At some point we want to tie the type to a given sample run too
                     self._catalog_cls().add_type(run, key)
         except:
-            print "SANSCatalogWidget: Could not access local data catalog"
+            print("SANSCatalogWidget: Could not access local data catalog")
 
     def copyCells(self):
         indices = self._content.data_set_table.selectedIndexes()

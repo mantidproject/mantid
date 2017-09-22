@@ -2,7 +2,8 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
@@ -236,8 +237,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
                             std::map<int, Kernel::V3D> &posMap,
                             std::map<int, double> &scaleMap) {
 
-  Geometry::ParameterMap &pmap = WS->instrumentParameters();
   auto &detectorInfo = WS->mutableDetectorInfo();
+  auto &componentInfo = WS->mutableComponentInfo();
 
   double maxScale = -1e6, minScale = 1e6, aveScale = 0.0;
   int scaleCount = 0;
@@ -264,8 +265,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
       if (maxScale < scale)
         maxScale = scale;
       aveScale += fabs(1.0 - scale);
-      scaleCount++;
-      pmap.addV3D(&detectorInfo.detector(i), "sca", V3D(1.0, scale, 1.0));
+      componentInfo.setScaleFactor(i, V3D(1.0, scale, 1.0));
+      ++scaleCount;
     }
     prog.report();
   }

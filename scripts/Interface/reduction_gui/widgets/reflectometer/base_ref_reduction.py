@@ -1,4 +1,5 @@
 # pylint: disable=too-many-lines,invalid-name,bare-except,too-many-arguments,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 import math
 import time
 import sys
@@ -348,8 +349,8 @@ class BaseRefWidget(BaseWidget):
         new_e_axis = []
 
         #        if self.bDEBUG:
-        #            print 'x_axis before _smooth_x_axis:'
-        #            print x_axis
+        #            print('x_axis before _smooth_x_axis:')
+        #            print(x_axis)
 
         sz = len(x_axis)
         i = 0
@@ -404,9 +405,9 @@ class BaseRefWidget(BaseWidget):
             i += 1
 
         #        if self.bDEBUG:
-        #            print
-        #            print 'x-axis after _smooth_x_axis:'
-        #            print new_x_axis
+        #            print()
+        #            print('x-axis after _smooth_x_axis:')
+        #            print(new_x_axis)
 
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
@@ -509,7 +510,7 @@ class BaseRefWidget(BaseWidget):
 
         # DEBUGGING ONLY
         _file_number = 0
-        #        print '=========== BEFORE REBINING =========='
+        #        print('=========== BEFORE REBINING ==========')
         for ws in scaled_ws_list:
             # print 'file_number: ' , file_number
             data_y = mantid.mtd[ws].dataY(0)
@@ -536,12 +537,12 @@ class BaseRefWidget(BaseWidget):
         skip_index = 0
         point_to_skip = 3
 
-        #        print '============ AFTER REBINING ================' #DEBUGGING ONLY
+        #        print('============ AFTER REBINING ================' #DEBUGGING ONLY)
 
         # Add in the other histos, averaging the overlaps
         for i in range(1, len(scaled_ws_list)):
 
-            #            print 'i: ' , i
+            #            print('i: ' , i)
 
             skip_point = True
             can_skip_last_point = False
@@ -550,11 +551,11 @@ class BaseRefWidget(BaseWidget):
             data_e_i = mantid.mtd[scaled_ws_list[i] + '_histo'].dataE(0)
             for j in range(len(data_y_i) - 1):
 
-                #                print '-> j: ' , j
+                #                print('-> j: ' , j)
 
                 if data_y_i[j] > 0:
 
-                    #                    print '   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j]
+                    #                    print('   data_y_i[j]: ', data_y_i[j], ' data_e_i[j]: ' , data_e_i[j])
 
                     can_skip_last_point = True
                     if skip_point:
@@ -590,7 +591,7 @@ class BaseRefWidget(BaseWidget):
 
         # make sure there is the right output workspace called '
         #        if not mtd.workspaceExists('ref_combined'):
-        #            print 'Workspace "ref_combined" does not exist !'
+        #            print('Workspace "ref_combined" does not exist !')
         #            return
 
         # get default output file name
@@ -632,7 +633,7 @@ class BaseRefWidget(BaseWidget):
         # using mean or value with less error
         _overlap_less_error_flag = self._summary.overlapValueLowestErrorRadioButton.isChecked()
         wks_file_name = self._produce_y_of_same_x_(_overlap_less_error_flag)
-        #        print 'wks_file_name: ' , wks_file_name
+        #        print('wks_file_name: ' , wks_file_name)
 
         #        mt = mtd['ref_combined']
         #        x_axis = mt.readX(0)[:]
@@ -1138,7 +1139,7 @@ class BaseRefWidget(BaseWidget):
                                                        instrument='REFL')
 
         #        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
-        #            print 'Inside the call_back on the python side'
+        #            print('Inside the call_back on the python side')
         #            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
         #            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
         #            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
@@ -1299,7 +1300,7 @@ class BaseRefWidget(BaseWidget):
         try:
             f = mantid.FileFinder.findRuns("%s%s" %
                                            (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
-            #            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
+            #            print(FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text()))))
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())
 
