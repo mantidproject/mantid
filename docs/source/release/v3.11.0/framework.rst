@@ -45,7 +45,11 @@ Improved
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
-- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>` has had several improvements:
+
+  * it now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays
+  * the NumberOfWavelengthPoints input property is now validated more rigorously
+  * a new MaxScatterPtAttempts input has been added to control how many tries are made to generate a random point in the object. Useful for cases such as thin annuli that require a higher number of tries. The previous version was hard coded internally.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
