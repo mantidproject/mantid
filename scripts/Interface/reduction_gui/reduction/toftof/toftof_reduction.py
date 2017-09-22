@@ -46,7 +46,6 @@ class TOFTOFScriptElement(BaseScriptElement):
     DEF_normalise  = NORM_NONE
     DEF_correctTof = CORR_TOF_NONE
 
-    DEF_saveDir    = ''
     DEF_saveSofQW  = False
     DEF_saveSofTW  = False
     DEF_saveNXSPE  = False
@@ -98,7 +97,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.keepSteps     = self.DEF_keepSteps
 
         # save data
-        self.saveDir      = self.DEF_saveDir
+        self.saveDir      = ''
         self.saveSofQW    = self.DEF_saveSofQW
         self.saveSofTW    = self.DEF_saveSofTW
         self.saveNXSPE    = self.DEF_saveNXSPE
@@ -209,7 +208,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.createDiff    = get_bol('create_diff',    self.DEF_createDiff)
             self.keepSteps     = get_bol('keep_steps',     self.DEF_keepSteps)
 
-            self.saveDir     = get_str('save_dir',     self.DEF_saveDir)
+            self.saveDir     = get_str('save_dir')
             self.saveSofQW   = get_bol('save_sofqw',   self.DEF_saveSofQW)
             self.saveSofTW   = get_bol('save_softw',   self.DEF_saveSofTW)
             self.saveNXSPE   = get_bol('save_nxspe',   self.DEF_saveNXSPE)
@@ -279,7 +278,19 @@ class TOFTOFScriptElement(BaseScriptElement):
         def get_time(workspace):
             return get_log(workspace, 'duration')
 
+        def save_wsgroup(wsgroup, suffix):
+            l("# save {}".format(wsgroup))
+            l("for ws in {}:".format(wsgroup))
+            l("    name = ws.getComment() + {}".format(suffix))
+            if self.saveNXSPE:
+                l("    SaveNXSPE(ws, join('{}',name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
+            if self.saveNexus:
+                l("    SaveNexus(ws, join('{}',name + '.nxs'))".format(self.saveDir))
+            l()
+
+
         l("import numpy as np")
+        l("from os.path import join")
         l()
         l("config['default.facility'] = '{}'"   .format(self.facility_name))
         l("config['default.instrument'] = '{}'" .format(self.instrument_name))
@@ -569,6 +580,10 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("DeleteWorkspaces('step1,step2,step3')")
             l()
 
+        if self.saveSofTW:
+            suf = "'_Ei_{}'.format(round(Ei,2))"
+            save_wsgroup(gLast, suf)
+
         if self.binQon:
             gDataBinQ = gData + 'SQW'
             l("# calculate momentum transfer Q for sample data")
@@ -577,6 +592,8 @@ class TOFTOFScriptElement(BaseScriptElement):
             l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
               .format(gDataBinQ, gLast, self.replaceNaNs))
             l()
+            if self.saveSofQW:
+                save_wsgroup(gDataBinQ, "'_SQW'")
 
         l("# make nice workspace names")
         l("for ws in {}:" .format(gDataS))

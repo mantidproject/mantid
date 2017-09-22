@@ -454,6 +454,7 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.createDiff    = self.chkCreateDiff.isChecked()
         elem.keepSteps     = self.chkKeepSteps.isChecked()
 
+        elem.saveDir       = line_text(self.saveDir)
         elem.saveSofQW     = self.chkSofQW.isChecked()
         elem.saveSofTW     = self.chkSofTW.isChecked()
         elem.saveNXSPE     = self.chkNxspe.isChecked()
