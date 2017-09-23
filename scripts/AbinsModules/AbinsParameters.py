@@ -42,7 +42,7 @@ pkt_per_peak = 50  # number of points for each peak broadened by the experimenta
 bin_width = 1.0  # defines width of bins used in rebinning of S
 max_wavenumber = 4100.0  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
-acoustic_phonon_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
+acoustic_vibrational_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
 
 # threshold expressed as a fraction of max S intensity below which S values are treated as zero
 s_relative_threshold = 0.01
