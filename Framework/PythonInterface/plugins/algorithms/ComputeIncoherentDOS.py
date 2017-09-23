@@ -9,11 +9,7 @@ from mantid.simpleapi import *
 
 
 def evaluateEbin(Emin, Emax, Ei, strn):
-    return [eval(estr) for estr in strn.split(',')]
-
-
-def evaluateQRange(Qmin, Qmax, strn):
-    return [eval(qstr) for qstr in strn.split(',')]
+    return [eval(estr,None,{'Emax':Emax, 'Emin':Emin, 'Ei':Ei}) for estr in strn.split(',')]
 
 
 class ComputeIncoherentDOS(PythonAlgorithm):
@@ -102,7 +98,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
             raise ValueError('QSumRange must be a comma separated string with two values.')
         try:
             # Do this in a member function to make sure no other variables can be evaluated other than Qmin and Qmax.
-            dq = evaluateQRange(min(qq), max(qq), QSumRange)
+            dq = [eval(qstr, None, {'Qmin':min(qq), 'Qmax':max(qq)}) for qstr in QSumRange.split(',')]
         except NameError:
             raise ValueError('Only the variables ''Qmin'' and ''Qmax'' is allowed in QSumRange.')
 
