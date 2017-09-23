@@ -76,7 +76,7 @@ private:
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
   QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
-  void IqtFit::extendParameterToPropertyMap(
+  void extendParameterToPropertyMaptFit::(
       const QString &functionName, const QString &prefix,
       QHash<QString, QString> &parameterToProperty);
 
