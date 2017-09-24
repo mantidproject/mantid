@@ -8,8 +8,6 @@ import hashlib
 import io
 import AbinsModules
 import os
-
-
 from mantid.kernel import logger, ConfigService
 
 
@@ -89,9 +87,8 @@ class IOmodule(object):
 
     def check_previous_data(self):
         """
-        Checks if currently used ab initio file is the same as in the previous calculations. Also checks if currently used
-        parameters from AbinsParameters are the same as in the previous calculations.
-
+        Checks if currently used ab initio file is the same as in the previous calculations. Also checks if currently
+        used parameters from AbinsParameters are the same as in the previous calculations.
         """
 
         if not self._valid_hash():
@@ -144,7 +141,8 @@ class IOmodule(object):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, "
-                                 "int or bytes was expected! (invalid type : %s)" % type(self._attributes[name]))
+                                 "int or bytes was expected! " + name +
+                                 "= (invalid type : %s) " % type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """

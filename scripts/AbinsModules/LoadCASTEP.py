@@ -20,7 +20,7 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
         self._sum_rule = None
-        self._dft_program = "CASTEP"
+        self._ab_initio_program = "CASTEP"
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
