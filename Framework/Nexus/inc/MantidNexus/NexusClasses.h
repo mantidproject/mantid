@@ -697,8 +697,7 @@ private:
       value.openLocal();
       value.load();
       for (int i = 0; i < value.dim0(); i++) {
-        auto t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         for (int j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
