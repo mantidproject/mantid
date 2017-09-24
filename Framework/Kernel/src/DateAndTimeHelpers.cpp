@@ -33,7 +33,7 @@ DateAndTime createFromSanitizedISO8601(const std::string &date) {
 
 /** Check if a string is iso8601 format.
  *
- * @param str :: string to check
+ * @param date :: string to check
  * @return true if the string conforms to ISO 860I, false otherwise.
  */
 bool stringIsISO8601(const std::string &date) {
@@ -47,7 +47,7 @@ bool stringIsISO8601(const std::string &date) {
  *if it does not and is of the ARGUS file date/time format
  *
  *@param date Date to be checked/corrected
- *@param displayWarning display warning messages in the log if the date is non
+ *@param displayWarnings display warning messages in the log if the date is non
  *conforming.
  */
 std::string verifyAndSanitizeISO8601(const std::string &date,

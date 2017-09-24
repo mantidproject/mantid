@@ -155,8 +155,6 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a
  *space.
  *    The time must included, but the time-zone specification is optional.
- *@param displayLogs :: if the logs should be dsiplayed during the execution of
- *the constructor
  */
 DateAndTime::DateAndTime(const std::string &ISO8601_string) : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string);
@@ -373,7 +371,6 @@ const DateAndTime &DateAndTime::defaultTime() {
 /** Sets the date and time using an ISO8601-formatted string
  *
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
- * @param displayLogs :: flag to indiciate if the logs should be displayed
  */
 void DateAndTime::setFromISO8601(const std::string &str) {
   // Make a copy
