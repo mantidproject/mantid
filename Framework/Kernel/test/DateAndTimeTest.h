@@ -18,7 +18,6 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 
-using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;

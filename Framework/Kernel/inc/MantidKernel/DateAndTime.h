@@ -5,8 +5,8 @@
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
+#include <cstdint>
 #include <iosfwd>
-#include <stdint.h>
 #include <string>
 #include <time.h>
 #include <vector>
@@ -122,7 +122,7 @@ public:
   static const boost::posix_time::ptime GPS_EPOCH;
 
   /// Const of one second time duration
-  static const time_duration oneSecond;
+  static const time_duration ONE_SECOND;
 
   static time_t utc_mktime(struct tm *utctime);
 

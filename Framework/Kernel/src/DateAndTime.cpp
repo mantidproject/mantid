@@ -4,9 +4,9 @@
 #include <boost/date_time/time.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <cmath>
 #include <exception>
 #include <limits>
-#include <math.h>
 #include <memory>
 #include <ostream>
 #include <stdexcept>
@@ -19,7 +19,7 @@ const boost::posix_time::ptime
     DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
 
 /// Const of one second time duration
-const time_duration DateAndTime::oneSecond =
+const time_duration DateAndTime::ONE_SECOND =
     boost::posix_time::time_duration(0, 0, 1, 0);
 
 namespace {
