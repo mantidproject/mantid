@@ -215,29 +215,23 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.saveNexus   = get_bol('save_nexus',   self.DEF_saveNexus)
             self.saveAscii   = get_bol('save_ascii',   self.DEF_saveAscii)
 
-    def to_script(self):
-
-        def error(message):
-            raise RuntimeError('TOFTOF reduction error: ' + message)
-
-        # sanity checks
-
+    def validate_inputs(self):
         # must have vanadium for TOF correction
         if self.CORR_TOF_VAN == self.correctTof:
             if not self.vanRuns:
-                error('missing vanadium runs')
+                self.error('missing vanadium runs')
 
         # must have vanadium and empty can for subtracting EC from van
         if self.subtractECVan:
             if not self.vanRuns:
-                error('missing vanadium runs')
+                self.error('missing vanadium runs')
             if not self.ecRuns:
-                error('missing empty can runs')
+                self.error('missing empty can runs')
 
         # binning parameters
         def check_bin_params(start, step, end):
             if not (start < end and step > 0 and start + step <= end):
-                error('incorrect binning parameters')
+                self.error('incorrect binning parameters')
 
         if self.binEon:
             check_bin_params(self.binEstart, self.binEstep, self.binEend)
@@ -246,81 +240,51 @@ class TOFTOFScriptElement(BaseScriptElement):
 
         # must have some data runs
         if not self.dataRuns:
-            error('missing data runs')
+            self.error('missing data runs')
 
         # must have a comment for runs
         if self.vanRuns and not self.vanCmnt:
-            error('missing vanadium comment')
+            self.error('missing vanadium comment')
 
         # saving settings must be consistent
         if self.saveNXSPE or self.saveNexus or self.saveAscii:
             if not self.saveDir:
-                error('missing directory to save the data')
+                self.error('missing directory to save the data')
             elif not (self.saveSofQW or self.saveSofTW):
-                error('you must select workspaces to save')
-        elif self.saveDir or self.saveSofQW or self.saveSofTW:
-            error('missing data format to save')
+                self.error('you must select workspaces to save')
+        elif self.saveSofQW or self.saveSofTW:
+            if not self.saveDir:
+                self.error('missing directory to save the data')
+            self.error('missing data format to save')
 
-        # generated script
-        script = ['']
+    @staticmethod
+    def error(message):
+        raise RuntimeError('TOFTOF reduction error: ' + message)
 
-        # helper: add a line to the script
-        def l(line=''):
-            script[0] += line + '\n'
+    @staticmethod
+    def get_log(workspace, tag):
+        return "{}.getRun().getLogData('{}').value".format(workspace, tag)
 
-        # helpers
-        def get_log(workspace, tag):
-            return "{}.getRun().getLogData('{}').value".format(workspace, tag)
+    def merge_runs(self, ws_raw, raw_runs, outws, comment):
+        self.l("{} = Load(Filename='{}')" .format(ws_raw, raw_runs))
+        self.l("{} = MergeRuns({})" .format(outws, ws_raw))
+        self.l("{}.setComment('{}')" .format(outws, comment))
+        self.l("temperature = np.mean({})".format(self.get_log(outws,'temperature')))
+        self.l("AddSampleLog({}, LogName='temperature', LogText=str(temperature), LogType='Number', LogUnit='K')"
+               .format(outws))
+        if not self.keepSteps:
+            self.l("DeleteWorkspace({})" .format(ws_raw))
+        self.l()
 
-        def get_ei(workspace):
-            return get_log(workspace, 'Ei')
-
-        def get_time(workspace):
-            return get_log(workspace, 'duration')
-
-        def merge_runs(ws_raw, raw_runs, outws, comment):
-            l("{} = Load(Filename='{}')" .format(ws_raw, raw_runs))
-            l("{} = MergeRuns({})" .format(outws, ws_raw))
-            l("{}.setComment('{}')" .format(outws, comment))
-            l("temperature = np.mean({})".format(get_log(outws,'temperature')))
-            l("AddSampleLog({}, LogName='temperature', LogText=str(temperature), LogType='Number', LogUnit='K')"
-              .format(outws))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(ws_raw))
-            l()
-
-        def save_wsgroup(wsgroup, suffix):
-            l("# save {}".format(wsgroup))
-            l("for ws in {}:".format(wsgroup))
-            l("    name = ws.getComment() + {}".format(suffix))
-            if self.saveNXSPE:
-                l("    SaveNXSPE(ws, join('{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
-            if self.saveNexus:
-                l("    SaveNexus(ws, join('{}', name + '.nxs'))".format(self.saveDir))
-            l()
-
-
-        l("import numpy as np")
-        l("from os.path import join")
-        l()
-        l("config['default.facility'] = '{}'"   .format(self.facility_name))
-        l("config['default.instrument'] = '{}'" .format(self.instrument_name))
-        l()
-        l("config.appendDataSearchDir(r'{}')"   .format(self.dataDir))
-        l()
-
-        dataRawGroup = []
-        dataGroup    = []
-        allGroup     = []
-
-        # if not self.keepSteps, delete the workspaces imediately, to free the memory
+    def load_runs(self, allGroup, dataGroup, dataRawGroup):
+        # if not self.keepSteps, delete the workspaces immediately, to free the memory
         # vanadium runs
         if self.vanRuns:
             wsRawVan = self.prefix + 'RawVan'
             wsVan    = self.prefix + 'Van'
 
-            l("# vanadium runs")
-            merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt)
+            self.l("# vanadium runs")
+            self.merge_runs(wsRawVan, self.vanRuns, wsVan, self.vanCmnt)
             allGroup.append(wsVan)
 
         # empty can runs
@@ -328,16 +292,16 @@ class TOFTOFScriptElement(BaseScriptElement):
             wsRawEC = self.prefix + 'RawEC'
             wsEC    = self.prefix + 'EC'
 
-            l("# empty can runs")
-            merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC')
+            self.l("# empty can runs")
+            self.merge_runs(wsRawEC, self.ecRuns, wsEC, 'EC')
             allGroup.append(wsEC)
 
         # data runs
         for i, (runs, cmnt) in enumerate(self.dataRuns):
             if not runs:
-                error('missing data runs value')
+                self.error('missing data runs value')
             if not cmnt:
-                error('missing data runs comment')
+                self.error('missing data runs comment')
 
             postfix = str(i + 1)
 
@@ -348,262 +312,302 @@ class TOFTOFScriptElement(BaseScriptElement):
             dataGroup.append(wsData)
             allGroup.append(wsData)
 
-            l("# data runs {}"           .format(postfix))
-            merge_runs(wsRawData, runs, wsData, cmnt)
+            self.l("# data runs {}"           .format(postfix))
+            self.merge_runs(wsRawData, runs, wsData, cmnt)
 
-            if i == 0:
-                wsData0 = wsData
+    def delete_workspaces(self, workspaces):
+        if not self.keepSteps:
+            self.l("DeleteWorkspaces({})" .format(self.group_list(workspaces)))
+        self.l()
 
-        def group_list(listVal, postfix=''):
-            return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
+    # helper: add a line to the script
+    def l(self,line=''):
+        self.script[0] += line + '\n'
+
+    # helpers
+    @staticmethod
+    def group_list(listVal, postfix=''):
+        return ('[' + ', '.join(listVal) + ']' + postfix) if listVal else ''
+
+    def get_ei(self, workspace):
+        return self.get_log(workspace, 'Ei')
+
+    def get_time(self, workspace):
+        return self.get_log(workspace, 'duration')
+
+    def save_wsgroup(self, wsgroup, suffix):
+        self.l("# save {}".format(wsgroup))
+        self.l("for ws in {}:".format(wsgroup))
+        self.l("    name = ws.getComment() + {}".format(suffix))
+        if self.saveNXSPE:
+            self.l("    SaveNXSPE(ws, join('{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
+        if self.saveNexus:
+            self.l("    SaveNexus(ws, join('{}', name + '.nxs'))".format(self.saveDir))
+        self.l()
+
+    def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
+        if self.NORM_MONITOR == self.normalise:
+            gDataNorm = gPrefix + 'Norm'
+            self.l("# normalise to monitor")
+            if self.vanRuns:
+                wsVanNorm = wsVan + 'Norm'
+                self.l("{} = MonitorEfficiencyCorUser({})" .format(wsVanNorm, wsVan))
+
+            if self.ecRuns:
+                wsECNorm = wsEC + 'Norm'
+                self.l("{} = MonitorEfficiencyCorUser({})" .format(wsECNorm, wsEC))
+
+            self.l("{} = MonitorEfficiencyCorUser({})"     .format(gDataNorm, gDataRuns))
+            return True
+
+        elif self.NORM_TIME == self.normalise:
+            gDataNorm = gPrefix + 'Norm'
+            self.l("# normalise to time")
+            if self.vanRuns:
+                wsVanNorm = wsVan + 'Norm'
+                self.l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
+                       .format(wsVanNorm, wsVan, self.get_time(wsVan)))
+
+            if self.ecRuns:
+                wsECNorm = wsEC + 'Norm'
+                self.l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
+                       .format(wsECNorm, wsEC, self.get_time(wsEC)))
+
+            self.l("names = []")
+            self.l("for ws in {}:" .format(gDataRuns))
+            self.l("    name = ws.getName() + 'Norm'")
+            self.l("    names.append(name)")
+            self.l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
+                   .format(self.get_time('ws')))
+            self.l()
+            self.l("{} = GroupWorkspaces(names)" .format(gDataNorm))
+            return True
+
+        # none, simply use the not normalised workspaces
+        return False
+
+    def correct_tof(self, gData):
+        gData2 = gData + 'TofCorr'
+        gDataCleanFrame = gData + 'CleanFrame'
+        eppTable = self.prefix + 'EppTable'
+        if self.CORR_TOF_VAN == self.correctTof:
+            self.l("# apply vanadium TOF correction")
+            self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTable))
+            self.delete_workspaces([gDataCleanFrame, eppTable])
+            return True
+
+        elif self.CORR_TOF_SAMPLE == self.correctTof:
+            eppTables = self.prefix + 'EppTables'
+            self.l("# apply sample TOF correction")
+            self.l("{} = FindEPP({})".format(eppTables, gData))
+            self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTables))
+            self.delete_workspaces([gDataCleanFrame, eppTables])
+            return True
+
+        if self.vanRuns:
+            self.delete_workspaces([eppTable])
+        else:
+            self.delete_workspaces([gData])
+        return False
+
+    def mask_detectors(self, gPrefix, gAll):
+        gDetectorsToMask = gPrefix + 'DetectorsToMask'
+        self.l("# mask detectors")
+        self.l("({}, numberOfFailures) = FindDetectorsOutsideLimits({})".format(gDetectorsToMask, gAll))
+        self.l("MaskDetectors({}, MaskedWorkspace={})".format(gAll, gDetectorsToMask))
+        if self.maskDetectors:
+            self.l("MaskDetectors({}, DetectorList='{}')".format(gAll, self.maskDetectors))
+        self.delete_workspaces([gDetectorsToMask])
+
+    def vanadium_correction(self, gData, wsVanNorm=''):
+        if self.vanRuns:
+            gDataCorr = gData + 'Corr'
+            detCoeffs = self.prefix + 'DetCoeffs'
+            eppTable  = self.prefix + 'EppTable'
+            self.l("# normalise to vanadium")
+            self.l("{} = FindEPP({})" .format(eppTable, wsVanNorm))
+            self.l("{} = ComputeCalibrationCoefVan({}, {})" .format(detCoeffs, wsVanNorm, eppTable))
+            self.l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
+            self.l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
+            self.l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
+            self.delete_workspaces([detCoeffs])
+            return gDataCorr
+        return gData
+
+    def to_script(self):
+        # sanity checks
+        self.validate_inputs()
+
+        # generated script
+        self.script = ['']
+
+        self.l("import numpy as np")
+        self.l("from os.path import join")
+        self.l()
+        self.l("config['default.facility'] = '{}'"   .format(self.facility_name))
+        self.l("config['default.instrument'] = '{}'" .format(self.instrument_name))
+        self.l()
+        self.l("config.appendDataSearchDir(r'{}')"   .format(self.dataDir))
+        self.l()
+
+        dataRawGroup = []
+        dataGroup    = []
+        allGroup     = []
+
+        self.load_runs(allGroup, dataGroup, dataRawGroup)
+        wsEC    = self.prefix + 'EC'
+        wsVan    = self.prefix + 'Van'
 
         gPrefix = 'g' + self.prefix
         gDataRuns    = gPrefix + 'DataRuns'
         gDataRawRuns = gPrefix + 'DataRawRuns'
         gAll         = gPrefix + 'All'
 
-        l("# grouping")
+        self.l("# grouping")
         if self.keepSteps:
-            l("{} = GroupWorkspaces({})" .format(gDataRawRuns, group_list(dataRawGroup)))
-        l("{} = GroupWorkspaces({})" .format(gDataRuns,    group_list(dataGroup)))
-        l("{} = GroupWorkspaces({})" .format(gAll,         group_list(allGroup)))
-        l()
+            self.l("{} = GroupWorkspaces({})" .format(gDataRawRuns, self.group_list(dataRawGroup)))
+        self.l("{} = GroupWorkspaces({})" .format(gDataRuns,    self.group_list(dataGroup)))
+        self.l("{} = GroupWorkspaces({})" .format(gAll,         self.group_list(allGroup)))
+        self.l()
 
-        l("# Ei")
+        self.l("# Ei")
         if len(allGroup) > 1:
-            l("if CompareSampleLogs({}, 'Ei', 0.001):" .format(gAll))
-            l("    raise RuntimeError('Ei values do not match')")
-            l()
+            self.l("if CompareSampleLogs({}, 'Ei', 0.001):" .format(gAll))
+            self.l("    raise RuntimeError('Ei values do not match')")
+            self.l()
 
-        l("Ei = {}" .format(get_ei(wsData0)))
-        l()
+        self.l("Ei = {}" .format(self.get_ei(dataGroup[0])))
+        self.l()
 
-        gDetectorsToMask = gPrefix + 'DetectorsToMask'
-        l("# mask detectors")
-        l("({}, numberOfFailures) = FindDetectorsOutsideLimits({})" .format(gDetectorsToMask, gAll))
-        l("MaskDetectors({}, MaskedWorkspace={})" .format(gAll, gDetectorsToMask))
-        if not self.keepSteps:
-            l("DeleteWorkspace({})" .format(gDetectorsToMask))
+        # mask detectors
+        self.mask_detectors(gPrefix, gAll)
 
-        if self.maskDetectors:
-            l("MaskDetectors({}, DetectorList='{}')" .format(gAll, self.maskDetectors))
-
-        l()
-
-        if self.NORM_MONITOR == self.normalise:
-            gDataNorm = gPrefix + 'Norm'
-
-            l("# normalise to monitor")
-
-            if self.vanRuns:
-                wsVanNorm = wsVan + 'Norm'
-                l("{} = MonitorEfficiencyCorUser({})" .format(wsVanNorm, wsVan))
-
-            if self.ecRuns:
-                wsECNorm = wsEC + 'Norm'
-                l("{} = MonitorEfficiencyCorUser({})" .format(wsECNorm, wsEC))
-
-            l("{} = MonitorEfficiencyCorUser({})"     .format(gDataNorm, gDataRuns))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(gAll))
-            l()
-
-        elif self.NORM_TIME == self.normalise:
-            gDataNorm = gPrefix + 'Norm'
-
-            l("# normalise to time")
-
-            if self.vanRuns:
-                wsVanNorm = wsVan + 'Norm'
-                l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsVanNorm, wsVan, get_time(wsVan)))
-
-            if self.ecRuns:
-                wsECNorm = wsEC + 'Norm'
-                l("{} = Scale({}, 1.0 / float({}), 'Multiply')"
-                  .format(wsECNorm, wsEC, get_time(wsEC)))
-
-            l("names = []")
-            l("for ws in {}:" .format(gDataRuns))
-            l("    name = ws.getName() + 'Norm'")
-            l("    names.append(name)")
-            l("    Scale(ws, 1.0 / float({}), 'Multiply', OutputWorkspace=name)"
-              .format(get_time('ws')))
-            l()
-            l("{} = GroupWorkspaces(names)" .format(gDataNorm))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(gAll))
-            l()
-
-        else:  # none, simply use the not normalised workspaces
-            gDataNorm = gDataRuns
-
-            if self.vanRuns:
-                wsVanNorm = wsVan
-            if self.ecRuns:
-                wsECNorm = wsEC
+        normalized = self.normalize_data(gPrefix, gDataRuns, wsEC, wsVan)
+        gDataNorm = gPrefix + 'Norm' if normalized else gDataRuns
+        wsVanNorm = wsVan + 'Norm' if normalized else wsVan
+        wsECNorm = wsEC + 'Norm' if normalized else wsEC
+        if normalized:
+            self.delete_workspaces([gAll])
 
         if self.ecRuns:
             gDataSubEC = gPrefix + 'DataSubEC'
             scaledEC   = self.prefix + 'ScaledEC'
-            l("# subtract empty can")
-            l("ecFactor = {:.3f}" .format(self.ecFactor))
-            l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
-              .format(scaledEC, wsECNorm))
-            l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
+            self.l("# subtract empty can")
+            self.l("ecFactor = {:.3f}" .format(self.ecFactor))
+            self.l("{} = Scale({}, Factor=ecFactor, Operation='Multiply')"
+                   .format(scaledEC, wsECNorm))
+            self.l("{} = Minus({}, {})" .format(gDataSubEC, gDataNorm, scaledEC))
             if self.subtractECVan:
                 wsVanSubEC = wsVan + 'SubEC'
-                l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(scaledEC))
-            l()
+                self.l("{} = Minus({}, {})" .format(wsVanSubEC, wsVanNorm, scaledEC))
+            self.delete_workspaces([scaledEC])
 
-        l("# group data for processing")  # without empty can
+        self.l("# group data for processing")
         gDataSource = gDataSubEC if self.ecRuns else gDataNorm
         gData = gPrefix + 'Data'
         if self.ecRuns:
             wsECNorm2 = wsECNorm + '2'
-            l("{} = CloneWorkspace({})".format(wsECNorm2, wsECNorm))
+            self.l("{} = CloneWorkspace({})".format(wsECNorm2, wsECNorm))
         if self.vanRuns:
             wsVanNorm = wsVanSubEC if self.subtractECVan else wsVanNorm
             if self.ecRuns:
-                l("{} = GroupWorkspaces({}list({}.getNames()) + [{}])"
-                    .format(gData, group_list([wsVanNorm], ' + '), gDataSource, wsECNorm2))
+                self.l("{} = GroupWorkspaces({}list({}.getNames()))"
+                       .format(gData, self.group_list([wsVanNorm, wsECNorm2], ' + '), gDataSource))
             else:
-                l("{} = GroupWorkspaces({}list({}.getNames()))"
-                    .format(gData, group_list([wsVanNorm], ' + '), gDataSource))
+                self.l("{} = GroupWorkspaces({}list({}.getNames()))"
+                       .format(gData, self.group_list([wsVanNorm], ' + '), gDataSource))
         else:
             if self.ecRuns:
-                l("{} = GroupWorkspaces({}list({}.getNames()))"
-                  .format(gData, group_list([wsECNorm2], ' + '), gDataSource))
+                self.l("{} = GroupWorkspaces({}list({}.getNames()))"
+                       .format(gData, self.group_list([wsECNorm2], ' + '), gDataSource))
             else:
-                l("{} = CloneWorkspace({})" .format(gData, gDataSource))
-        l()
+                self.l("{} = CloneWorkspace({})" .format(gData, gDataSource))
+        self.l()
 
-        if self.vanRuns:
-            gDataCorr = gData + 'Corr'
-            detCoeffs = self.prefix + 'DetCoeffs'
-            eppTable  = self.prefix + 'EppTable'
-            l("# normalise to vanadium")
-            l("{} = FindEPP({})" .format(eppTable, wsVanNorm))
-            l("{} = ComputeCalibrationCoefVan({}, {})" .format(detCoeffs, wsVanNorm, eppTable))
-            l("badDetectors = np.where(np.array({}.extractY()).flatten() <= 0)[0]" .format(detCoeffs))
-            l("MaskDetectors({}, DetectorList=badDetectors)" .format(gData))
-            l("{} = Divide({}, {})" .format(gDataCorr, gData, detCoeffs))
-            if not self.keepSteps:
-                l("DeleteWorkspace({})" .format(detCoeffs))
-            l()
+        gDataCorr = self.vanadium_correction(gData, wsVanNorm)
 
         gDataCleanFrame = gData + 'CleanFrame'
-        l("# remove half-filled time bins (clean frame)")
-        l("{} = TOFTOFCropWorkspace({})"
-          .format(gDataCleanFrame, gDataCorr if self.vanRuns else gData))
-        if self.vanRuns and not self.keepSteps:
-            l("DeleteWorkspace({})" .format(gDataCorr))
-        l()
+        self.l("# remove half-filled time bins (clean frame)")
+        self.l("{} = TOFTOFCropWorkspace({})"
+               .format(gDataCleanFrame, gDataCorr))
+        if self.vanRuns:
+            self.delete_workspaces([gDataCorr])
 
-        gData2 = gData + 'TofCorr'
-        if self.CORR_TOF_VAN == self.correctTof:
-            l("# apply vanadium TOF correction")
-            l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTable))
-            if not self.keepSteps:
-                l("DeleteWorkspaces([{}, {}])" .format(gDataCleanFrame, eppTable))
-            l()
-
-        elif self.CORR_TOF_SAMPLE == self.correctTof:
-            eppTables  = self.prefix + 'EppTables'
-            l("# apply sample TOF correction")
-            l("{} = FindEPP({})" .format(eppTables, gData))
-            l("{} = CorrectTOF({}, {})" .format(gData2, gDataCleanFrame, eppTables))
-            if not self.keepSteps:
-                l("DeleteWorkspaces([{}, {}])" .format(gDataCleanFrame, eppTables))
-            l()
-
-        else:
-            gData2 = gDataCleanFrame
-            if self.vanRuns and not self.keepSteps:
-                l("DeleteWorkspace({})" .format(eppTable))
-            elif not self.keepSteps:
-                l("DeleteWorkspace({})" .format(gData))
+        tof_corrected = self.correct_tof(gData)
+        gData2 = gData + 'TofCorr' if tof_corrected else gDataCleanFrame
 
         gDataDeltaE = gData + 'DeltaE'
-        l("# convert units")
-        l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)"
-          .format(gDataDeltaE, gData2))
-        l("ConvertToDistribution({})" .format(gDataDeltaE))
-        if not self.keepSteps:
-            l("DeleteWorkspace({})" .format(gData2))
-        l()
+        self.l("# convert units")
+        self.l("{} = ConvertUnits({}, Target='DeltaE', EMode='Direct', EFixed=Ei)"
+               .format(gDataDeltaE, gData2))
+        self.l("ConvertToDistribution({})" .format(gDataDeltaE))
+        self.delete_workspaces([gData2])
 
         gDataCorrDeltaE = gData + 'CorrDeltaE'
-        l("# correct for energy dependent detector efficiency")
-        l("{} = DetectorEfficiencyCorUser({})" .format(gDataCorrDeltaE, gDataDeltaE))
-        if not self.keepSteps:
-            l("DeleteWorkspace({})" .format(gDataDeltaE))
-        l()
+        self.l("# correct for energy dependent detector efficiency")
+        self.l("{} = DetectorEfficiencyCorUser({})" .format(gDataCorrDeltaE, gDataDeltaE))
+        self.delete_workspaces([gDataDeltaE])
 
         gDataS = gData + 'S'
-        l("# calculate S (Ki/kF correction)")
-        l("{} = CorrectKiKf({})" .format(gDataS, gDataCorrDeltaE))
-        if not self.keepSteps:
-            l("DeleteWorkspace({})" .format(gDataCorrDeltaE))
-        l()
+        self.l("# calculate S (Ki/kF correction)")
+        self.l("{} = CorrectKiKf({})" .format(gDataS, gDataCorrDeltaE))
+        self.delete_workspaces([gDataCorrDeltaE])
 
         gLast = gDataS
         if self.binEon:
             gDataBinE = gData + 'BinE'
-            l("# energy binning")
-            l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'"
-              .format(self.binEstart, self.binEstep, self.binEend))
-            l("{} = Rebin({}, Params=rebinEnergy, IgnoreBinErrors=True)" .format(gDataBinE, gLast))
-            l()
+            self.l("# energy binning")
+            self.l("rebinEnergy = '{:.3f}, {:.3f}, {:.3f}'"
+                   .format(self.binEstart, self.binEstep, self.binEend))
+            self.l("{} = Rebin({}, Params=rebinEnergy, IgnoreBinErrors=True)" .format(gDataBinE, gLast))
+            self.l()
             gLast = gDataBinE
 
         if self.binEon and self.createDiff:
             gDataD = gData + 'D'
-            l("# create diffractograms")
-            l("for ws in {}:" .format(gLast))
-            l("    step1 = RemoveMaskedSpectra(ws)")
-            l("    step2 = IntegrateByComponent(step1)")
-            l("    step3 = ConvertSpectrumAxis(step2, Target='Theta', EMode='Direct', EFixed=Ei, OrderAxis=True)")
-            l("    Transpose(step3, OutputWorkspace='{}_D_' + ws.getComment())"
-              .format(self.prefix))
-            l("{} = GroupWorkspaces(['{}_D_'+ ws.getComment() for ws in {}])"
-              .format(gDataD, self.prefix, gLast))
-            l("DeleteWorkspaces('step1,step2,step3')")
-            l()
+            self.l("# create diffractograms")
+            self.l("for ws in {}:" .format(gLast))
+            self.l("    step1 = RemoveMaskedSpectra(ws)")
+            self.l("    step2 = IntegrateByComponent(step1)")
+            self.l("    step3 = ConvertSpectrumAxis(step2, Target='Theta', EMode='Direct', EFixed=Ei, OrderAxis=True)")
+            self.l("    Transpose(step3, OutputWorkspace='{}_D_' + ws.getComment())"
+                   .format(self.prefix))
+            self.l("{} = GroupWorkspaces(['{}_D_'+ ws.getComment() for ws in {}])"
+                   .format(gDataD, self.prefix, gLast))
+            self.l("DeleteWorkspaces('step1,step2,step3')")
+            self.l()
 
         if self.saveSofTW:
             suf = "'_Ei_{}'.format(round(Ei,2))"
-            save_wsgroup(gLast, suf)
+            self.save_wsgroup(gLast, suf)
 
         if self.binQon:
             gDataBinQ = gData + 'SQW'
-            l("# calculate momentum transfer Q for sample data")
-            l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
-              .format(self.binQstart, self.binQstep, self.binQend))
-            l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
-              .format(gDataBinQ, gLast, self.replaceNaNs))
-            l()
+            self.l("# calculate momentum transfer Q for sample data")
+            self.l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
+                   .format(self.binQstart, self.binQstep, self.binQend))
+            self.l("{} = SofQW3({}, QAxisBinning=rebinQ, EMode='Direct', EFixed=Ei, ReplaceNaNs={})"
+                   .format(gDataBinQ, gLast, self.replaceNaNs))
+            self.l()
             if self.saveSofQW:
-                save_wsgroup(gDataBinQ, "'_SQW'")
+                self.save_wsgroup(gDataBinQ, "'_SQW'")
 
-        l("# make nice workspace names")
-        l("for ws in {}:" .format(gDataS))
-        l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
-          .format(self.prefix))
+        self.l("# make nice workspace names")
+        self.l("for ws in {}:" .format(gDataS))
+        self.l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+               .format(self.prefix))
         if self.binEon:
-            l("for ws in {}:" .format(gDataBinE))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
-              .format(self.prefix))
+            self.l("for ws in {}:" .format(gDataBinE))
+            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
+                   .format(self.prefix))
         if self.binQon:
-            l("for ws in {}:" .format(gDataBinQ))
-            l("    RenameWorkspace(ws, OutputWorkspace='{}_' + ws.getComment() + '_sqw')"
-              .format(self.prefix))
+            self.l("for ws in {}:" .format(gDataBinQ))
+            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_' + ws.getComment() + '_sqw')"
+                   .format(self.prefix))
 
-        return script[0]
+        return self.script[0]
 
-# -------------------------------------------------------------------------------
+#  -------------------------------------------------------------------------------
 
 
 class TOFTOFReductionScripter(BaseReductionScripter):
@@ -611,5 +615,5 @@ class TOFTOFReductionScripter(BaseReductionScripter):
     def __init__(self, name, facility):
         BaseReductionScripter.__init__(self, name, facility)
 
-# -------------------------------------------------------------------------------
-# eof
+#  -------------------------------------------------------------------------------
+#  eof
