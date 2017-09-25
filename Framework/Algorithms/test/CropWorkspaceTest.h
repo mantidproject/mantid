@@ -387,7 +387,8 @@ public:
     // Change the data so we know we've cropped the correct one
     const size_t croppedIndex(1);
     const double flagged(100.0);
-    for (size_t i = 0; i < inputWS->blocksize(); ++i) {
+    const size_t numBins = inputWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       inputWS->dataY(croppedIndex)[i] = flagged;
     }
     const char *labels[3] = {"Entry1", "Entry2", "Entry3"};

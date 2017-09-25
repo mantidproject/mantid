@@ -138,9 +138,10 @@ public:
       Mantid::MantidVec &x = ws2->dataX(is);
       Mantid::MantidVec &y = ws2->dataY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
-        x[i] = 0.1 * double(i);
-        y[i] = 10.0 + double(is) + (0.5 + 0.1 * double(is)) * x[i];
+      for (size_t i = 0; i < y.size(); ++i) {
+        x[i] = 0.1 * static_cast<double>(i);
+        const double is_d = static_cast<double>(is);
+        y[i] = 10.0 + is_d + (0.5 + 0.1 * is_d) * x[i];
       }
     }
 
