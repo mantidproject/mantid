@@ -1045,8 +1045,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         cf = CrystalField('Ce', 'C2v', B20=0.37, B22=3.97, B40=-0.0317, B42=-0.116, B44=-0.12,
                       Temperature=44.0, FWHM=1.0, ResolutionModel=([0, 50], [1, 2]))
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.48594457, 8)
-        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.84816578, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.581014682, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
 
     def test_resolution_single_spectrum_fit(self):
         from CrystalField import CrystalField, CrystalFieldFit
@@ -1066,9 +1066,9 @@ class CrystalFieldFitTest(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
         fit.fit()
 
-        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0005, 4)
-        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.4816, 4)
-        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.846, 2)
+        self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0112, 4)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58106, 4)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.7947, 2)
 
     def test_resolution_single_spectrum_fit_variation(self):
         from CrystalField import CrystalField, CrystalFieldFit
@@ -1164,8 +1164,8 @@ class CrystalFieldFitTest(unittest.TestCase):
         sp = cf.getSpectrum()
         self.assertAlmostEqual(cf.peaks.param[1]['PeakCentre'], 29.0507341109, 8)
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.48594457, 8)
-        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.84816578, 8)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.581014682, 8)
+        self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.884945866, 8)
 
     def test_ResolutionModel_set_single_variation(self):
         from CrystalField import ResolutionModel, CrystalField
@@ -1178,7 +1178,7 @@ class CrystalFieldFitTest(unittest.TestCase):
                       Temperature=44.0, FWHM=1.0, ResolutionModel=rm, FWHMVariation=0.3)
         sp = cf.getSpectrum()
         self.assertAlmostEqual(cf.peaks.param[0]['FWHM'], 1.0, 8)
-        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.485945, 1)
+        self.assertAlmostEqual(cf.peaks.param[1]['FWHM'], 1.58101, 1)
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.85644, 1)
 
     def test_ResolutionModel_set_multi(self):
