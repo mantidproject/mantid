@@ -84,5 +84,8 @@ Bugfixes
 - :ref:`algm-CalculateSampleTransmission` now divides by the tabulated wavelength when calculating the absorption cross section.
 - The Sum Files option in the Indirect Diffraction Reduction interface now allows for correctly corresponding each sum of
   sample runs defined with a range (e.g. A-B, where A and B are run numbers) to the corresponding vanadium run, dependent on D-Range.
+- The 'Sample Runs' field in the Indirect Diffraction Interface now recognizes 3 operators: '-', '+', ':'. The '-' operator is used
+  to supply a given range of runs and sum them when SumFiles is checked. The '+' operator is used to supply a given list of runs and
+  sum when SumFiles is checked. The ':' operator is used to supply a range of runs, which will never be summed.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_
