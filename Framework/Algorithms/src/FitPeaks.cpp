@@ -155,6 +155,11 @@ void FitPeaks::processInputs() {
   if (m_stopWorkspaceIndex == 0)
     m_stopWorkspaceIndex = m_inputWS->getNumberHistograms();
 
+  // Set up peak function
+  m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+      API::FunctionFactory::Instance().createFunction(m_peakFuncType));
+  m_peakParameterNames = m_peakFunction->getParameterNames();
+
   m_peakCenters = getProperty("PeakCenters");
   m_peakWindowLeft = getProperty("FitWindowLeftBoundary");
   m_peakWindowRight = getProperty("FitWindowRightBoundary");
@@ -632,6 +637,125 @@ double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
   return abs_max;
 }
 
+//----------------------------------------------------------------------------------------------
+double FitPeaks::FitIndividualPeak() {
+  // FitSinglePeak version 2.0
+
+  // Estimate peak background
+
+  // Fit peak (core)
+  double cost =
+      call_fit_peak(m_inputWS, ws_index, peak_function, m_backgroundFunction,
+                    fit_window, peak_range, init_peak_parameters);
+
+  // check chi^2 and height
+  bool good_fit = false;
+  if (0 < cost < DBL_MAX && peak_function->height() > m_minHeight)
+    good_fit = true;
+
+  // check with peak position tolerane
+  if (good_fit && m_applyPeakPositionTolerance &&
+      (peak_function->centre() - peak_position) < m_peakPositionTolerance())
+    good_fit = true;
+}
+
+//----------------------------------------------------------------------------------------------
+double FitPeaks::call_fit_peak() {
+
+  std::stringstream dbss;
+  dbss << "[Call FitPeak] Fit 1 peak at X = " << peakfunction->centre()
+       << " of spectrum " << wsindex;
+  g_log.information(dbss.str());
+
+  double userFWHM = m_peakFunction->fwhm();
+  bool fitwithsteppedfwhm = (guessedFWHMStep > 0);
+
+  FitOneSinglePeak fitpeak;
+  fitpeak.setChild(true);
+  fitpeak.setWorskpace(dataws, wsindex);
+  fitpeak.setFitWindow(vec_fitwindow[0], vec_fitwindow[1]);
+  fitpeak.setFittingMethod(m_minimizer, m_costFunction);
+  fitpeak.setFunctions(peakfunction, backgroundfunction);
+  fitpeak.setupGuessedFWHM(userFWHM, minGuessFWHM, maxGuessFWHM,
+                           guessedFWHMStep, fitwithsteppedfwhm);
+  fitpeak.setPeakRange(vec_peakrange[0], vec_peakrange[1]);
+
+  if (estBackResult == 1) {
+    g_log.information("simpleFit");
+    fitpeak.simpleFit();
+  } else if (m_highBackground) {
+    g_log.information("highBkgdFit");
+    fitpeak.highBkgdFit();
+  } else {
+    g_log.information("simpleFit");
+    fitpeak.simpleFit();
+  }
+
+  double costfuncvalue = fitpeak.getFitCostFunctionValue();
+  std::string dbinfo = fitpeak.getDebugMessage();
+  g_log.information(dbinfo);
+
+  return costfuncvalue;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Fit function in single domain
+  * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
+ * be executed)
+  * @return :: chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL,
+ * return DBL_MAX
+  */
+double FitPeaks::fitFunctionSD(IFunction_sptr fitfunc,
+                               MatrixWorkspace_sptr dataws, size_t wsindex,
+                               double xmin, double xmax) {
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // Set the properties
+  fit->setProperty("Function", fitfunc);
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("MaxIterations", 50); // magic number
+  fit->setProperty("StartX", xmin);
+  fit->setProperty("EndX", xmax);
+  fit->setProperty("Minimizer", m_minimizer);
+  fit->setProperty("CostFunction", m_costFunction);
+  fit->setProperty("CalcErrors", true);
+
+  // Execute fit and get result of fitting background
+  m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
+
+  fit->executeAsChildAlg();
+  if (!fit->isExecuted()) {
+    g_log.error("Fit for background is not executed. ");
+    throw std::runtime_error("Fit for background is not executed. ");
+  }
+  ++m_numFitCalls;
+
+  // Retrieve result
+  std::string fitStatus = fit->getProperty("OutputStatus");
+  double chi2 = EMPTY_DBL();
+  if (fitStatus == "success") {
+    chi2 = fit->getProperty("OutputChi2overDoF");
+    fitfunc = fit->getProperty("Function");
+  }
+
+  // Debug information
+  m_sstream << "[F1201] FitSingleDomain Fitted-Function " << fitfunc->asString()
+            << ": Fit-status = " << fitStatus << ", chi^2 = " << chi2 << ".\n";
+
+  return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
 /**
  * @brief FitPeaks::generateOutputWorkspaces
  */
