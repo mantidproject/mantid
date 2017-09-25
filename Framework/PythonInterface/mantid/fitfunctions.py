@@ -150,6 +150,30 @@ class FunctionWrapper(object):
         return output_array
       else:
         return output_array[0]
+        
+  def plot(self, **kwargs):
+      """ Plot the function
+      
+          :param workspace=ws: workspace upon whose x values 
+          the function is plotted.
+      """
+      from mantidplot import plot 
+      from mantid.simpleapi import CreateWorkspace
+      
+      isWorkspace = False
+      for key in kwargs:
+        if key == "workspace":
+           isWorkspace = True
+           ws = kwargs[key]
+
+      if isWorkspace:
+          xvals = ws.readX(0)
+          outWs = self(ws)
+          vals = outWs.readY(1)
+          valWs = CreateWorkspace( DataX=xvals, DataY=vals)
+          plot("valWs",0)
+      else:
+          print "Can't plot"
          
   def tie (self, *args, **kwargs):
     """ Add ties.
