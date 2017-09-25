@@ -393,7 +393,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         if self.CORR_TOF_VAN == self.correctTof:
             self.l("# apply vanadium TOF correction")
             self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTable))
-            self.delete_workspaces([gDataCleanFrame, eppTable])
+            self.delete_workspaces([gDataCleanFrame, gData, eppTable])
             return True
 
         elif self.CORR_TOF_SAMPLE == self.correctTof:
@@ -401,11 +401,11 @@ class TOFTOFScriptElement(BaseScriptElement):
             self.l("# apply sample TOF correction")
             self.l("{} = FindEPP({})".format(eppTables, gData))
             self.l("{} = CorrectTOF({}, {})".format(gData2, gDataCleanFrame, eppTables))
-            self.delete_workspaces([gDataCleanFrame, eppTables])
+            self.delete_workspaces([gDataCleanFrame, gData, eppTables])
             return True
 
         if self.vanRuns:
-            self.delete_workspaces([eppTable])
+            self.delete_workspaces([eppTable, gData])
         else:
             self.delete_workspaces([gData])
         return False
@@ -532,6 +532,8 @@ class TOFTOFScriptElement(BaseScriptElement):
                .format(gDataCleanFrame, gDataCorr))
         if self.vanRuns:
             self.delete_workspaces([gDataCorr])
+        if self.ecRuns:
+            self.delete_workspaces([gDataSubEC])
 
         tof_corrected = self.correct_tof(gData)
         gData2 = gData + 'TofCorr' if tof_corrected else gDataCleanFrame
