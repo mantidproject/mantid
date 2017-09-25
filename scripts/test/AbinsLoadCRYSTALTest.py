@@ -38,5 +38,6 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTe
         self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
         self.check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
 
+
 if __name__ == '__main__':
     unittest.main()
