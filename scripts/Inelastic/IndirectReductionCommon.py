@@ -13,7 +13,7 @@ def create_range_from(range_str, delimiter):
     """
     Creates a range from the specified string, by splitting by the specified
     delimiter.
-    
+
     :param range_str:   The range string, in the format A-B where A is the lower
                         bound of the range, - is the delimiter and B is the upper
                         bound of the range.
