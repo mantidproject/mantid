@@ -294,11 +294,13 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
   if (!isEmpty(intMin) && !isEmpty(intMax)) {
     if (intMin > intMax) {
       issues["IntegrationRangeMin"] =
-          "Integration minimum set to larger value than maximum.";
+          "Range minimum set to a larger value than maximum.";
+      issues["IntegrationRangeMax"] =
+          "Range maximum set to a smaller value than minimum.";
     }
   }
 
-  if (monWS) {
+  if (monWS && monSpecProp->isDefault()) {
     const int monIndex = getProperty("MonitorWorkspaceIndex");
     if (monIndex < 0) {
       issues["MonitorWorkspaceIndex"] = "A workspace index cannot be negative.";
