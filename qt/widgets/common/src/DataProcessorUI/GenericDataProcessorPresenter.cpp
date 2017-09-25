@@ -125,7 +125,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_progressReporter(nullptr), m_postprocess(true), m_promptUser(true),
+      m_progressReporter(nullptr), m_postprocess(true), m_preprocessing(QString()), m_promptUser(true),
       m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
@@ -297,11 +297,11 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
   auto newPostprocessingOptions = m_mainPresenter->getPostprocessingOptions();
 
-  auto settingsChanged = m_preprocessingOptions != newPreprocessingOptions ||
+  auto settingsChanged = m_preprocessing.m_options != newPreprocessingOptions ||
                          m_processingOptions != newProcessingOptions ||
                          m_postprocessingOptions != newPostprocessingOptions;
 
-  m_preprocessingOptions = newPreprocessingOptions;
+  m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
   m_postprocessingOptions = newPostprocessingOptions;
 
@@ -551,7 +551,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     // Global pre-processing options as a map where keys are column
     // name and values are pre-processing options as a string
     const auto preprocessingOptionsMap =
-        convertStringToMap(m_preprocessingOptions);
+        convertStringToMap(m_preprocessing.m_options);
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
@@ -951,7 +951,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Global pre-processing options as a map
   std::map<QString, QString> globalOptions;
   if (!m_preprocessMap.empty())
-    globalOptions = convertStringToMap(m_preprocessingOptions);
+    globalOptions = convertStringToMap(m_preprocessing.m_options);
 
   // Pre-processing properties
   auto preProcessPropMap =

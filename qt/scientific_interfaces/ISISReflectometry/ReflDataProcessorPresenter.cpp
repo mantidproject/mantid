@@ -73,7 +73,7 @@ void ReflDataProcessorPresenter::process() {
     return;
 
   // Get global settings
-  m_preprocessingOptions = m_mainPresenter->getPreprocessingOptionsAsString();
+  this->setPreprocessingOptions(m_mainPresenter->getPreprocessingOptionsAsString());
   m_processingOptions = m_mainPresenter->getProcessingOptions();
   m_postprocessingOptions = m_mainPresenter->getPostprocessingOptions();
 

@@ -64,6 +64,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+struct PreprocessingAttributes {
+  PreprocessingAttributes(const QString& options) : m_options(options) {}
+  QString m_options;
+};
+
+
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
       public DataProcessorPresenter,
@@ -152,8 +158,11 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
+  void setPreprocessingOptions(QString const& options) {
+    m_preprocessing.m_options = options;
+  }
   // Pre-processing options
-  QString m_preprocessingOptions;
+  PreprocessingAttributes m_preprocessing;
   // Data processor options
   QString m_processingOptions;
   // Post-processing options
