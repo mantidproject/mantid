@@ -416,6 +416,7 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
     // try and get stold to parse a number out of the string
     // if this throws then we don't have a number
     try {
+      // cppcheck-suppress ignoredReturnValue
       std::stold(str);
       return true;
     } catch (const std::invalid_argument &e) {
