@@ -71,6 +71,11 @@ struct PreprocessingAttributes {
   std::map<QString, PreprocessingAlgorithm> m_map;
 };
 
+struct PostprocessingAttributes {
+  PostprocessingAttributes(const QString& options) : m_options(options) {}
+  QString m_options;
+};
+
 
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
@@ -163,12 +168,17 @@ protected:
   void setPreprocessingOptions(QString const& options) {
     m_preprocessing.m_options = options;
   }
+
+  void setPostprocessingOptions(QString const& options) {
+    m_postprocessing.m_options = options;
+  }
+  
+  PostprocessingAttributes m_postprocessing;
+
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
   QString m_processingOptions;
-  // Post-processing options
-  QString m_postprocessingOptions;
   void updateProcessedStatus(const std::pair<int, GroupData> & group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);

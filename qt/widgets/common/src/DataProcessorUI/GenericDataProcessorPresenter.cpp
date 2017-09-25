@@ -123,7 +123,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_processor(processor),
+      m_processor(processor), m_postprocessing(QString()),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
       m_progressReporter(nullptr), m_postprocess(true), m_preprocessing(QString(), preprocessMap), m_promptUser(true),
       m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
@@ -299,11 +299,11 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
 
   auto settingsChanged = m_preprocessing.m_options != newPreprocessingOptions ||
                          m_processingOptions != newProcessingOptions ||
-                         m_postprocessingOptions != newPostprocessingOptions;
+                         m_postprocessing.m_options != newPostprocessingOptions;
 
   m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
-  m_postprocessingOptions = newPostprocessingOptions;
+  m_postprocessing.m_options = newPostprocessingOptions;
 
   return settingsChanged;
 }
@@ -556,7 +556,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessing.m_map,
         m_processor, m_postprocessor, preprocessingOptionsMap,
-        m_processingOptions, m_postprocessingOptions);
+        m_processingOptions, m_postprocessing.m_options);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 
@@ -618,7 +618,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   setAlgorithmProperty(alg.get(), m_postprocessor.outputProperty(),
                        outputWSName);
 
-  auto optionsMap = parseKeyValueString(m_postprocessingOptions.toStdString());
+  auto optionsMap = parseKeyValueString(m_postprocessing.m_options.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
