@@ -5,6 +5,8 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+  src/DragEventHelper.cpp
+  src/DragEventHelperOSX.cpp
 	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -158,6 +160,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/BoolPropertyWidget.h
+  inc/MantidQtWidgets/Common/DragEventHelper.h
   inc/MantidQtWidgets/Common/FilePropertyWidget.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/ListPropertyWidget.h
@@ -261,7 +264,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
 	inc/MantidQtWidgets/Common/DllOption.h
-	inc/MantidQtWidgets/Common/FileDialogHandler.h
+  inc/MantidQtWidgets/Common/DragEventHelper.h
+  inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
 	inc/MantidQtWidgets/Common/DistributionOptions.h

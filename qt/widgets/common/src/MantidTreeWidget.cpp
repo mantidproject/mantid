@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
+#include "MantidQtWidgets/Common/DragEventHelper.h"
 
 #include <QApplication>
 #include <QDragMoveEvent>
@@ -56,17 +57,7 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
 * @param de :: The drag drop event
 */
 void MantidTreeWidget::dropEvent(QDropEvent *de) {
-  QStringList filenames;
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    QList<QUrl> urlList = mimeData->urls();
-    for (int i = 0; i < urlList.size(); ++i) {
-      QString fName = urlList[i].toLocalFile();
-      if (fName.size() > 0) {
-        filenames.append(fName);
-      }
-    }
-  }
+  const auto filenames = DragEventHelper::getFileNames(de);
   de->acceptProposedAction();
 
   for (int i = 0; i < filenames.size(); ++i) {
