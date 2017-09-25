@@ -27,7 +27,7 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
         full_path_filename = AbinsTestHelpers.find_file(filename=filename)
 
         castep_reader = LoadCASTEP(input_ab_initio_filename=full_path_filename)
-        good_data = castep_reader.read_phonon_file()
+        good_data = castep_reader.read_vibrational_data_file()
 
         # wrong filename
         self.assertRaises(ValueError, CalculateSingleCrystal, filename=1,
@@ -53,8 +53,8 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
         # calculation of crystal data
         good_data = self._get_good_data(filename=name)
         good_tester = CalculateSingleCrystal(filename=AbinsTestHelpers.find_file(filename=name + ".phonon"),
-                                       temperature=self._temperature,
-                                       abins_data=good_data["DFT"])
+                                             temperature=self._temperature,
+                                             abins_data=good_data["DFT"])
         calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated crystal data  is correct
@@ -62,8 +62,8 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
 
         # check if loading crystal data is correct
         new_tester = CalculateSingleCrystal(filename=AbinsTestHelpers.find_file(filename=name + ".phonon"),
-                                      temperature=self._temperature,
-                                      abins_data=good_data["DFT"])
+                                            temperature=self._temperature,
+                                            abins_data=good_data["DFT"])
         loaded_data = new_tester.load_data().extract()
 
         self.assertEqual(True, np.allclose(calculated_data["dw_crystal_data"], loaded_data["dw_crystal_data"]))
@@ -73,7 +73,7 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
         castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
         crystal = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_crystal_DW.txt"))
 
-        return {"DFT": castep_reader.read_phonon_file(), "dw_crystal_data": crystal}
+        return {"DFT": castep_reader.read_vibrational_data_file(), "dw_crystal_data": crystal}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):
@@ -88,6 +88,7 @@ class AbinsCalculateSingleCrystalTest(unittest.TestCase):
         correct_data = np.asarray(correct_data)
 
         return correct_data
+
 
 if __name__ == '__main__':
     unittest.main()
