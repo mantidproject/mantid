@@ -357,7 +357,8 @@ void SplineInterpolation::extrapolateFlat(
       derivs[row]->mutableY(0)[bin] = 0.;
     }
   }
-  for (size_t bin = indices.second; bin < ows->blocksize(); ++bin) {
+  const size_t numBins = ows->blocksize();
+  for (size_t bin = indices.second; bin < numBins; ++bin) {
     ows->mutableY(row)[bin] = yLast;
     if (doDerivs) {
       // if derivatives are requested

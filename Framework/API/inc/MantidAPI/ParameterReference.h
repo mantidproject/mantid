@@ -51,6 +51,7 @@ public:
   std::size_t getLocalIndex() const;
   std::size_t parameterIndex() const;
   std::string parameterName() const;
+  IFunction *ownerFunction() const;
 
 protected:
   void reset(IFunction *fun, std::size_t index, bool isDefault = false);

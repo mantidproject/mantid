@@ -61,17 +61,27 @@ class GeneralLoadDFTTester(object):
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
         self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
-        self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
-                         data["attributes"]["filename"])
+
+        try:
+            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
+                             data["attributes"]["filename"])
+        except AssertionError:
+            self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension.upper()),
+                             data["attributes"]["filename"])
 
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
-    def _check_loader_data(self, correct_data=None, input_dft_filename=None, extension=None):
+    def _check_loader_data(self, correct_data=None, input_dft_filename=None, extension=None, loader=None):
 
-        loader = AbinsModules.LoadDMOL3(
-            input_dft_filename=AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension))
-        loaded_data = loader.load_formatted_data().extract()
+        try:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension)
+            dft_loader = loader(input_dft_filename=read_filename)
+        except ValueError:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension.upper())
+            dft_loader = loader(input_dft_filename=read_filename)
+
+        loaded_data = dft_loader.load_formatted_data().extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
@@ -96,7 +106,7 @@ class GeneralLoadDFTTester(object):
             self.assertEqual(True, np.allclose(np.array(correct_atoms["atom_%s" % item]["coord"]),
                                                atoms["atom_%s" % item]["coord"]))
 
-    def _check(self, name=None, loader=None):
+    def check(self, name=None, loader=None):
 
         extension = self._loaders_extensions[str(loader)]
 
@@ -110,7 +120,7 @@ class GeneralLoadDFTTester(object):
         self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=name, extension=extension)
+        self._check_loader_data(correct_data=correct_data, input_dft_filename=name, extension=extension, loader=loader)
 
     def _read_dft(self, loader=None, filename=None, extension=None):
         """
@@ -120,13 +130,17 @@ class GeneralLoadDFTTester(object):
         :returns: phonon data
         """
         # 1) Read data
-        filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
-        dft_reader = loader(input_dft_filename=filename)
+        try:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
+            ab_initio_reader = loader(input_dft_filename=read_filename)
+        except ValueError:
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
+            ab_initio_reader = loader(input_dft_filename=read_filename)
 
-        data = self._get_reader_data(dft_reader=dft_reader)
+        data = self._get_reader_data(dft_reader=ab_initio_reader)
 
         # test validData method
-        self.assertEqual(True, dft_reader._clerk._valid_hash())
+        self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
 
         return data
 
