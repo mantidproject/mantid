@@ -410,10 +410,16 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
   }
 
   const auto isNumber = [](const std::string &str) {
-    // try and get stringstream to parse a number out of the string
-    // if this fails it will not set the eof character
-    long double ld;
-    return ((std::istringstream(str) >> ld >> std::ws).eof());
+    // try and get stold to parse a number out of the string
+    // if this throws then we don't have a number
+    try {
+      std::stold(str);
+      return true;
+    } catch (const std::invalid_argument &e) {
+      return false;
+    } catch (const std::out_of_range &e) {
+      return false;
+    }
   };
 
   return (isNumber(s)) ? LoadLog::number : LoadLog::empty;
