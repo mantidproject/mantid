@@ -73,9 +73,11 @@ void MSDFit::run() {
     return;
 
   // Set the result workspace for Python script export
+  QString model = m_uiForm.modelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
   m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
+      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_" +
+      model.toStdString() + "_msd";
 
   QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
@@ -85,6 +87,7 @@ void MSDFit::run() {
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
+  msdAlg->setProperty("Model", model.toStdString());
   msdAlg->setProperty("InputWorkspace", wsName.toStdString());
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);

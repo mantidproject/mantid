@@ -216,8 +216,9 @@ public:
     for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
       TS_ASSERT_EQUALS(out->getSpectrum(wi).getSpectrumNo(), specnum_t(wi));
       TS_ASSERT(!out->getSpectrum(wi).getDetectorIDs().empty());
-      for (size_t x = 0; x < out->blocksize(); x++)
-        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
     }
 
     if (combineLogs) {
