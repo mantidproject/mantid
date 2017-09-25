@@ -104,7 +104,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Validate input files
         input_files = self.getProperty('InputFiles').value
-        logger.error("Input Files: " + str(input_files))
         if len(input_files) == 0:
             issues['InputFiles'] = 'InputFiles must contain at least one filename'
 
@@ -332,6 +331,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             self._ipf_filename = os.path.join(config['instrumentDefinition.directory'], self._ipf_filename)
         logger.information('IPF filename is: %s' % self._ipf_filename)
 
+        if len(self._data_files) == 1:
+            logger.warning('SumFiles options has no effect when only one file is provided')
         # Only enable sum files if we actually have more than one file
         self._sum_files = self.getProperty('SumFiles').value
 
