@@ -21,7 +21,7 @@ def create_range_from(range_str, delimiter):
     :return:            The range created from the range string.
     """
     lower, upper = range_str.split(delimiter, 1)
-    return range(int(lower), int(upper))
+    return range(int(lower), int(upper)+1)
 
 
 def create_file_range_parser(instrument):
