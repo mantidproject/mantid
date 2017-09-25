@@ -245,12 +245,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         fit = CrystalFieldFit(Model=cf, InputWorkspace=ws, MaxIterations=10)
         fit.fit()
 
-        # f = cf.function
-        # for i in range(f.nParams()):
-        #     if not f.isFixed(i):
-        #         print i, f.parameterName(i), f.getParameterValue(i)
-        # self.assertFalse(True)
-
         self.assertTrue(cf.chi2 > 0.0)
         self.assertTrue(cf.chi2 < chi2)
 
@@ -516,7 +510,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
         s = str(cf.function)
-        print s
         self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
 
@@ -563,7 +556,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
 
         cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
         s = str(cf.function)
-        print s
         self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
 
