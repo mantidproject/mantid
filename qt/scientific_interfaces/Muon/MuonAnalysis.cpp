@@ -1767,7 +1767,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   // leave the 0th layer -> layer is not empty
   s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
-  // if there is more than one layer delete the oldest one manually 
+  // if there is more than one layer delete the oldest one manually
   s << "if %FITSTOKEEP% != -1:";
   s << "  layer = win.activeLayer()";
   s << "  if layer.numCurves()>1:";
