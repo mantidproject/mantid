@@ -685,7 +685,7 @@ IqtFit::createParameterToPropertyMap(const QVector<QString> &functionNames) {
   QHash<QString, QString> parameterToProperty;
 
   for (int i = 0; i < functionNames.size(); ++i) {
-    QString prefix = "f" + QString::number(i+1) + ".";
+    QString prefix = "f" + QString::number(i + 1) + ".";
     extendParameterToPropertyMap(functionNames[i], prefix, parameterToProperty);
   }
 
