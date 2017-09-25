@@ -230,8 +230,11 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     line >> blockcolumn;
     l_kind = classify(blockcolumn);
 
-    if (LoadLog::empty == l_kind)
+    if (LoadLog::empty == l_kind) {
+      g_log.warning() << "Failed to parse line in log file: " << timecolumn
+                      << "\t" << blockcolumn;
       continue;
+    }
 
     if (LoadLog::string != l_kind) {
       throw std::invalid_argument(
