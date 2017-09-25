@@ -325,7 +325,7 @@ class CrystalFieldMultiSite(object):
             background = None
             property_name = "background"
         if peak is not None and background is None: #single arg case
-            if isinstance(peak, basestring):
+            if isinstance(peak, str):
                 number_of_functions = peak.count(';') + 1
                 if number_of_functions == 2:
                     peak, background = peak.split(';')
@@ -419,7 +419,7 @@ class CrystalFieldMultiSite(object):
 
     @Ions.setter
     def Ions(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self.function.setAttributeValue('Ions', value)
         else:
             self.function.setAttributeValue('Ions', iterable_to_string(value))
@@ -432,7 +432,7 @@ class CrystalFieldMultiSite(object):
 
     @Symmetries.setter
     def Symmetries(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self.function.setAttributeValue('Symmetries', value)
         else:
             self.function.setAttributeValue('Symmetries', iterable_to_string(value))
