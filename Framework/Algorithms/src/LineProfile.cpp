@@ -414,7 +414,7 @@ void LineProfile::exec() {
   // specified.
   Box actualBounds;
   actualBounds.top = verticalBins[vertInterval.first];
-  actualBounds.bottom = verticalBins[vertInterval.second] - 1;
+  actualBounds.bottom = verticalBins[vertInterval.second - 1];
   actualBounds.left = horizontalBins[horInterval.first];
   actualBounds.right = horizontalBins[horInterval.second - 1];
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
