@@ -395,13 +395,12 @@ class StateGuiModel(object):
     # ADJUSTMENT TAB
     # ==================================================================================================================
     # ==================================================================================================================
-    def _update_incident_spectrum_info(self, spectrum=None, interpolate=None, is_trans=False):
+    def _update_incident_spectrum_info(self, spectrum=None, interpolate=False, is_trans=False):
         if MonId.spectrum in self._user_file_items:
             settings = self._user_file_items[MonId.spectrum]
         else:
-            # If the entry does not already exist, then add it. The -1. is an illegal input which should get overridden
-            # and if not we want it to fail.
-            settings = [monitor_spectrum(spectrum=-1, is_trans=is_trans, interpolate=is_trans)]
+            # If the entry does not already exist, then add it.
+            settings = [monitor_spectrum(spectrum=spectrum, is_trans=is_trans, interpolate=interpolate)]
 
         new_settings = []
         for setting in settings:
