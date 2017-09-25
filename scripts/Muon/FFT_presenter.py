@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
+from Muon import ThreadModel
 
 class FFTPresenter(object):
 
@@ -17,9 +18,6 @@ class FFTPresenter(object):
         self.view.tableClickSignal.connect(self.tableClicked)
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
-        self.alg.started.connect(self.deactivate)
-        self.alg.finished.connect(self.view.activateButton)
-        self.alg.finished.connect(self.alg.deleteLater)
 
     def activate(self):
         self.view.activateButton()
@@ -51,6 +49,12 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def handleButton(self):
+        thread=ThreadModel.ThreadModel(self.alg)
+        thread.started.connect(self.deactivate)
+        thread.finished.connect(self.view.activateButton)
+        thread.finished.connect(thread.deleteLater)
+
+
         inputs={}
         inputs["Run"]=self.load.getRunName()
 
@@ -91,8 +95,8 @@ class FFTPresenter(object):
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
         inputs["FFT"]=FFTInputs
-        self.alg.loadData(inputs)
-        self.alg.start()
+        thread.loadData(inputs)
+        thread.start()
         self.view.setPhaseBox()
 
     def get_FFT_input(self):

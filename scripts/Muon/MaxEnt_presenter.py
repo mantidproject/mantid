@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
+from Muon import ThreadModel
 
 class MaxEntPresenter(object):
 
@@ -10,11 +11,9 @@ class MaxEntPresenter(object):
         # set data
         self.getWorkspaceNames()
         #connect
-        self.alg.started.connect(self.view.deactivateButton)
-        self.alg.finished.connect(self.view.activateButton)
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
  
-        self.alg.finished.connect(self.alg.deleteLater)
+        #self.alg.finished.connect(self.alg.deleteLater)
 
     # only get ws that are groups or pairs
     # ignore raw
@@ -31,10 +30,21 @@ class MaxEntPresenter(object):
 
     #functions
     def handleMaxEntButton(self):
+        thread=ThreadModel.ThreadModel(self.alg)
+        thread.started.connect(self.deactivate)
+        thread.finished.connect(self.activate)
+        thread.finished.connect(thread.deleteLater)
+
         inputs = self.getMaxEntInput()
         runName=self.load.getRunName()
-        self.alg.setInputs(inputs,runName)
-        self.alg.start()
+        thread.setInputs(inputs,runName)
+        thread.start()
+
+    def activate(self):
+        self.view.activateButton()
+
+    def deactivate(self):
+        self.view.deactivateButton()
 
     def getMaxEntInput(self):
         inputs=self.view.initMaxEntInput()
