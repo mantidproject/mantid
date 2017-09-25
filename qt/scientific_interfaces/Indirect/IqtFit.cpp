@@ -92,8 +92,8 @@ void IqtFit::setup() {
 
   m_properties["LinearBackground"] =
       m_grpManager->addProperty("LinearBackground");
-  m_properties["BackgroundA0"] = m_iqtFRangeManager->addProperty("A0");
-  m_iqtFRangeManager->setDecimals(m_properties["BackgroundA0"], NUM_DECIMALS);
+  m_properties["BackgroundA0"] = m_dblManager->addProperty("A0");
+  m_dblManager->setDecimals(m_properties["BackgroundA0"], NUM_DECIMALS);
   m_properties["LinearBackground"]->addSubProperty(
       m_properties["BackgroundA0"]);
 
@@ -102,8 +102,8 @@ void IqtFit::setup() {
 
   m_properties["StretchedExp"] = createStretchedExp("StretchedExp");
 
-  m_iqtFRangeManager->setMinimum(m_properties["BackgroundA0"], 0);
-  m_iqtFRangeManager->setMaximum(m_properties["BackgroundA0"], 1);
+  m_dblManager->setMinimum(m_properties["BackgroundA0"], 0);
+  m_dblManager->setMaximum(m_properties["BackgroundA0"], 1);
 
   m_dblManager->setMinimum(m_properties["Exponential1.Intensity"], 0);
   m_dblManager->setMaximum(m_properties["Exponential1.Intensity"], 1);
@@ -209,8 +209,12 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitMultiple");
   }
 
+  auto replaceAlg = replaceInfinityAndNaN(m_iqtFInputWSName.toStdString());
+  replaceAlg->execute();
+  MatrixWorkspace_sptr inputWs = replaceAlg->getProperty("OutputWorkspace");
+
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("InputWorkspace", m_iqtFInputWS);
+  iqtFitAlg->setProperty("InputWorkspace", inputWs);
   iqtFitAlg->setProperty("Function", function);
   iqtFitAlg->setProperty("FitType", fitType);
   iqtFitAlg->setProperty("StartX", startX);
@@ -228,8 +232,8 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
 }
 
 /**
-* Plot workspace based on user input
-*/
+ * Plot workspace based on user input
+ */
 void IqtFit::plotWorkspace() {
   auto resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       m_baseName + "_Result");
@@ -249,8 +253,8 @@ void IqtFit::plotWorkspace() {
 }
 
 /**
-* Save the result of the algorithm
-*/
+ * Save the result of the algorithm
+ */
 void IqtFit::saveResult() {
   const auto workingdirectory =
       Mantid::Kernel::ConfigService::Instance().getString(
@@ -262,8 +266,8 @@ void IqtFit::saveResult() {
 }
 
 /**
-* Plots the current spectrum displayed in the preview plot
-*/
+ * Plots the current spectrum displayed in the preview plot
+ */
 void IqtFit::plotCurrentPreview() {
   if (!m_iqtFInputWS) {
     return;
@@ -282,10 +286,10 @@ void IqtFit::plotCurrentPreview() {
 }
 
 /**
-* Handles completion of the IqtFitMultiple algorithm.
-* @param error True if the algorithm was stopped due to error, false otherwise
-* @param outputWsName The name of the output workspace
-*/
+ * Handles completion of the IqtFitMultiple algorithm.
+ * @param error True if the algorithm was stopped due to error, false otherwise
+ * @param outputWsName The name of the output workspace
+ */
 void IqtFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
@@ -309,14 +313,14 @@ void IqtFit::algorithmComplete(bool error) {
 }
 
 /**
-* Constructs the desired output base name for the  IqtFitMultiple
-* @param inputName     :: Name of the inputworkspace
-* @param fitType       :: The type of fit that is being performed
-* @param multi         :: If the fit is running the IqtFitMultiple
-* @param specMin       :: Minimum number of spectra being fitted
-* @param specMax       :: Maximum number of spectra being fitted
-* @return the base name
-*/
+ * Constructs the desired output base name for the  IqtFitMultiple
+ * @param inputName     :: Name of the inputworkspace
+ * @param fitType       :: The type of fit that is being performed
+ * @param multi         :: If the fit is running the IqtFitMultiple
+ * @param specMin       :: Minimum number of spectra being fitted
+ * @param specMax       :: Maximum number of spectra being fitted
+ * @return the base name
+ */
 std::string IqtFit::constructBaseName(const std::string &inputName,
                                       const std::string &fitType,
                                       const bool &multi, const size_t &specMin,
@@ -361,12 +365,12 @@ void IqtFit::loadSettings(const QSettings &settings) {
 }
 
 /**
-* Called when new data has been loaded by the data selector.
-*
-* Configures ranges for spin boxes before raw plot is done.
-*
-* @param wsName Name of new workspace loaded
-*/
+ * Called when new data has been loaded by the data selector.
+ *
+ * Configures ranges for spin boxes before raw plot is done.
+ *
+ * @param wsName Name of new workspace loaded
+ */
 void IqtFit::newDataLoaded(const QString wsName) {
   m_iqtFInputWSName = wsName;
   m_iqtFInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -401,8 +405,7 @@ CompositeFunction_sptr IqtFit::createFunction(bool tie) {
 
   IFunction_sptr func =
       FunctionFactory::Instance().createFunction("LinearBackground");
-  func->setParameter("A0",
-                     m_iqtFRangeManager->value(m_properties["BackgroundA0"]));
+  func->setParameter("A0", m_dblManager->value(m_properties["BackgroundA0"]));
   result->addFunction(func);
   result->tie("f0.A1", "0");
   if (tie) {
@@ -587,8 +590,8 @@ void IqtFit::typeSelection(int index) {
 }
 
 /**
-* Update the current plot option selected
-*/
+ * Update the current plot option selected
+ */
 void IqtFit::updateCurrentPlotOption(QString newOption) {
   m_plotOption = newOption.toStdString();
 }
@@ -680,11 +683,10 @@ void IqtFit::setDefaultParameters(const QString &name) {
 QHash<QString, QString>
 IqtFit::createParameterToPropertyMap(const QVector<QString> &functionNames) {
   QHash<QString, QString> parameterToProperty;
-  int functionNumber = 1;
 
-  for (auto &functionName : functionNames) {
-    QString prefix = "f" + QString::number(functionNumber) + ".";
-    extendParameterToPropertyMap(functionName, prefix, parameterToProperty);
+  for (int i = 0; i < functionNames.size(); ++i) {
+    QString prefix = "f" + QString::number(i+1) + ".";
+    extendParameterToPropertyMap(functionNames[i], prefix, parameterToProperty);
   }
 
   parameterToProperty["f0.A0"] = "BackgroundA0";
@@ -711,23 +713,23 @@ void IqtFit::extendParameterToPropertyMap(
 }
 
 /**
-* Handles the user entering a new minimum spectrum index.
-*
-* Prevents the user entering an overlapping spectra range.
-*
-* @param value Minimum spectrum index
-*/
+ * Handles the user entering a new minimum spectrum index.
+ *
+ * Prevents the user entering an overlapping spectra range.
+ *
+ * @param value Minimum spectrum index
+ */
 void IqtFit::specMinChanged(int value) {
   m_uiForm.spSpectraMax->setMinimum(value);
 }
 
 /**
-* Handles the user entering a new maximum spectrum index.
-*
-* Prevents the user entering an overlapping spectra range.
-*
-* @param value Maximum spectrum index
-*/
+ * Handles the user entering a new maximum spectrum index.
+ *
+ * Prevents the user entering an overlapping spectra range.
+ *
+ * @param value Maximum spectrum index
+ */
 void IqtFit::specMaxChanged(int value) {
   m_uiForm.spSpectraMin->setMaximum(value);
 }
@@ -741,7 +743,7 @@ void IqtFit::xMaxSelected(double val) {
 }
 
 void IqtFit::backgroundSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["BackgroundA0"], val);
+  m_dblManager->setValue(m_properties["BackgroundA0"], val);
   m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
   m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
   m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
@@ -831,11 +833,11 @@ void IqtFit::constrainIntensities(CompositeFunction_sptr func) {
 }
 
 /**
-* Generates a string that defines the fitting minimizer based on the user
-* options.
-*
-* @return Minimizer as a string
-*/
+ * Generates a string that defines the fitting minimizer based on the user
+ * options.
+ *
+ * @return Minimizer as a string
+ */
 QString IqtFit::minimizerString(QString outputName) const {
   QString minimizer = "Levenberg-Marquardt";
 
@@ -962,8 +964,12 @@ void IqtFit::updateProperties(int specNo) {
     QMap<QString, double> paramMap = m_parameterValues[index];
 
     for (auto &paramName : paramMap.keys()) {
-      QString propertyName = m_parameterToProperty[paramName];
-      m_dblManager->setValue(m_properties[propertyName], paramMap[paramName]);
+
+      if (m_parameterToProperty.contains(paramName) &&
+          !m_parameterToProperty[paramName].isEmpty()) {
+        QString propertyName = m_parameterToProperty[paramName];
+        m_dblManager->setValue(m_properties[propertyName], paramMap[paramName]);
+      }
     }
   } else {
     setDefaultParameters("Exponential1");
@@ -1091,6 +1097,17 @@ void IqtFit::unFixItem() {
   QtProperty *proplbl = prop->subProperties()[0];
   delete proplbl;
   delete prop;
+}
+
+IAlgorithm_sptr IqtFit::replaceInfinityAndNaN(const std::string &wsName) {
+  auto replaceAlg = AlgorithmManager::Instance().create("ReplaceSpecialValues");
+  replaceAlg->setChild(true);
+  replaceAlg->initialize();
+  replaceAlg->setProperty("InputWorkspace", wsName);
+  replaceAlg->setProperty("NaNValue", 0.0);
+  replaceAlg->setProperty("InfinityError", 0.0);
+  replaceAlg->setProperty("OutputWorkspace", wsName);
+  return replaceAlg;
 }
 
 } // namespace IDA

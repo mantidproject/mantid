@@ -1,17 +1,17 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
-#include "ui_IqtFit.h"
 #include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "ui_IqtFit.h"
 
 namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
-}
-}
+} // namespace API
+} // namespace Mantid
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -80,6 +80,7 @@ private:
   extendParameterToPropertyMap(const QString &functionName,
                                const QString &prefix,
                                QHash<QString, QString> &parameterToProperty);
+  Mantid::API::IAlgorithm_sptr replaceInfinityAndNaN(const std::string &wsName);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
