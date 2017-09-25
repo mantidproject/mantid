@@ -233,7 +233,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // calculate exponential decay outside of the loop
   std::vector<double> expDecay(xPointData.size()); // make a copy
   for (size_t i = 0; i < xPointData.size(); ++i) {
-	  expDecay[i] = exp(-(xPointData[i] - X0) / muLife);
+    expDecay[i] = exp(-(xPointData[i] - X0) / muLife);
   }
 
   for (size_t i = 0; i < npoints; i++) {
