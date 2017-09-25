@@ -45,11 +45,11 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - loading CASTEP phonon data :**
+**Example - loading CASTEP vibrational data :**
 
 .. testcode:: AbinsCastepSimple
 
-    benzene_wrk = Abins(DFTProgram="CASTEP", PhononFile="benzene.phonon", QuantumOrderEventsNumber="1")
+    benzene_wrk = Abins(AbInitioProgram="CASTEP", VibrationalDataFile="benzene.phonon", QuantumOrderEventsNumber="1")
 
 
     for name in benzene_wrk.getNames():
@@ -64,11 +64,11 @@ Output:
     benzene_wrk_H_total
     benzene_wrk_H
 
-**Example - loading CRYSTAL phonon data :**
+**Example - loading CRYSTAL vibrational data :**
 
 .. testcode:: AbinsCrystalSimple
 
-    wrk=Abins(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
+    wrk=Abins(AbInitioProgram="CRYSTAL", VibrationalDataFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
         print name
@@ -92,9 +92,10 @@ Output:
 
 .. testcode:: AbinsexplicitParameters
 
-    wrk_verbose=Abins(DFTprogram="CASTEP", PhononFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
-                    Temperature=10, SampleForm="Powder", Instrument="TOSCA", Atoms="H", SumContributions=True,
-                    QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
+    wrk_verbose=Abins(AbInitioProgram="CASTEP", VibrationalDataFile="benzene.phonon",
+                      ExperimentalFile="benzene_experimental.dat",
+                      Temperature=10, SampleForm="Powder", Instrument="TOSCA", Atoms="H", SumContributions=True,
+                      QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
 
     for name in wrk_verbose.getNames():
         print name
