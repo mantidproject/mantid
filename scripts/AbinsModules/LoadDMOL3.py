@@ -19,7 +19,7 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         self._norm = 0
         self._parser = AbinsModules.GeneralAbInitioParser()
 
-    def read_vibrational_data_file(self):
+    def read_vibrational_data(self):
         """
         Reads vibrational data from DMOL3 output files. Saves frequencies, weights of k-point vectors, k-point vectors,
         amplitudes of atomic displacements, hash of file  with vibrational data to <>.hdf5

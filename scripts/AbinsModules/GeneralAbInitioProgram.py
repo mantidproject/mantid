@@ -25,7 +25,7 @@ class GeneralAbInitioProgram(object):
         self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
                                             group_name=AbinsModules.AbinsParameters.ab_initio_group)
 
-    def read_vibrational_data_file(self):
+    def read_vibrational_data(self):
         """
         This method is different for different ab initio programs. It has to be overridden by inheriting class.
         This method should do the following:
@@ -197,7 +197,7 @@ class GeneralAbInitioProgram(object):
 
             logger.notice(str(err))
             self._clerk.erase_hdf_file()
-            ab_initio_data = self.read_vibrational_data_file()
+            ab_initio_data = self.read_vibrational_data()
             logger.notice(str(ab_initio_data) + " from ab initio input file has been loaded.")
 
         return ab_initio_data

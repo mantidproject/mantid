@@ -28,7 +28,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
 
         self._ab_initio_program = "CRYSTAL"
 
-    def read_vibrational_data_file(self):
+    def read_vibrational_data(self):
         """
         Reads vibrational data from CRYSTAL output files. Saves frequencies, weights of k-point vectors, k-point
         vectors, amplitudes of atomic displacements, hash of the vibrational data file (hash) to <>.hdf5
