@@ -671,7 +671,7 @@ User input dictionary
 
 As mentioned above, we cannot make any assumptions about the order or multiplicity of the
 user commands. We use a simple Python dictionary to store the specified settings.
-In fact the dictionary maps from enum-like classes, defined in *settings_tags.py* to
+In fact, the dictionary maps from enum-like classes, defined in *settings_tags.py* to
 a list of settings. The settings can be simple values, lists, dictionaries or *named_tuples* defined
 in *settings_tags.py*.
 
@@ -681,7 +681,7 @@ changing the naming in the future. Also note that some settings only allow one v
 which means that the director which uses these settings will use the last value in the list.
 
 The user input dictionary is normally populated by the settings specified in the user file and
-which are parsed by *UserFileParser* in *user_file_parser.py*. In addition the dictionary can
+parsed by *UserFileParser* in *user_file_parser.py*. In addition the dictionary can
 be modified by using the *ISISCommandInterface* or the SANS GUI. Changes to the original
 settings will override settings specified in the user file.
 
@@ -1252,7 +1252,7 @@ The sub-steps of this algorithm are:
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
    monitor workspace is scaled. The scaling factor is the ratio of the charge of the sliced data set
-   and the charge of the entire data set. Also note that this factor is returned and used later on in .
+   and the charge of the entire data set.
 3. If we are dealing with an even-mode workspace and the compatibility mode has been chosen then
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
@@ -1278,13 +1278,10 @@ The sub-steps of this algorithm are:
    now the event-mode workspace could be used as an event workspace, but the momentum transfer conversion (the next step)
    requires a histogram-mode workspace.
 10. The final step, the conversion to momentum transfer units, either uses :ref:`Q1D <algm-Q1D>`
-    or :ref:`Qxy <algm-Qxy>` depending on what the setting of the reduction dimensionality is. This step
+    or :ref:`Qxy <algm-Qxy>` depending on the setting of the reduction dimensionality. This step
     uses the data workspace as well as all of the adjustment workspaces which have been provided earlier
     on. The resulting *OutputWorkspace* and the *SumOfCounts* as well as *SumOfNormFactors* counts
     are provided as outputs.
-
-
-.. rubric:: Footnotes
 
 
 .. categories:: Development
