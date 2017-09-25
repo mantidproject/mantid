@@ -112,7 +112,7 @@ The reduction back-end consists of three components:
 *SANSState*
 ###########
 
-Motivationhttps://apps.ce.collabserv.com/profiles/html/profileView.do?userid=200975807#&tabinst=Updates
+Motivation
 ----------
 
 As mentioned above, the amount of parameters that can be set by the user makes
