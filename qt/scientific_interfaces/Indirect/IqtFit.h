@@ -77,9 +77,9 @@ private:
   QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
   void
-  extendParameterToPropertyMapFit(const QString &functionName,
-                                  const QString &prefix,
-                                  QHash<QString, QString> &parameterToProperty);
+  extendParameterToPropertyMap(const QString &functionName,
+                               const QString &prefix,
+                               QHash<QString, QString> &parameterToProperty);
 
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;

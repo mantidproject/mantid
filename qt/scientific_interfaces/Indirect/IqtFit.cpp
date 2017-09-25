@@ -764,9 +764,9 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
     m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0 - val);
     m_dblManager->setValue(m_properties["Exponential2.Intensity"], 1.0 - val);
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0 - val);
-  } else if (autoUpdate && prop == m_properties["Exponential1.Intensity"] ||
+  } else if (autoUpdate && (prop == m_properties["Exponential1.Intensity"] ||
              prop == m_properties["Exponential2.Intensity"] ||
-             prop == m_properties["StretchedExp.Intensity"]) {
+             prop == m_properties["StretchedExp.Intensity"])) {
     backgroundRangeSelector->setMinimum(1.0 - val);
     m_dblManager->setValue(m_properties["Exponential1.Intensity"], val);
     m_dblManager->setValue(m_properties["Exponential2.Intensity"], val);
