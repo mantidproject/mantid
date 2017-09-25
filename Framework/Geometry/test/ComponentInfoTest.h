@@ -166,7 +166,7 @@ public:
     auto position = Eigen::Vector3d{0, 0, 0};
     // No rotation
     auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
-    auto internalInfo = std::move(makeSingleComponentInfo(position, rotation));
+    auto internalInfo = makeSingleComponentInfo(position, rotation);
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -198,7 +198,7 @@ public:
     auto position = Eigen::Vector3d{10, 0, 0};
     auto rotation = Eigen::Quaterniond(
         Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
-    auto internalInfo = std::move(makeSingleComponentInfo(position, rotation));
+    auto internalInfo = makeSingleComponentInfo(position, rotation);
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -218,7 +218,7 @@ public:
 
   void test_copy_construction() {
 
-    auto internalInfo = std::move(makeSingleComponentInfo());
+    auto internalInfo = makeSingleComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
