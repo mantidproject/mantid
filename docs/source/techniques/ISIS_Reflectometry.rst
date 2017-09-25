@@ -17,7 +17,8 @@ This document explains set up of reflectometry instruments at ISIS and how Manti
 
 Introduction
 ------------
-Reflectometry is a non-invasive technique that allows us to analyse the properties of mediums. The technique is based on the reflection of neutrons at the interface of interest; this is analogous to how light (travelling through air) reflects off the surface of water (our interface of interest). The analysis of the reflected signals can give us insight into the membrane that separates the two mediums. A highly collimated beam of neutrons is shined onto an extremely flat surface and the intensity of the reflected radiation is measured as a function of angle or neutron wavelength. The exact shape of the reflectivity profile provides detailed information about the structure of the surface, including the thickness, density and roughness of any thin films layered on the surface.
+Reflectometry is a non-invasive technique that allows us to analyse the properties of thin films. The technique is based on the reflection of neutrons at the interfaces of interest; this is analogous to how light (travelling through air) reflects off the surface of water (our interface of interest). Analysis of the reflected signal can give us insight into the thin films' properties, and the interfaces between them. A highly collimated beam of neutrons illuminates a flat surface and the reflected intensity is measured as a function of angle and neutron wavelength. The reflectivity profile can be fitted to a model after the experiment to provide detailed information about the structure, including the thickness, density and roughness of any thin films layered on the surface.
+
 
 For more information, see the `ISIS website <https://www.isis.stfc.ac.uk/Pages/Reflectometry.aspx>`__.
 
@@ -35,7 +36,7 @@ The main components in the instrument are shown below:
 
 * *Source*: The source of neutrons
 * *Sample*: The material under analysis
-* *Slits*: These are used to produce a beam of the required divergence so that the sample is fully illuminated by neutrons. The slits define the *resolution* in momentum transfer, :math:`Q`.
+* *Slits*: These are used to collimate the beam to only illuminate the required area (the sample). The slits define the *resolution* in momentum transfer, :math:`Q`.
 * *Monitors*: These are used to normalize the detector signal
 * *Detectors*: Scattered neutrons are recorded in banks of detectors located at different *scattering angles*, :math:`2\theta_{det}`. Note that the terminology here differs from that in neutron diffraction, where :math:`\theta` is referred to as the scattering angle rather than :math:`2\theta`.
 * :math:`\theta_i`: the *incident angle*, that is, the angle between the incident beam and the sample
@@ -43,8 +44,8 @@ The main components in the instrument are shown below:
 
 In addition, some instruments also use:
 
-* *Polarizers*: These apply an external magnetic field to align the spin of the neutrons, which can then only be parallel or anti-parallel to the field.
-* *Supermirrors*: Some samples, such as liquids, cannot be rotated easily. Rather than rotating the sample, "supermirrors" can be used to redirect the beam such that it hits the sample at the required incident angle.
+* *Polarizers*: These use neutron spin dependent supermirrors to separate out the two possible neutron spin states: *up* and *down*, which align parallel or anti-parallel to an applied magnetic field.
+* *Supermirrors*: Some samples, such as liquids, cannot be angled. Therefore "supermirrors" can be used to change the incident angle of the beam to enable multiple angles to be measured from the surface.
 
 Reduction
 =========
@@ -54,15 +55,15 @@ The main reduction algorithm is :ref:`algm-ReflectometryReductionOneAuto`, which
 Specular Reflection
 -------------------
 
-In an experiment, the intensity, :math:`I` (i.e. the number of neutrons received at the detector) is measured as a function of time-of-flight, :math:`TOF`. The desired outcome of the reduction is a one-dimensional plot (summed over the detectors) of :math:`I` against momentum transfer, :math:`Q`.
+In an experiment, the reflected intensity, :math:`I` (i.e. the number of neutrons received at the detector) is measured as a function of time-of-flight, :math:`TOF`. The desired outcome of the reduction is a one-dimensional plot (summed over the detectors) of reflectivity normalised by an un-reflected beam, :math:`I_0` against momentum transfer, :math:`Q`.
 
-To achieve this, the input workspace in :math:`TOF` is first converted to wavelength, :math:`\lambda`, and normalisation by monitors, direct beam and transmission runs are optionally applied. The workspace is summed over all detectors in the region of interest, using either constant-:math:`\lambda` or constant-:math:`Q` binning. The result is a one-dimensional array of :math:`I` against :math:`\lambda`. The summed workspace is converted to :math:`Q` and rebinned to the required resolution, as determined by the slits - the :ref:`algm-NRCalculateSlitResolution` algorithm is used to calculate the slit resolution.
+To achieve this, the input workspace in :math:`TOF` is first converted to wavelength, :math:`\lambda`, and normalised by monitors; direct beam and transmission runs are optionally applied. The workspace is summed over all detectors in the region of interest, using either constant-:math:`\lambda` or constant-:math:`Q` binning. The result is a one-dimensional array of :math:`I` against :math:`\lambda`. The summed workspace is converted to :math:`Q` and rebinned to the required resolution, as determined either by the slits or the user. The :ref:`algm-NRCalculateSlitResolution` algorithm is used to calculate the slit resolution.
 
 The resulting one-dimensional plot of :math:`I` against :math:`Q` is typically referred to as ``IvsQ``. :ref:`algm-ReflectometryReductionOneAuto` also outputs the unbinned workspace in :math:`Q`, as well as the summed workspace in :math:`\lambda`, and these are typically referred to as ``IvsQ_unbinned`` and ``IvsLam`` respectively.
 
-An experiment may be repeated with different :math:`\theta_i` and the results stitched together in order to obtain a greater range in :math:`Q`.
+An experiment may be repeated with different :math:`\theta_i` and the results stitched together in order to obtain the reflectivity over a greater range of :math:`Q`.
 
-A sample under certain conditions (temperature, magnetic field, etc) is usually measured at two or three different incident angles, :math:`\theta_i`. This means that we typically end up with two or three :math:`TOF` workspaces that are combined (*stitched*) to give a final plot covering a greater range in :math:`Q`.
+A sample under certain conditions (temperature, magnetic field, etc) is usually measured at two or three different incident angles, :math:`\theta_i`. This means that we typically end up with two or three :math:`TOF` workspaces that are combined (*stitched*) and processed to give a single plot covering a larger range of :math:`Q`.
 
 The actual reduction is relatively simple and produces a simple one dimensional plot which can be saved as an ASCII file. However, there can be many files to deal with and we need to make sure that we process the correct runs together and with the correct parameters, transmission runs etc.
 
@@ -128,15 +129,15 @@ ISIS Instruments
 
 There are five reflectometry instruments at ISIS:
 
-* *Inter*: High-intensity chemical interfaces reflectometer. Narrow beam.
-* *Offspec*: Gives access to nanometre length scales parallel and perpendicular to interfaces. Uses the technique of neutron spin-echo to encode the path that neutrons take through the instrument.
+* *Inter*: High-intensity reflectometer. Specialised for free liquid surfaces.
+* *Offspec*: Polarised neutron reflectometer with optional polarisation analysis, using a high resolution position sensitive detector. Used to study magnetic ordering in and between the layers and surfaces of thin film materials.
 * *Polref*: Polarised neutron reflectometer. Used to study magnetic ordering in and between the layers and surfaces of thin film materials.
-* *Crisp*: Designed for high resolution studies of a wide range of interfacial phenomena.
-* *Surf*: Optimised for higher flux. Designed for liquid interface research.
+* *Crisp*: Designed for studies of a wide range of interfacial phenomena.
+* *Surf*: Optimised for higher flux and short wavelengths. Designed for liquid interface research.
 
 Detectors
 ---------
-Currently at ISIS we deal with two types of detector: point-detectors (e.g. Inter) or multi-/linear-detectors (e.g. Polref and Offspec). Note that some instruments have both point and linear detectors. We are expecting to add 2D detectors in the near future.
+Currently at ISIS we deal with two types of detector: point-detectors (e.g. Inter) or multi-/linear-detectors (e.g. Polref and Offspec). Note that most instruments have both point and linear detectors. We are expecting to add 2D detectors in the near future.
 
 Because runs are performed at different incident angles, the **detectors are moved** between different runs. Some instruments (e.g. Inter) move detectors vertically, whereas others (Polref, Offspec) rotate them around the sample.
 
@@ -169,7 +170,7 @@ Related to :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryRed
 
 :ref:`algm-Stitch1DMany` does the work to stitch multiple runs together, which is quite a complicated operation.
 
-:ref:`algm-ConvertToReflectometryQ`: similar to :ref:`algm-ReflectometryReductionOneAuto`, but it doesn’t normalize by monitors, transmission run, etc (in fact, scientists typically run :ref:`algm-ReflectometryReductionOneAuto` prior to running this algorithm, so that they obtain the normalized intensity). The input is a workspace in wavelength, and the output is a :math:`QxQz` map (or :math:`KiKf` or :math:`PiPf`). Therefore, the difference to :ref:`algm-ReflectometryReductionOne` is that the latter outputs the modulus of :math:`Q`, whereas this algorithm produces different components of :math:`Q`.
+:ref:`algm-ConvertToReflectometryQ`: This algorithm is generally used to examine off-specular scattering. The input is a workspace in wavelength, and the output is a :math:`QxQz` map (or :math:`KiKf` or :math:`PiPf`). It doesn't normalize by monitors, transmission run, etc (in fact, scientists typically run :ref:`algm-ReflectometryReductionOneAuto` prior to running this algorithm, so that they obtain the normalized intensity).
 
 Interface
 ---------
