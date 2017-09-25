@@ -73,7 +73,12 @@ struct PreprocessingAttributes {
 
 struct PostprocessingAttributes {
   PostprocessingAttributes(const QString& options) : m_options(options) {}
+  PostprocessingAttributes(const QString& options, PostprocessingAlgorithm algorithm, std::map<QString, QString> map) : m_options(options), m_algorithm(algorithm), m_map(map) {}
   QString m_options;
+  // Post-processing algorithm
+  PostprocessingAlgorithm m_algorithm;
+  // Post-processing map
+  std::map<QString, QString> m_map;
 };
 
 
@@ -214,10 +219,7 @@ private:
   WhiteList m_whitelist;
   // The data processor algorithm
   ProcessingAlgorithm m_processor;
-  // Post-processing algorithm
-  PostprocessingAlgorithm m_postprocessor;
-  // Post-processing map
-  std::map<QString, QString> m_postprocessMap;
+  
   // The current queue of groups to be reduced
   GroupQueue m_group_queue;
   // The current group we are reducing row data for
