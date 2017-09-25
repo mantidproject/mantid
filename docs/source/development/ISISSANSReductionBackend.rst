@@ -1080,7 +1080,8 @@ a particular masking instruction. The algorithm sub-steps are:
 *SANSMove*
 ------------
 
-The :ref:`SANSMove <algm-SANSMove>` algorithm moves a SANS workspace according to the settings in
+The :ref:`SANSMove <algm-SANSMove>` algorithm moves the instrument component
+of the SANS workspace according to the settings in
 the state object. Additionally the user can specify the beam centre.
 Note that if the beam centre is also specified in the state object, then the
 manual selection takes precedence. The way we perform a move is highly-instrument
@@ -1198,9 +1199,9 @@ a script. It takes three important inputs:
   loaded data into the ADS. The ADS is also checked for can reductions.
 - An *output_mode* enum, which can be:
 
-  - *PublishToADS* which means that the reduced data is added to the ADS
-  - *SaveToFile* which means that the reduced data is saved only to file
-  - *Both* which means that the reduced data is added to the ADS and saved to file
+  - *PublishToADS* means that the reduced data is added to the ADS
+  - *SaveToFile* means that the reduced data is saved only to file
+  - *Both* means that the reduced data is added to the ADS and saved to file
 
 
 *SANSBatchReduction* reduces the list of states sequentially. The for-loop in
@@ -1270,9 +1271,9 @@ The sub-steps of this algorithm are:
    with the absolute scale and divide by the sample volume.
 8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
-   they are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
+   the instruments referenced in the workspace are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
    algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment
-   workspace. Note that the creation is optional.
+   workspace. Note that their creation is optional.
 9. Convert the data workspace into histogram-mode using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`.
    This is only relevant for event-mode workspaces where the compatibility mode has not been used. Up until
    now the event-mode workspace could be used as an event workspace, but the momentum transfer conversion (the next step)
