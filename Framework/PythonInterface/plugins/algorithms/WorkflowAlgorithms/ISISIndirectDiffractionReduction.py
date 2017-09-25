@@ -275,13 +275,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         # Remove the container workspaces
         if self._container_workspace is not None:
-            DeleteWorkspace(self._container_workspace)
-            DeleteWorkspace(self._container_workspace + '_mon')
+            self._delete_all([self._container_workspace])
 
+        # Remove the vanadium workspaces
         if self._vanadium_ws:
-            for van_ws in self._vanadium_ws:
-                DeleteWorkspace(van_ws)
-                DeleteWorkspace(van_ws+'_mon')
+            self._delete_all(self._vanadium_ws)
 
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
@@ -372,6 +370,19 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                       Factor=scale_factor,
                       Operation='Multiply')
 
+    def _delete_all(self, workspace_names):
+        """
+        Deletes the workspaces with the specified names and their associated
+        monitor workspaces.
+
+        :param workspace_names: The names of the workspaces to delete.
+        """
+
+        for workspace_name in workspace_names:
+            DeleteWorkspace(workspace_name)
+
+            if mtd.doesExist(workspace_name + "_mon"):
+                DeleteWorkspace(workspace_name + '_mon')
 
 # ------------------------------------------------------------------------------
 

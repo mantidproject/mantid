@@ -37,10 +37,10 @@ def create_file_range_parser(instrument):
     def parser(file_range):
         file_range = file_range.strip()
         # Check whether this is a range or single file
-        if '-' in file_range or ':' in file_range:
-            return [[instrument + str(run) for run in create_range_from(file_range)]]
-        elif ':' in file_range
-            return [[instrument + str(run)] for run in create_range_from(file_range)]
+        if '-' in file_range:
+            return [[instrument + str(run) for run in create_range_from(file_range, '-')]]
+        elif ':' in file_range:
+            return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
         elif '+' in file_range:
             return [[instrument + run for run in file_range.split('+')]]
         else:
@@ -48,6 +48,7 @@ def create_file_range_parser(instrument):
                 return [[instrument + str(int(file_range))]]
             except ValueError:
                 return [[file_range]]
+
     return parser
 
 
@@ -235,6 +236,7 @@ def chop_workspace(workspace, monitor_index):
         return mtd[workspace_name].getNames(), True
     else:
         return [workspace_name], False
+
 
 # -------------------------------------------------------------------------------
 
