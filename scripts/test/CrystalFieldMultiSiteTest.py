@@ -128,6 +128,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         ws = CreateWorkspace(x, y, e)
         x, y = cfms.getSpectrum(0, ws)
         y = y / c_mbsr
+        print(y)
         self.assertAlmostEqual(y[0], 12.474955, 6)
         self.assertAlmostEqual(y[1], 4.300416, 6)
         self.assertAlmostEqual(y[2], 1.452309, 6)
@@ -534,6 +535,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
         s = str(cf.function)
+        print(s)
         self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s)
 
         cf = 2 * cf1 + cf2 * 8
