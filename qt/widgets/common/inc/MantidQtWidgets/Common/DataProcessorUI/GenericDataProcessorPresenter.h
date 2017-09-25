@@ -66,7 +66,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
   PreprocessingAttributes(const QString& options) : m_options(options) {}
+  PreprocessingAttributes(const QString& options, std::map<QString, PreprocessingAlgorithm> map) : m_options(options), m_map(map) {}
   QString m_options;
+  std::map<QString, PreprocessingAlgorithm> m_map;
 };
 
 
@@ -200,8 +202,6 @@ private:
   QString m_wsName;
   // The whitelist
   WhiteList m_whitelist;
-  // The pre-processing instructions
-  std::map<QString, PreprocessingAlgorithm> m_preprocessMap;
   // The data processor algorithm
   ProcessingAlgorithm m_processor;
   // Post-processing algorithm

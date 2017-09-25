@@ -123,9 +123,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
+      m_processor(processor),
       m_postprocessor(postprocessor), m_postprocessMap(postprocessMap),
-      m_progressReporter(nullptr), m_postprocess(true), m_preprocessing(QString()), m_promptUser(true),
+      m_progressReporter(nullptr), m_postprocess(true), m_preprocessing(QString(), preprocessMap), m_promptUser(true),
       m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
@@ -554,7 +554,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
         convertStringToMap(m_preprocessing.m_options);
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
-        m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
+        m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessing.m_map,
         m_processor, m_postprocessor, preprocessingOptionsMap,
         m_processingOptions, m_postprocessingOptions);
     auto generatedNotebook =
@@ -950,7 +950,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   // Global pre-processing options as a map
   std::map<QString, QString> globalOptions;
-  if (!m_preprocessMap.empty())
+  if (!m_preprocessing.m_map.empty())
     globalOptions = convertStringToMap(m_preprocessing.m_options);
 
   // Pre-processing properties
@@ -987,7 +987,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       continue;
     }
 
-    if (m_preprocessMap.count(columnName)) {
+    if (m_preprocessing.m_map.count(columnName)) {
       // This column needs pre-processing
 
       // We do not want the associated properties to be set again in
@@ -998,7 +998,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
         }
       }
 
-      auto preprocessor = m_preprocessMap.at(columnName);
+      auto preprocessor = m_preprocessing.m_map.at(columnName);
 
       auto const globalOptionsForColumn = globalOptions.count(columnName) > 0
                                               ? globalOptions.at(columnName)
@@ -1063,7 +1063,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       auto column = *columnIt2;
       auto runNumbers = *runNumbersIt2;
 
-      if (runNumbers.isEmpty() && !m_preprocessMap.count(column.name())) {
+      if (runNumbers.isEmpty() && !m_preprocessing.m_map.count(column.name())) {
 
         QString propValue = QString::fromStdString(
             alg->getPropertyValue(column.algorithmProperty().toStdString()));
