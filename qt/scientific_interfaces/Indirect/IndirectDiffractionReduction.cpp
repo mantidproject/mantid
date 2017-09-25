@@ -153,7 +153,10 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
 
-  deleteGroupingWorkspace();
+  // Delete grouping workspace, if created.
+  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
+    deleteGroupingWorkspace();
+  }
 
   if (error) {
     showInformationBox(
