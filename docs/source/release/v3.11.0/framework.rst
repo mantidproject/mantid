@@ -8,6 +8,7 @@ Framework Changes
 Concepts
 --------
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
+- The ``blocksize()`` of a workspace now throws an exception if the number of bins is not constant. ``size()`` has been modified to the sum of the number of bins in each ``Histogram``.
 
 Properties
 ----------
@@ -22,7 +23,7 @@ New
 
 - :ref:`ConjoinXRuns <algm-ConjoinXRuns>` performs concatenation of the workspaces into a single one by handling the sample logs merging as in :ref:`MergeRuns <algm-MergeRuns>`.
 - :ref:`LoadSESANS <algm-LoadSESANS>` Loading SESANS data to a MatrixWorkspace is now supported.
-- :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.  
+- :ref:`SaveSESANS <algm-SaveSESANS>` Saving a workspace using the SESANS format is now supported.
 - :ref:`PaddingAndApodization <algm-PaddingAndApodization-v1>` a new algorithm for padding data and adding an apodization function.
 - :ref:`algm-IntegrateEPP` integrates a workspace around the elastic peak positions given in an EPP table.
 
@@ -31,7 +32,7 @@ Improved
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` is extended to support conversion to elastic d-spacing.
 - :ref:`SumSpectra <algm-SumSpectra-v1>`: Fixed a bug where a wrong fallback value would be used in case of invalid values being set for min/max worspace index, and improved input validation for those properties.
 - :ref:`SetUncertainties <algm-SetUncertainties-v1>` now provides a "custom" mode, which lets the user specify both an arbitrary error value whose occurences are to be replaced in the input workspace, as well as the value to replace it with.
-- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information. 
+- :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
 - :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces-v1>` provides option to change Y axis unit and label.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
@@ -113,7 +114,7 @@ Python Fit Functions
 ####################
 
 - A bug that makes it difficult to define and use attributes in python fit functions has been fixed.
-- The usability of the fit functions has been improved, enabling users to construct and modify the functions as objects rather than strings 
+- The usability of the fit functions has been improved, enabling users to construct and modify the functions as objects rather than strings
   as described :ref:`here <FitFunctionsInPython>`.
 
 |
