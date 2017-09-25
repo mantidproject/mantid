@@ -159,7 +159,7 @@ def fitGaussian(fitPar, index, ws, outputWs):
         end = min(centre + margin, RIGHTLIMIT)
 
         fit_msg = 'name=LinearBackground,A0=%f;name=Gaussian,Height=%f,PeakCentre=%f,Sigma=%f' % (
-        background, height, centre, width)
+                  background, height, centre, width)
 
         Fit(InputWorkspace=ws, Function=fit_msg,
             StartX=str(start), EndX=str(end), Output=outputWs)
@@ -339,7 +339,7 @@ def correctTubeToIdealTube(tubePoints, idealTubePoints, nDets, TestMode=False, p
     try:
         Fit(InputWorkspace="PolyFittingWorkspace", Function='name=Polynomial,n=%d' % polinFit, StartX=str(0.0),
             EndX=str(nDets), Output="QF")
-    except Exception as e:
+    except:
         print("Fit failed")
         return []
 
