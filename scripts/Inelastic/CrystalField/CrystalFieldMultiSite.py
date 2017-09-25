@@ -384,7 +384,7 @@ class CrystalFieldMultiSite(object):
             raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
         ions = self.Ions + [other.Ion]
         symmetries = self.Symmetries + [other.Symmetry]
-        abundances = self._abundances.values() + [scale_factor]
+        abundances = list(self._abundances.values()) + [scale_factor]
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
@@ -400,7 +400,7 @@ class CrystalFieldMultiSite(object):
             raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
         ions = [other.Ion] + self.Ions
         symmetries = [other.Symmetry] + self.Symmetries
-        abundances = [scale_factor] + self._abundances.values()
+        abundances = [scale_factor] + list(self._abundances.values())
         params = get_parameters_for_add(other, 0)
         params.update(get_parameters_for_add_from_multisite(self, 1))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,

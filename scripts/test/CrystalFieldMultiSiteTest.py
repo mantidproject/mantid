@@ -112,6 +112,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         r = [0.0, 1.45, 2.4, 3.0, 3.85]
         x, y = cfms.getSpectrum(r)
         y = y / c_mbsr
+        # expected_y = [13.564311, 0.021439, 0.076615, 0.047189, 6.788622]
         expected_y = [13.950363, 0.02298, 0.031946, 0.189161, 0.392888]
         np.testing.assert_equal(x, r)
         np.testing.assert_almost_equal(y, expected_y, 6)
