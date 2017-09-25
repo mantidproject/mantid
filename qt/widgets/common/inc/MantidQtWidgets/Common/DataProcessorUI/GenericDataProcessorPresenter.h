@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -16,9 +16,11 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeData.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "boost/optional.hpp"
 
 #include <QSet>
 #include <queue>
@@ -65,22 +67,159 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const QString& options) : m_options(options) {}
-  PreprocessingAttributes(const QString& options, std::map<QString, PreprocessingAlgorithm> map) : m_options(options), m_map(map) {}
+  PreprocessingAttributes(const QString &options) : m_options(options) {}
+  PreprocessingAttributes(const QString &options,
+                          std::map<QString, PreprocessingAlgorithm> map)
+      : m_options(options), m_map(map) {}
   QString m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 };
 
 struct PostprocessingAttributes {
-  PostprocessingAttributes(const QString& options) : m_options(options) {}
-  PostprocessingAttributes(const QString& options, PostprocessingAlgorithm algorithm, std::map<QString, QString> map) : m_options(options), m_algorithm(algorithm), m_map(map) {}
+  PostprocessingAttributes(const QString &options) : m_options(options) {}
+  PostprocessingAttributes(const QString &options,
+                           PostprocessingAlgorithm algorithm,
+                           std::map<QString, QString> map)
+      : m_options(options), m_algorithm(algorithm), m_map(map) {}
   QString m_options;
   // Post-processing algorithm
   PostprocessingAlgorithm m_algorithm;
   // Post-processing map
   std::map<QString, QString> m_map;
-};
 
+  QString getPostprocessedWorkspaceName(const WhiteList &whitelist,
+                                        const GroupData &groupData,
+                                        const QString &prefix) {
+    QStringList outputNames;
+    for (const auto &data : groupData) {
+      outputNames.append(
+          getReducedWorkspaceName(whitelist, data.second, prefix));
+    }
+    return prefix + outputNames.join("_");
+  }
+
+  QString getReducedWorkspaceName(const WhiteList &whitelist,
+                                  const QStringList &data,
+                                  const QString &prefix) {
+
+    if (static_cast<std::size_t>(data.size()) != whitelist.size())
+      throw std::invalid_argument("Can't find reduced workspace name");
+
+    /* This method calculates, for a given row, the name of the output
+    * (processed)
+    * workspace. This is done using the white list, which contains information
+    * about the columns that should be included to create the ws name. In
+    * Reflectometry for example, we want to include values in the 'Run(s)' and
+    * 'Transmission Run(s)' columns. We may also use a prefix associated with
+    * the column when specified. Finally, to construct the ws name we may also
+    * use a 'global' prefix associated with the processing algorithm (for
+    * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
+    * this method */
+
+    // Temporary vector of strings to construct the name
+    QStringList names;
+
+    auto columnIt = whitelist.cbegin();
+    auto runNumbersIt = data.constBegin();
+    for (; columnIt != whitelist.cend(); ++columnIt, ++runNumbersIt) {
+      auto column = *columnIt;
+      // Do we want to use this column to generate the name of the output ws?
+      if (column.isShown()) {
+        auto const runNumbers = *runNumbersIt;
+
+        if (!runNumbers.isEmpty()) {
+          // But we may have things like '1+2' which we want to replace with
+          // '1_2'
+          auto value = runNumbers.split("+", QString::SkipEmptyParts);
+          names.append(column.prefix() + value.join("_"));
+        }
+      }
+    } // Columns
+
+    auto wsname = prefix;
+    wsname += names.join("_");
+    return wsname;
+  }
+
+  void removeWorkspace(QString const &workspaceName) const {
+    Mantid::API::AnalysisDataService::Instance().remove(
+        workspaceName.toStdString());
+  }
+
+  bool workspaceExists(QString const &workspaceName) const {
+    return Mantid::API::AnalysisDataService::Instance().doesExist(
+        workspaceName.toStdString());
+  }
+
+  void removeIfExists(QString const &workspaceName) const {
+    if (workspaceExists(workspaceName)) {
+      removeWorkspace(workspaceName);
+    }
+  }
+
+  void postprocessGroup(QString const &processorPrefix,
+                        const GroupData &groupData,
+                        WhiteList const &whitelist) {
+    QStringList inputNames;
+
+    auto const outputWSName = getPostprocessedWorkspaceName(
+        whitelist, groupData, m_algorithm.prefix());
+
+    for (auto const &row : groupData) {
+      auto const inputWSName =
+          getReducedWorkspaceName(whitelist, row.second, processorPrefix);
+
+      if (workspaceExists(inputWSName)) {
+        inputNames.append(inputWSName);
+      }
+    }
+
+    auto const inputWSNames = inputNames.join(", ");
+
+    // If the previous result is in the ADS already, we'll need to remove it.
+    // If it's a group, we'll get an error for trying to group into a used group
+    // name
+    removeIfExists(outputWSName);
+
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().create(m_algorithm.name().toStdString());
+    alg->initialize();
+    alg->setProperty(m_algorithm.inputProperty().toStdString(),
+                              inputWSNames.toStdString());
+    alg->setProperty(m_algorithm.outputProperty().toStdString(),
+                              outputWSName.toStdString());
+
+    auto optionsMap = parseKeyValueString(m_options.toStdString());
+    for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+      try {
+        alg->setProperty(kvp->first, kvp->second);
+      } catch (Mantid::Kernel::Exception::NotFoundError &) {
+        throw std::runtime_error("Invalid property in options column: " +
+                                 kvp->first);
+      }
+    }
+
+    // Options specified via post-process map
+    for (auto const &prop : m_map) {
+      auto const propName = prop.second;
+      auto const propValueStr =
+          groupData.begin()->second[whitelist.indexFromName(prop.first)];
+      if (!propValueStr.isEmpty()) {
+        // Warning: we take minus the value of the properties because in
+        // Reflectometry this property refers to the rebin step, and they want a
+        // logarithmic binning. If other technique areas need to use a
+        // post-process map we'll need to re-think how to do this.
+        alg->setPropertyValue(propName.toStdString(),
+                              ("-" + propValueStr).toStdString());
+      }
+    }
+
+    alg->execute();
+
+    if (!alg->isExecuted())
+      throw std::runtime_error("Failed to post-process workspaces.");
+  }
+};
 
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
@@ -170,21 +309,21 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(QString const& options) {
+  void setPreprocessingOptions(QString const &options) {
     m_preprocessing.m_options = options;
   }
 
-  void setPostprocessingOptions(QString const& options) {
-    m_postprocessing.m_options = options;
+  void setPostprocessingOptions(QString const &options) {
+    m_postprocessing.get().m_options = options;
   }
-  
-  PostprocessingAttributes m_postprocessing;
+
+  boost::optional<PostprocessingAttributes> m_postprocessing;
 
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
   QString m_processingOptions;
-  void updateProcessedStatus(const std::pair<int, GroupData> & group);
+  void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -210,8 +349,10 @@ protected slots:
 
 private:
   bool areOptionsUpdated();
-  void applyDefaultOptions(std::map<QString, QVariant>& options);
-  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg, const std::string& hiddenOptions, const std::string& columnName);
+  void applyDefaultOptions(std::map<QString, QVariant> &options);
+  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
+                                       const std::string &hiddenOptions,
+                                       const std::string &columnName);
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
@@ -219,7 +360,7 @@ private:
   WhiteList m_whitelist;
   // The data processor algorithm
   ProcessingAlgorithm m_processor;
-  
+
   // The current queue of groups to be reduced
   GroupQueue m_group_queue;
   // The current group we are reducing row data for
@@ -228,8 +369,6 @@ private:
   RowItem m_rowItem;
   // The progress reporter
   ProgressPresenter *m_progressReporter;
-  // A boolean indicating whether a post-processing algorithm has been defined
-  bool m_postprocess;
   // The number of columns
   int m_columns;
   // A boolean indicating whether to prompt the user when getting selected runs
