@@ -112,7 +112,7 @@ The reduction back-end consists of three components:
 *SANSState*
 ###########
 
-Motivation
+Motivationhttps://apps.ce.collabserv.com/profiles/html/profileView.do?userid=200975807#&tabinst=Updates
 ----------
 
 As mentioned above, the amount of parameters that can be set by the user makes
@@ -418,7 +418,7 @@ The validation ensures that all entries are specified and that the lower wavelen
 *********
 
 The *StateSave* class does not hold information which is directly related to the reduction but contains
-the all the required information about saving the reduced data. The relevant parameters are:
+the required information about saving the reduced data. The relevant parameters are:
 
 ================================== ================================================== =================================== ========= =============== =======
 Name                               Comment                                            Type                                Optional? Auto-generated? Default
@@ -520,7 +520,7 @@ fit                              A dict for each data type (sample and can) to t
 
 Note that the transmission information can be either collected via a monitor or
 via a region on the detector. In the former case *transmission_monitor* is the
-relevant parameter whereas in the former case it is *transmission_radius_on_detector*,
+relevant parameter whereas in the latter case it is *transmission_radius_on_detector*,
 *transmission_roi_files* and *transmission_mask_files*. Also note that we have
 instrument specific versions of these state classes, mainly to accommodate for
 the different wavelength ranges (and potentially default prompt peak settings.)
