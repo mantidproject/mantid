@@ -79,7 +79,7 @@ def _assign_change_to_facility(domains, changes, year, facility_dict, date_key, 
                 domain = 'stfc.ac.uk'
             facility_dict[date_key][domains[domain]] != increment
             found = True
-    return found
+    return found, facility_dict
 
 
 if __name__ == '__main__':
@@ -237,17 +237,19 @@ if __name__ == '__main__':
                         removed = item.strip().split(' ')[0]
                         # print ("DELETIONS:{0}".format(removed))
 
-                found = False
-                found = _assign_change_to_facility(domains=domains, changes=email_changes, year=year,
-                                                   facility_dict=facility_changed, date_key=date_key,
-                                                   increment=int(changed)) or found
-                found = _assign_change_to_facility(domains=domains, changes=email_changes, year=year,
-                                                   facility_dict=facility_added, date_key=date_key,
-                                                   increment=int(added)) or found
-                found = _assign_change_to_facility(domains=domains, changes=email_changes, year=year,
-                                                   facility_dict=facility_removed, date_key=date_key,
-                                                   increment=int(removed)) or found
-
+                (facility_changed, found_changed) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                               year=year, date_key=date_key,
+                                                                               facility_dict=facility_changed,
+                                                                               increment=int(changed))
+                (facility_added, found_added) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                           year=year, date_key=date_key,
+                                                                           facility_dict=facility_added,
+                                                                           increment=int(added))
+                (facility_removed, found_removed) = _assign_change_to_facility(domains=domains, changes=email_changes,
+                                                                               year=year, date_key=date_key,
+                                                                               facility_dict=facility_removed,
+                                                                               increment=int(removed))
+                found = found_changed or found_added or found_removed
                 # Print out the email address if it didn't match anything
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
@@ -260,9 +262,9 @@ if __name__ == '__main__':
 
             for line in f2reading:
                 email_commits = line.replace('"','').strip()
-                found = _assign_change_to_facility(domains=domains, changes=email_commits, year=year,
-                                                   facility_dict=facility_commits, date_key=date_key,
-                                                   increment=1)
+                (found, facility_commits) = _assign_change_to_facility(domains=domains, changes=email_commits,
+                                                                       year=year, facility_dict=facility_commits,
+                                                                       date_key=date_key, increment=1)
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
 
