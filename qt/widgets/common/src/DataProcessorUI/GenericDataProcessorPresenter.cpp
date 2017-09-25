@@ -123,8 +123,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_processor(processor), m_postprocessing(QString(), postprocessor, postprocessMap),
-      m_progressReporter(nullptr), m_postprocess(true), m_preprocessing(QString(), preprocessMap), m_promptUser(true),
+      m_processor(processor), m_postprocessing(postprocessor.name().isEmpty() ? boost::optional<PostprocessingAttributes>() : PostprocessingAttributes(QString(), postprocessor, postprocessMap)),
+      m_progressReporter(nullptr), m_preprocessing(QString(), preprocessMap), m_promptUser(true),
       m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
       m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
@@ -160,13 +160,12 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   m_columns = static_cast<int>(m_whitelist.size());
 
-  if (m_postprocessing.m_algorithm.name().isEmpty()) {
-    m_postprocess = false;
-    m_manager =
-        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
-  } else {
+  if (hasPostprocessing()) {
     m_manager =
         Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
+  } else {
+    m_manager =
+        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
   }
 }
 
@@ -298,11 +297,11 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
 
   auto settingsChanged = m_preprocessing.m_options != newPreprocessingOptions ||
                          m_processingOptions != newProcessingOptions ||
-                         m_postprocessing.m_options != newPostprocessingOptions;
+                         m_postprocessing->m_options != newPostprocessingOptions;
 
   m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
-  m_postprocessing.m_options = newPostprocessingOptions;
+  m_postprocessing->m_options = newPostprocessingOptions;
 
   return settingsChanged;
 }
@@ -332,7 +331,7 @@ void GenericDataProcessorPresenter::process() {
 
   for (const auto &group : m_selectedData) {
     auto groupOutputNotFound = !workspaceExists(
-        getPostprocessedWorkspaceName(group.second, m_postprocessing.m_algorithm.prefix()));
+        getPostprocessedWorkspaceName(group.second, m_postprocessing->m_algorithm.prefix()));
 
     if (settingsHaveChanged || groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
@@ -554,8 +553,8 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessing.m_map,
-        m_processor, m_postprocessing.m_algorithm, preprocessingOptionsMap,
-        m_processingOptions, m_postprocessing.m_options);
+        m_processor, m_postprocessing->m_algorithm, preprocessingOptionsMap,
+        m_processingOptions, m_postprocessing->m_options);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 
@@ -566,6 +565,9 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
   }
 }
 
+bool GenericDataProcessorPresenter::hasPostprocessing() const {
+  return bool(m_postprocessing);
+}
 /**
 Post-processes the workspaces created by the given rows together.
 @param groupData : the data in a given group as received from the tree manager
@@ -578,7 +580,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   // where all rows are in one group. We don't want to perform post-processing
   // in
   // this case.
-  if (!m_postprocess)
+  if (!hasPostprocessing())
     return;
 
   // The input workspace names
@@ -586,7 +588,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
 
   // The name to call the post-processed ws
   auto const outputWSName =
-      getPostprocessedWorkspaceName(groupData, m_postprocessing.m_algorithm.prefix());
+      getPostprocessedWorkspaceName(groupData, m_postprocessing->m_algorithm.prefix());
 
   // Go through each row and get the input ws names
   for (auto const &row : groupData) {
@@ -610,14 +612,14 @@ void GenericDataProcessorPresenter::postProcessGroup(
   }
 
   IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().create(m_postprocessing.m_algorithm.name().toStdString());
+      AlgorithmManager::Instance().create(m_postprocessing->m_algorithm.name().toStdString());
   alg->initialize();
-  setAlgorithmProperty(alg.get(), m_postprocessing.m_algorithm.inputProperty(),
+  setAlgorithmProperty(alg.get(), m_postprocessing->m_algorithm.inputProperty(),
                        inputWSNames);
-  setAlgorithmProperty(alg.get(), m_postprocessing.m_algorithm.outputProperty(),
+  setAlgorithmProperty(alg.get(), m_postprocessing->m_algorithm.outputProperty(),
                        outputWSName);
 
-  auto optionsMap = parseKeyValueString(m_postprocessing.m_options.toStdString());
+  auto optionsMap = parseKeyValueString(m_postprocessing->m_options.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
       setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
@@ -628,7 +630,7 @@ void GenericDataProcessorPresenter::postProcessGroup(
   }
 
   // Options specified via post-process map
-  for (auto const &prop : m_postprocessing.m_map) {
+  for (auto const &prop : m_postprocessing->m_map) {
     auto const propName = prop.second;
     auto const propValueStr =
         groupData.begin()->second[m_whitelist.indexFromName(prop.first)];
@@ -784,7 +786,7 @@ Returns the name of the reduced workspace for a given group
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const QString &prefix) {
 
-  if (!m_postprocess)
+  if (!hasPostprocessing())
     return QString();
 
   /* This method calculates, for a given set of rows, the name of the output
@@ -1509,7 +1511,7 @@ void GenericDataProcessorPresenter::plotGroup() {
 
   // This method shouldn't be called if a post-processing algorithm is not
   // defined
-  if (!m_postprocess)
+  if (!hasPostprocessing())
     throw std::runtime_error("Can't plot group.");
 
   // Set of workspaces to plot
@@ -1522,7 +1524,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   for (const auto &item : items) {
     if (item.second.size() > 1) {
       auto const wsName =
-          getPostprocessedWorkspaceName(item.second, m_postprocessing.m_algorithm.prefix());
+          getPostprocessedWorkspaceName(item.second, m_postprocessing->m_algorithm.prefix());
 
       if (workspaceExists(wsName))
         workspaces.insert(wsName, nullptr);

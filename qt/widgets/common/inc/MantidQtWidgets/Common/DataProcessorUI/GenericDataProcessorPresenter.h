@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include <boost/optional.hpp>
 
 #include <QSet>
 #include <queue>
@@ -137,6 +138,7 @@ public:
                    ProgressableView *progressView) override;
   void accept(DataProcessorMainPresenter *mainPresenter) override;
   void setModel(QString const &name) override;
+  bool hasPostprocessing() const;
 
   // The following methods are public only for testing purposes
   // Get the whitelist
@@ -175,10 +177,10 @@ protected:
   }
 
   void setPostprocessingOptions(QString const& options) {
-    m_postprocessing.m_options = options;
+    m_postprocessing->m_options = options;
   }
   
-  PostprocessingAttributes m_postprocessing;
+  boost::optional<PostprocessingAttributes> m_postprocessing;
 
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
@@ -228,8 +230,6 @@ private:
   RowItem m_rowItem;
   // The progress reporter
   ProgressPresenter *m_progressReporter;
-  // A boolean indicating whether a post-processing algorithm has been defined
-  bool m_postprocess;
   // The number of columns
   int m_columns;
   // A boolean indicating whether to prompt the user when getting selected runs
