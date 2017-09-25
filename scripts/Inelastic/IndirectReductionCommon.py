@@ -9,6 +9,20 @@ import numpy as np
 
 # -------------------------------------------------------------------------------
 
+def create_range_from(range_str, delimiter):
+    """
+    Creates a range from the specified string, by splitting by the specified
+    delimiter.
+    
+    :param range_str:   The range string, in the format A-B where A is the lower
+                        bound of the range, - is the delimiter and B is the upper
+                        bound of the range.
+    :param delimiter:   The range delimiter.
+    :return:            The range created from the range string.
+    """
+    lower, upper = range_str.split(delimiter, 1)
+    return range(int(lower), int(upper))
+
 
 def create_file_range_parser(instrument):
     """
@@ -24,13 +38,9 @@ def create_file_range_parser(instrument):
         file_range = file_range.strip()
         # Check whether this is a range or single file
         if '-' in file_range or ':' in file_range:
-            lower, upper = file_range.split('-', 1)
-            run_numbers = range(int(lower), int(upper)+1)
-
-            if '-' in file_range:
-                return [[instrument + str(run) for run in run_numbers]]
-            else:
-                return [[instrument + str(run)] for run in run_numbers]
+            return [[instrument + str(run) for run in create_range_from(file_range)]]
+        elif ':' in file_range
+            return [[instrument + str(run)] for run in create_range_from(file_range)]
         elif '+' in file_range:
             return [[instrument + run for run in file_range.split('+')]]
         else:
