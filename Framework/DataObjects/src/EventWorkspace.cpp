@@ -137,19 +137,25 @@ void EventWorkspace::init(const std::size_t &NVectors,
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
-  return this->data.size() * this->blocksize();
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](size_t value, EventList *histo) {
+                           return value + histo->histogram_size();
+                         });
 }
 
 /// Get the blocksize, aka the number of bins in the histogram
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
-  // Pick the first pixel to find the blocksize.
-  auto it = data.begin();
-  if (it == data.end()) {
+  if (data.empty()) {
     throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, "
                            "therefore cannot determine blocksize (# of bins).");
   } else {
-    return (*it)->histogram_size();
+    size_t numBins = data[0]->histogram_size();
+    for (const auto *iter : data)
+      if (numBins != iter->histogram_size())
+        throw std::length_error(
+            "blocksize undefined because size of histograms is not equal");
+    return numBins;
   }
 }
 

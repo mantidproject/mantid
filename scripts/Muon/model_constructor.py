@@ -10,7 +10,7 @@ from Muon import ThreadModel
 """
 
 
-class modelConstructor(object):
+class ModelConstructor(object):
 
     def __init__(self,includeTransform):
         # construct transformation memebers

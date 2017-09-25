@@ -18,7 +18,8 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
         self.alg.started.connect(self.deactivate)
-        self.alg.finished.connect(self.activate)
+        self.alg.finished.connect(self.view.activateButton)
+        self.alg.finished.connect(self.alg.deleteLater)
 
     def activate(self):
         self.view.activateButton()
@@ -71,7 +72,6 @@ class FFTPresenter(object):
             if self.view.isRaw():
                 self.view.addRaw(preInputs,"InputWorkspace")
         inputs["preRe"]=preInputs
-        #model.preAlg(preInputs)
 
         #do apodization and padding to complex data
         if self.view.isComplex() and self.view.getWS()!="PhaseQuad":
@@ -79,7 +79,6 @@ class FFTPresenter(object):
             self.view.ImAdvanced(ImPreInputs)
             if self.view.isRaw():
                 self.view.addRaw(ImPreInputs,"InputWorkspace")
-            #model.preAlg(preInputs)
             inputs["preIm"]=ImPreInputs
 
         #do FFT to transformed data
@@ -91,7 +90,6 @@ class FFTPresenter(object):
         else:
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
-        #model.FFTAlg(FFTInputs)
         inputs["FFT"]=FFTInputs
         self.alg.loadData(inputs)
         self.alg.start()

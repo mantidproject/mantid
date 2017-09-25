@@ -4,15 +4,14 @@ from Muon import FFT_view
 from Muon import MaxEnt_view
 from Muon import transform_selection_view
 
-"""
- simple class to create a single object
- containing all of the views.
- Only need to pass a single object to all
- presenters
-"""
 
-
-class viewConstructor(object):
+class ViewConstructor(object):
+    """
+     simple class to create a single object
+     containing all of the views.
+     Only need to pass a single object to all
+     presenters
+    """
 
     def __init__(self,includeTransform,parent=None ):
         # construct transformation memebers

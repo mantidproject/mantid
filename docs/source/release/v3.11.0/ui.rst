@@ -41,6 +41,9 @@ Workspace History Window
 Documentation
 #############
 
+- Improve documentation for `RewriteSpectraMap` property of the `LoadInstrument`
+  algorithm
+
 Custom Interfaces
 #################
 

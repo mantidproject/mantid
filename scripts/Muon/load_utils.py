@@ -5,15 +5,15 @@ import mantid.simpleapi as mantid
 class LoadUtils(object):
 
     def __init__(self, parent=None):
-        self.options = mantid.AnalysisDataService.getObjectNames()
-        self.options = [item.replace(" ","") for item in self.options]
-        # if periods get the info from the first period
-        if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
-            tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
-        else:
+        if self.MuonAnalysisExists():
+            # get everything from the ADS
+            self.options = mantid.AnalysisDataService.getObjectNames()
+            self.options = [item.replace(" ","") for item in self.options]
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
-        self.instrument=tmpWS.getInstrument().getName()
-        self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
+            self.instrument=tmpWS.getInstrument().getName()
+            self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
+        else:
+            mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
 
     def getCurrentWS(self):
         return self.runName, self.options
@@ -23,3 +23,9 @@ class LoadUtils(object):
 
     def getInstrument(self):
         return self.instrument
+
+    def MuonAnalysisExists(self):
+        if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
+            return True
+        else:
+            return mantid.AnalysisDataService.doesExist("MuonAnalysis")
