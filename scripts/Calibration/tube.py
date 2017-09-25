@@ -375,12 +375,12 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     FITPAR = 'fitPar'
     MARGIN = 'margin'
     RANGELIST = 'rangeList'
-    CALIBTABLE = 'calib_table'
-    PLOTTUBE = 'plot_tube'
-    EXCLUDESHORT = 'exclude_short_tubes'
-    OVERRIDEPEAKS = 'override_peaks'
+    CALIBTABLE = 'calibTable'
+    PLOTTUBE = 'plotTube'
+    EXCLUDESHORT = 'excludeShortTubes'
+    OVERRIDEPEAKS = 'overridePeaks'
     FITPOLIN = 'fitPolyn'
-    OUTPUTPEAK = 'output_peak'
+    OUTPUTPEAK = 'outputPeak'
 
     param_helper = _CalibrationParameterHelper(FITPAR, MARGIN, RANGELIST, CALIBTABLE, PLOTTUBE, EXCLUDESHORT,
                                                OVERRIDEPEAKS, FITPOLIN, OUTPUTPEAK)
@@ -783,6 +783,8 @@ class _CalibrationParameterHelper(object):
             return self._get_override_peaks(args, tube_set=kwargs["tube_set"], ideal_tube=kwargs["ideal_tube"])
         if name == self.OUTPUTPEAK:
             return self._get_output_peak(args, ideal_tube=kwargs["ideal_tube"])
+        if name == self.FITPOLIN:
+            return self._get_fit_polin(args)
 
     def _get_output_peak(self, args, ideal_tube):
         delete_peak_table_after = False
