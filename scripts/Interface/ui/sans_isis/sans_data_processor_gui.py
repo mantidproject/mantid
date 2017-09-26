@@ -297,29 +297,33 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         return str(self.batch_line_edit.text())
 
     def _on_load_pixel_adjustment_det_1(self):
-        load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_pixel_adjustment_det_1)
+        # load_file(self.pixel_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_pixel_adjustment_det_1)
+        pass
 
     def get_pixel_adjustment_det_1(self):
         return str(self.pixel_adjustment_det_1_line_edit.text())
 
     def _on_load_pixel_adjustment_det_2(self):
-        load_file(self.pixel_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_pixel_adjustment_det_2)
+        # load_file(self.pixel_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_pixel_adjustment_det_2)
+        pass
 
     def get_pixel_adjustment_det_2(self):
         return str(self.pixel_adjustment_det_2_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_1(self):
-        load_file(self.wavelength_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_wavelength_adjustment_det_1)
+        # load_file(self.wavelength_adjustment_det_1_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_wavelength_adjustment_det_1)
+        pass
 
     def get_wavelength_adjustment_det_1(self):
         return str(self.wavelength_adjustment_det_1_line_edit.text())
 
     def _on_load_wavelength_adjustment_det_2(self):
-        load_file(self.wavelength_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_wavelength_adjustment_det_2)
+        # load_file(self.wavelength_adjustment_det_2_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_wavelength_adjustment_det_2)
+        pass
 
     def get_wavelength_adjustment_det_2(self):
         return str(self.wavelength_adjustment_det_2_line_edit.text())
@@ -327,7 +331,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
         is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
-        self.merged_settings.setEnabled(is_merged)
+        self.merged_settings.setEnabled(False)
 
     def _on_q_resolution_shape_has_changed(self):
         shape_selection = self.q_resolution_shape_combo_box.currentIndex()
@@ -438,29 +442,33 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         return str(self.transmission_roi_files_line_edit.text())
 
     def _on_load_transmission_roi_files(self):
-        load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_transmission_roi_files)
+        # load_file(self.transmission_roi_files_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_transmission_roi_files)
+        pass
 
     def get_transmission_mask_files(self):
         return str(self.transmission_mask_files_line_edit.text())
 
     def _on_load_transmission_mask_files(self):
-        load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_transmission_mask_files)
+        # load_file(self.transmission_mask_files_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_transmission_mask_files)
+        pass
 
     def get_moderator_file(self):
         return str(self.q_resolution_moderator_file_line_edit.text())
 
     def _on_load_moderator_file(self):
-        load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
-                  self.__path_key,  self.get_moderator_file)
+        # load_file(self.q_resolution_moderator_file_line_edit, "*.*", self.__generic_settings,
+        #           self.__path_key,  self.get_moderator_file)
+        pass
 
     def get_mask_file(self):
         return str(self.mask_file_input_line_edit.text())
 
     def _on_load_mask_file(self):
-        self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                        self.__mask_file_input_path_key,  self.get_mask_file)
+        # self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
+        #                 self.__mask_file_input_path_key,  self.get_mask_file)
+        pass
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
@@ -1350,9 +1358,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
 
-        self.wavelength_min_line_edit.setValidator(positive_double_validator)
-        self.wavelength_max_line_edit.setValidator(positive_double_validator)
-        self.wavelength_step_line_edit.setValidator(positive_double_validator)
+        # self.wavelength_min_line_edit.setValidator(positive_double_validator)
+        # self.wavelength_max_line_edit.setValidator(positive_double_validator)
+        # self.wavelength_step_line_edit.setValidator(positive_double_validator)
 
         self.absolute_scale_line_edit.setValidator(double_validator)
         self.height_line_edit.setValidator(positive_double_validator)
