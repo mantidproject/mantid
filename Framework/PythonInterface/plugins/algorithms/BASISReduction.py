@@ -555,7 +555,7 @@ class BASISReduction(PythonAlgorithm):
         sapi.Scale(InputWorkspace=wsName,
                    OutputWorkspace=wsName,
                    Factor=1./maximumYvalue,
-                   Operation="Multiply",)
+                   Operation="Multiply")
 
 
 # Register algorithm with Mantid.
