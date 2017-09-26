@@ -33,7 +33,6 @@ Custom Interfaces
 - Indirect ILL calibration tab, deprecated since v3.9 is now dropped.
 - SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
 
-
 SliceViewer Improvements
 ########################
 
@@ -62,7 +61,7 @@ VSI Improvements
   - Refactor the threshold filter to take advantage of structured data.
   - Minimize duplicate code in vtkDataArrayPrivate and parallelize range calculation.
 
-- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
+- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin
   sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
 
 Bugs Resolved
@@ -71,6 +70,7 @@ Bugs Resolved
 - Fixed a bug where setting a table column's plot type would not be saved to the workspace correctly.
 - We have improved the documentation for the `RewriteSpectraMap` property of the `LoadInstrument`
   algorithm
+- Fixed a bug where replacing a workspace with X errors with a workspace without would cause a crash if the workspace's data view was open.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
