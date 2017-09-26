@@ -4,8 +4,10 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 import mantid.simpleapi as sapi
-from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, FileProperty, FileAction
-from mantid.kernel import IntArrayProperty, StringListValidator, FloatArrayProperty, EnabledWhenProperty,\
+from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory,\
+    FileProperty, FileAction
+from mantid.kernel import IntArrayProperty, StringListValidator,\
+    FloatArrayProperty, EnabledWhenProperty,\
     FloatArrayLengthValidator, Direction, PropertyCriterion
 from mantid import config
 from os.path import join as pjoin
@@ -190,7 +192,8 @@ class BASISReduction(PythonAlgorithm):
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
-        self._reflection = REFLECTIONS_DICT[self.getProperty("ReflectionType").value]
+        self._reflection =\
+            REFLECTIONS_DICT[self.getProperty("ReflectionType").value]
         self._doIndiv = self.getProperty("DoIndividual").value
         # micro-eV to mili-eV
         self._etBins = 1.E-03 * self.getProperty("EnergyBins").value
@@ -240,7 +243,7 @@ class BASISReduction(PythonAlgorithm):
             if ";" in norm_runs:
                 raise SyntaxError("Normalization does not support run groups")
             self._normalizationType = self.getProperty("NormalizationType").value
-            self.log().information("Divide by Vanadium with normalization" +\
+            self.log().information("Divide by Vanadium with normalization" +
                                    self._normalizationType)
 
             # Following steps common to all types of Vanadium normalization
@@ -317,13 +320,13 @@ class BASISReduction(PythonAlgorithm):
             # Output Dave and Nexus files
             extension = "_divided.dat" if self._doNorm else ".dat"
             dave_grp_filename = self._makeRunName(self._samWsRun, False) +\
-                                extension
+                extension
             sapi.SaveDaveGrp(Filename=dave_grp_filename,
                              InputWorkspace=self._samSqwWs,
                              ToMicroEV=True)
             extension = "_divided_sqw.nxs" if self._doNorm else "_sqw.nxs"
             processed_filename = self._makeRunName(self._samWsRun, False) +\
-                                 extension
+                extension
             sapi.SaveNexus(Filename=processed_filename,
                            InputWorkspace=self._samSqwWs)
 
