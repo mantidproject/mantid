@@ -614,8 +614,8 @@ On POLARIS this is set to the following:
 
 .. _masking_file_name_polaris_isis-powder-diffraction-ref:
 
-masking_file_name
-^^^^^^^^^^^^^^^^^^
+vanadium_peaks_masking_file
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Determines the name of the masking file containing the 
 masks to remove Bragg peaks on Polaris. This file must 
 be located within the top level of the
@@ -625,7 +625,7 @@ On POLARIS this is set to the following:
 
 ..  code-block:: python
 
-  masking_file_name: "VanaPeaks.dat"
+  vanadium_peaks_masking_file: "VanaPeaks.dat"
 
 .. _raw_data_cropping_values_polaris_isis-powder-diffraction-ref:
 

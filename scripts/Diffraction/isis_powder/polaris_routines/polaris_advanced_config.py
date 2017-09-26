@@ -13,7 +13,7 @@ absorption_correction_params = {
 }
 
 file_names = {
-    "masking_file_name": "VanaPeaks.dat",
+    "vanadium_peaks_masking_file": "VanaPeaks.dat",
     "grouping_file_name": "Master_copy_of_grouping_file_with_essential_masks.cal"
 }
 
@@ -50,9 +50,9 @@ vanadium_cropping_values = [
 
 variable_help = {
     "file_names": {
-        "masking_file_name": "Specifies the name of the of the file containing the positions of the vanadium Bragg "
-                             "Peaks to mask out. This must be located at the root of the calibration folder the user "
-                             "has specified."
+        "vanadium_peaks_masking_file": "Specifies the name of the of the file containing the positions of the vanadium "
+                                       "Bragg Peaks to mask out. This must be located at the root of the calibration "
+                                       "folder the user has specified."
     },
 
     "script_params": {
