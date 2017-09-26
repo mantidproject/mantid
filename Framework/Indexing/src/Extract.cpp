@@ -1,9 +1,16 @@
 #include "MantidIndexing/Extract.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Indexing {
+
+/// Extracts IndexInfo from source IndexInfo, extracting data for all indices
+/// specified by index set.
+IndexInfo extract(const IndexInfo &source, const SpectrumIndexSet &indices) {
+  return extract(source, std::vector<size_t>(indices.begin(), indices.end()));
+}
 
 /// Extracts IndexInfo from source IndexInfo, extracting data for all indices
 /// specified by vector.

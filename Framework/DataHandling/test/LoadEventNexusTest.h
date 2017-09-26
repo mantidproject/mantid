@@ -246,14 +246,12 @@ public:
     TSM_ASSERT("The number of spectra in the workspace should be equal to the "
                "spectra filtered",
                outWs->getNumberHistograms() == specList.size());
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(0).getSpectrumNo() == 13);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(1).getSpectrumNo() == 16);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(2).getSpectrumNo() == 21);
-    TSM_ASSERT("Some spectra were not found in the workspace",
-               outWs->getSpectrum(3).getSpectrumNo() == 28);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 14);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(1).getSpectrumNo(), 17);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(2).getSpectrumNo(), 22);
+    TS_ASSERT_EQUALS(outWs->getSpectrum(3).getSpectrumNo(), 29);
 
     // B) test SpectrumMin and SpectrumMax
     wsName = "test_partial_spectra_loading_SpectrumMin_SpectrumMax";
@@ -274,9 +272,11 @@ public:
     // check number and indices of spectra
     const size_t numSpecs = specMax - specMin + 1;
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), numSpecs);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
     for (size_t specIdx = 0; specIdx < numSpecs; specIdx++) {
       TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx).getSpectrumNo(),
-                       static_cast<int>(specMin + specIdx));
+                       static_cast<int>(specMin + specIdx + 1));
     }
 
     // C) test SpectrumList + SpectrumMin and SpectrumMax
@@ -310,12 +310,14 @@ public:
     // check number and indices of spectra
     const size_t n = sMax - sMin + 1; // this n is the 20...22, excluding '17'
     TS_ASSERT_EQUALS(outWs->getNumberHistograms(), n + 1); // +1 is the '17'
-    // 17 should come from SpectrumList
-    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 17);
+    // Spectrum numbers match those that same detector would have in unfiltered
+    // load, in this case detID + 1 since IDs in instrument start at 0.
+    // 18 should come from SpectrumList
+    TS_ASSERT_EQUALS(outWs->getSpectrum(0).getSpectrumNo(), 18);
     // and then sMin(20)...sMax(22)
     for (size_t specIdx = 0; specIdx < n; specIdx++) {
       TS_ASSERT_EQUALS(outWs->getSpectrum(specIdx + 1).getSpectrumNo(),
-                       static_cast<int>(sMin + specIdx));
+                       static_cast<int>(sMin + specIdx + 1));
     }
   }
 
@@ -357,8 +359,8 @@ public:
     auto outWs2 =
         AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName2);
 
-    TSM_ASSERT("The number of spectra in the workspace should be 12",
-               outWs->getNumberHistograms() == 12);
+    TSM_ASSERT_EQUALS("The number of spectra in the workspace should be 12",
+                      outWs->getNumberHistograms(), 12);
 
     TSM_ASSERT_EQUALS("The number of events in the precount and not precount "
                       "workspaces do not match",

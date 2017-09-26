@@ -1,4 +1,5 @@
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
 
@@ -7,7 +8,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -18,6 +18,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <boost/function.hpp>
 #include <boost/random/mersenne_twister.hpp>
@@ -1081,57 +1082,30 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 void LoadEventNexus::createSpectraMapping(
     const std::string &nxsfile, const bool monitorsOnly,
     const std::vector<std::string> &bankNames) {
-  bool spectramap = false;
-  m_specMin = getProperty("SpectrumMin");
-  m_specMax = getProperty("SpectrumMax");
-  m_specList = getProperty("SpectrumList");
-
-  // set up the
+  LoadEventNexusIndexSetup indexSetup(
+      m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
+      getProperty("SpectrumMax"), getProperty("SpectrumList"));
   if (!monitorsOnly && !bankNames.empty()) {
-    std::vector<IDetector_const_sptr> allDets;
-
-    for (const auto &bankName : bankNames) {
-      // Only build the map for the single bank
-      std::vector<IDetector_const_sptr> dets;
-      m_ws->getInstrument()->getDetectorsInBank(dets, bankName);
-      if (dets.empty())
-        throw std::runtime_error("Could not find the bank named '" + bankName +
-                                 "' as a component assembly in the instrument "
-                                 "tree; or it did not contain any detectors."
-                                 " Try unchecking SingleBankPixelsOnly.");
-      allDets.insert(allDets.end(), dets.begin(), dets.end());
+    if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") ||
+        !isDefault("SpectrumList"))
+      g_log.warning() << "Spectrum min/max/list selection ignored when "
+                         "`SingleBankPixelsOnly` is enabled\n";
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(bankNames));
+    g_log.debug() << "Populated spectra map for select banks\n";
+  } else if (auto mapping = loadISISVMSSpectraMapping(m_top_entry_name)) {
+    if (monitorsOnly) {
+      g_log.debug() << "Loading only monitor spectra from " << nxsfile << "\n";
+    } else {
+      g_log.debug() << "Loading only detector spectra from " << nxsfile << "\n";
     }
-    if (!allDets.empty()) {
-      m_ws->resizeTo(allDets.size());
-      // Make an event list for each.
-      for (size_t wi = 0; wi < allDets.size(); wi++) {
-        const detid_t detID = allDets[wi]->getID();
-        m_ws->setDetectorIdsForAllPeriods(wi, detID);
-      }
-      spectramap = true;
-      g_log.debug() << "Populated spectra map for select banks\n";
-    }
-
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo(*mapping, monitorsOnly));
   } else {
-    spectramap =
-        loadISISVMSSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
-    // Did we load one? If so then the event ID is the spectrum number and not
-    // det ID
-    if (spectramap)
-      this->event_id_is_spec = true;
-  }
-
-  if (!spectramap) {
     g_log.debug() << "No custom spectra mapping found, continuing with default "
                      "1:1 mapping of spectrum:detectorID\n";
-    auto specList = m_ws->getInstrument()->getDetectorIDs(true);
-    createSpectraList(*std::min_element(specList.begin(), specList.end()),
-                      *std::max_element(specList.begin(), specList.end()));
-    // The default 1:1 will suffice but exclude the monitors as they are always
-    // in a separate workspace
-    m_ws->padSpectra(m_specList);
+    m_ws->setIndexInfo(indexSetup.makeIndexInfo());
     g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
   }
+  std::tie(m_specMin, m_specMax) = indexSetup.eventIDLimits();
 }
 
 //-----------------------------------------------------------------------------
@@ -1311,21 +1285,18 @@ void LoadEventNexus::runLoadMonitors() {
 * existence of
 * an isis_vms_compat block in the file, if it exists it pulls out the spectra
 * mapping listed there
-* @param filename :: A filename
-* @param monitorsOnly :: If true then only the monitor spectra are loaded
 * @param entry_name :: name of the NXentry to open.
 * @returns True if the mapping was loaded or false if the block does not exist
 */
-bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
-                                               const bool monitorsOnly,
-                                               const std::string &entry_name) {
+std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+LoadEventNexus::loadISISVMSSpectraMapping(const std::string &entry_name) {
   const std::string vms_str = "/isis_vms_compat";
   try {
     g_log.debug() << "Attempting to load custom spectra mapping from '"
                   << entry_name << vms_str << "'.\n";
     m_file->openPath("/" + entry_name + vms_str);
   } catch (::NeXus::Exception &) {
-    return false; // Doesn't exist
+    return nullptr; // Doesn't exist
   }
 
   // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
@@ -1369,57 +1340,11 @@ bool LoadEventNexus::loadISISVMSSpectraMapping(const std::string &filename,
        << ", SPEC=" << spec.size() << "\n";
     throw std::runtime_error(os.str());
   }
-  // Monitor filtering/selection
-  const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
-  const size_t nmons(monitors.size());
-  if (monitorsOnly) {
-    g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
-    // Find the det_ids in the udet array.
-    m_ws->resizeTo(nmons);
-    for (size_t i = 0; i < nmons; ++i) {
-      // Find the index in the udet array
-      const detid_t &id = monitors[i];
-      std::vector<int32_t>::const_iterator it =
-          std::find(udet.begin(), udet.end(), id);
-      if (it != udet.end()) {
-        const specnum_t &specNo = spec[it - udet.begin()];
-        m_ws->setSpectrumNumberForAllPeriods(i, specNo);
-        m_ws->setDetectorIdsForAllPeriods(i, id);
-      }
-    }
-  } else {
-    g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-
-    // If optional spectra are provided, if so, m_specList is initialized. spec
-    // is used if necessary
-    createSpectraList(*std::min_element(spec.begin(), spec.end()),
-                      *std::max_element(spec.begin(), spec.end()));
-
-    if (!m_specList.empty()) {
-      int i = 0;
-      std::vector<int32_t> spec_temp, udet_temp;
-      for (auto &element : spec) {
-        if (find(m_specList.begin(), m_specList.end(), element) !=
-            m_specList.end()) // spec element *it is not in spec_list
-        {
-          spec_temp.push_back(element);
-          udet_temp.push_back(udet.at(i));
-        }
-        i++;
-      }
-      spec = spec_temp;
-      udet = udet_temp;
-    }
-
-    SpectrumDetectorMapping mapping(spec, udet, monitors);
-    m_ws->resizeTo(mapping.getMapping().size());
-    // Make sure spectrum numbers are correct
-    auto uniqueSpectra = mapping.getSpectrumNumbers();
-    m_ws->setSpectrumNumbersFromUniqueSpectra(uniqueSpectra);
-    // Fill detectors based on this mapping
-    m_ws->updateSpectraUsing(mapping);
-  }
-  return true;
+  // If mapping loaded the event ID is the spectrum number and not det ID
+  this->event_id_is_spec = true;
+  return Kernel::make_unique<
+      std::pair<std::vector<int32_t>, std::vector<int32_t>>>(std::move(spec),
+                                                             std::move(udet));
 }
 
 /**
@@ -1693,80 +1618,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
   }
 
   file.closeGroup();
-}
-
-/**
-* Check the validity of the optional spectrum range/list provided and identify
-*if partial data should be loaded.
-*
-* @param min :: The minimum spectrum number read from file
-* @param max :: The maximum spectrum number read from file
-*/
-
-void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
-
-  // check if range [SpectrumMin, SpectrumMax] was supplied
-  if (m_specMin != EMPTY_INT() || m_specMax != EMPTY_INT()) {
-    if (m_specMax == EMPTY_INT()) {
-      m_specMax = max;
-    }
-    if (m_specMin == EMPTY_INT()) {
-      m_specMin = min;
-    }
-
-    if (m_specMax > max) {
-      throw std::invalid_argument("Inconsistent range property: SpectrumMax is "
-                                  "larger than maximum spectrum found in "
-                                  "file.");
-    }
-
-    // Sanity checks for min/max
-    if (m_specMin > m_specMax) {
-      throw std::invalid_argument("Inconsistent range property: SpectrumMin is "
-                                  "larger than SpectrumMax.");
-    }
-
-    // Populate spec_list
-    for (int32_t i = m_specMin; i <= m_specMax; i++)
-      m_specList.push_back(i);
-  } else {
-    // Check if SpectrumList was supplied
-
-    if (!m_specList.empty()) {
-      // Check no negative/zero numbers have been passed
-      auto itr = std::find_if(m_specList.begin(), m_specList.end(),
-                              std::bind2nd(std::less<int32_t>(), 1));
-      if (itr != m_specList.end()) {
-        throw std::invalid_argument(
-            "Negative/Zero SpectraList property encountered.");
-      }
-
-      // Check range and set m_specMax to maximum value in m_specList
-      if ((m_specMax =
-               *std::max_element(m_specList.begin(), m_specList.end())) >
-          *std::max_element(m_specList.begin(), m_specList.end())) {
-        throw std::invalid_argument("Inconsistent range property: SpectrumMax "
-                                    "is larger than number of spectra.");
-      }
-
-      // Set m_specMin to minimum value in m_specList
-      m_specMin = *std::min_element(m_specList.begin(), m_specList.end());
-    }
-  }
-
-  if (!m_specList.empty()) {
-
-    // Check that spectra supplied by user do not correspond to monitors
-    auto nmonitors = m_ws->getInstrument()->getMonitors().size();
-
-    for (size_t i = 0; i < nmonitors; ++i) {
-      if (std::find(m_specList.begin(), m_specList.end(), i + 1) !=
-          m_specList.end()) {
-        throw std::invalid_argument("Inconsistent range property: some of the "
-                                    "selected spectra correspond to monitors.");
-      }
-    }
-  }
 }
 
 /**

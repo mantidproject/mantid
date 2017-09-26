@@ -134,8 +134,6 @@ public:
   /// Filter by a maximum time-of-flight
   double filter_tof_max;
 
-  /// Spectra list to load
-  std::vector<int32_t> m_specList;
   /// Minimum spectrum to load
   int32_t m_specMin;
   /// Maximum spectrum to load
@@ -192,9 +190,8 @@ private:
   void setTimeFilters(const bool monitors);
 
   /// Load a spectra mapping from the given file
-  bool loadISISVMSSpectraMapping(const std::string &filename,
-                                 const bool monitorsOnly,
-                                 const std::string &entry_name);
+  std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
+  loadISISVMSSpectraMapping(const std::string &entry_name);
 
   /// ISIS specific methods for dealing with wide events
   void loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
@@ -206,9 +203,6 @@ private:
                             const std::string &binsName, size_t start_wi = 0,
                             size_t end_wi = 0);
   template <typename T> void filterDuringPause(T workspace);
-
-  // Validate the optional spectra input properties and initialize m_specList
-  void createSpectraList(int32_t min, int32_t max);
 
   /// Set the top entry field name
   void setTopEntryName();
