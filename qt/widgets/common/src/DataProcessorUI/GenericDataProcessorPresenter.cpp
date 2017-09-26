@@ -791,10 +791,10 @@ Returns the name of the reduced workspace for a given group
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const QString &prefix) {
-  if(hasPostprocessing())
-    return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist, groupData, prefix);
-  else
-    return QString();
+  assert(hasPostprocessing() &&
+         "Only call this function if you have postprocessing.");
+  return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist, groupData,
+                                                         prefix);
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -1518,15 +1518,17 @@ void GenericDataProcessorPresenter::plotGroup() {
 
   auto const items = m_manager->selectedData();
 
-  for (const auto &item : items) {
-    if (item.second.size() > 1) {
-      auto const wsName = getPostprocessedWorkspaceName(
-          item.second, m_postprocessing->m_algorithm.prefix());
+  if (hasPostprocessing()) {
+    for (const auto &item : items) {
+      if (item.second.size() > 1) {
+        auto const wsName = getPostprocessedWorkspaceName(
+            item.second, m_postprocessing->m_algorithm.prefix());
 
-      if (workspaceExists(wsName))
-        workspaces.insert(wsName, nullptr);
-      else
-        notFound.insert(wsName);
+        if (workspaceExists(wsName))
+          workspaces.insert(wsName, nullptr);
+        else
+          notFound.insert(wsName);
+      }
     }
   }
 

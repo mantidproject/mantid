@@ -207,9 +207,7 @@ public:
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
 
-  // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                        const QString &prefix = "");
+  
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -264,7 +262,9 @@ protected:
   virtual void plotRow();
   virtual void plotGroup();
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
-
+  // Get the name of a post-processed workspace
+  QString getPostprocessedWorkspaceName(const GroupData &groupData,
+                                        const QString &prefix = "");
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);
