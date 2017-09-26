@@ -123,14 +123,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_processor(processor),
-      m_postprocessing(postprocessor.name().isEmpty()
-                           ? boost::optional<PostprocessingAttributes>()
-                           : PostprocessingAttributes(QString(), postprocessor,
-                                                      postprocessMap)),
-      m_progressReporter(nullptr), m_preprocessing(QString(), preprocessMap),
-      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
-      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_processor(processor), m_postprocessing(postprocessor.name().isEmpty() ? boost::optional<PostprocessingAttributes>() : PostprocessingAttributes(QString(), postprocessor, postprocessMap)),
+      m_progressReporter(nullptr), m_preprocessing(QString(), preprocessMap), m_promptUser(true),
+      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
+      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -299,10 +295,9 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   auto newProcessingOptions = m_mainPresenter->getProcessingOptions();
   auto newPostprocessingOptions = m_mainPresenter->getPostprocessingOptions();
 
-  auto settingsChanged =
-      m_preprocessing.m_options != newPreprocessingOptions ||
-      m_processingOptions != newProcessingOptions ||
-      m_postprocessing->m_options != newPostprocessingOptions;
+  auto settingsChanged = m_preprocessing.m_options != newPreprocessingOptions ||
+                         m_processingOptions != newProcessingOptions ||
+                         m_postprocessing->m_options != newPostprocessingOptions;
 
   m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
@@ -335,8 +330,8 @@ void GenericDataProcessorPresenter::process() {
   int maxProgress = 0;
 
   for (const auto &group : m_selectedData) {
-    auto groupOutputNotFound = !workspaceExists(getPostprocessedWorkspaceName(
-        group.second, m_postprocessing->m_algorithm.prefix()));
+    auto groupOutputNotFound = !workspaceExists(
+        getPostprocessedWorkspaceName(group.second, m_postprocessing->m_algorithm.prefix()));
 
     if (settingsHaveChanged || groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
@@ -557,10 +552,9 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
         convertStringToMap(m_preprocessing.m_options);
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
-        m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessing.m_map, m_processor, m_postprocessing->m_algorithm,
-        preprocessingOptionsMap, m_processingOptions,
-        m_postprocessing->m_options);
+        m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessing.m_map,
+        m_processor, m_postprocessing->m_algorithm, preprocessingOptionsMap,
+        m_processingOptions, m_postprocessing->m_options);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 
@@ -580,9 +574,80 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
-  if (hasPostprocessing()) {
-    m_postprocessing->postProcessGroup(m_whitelist, groupData, m_processor.prefix(0));
+
+  // If no post processing has been defined, then we are dealing with a
+  // one-level tree
+  // where all rows are in one group. We don't want to perform post-processing
+  // in
+  // this case.
+  if (!hasPostprocessing())
+    return;
+
+  // The input workspace names
+  QStringList inputNames;
+
+  // The name to call the post-processed ws
+  auto const outputWSName =
+      getPostprocessedWorkspaceName(groupData, m_postprocessing->m_algorithm.prefix());
+
+  // Go through each row and get the input ws names
+  for (auto const &row : groupData) {
+
+    // The name of the reduced workspace for this row
+    auto const inputWSName =
+        getReducedWorkspaceName(row.second, m_processor.prefix(0));
+
+    if (workspaceExists(inputWSName)) {
+      inputNames.append(inputWSName);
+    }
   }
+
+  auto const inputWSNames = inputNames.join(", ");
+
+  // If the previous result is in the ADS already, we'll need to remove it.
+  // If it's a group, we'll get an error for trying to group into a used group
+  // name
+  if (workspaceExists(outputWSName)) {
+    removeWorkspace(outputWSName);
+  }
+
+  IAlgorithm_sptr alg =
+      AlgorithmManager::Instance().create(m_postprocessing->m_algorithm.name().toStdString());
+  alg->initialize();
+  setAlgorithmProperty(alg.get(), m_postprocessing->m_algorithm.inputProperty(),
+                       inputWSNames);
+  setAlgorithmProperty(alg.get(), m_postprocessing->m_algorithm.outputProperty(),
+                       outputWSName);
+
+  auto optionsMap = parseKeyValueString(m_postprocessing->m_options.toStdString());
+  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
+    try {
+      setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
+    } catch (Mantid::Kernel::Exception::NotFoundError &) {
+      throw std::runtime_error("Invalid property in options column: " +
+                               kvp->first);
+    }
+  }
+
+  // Options specified via post-process map
+  for (auto const &prop : m_postprocessing->m_map) {
+    auto const propName = prop.second;
+    auto const propValueStr =
+        groupData.begin()->second[m_whitelist.indexFromName(prop.first)];
+    if (!propValueStr.isEmpty()) {
+      // Warning: we take minus the value of the properties because in
+      // Reflectometry this property refers to the rebin step, and they want a
+      // logarithmic binning. If other technique areas need to use a
+      // post-process map we'll need to re-think how to do this.
+      alg->setPropertyValue(propName.toStdString(),
+                            ("-" + propValueStr).toStdString());
+    }
+  }
+
+  alg->execute();
+
+  if (!alg->isExecuted())
+    throw std::runtime_error("Failed to post-process workspaces.");
 }
 
 /**
@@ -964,11 +1029,11 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
       alg, m_processingOptions.toStdString(), "options",
-      [&](Mantid::API::IAlgorithm *const alg, std::string key,
-          std::string value) -> void {
-        if (isUnrestrictedProperty(QString::fromStdString(key)))
-          ::setAlgorithmProperty(alg, key, value);
-      });
+      [&](Mantid::API::IAlgorithm *const alg, std::string key, std::string value)
+          -> void { 
+          if(isUnrestrictedProperty(QString::fromStdString(key)))
+            ::setAlgorithmProperty(alg, key, value); 
+          });
 
   const auto userOptions = data->at(m_columns - 2);
   setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
@@ -1458,8 +1523,8 @@ void GenericDataProcessorPresenter::plotGroup() {
 
   for (const auto &item : items) {
     if (item.second.size() > 1) {
-      auto const wsName = getPostprocessedWorkspaceName(
-          item.second, m_postprocessing->m_algorithm.prefix());
+      auto const wsName =
+          getPostprocessedWorkspaceName(item.second, m_postprocessing->m_algorithm.prefix());
 
       if (workspaceExists(wsName))
         workspaces.insert(wsName, nullptr);
