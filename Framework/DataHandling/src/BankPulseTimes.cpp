@@ -45,7 +45,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
-*  Handles a zero-sized vector 
+*  Handles a zero-sized vector
 *  @param times
  */
 BankPulseTimes::BankPulseTimes(
