@@ -90,6 +90,9 @@ void FitPeaks::init() {
 
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
                   "List of peak centers to fit against.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "PeakCentersWorkspace", "MatrixWorkspace containing peak centers"));
+
   declareProperty(
       Kernel::make_unique<ArrayProperty<double>>("FitWindowLeftBoundary"),
       "List of left boundaries of the peak fitting window corresponding to "
@@ -98,6 +101,10 @@ void FitPeaks::init() {
       Kernel::make_unique<ArrayProperty<double>>("FitWindowRightBoundary"),
       "List of right boundaries of the peak fitting window corresponding to "
       "PeakCenters.");
+
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>("FitPeakWindowWorkspace"),
+                  "MatrixWorkspace for of peak windows");
+
   declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakRanges"),
                   "List of double for each peak's range.");
 
