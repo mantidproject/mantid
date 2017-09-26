@@ -734,13 +734,21 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
       outputName.toStdString());
 }
 
-QString GenericDataProcessorPresenter::getReducedWorkspaceName(
-    const WhiteList& whitelist, const QStringList &data, const QString &prefix) {
-
-  if (data.size() != static_cast<int>(whitelist.size()))
+/**
+Returns the name of the reduced workspace for a given row
+@param data :: [input] The data for this row
+@param prefix : A prefix to be appended to the generated ws name
+@throws std::runtime_error if the workspace could not be prepared
+@returns : The name of the workspace
+*/
+QString
+GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
+                                                       const QString &prefix) {
+  if (data.size() != static_cast<int>(m_whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
-  /* This method calculates, for a given row, the name of the output (processed)
+  /* This method calculates, for a given row, the name of the output
+  * (processed)
   * workspace. This is done using the white list, which contains information
   * about the columns that should be included to create the ws name. In
   * Reflectometry for example, we want to include values in the 'Run(s)' and
@@ -753,16 +761,17 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
   // Temporary vector of strings to construct the name
   QStringList names;
 
-  auto columnIt = whitelist.cbegin();
+  auto columnIt = m_whitelist.cbegin();
   auto runNumbersIt = data.constBegin();
-  for (; columnIt != whitelist.cend(); ++columnIt, ++runNumbersIt) {
+  for (; columnIt != m_whitelist.cend(); ++columnIt, ++runNumbersIt) {
     auto column = *columnIt;
     // Do we want to use this column to generate the name of the output ws?
     if (column.isShown()) {
       auto const runNumbers = *runNumbersIt;
 
       if (!runNumbers.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with '1_2'
+        // But we may have things like '1+2' which we want to replace with
+        // '1_2'
         auto value = runNumbers.split("+", QString::SkipEmptyParts);
         names.append(column.prefix() + value.join("_"));
       }
@@ -772,19 +781,6 @@ QString GenericDataProcessorPresenter::getReducedWorkspaceName(
   auto wsname = prefix;
   wsname += names.join("_");
   return wsname;
-}
-
-/**
-Returns the name of the reduced workspace for a given row
-@param data :: [input] The data for this row
-@param prefix : A prefix to be appended to the generated ws name
-@throws std::runtime_error if the workspace could not be prepared
-@returns : The name of the workspace
-*/
-QString
-GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
-                                                       const QString &prefix) {
-  return getReducedWorkspaceName(m_whitelist, data, prefix);
 }
 
 /**
@@ -805,7 +801,7 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   QStringList outputNames;
 
   for (const auto &data : groupData) {
-    outputNames.append(getReducedWorkspaceName(data.second));
+    outputNames.append(m_postprocessing->getReducedWorkspaceName(m_whitelist, data.second));
   }
   return prefix + outputNames.join("_");
 }

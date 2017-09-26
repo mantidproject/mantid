@@ -80,7 +80,47 @@ struct PostprocessingAttributes {
                            PostprocessingAlgorithm algorithm,
                            std::map<QString, QString> map)
       : m_options(options), m_algorithm(algorithm), m_map(map) {}
+  QString getReducedWorkspaceName(const WhiteList &whitelist,
+                                  const QStringList &data,
+                                  const QString &prefix = "") {
+    if (data.size() != static_cast<int>(whitelist.size()))
+      throw std::invalid_argument("Can't find reduced workspace name");
 
+    /* This method calculates, for a given row, the name of the output
+    * (processed)
+    * workspace. This is done using the white list, which contains information
+    * about the columns that should be included to create the ws name. In
+    * Reflectometry for example, we want to include values in the 'Run(s)' and
+    * 'Transmission Run(s)' columns. We may also use a prefix associated with
+    * the column when specified. Finally, to construct the ws name we may also
+    * use a 'global' prefix associated with the processing algorithm (for
+    * instance 'IvsQ_' in Reflectometry) this is given by the second argument to
+    * this method */
+
+    // Temporary vector of strings to construct the name
+    QStringList names;
+
+    auto columnIt = whitelist.cbegin();
+    auto runNumbersIt = data.constBegin();
+    for (; columnIt != whitelist.cend(); ++columnIt, ++runNumbersIt) {
+      auto column = *columnIt;
+      // Do we want to use this column to generate the name of the output ws?
+      if (column.isShown()) {
+        auto const runNumbers = *runNumbersIt;
+
+        if (!runNumbers.isEmpty()) {
+          // But we may have things like '1+2' which we want to replace with
+          // '1_2'
+          auto value = runNumbers.split("+", QString::SkipEmptyParts);
+          names.append(column.prefix() + value.join("_"));
+        }
+      }
+    } // Columns
+
+    auto wsname = prefix;
+    wsname += names.join("_");
+    return wsname;
+  }
   QString m_options;
   // Post-processing algorithm
   PostprocessingAlgorithm m_algorithm;
@@ -152,9 +192,6 @@ public:
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
 
-  QString getReducedWorkspaceName(const WhiteList& whitelist,
-                                  const QStringList &data,
-                                  const QString &prefix = "");
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
                                         const QString &prefix = "");
