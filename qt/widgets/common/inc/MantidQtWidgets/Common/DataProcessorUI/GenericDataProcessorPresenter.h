@@ -1,8 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 #define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_H
 
-#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -66,15 +66,20 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 struct PreprocessingAttributes {
-  PreprocessingAttributes(const QString& options) : m_options(options) {}
-  PreprocessingAttributes(const QString& options, std::map<QString, PreprocessingAlgorithm> map) : m_options(options), m_map(map) {}
+  PreprocessingAttributes(const QString &options) : m_options(options) {}
+  PreprocessingAttributes(const QString &options,
+                          std::map<QString, PreprocessingAlgorithm> map)
+      : m_options(options), m_map(map) {}
   QString m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 };
 
 struct PostprocessingAttributes {
-  PostprocessingAttributes(const QString& options) : m_options(options) {}
-  PostprocessingAttributes(const QString& options, PostprocessingAlgorithm algorithm, std::map<QString, QString> map) : m_options(options), m_algorithm(algorithm), m_map(map) {}
+  PostprocessingAttributes(const QString &options) : m_options(options) {}
+  PostprocessingAttributes(const QString &options,
+                           PostprocessingAlgorithm algorithm,
+                           std::map<QString, QString> map)
+      : m_options(options), m_algorithm(algorithm), m_map(map) {}
 
   QString m_options;
   // Post-processing algorithm
@@ -82,7 +87,6 @@ struct PostprocessingAttributes {
   // Post-processing map
   std::map<QString, QString> m_map;
 };
-
 
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
     : public QObject,
@@ -147,6 +151,10 @@ public:
   // Get the name of the reduced workspace for a given row
   QString getReducedWorkspaceName(const QStringList &data,
                                   const QString &prefix = "");
+
+  QString getReducedWorkspaceName(const WhiteList& whitelist,
+                                  const QStringList &data,
+                                  const QString &prefix = "");
   // Get the name of a post-processed workspace
   QString getPostprocessedWorkspaceName(const GroupData &groupData,
                                         const QString &prefix = "");
@@ -173,21 +181,21 @@ protected:
   QString m_loader;
   // The list of selected items to reduce
   TreeData m_selectedData;
-  void setPreprocessingOptions(QString const& options) {
+  void setPreprocessingOptions(QString const &options) {
     m_preprocessing.m_options = options;
   }
 
-  void setPostprocessingOptions(QString const& options) {
+  void setPostprocessingOptions(QString const &options) {
     m_postprocessing->m_options = options;
   }
-  
+
   boost::optional<PostprocessingAttributes> m_postprocessing;
 
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;
   // Data processor options
   QString m_processingOptions;
-  void updateProcessedStatus(const std::pair<int, GroupData> & group);
+  void updateProcessedStatus(const std::pair<int, GroupData> &group);
   // Post-process some rows
   void postProcessGroup(const GroupData &data);
   // Reduce a row
@@ -213,8 +221,10 @@ protected slots:
 
 private:
   bool areOptionsUpdated();
-  void applyDefaultOptions(std::map<QString, QVariant>& options);
-  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg, const std::string& hiddenOptions, const std::string& columnName);
+  void applyDefaultOptions(std::map<QString, QVariant> &options);
+  void setPropertiesFromKeyValueString(Mantid::API::IAlgorithm_sptr alg,
+                                       const std::string &hiddenOptions,
+                                       const std::string &columnName);
   Mantid::API::IAlgorithm_sptr createProcessingAlgorithm() const;
   // the name of the workspace/table/model in the ADS, blank if unsaved
   QString m_wsName;
@@ -222,7 +232,7 @@ private:
   WhiteList m_whitelist;
   // The data processor algorithm
   ProcessingAlgorithm m_processor;
-  
+
   // The current queue of groups to be reduced
   GroupQueue m_group_queue;
   // The current group we are reducing row data for
