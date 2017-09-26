@@ -161,14 +161,25 @@ class FunctionWrapper(object):
       from mantid.simpleapi import CreateWorkspace
       
       isWorkspace = False
+      extractSpectrum = False
+      workspaceIndex = 0
       for key in kwargs:
         if key == "workspace":
            isWorkspace = True
            ws = kwargs[key]
+        if key == "workspaceIndex":
+           workspaceIndex = kwargs[key]
+           if workspaceIndex > 0:
+              extractSpectrum = True
 
       if isWorkspace:
-          xvals = ws.readX(0)
-          outWs = self(ws)
+          xvals = ws.readX(workspaceIndex)
+          if extractSpectrum:
+              yvals = ws.readX(workspaceIndex)
+              spectrumWs = CreateWorkspace( DataX=xvals, DataY=yvals)
+          else:
+              spectrumWs = ws           
+          outWs = self(spectrumWs)
           vals = outWs.readY(1)
           valWs = CreateWorkspace( DataX=xvals, DataY=vals)
           plot("valWs",0)
