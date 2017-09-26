@@ -12,7 +12,6 @@ class FFTPresenter(object):
         self.view=view
         self.alg=alg
         self.load=load
-
         # set data
         self.getWorkspaceNames()
         #connect
@@ -49,11 +48,13 @@ class FFTPresenter(object):
         elif  row == self.view.getShiftBoxRow() and col == 1:
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
+    def createThread(self):
+        return ThreadModel.ThreadModel(self.alg)
+
     def handleButton(self):
-        thread=ThreadModel.ThreadModel(self.alg)
-        thread.started.connect(self.deactivate)
-        thread.finished.connect(self.view.activateButton)
-        thread.finished.connect(thread.deleteLater)
+        self.thread=self.createThread()
+        self.thread.started.connect(self.deactivate)
+        self.thread.finished.connect(self.handleFinished)
 
         inputs={}
         inputs["Run"]=self.load.getRunName()
@@ -95,9 +96,14 @@ class FFTPresenter(object):
             if self.view.isRaw():
                 self.view.addRaw(FFTInputs,"OutputWorkspace")
         inputs["FFT"]=FFTInputs
-        thread.loadData(inputs)
-        thread.start()
+        self.thread.loadData(inputs)
+        self.thread.start()
         self.view.setPhaseBox()
+
+    def handleFinished(self):
+        self.activate()
+        self.thread.deleteLater
+        self.thread=None
 
     def get_FFT_input(self):
         FFTInputs=self.view.initFFTInput()

@@ -49,18 +49,18 @@ class FFTPresenterTest(unittest.TestCase):
         self.model1=mock.create_autospec(FFT_model.FFTModel,spec_set=False)
         self.model=mock.create_autospec(FFT_model.FFTWrapper,spec_set=False)
         
-
-        self.alg=mock.create_autospec(ThreadModel.ThreadModel(self.model),spec_set=True)
-        self.alg.start=mock.Mock()
-        self.alg.started=mock.Mock()
-        self.alg.finished=mock.Mock()
-        self.alg.setInputs=mock.Mock()
-        self.alg.loadData=mock.MagicMock()
-
-
-
         #set presenter
-        self.presenter=FFT_presenter.FFTPresenter(self.view,self.alg,self.load)
+        self.presenter=FFT_presenter.FFTPresenter(self.view,self.model,self.load)
+
+        self.thread=mock.create_autospec(ThreadModel.ThreadModel)
+        self.thread.start=mock.Mock()
+        self.thread.started=mock.Mock()
+        self.thread.finished=mock.Mock()
+        self.thread.setInputs=mock.Mock()
+        self.thread.loadData=mock.Mock()
+       
+        self.presenter.createThread=mock.Mock(return_value=self.thread)
+
 
     def sendSignal(self):
         row,col=self.view.tableClickSignal()
@@ -89,7 +89,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNotRawAndIm(self):
         self.view.isAutoShift=mock.Mock(return_value=True)
@@ -102,7 +102,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonRawAndIm(self):
         self.view.isAutoShift=mock.Mock(return_value=True)
@@ -115,7 +115,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==3)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonRawAndNoIm(self):
         self.view.isAutoShift=mock.Mock(return_value=True)
@@ -128,7 +128,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==2)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftNotRawAndNoIm(self):
         self.view.isAutoShift=mock.Mock(return_value=False)
@@ -141,7 +141,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftNotRawAndIm(self):
         self.view.isAutoShift=mock.Mock(return_value=False)
@@ -154,7 +154,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==0)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftRawAndIm(self):
         self.view.isAutoShift=mock.Mock(return_value=False)
@@ -167,7 +167,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==3)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonNoShiftRawAndNoIm(self):
         self.view.isAutoShift=mock.Mock(return_value=False)
@@ -180,7 +180,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==2)
         assert(self.view.setPhaseBox.call_count==1)
         assert(self.view.getAxis.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonPhaseQuad(self):
         self.view.getWS=mock.Mock(return_value="PhaseQuad")
@@ -195,7 +195,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonImPhaseQuad(self):
         self.view.getWS=mock.Mock(return_value="PhaseQuad")
@@ -210,7 +210,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==1)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonPhaseQuadNoTable(self):
         self.view.getWS=mock.Mock(return_value="PhaseQuad")
@@ -226,7 +226,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==0)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_buttonImPhaseQuadNoTable(self):
         self.view.getWS=mock.Mock(return_value="PhaseQuad")
@@ -242,7 +242,7 @@ class FFTPresenterTest(unittest.TestCase):
         assert(self.view.RePhaseAdvanced.call_count==1)
         assert(self.view.getFFTRePhase.call_count==1)
         assert(self.view.getFFTImPhase.call_count==1)
-        assert(self.alg.start.call_count==1)
+        assert(self.presenter.thread.start.call_count==1)
 
     def test_activateButton(self):
         self.presenter.activate()
