@@ -84,3 +84,26 @@ QStringList DropEventHelper::getFileNames(const QDropEvent *event) {
   }
   return filenames;
 }
+
+/** Extract python file names from a drop event
+ *
+ * This will filter the list of file names extracted from a QDropEvent that
+ * end with the extension .py
+ *
+ * @param event :: the QDropEvent to filter filenames from
+ * @return a list of python file names
+ */
+QStringList DropEventHelper::extractPythonFiles(const QDropEvent *event)
+{
+  QStringList filenames;
+
+  for (const auto &name : getFileNames(event)) {
+    QFileInfo fi(name);
+
+    if (fi.suffix().toUpper() == "PY") {
+      filenames.append(name);
+    }
+  }
+
+  return filenames;
+}
