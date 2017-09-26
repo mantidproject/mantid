@@ -618,16 +618,16 @@ void GenericDataProcessorPresenter::postProcessGroup(
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
       m_postprocessing->m_algorithm.name().toStdString());
   alg->initialize();
-  setAlgorithmProperty(alg.get(), m_postprocessing->m_algorithm.inputProperty(),
-                       inputWSNames);
-  setAlgorithmProperty(
-      alg.get(), m_postprocessing->m_algorithm.outputProperty(), outputWSName);
+  alg->setProperty(m_postprocessing->m_algorithm.inputProperty().toStdString(),
+                   inputWSNames.toStdString());
+  alg->setProperty(m_postprocessing->m_algorithm.outputProperty().toStdString(),
+                   outputWSName.toStdString());
 
   auto optionsMap =
       parseKeyValueString(m_postprocessing->m_options.toStdString());
   for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
     try {
-      setAlgorithmProperty(alg.get(), kvp->first, kvp->second);
+      alg->setProperty(kvp->first, kvp->second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       throw std::runtime_error("Invalid property in options column: " +
                                kvp->first);
