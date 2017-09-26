@@ -75,6 +75,28 @@ class StringContainsValidatorTest(unittest.TestCase):
         self.assertRaises(ValueError, alg.setProperty, "Input", "HomeRenter")
         self.assertRaises(ValueError, alg.setProperty, "Input", "catmeOw")
         testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "HomeOwner")
+        
+    def test_StringContainsValidator_with_multiple_required_strings_constructor(self):
+        """
+            Test that a string-contains validator made from constructor that 
+            supplies multiple strings required to all be contained in the input string
+        """
+
+        class StringContainsValidatorWithMultipleItem(PythonAlgorithm):
+
+            def PyInit(self):
+                validator = StringContainsValidator(["Home","meOw"])
+                self.declareProperty("Input", "", validator)
+
+            def PyExec(self):
+                pass
+
+        alg = StringContainsValidatorWithMultipleItem()
+        alg.initialize()
+        self.assertRaises(ValueError, alg.setProperty, "Input", "NotValid")
+        self.assertRaises(ValueError, alg.setProperty, "Input", "HomeRenter")
+        self.assertRaises(ValueError, alg.setProperty, "Input", "catmeOw")
+        testhelpers.assertRaisesNothing(self, alg.setProperty, "Input", "HomeOwner")
 
 
 if __name__ == '__main__':
