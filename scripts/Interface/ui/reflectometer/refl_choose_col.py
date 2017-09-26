@@ -3,8 +3,8 @@
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour
 from __future__ import (absolute_import, division, print_function)
-import ui_refl_columns
 from PyQt4 import QtCore, QtGui
+from ui.reflectometer.ui_refl_columns import Ui_chooseColumnsDialog
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -13,7 +13,7 @@ except AttributeError:
         return s
 
 
-class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
+class ReflChoose(QtGui.QDialog, Ui_chooseColumnsDialog):
 
     visiblestates = {}
 

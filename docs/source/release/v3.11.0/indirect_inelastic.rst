@@ -11,14 +11,33 @@ New features
 Algorithms
 ##########
 
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
+
+Vesuvio
+#######
+- Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
+- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O for oxygen
+- Gamma Corrections are no longer done for back-scattering spectra
+- Multiple scattering corrections for back-scattering spectra now approximate hydrogen peak, this peak can be constrained with masses specified by symbol
+
 Bayes
 #####
-
 - Removed fit option from plot options drop-down menu.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 
 Data Analysis
 #############
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
+
+Elwin
+~~~~~
+
+Bugfixes
+--------
+- Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
 
 ConvFit
 ~~~~~~~
@@ -28,8 +47,21 @@ Bugfixes
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
 - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
 
+
+MSDFit
+~~~~~~
+
+Improvements
+------------
+- Added model selection to MSDFit, with three current models: MsdPeters, MsdYi and MsdPeters. New models now
+  work with workspaces in Q not Q^2 (e.g. _eq workspaces 'Elastic Q')
+
+
 Jump Fit
 ~~~~~~~~
+
+General
+~~~~~~~
 
 Improvements
 ------------
@@ -37,6 +69,11 @@ Improvements
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
+
+Dropped
+-------
+- `LoadILLIndirect-v1 <http://docs.mantidproject.org/v3.10.1/algorithms/LoadILLIndirect-v1.html>`_, `IndirectILLReduction <http://docs.mantidproject.org/v3.10.1/algorithms/IndirectILLReduction-v1.html>`_, `ILLIN16BCalibration <http://docs.mantidproject.org/v3.10.1/algorithms/ILLIN16BCalibration-v1.html>`_ algorithms deprecated since v3.9, are now removed.
+
 
 Bugfixes
 --------

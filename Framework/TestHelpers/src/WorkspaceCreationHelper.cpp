@@ -22,6 +22,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -57,8 +58,14 @@ MockAlgorithm::MockAlgorithm(size_t nSteps)
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
-    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
-      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
+    : peakCentre(peakCentre_), sigma(sigma_), height(height_),
+      fitStatus(fitStatus_) {}
+
+EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
+                         const double sigma_, const double height_,
+                         const FitStatus fitStatus_)
+    : workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
+      height(height_), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -370,6 +377,33 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
       *space, includeMonitors, startYNegative, instrumentName);
 
   return space;
+}
+
+//================================================================================================================
+/*
+ * startTime is in seconds
+ */
+MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime,
+    size_t firstInterval, bool includeMonitors, bool startYNegative,
+    bool isHistogram, const std::string &instrumentName) {
+
+  auto baseWS = create2DWorkspaceWithFullInstrument(
+      nhist, nbins, includeMonitors, startYNegative, isHistogram,
+      instrumentName);
+
+  auto builder =
+      ScanningWorkspaceBuilder(baseWS->getInstrument(), nTimeIndexes, nbins);
+
+  std::vector<double> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i) {
+    timeRanges.push_back(double(i + firstInterval));
+  }
+
+  builder.setTimeRanges(Mantid::Kernel::DateAndTime(int(startTime), 0),
+                        timeRanges);
+
+  return builder.buildWorkspace();
 }
 
 //================================================================================================================
@@ -845,7 +879,7 @@ void displayDataY(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &y = ws->y(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < y.size(); ++j) {
       std::cout << y[j] << " ";
     }
     std::cout << '\n';
@@ -860,7 +894,7 @@ void displayDataX(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &x = ws->x(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < x.size(); ++j) {
       std::cout << x[j] << " ";
     }
     std::cout << '\n';
@@ -874,7 +908,7 @@ void displayDataE(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &e = ws->e(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < e.size(); ++j) {
       std::cout << e[j] << " ";
     }
     std::cout << '\n';
@@ -1409,7 +1443,11 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   auto statusColumn = ws->addColumn("str", "FitStatus");
   for (size_t i = 0; i != rows.size(); ++i) {
     const auto &row = rows[i];
-    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    if (row.workspaceIndex < 0) {
+      wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    } else {
+      wsIndexColumn->cell<int>(i) = row.workspaceIndex;
+    }
     centreColumn->cell<double>(i) = row.peakCentre;
     centreErrorColumn->cell<double>(i) = row.peakCentreError;
     sigmaColumn->cell<double>(i) = row.sigma;

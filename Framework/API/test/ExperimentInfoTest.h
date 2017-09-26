@@ -467,7 +467,7 @@ public:
     mappings.emplace(1, std::set<Mantid::detid_t>{2});
     expt.cacheDetectorGroupings(mappings);
 
-    size_t index;
+    size_t index{0};
     TS_ASSERT_THROWS_NOTHING(index = expt.groupOfDetectorID(1));
     TS_ASSERT_EQUALS(index, 0);
   }

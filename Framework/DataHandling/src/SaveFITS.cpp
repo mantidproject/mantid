@@ -44,8 +44,8 @@ const std::string SaveFITS::g_FITSHdrRefComment2 =
 // extend this if we ever want to support 64 bits pixels
 const size_t SaveFITS::g_maxBitDepth = 32;
 // this has to have int type for the validator and getProperty
-const std::vector<int> SaveFITS::g_bitDepths{8, 16,
-                                             static_cast<int>(g_maxBitDepth)};
+const std::array<int, 3> SaveFITS::g_bitDepths = {
+    {8, 16, static_cast<int>(g_maxBitDepth)}};
 const size_t SaveFITS::g_maxBytesPP = g_maxBitDepth / 8;
 
 using Mantid::Kernel::Direction;

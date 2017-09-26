@@ -83,6 +83,10 @@ bool DetectorInfo::isEquivalent(const DetectorInfo &other) const {
 /// instrument.
 size_t DetectorInfo::size() const { return m_detectorIDs->size(); }
 
+/// Returns the size of DetectorInfo taking into account scanning, i.e., the sum
+/// of the number of scan points for every detector in the instrument.
+size_t DetectorInfo::scanSize() const { return m_detectorInfo->scanSize(); }
+
 /// Returns true if the beamline has scanning detectors.
 bool DetectorInfo::isScanning() const { return m_detectorInfo->isScanning(); }
 

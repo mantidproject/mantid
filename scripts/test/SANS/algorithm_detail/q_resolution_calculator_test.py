@@ -11,7 +11,7 @@ from math import sqrt
 from sans.algorithm_detail.q_resolution_calculator import (QResolutionCalculatorFactory, NullQResolutionCalculator,
                                                            QResolutionCalculatorISIS, get_aperture_diameters,
                                                            load_sigma_moderator_workspace, create_q_resolution_workspace)
-from sans.common.enums import SANSInstrument
+from sans.common.enums import (SANSInstrument, SANSFacility)
 
 
 class MockContainer:
@@ -75,6 +75,7 @@ class QResolutionCalculatorTest(unittest.TestCase):
         mock_state = MockContainer()
         mock_state.data = MockContainer()
         mock_state.data.instrument = SANSInstrument.LARMOR
+        mock_state.data.facility = SANSFacility.ISIS
         convert_to_q = MockContainer()
         convert_to_q.use_q_resolution = use_q_resolution
         for key, value in kwargs.items():
@@ -82,11 +83,11 @@ class QResolutionCalculatorTest(unittest.TestCase):
         mock_state.convert_to_q = convert_to_q
         return mock_state
 
-    def test_that_raises_when_unknown_instrument_is_chosen(self):
+    def test_that_raises_when_unknown_facility_is_chosen(self):
         # Arrange
         mock_state = MockContainer()
         mock_state.data = MockContainer()
-        mock_state.data.instrument = None
+        mock_state.data.facility = None
         factory = QResolutionCalculatorFactory()
 
         # Act + Assert

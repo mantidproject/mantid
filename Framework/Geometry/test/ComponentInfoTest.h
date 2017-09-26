@@ -222,11 +222,10 @@ public:
     // No rotation
     const double radius = 1.0;
     auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
-    auto internalInfo =
-        std::move(makeSingleBeamlineComponentInfo(position, rotation));
-    Mantid::Geometry::ObjComponent comp1(
-        "component1", ComponentCreationHelper::createSphere(radius));
-
+    
+    auto internalInfo = makeSingleComponentInfo(position, rotation);
+    Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
+    
     auto componentIds =
         boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});
@@ -259,8 +258,7 @@ public:
     auto position = Eigen::Vector3d{10, 0, 0};
     auto rotation = Eigen::Quaterniond(
         Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
-    auto internalInfo =
-        std::move(makeSingleBeamlineComponentInfo(position, rotation));
+    auto internalInfo = makeSingleComponentInfo(position, rotation);
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -279,13 +277,13 @@ public:
   }
 
   void test_boundingBox_single_component() {
-
+    
     const double radius = 2;
     Eigen::Vector3d position{1, 1, 1};
-    auto internalInfo = std::move(makeSingleBeamlineComponentInfo(position));
+    auto internalInfo = makeSingleBeamlineComponentInfo(position);
     Mantid::Geometry::ObjComponent comp1(
         "component1", ComponentCreationHelper::createSphere(radius));
-
+    
     auto componentIds =
         boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
             std::vector<Mantid::Geometry::ComponentID>{&comp1});

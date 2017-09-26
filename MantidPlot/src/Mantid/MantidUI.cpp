@@ -420,7 +420,7 @@ void MantidUI::shutdown() {
 
   // If any python objects need to be cleared away then the GIL needs to be
   // held.
-  ScopedPythonGIL gil;
+  ScopedPythonGIL lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().shutdown();
@@ -1423,7 +1423,8 @@ Table *MantidUI::createDetectorTable(
             double efixed = ws->getEFixed(det);
             double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-            double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+            double q = Mantid::Kernel::UnitConversion::convertToElasticQ(
+                usignTheta, efixed);
             colValues << QVariant(q);
           } catch (std::runtime_error &) {
             colValues << QVariant("No Efixed");
@@ -2216,7 +2217,7 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // If any python objects need to be cleared away then the GIL needs to be
   // held. This doesn't feel like
   // it is in the right place but it will do no harm
-  ScopedPythonGIL gil;
+  ScopedPythonGIL lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();

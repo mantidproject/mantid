@@ -213,7 +213,7 @@ void Q1DWeighted::exec() {
         // For reference - in the case where we don't use sub-pixels, simply
         // use:
         //     double sinTheta = sin( spectrumInfo.twoTheta(i)/2.0 );
-        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0);
+        V3D pos = spectrumInfo.position(i) - V3D(sub_x, sub_y, 0.0) - samplePos;
         double sinTheta = sin(0.5 * pos.angle(beamLine));
         double factor = fmp * sinTheta;
         double q = factor * 2.0 / (XIn[j] + XIn[j + 1]);

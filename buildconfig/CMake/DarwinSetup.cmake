@@ -51,24 +51,11 @@ else ()
   set ( PY_VER 2.7 )
 endif ()
 
-execute_process(COMMAND python${PY_VER}-config --prefix OUTPUT_VARIABLE PYTHON_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-if(${PYTHON_VERSION_MAJOR} GREATER 2)
-  execute_process(COMMAND python${PY_VER}-config --abiflags OUTPUT_VARIABLE PY_ABI OUTPUT_STRIP_TRAILING_WHITESPACE)
-else()
-  # --abiflags option not available in python 2
-  set(PY_ABI "")
-endif()
-
-set( PYTHON_LIBRARY "${PYTHON_PREFIX}/lib/libpython${PY_VER}${PY_ABI}.dylib" CACHE FILEPATH "PYTHON_LIBRARY" FORCE )
-set( PYTHON_INCLUDE_DIR "${PYTHON_PREFIX}/include/python${PY_VER}${PY_ABI}" CACHE PATH "PYTHON_INCLUDE_DIR" FORCE )
-
 find_package ( PythonLibs REQUIRED )
 # If found, need to add debug library into libraries variable
 if ( PYTHON_DEBUG_LIBRARIES )
   set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
 endif ()
-
 
 # Generate a target to put a mantidpython wrapper in the appropriate directory
 if ( NOT TARGET mantidpython )
