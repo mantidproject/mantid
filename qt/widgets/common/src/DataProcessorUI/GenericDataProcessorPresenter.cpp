@@ -791,19 +791,10 @@ Returns the name of the reduced workspace for a given group
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
     const GroupData &groupData, const QString &prefix) {
-
-  if (!hasPostprocessing())
+  if(hasPostprocessing())
+    return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist, groupData, prefix);
+  else
     return QString();
-
-  /* This method calculates, for a given set of rows, the name of the output
-  * (post-processed) workspace */
-
-  QStringList outputNames;
-
-  for (const auto &data : groupData) {
-    outputNames.append(m_postprocessing->getReducedWorkspaceName(m_whitelist, data.second));
-  }
-  return prefix + outputNames.join("_");
 }
 
 /** Loads a run found from disk or AnalysisDataService

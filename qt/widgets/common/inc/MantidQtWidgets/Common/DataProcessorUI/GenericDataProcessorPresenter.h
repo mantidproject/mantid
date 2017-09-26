@@ -121,6 +121,21 @@ struct PostprocessingAttributes {
     wsname += names.join("_");
     return wsname;
   }
+
+  QString getPostprocessedWorkspaceName(const WhiteList& whitelist, 
+                                        const GroupData &groupData,
+                                        const QString &prefix = "") {
+    /* This method calculates, for a given set of rows, the name of the output
+    * (post-processed) workspace */
+
+    QStringList outputNames;
+
+    for (const auto &data : groupData) {
+      outputNames.append(getReducedWorkspaceName(whitelist, data.second));
+    }
+    return prefix + outputNames.join("_");
+  }
+
   QString m_options;
   // Post-processing algorithm
   PostprocessingAlgorithm m_algorithm;
