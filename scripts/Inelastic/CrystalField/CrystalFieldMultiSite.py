@@ -105,24 +105,15 @@ class CrystalFieldMultiSite(object):
         return kwargs
 
     def _setRemainingArguments(self, kwargs):
-        for key in kwargs:
-            if key == 'ToleranceEnergy':
-                self.ToleranceEnergy = kwargs[key]
-            elif key == 'ToleranceIntensity':
-                self.ToleranceIntensity = kwargs[key]
-            elif key == 'NPeaks':
-                self.NPeaks = kwargs[key]
-            elif key == 'FWHMVariation':
-                self.FWHMVariation = kwargs[key]
-            elif key == 'FixAllPeaks':
-                self.FixAllPeaks = kwargs[key]
-            elif key == 'PeakShape':
-                self.PeakShape = kwargs[key]
-            elif key == 'PhysicalProperty':
-                self.PhysicalProperty = kwargs[key]
-            else:
-                # Crystal field parameters
-                self.function.setParameter(key, kwargs[key])
+        possible_args = ['ToleranceEnergy', 'ToleranceIntensity', 'NPeaks', 'FWHMVariation', 'FixAllPeaks',
+                         'PeakShape', 'PhysicalProperty']
+        for attribute in possible_args:
+            value, kwargs = read_and_del(attribute, kwargs)
+            if value is not None:
+                setattr(self, attribute, value)
+
+        for key in kwargs:  # Crystal field parameters remain - must be set last
+            self.function.setParameter(key, kwargs[key])
 
     def _isMultiSite(self):
         return len(self.Ions) > 1
