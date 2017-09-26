@@ -434,6 +434,20 @@ class TOFTOFScriptElement(BaseScriptElement):
             return gDataCorr
         return gData
 
+    def rename_workspaces(self, gData):
+        self.l("# make nice workspace names")
+        self.l("for ws in {}:".format(gData + 'S'))
+        self.l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
+               .format(self.prefix))
+        if self.binEon:
+            self.l("for ws in {}:".format(gData + 'BinE'))
+            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
+                   .format(self.prefix))
+        if self.binQon and self.binEon:
+            self.l("for ws in {}:".format(gData + 'SQW'))
+            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_' + ws.getComment() + '_sqw')"
+                   .format(self.prefix))
+
     def to_script(self):
         # sanity checks
         self.validate_inputs()
@@ -532,8 +546,6 @@ class TOFTOFScriptElement(BaseScriptElement):
                .format(gDataCleanFrame, gDataCorr))
         if self.vanRuns:
             self.delete_workspaces([gDataCorr])
-        if self.ecRuns:
-            self.delete_workspaces([gDataSubEC])
 
         tof_corrected = self.correct_tof(gData)
         gData2 = gData + 'TofCorr' if tof_corrected else gDataCleanFrame
@@ -583,7 +595,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             suf = "'_Ei_{}'.format(round(Ei,2))"
             self.save_wsgroup(gLast, suf)
 
-        if self.binQon:
+        if self.binQon and self.binEon:
             gDataBinQ = gData + 'SQW'
             self.l("# calculate momentum transfer Q for sample data")
             self.l("rebinQ = '{:.3f}, {:.3f}, {:.3f}'"
@@ -594,18 +606,7 @@ class TOFTOFScriptElement(BaseScriptElement):
             if self.saveSofQW:
                 self.save_wsgroup(gDataBinQ, "'_SQW'")
 
-        self.l("# make nice workspace names")
-        self.l("for ws in {}:" .format(gDataS))
-        self.l("    RenameWorkspace(ws, OutputWorkspace='{}_S_' + ws.getComment())"
-               .format(self.prefix))
-        if self.binEon:
-            self.l("for ws in {}:" .format(gDataBinE))
-            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_E_' + ws.getComment())"
-                   .format(self.prefix))
-        if self.binQon:
-            self.l("for ws in {}:" .format(gDataBinQ))
-            self.l("    RenameWorkspace(ws, OutputWorkspace='{}_' + ws.getComment() + '_sqw')"
-                   .format(self.prefix))
+        self.rename_workspaces(gData)
 
         return self.script[0]
 
