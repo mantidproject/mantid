@@ -94,17 +94,17 @@ set ( MANTIDLIBS ${MANTIDLIBS} Indexing )
 set ( MANTIDLIBS ${MANTIDLIBS} Kernel )
 set ( MANTIDLIBS ${MANTIDLIBS} Beamline )
 
-include_directories (Geometry/inc)
 # muParser needed by Geometry and subsequent packages
 include_directories ( ${MUPARSER_INCLUDE_DIR} )
 set ( MANTIDLIBS ${MANTIDLIBS} ${MUPARSER_LIBRARIES} )
-add_subdirectory (Geometry)
 
-include_directories (NexusGeometry/inc) 
-add_subdirectory (NexusGeometry)
-#NexusGeometry has header-only dependencies on Geometry
-set ( MANTIDLIBS ${MANTIDLIBS} NexusGeometry )
+include_directories (Geometry/inc)
+add_subdirectory (Geometry)
 set ( MANTIDLIBS ${MANTIDLIBS} Geometry )
+
+include_directories (NexusGeometry/inc)
+add_subdirectory (NexusGeometry)
+set ( MANTIDLIBS ${MANTIDLIBS} NexusGeometry )
 
 include_directories (API/inc)
 add_subdirectory (API)

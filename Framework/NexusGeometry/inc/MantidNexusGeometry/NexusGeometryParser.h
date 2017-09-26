@@ -57,7 +57,7 @@ private:
     ///Gets the transformations applied to the detector's pixelOffsets
     Eigen::Transform<double, 3, Eigen::Affine> getTransformations(H5::Group &detectorGroup);
     ///Gets the data from a string dataset
-    H5std_string get1DStringDataset(H5std_string &dataset);
+    H5std_string get1DStringDataset(const H5std_string &dataset);
     ///Read dataset into vector
     template<typename valueType> std::vector<valueType> get1DDataset(H5std_string &dataset);
     Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> parsePixelShape(H5::Group &detectorGroup);

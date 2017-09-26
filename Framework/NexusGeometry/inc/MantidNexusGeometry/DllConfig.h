@@ -4,9 +4,9 @@
 #include "MantidKernel/System.h"
 
 #ifdef IN_MANTID_NEXUSGEOMETRY
-#define MANTID_DATAHANDLING_DLL DLLExport
+#define MANTID_NEXUSGEOMETRY_DLL DLLExport
 #else
-#define MANTID_DATAHANDLING_DLL DLLImport
+#define MANTID_NEXUSGEOMETRY_DLL DLLImport
 #endif
 
 #endif // MANTID_NEXUSGEOMETRY_DLLCONFIG_H_

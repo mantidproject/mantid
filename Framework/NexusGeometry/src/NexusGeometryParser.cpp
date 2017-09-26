@@ -279,8 +279,8 @@ std::vector<valueType> NexusGeometryParser::get1DDataset(H5std_string &dataset)
     return values;
 }
 
-H5std_string NexusGeometryParser::get1DStringDataset(H5std_string &dataset)
-{
+H5std_string
+NexusGeometryParser::get1DStringDataset(const H5std_string &dataset) {
     //Open data set
     DataSet data = this->nexusFile.openDataSet (dataset);
     //Get size
@@ -393,7 +393,6 @@ void NexusGeometryParser::parseNexusShape(Group &detectorGroup)
         shapeGroup = detectorGroup.openGroup(PIXEL_SHAPE);
     } catch(...){
         //Placeholder - no group pixel_shape
-        int i;
     }
 
     H5std_string shapeType;
@@ -437,6 +436,7 @@ void NexusGeometryParser::parseAndAddSource()
     Group sourceGroup = this->rootGroup.openGroup(sourcePath);
     auto sourceName = this->get1DStringDataset("/name");
     auto defaultPos = Eigen::Vector3d(0.0,0.0,0.0);
+    // TODO incomplete
 }
 //Parse sample and add to instrument
 void NexusGeometryParser::parseAndAddSample()
