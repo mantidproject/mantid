@@ -589,6 +589,121 @@ class MainWindow(QtGui.QMainWindow):
             mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
             print("Show help from (url)", QtCore.QUrl(self.externalUrl))
 
+    def _load_spice_data_to_raw_table(self, exp_no, scan_no, data_file_name):
+        try:
+            success = self._myControl.loadSpicePDData(exp_no, scan_no, data_file_name)
+            return success, "" if success else "Load data failed."
+        except NotImplementedError as ne:
+            return False, str(ne)
+
+    def _get_corr_file_names_and_wavelength(self, exp_no, scan_no, data_file_name):
+        # Obtain the correction file names and wavelength from SPICE file
+        wavelength_error = False
+        err_msg = ""
+        local_dir = os.path.dirname(data_file_name)
+        try:
+            status, return_body = self._myControl.retrieveCorrectionData(instrument='HB2A',
+                                                                         exp=exp_no, scan=scan_no,
+                                                                         localdatadir=local_dir)
+        except NotImplementedError as e:
+            err_msg = str(e)
+            if err_msg.count('m1') > 0:
+                # error is about wavelength
+                status = False
+                wavelength_error = True
+            else:
+                # other error
+                raise e
+
+        if status:
+            auto_wavelength = return_body[0]
+            van_corr_filename = return_body[1]
+            excl_det_filename = return_body[2]
+
+            if van_corr_filename is not None:
+                self.ui.lineEdit_vcorrFileName.setText(van_corr_filename)
+            if excl_det_filename is not None:
+                self.ui.lineEdit_excludedDetFileName.setText(excl_det_filename)
+        else:
+            auto_wavelength = None
+            van_corr_filename = None
+            excl_det_filename = None
+        return auto_wavelength, van_corr_filename, excl_det_filename, wavelength_error, err_msg
+
+    def _set_wavelength(self, auto_wavelength, wavelength_error, exp_no, scan_no, err_msg):
+        if auto_wavelength is None:
+            # unable to get wavelength from SPICE data
+            self.ui.comboBox_wavelength.setCurrentIndex(4)
+            if wavelength_error:
+                self.ui.lineEdit_wavelength.setText(err_msg)
+            else:
+                self.ui.lineEdit_wavelength.setText(self.ui.comboBox_wavelength.currentText())
+            self._myControl.setWavelength(exp_no, scan_no, wavelength=None)
+        else:
+            # get wavelength from SPICE data.  set value to GUI
+            self.ui.lineEdit_wavelength.setText(str(auto_wavelength))
+            allowed_wavelengths = [2.41, 1.54, 1.12]
+            num_items = self.ui.comboBox_wavelength.count()
+            good = False
+            for ic in range(num_items - 1):
+                if abs(auto_wavelength - allowed_wavelengths[ic]) < 0.01:
+                    good = True
+                    self.ui.comboBox_wavelength.setCurrentIndex(ic)
+
+            if not good:
+                self.ui.comboBox_wavelength.setCurrentIndex(num_items - 1)
+
+            self._myControl.setWavelength(exp_no, scan_no, wavelength=auto_wavelength)
+
+    def _get_and_parse_det_efficiency_file(self, van_corr_filename):
+        if self.ui.checkBox_useDetEffCorr.isChecked():
+            # Apply detector efficiency correction
+            if van_corr_filename is None:
+                # browse vanadium correction file
+                file_filter = "Text (*.txt);;Data (*.dat);;All files (*)"
+                current_dir = os.getcwd()
+                van_corr_filenames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', current_dir, file_filter)
+                if len(van_corr_filenames) > 0:
+                    van_corr_filename = van_corr_filenames[0]
+                    self.ui.lineEdit_vcorrFileName.setText(str(van_corr_filename))
+                else:
+                    self._logError("User does not specify any vanadium correction file.")
+                    self.ui.checkBox_useDetEffCorr.setChecked(False)
+
+            # Parse if it is not None
+            if van_corr_filename is not None:
+                detector_efficiency_ws, err_msg = self._myControl.parseDetEffCorrFile('HB2A', van_corr_filename)
+                if detector_efficiency_ws is None:
+                    print("Parsing detectors efficiency file error: {0}.".format(err_msg))
+                    return None
+                else:
+                    return detector_efficiency_ws
+            else:
+                return None
+
+        else:
+            # Not chosen to apply detector efficiency correction:w
+            return None
+
+    def _parse_spice_data_to_MDEventWS(self, detector_efficiency_table, exp_no, scan_no):
+        try:
+            print("Det Efficiency Table WS: ", str(detector_efficiency_table))
+            exec_status = self._myControl.parseSpiceData(exp_no, scan_no, detector_efficiency_table)
+            return exec_status, "" if exec_status else "Parse data failed."
+        except NotImplementedError as e:
+            return False, str(e)
+
+    def _parse_detector_exclusion_file(self, exclude_detector_filename):
+        if exclude_detector_filename is not None:
+            exclude_detector_list, err_msg = self._myControl.parseExcludedDetFile('HB2A', exclude_detector_filename)
+
+            text_buf = ""
+            for det_id in exclude_detector_list:
+                text_buf += "{0},".format(det_id)
+            if len(text_buf) > 0:
+                text_buf = text_buf[:-1]
+                self.ui.lineEdit_detExcluded.setText(text_buf)
+
     def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data
         It does not support for tab 'Advanced Setup'
@@ -596,180 +711,76 @@ class MainWindow(QtGui.QMainWindow):
         For tab 'Normalized' and 'Vanadium', this method will load data to MDEVentWorkspaces but NOT reduce to single spectrum
         """
         # Kick away unsupported tabs
-        itab = self.ui.tabWidget.currentIndex()
-        tabtext = str(self.ui.tabWidget.tabText(itab))
-        print("[DB] Current active tab is No. %d as %s." % (itab, tabtext))
+        i_tab = self.ui.tabWidget.currentIndex()
+        tab_text = str(self.ui.tabWidget.tabText(i_tab))
+        print("[DB] Current active tab is No. {0} as {1}.".format(i_tab, tab_text))
 
         # Rule out unsupported tab
-        if itab == 5:
+        if i_tab == 5:
             # 'advanced'
-            msg = "Tab %s does not support 'Load Data'. Request is ambiguous." % tabtext
+            msg = "Tab {0} does not support 'Load Data'. Request is ambiguous.".format(tab_text)
             QtGui.QMessageBox.information(self, "Click!", msg)
             return
 
         # Get exp number and scan number
         if isinstance(exp, int) and isinstance(scan, int):
             # use input
-            expno = exp
-            scanno = scan
+            exp_no = exp
+            scan_no = scan
         else:
             # read from GUI
             try:
-                expno, scanno = self._uiGetExpScanNumber()
-                self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
+                exp_no, scan_no = self._uiGetExpScanNumber()
+                self._logDebug("Attending to load Exp {0} Scan {1}.".format(exp_no, scan_no))
             except NotImplementedError as ne:
-                self._logError("Error to get Exp and Scan due to %s." % (str(ne)))
+                self._logError("Error to get Exp and Scan due to {0}.".format(str(ne)))
                 return
 
         # Form data file name and download data
-        status, datafilename = self._uiDownloadDataFile(exp=expno, scan=scanno)
+        status, data_filename = self._uiDownloadDataFile(exp=exp_no, scan=scan_no)
         if not status:
-            self._logError("Unable to download or locate local data file for Exp %d \
-                Scan %d." % (expno, scanno))
+            self._logError("Unable to download or locate local data file for Exp {0} Scan {1}.".format(exp_no, scan_no))
 
         # (Load data for tab 0, 1, 2 and 4)
-        if itab not in [0, 1, 2, 3, 4]:
+        if i_tab not in [0, 1, 2, 3, 4]:
             # Unsupported Tabs: programming error!
-            errmsg = "%d-th tab should not get this far.\n" % (itab)
-            errmsg += 'GUI has been changed, but the change has not been considered! iTab = %d' % (itab)
-            raise NotImplementedError(errmsg)
+            err_msg = "{0}-th tab should not get this far.\n".format(i_tab)
+            err_msg += 'GUI has been changed, but the change has not been considered! iTab = {0}'.format(i_tab)
+            raise NotImplementedError(err_msg)
 
         # Load SPICE data to raw table (step 1)
-        try:
-            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
-            if not execstatus:
-                cause = "Load data failed."
-            else:
-                cause = None
-        except NotImplementedError as ne:
-            execstatus = False
-            cause = str(ne)
-
-        # Return as failed to load data
-        if not execstatus:
-            self._logError(cause)
+        load_success, msg = self._load_spice_data_to_raw_table(exp_no, scan_no, data_filename)
+        if not load_success:
+            self._logError(msg)
             return
 
         # Obtain the correction file names and wavelength from SPICE file
-        wavelengtherror = False
-        errmsg = ""
-        localdir = os.path.dirname(datafilename)
-        try:
-            status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A',
-                                                                        exp=expno, scan=scanno,
-                                                                        localdatadir=localdir)
-        except NotImplementedError as e:
-            errmsg = str(e)
-            if errmsg.count('m1') > 0:
-                # error is about wavelength
-                status = False
-                wavelengtherror = True
-            else:
-                # other error
-                raise e
-
-        if status:
-            autowavelength = returnbody[0]
-            vancorrfname = returnbody[1]
-            excldetfname = returnbody[2]
-
-            if vancorrfname is not None:
-                self.ui.lineEdit_vcorrFileName.setText(vancorrfname)
-            if excldetfname is not None:
-                self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
-        else:
-            autowavelength = None
-            vancorrfname = None
-            excldetfname = None
+        (auto_wavelength, van_corr_filename, exclude_detector_filename, wavelength_error, err_msg) \
+            = self._load_spice_data_to_raw_table(exp_no, scan_no, data_filename)
 
         # Set wavelength to GUI except 'multiple scans'
-        if autowavelength is None:
-            # unable to get wavelength from SPICE data
-            self.ui.comboBox_wavelength.setCurrentIndex(4)
-            if wavelengtherror:
-                self.ui.lineEdit_wavelength.setText(errmsg)
-            else:
-                self.ui.lineEdit_wavelength.setText(self.ui.comboBox_wavelength.currentText())
-            self._myControl.setWavelength(expno, scanno, wavelength=None)
-        else:
-            # get wavelength from SPICE data.  set value to GUI
-            self.ui.lineEdit_wavelength.setText(str(autowavelength))
-            allowedwavelengths = [2.41, 1.54, 1.12]
-            numitems = self.ui.comboBox_wavelength.count()
-            good = False
-            for ic in range(numitems - 1):
-                if abs(autowavelength - allowedwavelengths[ic]) < 0.01:
-                    good = True
-                    self.ui.comboBox_wavelength.setCurrentIndex(ic)
-
-            if not good:
-                self.ui.comboBox_wavelength.setCurrentIndex(numitems - 1)
-
-            self._myControl.setWavelength(expno, scanno, wavelength=autowavelength)
+        self._set_wavelength(auto_wavelength, wavelength_error, exp_no, scan_no, err_msg)
 
         # Optionally obtain and parse det effecient file
-        if self.ui.checkBox_useDetEffCorr.isChecked():
-            # Apply detector efficiency correction
-            if vancorrfname is None:
-                # browse vanadium correction file
-                filefilter = "Text (*.txt);;Data (*.dat);;All files (*)"
-                curDir = os.getcwd()
-                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curDir, filefilter)
-                if len(vancorrfnames) > 0:
-                    vancorrfname = vancorrfnames[0]
-                    self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname))
-                else:
-                    self._logError("User does not specify any vanadium correction file.")
-                    self.ui.checkBox_useDetEffCorr.setChecked(False)
-
-            # Parse if it is not None
-            if vancorrfname is not None:
-                detefftablews, errmsg = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
-                if detefftablews is None:
-                    print("Parsing detectors efficiency file error: %s." % (errmsg))
-            else:
-                detefftablews = None
-
-        else:
-            # Not chosen to apply detector efficiency correction:w
-            detefftablews = None
+        detector_efficiency_table_ws = self._get_and_parse_det_efficiency_file(van_corr_filename)
 
         # Parse SPICE data to MDEventWorkspaces
-        try:
-            print("Det Efficiency Table WS: ", str(detefftablews))
-            execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
-            if not execstatus:
-                cause = "Parse data failed."
-            else:
-                cause = None
-        except NotImplementedError as e:
-            execstatus = False
-            cause = str(e)
-
-        # Return if data parsing is error
-        if not execstatus:
-            self._logError(cause)
+        success, msg = self._parse_spice_data_to_MDEventWS(detector_efficiency_table_ws, exp_no, scan_no)
+        if not success:
+            self._logError(msg)
             return
 
         # Optionally parse detector exclusion file and set to line text
-        if excldetfname is not None:
-            excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
-
-            textbuf = ""
-            for detid in excludedetlist:
-                textbuf += "%d," % (detid)
-            if len(textbuf) > 0:
-                textbuf = textbuf[:-1]
-                self.ui.lineEdit_detExcluded.setText(textbuf)
+        self._parse_detector_exclusion_file(exclude_detector_filename)
 
         # Set up some widgets for raw detector data.  Won't be applied to tab 3
-        if itab != 3:
-            floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+        if i_tab != 3:
+            float_sample_log_name_list = self._myControl.getSampleLogNames(exp_no, scan_no)
             self.ui.comboBox_indvDetXLabel.clear()
             self.ui.comboBox_indvDetXLabel.addItem("2theta/Scattering Angle")
-            self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+            self.ui.comboBox_indvDetXLabel.addItems(float_sample_log_name_list)
             self.ui.comboBox_indvDetYLabel.clear()
-            self.ui.comboBox_indvDetYLabel.addItems(floatsamplelognamelist)
+            self.ui.comboBox_indvDetYLabel.addItems(float_sample_log_name_list)
 
         return True
 
@@ -883,7 +894,7 @@ class MainWindow(QtGui.QMainWindow):
             wl_list = []
             for scanno in scanlist:
                 print("Exp %d Scan %d. Wavelength = %s." % (
-                expno, scanno, str(self._myControl.getWavelength(expno, scanno))))
+                    expno, scanno, str(self._myControl.getWavelength(expno, scanno))))
                 wl_list.append(float(self._myControl.getWavelength(expno, scanno)))
 
             wl_list = sorted(wl_list)
