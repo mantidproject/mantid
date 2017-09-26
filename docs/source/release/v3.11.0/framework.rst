@@ -96,7 +96,7 @@ Bug fixes
 Improved
 ########
 
-- `:ref:`Fit` Outputs a function object containing the optimized parameter values.
+- `:ref:`Fit <algm-Fit>` outputs a function object containing the optimized parameter values. See the usage examples for more detail.
 
 Python
 ------
