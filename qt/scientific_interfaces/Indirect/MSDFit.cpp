@@ -35,10 +35,16 @@ void MSDFit::setup() {
   m_properties["End"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["End"], NUM_DECIMALS);
 
+  m_properties["Gaussian"] = createModel("Gaussian", {"Intensity", "MSD"});
+  m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
+  m_properties["Yi"] = createModel("Yi", {"Intensity", "MSD", "Sigma"});
+
   m_msdTree->addProperty(m_properties["Start"]);
   m_msdTree->addProperty(m_properties["End"]);
 
   auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
+
+  modelSelection(m_uiForm.cbModelInput->currentIndex());
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(minChanged(double)));
@@ -49,6 +55,8 @@ void MSDFit::setup() {
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
+  connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(modelSelection(int)));
   connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
@@ -73,7 +81,7 @@ void MSDFit::run() {
     return;
 
   // Set the result workspace for Python script export
-  QString model = m_uiForm.modelInput->currentText();
+  QString model = m_uiForm.cbModelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
 
   double xStart = m_dblManager->value(m_properties["Start"]);
@@ -299,6 +307,26 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMinimum(val);
   else if (prop == m_properties["End"])
     fitRangeSelector->setMaximum(val);
+}
+
+QtProperty *MSDFit::createModel(const QString &modelName,
+                                const std::vector<QString> modelParameters) {
+  QtProperty *expGroup = m_grpManager->addProperty(modelName);
+
+  for (auto &modelParam : modelParameters) {
+    QString paramName = modelName + "." + modelParam;
+    m_properties[paramName] = m_dblManager->addProperty(modelParam);
+    m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
+    expGroup->addSubProperty(m_properties[paramName]);
+  }
+
+  return expGroup;
+}
+
+void MSDFit::modelSelection(int selected) {
+  QString model = m_uiForm.cbModelInput->itemText(selected);
+  m_msdTree->clear();
+  m_msdTree->addProperty(m_properties[model]);
 }
 
 /**

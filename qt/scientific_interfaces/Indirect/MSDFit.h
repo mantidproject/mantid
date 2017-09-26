@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_MSDFIT_H_
 
-#include "ui_MSDFit.h"
 #include "IndirectDataAnalysisTab.h"
+#include "ui_MSDFit.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,9 +33,12 @@ private slots:
   void plotClicked();
   void plotCurrentPreview();
   void algorithmComplete(bool error);
+  void modelSelection(int selected);
 
 private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(long specMin, long specMax);
+  QtProperty *createModel(const QString &modelName,
+                          const std::vector<QString> modelParameters);
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
