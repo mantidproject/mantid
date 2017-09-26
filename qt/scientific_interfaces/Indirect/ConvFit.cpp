@@ -1293,7 +1293,7 @@ void ConvFit::updateParameters(int specNo) {
 
   if (fitTypeIndex == 2 && m_fittedIndex == 2) {
     functionName = "Lorentzian 1";
-    IndirectTab::updateParameters(functionName, pref, params, parameters, 0, 3);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 0, 3);
 
     funcIndex++;
     pref = prefBase;
@@ -1301,14 +1301,14 @@ void ConvFit::updateParameters(int specNo) {
             QString::number(subIndex) + ".";
 
     functionName = "Lorentzian 2";
-    IndirectTab::updateParameters(functionName, pref, params, parameters, 3, 0);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 3, 0);
   } else {
 
     if (fitTypeIndex == 2 && m_fittedIndex == 1) {
       functionName = "Lorentzian 1";
     }
 
-    IndirectTab::updateParameters(functionName, pref, params, parameters, 0, 0);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 0, 0);
   }
 }
 
