@@ -169,7 +169,7 @@ class BayesQuasi(PythonAlgorithm):
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
         first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
-        self.check_enery_range_for_zeroes(first_data_point, last_data_point)
+        self.check_energy_range_for_zeroes(first_data_point, last_data_point)
 
         # update erange with new values
         erange = [self._e_min, self._e_max]
@@ -383,7 +383,7 @@ class BayesQuasi(PythonAlgorithm):
         if self._background == 'Zero':
             return 0
 
-    def check_enery_range_for_zeroes(self, first_data_point, last_data_point):
+    def check_energy_range_for_zeroes(self, first_data_point, last_data_point):
         if first_data_point > self._e_min:
             logger.warning("Sample workspace contains leading zeros within the energy range.")
             logger.warning("Updating eMin: eMin = " + str(first_data_point))
