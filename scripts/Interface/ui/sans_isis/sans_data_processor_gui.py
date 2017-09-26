@@ -330,7 +330,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _on_reduction_mode_selection_has_changed(self):
         selection = self.reduction_mode_combo_box.currentText()
-        is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)
+        is_merged = selection == ReductionMode.to_string(ReductionMode.Merged)  # noqa
         self.merged_settings.setEnabled(False)
 
     def _on_q_resolution_shape_has_changed(self):
