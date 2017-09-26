@@ -2,6 +2,9 @@
 #define MANTID_TYPES_DLLCONFIG_H_
 
 /*
+This file contains the DLLExport/DLLImport linkage configuration for the
+Types library
+
 @author Lamar Moore, STFC
 
 Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -34,4 +37,4 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 #define EXTERN_MANTID_TYPES extern
 #endif /* IN_MANTID_KERNEL*/
 
-#endif // MANTID_TYPES_DLLCONFIG_H_
+#endif // MANTID_KERNEL_DLLCONFIG_H_

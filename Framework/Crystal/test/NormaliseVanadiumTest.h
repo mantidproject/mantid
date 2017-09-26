@@ -6,7 +6,6 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -28,15 +27,16 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
-using namespace Mantid::Types;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 /** Create an EventWorkspace containing fake data of single-crystal diffraction.
- *
- * @return EventWorkspace_sptr
- */
+*
+* @return EventWorkspace_sptr
+*/
 EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   FacilityHelper::ScopedFacilities loadTESTFacility(
       "IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
@@ -53,8 +53,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   size_t nd = 1;
   // Make a random generator for each dimensions
   typedef boost::variate_generator<boost::mt19937 &,
-                                   boost::uniform_real<double>>
-      gen_t;
+                                   boost::uniform_real<double>> gen_t;
   gen_t *gens[1];
   for (size_t d = 0; d < nd; ++d) {
     double min = -1.;
@@ -84,8 +83,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
   // a bug
   retVal->populateInstrumentParameters();
 
-  DateAndTime run_start =
-      DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
+  DateAndTime run_start("2010-01-01T00:00:00");
 
   for (int pix = 0; pix < numPixels; pix++) {
     EventList &el = retVal->getSpectrum(pix);
@@ -104,8 +102,9 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
                               (pix % 100 - 50.5) * (pix % 100 - 50.5)));
     for (int i = 0; i < r; i++) {
       el += TofEvent(
-          0.75 + binDelta *
-                     (((*gens[0])() + (*gens[0])() + (*gens[0])()) * 2. - 3.),
+          0.75 +
+              binDelta *
+                  (((*gens[0])() + (*gens[0])() + (*gens[0])()) * 2. - 3.),
           run_start + double(i));
     }
   }
@@ -127,10 +126,10 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents) {
 }
 
 /** Creates an instance of the NormaliseVanadium algorithm and sets its
- * properties.
- *
- * @return NormaliseVanadium alg
- */
+* properties.
+*
+* @return NormaliseVanadium alg
+*/
 IAlgorithm_sptr createAlgorithm() {
   int numEventsPer = 100;
   MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
@@ -145,7 +144,7 @@ IAlgorithm_sptr createAlgorithm() {
 
   return alg;
 }
-} // namespace
+}
 
 class NormaliseVanadiumImpl : public NormaliseVanadium {
 public:

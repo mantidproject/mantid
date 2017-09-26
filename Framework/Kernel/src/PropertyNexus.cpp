@@ -1,10 +1,10 @@
 #include "MantidKernel/PropertyNexus.h"
 
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -43,7 +43,7 @@ namespace PropertyNexus {
 template <typename NumT>
 std::unique_ptr<Property>
 makeProperty(::NeXus::File *file, const std::string &name,
-             const std::vector<Mantid::Types::DateAndTime> &times) {
+             const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -61,15 +61,15 @@ makeProperty(::NeXus::File *file, const std::string &name,
 }
 
 /** Helper method to create a time series property from a boolean
- *
- * @param file :: nexus file handle
- * @param name :: name of the property being created
- * @param times :: vector of times, empty = single property with value
- * @return Property *
- */
-std::unique_ptr<Property> makeTimeSeriesBoolProperty(
-    ::NeXus::File *file, const std::string &name,
-    const std::vector<Mantid::Types::DateAndTime> &times) {
+*
+* @param file :: nexus file handle
+* @param name :: name of the property being created
+* @param times :: vector of times, empty = single property with value
+* @return Property *
+*/
+std::unique_ptr<Property>
+makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
+                           const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -85,7 +85,7 @@ std::unique_ptr<Property> makeTimeSeriesBoolProperty(
 /** Make a string/vector\<string\> property */
 std::unique_ptr<Property>
 makeStringProperty(::NeXus::File *file, const std::string &name,
-                   const std::vector<Mantid::Types::DateAndTime> &times) {
+                   const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
@@ -147,13 +147,13 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     typeIsBool = true;
   }
 
-  std::vector<Mantid::Types::DateAndTime> times;
+  std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
     // Use a default start time
     if (startStr.empty())
       startStr = "2000-01-01T00:00:00";
     // Convert time in seconds to DateAndTime
-    auto start = Mantid::Types::DateAndTimeHelpers::createFromISO8601(startStr);
+    Types::Core::DateAndTime start(startStr);
     times.reserve(timeSec.size());
     for (double time : timeSec) {
       times.push_back(start + time);
@@ -216,5 +216,5 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
 
 } // namespace PropertyNexus
 
-} // namespace Kernel
 } // namespace Mantid
+} // namespace API

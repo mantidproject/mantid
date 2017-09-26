@@ -2,35 +2,34 @@
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
-#include <unordered_set>
 #include <utility>
+#include <unordered_set>
 
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::Logger;
-using Mantid::Kernel::NetworkProxy;
 using Mantid::Kernel::ProxyInfo;
+using Mantid::Kernel::NetworkProxy;
 
 // from poco
-#include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Net/NetException.h>
 #include <Poco/Path.h>
+#include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
+#include <Poco/Exception.h>
+#include <Poco/Net/NetException.h>
 /*#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 */
-#include "Poco/Net/FilePartSource.h"
 #include <Poco/Net/HTMLForm.h>
+#include "Poco/Net/FilePartSource.h"
 
 // Visual Studio complains with the inclusion of Poco/FileStream
 // disabling this warning.
@@ -46,14 +45,14 @@ using Mantid::Kernel::ProxyInfo;
 #include <Poco/NullStream.h>
 #include <cstdlib>
 #endif
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DirectoryIterator.h>
 #include <Poco/StreamCopier.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormatter.h>
 
 // from boost
-#include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
 #include <json/json.h>
@@ -63,7 +62,7 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("ScriptRepositoryImpl");
-} // namespace
+}
 
 /// Default timeout
 int DEFAULT_TIMEOUT_SEC = 30;
@@ -363,8 +362,7 @@ void ScriptRepositoryImpl::ensureValidRepository() {
   if (!isValid()) {
     std::stringstream ss;
     ss << "ScriptRepository is not installed correctly. The current path for "
-          "ScriptRepository is "
-       << local_repository
+          "ScriptRepository is " << local_repository
        << " but some important files that are required are corrupted or not "
           "present."
        << "\nPlease, re-install the ScriptRepository!\n"
@@ -466,12 +464,11 @@ std::vector<std::string> ScriptRepositoryImpl::listFiles() {
     // it will proceed in this situation.
   } catch (Poco::Exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.className() << ":> " << ex.displayText() << '\n';
+                     "repository. Details: " << ex.className() << ":> "
+                  << ex.displayText() << '\n';
   } catch (std::exception &ex) {
     g_log.error() << "ScriptRepository failed to list all entries inside the "
-                     "repository. Details: "
-                  << ex.what() << '\n';
+                     "repository. Details: " << ex.what() << '\n';
   }
   std::vector<std::string> out(repo.size());
   size_t i = repo.size();
@@ -658,7 +655,7 @@ void ScriptRepositoryImpl::download_directory(
       dir.createDirectories();
 
       entry.second.status = BOTH_UNCHANGED;
-      entry.second.downloaded_date = DateAndTimeHelpers::createFromISO8601(
+      entry.second.downloaded_date = DateAndTime(
           Poco::DateTimeFormatter::format(dir.getLastModified(), timeformat));
       entry.second.downloaded_pubdate = entry.second.pub_date;
       updateLocalJson(entry.first, entry.second);
@@ -742,7 +739,7 @@ void ScriptRepositoryImpl::download_file(const std::string &file_path,
 
   {
     Poco::File local(local_path);
-    entry.downloaded_date = DateAndTimeHelpers::createFromISO8601(
+    entry.downloaded_date = DateAndTime(
         Poco::DateTimeFormatter::format(local.getLastModified(), timeformat));
     entry.downloaded_pubdate = entry.pub_date;
     entry.status = BOTH_UNCHANGED;
@@ -893,15 +890,13 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       RepositoryEntry &entry = repo.at(file_path);
       {
         Poco::File local(absolute_path);
-        entry.downloaded_date = DateAndTimeHelpers::createFromISO8601(
-            Poco::DateTimeFormatter::format(local.getLastModified(),
-                                            timeformat));
+        entry.downloaded_date = DateAndTime(Poco::DateTimeFormatter::format(
+            local.getLastModified(), timeformat));
         // update the pub_date and downloaded_pubdate with the pub_date given by
         // the upload.
         // this ensures that the status will be correctly defined.
         if (!published_date.empty())
-          entry.pub_date =
-              DateAndTimeHelpers::createFromISO8601(published_date);
+          entry.pub_date = DateAndTime(published_date);
         entry.downloaded_pubdate = entry.pub_date;
         entry.status = BOTH_UNCHANGED;
       }
@@ -915,8 +910,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // So add to the file locally to avoid race condition.
       RepositoryEntry &remote_entry = repo.at(file_path);
       if (!published_date.empty())
-        remote_entry.pub_date =
-            DateAndTimeHelpers::createFromISO8601(published_date);
+        remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
       g_log.debug() << "ScriptRepository updating repository json \n";
       updateRepositoryJson(file_path, remote_entry);
@@ -930,14 +924,14 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 }
 
 /*
- * Adds an entry to .repository.json
- * This is necessary when uploading a file to keep .repository.json and
- * .local.json in sync, and thus display correct file status in the GUI.
- * Requesting an updated .repository.json from the server is not viable
- * at such a time as it would create a race condition.
- * @param path: relative path of uploaded file
- * @param entry: the entry to add to the json file
- */
+* Adds an entry to .repository.json
+* This is necessary when uploading a file to keep .repository.json and
+* .local.json in sync, and thus display correct file status in the GUI.
+* Requesting an updated .repository.json from the server is not viable
+* at such a time as it would create a race condition.
+* @param path: relative path of uploaded file
+* @param entry: the entry to add to the json file
+*/
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
                                                 const RepositoryEntry &entry) {
 
@@ -1439,8 +1433,7 @@ void ScriptRepositoryImpl::parseCentralRepository(Repository &repo) {
       RepositoryEntry &entry = repo[filepath];
       entry.remote = true;
       entry.directory = entry_json.get("directory", false).asBool();
-      entry.pub_date = DateAndTimeHelpers::createFromISO8601(
-          entry_json.get("pub_date", "").asString());
+      entry.pub_date = DateAndTime(entry_json.get("pub_date", "").asString());
       entry.description = entry_json.get("description", "").asString();
       entry.author = entry_json.get("author", "").asString();
       entry.status = BOTH_UNCHANGED;
@@ -1509,11 +1502,9 @@ void ScriptRepositoryImpl::parseDownloadedEntries(Repository &repo) {
           // was found at the local file system and at the remote repository
 
           entry_it->second.downloaded_pubdate =
-              DateAndTimeHelpers::createFromISO8601(
-                  entry_json.get("downloaded_pubdate", "").asString());
+              DateAndTime(entry_json.get("downloaded_pubdate", "").asString());
           entry_it->second.downloaded_date =
-              DateAndTimeHelpers::createFromISO8601(
-                  entry_json.get("downloaded_date", "").asString());
+              DateAndTime(entry_json.get("downloaded_date", "").asString());
           std::string auto_update =
               entry_json.get("auto_update", "false").asString();
           entry_it->second.auto_update =
@@ -1659,7 +1650,7 @@ void ScriptRepositoryImpl::recursiveParsingDirectories(const std::string &path,
       // '\n';
       RepositoryEntry &entry = repo[entry_path];
       entry.local = true;
-      entry.current_date = DateAndTimeHelpers::createFromISO8601(
+      entry.current_date = DateAndTime(
           Poco::DateTimeFormatter::format(it->getLastModified(), timeformat));
       entry.directory = it->isDirectory();
       if (it->isDirectory())
@@ -1774,6 +1765,6 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   return path;
 }
 
-} // namespace API
+} // END API
 
-} // namespace Mantid
+} // END MANTID

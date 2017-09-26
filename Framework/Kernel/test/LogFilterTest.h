@@ -5,7 +5,6 @@
 
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeInterval.h"
 #include <ctime>
 
 using namespace Mantid::Kernel;

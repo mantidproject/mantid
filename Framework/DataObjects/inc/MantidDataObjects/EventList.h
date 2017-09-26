@@ -14,10 +14,11 @@
 
 namespace Mantid {
 namespace Types {
+namespace Core {
 class DateAndTime;
 }
+} // namespace Types
 namespace Kernel {
-
 class SplittingInterval;
 typedef std::vector<SplittingInterval> TimeSplitterType;
 class Unit;
@@ -78,7 +79,7 @@ public:
 
   EventList(const EventList &rhs);
 
-  EventList(const std::vector<Types::TofEvent> &events);
+  EventList(const std::vector<Types::Event::TofEvent> &events);
 
   EventList(const std::vector<WeightedEvent> &events);
 
@@ -91,9 +92,9 @@ public:
 
   EventList &operator=(const EventList &);
 
-  EventList &operator+=(const Types::TofEvent &event);
+  EventList &operator+=(const Types::Event::TofEvent &event);
 
-  EventList &operator+=(const std::vector<Types::TofEvent> &more_events);
+  EventList &operator+=(const std::vector<Types::Event::TofEvent> &more_events);
 
   EventList &operator+=(const WeightedEvent &event);
 
@@ -115,9 +116,9 @@ public:
    *faster.
    * NOTE: Only call this on a un-weighted event list!
    *
-   * @param event :: Types::TofEvent to add at the end of the list.
+   * @param event :: TofEvent to add at the end of the list.
    * */
-  inline void addEventQuickly(const Types::TofEvent &event) {
+  inline void addEventQuickly(const Types::Event::TofEvent &event) {
     this->events.push_back(event);
     this->order = UNSORTED;
   }
@@ -148,8 +149,8 @@ public:
 
   WeightedEvent getEvent(size_t event_number);
 
-  std::vector<Types::TofEvent> &getEvents();
-  const std::vector<Types::TofEvent> &getEvents() const;
+  std::vector<Types::Event::TofEvent> &getEvents();
+  const std::vector<Types::Event::TofEvent> &getEvents() const;
 
   std::vector<WeightedEvent> &getWeightedEvents();
   const std::vector<WeightedEvent> &getWeightedEvents() const;
@@ -258,14 +259,14 @@ public:
   void getTofs(std::vector<double> &tofs) const override;
   double getTofMin() const override;
   double getTofMax() const override;
-  Mantid::Types::DateAndTime getPulseTimeMax() const override;
-  Mantid::Types::DateAndTime getPulseTimeMin() const override;
-  void getPulseTimeMinMax(Mantid::Types::DateAndTime &tMin,
-                          Mantid::Types::DateAndTime &tM) const;
-  Mantid::Types::DateAndTime
+  Mantid::Types::Core::DateAndTime getPulseTimeMax() const override;
+  Mantid::Types::Core::DateAndTime getPulseTimeMin() const override;
+  void getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
+                          Mantid::Types::Core::DateAndTime &tM) const;
+  Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(const double &tofFactor,
                      const double &tofOffset) const override;
-  Mantid::Types::DateAndTime
+  Mantid::Types::Core::DateAndTime
   getTimeAtSampleMin(const double &tofFactor,
                      const double &tofOffset) const override;
 
@@ -281,18 +282,18 @@ public:
   /// Return the list of event weight error values
   void getWeightErrors(std::vector<double> &weightErrors) const override;
 
-  std::vector<Mantid::Types::DateAndTime> getPulseTimes() const override;
+  std::vector<Mantid::Types::Core::DateAndTime> getPulseTimes() const override;
 
   void setTofs(const MantidVec &tofs) override;
 
   void reverse();
 
-  void filterByPulseTime(Mantid::Types::DateAndTime start,
-                         Mantid::Types::DateAndTime stop,
+  void filterByPulseTime(Types::Core::DateAndTime start,
+                         Types::Core::DateAndTime stop,
                          EventList &output) const;
 
-  void filterByTimeAtSample(Mantid::Types::DateAndTime start,
-                            Mantid::Types::DateAndTime stop, double tofFactor,
+  void filterByTimeAtSample(Types::Core::DateAndTime start,
+                            Types::Core::DateAndTime stop, double tofFactor,
                             double tofOffset, EventList &output) const;
 
   void filterInPlace(Kernel::TimeSplitterType &splitter);
@@ -372,8 +373,8 @@ private:
   /// Histogram object holding the histogram data. Currently only X.
   HistogramData::Histogram m_histogram;
 
-  /// List of Types::TofEvent (no weights).
-  mutable std::vector<Types::TofEvent> events;
+  /// List of TofEvent (no weights).
+  mutable std::vector<Types::Event::TofEvent> events;
 
   /// List of WeightedEvent's
   mutable std::vector<WeightedEvent> weightedEvents;
@@ -472,19 +473,19 @@ private:
   template <class T>
   static void
   getPulseTimesHelper(const std::vector<T> &events,
-                      std::vector<Mantid::Types::DateAndTime> &times);
+                      std::vector<Mantid::Types::Core::DateAndTime> &times);
   template <class T>
   static void setTofsHelper(std::vector<T> &events,
                             const std::vector<double> &tofs);
   template <class T>
   static void filterByPulseTimeHelper(std::vector<T> &events,
-                                      Mantid::Types::DateAndTime start,
-                                      Mantid::Types::DateAndTime stop,
+                                      Types::Core::DateAndTime start,
+                                      Types::Core::DateAndTime stop,
                                       std::vector<T> &output);
   template <class T>
   static void filterByTimeAtSampleHelper(std::vector<T> &events,
-                                         Mantid::Types::DateAndTime start,
-                                         Mantid::Types::DateAndTime stop,
+                                         Types::Core::DateAndTime start,
+                                         Types::Core::DateAndTime stop,
                                          double tofFactor, double tofOffset,
                                          std::vector<T> &output);
   template <class T>
@@ -546,9 +547,10 @@ private:
 
 // Methods overloaded to get event vectors.
 DLLExport void getEventsFrom(EventList &el,
-                             std::vector<Types::TofEvent> *&events);
-DLLExport void getEventsFrom(const EventList &el,
-                             std::vector<Types::TofEvent> const *&events);
+                             std::vector<Types::Event::TofEvent> *&events);
+DLLExport void
+getEventsFrom(const EventList &el,
+              std::vector<Types::Event::TofEvent> const *&events);
 DLLExport void getEventsFrom(EventList &el,
                              std::vector<WeightedEvent> *&events);
 DLLExport void getEventsFrom(const EventList &el,

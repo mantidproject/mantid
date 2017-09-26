@@ -739,7 +739,7 @@ private:
   ///@returns a property pointer
   template <class NX_TYPE, class TIME_TYPE>
   Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
-                               Mantid::Types::DateAndTime start_t,
+                               Types::Core::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);

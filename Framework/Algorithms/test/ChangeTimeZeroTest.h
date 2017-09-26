@@ -1,26 +1,25 @@
 #ifndef CHANGETIMEZEROTEST_H_
 #define CHANGETIMEZEROTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ChangeTimeZero.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/DateTimeValidator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/DateTimeValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 
@@ -29,8 +28,7 @@ const std::string boolSeriesID("boolTimeSeries");
 const std::string intSeriesID("intTimeSeries");
 const std::string stringSeriesID("stringTimeSeries");
 const std::string stringID("string");
-DateAndTime stringPropertyTime =
-    DateAndTimeHelpers::createFromISO8601("2010-01-01T00:10:00");
+DateAndTime stringPropertyTime("2010-01-01T00:10:00");
 enum LogType { STANDARD, NOPROTONCHARGE };
 
 template <typename T>
@@ -155,7 +153,7 @@ MatrixWorkspace_sptr execute_change_time(MatrixWorkspace_sptr in_ws,
   auto out_ws = alg.getProperty("OutputWorkspace");
   return out_ws;
 }
-} // namespace
+}
 
 class ChangeTimeZeroTest : public CxxTest::TestSuite {
 public:
@@ -165,8 +163,7 @@ public:
   static void destroySuite(ChangeTimeZeroTest *suite) { delete suite; }
 
   ChangeTimeZeroTest()
-      : m_startTime(
-            DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00")),
+      : m_startTime("2010-01-01T00:00:00"),
         m_stringPropertyTime(stringPropertyTime),
         m_dateTimeValidator(boost::make_shared<DateTimeValidator>()),
         m_length(10) {}
@@ -403,12 +400,12 @@ public:
   }
 
   /**
-   * Test that the algorithm can handle a WorkspaceGroup as input without
-   * crashing
-   * We have to use the ADS to test WorkspaceGroups
-   *
-   * Need to use absolute time to test this part of validateInputs
-   */
+ * Test that the algorithm can handle a WorkspaceGroup as input without
+ * crashing
+ * We have to use the ADS to test WorkspaceGroups
+ *
+ * Need to use absolute time to test this part of validateInputs
+ */
   void testValidateInputsWithWSGroup() {
     const double timeShiftDouble = 1000;
     DateAndTime absoluteTimeShift = m_startTime + timeShiftDouble;
@@ -475,8 +472,7 @@ private:
     double timeShift = relativeTimeShift;
     if (relativeTimeShift == 0.0) {
       timeShift = DateAndTime::secondsFromDuration(
-          DateAndTimeHelpers::createFromISO8601(absoluteTimeShift) -
-          m_startTime);
+          DateAndTime(absoluteTimeShift) - m_startTime);
     }
 
     MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
@@ -527,7 +523,7 @@ private:
         dynamic_cast<PropertyWithValue<std::string> *>(prop);
     auto value = propertyWithValue->value();
     if (checkDateTime(value)) {
-      DateAndTime newTime = DateAndTimeHelpers::createFromISO8601(value);
+      DateAndTime newTime(value);
       double secs =
           DateAndTime::secondsFromDuration(newTime - m_stringPropertyTime);
       TSM_ASSERT_DELTA("String property should have shifted time", secs,
@@ -604,8 +600,7 @@ private:
 public:
   void setUp() override {
 
-    DateAndTime date =
-        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
+    DateAndTime date("2010-01-01T00:00:00");
 
     // Set up the Workspace 2D
     const int length2D = 3000;

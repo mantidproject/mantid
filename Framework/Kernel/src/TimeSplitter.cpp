@@ -1,9 +1,8 @@
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidTypes/DateAndTime.h"
-
-using Mantid::Types::DateAndTime;
 
 namespace Mantid {
+
+using namespace Types::Core;
 namespace Kernel {
 
 /// Default constructor
@@ -269,5 +268,5 @@ TimeSplitterType operator~(const TimeSplitterType &a) {
   }
   return out;
 }
-} // namespace Kernel
-} // namespace Mantid
+}
+}

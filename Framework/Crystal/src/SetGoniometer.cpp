@@ -88,7 +88,7 @@ void SetGoniometer::exec() {
                               << "_FixedValue\n";
           axisName = "GoniometerAxis" + Strings::toString(i) + "_FixedValue";
           try {
-            Mantid::Types::DateAndTime now = Mantid::Types::DateAndTime::getCurrentTime();
+            Types::Core::DateAndTime now = Types::Core::DateAndTime::getCurrentTime();
             auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");

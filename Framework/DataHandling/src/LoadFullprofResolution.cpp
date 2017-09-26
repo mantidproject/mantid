@@ -784,7 +784,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
   writer.setOptions(XMLWriter::PRETTY_PRINT);
 
   //   Get current time
-  Mantid::Types::DateAndTime date = Mantid::Types::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime date = Types::Core::DateAndTime::getCurrentTime();
   std::string ISOdate = date.toISO8601String();
   std::string ISOdateShort =
       ISOdate.substr(0, 19); // Remove fraction of seconds

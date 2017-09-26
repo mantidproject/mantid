@@ -8,7 +8,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include <Poco/Timer.h>
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include <mutex>
 
 namespace Mantid {
@@ -46,7 +46,7 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Types::DateAndTime startTime = Mantid::Types::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -71,7 +71,7 @@ private:
   int m_numExtractDataCalls; ///< Number of times extractData has been called
 
   /// Date and time of the next time to end the run
-  Mantid::Types::DateAndTime m_nextEndRunTime;
+  Mantid::Types::Core::DateAndTime m_nextEndRunTime;
 
   /// Fake run number to give
   int m_runNumber;

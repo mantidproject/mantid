@@ -4,7 +4,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -66,7 +66,7 @@ private:
   void init() override;
   void exec() override;
 
-  std::vector<Mantid::Types::DateAndTime>
+  std::vector<Types::Core::DateAndTime>
   getAbsoluteTimes(const NeXus::NXDouble &) const;
   std::vector<double> getAxis(const NeXus::NXDouble &) const;
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
@@ -107,7 +107,7 @@ private:
   std::string m_instName;            ///< instrument name to load the IDF
   std::set<std::string> m_instNames; ///< supported instruments
   std::string m_fileName;            ///< file name to load
-  Mantid::Types::DateAndTime m_startTime;   ///< start time of acquisition
+  Types::Core::DateAndTime m_startTime;   ///< start time of acquisition
   ScanType m_scanType;               ///< NoScan, DetectorScan or OtherScan
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info

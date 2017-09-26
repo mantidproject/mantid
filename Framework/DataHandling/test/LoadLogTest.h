@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadLogTest : public CxxTest::TestSuite {
 public:
@@ -173,7 +174,7 @@ public:
     Property *prop = 0;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
-    std::vector<Mantid::Types::DateAndTime> times;
+    std::vector<DateAndTime> times;
 
     TS_ASSERT_THROWS_NOTHING(prop = output->run().getLogData("Temp1"));
     tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);

@@ -2,10 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeInterval.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>
@@ -14,15 +13,16 @@
 const char *START_COLLECTION = "START_COLLECTION";
 const char *STOP_COLLECTION = "STOP_COLLECTION";
 
-using Mantid::Types::DateAndTime;
 using std::size_t;
 
 namespace Mantid {
+
+using Types::Core::DateAndTime;
 namespace Kernel {
 namespace {
 /// static logger
 Logger g_log("LogParser");
-} // namespace
+}
 
 /// @returns the name of the log created that defines the status during a run
 const std::string LogParser::statusLogName() { return std::string("running"); }
@@ -159,8 +159,7 @@ Try to pass the periods
 @param idata : stream of input data
 @param periods : periods data to update
 */
-void LogParser::tryParsePeriod(const std::string &scom,
-                               const Types::DateAndTime &time,
+void LogParser::tryParsePeriod(const std::string &scom, const DateAndTime &time,
                                std::istringstream &idata,
                                Kernel::TimeSeriesProperty<int> *const periods) {
   int ip = -1;
@@ -190,8 +189,8 @@ void LogParser::tryParsePeriod(const std::string &scom,
 }
 
 /** Create given the icpevent log property.
- *  @param log :: A pointer to the property
- */
+*  @param log :: A pointer to the property
+*/
 LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   Kernel::TimeSeriesProperty<int> *periods =
       new Kernel::TimeSeriesProperty<int>(periodsLogName());
@@ -203,14 +202,14 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
   const Kernel::TimeSeriesProperty<std::string> *icpLog =
       dynamic_cast<const Kernel::TimeSeriesProperty<std::string> *>(log);
   if (!icpLog || icpLog->size() == 0) {
-    periods->addValue(Mantid::Types::DateAndTime(), 1);
-    status->addValue(Mantid::Types::DateAndTime(), true);
+    periods->addValue(Types::Core::DateAndTime(), 1);
+    status->addValue(Types::Core::DateAndTime(), true);
     g_log.warning()
         << "Cannot process ICPevent log. Period 1 assumed for all data.\n";
     return;
   }
 
-  std::multimap<Mantid::Types::DateAndTime, std::string> logm =
+  std::multimap<Types::Core::DateAndTime, std::string> logm =
       icpLog->valueAsMultiMap();
   CommandMap command_map =
       createCommandMap(LogParser::isICPEventLogNewStyle(logm));
@@ -261,7 +260,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   ostr << period;
   Kernel::TimeSeriesProperty<bool> *p =
       new Kernel::TimeSeriesProperty<bool>("period " + ostr.str());
-  std::map<Mantid::Types::DateAndTime, int> pMap = periods->valueAsMap();
+  std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)
     p->addValue(it->first, false);
@@ -274,7 +273,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
 /**
  * Create a log vale for the current period.
  * @param period: The period number to create the log entry for.
- */
+*/
 Kernel::Property *LogParser::createCurrentPeriodLog(const int &period) const {
   Kernel::PropertyWithValue<int> *currentPeriodProperty =
       new Kernel::PropertyWithValue<int>("current_period", period);
@@ -294,12 +293,13 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createRunningLog() const {
 namespace {
 /// Define operator for checking for new-style icp events
 struct hasNewStyleCommands {
-  bool operator()(const std::pair<Mantid::Types::DateAndTime, std::string> &p) {
+  bool
+  operator()(const std::pair<Mantid::Types::Core::DateAndTime, std::string> &p) {
     return p.second.find(START_COLLECTION) != std::string::npos ||
            p.second.find(STOP_COLLECTION) != std::string::npos;
   }
 };
-} // namespace
+}
 
 /**
  * Check if the icp log commands are in the new style. The new style is the one
@@ -308,7 +308,7 @@ struct hasNewStyleCommands {
  * @param logm :: A log map created from a icp-event log.
  */
 bool LogParser::isICPEventLogNewStyle(
-    const std::multimap<Mantid::Types::DateAndTime, std::string> &logm) {
+    const std::multimap<Types::Core::DateAndTime, std::string> &logm) {
   hasNewStyleCommands checker;
 
   return std::find_if(logm.begin(), logm.end(), checker) != logm.end();
@@ -324,7 +324,7 @@ bool LogParser::isICPEventLogNewStyle(
  *             TimeSeriesProperty<double>.
  * @return The mean value over time.
  * @throw runtime_error if the property is not TimeSeriesProperty<double>
- */
+*/
 double timeMean(const Kernel::Property *p) {
   const Kernel::TimeSeriesProperty<double> *dp =
       dynamic_cast<const Kernel::TimeSeriesProperty<double> *>(p);
@@ -338,17 +338,17 @@ double timeMean(const Kernel::Property *p) {
     return dp->nthValue(1);
   }
   double res = 0.;
-  Types::time_duration total(0, 0, 0, 0);
+  Types::Core::time_duration total(0, 0, 0, 0);
   size_t dp_size = dp->size();
   for (size_t i = 0; i < dp_size; i++) {
     Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
-    Types::time_duration dt = t.length();
+    Types::Core::time_duration dt = t.length();
     total += dt;
     res += dp->nthValue(static_cast<int>(i)) *
-           Mantid::Types::DateAndTime::secondsFromDuration(dt);
+           Types::Core::DateAndTime::secondsFromDuration(dt);
   }
 
-  double total_seconds = Mantid::Types::DateAndTime::secondsFromDuration(total);
+  double total_seconds = Types::Core::DateAndTime::secondsFromDuration(total);
 
   // If all the time stamps were the same, just return the first value.
   if (total_seconds == 0.0)
@@ -360,5 +360,5 @@ double timeMean(const Kernel::Property *p) {
   return res;
 }
 
-} // namespace Kernel
+} // namespace Geometry
 } // namespace Mantid

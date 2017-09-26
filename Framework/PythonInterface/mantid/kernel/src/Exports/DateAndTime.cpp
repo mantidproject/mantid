@@ -1,11 +1,8 @@
-#include "MantidTypes/DateAndTime.h"
-#include <MantidKernel/DateAndTimeHelpers.h>
+#include "MantidKernel/DateAndTime.h"
 #include <boost/python/class.hpp>
-#include <boost/python/make_constructor.hpp>
 #include <boost/python/operators.hpp> // Also provides self
 
-using Mantid::Types::DateAndTime;
-using Mantid::Types::time_duration;
+using namespace Mantid::Types::Core;
 using namespace boost::python;
 using boost::python::arg;
 
@@ -19,14 +16,11 @@ std::string ISO8601StringPlusSpace(DateAndTime &self) {
   return self.toISO8601String() + " ";
 }
 
-void createFromISO8601(DateAndTime &self, const std::string &date) {
-  self = Mantid::Types::DateAndTimeHelpers::createFromISO8601(date);
-}
-
 void export_DateAndTime() {
   class_<DateAndTime>("DateAndTime", no_init)
       // Constructors
-      .def("__init__", make_constructor(&createFromISO8601))
+      .def(init<const std::string>((arg("self"), arg("ISO8601 string")),
+                                   "Construct from an ISO8601 string"))
       .def(init<double, double>(
           (arg("self"), arg("seconds"), arg("nanoseconds")),
           "Construct using a number of seconds and nanoseconds (floats)"))

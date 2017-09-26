@@ -1,27 +1,8 @@
-#include "MantidTypes/DateAndTime.h"
-
-#include <boost/date_time/date.hpp>
-#include <boost/date_time/time.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <cmath>
-#include <exception>
-#include <limits>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
+#include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
 namespace Types {
-
-const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
-/// The epoch for GPS times.
-const boost::posix_time::ptime
-    DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
-
-/// Const of one second time duration
-const time_duration DateAndTime::ONE_SECOND =
-    boost::posix_time::time_duration(0, 0, 1, 0);
+namespace Core {
 
 namespace {
 /// Max allowed nanoseconds in the time; 2^62-1
@@ -131,6 +112,16 @@ time_t DateAndTime::utc_mktime(struct tm *utctime) {
   return result;
 }
 
+/// The epoch for GPS times.
+boost::posix_time::ptime DateAndTime::GPS_EPOCH() {
+  return boost::posix_time::ptime(boost::gregorian::date(1990, 1, 1));
+}
+
+/// Const of one second time duration
+time_duration DateAndTime::ONE_SECOND() {
+  return boost::posix_time::time_duration(0, 0, 1, 0);
+}
+
 //------------------------------------------------------------------------------------------------
 /** Default, empty constructor */
 DateAndTime::DateAndTime() : _nanoseconds(0) {}
@@ -231,7 +222,7 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
  * @return a boost::posix_time::ptime.
  */
 boost::posix_time::ptime DateAndTime::to_ptime() const {
-  return GPS_EPOCH + durationFromNanoseconds(_nanoseconds);
+  return GPS_EPOCH() + durationFromNanoseconds(_nanoseconds);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -249,7 +240,7 @@ void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime) {
     if (_ptime.is_not_a_date_time())
       _nanoseconds = MIN_NANOSECONDS;
   } else {
-    _nanoseconds = nanosecondsFromDuration(_ptime - GPS_EPOCH);
+    _nanoseconds = nanosecondsFromDuration(_ptime - GPS_EPOCH());
 
     // Check for overflow
     if (_nanoseconds < 0) {
@@ -361,6 +352,12 @@ DateAndTime DateAndTime::maximum() { return DateAndTime(MAX_NANOSECONDS); }
 
 /** Return the minimum time possible */
 DateAndTime DateAndTime::minimum() { return DateAndTime(MIN_NANOSECONDS); }
+
+/// A default date and time to use when time is not specified
+const DateAndTime &DateAndTime::defaultTime() {
+  static DateAndTime time("1970-01-01T00:00:00");
+  return time;
+}
 
 //------------------------------------------------------------------------------------------------
 /** Sets the date and time using an ISO8601-formatted string
@@ -860,7 +857,6 @@ std::ostream &operator<<(std::ostream &stream, const DateAndTime &t) {
   stream << t.toSimpleString();
   return stream;
 }
-
+} // namespace Core
 } // namespace Types
-
 } // namespace Mantid

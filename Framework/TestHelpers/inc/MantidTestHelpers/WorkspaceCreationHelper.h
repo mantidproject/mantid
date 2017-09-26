@@ -14,24 +14,28 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/make_unique.h"
 
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
 }
-} // namespace Mantid
+}
 
 namespace WorkspaceCreationHelper {
 /// Create a Fibonacci series
@@ -302,8 +306,8 @@ createEventWorkspace(int numPixels, int numBins, int numEvents = 100,
 Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
     double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
-    Mantid::Types::DateAndTime run_start =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
+    Mantid::Types::Core::DateAndTime run_start =
+        Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00"));
 
 Mantid::DataObjects::EventWorkspace_sptr
 createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,

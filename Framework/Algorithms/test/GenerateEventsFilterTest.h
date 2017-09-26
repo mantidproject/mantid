@@ -1,40 +1,38 @@
 #ifndef MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
 #define MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
 
-#include <Poco/File.h>
-#include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <cmath>
+#include <Poco/File.h>
 
-#include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/GenerateEventsFilter.h"
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
 
 using namespace std;
 
 namespace {
 //----------------------------------------------------------------------------------------------
 /** Create an EventWorkspace containing an integer log
- * 1. Run start  = 10  (s)
- * 2. Run end    = 22  (s)
- * 3. Pulse      = 0.5 (s)
- * 4. Log change = 1   (s)
- */
+* 1. Run start  = 10  (s)
+* 2. Run end    = 22  (s)
+* 3. Pulse      = 0.5 (s)
+* 4. Log change = 1   (s)
+*/
 EventWorkspace_sptr createEventWorkspaceIntLog() {
   using namespace WorkspaceCreationHelper;
 
@@ -50,10 +48,10 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
   int64_t pulsetime_ns = 5 * factor / 10;
   int64_t logduration_ns = 1 * factor;
 
-  Mantid::Types::DateAndTime runstarttime(runstarttime_ns);
+  Types::Core::DateAndTime runstarttime(runstarttime_ns);
   eventws->mutableRun().addProperty("run_start",
                                     runstarttime.toISO8601String());
-  Mantid::Types::DateAndTime runendtime(runstoptime_ns);
+  Types::Core::DateAndTime runendtime(runstoptime_ns);
   eventws->mutableRun().addProperty("run_end", runendtime.toISO8601String());
 
   // 3. Proton charge log
@@ -61,7 +59,7 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
       new Kernel::TimeSeriesProperty<double>("proton_charge");
   int64_t curtime_ns = runstarttime_ns;
   while (curtime_ns <= runstoptime_ns) {
-    Mantid::Types::DateAndTime curtime(curtime_ns);
+    Types::Core::DateAndTime curtime(curtime_ns);
     protonchargelog->addValue(curtime, 1.0);
     curtime_ns += pulsetime_ns;
   }
@@ -76,7 +74,7 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
   // double period = static_cast<double>(pulsetime_ns);
   curtime_ns = runstarttime_ns;
   while (curtime_ns < runstoptime_ns) {
-    Mantid::Types::DateAndTime curtime(curtime_ns);
+    Types::Core::DateAndTime curtime(curtime_ns);
     dummyintlog->addValue(curtime, logvalue);
 
     curtime_ns += logduration_ns;
@@ -86,7 +84,7 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
 
   return eventws;
 }
-} // namespace
+}
 class GenerateEventsFilterTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -141,7 +139,7 @@ public:
 
     TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), 1);
     Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
-    Mantid::Types::DateAndTime runstart(3000000000);
+    Types::Core::DateAndTime runstart(3000000000);
     TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(),
                      runstart.totalNanoseconds() + 100);
     TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(),
@@ -201,14 +199,13 @@ public:
 
     std::string runstarttimestr =
         eventWS->run().getProperty("run_start")->value();
-    DateAndTime runstarttime =
-        DateAndTimeHelpers::createFromISO8601(runstarttimestr);
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             eventWS->run().getProperty("proton_charge"));
-    Mantid::Types::DateAndTime runstoptime = Mantid::Types::DateAndTime(
+    Types::Core::DateAndTime runstoptime = Types::Core::DateAndTime(
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // b) First interval
@@ -226,8 +223,8 @@ public:
 
     // d) Randomly
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(40);
-    Mantid::Types::DateAndTime t0 = splitterR.start();
-    Mantid::Types::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.start();
+    Types::Core::DateAndTime tf = splitterR.stop();
     int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, timeinterval_ns);
     int64_t dt_runtimestart = t0.totalNanoseconds() - runstarttime_ns;
@@ -364,7 +361,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log
-   */
+    */
   void test_genFilterByIntegerLog() {
     // 1. Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
@@ -435,7 +432,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test to generate a set of filters against an integer log by using the
    * single value mode
-   */
+    */
   void test_genFilterByIntegerLog2() {
     // Create input
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspaceIntLog();
@@ -514,7 +511,7 @@ public:
     int64_t runstoptime_ns = 3001000000;
     int64_t pulsetime_ns = 100000;
 
-    Mantid::Types::DateAndTime runstarttime(runstarttime_ns);
+    Types::Core::DateAndTime runstarttime(runstarttime_ns);
     eventws->mutableRun().addProperty("run_start",
                                       runstarttime.toISO8601String());
 
@@ -523,7 +520,7 @@ public:
         new Kernel::TimeSeriesProperty<double>("proton_charge");
     int64_t curtime_ns = runstarttime_ns;
     while (curtime_ns <= runstoptime_ns) {
-      Mantid::Types::DateAndTime curtime(curtime_ns);
+      Types::Core::DateAndTime curtime(curtime_ns);
       protonchargelog->addValue(curtime, 1.0);
       curtime_ns += pulsetime_ns;
     }
@@ -537,7 +534,7 @@ public:
     double period = static_cast<double>(pulsetime_ns);
     curtime_ns = runstarttime_ns;
     while (curtime_ns < runstoptime_ns) {
-      Mantid::Types::DateAndTime curtime(curtime_ns);
+      Types::Core::DateAndTime curtime(curtime_ns);
       double value =
           sin(M_PI * static_cast<double>(curtime_ns) / period * 0.25);
       sinlog->addValue(curtime, value);
@@ -551,7 +548,7 @@ public:
     period = static_cast<double>(pulsetime_ns * 10);
     curtime_ns = runstarttime_ns;
     while (curtime_ns < runstoptime_ns) {
-      Mantid::Types::DateAndTime curtime(curtime_ns);
+      Types::Core::DateAndTime curtime(curtime_ns);
       double value = sin(2 * M_PI * static_cast<double>(curtime_ns) / period);
       coslog->addValue(curtime, value);
       curtime_ns += pulsetime_ns * 2;
@@ -602,7 +599,7 @@ public:
 
     TS_ASSERT_EQUALS(splittersws->x(0).size(), 2);
     TS_ASSERT_EQUALS(splittersws->y(0).size(), 1);
-    Mantid::Types::DateAndTime runstart(3000000000);
+    Types::Core::DateAndTime runstart(3000000000);
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
                      runstart.totalNanoseconds() + 100);
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[1] * 1.E9),
@@ -661,15 +658,14 @@ public:
 
     std::string runstarttimestr =
         eventWS->run().getProperty("run_start")->value();
-    DateAndTime runstarttime =
-        DateAndTimeHelpers::createFromISO8601(runstarttimestr);
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             eventWS->run().getProperty("proton_charge"));
-    DateAndTime runstoptime =
-        DateAndTime(protonchargelog->lastTime().totalNanoseconds() + 100000);
+    Types::Core::DateAndTime runstoptime = Types::Core::DateAndTime(
+        protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First interval
     TS_ASSERT_EQUALS(static_cast<int64_t>(splittersws->x(0)[0] * 1.E9),
@@ -687,8 +683,8 @@ public:
     /* d) Randomly
 
     Kernel::SplittingInterval splitterR = splittersws->getSplitter(40);
-    Mantid::Types::DateAndTime t0 = splitterR.start();
-    Mantid::Types::DateAndTime tf = splitterR.stop();
+    Types::Core::DateAndTime t0 = splitterR.start();
+    Types::Core::DateAndTime tf = splitterR.stop();
     int64_t dt_ns = tf.totalNanoseconds()-t0.totalNanoseconds();
     TS_ASSERT_EQUALS(dt_ns, timeinterval_ns);
     int64_t dt_runtimestart = t0.totalNanoseconds()-runstarttime_ns;
@@ -1069,14 +1065,13 @@ public:
 
     std::string runstarttimestr =
         eventWS->run().getProperty("run_start")->value();
-    DateAndTime runstarttime =
-        DateAndTimeHelpers::createFromISO8601(runstarttimestr);
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
     int64_t runstarttime_ns = runstarttime.totalNanoseconds();
 
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             eventWS->run().getProperty("proton_charge"));
-    Mantid::Types::DateAndTime runstoptime = Mantid::Types::DateAndTime(
+    Types::Core::DateAndTime runstoptime = Types::Core::DateAndTime(
         protonchargelog->lastTime().totalNanoseconds() + 100000);
 
     // First 3 intervals
@@ -1110,7 +1105,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Test that time intervals consisting solely of zero-values throws
-   */
+  */
   void test_timeIntervalsOnlyZeroValuesThrows() {
     // Create input Workspace & initial setup
     DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
@@ -1143,7 +1138,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Convert the splitters stored in a matrix workspace to a vector of
    * SplittingInterval objects
-   */
+    */
   size_t convertMatrixSplitterToSplitters(
       API::MatrixWorkspace_const_sptr matrixws,
       std::vector<Kernel::SplittingInterval> &splitters) {
@@ -1155,9 +1150,8 @@ public:
     for (size_t i = 0; i < vecY.size(); ++i) {
       if (vecY[i] >= -0.0) {
         // A valid time interval for Splitters
-        Mantid::Types::DateAndTime tstart(static_cast<int64_t>(vecX[i] * 1.E9));
-        Mantid::Types::DateAndTime tstop(
-            static_cast<int64_t>(vecX[i + 1] * 1.E9));
+        Types::Core::DateAndTime tstart(static_cast<int64_t>(vecX[i] * 1.E9));
+        Types::Core::DateAndTime tstop(static_cast<int64_t>(vecX[i + 1] * 1.E9));
         int wsindex = static_cast<int>(vecY[i]);
 
         Kernel::SplittingInterval ti(tstart, tstop, wsindex);

@@ -23,7 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::Types::TofEvent;
+using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CompareWorkspaces)

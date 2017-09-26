@@ -27,8 +27,8 @@ Logger g_log("DateAndTime");
  *@param date Date used to create DateAndTime object. May be sanitized first.
  *
  */
-DateAndTime createFromSanitizedISO8601(const std::string &date) {
-  return DateAndTime(verifyAndSanitizeISO8601(date));
+Types::Core::DateAndTime createFromSanitizedISO8601(const std::string &date) {
+  return Types::Core::DateAndTime(verifyAndSanitizeISO8601(date));
 }
 
 /** Check if a string is iso8601 format.

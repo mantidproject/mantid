@@ -11,7 +11,7 @@ using namespace Mantid::API;
 using std::string;
 using std::stringstream;
 using std::vector;
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {

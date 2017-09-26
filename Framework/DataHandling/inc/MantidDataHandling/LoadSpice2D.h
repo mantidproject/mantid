@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LoadSpice2D_H
 #define MANTID_DATAHANDLING_LoadSpice2D_H
 
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/XmlHandler.h"
@@ -120,8 +120,8 @@ private:
   double m_wavelength{0.0};
   double m_dwavelength{0.0};
   double m_sansSpiceXmlFormatVersion{0.0};
-  Mantid::Types::DateAndTime m_startTime;
-  Mantid::Types::DateAndTime m_endTime;
+  Mantid::Types::Core::DateAndTime m_startTime;
+  Mantid::Types::Core::DateAndTime m_endTime;
 };
 } // namespace DataHandling
 } // namespace Mantid

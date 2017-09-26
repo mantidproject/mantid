@@ -1,6 +1,7 @@
 #include "MantidDataHandling/ProcessBankData.h"
 
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace DataHandling {
@@ -73,10 +74,10 @@ void ProcessBankData::run() { // override {
   }
 
   // Default pulse time (if none are found)
-  Mantid::Types::DateAndTime pulsetime;
+  Mantid::Types::Core::DateAndTime pulsetime;
   int periodNumber = 1;
   int periodIndex = 0;
-  Mantid::Types::DateAndTime lastpulsetime(0);
+  Mantid::Types::Core::DateAndTime lastpulsetime(0);
 
   bool pulsetimesincreasing = true;
 

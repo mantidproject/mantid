@@ -58,7 +58,7 @@ public:
   //----------------------------------------------------------------------
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Types::DateAndTime startTime = Mantid::Types::DateAndTime()) override;
+  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   //----------------------------------------------------------------------

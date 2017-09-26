@@ -9,7 +9,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Interpolation.h"
 
 // STL

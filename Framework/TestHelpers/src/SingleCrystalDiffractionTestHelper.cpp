@@ -21,7 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {

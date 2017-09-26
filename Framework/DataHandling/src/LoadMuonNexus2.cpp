@@ -34,14 +34,14 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
-using namespace Kernel::DateAndTimeHelpers;
+using namespace DateAndTimeHelpers;
 using namespace API;
 using Geometry::Instrument;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}

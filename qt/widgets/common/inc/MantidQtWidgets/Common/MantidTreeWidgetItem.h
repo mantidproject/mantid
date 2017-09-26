@@ -2,7 +2,7 @@
 #define MANTIDTREEWIDGETITEM_H
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <MantidTypes/DateAndTime.h>
+#include <MantidKernel/DateAndTime.h>
 #include <MantidQtWidgets/Common/WorkspaceObserver.h>
 #include <QTreeWidgetItem>
 
@@ -24,7 +24,7 @@ public:
 private:
   bool operator<(const QTreeWidgetItem &other) const override;
   MantidTreeWidget *m_parent;
-  static Mantid::Types::DateAndTime getLastModified(const QTreeWidgetItem *);
+  static Mantid::Types::Core::DateAndTime getLastModified(const QTreeWidgetItem *);
   int m_sortPos;
 };
 }

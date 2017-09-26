@@ -10,7 +10,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -21,7 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Types::Core::DateAndTime;
 using namespace std;
 
 typedef Mantid::Kernel::StringTokenizer tokenizer;
@@ -312,7 +311,7 @@ Instrument_const_sptr CreateChunkingFromInstrument::getInstrument() {
       nxsfile.openGroup(top_entry_name, "NXentry");
       nxsfile.readData("start_time", start_time);
       tempWS->mutableRun().addProperty(
-          "run_start", DateAndTimeHelpers::createFromISO8601(start_time).toISO8601String(), true);
+          "run_start", DateAndTime(start_time).toISO8601String(), true);
 
       // get the instrument name
       nxsfile.openGroup("instrument", "NXinstrument");

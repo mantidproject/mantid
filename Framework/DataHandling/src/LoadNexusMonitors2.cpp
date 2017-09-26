@@ -329,7 +329,7 @@ void LoadNexusMonitors2::exec() {
   // Old SNS files don't have this
   try {
     // The run_start will be loaded from the pulse times.
-    Mantid::Types::DateAndTime run_start(0, 0);
+    Types::Core::DateAndTime run_start(0, 0);
     run_start = m_workspace->getFirstPulseTime();
     m_workspace->mutableRun().addProperty("run_start",
                                           run_start.toISO8601String(), true);
@@ -796,7 +796,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   file.closeData();
   file.openData("event_time_zero");
   file.getDataCoerce(seconds);
-  Mantid::Types::DateAndTime pulsetime_offset;
+  Mantid::Types::Core::DateAndTime pulsetime_offset;
   {
     std::string startTime;
     file.getAttr("offset", startTime);
@@ -807,8 +807,8 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   // load up the event list
   DataObjects::EventList &event_list = eventWS->getSpectrum(i);
 
-  Mantid::Types::DateAndTime pulsetime(0);
-  Mantid::Types::DateAndTime lastpulsetime(0);
+  Mantid::Types::Core::DateAndTime pulsetime(0);
+  Mantid::Types::Core::DateAndTime lastpulsetime(0);
   std::size_t numEvents = time_of_flight.size();
   bool pulsetimesincreasing = true;
   size_t pulse_index(0);
@@ -826,7 +826,8 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
     if (pulsetime < lastpulsetime)
       pulsetimesincreasing = false;
     lastpulsetime = pulsetime;
-    event_list.addEventQuickly(Types::TofEvent(time_of_flight[j], pulsetime));
+    event_list.addEventQuickly(
+        Types::Event::TofEvent(time_of_flight[j], pulsetime));
   }
   if (pulsetimesincreasing)
     event_list.setSortOrder(DataObjects::PULSETIME_SORT);

@@ -1,23 +1,21 @@
 #ifndef TIMESERIESPROPERTYTEST_H_
 #define TIMESERIESPROPERTYTEST_H_
 
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/TimeInterval.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/make_unique.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSplitter.h"
 
-#include <boost/make_shared.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <vector>
 
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<double>. Callee owns the returned object.
@@ -34,10 +32,9 @@ class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<int>. Callee owns the returned object.
   TimeSeriesProperty<int> *createIntegerTSP(int numberOfValues) {
     TimeSeriesProperty<int> *log = new TimeSeriesProperty<int>("intProp");
-    auto startTime =
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    DateAndTime startTime("2007-11-30T16:17:00");
     for (int value = 0; value < numberOfValues; ++value) {
-      auto time = startTime + value * 10.0;
+      DateAndTime time = startTime + value * 10.0;
       TS_ASSERT_THROWS_NOTHING(log->addValue(time, value + 1));
     }
     return log;
@@ -172,14 +169,10 @@ public:
     TS_ASSERT_DELTA(timeSec[3], 30.0, 1e-6);
     std::vector<DateAndTime> time;
     time = p->timesAsVector();
-    TS_ASSERT_EQUALS(
-        time[0], DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(
-        time[1], DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(
-        time[2], DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(
-        time[3], DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(time[0], DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(time[1], DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(time[2], DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(time[3], DateAndTime("2007-11-30T16:17:30"));
 
     delete p;
   }
@@ -187,7 +180,7 @@ public:
   void test_replaceValues() {
     // Arrange
     size_t num = 1000;
-    auto first = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    DateAndTime first("2007-11-30T16:17:10");
     std::vector<DateAndTime> times;
 
     std::vector<double> values;
@@ -214,7 +207,7 @@ public:
 
   void test_addValues() {
     size_t num = 1000;
-    auto first = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    DateAndTime first("2007-11-30T16:17:10");
     std::vector<DateAndTime> times;
 
     std::vector<double> values;
@@ -257,13 +250,11 @@ public:
 
     TS_ASSERT_EQUALS(log->size(), 5);
 
-    auto t0 = log->firstTime();
-    auto tf = log->lastTime();
+    DateAndTime t0 = log->firstTime();
+    DateAndTime tf = log->lastTime();
 
-    TS_ASSERT_EQUALS(
-        t0, DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(
-        tf, DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:10"));
+    TS_ASSERT_EQUALS(t0, DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(tf, DateAndTime("2007-11-30T16:19:10"));
 
     delete log;
     delete log2;
@@ -318,8 +309,8 @@ public:
   void test_filterByTime() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
     TS_ASSERT_EQUALS(log->realSize(), 6);
-    auto start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    auto stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
@@ -337,8 +328,8 @@ public:
     TS_ASSERT_EQUALS(log->realSize(), 6);
 
     Mantid::Kernel::SplittingInterval interval0(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40"), 0);
+        DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
+        0);
 
     Mantid::Kernel::TimeSplitterType splitters;
     splitters.push_back(interval0);
@@ -358,12 +349,12 @@ public:
     TS_ASSERT_EQUALS(log->realSize(), 10);
 
     Mantid::Kernel::SplittingInterval interval0(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40"), 0);
+        DateAndTime("2007-11-30T16:17:10"), DateAndTime("2007-11-30T16:17:40"),
+        0);
 
     Mantid::Kernel::SplittingInterval interval1(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:05"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:25"), 0);
+        DateAndTime("2007-11-30T16:18:05"), DateAndTime("2007-11-30T16:18:25"),
+        0);
 
     Mantid::Kernel::TimeSplitterType splitters;
     splitters.push_back(interval0);
@@ -385,8 +376,8 @@ public:
     TimeSeriesProperty<int> *log = createIntegerTSP(1);
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
-    auto start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    auto stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
     log->filterByTime(start, stop);
 
     // Still there!
@@ -402,8 +393,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(log->addValue("1990-01-01T00:00:00", 1));
     TS_ASSERT_EQUALS(log->realSize(), 1);
 
-    auto start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    auto stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
     log->filterByTime(start, stop);
 
     // Still there!
@@ -434,15 +425,15 @@ public:
     DateAndTime t;
 
     s = splitter[0];
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:09");
+    t = DateAndTime("2007-11-30T16:17:09");
     TS_ASSERT_DELTA(s.start(), t, 1e-3);
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:11");
+    t = DateAndTime("2007-11-30T16:17:11");
     TS_ASSERT_DELTA(s.stop(), t, 1e-3);
 
     s = splitter[1];
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:29");
+    t = DateAndTime("2007-11-30T16:17:29");
     TS_ASSERT_DELTA(s.start(), t, 1e-3);
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:41");
+    t = DateAndTime("2007-11-30T16:17:41");
     TS_ASSERT_DELTA(s.stop(), t, 1e-3);
 
     // Now test with left-aligned log value boundaries
@@ -451,15 +442,15 @@ public:
     TS_ASSERT_EQUALS(splitter.size(), 2);
 
     s = splitter[0];
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    t = DateAndTime("2007-11-30T16:17:10");
     TS_ASSERT_DELTA(s.start(), t, 1e-3);
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
+    t = DateAndTime("2007-11-30T16:17:20");
     TS_ASSERT_DELTA(s.stop(), t, 1e-3);
 
     s = splitter[1];
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    t = DateAndTime("2007-11-30T16:17:30");
     TS_ASSERT_DELTA(s.start(), t, 1e-3);
-    t = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50");
+    t = DateAndTime("2007-11-30T16:17:50");
     TS_ASSERT_DELTA(s.stop(), t, 1e-3);
 
     // Check throws if min > max
@@ -486,84 +477,68 @@ public:
     TS_ASSERT_THROWS_NOTHING(log.addValue("2007-11-30T16:17:50", 2));
 
     // Create a TimeInterval that's wider than this log
-    TimeInterval interval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"));
+    TimeInterval interval(DateAndTime("2007-11-30T16:16:00"),
+                          DateAndTime("2007-11-30T16:18:50"));
 
     TimeSplitterType splitter;
     // Test good at both ends
     log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
     log.expandFilterToRange(splitter, 1.0, 2.2, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(
-        splitter[0].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[0].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[1].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[1].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"),
+                    1e-3);
 
     // Test bad at both ends
     log.makeFilterByValue(splitter, 2.5, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 2.5, 10.0, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(
-        splitter[0].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[0].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:20"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"),
+                    1e-3);
 
     // Test good at start, bad at end
     log.makeFilterByValue(splitter, -1.0, 1.5, 0.0, false);
     log.expandFilterToRange(splitter, -1.0, 1.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(
-        splitter[0].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[0].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:16:00"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"),
+                    1e-3);
 
     // Test good at end, bad at start
     log.makeFilterByValue(splitter, 1.99, 2.5, 1.0, false);
     log.expandFilterToRange(splitter, 1.99, 2.5, interval);
     TS_ASSERT_EQUALS(splitter.size(), 2);
-    TS_ASSERT_DELTA(
-        splitter[0].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[0].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[1].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[1].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:10"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[1].start(), DateAndTime("2007-11-30T16:17:50"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"),
+                    1e-3);
 
     // Check throws if min > max
     TS_ASSERT_THROWS(log.expandFilterToRange(splitter, 2.0, 1.0, interval),
                      std::invalid_argument);
 
     // Test good at both ends, but interval narrower than log range
-    TimeInterval narrowinterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:41"));
+    TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"),
+                                DateAndTime("2007-11-30T16:17:41"));
     log.makeFilterByValue(splitter, 0.0, 10.0, 0.0, false);
     log.expandFilterToRange(splitter, 0.0, 10.0, narrowinterval);
     TS_ASSERT_EQUALS(splitter.size(), 1);
-    TS_ASSERT_DELTA(
-        splitter[0].start(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"), 1e-3);
-    TS_ASSERT_DELTA(
-        splitter[0].stop(),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA(splitter[0].start(), DateAndTime("2007-11-30T16:17:00"),
+                    1e-3);
+    TS_ASSERT_DELTA(splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"),
+                    1e-3);
   }
 
   void test_expandFilterToRange_throws_for_string_property() {
@@ -580,35 +555,30 @@ public:
 
     // Test a filter that's fully within the range of both properties
     TimeSplitterType filter;
-    filter.push_back(SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:29")));
+    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
+                                       DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
 
     // Test a filter that starts before the log start time
-    filter[0] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:30"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:13"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:16:30"),
+                                  DateAndTime("2007-11-30T16:17:13"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.820, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.070, 0.001);
 
     // How about one that's entirely outside the log range (should just take the
     // last value)
-    filter[0] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2013-01-01T00:00:00"),
-        DateAndTimeHelpers::createFromISO8601("2013-01-01T01:00:00"));
+    filter[0] = SplittingInterval(DateAndTime("2013-01-01T00:00:00"),
+                                  DateAndTime("2013-01-01T01:00:00"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 10.55, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 5.0, 0.001);
 
     // Test a filter with two separate ranges, one of which goes past the end of
     // the log
-    filter[0] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"));
-    filter.push_back(SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:45")));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
+                                  DateAndTime("2007-11-30T16:17:15"));
+    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),
+                                       DateAndTime("2007-11-30T16:17:45")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
@@ -616,26 +586,22 @@ public:
     // the first)
     // It should work fine.
     filter[0] = filter[1];
-    filter[0] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
+                                  DateAndTime("2007-11-30T16:17:15"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
     // What about an overlap between the filters? It's odd, but it's allowed.
-    filter[0] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"));
-    filter[1] = SplittingInterval(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"),
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
+    filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
+                                  DateAndTime("2007-11-30T16:17:15"));
+    filter[1] = SplittingInterval(DateAndTime("2007-11-30T16:17:10"),
+                                  DateAndTime("2007-11-30T16:17:20"));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 8.16, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 1.75, 0.001);
 
     // Check the correct behaviour of empty of single value logs.
     TS_ASSERT(std::isnan(dProp->averageValueInFilter(filter)));
-    iProp->addValue(
-        DateAndTimeHelpers::createFromISO8601("2010-11-30T16:17:25"), 99);
+    iProp->addValue(DateAndTime("2010-11-30T16:17:25"), 99);
     TS_ASSERT_EQUALS(iProp->averageValueInFilter(filter), 99.0);
 
     // Clean up
@@ -674,24 +640,24 @@ public:
     // Make a splitter
     DateAndTime start, stop;
     TimeSplitterType splitter;
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
+    start = DateAndTime("2007-11-30T16:17:10");
+    stop = DateAndTime("2007-11-30T16:17:40");
     splitter.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:55");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:56");
+    start = DateAndTime("2007-11-30T16:17:55");
+    stop = DateAndTime("2007-11-30T16:17:56");
     splitter.push_back(SplittingInterval(start, stop, 1));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:56");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:01");
+    start = DateAndTime("2007-11-30T16:17:56");
+    stop = DateAndTime("2007-11-30T16:18:01");
     splitter.push_back(SplittingInterval(start, stop, 2)); // just one entry
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:09");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:21");
+    start = DateAndTime("2007-11-30T16:18:09");
+    stop = DateAndTime("2007-11-30T16:18:21");
     splitter.push_back(SplittingInterval(start, stop, 3));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:45");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:22:50");
+    start = DateAndTime("2007-11-30T16:18:45");
+    stop = DateAndTime("2007-11-30T16:22:50");
     splitter.push_back(SplittingInterval(start, stop, 4));
 
     log->splitByTime(splitter, outputs, false);
@@ -729,12 +695,12 @@ public:
     // Make a splitter
     DateAndTime start, stop;
     TimeSplitterType splitter;
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
+    start = DateAndTime("2007-11-30T16:17:10");
+    stop = DateAndTime("2007-11-30T16:17:40");
     splitter.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:35");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:59");
+    start = DateAndTime("2007-11-30T16:17:35");
+    stop = DateAndTime("2007-11-30T16:17:59");
     splitter.push_back(SplittingInterval(start, stop, 0));
 
     log->splitByTime(splitter, outputs, false);
@@ -757,20 +723,13 @@ public:
   void test_splitByTimeVector() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:55"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:56"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:09"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:45"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:22:50"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:10"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:40"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:55"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:56"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:18:09"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:18:45"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:22:50"));
 
     std::vector<int> split_target_vec;
     split_target_vec.push_back(1);
@@ -781,26 +740,16 @@ public:
     split_target_vec.push_back(3);
 
     TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-                 1);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"),
-                 2);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
-                 3);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30"),
-                 4);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00"),
-                 5);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:30"),
-                 6);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00"),
-                 7);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:30"),
-                 8);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:00"),
-                 9);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:30"),
-                 10);
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
 
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
@@ -850,20 +799,13 @@ public:
   void test_splitByTimeVectorEarlySplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:00:10"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:00:40"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:07:55"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:07:56"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:08:09"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:08:45"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:12:50"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:40"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:55"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:56"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:09"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:45"));
+    split_time_vec.push_back(DateAndTime("2007-11-30T16:12:50"));
 
     std::vector<int> split_target_vec;
     split_target_vec.push_back(1);
@@ -874,26 +816,16 @@ public:
     split_target_vec.push_back(3);
 
     TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-                 1);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"),
-                 2);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
-                 3);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30"),
-                 4);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00"),
-                 5);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:30"),
-                 6);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00"),
-                 7);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:30"),
-                 8);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:00"),
-                 9);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:30"),
-                 10);
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
 
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
@@ -920,20 +852,13 @@ public:
   void test_splitByTimeVectorLaterSplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:00:10"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:00:40"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:07:55"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:07:56"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:08:09"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:08:45"));
-    split_time_vec.push_back(
-        DateAndTimeHelpers::createFromISO8601("2007-12-30T16:12:50"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:10"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:40"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:55"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:56"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:09"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:45"));
+    split_time_vec.push_back(DateAndTime("2007-12-30T16:12:50"));
 
     std::vector<int> split_target_vec;
     split_target_vec.push_back(1);
@@ -945,26 +870,16 @@ public:
 
     // create test log
     TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-                 1);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"),
-                 2);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
-                 3);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30"),
-                 4);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00"),
-                 5);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:30"),
-                 6);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00"),
-                 7);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:30"),
-                 8);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:00"),
-                 9);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:30"),
-                 10);
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
 
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
@@ -989,30 +904,19 @@ public:
   void test_splitByTimeVectorFastLogSplitter() {
     // create test log
     TimeSeriesProperty<int> log("test log");
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-                 1);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"),
-                 2);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"),
-                 3);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30"),
-                 4);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00"),
-                 5);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:30"),
-                 6);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00"),
-                 7);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:30"),
-                 8);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:00"),
-                 9);
-    log.addValue(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:21:30"),
-                 10);
+    log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
+    log.addValue(DateAndTime("2007-11-30T16:17:30"), 2);
+    log.addValue(DateAndTime("2007-11-30T16:18:00"), 3);
+    log.addValue(DateAndTime("2007-11-30T16:18:30"), 4);
+    log.addValue(DateAndTime("2007-11-30T16:19:00"), 5);
+    log.addValue(DateAndTime("2007-11-30T16:19:30"), 6);
+    log.addValue(DateAndTime("2007-11-30T16:20:00"), 7);
+    log.addValue(DateAndTime("2007-11-30T16:20:30"), 8);
+    log.addValue(DateAndTime("2007-11-30T16:21:00"), 9);
+    log.addValue(DateAndTime("2007-11-30T16:21:30"), 10);
 
     // create a high frequency splitter
-    auto split_time =
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    DateAndTime split_time("2007-11-30T16:17:00");
     int64_t dt = 100 * 1000;
 
     std::vector<DateAndTime> vec_split_times;
@@ -1164,23 +1068,23 @@ public:
   void test_getSingleValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
-    auto time1 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:23");
+    DateAndTime time1("2007-11-30T16:17:23");
     double v1 = p->getSingleValue(time1);
     TS_ASSERT_DELTA(v1, 5.55, 1e-6);
 
-    auto time2 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:03");
+    DateAndTime time2("2007-11-30T16:17:03");
     double v2 = p->getSingleValue(time2);
     TS_ASSERT_DELTA(v2, 9.99, 1e-6);
 
-    auto time3 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:31");
+    DateAndTime time3("2007-11-30T16:17:31");
     double v3 = p->getSingleValue(time3);
     TS_ASSERT_DELTA(v3, 10.55, 1e-6);
 
-    auto time4 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    DateAndTime time4("2007-11-30T16:17:00");
     double v4 = p->getSingleValue(time4);
     TS_ASSERT_DELTA(v4, 9.99, 1e-6);
 
-    auto time5 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:59");
+    DateAndTime time5("2007-11-30T16:16:59");
     double v5 = p->getSingleValue(time5);
     TS_ASSERT_DELTA(v5, 9.99, 1e-6);
 
@@ -1190,7 +1094,7 @@ public:
   void test_getSingleValue_emptyPropertyThrows() {
     const TimeSeriesProperty<int> empty("Empty");
 
-    auto time = DateAndTimeHelpers::createFromISO8601("2013-01-30T16:17:23");
+    DateAndTime time("2013-01-30T16:17:23");
     TS_ASSERT_THROWS(empty.getSingleValue(time), std::runtime_error);
     int i;
     TS_ASSERT_THROWS(empty.getSingleValue(time, i), std::runtime_error);
@@ -1199,11 +1103,11 @@ public:
   void test_firstLastTimeValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
-    auto t0 = p->firstTime();
-    auto tf = p->lastTime();
+    Mantid::Types::Core::DateAndTime t0 = p->firstTime();
+    Mantid::Types::Core::DateAndTime tf = p->lastTime();
 
-    auto t0c = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    auto tfc = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t0c("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tfc("2007-11-30T16:17:30");
 
     double v0 = p->firstValue();
     double vf = p->lastValue();
@@ -1267,9 +1171,9 @@ public:
     p1->merge(p2);
 
     // 3. Verify
-    auto t0 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    auto tf = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:35");
-    auto t1 = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05");
+    Mantid::Types::Core::DateAndTime t0("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tf("2007-11-30T16:17:35");
+    Mantid::Types::Core::DateAndTime t1("2007-11-30T16:17:05");
 
     TS_ASSERT_EQUALS(p1->firstTime(), t0);
     TS_ASSERT_EQUALS(p1->lastTime(), tf);
@@ -1359,10 +1263,10 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(p->clone());
 
     // 3. Check
-    std::vector<Mantid::Types::DateAndTime> times1 = p->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times1 = p->timesAsVector();
     std::vector<double> values1 = p->valuesAsVector();
 
-    std::vector<Mantid::Types::DateAndTime> times2 = newp->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times2 = newp->timesAsVector();
     std::vector<double> values2 = newp->valuesAsVector();
 
     TS_ASSERT_EQUALS(times1, times2);
@@ -1453,7 +1357,7 @@ public:
     TS_ASSERT_EQUALS(p->realSize(), 1);
     TS_ASSERT_EQUALS(p->lastValue(), 99);
 
-    auto t = DateAndTimeHelpers::createFromISO8601("2007-11-30T15:17:00");
+    DateAndTime t("2007-11-30T15:17:00");
     p->addValue(t, 88);
     TS_ASSERT_EQUALS(p->size(), 2);
 
@@ -1485,15 +1389,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Create method 1
-    std::vector<Mantid::Types::DateAndTime> times;
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(3.00);
@@ -1506,8 +1406,8 @@ public:
 
     TS_ASSERT_EQUALS(p->size(), p1->size());
     if (p->size() == p1->size()) {
-      std::vector<Mantid::Types::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::DateAndTime> times1 = p1->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 = p1->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1516,7 +1416,7 @@ public:
     }
 
     // 3 Create method 2
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
 
@@ -1531,8 +1431,8 @@ public:
 
     TS_ASSERT_EQUALS(p->size(), p2->size());
     if (p->size() == p2->size()) {
-      std::vector<Mantid::Types::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::DateAndTime> times1 = p2->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 = p2->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1594,25 +1494,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Types::DateAndTime, double> tmap = p->valueAsCorrectMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsCorrectMap();
 
     // 3. Check
-    std::vector<Mantid::Types::DateAndTime> times;
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(2.00);
     values.push_back(3.00);
     values.push_back(4.00);
 
-    std::map<Mantid::Types::DateAndTime, double>::iterator tit;
+    std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
     for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
       TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1637,21 +1533,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get multimap
-    std::multimap<Mantid::Types::DateAndTime, double> tmap =
+    std::multimap<Mantid::Types::Core::DateAndTime, double> tmap =
         p->valueAsMultiMap();
 
     // 3. Check
-    std::vector<Mantid::Types::DateAndTime> times;
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(1.99);
@@ -1685,25 +1576,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Types::DateAndTime, double> tmap = p->valueAsMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsMap();
 
     // 3. Check
-    std::vector<Mantid::Types::DateAndTime> times;
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:15"));
-    times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(2.00);
     values.push_back(3.00);
     values.push_back(4.00);
 
-    std::map<Mantid::Types::DateAndTime, double>::iterator tit;
+    std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
     for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
       TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1732,28 +1619,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Types::DateAndTime, double> tmap = p->valueAsMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsMap();
 
     // 3. Check
     TS_ASSERT_EQUALS(tmap.size(), 4);
 
     if (tmap.size() == 4) {
-      std::vector<Mantid::Types::DateAndTime> times;
-      times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2007-11-30T16:17:00"));
-      times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2007-11-30T16:17:10"));
-      times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2007-11-30T16:17:20"));
-      times.push_back(Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2007-11-30T16:17:30"));
+      std::vector<Mantid::Types::Core::DateAndTime> times;
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
       std::vector<double> values;
       values.push_back(1.00);
       values.push_back(2.00);
       values.push_back(3.00);
       values.push_back(4.00);
 
-      std::map<Mantid::Types::DateAndTime, double>::iterator tit;
+      std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
       size_t index = 0;
       for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
         TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1785,20 +1668,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 3. Test with term
-    auto t0 = p->nthTime(0);
-    auto t0c = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime t0 = p->nthTime(0);
+    Mantid::Types::Core::DateAndTime t0c("2007-11-30T16:17:00");
     TS_ASSERT_EQUALS(t0, t0c);
 
-    auto t2 = p->nthTime(2);
-    auto t2c = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
+    Mantid::Types::Core::DateAndTime t2 = p->nthTime(2);
+    Mantid::Types::Core::DateAndTime t2c("2007-11-30T16:17:20");
     TS_ASSERT_EQUALS(t2, t2c);
 
-    auto t3 = p->nthTime(3);
-    auto t3c = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t3 = p->nthTime(3);
+    Mantid::Types::Core::DateAndTime t3c("2007-11-30T16:17:30");
     TS_ASSERT_EQUALS(t3, t3c);
 
-    auto t100 = p->nthTime(100);
-    auto t100c = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t100 = p->nthTime(100);
+    Mantid::Types::Core::DateAndTime t100c("2007-11-30T16:17:30");
     TS_ASSERT_EQUALS(t100, t100c);
 
     // 4. Double time
@@ -1832,27 +1715,21 @@ public:
     // 3. Test
     Mantid::Kernel::TimeInterval dt0 = p->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:00"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:05"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
 
     Mantid::Kernel::TimeInterval dt1 = p->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:05"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:15"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
 
     Mantid::Kernel::TimeInterval dt2 = p->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:15"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:35"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
 
     // -1 Clean
     delete p;
@@ -1865,7 +1742,7 @@ public:
    */
   void test_filter() {
     // 1. Create a base property
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1876,7 +1753,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Types::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // b) Copy size and interval information in order to verify clearFilter()
@@ -1902,19 +1779,15 @@ public:
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
 
     // 4. Clear filter
     p1->clearFilter();
@@ -1965,7 +1838,7 @@ public:
    */
   void test_filterBoundary1() {
     // 1. Create a base property
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1976,7 +1849,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Types::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -1995,41 +1868,33 @@ public:
     // 4. Check interval & Value
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:00"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 1, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
     TS_ASSERT_EQUALS(dt12.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:20:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
     TS_ASSERT_EQUALS(dt12.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T17:19:30"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
     double v12 = p1->nthValue(11);
     TS_ASSERT_DELTA(v12, 20, 1.0E-8);
 
@@ -2044,12 +1909,12 @@ public:
   }
 
   /*
-   * Test filterWith() on different boundary conditions
-   * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
-   */
+    * Test filterWith() on different boundary conditions
+    * Filter_T0 < Log_T0 < LogTf < Filter_Tf, F... T... F... T... F...
+    */
   void test_filterBoundary2() {
     // 1. Create a base property
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -2060,7 +1925,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Types::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -2079,11 +1944,9 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:20"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2098,12 +1961,12 @@ public:
   }
 
   /*
-   * Test filterWith() on different boundary conditions
-   * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
-   */
+    * Test filterWith() on different boundary conditions
+    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf, T... F... T... F...
+    */
   void test_filterBoundary3() {
     // 1. Create a base property
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -2114,7 +1977,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Types::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -2133,21 +1996,17 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 1.0E-8);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 1.0E-8);
 
@@ -2164,11 +2023,11 @@ public:
   /*
    * Test filterWith() on different boundary conditions
    * Log_T0 < Filter_T0 <  < Filter_Tf  LogTf,  F... T... F... T... F...
-   */
+  */
 
   void test_filterBoundary4() {
     // 1. Create a base property
-    auto tStart = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -2179,7 +2038,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Types::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -2198,11 +2057,9 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                         "2007-11-30T16:17:20"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2340,7 +2197,7 @@ public:
   //----------------------------------------------------------------------------
 
   /** A test for filter nothing
-   */
+    */
   void test_filterByTime_out_of_range_filters_nothing() {
     TimeSeriesProperty<int> *log = createIntegerTSP(6);
 
@@ -2348,9 +2205,9 @@ public:
 
     TS_ASSERT_EQUALS(original_size, 6);
 
-    auto start = DateAndTimeHelpers::createFromISO8601(
+    DateAndTime start = DateAndTime(
         "2007-11-30T15:00:00"); // Much earlier than first time series value
-    auto stop = DateAndTimeHelpers::createFromISO8601(
+    DateAndTime stop = DateAndTime(
         "2007-11-30T17:00:00"); // Much later than last time series value
 
     log->filterByTime(start, stop);
@@ -2406,14 +2263,9 @@ public:
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::DateAndTime
-        firstStart =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-        firstEnd = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"),
-        secondStart =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:35"),
-        secondEnd =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:40");
+    Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
+        firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
+        secondEnd("2007-11-30T16:18:40");
     filter->addValue(firstStart.toISO8601String(), true);
     filter->addValue(firstEnd.toISO8601String(), false);
     filter->addValue("2007-11-30T16:17:25", false);
@@ -2438,14 +2290,9 @@ public:
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Types::DateAndTime
-        firstEnd = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05"),
-        secondStart =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"),
-        secondEnd =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15"),
-        thirdStart =
-            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:35");
+    Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
+        secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
+        thirdStart("2007-11-30T16:18:35");
     filter->addValue(log->firstTime(), true);
     filter->addValue(firstEnd.toISO8601String(), false);
     filter->addValue(secondStart.toISO8601String(), true);
@@ -2470,7 +2317,7 @@ private:
     // Build the log
     auto log =
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
-    auto logTime = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime logTime("2007-11-30T16:17:00");
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
       const double val = static_cast<double>(i);

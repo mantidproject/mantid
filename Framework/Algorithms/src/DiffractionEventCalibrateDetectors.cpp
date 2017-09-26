@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
+#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFunction.h"
@@ -6,7 +7,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidAlgorithms/GSLFunctions.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -14,15 +14,15 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/BoundedValidator.h"
 
 #include <Poco/File.h>
 #include <cmath>
-#include <fstream>
 #include <numeric>
+#include <fstream>
 #include <sstream>
 
 namespace Mantid {
@@ -35,6 +35,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
 
 /**
  * The gsl_costFunction is optimized by GSL simplex
@@ -236,7 +237,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 }
 
 /** Initialisation method
- */
+*/
 void DiffractionEventCalibrateDetectors::init() {
   declareProperty(make_unique<WorkspaceProperty<EventWorkspace>>(
                       "InputWorkspace", "", Direction::Input,
@@ -275,9 +276,9 @@ void DiffractionEventCalibrateDetectors::init() {
 }
 
 /** Executes the algorithm
- *
- *  @throw runtime_error Thrown if algorithm cannot execute
- */
+*
+*  @throw runtime_error Thrown if algorithm cannot execute
+*/
 void DiffractionEventCalibrateDetectors::exec() {
   // Try to retrieve optional properties
   const int maxIterations = getProperty("MaxIterations");
@@ -375,9 +376,7 @@ void DiffractionEventCalibrateDetectors::exec() {
     outfile << "# Base and up give directions of unit vectors for a local\n";
     outfile << "# x,y coordinate system on the face of the detector.\n";
     outfile << "#\n";
-    outfile << "# "
-            << Mantid::Types::DateAndTime::getCurrentTime().toFormattedString(
-                   "%c")
+    outfile << "# " << DateAndTime::getCurrentTime().toFormattedString("%c")
             << "\n";
     outfile << "#\n";
     outfile << "6         L1     T0_SHIFT\n";
@@ -586,5 +585,5 @@ void DiffractionEventCalibrateDetectors::exec() {
   outfile.close();
 }
 
-} // namespace Algorithms
+} // namespace Algorithm
 } // namespace Mantid

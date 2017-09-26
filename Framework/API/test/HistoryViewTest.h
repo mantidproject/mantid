@@ -4,11 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class HistoryViewTest : public CxxTest::TestSuite {
 
@@ -45,7 +44,7 @@ private:
 private:
   AlgorithmHistory_sptr
   createFromTestAlg(const std::string &name,
-                    DateAndTime execTime = DateAndTimeHelpers::defaultTime()) {
+                    DateAndTime execTime = DateAndTime::defaultTime()) {
     testalg alg;
     alg.initialize();
     alg.setPropertyValue("name", name);

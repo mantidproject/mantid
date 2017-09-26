@@ -1,11 +1,10 @@
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/HistoryView.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -21,7 +20,7 @@ namespace API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
-} // namespace
+}
 
 /// Default Constructor
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}
@@ -360,12 +359,12 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   Poco::DateTime start_timedate;
   // This is needed by the Poco parsing function
   int tzdiff(-1);
-  Mantid::Types::DateAndTime utc_start;
+  Mantid::Types::Core::DateAndTime utc_start;
   if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
                                       start_timedate, tzdiff)) {
     g_log.warning() << "Error parsing start time in algorithm history entry."
                     << "\n";
-    utc_start = Mantid::Types::DateAndTimeHelpers::defaultTime();
+    utc_start = Types::Core::DateAndTime::defaultTime();
   }
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);

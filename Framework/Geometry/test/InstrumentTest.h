@@ -2,17 +2,17 @@
 #define INSTRUMENTTEST_H_
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidKernel/DateAndTime.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -419,12 +419,8 @@ public:
   void test_getValidFromDate() {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    Mantid::Types::DateAndTime validFrom =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-            "1900-01-31T23:59:59");
-    Mantid::Types::DateAndTime validTo =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-            "2100-01-31 23:59:59");
+    Types::Core::DateAndTime validFrom("1900-01-31T23:59:59");
+    Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);
     inst->setValidToDate(validTo);
     TS_ASSERT_EQUALS(inst->getValidFromDate(), validFrom);
@@ -596,10 +592,9 @@ public:
     TS_ASSERT(toQuaterniond(legacyInstrument.getDetector(19)->getRotation())
                   .isApprox(toQuaterniond(detRot * bankRot), 1e-10));
     // Check the scale factor
-    TS_ASSERT(
-        toVector3d(
-            legacyInstrument.getComponentByName("bank3")->getScaleFactor())
-            .isApprox(toVector3d(newScaleFactor), 1e-10));
+    TS_ASSERT(toVector3d(legacyInstrument.getComponentByName("bank3")
+                             ->getScaleFactor())
+                  .isApprox(toVector3d(newScaleFactor), 1e-10));
   }
 
   void test_makeLegacyParameterMap_scaled_RectangularDetector() {

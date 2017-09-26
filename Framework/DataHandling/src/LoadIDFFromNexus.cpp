@@ -3,24 +3,22 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <nexus/NeXusFile.hpp>
 
-using Mantid::Types::DateAndTime;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeIterator;
 using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,6 +28,7 @@ DECLARE_ALGORITHM(LoadIDFFromNexus)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadIDFFromNexus::LoadIDFFromNexus() {}
@@ -153,7 +152,7 @@ void LoadIDFFromNexus::exec() {
  * @param instName :: short name of instrument as it appears in IDF filename
  * etc.
  * @returns  full path name of correction file if found else ""
- */
+*/
 std::string
 LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 
@@ -181,18 +180,18 @@ LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 }
 
 /* Reads the parameter correction file and if a correction is needed output the
- *parameterfile needed
- *  and whether it is to be appended.
- * @param correction_file :: path nsame of correction file as returned by
- *getParameterCorrectionFile()
- * @param date :: IS8601 date string applicable: Must be full timestamp
- *(timezone optional)
- * @param parameter_file :: output parameter file to use or "" if none
- * @param append :: output whether the parameters from parameter_file should be
- *appended.
- *
- *  @throw FileError Thrown if unable to parse XML file
- */
+*parameterfile needed
+*  and whether it is to be appended.
+* @param correction_file :: path nsame of correction file as returned by
+*getParameterCorrectionFile()
+* @param date :: IS8601 date string applicable: Must be full timestamp (timezone
+*optional)
+* @param parameter_file :: output parameter file to use or "" if none
+* @param append :: output whether the parameters from parameter_file should be
+*appended.
+*
+*  @throw FileError Thrown if unable to parse XML file
+*/
 void LoadIDFFromNexus::readParameterCorrectionFile(
     const std::string &correction_file, const std::string &date,
     std::string &parameter_file, bool &append) {
@@ -235,8 +234,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
 
   // Convert date to Mantid object
   g_log.notice() << "Date for correction file " << date << "\n";
-  DateAndTime externalDate =
-      Mantid::Types::DateAndTimeHelpers::createFromISO8601(date);
+  DateAndTime externalDate(date);
 
   // Examine the XML structure obtained by parsing
   Poco::AutoPtr<NodeList> correctionNodeList =
@@ -245,10 +243,8 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
     // For each correction element
     Element *corr = dynamic_cast<Element *>(correctionNodeList->item(i));
     if (corr) {
-      auto start = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          corr->getAttribute("valid-from"));
-      auto end = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          corr->getAttribute("valid-to"));
+      DateAndTime start(corr->getAttribute("valid-from"));
+      DateAndTime end(corr->getAttribute("valid-to"));
       if (start <= externalDate && externalDate <= end) {
         parameter_file = corr->getAttribute("file");
         append = (corr->getAttribute("append") == "true");

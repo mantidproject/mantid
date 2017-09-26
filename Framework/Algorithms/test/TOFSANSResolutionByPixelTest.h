@@ -1,19 +1,18 @@
 #ifndef TOFSANSRESOLUTIONBYPIXELTEST_H_
 #define TOFSANSRESOLUTIONBYPIXELTEST_H_
 
+#include <cxxtest/TestSuite.h>
+#include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "boost/shared_ptr.hpp"
 #include <stdexcept>
@@ -117,9 +116,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
-  Mantid::Types::DateAndTime startTime =
-      Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2010-01-01T00:10:00");
+  Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
     timeSeries->addValue(startTime + static_cast<double>(i), value);
@@ -183,7 +180,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   }
   return ws2d;
 }
-} // namespace
+}
 
 class TOFSANSResolutionByPixelTest : public CxxTest::TestSuite {
 public:

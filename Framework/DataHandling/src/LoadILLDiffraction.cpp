@@ -1,4 +1,6 @@
 #include "MantidDataHandling/LoadILLDiffraction.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -6,22 +8,18 @@
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidTypes/DateAndTime.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <numeric>
 
 #include <H5Cpp.h>
-#include <Poco/Path.h>
 #include <nexus/napi.h>
-
-using Mantid::Types::DateAndTime;
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -31,6 +29,7 @@ using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
+using Types::Core::DateAndTime;
 
 namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
@@ -44,7 +43,7 @@ constexpr size_t NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double rad2deg = 180. / M_PI;
-} // namespace
+}
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
@@ -118,8 +117,8 @@ void LoadILLDiffraction::exec() {
 }
 
 /**
- * Loads the scanned detector data
- */
+* Loads the scanned detector data
+*/
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
@@ -128,7 +127,7 @@ void LoadILLDiffraction::loadDataScan() {
 
   m_instName = firstEntry.getString("instrument/name");
 
-  m_startTime = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
+  m_startTime = DateAndTime(
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
   // read the detector data
@@ -190,8 +189,8 @@ void LoadILLDiffraction::loadDataScan() {
 }
 
 /**
- * Dumps the metadata from the whole file to SampleLogs
- */
+* Dumps the metadata from the whole file to SampleLogs
+*/
 void LoadILLDiffraction::loadMetaData() {
 
   m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
@@ -250,8 +249,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String()
-                << "\n";
+                       .toISO8601String() << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
@@ -645,8 +643,8 @@ void LoadILLDiffraction::resolveInstrument() {
 }
 
 /**
- * Runs LoadInstrument as child to link the non-moving instrument to workspace
- */
+* Runs LoadInstrument as child to link the non-moving instrument to workspace
+*/
 void LoadILLDiffraction::loadStaticInstrument() {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", getInstrumentFilePath(m_instName));
@@ -670,9 +668,9 @@ MatrixWorkspace_sptr LoadILLDiffraction::loadEmptyInstrument() {
 }
 
 /**
- * Rotates the detector to the 2theta0 read from the file
- * @param twoTheta0Read : 2theta0 read from the file
- */
+* Rotates the detector to the 2theta0 read from the file
+* @param twoTheta0Read : 2theta0 read from the file
+*/
 void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
   Instrument_const_sptr instrument = m_outWorkspace->getInstrument();
   IComponent_const_sptr component = instrument->getComponentByName("detector");
@@ -689,11 +687,11 @@ void LoadILLDiffraction::moveTwoThetaZero(double twoTheta0Read) {
 }
 
 /**
- * Makes up the full path of the relevant IDF dependent on resolution mode
- * @param instName : the name of the instrument (including the resolution mode
- * suffix)
- * @return : the full path to the corresponding IDF
- */
+* Makes up the full path of the relevant IDF dependent on resolution mode
+* @param instName : the name of the instrument (including the resolution mode
+* suffix)
+* @return : the full path to the corresponding IDF
+*/
 std::string
 LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
 

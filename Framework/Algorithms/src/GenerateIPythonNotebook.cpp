@@ -1,18 +1,17 @@
 #include "MantidAlgorithms/GenerateIPythonNotebook.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/NotebookBuilder.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/NotebookBuilder.h"
+#include "MantidAPI/Workspace.h"
 
 #include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
@@ -25,7 +24,7 @@ namespace Algorithms {
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
 /** Initialize the algorithm's properties.
- */
+*/
 void GenerateIPythonNotebook::init() {
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "InputWorkspace", "", Direction::Input),
@@ -62,7 +61,7 @@ void GenerateIPythonNotebook::init() {
 }
 
 /** Execute the algorithm.
- */
+*/
 void GenerateIPythonNotebook::exec() {
   const Workspace_const_sptr ws = getProperty("InputWorkspace");
   const bool unrollAll = getProperty("UnrollAll");
@@ -85,12 +84,9 @@ void GenerateIPythonNotebook::exec() {
   if (!startTime.empty()) {
     if (endTime.empty()) {
       // If no end time was given then filter up to now
-      view->filterBetweenExecDate(
-          DateAndTimeHelpers::createFromISO8601(startTime));
+      view->filterBetweenExecDate(DateAndTime(startTime));
     } else {
-      view->filterBetweenExecDate(
-          DateAndTimeHelpers::createFromISO8601(startTime),
-          DateAndTimeHelpers::createFromISO8601(endTime));
+      view->filterBetweenExecDate(DateAndTime(startTime), DateAndTime(endTime));
     }
   }
 

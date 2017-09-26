@@ -1,7 +1,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
@@ -29,8 +29,8 @@ using std::vector;
 namespace Mantid {
 namespace DataObjects {
 using Kernel::Exception::NotImplementedError;
-using Mantid::Types::DateAndTime;
-using Mantid::Types::TofEvent;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 using namespace Mantid::API;
 
 namespace {
@@ -2714,7 +2714,7 @@ std::vector<double> EventList::getWeightErrors() const {
 template <class T>
 void EventList::getPulseTimesHelper(
     const std::vector<T> &events,
-    std::vector<Mantid::Types::DateAndTime> &times) {
+    std::vector<Mantid::Types::Core::DateAndTime> &times) {
   times.clear();
   for (const auto &event : events) {
     times.push_back(event.pulseTime());
@@ -2725,8 +2725,8 @@ void EventList::getPulseTimesHelper(
  *
  * @return by copy a vector of DateAndTime times
  */
-std::vector<Mantid::Types::DateAndTime> EventList::getPulseTimes() const {
-  std::vector<Mantid::Types::DateAndTime> times;
+std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
+  std::vector<Mantid::Types::Core::DateAndTime> times;
   // Set the capacity of the vector to avoid multiple resizes
   times.reserve(this->getNumberEvents());
 
@@ -2925,8 +2925,8 @@ DateAndTime EventList::getPulseTimeMax() const {
   return tMax;
 }
 
-void EventList::getPulseTimeMinMax(Mantid::Types::DateAndTime &tMin,
-                                   Mantid::Types::DateAndTime &tMax) const {
+void EventList::getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
+                                   Mantid::Types::Core::DateAndTime &tMax) const {
   // set up as the minimum available date time.
   tMax = DateAndTime::minimum();
   tMin = DateAndTime::maximum();
@@ -3621,8 +3621,8 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   }
 }
 
-void EventList::filterByTimeAtSample(Mantid::Types::DateAndTime start,
-                                     Mantid::Types::DateAndTime stop, double tofFactor,
+void EventList::filterByTimeAtSample(Types::Core::DateAndTime start,
+                                     Types::Core::DateAndTime stop, double tofFactor,
                                      double tofOffset,
                                      EventList &output) const {
   if (this == &output) {
@@ -4278,7 +4278,7 @@ void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
   // Prepare to TimeSplitter Iterate through the splitter at the same time
   auto itspl = splitter.begin();
   auto itspl_end = splitter.end();
-  Mantid::Types::DateAndTime start, stop;
+  Types::Core::DateAndTime start, stop;
 
   // Prepare to Events Iterate through all events (sorted by tof)
   auto itev = events.begin();

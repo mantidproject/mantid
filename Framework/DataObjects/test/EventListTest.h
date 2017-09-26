@@ -16,10 +16,9 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
-using Mantid::Types::DateAndTime;
-using Mantid::Types::TofEvent;
 
-
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
@@ -2379,7 +2378,7 @@ public:
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
       el += TofEvent(rand() % 1000,
-                     time); // Mantid::Types::DateAndTime(time*1.0, 0.0) );
+                     time); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 
@@ -2396,7 +2395,7 @@ public:
       // All pulse times from 0 to 999 in seconds
       DateAndTime pulsetime(static_cast<int64_t>(time * 1000000));
       el += TofEvent(rand() % 1000,
-                     pulsetime); // Mantid::Types::DateAndTime(time*1.0, 0.0) );
+                     pulsetime); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 

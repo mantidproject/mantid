@@ -2,11 +2,10 @@
 #define _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_
 
 #include "MantidAPI/ScriptRepository.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidScriptRepository/DllConfig.h"
-#include "MantidTypes/DateAndTime.h"
-#include <json/value.h>
 #include <map>
+#include <json/value.h>
 
 namespace Mantid {
 namespace API {
@@ -45,17 +44,17 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
     /// For the local files, get the DateAndTime reported by the operative
     /// system
     /// or defaultTime if not available.
-    Mantid::Types::DateAndTime current_date;
+    Types::Core::DateAndTime current_date;
     /// For the files that were downloaded, get the DateAndTime reported when
     /// they
     /// were created.
-    Mantid::Types::DateAndTime downloaded_date;
+    Types::Core::DateAndTime downloaded_date;
     /// For the remote files, get the DateAndTime of the last revision.
-    Mantid::Types::DateAndTime pub_date;
+    Types::Core::DateAndTime pub_date;
     /// Description of the files.
     std::string description;
     /// The version downloaded of this file
-    Mantid::Types::DateAndTime downloaded_pubdate;
+    Types::Core::DateAndTime downloaded_pubdate;
     /// Indicate if this file should be updated automatically.
     bool auto_update;
     /// Identify the author of this file.
@@ -65,11 +64,10 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
     /// provide a constructor, to set the default values.
     RepositoryEntry()
         : remote(false), local(false), directory(false),
-          current_date(Mantid::Types::DateAndTimeHelpers::defaultTime()),
-          downloaded_date(Mantid::Types::DateAndTimeHelpers::defaultTime()),
-          pub_date(Mantid::Types::DateAndTimeHelpers::defaultTime()),
-          description(""),
-          downloaded_pubdate(Mantid::Types::DateAndTimeHelpers::defaultTime()),
+          current_date(Types::Core::DateAndTime::defaultTime()),
+          downloaded_date(Types::Core::DateAndTime::defaultTime()),
+          pub_date(Types::Core::DateAndTime::defaultTime()), description(""),
+          downloaded_pubdate(Types::Core::DateAndTime::defaultTime()),
           auto_update(false), author(""), status(BOTH_UNCHANGED){};
   };
 

@@ -1,25 +1,22 @@
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <fstream>
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 using namespace std;
-
-using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -234,9 +231,9 @@ void GetTimeSeriesLogInformation::processTimeRange() {
 
 /** Convert a value in nanosecond to DateAndTime.  The value is treated as an
  * absolute time from
- * 1990.01.01
- */
-Mantid::Types::DateAndTime
+  * 1990.01.01
+  */
+Types::Core::DateAndTime
 GetTimeSeriesLogInformation::getAbsoluteTime(double abstimens) {
   DateAndTime temptime(static_cast<int64_t>(abstimens));
 
@@ -244,9 +241,9 @@ GetTimeSeriesLogInformation::getAbsoluteTime(double abstimens) {
 }
 
 /** Calculate the time from a given relative time from run start
- * @param deltatime :: double as a relative time to run start time in second
- */
-Mantid::Types::DateAndTime
+  * @param deltatime :: double as a relative time to run start time in second
+  */
+Types::Core::DateAndTime
 GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
   int64_t totaltime =
       m_starttime.totalNanoseconds() + static_cast<int64_t>(deltatime * 1.0E9);
@@ -256,7 +253,7 @@ GetTimeSeriesLogInformation::calculateRelativeTime(double deltatime) {
 }
 
 /** Generate statistic information table workspace
- */
+  */
 TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
   auto tablews = boost::make_shared<TableWorkspace>();
 
@@ -306,8 +303,7 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
   std::ofstream ofs;
   ofs.open(ofilename.c_str(), std::ios::out);
 
-  DateAndTime t0 = DateAndTimeHelpers::createFromISO8601(
-      ws->run().getProperty("run_start")->value());
+  Types::Core::DateAndTime t0(ws->run().getProperty("run_start")->value());
 
   for (size_t i = 1; i < abstimevec.size(); i++) {
     double tempdts = static_cast<double>(abstimevec[i].totalNanoseconds() -
@@ -338,13 +334,13 @@ void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
 }
 
 /** Output distributions in order for a better understanding of the log
- * Result is written to a Workspace2D
- *
- * @param timevec  :: a vector of time stamps
- * @param stepsize :: resolution of the delta time count bin
- */
+  * Result is written to a Workspace2D
+  *
+  * @param timevec  :: a vector of time stamps
+  * @param stepsize :: resolution of the delta time count bin
+  */
 Workspace2D_sptr GetTimeSeriesLogInformation::calDistributions(
-    std::vector<Mantid::Types::DateAndTime> timevec, double stepsize) {
+    std::vector<Types::Core::DateAndTime> timevec, double stepsize) {
   // 1. Get a vector of delta T (in unit of seconds)
   double dtmin = static_cast<double>(timevec.back().totalNanoseconds() -
                                      timevec[0].totalNanoseconds()) *
@@ -420,8 +416,8 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
   size_t countsame = 0;
   size_t countinverse = 0;
   for (size_t i = 1; i < m_timeVec.size(); i++) {
-    Mantid::Types::DateAndTime tprev = m_timeVec[i - 1];
-    Mantid::Types::DateAndTime tpres = m_timeVec[i];
+    Types::Core::DateAndTime tprev = m_timeVec[i - 1];
+    Types::Core::DateAndTime tpres = m_timeVec[i];
     if (tprev == tpres)
       countsame++;
     else if (tprev > tpres)
@@ -430,8 +426,8 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
 
   //   Written to summary map
   /*
-  Kernel::time_duration dts = m_timeVec[0]-m_starttime;
-  Kernel::time_duration dtf = m_timeVec.back() - m_timeVec[0];
+  Types::Core::time_duration dts = m_timeVec[0]-m_starttime;
+  Types::Core::time_duration dtf = m_timeVec.back() - m_timeVec[0];
   size_t f = m_timeVec.size()-1;
   */
 
@@ -566,5 +562,5 @@ void GetTimeSeriesLogInformation::checkLogValueChanging(
   g_log.debug() << ss.str();
 }
 
-} // namespace Algorithms
 } // namespace Mantid
+} // namespace Algorithms

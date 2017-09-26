@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -23,8 +22,6 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
-
-using namespace Mantid::Types;
 
 namespace Mantid {
 namespace DataHandling {
@@ -336,12 +333,11 @@ void LoadBBY::exec() {
       "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  Types::time_duration duration = boost::posix_time::microseconds(
+  Types::Core::time_duration duration = boost::posix_time::microseconds(
       static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
-  Mantid::Types::DateAndTime start_time =
-      DateAndTimeHelpers::createFromISO8601("2000-01-01T00:00:00");
-  Mantid::Types::DateAndTime end_time(start_time + duration);
+  Types::Core::DateAndTime start_time("2000-01-01T00:00:00");
+  Types::Core::DateAndTime end_time(start_time + duration);
 
   logManager.addProperty("start_time", start_time.toISO8601String());
   logManager.addProperty("end_time", end_time.toISO8601String());
@@ -814,5 +810,5 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // DataHandling
+} // Mantid

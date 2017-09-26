@@ -11,10 +11,10 @@
 #include <cxxtest/TestSuite.h>
 #include <ctime>
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class TimeSplitterTest : public CxxTest::TestSuite {
 public:
@@ -25,14 +25,14 @@ public:
   void test_SplittingInterval_AND() {
     DateAndTime start_a, stop_a, start_b, stop_b;
 
-    start_a = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    stop_a = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
+    start_a = DateAndTime("2007-11-30T16:17:10");
+    stop_a = DateAndTime("2007-11-30T16:17:20");
     SplittingInterval a(start_a, stop_a, 0);
 
     SplittingInterval b, c;
     // b is all inside a
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:12");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:18");
+    start_b = DateAndTime("2007-11-30T16:17:12");
+    stop_b = DateAndTime("2007-11-30T16:17:18");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
@@ -40,8 +40,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_b);
 
     // a is all inside b
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:23");
+    start_b = DateAndTime("2007-11-30T16:17:05");
+    stop_b = DateAndTime("2007-11-30T16:17:23");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
@@ -49,8 +49,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_a);
 
     // b goes past the end of a
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:12");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25");
+    start_b = DateAndTime("2007-11-30T16:17:12");
+    stop_b = DateAndTime("2007-11-30T16:17:25");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
@@ -58,8 +58,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_a);
 
     // b starts before a and ends before
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15");
+    start_b = DateAndTime("2007-11-30T16:17:05");
+    stop_b = DateAndTime("2007-11-30T16:17:15");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(a.overlaps(b));
@@ -67,16 +67,16 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_b);
 
     // No overlap (b < a)
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:01");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:02");
+    start_b = DateAndTime("2007-11-30T16:17:01");
+    stop_b = DateAndTime("2007-11-30T16:17:02");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(!a.overlaps(b));
     TS_ASSERT_LESS_THAN_EQUALS(c.duration(), 0.0);
 
     // No overlap (a < b)
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:42");
+    start_b = DateAndTime("2007-11-30T16:17:30");
+    stop_b = DateAndTime("2007-11-30T16:17:42");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a & b;
     TS_ASSERT(!a.overlaps(b));
@@ -90,14 +90,14 @@ public:
   void test_SplittingInterval_OR() {
     DateAndTime start_a, stop_a, start_b, stop_b;
 
-    start_a = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    stop_a = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
+    start_a = DateAndTime("2007-11-30T16:17:10");
+    stop_a = DateAndTime("2007-11-30T16:17:20");
     SplittingInterval a(start_a, stop_a, 0);
 
     SplittingInterval b, c;
     // b is all inside a
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:12");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:18");
+    start_b = DateAndTime("2007-11-30T16:17:12");
+    stop_b = DateAndTime("2007-11-30T16:17:18");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
@@ -105,8 +105,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_a);
 
     // a is all inside b
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:23");
+    start_b = DateAndTime("2007-11-30T16:17:05");
+    stop_b = DateAndTime("2007-11-30T16:17:23");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
@@ -114,8 +114,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_b);
 
     // b goes past the end of a
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:12");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25");
+    start_b = DateAndTime("2007-11-30T16:17:12");
+    stop_b = DateAndTime("2007-11-30T16:17:25");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
@@ -123,8 +123,8 @@ public:
     TS_ASSERT_EQUALS(c.stop(), stop_b);
 
     // b starts before a and ends before
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:05");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15");
+    start_b = DateAndTime("2007-11-30T16:17:05");
+    stop_b = DateAndTime("2007-11-30T16:17:15");
     b = SplittingInterval(start_b, stop_b, 0);
     c = a | b;
     TS_ASSERT(a.overlaps(b));
@@ -133,15 +133,15 @@ public:
 
     // No overlap (b < a) - This throws an exception because you need two
     // outputs!
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:01");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:02");
+    start_b = DateAndTime("2007-11-30T16:17:01");
+    stop_b = DateAndTime("2007-11-30T16:17:02");
     b = SplittingInterval(start_b, stop_b, 0);
     TS_ASSERT(!a.overlaps(b));
     TS_ASSERT_THROWS(c = a | b;, std::invalid_argument);
 
     // No overlap (a < b)
-    start_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
-    stop_b = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:42");
+    start_b = DateAndTime("2007-11-30T16:17:30");
+    stop_b = DateAndTime("2007-11-30T16:17:42");
     b = SplittingInterval(start_b, stop_b, 0);
     TS_ASSERT(!a.overlaps(b));
     TS_ASSERT_THROWS(c = a | b;, std::invalid_argument);
@@ -152,37 +152,37 @@ public:
     // Make a splitter
     DateAndTime start, stop;
     TimeSplitterType a, b;
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:17:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50");
+    start = DateAndTime("2007-11-30T16:17:40");
+    stop = DateAndTime("2007-11-30T16:17:50");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:10");
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:18:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30");
+    start = DateAndTime("2007-11-30T16:18:20");
+    stop = DateAndTime("2007-11-30T16:18:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // Smaller than the first one
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:01");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25");
+    start = DateAndTime("2007-11-30T16:17:01");
+    stop = DateAndTime("2007-11-30T16:17:25");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:26");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:27");
+    start = DateAndTime("2007-11-30T16:17:26");
+    stop = DateAndTime("2007-11-30T16:17:27");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:45");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:15");
+    start = DateAndTime("2007-11-30T16:17:45");
+    stop = DateAndTime("2007-11-30T16:18:15");
     b.push_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
@@ -195,20 +195,20 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:01"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:01"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:25"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:26"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:27"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:26"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:27"));
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:45"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:45"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:50"));
     i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:10"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
   }
 
   //----------------------------------------------------------------------------
@@ -216,41 +216,41 @@ public:
     // Make a splitter
     DateAndTime start, stop;
     TimeSplitterType a, b;
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:17:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:50");
+    start = DateAndTime("2007-11-30T16:17:40");
+    stop = DateAndTime("2007-11-30T16:17:50");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:10");
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:18:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30");
+    start = DateAndTime("2007-11-30T16:18:20");
+    stop = DateAndTime("2007-11-30T16:18:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // Smaller than the first one
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:01");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:25");
+    start = DateAndTime("2007-11-30T16:17:01");
+    stop = DateAndTime("2007-11-30T16:17:25");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:26");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:27");
+    start = DateAndTime("2007-11-30T16:17:26");
+    stop = DateAndTime("2007-11-30T16:17:27");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:45");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:15");
+    start = DateAndTime("2007-11-30T16:17:45");
+    stop = DateAndTime("2007-11-30T16:18:15");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:55");
+    start = DateAndTime("2007-11-30T16:18:50");
+    stop = DateAndTime("2007-11-30T16:18:55");
     b.push_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
@@ -263,17 +263,17 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:15"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:15"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:20"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:30"));
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:55"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
   }
 
   //----------------------------------------------------------------------------
@@ -282,23 +282,23 @@ public:
     DateAndTime start, stop;
     TimeSplitterType a, b;
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // A bad (reversed) interval
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:32");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:31");
+    start = DateAndTime("2007-11-30T16:17:32");
+    stop = DateAndTime("2007-11-30T16:17:31");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // REVERSED interval that is before the first one
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    start = DateAndTime("2007-11-30T16:17:15");
+    stop = DateAndTime("2007-11-30T16:17:00");
     b.push_back(SplittingInterval(start, stop, 0));
 
     // Another bad interval
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:45");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:35");
+    start = DateAndTime("2007-11-30T16:17:45");
+    stop = DateAndTime("2007-11-30T16:17:35");
     b.push_back(SplittingInterval(start, stop, 0));
 
     // Now AND the splitters (filters) together
@@ -311,8 +311,8 @@ public:
 
     SplittingInterval i;
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
   }
 
   //----------------------------------------------------------------------------
@@ -322,12 +322,12 @@ public:
     SplittingInterval i;
 
     //---- Normal Case ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:17:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // Perform the NOT operation
@@ -339,12 +339,12 @@ public:
 
     i = c[0];
     TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:20"));
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
     TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
   }
 
@@ -370,12 +370,12 @@ public:
     TimeSplitterType a, b, c;
     SplittingInterval i;
     // Overlapping case ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:15");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:17:15");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:10");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     c = ~a;
@@ -385,9 +385,9 @@ public:
 
     i = c[0];
     TS_ASSERT_EQUALS(i.start(), DateAndTime::minimum());
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:00"));
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:30"));
     TS_ASSERT_EQUALS(i.stop(), DateAndTime::maximum());
   }
 
@@ -398,41 +398,41 @@ public:
     SplittingInterval i;
 
     //  the splitter ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00");
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop = DateAndTime("2007-11-30T16:16:00");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:18:00");
     b.push_back(SplittingInterval(start, stop, 1));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:19:00");
     b.push_back(SplittingInterval(start, stop, 2));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00");
+    start = DateAndTime("2007-11-30T16:19:00");
+    stop = DateAndTime("2007-11-30T16:20:00");
     b.push_back(SplittingInterval(start, stop, 3));
 
     // the filter ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:50");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10");
+    start = DateAndTime("2007-11-30T16:16:50");
+    stop = DateAndTime("2007-11-30T16:17:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30");
+    start = DateAndTime("2007-11-30T16:17:20");
+    stop = DateAndTime("2007-11-30T16:17:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:10");
+    start = DateAndTime("2007-11-30T16:17:40");
+    stop = DateAndTime("2007-11-30T16:18:10");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:55");
+    start = DateAndTime("2007-11-30T16:18:50");
+    stop = DateAndTime("2007-11-30T16:18:55");
     a.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:22:20");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:22:30");
+    start = DateAndTime("2007-11-30T16:22:20");
+    stop = DateAndTime("2007-11-30T16:22:30");
     a.push_back(SplittingInterval(start, stop, 0));
 
     // Do the PLUS operation
@@ -443,28 +443,28 @@ public:
       return; // avoid segfaults if this part of the test fails
 
     i = c[0];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[1];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:20"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:20"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:17:30"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[2];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:40"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:17:40"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:00"));
     TS_ASSERT_EQUALS(i.index(), 1);
 
     i = c[3];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:10"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:10"));
     TS_ASSERT_EQUALS(i.index(), 2);
 
     i = c[4];
-    TS_ASSERT_EQUALS(i.start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"));
-    TS_ASSERT_EQUALS(i.stop(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:55"));
+    TS_ASSERT_EQUALS(i.start(), DateAndTime("2007-11-30T16:18:50"));
+    TS_ASSERT_EQUALS(i.stop(), DateAndTime("2007-11-30T16:18:55"));
     TS_ASSERT_EQUALS(i.index(), 2);
 
     // This fails since you can't add splitters together
@@ -477,28 +477,28 @@ public:
     TimeSplitterType b;
 
     //  the splitter ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00");
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop = DateAndTime("2007-11-30T16:16:00");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00");
+    start = DateAndTime("2007-11-30T16:19:00");
+    stop = DateAndTime("2007-11-30T16:20:00");
     b.push_back(SplittingInterval(start, stop, 3));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:19:00");
     b.push_back(SplittingInterval(start, stop, 2));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:18:00");
     b.push_back(SplittingInterval(start, stop, 1));
 
     std::sort(b.begin(), b.end());
 
-    TS_ASSERT_EQUALS(b[0].start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00"));
-    TS_ASSERT_EQUALS(b[1].start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"));
-    TS_ASSERT_EQUALS(b[2].start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"));
-    TS_ASSERT_EQUALS(b[3].start(), DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00"));
+    TS_ASSERT_EQUALS(b[0].start(), DateAndTime("2007-11-30T16:15:00"));
+    TS_ASSERT_EQUALS(b[1].start(), DateAndTime("2007-11-30T16:17:00"));
+    TS_ASSERT_EQUALS(b[2].start(), DateAndTime("2007-11-30T16:18:00"));
+    TS_ASSERT_EQUALS(b[3].start(), DateAndTime("2007-11-30T16:19:00"));
   }
 
   //----------------------------------------------------------------------------
@@ -507,34 +507,34 @@ public:
     TimeSplitterType b;
 
     //  the splitter ------
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:15:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:16:00");
+    start = DateAndTime("2007-11-30T16:15:00");
+    stop = DateAndTime("2007-11-30T16:16:00");
     b.push_back(SplittingInterval(start, stop, 0));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:20:00");
+    start = DateAndTime("2007-11-30T16:19:00");
+    stop = DateAndTime("2007-11-30T16:20:00");
     b.push_back(SplittingInterval(start, stop, 3));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:19:00");
+    start = DateAndTime("2007-11-30T16:18:00");
+    stop = DateAndTime("2007-11-30T16:19:00");
     b.push_back(SplittingInterval(start, stop, 2));
 
-    start = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
-    stop = DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00");
+    start = DateAndTime("2007-11-30T16:17:00");
+    stop = DateAndTime("2007-11-30T16:18:00");
     b.push_back(SplittingInterval(start, stop, 1));
 
     std::sort(b.begin(), b.end());
 
     TimeSplitterType::iterator sit;
 
-    SplittingInterval temp1(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"),
-                            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"), -1);
+    SplittingInterval temp1(DateAndTime("2007-11-30T16:17:00"),
+                            DateAndTime("2007-11-30T16:17:00"), -1);
     sit = std::lower_bound(b.begin(), b.end(), temp1);
     int index1 = int(sit - b.begin());
     TS_ASSERT_EQUALS(index1, 1);
 
-    SplittingInterval temp2(DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:10"),
-                            DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"), -1);
+    SplittingInterval temp2(DateAndTime("2007-11-30T16:17:10"),
+                            DateAndTime("2007-11-30T16:17:00"), -1);
     sit = std::lower_bound(b.begin(), b.end(), temp2);
     int index2 = int(sit - b.begin());
     TS_ASSERT_EQUALS(index2, 2);

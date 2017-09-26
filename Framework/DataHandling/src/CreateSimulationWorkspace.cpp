@@ -26,8 +26,8 @@
 namespace {
 
 struct StartAndEndTime {
-  Mantid::Types::DateAndTime startTime;
-  Mantid::Types::DateAndTime endTime;
+  Mantid::Types::Core::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime endTime;
 };
 
 StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
@@ -50,8 +50,8 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 }
 
 StartAndEndTime getStartAndEndTimesFromNexusFile(
-    std::string filename, const Mantid::Types::DateAndTime &startTimeDefault,
-    const Mantid::Types::DateAndTime &endTimeDefault) {
+    std::string filename, const Mantid::Types::Core::DateAndTime &startTimeDefault,
+    const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
   try {
     startAndEndTime.startTime =
@@ -407,15 +407,15 @@ void CreateSimulationWorkspace::setStartDate(
   auto hasDetTableFile = !detTableFile.empty();
   auto &run = workspace->mutableRun();
 
-  Mantid::Types::DateAndTime startTime;
-  Mantid::Types::DateAndTime endTime;
+  Types::Core::DateAndTime startTime;
+  Types::Core::DateAndTime endTime;
   try {
     // The start and end times might not be valid, and hence can throw
     startTime = run.startTime();
     endTime = run.endTime();
   } catch (std::runtime_error &) {
-    startTime = Mantid::Types::DateAndTime::getCurrentTime();
-    endTime = Mantid::Types::DateAndTime::getCurrentTime();
+    startTime = Types::Core::DateAndTime::getCurrentTime();
+    endTime = Types::Core::DateAndTime::getCurrentTime();
   }
 
   if (hasDetTableFile) {

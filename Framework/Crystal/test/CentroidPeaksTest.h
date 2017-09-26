@@ -9,7 +9,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -32,7 +31,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -57,8 +57,7 @@ public:
     size_t nd = 1;
     // Make a random generator for each dimensions
     typedef boost::variate_generator<boost::mt19937 &,
-                                     boost::uniform_real<double>>
-        gen_t;
+                                     boost::uniform_real<double>> gen_t;
     gen_t *gens[1];
     for (size_t d = 0; d < nd; ++d) {
       double min = -1.;
@@ -88,8 +87,7 @@ public:
     // a bug
     retVal->populateInstrumentParameters();
 
-    DateAndTime run_start =
-        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
+    DateAndTime run_start("2010-01-01T00:00:00");
 
     for (int pix = 0; pix < numPixels; ++pix) {
       auto &el = retVal->getSpectrum(pix);

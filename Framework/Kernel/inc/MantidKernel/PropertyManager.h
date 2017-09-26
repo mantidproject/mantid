@@ -62,8 +62,8 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByTime(const Mantid::Types::DateAndTime &start,
-                    const Mantid::Types::DateAndTime &stop) override;
+  void filterByTime(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop) override;
   void splitByTime(std::vector<SplittingInterval> &splitter,
                    std::vector<PropertyManager *> outputs) const override;
   void filterByProperty(const TimeSeriesProperty<bool> &filter) override;

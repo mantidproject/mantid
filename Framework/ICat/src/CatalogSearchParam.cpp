@@ -1,5 +1,5 @@
 #include "MantidICat/CatalogSearchParam.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include <boost/algorithm/string/regex.hpp>
 
 namespace Mantid {
@@ -222,8 +222,7 @@ time_t CatalogSearchParam::getTimevalue(const std::string &inputDate) {
   std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
                         dateSegments.at(0) + " 0:00:00.000";
   // Return the date as time_t value.
-  return Mantid::Types::DateAndTimeHelpers::createFromISO8601(isoDate)
-      .to_time_t();
+  return Types::Core::DateAndTime(isoDate).to_time_t();
 }
-} // namespace ICat
-} // namespace Mantid
+}
+}

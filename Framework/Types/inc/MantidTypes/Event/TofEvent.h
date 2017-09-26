@@ -1,39 +1,36 @@
 #ifndef MANTID_TYPES_TOFEVENT_H
 #define MANTID_TYPES_TOFEVENT_H
 
-#include "MantidTypes/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidTypes/DllConfig.h"
 
 namespace Mantid {
 namespace DataObjects {
 class EventList;
 class WeightedEvent;
 class WeightedEventNoTime;
-class tofGreaterOrEqual;
-class tofGreater;
 } // namespace DataObjects
-
 namespace DataHandling {
 class LoadEventNexus;
 }
 namespace Types {
-//==========================================================================================
-/** Info about a single neutron detection event:
- *
- *  - the time of flight of the neutron (can be converted to other units)
- *  - the absolute time of the pulse at which it was produced
- */
+namespace Event {
+  //==========================================================================================
+  /** Info about a single neutron detection event:
+  *
+  *  - the time of flight of the neutron (can be converted to other units)
+  *  - the absolute time of the pulse at which it was produced
+  */
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class _declspec(dllexport) TofEvent {
+class MANTID_TYPES_DLL TofEvent {
 
   /// EventList has the right to mess with TofEvent.
-  friend class Mantid::DataObjects::EventList;
-  friend class Mantid::DataObjects::WeightedEvent;
-  friend class Mantid::DataObjects::WeightedEventNoTime;
-  friend class Mantid::DataObjects::tofGreaterOrEqual;
-  friend class Mantid::DataObjects::tofGreater;
-  friend class Mantid::DataHandling::LoadEventNexus; // Needed while the ISIS
-                                                     // hack of spreading events
-                                                     // out in a bin remains
+  friend class DataObjects::EventList;
+  friend class DataObjects::WeightedEvent;
+  friend class DataObjects::WeightedEventNoTime;
+  friend class DataHandling::LoadEventNexus; // Needed while the ISIS hack of
+                                             // spreading events out in a bin
+                                             // remains
 
 protected:
   /** The 'x value' of the event. This will be in a unit available from the
@@ -53,7 +50,7 @@ protected:
    * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be
    *enough.
    */
-  DateAndTime m_pulsetime;
+  Core::DateAndTime m_pulsetime;
 
 public:
   /// Constructor, specifying only the time of flight in microseconds
@@ -61,7 +58,7 @@ public:
 
   /// Constructor, specifying the time of flight in microseconds and the frame
   /// id
-  TofEvent(double tof, const Mantid::Types::DateAndTime pulsetime);
+  TofEvent(double tof, const Core::DateAndTime pulsetime);
 
   /// Empty constructor
   TofEvent();
@@ -75,7 +72,7 @@ public:
 
   double operator()() const;
   double tof() const;
-  Mantid::Types::DateAndTime pulseTime() const;
+  Mantid::Types::Core::DateAndTime pulseTime() const;
   double weight() const;
   double error() const;
   double errorSquared() const;
@@ -90,19 +87,19 @@ public:
 //==========================================================================================
 
 /** () operator: return the tof (X value) of the event.
- *  This is useful for std operations like comparisons and std::lower_bound
- *  @return :: double, the tof (X value) of the event.
- */
+*  This is useful for std operations like comparisons and std::lower_bound
+*  @return :: double, the tof (X value) of the event.
+*/
 inline double TofEvent::operator()() const { return m_tof; }
 
 /** @return The 'x value'. Despite the name, this can be in any unit in the
- * UnitFactory.
- *  If it is time-of-flight, it will be in microseconds.
- */
+* UnitFactory.
+*  If it is time-of-flight, it will be in microseconds.
+*/
 inline double TofEvent::tof() const { return m_tof; }
 
 /// Return the pulse time
-inline Mantid::Types::DateAndTime TofEvent::pulseTime() const {
+inline Core::DateAndTime TofEvent::pulseTime() const {
   return m_pulsetime;
 }
 
@@ -114,6 +111,7 @@ inline double TofEvent::error() const { return 1.0; }
 
 /// Return the errorSquared of the event - exactly 1.0 always
 inline double TofEvent::errorSquared() const { return 1.0; }
+} // namespace Event
 } // namespace Types
 } // namespace Mantid
-#endif // MANTIS_TYPES_TOFEVENT_H
+#endif // MANTID_TYPES_TOFEVENT_H

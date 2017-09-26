@@ -3,20 +3,20 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
-#include "MantidAlgorithms/CorelliCrossCorrelate.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTypes/DateAndTime.h"
 
 using Mantid::Algorithms::CorelliCrossCorrelate;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CorelliCrossCorrelateTest : public CxxTest::TestSuite {
 public:
@@ -50,8 +50,7 @@ public:
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
         "CorelliCrossCorrelateTest_OutputWS");
 
-    DateAndTime startTime =
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    DateAndTime startTime("2007-11-30T16:17:00");
     auto &evlist = ws->getSpectrum(0);
 
     // Add some events to the workspace.

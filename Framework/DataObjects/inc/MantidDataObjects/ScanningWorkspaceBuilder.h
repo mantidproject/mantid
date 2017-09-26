@@ -4,7 +4,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
 
@@ -64,9 +64,9 @@ public:
   void setHistogram(HistogramData::Histogram histogram);
 
   void
-  setTimeRanges(std::vector<std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime>>
+  setTimeRanges(std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
                     timeRanges);
-  void setTimeRanges(const Mantid::Types::DateAndTime &startTime,
+  void setTimeRanges(const Types::Core::DateAndTime &startTime,
                      const std::vector<double> &durations);
   void setPositions(std::vector<std::vector<Kernel::V3D>> positions);
   void setRotations(std::vector<std::vector<Kernel::Quat>> rotations);
@@ -87,7 +87,7 @@ private:
 
   HistogramData::Histogram m_histogram;
 
-  std::vector<std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime>> m_timeRanges;
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> m_timeRanges;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;
 

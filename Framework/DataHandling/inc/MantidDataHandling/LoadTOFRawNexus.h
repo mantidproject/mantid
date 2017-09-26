@@ -9,7 +9,7 @@
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <mutex>
 
@@ -94,7 +94,7 @@ protected:
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
-  std::vector<Mantid::Types::DateAndTime> pulseTimes;
+  std::vector<Types::Core::DateAndTime> pulseTimes;
 
   /// Number of bins
   size_t m_numBins;

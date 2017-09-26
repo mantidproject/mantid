@@ -1,20 +1,18 @@
 #ifndef MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
 #define MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
-#include "MantidAlgorithms/AddSampleLog.h"
-#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include <cxxtest/TestSuite.h>
+#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include "MantidAlgorithms/AddSampleLog.h"
 
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/LogFilter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTypes/DateAndTime.h"
 
 using namespace Mantid::Algorithms;
-using namespace Mantid::Types;
 using Mantid::Kernel::V3D;
 using namespace Mantid::Geometry;
 
@@ -107,8 +105,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
-  DateAndTime startTime =
-      DateAndTimeHelpers::createFromISO8601("2010-01-01T00:10:00");
+  Mantid::Types::Core::DateAndTime startTime("2010-01-01T00:10:00");
   timeSeries->setUnits("mm");
   for (unsigned int i = 0; i < length; i++) {
     timeSeries->addValue(startTime + static_cast<double>(i), value);
@@ -162,7 +159,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
   }
   return ws2d;
 }
-} // namespace
+}
 
 class SANSCollimationLengthEstimatorTest : public CxxTest::TestSuite {
 public:

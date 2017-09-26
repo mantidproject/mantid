@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyHistory.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include <nexus/NeXusFile.hpp>
 
 #include <boost/bind.hpp>
@@ -74,19 +74,19 @@ class MANTID_API_DLL AlgorithmHistory {
 public:
   /// History container
 
-  /// The date-and-time will be stored as the Mantid::Types::DateAndTime type
+  /// The date-and-time will be stored as the Mantid::Types::Core::DateAndTime type
   explicit AlgorithmHistory(
       const Algorithm *const alg,
-      const Mantid::Types::DateAndTime &start = Mantid::Types::DateAndTime::getCurrentTime(),
+      const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
   AlgorithmHistory(
       const std::string &name, int vers,
-      const Mantid::Types::DateAndTime &start = Mantid::Types::DateAndTime::getCurrentTime(),
+      const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
       const double &duration = -1.0, std::size_t uexeccount = 0);
-  void addExecutionInfo(const Mantid::Types::DateAndTime &start,
+  void addExecutionInfo(const Types::Core::DateAndTime &start,
                         const double &duration);
   void addProperty(const std::string &name, const std::string &value,
                    bool isdefault, const unsigned int &direction = 99);
@@ -101,7 +101,7 @@ public:
   /// get execution duration
   double executionDuration() const { return m_executionDuration; }
   /// get execution date
-  Mantid::Types::DateAndTime executionDate() const { return m_executionDate; }
+  Mantid::Types::Core::DateAndTime executionDate() const { return m_executionDate; }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
   /// get parameter list of algorithm in history const
@@ -141,7 +141,7 @@ public:
   void setExecCount(std::size_t execCount) { m_execCount = execCount; }
   /// Set data on history after it is created
   void fillAlgorithmHistory(const Algorithm *const alg,
-                            const Mantid::Types::DateAndTime &start,
+                            const Types::Core::DateAndTime &start,
                             const double &duration, std::size_t uexeccount);
   // Allow Algorithm::execute to change the exec count & duration after the
   // algorithm was executed
@@ -157,7 +157,7 @@ private:
   /// The version of the algorithm
   int m_version{-1};
   /// The execution date of the algorithm
-  Mantid::Types::DateAndTime m_executionDate;
+  Mantid::Types::Core::DateAndTime m_executionDate;
   /// The execution duration of the algorithm
   double m_executionDuration{-1.0};
   /// The PropertyHistory's defined for the algorithm

@@ -9,7 +9,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
@@ -437,7 +437,7 @@ bool Algorithm::execute() {
   }
 
   notificationCenter().postNotification(new StartedNotification(this));
-  Mantid::Types::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime startTime;
 
   // Return a failure if the algorithm hasn't been initialized
   if (!isInitialized()) {
@@ -549,7 +549,7 @@ bool Algorithm::execute() {
         m_running = true;
       }
 
-      startTime = Mantid::Types::DateAndTime::getCurrentTime();
+      startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
@@ -1205,13 +1205,13 @@ bool Algorithm::checkGroups() {
  *
  * @return whether processGroups succeeds.
  */
-bool Algorithm::doCallProcessGroups(Mantid::Types::DateAndTime &startTime) {
+bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime) {
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
   // CheckWorkspacesMatch, RenameWorkspace)
 
-  startTime = Mantid::Types::DateAndTime::getCurrentTime();
+  startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
 

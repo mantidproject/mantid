@@ -12,10 +12,10 @@
 
 #include "MantidAlgorithms/FilterByTime2.h"
 #include "MantidDataHandling/LoadEventPreNexus2.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;

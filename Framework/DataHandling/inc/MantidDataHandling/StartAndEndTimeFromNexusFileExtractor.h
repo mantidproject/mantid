@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_STARTANDENDTIMEFROMNEXUSFILEEXTRACTOR_H_
 
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include <string>
 
 namespace Mantid {
@@ -29,9 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-Mantid::Types::DateAndTime DLLExport
+Mantid::Types::Core::DateAndTime DLLExport
 extractStartTime(const std::string &filename);
-Mantid::Types::DateAndTime DLLExport
+Mantid::Types::Core::DateAndTime DLLExport
 extractEndTime(const std::string &filename);
 } // namespace DataHandling
 } // namespace Mantid

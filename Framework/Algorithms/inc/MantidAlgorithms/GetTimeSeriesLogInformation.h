@@ -57,19 +57,19 @@ public:
 private:
   API::MatrixWorkspace_sptr m_dataWS;
 
-  Mantid::Types::DateAndTime mRunStartTime;
-  Mantid::Types::DateAndTime mFilterT0;
-  Mantid::Types::DateAndTime mFilterTf;
+  Types::Core::DateAndTime mRunStartTime;
+  Types::Core::DateAndTime mFilterT0;
+  Types::Core::DateAndTime mFilterTf;
 
   std::map<std::string, std::size_t> m_intInfoMap;
   std::map<std::string, double> m_dblInfoMap;
 
   Kernel::TimeSeriesProperty<double> *m_log;
-  std::vector<Mantid::Types::DateAndTime> m_timeVec;
+  std::vector<Types::Core::DateAndTime> m_timeVec;
   std::vector<double> m_valueVec;
 
-  Mantid::Types::DateAndTime m_starttime;
-  Mantid::Types::DateAndTime m_endtime;
+  Types::Core::DateAndTime m_starttime;
+  Types::Core::DateAndTime m_endtime;
 
   bool m_ignoreNegativeTime;
 
@@ -85,24 +85,24 @@ private:
 
   /// Calcualte the distribution of delta T in time stamps
   DataObjects::Workspace2D_sptr
-  calDistributions(std::vector<Mantid::Types::DateAndTime> timevec, double stepsize);
+  calDistributions(std::vector<Types::Core::DateAndTime> timevec, double stepsize);
 
   void exportLog(API::MatrixWorkspace_sptr ws,
-                 std::vector<Mantid::Types::DateAndTime> abstimevec, double dts);
+                 std::vector<Types::Core::DateAndTime> abstimevec, double dts);
 
   void setupEventWorkspace(int numentries,
-                           std::vector<Mantid::Types::DateAndTime> &times,
+                           std::vector<Types::Core::DateAndTime> &times,
                            std::vector<double> values);
 
-  void setupWorkspace2D(int numentries, std::vector<Mantid::Types::DateAndTime> &times,
+  void setupWorkspace2D(int numentries, std::vector<Types::Core::DateAndTime> &times,
                         std::vector<double> values);
 
   void execQuickStatistics();
 
   void exportErrorLog(API::MatrixWorkspace_sptr ws,
-                      std::vector<Mantid::Types::DateAndTime> abstimevec, double dts);
+                      std::vector<Types::Core::DateAndTime> abstimevec, double dts);
 
-  void checkLogValueChanging(std::vector<Mantid::Types::DateAndTime> timevec,
+  void checkLogValueChanging(std::vector<Types::Core::DateAndTime> timevec,
                              std::vector<double> values, double delta);
 
   void checkLogBasicInforamtion();
@@ -110,9 +110,9 @@ private:
   /// Generate statistic information table workspace
   DataObjects::TableWorkspace_sptr generateStatisticTable();
 
-  Mantid::Types::DateAndTime getAbsoluteTime(double abstimens);
+  Types::Core::DateAndTime getAbsoluteTime(double abstimens);
 
-  Mantid::Types::DateAndTime calculateRelativeTime(double deltatime);
+  Types::Core::DateAndTime calculateRelativeTime(double deltatime);
 };
 
 } // namespace Algorithms

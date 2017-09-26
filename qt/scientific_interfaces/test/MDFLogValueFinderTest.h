@@ -1,22 +1,21 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 #define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
 
-#include "../MultiDatasetFit/MDFLogValueFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "../MultiDatasetFit/MDFLogValueFinder.h"
 
-#include <QStringList>
 #include <cxxtest/TestSuite.h>
-
-using namespace Mantid::Types;
+#include <QStringList>
 
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::ScopedWorkspace;
 using Mantid::API::WorkspaceFactory;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Math::StatisticType;
 using Mantid::Kernel::TimeSeriesProperty;
 using MantidQt::CustomInterfaces::MDFLogValueFinder;
@@ -154,7 +153,7 @@ private:
     for (size_t i = 0; i < 10; ++i) {
       DateAndTime t;
       const std::string &time = "2016-08-24T14:26:0" + std::to_string(i);
-      DateAndTimeHelpers::setFromISO8601(t, time);
+      t.setFromISO8601(time);
       times.push_back(t);
       values.push_back(static_cast<double>(i + logValue));
     }

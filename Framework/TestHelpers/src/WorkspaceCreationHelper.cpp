@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -26,13 +27,11 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -52,7 +51,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
     : m_Progress(
@@ -86,17 +86,17 @@ void removeWS(const std::string &name) {
 }
 
 /**
- * Creates bin or point based histograms based on the data passed
- * in for Y and E values and the bool specified.
- *
- * @param isHistogram :: Specifies whether the returned histogram
- * should use points or bin edges for the x axis. True gives bin edges.
- * @param yAxis :: Takes an rvalue (move) of the y axis for the new histogram
- * @param eAxis :: Takes an rvalue (move) of the e axis for the new histogram
- *
- * @return :: Returns a histogram with the user specified X axis type
- * and the data the user passed in.
- */
+  * Creates bin or point based histograms based on the data passed
+  * in for Y and E values and the bool specified.
+  *
+  * @param isHistogram :: Specifies whether the returned histogram
+  * should use points or bin edges for the x axis. True gives bin edges.
+  * @param yAxis :: Takes an rvalue (move) of the y axis for the new histogram
+  * @param eAxis :: Takes an rvalue (move) of the e axis for the new histogram
+  *
+  * @return :: Returns a histogram with the user specified X axis type
+  * and the data the user passed in.
+  */
 template <typename YType, typename EType>
 Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
   // We don't need to check if y.size() == e.size() as the histogram
@@ -559,13 +559,13 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
 }
 
 /**
- * Create a very small 2D workspace for a virtual reflectometry instrument with
- * multiple detectors
- * @return workspace with instrument attached.
- * @param startX : X Tof start value for the workspace.
- * @param detSize : optional detector height (default is 0 which puts all
- * detectors at the same position)
- */
+* Create a very small 2D workspace for a virtual reflectometry instrument with
+* multiple detectors
+* @return workspace with instrument attached.
+* @param startX : X Tof start value for the workspace.
+* @param detSize : optional detector height (default is 0 which puts all
+* detectors at the same position)
+*/
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     double startX, const double detSize) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
@@ -704,8 +704,7 @@ EventWorkspace_sptr createEventWorkspace(int numPixels, int numBins,
                                          int start_at_pixelID) {
   return createEventWorkspaceWithStartTime(
       numPixels, numBins, numEvents, x0, binDelta, eventPattern,
-      start_at_pixelID,
-      DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00"));
+      start_at_pixelID, DateAndTime("2010-01-01T00:00:00"));
 }
 
 /**
@@ -1237,17 +1236,17 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
 }
 
 /**
- * Populates the destination array (usually a mutable histogram)
- * starting at the index specified with the doubles provided in an
- * initializer list. Note the caller is responsible for ensuring
- * the destination has capacity for startingIndex + size(initializer list)
- * number of values
- *
- * @param destination :: The array to populate with data
- * @param startingIndex :: The index to start populating data at
- * @param values :: The initializer list to populate the array with
- * starting at the index specified
- */
+  * Populates the destination array (usually a mutable histogram)
+  * starting at the index specified with the doubles provided in an
+  * initializer list. Note the caller is responsible for ensuring
+  * the destination has capacity for startingIndex + size(initializer list)
+  * number of values
+  *
+  * @param destination :: The array to populate with data
+  * @param startingIndex :: The index to start populating data at
+  * @param values :: The initializer list to populate the array with
+  * starting at the index specified
+  */
 template <typename T>
 void populateWsWithInitList(T &destination, size_t startingIndex,
                             const std::initializer_list<double> &values) {

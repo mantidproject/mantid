@@ -1,13 +1,13 @@
-#include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidAPI/CatalogManager.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidKernel/DateAndTime.h"
 
+#include <boost/algorithm/string/regex.hpp>
 #include <Poco/ActiveResult.h>
 #include <QCoreApplication>
 #include <QTime>
-#include <boost/algorithm/string/regex.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -238,8 +238,7 @@ time_t CatalogHelper::getTimevalue(const std::string &inputDate) {
   std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
                         dateSegments.at(0) + " 0:00:00.000";
   // Return the date as time_t value.
-  return Mantid::Types::DateAndTimeHelpers::createFromISO8601(isoDate)
-      .to_time_t();
+  return Mantid::Types::Core::DateAndTime(isoDate).to_time_t();
 }
 
 /**

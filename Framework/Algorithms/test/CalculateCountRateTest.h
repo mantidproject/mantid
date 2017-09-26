@@ -5,12 +5,11 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidHistogramData/HistogramX.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <numeric>
@@ -173,10 +172,8 @@ public:
 
     // Check time series log outside of the data range
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
-    Mantid::Types::DateAndTime first =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-            "2015-11-30T16:17:10");
-    std::vector<Mantid::Types::DateAndTime> times(140);
+    Types::Core::DateAndTime first("2015-11-30T16:17:10");
+    std::vector<Types::Core::DateAndTime> times(140);
     std::vector<double> values(140);
 
     for (size_t i = 0; i < 140; ++i) {
@@ -184,7 +181,7 @@ public:
       values[i] = double(i);
     }
 
-    // DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00")
+    // DateAndTime("2010-01-01T00:00:00")
 
     pTime_log->addValues(times, values);
     sws->mutableRun().addProperty(pTime_log, true);
@@ -197,8 +194,7 @@ public:
     TS_ASSERT(!alg.useLogDerivative());
 
     // Check correct date and time
-    first = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        "2010-01-01T00:00:00");
+    first = Types::Core::DateAndTime("2010-01-01T00:00:00");
     times.resize(240);
     values.resize(240);
     for (size_t i = 0; i < 240; ++i) {
@@ -472,10 +468,8 @@ public:
     }
 
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
-    Mantid::Types::DateAndTime first =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-            "2010-01-01T00:00:00");
-    std::vector<Mantid::Types::DateAndTime> times(240);
+    Types::Core::DateAndTime first("2010-01-01T00:00:00");
+    std::vector<Types::Core::DateAndTime> times(240);
     std::vector<double> values(240);
 
     for (size_t i = 0; i < values.size(); ++i) {

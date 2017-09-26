@@ -1,6 +1,6 @@
 #include "MantidKernel/Property.h"
 
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/OptionalBool.h"
@@ -209,8 +209,8 @@ void Property::setUnits(const std::string &unit) { m_units = unit; }
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Mantid::Types::DateAndTime &start,
-                            const Mantid::Types::DateAndTime &stop) {
+void Property::filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop) {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general

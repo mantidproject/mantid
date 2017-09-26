@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../Muon/MuonAnalysisHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -13,8 +12,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "../Muon/MuonAnalysisHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
@@ -22,7 +21,7 @@ using namespace MantidQt::CustomInterfaces::MuonAnalysisHelper;
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 /// This is a wrapper for the ADS that automatically clears itself on
 /// destruction
@@ -132,8 +131,8 @@ public:
         WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     MatrixWorkspace_sptr ws3 =
         WorkspaceCreationHelper::create2DWorkspace123(1, 3);
-    auto start = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
-    auto end = DateAndTimeHelpers::createFromISO8601("2015-12-24T09:00:00Z");
+    DateAndTime start{"2015-12-23T15:32:40Z"};
+    DateAndTime end{"2015-12-24T09:00:00Z"};
     addLog(ws1, "run_start", start.toSimpleString());
     addLog(ws1, "run_end", end.toSimpleString());
     addLog(ws1, "run_number", "15189");
@@ -184,8 +183,8 @@ public:
 
   void test_replaceLogValue() {
     ScopedWorkspace ws(createWs("MUSR", 15189));
-    auto start1 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
-    auto start2 = DateAndTimeHelpers::createFromISO8601("2014-12-23T15:32:40Z");
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
     addLog(ws.retrieve(), "run_start", start1.toSimpleString());
     replaceLogValue(ws.name(), "run_start", start2.toSimpleString());
     auto times = findLogValues(ws.retrieve(), "run_start");
@@ -196,8 +195,8 @@ public:
   void test_findLogValues() {
     Workspace_sptr ws1 = createWs("MUSR", 15189);
     Workspace_sptr ws2 = createWs("MUSR", 15190);
-    auto start1 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
-    auto start2 = DateAndTimeHelpers::createFromISO8601("2014-12-23T15:32:40Z");
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
     addLog(ws1, "run_start", start1.toSimpleString());
     addLog(ws2, "run_start", start2.toSimpleString());
     auto groupWS = groupWorkspaces({ws1, ws2});
@@ -205,23 +204,21 @@ public:
     auto badLogs = findLogValues(groupWS, "not_present");
     auto singleStart = findLogValues(ws1, "run_start");
     TS_ASSERT_EQUALS(2, starts.size());
-    TS_ASSERT_EQUALS(start1.toSimpleString(), starts[0]);
-    TS_ASSERT_EQUALS(start2.toSimpleString(), starts[1]);
+    TS_ASSERT_EQUALS(start1, starts[0]);
+    TS_ASSERT_EQUALS(start2, starts[1]);
     TS_ASSERT_EQUALS(0, badLogs.size());
     TS_ASSERT_EQUALS(1, singleStart.size());
-    TS_ASSERT_EQUALS(start1.toSimpleString(), singleStart[0]);
+    TS_ASSERT_EQUALS(start1, singleStart[0]);
   }
 
   void test_findLogRange_singleWS() {
     Workspace_sptr ws = createWs("MUSR", 15189);
-    auto start = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
+    DateAndTime start{"2015-12-23T15:32:40Z"};
     addLog(ws, "run_start", start.toSimpleString());
-    auto range =
-        findLogRange(ws, "run_start",
-                     [](const std::string &first, const std::string &second) {
-                       return DateAndTimeHelpers::createFromISO8601(first) <
-                              DateAndTimeHelpers::createFromISO8601(second);
-                     });
+    auto range = findLogRange(ws, "run_start", [](const std::string &first,
+                                                  const std::string &second) {
+      return DateAndTime(first) < DateAndTime(second);
+    });
     TS_ASSERT_EQUALS(range.first, start.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start.toSimpleString());
   }
@@ -229,16 +226,15 @@ public:
   void test_findLogRange_groupWS() {
     Workspace_sptr ws1 = createWs("MUSR", 15189);
     Workspace_sptr ws2 = createWs("MUSR", 15190);
-    auto start1 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
-    auto start2 = DateAndTimeHelpers::createFromISO8601("2014-12-23T15:32:40Z");
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
     addLog(ws1, "run_start", start1.toSimpleString());
     addLog(ws2, "run_start", start2.toSimpleString());
     auto groupWS = groupWorkspaces({ws1, ws2});
     auto range =
         findLogRange(groupWS, "run_start",
                      [](const std::string &first, const std::string &second) {
-                       return DateAndTimeHelpers::createFromISO8601(first) <
-                              DateAndTimeHelpers::createFromISO8601(second);
+                       return DateAndTime(first) < DateAndTime(second);
                      });
     TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
@@ -247,16 +243,15 @@ public:
   void test_findLogRange_vectorOfWorkspaces() {
     Workspace_sptr ws1 = createWs("MUSR", 15189);
     Workspace_sptr ws2 = createWs("MUSR", 15190);
-    auto start1 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z");
-    auto start2 = DateAndTimeHelpers::createFromISO8601("2014-12-23T15:32:40Z");
+    DateAndTime start1{"2015-12-23T15:32:40Z"};
+    DateAndTime start2{"2014-12-23T15:32:40Z"};
     addLog(ws1, "run_start", start1.toSimpleString());
     addLog(ws2, "run_start", start2.toSimpleString());
     std::vector<Workspace_sptr> workspaces = {ws1, ws2};
     auto range =
         findLogRange(workspaces, "run_start",
                      [](const std::string &first, const std::string &second) {
-                       return DateAndTimeHelpers::createFromISO8601(first) <
-                              DateAndTimeHelpers::createFromISO8601(second);
+                       return DateAndTime(first) < DateAndTime(second);
                      });
     TS_ASSERT_EQUALS(range.first, start2.toSimpleString());
     TS_ASSERT_EQUALS(range.second, start1.toSimpleString());
@@ -268,8 +263,7 @@ public:
     auto timeRange =
         findLogRange(ws, "run_start",
                      [](const std::string &first, const std::string &second) {
-                       return DateAndTimeHelpers::createFromISO8601(first) <
-                              DateAndTimeHelpers::createFromISO8601(second);
+                       return DateAndTime(first) < DateAndTime(second);
                      });
     TS_ASSERT_EQUALS(timeRange.first, "");
     TS_ASSERT_EQUALS(timeRange.second, "");
@@ -303,13 +297,10 @@ public:
   void test_appendTimeSeriesLogs() {
     Workspace_sptr ws1 = createWs("MUSR", 15189);
     Workspace_sptr ws2 = createWs("MUSR", 15190);
-    const DateAndTime
-        time1 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:40Z"),
-        time2 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:41Z"),
-        time3 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:42Z"),
-        time4 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:43Z"),
-        time5 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:44Z"),
-        time6 = DateAndTimeHelpers::createFromISO8601("2015-12-23T15:32:45Z");
+    const DateAndTime time1{"2015-12-23T15:32:40Z"},
+        time2{"2015-12-23T15:32:41Z"}, time3{"2015-12-23T15:32:42Z"},
+        time4{"2015-12-23T15:32:43Z"}, time5{"2015-12-23T15:32:44Z"},
+        time6{"2015-12-23T15:32:45Z"};
     const double value1(1), value2(2), value3(3), value4(4), value5(5),
         value6(6);
     const std::string logName = "TSLog";
@@ -742,7 +733,7 @@ private:
 
   // Adds a time series log to the workspace
   void addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
-                        const std::vector<Mantid::Types::DateAndTime> &times,
+                        const std::vector<Mantid::Types::Core::DateAndTime> &times,
                         const std::vector<double> &values) {
     TS_ASSERT_EQUALS(times.size(), values.size());
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);

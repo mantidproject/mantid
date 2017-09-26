@@ -1,12 +1,12 @@
 #include "MantidKernel/UsageService.h"
 #include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/ParaViewVersion.h"
-#include "MantidTypes/DateAndTime.h"
 
 #include <Poco/ActiveResult.h>
 
@@ -28,7 +28,7 @@ const std::string FEATURE_URL("http://reports.mantidproject.org/api/feature");
 
 //----------------------------------------------------------------------------------------------
 /** FeatureUsage
- */
+*/
 FeatureUsage::FeatureUsage(const std::string &type, const std::string &name,
                            const bool internal)
     : type(type), name(name), internal(internal) {}
@@ -96,7 +96,7 @@ void UsageServiceImpl::registerStartup() {
 }
 
 /** registerFeatureUsage
- */
+*/
 void UsageServiceImpl::registerFeatureUsage(const std::string &type,
                                             const std::string &name,
                                             const bool internal) {
@@ -185,8 +185,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
- * This puts together the system information for the json document.
- */
+* This puts together the system information for the json document.
+*/
 ::Json::Value UsageServiceImpl::generateFeatureHeader() {
   ::Json::Value header;
 
@@ -197,8 +197,8 @@ void UsageServiceImpl::timerCallback(Poco::Timer &) {
 }
 
 /**
- * This puts together the system information for the json document.
- */
+* This puts together the system information for the json document.
+*/
 std::string UsageServiceImpl::generateStartupMessage() {
   ::Json::Value message;
 
@@ -228,7 +228,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
 
   // mantid version and sha1
   message["dateTime"] =
-      Mantid::Types::DateAndTime::getCurrentTime().toISO8601String();
+      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
   message["application"] = m_application;
 
@@ -274,17 +274,17 @@ std::string UsageServiceImpl::generateFeatureUsageMessage() {
 
 //--------------------------------------------------------------------------------------------
 /**
- * Asynchronous execution
- */
+* Asynchronous execution
+*/
 
 /**Async method for sending startup messages
- */
+*/
 int UsageServiceImpl::sendStartupAsyncImpl(const std::string &message) {
   return this->sendReport(message, STARTUP_URL);
 }
 
 /**Async method for sending feature messages
- */
+*/
 int UsageServiceImpl::sendFeatureAsyncImpl(const std::string &message) {
   return this->sendReport(message, FEATURE_URL);
 }
@@ -301,8 +301,7 @@ int UsageServiceImpl::sendReport(const std::string &message,
   } catch (Mantid::Kernel::Exception::InternetError &e) {
     status = e.errorCode();
     g_log.information() << "Call to \"" << url << "\" responded with " << status
-                        << "\n"
-                        << e.what() << "\n";
+                        << "\n" << e.what() << "\n";
   }
 
   return status;

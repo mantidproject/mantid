@@ -11,18 +11,18 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidLiveData/Exception.h"
 
-#include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
-#include <Poco/Net/SocketAddress.h>
 #include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/SocketAddress.h>
 
-#include <exception>
-#include <fstream>
 #include <string>
+#include <fstream>
+#include <exception>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Core::DateAndTime;
 
 #if 0
 // Port numbers
@@ -122,13 +122,13 @@ typedef struct neutron_event_struct NEUTRON_EVENT, *NEUTRON_EVENT_PTR;
  ****************************************************************************/
 
 // Helper function to get a DateAndTime value from a pulse_id_struct
-Mantid::Types::DateAndTime timeFromPulse(const pulse_id_struct *p) {
+Mantid::Types::Core::DateAndTime timeFromPulse(const pulse_id_struct *p) {
   uint32_t seconds = p->pulseIDhigh;
   uint32_t nanoseconds = p->pulseIDlow;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
-  return Mantid::Types::DateAndTime(static_cast<int64_t>(seconds),
-                                    static_cast<int64_t>(nanoseconds));
+  return DateAndTime(static_cast<int64_t>(seconds),
+                     static_cast<int64_t>(nanoseconds));
 }
 
 namespace Mantid {
@@ -138,7 +138,7 @@ DECLARE_LISTENER(TOPAZLiveEventDataListener)
 namespace {
 /// static logger
 Kernel::Logger g_log("SNSLiveEventDataListener");
-} // namespace
+}
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
@@ -265,7 +265,7 @@ bool TOPAZLiveEventDataListener::isConnected() { return m_isConnected; }
 /// it and stores the resulting events in a temporary workspace.
 /// @param startTime Ignored.  This class doesn't have the capability to
 /// replay historical data.
-void TOPAZLiveEventDataListener::start(Mantid::Types::DateAndTime startTime) {
+void TOPAZLiveEventDataListener::start(Types::Core::DateAndTime startTime) {
   (void)startTime; // Keep the compiler from complaining about unsed variable
 
   // Initialize the workspace
@@ -373,7 +373,7 @@ void TOPAZLiveEventDataListener::run() {
         }
 
         // Timestamp for the events
-        Mantid::Types::DateAndTime eventTime = timeFromPulse(&pid[i]);
+        Mantid::Types::Core::DateAndTime eventTime = timeFromPulse(&pid[i]);
 
         std::lock_guard<std::mutex> scopedLock(m_mutex);
         // Save the pulse charge in the logs
@@ -520,7 +520,7 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
 
 /// Adds an event to the workspace
 void TOPAZLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Types::DateAndTime pulseTime)
+    uint32_t pixelId, double tof, const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -529,7 +529,7 @@ void TOPAZLiveEventDataListener::appendEvent(
   auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     std::size_t workspaceIndex = it->second;
-    TofEvent event(tof, pulseTime);
+    Mantid::Types::Event::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     // TODO: do we want to disable this warning?  Most of the time, we

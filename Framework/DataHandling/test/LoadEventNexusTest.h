@@ -8,11 +8,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Geometry;
@@ -20,7 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
@@ -474,9 +474,8 @@ public:
                     1.426, 1e-6);
 
     // Check monitor workspace pointer held in main workspace
-    TS_ASSERT_EQUALS(
-        WS,
-        ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
+    TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")
+                             ->monitorWorkspace());
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
@@ -557,7 +556,7 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "HYSPECA");
-    TS_ASSERT_EQUALS(inst->getValidFromDate().toSimpleString(),
+    TS_ASSERT_EQUALS(inst->getValidFromDate(),
                      std::string("2011-Jul-20 17:02:48.437294000"));
     TS_ASSERT_EQUALS(inst->getNumberDetectors(), 20483);
     TS_ASSERT_EQUALS(inst->baseInstrument()->getMonitors().size(), 3);

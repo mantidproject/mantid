@@ -149,7 +149,7 @@ int ISISHistoDataListener::runNumber() const {
 }
 
 void ISISHistoDataListener::start(
-    Mantid::Types::DateAndTime /*startTime*/) // Ignore the start time
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {}
 
 /**

@@ -3,18 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/RemoveLogs.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/RemoveLogs.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -24,7 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class RemoveLogsTest : public CxxTest::TestSuite {
 public:
@@ -126,8 +125,7 @@ private:
     std::vector<DateAndTime> times;
     std::vector<int> index;
     std::vector<double> dbl1, dbl2;
-    DateAndTime startTime =
-        DateAndTimeHelpers::createFromISO8601("2010-01-01T00:00:00");
+    DateAndTime startTime("2010-01-01T00:00:00");
     for (int i = 0; i < 100; ++i) {
       times.push_back(startTime + i * 10.0);
       index.push_back(i);

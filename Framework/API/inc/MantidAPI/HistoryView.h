@@ -7,7 +7,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <list>
 #include <vector>
@@ -53,9 +53,9 @@ public:
   void unrollAll();
   void roll(size_t index);
   void rollAll();
-  void filterBetweenExecDate(Mantid::Types::DateAndTime start,
-                             Mantid::Types::DateAndTime end =
-                                 Mantid::Types::DateAndTime::getCurrentTime());
+  void filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                             Mantid::Types::Core::DateAndTime end =
+                                 Mantid::Types::Core::DateAndTime::getCurrentTime());
   /**
   * Get the list of History Items for this view.
   *

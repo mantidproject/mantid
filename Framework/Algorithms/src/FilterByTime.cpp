@@ -3,11 +3,9 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-
-using Mantid::Types::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,8 +16,9 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
+using DataObjects::EventWorkspace_const_sptr;
+using Types::Core::DateAndTime;
 
 void FilterByTime::init() {
   std::string commonHelp("\nYou can only specify the relative or absolute "
@@ -82,8 +81,8 @@ void FilterByTime::exec() {
   if ((start_str != "") && (stop_str != "") && (start_dbl <= 0.0) &&
       (stop_dbl <= 0.0)) {
     // Use the absolute string
-    start = Mantid::Types::DateAndTimeHelpers::createFromISO8601(start_str);
-    stop = Mantid::Types::DateAndTimeHelpers::createFromISO8601(stop_str);
+    start = DateAndTime(start_str);
+    stop = DateAndTime(stop_str);
   } else if ((start_str == "") && (stop_str == "") &&
              ((start_dbl > 0.0) || (stop_dbl > 0.0))) {
     // Use the relative times in seconds.

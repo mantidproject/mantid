@@ -8,8 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidTypes/DateAndTime.h"
-#include "MantidTypes/TofEvent.h"
+#include "MantidTypes/Event/TofEvent.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -23,7 +22,6 @@ class LoadEventNexus;
 }
 
 namespace DataObjects {
-
 //==========================================================================================
 /** Info about a single neutron detection event, including a weight and error
  *value:
@@ -33,7 +31,7 @@ namespace DataObjects {
  *  - weight of the neutron (float, can be
  */
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class DLLExport WeightedEvent : public Types::TofEvent {
+class DLLExport WeightedEvent : public Types::Event::TofEvent {
 
   /// EventList has the right to mess with WeightedEvent.
   friend class EventList;
@@ -53,9 +51,9 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
-  WeightedEvent(double tof, const Mantid::Types::DateAndTime pulsetime,
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
                 double weight, double errorSquared);
-  WeightedEvent(double tof, const Mantid::Types::DateAndTime pulsetime,
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
                 float weight, float errorSquared);
 
   WeightedEvent(const TofEvent &, double weight, double errorSquared);
@@ -114,19 +112,21 @@ public:
   WeightedEventNoTime(double tof, double weight, double errorSquared);
   WeightedEventNoTime(double tof, float weight, float errorSquared);
 
-  WeightedEventNoTime(double tof, const Mantid::Types::DateAndTime pulsetime,
+  WeightedEventNoTime(double tof,
+                      const Mantid::Types::Core::DateAndTime pulsetime,
                       double weight, double errorSquared);
-  WeightedEventNoTime(double tof, const Mantid::Types::DateAndTime pulsetime,
+  WeightedEventNoTime(double tof,
+                      const Mantid::Types::Core::DateAndTime pulsetime,
                       float weight, float errorSquared);
 
-  WeightedEventNoTime(const Types::TofEvent &, double weight,
+  WeightedEventNoTime(const Types::Event::TofEvent &, double weight,
                       double errorSquared);
-  WeightedEventNoTime(const Types::TofEvent &, float weight,
+  WeightedEventNoTime(const Types::Event::TofEvent &, float weight,
                       float errorSquared);
 
   WeightedEventNoTime(const WeightedEvent &);
 
-  WeightedEventNoTime(const Types::TofEvent &);
+  WeightedEventNoTime(const Types::Event::TofEvent &);
 
   WeightedEventNoTime();
 
@@ -138,7 +138,7 @@ public:
 
   double operator()() const;
   double tof() const;
-  Mantid::Types::DateAndTime pulseTime() const;
+  Mantid::Types::Core::DateAndTime pulseTime() const;
   double weight() const;
   double error() const;
   double errorSquared() const;
@@ -181,7 +181,7 @@ inline double WeightedEventNoTime::tof() const { return m_tof; }
 /** Return the pulse time; this returns 0 since this
  *  type of Event has no time associated.
  */
-inline Mantid::Types::DateAndTime WeightedEventNoTime::pulseTime() const {
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTime() const {
   return 0;
 }
 

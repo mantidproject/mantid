@@ -18,7 +18,6 @@ if ( CXXTEST_FOUND )
   target_link_libraries( PythonInterfaceCppTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
             Geometry
-            Types
             Kernel
             PythonKernelModule
             PythonAPIModule

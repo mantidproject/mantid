@@ -9,7 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"

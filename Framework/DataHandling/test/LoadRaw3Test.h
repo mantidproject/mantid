@@ -1,15 +1,15 @@
 #ifndef LoadRaw3TEST_H_
 #define LoadRaw3TEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
@@ -22,7 +22,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadRaw3Test : public CxxTest::TestSuite {
 public:

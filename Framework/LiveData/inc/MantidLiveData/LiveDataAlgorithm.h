@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/ILiveListener.h"
 
 namespace Mantid {
@@ -53,7 +53,7 @@ public:
 protected:
   void initProps();
 
-  Mantid::Types::DateAndTime getStartTime() const;
+  Mantid::Types::Core::DateAndTime getStartTime() const;
 
   Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 

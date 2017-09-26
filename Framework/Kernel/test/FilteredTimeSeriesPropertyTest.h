@@ -3,7 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/TimeInterval.h"
 
 using Mantid::Kernel::FilteredTimeSeriesProperty;
 

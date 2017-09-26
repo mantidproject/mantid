@@ -10,7 +10,7 @@
 #include <QtCore/qstringlist.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
@@ -22,7 +22,7 @@ using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::ConfigService;
 
 namespace {

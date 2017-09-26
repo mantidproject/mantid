@@ -2,7 +2,7 @@
 #define MANTID_GEOMETRY_DETECTORINFO_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
@@ -119,13 +119,13 @@ public:
   size_t indexOf(const detid_t id) const { return m_detIDToIndex->at(id); }
 
   size_t scanCount(const size_t index) const;
-  std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime>
+  std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
   scanInterval(const std::pair<size_t, size_t> &index) const;
   void setScanInterval(
       const size_t index,
-      const std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime> &interval);
+      const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   void setScanInterval(
-      const std::pair<Mantid::Types::DateAndTime, Mantid::Types::DateAndTime> &interval);
+      const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
 
   void merge(const DetectorInfo &other);
 

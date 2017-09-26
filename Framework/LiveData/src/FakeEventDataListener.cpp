@@ -3,15 +3,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/Exception.h"
-#include "MantidTypes/DateAndTime.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Types::DateAndTime;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
@@ -63,8 +62,7 @@ ILiveListener::RunStatus FakeEventDataListener::runStatus() {
 int FakeEventDataListener::runNumber() const { return m_runNumber; }
 
 void FakeEventDataListener::start(
-    Mantid::Types::DateAndTime /*startTime*/) // Ignore the start time for now
-                                              // at least
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time for now at least
 {
   // Set up the workspace buffer (probably won't know its dimensions before this
   // point)
@@ -75,8 +73,7 @@ void FakeEventDataListener::start(
       WorkspaceFactory::Instance().create("EventWorkspace", 2, 2, 1));
   // Set a sample tof range
   m_rand->setRange(40000, 60000);
-  m_rand->setSeed(
-      Mantid::Types::DateAndTime::getCurrentTime().totalNanoseconds());
+  m_rand->setSeed(Types::Core::DateAndTime::getCurrentTime().totalNanoseconds());
 
   // If necessary, calculate the number of events we need to generate on each
   // call of generateEvents
@@ -139,8 +136,10 @@ boost::shared_ptr<Workspace> FakeEventDataListener::extractData() {
 void FakeEventDataListener::generateEvents(Poco::Timer &) {
   std::lock_guard<std::mutex> _lock(m_mutex);
   for (long i = 0; i < m_callbackloop; ++i) {
-    m_buffer->getSpectrum(0).addEventQuickly(TofEvent(m_rand->nextValue()));
-    m_buffer->getSpectrum(1).addEventQuickly(TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(0).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
+    m_buffer->getSpectrum(1).addEventQuickly(
+        Types::Event::TofEvent(m_rand->nextValue()));
   }
 }
 } // namespace LiveData

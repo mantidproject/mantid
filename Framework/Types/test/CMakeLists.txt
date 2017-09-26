@@ -6,8 +6,7 @@ if ( CXXTEST_FOUND )
     Types
     ${Boost_LIBRARIES}
     ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
- )
+    ${GTEST_LIBRARIES} )
 
   add_dependencies ( FrameworkTests TypesTest )
   # Add to the 'FrameworkTests' group in VS

@@ -1,8 +1,7 @@
-#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
+#include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 #include "MantidRemoteJobManagers/SimpleJSON.h"
 
 #include <fstream>
@@ -16,9 +15,10 @@ DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPIJobManager)
 namespace {
 // static logger object
 Mantid::Kernel::Logger g_log("MantidWebServiceAPIJobManager");
-} // namespace
+}
 
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Abort a previously submitted job
@@ -101,8 +101,8 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     const std::string &localFileName) {
 
   std::istream &respStream =
-      httpGet("/download", std::string("TransID=") + transactionID +
-                               "&File=" + remoteFileName);
+      httpGet("/download", std::string("TransID=") + transactionID + "&File=" +
+                               remoteFileName);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
@@ -222,12 +222,9 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
     info.name = jobNames[i];
     info.runnableName = scriptNames[i];
     info.transactionID = transIds[i];
-    info.submitDate =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(submitDates[i]);
-    info.startDate =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(startDates[i]);
-    info.completionTime = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        completionDates[i]);
+    info.submitDate = DateAndTime(submitDates[i]);
+    info.startDate = DateAndTime(startDates[i]);
+    info.completionTime = DateAndTime(completionDates[i]);
     info.cmdLine = cmdLines[i];
     result.push_back(info);
   }
@@ -322,16 +319,13 @@ MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
   // in the output and see if the values are there...
   if (status.find("SubmitDate") != status.end()) {
     status["SubmitDate"].getValue(value);
-    info.submitDate =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(value);
+    info.submitDate = DateAndTime(value);
 
     status["StartDate"].getValue(value);
-    info.startDate =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(value);
+    info.startDate = DateAndTime(value);
 
     status["CompletionDate"].getValue(value);
-    info.completionTime =
-        Mantid::Types::DateAndTimeHelpers::createFromISO8601(value);
+    info.completionTime = DateAndTime(value);
   }
 
   // in principle not required for/provided by the Mantid remote job submission

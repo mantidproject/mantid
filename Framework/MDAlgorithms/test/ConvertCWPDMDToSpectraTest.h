@@ -9,19 +9,18 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
-using Mantid::DataHandling::LoadSpiceAscii;
 using Mantid::MDAlgorithms::ConvertCWPDMDToSpectra;
+using Mantid::DataHandling::LoadSpiceAscii;
 using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class ConvertCWPDMDToSpectraTest : public CxxTest::TestSuite {
 public:

@@ -20,7 +20,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 
 using Mantid::MDAlgorithms::ConvertSpiceDataToRealSpace;
 using Mantid::DataHandling::LoadInstrument;
@@ -29,7 +28,7 @@ using Mantid::DataHandling::LoadSpiceAscii;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class ConvertSpiceDataToRealSpaceTest : public CxxTest::TestSuite {
 public:

@@ -16,7 +16,7 @@ namespace Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::Types::DateAndTime;
+using Types::Core::DateAndTime;
 
 /**
  Helper method to transform a MantidVector containing absolute times in

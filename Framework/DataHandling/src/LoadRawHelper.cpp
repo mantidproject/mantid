@@ -11,7 +11,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -23,11 +22,11 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/DirectoryIterator.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
 
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
@@ -37,7 +36,7 @@ namespace DataHandling {
 
 using namespace Kernel;
 using namespace API;
-using namespace Types;
+using Types::Core::DateAndTime;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
@@ -379,8 +378,8 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
  */
 void LoadRawHelper::setWorkspaceData(
     DataObjects::Workspace2D_sptr newWorkspace,
-    const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
-        &timeChannelsVec,
+    const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &
+        timeChannelsVec,
     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
     int64_t lengthIn, int64_t binStart) {
   if (!newWorkspace)
@@ -841,14 +840,14 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
  * @param isisRaw: pointer to the raw file
  * @return the endtime
  */
-Mantid::Types::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
   std::string isisDate = std::string(isisRaw->rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  return DateAndTimeHelpers::createFromISO8601(
-      isisDate.substr(7, 4) + "-" +
-      convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
-      isisDate.substr(0, 2) + "T" + std::string(isisRaw->rpb.r_endtime, 8));
+  return DateAndTime(isisDate.substr(7, 4) + "-" +
+                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" +
+                     std::string(isisRaw->rpb.r_endtime, 8));
 }
 
 /**
@@ -856,14 +855,14 @@ Mantid::Types::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
  * @param isisRaw: pointer to the raw file
  * @return the start time
  */
-Mantid::Types::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
   auto isisDate = std::string(isisRaw->hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
-  return DateAndTimeHelpers::createFromISO8601(
-      isisDate.substr(7, 4) + "-" +
-      convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
-      isisDate.substr(0, 2) + "T" + std::string(isisRaw->hdr.hd_time, 8));
+  return DateAndTime(isisDate.substr(7, 4) + "-" +
+                     convertMonthLabelToIntStr(isisDate.substr(3, 3)) + "-" +
+                     isisDate.substr(0, 2) + "T" +
+                     std::string(isisRaw->hdr.hd_time, 8));
 }
 
 /// To help transforming date stored in ISIS raw file into iso 8601
@@ -1091,8 +1090,9 @@ void LoadRawHelper::loadSpectra(
   for (specnum_t i = 1; i <= m_numberOfSpectra; ++i) {
     int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
-        (m_list && find(m_spec_list.begin(), m_spec_list.end(), i) !=
-                       m_spec_list.end())) {
+        (m_list &&
+         find(m_spec_list.begin(), m_spec_list.end(), i) !=
+             m_spec_list.end())) {
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
@@ -1106,9 +1106,9 @@ void LoadRawHelper::loadSpectra(
 
       if (numberOfPeriods == 1) {
         if (++histCurrent % 100 == 0) {
-          m_prog =
-              progStart + (progEnd - progStart) *
-                              (static_cast<double>(histCurrent) / histTotal);
+          m_prog = progStart +
+                   (progEnd - progStart) *
+                       (static_cast<double>(histCurrent) / histTotal);
         }
         interruption_point();
       }

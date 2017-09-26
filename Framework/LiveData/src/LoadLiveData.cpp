@@ -16,6 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {
@@ -101,8 +102,8 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
       for (auto prop : proplist) {
         if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
-            g_log.information()
-                << "Using " << prop->name() << " as the input property.\n";
+            g_log.information() << "Using " << prop->name()
+                                << " as the input property.\n";
             alg->setPropertyValue(prop->name(), inputName);
             inputPropertyWorkspaceFound = true;
           }
@@ -399,7 +400,7 @@ void LoadLiveData::exec() {
   }
 
   // TODO: Have the ILiveListener tell me exactly the time stamp
-  Types::DateAndTime lastTimeStamp = Types::DateAndTime::getCurrentTime();
+  DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();
   this->setPropertyValue("LastTimeStamp", lastTimeStamp.toISO8601String());
 
   // Now we process the chunk

@@ -1,11 +1,14 @@
 #ifndef TOFEVENTTEST_H_
 #define TOFEVENTTEST_H_ 1
 
+#include "MantidTypes/Event/TofEvent.h"
+#include <cmath>
 #include <cxxtest/TestSuite.h>
-#include "MantidTypes/TofEvent.h"
 
-using namespace Mantid;
-using namespace Mantid::Types;
+using Mantid::Types::Event::TofEvent;
+
+using std::size_t;
+using std::vector;
 
 //==========================================================================================
 class TofEventTest : public CxxTest::TestSuite {

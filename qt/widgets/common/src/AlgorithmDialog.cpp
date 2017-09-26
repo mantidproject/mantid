@@ -26,6 +26,7 @@
 using namespace MantidQt::API;
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::IAlgorithm;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("AlgorithmDialog");

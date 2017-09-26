@@ -23,14 +23,15 @@ class typeinfo;
 
 namespace Mantid {
 namespace Types {
+namespace Core {
 class DateAndTime;
 }
+} // namespace Types
 namespace Kernel {
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
 class DataItem;
-
 class IPropertySettings;
 class PropertyHistory;
 class SplittingInterval;
@@ -160,8 +161,8 @@ public:
   virtual std::string getDefault() const = 0;
 
   /** Is Multiple Selection Allowed
-   *  @return true if multiple selection is allowed
-   */
+  *  @return true if multiple selection is allowed
+  */
   virtual bool isMultipleSelectionAllowed() { return false; };
 
   virtual std::vector<std::string> allowedValues() const;
@@ -178,8 +179,8 @@ public:
 
   /// Add to this
   virtual Property &operator+=(Property const *rhs) = 0;
-  virtual void filterByTime(const Mantid::Types::DateAndTime &start,
-                            const Mantid::Types::DateAndTime &stop);
+  virtual void filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop);
   virtual void splitByTime(std::vector<SplittingInterval> &splitter,
                            std::vector<Property *> outputs,
                            bool isProtonCharge = true) const;
@@ -193,8 +194,8 @@ public:
   virtual size_t getMemorySize() const { return sizeof(Property); }
 
   /** Just returns the property (*this) unless overridden
-   *  @return a property with the value
-   */
+  *  @return a property with the value
+  */
   virtual Property &merge(Property *) { return *this; }
 
   /// Set the group this property belongs to

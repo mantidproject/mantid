@@ -6,20 +6,18 @@
 #include "MantidAPI/LogFilterGenerator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTypes/DateAndTime.h"
 
 #include <numeric>
 
-using Mantid::API::LogFilterGenerator;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::LogFilterGenerator;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::LogFilter;
 using Mantid::Kernel::TimeSeriesProperty;
-using Mantid::Types::DateAndTime;
-using namespace Mantid::Types;
 
 class LogFilterGeneratorTest : public CxxTest::TestSuite {
 public:
@@ -67,12 +65,9 @@ public:
     TS_ASSERT(filter->filter());
     const auto &resultMap = filter->filter()->valueAsCorrectMap();
     std::map<DateAndTime, bool> expected;
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"), true);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"), false);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"), true);
+    expected.emplace(DateAndTime("2007-11-30T16:17:00"), true);
+    expected.emplace(DateAndTime("2007-11-30T16:17:30"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:18:00"), true);
     TS_ASSERT_EQUALS(resultMap.size(), 3);
     TS_ASSERT_EQUALS(resultMap, expected);
   }
@@ -94,10 +89,8 @@ public:
     const auto &values = filter->filter()->valueAsCorrectMap();
     TS_ASSERT(!values.empty());
     std::map<DateAndTime, bool> expected;
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:20"), true);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:18:20"), true);
+    expected.emplace(DateAndTime("2007-11-30T16:18:50"), false);
     TS_ASSERT_EQUALS(expected, values);
   }
 
@@ -118,16 +111,11 @@ public:
     // 16:18:00    T        F        F
     // 16:18:20    T        T        T
     // 16:18:50    T        F        F
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00"), false);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:30"), false);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:00"), false);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:20"), true);
-    expected.emplace(
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:18:50"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:17:00"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:17:30"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:18:00"), false);
+    expected.emplace(DateAndTime("2007-11-30T16:18:20"), true);
+    expected.emplace(DateAndTime("2007-11-30T16:18:50"), false);
     TS_ASSERT_EQUALS(expected, values);
   }
 
@@ -154,8 +142,7 @@ private:
     auto log =
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("TestLog");
     constexpr size_t logSize(12);
-    const DateAndTime initialTime =
-        DateAndTimeHelpers::createFromISO8601("2007-11-30T16:17:00");
+    const DateAndTime initialTime("2007-11-30T16:17:00");
     std::vector<DateAndTime> times;
     std::vector<double> values;
     times.reserve(logSize);

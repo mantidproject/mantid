@@ -1,8 +1,7 @@
 #ifndef TIMESPLITTER_H
 #define TIMESPLITTER_H
 
-#include "MantidKernel/DllConfig.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -21,12 +20,11 @@ public:
   /// Default constructor
   SplittingInterval();
 
-  SplittingInterval(const Mantid::Types::DateAndTime &start,
-                    const Mantid::Types::DateAndTime &stop,
-                    const int index = 0);
+  SplittingInterval(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop, const int index = 0);
 
-  Mantid::Types::DateAndTime start() const;
-  Mantid::Types::DateAndTime stop() const;
+  Types::Core::DateAndTime start() const;
+  Types::Core::DateAndTime stop() const;
 
   double duration() const;
 
@@ -43,9 +41,9 @@ public:
 
 private:
   /// begin
-  Mantid::Types::DateAndTime m_start;
+  Types::Core::DateAndTime m_start;
   /// end
-  Mantid::Types::DateAndTime m_stop;
+  Types::Core::DateAndTime m_stop;
   /// Index of the destination
   int m_index;
 };
@@ -58,12 +56,12 @@ private:
 typedef std::vector<SplittingInterval> TimeSplitterType;
 
 // -------------- Operators ---------------------
-MANTID_KERNEL_DLL TimeSplitterType operator+(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator&(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
-MANTID_KERNEL_DLL TimeSplitterType operator|(const TimeSplitterType &a,
-                                             const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType
+operator+(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType
+operator&(const TimeSplitterType &a, const TimeSplitterType &b);
+MANTID_KERNEL_DLL TimeSplitterType
+operator|(const TimeSplitterType &a, const TimeSplitterType &b);
 MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel

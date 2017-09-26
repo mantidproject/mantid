@@ -88,7 +88,7 @@ AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox() {
   }
 }
 void AlgExecSummaryGrpBox::setData(const double execDuration,
-                                   const Mantid::Types::DateAndTime execDate) {
+                                   const Mantid::Types::Core::DateAndTime execDate) {
   QString dur("");
   dur.setNum(execDuration, 'g', 6);
   dur += " seconds";
@@ -319,7 +319,7 @@ AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {
       const auto entry = m_algHist.getAlgorithmHistory(i);
       double duration = 0;
       duration = entry->executionDuration();
-      Mantid::Types::DateAndTime date = entry->executionDate();
+      Mantid::Types::Core::DateAndTime date = entry->executionDate();
       pgrpBox->setData(duration, date);
     }
     return pgrpBox;
@@ -448,7 +448,7 @@ void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
     AlgorithmHistory_const_sptr algHistory) {
   // getting the selcted algorithm at pos from History vector
   double duration = algHistory->executionDuration();
-  Mantid::Types::DateAndTime date = algHistory->executionDate();
+  Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
   if (m_execSumGrpBox)
     m_execSumGrpBox->setData(duration, date);
 }

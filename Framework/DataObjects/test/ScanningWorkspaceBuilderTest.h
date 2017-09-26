@@ -21,7 +21,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::ScanningWorkspaceBuilder;
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Instrument_const_sptr createSimpleInstrument(size_t nDetectors, size_t nBins) {

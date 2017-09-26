@@ -46,7 +46,7 @@ std::string RUN_START_PROPERTY = "run_start";
  */
 template <typename T>
 void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
-                 const Mantid::Types::DateAndTime &time, T value) {
+                 const Mantid::Types::Core::DateAndTime &time, T value) {
   if (mutableRunInfo.hasProperty(name)) {
     auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
     property->addValue(time, value);
@@ -102,7 +102,8 @@ void addSampleEnvLogs(
 
 namespace Mantid {
 namespace LiveData {
-  using Mantid::Types::TofEvent;
+using Types::Event::TofEvent;
+using Types::Core::DateAndTime;
 
 // -----------------------------------------------------------------------------
 // Public members

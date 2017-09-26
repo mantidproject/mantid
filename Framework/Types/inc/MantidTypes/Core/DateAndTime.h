@@ -13,9 +13,9 @@
 
 namespace Mantid {
 namespace Types {
-
+namespace Core {
 /// Durations and time intervals
-typedef boost::posix_time::time_duration time_duration;
+using time_duration = boost::posix_time::time_duration;
 
 //=============================================================================================
 /** Class for holding the date and time in Mantid.
@@ -27,9 +27,27 @@ typedef boost::posix_time::time_duration time_duration;
  *
  * @author Janik Zikovsky, SNS
  * @date November 12, 2010
- *
- *
- * */
+ Copyright &copy; 2017-18 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://github.com/mantidproject/mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 // Make the compiler pack the data size aligned to 1-byte, to use as little
 // space as possible
@@ -110,6 +128,7 @@ public:
   static int64_t nanosecondsFromDuration(const time_duration &td);
   static int64_t nanosecondsFromSeconds(double sec);
   static time_duration durationFromNanoseconds(int64_t dur);
+  static const DateAndTime &defaultTime();
   static void createVector(const DateAndTime start,
                            const std::vector<double> &seconds,
                            std::vector<DateAndTime> &out);
@@ -130,8 +149,8 @@ private:
   int64_t _nanoseconds;
 };
 #pragma pack(pop)
-
+} // namespace Core
 } // namespace Types
 } // namespace Mantid
 
-#endif // MANTID_TYPES_DATE_AND_TIME_H
+#endif //MANTID_TYPES_DATE_AND_TIME_H

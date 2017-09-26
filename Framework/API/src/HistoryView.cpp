@@ -193,12 +193,12 @@ void HistoryView::roll(std::vector<HistoryItem>::iterator &it) {
  * @param start Start of time range
  * @param end End of time range
  */
-void HistoryView::filterBetweenExecDate(Mantid::Types::DateAndTime start,
-                                        Mantid::Types::DateAndTime end) {
+void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start,
+                                        Mantid::Types::Core::DateAndTime end) {
   auto lastItem = std::remove_if(
       m_historyItems.begin(), m_historyItems.end(),
       [&start, &end](const HistoryItem &item) {
-        Mantid::Types::DateAndTime algExecutionDate =
+        Mantid::Types::Core::DateAndTime algExecutionDate =
             item.getAlgorithmHistory()->executionDate();
         return algExecutionDate < start || algExecutionDate > end;
       });

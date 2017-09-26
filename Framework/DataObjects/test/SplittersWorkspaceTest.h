@@ -24,12 +24,12 @@ public:
   void testClone() {
     SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Mantid::Types::DateAndTime(10000),
-                                 Mantid::Types::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Mantid::Types::DateAndTime(20000),
-                                 Mantid::Types::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Mantid::Types::DateAndTime(40000),
-                                 Mantid::Types::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     splitterws.addSplitter(s1);
     splitterws.addSplitter(s2);
@@ -46,12 +46,12 @@ public:
   void test_Add() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Mantid::Types::DateAndTime(10000),
-                                 Mantid::Types::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Mantid::Types::DateAndTime(20000),
-                                 Mantid::Types::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Mantid::Types::DateAndTime(40000),
-                                 Mantid::Types::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s1));
     TS_ASSERT_THROWS_NOTHING(splitterws.addSplitter(s2));
@@ -63,12 +63,12 @@ public:
   void test_AddGet() {
     DataObjects::SplittersWorkspace splitterws;
 
-    Kernel::SplittingInterval s1(Mantid::Types::DateAndTime(10000),
-                                 Mantid::Types::DateAndTime(15000), 1);
-    Kernel::SplittingInterval s2(Mantid::Types::DateAndTime(20000),
-                                 Mantid::Types::DateAndTime(30000), 3);
-    Kernel::SplittingInterval s3(Mantid::Types::DateAndTime(40000),
-                                 Mantid::Types::DateAndTime(50000), 2);
+    Kernel::SplittingInterval s1(Types::Core::DateAndTime(10000),
+                                 Types::Core::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Types::Core::DateAndTime(20000),
+                                 Types::Core::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Types::Core::DateAndTime(40000),
+                                 Types::Core::DateAndTime(50000), 2);
 
     std::vector<Kernel::SplittingInterval> splitters;
     splitters.push_back(s1);

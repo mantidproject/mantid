@@ -5,8 +5,10 @@
 
 namespace Mantid {
 namespace Types {
+namespace Core {
 class DateAndTime;
 }
+} // namespace Types
 namespace Kernel {
 //---------------------------------------------------------------------------
 // Forward Declarations
@@ -52,7 +54,7 @@ public:
   virtual double
   averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
-  virtual std::vector<Types::DateAndTime> timesAsVector() const = 0;
+  virtual std::vector<Types::Core::DateAndTime> timesAsVector() const = 0;
   /// Returns the calculated time weighted average value
   virtual double timeAverageValue() const = 0;
   /// Returns the real size of the time series property map:

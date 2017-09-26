@@ -13,7 +13,6 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -28,7 +27,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
@@ -111,7 +110,7 @@ void ConvertSpiceDataToRealSpace::exec() {
     // Use parent workspace's first
     std::string runstartstr = parentWS->run().getProperty("run_start")->value();
     try {
-      auto temprunstart = DateAndTimeHelpers::createFromISO8601(runstartstr);
+      DateAndTime temprunstart(runstartstr);
       runstart = temprunstart;
       hasrunstartset = true;
     } catch (...) {
@@ -126,7 +125,7 @@ void ConvertSpiceDataToRealSpace::exec() {
     // Use user given
     std::string runstartstr = getProperty("RunStart");
     try {
-      auto temprunstart = DateAndTimeHelpers::createFromISO8601(runstartstr);
+      DateAndTime temprunstart(runstartstr);
       runstart = temprunstart;
       hasrunstartset = true;
     } catch (...) {
@@ -143,7 +142,7 @@ void ConvertSpiceDataToRealSpace::exec() {
 
   // Convert table workspace to a list of 2D workspaces
   std::map<std::string, std::vector<double>> logvecmap;
-  std::vector<Mantid::Types::DateAndTime> vectimes;
+  std::vector<Types::Core::DateAndTime> vectimes;
 
   // Set up range for x/y/z
   m_extentMins.resize(3);
@@ -205,10 +204,9 @@ void ConvertSpiceDataToRealSpace::exec() {
 std::vector<MatrixWorkspace_sptr>
 ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
     DataObjects::TableWorkspace_sptr tablews,
-    API::MatrixWorkspace_const_sptr parentws,
-    Mantid::Types::DateAndTime runstart,
+    API::MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
     std::map<std::string, std::vector<double>> &logvecmap,
-    std::vector<Mantid::Types::DateAndTime> &vectimes) {
+    std::vector<Types::Core::DateAndTime> &vectimes) {
   // Get table workspace's column information
   size_t ipt, irotangle, itime;
   std::vector<std::pair<size_t, size_t>> anodelist;
@@ -284,7 +282,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
  */
 MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
     DataObjects::TableWorkspace_sptr tablews, size_t irow,
-    MatrixWorkspace_const_sptr parentws, Mantid::Types::DateAndTime runstart,
+    MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
     size_t ipt, size_t irotangle, size_t itime,
     const std::vector<std::pair<size_t, size_t>> anodelist, double &duration) {
   // New workspace from parent workspace
@@ -437,7 +435,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
 void ConvertSpiceDataToRealSpace::appendSampleLogs(
     IMDEventWorkspace_sptr mdws,
     const std::map<std::string, std::vector<double>> &logvecmap,
-    const std::vector<Mantid::Types::DateAndTime> &vectimes) {
+    const std::vector<Types::Core::DateAndTime> &vectimes) {
   // Check!
   size_t numexpinfo = mdws->getNumExperimentInfo();
   if (numexpinfo == 0)
@@ -460,7 +458,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
 
   // Add run_start and start_time to each ExperimentInfo
   for (size_t i = 0; i < vectimes.size(); ++i) {
-    Mantid::Types::DateAndTime runstart = vectimes[i];
+    Types::Core::DateAndTime runstart = vectimes[i];
     mdws->getExperimentInfo(static_cast<uint16_t>(i))
         ->mutableRun()
         .addLogData(new PropertyWithValue<std::string>(
@@ -750,5 +748,5 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
   }
 }
 
-} // namespace MDAlgorithms
+} // namespace DataHandling
 } // namespace Mantid

@@ -8,7 +8,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -57,16 +56,15 @@ getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
   }
   return keys;
 }
-} // namespace
+}
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
 using namespace Mantid::API;
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Sets double validator for specified field.
@@ -138,21 +136,19 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
 
   const Run &run = runWs->run();
 
-  Mantid::Types::DateAndTime start, end;
+  Mantid::Types::Core::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";
   if (run.hasProperty("run_start")) {
-    start = DateAndTimeHelpers::createFromISO8601(
-        run.getProperty("run_start")->value());
+    start = run.getProperty("run_start")->value();
     out << start.toSimpleString();
   }
 
   // Add the end time for the run
   out << "\nEnd: ";
   if (run.hasProperty("run_end")) {
-    end = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-        run.getProperty("run_end")->value());
+    end = run.getProperty("run_end")->value();
     out << end.toSimpleString();
   }
 
@@ -496,20 +492,19 @@ Workspace_sptr sumWorkspaces(const std::vector<Workspace_sptr> &workspaces) {
 
   // Comparison function for dates
   auto dateCompare = [](const std::string &first, const std::string &second) {
-    return DateAndTimeHelpers::createFromISO8601(first) <
-           DateAndTimeHelpers::createFromISO8601(second);
+    return DateAndTime(first) < DateAndTime(second);
   };
 
   // Comparison function for doubles
-  auto numericalCompare = [](const std::string &first,
-                             const std::string &second) {
-    try {
-      return boost::lexical_cast<double>(first) <
-             boost::lexical_cast<double>(second);
-    } catch (boost::bad_lexical_cast & /*e*/) {
-      return false;
-    }
-  };
+  auto numericalCompare =
+      [](const std::string &first, const std::string &second) {
+        try {
+          return boost::lexical_cast<double>(first) <
+                 boost::lexical_cast<double>(second);
+        } catch (boost::bad_lexical_cast & /*e*/) {
+          return false;
+        }
+      };
 
   // Range of log values
   auto runNumRange = findLogRange(workspaces, "run_number", numericalCompare);
@@ -1149,4 +1144,4 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
 }
 } // namespace MuonAnalysisHelper
 } // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace Mantid

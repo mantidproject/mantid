@@ -1,13 +1,12 @@
 #include "MantidAlgorithms/Pause.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 
 #include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {

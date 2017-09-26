@@ -42,10 +42,12 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
-using namespace Kernel::DateAndTimeHelpers;
+using namespace DateAndTimeHelpers;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 namespace {
 
@@ -1187,7 +1189,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     Kernel::TimeSeriesProperty<double> *log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             localWorkspace->mutableRun().getProperty("proton_charge"));
-    std::vector<Mantid::Types::DateAndTime> temp;
+    std::vector<Types::Core::DateAndTime> temp;
     if (log)
       temp = log->timesAsVector();
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
@@ -1196,13 +1198,11 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
 
     // Use the first pulse as the run_start time.
     if (!temp.empty()) {
-      if (temp[0] < Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-                        "1991-01-01T00:00:00"))
+      if (temp[0] < Types::Core::DateAndTime("1991-01-01T00:00:00"))
         alg.getLogger().warning() << "Found entries in the proton_charge "
                                      "sample log with invalid pulse time!\n";
 
-      Mantid::Types::DateAndTime run_start =
-          localWorkspace->getFirstPulseTime();
+      Types::Core::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start =
       // first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to
@@ -1398,8 +1398,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // Default to ALL pulse times
   bool is_time_filtered = false;
-  filter_time_start = Mantid::Types::DateAndTime::minimum();
-  filter_time_stop = Mantid::Types::DateAndTime::maximum();
+  filter_time_start = Types::Core::DateAndTime::minimum();
+  filter_time_stop = Types::Core::DateAndTime::maximum();
 
   if (m_allBanksPulseTimes->numPulses > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from

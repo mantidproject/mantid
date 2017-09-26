@@ -18,8 +18,10 @@ class IndexInfo;
 }
 
 namespace Types {
+namespace Core {
 class DateAndTime;
 }
+} 
 
 namespace Geometry {
 class ParameterMap;
@@ -153,8 +155,8 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
 
-  virtual Mantid::Types::DateAndTime getFirstPulseTime() const;
-  Mantid::Types::DateAndTime getLastPulseTime() const;
+  virtual Types::Core::DateAndTime getFirstPulseTime() const;
+  Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const std::size_t = 0) const;

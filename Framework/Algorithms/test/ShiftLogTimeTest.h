@@ -1,22 +1,21 @@
 #ifndef MANTID_ALGORITHMS_SHIFTLOGTIMETEST_H_
 #define MANTID_ALGORITHMS_SHIFTLOGTIMETEST_H_
 
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Run.h"
+#include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/ShiftLogTime.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include <cxxtest/TestSuite.h>
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Run.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class ShiftLogTimeTest : public CxxTest::TestSuite {
 public:
@@ -60,7 +59,7 @@ private:
    */
   void verify(const std::string in_name, const std::string out_name,
               const int shift) {
-    DateAndTime start = DateAndTimeHelpers::createFromISO8601(start_str);
+    DateAndTime start(start_str);
 
     // create a workspace to mess with
     Workspace2D_sptr testWorkspace(new Workspace2D);

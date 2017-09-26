@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/HistogramDataTestHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -36,7 +36,7 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Event::TofEvent;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -980,7 +980,7 @@ private:
       timeRanges.push_back(double(i + 1));
     }
 
-    builder.setTimeRanges(Mantid::Types::DateAndTime(0), timeRanges);
+    builder.setTimeRanges(Mantid::Types::Core::DateAndTime(0), timeRanges);
     return builder.buildWorkspace();
   }
 

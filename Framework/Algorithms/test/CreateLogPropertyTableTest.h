@@ -12,7 +12,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 
 #include <string>
 #include <vector>
@@ -22,7 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class CreateLogPropertyTableTest : public CxxTest::TestSuite {
 public:

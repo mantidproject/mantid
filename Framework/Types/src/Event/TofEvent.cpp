@@ -1,9 +1,11 @@
-#include "MantidTypes/TofEvent.h"
+#include "MantidTypes/Event/TofEvent.h"
 
 using std::ostream;
 
 namespace Mantid {
 namespace Types {
+using Core::DateAndTime;
+namespace Event {
 //==========================================================================
 /// --------------------- TofEvent stuff ----------------------------------
 //==========================================================================
@@ -77,6 +79,6 @@ ostream &operator<<(ostream &os, const TofEvent &event) {
   os << event.m_tof << "," << event.m_pulsetime.toSimpleString();
   return os;
 }
-
+} // namespace Event
 } // namespace Types
 } // namespace Mantid

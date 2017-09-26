@@ -8,7 +8,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using Mantid::Algorithms::EstimateResolutionDiffraction;
@@ -18,7 +18,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using namespace Mantid::Types;
+using Mantid::Types::Core::DateAndTime;
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:
@@ -32,7 +32,7 @@ public:
   }
 
   /** Test init
-   */
+    */
   void test_Init() {
     EstimateResolutionDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -40,7 +40,7 @@ public:
   }
 
   /** Test POWGEN
-   */
+    */
   void test_EmptyPG3() {
     // Create an empty PG3 workspace
     MatrixWorkspace_sptr ws = createInstrument();
@@ -73,7 +73,7 @@ public:
   }
 
   /** Create an instrument
-   */
+    */
   API::MatrixWorkspace_sptr createInstrument() {
     // Create empty workspace
     LoadEmptyInstrument loader;

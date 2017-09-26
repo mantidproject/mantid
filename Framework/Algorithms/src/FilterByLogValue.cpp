@@ -1,12 +1,10 @@
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidAPI/Run.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidAPI/Run.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/TimeInterval.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,9 +16,9 @@ using namespace DataObjects;
 using namespace API;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
-using Mantid::Types::DateAndTime;
+using DataObjects::EventWorkspace_const_sptr;
+using Types::Core::DateAndTime;
 
 std::string CENTRE("Centre");
 std::string LEFT("Left");
@@ -125,9 +123,7 @@ void FilterByLogValue::exec() {
 
   // Find the start and stop times of the run, but handle it if they are not
   // found.
-  DateAndTime run_start(0),
-      run_stop = Mantid::Types::DateAndTimeHelpers::createFromISO8601(
-          "2100-01-01T00:00:00");
+  DateAndTime run_start(0), run_stop("2100-01-01T00:00:00");
   bool handle_edge_values = false;
   try {
     run_start = inputWS->getFirstPulseTime() - tolerance;
