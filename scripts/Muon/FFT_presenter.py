@@ -5,6 +5,7 @@ import mantid.simpleapi as mantid
 
 from Muon import ThreadModel
 
+
 class FFTPresenter(object):
 
     def __init__(self,view,alg,load):
@@ -53,7 +54,6 @@ class FFTPresenter(object):
         thread.started.connect(self.deactivate)
         thread.finished.connect(self.view.activateButton)
         thread.finished.connect(thread.deleteLater)
-
 
         inputs={}
         inputs["Run"]=self.load.getRunName()
