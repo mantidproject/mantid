@@ -55,6 +55,7 @@ Bugs Resolved
 -------------
 - Fixed a bug causing table windows with string values to appear truncated if the string contained a space.
 - Fixed a bug where setting a table column's plot type would not be saved to the workspace correctly.
+- Fixed a bug where replacing a workspace with X errors with a workspace without would cause a crash if the workspace's data view was open.
 
 SliceViewer Improvements
 ------------------------
