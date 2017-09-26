@@ -303,7 +303,9 @@ void IqtFit::algorithmComplete(bool error) {
   }
 
   m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
-  readParametersFromTable(m_baseName + "_Parameters");
+  m_parameterValues = IndirectTab::extractParametersFromTable(
+      m_baseName + "_Parameters", m_parameterToProperty.keys().toSet(),
+      m_runMin, m_runMax);
   updateProperties(m_uiForm.spPlotSpectrum->value());
 
   updatePlot();
@@ -754,8 +756,8 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlot->getRangeSelector("IqtFitBackground");
   auto specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
-  bool autoUpdate = !m_parameterValues.contains(specNo) ||
-                    m_parameterValues[specNo].isEmpty();
+  bool autoUpdate = specNo > m_runMax || specNo < m_runMin ||
+                    m_parameterValues[prop->propertyName()].isEmpty();
 
   if (prop == m_properties["StartX"]) {
     fitRangeSelector->setMinimum(val);
@@ -949,69 +951,28 @@ void IqtFit::plotGuess(QtProperty *) {
 
 /*
  * Updates the properties in the property table using the stored parameter
- *values
- * for the specified spectrum.
+ * values for the specified spectrum.
  *
  * @param specNo  The index of the parameter values to update the properties in
- *the
- *                property table with.
+ *                the property table with.
  */
 void IqtFit::updateProperties(int specNo) {
   size_t index = boost::numeric_cast<size_t>(specNo);
+  auto parameterNames = m_parameterValues.keys();
 
   // Check whether parameter values exist for the specified spectrum number
-  if (m_parameterValues.contains(index)) {
-    QMap<QString, double> paramMap = m_parameterValues[index];
+  if (m_parameterValues[parameterNames[0]].contains(index)) {
 
-    for (auto &paramName : paramMap.keys()) {
-
-      if (m_parameterToProperty.contains(paramName) &&
-          !m_parameterToProperty[paramName].isEmpty()) {
-        QString propertyName = m_parameterToProperty[paramName];
-        m_dblManager->setValue(m_properties[propertyName], paramMap[paramName]);
-      }
+    for (auto &paramName : parameterNames) {
+      auto propertyName = m_parameterToProperty[paramName];
+      m_dblManager->setValue(m_properties[propertyName],
+                             m_parameterValues[paramName][index]);
     }
+
   } else {
     setDefaultParameters("Exponential1");
     setDefaultParameters("Exponential2");
     setDefaultParameters("StretchedExp");
-  }
-}
-
-/*
- * Reads the parameters from the table workspace with the specified name
- * and stores them in the parameter values map. If no table workspace with
- * the specified name exists in the ADS, simply returns.
- *
- * @param tableWsName The name of the table to read the parameter values from.
- */
-void IqtFit::readParametersFromTable(const std::string &tableWsName) {
-
-  // Check if a table with the specified name exists in the ADS
-  if (AnalysisDataService::Instance().doesExist(tableWsName)) {
-    auto tableWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        tableWsName);
-
-    // Initialize parameter values map with maps for storing
-    // values at each spectrum.
-    for (size_t i = 0; i < tableWs->rowCount(); ++i) {
-      m_parameterValues[i] = QMap<QString, double>();
-    }
-
-    for (auto &name : tableWs->getColumnNames()) {
-      QString columnName = QString::fromStdString(name);
-      auto it = m_parameterToProperty.find(columnName);
-
-      // Check whether the parameter of the current column, is
-      // within the property table.
-      if (it != m_parameterToProperty.end()) {
-        auto const column = tableWs->getColumn(name);
-
-        for (size_t i = 0; i < column->size(); ++i) {
-          m_parameterValues[i][columnName] = column->toDouble(i);
-        }
-      }
-    }
   }
 }
 

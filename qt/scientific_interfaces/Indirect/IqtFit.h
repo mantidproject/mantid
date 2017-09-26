@@ -70,7 +70,6 @@ private:
                                 const size_t &specMin, const size_t &specMax);
   Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
                                                const size_t &specMax);
-  void readParametersFromTable(const std::string &tableWsName);
   void updateFitFunctions();
   void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
@@ -97,8 +96,9 @@ private:
   std::string m_baseName;
   size_t m_runMin;
   size_t m_runMax;
+
   QVector<QString> m_fitFunctions;
-  QHash<size_t, QMap<QString, double>> m_parameterValues;
+  QHash<QString, QHash<size_t, double>> m_parameterValues;
   QHash<QString, QString> m_parameterToProperty;
 };
 } // namespace IDA
