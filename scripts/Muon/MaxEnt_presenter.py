@@ -28,16 +28,22 @@ class MaxEntPresenter(object):
         self.view.addItems(final_options)
 
     #functions
+    def createThread(self):
+        return ThreadModel.ThreadModel(self.alg)
+
     def handleMaxEntButton(self):
-        thread=ThreadModel.ThreadModel(self.alg)
-        thread.started.connect(self.deactivate)
-        thread.finished.connect(self.activate)
-        thread.finished.connect(thread.deleteLater)
+        self.thread=self.createThread()
+        self.thread.started.connect(self.deactivate)
+        self.thread.finished.connect(self.handleFinished)
 
         inputs = self.getMaxEntInput()
         runName=self.load.getRunName()
-        thread.setInputs(inputs,runName)
-        thread.start()
+        self.thread.setInputs(inputs,runName)
+        self.thread.start()
+
+    def handleFinished(self):
+        self.thread.deleteLater
+        self.activate()
 
     def activate(self):
         self.view.activateButton()
