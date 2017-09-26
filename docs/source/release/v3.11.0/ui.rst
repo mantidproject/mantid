@@ -18,6 +18,7 @@ User Interface
 --------------
 
 - Choosing 'Show Detectors' for a workspace will now also show the time indexes for scanning workspaces.
+- Fixed the ability to drag & drop files into Mantid OSX >=10.10
 
 Instrument View
 ###############
