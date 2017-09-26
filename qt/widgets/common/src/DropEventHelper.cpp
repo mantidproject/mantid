@@ -1,10 +1,14 @@
 
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <QStringList>
 #include <QUrl>
-#include <SystemConfiguration/SystemConfiguration.h>
+#include <QFileInfo>
+
+// Compile on OSX only.
+#if defined(__APPLE__)
+#include <CoreFoundation/CoreFoundation.h>
+#endif defined(__APPLE__)
 
 using namespace MantidQt::MantidWidgets;
 
