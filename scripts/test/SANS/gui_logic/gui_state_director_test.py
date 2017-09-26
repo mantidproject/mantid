@@ -3,8 +3,6 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 
-import mantid
-
 from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
@@ -69,5 +67,3 @@ class GuiStateDirectorTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-

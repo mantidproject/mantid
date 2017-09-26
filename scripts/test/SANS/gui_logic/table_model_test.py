@@ -2,8 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-import mantid
-
 from sans.gui_logic.models.table_model import (TableModel, TableIndexModel)
 
 
@@ -83,6 +81,7 @@ class TableModelTest(unittest.TestCase):
     def _user_file_wrapper(value):
         table_model = TableModel()
         table_model.user_file = value
+
 
 if __name__ == '__main__':
     unittest.main()

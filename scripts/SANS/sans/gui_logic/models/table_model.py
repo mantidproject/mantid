@@ -40,7 +40,7 @@ class TableModel(object):
             return self._table_entries[row_index].user_file
         else:
             raise IndexError("The row {} does not exist.".format(row_index))
-    
+
     @property
     def batch_file(self):
         return self._batch_file

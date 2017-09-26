@@ -4,12 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
 
-import mantid
 from mantid.kernel import config
 from mantid.kernel import PropertyManagerDataService
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, OutputMode, ISISReductionMode,
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_2)
 from sans.test_helper.mock_objects import (create_mock_view)
@@ -31,6 +30,7 @@ BATCH_FILE_TEST_CONTENT_2 = "# MANTID_BATCH_FILE add more text here\n" \
                             "sample_sans,SANS2D00022024,sample_trans,SANS2D00022048," \
                             "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
                             "sample_sans,SANS2D00022024,output_as,test_file2\n"
+
 
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -241,9 +241,8 @@ class RunTabPresenterTest(unittest.TestCase):
         state0 = presenter.get_state_for_row(0)
 
         # Assert
-        self.assertTrue(state.convert_to_q.use_gravity == False)
-        self.assertTrue(state0.convert_to_q.use_gravity == True)
-
+        self.assertTrue(state.convert_to_q.use_gravity is False)
+        self.assertTrue(state0.convert_to_q.use_gravity is True)
 
     def test_that_returns_none_when_index_does_not_exist(self):
         # Arrange

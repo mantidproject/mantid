@@ -155,7 +155,8 @@ def create_properties():
                                        property_type=str),
                   algorithm_list_entry(column_name="User File",
                                        algorithm_property="UserFile",
-                                       description='The user file to use, this will override GUI changes for this row. If left unspecified default will be used',
+                                       description=('The user file to use, this will override GUI changes for this row.'
+                                                    ' If left unspecified default will be used'),
                                        show_value=False,
                                        default="",
                                        prefix='',
