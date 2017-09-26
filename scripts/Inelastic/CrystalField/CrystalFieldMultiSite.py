@@ -357,7 +357,7 @@ class CrystalFieldMultiSite(object):
         """Used to add two CrystalFieldMultiSite"""
         ions = self.Ions + other.Ions
         symmetries = self.Symmetries + other.Symmetries
-        abundances = self._abundances.values() + other._abundances.values()
+        abundances = list(self._abundances.values()) + list(other._abundances.values())
         params = get_parameters_for_add_from_multisite(self, 0)
         params.update(get_parameters_for_add_from_multisite(other, len(self.Ions)))
         new_cf = CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=self.Temperatures,
