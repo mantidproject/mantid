@@ -169,7 +169,7 @@ protected:
     m_postprocessing->m_options = options;
   }
 
-  boost::optional<PostprocessingAttributes> m_postprocessing;
+  boost::optional<PostprocessingStep> m_postprocessing;
 
   // Pre-processing options
   PreprocessingAttributes m_preprocessing;

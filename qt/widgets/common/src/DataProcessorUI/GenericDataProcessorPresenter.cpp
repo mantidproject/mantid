@@ -124,10 +124,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
       m_processor(processor),
-      m_postprocessing(postprocessor.name().isEmpty()
-                           ? boost::optional<PostprocessingAttributes>()
-                           : PostprocessingAttributes(QString(), postprocessor,
-                                                      postprocessMap)),
+      m_postprocessing(
+          postprocessor.name().isEmpty()
+              ? boost::optional<PostprocessingStep>()
+              : PostprocessingStep(QString(), postprocessor, postprocessMap)),
       m_progressReporter(nullptr), m_preprocessing(QString(), preprocessMap),
       m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
       m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
@@ -579,7 +579,8 @@ Post-processes the workspaces created by the given rows together.
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
   if (hasPostprocessing())
-    m_postprocessing->postProcessGroup(m_processor.prefix(0), m_whitelist, groupData);
+    m_postprocessing->postProcessGroup(m_processor.prefix(0), m_whitelist,
+                                       groupData);
 }
 
 /**

@@ -13,10 +13,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-struct EXPORT_OPT_MANTIDQT_COMMON PostprocessingAttributes {
+struct EXPORT_OPT_MANTIDQT_COMMON PostprocessingStep {
 public:
-  PostprocessingAttributes(const QString &options);
-  PostprocessingAttributes(const QString &options,
+  PostprocessingStep(const QString &options);
+  PostprocessingStep(const QString &options,
                            PostprocessingAlgorithm algorithm,
                            std::map<QString, QString> map);
 
