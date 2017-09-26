@@ -157,6 +157,56 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
 
         return RUB.I
 
+    @staticmethod
+    def _calc_result_center_I(res, res_p):
+        s1 = 1
+        s2 = 1
+        for r in range(0, 3):
+            for cc in range(3):
+
+                if cc == 0:
+                    if r > 0:
+                        s1 = (-1) ** r
+                        s2 = -s1
+
+                res[r, cc] = res_p[0, cc] / 2 + s1 * res_p[1, cc] / 2 + s2 * res_p[2, cc] / 2
+
+        return res.I
+
+    @staticmethod
+    def _calc_result_center_F(res, res_p):
+        ss = [0, 0, 0]
+
+        for r in range(3):
+            for cc in range(3):
+                ss = [1, 1, 1]
+                ss[r] = 0
+
+                res[r, cc] = ss[0] * res_p[0, cc] / 2 + ss[1] * res_p[1, cc] / 2 + ss[2] * res_p[2, cc] / 2
+
+        return res.I
+
+    @staticmethod
+    def _calc_result_center_ABC(res, res_p, r):
+        k = 0
+
+        res[r, 0] = res_p[r, 0]
+        res[r, 1] = res_p[r, 1]
+        res[r, 2] = res_p[r, 2]
+        for i in range(1, 3):
+
+            if k == r:
+                k += 1
+            for cc in range(3):
+                R = (r + 1) % 3
+                s = (-1) ** i
+
+                res[k, cc] = res_p[(R) % 3, cc] / 2 + s * res_p[(R + 1) % 3, cc] / 2
+
+            k += 1
+
+        return res.I
+
     def CalcNiggliUB(self, a, b, c, alpha, beta, gamma, celltype, Center):
 
         if Center == 'P':
@@ -175,36 +225,14 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
             Center = 'R'
 
         if Center == 'I':
-
-            s1 = 1
-            s2 = 1
-            for r in range(0, 3):
-                for cc in range(3):
-
-                    if cc == 0:
-                        if r > 0:
-                            s1 = (-1) ** r
-                            s2 = -s1
-
-                    Res[r, cc] = ResP[0, cc] / 2 + s1 * ResP[1, cc] / 2 + s2 * ResP[2, cc] / 2
-
-            Res = Res.I
+            Res = Peak2ConvCell_Test._calc_result_center_I(Res, ResP)
 
         elif Center == 'F':
 
             if celltype == 'H' or celltype == 'M':
                 return None
 
-            ss = [0, 0, 0]
-
-            for r in range(3):
-                for cc in range(3):
-                    ss = [1, 1, 1]
-                    ss[r] = 0
-
-                    Res[r, cc] = ss[0] * ResP[0, cc] / 2 + ss[1] * ResP[1, cc] / 2 + ss[2] * ResP[2, cc] / 2
-
-            Res = Res.I
+            Res = Peak2ConvCell_Test._calc_result_center_F(Res, ResP)
 
         elif Center == 'A' or Center == 'B' or Center == 'C':
 
@@ -229,24 +257,7 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
             elif a == b and celltype == 'O':
                 return None
 
-            k = 0
-
-            Res[r, 0] = ResP[r, 0]
-            Res[r, 1] = ResP[r, 1]
-            Res[r, 2] = ResP[r, 2]
-            for i in range(1, 3):
-
-                if k == r:
-                    k += 1
-                for cc in range(3):
-                    R = (r + 1) % 3
-                    s = (-1) ** i
-
-                    Res[k, cc] = ResP[(R) % 3, cc] / 2 + s * ResP[(R + 1) % 3, cc] / 2
-
-                k += 1
-
-            Res = Res.I
+            Res = Peak2ConvCell_Test._calc_result_center_ABC(Res, ResP, r)
 
         elif Center == 'R':
 
@@ -258,12 +269,6 @@ class Peak2ConvCell_Test(object):  # (stresstesting.MantidStressTest):
                 # Did not work with 0 error. FindUBUsingFFT failed
                 # Alpha = alpha*math.pi/180
 
-                # Res[0,0] = a
-                # Res[1,0] =(a*math.cos( Alpha ))
-                # Res[1,1] = (a*math.sin( Alpha ))
-                # Res[2,0] =(a*math.cos( Alpha ))
-                # Res[2,1] =(a*Res[1,0] -Res[2,0]*Res[1,0])/Res[1,1]
-                # Res[2,2] =math.sqrt( a*a- Res[2,1]*Res[2,1]-Res[2,0]*Res[2,0])
             Res[0, 0] = .5 * a
             Res[0, 1] = math.sqrt(3) * a / 2
             Res[0, 2] = .5 * b
