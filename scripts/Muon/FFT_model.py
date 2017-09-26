@@ -115,19 +115,11 @@ class FFTModel(object):
             phaseTable.addRow([j,asym,phi])
 
     def PhaseQuad(self):
-        #need to load the data as a 'raw' file
-        loadAlg=mantid.AlgorithmManager.create("Load")
-        loadAlg.initialize()
-        loadAlg.setChild(False)
-        loadAlg.setProperty("Filename",self.runName+".nxs")
-        loadAlg.setProperty("OutputWorkspace","__data__")
-        loadAlg.execute()
-
         phaseQuad=mantid.AlgorithmManager.create("PhaseQuad")
         phaseQuad.initialize()
         phaseQuad.setChild(False)
         print (self.runName)
-        phaseQuad.setProperty("InputWorkspace","__data__")
+        phaseQuad.setProperty("InputWorkspace","MuonAnalysis")
         phaseQuad.setProperty("PhaseTable","PhaseTable")
         phaseQuad.setProperty("OutputWorkspace","__phaseQuad__")
         phaseQuad.execute()
