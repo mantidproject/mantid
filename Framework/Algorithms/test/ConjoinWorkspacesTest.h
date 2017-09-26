@@ -246,9 +246,11 @@ public:
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS(out->blocksize(), numBins);
 
-    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++)
-      for (size_t x = 0; x < out->blocksize(); x++)
-        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
+    }
   }
 
   void test_DONTCheckForOverlap_Events() { performTestNoOverlap(true); }

@@ -55,8 +55,7 @@ private:
   bool
   isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const override;
   /// Returns the size of the new X vector
-  std::size_t
-  getNewXSize(const API::MatrixWorkspace_sptr inputWS) const override;
+  std::size_t getNewXSize(const std::size_t ySize) const override;
   /// Calculate the X point values. Implement in an inheriting class.
   Kernel::cow_ptr<HistogramData::HistogramX> calculateXPoints(
       Kernel::cow_ptr<HistogramData::HistogramX> inputX) const override;

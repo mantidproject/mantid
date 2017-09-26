@@ -112,10 +112,10 @@ public:
    * 2 events per bin
    */
   EventWorkspace_sptr createFlatEventWorkspace() {
-    return createEventWorkspace(1, 1, true);
+    return createEventWorkspace(true, true, true);
   }
 
-  void setUp() override { ew = createEventWorkspace(1, 1); }
+  void setUp() override { ew = createEventWorkspace(true, true); }
 
   void test_constructor() {
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
@@ -140,6 +140,20 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(min_memory, ew->getMemorySize());
   }
 
+  void testUnequalBins() {
+    ew = createEventWorkspace(true, false);
+    // normal behavior
+    TS_ASSERT_EQUALS(ew->blocksize(), 1);
+    TS_ASSERT(ew->isCommonBins());
+    TS_ASSERT_EQUALS(ew->size(), 500);
+
+    // set the first histogram to have 2 bins
+    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
+    TS_ASSERT_THROWS(ew->blocksize(), std::logic_error);
+    TS_ASSERT(!(ew->isCommonBins()));
+    TS_ASSERT_EQUALS(ew->size(), 501);
+  }
+
   void test_destructor() {
     EventWorkspace *ew2 = new EventWorkspace();
     delete ew2;
@@ -147,7 +161,7 @@ public:
 
   void test_constructor_setting_default_x() {
     // Do the workspace, but don't set x explicity
-    ew = createEventWorkspace(1, 0);
+    ew = createEventWorkspace(true, false);
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), NUMPIXELS);
     TS_ASSERT_EQUALS(ew->blocksize(), 1);
     TS_ASSERT_EQUALS(ew->size(), 500);
@@ -415,12 +429,10 @@ public:
   }
 
   void test_histogram_pulse_time() {
-    const size_t nHistos = 1;
-    const bool setXAxis = false;
     EventWorkspace_sptr ws =
-        createEventWorkspace(nHistos, setXAxis); // Creates TOF events with
-                                                 // pulse_time intervals of
-                                                 // BIN_DELTA/2
+        createEventWorkspace(true, false); // Creates TOF events with
+                                           // pulse_time intervals of
+                                           // BIN_DELTA/2
 
     // Create bin steps = 4*BIN_DELTA.
     BinEdges axis1(NUMBINS / 4, LinearGenerator(0.0, 4.0 * BIN_DELTA));

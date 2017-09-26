@@ -434,9 +434,28 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
     @param group_file File for File method
     @param group_ws Workspace for Workspace method
     """
-    from mantid.simpleapi import (MaskDetectors, GroupDetectors)
+    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws)
 
-    instrument = mtd[workspace_name].getInstrument()
+    if grouped_ws is not None:
+        mtd.addOrReplace(workspace_name, grouped_ws)
+
+
+def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None):
+    """
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
+    Workflow.GroupingFile parameters and GroupingPolicy property.
+
+    @param workspace Workspace to group spectra of
+    @param masked_detectors List of spectra numbers to mask
+    @param method Grouping method (IPF, All, Individual, File, Workspace)
+    @param group_file File for File method
+    @param group_ws Workspace for Workspace method
+    """
+    instrument = workspace.getInstrument()
+    group_detectors = AlgorithmManager.create("GroupDetectors")
+    group_detectors.setChild(True)
+    group_detectors.setProperty("InputWorkspace", workspace)
+    group_detectors.setProperty("Behaviour", 'Average')
 
     # If grouping as per he IPF is desired
     if method == 'IPF':
@@ -450,22 +469,19 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
         # Otherwise use the value of GroupingPolicy
         grouping_method = method
 
-    logger.information('Grouping method for workspace %s is %s' % (workspace_name, grouping_method))
+    logger.information('Grouping method for workspace %s is %s' % (workspace.getName(), grouping_method))
 
     if grouping_method == 'Individual':
         # Nothing to do here
-        return
+        return None
 
     elif grouping_method == 'All':
         # Get a list of all spectra minus those which are masked
-        num_spec = mtd[workspace_name].getNumberHistograms()
+        num_spec = workspace.getNumberHistograms()
         spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       WorkspaceIndexList=spectra_list)
+        group_detectors.setProperty("WorkspaceIndexList", spectra_list)
 
     elif grouping_method == 'File':
         # Get the filename for the grouping file
@@ -487,24 +503,21 @@ def group_spectra(workspace_name, masked_detectors, method, group_file=None, gro
 
         # Mask detectors if required
         if len(masked_detectors) > 0:
-            MaskDetectors(Workspace=workspace_name,
-                          WorkspaceIndexList=masked_detectors)
+            _mask_detectors(workspace, masked_detectors)
 
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       MapFile=grouping_file)
+        group_detectors.setProperty("MapFile", grouping_file)
 
     elif grouping_method == 'Workspace':
         # Apply the grouping
-        GroupDetectors(InputWorkspace=workspace_name,
-                       OutputWorkspace=workspace_name,
-                       Behaviour='Average',
-                       CopyGroupingFromWorkspace=group_ws)
+        group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     else:
-        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace.getName()))
+
+    group_detectors.setProperty("OutputWorkspace", "__temp")
+    group_detectors.execute()
+    return group_detectors.getProperty("OutputWorkspace").value
 
 
 # -------------------------------------------------------------------------------
@@ -692,12 +705,7 @@ def save_reduction(workspace_names, formats, x_units='DeltaE'):
                       Filename=workspace_name + '.nxspe')
 
         if 'ascii' in formats:
-            # Changed to version 2 to enable re-loading of files into mantid
-            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
-            saveAsciiAlg.initialize()
-            saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
-            saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
-            saveAsciiAlg.execute()
+            _save_ascii(workspace_name, workspace_name + ".dat")
 
         if 'aclimax' in formats:
             if x_units == 'DeltaE_inWavenumber':
@@ -793,4 +801,39 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
         except RuntimeError:
             logger.warning('Rebinning failed, will try to continue anyway.')
 
+
 # -------------------------------------------------------------------------------
+
+# ========== Child Algorithms ==========
+
+def _mask_detectors(workspace, masked_indices):
+    """
+    Masks the detectors at the specified indices in the specified
+    workspace.
+
+    :param workspace:       The workspace whose detectors to mask.
+    :param masked_indices:  The indices of the detectors to mask.
+    """
+    mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
+    mask_detectors.setChild(True)
+    mask_detectors.initialize()
+    mask_detectors.setProperty("Workspace", workspace)
+    mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
+    mask_detectors.execute()
+
+
+def _save_ascii(workspace, file_name):
+    """
+    Saves the specified workspace into a file with the specified name,
+    in ASCII-format.
+
+    :param workspace:   The workspace to save.
+    :param file_name:   The name of the file to save the workspace into.
+    """
+    # Changed to version 2 to enable re-loading of files into mantid
+    save_ascii_alg = AlgorithmManager.createUnmanaged('SaveAscii', 2)
+    save_ascii_alg.setChild(True)
+    save_ascii_alg.initialize()
+    save_ascii_alg.setProperty('InputWorkspace', workspace)
+    save_ascii_alg.setProperty('Filename', file_name + '.dat')
+    save_ascii_alg.execute()

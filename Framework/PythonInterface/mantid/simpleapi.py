@@ -296,70 +296,77 @@ def StartLiveData(*args, **kwargs):
 
 # ---------------------------- Fit ---------------------------------------------
 
-
-def fitting_algorithm(f):
+def fitting_algorithm(inout=False):
     """
-    Decorator generating code for fitting algorithms (currently Fit and CalculateChiSquared).
-    When applied to a function definition this decorator replaces its code with code of
-    function 'wrapper' defined below.
+    Decorator generating code for fitting algorithms (Fit, CalculateChiSquared,
+    EvaluateFunction).
+    When applied to a function definition this decorator replaces its code
+    with code of function 'wrapper' defined below.
+    :param inout: if True, return also the InOut properties of algorithm f
     """
-    def wrapper(*args, **kwargs):
-        function, input_workspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
-        # Remove from keywords so it is not set twice
-        if "Function" in kwargs:
-            del kwargs['Function']
-        if "InputWorkspace" in kwargs:
-            del kwargs['InputWorkspace']
+    def inner_fitting_algorithm(f):
+        """
+        :param f: algorithm calling Fit 
+        """
+        def wrapper(*args, **kwargs):
+            function, input_workspace = _get_mandatory_args(function_name,
+                ["Function", "InputWorkspace"], *args, **kwargs)
+            # Remove from keywords so it is not set twice
+            if "Function" in kwargs:
+                del kwargs['Function']
+            if "InputWorkspace" in kwargs:
+                del kwargs['InputWorkspace']
 
-        # Check for behaviour consistent with old API
-        if type(function) == str and function in _api.AnalysisDataService:
-            raise ValueError("Fit API has changed. The function must now come "
-                             "first in the argument list and the workspace second.")
-        # Deal with case where function is a FunctionWrapper.
-        if isinstance(function,FunctionWrapper):
-            function = function.__str__()
-            
-        # Create and execute
-        algm = _create_algorithm_object(function_name)
-        _set_logging_option(algm, kwargs)
-        if 'EvaluationType' in kwargs:
-            algm.setProperty('EvaluationType', kwargs['EvaluationType'])
-            del kwargs['EvaluationType']
-        algm.setProperty('Function', function)  # Must be set first
-        if input_workspace is not None:
-            algm.setProperty('InputWorkspace', input_workspace)
-        else:
-            del algm['InputWorkspace']
+            # Check for behaviour consistent with old API
+            if type(function) == str and function in _api.AnalysisDataService:
+                msg = "Fit API has changed. The function must now come " + \
+                      "first in the argument list and the workspace second."
+                raise ValueError(msg)
+            # Deal with case where function is a FunctionWrapper.
+            if isinstance(function,FunctionWrapper):
+                function = function.__str__()
 
-        # Set all workspace properties before others
-        for key in list(kwargs.keys()):
-            if key.startswith('InputWorkspace_'):
-                algm.setProperty(key, kwargs[key])
-                del kwargs[key]
+            # Create and execute
+            algm = _create_algorithm_object(function_name)
+            _set_logging_option(algm, kwargs)
+            if 'EvaluationType' in kwargs:
+                algm.setProperty('EvaluationType', kwargs['EvaluationType'])
+                del kwargs['EvaluationType']
+            algm.setProperty('Function', function)  # Must be set first
+            if input_workspace is not None:
+                algm.setProperty('InputWorkspace', input_workspace)
+            else:
+                del algm['InputWorkspace']
 
-        lhs = _lhs_info()
-        # Check for any properties that aren't known and warn they will not be used
-        for key in list(kwargs.keys()):
-            if key not in algm:
-                logger.warning("You've passed a property (%s) to %s() that doesn't"
-                               " apply to any of the input workspaces." % (key, function_name))
-                del kwargs[key]
-        set_properties(algm, **kwargs)
-        algm.execute()
+            # Set all workspace properties before others
+            for key in list(kwargs.keys()):
+                if key.startswith('InputWorkspace_'):
+                    algm.setProperty(key, kwargs[key])
+                    del kwargs[key]
 
-        return _gather_returns(function_name, lhs, algm)
-    # end
-    function_name = f.__name__
-    signature = ("\bFunction, InputWorkspace", "**kwargs")
-    fwrapper = _customise_func(wrapper, function_name, signature,
-                               f.__doc__)
-    if function_name not in __SPECIALIZED_FUNCTIONS__:
-        __SPECIALIZED_FUNCTIONS__.append(function_name)
-    return fwrapper
+            lhs = _lhs_info()
+            # Check for unknown properties and warn they will not be used
+            for key in list(kwargs.keys()):
+                if key not in algm:
+                    msg = 'Property {} to {} does not apply to any of the ' +\
+                          ' input workspaces'.format(key, function_name)
+                    logger.warning(msg)
+                    del kwargs[key]
+            set_properties(algm, **kwargs)
+            algm.execute()
+            return _gather_returns(function_name, lhs, algm, inout=inout)
+        # end
+        function_name = f.__name__
+        signature = ("\bFunction, InputWorkspace", "**kwargs")
+        fwrapper = _customise_func(wrapper, function_name, signature, f.__doc__)
+        if function_name not in __SPECIALIZED_FUNCTIONS__:
+            __SPECIALIZED_FUNCTIONS__.append(function_name)
+        return fwrapper
+    return inner_fitting_algorithm
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm(inout=True)
 def Fit(*args, **kwargs):
     """
     Fit defines the interface to the fitting within Mantid.
@@ -379,7 +386,7 @@ def Fit(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def CalculateChiSquared(*args, **kwargs):
     """
     This function calculates chi squared calculation for a function and a data set.
@@ -394,7 +401,7 @@ def CalculateChiSquared(*args, **kwargs):
 
 
 # Use a python decorator (defined above) to generate the code for this function.
-@fitting_algorithm
+@fitting_algorithm()
 def EvaluateFunction(*args, **kwargs):
     """
     This function evaluates a function on a data set.
@@ -756,6 +763,17 @@ def _is_workspace_property(prop):
         # Doesn't look like a workspace property
         return False
 
+def _is_function_property(prop):
+    """
+    Returns True if the property is a fit function
+    
+    :param prop: A property object
+    :type Property
+    :return:  True if the property is considered a fit function
+    """
+    if isinstance(prop, _api.FunctionProperty):
+        return True
+    return False
 
 def _get_args_from_lhs(lhs, algm_obj):
     """
@@ -813,7 +831,7 @@ def _merge_keywords_with_lhs(keywords, lhs_args):
     return final_keywords
 
 
-def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
+def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
     """Gather the return values and ensure they are in the
        correct order as defined by the output properties and
        return them as a tuple. If their is a single return
@@ -824,6 +842,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
        lhs of the function call and the names of these variables.
        :param algm_obj: An executed algorithm object.
        :param ignore_regex: A list of strings containing regex expressions to match
+       :param inout : gather also the InOut properties if True.
        against property names that will be ignored & not returned.
     """
     if ignore_regex is None:
@@ -845,7 +864,10 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
         ignore_regex[index] = re.compile(expr)
 
     retvals = OrderedDict()
-    for name in algm_obj.outputProperties():
+    names = algm_obj.outputProperties()
+    if inout:
+        names.extend(algm_obj.inoutProperties())
+    for name in names:
         if ignore_property(name, ignore_regex):
             continue
         prop = algm_obj.getProperty(name)
@@ -862,6 +884,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None):
                     raise RuntimeError("Internal error. Output workspace property '%s' on "
                                        "algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
+        elif _is_function_property(prop):
+            retvals[name] = FunctionWrapper(prop.value)
         else:
             if hasattr(prop, 'value'):
                 retvals[name] = prop.value

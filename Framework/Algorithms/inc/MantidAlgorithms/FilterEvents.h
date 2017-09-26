@@ -72,6 +72,7 @@ public:
   const std::string category() const override {
     return "Events\\EventFiltering";
   }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods

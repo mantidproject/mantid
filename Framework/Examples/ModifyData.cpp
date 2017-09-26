@@ -57,7 +57,8 @@ void ModifyData::exec() {
     const auto &EValues = inputW->e(i);
 
     // Iterate over i-th spectrum and modify the data
-    for (size_t j = 0; j < inputW->blocksize(); j++) {
+    const auto numBins = YValues.size();
+    for (size_t j = 0; j < numBins; j++) {
       g_log.information() << "Spectrum " << i << " Point " << j
                           << " values: " << XValues[j] << ' ' << YValues[j]
                           << ' ' << EValues[j] << std::endl;
@@ -81,7 +82,8 @@ void ModifyData::exec() {
     const auto &YValues = outputW->y(i);
     const auto &EValues = outputW->e(i);
 
-    for (size_t j = 0; j < outputW->blocksize(); ++j) {
+    const auto numBins = YValues.size();
+    for (size_t j = 0; j < numBins; ++j) {
       // Get the reference to a data point
       g_log.information() << "Point number " << count++
                           << " values: " << XValues[j] << ' ' << YValues[j]
