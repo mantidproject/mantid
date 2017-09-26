@@ -169,7 +169,7 @@ public:
   }
 
   void test_copy_construction() {
-    auto internalInfo = std::move(makeSingleBeamlineComponentInfo());
+    auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -195,7 +195,7 @@ public:
   }
 
   void test_has_shape() {
-    auto internalInfo = std::move(makeSingleBeamlineComponentInfo());
+    auto internalInfo = makeSingleBeamlineComponentInfo();
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -223,7 +223,7 @@ public:
     const double radius = 1.0;
     auto rotation = Eigen::Quaterniond(Eigen::Affine3d::Identity().rotation());
 
-    auto internalInfo = makeSingleComponentInfo(position, rotation);
+    auto internalInfo = makeSingleBeamlineComponentInfo(position, rotation);
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
@@ -258,7 +258,7 @@ public:
     auto position = Eigen::Vector3d{10, 0, 0};
     auto rotation = Eigen::Quaterniond(
         Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
-    auto internalInfo = makeSingleComponentInfo(position, rotation);
+    auto internalInfo = makeSingleBeamlineComponentInfo(position, rotation);
     Mantid::Geometry::ObjComponent comp1("component1", createCappedCylinder());
 
     auto componentIds =
