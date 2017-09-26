@@ -502,6 +502,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf3 = CrystalField('Tb', 'C2v', **params)
         cf = 2 * cf1 + cf2 * 8 + cf3
         s = str(cf.function)
+        print(s)
         self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
         self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
 
@@ -549,6 +550,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf3 = CrystalField('Tb', 'C2v', **params)
         cf = 2 * cf1 + cf2 * 8 + cf3
         s = str(cf.function)
+        print(s)
         self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
         self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
 
