@@ -408,7 +408,8 @@ class TOFTOFSetupWidget(BaseWidget):
     def _onBinEon(self, onVal):
         if not onVal:
             self.chkNxspe.setChecked(False)
-        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe):
+            self.chkReplaceNaNs.setChecked(False)
+        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe, self.chkReplaceNaNs):
             widget.setEnabled(onVal)
 
     def _onBinQon(self, onVal):
