@@ -2,10 +2,9 @@
 #include <MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MantidQtWidgets/Common/MantidDisplayBase.h"
-#include "MantidQtWidgets/Common/DragEventHelper.h"
 
 #include <QApplication>
 #include <QDragMoveEvent>
@@ -57,7 +56,7 @@ void MantidTreeWidget::dragEnterEvent(QDragEnterEvent *de) {
 * @param de :: The drag drop event
 */
 void MantidTreeWidget::dropEvent(QDropEvent *de) {
-  const auto filenames = DragEventHelper::getFileNames(de);
+  const auto filenames = DropEventHelper::getFileNames(de);
   de->acceptProposedAction();
 
   for (int i = 0; i < filenames.size(); ++i) {

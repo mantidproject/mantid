@@ -9,12 +9,12 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_COMMON DragEventHelper {
+class EXPORT_OPT_MANTIDQT_COMMON DropEventHelper {
 public:
-    static QStringList getFileNames(const QDropEvent* event);
+  static QStringList getFileNames(const QDropEvent *event);
 };
 
-} // MantidWidgets
-} // MantidQt
+} // namespace MantidWidgets
+} // namespace MantidQt
 
 #endif
