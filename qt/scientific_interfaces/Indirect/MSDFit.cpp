@@ -1,7 +1,7 @@
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MSDFit.h"
 #include "../General/UserInputValidator.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <QFileInfo>
@@ -75,25 +75,18 @@ void MSDFit::run() {
   // Set the result workspace for Python script export
   QString model = m_uiForm.modelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
-  m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_" +
-      model.toStdString() + "_msd";
 
-  QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
   double xEnd = m_dblManager->value(m_properties["End"]);
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
 
-  IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
-  msdAlg->initialize();
-  msdAlg->setProperty("Model", model.toStdString());
-  msdAlg->setProperty("InputWorkspace", wsName.toStdString());
-  msdAlg->setProperty("XStart", xStart);
-  msdAlg->setProperty("XEnd", xEnd);
-  msdAlg->setProperty("SpecMin", specMin);
-  msdAlg->setProperty("SpecMax", specMax);
-  msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
+  m_pythonExportWsName =
+      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
+      std::to_string(specMin) + "_s" + std::to_string(specMax) + "_" +
+      model.toStdString() + "_msd";
+
+  IAlgorithm_sptr msdAlg = msdFitAlgorithm(specMin, specMax);
 
   m_batchAlgoRunner->addAlgorithm(msdAlg);
   m_batchAlgoRunner->executeBatchAsync();
@@ -108,26 +101,34 @@ void MSDFit::singleFit() {
 
   // Set the result workspace for Python script export
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
-  m_pythonExportWsName =
-      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_msd";
+  long fitSpec = m_uiForm.spPlotSpectrum->value();
 
+  m_pythonExportWsName =
+      dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
+      std::to_string(fitSpec) + "_msd";
+
+  IAlgorithm_sptr msdAlg = msdFitAlgorithm(fitSpec, fitSpec);
+
+  m_batchAlgoRunner->addAlgorithm(msdAlg);
+
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+IAlgorithm_sptr MSDFit::msdFitAlgorithm(long specMin, long specMax) {
   QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
   double xStart = m_dblManager->value(m_properties["Start"]);
   double xEnd = m_dblManager->value(m_properties["End"]);
-  long fitSpec = m_uiForm.spPlotSpectrum->value();
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
   msdAlg->setProperty("InputWorkspace", wsName.toStdString());
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);
-  msdAlg->setProperty("SpecMin", fitSpec);
-  msdAlg->setProperty("SpecMax", fitSpec);
+  msdAlg->setProperty("SpecMin", specMin);
+  msdAlg->setProperty("SpecMax", specMax);
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
-  m_batchAlgoRunner->addAlgorithm(msdAlg);
-
-  m_batchAlgoRunner->executeBatchAsync();
+  return msdAlg;
 }
 
 bool MSDFit::validate() {
@@ -331,8 +332,8 @@ void MSDFit::plotClicked() {
 }
 
 /**
-* Plots the current spectrum displayed in the preview plot
-*/
+ * Plots the current spectrum displayed in the preview plot
+ */
 void MSDFit::plotCurrentPreview() {
 
   // Check a workspace has been selected

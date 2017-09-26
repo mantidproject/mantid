@@ -35,6 +35,8 @@ private slots:
   void algorithmComplete(bool error);
 
 private:
+  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(long specMin, long specMax);
+
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
   Mantid::API::MatrixWorkspace_sptr m_msdInputWS;
