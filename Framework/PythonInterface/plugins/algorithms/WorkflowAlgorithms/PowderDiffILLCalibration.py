@@ -168,8 +168,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         elif self._method == 'Mean':
             factor = np.mean(ratios)
         elif self._method == 'MostLikelyMean':
-            pass
-            #TODO: implement the maximum likelihood method
+            factor = MostLikelyMean(ratios)
         return factor
 
     '''
