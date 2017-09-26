@@ -39,9 +39,6 @@ void MSDFit::setup() {
   m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
   m_properties["Yi"] = createModel("Yi", {"Intensity", "MSD", "Sigma"});
 
-  m_msdTree->addProperty(m_properties["Start"]);
-  m_msdTree->addProperty(m_properties["End"]);
-
   auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
 
   modelSelection(m_uiForm.cbModelInput->currentIndex());
@@ -326,6 +323,9 @@ QtProperty *MSDFit::createModel(const QString &modelName,
 void MSDFit::modelSelection(int selected) {
   QString model = m_uiForm.cbModelInput->itemText(selected);
   m_msdTree->clear();
+
+  m_msdTree->addProperty(m_properties["Start"]);
+  m_msdTree->addProperty(m_properties["End"]);
   m_msdTree->addProperty(m_properties[model]);
 }
 
