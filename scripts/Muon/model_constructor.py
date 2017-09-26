@@ -13,7 +13,6 @@ class ModelConstructor(object):
      presenters
     """
 
-
     def __init__(self,includeTransform):
         # construct transformation memebers
         if includeTransform:

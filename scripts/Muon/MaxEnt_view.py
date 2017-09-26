@@ -76,7 +76,7 @@ class MaxEntView(QtGui.QWidget):
 
         self.tableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
         table_utils.setTableHeaders(self.tableA)
-        
+
         table_utils.setRowName(self.tableA,0,"Chi target")
         self.chiTarget= table_utils.addDoubleToTable(self.tableA,100,0)
 

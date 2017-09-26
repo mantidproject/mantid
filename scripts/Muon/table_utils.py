@@ -49,7 +49,6 @@ def addSpinBoxToTable(table,default,row):
     return box
 
 
-
 def setTableHeaders(table):
         if os.name != "nt":
             return
@@ -74,4 +73,3 @@ def setTableHeaders(table):
                 +"}"
             table.setStyleSheet(styleSheet)
         return styleSheet
-
