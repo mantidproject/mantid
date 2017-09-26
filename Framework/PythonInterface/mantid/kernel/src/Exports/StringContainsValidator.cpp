@@ -12,15 +12,15 @@ namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 namespace {
-  StringContainsValidator *createStringContainsValidator() {
-    return new StringContainsValidator();
-  }
-
-StringContainsValidator *createStringContainsValidatorWithStrings(const boost::python::list &values) {
-    return new StringContainsValidator(Converters::PySequenceToVector<std::string>(values)());
-
+StringContainsValidator *createStringContainsValidator() {
+  return new StringContainsValidator();
 }
 
+StringContainsValidator *
+createStringContainsValidatorWithStrings(const boost::python::list &values) {
+  return new StringContainsValidator(
+      Converters::PySequenceToVector<std::string>(values)());
+}
 
 /// Set required strings from a python list
 void setRequiredStrings(StringContainsValidator &self,
@@ -34,9 +34,9 @@ void export_StringContainsValidator() {
       "StringContainsValidator")
       .def("__init__", make_constructor(&createStringContainsValidator,
                                         default_call_policies()))
-      .def("__init__", make_constructor(
-        &createStringContainsValidatorWithStrings, default_call_policies(),
-        ( arg("values") )))                         
+      .def("__init__",
+           make_constructor(&createStringContainsValidatorWithStrings,
+                            default_call_policies(), (arg("values"))))
       .def("setRequiredStrings", &setRequiredStrings, arg("Strings"),
            "Set the list of sub strings that the input must contain");
 }
