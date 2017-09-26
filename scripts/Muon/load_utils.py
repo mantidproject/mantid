@@ -12,6 +12,7 @@ class LoadUtils(object):
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis")
             self.instrument=tmpWS.getInstrument().getName()
             self.runName=self.instrument+str(tmpWS.getRunNumber()).zfill(8)
+
         else:
             mantid.logger.error("Muon Analysis workspace does not exist - no data loaded")
 

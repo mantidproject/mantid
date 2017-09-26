@@ -19,6 +19,7 @@ class MaxEntPresenterTest(unittest.TestCase):
     def setUp(self):
         self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
         self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
+        
         self.model=mock.create_autospec(MaxEnt_model.MaxEntModel,spec_set=True)
 
         self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)
@@ -60,6 +61,7 @@ class MaxEntPresenterTest(unittest.TestCase):
         assert(self.view.isRaw.call_count==1)
         assert(self.view.addRaw.call_count==0)
         assert(self.thread.start.call_count==1)
+
  
 if __name__ == '__main__':
     unittest.main()

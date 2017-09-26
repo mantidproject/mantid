@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
+
 Vesuvio
 #######
 - Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']

@@ -15,7 +15,6 @@ class MaxEntModel(object):
         self.inputs=inputs
         for name,value in iteritems(self.inputs):
             self.alg.setProperty(name,value)
-
         self.run=runName
 
     def execute(self):

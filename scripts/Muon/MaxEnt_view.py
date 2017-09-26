@@ -14,8 +14,10 @@ class MaxEntView(QtGui.QWidget):
         self.grid = QtGui.QGridLayout(self)
 
         #make table
+
         self.table = QtGui.QTableWidget(self)
         self.table.resize(800, 800)
+
         self.table.setRowCount(8)
         self.table.setColumnCount(2)
         self.table.setColumnWidth(0,300)
@@ -23,6 +25,7 @@ class MaxEntView(QtGui.QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
+
         table_utils.setTableHeaders(self.table)
 
         # populate table
@@ -62,16 +65,18 @@ class MaxEntView(QtGui.QWidget):
         #make table
         self.tableA = QtGui.QTableWidget(self)
         self.tableA.resize(800, 800)
+
         self.tableA.setRowCount(6)
         self.tableA.setColumnCount(2)
         self.tableA.setColumnWidth(0,300)
         self.tableA.setColumnWidth(1,300)
+
         self.tableA.verticalHeader().setVisible(False)
         self.tableA.horizontalHeader().setStretchLastSection(True)
 
         self.tableA.setHorizontalHeaderLabels(("Advanced Property;Value").split(";"))
         table_utils.setTableHeaders(self.tableA)
-
+        
         table_utils.setRowName(self.tableA,0,"Chi target")
         self.chiTarget= table_utils.addDoubleToTable(self.tableA,100,0)
 

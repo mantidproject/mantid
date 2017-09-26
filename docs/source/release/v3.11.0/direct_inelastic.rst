@@ -33,7 +33,7 @@ Crystal Field
 Other changes
 #############
 
-- New T0 formula for CNCS instrument
+- New :math:`T_0`  formula for CNCS instrument
 
 Instrument definitions
 ----------------------
