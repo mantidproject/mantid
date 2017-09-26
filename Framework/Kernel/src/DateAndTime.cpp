@@ -16,7 +16,8 @@ namespace Mantid {
 using namespace Types::Core;
 namespace Kernel {
 
-TimeInterval::TimeInterval(const DateAndTime &from, const DateAndTime &to)
+TimeInterval::TimeInterval(const Types::Core::DateAndTime &from,
+                           const Types::Core::DateAndTime &to)
     : m_begin(from) {
   if (to > from)
     m_end = to;

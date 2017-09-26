@@ -1377,8 +1377,9 @@ void TimeSeriesProperty<TYPE>::create(
  *                      Vector sizes must match.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
-                                      const std::vector<TYPE> &new_values) {
+void TimeSeriesProperty<TYPE>::create(
+    const std::vector<Types::Core::DateAndTime> &new_times,
+    const std::vector<TYPE> &new_values) {
   if (new_times.size() != new_values.size())
     throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
                                 "for the time and values vectors.");
@@ -1408,7 +1409,8 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
  *  @return Value at time \a t
  */
 template <typename TYPE>
-TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
+TYPE TimeSeriesProperty<TYPE>::getSingleValue(
+    const Types::Core::DateAndTime &t) const {
   if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
@@ -1456,7 +1458,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
  *  @return Value at time \a t
  */
 template <typename TYPE>
-TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
+TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
                                               int &index) const {
   if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +

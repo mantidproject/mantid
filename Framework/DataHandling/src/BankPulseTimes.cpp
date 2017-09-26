@@ -45,8 +45,11 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Build from a vector of date and times.
-*  Handles a zero-sized vector */
-BankPulseTimes::BankPulseTimes(const std::vector<DateAndTime> &times) {
+*  Handles a zero-sized vector 
+*  @param times
+ */
+BankPulseTimes::BankPulseTimes(
+    const std::vector<Mantid::Types::Core::DateAndTime> &times) {
   numPulses = times.size();
   pulseTimes = nullptr;
   if (numPulses == 0)
