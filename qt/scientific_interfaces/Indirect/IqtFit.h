@@ -72,7 +72,6 @@ private:
                                                const size_t &specMax);
   void updateFitFunctions();
   void plotResult(const std::string &groupName, const size_t &specNo);
-  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
   QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
   void

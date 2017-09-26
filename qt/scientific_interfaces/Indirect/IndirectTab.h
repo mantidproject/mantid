@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/PreviewPlot.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -131,6 +132,10 @@ protected:
 
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
+
+  /// Resizes the specified plot range
+  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
+                       QPair<double, double> range);
 
   /// Updates the properties in the m_dblManager
   void updateProperties(const QString &functionName, const QString &prefix,

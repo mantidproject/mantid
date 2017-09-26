@@ -1,10 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -15,7 +15,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class RangeSelector;
 }
-}
+} // namespace MantidQt
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -26,10 +26,10 @@ class RangeSelector;
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)

@@ -4,6 +4,8 @@
 #include "IndirectDataAnalysisTab.h"
 #include "ui_MSDFit.h"
 
+#include <boost/weak_ptr.hpp>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -21,7 +23,8 @@ private:
 
 private slots:
   void singleFit();
-  void plotFit(QString wsName = QString(), int specNo = -1);
+  void plotFit();
+  void plotFit(const std::string& wsName, int specNo);
   void newDataLoaded(const QString wsName);
   void plotInput();
   void specMinChanged(int value);
@@ -34,15 +37,20 @@ private slots:
   void plotCurrentPreview();
   void algorithmComplete(bool error);
   void modelSelection(int selected);
+  void updatePlot();
 
 private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(long specMin, long specMax);
   QtProperty *createModel(const QString &modelName,
                           const std::vector<QString> modelParameters);
+  void plotResult(const std::string &groupWsName, size_t specNo);
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
-  Mantid::API::MatrixWorkspace_sptr m_msdInputWS;
+  size_t m_runMin;
+  size_t m_runMax;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_msdInputWS;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

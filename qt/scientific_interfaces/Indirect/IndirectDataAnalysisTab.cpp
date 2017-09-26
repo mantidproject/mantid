@@ -1,12 +1,13 @@
 #include "IndirectDataAnalysisTab.h"
-#include "MantidAPI/MatrixWorkspace.h"
+
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "boost/shared_ptr.hpp"
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 #include <QSettings>
 #include <QString>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
 
 using namespace Mantid::API;
 
@@ -42,7 +43,6 @@ void IndirectDataAnalysisTab::loadTabSettings(const QSettings &settings) {
  * Slot that can be called when a user edits an input.
  */
 void IndirectDataAnalysisTab::inputChanged() { validate(); }
-
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

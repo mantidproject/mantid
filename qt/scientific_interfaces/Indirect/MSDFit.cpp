@@ -30,10 +30,10 @@ void MSDFit::setup() {
 
   m_msdTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  m_properties["Start"] = m_dblManager->addProperty("StartX");
-  m_dblManager->setDecimals(m_properties["Start"], NUM_DECIMALS);
-  m_properties["End"] = m_dblManager->addProperty("EndX");
-  m_dblManager->setDecimals(m_properties["End"], NUM_DECIMALS);
+  m_properties["StartX"] = m_dblManager->addProperty("StartX");
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_properties["EndX"] = m_dblManager->addProperty("EndX");
+  m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
   m_properties["Gaussian"] = createModel("Gaussian", {"Intensity", "MSD"});
   m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
@@ -65,8 +65,6 @@ void MSDFit::setup() {
   connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this,
           SLOT(specMaxChanged(int)));
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-          SLOT(plotFit()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
@@ -81,23 +79,22 @@ void MSDFit::run() {
   QString model = m_uiForm.cbModelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
 
-  double xStart = m_dblManager->value(m_properties["Start"]);
-  double xEnd = m_dblManager->value(m_properties["End"]);
+  double xStart = m_dblManager->value(m_properties["StartX"]);
+  double xEnd = m_dblManager->value(m_properties["EndX"]);
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
 
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
-      std::to_string(specMin) + "_s" + std::to_string(specMax) + "_" +
+      std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
       model.toStdString() + "_msd";
 
   IAlgorithm_sptr msdAlg = msdFitAlgorithm(specMin, specMax);
-
   m_batchAlgoRunner->addAlgorithm(msdAlg);
-  m_batchAlgoRunner->executeBatchAsync();
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 void MSDFit::singleFit() {
@@ -113,20 +110,23 @@ void MSDFit::singleFit() {
       std::to_string(fitSpec) + "_msd";
 
   IAlgorithm_sptr msdAlg = msdFitAlgorithm(fitSpec, fitSpec);
-
   m_batchAlgoRunner->addAlgorithm(msdAlg);
 
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 IAlgorithm_sptr MSDFit::msdFitAlgorithm(long specMin, long specMax) {
-  QString wsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  double xStart = m_dblManager->value(m_properties["Start"]);
-  double xEnd = m_dblManager->value(m_properties["End"]);
+  auto wsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
+  double xStart = m_dblManager->value(m_properties["StartX"]);
+  double xEnd = m_dblManager->value(m_properties["EndX"]);
+  m_runMin = boost::numeric_cast<size_t>(specMin);
+  m_runMax = boost::numeric_cast<size_t>(specMax);
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
-  msdAlg->setProperty("InputWorkspace", wsName.toStdString());
+  msdAlg->setProperty("InputWorkspace", wsName);
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);
   msdAlg->setProperty("SpecMin", specMin);
@@ -141,8 +141,8 @@ bool MSDFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample input", m_uiForm.dsSampleInput);
 
-  auto range = std::make_pair(m_dblManager->value(m_properties["Start"]),
-                              m_dblManager->value(m_properties["End"]));
+  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                              m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("a range", range);
 
   int specMin = m_uiForm.spSpectraMin->value();
@@ -172,9 +172,16 @@ void MSDFit::algorithmComplete(bool error) {
   if (error)
     return;
 
+  plotFit();
+
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
+}
+
+void MSDFit::plotFit() {
+  return plotFit(m_pythonExportWsName + "_Workspaces",
+                 m_uiForm.spPlotSpectrum->value());
 }
 
 /**
@@ -185,22 +192,16 @@ void MSDFit::algorithmComplete(bool error) {
  * @param specNo Spectrum number relating to input workspace to plot fit
  *               for (defaults to value of preview spectrum index)
  */
-void MSDFit::plotFit(QString wsName, int specNo) {
-  if (wsName.isEmpty())
-    wsName = QString::fromStdString(m_pythonExportWsName) + "_Workspaces";
+void MSDFit::plotFit(const std::string &wsName, int specNo) {
 
-  if (specNo == -1)
-    specNo = m_uiForm.spPlotSpectrum->value();
-
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(
-          wsName.toStdString())) {
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
     // Remove the old fit
     m_uiForm.ppPlot->removeSpectrum("Fit");
 
     // Get the workspace
     auto groupWs =
         AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            wsName.toStdString());
+            wsName);
     auto groupWsNames = groupWs->getNames();
 
     // Find the correct fit workspace and plot it
@@ -222,6 +223,54 @@ void MSDFit::plotFit(QString wsName, int specNo) {
   }
 }
 
+void MSDFit::updatePlot() {
+  m_uiForm.ppPlot->clear();
+
+  size_t specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
+  const auto groupName = m_pythonExportWsName + "_Workspaces";
+
+  if (AnalysisDataService::Instance().doesExist(groupName) &&
+      m_runMin <= specNo && specNo <= m_runMax) {
+    plotResult(groupName, specNo);
+  } else {
+    auto inputWs = m_msdInputWS.lock();
+
+    if (inputWs) {
+      m_previewPlotData = inputWs;
+      m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
+    } else {
+      g_log.error("No workspace loaded, cannot create preview plot.");
+      return;
+    }
+  }
+
+  try {
+    const QPair<double, double> curveRange =
+        m_uiForm.ppPlot->getCurveRange("Sample");
+    const std::pair<double, double> range(curveRange.first, curveRange.second);
+    m_dblManager->setRange(m_properties["StartX"], range.first, range.second);
+    m_dblManager->setRange(m_properties["EndX"], range.first, range.second);
+    IndirectDataAnalysisTab::resizePlotRange(m_uiForm.ppPlot);
+  } catch (std::invalid_argument &exc) {
+    showMessageBox(exc.what());
+  }
+}
+
+void MSDFit::plotResult(const std::string &groupWsName, size_t specNo) {
+  WorkspaceGroup_sptr outputGroup =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWsName);
+
+  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      outputGroup->getItem(specNo));
+
+  if (ws) {
+    m_previewPlotData = ws;
+    m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
+    m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
+  }
+}
+
 /**
  * Called when new data has been loaded by the data selector.
  *
@@ -230,10 +279,11 @@ void MSDFit::plotFit(QString wsName, int specNo) {
  * @param wsName Name of new workspace loaded
  */
 void MSDFit::newDataLoaded(const QString wsName) {
-  m_msdInputWS =
+  auto workspace =
       Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString());
-  int maxWsIndex = static_cast<int>(m_msdInputWS->getNumberHistograms()) - 1;
+  int maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
+  m_msdInputWS = workspace;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -256,14 +306,18 @@ void MSDFit::plotInput() {
   m_uiForm.ppPlot->clear();
 
   int wsIndex = m_uiForm.spPlotSpectrum->value();
-  m_uiForm.ppPlot->addSpectrum("Sample", m_msdInputWS, wsIndex);
+  auto inputWs = m_msdInputWS.lock();
 
-  try {
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    m_uiForm.ppPlot->getRangeSelector("MSDRange")
-        ->setRange(range.first, range.second);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
+  if (inputWs) {
+    m_uiForm.ppPlot->addSpectrum("Sample", inputWs, wsIndex);
+
+    try {
+      QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+      m_uiForm.ppPlot->getRangeSelector("MSDRange")
+          ->setRange(range.first, range.second);
+    } catch (std::invalid_argument &exc) {
+      showMessageBox(exc.what());
+    }
   }
 }
 
@@ -290,19 +344,19 @@ void MSDFit::specMaxChanged(int value) {
 }
 
 void MSDFit::minChanged(double val) {
-  m_dblManager->setValue(m_properties["Start"], val);
+  m_dblManager->setValue(m_properties["StartX"], val);
 }
 
 void MSDFit::maxChanged(double val) {
-  m_dblManager->setValue(m_properties["End"], val);
+  m_dblManager->setValue(m_properties["EndX"], val);
 }
 
 void MSDFit::updateRS(QtProperty *prop, double val) {
   auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("MSDRange");
 
-  if (prop == m_properties["Start"])
+  if (prop == m_properties["StartX"])
     fitRangeSelector->setMinimum(val);
-  else if (prop == m_properties["End"])
+  else if (prop == m_properties["EndX"])
     fitRangeSelector->setMaximum(val);
 }
 
@@ -324,7 +378,7 @@ void MSDFit::modelSelection(int selected) {
   QString model = m_uiForm.cbModelInput->itemText(selected);
   m_msdTree->clear();
 
-  m_msdTree->addProperty(m_properties["Start"]);
+  m_msdTree->addProperty(m_properties["StartX"]);
   m_msdTree->addProperty(m_properties["End"]);
   m_msdTree->addProperty(m_properties[model]);
 }
@@ -343,19 +397,18 @@ void MSDFit::saveClicked() {
  * Handles mantid plotting
  */
 void MSDFit::plotClicked() {
-  auto wsName = QString::fromStdString(m_pythonExportWsName) + "_Workspaces";
-  if (checkADSForPlotSaveWorkspace(wsName.toStdString(), true)) {
+  auto wsName = m_pythonExportWsName + "_Workspaces";
+  if (checkADSForPlotSaveWorkspace(wsName, true)) {
     // Get the workspace
     auto groupWs =
         AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>(
-            wsName.toStdString());
+            wsName);
     auto groupWsNames = groupWs->getNames();
-    if (groupWsNames.size() != 1) {
-      plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
-    }
 
+    if (groupWsNames.size() != 1)
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
     else
-      plotSpectrum(wsName, 0, 2);
+      plotSpectrum(QString::fromStdString(wsName), 0, 2);
   }
 }
 
@@ -363,11 +416,12 @@ void MSDFit::plotClicked() {
  * Plots the current spectrum displayed in the preview plot
  */
 void MSDFit::plotCurrentPreview() {
+  auto previewWs = m_previewPlotData.lock();
 
   // Check a workspace has been selected
-  if (m_msdInputWS) {
+  if (previewWs) {
     const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
-    IndirectTab::plotSpectrum(QString::fromStdString(m_msdInputWS->getName()),
+    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
                               workspaceIndex, workspaceIndex);
   }
 }

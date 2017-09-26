@@ -629,7 +629,7 @@ void IqtFit::updatePlot() {
     m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
                                  range.second);
 
-    resizePlotRange(m_uiForm.ppPlot);
+    IndirectDataAnalysisTab::resizePlotRange(m_uiForm.ppPlot);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -655,11 +655,6 @@ void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
     m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
   }
-}
-
-void IqtFit::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview) {
-  preview->resizeX();
-  preview->setAxisRange(qMakePair(0.0, 1.0), QwtPlot::yLeft);
 }
 
 void IqtFit::setDefaultParameters(const QString &name) {
