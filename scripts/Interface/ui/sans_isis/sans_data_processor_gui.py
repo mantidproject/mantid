@@ -506,7 +506,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
             gui_element.addItem(element)
 
     def halt_process_flag(self):
-        self.data_processor_table.skipProcessing();
+        self.data_processor_table.skipProcessing()
 
     @staticmethod
     def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):

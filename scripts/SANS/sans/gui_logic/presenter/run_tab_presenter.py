@@ -843,7 +843,7 @@ class RunTabPresenter(object):
                     self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
                                            "been added to the Mantid search directories! See here for more "
                                            "details: {}".format(row, str(e)))
-                    self._view.halt_process_flag();
+                    self._view.halt_process_flag()
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))

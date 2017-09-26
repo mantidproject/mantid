@@ -4,12 +4,11 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import sys
 
-import mantid
 from mantid.kernel import config
 from mantid.kernel import PropertyManagerDataService
 
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, OutputMode, ISISReductionMode,
+from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 from sans.test_helper.mock_objects import (create_mock_view)
