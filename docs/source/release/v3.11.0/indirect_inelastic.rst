@@ -74,6 +74,7 @@ Improvements
 - The *S(Q, W)* interface now automatically replaces NaN values with 0.
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
 
 Dropped
 -------
