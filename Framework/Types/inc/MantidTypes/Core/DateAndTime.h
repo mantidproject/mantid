@@ -153,4 +153,4 @@ private:
 } // namespace Types
 } // namespace Mantid
 
-#endif //MANTID_TYPES_DATE_AND_TIME_H
+#endif // MANTID_TYPES_DATE_AND_TIME_H

@@ -87,8 +87,9 @@ AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox() {
     m_execDateTimeEdit = NULL;
   }
 }
-void AlgExecSummaryGrpBox::setData(const double execDuration,
-                                   const Mantid::Types::Core::DateAndTime execDate) {
+void AlgExecSummaryGrpBox::setData(
+    const double execDuration,
+    const Mantid::Types::Core::DateAndTime execDate) {
   QString dur("");
   dur.setNum(execDuration, 'g', 6);
   dur += " seconds";

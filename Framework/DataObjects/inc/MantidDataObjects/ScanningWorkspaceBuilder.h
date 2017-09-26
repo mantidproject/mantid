@@ -63,9 +63,9 @@ public:
 
   void setHistogram(HistogramData::Histogram histogram);
 
-  void
-  setTimeRanges(std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
-                    timeRanges);
+  void setTimeRanges(
+      std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+          timeRanges);
   void setTimeRanges(const Types::Core::DateAndTime &startTime,
                      const std::vector<double> &durations);
   void setPositions(std::vector<std::vector<Kernel::V3D>> positions);
@@ -87,7 +87,8 @@ private:
 
   HistogramData::Histogram m_histogram;
 
-  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> m_timeRanges;
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+      m_timeRanges;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;
 

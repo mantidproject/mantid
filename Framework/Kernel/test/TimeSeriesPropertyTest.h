@@ -1266,7 +1266,8 @@ public:
     std::vector<Mantid::Types::Core::DateAndTime> times1 = p->timesAsVector();
     std::vector<double> values1 = p->valuesAsVector();
 
-    std::vector<Mantid::Types::Core::DateAndTime> times2 = newp->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times2 =
+        newp->timesAsVector();
     std::vector<double> values2 = newp->valuesAsVector();
 
     TS_ASSERT_EQUALS(times1, times2);
@@ -1407,7 +1408,8 @@ public:
     TS_ASSERT_EQUALS(p->size(), p1->size());
     if (p->size() == p1->size()) {
       std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::Core::DateAndTime> times1 = p1->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 =
+          p1->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1432,7 +1434,8 @@ public:
     TS_ASSERT_EQUALS(p->size(), p2->size());
     if (p->size() == p2->size()) {
       std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Types::Core::DateAndTime> times1 = p2->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 =
+          p2->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1494,7 +1497,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsCorrectMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap =
+        p->valueAsCorrectMap();
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;

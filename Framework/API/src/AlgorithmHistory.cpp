@@ -82,10 +82,9 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
  * (optional)
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
-void AlgorithmHistory::fillAlgorithmHistory(const Algorithm *const alg,
-                                            const Types::Core::DateAndTime &start,
-                                            const double &duration,
-                                            std::size_t uexeccount) {
+void AlgorithmHistory::fillAlgorithmHistory(
+    const Algorithm *const alg, const Types::Core::DateAndTime &start,
+    const double &duration, std::size_t uexeccount) {
   m_name = alg->name();
   m_version = alg->version();
   m_executionDate = start;

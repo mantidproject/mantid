@@ -94,7 +94,8 @@ public:
 
     TS_ASSERT_EQUALS(mergprop->size(), p1->size() + p2->size());
 
-    std::vector<Types::Core::DateAndTime> mergedtimes = mergprop->timesAsVector();
+    std::vector<Types::Core::DateAndTime> mergedtimes =
+        mergprop->timesAsVector();
     for (size_t i = 0; i < 2 * num1; i++) {
       Types::Core::DateAndTime logtime = mergedtimes[i];
       double logvalue = mergprop->getSingleValue(logtime);

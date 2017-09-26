@@ -76,7 +76,8 @@ private:
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
       DataObjects::TableWorkspace_sptr tablews,
-      API::MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
+      API::MatrixWorkspace_const_sptr parentws,
+      Types::Core::DateAndTime runstart,
       std::map<std::string, std::vector<double>> &logvecmap,
       std::vector<Types::Core::DateAndTime> &vectimes);
 
@@ -101,11 +102,13 @@ private:
                        std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr loadRunToMatrixWS(
-      DataObjects::TableWorkspace_sptr tablews, size_t irow,
-      API::MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
-      size_t ipt, size_t irotangle, size_t itime,
-      const std::vector<std::pair<size_t, size_t>> anodelist, double &duration);
+  API::MatrixWorkspace_sptr
+  loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
+                    API::MatrixWorkspace_const_sptr parentws,
+                    Types::Core::DateAndTime runstart, size_t ipt,
+                    size_t irotangle, size_t itime,
+                    const std::vector<std::pair<size_t, size_t>> anodelist,
+                    double &duration);
 
   /// Append Experiment Info
   void

@@ -22,7 +22,8 @@ void CatalogKeepAlive::exec() {
   if (timePeriod <= 0)
     throw std::runtime_error("TimePeriod must be greater than zero.");
 
-  Types::Core::DateAndTime lastTimeExecuted = Types::Core::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime lastTimeExecuted =
+      Types::Core::DateAndTime::getCurrentTime();
 
   // Keep going until cancelled
   while (true) {

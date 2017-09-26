@@ -520,7 +520,8 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
 
 /// Adds an event to the workspace
 void TOPAZLiveEventDataListener::appendEvent(
-    uint32_t pixelId, double tof, const Mantid::Types::Core::DateAndTime pulseTime)
+    uint32_t pixelId, double tof,
+    const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {

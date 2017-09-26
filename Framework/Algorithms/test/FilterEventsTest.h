@@ -162,9 +162,11 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
-    TS_ASSERT_EQUALS(splitter0->nthTime(1), Types::Core::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter0->nthTime(1),
+                     Types::Core::DateAndTime(20035000000));
     TS_ASSERT_EQUALS(splitter0->nthValue(1), 0);
 
     // Check Workspace group 1
@@ -182,11 +184,14 @@ public:
             filteredws1->run().getProperty("splitter"));
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
-    TS_ASSERT_EQUALS(splitter1->nthTime(1), Types::Core::DateAndTime(20035000000));
+    TS_ASSERT_EQUALS(splitter1->nthTime(1),
+                     Types::Core::DateAndTime(20035000000));
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter1->nthTime(2), Types::Core::DateAndTime(20195000000));
+    TS_ASSERT_EQUALS(splitter1->nthTime(2),
+                     Types::Core::DateAndTime(20195000000));
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Check Workspace group 2
@@ -219,22 +224,29 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(1), Types::Core::DateAndTime(20200000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(1),
+                     Types::Core::DateAndTime(20200000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(2), Types::Core::DateAndTime(20265000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(2),
+                     Types::Core::DateAndTime(20265000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(3), Types::Core::DateAndTime(20300000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(3),
+                     Types::Core::DateAndTime(20300000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(3), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(4), Types::Core::DateAndTime(20365000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(4),
+                     Types::Core::DateAndTime(20365000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(4), 0);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(5), Types::Core::DateAndTime(20400000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(5),
+                     Types::Core::DateAndTime(20400000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(5), 1);
-    TS_ASSERT_EQUALS(splitter2->nthTime(6), Types::Core::DateAndTime(20465000000));
+    TS_ASSERT_EQUALS(splitter2->nthTime(6),
+                     Types::Core::DateAndTime(20465000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
 
     // Clean up
@@ -680,7 +692,8 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
     TS_ASSERT_EQUALS(
         splitter0->nthTime(1).totalNanoseconds(),
@@ -703,7 +716,8 @@ public:
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
 
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
@@ -711,10 +725,10 @@ public:
         Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(
-        splitter1->nthTime(2).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter1->nthTime(2).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(1.95e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Workspace 2
@@ -734,18 +748,19 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
-    TS_ASSERT_EQUALS(
-        splitter2->nthTime(1).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter2->nthTime(1).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(1.95e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(
-        splitter2->nthTime(2).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter2->nthTime(2).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(2.65e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
     // Check spectrum 3 of workspace 2
@@ -873,7 +888,8 @@ public:
             filteredws0->run().getProperty("splitter"));
     TS_ASSERT(splitter0);
     TS_ASSERT_EQUALS(splitter0->size(), 2);
-    TS_ASSERT_EQUALS(splitter0->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter0->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter0->nthValue(0), 1);
     TS_ASSERT_EQUALS(
         splitter0->nthTime(1).totalNanoseconds(),
@@ -896,7 +912,8 @@ public:
     TS_ASSERT(splitter1);
     TS_ASSERT_EQUALS(splitter1->size(), 3);
 
-    TS_ASSERT_EQUALS(splitter1->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter1->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter1->nthValue(0), 0);
 
     TS_ASSERT_EQUALS(
@@ -904,10 +921,10 @@ public:
         Types::Core::DateAndTime(static_cast<int>(3.5e+07)).totalNanoseconds() +
             runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(1), 1);
-    TS_ASSERT_EQUALS(
-        splitter1->nthTime(2).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter1->nthTime(2).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(1.95e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter1->nthValue(2), 0);
 
     // Workspace 2
@@ -925,18 +942,19 @@ public:
     TS_ASSERT(splitter2);
     TS_ASSERT_EQUALS(splitter2->size(), 7);
 
-    TS_ASSERT_EQUALS(splitter2->nthTime(0), Types::Core::DateAndTime(runstart_i64));
+    TS_ASSERT_EQUALS(splitter2->nthTime(0),
+                     Types::Core::DateAndTime(runstart_i64));
     TS_ASSERT_EQUALS(splitter2->nthValue(0), 0);
 
-    TS_ASSERT_EQUALS(
-        splitter2->nthTime(1).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(1.95e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter2->nthTime(1).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(1.95e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(1), 1);
-    TS_ASSERT_EQUALS(
-        splitter2->nthTime(2).totalNanoseconds(),
-        Types::Core::DateAndTime(static_cast<int>(2.65e+08)).totalNanoseconds() +
-            runstart_i64);
+    TS_ASSERT_EQUALS(splitter2->nthTime(2).totalNanoseconds(),
+                     Types::Core::DateAndTime(static_cast<int>(2.65e+08))
+                             .totalNanoseconds() +
+                         runstart_i64);
     TS_ASSERT_EQUALS(splitter2->nthValue(2), 0);
 
     // Check spectrum 3 of workspace 2

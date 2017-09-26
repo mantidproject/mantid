@@ -1151,7 +1151,8 @@ public:
       if (vecY[i] >= -0.0) {
         // A valid time interval for Splitters
         Types::Core::DateAndTime tstart(static_cast<int64_t>(vecX[i] * 1.E9));
-        Types::Core::DateAndTime tstop(static_cast<int64_t>(vecX[i + 1] * 1.E9));
+        Types::Core::DateAndTime tstop(
+            static_cast<int64_t>(vecX[i + 1] * 1.E9));
         int wsindex = static_cast<int>(vecY[i]);
 
         Kernel::SplittingInterval ti(tstart, tstop, wsindex);

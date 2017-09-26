@@ -74,18 +74,20 @@ class MANTID_API_DLL AlgorithmHistory {
 public:
   /// History container
 
-  /// The date-and-time will be stored as the Mantid::Types::Core::DateAndTime type
-  explicit AlgorithmHistory(
-      const Algorithm *const alg,
-      const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
+  /// The date-and-time will be stored as the Mantid::Types::Core::DateAndTime
+  /// type
+  explicit AlgorithmHistory(const Algorithm *const alg,
+                            const Types::Core::DateAndTime &start =
+                                Types::Core::DateAndTime::getCurrentTime(),
+                            const double &duration = -1.0,
+                            std::size_t uexeccount = 0);
   ~AlgorithmHistory();
   AlgorithmHistory &operator=(const AlgorithmHistory &);
   AlgorithmHistory(const AlgorithmHistory &);
-  AlgorithmHistory(
-      const std::string &name, int vers,
-      const Types::Core::DateAndTime &start = Types::Core::DateAndTime::getCurrentTime(),
-      const double &duration = -1.0, std::size_t uexeccount = 0);
+  AlgorithmHistory(const std::string &name, int vers,
+                   const Types::Core::DateAndTime &start =
+                       Types::Core::DateAndTime::getCurrentTime(),
+                   const double &duration = -1.0, std::size_t uexeccount = 0);
   void addExecutionInfo(const Types::Core::DateAndTime &start,
                         const double &duration);
   void addProperty(const std::string &name, const std::string &value,
@@ -101,7 +103,9 @@ public:
   /// get execution duration
   double executionDuration() const { return m_executionDuration; }
   /// get execution date
-  Mantid::Types::Core::DateAndTime executionDate() const { return m_executionDate; }
+  Mantid::Types::Core::DateAndTime executionDate() const {
+    return m_executionDate;
+  }
   /// get the execution count
   const std::size_t &execCount() const { return m_execCount; }
   /// get parameter list of algorithm in history const

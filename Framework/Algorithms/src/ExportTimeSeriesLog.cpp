@@ -340,9 +340,9 @@ void ExportTimeSeriesLog::setupEventWorkspace(
  * second is 1E-9
  */
 bool ExportTimeSeriesLog::calculateTimeSeriesRangeByTime(
-    std::vector<Types::Core::DateAndTime> &vec_times, const double &rel_start_time,
-    size_t &i_start, const double &rel_stop_time, size_t &i_stop,
-    const double &time_factor) {
+    std::vector<Types::Core::DateAndTime> &vec_times,
+    const double &rel_start_time, size_t &i_start, const double &rel_stop_time,
+    size_t &i_stop, const double &time_factor) {
   // Initialize if there is something wrong.
   i_start = 0;
   i_stop = vec_times.size() - 1;

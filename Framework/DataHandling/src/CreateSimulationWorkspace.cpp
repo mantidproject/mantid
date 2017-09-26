@@ -50,7 +50,8 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 }
 
 StartAndEndTime getStartAndEndTimesFromNexusFile(
-    std::string filename, const Mantid::Types::Core::DateAndTime &startTimeDefault,
+    std::string filename,
+    const Mantid::Types::Core::DateAndTime &startTimeDefault,
     const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
   try {

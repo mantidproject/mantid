@@ -315,8 +315,8 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
   try {
     nxfile.openData("name");
     instrument = nxfile.getStrData();
-    alg->getLogger().debug()
-        << "Instrument name read from NeXus file is " << instrument << '\n';
+    alg->getLogger().debug() << "Instrument name read from NeXus file is "
+                             << instrument << '\n';
   } catch (::NeXus::Exception &) {
     // Try to fall back to isis compatibility options
     nxfile.closeGroup();

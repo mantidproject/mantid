@@ -66,11 +66,10 @@ private:
 
   void exec() override;
 
-  bool
-  calculateTimeSeriesRangeByTime(std::vector<Types::Core::DateAndTime> &vec_times,
-                                 const double &rel_start_time, size_t &i_start,
-                                 const double &rel_stop_time, size_t &i_stop,
-                                 const double &time_factor);
+  bool calculateTimeSeriesRangeByTime(
+      std::vector<Types::Core::DateAndTime> &vec_times,
+      const double &rel_start_time, size_t &i_start,
+      const double &rel_stop_time, size_t &i_stop, const double &time_factor);
 
   void exportLog(const std::string &logname, const std::string timeunit,
                  const double &starttime, const double &stoptime,
@@ -83,7 +82,8 @@ private:
                            std::vector<double> values, const bool &epochtime);
 
   void setupWorkspace2D(const size_t &start_index, const size_t &stop_index,
-                        int numentries, std::vector<Types::Core::DateAndTime> &times,
+                        int numentries,
+                        std::vector<Types::Core::DateAndTime> &times,
                         std::vector<double> values, const bool &epochtime,
                         const double &timeunitfactor, size_t nspec);
 

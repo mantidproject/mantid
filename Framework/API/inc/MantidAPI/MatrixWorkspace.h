@@ -21,7 +21,7 @@ namespace Types {
 namespace Core {
 class DateAndTime;
 }
-} 
+}
 
 namespace Geometry {
 class ParameterMap;

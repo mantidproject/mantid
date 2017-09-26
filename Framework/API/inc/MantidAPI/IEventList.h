@@ -84,7 +84,8 @@ public:
   /// Return the list of event weight error values
   virtual void getWeightErrors(std::vector<double> &weightErrors) const = 0;
   /// Return the list of pulse time values
-  virtual std::vector<Mantid::Types::Core::DateAndTime> getPulseTimes() const = 0;
+  virtual std::vector<Mantid::Types::Core::DateAndTime>
+  getPulseTimes() const = 0;
   /// Get the minimum TOF from the list
   virtual double getTofMin() const = 0;
   /// Get the maximum TOF from the list

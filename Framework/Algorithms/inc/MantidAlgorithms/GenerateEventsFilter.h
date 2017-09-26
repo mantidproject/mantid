@@ -123,8 +123,8 @@ private:
       int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
       std::vector<int> &vecSplitGroup, std::map<size_t, int> indexwsindexmap,
       const std::vector<double> &logvalueranges, Types::Core::time_duration tol,
-      bool filterIncrease, bool filterDecrease, Types::Core::DateAndTime startTime,
-      Types::Core::DateAndTime stopTime);
+      bool filterIncrease, bool filterDecrease,
+      Types::Core::DateAndTime startTime, Types::Core::DateAndTime stopTime);
 
   /// Generate event filters for integer sample log
   void processIntegerValueFilter(int minvalue, int maxvalue,
@@ -143,8 +143,9 @@ private:
   Types::Core::DateAndTime
   makeSplitterInVector(std::vector<Types::Core::DateAndTime> &vecSplitTime,
                        std::vector<int> &vecGroupIndex,
-                       Types::Core::DateAndTime start, Types::Core::DateAndTime stop,
-                       int group, int64_t tol_ns, Types::Core::DateAndTime lasttime);
+                       Types::Core::DateAndTime start,
+                       Types::Core::DateAndTime stop, int group, int64_t tol_ns,
+                       Types::Core::DateAndTime lasttime);
 
   /// Generate a matrix workspace containing splitters
   void generateSplittersInMatrixWorkspace();

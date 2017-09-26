@@ -51,7 +51,8 @@ const std::string SCAN_PROPERTY("scan_index");
 const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
 // Helper function to get a DateAndTime value from an ADARA packet header
-Mantid::Types::Core::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
+Mantid::Types::Core::DateAndTime
+timeFromPacket(const ADARA::PacketHeader &hdr) {
   const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 

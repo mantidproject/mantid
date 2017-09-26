@@ -79,15 +79,17 @@ void ScanningWorkspaceBuilder::setTimeRanges(
     const std::vector<double> &durations) {
   verifyTimeIndexSize(durations.size(), "time durations");
 
-  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges =
-      {std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
-          startTime, startTime + durations[0])};
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+      timeRanges = {
+          std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
+              startTime, startTime + durations[0])};
 
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     const auto newStartTime = timeRanges[i - 1].second;
     const auto endTime = newStartTime + durations[i];
-    timeRanges.push_back(std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
-        newStartTime, endTime));
+    timeRanges.push_back(
+        std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
+            newStartTime, endTime));
   }
 
   setTimeRanges(std::move(timeRanges));

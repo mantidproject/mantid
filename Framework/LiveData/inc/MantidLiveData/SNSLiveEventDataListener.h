@@ -49,8 +49,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void
-  start(const Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(const Types::Core::DateAndTime startTime =
+                 Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   ILiveListener::RunStatus runStatus() override;
@@ -155,7 +155,7 @@ private:
                             // If true, the thread exits
 
   Types::Core::DateAndTime m_startTime; // The requested start time for the data
-                                   // stream (needed by the run() function)
+                                        // stream (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
   // with the 'real' value by the time we call initWorkspacePart2.  (We can't

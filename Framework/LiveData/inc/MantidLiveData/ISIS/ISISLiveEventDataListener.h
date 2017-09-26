@@ -95,7 +95,8 @@ public:
    *                   The value of 'now' is zero for compatibility with the SNS
    * live stream.
    */
-  void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
 
   /** Get the data that's been buffered since the last call to this method
    *  (or since start() was called).

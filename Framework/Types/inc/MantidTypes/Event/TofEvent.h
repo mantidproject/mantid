@@ -15,12 +15,12 @@ class LoadEventNexus;
 }
 namespace Types {
 namespace Event {
-  //==========================================================================================
-  /** Info about a single neutron detection event:
-  *
-  *  - the time of flight of the neutron (can be converted to other units)
-  *  - the absolute time of the pulse at which it was produced
-  */
+//==========================================================================================
+/** Info about a single neutron detection event:
+*
+*  - the time of flight of the neutron (can be converted to other units)
+*  - the absolute time of the pulse at which it was produced
+*/
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
 class MANTID_TYPES_DLL TofEvent {
 
@@ -99,9 +99,7 @@ inline double TofEvent::operator()() const { return m_tof; }
 inline double TofEvent::tof() const { return m_tof; }
 
 /// Return the pulse time
-inline Core::DateAndTime TofEvent::pulseTime() const {
-  return m_pulsetime;
-}
+inline Core::DateAndTime TofEvent::pulseTime() const { return m_pulsetime; }
 
 /// Return the weight of the event - exactly 1.0 always
 inline double TofEvent::weight() const { return 1.0; }

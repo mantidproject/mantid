@@ -2925,8 +2925,9 @@ DateAndTime EventList::getPulseTimeMax() const {
   return tMax;
 }
 
-void EventList::getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
-                                   Mantid::Types::Core::DateAndTime &tMax) const {
+void EventList::getPulseTimeMinMax(
+    Mantid::Types::Core::DateAndTime &tMin,
+    Mantid::Types::Core::DateAndTime &tMax) const {
   // set up as the minimum available date time.
   tMax = DateAndTime::minimum();
   tMin = DateAndTime::maximum();
@@ -3622,8 +3623,8 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
 }
 
 void EventList::filterByTimeAtSample(Types::Core::DateAndTime start,
-                                     Types::Core::DateAndTime stop, double tofFactor,
-                                     double tofOffset,
+                                     Types::Core::DateAndTime stop,
+                                     double tofFactor, double tofOffset,
                                      EventList &output) const {
   if (this == &output) {
     throw std::invalid_argument("In-place filtering is not allowed");

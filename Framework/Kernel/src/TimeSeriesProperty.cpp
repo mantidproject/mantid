@@ -258,8 +258,9 @@ void TimeSeriesProperty<TYPE>::setName(const std::string name) {
  *are kept.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTime(const Types::Core::DateAndTime &start,
-                                            const Types::Core::DateAndTime &stop) {
+void TimeSeriesProperty<TYPE>::filterByTime(
+    const Types::Core::DateAndTime &start,
+    const Types::Core::DateAndTime &stop) {
   // 0. Sort
   sortIfNecessary();
 
@@ -1353,9 +1354,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
  *    Vector sizes must match.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::create(const Types::Core::DateAndTime &start_time,
-                                      const std::vector<double> &time_sec,
-                                      const std::vector<TYPE> &new_values) {
+void TimeSeriesProperty<TYPE>::create(
+    const Types::Core::DateAndTime &start_time,
+    const std::vector<double> &time_sec, const std::vector<TYPE> &new_values) {
   if (time_sec.size() != new_values.size())
     throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
                                 "for the time and values vectors.");

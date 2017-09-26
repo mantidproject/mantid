@@ -904,10 +904,11 @@ void GenerateEventsFilter::makeFilterBySingleValue(
   *              with the old direction)
   */
 bool GenerateEventsFilter::identifyLogEntry(
-    const int &index, const Types::Core::DateAndTime &currT, const bool &lastgood,
-    const double &minvalue, const double &maxvalue,
-    const Types::Core::DateAndTime &startT, const Types::Core::DateAndTime &stopT,
-    const bool &filterIncrease, const bool &filterDecrease) {
+    const int &index, const Types::Core::DateAndTime &currT,
+    const bool &lastgood, const double &minvalue, const double &maxvalue,
+    const Types::Core::DateAndTime &startT,
+    const Types::Core::DateAndTime &stopT, const bool &filterIncrease,
+    const bool &filterDecrease) {
   double val = m_dblLog->nthValue(index);
 
   // Identify by time and value
@@ -1654,8 +1655,8 @@ int GenerateEventsFilter::determineChangingDirection(int startindex) {
 /** Add a new splitter to vector of splitters.  It is used by FilterByTime only.
   */
 void GenerateEventsFilter::addNewTimeFilterSplitter(
-    Types::Core::DateAndTime starttime, Types::Core::DateAndTime stoptime, int wsindex,
-    string info) {
+    Types::Core::DateAndTime starttime, Types::Core::DateAndTime stoptime,
+    int wsindex, string info) {
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter
@@ -1698,7 +1699,8 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(
 DateAndTime GenerateEventsFilter::makeSplitterInVector(
     std::vector<Types::Core::DateAndTime> &vecSplitTime,
     std::vector<int> &vecGroupIndex, Types::Core::DateAndTime start,
-    Types::Core::DateAndTime stop, int group, int64_t tol_ns, DateAndTime lasttime) {
+    Types::Core::DateAndTime stop, int group, int64_t tol_ns,
+    DateAndTime lasttime) {
   DateAndTime starttime(start.totalNanoseconds() - tol_ns);
   DateAndTime stoptime(stop.totalNanoseconds() - tol_ns);
   // DateAndTime starttime = start-tolerance;

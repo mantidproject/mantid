@@ -334,13 +334,14 @@ DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
 /** Set the scan interval of the detector with given detector index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Types::Core::DateAndTime. Note that it is currently not possible
+ * since 1990, as in Types::Core::DateAndTime. Note that it is currently not
+ *possible
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */
 void DetectorInfo::setScanInterval(
-    const size_t index,
-    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
+    const size_t index, const std::pair<Types::Core::DateAndTime,
+                                        Types::Core::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(index, {interval.first.totalNanoseconds(),
                                           interval.second.totalNanoseconds()});
 }
@@ -349,8 +350,8 @@ void DetectorInfo::setScanInterval(
  *
  * Prefer this over setting intervals for individual detectors since it enables
  * internal performance optimization. See also overload for other details. */
-void DetectorInfo::setScanInterval(
-    const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
+void DetectorInfo::setScanInterval(const std::pair<
+    Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
   m_detectorInfo->setScanInterval(
       {interval.first.totalNanoseconds(), interval.second.totalNanoseconds()});
 }

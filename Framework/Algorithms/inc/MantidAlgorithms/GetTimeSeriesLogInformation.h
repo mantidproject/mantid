@@ -85,7 +85,8 @@ private:
 
   /// Calcualte the distribution of delta T in time stamps
   DataObjects::Workspace2D_sptr
-  calDistributions(std::vector<Types::Core::DateAndTime> timevec, double stepsize);
+  calDistributions(std::vector<Types::Core::DateAndTime> timevec,
+                   double stepsize);
 
   void exportLog(API::MatrixWorkspace_sptr ws,
                  std::vector<Types::Core::DateAndTime> abstimevec, double dts);
@@ -94,13 +95,15 @@ private:
                            std::vector<Types::Core::DateAndTime> &times,
                            std::vector<double> values);
 
-  void setupWorkspace2D(int numentries, std::vector<Types::Core::DateAndTime> &times,
+  void setupWorkspace2D(int numentries,
+                        std::vector<Types::Core::DateAndTime> &times,
                         std::vector<double> values);
 
   void execQuickStatistics();
 
   void exportErrorLog(API::MatrixWorkspace_sptr ws,
-                      std::vector<Types::Core::DateAndTime> abstimevec, double dts);
+                      std::vector<Types::Core::DateAndTime> abstimevec,
+                      double dts);
 
   void checkLogValueChanging(std::vector<Types::Core::DateAndTime> timevec,
                              std::vector<double> values, double delta);

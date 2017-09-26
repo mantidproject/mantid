@@ -732,9 +732,10 @@ private:
   }
 
   // Adds a time series log to the workspace
-  void addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
-                        const std::vector<Mantid::Types::Core::DateAndTime> &times,
-                        const std::vector<double> &values) {
+  void
+  addTimeSeriesLog(const Workspace_sptr &ws, const std::string &logName,
+                   const std::vector<Mantid::Types::Core::DateAndTime> &times,
+                   const std::vector<double> &values) {
     TS_ASSERT_EQUALS(times.size(), values.size());
     auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     TS_ASSERT(matrixWS);

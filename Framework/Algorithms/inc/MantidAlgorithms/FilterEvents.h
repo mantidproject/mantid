@@ -156,10 +156,10 @@ private:
       std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
 
   template <typename TYPE>
-  void
-  splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
-                          std::vector<Types::Core::DateAndTime> &split_datetime_vec,
-                          const int max_target_index);
+  void splitTimeSeriesProperty(
+      Kernel::TimeSeriesProperty<TYPE> *tsp,
+      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
 
   void splitDoubleTimeSeriesLogs(
       const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,

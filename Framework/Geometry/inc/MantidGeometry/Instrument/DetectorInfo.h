@@ -121,11 +121,11 @@ public:
   size_t scanCount(const size_t index) const;
   std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>
   scanInterval(const std::pair<size_t, size_t> &index) const;
-  void setScanInterval(
-      const size_t index,
-      const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
-  void setScanInterval(
-      const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
+  void setScanInterval(const size_t index,
+                       const std::pair<Types::Core::DateAndTime,
+                                       Types::Core::DateAndTime> &interval);
+  void setScanInterval(const std::pair<Types::Core::DateAndTime,
+                                       Types::Core::DateAndTime> &interval);
 
   void merge(const DetectorInfo &other);
 
