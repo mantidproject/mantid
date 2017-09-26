@@ -493,7 +493,7 @@ void Elwin::plotClicked() {
     plotSpectrum(workspaceBaseName + "_elf");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   true))
+                                   true, false))
     plotSpectrum(workspaceBaseName + "_elt");
 }
 

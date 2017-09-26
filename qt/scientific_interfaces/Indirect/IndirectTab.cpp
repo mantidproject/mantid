@@ -620,20 +620,19 @@ QString IndirectTab::runPythonCode(QString code, bool no_output) {
  * @return False if no workspace found, True if workspace found
  */
 bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
-                                               const bool &plotting) {
+                                               const bool plotting,
+                                               const bool warn) {
   const auto workspaceExists =
       AnalysisDataService::Instance().doesExist(workspaceName);
-  if (workspaceExists) {
-    return true;
-  } else {
+  if (warn && !workspaceExists) {
     const std::string plotSave = plotting ? "plotting" : "saving";
     const auto errorMessage = "Error while " + plotSave +
                               ":\nThe workspace \"" + workspaceName +
                               "\" could not be found.";
     const char *textMessage = errorMessage.c_str();
-    QMessageBox::warning(NULL, tr("Workspace not found"), tr(textMessage));
-    return false;
+    QMessageBox::warning(nullptr, tr("Indirect "), tr(textMessage));
   }
+  return workspaceExists;
 }
 
 } // namespace CustomInterfaces
