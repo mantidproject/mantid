@@ -1326,11 +1326,25 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
  * @param ws: the new workspace
  */
 void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
-  // Remove the tabs
-  for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it) {
-    auto &extension = it->second;
-    extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
-                                            m_startRow, it->first);
-    connectTableView(extension.tableView, extension.model);
+  auto it = m_extensions.begin();
+  while (it != m_extensions.cend()) {
+    switch (it->first) {
+    case MantidMatrixModel::DX:
+      if (ws->hasDx(0)) {
+        auto &extension = it->second;
+        extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
+                                                m_startRow, it->first);
+        connectTableView(extension.tableView, extension.model);
+        ++it;
+      } else {
+        closeDependants();
+        m_tabs->removeTab(modelTypeToInt(it->first));
+        delete it->second.tableView;
+        it = m_extensions.erase(it);
+      }
+      break;
+    default:
+      throw std::runtime_error("Unknown MantidMatrix extension.");
+    }
   }
 }
