@@ -48,6 +48,8 @@ vanadium_cropping_values = [
     (800, 19995),  # Bank 5
 ]
 
+sample_empty_scale = 1.0
+
 variable_help = {
     "file_names": {
         "vanadium_peaks_masking_file": "Specifies the name of the of the file containing the positions of the vanadium "
@@ -79,4 +81,5 @@ variables = {
     "focused_cropping_values": focused_cropping_values,
     "vanadium_cropping_values": vanadium_cropping_values,
     "focused_bin_widths": focused_bin_widths,
+    "sample_empty_scale": sample_empty_scale
 }
