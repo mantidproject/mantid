@@ -53,15 +53,14 @@ GenerateNotebook::GenerateNotebook(
     const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
+    const PostprocessingStep &postprocessingStep,
     const std::map<QString, QString> preprocessingOptionsMap,
-    const QString processingOptions, const QString postprocessingOptions)
+    const QString processingOptions)
     : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
       m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessor(postprocessor),
+      m_postprocessingStep(postprocessingStep),
       m_preprocessingOptionsMap(preprocessingOptionsMap),
-      m_processingOptions(processingOptions),
-      m_postprocessingOptions(postprocessingOptions) {
+      m_processingOptions(processingOptions) {
 
   if (m_whitelist.size() < 2)
     throw std::invalid_argument(
@@ -120,7 +119,7 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
       // If there was only one run selected, it could not be post-processed
       postProcessString =
           postprocessGroupString(rowMap, m_whitelist, m_processor,
-                                 m_postprocessor, m_postprocessingOptions);
+                                 m_postprocessingStep);
     }
     notebook->codeCell(boost::get<0>(postProcessString).toStdString());
 
@@ -290,8 +289,7 @@ QString tableString(const TreeData &treeData,
 boost::tuple<QString, QString> postprocessGroupString(
     const GroupData &rowMap, const WhiteList &whitelist,
     const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
-    const QString &postprocessingOptions) {
+    const PostprocessingStep &postprocessingStep) {
   QString stitchString;
 
   stitchString += "#Post-process workspaces\n";
@@ -312,18 +310,20 @@ boost::tuple<QString, QString> postprocessGroupString(
     outputName.append(suffix);
   }
 
-  QString outputWSName = postprocessor.prefix() + outputName.join("_");
+  auto postprocessingAlgorithm = postprocessingStep.m_algorithm;
+
+  QString outputWSName = postprocessingStep.m_algorithm.prefix() + outputName.join("_");
   stitchString += outputWSName;
   stitchString += completeOutputProperties(
-      postprocessor.name(), postprocessor.numberOfOutputProperties());
+      postprocessingAlgorithm.name(), postprocessingAlgorithm.numberOfOutputProperties());
   stitchString += " = ";
-  stitchString += postprocessor.name() + "(";
-  stitchString += postprocessor.inputProperty() + " = '";
+  stitchString += postprocessingAlgorithm.name() + "(";
+  stitchString += postprocessingAlgorithm.inputProperty() + " = '";
   stitchString += inputNames.join(", ");
   stitchString += "'";
-  if (!postprocessingOptions.isEmpty()) {
+  if (!postprocessingStep.m_options.isEmpty()) {
     stitchString += ", ";
-    stitchString += postprocessingOptions;
+    stitchString += postprocessingStep.m_options;
     stitchString += ")";
   }
 

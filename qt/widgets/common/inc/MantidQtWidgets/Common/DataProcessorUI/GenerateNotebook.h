@@ -29,7 +29,7 @@
     */
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
@@ -58,8 +58,7 @@ QString DLLExport titleString(const QString &wsName);
 boost::tuple<QString, QString> DLLExport postprocessGroupString(
     const GroupData &rowMap, const WhiteList &whitelist,
     const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
-    const QString &postprocessingOptions);
+    const PostprocessingStep &postprocessingStep);
 
 QString DLLExport
 plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
@@ -104,10 +103,9 @@ public:
       const std::map<QString, PreprocessingAlgorithm> &
           preprocessMap,
       const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
+      const PostprocessingStep &postprocessingStep,
       const std::map<QString, QString> preprocessingInstructionsMap,
-      const QString processingInstructions,
-      const QString postprocessingInstructions);
+      const QString processingInstructions);
   virtual ~GenerateNotebook(){};
 
   QString generateNotebook(const TreeData &data);
@@ -126,7 +124,7 @@ private:
   // The processing (reduction) algorithm
   ProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  PostprocessingAlgorithm m_postprocessor;
+  PostprocessingStep m_postprocessingStep;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   std::map<QString, QString> m_preprocessingOptionsMap;
@@ -134,7 +132,6 @@ private:
   QString m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line
   // edit
-  QString m_postprocessingOptions;
 };
 }
 }

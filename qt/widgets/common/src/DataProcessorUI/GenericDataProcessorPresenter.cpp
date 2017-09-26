@@ -556,9 +556,8 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessing.m_map, m_processor, m_postprocessing->m_algorithm,
-        preprocessingOptionsMap, m_processingOptions,
-        m_postprocessing->m_options);
+        m_preprocessing.m_map, m_processor, *m_postprocessing, preprocessingOptionsMap,
+         m_processingOptions);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 
