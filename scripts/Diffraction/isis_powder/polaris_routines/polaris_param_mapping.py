@@ -25,6 +25,7 @@ attr_mapping = \
      ParamMapEntry(ext_name="run_number",               int_name="run_number"),
      ParamMapEntry(ext_name="sample_empty",             int_name="sample_empty",   optional=True),
      ParamMapEntry(ext_name="sample_empty_scale",       int_name="sample_empty_scale"),
+     ParamMapEntry(ext_name="suffix",                   int_name="suffix", optional=True),
      ParamMapEntry(ext_name="spline_coefficient",       int_name="spline_coeff"),
      ParamMapEntry(ext_name="output_directory",         int_name="output_dir"),
      ParamMapEntry(ext_name="user_name",                int_name="user_name"),

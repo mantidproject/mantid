@@ -88,7 +88,13 @@ class Polaris(AbstractInst):
                 use_new_name = True if int(run_number) >= first_run_new_name else False
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
+
             return prefix + str(run_number)
+
+    def _generate_output_file_name(self, run_number_string):
+        suffix = self._inst_settings.suffix
+        suffix = "" if suffix is None else suffix
+        return Polaris._generate_input_file_name(run_number_string) + suffix
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
