@@ -19,6 +19,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _unit = None
     _out_name = None
     _progress = None
+    _format = None
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -78,6 +79,12 @@ class PowderDiffILLReduction(PythonAlgorithm):
                              validator=StringListValidator(['ScatteringAngle', 'MomentumTransfer', 'dSpacing']),
                              doc='The unit of the reduced diffractogram.')
 
+        self.declareProperty(name='PrepareToSaveAs', defaultValue='NexusProcessed',
+                             validator=StringListValidator(['NexusProcessed', 'FullProf', 'GSAS']),
+                             doc='Performs some more steps depending on the format intended to save later in. '
+                                 'Does nothing by default (nexus processed). '
+                                 'This algorithm does not save itself, but prepares for the corresponding format.')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
                              doc='Output workspace containing the reduced data.')
@@ -91,6 +98,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._normalise_option = self.getPropertyValue('NormaliseTo')
         self._calibration_file = self.getPropertyValue('CalibrationFile')
         self._unit = self.getPropertyValue('Unit')
+        self._format = self.getPropertyValue('PrepareToSaveAs')
         if self._normalise_option == 'ROI':
             self._region_of_interest = self.getProperty('ROI').value
 
@@ -129,7 +137,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
         if self._normalise_option == 'Time':
             for ws in to_group:
-                #normalise to time here, before joining, since the duration is in sample logs
+                # normalise to time here, before joining, since the duration is in sample logs
                 duration = mtd[ws].getRun().getLogData('duration').value
                 Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=1./duration)
 
@@ -156,22 +164,51 @@ class PowderDiffILLReduction(PythonAlgorithm):
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
 
-        if self._unit == 'ScatteringAngle':
-            ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target='SignedTheta')
-        elif self._unit == 'MomentumTransfer':
-            ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target='ElasticQ')
+        if self._format == 'FullProf':
+            self._crop_negative_2theta(joined_ws)
+            self._crop_dead_pixels(joined_ws)
 
+        target = 'SignedTheta'
+        if self._unit == 'MomentumTransfer':
+            target = 'ElasticQ'
+        elif self._unit == 'dSpacing':
+            target = 'ElasticDSpacing'
+
+        ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target=target)
         Transpose(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
-
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
-
         self.setProperty('OutputWorkspace', self._out_name)
 
-    def _normalise_to_roi(self, ws):
-        '''
+    '''
+        Crops out the part of the workspace corresponding to negative signed 2theta
+        @param ws: the input workspace
+    '''
+    def _crop_negative_2theta(self, ws):
+        theta_ws = self._hide('2theta')
+        ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta', OrderAxis=False)
+        positive_index = np.where(mtd[theta_ws].getAxis(1).extractValues() > 0)[0][0]
+        self.log().information('First positive 2theta at workspace index: ' + str(positive_index))
+        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, StartWorkspaceIndex=positive_index)
+        DeleteWorkspace(theta_ws)
+
+    '''
+        Crops out the spectra corresponding to zero counting pixels
+    '''
+    def _crop_dead_pixels(self, ws):
+        dead_pixels = []
+        for spectrum in range(mtd[ws].getNumberHistograms()):
+            counts = mtd[ws].readY(spectrum)
+            if not np.any(counts):
+                dead_pixels.append(spectrum)
+        self.log().information('Found zero counting cells at indices: ' + str(dead_pixels))
+        MaskDetectors(Workspace=ws, WorkspaceIndexList=dead_pixels)
+        ExtractUnmaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+
+    '''
         Normalises counts to the sum of counts in the region-of-interest
         @param ws : input workspace with raw spectrum axis
-        '''
+    '''
+    def _normalise_to_roi(self, ws):
         theta_ws = self._hide('theta')
         roi_ws = self._hide('roi')
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta')
@@ -182,12 +219,12 @@ class PowderDiffILLReduction(PythonAlgorithm):
         DeleteWorkspace(roi_ws)
         DeleteWorkspace(theta_ws)
 
-    def _parse_roi(self, ws):
-        '''
-        Parses the region of interest string from 2theta ranges to workspace indices
+    '''
+        Parses the regions of interest string from 2theta ranges to workspace indices
         @param ws : input workspace with 2theta as spectrum axis
         Returns: roi as workspace indices, e.g. 7-20,100-123
-        '''
+    '''
+    def _parse_roi(self, ws):
         result = ''
         axis = mtd[ws].getAxis(1).extractValues()
         index = 0

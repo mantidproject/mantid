@@ -46,13 +46,13 @@ class PowderDiffILLCalibration(PythonAlgorithm):
 
         self.declareProperty(name='CalibrationMethod',
                              defaultValue='Median',
-                             validator=StringListValidator(['Median', 'Mean', 'MaximumLikelihood']),
+                             validator=StringListValidator(['Median', 'Mean', 'MostLikelyMean']),
                              doc='The method of how the calibration constant of a '
                                  'pixel relative to the neighbouring one is derived.')
 
         self.declareProperty(name='NormaliseTo',
                              defaultValue='None',
-                             validator=StringListValidator(['None', 'Time', 'Monitor', 'ROI']),
+                             validator=StringListValidator(['None', 'Monitor', 'ROI']),
                              doc='Normalise to time, monitor or ROI counts before deriving the calibration.')
 
         thetaRangeValidator = FloatArrayOrderedPairsValidator()
@@ -93,10 +93,21 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         issues = dict()
         return issues
 
+    '''
+        Merges the response of the current pixel with the current combined reference in the
+        overlapping region, taking into account the relative scale factor.
+        Updates the reference workspace to contain the weighted sum of the two, or the clone
+        of one or the other if the scale factor is pathological.
+        @param ws: workspace containing data from the current pixel
+        @param cropped_ws: same as ws, but last bins cropped to match the size of the reference
+        @param ref_ws: current reference workspace
+        @param factor: relative efficiency factor for the current pixel
+    '''
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
+
         ws_y = mtd[ws].extractY().flatten()[-self._bin_offset:]
         ws_e = mtd[ws].extractE().flatten()[-self._bin_offset:]
-        ws_t = mtd[ws].getAxis(1).extractValues().flatten()[-self._bin_offset:]
+        ws_t = mtd[ws].getAxis(1).extractValues()[-self._bin_offset:]
         ws_x = np.zeros(self._bin_offset)
         ws_out = ref_ws + '_temp'
         ws_last = ref_ws + '_last'
@@ -117,7 +128,16 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=ws_out, OutputWorkspace=ref_ws)
         DeleteWorkspace(cropped_ws)
 
+    '''
+        Exctract the subarrays from ratios and errors, where angles are
+        outside the given list of ranges
+        @param ratios: input array of response ratios
+        @param errors: errors on the ratios
+        @param angles: 2theta angles corresponding to the ratios
+        @returns: a tuple of extracted ratios, errors, angles
+    '''
     def _exclude_ranges(self, ratios, errors, angles):
+
         for range in np.split(self._excluded_ranges, len(self._excluded_ranges) / 2):
             cond = (angles < range[0]) | (angles > range[1])
             ratios = ratios[cond]
@@ -125,10 +145,18 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             angles = angles[cond]
         return [ratios, errors, angles]
 
+    '''
+        Calculates the relative detector efficiency from the workspace containing response ratios.
+        Implements mean, median and most likely mean methods.
+        @param ratio: input workspace containing response ratios
+        @returns: relative calibration factor
+
+    '''
     def _compute_relative_factor(self, ratio):
+
         ratios = mtd[ratio].extractY()
         errors = mtd[ratio].extractE()
-        angles = mtd[ratio].getAxis(1).extractValues().flatten()
+        angles = mtd[ratio].getAxis(1).extractValues()
 
         if self._excluded_ranges is not None:
             if len(self._excluded_ranges) is not 0:
@@ -139,13 +167,18 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             factor = np.median(ratios)
         elif self._method == 'Mean':
             factor = np.mean(ratios)
-        elif self._method == 'MaximumLikelihood':
+        elif self._method == 'MostLikelyMean':
             pass
             #TODO: implement the maximum likelihood method
-        DeleteWorkspace(ratio)
         return factor
 
+    '''
+        Ensures that the input workspace corresponds to a detector scan
+        @param scan_ws: input detector scan workspace
+        @throws: RuntimeError if the workspace is not a detector scan
+    '''
     def _validate_scan(self, scan_ws):
+
         is_scanned = False
         try:
             mtd[scan_ws].detectorInfo().isMasked(0)
@@ -154,12 +187,16 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         if not is_scanned:
             raise RuntimeError('The input run does not correspond to a detector scan.')
 
+    '''
+        Applies previously derived calibration to the vanadium detector scan.
+        @param raw_ws: the raw loaded workspace
+    '''
     def _calibrate(self, raw_ws):
         calib_ws = self._hide('calib')
         LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
 
-        constants = mtd[calib_ws].extractY().flatten()
-        errors = mtd[calib_ws].extractE().flatten()
+        constants = mtd[calib_ws].extractY()
+        errors = mtd[calib_ws].extractE()
         xaxis = np.zeros(self._n_det)
 
         constants = np.repeat(constants, self._scan_points)
@@ -170,9 +207,15 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                         NSpec=self._scan_points * self._n_det, OutputWorkspace=calib_ws)
         Multiply(LHSWorkspace=raw_ws, RHSWorkspace=calib_ws, OutputWorkspace=raw_ws)
 
+    '''
+        Normalises the input data to monitor
+        @param raw_ws: raw input workspace
+        @param mon_ws: monitor workspace
+    '''
     def _normalise_to_monitor(self, raw_ws, mon_ws):
-        mon_counts = mtd[mon_ws].extractY().flatten()
-        mon_errors = mtd[mon_ws].extractE().flatten()
+
+        mon_counts = mtd[mon_ws].extractY()
+        mon_errors = mtd[mon_ws].extractE()
         xaxis = np.zeros(self._scan_points)
 
         mon_counts = np.tile(mon_counts, [self._n_det])
@@ -234,10 +277,11 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         raw_y = mtd[raw_ws].extractY().flatten()
         raw_e = mtd[raw_ws].extractE().flatten()
         raw_x = mtd[raw_ws].extractX().flatten()
-        raw_t = mtd[raw_ws].getAxis(1).extractValues().flatten()
+        raw_t = mtd[raw_ws].getAxis(1).extractValues()
 
         zeros = np.zeros(self._n_det)
         constants = np.ones(self._n_det)
+        live_pixels = np.zeros(self._n_det, dtype=bool)
 
         comb_response_size = (self._n_det - 1) * self._bin_offset + self._scan_points
         comb_response = np.zeros(comb_response_size)
@@ -246,6 +290,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         comb_response_zeros = np.zeros(comb_response_size)
 
         if self._out_response:
+            # prepare the combined response if requested
             for pixel in range(1, self._first_pixel):
                 for scan_point in range(0, self._bin_offset):
                     comb_response_theta[(pixel - 1) * self._bin_offset + scan_point] = \
@@ -259,6 +304,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     comb_response_theta[(pixel - 1) * self._bin_offset + scan_point] = \
                         raw_t[(pixel - 1) * self._scan_points + scan_point]
 
+        # loop over all the requested pixels to derive the calibration
         for det in range(self._first_pixel, self._last_pixel + 1):
             ws = '__det_' + str(det)
             start = (det - 1) * self._scan_points
@@ -268,10 +314,16 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             det_x = raw_x[start:end]
             det_t = raw_t[start:end]
 
+            # keep track of dead pixels
+            if np.any(det_y):
+                live_pixels[det - 1] = True
+
             CreateWorkspace(DataX=det_x, DataY=det_y, DataE=det_e, NSpec=self._scan_points,
                             VerticalAxisValues=det_t, VerticalAxisUnit='Degrees', OutputWorkspace=ws)
 
-            if det != self._first_pixel:
+            if det == self._first_pixel:
+                CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
+            else:
                 ratio_ws = ws + '_ratio'
                 cropped_ws = ws + '_cropped'
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws,
@@ -279,6 +331,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                 self._progress.report('Computing the relative calibration factor for pixel #' + str(det))
                 Divide(LHSWorkspace=ref_ws, RHSWorkspace=cropped_ws, OutputWorkspace=ratio_ws, EnableLogging=False)
                 factor = self._compute_relative_factor(ratio_ws)
+                DeleteWorkspace(ratio_ws)
                 if str(factor) == 'nan' or str(factor) == 'inf' or factor == 0.:
                     self.log().warning('Factor is ' + str(factor) + ' for pixel #' + str(det))
                 else:
@@ -286,10 +339,9 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                     constants[det - 1] = factor
 
                 self._update_reference(ws, cropped_ws, ref_ws, factor)
-            else:
-                CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, StartWorkspaceIndex=self._bin_offset)
 
             if self._out_response:
+                # take care of combined response
                 end = self._bin_offset
                 if det == self._last_pixel:
                     end = self._scan_points - self._bin_offset
@@ -311,19 +363,20 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         DeleteWorkspace(ref_ws)
         DeleteWorkspace(raw_ws)
 
-        absolute_norm = np.median(constants)
+        # perform absolute normalisation
+        absolute_norm = np.median(constants[live_pixels])
         self.log().information('Absolute normalisation constant is: ' + str(absolute_norm))
-        out_temp = '__' + self._out_name
-        CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=out_temp)
-        Scale(InputWorkspace=out_temp, OutputWorkspace=out_temp, Factor=1./absolute_norm)
+        constants = np.divide(constants, absolute_norm)
+        constants[np.logical_not(live_pixels)] = 1.
 
-        RenameWorkspace(InputWorkspace=out_temp, OutputWorkspace=self._out_name)
+        # create and set output workspace[s]
+        CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
         if self._out_response:
             CreateWorkspace(DataX=comb_response_zeros, DataY=comb_response, DataE=comb_response_err,
-                            NSpec=comb_response_size, VerticalAxisUnit='Degrees', VerticalAxisValues=comb_response_theta,
-                            OutputWorkspace = self._out_response)
+                            VerticalAxisUnit='Degrees', VerticalAxisValues=comb_response_theta,
+                            NSpec=comb_response_size, OutputWorkspace=self._out_response)
             self.setProperty('OutputResponseWorkspace', self._out_response)
 
 #Register the algorithm with Mantid

@@ -42,7 +42,10 @@ constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 constexpr size_t NUMBER_MONITORS = 1;
 // This is the angular size of a pixel in degrees (in low resolution mode)
 constexpr double D20_PIXEL_SIZE = 0.1;
-constexpr double rad2deg = 180. / M_PI;
+// The conversion factor from radian to degree
+constexpr double RAD_TO_DEG = 180. / M_PI;
+// A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
+constexpr double WAVE_TO_E = 81.8;
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -252,7 +255,8 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String() << "\n";
+                       .toISO8601String()
+                << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
@@ -310,7 +314,7 @@ void LoadILLDiffraction::calculateRelativeRotations(
   // tube. Here we get the angle of that tube as defined in the IDF.
 
   double firstTubeRotationAngle =
-      firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
+      firstTubePosition.angle(V3D(0, 0, 1)) * RAD_TO_DEG;
 
   if (m_instName == "D20") {
     // this is the magical formula to treat the offset of the 2theta0 decoder.
@@ -714,6 +718,9 @@ void LoadILLDiffraction::setSampleLogs() {
     run.addLogData(new PropertyWithValue<int>(
         "ScanSteps", static_cast<int>(m_numberScanPoints)));
   }
+  double lambda = run.getLogAsSingleValue("wavelength");
+  double eFixed = WAVE_TO_E / (lambda * lambda);
+  run.addLogData(new PropertyWithValue<double>("Ei", eFixed));
 }
 } // namespace DataHandling
 } // namespace Mantid
