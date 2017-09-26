@@ -75,6 +75,7 @@ struct PreprocessingAttributes {
 struct PostprocessingAttributes {
   PostprocessingAttributes(const QString& options) : m_options(options) {}
   PostprocessingAttributes(const QString& options, PostprocessingAlgorithm algorithm, std::map<QString, QString> map) : m_options(options), m_algorithm(algorithm), m_map(map) {}
+
   QString m_options;
   // Post-processing algorithm
   PostprocessingAlgorithm m_algorithm;
@@ -230,8 +231,6 @@ private:
   RowItem m_rowItem;
   // The progress reporter
   ProgressPresenter *m_progressReporter;
-  // The number of columns
-  int m_columns;
   // A boolean indicating whether to prompt the user when getting selected runs
   bool m_promptUser;
   // stores whether or not the table has changed since it was last saved

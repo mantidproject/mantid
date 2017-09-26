@@ -158,8 +158,6 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
                              "specified via this column and global options "
                              "specified externally, the former prevail.");
 
-  m_columns = static_cast<int>(m_whitelist.size());
-
   if (hasPostprocessing()) {
     m_manager =
         Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
@@ -280,7 +278,7 @@ void GenericDataProcessorPresenter::acceptViews(
       AlgorithmManager::Instance().create(m_processor.name().toStdString());
   m_view->setOptionsHintStrategy(
       new AlgorithmHintStrategy(alg, toStdStringSet(m_processor.blacklist())),
-      m_columns - 2);
+      static_cast<int>(m_whitelist.size()) - 2);
 
   // Start with a blank table
   newTable();
@@ -740,7 +738,7 @@ QString
 GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
                                                        const QString &prefix) {
 
-  if (static_cast<int>(data.size()) != m_columns)
+  if (data.size() != static_cast<int>(m_whitelist.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 
   /* This method calculates, for a given row, the name of the output (processed)
@@ -1035,7 +1033,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
             ::setAlgorithmProperty(alg, key, value); 
           });
 
-  const auto userOptions = data->at(m_columns - 2);
+  const auto userOptions = data->at(static_cast<int>(m_whitelist.size()) - 2);
   setPropertiesFromKeyValueString(alg, userOptions.toStdString(), "options");
 
   const auto hiddenOptions = data->back();
@@ -1341,7 +1339,7 @@ void GenericDataProcessorPresenter::addHandle(
           name))
     return;
 
-  if (!m_manager->isValidModel(workspace, m_columns))
+  if (!m_manager->isValidModel(workspace, m_whitelist.size()))
     return;
 
   m_workspaceList.insert(QString::fromStdString(name));
@@ -1395,7 +1393,7 @@ void GenericDataProcessorPresenter::afterReplaceHandle(
   m_workspaceList.remove(qName);
 
   // If it's a table workspace, bring it back
-  if (m_manager->isValidModel(workspace, m_columns))
+  if (m_manager->isValidModel(workspace, static_cast<int>(m_whitelist.size())))
     m_workspaceList.insert(qName);
 
   m_view->setTableList(m_workspaceList);
