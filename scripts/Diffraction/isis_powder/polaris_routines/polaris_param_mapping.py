@@ -18,7 +18,6 @@ attr_mapping = \
      ParamMapEntry(ext_name="focused_bin_widths",          int_name="focused_bin_widths"),
      ParamMapEntry(ext_name="grouping_file_name",          int_name="grouping_file_name"),
      ParamMapEntry(ext_name="input_mode",                  int_name="input_mode", enum_class=INPUT_BATCHING),
-     ParamMapEntry(ext_name="vanadium_peaks_masking_file", int_name="masking_file_name"),
      ParamMapEntry(ext_name="mode",                        int_name="mode", enum_class=POLARIS_CHOPPER_MODES),
      ParamMapEntry(ext_name="multiple_scattering",         int_name="multiple_scattering"),
      ParamMapEntry(ext_name="raw_data_cropping_values",    int_name="raw_data_crop_values"),
@@ -29,5 +28,6 @@ attr_mapping = \
      ParamMapEntry(ext_name="spline_coefficient",          int_name="spline_coeff"),
      ParamMapEntry(ext_name="output_directory",            int_name="output_dir"),
      ParamMapEntry(ext_name="user_name",                   int_name="user_name"),
-     ParamMapEntry(ext_name="vanadium_cropping_values",    int_name="van_crop_values")
+     ParamMapEntry(ext_name="vanadium_cropping_values",    int_name="van_crop_values"),
+     ParamMapEntry(ext_name="vanadium_peaks_masking_file", int_name="masking_file_name")
     ]
