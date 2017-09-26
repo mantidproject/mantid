@@ -59,6 +59,7 @@ def iterable_to_string(iterable):
 class CrystalFieldMultiSite(object):
 
     def __init__(self, Ions, Symmetries, **kwargs):
+        from collections import OrderedDict
 
         self._makeFunction()
 
@@ -77,7 +78,7 @@ class CrystalFieldMultiSite(object):
 
         kwargs = self._setMandatoryArguments(kwargs)
 
-        self._abundances = {}
+        self._abundances = OrderedDict()
         abundances, kwargs = read_and_del('abundances', kwargs)
         self._makeAbundances(abundances)
 
@@ -227,7 +228,8 @@ class CrystalFieldMultiSite(object):
             self.function.fixParameter(a)
 
     def ties(self, *args, **kwargs):
-        """Set ties on the field parameters.
+        """
+        Set ties on the field parameters.
 
         @param kwargs: Ties as name=value pairs: name is a parameter name,
             the value is a tie string or a number. For example:
