@@ -2079,40 +2079,39 @@ void FitPropertyBrowser::deleteTie() {
   // get name from composite function
   if (ci->property()->propertyName() == "Tie") {
 	  auto ties = h->getTies();
-	  QString QparName = ties.key(ci->property(), "");
-	  std::string parName = QparName.toStdString();
-	  QStringList fnNames;
-
-	  int iPar = -1;
+	  QString qParName = ties.key(ci->property(), "");
+	  std::string parName = qParName.toStdString();
+	  QStringList functionNames;
+	  // ithParameter = -1 => not found
+	  int ithParameter = -1;
 	  for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
-		  Mantid::API::ParameterReference ref(m_compositeFunction.get(), i);
-		  Mantid::API::IFunction *fun = ref.getLocalFunction();
+		  Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
+		  Mantid::API::IFunction *function = parameterRef.getLocalFunction();
 
 		  // Pick out parameters with the same name as the one we're tying from
-		  if (fun->parameterName(static_cast<int>(ref.getLocalIndex())) == parName) {
-			  if (iPar == -1 &&
-				  fun ==
+		  if (function->parameterName(static_cast<int>(parameterRef.getLocalIndex())) == parName) {
+			  if (ithParameter == -1 &&
+				  function ==
 				  h->function()
 				  .get()) // If this is the 'tied from' parameter, remember it
 			  {
-				  iPar = (int)i;
+				  ithParameter = static_cast<int>(i);
 			  }
 			  else // Otherwise add it to the list of potential 'tyees'
 			  {
-				  fnNames << QString::fromStdString(
+				  functionNames << QString::fromStdString(
 					  m_compositeFunction->parameterName(i));
 			  }
 		  }
 	  }
-	  if (fnNames.empty() || iPar < 0) {
+	  if (functionNames.empty() || ithParameter < 0) {
 		  QMessageBox::information(this, "Mantid - information",
 			  "Cannot find a parameter with this tie");
-		  return;
 	  }
-
+	  else{
 	  QString tieExpr =
-		  QString::fromStdString(m_compositeFunction->parameterName(iPar));
-	  h->removeTie(ci->property(), tieExpr.toStdString());
+		  QString::fromStdString(m_compositeFunction->parameterName(ithParameter));
+	  h->removeTie(ci->property(), tieExpr.toStdString());}
   }
   else {
 	  h->removeTie(ci->property()->propertyName());

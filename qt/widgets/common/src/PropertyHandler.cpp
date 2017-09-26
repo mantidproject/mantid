@@ -1093,10 +1093,9 @@ void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
 	QtProperty *parProp = getParameterProperty(parName);
 	if (parProp) {
 		m_browser->m_changeSlotsEnabled = false;
-		auto tom = parName.toStdString();
-		auto &cfun = *m_browser->compositeFunction();
-		auto index = cfun.parameterIndex(globalName);
-		cfun.removeTie(index);
+		auto &compositeFunction = *m_browser->compositeFunction();
+		auto index = compositeFunction.parameterIndex(globalName);
+		compositeFunction.removeTie(index);
 		parProp->removeSubProperty(prop);
 		m_ties.remove(QString::fromStdString(globalName));
 		m_ties.remove(parName);
@@ -1114,7 +1113,7 @@ void PropertyHandler::removeTie(QtProperty *prop) {
 		return;
 
 	QtProperty *parProp = getParameterProperty(parName);
-	if (parProp) {
+	if (parProp != nullptr) {
 		m_browser->m_changeSlotsEnabled = false;
 		auto tom = parName.toStdString();
 		m_fun->removeTie(parName.toStdString());
