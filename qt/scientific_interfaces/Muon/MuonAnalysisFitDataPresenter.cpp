@@ -369,9 +369,13 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 * @param name :: the name of the workspace to add.
 */
 void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
+  // not set correctly.... 
+  std::cout<<"testing "<<m_isItTFAsymm<<std::endl;
   if (m_isItTFAsymm) {
+  std::cout<<"testing 1 "<<std::endl;
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
             "MuonAnalysisTFNormalizations")) {
+          std::cout<<"testing 2 "<<std::endl;
       Mantid::API::ITableWorkspace_sptr table =
           Mantid::API::WorkspaceFactory::Instance().createTable();
       AnalysisDataService::Instance().addOrReplace(
@@ -380,6 +384,8 @@ void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
       table->addColumn("str", "name");
       table->addColumn("str", "method");
     }
+
+    std::cout<<"testing 3 "<<std::endl;
     Mantid::API::ITableWorkspace_sptr table =
         boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
