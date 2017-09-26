@@ -29,11 +29,15 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+// Header only dependency on this file
+// Dependency on Kernel should NOT be added
+#include "../../Kernel/inc/MantidKernel/System.h"
+
 #ifdef IN_MANTID_TYPES
-#define MANTID_TYPES_DLL _declspec(dllexport)
+#define MANTID_TYPES_DLL DLLExport
 #define EXTERN_MANTID_TYPES
 #else
-#define MANTID_TYPES_DLL _declspec(dllimport)
+#define MANTID_TYPES_DLL DLLImport
 #define EXTERN_MANTID_TYPES extern
 #endif /* IN_MANTID_KERNEL*/
 
