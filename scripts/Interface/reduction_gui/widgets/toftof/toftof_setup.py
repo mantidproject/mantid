@@ -406,7 +406,9 @@ class TOFTOFSetupWidget(BaseWidget):
             self.saveDir.setText(dirname)
 
     def _onBinEon(self, onVal):
-        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff):
+        if not onVal:
+            self.chkNxspe.setChecked(False)
+        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe):
             widget.setEnabled(onVal)
 
     def _onBinQon(self, onVal):
