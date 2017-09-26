@@ -50,9 +50,9 @@ vanadium_cropping_values = [
 
 variable_help = {
     "file_names": {
-        "masking_file_name": "Specifies the name of the of the file containing the positions of the  Bragg Peaks to "
-                             "mask out. This must be located at the root of the calibration folder the user has "
-                             "specified."
+        "masking_file_name": "Specifies the name of the of the file containing the positions of the vanadium Bragg "
+                             "Peaks to mask out. This must be located at the root of the calibration folder the user "
+                             "has specified."
     },
 
     "script_params": {
