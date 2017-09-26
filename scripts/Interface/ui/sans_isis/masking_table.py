@@ -64,6 +64,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
         self.display_mask_push_button.clicked.connect(self.on_display)
+        self.select_row_push_button.clicked.connect(self._on_update_rows)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
