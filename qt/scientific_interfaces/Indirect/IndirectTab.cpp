@@ -672,7 +672,8 @@ QString IndirectTab::runPythonCode(QString code, bool no_output) {
 /**
  * Checks if the ADS contains a workspace and opens a message box if not
  * @param workspaceName The name of the workspace to look for
- * @param plotting      If true use plotting error message, false use saving error
+ * @param plotting      If true use plotting error message, false use saving
+ * error
  *                      message
  * @return              False if no workspace found, True if workspace found
  */
