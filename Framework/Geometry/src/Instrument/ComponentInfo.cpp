@@ -276,26 +276,27 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
       ++compIterator;
     } else if (isStructuredBank(index)) {
       auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
-      // nSubComponents, subtract off self hence -1.
+      // nSubComponents, subtract off self hence -1. nSubComponents = number of
+      // horizontal columns.
       auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
       auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
       auto nSubDetectors =
           std::distance(innerRangeDet.begin(), innerRangeDet.end());
       auto nY = nSubDetectors / nSubComponents;
-      size_t corner1 = *innerRangeDet.begin();
-      size_t corner2 = corner1 + nSubDetectors - 1;
-      size_t corner3 = corner1 + (nY - 1);
-      size_t corner4 = corner2 - (nY - 1);
+      size_t bottomLeft = *innerRangeDet.begin();
+      size_t topRight = bottomLeft + nSubDetectors - 1;
+      size_t topLeft = bottomLeft + (nY - 1);
+      size_t bottomRight = topRight - (nY - 1);
 
-      absoluteBB.grow(componentBoundingBox(corner1, reference));
-      absoluteBB.grow(componentBoundingBox(corner2, reference));
-      absoluteBB.grow(componentBoundingBox(corner3, reference));
-      absoluteBB.grow(componentBoundingBox(corner4, reference));
+      absoluteBB.grow(componentBoundingBox(bottomLeft, reference));
+      absoluteBB.grow(componentBoundingBox(topRight, reference));
+      absoluteBB.grow(componentBoundingBox(topLeft, reference));
+      absoluteBB.grow(componentBoundingBox(bottomRight, reference));
 
       // Get bounding box for rectangular bank.
       // Record detector ranges to skip
       // Skip all sub components.
-      detExclusions.emplace(std::make_pair(corner1, corner2));
+      detExclusions.emplace(std::make_pair(bottomLeft, topRight));
       compIterator = innerRangeComp.rend();
     } else {
       absoluteBB.grow(componentBoundingBox(index, reference));
