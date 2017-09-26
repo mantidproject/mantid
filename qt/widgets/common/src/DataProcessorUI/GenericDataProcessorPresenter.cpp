@@ -578,81 +578,8 @@ Post-processes the workspaces created by the given rows together.
 */
 void GenericDataProcessorPresenter::postProcessGroup(
     const GroupData &groupData) {
-
-  // If no post processing has been defined, then we are dealing with a
-  // one-level tree
-  // where all rows are in one group. We don't want to perform post-processing
-  // in
-  // this case.
-  if (!hasPostprocessing())
-    return;
-
-  // The input workspace names
-  QStringList inputNames;
-
-  // The name to call the post-processed ws
-  auto const outputWSName = getPostprocessedWorkspaceName(
-      groupData, m_postprocessing->m_algorithm.prefix());
-
-  // Go through each row and get the input ws names
-  for (auto const &row : groupData) {
-
-    // The name of the reduced workspace for this row
-    auto const inputWSName =
-        getReducedWorkspaceName(row.second, m_processor.prefix(0));
-
-    if (workspaceExists(inputWSName)) {
-      inputNames.append(inputWSName);
-    }
-  }
-
-  auto const inputWSNames = inputNames.join(", ");
-
-  // If the previous result is in the ADS already, we'll need to remove it.
-  // If it's a group, we'll get an error for trying to group into a used group
-  // name
-  if (workspaceExists(outputWSName)) {
-    removeWorkspace(outputWSName);
-  }
-
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create(
-      m_postprocessing->m_algorithm.name().toStdString());
-  alg->initialize();
-  alg->setProperty(m_postprocessing->m_algorithm.inputProperty().toStdString(),
-                   inputWSNames.toStdString());
-  alg->setProperty(m_postprocessing->m_algorithm.outputProperty().toStdString(),
-                   outputWSName.toStdString());
-
-  auto optionsMap =
-      parseKeyValueString(m_postprocessing->m_options.toStdString());
-  for (auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp) {
-    try {
-      alg->setProperty(kvp->first, kvp->second);
-    } catch (Mantid::Kernel::Exception::NotFoundError &) {
-      throw std::runtime_error("Invalid property in options column: " +
-                               kvp->first);
-    }
-  }
-
-  // Options specified via post-process map
-  for (auto const &prop : m_postprocessing->m_map) {
-    auto const propName = prop.second;
-    auto const propValueStr =
-        groupData.begin()->second[m_whitelist.indexFromName(prop.first)];
-    if (!propValueStr.isEmpty()) {
-      // Warning: we take minus the value of the properties because in
-      // Reflectometry this property refers to the rebin step, and they want a
-      // logarithmic binning. If other technique areas need to use a
-      // post-process map we'll need to re-think how to do this.
-      alg->setPropertyValue(propName.toStdString(),
-                            ("-" + propValueStr).toStdString());
-    }
-  }
-
-  alg->execute();
-
-  if (!alg->isExecuted())
-    throw std::runtime_error("Failed to post-process workspaces.");
+  if (hasPostprocessing())
+    m_postprocessing->postProcessGroup(m_processor.prefix(0), m_whitelist, groupData);
 }
 
 /**
