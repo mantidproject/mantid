@@ -1292,21 +1292,19 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   // We need to hook up the extension
   extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
                                           m_cols, m_startRow, type);
-  extension.tableView = new QTableView();
-
-  // Add it to the extension collection, so we can set it up in place
-  m_extensions.emplace(type, extension);
-  auto mapped_extension = m_extensions[type];
+  extension.tableView = Mantid::Kernel::make_unique<QTableView>();
 
   // Add a new tab
-  m_tabs->insertTab(modelTypeToInt(type), mapped_extension.tableView,
-                    mapped_extension.label);
+  m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),
+                    extension.label);
 
   // Install the eventfilter
-  mapped_extension.tableView->installEventFilter(this);
+  extension.tableView->installEventFilter(this);
 
   // Connect Table View
-  connectTableView(mapped_extension.tableView, mapped_extension.model);
+  connectTableView(extension.tableView.get(), extension.model);
+
+  m_extensions.emplace(type, std::move(extension));
 
   // Set the column width
   auto columnWidth = m_extensionRequest.getColumnWidthPreference(
@@ -1334,12 +1332,11 @@ void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
         auto &extension = it->second;
         extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
                                                 m_startRow, it->first);
-        connectTableView(extension.tableView, extension.model);
+        connectTableView(extension.tableView.get(), extension.model);
         ++it;
       } else {
         closeDependants();
         m_tabs->removeTab(modelTypeToInt(it->first));
-        delete it->second.tableView;
         it = m_extensions.erase(it);
       }
       break;
