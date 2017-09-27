@@ -134,24 +134,6 @@ public:
                       ws2CompInfo.position(ws2CompInfo.sample()));
   }
 
-  void test_replace_keeps_original_instrument() {
-    auto ws1 = doExec<EventWorkspace>("Replace");
-    auto &ws1CompInfo = ws1->mutableComponentInfo();
-    // Put the sample somewhere else prior to the next replace
-    const Kernel::V3D newSamplePosition =
-        ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
-    ws1CompInfo.setPosition(ws1CompInfo.sample(), newSamplePosition);
-
-    // Second Run of replace
-    auto ws2 = doExec<EventWorkspace>("Replace");
-    const auto &ws2CompInfo = ws2->componentInfo();
-    // Check the sample is where I put it. i.e. Instrument should NOT be
-    // overwritten.
-    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten",
-                      newSamplePosition,
-                      ws2CompInfo.position(ws2CompInfo.sample()));
-  }
-
   //--------------------------------------------------------------------------------------------
   void test_append() {
     EventWorkspace_sptr ws1, ws2;
