@@ -13,48 +13,46 @@
  * @param ManagerType :: Manager class to use
  */
 template <class ManagerType>
-class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType>
-{
+class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType> {
   typedef QtAbstractEditorFactory<ManagerType> FactoryBaseType;
+
 public:
   CompositeEditorFactory(QObject *parent, FactoryBaseType *defaultFactory)
-    : QtAbstractEditorFactory<ManagerType>(parent), 
-    m_defaultFactory(defaultFactory),
-    m_secondaryFactory(NULL)
-  {
-  }
+      : QtAbstractEditorFactory<ManagerType>(parent),
+        m_defaultFactory(defaultFactory), m_secondaryFactory(NULL) {}
 
-  void setSecondaryFactory( const QString &optionName, FactoryBaseType *factory )
-  {
+  void setSecondaryFactory(const QString &optionName,
+                           FactoryBaseType *factory) {
     m_optionName = optionName;
     m_secondaryFactory = factory;
   }
 
 protected:
   void connectPropertyManager(ManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   void disconnectPropertyManager(ManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   QWidget *createEditorForManager(ManagerType *manager, QtProperty *property,
                                   QWidget *parent) override {
-    if ( !m_secondaryFactory )
-    {
+    if (!m_secondaryFactory) {
       throw std::logic_error("Secondary editor factory isn't set.");
     }
 
-    if ( property->hasOption(m_optionName) && property->checkOption(m_optionName) )
-    {
-      return m_secondaryFactory->createEditorForManager( manager, property, parent );
+    if (property->hasOption(m_optionName) &&
+        property->checkOption(m_optionName)) {
+      return m_secondaryFactory->createEditorForManager(manager, property,
+                                                        parent);
     }
 
-    return m_defaultFactory->createEditorForManager( manager, property, parent );
+    return m_defaultFactory->createEditorForManager(manager, property, parent);
   }
+
 private:
   FactoryBaseType *m_defaultFactory;
   FactoryBaseType *m_secondaryFactory;

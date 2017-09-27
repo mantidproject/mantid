@@ -223,6 +223,20 @@ public:
     TS_ASSERT_EQUALS(tsp->size(), 33);
   }
 
+  void test_ISISTextFile_withRubbishLogFileInput_fails() {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    LoadLog alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", "ENGINX00275776_ICPputlog.txt");
+    alg.setProperty("Workspace", ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    const auto props = ws->run().getProperties();
+    TS_ASSERT_EQUALS(props.size(), 2);
+  };
+
   void test_SNSTextFile_noNames_fails() { do_test_SNSTextFile("", "", true); }
 
   void test_SNSTextFile_tooFewNames_fails() {

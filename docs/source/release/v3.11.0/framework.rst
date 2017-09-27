@@ -46,7 +46,11 @@ Improved
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
 - :ref:`Load <algm-Load-v1>` now supports use of tilde in file paths in Python, for example Load(Filename="~/data/test.nxs", ...)
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
-- :ref:`algm-MonteCarloAbsorption` now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays. Also, the NumberOfWavelengthPoints input property is now validated more rigorously.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>` has had several improvements:
+
+  * it now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays
+  * the NumberOfWavelengthPoints input property is now validated more rigorously
+  * a new MaxScatterPtAttempts input has been added to control how many tries are made to generate a random point in the object. Useful for cases such as thin annuli that require a higher number of tries. The previous version was hard coded internally.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
@@ -56,6 +60,7 @@ Improved
 - :ref:`LoadBBY <algm-LoadBBY-v1>`: Fixed bug where the logManager did not work with sample_name, sample_aperture and source_aperture. Also added more information regarding the sample and the selected choppers.
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>`: Added an option to disable the sorting of the resulting axis making it useful especially for scanning workspaces. Also reduced the complexity of the operation for the default (ordered axis) case from *Nˆ2* to *N*.
 - :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
+- :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
 
 Deprecated
 ##########
@@ -91,11 +96,12 @@ Bug fixes
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
 - Fix displayed type name for optional boolean properties.
+- Fix parameters that are tied to functions can now be untied correctly. 
 
 Improved
 ########
 
-- `:ref:`Fit` Outputs a function object containing the optimized parameter values.
+- :ref:`Fit <algm-Fit>` outputs a function object containing the optimized parameter values. See the usage examples for more detail.
 
 Python
 ------
@@ -104,6 +110,8 @@ Python
 
 Python Algorithms
 #################
+
+- Exposed `StringContainsValidator` to python to enable python algorithms to place requirement on input string to contain certain substrings.
 
 Bugfixes
 ########

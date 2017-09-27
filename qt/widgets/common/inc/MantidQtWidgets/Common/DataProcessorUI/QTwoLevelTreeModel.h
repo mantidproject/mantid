@@ -44,13 +44,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel
-    : public AbstractTreeModel {
+class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QTwoLevelTreeModel(
-      Mantid::API::ITableWorkspace_sptr tableWorkspace,
-      const WhiteList &whitelist);
+  QTwoLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                     const WhiteList &whitelist);
   ~QTwoLevelTreeModel() override;
 
   // Functions to read data from the model

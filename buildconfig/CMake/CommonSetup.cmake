@@ -251,6 +251,25 @@ elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
 endif ()
 
 ###########################################################################
+# Configure clang-tidy if the tool is found
+###########################################################################
+
+if ( CMAKE_VERSION GREATER "3.5" )
+  find_program (CLANG_TIDY_EXE NAMES "clang-tidy")
+  if (CLANG_TIDY_EXE)
+    message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+    set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
+    if (ENABLE_CLANG_TIDY)
+      set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*")
+      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
+        CACHE STRING "" FORCE)
+    else()
+      set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
+    endif()
+  endif()
+endif()
+
+###########################################################################
 # Setup cppcheck
 ###########################################################################
 include ( CppCheckSetup )

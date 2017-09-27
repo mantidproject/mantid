@@ -15,6 +15,7 @@ SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
+    "Bin2DPowderDiffraction(v1)":("dSpaceBinning","dPerpendicularBinning"),
     "CalculateUMatrix(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "ConvertToMD(v1)":("dEAnalysisMode"),
     "ConvertToMDMinMaxLocal(v1)":("dEAnalysisMode"),
