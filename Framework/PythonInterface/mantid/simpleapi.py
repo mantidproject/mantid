@@ -45,6 +45,8 @@ __SPECIALIZED_FUNCTIONS__ = ["Load", "StartLiveData", "CutMD", "RenameWorkspace"
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD", "IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
+# The "magic" keyword to run as a child algorithm explicitly without storing on ADS
+__CHILD_KEYWORD__ = "Child"
 
 
 def specialization_exists(name):
@@ -880,10 +882,14 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
             try:
                 retvals[name] = _api.AnalysisDataService[value_str]
             except KeyError:
-                if not prop.isOptional():
-                    raise RuntimeError("Internal error. Output workspace property '%s' on "
-                                       "algorithm '%s' has not been stored correctly."
-                                       "Please contact development team." % (name,  algm_obj.name()))
+                value = prop.value
+                if value is not None:
+                    retvals[name] = value
+                else:
+                    if not prop.isOptional():
+                        raise RuntimeError("Internal error. Output workspace property '%s' on "
+                                           "algorithm '%s' has not been stored correctly. "
+                                           "Please contact development team." % (name,  algm_obj.name()))
         elif _is_function_property(prop):
             retvals[name] = FunctionWrapper(prop.value)
         else:
@@ -931,6 +937,15 @@ def _set_logging_option(algm_obj, kwargs):
     if __LOGGING_KEYWORD__ in kwargs:
         algm_obj.setLogging(kwargs[__LOGGING_KEYWORD__])
         del kwargs[__LOGGING_KEYWORD__]
+
+
+def _set_child(algm_obj, kwargs):
+
+    if __CHILD_KEYWORD__ in kwargs:
+        algm_obj.setAlwaysStoreInADS(not kwargs[__CHILD_KEYWORD__])
+        del kwargs[__CHILD_KEYWORD__]
+    else:
+        algm_obj.setAlwaysStoreInADS(True)
 
 
 def set_properties(alg_object, *args, **kwargs):
@@ -1000,6 +1015,7 @@ def _create_algorithm_function(name, version, algm_object):
 
         algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
+        _set_child(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
@@ -1058,12 +1074,7 @@ def _create_algorithm_object(name, version=-1, startProgress=None, endProgress=N
             kwargs['startProgress'] = float(startProgress)
             kwargs['endProgress'] = float(endProgress)
         alg = parent.createChildAlgorithm(name, **kwargs)
-
         alg.setLogging(parent.isLogging())  # default is to log if parent is logging
-
-        # Historic: simpleapi functions always put stuff in the ADS
-        #           If we change this we culd potentially break many users' algorithms
-        alg.setAlwaysStoreInADS(True)
     else:
         # managed algorithm so that progress reporting
         # can be more easily wired up automatically
