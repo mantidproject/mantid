@@ -163,6 +163,7 @@ class FunctionWrapper(object):
       isWorkspace = False
       extractSpectrum = False
       workspaceIndex = 0
+      haveXValues = False
       for key in kwargs:
         if key == "workspace":
            isWorkspace = True
@@ -171,12 +172,15 @@ class FunctionWrapper(object):
            workspaceIndex = kwargs[key]
            if workspaceIndex > 0:
               extractSpectrum = True
+        if key == "xValues":
+           xvals = kwargs[key]
+           haveXValues = True
 
       if isWorkspace:
-          xvals = ws.readX(workspaceIndex)
-          if extractSpectrum:
-              yvals = ws.readX(workspaceIndex)
-              spectrumWs = CreateWorkspace( DataX=xvals, DataY=yvals)
+          if not haveXValues:
+              xvals = ws.readX(workspaceIndex)
+          if extractSpectrum or haveXValues:
+              spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
           else:
               spectrumWs = ws           
           outWs = self(spectrumWs)
