@@ -23,10 +23,7 @@ private:
 
 private slots:
   void singleFit();
-  void plotFit();
-  void plotFit(const std::string& wsName, int specNo);
   void newDataLoaded(const QString wsName);
-  void plotInput();
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void minChanged(double val);
@@ -37,13 +34,17 @@ private slots:
   void plotCurrentPreview();
   void algorithmComplete(bool error);
   void modelSelection(int selected);
-  void updatePlot();
+  void updatePlot(int specNo);
+  void updatePlotRange();
+  void updateProperties(int specNo);
 
 private:
-  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(long specMin, long specMax);
+  Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string& model, long specMin, long specMax);
   QtProperty *createModel(const QString &modelName,
                           const std::vector<QString> modelParameters);
   void plotResult(const std::string &groupWsName, size_t specNo);
+  QHash<QString, QString> createParameterToPropertyMap(const QString& model);
+  std::string modelToAlgorithmProperty(const QString& model);
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
@@ -51,6 +52,9 @@ private:
   size_t m_runMax;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_msdInputWS;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
+
+  QHash<QString, QHash<size_t, double>> m_parameterValues;
+  QHash<QString, QString> m_parameterToProperty;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

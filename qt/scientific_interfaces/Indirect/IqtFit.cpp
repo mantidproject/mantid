@@ -629,7 +629,7 @@ void IqtFit::updatePlot() {
     m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
                                  range.second);
 
-    IndirectDataAnalysisTab::resizePlotRange(m_uiForm.ppPlot);
+    IndirectTab::resizePlotRange(m_uiForm.ppPlot, qMakePair(0.0, 1.0));
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
