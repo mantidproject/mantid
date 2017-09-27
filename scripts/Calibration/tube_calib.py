@@ -181,7 +181,7 @@ def fit_gaussian(fit_par, index, ws, output_ws):
     return peak_index
 
 
-def get_points(integrated_ws, func_forms, fit_params, which_tube, show_plot=False):
+def getPoints(integrated_ws, func_forms, fit_params, which_tube, show_plot=False):
     """
     Get the centres of N slits or edges for calibration
 
@@ -357,8 +357,8 @@ def correct_tube_to_ideal_tube(tube_points, ideal_tube_points, n_detectors, test
     return x_result
 
 
-def get_calibrated_pixel_positions(ws, tube_positions, ideal_tube_positions, which_tube, peak_test_mode=False,
-                                   polin_fit=2):
+def getCalibratedPixelPositions(ws, tube_positions, ideal_tube_positions, which_tube, peak_test_mode=False,
+                                polin_fit=2):
     """
        Get the calibrated detector positions for one tube
        The tube is specified by a list of workspace indices of its spectra
@@ -523,7 +523,7 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
         else:
             # find the peaks positions
             plot_this_tube = i in plotTube
-            actual_tube = get_points(ws, iTube.getFunctionalForms(), fitPar, wht, show_plot=plot_this_tube)
+            actual_tube = getPoints(ws, iTube.getFunctionalForms(), fitPar, wht, show_plot=plot_this_tube)
             if plot_this_tube:
                 RenameWorkspace('FittedData', OutputWorkspace='FittedTube%d' % (i))
                 RenameWorkspace('TubePlot', OutputWorkspace='TubePlot%d' % (i))
@@ -535,8 +535,8 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
         # Define the correct position of detectors
         ##########################################
 
-        det_id_list, det_position_list = get_calibrated_pixel_positions(ws, actual_tube, iTube.getArray(), wht,
-                                                                        peaksTestMode, polinFit)
+        det_id_list, det_position_list = getCalibratedPixelPositions(ws, actual_tube, iTube.getArray(), wht,
+                                                                     peaksTestMode, polinFit)
         # save the detector positions to calibTable
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
@@ -592,7 +592,7 @@ def getCalibrationFromPeakFile(ws, calibTable, iTube, PeakFile):
             print("Unable to get any workspace indices for this tube. Calibration abandoned.")
             return
 
-        det_id_list, det_pos_list = get_calibrated_pixel_positions(ws, actual_tube, ideal_tube, wht)
+        det_id_list, det_pos_list = getCalibratedPixelPositions(ws, actual_tube, ideal_tube, wht)
 
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
@@ -637,7 +637,7 @@ def constructIdealTubeFromRealTube(ws, tube, fitPar, funcForm):
         raise RuntimeError("Unable to get any workspace indices for this tube. Cannot use as ideal tube.")
 
         # Get actual tube on which ideal tube is based
-    actual_tube = get_points(ws, funcForm, fitPar, wht)
+    actual_tube = getPoints(ws, funcForm, fitPar, wht)
     print("Actual tube that ideal tube is to be based upon", actual_tube)
 
     # Get ideal tube based on this actual tube
