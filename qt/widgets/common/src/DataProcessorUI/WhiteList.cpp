@@ -7,11 +7,10 @@ namespace DataProcessor {
 /** Adds an element to the whitelist
 * @param colName : the name of the column to be added
 * @param algProperty : the name of the property linked to this column
-* @param showValue : true if we want to use what's in this column to
-* generate
-* the output ws name
-* @param prefix : the prefix to be added to the value of this column
 * @param description : a description of this column
+* @param isShown : true if we want to use what's in this column to
+* generate the output ws name.
+* @param prefix : the prefix to be added to the value of this column
 */
 void WhiteList::addElement(const QString &colName, const QString &algProperty,
                            const QString &description, bool isShown,
@@ -24,7 +23,7 @@ void WhiteList::addElement(const QString &colName, const QString &algProperty,
 }
 
 /** Returns the column index for a column specified via its name
-    @param colName : The column name
+    @param columnName : The column name
 */
 int WhiteList::indexFromName(const QString &columnName) const {
   auto nameIt = std::find(m_names.cbegin(), m_names.cend(), columnName);

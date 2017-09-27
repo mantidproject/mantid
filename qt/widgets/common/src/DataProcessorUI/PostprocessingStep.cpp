@@ -89,6 +89,8 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
 
 /**
   Post-processes the workspaces created by the given rows together.
+  @param processorPrefix : The prefix of the processor algorithm.
+  @param whitelist : The list of columns in the table.
   @param groupData : the data in a given group as received from the tree
   manager
  */
