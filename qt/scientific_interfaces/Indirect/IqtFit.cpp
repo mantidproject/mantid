@@ -27,8 +27,7 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
       m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
-      m_previewPlotData(), m_iqtFInputWSName(), m_ties(), m_runMin(-1),
-      m_runMax(-1) {
+      m_previewPlotData(), m_ties(), m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -158,7 +157,8 @@ void IqtFit::setup() {
 }
 
 void IqtFit::run() {
-  if (m_iqtFInputWS == NULL) {
+
+  if (!m_iqtFInputWS.lock()) {
     return;
   }
 
@@ -166,7 +166,8 @@ void IqtFit::run() {
   m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(m_runMin, m_runMax);
+  IAlgorithm_sptr iqtFitAlg =
+      iqtFitAlgorithm(m_iqtFInputWS.lock(), m_runMin, m_runMax);
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -174,8 +175,9 @@ void IqtFit::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
-                                                     const size_t &specMax) {
+Mantid::API::IAlgorithm_sptr
+IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs, const size_t &specMin,
+                        const size_t &specMax) {
   const bool constrainBeta = m_uiForm.ckConstrainBeta->isChecked();
   const bool constrainIntens = m_uiForm.ckConstrainIntensities->isChecked();
   CompositeFunction_sptr func = createFunction();
@@ -198,8 +200,8 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   const auto maxIt = boost::lexical_cast<long>(
       m_properties["MaxIterations"]->valueText().toStdString());
 
-  m_baseName = constructBaseName(m_iqtFInputWSName.toStdString(), fitType, true,
-                                 specMin, specMax);
+  m_baseName =
+      constructBaseName(inputWs->getName(), fitType, true, specMin, specMax);
 
   IAlgorithm_sptr iqtFitAlg;
 
@@ -209,12 +211,12 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitMultiple");
   }
 
-  auto replaceAlg = replaceInfinityAndNaN(m_iqtFInputWSName.toStdString());
+  auto replaceAlg = replaceInfinityAndNaN(inputWs->getName());
   replaceAlg->execute();
-  MatrixWorkspace_sptr inputWs = replaceAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr iqtInputWs = replaceAlg->getProperty("OutputWorkspace");
 
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("InputWorkspace", inputWs);
+  iqtFitAlg->setProperty("InputWorkspace", iqtInputWs);
   iqtFitAlg->setProperty("Function", function);
   iqtFitAlg->setProperty("FitType", fitType);
   iqtFitAlg->setProperty("StartX", startX);
@@ -269,19 +271,22 @@ void IqtFit::saveResult() {
  * Plots the current spectrum displayed in the preview plot
  */
 void IqtFit::plotCurrentPreview() {
-  if (!m_iqtFInputWS) {
+  auto inputWs = m_iqtFInputWS.lock();
+  auto previewWs = m_previewPlotData.lock();
+
+  if (!inputWs || !previewWs) {
     return;
   }
-  if (m_iqtFInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+
+  if (inputWs->getName().compare(previewWs->getName()) == 0) {
     // Plot only the sample curve
     const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
-    IndirectTab::plotSpectrum(
-        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
-        workspaceIndex);
+    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
+                              workspaceIndex, workspaceIndex);
   } else {
     // Plot Sample, Fit and Diff curve
-    IndirectTab::plotSpectrum(
-        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
+                              2);
   }
 }
 
@@ -374,11 +379,11 @@ void IqtFit::loadSettings(const QSettings &settings) {
  * @param wsName Name of new workspace loaded
  */
 void IqtFit::newDataLoaded(const QString wsName) {
-  m_iqtFInputWSName = wsName;
-  m_iqtFInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_iqtFInputWSName.toStdString());
+  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
+  m_iqtFInputWS = inputWs;
 
-  int maxWsIndex = static_cast<int>(m_iqtFInputWS->getNumberHistograms()) - 1;
+  int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -599,7 +604,9 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  if (!m_iqtFInputWS) {
+  auto inputWs = m_iqtFInputWS.lock();
+
+  if (!inputWs) {
     g_log.error("No workspace loaded, cannot create preview plot.");
     return;
   }
@@ -613,9 +620,9 @@ void IqtFit::updatePlot() {
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       specNo <= m_runMax && specNo >= m_runMin) {
     plotResult(groupName, specNo);
-  } else {
+  } else if (inputWs) {
     m_previewPlotData = m_iqtFInputWS;
-    m_uiForm.ppPlot->addSpectrum("Sample", m_iqtFInputWS, specNo);
+    m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
   }
 
   try {
@@ -629,7 +636,7 @@ void IqtFit::updatePlot() {
     m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
                                  range.second);
 
-    IndirectTab::resizePlotRange(m_uiForm.ppPlot, qMakePair(0.0, 1.0));
+    resizePlotRange(m_uiForm.ppPlot);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
@@ -642,7 +649,7 @@ void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
   MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo));
+      outputGroup->getItem(specNo - m_runMin));
 
   if (ws) {
     if (m_uiForm.ckPlotGuess->isChecked()) {
@@ -657,16 +664,22 @@ void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
   }
 }
 
+void IqtFit::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview) {
+  preview->resizeX();
+  preview->setAxisRange(qMakePair(0.0, 1.0), QwtPlot::yLeft);
+}
+
 void IqtFit::setDefaultParameters(const QString &name) {
   double background = m_dblManager->value(m_properties["BackgroundA0"]);
   // intensity is always 1-background
   m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
 
+  auto inputWs = m_iqtFInputWS.lock();
   double tau = 0;
 
-  if (m_iqtFInputWS) {
-    auto x = m_iqtFInputWS->x(0);
-    auto y = m_iqtFInputWS->y(0);
+  if (inputWs) {
+    auto x = inputWs->x(0);
+    auto y = inputWs->y(0);
 
     if (x.size() > 4) {
       tau = -x[4] / log(y[4]);
@@ -872,7 +885,7 @@ void IqtFit::singleFit() {
 
   updateFitFunctions();
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
-  m_singleFitAlg = iqtFitAlgorithm(specNo, specNo);
+  m_singleFitAlg = iqtFitAlgorithm(m_iqtFInputWS.lock(), specNo, specNo);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
@@ -907,15 +920,16 @@ void IqtFit::updateGuessPlot() {
 
 void IqtFit::plotGuess(QtProperty *) {
   CompositeFunction_sptr function = createFunction(true);
+  auto inputWs = m_iqtFInputWS.lock();
 
   // Create the double* array from the input workspace
-  const size_t binIndxLow = m_iqtFInputWS->binIndexOf(
-      m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh = m_iqtFInputWS->binIndexOf(
-      m_iqtFRangeManager->value(m_properties["EndX"]));
+  const size_t binIndxLow =
+      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
+  const size_t binIndxHigh =
+      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
-  const auto &xPoints = m_iqtFInputWS->points(0);
+  const auto &xPoints = inputWs->points(0);
 
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
