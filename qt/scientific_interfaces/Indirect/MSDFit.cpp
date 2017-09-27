@@ -58,7 +58,7 @@ void MSDFit::setup() {
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-    SLOT(updateProperties(int)));
+          SLOT(updateProperties(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -231,7 +231,7 @@ void MSDFit::plotResult(const std::string &groupWsName, size_t specNo) {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWsName);
 
   MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo));
+      outputGroup->getItem(specNo - m_runMin));
 
   if (ws) {
     m_previewPlotData = ws;
