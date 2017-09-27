@@ -490,6 +490,7 @@ public:
   virtual IConstraint *getConstraint(size_t i) const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string &parName);
+  virtual void setConstraintPenaltyFactor(const std::string &parName, const double &c);
   /// Write a parameter constraint to a string
   std::string writeConstraints() const;
   /// Remove all constraints.

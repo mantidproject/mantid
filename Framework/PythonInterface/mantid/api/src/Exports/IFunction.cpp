@@ -227,6 +227,10 @@ void export_IFunction() {
       .def("getConstraints", &IFunction::writeConstraints, arg("self"),
            "Returns the list of current constraints as a string")
 
+      .def("setConstraintPenaltyFactor", &IFunction::setConstraintPenaltyFactor,
+           (arg("self"), arg("name"), arg("value")),
+           "Set the constraint penalty factor for named parameter")
+
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")
 
