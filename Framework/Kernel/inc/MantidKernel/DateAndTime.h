@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <string>
-#include <time.h>
+#include <ctime>
 #include <vector>
 
 namespace Mantid {

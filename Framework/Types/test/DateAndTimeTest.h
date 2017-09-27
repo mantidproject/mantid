@@ -8,13 +8,15 @@
 #ifndef DATEANDTIMETEST_H_
 #define DATEANDTIMETEST_H_
 
-#include "MantidTypes/Core/DateAndTime.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/System.h"
+#include <ctime>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
-#include <time.h>
+#include <sys/stat.h>
 
 using namespace Mantid;
-using namespace Types::Core;
+using namespace Mantid::Kernel;
 
 using std::runtime_error;
 using std::size_t;
@@ -57,6 +59,10 @@ public:
 
   void test_constructor_fails_invalid_string() {
     TS_ASSERT_THROWS(DateAndTime("invalid time string"), std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"),
+                     std::invalid_argument);
   }
 
   void test_limits_on_construction() {
@@ -306,7 +312,7 @@ public:
     timeinfo->tm_min = 0;
     timeinfo->tm_sec = 0;
     // Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t utc_time_t = DateAndTime::utc_mktime(timeinfo);
+    std::time_t utc_time_t = Mantid::Kernel::DateAndTime::utc_mktime(timeinfo);
     // This will be the local time
     std::time_t local_time_t = std::mktime(timeinfo);
 
@@ -344,9 +350,9 @@ public:
     DateAndTime time_no_fraction = DateAndTime("2010-03-24T14:12:51");
 
     // The conversion should handle the fraction
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_no_fraction), 0.562,
-        0.0005);
+    TS_ASSERT_DELTA(Mantid::Kernel::DateAndTime::secondsFromDuration(
+                        time_no_tz - time_no_fraction),
+                    0.562, 0.0005);
 
     // ZULU specified
     DateAndTime time_z = DateAndTime("2010-03-24T14:12:51.562Z");
@@ -359,20 +365,21 @@ public:
     DateAndTime time_negative_tz2 = DateAndTime("2010-03-24T06:12:51.562-08");
 
     // Now check the time zone difference
-    TS_ASSERT_DELTA(DateAndTime::secondsFromDuration(time_no_tz - time_z), 0.0,
-                    1e-4);
     TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_positive_tz2), 0.0,
-        1e-4);
-    TS_ASSERT_DELTA(
-        DateAndTime::secondsFromDuration(time_no_tz - time_negative_tz2), 0.0,
-        1e-4);
+        Mantid::Kernel::DateAndTime::secondsFromDuration(time_no_tz - time_z),
+        0.0, 1e-4);
+    TS_ASSERT_DELTA(Mantid::Kernel::DateAndTime::secondsFromDuration(
+                        time_no_tz - time_positive_tz),
+                    0.0, 1e-4);
+    TS_ASSERT_DELTA(Mantid::Kernel::DateAndTime::secondsFromDuration(
+                        time_no_tz - time_negative_tz),
+                    0.0, 1e-4);
+    TS_ASSERT_DELTA(Mantid::Kernel::DateAndTime::secondsFromDuration(
+                        time_no_tz - time_positive_tz2),
+                    0.0, 1e-4);
+    TS_ASSERT_DELTA(Mantid::Kernel::DateAndTime::secondsFromDuration(
+                        time_no_tz - time_negative_tz2),
+                    0.0, 1e-4);
   }
 
   void testDurations() {
@@ -404,8 +411,8 @@ public:
   }
 
   /* Ensure that exceptions thrown by boost date_time conversions are caught
-  where they
-  may cause problems. */
+     where they
+     may cause problems. */
   void testNotADateTime() {
     boost::posix_time::ptime time(boost::posix_time::not_a_date_time);
     DateAndTime dt(time);
