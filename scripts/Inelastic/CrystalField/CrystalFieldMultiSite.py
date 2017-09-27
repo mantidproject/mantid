@@ -19,7 +19,7 @@ def makeWorkspace(xArray, yArray):
 def get_parameters_for_add(cf, new_ion_index):
     """get params from crystalField object to append"""
     params = {}
-    ion_prefix = 'ion%s.' % new_ion_index
+    ion_prefix = 'ion{0}.'.format(new_ion_index)
     for bparam in CrystalField.field_parameter_names:
         params[ion_prefix + bparam] = cf[bparam]
     return params
@@ -29,9 +29,9 @@ def get_parameters_for_add_from_multisite(cfms, new_ion_index):
     """get params from crystalFieldMultiSite object to append"""
     params = {}
     for i in range(len(cfms.Ions)):
-        ion_prefix = 'ion%s.' % (new_ion_index + i)
+        ion_prefix = 'ion{0}.'.format(new_ion_index + i)
         if cfms._isMultiSite():
-            existing_prefix = 'ion%s.' % i
+            existing_prefix = 'ion{0}.'.format(i)
         else:
             existing_prefix = ''
         for bparam in CrystalField.field_parameter_names:
@@ -138,8 +138,8 @@ class CrystalFieldMultiSite(object):
             ws = arg1
             ws_index = arg2
         else:
-            raise TypeError('expected int for one argument in GetSpectrum, got %s and %s' %
-                            (arg1.__class__.__name__, arg2.__class__.__name__))
+            raise TypeError('expected int for one argument in GetSpectrum, got {0} and {0}'.format(
+                arg1.__class__.__name__, arg2.__class__.__name__))
 
         if isinstance(ws, list) or isinstance(ws, np.ndarray):
             ws = self._convertToWS(ws)
@@ -181,7 +181,7 @@ class CrystalFieldMultiSite(object):
         elif len(args) == 2:
             return self._getSpectrumTwoArgs(*args)
         else:
-            raise RuntimeError('getSpectrum expected 1-3 arguments, got %s' % len(args))
+            raise RuntimeError('getSpectrum expected 1-3 arguments, got {0}s'.format(len(args)))
 
 
     def _convertToWS(self, wksp_list):
@@ -225,7 +225,7 @@ class CrystalFieldMultiSite(object):
         """Create dict for ion intensity scalings"""
         if abundances is not None:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion%s' % ion_index]  = abundances[ion_index]
+                self._abundances['ion{0}'.format(ion_index)]  = abundances[ion_index]
             max_ion = max(self._abundances, key=lambda key: self._abundances[key])
             ties = {}
             for ion in self._abundances.keys():
@@ -237,7 +237,7 @@ class CrystalFieldMultiSite(object):
                     self.ties(ties)
         else:
             for ion_index in range(len(self.Ions)):
-                self._abundances['ion%s' % ion_index]  = 1.0
+                self._abundances['ion{0}'.format(ion_index)]  = 1.0
 
     def update(self, func):
         """
@@ -283,12 +283,12 @@ class CrystalFieldMultiSite(object):
         createWS.initialize()
 
         xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = name if name is not None else 'CrystalFieldMultiSite_%s' % self.Ions
+        ws_name = name if name is not None else 'CrystalFieldMultiSite_{0}'.format(self.Ions)
 
         if isinstance(i, int):
             if workspace is None:
                 if i > 0:
-                    ws_name += '_%s' % i
+                    ws_name += '_{0}'.format(i)
                 createWS.setProperty('DataX', xArray)
                 createWS.setProperty('DataY', yArray)
                 createWS.setProperty('OutputWorkspace', ws_name)
@@ -296,16 +296,16 @@ class CrystalFieldMultiSite(object):
                 plot_window = self._plot_window[i] if i in self._plot_window else None
                 self._plot_window[i] = plotSpectrum(ws_name, 0, window=plot_window, clearWindow=True)
             else:
-                ws_name += '_%s' % workspace
+                ws_name += '_'.format(workspace)
                 if i > 0:
-                    ws_name += '_%s' % i
+                    ws_name += '_'.format(i)
                 createWS.setProperty('DataX', xArray)
                 createWS.setProperty('DataY', yArray)
                 createWS.setProperty('OutputWorkspace', ws_name)
                 createWS.execute()
                 plotSpectrum(ws_name, 0)
         else:
-            ws_name += '_%s' % i
+            ws_name += '_'.format(i)
             createWS.setProperty('DataX', xArray)
             createWS.setProperty('DataY', yArray)
             createWS.setProperty('OutputWorkspace', ws_name)
@@ -347,27 +347,28 @@ class CrystalFieldMultiSite(object):
                     peak, background = peak.split(';')
                 elif number_of_functions == 1:
                     setattr(self._background, property_name, Function(self.function, prefix='bg.'))
-                    self.function.setAttributeValue('Background', '%s' % peak)
+                    self.function.setAttributeValue('Background', peak)
                 else:
-                    raise ValueError("argument passed to background must have exactly 1 or 2 functions, got %s"
-                                     % number_of_functions)
+                    raise ValueError("argument passed to background must have exactly 1 or 2 functions, got {0}".format(
+                                     number_of_functions))
+
 
             elif isinstance(peak, CompositeFunctionWrapper):
                 if len(peak) == 2:
                     peak, background = str(peak).split(';')
                 else:
-                    raise ValueError("composite function passed to background must have exactly 2 functions, got %s"
-                                     % len(peak))
+                    raise ValueError("composite function passed to background must have "
+                                     "exactly 2 functions, got {0}".format(len(peak)))
             elif isinstance(peak, FunctionWrapper):
                 setattr(self._background, property_name, Function(self.function, prefix='bg.'))
-                self.function.setAttributeValue('Background', '%s' % peak)
+                self.function.setAttributeValue('Background', str(peak))
             else:
                 raise TypeError("background argument(s) must be string or function object(s)")
 
         if background is not None and peak is not None:
             self._background.peak = Function(self.function, prefix='bg.f0.')
             self._background.background = Function(self.function, prefix='bg.f1.')
-            self.function.setAttributeValue('Background', '%s;%s' % (peak, background))
+            self.function.setAttributeValue('Background', '{0};{1}'.format(peak, background))
 
     def _combine_multisite(self, other):
         """Used to add two CrystalFieldMultiSite"""
@@ -397,7 +398,8 @@ class CrystalFieldMultiSite(object):
         elif isinstance(other, CrystalFieldMultiSite):
             return self._combine_multisite(other)
         if not isinstance(other, CrystalField):
-            raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
+            raise TypeError('Unsupported operand type(s) for +: '
+                            'CrystalFieldMultiSite and {0}'.format(other.__class__.__name__))
         ions = self.Ions + [other.Ion]
         symmetries = self.Symmetries + [other.Symmetry]
         abundances = list(self._abundances.values()) + [scale_factor]
@@ -413,7 +415,8 @@ class CrystalFieldMultiSite(object):
             scale_factor = other.abundance
             other = other.crystalField
         if not isinstance(other, CrystalField):
-            raise TypeError('Unsupported operand type(s) for +: CrystalFieldMultiSite and %s'% other.__class__.__name__)
+            raise TypeError('Unsupported operand type(s) for +: '
+                            'CrystalFieldMultiSite and {0}'.format(other.__class__.__name__))
         ions = [other.Ion] + self.Ions
         symmetries = [other.Symmetry] + self.Symmetries
         abundances = [scale_factor] + list(self._abundances.values())
