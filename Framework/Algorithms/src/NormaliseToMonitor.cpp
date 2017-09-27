@@ -7,11 +7,13 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cfloat>
 #include <numeric>
@@ -335,6 +337,7 @@ void NormaliseToMonitor::checkProperties(
   Property *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
+  m_syncScanInput = inputWorkspace->detectorInfo().isScanning();
   // Or is it in a separate workspace
   bool sepWS{monWS};
   // or monitor ID
@@ -363,25 +366,18 @@ void NormaliseToMonitor::checkProperties(
   // Do a check for common binning and store
   m_commonBins = API::WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
-  int spec_num(-1);
+  int specNum(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
-  m_monitor = sepWS ? this->getMonitorWorkspace(inputWorkspace, spec_num)
-                    : this->getInWSMonitorSpectrum(inputWorkspace, spec_num);
+  m_monitor = sepWS ? this->getMonitorWorkspace(inputWorkspace)
+                    : this->getInWSMonitorSpectrum(inputWorkspace);
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if
   // not
-  try {
-    if (!m_monitor->spectrumInfo().isMonitor(0)) {
-      g_log.warning() << "The spectrum N: " << spec_num
+  for (const auto workspaceIndex : m_workspaceIndices)
+    if (!m_monitor->spectrumInfo().isMonitor(workspaceIndex))
+      g_log.warning() << "The spectrum N: " << specNum
                       << " in MonitorWorkspace does not refer to a monitor.\n"
                       << "Continuing with normalization regardless.";
-    }
-  } catch (Kernel::Exception::NotFoundError &) {
-    g_log.warning(
-        "Unable to check if the spectrum provided relates to a monitor - "
-        "the instrument is not fully specified.\n"
-        "Continuing with normalization regardless.");
-  }
 }
 
 /** Checks and retrieves the requested spectrum out of the input workspace
@@ -392,7 +388,7 @@ void NormaliseToMonitor::checkProperties(
  *  @throw std::runtime_error If the properties are invalid
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
-    const API::MatrixWorkspace_sptr &inputWorkspace, int &spectra_num) {
+    const API::MatrixWorkspace_sptr &inputWorkspace) {
   // this is the index of the spectra within the workspace and we need to
   // identify it either from DetID or from SpecID
   // size_t spectra_num(-1);
@@ -413,12 +409,16 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error(
           "Can not find spectra, corresponding to the requested monitor ID");
     }
-    if (indexList.size() > 1) {
+    if (indexList.size() > 1 && !m_syncScanInput) {
       throw std::runtime_error("More then one spectra corresponds to the "
                                "requested monitor ID, which is unheard of");
     }
-    spectra_num = static_cast<int>(indexList[0]);
+    m_workspaceIndices = indexList;
   } else { // monitor spectrum is specified.
+    if (m_syncScanInput)
+      throw std::runtime_error("For a sync-scan input workspace the monitor ID "
+                               "must be provided. Normalisation can not be "
+                               "performed to a spectrum.");
     const SpectraAxis *axis =
         dynamic_cast<const SpectraAxis *>(inputWorkspace->getAxis(1));
     if (!axis) {
@@ -430,9 +430,9 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");
     }
-    spectra_num = static_cast<int>(specs[monitorSpec]);
+    m_workspaceIndices = std::vector<size_t>(1, specs[monitorSpec]);
   }
-  return this->extractMonitorSpectrum(inputWorkspace, spectra_num);
+  return inputWorkspace;
 }
 
 /** Checks and retrieves the monitor spectrum out of the input workspace
@@ -441,38 +441,16 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
  *  @returns A workspace containing the monitor spectrum only
  */
 API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
-    const API::MatrixWorkspace_sptr &inputWorkspace, int &wsID) {
+    const API::MatrixWorkspace_sptr &inputWorkspace) {
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
-  wsID = getProperty("MonitorWorkspaceIndex");
+  uint64_t wsID = getProperty("MonitorWorkspaceIndex");
+  m_workspaceIndices = std::vector<size_t>(1, wsID);
   // In this case we need to test whether the bins in the monitor workspace
   // match
   m_commonBins = (m_commonBins && API::WorkspaceHelpers::matchingBins(
                                       *inputWorkspace, *monitorWS, true));
   // Copy the monitor spectrum because it will get changed
-  return this->extractMonitorSpectrum(monitorWS, wsID);
-}
-
-/** Pulls the monitor spectrum out of a larger workspace
- *  @param WS :: The workspace containing the spectrum to extract
- *  @param index :: The index of the spectrum to extract
- *  @returns A workspace containing the single spectrum requested
- */
-API::MatrixWorkspace_sptr
-NormaliseToMonitor::extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
-                                           const std::size_t index) {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum");
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
-  childAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr outWS = childAlg->getProperty("OutputWorkspace");
-
-  IAlgorithm_sptr alg = createChildAlgorithm("ConvertToMatrixWorkspace");
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outWS);
-  alg->executeAsChildAlg();
-  outWS = alg->getProperty("OutputWorkspace");
-
-  // Only get to here if successful
-  return outWS;
+  return monitorWS;
 }
 
 /** Sets the maximum and minimum X values of the monitor spectrum to use for
@@ -561,95 +539,110 @@ void NormaliseToMonitor::normaliseBinByBin(
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
-  // Get hold of the monitor spectrum
-  const auto &monX = m_monitor->binEdges(0);
-  auto monY = m_monitor->counts(0);
-  auto monE = m_monitor->countStandardDeviations(0);
-  // Calculate the overall normalization just the once if bins are all matching
-  if (m_commonBins)
-    this->normalisationFactor(monX, monY, monE);
+  for (auto &workspaceIndex : m_workspaceIndices) {
+    // Get hold of the monitor spectrum
+    const auto &monX = m_monitor->binEdges(workspaceIndex);
+    auto monY = m_monitor->counts(workspaceIndex);
+    auto monE = m_monitor->countStandardDeviations(workspaceIndex);
+    // TODO: is this definitely the same as spectrum index?
+    const auto timeIndex =
+        m_monitor->spectrumInfo().spectrumDefinition(workspaceIndex)[0].second;
+    // Calculate the overall normalization just the once if bins are all
+    // matching
+    if (m_commonBins)
+      this->normalisationFactor(monX, monY, monE);
 
-  const size_t numHists = inputWorkspace->getNumberHistograms();
-  auto specLength = inputWorkspace->blocksize();
-  // Flag set when a division by 0 is found
-  bool hasZeroDivision = false;
-  Progress prog(this, 0.0, 1.0, numHists);
-  // Loop over spectra
-  PARALLEL_FOR_IF(
-      Kernel::threadSafe(*inputWorkspace, *outputWorkspace, *m_monitor))
-  for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    prog.report();
+    const size_t numHists = inputWorkspace->getNumberHistograms();
+    auto specLength = inputWorkspace->blocksize();
+    // Flag set when a division by 0 is found
+    bool hasZeroDivision = false;
+    Progress prog(this, 0.0, 1.0, numHists);
+    // Loop over spectra
+    PARALLEL_FOR_IF(
+        Kernel::threadSafe(*inputWorkspace, *outputWorkspace, *m_monitor))
+    for (int64_t i = 0; i < int64_t(numHists); ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      prog.report();
 
-    const auto &X = inputWorkspace->binEdges(i);
-    // If not rebinning, just point to our monitor spectra, otherwise create new
-    // vectors
+      if (m_syncScanInput) {
+        const auto &specDef =
+            inputWorkspace->spectrumInfo().spectrumDefinition(i);
+        if (specDef.size() > 0 && specDef[0].second != timeIndex)
+          continue;
+      }
 
-    auto Y = (m_commonBins ? monY : Counts(specLength));
-    auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
+      const auto &X = inputWorkspace->binEdges(i);
+      // If not rebinning, just point to our monitor spectra, otherwise create
+      // new
+      // vectors
 
-    if (!m_commonBins) {
-      // ConvertUnits can give X vectors of all zeros - skip these, they cause
-      // problems
-      if (X.back() == 0.0 && X.front() == 0.0)
-        continue;
-      // Rebin the monitor spectrum to match the binning of the current data
-      // spectrum
-      VectorHelper::rebinHistogram(
-          monX.rawData(), monY.mutableRawData(), monE.mutableRawData(),
-          X.rawData(), Y.mutableRawData(), E.mutableRawData(), false);
-      // Recalculate the overall normalization factor
-      this->normalisationFactor(X, Y, E);
+      auto Y = (m_commonBins ? monY : Counts(specLength));
+      auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
+
+      if (!m_commonBins) {
+        // ConvertUnits can give X vectors of all zeros - skip these, they cause
+        // problems
+        if (X.back() == 0.0 && X.front() == 0.0)
+          continue;
+        // Rebin the monitor spectrum to match the binning of the current data
+        // spectrum
+        VectorHelper::rebinHistogram(
+            monX.rawData(), monY.mutableRawData(), monE.mutableRawData(),
+            X.rawData(), Y.mutableRawData(), E.mutableRawData(), false);
+        // Recalculate the overall normalization factor
+        this->normalisationFactor(X, Y, E);
+      }
+
+      if (inputEvent) {
+        // --- EventWorkspace ---
+        EventList &outEL = outputEvent->getSpectrum(i);
+        outEL.divide(X.rawData(), Y.mutableRawData(), E.mutableRawData());
+      } else {
+        // --- Workspace2D ---
+        auto &YOut = outputWorkspace->mutableY(i);
+        auto &EOut = outputWorkspace->mutableE(i);
+        const auto &inY = inputWorkspace->y(i);
+        const auto &inE = inputWorkspace->e(i);
+        outputWorkspace->mutableX(i) = inputWorkspace->x(i);
+
+        // The code below comes more or less straight out of Divide.cpp
+        for (size_t k = 0; k < specLength; ++k) {
+          // Get the input Y's
+          const double leftY = inY[k];
+          const double rightY = Y[k];
+
+          if (rightY == 0.0) {
+            hasZeroDivision = true;
+          }
+
+          // Calculate result and store in local variable to avoid overwriting
+          // original data if output workspace is same as one of the input ones
+          const double newY = leftY / rightY;
+
+          if (fabs(rightY) > 1.0e-12 && fabs(newY) > 1.0e-12) {
+            const double lhsFactor = (inE[k] < 1.0e-12 || fabs(leftY) < 1.0e-12)
+                                         ? 0.0
+                                         : pow((inE[k] / leftY), 2);
+            const double rhsFactor =
+                E[k] < 1.0e-12 ? 0.0 : pow((E[k] / rightY), 2);
+            EOut[k] = std::abs(newY) * sqrt(lhsFactor + rhsFactor);
+          }
+
+          // Now store the result
+          YOut[k] = newY;
+        } // end Workspace2D case
+      }   // end loop over current spectrum
+
+      PARALLEL_END_INTERUPT_REGION
+    } // end loop over spectra
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    if (hasZeroDivision) {
+      g_log.warning() << "Division by zero in some of the bins.\n";
     }
-
-    if (inputEvent) {
-      // --- EventWorkspace ---
-      EventList &outEL = outputEvent->getSpectrum(i);
-      outEL.divide(X.rawData(), Y.mutableRawData(), E.mutableRawData());
-    } else {
-      // --- Workspace2D ---
-      auto &YOut = outputWorkspace->mutableY(i);
-      auto &EOut = outputWorkspace->mutableE(i);
-      const auto &inY = inputWorkspace->y(i);
-      const auto &inE = inputWorkspace->e(i);
-      outputWorkspace->mutableX(i) = inputWorkspace->x(i);
-
-      // The code below comes more or less straight out of Divide.cpp
-      for (size_t k = 0; k < specLength; ++k) {
-        // Get the input Y's
-        const double leftY = inY[k];
-        const double rightY = Y[k];
-
-        if (rightY == 0.0) {
-          hasZeroDivision = true;
-        }
-
-        // Calculate result and store in local variable to avoid overwriting
-        // original data if output workspace is same as one of the input ones
-        const double newY = leftY / rightY;
-
-        if (fabs(rightY) > 1.0e-12 && fabs(newY) > 1.0e-12) {
-          const double lhsFactor = (inE[k] < 1.0e-12 || fabs(leftY) < 1.0e-12)
-                                       ? 0.0
-                                       : pow((inE[k] / leftY), 2);
-          const double rhsFactor =
-              E[k] < 1.0e-12 ? 0.0 : pow((E[k] / rightY), 2);
-          EOut[k] = std::abs(newY) * sqrt(lhsFactor + rhsFactor);
-        }
-
-        // Now store the result
-        YOut[k] = newY;
-      } // end Workspace2D case
-    }   // end loop over current spectrum
-
-    PARALLEL_END_INTERUPT_REGION
-  } // end loop over spectra
-  PARALLEL_CHECK_INTERUPT_REGION
-  if (hasZeroDivision) {
-    g_log.warning() << "Division by zero in some of the bins.\n";
+    if (inputEvent)
+      outputEvent->clearMRU();
   }
-  if (inputEvent)
-    outputEvent->clearMRU();
 }
 
 /** Calculates the overall normalization factor.

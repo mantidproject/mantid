@@ -102,14 +102,10 @@ private:
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace,
-                         int &spectra_num);
+  getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr &inputWorkspace);
+  size_t getInWSMonitorIndex(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
-  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace,
-                      int &wsID);
-  API::MatrixWorkspace_sptr
-  extractMonitorSpectrum(const API::MatrixWorkspace_sptr &WS,
-                         std::size_t index);
+  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
   bool setIntegrationProps();
 
   void
@@ -131,6 +127,8 @@ private:
   double m_integrationMin = EMPTY_DBL();
   /// The upper bound of the integration range
   double m_integrationMax = EMPTY_DBL();
+  bool m_syncScanInput;
+  std::vector<size_t> m_workspaceIndices;
 };
 
 // the internal class to verify and modify interconnected properties affecting
