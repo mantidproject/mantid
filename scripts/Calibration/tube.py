@@ -334,7 +334,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. \
     (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-    :param plotTube: If given, the tube whose index is in plot_tube will be ploted as well as its fitted peaks, it can \
+    :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can \
     receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
 
     :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at \
