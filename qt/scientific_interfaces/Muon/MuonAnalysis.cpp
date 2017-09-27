@@ -1722,8 +1722,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
          "type = connect,"
          "window = window_to_use)";
     // clang-format on
-	// set if TFAsymm is on or off
-	addToTable =getIfTFAsymmStore();
+    // set if TFAsymm is on or off
+    addToTable = getIfTFAsymmStore();
   } else {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1800,7 +1800,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  m_fitDataPresenter->storeNormalization(safeWSName.toStdString(),addToTable);
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString(), addToTable);
 }
 
 /**
@@ -2188,7 +2188,7 @@ void MuonAnalysis::loadFittings() {
 * Update stored value
 */
 void MuonAnalysis::handleGroupBox() {
-   // send the group to dataselector
+  // send the group to dataselector
   m_dataSelector->setGroupsSelected(m_uiForm.fitBrowser->getChosenGroups());
   // update labels for single fit
   auto names = m_fitDataPresenter->generateWorkspaceNames(true);
@@ -2558,14 +2558,12 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setAllPeriods();
     }
-	if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
-		isItGroup) {
-		m_uiForm.fitBrowser->setTFAsymm(true);
-	}
-	else {
-		m_uiForm.fitBrowser->setTFAsymm(false);
-
- 	}
+    if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
+        isItGroup) {
+      m_uiForm.fitBrowser->setTFAsymm(true);
+    } else {
+      m_uiForm.fitBrowser->setTFAsymm(false);
+    }
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
@@ -2964,8 +2962,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
-	bool addToTable = getIfTFAsymmStore();
-    m_fitDataPresenter->storeNormalization(wsName,addToTable);
+    bool addToTable = getIfTFAsymmStore();
+    m_fitDataPresenter->storeNormalization(wsName, addToTable);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -3200,10 +3198,10 @@ void MuonAnalysis::setAnalysisTabsEnabled(const bool enabled) {
 }
 
 bool MuonAnalysis::getIfTFAsymmStore() const {
-	Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
-	bool value= m_dataLoader.isContainedIn(m_groupPairName,
-		options.grouping.groupNames);
-	return value;
+  Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+  bool value =
+      m_dataLoader.isContainedIn(m_groupPairName, options.grouping.groupNames);
+  return value;
 }
 
 } // namespace MantidQt

@@ -368,7 +368,8 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 * do nothing.
 * @param name :: the name of the workspace to add.
 */
-void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,bool addToTable) const {
+void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,
+                                                      bool addToTable) const {
   if (addToTable) {
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
             "MuonAnalysisTFNormalizations")) {
@@ -481,13 +482,13 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     g_log.error(err.str());
   }
   const auto grouping = m_grouping;
-  auto groupName= params.itemName;
-	  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(), groupName) !=
-		  grouping.groupNames.end()) {
-		  
-		  storeNormalization(name,true);
-	  }
-  
+  auto groupName = params.itemName;
+  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(),
+                groupName) != grouping.groupNames.end()) {
+
+    storeNormalization(name, true);
+  }
+
   return outputWS;
 }
 
