@@ -116,7 +116,7 @@ public:
                            std::vector<DateAndTime> &out);
 
   /// The difference in seconds between standard unix and gps epochs.
-  static const uint32_t EPOCH_DIFF = 631152000;
+  static const uint32_t EPOCH_DIFF;
 
   /// The epoch for GPS times.
   static const boost::posix_time::ptime GPS_EPOCH;

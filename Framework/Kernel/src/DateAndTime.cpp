@@ -14,6 +14,7 @@
 namespace Mantid {
 namespace Kernel {
 
+const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
 /// The epoch for GPS times.
 const boost::posix_time::ptime
     DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
