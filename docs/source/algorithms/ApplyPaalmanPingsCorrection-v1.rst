@@ -136,11 +136,9 @@ Usage
                                        CorrectionsWorkspace=corrections_ws,
                                        CanWorkspace=can_ws)
 
-    print 'Corrected workspace has %d spectra over %d bins' % (
-          corr.getNumberHistograms(), corr.blocksize())
+    print('Corrected workspace has {} spectra over {} bins'.format(corr.getNumberHistograms(), corr.blocksize()))
 
-    print 'Type of correction applied: %s' % (
-          corr.getRun()['corrections_type'].value)
+    print('Type of correction applied: {}'.format(corr.getRun()['corrections_type'].value))
 
 Output:
 
