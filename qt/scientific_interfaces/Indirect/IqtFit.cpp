@@ -649,7 +649,7 @@ void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
   MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo));
+      outputGroup->getItem(specNo - m_runMin));
 
   if (ws) {
     if (m_uiForm.ckPlotGuess->isChecked()) {
