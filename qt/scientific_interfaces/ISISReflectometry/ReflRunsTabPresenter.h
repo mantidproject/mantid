@@ -1,9 +1,9 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLRUNSTABPRESENTER_H
 
+#include "MantidAPI/IAlgorithm.h"
 #include "DllConfig.h"
 #include "IReflRunsTabPresenter.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
 #include <boost/shared_ptr.hpp>
 
@@ -85,7 +85,6 @@ public:
   void confirmReductionPaused() const override;
   void confirmReductionResumed() const override;
 
-
 private:
   /// The search model
   boost::shared_ptr<ReflSearchModel> m_searchModel;
@@ -110,18 +109,12 @@ private:
   /// Whether the instrument has been changed before a search was made with it
   bool m_instrumentChanged;
 
-  // Tracking Vars
-  int m_selectedTable;
-  std::string m_transmissionRuns;
-
-  void updatePreprocessingOptionsAsString(const QString &newOptions);
   /// searching
   void search();
   void populateSearch(Mantid::API::IAlgorithm_sptr searchAlg);
   void autoreduce(bool startNew);
   void transfer();
-  void onTableChanged();
-  void pushCommands(int selectedTable);
+  void pushCommands();
   /// transfer strategy
   std::unique_ptr<ReflTransferStrategy> getTransferStrategy();
   /// change the instrument

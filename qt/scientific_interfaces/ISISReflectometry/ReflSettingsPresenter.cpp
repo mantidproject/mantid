@@ -1,11 +1,11 @@
 #include "ReflSettingsPresenter.h"
-#include "IReflSettingsTabPresenter.h"
-#include "IReflSettingsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "IReflSettingsTabPresenter.h"
+#include "IReflSettingsView.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 
 namespace MantidQt {
@@ -296,14 +296,14 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
 
   if (loadRuns) {
     for (const auto &run : transRuns) {
-      if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
-        // Load transmission runs and put them in the ADS
-        IAlgorithm_sptr alg =
-            AlgorithmManager::Instance().create("LoadISISNexus");
-        alg->setProperty("Filename", run);
-        alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-        alg->execute();
-      }
+      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
+        continue;
+      // Load transmission runs and put them in the ADS
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
+      alg->setProperty("Filename", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->execute();
     }
   }
 

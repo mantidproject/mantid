@@ -121,7 +121,6 @@ private slots:
   void on_actionSearch_triggered();
   void on_actionAutoreduce_triggered();
   void on_actionTransfer_triggered();
-  void on_toolboxSelectionChanged(int selectedIndex);
   void slitCalculatorTriggered();
   void icatSearchComplete();
   void instrumentChanged(int index);

@@ -105,7 +105,6 @@ public:
                               int parentColumn) = 0;
   virtual int getNumberOfRows() = 0;
   virtual void clearTable() = 0;
-  virtual void updatePreprocessingOptionsAsString(const QString& newOptions) = 0;
 };
 }
 }

@@ -1,6 +1,4 @@
 #include "ReflRunsTabPresenter.h"
-#include "IReflMainWindowPresenter.h"
-#include "IReflRunsTabView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -9,24 +7,26 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/UserCatalogInfo.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
-#include "MantidQtWidgets/Common/ProgressPresenter.h"
+#include "IReflMainWindowPresenter.h"
+#include "IReflRunsTabView.h"
 #include "ReflCatalogSearcher.h"
-#include "ReflFromStdStringMap.h"
 #include "ReflLegacyTransferStrategy.h"
 #include "ReflMeasureTransferStrategy.h"
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
+#include "ReflFromStdStringMap.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
+#include "MantidQtWidgets/Common/ProgressPresenter.h"
 
 #include <QStringList>
-#include <algorithm>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
-#include <iterator>
 #include <sstream>
 #include <vector>
+#include <algorithm>
+#include <iterator>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -142,27 +142,22 @@ void ReflRunsTabPresenter::notify(IReflRunsTabPresenter::Flag flag) {
     changeInstrument();
     break;
   case IReflRunsTabPresenter::GroupChangedFlag:
-    onTableChanged();
+    pushCommands();
     break;
   }
   // Not having a 'default' case is deliberate. gcc issues a warning if there's
   // a flag we aren't handling.
 }
 
-void ReflRunsTabPresenter::onTableChanged() {
-  auto selectedGroup = m_view->getSelectedGroup();
-  pushCommands(selectedGroup);
-  updatePreprocessingOptionsAsString(getPreprocessingOptionsAsString());
-}
-
 /** Pushes the list of commands (actions) */
-void ReflRunsTabPresenter::pushCommands(int selectedTable) {
+void ReflRunsTabPresenter::pushCommands() {
 
   m_view->clearCommands();
 
   // The expected number of commands
   const size_t nCommands = 31;
-  auto commands = m_tablePresenters.at(selectedTable)->publishCommands();
+  auto commands =
+      m_tablePresenters.at(m_view->getSelectedGroup())->publishCommands();
   if (commands.size() != nCommands) {
     throw std::runtime_error("Invalid list of commands");
   }
@@ -402,7 +397,7 @@ void ReflRunsTabPresenter::notifyADSChanged(
     const QSet<QString> &workspaceList) {
 
   UNUSED_ARG(workspaceList);
-  pushCommands(m_view->getSelectedGroup());
+  pushCommands();
 }
 
 /** Requests property names associated with pre-processing values.
@@ -415,11 +410,6 @@ QString ReflRunsTabPresenter::getPreprocessingProperties() const {
   return properties;
 }
 
-void ReflRunsTabPresenter::updatePreprocessingOptionsAsString(
-    const QString &newOptions) {
-  for (auto &tablePresenter : m_tablePresenters)
-    tablePresenter->updatePreprocessingOptionsAsString(newOptions);
-}
 /** Requests global pre-processing options as a string. Options are supplied by
   * the main presenter.
   * @return :: Global pre-processing options
@@ -431,13 +421,6 @@ QString ReflRunsTabPresenter::getPreprocessingOptionsAsString() const {
                         m_view->getSelectedGroup()));
 
   return optionsStr;
-}
-
-QString ReflRunsTabPresenter::preprocessingOptionsAsString(int selectedGroup, std::string const& transmissionRuns) {
-  return QString("Transmission Run(s),") +
-                    QString::fromStdString(m_mainPresenter->getTransmissionRuns(
-                        m_view->getSelectedGroup()));
-
 }
 
 /** Requests global processing options. Options are supplied by the main
