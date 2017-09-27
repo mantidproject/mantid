@@ -11,9 +11,10 @@ namespace MantidWidgets {
 
 namespace DropEventHelper {
 /// Get all filenames from a QDropEvent
-QStringList getFileNames(const QDropEvent *event);
+EXPORT_OPT_MANTIDQT_COMMON QStringList getFileNames(const QDropEvent *event);
 /// Get all python files from q QDropEvent
-QStringList extractPythonFiles(const QDropEvent *event);
+EXPORT_OPT_MANTIDQT_COMMON QStringList
+extractPythonFiles(const QDropEvent *event);
 };
 
 } // namespace MantidWidgets
