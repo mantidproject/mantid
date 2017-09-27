@@ -46,7 +46,7 @@ __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD", "IntegrateP
 # The "magic" keyword to enable/disable logging
 __LOGGING_KEYWORD__ = "EnableLogging"
 # The "magic" keyword to run as a child algorithm explicitly without storing on ADS
-__CHILD_KEYWORD__ = "Child"
+__STORE_KEYWORD__ = "StoreInADS"
 
 
 def specialization_exists(name):
@@ -158,6 +158,7 @@ def Load(*args, **kwargs):
     algm = _create_algorithm_object('Load', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
     try:
         algm.setProperty('Filename', filename)  # Must be set first
     except ValueError as ve:
@@ -261,6 +262,7 @@ def StartLiveData(*args, **kwargs):
                                     startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
     try:
         algm.setProperty('Instrument', instrument)  # Must be set first
     except ValueError as ve:
@@ -331,6 +333,7 @@ def fitting_algorithm(inout=False):
             # Create and execute
             algm = _create_algorithm_object(function_name)
             _set_logging_option(algm, kwargs)
+            _set_store_ads(algm, kwargs)
             if 'EvaluationType' in kwargs:
                 algm.setProperty('EvaluationType', kwargs['EvaluationType'])
                 del kwargs['EvaluationType']
@@ -509,6 +512,7 @@ def CutMD(*args, **kwargs):
     algm = _create_algorithm_object('CutMD', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
 
     # Now check that all the kwargs we've got are correct
     for key in kwargs.keys():
@@ -594,6 +598,7 @@ def RenameWorkspace(*args, **kwargs):
     algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
+    _set_store_ads(algm, kwargs)
     for key, val in arguments.items():
         algm.setProperty(key, val)
 
@@ -939,11 +944,16 @@ def _set_logging_option(algm_obj, kwargs):
         del kwargs[__LOGGING_KEYWORD__]
 
 
-def _set_child(algm_obj, kwargs):
+def _set_store_ads(algm_obj, kwargs):
+    """
+        Sets to always store in ADS, unless StoreInADS=False
 
-    if __CHILD_KEYWORD__ in kwargs:
-        algm_obj.setAlwaysStoreInADS(not kwargs[__CHILD_KEYWORD__])
-        del kwargs[__CHILD_KEYWORD__]
+        :param algm_obj: An initialised algorithm object
+        :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
+    """
+    if __STORE_KEYWORD__ in kwargs:
+        algm_obj.setAlwaysStoreInADS(not kwargs[__STORE_KEYWORD__])
+        del kwargs[__STORE_KEYWORD__]
     else:
         algm_obj.setAlwaysStoreInADS(True)
 
@@ -1015,7 +1025,7 @@ def _create_algorithm_function(name, version, algm_object):
 
         algm = _create_algorithm_object(name, _version, _startProgress, _endProgress)
         _set_logging_option(algm, kwargs)
-        _set_child(algm, kwargs)
+        _set_store_ads(algm, kwargs)
 
         # Temporary removal of unneeded parameter from user's python scripts
         if "CoordinatesToUse" in kwargs and name in __MDCOORD_FUNCTIONS__:
