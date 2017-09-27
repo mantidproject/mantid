@@ -5,14 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
+#include <chrono>
 #include <iosfwd>
-
-#ifdef _WIN32
-#include <time.h>
-#else
-#include <sys/time.h>
-#endif
 #include <string>
+
+// forward declaration
+// class std::chrono::time_point;
 
 namespace Mantid {
 namespace Kernel {
@@ -53,12 +51,7 @@ public:
   void reset();
 
 private:
-// The type of this variable is different depending on the platform
-#ifdef _WIN32
-  clock_t
-#else
-  timeval
-#endif
+  std::chrono::time_point<std::chrono::high_resolution_clock>
       m_start; ///< The starting time (implementation dependent format)
 };
 

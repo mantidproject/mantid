@@ -44,25 +44,25 @@
 **
 ****************************************************************************/
 
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
-#include <QtGui/QPainter>
-#include <QtGui/QPushButton>
-#include <QtGui/QColorDialog>
 #include <QtCore/QMap>
-#include <QtGui/QLayout>
-#include <QtGui/QStyle>
-#include <QtGui/QLabel>
-#include <QtGui/QToolTip>
-#include <QtGui/QPixmap>
+#include <QtGui/QApplication>
+#include <QtGui/QColorDialog>
+#include <QtGui/QDesktopWidget>
 #include <QtGui/QFocusEvent>
-#include <QtGui/QPaintEvent>
 #include <QtGui/QGridLayout>
 #include <QtGui/QHideEvent>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QShowEvent>
+#include <QtGui/QLabel>
+#include <QtGui/QLayout>
 #include <QtGui/QMouseEvent>
-#include <math.h>
+#include <QtGui/QPaintEvent>
+#include <QtGui/QPainter>
+#include <QtGui/QPixmap>
+#include <QtGui/QPushButton>
+#include <QtGui/QShowEvent>
+#include <QtGui/QStyle>
+#include <QtGui/QToolTip>
+#include <cmath>
 
 #include "qtcolorpicker.h"
 

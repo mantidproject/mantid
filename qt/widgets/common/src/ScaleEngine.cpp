@@ -30,7 +30,7 @@
 #include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "MantidQtWidgets/Common/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/qwt_compat.h"
-#include <limits.h>
+#include <climits>
 
 QwtScaleTransformation *ScaleEngine::transformation() const {
   return new ScaleTransformation(this);

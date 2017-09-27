@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
 
 #ifdef _WIN32 /* _WIN32 */
-#include <time.h>
+#include <ctime>
 #endif
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"

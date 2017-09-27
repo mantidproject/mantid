@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_EVENTS_H_
 
 #ifdef _WIN32 /* _WIN32 */
-#include <time.h>
+#include <ctime>
 #endif
 #include <cstddef>
 #include <iosfwd>

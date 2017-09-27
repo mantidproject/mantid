@@ -9,7 +9,7 @@
 #include <boost/date_time/time.hpp>
 #include <boost/date_time/date.hpp>
 
-#include <math.h>
+#include <cmath>
 #include <exception>
 #include <limits>
 #include <memory>

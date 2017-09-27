@@ -8,12 +8,12 @@
 #ifndef DATEANDTIMETEST_H_
 #define DATEANDTIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
-#include <sys/stat.h>
-#include <time.h>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <sstream>
+#include <sys/stat.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

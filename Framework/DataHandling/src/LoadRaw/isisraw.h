@@ -12,7 +12,7 @@ struct ISISCRPT_STRUCT;
 #include <cstdlib>
 #include <cstring>
 #ifdef _WIN32 /* _WIN32 */
-#include <time.h>
+#include <ctime>
 #endif
 #include "MantidKernel/System.h"
 

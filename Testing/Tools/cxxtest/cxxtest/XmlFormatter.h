@@ -23,25 +23,18 @@
 #define CXXTEST_STACK_TRACE_FILELINE_PREFIX "\" location=\""
 #define CXXTEST_STACK_TRACE_FILELINE_SUFFIX ""
 
-
-#include <cxxtest/TestRunner.h>
-#include <cxxtest/TestListener.h>
-#include <cxxtest/TestTracker.h>
-#include <cxxtest/ValueTraits.h>
+#include <chrono>
+#include <cstring>
+#include <ctime>
 #include <cxxtest/ErrorFormatter.h>
 #include <cxxtest/StdHeaders.h>
-#include <ctime>
-#ifdef _WIN32
-#include <time.h>
-#else
-#include <sys/time.h>
-#endif
-#include <time.h>
+#include <cxxtest/TestListener.h>
+#include <cxxtest/TestRunner.h>
+#include <cxxtest/TestTracker.h>
+#include <cxxtest/ValueTraits.h>
 #include <iostream>
 #include <sstream>
-#include <cstring>
 #include <stdexcept>
-
 
 namespace CxxTest
 {
@@ -144,16 +137,16 @@ namespace CxxTest
             std::map<std::string,std::string>::iterator curr=attribute.begin();
             std::map<std::string,std::string>::iterator end =attribute.end();
             while (curr != end) {
-              os << curr->first.c_str() 
-                 << "=\"" << curr->second.c_str() << "\" ";
+              os << curr->first.c_str() << "=\"" << curr->second.c_str()
+                 << "\" ";
               curr++;
               }
             if (value.str().empty()) {
                 os << "/>";
             }
             else {
-                os << ">" << escape(value.str()).c_str() 
-                   << "</" << name.c_str() << ">";
+              os << ">" << escape(value.str()).c_str() << "</" << name.c_str()
+                 << ">";
             }
             os.endl(os);
             }
@@ -263,36 +256,28 @@ namespace CxxTest
     class XmlFormatter : public TestListener
     {
         public:
-        XmlFormatter( OutputStream *o, OutputStream *ostr, std::ostringstream *os) 
-           : cpuStartTime(0), cpuStopTime(0), _o(o), _ostr(ostr), _os(os), stream_redirect(NULL)
-        {}
+          XmlFormatter(OutputStream *o, OutputStream *ostr,
+                       std::ostringstream *os)
+              : cpuStartTime(0), cpuStopTime(0), _o(o), _ostr(ostr), _os(os),
+                stream_redirect(NULL) {}
 
-        virtual ~XmlFormatter()
-        {
-          delete _ostr;
-        }
+          virtual ~XmlFormatter() { delete _ostr; }
 
-        std::list<TestCaseInfo> info;
-        std::list<TestCaseInfo>::iterator testcase;
-        typedef std::list<ElementInfo>::iterator element_t;
-        std::string classname;
-        int ntests;
-        int nfail;
-        int nerror;
-        double totaltime;
-        // The type of this variable is different depending on the platform
-      #ifdef _WIN32
-        clock_t
-      #else
-        timeval
-      #endif
-        testStartTime, testStopTime, testRunStartTime, testRunStopTime;
+          std::list<TestCaseInfo> info;
+          std::list<TestCaseInfo>::iterator testcase;
+          typedef std::list<ElementInfo>::iterator element_t;
+          std::string classname;
+          int ntests;
+          int nfail;
+          int nerror;
+          double totaltime;
+          std::chrono::time_point<std::chrono::high_resolution_clock>
+              testStartTime, testStopTime, testRunStartTime, testRunStopTime;
 
-        /// CPU time (for all processors)
-        clock_t cpuStartTime, cpuStopTime;
+          /// CPU time (for all processors)
+          clock_t cpuStartTime, cpuStopTime;
 
-        int run()
-        {
+          int run() {
             TestRunner::runAllTests( *this );
             return tracker().failedTests();
         }
@@ -309,7 +294,7 @@ namespace CxxTest
         {
             char s[WorldDescription::MAX_STRLEN_TOTAL_TESTS];
             const WorldDescription &wd = tracker().world();
-            o << wd.strTotalTests( s ) 
+            o << wd.strTotalTests(s)
               << (wd.numTotalTests() == 1 ? " test" : " tests");
         }
 
@@ -324,7 +309,7 @@ namespace CxxTest
                 while ( ! classname.empty() && classname[0] == '.' )
                    classname.erase(0,1);
 
-                //CXXTEST_STD(cout) << "HERE " << desc.file() << " " 
+                // CXXTEST_STD(cout) << "HERE " << desc.file() << " "
                 //                  << classname << CXXTEST_STD(endl);
 
                 //classname=desc.suiteName();
@@ -355,23 +340,19 @@ namespace CxxTest
 
         void enterTest( const TestDescription & desc )
         {
-            #ifdef _WIN32
-                testStartTime = clock();
-            #else
-                gettimeofday(&testStartTime, 0);
-            #endif
-                testcase = info.insert(info.end(),TestCaseInfo());
-                testcase->testName = desc.testName();
-                testcase->className = classname;
-                std::ostringstream os;
-                os << desc.line();
-                testcase->line = os.str();
+          testStartTime = std::chrono::high_resolution_clock::now();
+          testcase = info.insert(info.end(), TestCaseInfo());
+          testcase->testName = desc.testName();
+          testcase->className = classname;
+          std::ostringstream os;
+          os << desc.line();
+          testcase->line = os.str();
 
-           if ( stream_redirect )
-              CXXTEST_STD(cerr) << "ERROR: The stream_redirect != NULL" 
-                                << CXXTEST_STD(endl);
+          if (stream_redirect)
+            CXXTEST_STD(cerr)
+                << "ERROR: The stream_redirect != NULL" << CXXTEST_STD(endl);
 
-           stream_redirect = 
+          stream_redirect =
               new TeeOutputStreams(CXXTEST_STD(cout), CXXTEST_STD(cerr));
         }
 
@@ -384,11 +365,7 @@ namespace CxxTest
           cpuStartTime = clock();
 
           // Record the time now.
-          #ifdef _WIN32
-            testRunStartTime = clock();
-          #else
-            gettimeofday(&testRunStartTime, 0);
-          #endif
+          testRunStartTime = std::chrono::high_resolution_clock::now();
         }
 
         /** Call this method after the run() call, but before tearDown()
@@ -399,12 +376,7 @@ namespace CxxTest
           //Also CPU time.
           cpuStopTime = clock();
 
-          // Record the time now.
-          #ifdef _WIN32
-            testRunStopTime = clock();
-          #else
-            gettimeofday(&testRunStopTime, 0);
-          #endif
+          testRunStopTime = std::chrono::high_resolution_clock::now();
         }
 
         void leaveTest( const TestDescription & )
@@ -425,25 +397,20 @@ namespace CxxTest
                 stream_redirect = NULL;
            }
 
+           testStopTime = std::chrono::high_resolution_clock::now();
+           const std::chrono::duration<double> duration_total =
+               testStopTime - testStartTime;
+           const double testTime = duration_total.count();
 
-        #ifdef _WIN32
-           const double testTime = double(clock() - testStartTime)/CLOCKS_PER_SEC;
-           const double testRunTime = double(testRunStopTime - testRunStartTime)/CLOCKS_PER_SEC;
-        #else
-           gettimeofday(&testStopTime, 0);
-           double sec = double(testStopTime.tv_sec - testStartTime.tv_sec);
-           double usec = double(testStopTime.tv_usec - testStartTime.tv_usec);
-           double testTime = sec + (usec / 1000000.0);
-
-           sec = double(testRunStopTime.tv_sec - testRunStartTime.tv_sec);
-           usec = double(testRunStopTime.tv_usec - testRunStartTime.tv_usec);
-           double testRunTime = sec + (usec / 1000000.0);
-        #endif
+           const std::chrono::duration<double> duration_test =
+               testRunStopTime - testRunStartTime;
+           const double testRunTime = duration_test.count();
 
            // The CPU runtime, which on linux will be from all processors. Don't know about windows, think it's wall-clock time.
-           double cpuTime = double(cpuStopTime - cpuStartTime)/CLOCKS_PER_SEC;
+           const double cpuTime =
+               static_cast<double>(cpuStopTime - cpuStartTime) / CLOCKS_PER_SEC;
            // CPU fraction = what fraction of the CPU(s) was used.
-           double CPUFraction = cpuTime / testRunTime;
+           const double CPUFraction = cpuTime / testRunTime;
 
            // Changed: we show the run() time, EXCLUDING the setup time.
            // Set the run time for this test
@@ -460,11 +427,10 @@ namespace CxxTest
           timeStream << totaltime;
                 (*_o) << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
                 (*_o) << "<testsuite name=\"" << desc.worldName() << "\" ";
-                (*_o) << " tests=\"" << ntests 
-                      << "\" errors=\"" << nerror 
-                      << "\" failures=\"" << nfail 
-                      << "\" package=\"" << desc.worldName()
-                      << "\" time=\"" << timeStream.str().c_str() << "\" >";
+                (*_o) << " tests=\"" << ntests << "\" errors=\"" << nerror
+                      << "\" failures=\"" << nfail << "\" package=\""
+                      << desc.worldName() << "\" time=\""
+                      << timeStream.str().c_str() << "\" >";
                 _o->endl(*_o);
                 (*_o) << _os->str().c_str();
                 _os->clear();
@@ -496,8 +462,8 @@ namespace CxxTest
 
         void failedAssert( const char *file, unsigned line, const char *expression )
         {
-            testFailure( file, line, "failedAssert" ) 
-               << "Assertion failed: " << expression;
+          testFailure(file, line, "failedAssert")
+              << "Assertion failed: " << expression;
         }
 
         void failedAssertEquals( const char *file, unsigned line,
@@ -514,10 +480,10 @@ namespace CxxTest
                                    const char *xStr, const char *yStr, const char *sizeStr,
                                    const void* /*x*/, const void* /*y*/, unsigned size )
         {
-            testFailure( file, line, "failedAssertSameData")
-               << "Error: Expected " << sizeStr 
-               << " (" << size << ")  bytes to be equal at ("
-               << xStr << ") and (" << yStr << "), found";
+          testFailure(file, line, "failedAssertSameData")
+              << "Error: Expected " << sizeStr << " (" << size
+              << ")  bytes to be equal at (" << xStr << ") and (" << yStr
+              << "), found";
         }
 
         void failedAssertSameFiles( const char *file, unsigned line,
@@ -533,21 +499,18 @@ namespace CxxTest
                                 const char *xStr, const char *yStr, const char *dStr,
                                 const char *x, const char *y, const char *d )
         {
-            testFailure( file, line, "failedAssertDelta" )
-               << "Error: Expected (" 
-               << xStr << " == " << yStr << ") up to " << dStr 
-               << " (" << d << "), found (" 
-               << x << " != " << y << ")";
+          testFailure(file, line, "failedAssertDelta")
+              << "Error: Expected (" << xStr << " == " << yStr << ") up to "
+              << dStr << " (" << d << "), found (" << x << " != " << y << ")";
         }
 
         void failedAssertDiffers( const char *file, unsigned line,
                                   const char *xStr, const char *yStr,
                                   const char *value )
         {
-            testFailure( file, line, "failedAssertDiffers" )
-               << "Error: Expected (" 
-               << xStr << " != " << yStr << "), found (" 
-               << value << ")";
+          testFailure(file, line, "failedAssertDiffers")
+              << "Error: Expected (" << xStr << " != " << yStr << "), found ("
+              << value << ")";
         }
 
         void failedAssertLessThan( const char *file, unsigned line,
@@ -574,10 +537,9 @@ namespace CxxTest
                                    const char *relation, const char *xStr, const char *yStr,
                                    const char *x, const char *y )
         {
-            testFailure( file, line, "failedAssertRelation" )
-               << "Error: Expected " << relation << "( " <<
-               xStr << ", " << yStr << " ), found !" << relation 
-               << "( " << x << ", " << y << " )";
+          testFailure(file, line, "failedAssertRelation")
+              << "Error: Expected " << relation << "( " << xStr << ", " << yStr
+              << " ), found !" << relation << "( " << x << ", " << y << " )";
         }
 
         void failedAssertPredicate( const char *file, unsigned line,
@@ -592,17 +554,17 @@ namespace CxxTest
                                  const char *expression, const char *type,
                                  bool otherThrown )
         {
-            testFailure( file, line, "failedAssertThrows" )
-               << "Error: Expected (" << expression << ") to throw ("  <<
-               type << ") but it " 
-               << (otherThrown ? "threw something else" : "didn't throw");
+          testFailure(file, line, "failedAssertThrows")
+              << "Error: Expected (" << expression << ") to throw (" << type
+              << ") but it "
+              << (otherThrown ? "threw something else" : "didn't throw");
         }
 
         void failedAssertThrowsNot( const char *file, unsigned line, const char *expression )
         {
-            testFailure( file, line, "failedAssertThrowsNot" )
-               << "Error: Expected (" << expression 
-               << ") not to throw, but it did";
+          testFailure(file, line, "failedAssertThrowsNot")
+              << "Error: Expected (" << expression
+              << ") not to throw, but it did";
         }
 
     protected:
@@ -684,4 +646,3 @@ namespace CxxTest
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
 // retains certain rights in this software.
-
