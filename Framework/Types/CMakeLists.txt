@@ -7,7 +7,6 @@ set ( SRC_FILES
 
 set ( INC_FILES
   inc/MantidTypes/Core/DateAndTime.h
-  inc/MantidTypes/DllConfig.h
   inc/MantidTypes/SpectrumDefinition.h
   inc/MantidTypes/Event/TofEvent.h
 )
