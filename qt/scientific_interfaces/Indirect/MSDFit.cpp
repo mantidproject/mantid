@@ -122,6 +122,18 @@ void MSDFit::singleFit() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
+/*
+ * Creates an initialized MSDFit Algorithm, using the model with the
+ * specified name, to be run from the specified minimum spectrum to
+ * the specified maximum spectrum.
+ *
+ * @param model   The name of the model to be used by the algorithm.
+ * @param specMin The minimum spectrum to fit.
+ * @param specMax The maximum spectrum to fit.
+ * @return        An MSDFit Algorithm using the specified model, which
+ *                will run across all spectrum between the specified
+ *                minimum and maximum.
+ */
 IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, long specMin,
                                         long specMax) {
   auto wsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
@@ -310,6 +322,15 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMaximum(val);
 }
 
+/*
+ * Creates a property representing a model with the specified name,
+ * and which takes the specified parameters.
+ *
+ * @param modelName       The name of the model.
+ * @param modelParameters The parameters taken by the model.
+ * @return                The created property, which represents the
+ *                        model in the property table.
+ */
 QtProperty *MSDFit::createModel(const QString &modelName,
                                 const std::vector<QString> modelParameters) {
   QtProperty *expGroup = m_grpManager->addProperty(modelName);
@@ -333,6 +354,15 @@ void MSDFit::modelSelection(int selected) {
   m_msdTree->addProperty(m_properties[model]);
 }
 
+/*
+ * Creates a map from the names of the specified model's parameters,
+ * to the name of the property in the property table, associated with
+ * this parameter.
+ *
+ * @param model The model whose parameters to create a map from.
+ * @return      A map from the model parameter names to the names
+ *              of their associated properties in the property table.
+ */
 QHash<QString, QString>
 MSDFit::createParameterToPropertyMap(const QString &model) {
   QHash<QString, QString> parameterToProperty;
@@ -347,6 +377,13 @@ MSDFit::createParameterToPropertyMap(const QString &model) {
   return parameterToProperty;
 }
 
+/*
+ * Given the selected model in the interface, returns the name of
+ * the associated model to pass to the MSDFit algorithm.
+ *
+ * @param model The name of the model as displayed in the interface.
+ * @return      The name of the model as defined in the MSDFit algorithm.
+ */
 std::string MSDFit::modelToAlgorithmProperty(const QString &model) {
 
   if (model == "Gaussian")
@@ -359,6 +396,13 @@ std::string MSDFit::modelToAlgorithmProperty(const QString &model) {
     return "";
 }
 
+/*
+ * Updates the property table using the parameter results for the
+ * specified spectrum.
+ *
+ * @param specNo  The spectrum number of the parameters to update
+ *                the property table with.
+ */
 void MSDFit::updateProperties(int specNo) {
   size_t index = boost::numeric_cast<size_t>(specNo);
   auto parameterNames = m_parameterValues.keys();
