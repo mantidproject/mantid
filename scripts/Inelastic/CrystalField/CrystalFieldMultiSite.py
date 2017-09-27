@@ -155,7 +155,6 @@ class CrystalFieldMultiSite(object):
         else:
             raise RuntimeError('getSpectrum expected 1-3 arguments, got {}s'.format(len(args)))
 
-
     def _convertToWS(self, wksp_list):
         """
         converts a list or numpy array to workspace
@@ -253,42 +252,22 @@ class CrystalFieldMultiSite(object):
         """
         self.function.addConstraints(','.join(args))
 
-    def plot(self, i=0, workspace=None, ws_index=0, name=None):
-        """Plot a spectrum. Parameters are the same as in getSpectrum(...)"""
+    def plot(self, *args):
+        """Plot a spectrum. Parameters are the same as in getSpectrum(...) with additional name argument"""
         from mantidplot import plotSpectrum
+        ws_name = args[3] if len(args) == 4 else 'CrystalFieldMultiSite_{}'.format(self.Ions)
+        xArray, yArray = self.getSpectrum(*args)
+        if isinstance(args[0], int):
+            ws_name += '_{}'.format(args[1])
+        ws_name += '_{}'.format(args[0])
         from mantid.api import AlgorithmManager
-        createWS = AlgorithmManager.createUnmanaged('CreateWorkspace')
-        createWS.initialize()
-
-        xArray, yArray = self.getSpectrum(i, workspace, ws_index)
-        ws_name = name if name is not None else 'CrystalFieldMultiSite_{}'.format(self.Ions)
-
-        if isinstance(i, int):
-            if workspace is None:
-                if i > 0:
-                    ws_name += '_{}'.format(i)
-                createWS.setProperty('DataX', xArray)
-                createWS.setProperty('DataY', yArray)
-                createWS.setProperty('OutputWorkspace', ws_name)
-                createWS.execute()
-                plot_window = self._plot_window[i] if i in self._plot_window else None
-                self._plot_window[i] = plotSpectrum(ws_name, 0, window=plot_window, clearWindow=True)
-            else:
-                ws_name += '_{}'.format(workspace)
-                if i > 0:
-                    ws_name += '_{}'.format(i)
-                createWS.setProperty('DataX', xArray)
-                createWS.setProperty('DataY', yArray)
-                createWS.setProperty('OutputWorkspace', ws_name)
-                createWS.execute()
-                plotSpectrum(ws_name, 0)
-        else:
-            ws_name += '_{}'.format(i)
-            createWS.setProperty('DataX', xArray)
-            createWS.setProperty('DataY', yArray)
-            createWS.setProperty('OutputWorkspace', ws_name)
-            createWS.execute()
-            plotSpectrum(ws_name, 0)
+        alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
+        alg.initialize()
+        alg.setProperty('DataX', xArray)
+        alg.setProperty('DataY', yArray)
+        alg.setProperty('OutputWorkspace', ws_name)
+        alg.execute()
+        plotSpectrum(ws_name, 0)
 
     def _setBackground(self, peak=None, background=None):
         """
