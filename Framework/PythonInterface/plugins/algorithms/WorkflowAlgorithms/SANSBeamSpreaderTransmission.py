@@ -61,7 +61,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                              direction=Direction.Output, doc = "Output message")
 
     #pylint: disable=too-many-locals,too-many-branches
-    def PyExec(self): # noqa: C901
+    def PyExec(self):
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)

@@ -95,7 +95,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 self.default_output_dir = head
         return output_str
 
-    def PyExec(self): # noqa: C901
+    def PyExec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         #output_ws = '__'+output_ws+'_reduced'

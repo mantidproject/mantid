@@ -86,7 +86,7 @@ class SANSReduction(PythonAlgorithm):
         return output_str
 
     #pylint: disable=too-many-locals,too-many-branches
-    def _py_exec(self): # noqa: C901
+    def _py_exec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
         property_manager_name = self.getProperty("ReductionProperties").value
