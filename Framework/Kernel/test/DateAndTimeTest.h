@@ -10,10 +10,10 @@
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
+#include <ctime>
 #include <cxxtest/TestSuite.h>
 #include <sstream>
 #include <sys/stat.h>
-#include <time.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -59,6 +59,10 @@ public:
 
   void test_constructor_fails_invalid_string() {
     TS_ASSERT_THROWS(DateAndTime("invalid time string"), std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"),
+                     std::invalid_argument);
   }
 
   void test_limits_on_construction() {

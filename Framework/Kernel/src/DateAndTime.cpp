@@ -156,7 +156,7 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
  *space.
  *    The time must included, but the time-zone specification is optional.
  */
-DateAndTime::DateAndTime(const std::string &ISO8601_string) : _nanoseconds(0) {
+DateAndTime::DateAndTime(std::string ISO8601_string) : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string);
 }
 
@@ -372,7 +372,7 @@ const DateAndTime &DateAndTime::defaultTime() {
  *
  * @param str :: ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
  */
-void DateAndTime::setFromISO8601(const std::string &str) {
+void DateAndTime::setFromISO8601(std::string str) {
   // Make a copy
   std::string time = str;
 
