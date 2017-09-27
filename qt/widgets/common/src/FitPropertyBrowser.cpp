@@ -2076,10 +2076,17 @@ void FitPropertyBrowser::deleteTie() {
   PropertyHandler *h = getHandler()->findHandler(paramProp);
   if (!h)
     return;
-  // get name from composite function
-  if (ci->property()->propertyName() == "Tie") {
+  // get name of parent property (i.e. function)
+  if (paramProp->propertyName() != "Tie") {
+	  auto parameterMap = h->getTies();
+	  auto match = parameterMap.find(paramProp->propertyName());
+	  if (match != parameterMap.end()) {
+		  paramProp = match.value();
+	  }
+  }
+  if (paramProp->propertyName() == "Tie") {
 	  auto ties = h->getTies();
-	  QString qParName = ties.key(ci->property(), "");
+	  QString qParName = ties.key(paramProp, "");
 	  std::string parName = qParName.toStdString();
 	  QStringList functionNames;
 	  // ithParameter = -1 => not found
@@ -2111,7 +2118,7 @@ void FitPropertyBrowser::deleteTie() {
 	  else{
 	  QString tieExpr =
 		  QString::fromStdString(m_compositeFunction->parameterName(ithParameter));
-	  h->removeTie(ci->property(), tieExpr.toStdString());}
+	  h->removeTie(paramProp, tieExpr.toStdString());}
   }
   else {
 	  h->removeTie(ci->property()->propertyName());
