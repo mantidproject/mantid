@@ -1,10 +1,11 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H
 #include <QString>
+#include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-class Column {
+class EXPORT_OPT_MANTIDQT_COMMON Column {
 public:
   Column(QString const &name, QString const &algorithmProperty, bool isShown,
          QString const &prefix, QString const &description);
