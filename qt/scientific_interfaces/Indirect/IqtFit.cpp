@@ -27,8 +27,7 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
       m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
-      m_previewPlotData(), m_ties(), m_runMin(-1),
-      m_runMax(-1) {
+      m_previewPlotData(), m_ties(), m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -167,7 +166,8 @@ void IqtFit::run() {
   m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(m_iqtFInputWS.lock(), m_runMin, m_runMax);
+  IAlgorithm_sptr iqtFitAlg =
+      iqtFitAlgorithm(m_iqtFInputWS.lock(), m_runMin, m_runMax);
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -200,8 +200,8 @@ IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs, const size_t &specMin,
   const auto maxIt = boost::lexical_cast<long>(
       m_properties["MaxIterations"]->valueText().toStdString());
 
-  m_baseName = constructBaseName(inputWs->getName(), fitType, true,
-                                 specMin, specMax);
+  m_baseName =
+      constructBaseName(inputWs->getName(), fitType, true, specMin, specMax);
 
   IAlgorithm_sptr iqtFitAlg;
 
@@ -213,10 +213,10 @@ IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs, const size_t &specMin,
 
   auto replaceAlg = replaceInfinityAndNaN(inputWs->getName());
   replaceAlg->execute();
-  MatrixWorkspace_sptr inputWs = replaceAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr iqtInputWs = replaceAlg->getProperty("OutputWorkspace");
 
   iqtFitAlg->initialize();
-  iqtFitAlg->setProperty("InputWorkspace", inputWs);
+  iqtFitAlg->setProperty("InputWorkspace", iqtInputWs);
   iqtFitAlg->setProperty("Function", function);
   iqtFitAlg->setProperty("FitType", fitType);
   iqtFitAlg->setProperty("StartX", startX);
