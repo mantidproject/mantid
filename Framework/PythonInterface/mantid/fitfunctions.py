@@ -181,8 +181,8 @@ class FunctionWrapper(object):
               spectrumWs = ws           
           outWs = self(spectrumWs)
           vals = outWs.readY(1)
-          valWs = CreateWorkspace( DataX=xvals, DataY=vals)
-          plot("valWs",0)
+          function = CreateWorkspace( DataX=xvals, DataY=vals)
+          plot("function",0)
       else:
           print "Can't plot"
          
