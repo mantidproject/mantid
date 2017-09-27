@@ -40,8 +40,7 @@
 /**
  * It allows the user to specify a custom display format.
  */
-class EXPORT_OPT_MANTIDQT_COMMON DoubleSpinBox
-    : public QAbstractSpinBox {
+class EXPORT_OPT_MANTIDQT_COMMON DoubleSpinBox : public QAbstractSpinBox {
   Q_OBJECT
 
 public:

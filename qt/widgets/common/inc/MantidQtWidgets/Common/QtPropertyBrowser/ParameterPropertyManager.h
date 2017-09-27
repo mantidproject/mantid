@@ -5,11 +5,13 @@
 
 #include <QMap>
 
-/** ParameterPropertyManager : specialized version of QtDoublePropertyManager for fitting parameters.
+/** ParameterPropertyManager : specialized version of QtDoublePropertyManager
+   for fitting parameters.
 
     Is capable to store/display parameter errors in addition to value.
 
-    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -29,34 +31,34 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager : public QtDoublePropertyManager
-{
+class EXPORT_OPT_MANTIDQT_COMMON ParameterPropertyManager
+    : public QtDoublePropertyManager {
   Q_OBJECT
 
 public:
   ParameterPropertyManager(QObject *parent = 0);
 
   /// Get parameter error
-  double error(const QtProperty* property) const;
+  double error(const QtProperty *property) const;
 
   /// Get parameter description
-  std::string description(const QtProperty* property) const;
+  std::string description(const QtProperty *property) const;
 
   /// Checks if given property has error value set
-  bool isErrorSet(const QtProperty* property) const;
+  bool isErrorSet(const QtProperty *property) const;
 
   /// Returns errors enabled status
   bool areErrorsEnabled() const { return m_errorsEnabled; }
 
 public Q_SLOTS:
   /// Set property error
-  void setError(QtProperty* property, const double& error);
+  void setError(QtProperty *property, const double &error);
 
   /// Set parameter description
-  void setDescription(QtProperty* property, const std::string& description);
+  void setDescription(QtProperty *property, const std::string &description);
 
   /// Clears error of the property, if one was set
-  void clearError(QtProperty* property);
+  void clearError(QtProperty *property);
 
   /// Clears errors from all properties, if set
   void clearErrors();
@@ -70,19 +72,20 @@ protected:
 
 private Q_SLOTS:
   /// Updates the tooltip of the property
-  void updateTooltip(QtProperty* property) const;
+  void updateTooltip(QtProperty *property) const;
 
 private:
   /// Text appended to parameter descr. tooltip if error is set
   static const QString ERROR_TOOLTIP;
 
   /// Parameter error values
-  QMap<QtProperty*, double> m_errors;
+  QMap<QtProperty *, double> m_errors;
 
   /// Parameter descriptions
-  QMap<QtProperty*, std::string> m_descriptions;
+  QMap<QtProperty *, std::string> m_descriptions;
 
-  /// Errors enabled flag. When is false, errors can be set, but will not be displayed
+  /// Errors enabled flag. When is false, errors can be set, but will not be
+  /// displayed
   bool m_errorsEnabled;
 };
 
