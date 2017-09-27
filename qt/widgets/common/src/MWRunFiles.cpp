@@ -27,7 +27,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
-using MantidQt::MantidWidgets::DropEventHelper;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 ////////////////////////////////////////////////////////////////////
 // FindFilesThread

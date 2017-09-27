@@ -38,7 +38,7 @@
 
 using namespace Mantid;
 using namespace MantidQt::API;
-using MantidQt::MantidWidgets::DropEventHelper;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 namespace {
 /// static logger

@@ -12,10 +12,9 @@
 
 using namespace MantidQt::MantidWidgets;
 
-// Compile on OSX only.
-#if defined(__APPLE__)
-
-/** Workaround for bug on OSX >=10.10 with Qt4
+/** Workaround for file path bug on OSX >=10.10 with Qt4
+ *
+ * On Windows/Linux this simply returns the URL unchanged.
  *
  * For more information see this bug report:
  * https://bugreports.qt.io/browse/QTBUG-40449
@@ -24,7 +23,9 @@ using namespace MantidQt::MantidWidgets;
  * @returns a valid url to a file path
  */
 QUrl fixupURL(const QUrl &url) {
+#if defined(__APPLE__)
   QString localFileQString = url.toLocalFile();
+  // Compile on OSX only.
   if (localFileQString.startsWith("/.file/id=")) {
     CFStringRef relCFStringRef = CFStringCreateWithCString(
         kCFAllocatorDefault, localFileQString.toUtf8().constData(),
@@ -52,9 +53,11 @@ QUrl fixupURL(const QUrl &url) {
     CFRelease(relCFStringRef);
   }
   return QUrl(localFileQString);
+#else
+  return url;
+#endif // defined(__APPLE__)
 }
 
-#endif // defined(__APPLE__)
 
 /** Extract a list of file names from a drop event.
  *
@@ -70,12 +73,7 @@ QStringList DropEventHelper::getFileNames(const QDropEvent *event) {
   if (mimeData->hasUrls()) {
     const auto urlList = mimeData->urls();
     for (const auto &url : urlList) {
-      QUrl fileUrl;
-#if !defined(__APPLE__)
-      fileUrl = url;
-#else
-      fileUrl = fixupURL(url);
-#endif
+      const auto fileUrl = fixupURL(url);
       const auto fName = fileUrl.toLocalFile();
       if (fName.size() > 0) {
         filenames.append(fName);
