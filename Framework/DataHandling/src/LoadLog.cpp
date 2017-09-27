@@ -419,9 +419,9 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
       // cppcheck-suppress ignoredReturnValue
       std::stold(str);
       return true;
-    } catch (const std::invalid_argument &e) {
+    } catch (const std::invalid_argument &) {
       return false;
-    } catch (const std::out_of_range &e) {
+    } catch (const std::out_of_range &) {
       return false;
     }
   };

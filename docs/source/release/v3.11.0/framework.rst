@@ -110,6 +110,8 @@ Python
 Python Algorithms
 #################
 
+- Exposed `StringContainsValidator` to python to enable python algorithms to place requirement on input string to contain certain substrings.
+
 Bugfixes
 ########
 
