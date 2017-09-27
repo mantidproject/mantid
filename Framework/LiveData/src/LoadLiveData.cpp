@@ -38,7 +38,8 @@ void copyInstrument(const API::Workspace *source, API::Workspace &target) {
   // Special handling for Worspace Groups.
   if (auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source)) {
     auto &targetGroup = dynamic_cast<API::WorkspaceGroup &>(target);
-    for (size_t index = 0; index < sourceGroup->size(); ++index) {
+    for (size_t index = 0;
+         index < std::min(sourceGroup->size(), targetGroup.size()); ++index) {
       copyInstrument(sourceGroup->getItem(index).get(),
                      *targetGroup.getItem(index));
     }
