@@ -302,7 +302,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self._layout.addLayout(box)
 
         box.addLayout(hbox((gbDataDir, gbPrefix)))
-        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, gbSave, 1)), gbData)))
+        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), vbox((gbData, gbSave)))))
 
         gbDataDir.setLayout(hbox((self.dataDir, self.btnDataDir)))
         gbPrefix.setLayout(hbox((self.prefix,)))
