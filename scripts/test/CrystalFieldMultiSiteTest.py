@@ -480,6 +480,25 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         s = str(cf2.function)
         self.assertTrue('ion0.IntensityScaling=0.125*ion1.IntensityScaling' in s)
 
+    def test_add_CrystalFieldMultiSite(self):
+        cfms1 = CrystalFieldMultiSite(Ions=['Pm'], Symmetries=['D2'], Temperatures=[44, 50], FWHMs=[1.1, 0.9],
+                                     B20=0.37737, B40=-0.031787, B42=-0.11611, B44=-0.15)
+        cfms2 = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44, 50],
+                                      FWHMs=[1.1, 0.9], parameters={'ion0.B20': 0.34, 'ion0.B22': 3.9770,
+                                                                    'ion1.B40': -0.03})
+        cfms3 = cfms1 + cfms2
+        self.assertEqual(len(cfms3.Ions), 3)
+        self.assertEqual(len(cfms3.Symmetries), 3)
+        self.assertEqual(cfms3['ion0.B20'], 0.37737)
+        self.assertEqual(cfms3['ion1.B20'], 0.34)
+        self.assertEqual(cfms3['ion1.B22'], 3.9770)
+        self.assertEqual(cfms3['ion2.B40'], -0.03)
+        s = str(cfms3.function)
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s or
+                       'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in s)
+        self.assertTrue('ion0.IntensityScaling=1.0*ion2.IntensityScaling' in s or
+                       'ion2.IntensityScaling=1.0*ion0.IntensityScaling' in s)
+
     def test_multi_ion_intensity_scaling(self):
         from CrystalField import CrystalField
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
