@@ -261,7 +261,7 @@ if ( CMAKE_VERSION GREATER "3.5" )
     set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
     if (ENABLE_CLANG_TIDY)
       set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*")
-      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${SOURCE_DIR}/*'"
+      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
         CACHE STRING "" FORCE)
     else()
       set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
