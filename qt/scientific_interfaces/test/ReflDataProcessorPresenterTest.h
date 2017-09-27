@@ -33,7 +33,8 @@ private:
     colGroup->setPlotType(0);
 
     for (auto const &column : whitelist) {
-      auto newWorkspaceColumn = ws->addColumn("str", column.name().toStdString());
+      auto newWorkspaceColumn =
+          ws->addColumn("str", column.name().toStdString());
       newWorkspaceColumn->setPlotType(0);
     }
 
