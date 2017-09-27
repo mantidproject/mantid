@@ -2078,50 +2078,50 @@ void FitPropertyBrowser::deleteTie() {
     return;
   // get name of parent property (i.e. function)
   if (paramProp->propertyName() != "Tie") {
-	  auto parameterMap = h->getTies();
-	  auto match = parameterMap.find(paramProp->propertyName());
-	  if (match != parameterMap.end()) {
-		  paramProp = match.value();
-	  }
+    auto parameterMap = h->getTies();
+    auto match = parameterMap.find(paramProp->propertyName());
+    if (match != parameterMap.end()) {
+      paramProp = match.value();
+    }
   }
   if (paramProp->propertyName() == "Tie") {
-	  auto ties = h->getTies();
-	  QString qParName = ties.key(paramProp, "");
-	  std::string parName = qParName.toStdString();
-	  QStringList functionNames;
-	  // ithParameter = -1 => not found
-	  int ithParameter = -1;
-	  for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
-		  Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
-		  Mantid::API::IFunction *function = parameterRef.getLocalFunction();
+    auto ties = h->getTies();
+    QString qParName = ties.key(paramProp, "");
+    std::string parName = qParName.toStdString();
+    QStringList functionNames;
+    // ithParameter = -1 => not found
+    int ithParameter = -1;
+    for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
+      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(),
+                                                   i);
+      Mantid::API::IFunction *function = parameterRef.getLocalFunction();
 
-		  // Pick out parameters with the same name as the one we're tying from
-		  if (function->parameterName(static_cast<int>(parameterRef.getLocalIndex())) == parName) {
-			  if (ithParameter == -1 &&
-				  function ==
-				  h->function()
-				  .get()) // If this is the 'tied from' parameter, remember it
-			  {
-				  ithParameter = static_cast<int>(i);
-			  }
-			  else // Otherwise add it to the list of potential 'tyees'
-			  {
-				  functionNames << QString::fromStdString(
-					  m_compositeFunction->parameterName(i));
-			  }
-		  }
-	  }
-	  if (functionNames.empty() || ithParameter < 0) {
-		  QMessageBox::information(this, "Mantid - information",
-			  "Cannot find a parameter with this tie");
-	  }
-	  else{
-	  QString tieExpr =
-		  QString::fromStdString(m_compositeFunction->parameterName(ithParameter));
-	  h->removeTie(paramProp, tieExpr.toStdString());}
-  }
-  else {
-	  h->removeTie(ci->property()->propertyName());
+      // Pick out parameters with the same name as the one we're tying from
+      if (function->parameterName(
+              static_cast<int>(parameterRef.getLocalIndex())) == parName) {
+        if (ithParameter == -1 &&
+            function ==
+                h->function()
+                    .get()) // If this is the 'tied from' parameter, remember it
+        {
+          ithParameter = static_cast<int>(i);
+        } else // Otherwise add it to the list of potential 'tyees'
+        {
+          functionNames << QString::fromStdString(
+              m_compositeFunction->parameterName(i));
+        }
+      }
+    }
+    if (functionNames.empty() || ithParameter < 0) {
+      QMessageBox::information(this, "Mantid - information",
+                               "Cannot find a parameter with this tie");
+    } else {
+      QString tieExpr = QString::fromStdString(
+          m_compositeFunction->parameterName(ithParameter));
+      h->removeTie(paramProp, tieExpr.toStdString());
+    }
+  } else {
+    h->removeTie(ci->property()->propertyName());
   }
 }
 
