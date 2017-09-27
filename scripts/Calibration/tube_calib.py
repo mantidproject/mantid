@@ -535,8 +535,8 @@ def getCalibration(ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
         # Define the correct position of detectors
         ##########################################
 
-        det_id_list, det_position_list = get_calibrated_pixel_positions(ws, actual_tube, iTube.getArray(), wht, peaksTestMode,
-                                                               polinFit)
+        det_id_list, det_position_list = get_calibrated_pixel_positions(ws, actual_tube, iTube.getArray(), wht,
+                                                                        peaksTestMode, polinFit)
         # save the detector positions to calibTable
         if len(det_id_list) == len(wht):  # We have corrected positions
             for j in range(len(wht)):
