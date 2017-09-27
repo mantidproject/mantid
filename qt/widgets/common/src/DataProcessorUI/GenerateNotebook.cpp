@@ -282,6 +282,7 @@ boost::tuple<QString, QString>
 postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep) {
+               
   QString stitchString;
 
   stitchString += "#Post-process workspaces\n";

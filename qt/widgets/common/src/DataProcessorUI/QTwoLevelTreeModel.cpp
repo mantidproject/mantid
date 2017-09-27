@@ -13,9 +13,8 @@ using namespace Mantid::API;
 @param whitelist : A WhiteList containing information about the
 columns, their indices and descriptions
 */
-QTwoLevelTreeModel::QTwoLevelTreeModel(
-    ITableWorkspace_sptr tableWorkspace,
-    const WhiteList &whitelist)
+QTwoLevelTreeModel::QTwoLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
+                                       const WhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size() + 1)
@@ -37,8 +36,7 @@ QTwoLevelTreeModel::~QTwoLevelTreeModel() {}
 * @param role : The role
 * @return : The data associated with the given index
 */
-QVariant QTwoLevelTreeModel::data(const QModelIndex &index,
-                                               int role) const {
+QVariant QTwoLevelTreeModel::data(const QModelIndex &index, int role) const {
 
   if (!index.isValid())
     return QVariant();
@@ -80,8 +78,9 @@ QVariant QTwoLevelTreeModel::data(const QModelIndex &index,
 * @param role : The role
 * @return : The column name
 */
-QVariant QTwoLevelTreeModel::headerData(
-    int section, Qt::Orientation orientation, int role) const {
+QVariant QTwoLevelTreeModel::headerData(int section,
+                                        Qt::Orientation orientation,
+                                        int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     return m_whitelist.name(section);
@@ -98,9 +97,8 @@ QVariant QTwoLevelTreeModel::headerData(
 * @param parent : The parent element
 * @return : The index of the element
 */
-QModelIndex
-QTwoLevelTreeModel::index(int row, int column,
-                                       const QModelIndex &parent) const {
+QModelIndex QTwoLevelTreeModel::index(int row, int column,
+                                      const QModelIndex &parent) const {
 
   return parent.isValid() ? createIndex(row, column, parent.row())
                           : createIndex(row, column, -1);
@@ -111,8 +109,8 @@ QTwoLevelTreeModel::index(int row, int column,
 * @param parent : The parent of this item
 * @return : The 'processed' status
 */
-bool QTwoLevelTreeModel::isProcessed(
-    int position, const QModelIndex &parent) const {
+bool QTwoLevelTreeModel::isProcessed(int position,
+                                     const QModelIndex &parent) const {
 
   if (!parent.isValid()) {
     // We have a group item (no parent)
@@ -141,8 +139,7 @@ bool QTwoLevelTreeModel::isProcessed(
 * @param index : The index
 * @return : Its parent
 */
-QModelIndex
-QTwoLevelTreeModel::parent(const QModelIndex &index) const {
+QModelIndex QTwoLevelTreeModel::parent(const QModelIndex &index) const {
 
   int internalIdInt = int(index.internalId());
 
@@ -156,7 +153,7 @@ QTwoLevelTreeModel::parent(const QModelIndex &index) const {
 * @return : Boolean indicating whether the insertion was successful or not
 */
 bool QTwoLevelTreeModel::insertRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
 
   bool success = false;
 
@@ -177,8 +174,7 @@ bool QTwoLevelTreeModel::insertRows(int position, int count,
 * @param parent : The parent index (as integer)
 * @return : Boolean indicating if the insertion was successful
 */
-bool QTwoLevelTreeModel::insertRows(int position, int count,
-                                                 int parent) {
+bool QTwoLevelTreeModel::insertRows(int position, int count, int parent) {
 
   // Parent does not exist
   if (parent < 0 || parent >= rowCount())
@@ -276,7 +272,7 @@ bool QTwoLevelTreeModel::insertGroups(int position, int count) {
 * not
 */
 bool QTwoLevelTreeModel::removeRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
 
   bool success = false;
 
@@ -347,8 +343,7 @@ bool QTwoLevelTreeModel::removeGroups(int position, int count) {
 * @param parent : The parent item
 * @return : Boolean indicating whether or not rows were removed
 */
-bool QTwoLevelTreeModel::removeRows(int position, int count,
-                                                 int parent) {
+bool QTwoLevelTreeModel::removeRows(int position, int count, int parent) {
 
   // Parent does not exist
   if (parent < 0 || parent >= rowCount())
@@ -424,7 +419,7 @@ int QTwoLevelTreeModel::rowCount(const QModelIndex &parent) const {
 * @param role : the role
 */
 bool QTwoLevelTreeModel::setData(const QModelIndex &index,
-                                              const QVariant &value, int role) {
+                                 const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
     return false;
@@ -474,8 +469,7 @@ bool QTwoLevelTreeModel::setData(const QModelIndex &index,
 * whitelist
 * @param table : A table workspace containing the data
 */
-void QTwoLevelTreeModel::setupModelData(
-    ITableWorkspace_sptr table) {
+void QTwoLevelTreeModel::setupModelData(ITableWorkspace_sptr table) {
 
   int nrows = static_cast<int>(table->rowCount());
 
@@ -501,8 +495,7 @@ void QTwoLevelTreeModel::setupModelData(
 * representing
 * @return :: the underlying table workspace
 */
-ITableWorkspace_sptr
-QTwoLevelTreeModel::getTableWorkspace() const {
+ITableWorkspace_sptr QTwoLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 
@@ -513,7 +506,7 @@ QTwoLevelTreeModel::getTableWorkspace() const {
 * @return : Boolean indicating whether process status was set successfully
 */
 bool QTwoLevelTreeModel::setProcessed(bool processed, int position,
-                                                   const QModelIndex &parent) {
+                                      const QModelIndex &parent) {
 
   if (!parent.isValid()) {
     // We have a group item (no parent)

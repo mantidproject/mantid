@@ -141,7 +141,7 @@ public:
         PostprocessingStep("", reflPostprocessor(),
                            std::map<QString, QString>()),
         std::map<QString, QString>(), "");
-
+ 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
     auto notebookLines = splitIntoLines(generatedNotebook);

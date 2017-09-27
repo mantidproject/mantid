@@ -53,8 +53,7 @@ public:
   virtual ~DataProcessorView(){};
 
   // Add actions to the toolbar
-  virtual void
-  addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
+  virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
   virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
@@ -116,7 +115,6 @@ public:
 
   //
   virtual void skipProcessing() = 0;
-
 };
 }
 }

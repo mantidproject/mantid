@@ -12,9 +12,8 @@ using namespace Mantid::API;
 @param tableWorkspace : The table workspace to wrap
 @param whitelist : A WhiteList containing the columns
 */
-QOneLevelTreeModel::QOneLevelTreeModel(
-    ITableWorkspace_sptr tableWorkspace,
-    const WhiteList &whitelist)
+QOneLevelTreeModel::QOneLevelTreeModel(ITableWorkspace_sptr tableWorkspace,
+                                       const WhiteList &whitelist)
     : AbstractTreeModel(tableWorkspace, whitelist) {
 
   if (tableWorkspace->columnCount() != m_whitelist.size())
@@ -32,8 +31,7 @@ QOneLevelTreeModel::~QOneLevelTreeModel() {}
 * @param role : The role
 * @return : The data associated with the given index
 */
-QVariant QOneLevelTreeModel::data(const QModelIndex &index,
-                                               int role) const {
+QVariant QOneLevelTreeModel::data(const QModelIndex &index, int role) const {
   if (!index.isValid())
     return QVariant();
 
@@ -57,8 +55,9 @@ QVariant QOneLevelTreeModel::data(const QModelIndex &index,
 * @param role : The role
 * @return : The column name
 */
-QVariant QOneLevelTreeModel::headerData(
-    int section, Qt::Orientation orientation, int role) const {
+QVariant QOneLevelTreeModel::headerData(int section,
+                                        Qt::Orientation orientation,
+                                        int role) const {
 
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     return m_whitelist.name(section);
@@ -72,9 +71,8 @@ QVariant QOneLevelTreeModel::headerData(
 * @param parent : The parent element
 * @return : The index of the element
 */
-QModelIndex
-QOneLevelTreeModel::index(int row, int column,
-                                       const QModelIndex &parent) const {
+QModelIndex QOneLevelTreeModel::index(int row, int column,
+                                      const QModelIndex &parent) const {
 
   UNUSED_ARG(parent);
   return createIndex(row, column);
@@ -85,8 +83,8 @@ QOneLevelTreeModel::index(int row, int column,
 * @param parent : The parent of this item
 * @return : The 'processed' status
 */
-bool QOneLevelTreeModel::isProcessed(
-    int position, const QModelIndex &parent) const {
+bool QOneLevelTreeModel::isProcessed(int position,
+                                     const QModelIndex &parent) const {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -106,8 +104,7 @@ bool QOneLevelTreeModel::isProcessed(
 * @param index : The index
 * @return : Its parent
 */
-QModelIndex
-QOneLevelTreeModel::parent(const QModelIndex &index) const {
+QModelIndex QOneLevelTreeModel::parent(const QModelIndex &index) const {
 
   UNUSED_ARG(index);
   return QModelIndex();
@@ -120,7 +117,7 @@ QOneLevelTreeModel::parent(const QModelIndex &index) const {
 * @return : Boolean indicating whether the insertion was successful or not
 */
 bool QOneLevelTreeModel::insertRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
   if (parent.isValid())
     return false;
 
@@ -153,7 +150,7 @@ bool QOneLevelTreeModel::insertRows(int position, int count,
 * not
 */
 bool QOneLevelTreeModel::removeRows(int position, int count,
-                                                 const QModelIndex &parent) {
+                                    const QModelIndex &parent) {
 
   if (parent.isValid())
     return false;
@@ -197,7 +194,7 @@ int QOneLevelTreeModel::rowCount(const QModelIndex &parent) const {
 * @param role : the role
 */
 bool QOneLevelTreeModel::setData(const QModelIndex &index,
-                                              const QVariant &value, int role) {
+                                 const QVariant &value, int role) {
 
   if (role != Qt::EditRole)
     return false;
@@ -223,7 +220,7 @@ bool QOneLevelTreeModel::setData(const QModelIndex &index,
 * @return : Boolean indicating whether process status was set successfully
 */
 bool QOneLevelTreeModel::setProcessed(bool processed, int position,
-                                                   const QModelIndex &parent) {
+                                      const QModelIndex &parent) {
 
   // No parent items exists, this should not be possible
   if (parent.isValid())
@@ -243,8 +240,7 @@ bool QOneLevelTreeModel::setProcessed(bool processed, int position,
 *
 * @return :: the underlying table workspace
 */
-ITableWorkspace_sptr
-QOneLevelTreeModel::getTableWorkspace() const {
+ITableWorkspace_sptr QOneLevelTreeModel::getTableWorkspace() const {
   return m_tWS;
 }
 

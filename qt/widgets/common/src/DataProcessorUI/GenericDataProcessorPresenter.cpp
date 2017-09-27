@@ -315,7 +315,10 @@ Process selected data
 void GenericDataProcessorPresenter::process() {
   // Emit a signal hat the process is starting
   m_view->emitProcessClicked();
-  if (GenericDataProcessorPresenter::m_skipProcessing) { m_skipProcessing = false; return; }
+  if (GenericDataProcessorPresenter::m_skipProcessing) {
+    m_skipProcessing = false;
+    return;
+  }
   m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
@@ -1757,7 +1760,7 @@ void GenericDataProcessorPresenter::clearTable() { m_manager->deleteRow(); }
   * Flag used to stop processing
 **/
 void GenericDataProcessorPresenter::skipProcessing() {
-	m_skipProcessing = true;
+  m_skipProcessing = true;
 }
 }
 }

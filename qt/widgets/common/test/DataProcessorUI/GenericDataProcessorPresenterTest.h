@@ -104,8 +104,7 @@ private:
     return whitelist;
   }
 
-  const std::map<QString, PreprocessingAlgorithm>
-  createReflectometryPreprocessingStep() {
+  const std::map<QString, PreprocessingAlgorithm> createReflectometryPreprocessingStep() {
     return {{"Run(s)", PreprocessingAlgorithm(
                            "Plus", "TOF_",
                            std::set<QString>{"LHSWorkspace", "RHSWorkspace",
