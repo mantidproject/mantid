@@ -115,7 +115,7 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
       m_dataSelector(dataSelector), m_dataLoader(dataLoader),
       m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
       m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
-      m_overwrite(false),m_isItTFAsymm(false) {
+      m_overwrite(false) {
   // Make sure the FitPropertyBrowser passed in implements the required
   // interfaces
   m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);

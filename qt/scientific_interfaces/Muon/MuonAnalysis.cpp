@@ -2558,7 +2558,14 @@ void MuonAnalysis::changeTab(int newTabIndex) {
       m_uiForm.fitBrowser->setAllGroupsOrPairs(isItGroup);
       m_uiForm.fitBrowser->setAllPeriods();
     }
+	if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry &&
+		isItGroup) {
+		m_uiForm.fitBrowser->setTFAsymm(true);
+	}
+	else {
+		m_uiForm.fitBrowser->setTFAsymm(false);
 
+ 	}
   } else if (newTab == m_uiForm.ResultsTable) {
     m_resultTableTab->refresh();
   }
