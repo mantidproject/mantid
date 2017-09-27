@@ -70,8 +70,9 @@ private:
   std::string constructBaseName(const std::string &inputName,
                                 const std::string &fitType, const bool &multi,
                                 const size_t &specMin, const size_t &specMax);
-  Mantid::API::IAlgorithm_sptr iqtFitAlgorithm(const size_t &specMin,
-                                               const size_t &specMax);
+  Mantid::API::IAlgorithm_sptr
+  iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
+                  const size_t &specMin, const size_t &specMax);
   void updateFitFunctions();
   void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
@@ -90,7 +91,6 @@ private:
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_iqtFInputWS;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
-  QString m_iqtFInputWSName;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;

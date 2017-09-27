@@ -27,7 +27,7 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
       m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
-      m_previewPlotData(), m_iqtFInputWSName(), m_ties(), m_runMin(-1),
+      m_previewPlotData(), m_ties(), m_runMin(-1),
       m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
@@ -167,7 +167,7 @@ void IqtFit::run() {
   m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(m_runMin, m_runMax);
+  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(m_iqtFInputWS.lock(), m_runMin, m_runMax);
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -175,8 +175,9 @@ void IqtFit::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
-                                                     const size_t &specMax) {
+Mantid::API::IAlgorithm_sptr
+IqtFit::iqtFitAlgorithm(MatrixWorkspace_sptr inputWs, const size_t &specMin,
+                        const size_t &specMax) {
   const bool constrainBeta = m_uiForm.ckConstrainBeta->isChecked();
   const bool constrainIntens = m_uiForm.ckConstrainIntensities->isChecked();
   CompositeFunction_sptr func = createFunction();
@@ -199,7 +200,7 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
   const auto maxIt = boost::lexical_cast<long>(
       m_properties["MaxIterations"]->valueText().toStdString());
 
-  m_baseName = constructBaseName(m_iqtFInputWSName.toStdString(), fitType, true,
+  m_baseName = constructBaseName(inputWs->getName(), fitType, true,
                                  specMin, specMax);
 
   IAlgorithm_sptr iqtFitAlg;
@@ -210,7 +211,7 @@ Mantid::API::IAlgorithm_sptr IqtFit::iqtFitAlgorithm(const size_t &specMin,
     iqtFitAlg = AlgorithmManager::Instance().create("IqtFitMultiple");
   }
 
-  auto replaceAlg = replaceInfinityAndNaN(m_iqtFInputWSName.toStdString());
+  auto replaceAlg = replaceInfinityAndNaN(inputWs->getName());
   replaceAlg->execute();
   MatrixWorkspace_sptr inputWs = replaceAlg->getProperty("OutputWorkspace");
 
@@ -378,10 +379,8 @@ void IqtFit::loadSettings(const QSettings &settings) {
  * @param wsName Name of new workspace loaded
  */
 void IqtFit::newDataLoaded(const QString wsName) {
-
-  m_iqtFInputWSName = wsName;
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_iqtFInputWSName.toStdString());
+      wsName.toStdString());
   m_iqtFInputWS = inputWs;
 
   int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
@@ -621,7 +620,7 @@ void IqtFit::updatePlot() {
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       specNo <= m_runMax && specNo >= m_runMin) {
     plotResult(groupName, specNo);
-  } else if(inputWs) {
+  } else if (inputWs) {
     m_previewPlotData = m_iqtFInputWS;
     m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
   }
@@ -886,7 +885,7 @@ void IqtFit::singleFit() {
 
   updateFitFunctions();
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
-  m_singleFitAlg = iqtFitAlgorithm(specNo, specNo);
+  m_singleFitAlg = iqtFitAlgorithm(m_iqtFInputWS.lock(), specNo, specNo);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
@@ -924,10 +923,10 @@ void IqtFit::plotGuess(QtProperty *) {
   auto inputWs = m_iqtFInputWS.lock();
 
   // Create the double* array from the input workspace
-  const size_t binIndxLow = inputWs->binIndexOf(
-      m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh = inputWs->binIndexOf(
-      m_iqtFRangeManager->value(m_properties["EndX"]));
+  const size_t binIndxLow =
+      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
+  const size_t binIndxHigh =
+      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
   const auto &xPoints = inputWs->points(0);
