@@ -126,11 +126,31 @@ class CrystalFieldMultiSite(object):
     def getParameter(self, param):
         self.function.getParameterValue(param)
 
-    def getSpectrum(self, workspace, i=0, ws_index=None):
-        """
-        Get the i-th spectrum calculated with the current field and peak parameters.
+    def _getSpectrumTwoArgs(self, arg1, arg2):
+        if isinstance(arg1, int):
+            i = arg1
+            ws = arg2
+            ws_index = 0
+            if self.Temperatures[i] < 0:
+                raise RuntimeError('You must first define a temperature for the spectrum')
+        elif isinstance(arg2, int):
+            i = 0
+            ws = arg1
+            ws_index = arg2
+        else:
+            raise TypeError('expected int for one argument in GetSpectrum, got %s and %s' %
+                            (arg1.__class__.__name__, arg2.__class__.__name__))
 
-        Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index i is assumed zero.
+        if isinstance(ws, list) or isinstance(ws, np.ndarray):
+            ws = self._convertToWS(ws)
+
+        return self._calcSpectrum(i, ws, ws_index)
+
+    def getSpectrum(self, *args):
+        """
+        Get a specified spectrum calculated with the current field and peak parameters.
+
+        Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index is assumed zero.
 
         Examples:
             cf.getSpectrum(1, ws, 5) # Calculate the second spectrum using the x-values from the 6th spectrum
@@ -139,33 +159,36 @@ class CrystalFieldMultiSite(object):
                                # in workspace ws.
             cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
                                   # in workspace ws.
+            cf.getSpectrum(3, ws) # Calculate the third spectrum using the x-values from the 1st spectrum
+                                  # in workspace ws.
 
-        @param i: Index of a spectrum to get.
-        @param workspace: A workspace to base on.
-        @param ws_index:  An index of a spectrum from workspace to use.
         @return: A tuple of (x, y) arrays
         """
-        wksp = workspace
-        if isinstance(wksp, int): # allow spectrum index to be passed as first argument
-            wksp = i
-            i = workspace
-        elif not isinstance(i, int):
-            raise RuntimeError('Spectrum index is expected to be int. Got %s' % i.__class__.__name__)
-        elif ws_index is None: # else allow ws_index to be second argument
-            ws_index = i
-            i = 0
-        if ws_index is None: # if ws_index not specified, set to default
-            ws_index = 0
+        if len(args) == 3:
+            ws = args[1]
+            if self.Temperatures[args[0]] < 0:
+                raise RuntimeError('You must first define a temperature for the spectrum')
+            if isinstance(ws, list) or isinstance(ws, np.ndarray):
+                ws = self._convertToWS(ws)
+            return self._calcSpectrum(args[0], ws, args[2])
 
-        if self.Temperatures[i] < 0:
-            raise RuntimeError('You must first define a temperature for the spectrum')
+        elif len(args) == 1:
+            ws = args[0]
+            if isinstance(ws, list) or isinstance(ws, np.ndarray):
+                ws = self._convertToWS(ws)
+            return self._calcSpectrum(0, ws, 0)
 
-        if isinstance(wksp, list) or isinstance(wksp, np.ndarray):
-            xArray = wksp
-            yArray = np.zeros_like(xArray)
-            wksp = makeWorkspace(xArray, yArray)
-            ws_index = 0
-        return self._calcSpectrum(i, wksp, ws_index)
+        elif len(args) == 2:
+            return self._getSpectrumTwoArgs(*args)
+        else:
+            raise RuntimeError('getSpectrum expected 1-3 arguments, got %s' % len(args))
+
+
+    def _convertToWS(self, wksp_list):
+        """converts a list or numpy array to workspace"""
+        xArray = wksp_list
+        yArray = np.zeros_like(xArray)
+        return makeWorkspace(xArray, yArray)
 
     def _calcSpectrum(self, i, workspace, ws_index, funstr=None):
         """Calculate i-th spectrum.
