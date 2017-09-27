@@ -172,7 +172,7 @@ std::vector<double> executeFit(Mantid::API::Algorithm &fit,
   fit.executeAsChildAlg();
   Mantid::API::ITableWorkspace_sptr fitResult =
       fit.getProperty("OutputParameters");
-  std::vector<double> parameters(fitResult->rowCount());
+  std::vector<double> parameters(fitResult->rowCount() - 1);
   for (size_t row = 0; row < parameters.size(); ++row) {
     parameters[row] = fitResult->cell<double>(row, 1);
   }
