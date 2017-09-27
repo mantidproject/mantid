@@ -158,7 +158,8 @@ void IqtFit::setup() {
 }
 
 void IqtFit::run() {
-  if (m_iqtFInputWS == NULL) {
+
+  if (!m_iqtFInputWS.lock()) {
     return;
   }
 
@@ -269,19 +270,22 @@ void IqtFit::saveResult() {
  * Plots the current spectrum displayed in the preview plot
  */
 void IqtFit::plotCurrentPreview() {
-  if (!m_iqtFInputWS) {
+  auto inputWs = m_iqtFInputWS.lock();
+  auto previewWs = m_previewPlotData.lock();
+
+  if (!inputWs || !previewWs) {
     return;
   }
-  if (m_iqtFInputWS->getName().compare(m_previewPlotData->getName()) == 0) {
+
+  if (inputWs->getName().compare(previewWs->getName()) == 0) {
     // Plot only the sample curve
     const auto workspaceIndex = m_uiForm.spPlotSpectrum->value();
-    IndirectTab::plotSpectrum(
-        QString::fromStdString(m_previewPlotData->getName()), workspaceIndex,
-        workspaceIndex);
+    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
+                              workspaceIndex, workspaceIndex);
   } else {
     // Plot Sample, Fit and Diff curve
-    IndirectTab::plotSpectrum(
-        QString::fromStdString(m_previewPlotData->getName()), 0, 2);
+    IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
+                              2);
   }
 }
 
@@ -374,11 +378,13 @@ void IqtFit::loadSettings(const QSettings &settings) {
  * @param wsName Name of new workspace loaded
  */
 void IqtFit::newDataLoaded(const QString wsName) {
-  m_iqtFInputWSName = wsName;
-  m_iqtFInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_iqtFInputWSName.toStdString());
 
-  int maxWsIndex = static_cast<int>(m_iqtFInputWS->getNumberHistograms()) - 1;
+  m_iqtFInputWSName = wsName;
+  auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_iqtFInputWSName.toStdString());
+  m_iqtFInputWS = inputWs;
+
+  int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
   m_uiForm.spPlotSpectrum->setMinimum(0);
@@ -599,7 +605,9 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  if (!m_iqtFInputWS) {
+  auto inputWs = m_iqtFInputWS.lock();
+
+  if (!inputWs) {
     g_log.error("No workspace loaded, cannot create preview plot.");
     return;
   }
@@ -613,9 +621,9 @@ void IqtFit::updatePlot() {
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       specNo <= m_runMax && specNo >= m_runMin) {
     plotResult(groupName, specNo);
-  } else {
+  } else if(inputWs) {
     m_previewPlotData = m_iqtFInputWS;
-    m_uiForm.ppPlot->addSpectrum("Sample", m_iqtFInputWS, specNo);
+    m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
   }
 
   try {
@@ -667,11 +675,12 @@ void IqtFit::setDefaultParameters(const QString &name) {
   // intensity is always 1-background
   m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
 
+  auto inputWs = m_iqtFInputWS.lock();
   double tau = 0;
 
-  if (m_iqtFInputWS) {
-    auto x = m_iqtFInputWS->x(0);
-    auto y = m_iqtFInputWS->y(0);
+  if (inputWs) {
+    auto x = inputWs->x(0);
+    auto y = inputWs->y(0);
 
     if (x.size() > 4) {
       tau = -x[4] / log(y[4]);
@@ -912,15 +921,16 @@ void IqtFit::updateGuessPlot() {
 
 void IqtFit::plotGuess(QtProperty *) {
   CompositeFunction_sptr function = createFunction(true);
+  auto inputWs = m_iqtFInputWS.lock();
 
   // Create the double* array from the input workspace
-  const size_t binIndxLow = m_iqtFInputWS->binIndexOf(
+  const size_t binIndxLow = inputWs->binIndexOf(
       m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh = m_iqtFInputWS->binIndexOf(
+  const size_t binIndxHigh = inputWs->binIndexOf(
       m_iqtFRangeManager->value(m_properties["EndX"]));
   const size_t nData = binIndxHigh - binIndxLow;
 
-  const auto &xPoints = m_iqtFInputWS->points(0);
+  const auto &xPoints = inputWs->points(0);
 
   std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());

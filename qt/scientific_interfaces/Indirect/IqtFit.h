@@ -6,6 +6,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IqtFit.h"
 
+#include <boost/weak_ptr.hpp>
+
 namespace Mantid {
 namespace API {
 class IFunction;
@@ -86,8 +88,8 @@ private:
   QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
   QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
   QMap<QtProperty *, QtProperty *> m_fixedProps;
-  Mantid::API::MatrixWorkspace_sptr m_iqtFInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_iqtFInputWS;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
   QString m_iqtFInputWSName;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
