@@ -48,7 +48,6 @@ private slots:
   void fitFunctionSelected(const QString &);
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -86,8 +85,6 @@ private:
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   // Pointer to sample workspace object
-  Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   Mantid::API::ITableWorkspace_sptr m_paramWs;
   QString m_cfInputWSName;
   int m_fittedIndex;

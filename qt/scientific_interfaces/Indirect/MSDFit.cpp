@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_msdTree(NULL), m_msdInputWS() {
+    : IndirectDataAnalysisTab(parent), m_msdTree(NULL) {
   m_uiForm.setupUi(parent);
 }
 
@@ -56,7 +56,7 @@ void MSDFit::setup() {
           SLOT(modelSelection(int)));
   connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot(int)));
+          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
 
@@ -68,7 +68,7 @@ void MSDFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
 }
 
 void MSDFit::run() {
@@ -210,10 +210,10 @@ void MSDFit::updatePlot(int spectrumNo) {
       m_runMin <= specNo && specNo <= m_runMax) {
     plotResult(groupName, specNo);
   } else {
-    auto inputWs = m_msdInputWS.lock();
+    auto inputWs = inputWorkspace();
 
     if (inputWs) {
-      m_previewPlotData = inputWs;
+      setPreviewPlotWorkspace(inputWs);
       m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
     } else {
       g_log.error("No workspace loaded, cannot create preview plot.");
@@ -244,7 +244,7 @@ void MSDFit::plotResult(const std::string &groupWsName, size_t specNo) {
       outputGroup->getItem(specNo - m_runMin));
 
   if (ws) {
-    m_previewPlotData = ws;
+    setPreviewPlotWorkspace(ws);
     m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
     m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
@@ -263,8 +263,8 @@ void MSDFit::newDataLoaded(const QString wsName) {
       Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString());
   int maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
-  m_msdInputWS = workspace;
-  m_previewPlotData = workspace;
+  setInputWorkspace(workspace);
+  setPreviewPlotWorkspace(workspace);
   m_pythonExportWsName = "";
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);
@@ -449,26 +449,6 @@ void MSDFit::plotClicked() {
       plotSpectrum(QString::fromStdString(m_pythonExportWsName), 1);
     else
       plotSpectrum(QString::fromStdString(wsName), 0, 2);
-  }
-}
-
-/**
- * Plots the current spectrum displayed in the preview plot
- */
-void MSDFit::plotCurrentPreview() {
-  auto previewWs = m_previewPlotData.lock();
-
-  // Check a workspace has been selected
-  if (previewWs) {
-    auto inputWs = m_msdInputWS.lock();
-
-    if (inputWs && previewWs->getName() == inputWs->getName()) {
-      IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_uiForm.spPlotSpectrum->value());
-    } else {
-      IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
-                                2);
-    }
   }
 }
 

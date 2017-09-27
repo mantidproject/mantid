@@ -4,8 +4,6 @@
 #include "IndirectDataAnalysisTab.h"
 #include "ui_MSDFit.h"
 
-#include <boost/weak_ptr.hpp>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -31,7 +29,6 @@ private slots:
   void updateRS(QtProperty *prop, double val);
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
   void algorithmComplete(bool error);
   void modelSelection(int selected);
   void updatePlot(int specNo);
@@ -51,8 +48,6 @@ private:
   QtTreePropertyBrowser *m_msdTree;
   size_t m_runMin;
   size_t m_runMax;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_msdInputWS;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
 
   QHash<QString, QHash<size_t, double>> m_parameterValues;
   QHash<QString, QString> m_parameterToProperty;

@@ -6,6 +6,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include <boost/weak_ptr.hpp>
+
 class QwtPlotCurve;
 class QwtPlot;
 class QSettings;
@@ -55,6 +57,21 @@ protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
 
+  /// Retrieve input workspace
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+
+  /// Set input workspace
+  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+
+  /// Retrieve preview plot workspace
+  Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace();
+
+  /// Set preview plot workspace
+  void setPreviewPlotWorkspace(Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+
+  /// Sets the selected spectrum
+  void setSelectedSpectrum(int spectrum);
+
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
@@ -63,6 +80,9 @@ protected:
 protected slots:
   /// Slot that can be called when a user eidts an input.
   void inputChanged();
+
+  /// Plots the current preview data
+  void plotCurrentPreview();
 
 private:
   /// Overidden by child class.
@@ -77,6 +97,9 @@ private:
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  int m_selectedSpectrum;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
