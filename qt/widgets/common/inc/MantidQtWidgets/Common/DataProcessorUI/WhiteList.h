@@ -1,6 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/Column.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ConstColumnIterator.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <map>
@@ -37,62 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class Column {
-public:
-  Column(QString const &name, QString const &algorithmProperty, bool isShown,
-         QString const &prefix, QString const &description);
-  QString const &name() const;
-  QString const &algorithmProperty() const;
-  bool isShown() const;
-  QString const &prefix() const;
-  QString const &description() const;
-
-private:
-  QString const &m_name;
-  QString const &m_algorithmProperty;
-  bool m_isShown;
-  QString const &m_prefix;
-  QString const &m_description;
-};
-
-class ConstColumnIterator {
-  using QStringIterator = std::vector<QString>::const_iterator;
-  using BoolIterator = std::vector<bool>::const_iterator;
-
-public:
-  using iterator_category = std::forward_iterator_tag;
-  using reference = const Column;
-  using pointer = const Column *;
-  using value_type = const Column;
-  using difference_type = typename QStringIterator::difference_type;
-  ConstColumnIterator(QStringIterator names, QStringIterator descriptions,
-                      QStringIterator algorithmProperties, BoolIterator isShown,
-                      QStringIterator prefixes);
-
-  ConstColumnIterator &operator++();
-  ConstColumnIterator operator++(int);
-  reference operator*() const;
-  bool operator==(const ConstColumnIterator &other) const;
-  bool operator!=(const ConstColumnIterator &other) const;
-  ConstColumnIterator &operator+=(difference_type n);
-  ConstColumnIterator &operator-=(difference_type n);
-
-private:
-  QStringIterator m_names;
-  QStringIterator m_descriptions;
-  QStringIterator m_algorithmProperties;
-  BoolIterator m_isShown;
-  QStringIterator m_prefixes;
-};
-
-ConstColumnIterator operator+(const ConstColumnIterator &lhs,
-                              ConstColumnIterator::difference_type n);
-ConstColumnIterator operator+(ConstColumnIterator::difference_type n,
-                              const ConstColumnIterator &rhs);
-ConstColumnIterator operator-(const ConstColumnIterator &lhs,
-                              ConstColumnIterator::difference_type n);
-ConstColumnIterator operator-(ConstColumnIterator::difference_type n,
-                              const ConstColumnIterator &rhs);
 
 class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:

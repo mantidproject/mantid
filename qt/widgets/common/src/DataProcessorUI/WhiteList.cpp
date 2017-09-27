@@ -1,81 +1,9 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
-
 #include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-
-Column::Column(QString const &name, QString const &algorithmProperty,
-               bool isShown, QString const &prefix, QString const &description)
-    : m_name(name), m_algorithmProperty(algorithmProperty), m_isShown(isShown),
-      m_prefix(prefix), m_description(description) {}
-
-QString const &Column::algorithmProperty() const { return m_algorithmProperty; }
-
-bool Column::isShown() const { return m_isShown; }
-
-QString const &Column::prefix() const { return m_prefix; }
-
-QString const &Column::description() const { return m_description; }
-
-QString const &Column::name() const { return m_name; }
-
-ConstColumnIterator::ConstColumnIterator(QStringIterator names,
-                                         QStringIterator descriptions,
-                                         QStringIterator algorithmProperties,
-                                         BoolIterator isShown,
-                                         QStringIterator prefixes)
-    : m_names(names), m_descriptions(descriptions),
-      m_algorithmProperties(algorithmProperties), m_isShown(isShown),
-      m_prefixes(prefixes) {}
-
-ConstColumnIterator &ConstColumnIterator::operator++() {
-  ++m_names;
-  ++m_descriptions;
-  ++m_algorithmProperties;
-  ++m_isShown;
-  ++m_prefixes;
-  return (*this);
-}
-
-ConstColumnIterator ConstColumnIterator::operator++(int) {
-  auto result = (*this);
-  ++result;
-  return result;
-}
-
-bool ConstColumnIterator::operator==(const ConstColumnIterator &other) const {
-  return m_names == other.m_names;
-}
-
-bool ConstColumnIterator::operator!=(const ConstColumnIterator &other) const {
-  return !((*this) == other);
-}
-
-auto ConstColumnIterator::operator*() const -> reference {
-  return reference(*m_names, *m_algorithmProperties, *m_isShown, *m_prefixes,
-                   *m_descriptions);
-}
-
-ConstColumnIterator &ConstColumnIterator::operator+=(difference_type n) {
-  m_names += n;
-  m_algorithmProperties += n;
-  m_isShown += n;
-  m_prefixes += n;
-  m_descriptions += n;
-  return (*this);
-}
-
-ConstColumnIterator &ConstColumnIterator::operator-=(difference_type n) {
-  m_names -= n;
-  m_algorithmProperties -= n;
-  m_isShown -= n;
-  m_prefixes -= n;
-  m_descriptions -= n;
-  return (*this);
-}
-
 /** Adds an element to the whitelist
 * @param colName : the name of the column to be added
 * @param algProperty : the name of the property linked to this column

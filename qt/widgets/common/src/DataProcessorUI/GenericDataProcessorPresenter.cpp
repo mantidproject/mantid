@@ -122,15 +122,15 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
-      m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
-      m_processor(processor),
+      m_mainPresenter(), m_loader(loader),
       m_postprocessing(
           postprocessor.name().isEmpty()
               ? boost::optional<PostprocessingStep>()
               : PostprocessingStep(QString(), postprocessor, postprocessMap)),
-      m_progressReporter(nullptr), m_preprocessing(QString(), preprocessMap),
-      m_promptUser(true), m_tableDirty(false), m_pauseReduction(false),
-      m_reductionPaused(true), m_nextActionFlag(ReductionFlag::StopReduceFlag) {
+      m_preprocessing(QString(), preprocessMap), m_whitelist(whitelist),
+      m_processor(processor), m_progressReporter(nullptr), m_promptUser(true),
+      m_tableDirty(false), m_pauseReduction(false), m_reductionPaused(true),
+      m_nextActionFlag(ReductionFlag::StopReduceFlag) {
 
   // Column Options must be added to the whitelist
   m_whitelist.addElement("Options", "Options",
@@ -556,8 +556,8 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist,
-        m_preprocessing.m_map, m_processor, *m_postprocessing, preprocessingOptionsMap,
-         m_processingOptions);
+        m_preprocessing.m_map, m_processor, *m_postprocessing,
+        preprocessingOptionsMap, m_processingOptions);
     auto generatedNotebook =
         std::string(notebook->generateNotebook(data).toStdString());
 

@@ -75,6 +75,8 @@
 	src/DataProcessorUI/WhiteList.cpp
     src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
+    src/DataProcessorUI/Column.cpp
+    src/DataProcessorUI/ConstColumnIterator.cpp
 	src/ParseKeyValueString.cpp
 	src/ParseNumerics.cpp
 	src/DataProcessorUI/QOneLevelTreeModel.cpp
