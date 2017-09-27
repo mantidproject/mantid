@@ -79,8 +79,6 @@ void MSDFit::run() {
   auto model = m_uiForm.cbModelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
 
-  double xStart = m_dblManager->value(m_properties["StartX"]);
-  double xEnd = m_dblManager->value(m_properties["EndX"]);
   long specMin = m_uiForm.spSpectraMin->value();
   long specMax = m_uiForm.spSpectraMax->value();
 
@@ -332,7 +330,7 @@ void MSDFit::updateRS(QtProperty *prop, double val) {
  *                        model in the property table.
  */
 QtProperty *MSDFit::createModel(const QString &modelName,
-                                const std::vector<QString> modelParameters) {
+                                const std::vector<QString> &modelParameters) {
   QtProperty *expGroup = m_grpManager->addProperty(modelName);
 
   for (auto &modelParam : modelParameters) {

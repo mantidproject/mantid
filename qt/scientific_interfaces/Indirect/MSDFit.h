@@ -42,7 +42,7 @@ private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
                                                long specMin, long specMax);
   QtProperty *createModel(const QString &modelName,
-                          const std::vector<QString> modelParameters);
+                          const std::vector<QString> &modelParameters);
   void plotResult(const std::string &groupWsName, size_t specNo);
   QHash<QString, QString> createParameterToPropertyMap(const QString &model);
   std::string modelToAlgorithmProperty(const QString &model);
