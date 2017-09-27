@@ -3,15 +3,21 @@ import numpy as np
 from CrystalField import CrystalField, Function
 
 
-def makeWorkspace(xArray, yArray):
-    """Create a workspace that doesn't appear in the ADS"""
+def makeWorkspace(xArray, yArray, child=True, ws_name='dummy'):
+    """
+    Create a workspace.
+    @param xArray: DataX values
+    @param yArray: DataY values
+    @param child: if true, the workspace won't appear in the ADS
+    @param ws_name: name of the workspace
+    """
     from mantid.api import AlgorithmManager
     alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
     alg.initialize()
-    alg.setChild(True)
+    alg.setChild(child)
     alg.setProperty('DataX', xArray)
     alg.setProperty('DataY', yArray)
-    alg.setProperty('OutputWorkspace', 'dummy')
+    alg.setProperty('OutputWorkspace', ws_name)
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
@@ -46,10 +52,15 @@ class CrystalFieldMultiSite(object):
 
         self._makeFunction()
 
+        bg_params = {}
         backgroundPeak = kwargs.pop('BackgroundPeak', None)
+        if backgroundPeak is not None:
+            bg_params['peak'] = backgroundPeak
         background = kwargs.pop('Background', None)
-        if background is not None or backgroundPeak is not None:
-            self._setBackground(backgroundPeak, background)
+        if background is not None:
+            bg_params['background'] = background
+        if len(bg_params) > 0:
+            self._setBackground(**bg_params)
 
         self.Ions = Ions
         self.Symmetries = Symmetries
@@ -257,19 +268,13 @@ class CrystalFieldMultiSite(object):
         from mantidplot import plotSpectrum
         ws_name = args[3] if len(args) == 4 else 'CrystalFieldMultiSite_{}'.format(self.Ions)
         xArray, yArray = self.getSpectrum(*args)
+        ws_name += '_{}'.format(args[0])
         if isinstance(args[0], int):
             ws_name += '_{}'.format(args[1])
-        ws_name += '_{}'.format(args[0])
-        from mantid.api import AlgorithmManager
-        alg = AlgorithmManager.createUnmanaged('CreateWorkspace')
-        alg.initialize()
-        alg.setProperty('DataX', xArray)
-        alg.setProperty('DataY', yArray)
-        alg.setProperty('OutputWorkspace', ws_name)
-        alg.execute()
+        makeWorkspace(xArray, yArray, child=False, ws_name=ws_name)
         plotSpectrum(ws_name, 0)
 
-    def _setBackground(self, peak=None, background=None):
+    def _setBackground(self, **kwargs):
         """
         Set background function(s).
 
@@ -289,43 +294,53 @@ class CrystalFieldMultiSite(object):
         @param background: A function passed as the background. Can be a string or FunctionWrapper e.g.
                 'name=LinearBackground,A0=1' or LinearBackground(A0=1)
         """
+        self._background = Function(self.function, prefix='bg.')
+        if len(kwargs) == 2:
+            self._setCompositeBackground(kwargs['peak'], kwargs['background'])
+        elif len(kwargs) == 1:
+            if 'peak' in kwargs.keys():
+                self._setSingleBackground(kwargs['peak'], 'peak')
+            elif 'background' in kwargs.keys():
+                self._setSingleBackground(kwargs['background'], 'background')
+            else:
+                raise RuntimeError('_setBackground expects peak or background arguments only')
+        else:
+            raise RuntimeError('_setBackground takes 1 or 2 arguments, got {}'.format(len(kwargs)))
+
+    def _setSingleBackground(self, background, property_name):
         from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 
-        self._background = Function(self.function, prefix='bg.')
-        property_name = "peak"
-        if background is not None and peak is None: #swap arguments, then do single arg case
-            peak = background
-            background = None
-            property_name = "background"
-        if peak is not None and background is None: #single arg case
-            if isinstance(peak, str):
-                number_of_functions = peak.count(';') + 1
-                if number_of_functions == 2:
-                    peak, background = peak.split(';')
-                elif number_of_functions == 1:
-                    setattr(self._background, property_name, Function(self.function, prefix='bg.'))
-                    self.function.setAttributeValue('Background', peak)
-                else:
-                    raise ValueError("argument passed to background must have exactly 1 or 2 functions, got {}".format(
-                                     number_of_functions))
-
-
-            elif isinstance(peak, CompositeFunctionWrapper):
-                if len(peak) == 2:
-                    peak, background = str(peak).split(';')
-                else:
-                    raise ValueError("composite function passed to background must have "
-                                     "exactly 2 functions, got {}".format(len(peak)))
-            elif isinstance(peak, FunctionWrapper):
-                setattr(self._background, property_name, Function(self.function, prefix='bg.'))
-                self.function.setAttributeValue('Background', str(peak))
+        if isinstance(background, str):
+            self._setBackgroundUsingString(background, property_name)
+        elif isinstance(background, CompositeFunctionWrapper):
+            if len(background) == 2:
+                peak, background = str(background).split(';')
+                self._setCompositeBackground(peak, background)
             else:
-                raise TypeError("background argument(s) must be string or function object(s)")
+                raise ValueError("composite function passed to background must have "
+                                 "exactly 2 functions, got {}".format(len(background)))
+        elif isinstance(background, FunctionWrapper):
+            setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+            self.function.setAttributeValue('Background', str(background))
+        else:
+            raise TypeError("background argument(s) must be string or function object(s)")
 
-        if background is not None and peak is not None:
-            self._background.peak = Function(self.function, prefix='bg.f0.')
-            self._background.background = Function(self.function, prefix='bg.f1.')
-            self.function.setAttributeValue('Background', '{0};{1}'.format(peak, background))
+    def _setCompositeBackground(self, peak, background):
+        self._background.peak = Function(self.function, prefix='bg.f0.')
+        self._background.background = Function(self.function, prefix='bg.f1.')
+        self.function.setAttributeValue('Background', '{0};{1}'.format(peak, background))
+
+    def _setBackgroundUsingString(self, background, property_name):
+        number_of_functions = background.count(';') + 1
+        if number_of_functions == 2:
+            peak, background = background.split(';')
+            self._setCompositeBackground(peak, background)
+        elif number_of_functions == 1:
+            setattr(self._background, property_name, Function(self.function, prefix='bg.'))
+            self.function.setAttributeValue('Background', background)
+        else:
+            raise ValueError("string passed to background must have exactly 1 or 2 functions, got {}".format(
+                number_of_functions))
 
     def _combine_multisite(self, other):
         """Used to add two CrystalFieldMultiSite"""
