@@ -117,6 +117,7 @@ above:
 The following parameters may also be optionally set:
 
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
+- :ref:`suffix_polaris_isis-powder-diffraction-ref`
 
 
 Example
@@ -514,6 +515,21 @@ Example Input:
   polaris_example.focus(sample_empty=100, ...)
   # Or a range of numbers
   polaris_example.focus(sample_empty="100-110", ...)
+
+.. _suffix_polaris_isis-powder-diffraction-ref:
+  
+suffix
+^^^^^^
+*Optional*
+
+This parameter specifies a suffix to append the names of output files
+during a focus.
+
+Example Input:
+
+.. code-block:: python
+
+  polaris_example.focus(suffix="-corr", ...) 
 
 .. _user_name_polaris_isis-powder-diffraction-ref:
 
