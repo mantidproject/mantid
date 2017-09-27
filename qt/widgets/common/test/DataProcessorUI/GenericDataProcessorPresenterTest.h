@@ -1111,7 +1111,7 @@ public:
 	  NiceMock<MockProgressableView> mockProgress;
 	  NiceMock<MockMainPresenter> mockMainPresenter;
 	  GenericDataProcessorPresenterNoThread presenter(
-		  createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+		  createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
 		  createReflectometryProcessor(), createReflectometryPostprocessor());
 	  presenter.acceptViews(&mockDataProcessorView, &mockProgress);
 	  presenter.accept(&mockMainPresenter);
