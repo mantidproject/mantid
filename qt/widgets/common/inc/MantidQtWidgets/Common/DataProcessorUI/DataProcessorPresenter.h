@@ -105,6 +105,8 @@ public:
                               int parentColumn) = 0;
   virtual int getNumberOfRows() = 0;
   virtual void clearTable() = 0;
+
+  virtual void skipProcessing() = 0;
 };
 }
 }
