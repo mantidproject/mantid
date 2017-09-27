@@ -6,11 +6,6 @@
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidGeometry/Objects/Object.h"
 
-namespace {
-/// Maximum number of tries to generate a track through the sample
-unsigned int MAX_EVENT_ATTEMPTS = 100;
-}
-
 namespace Mantid {
 using Kernel::PseudoRandomNumberGenerator;
 
@@ -21,14 +16,18 @@ namespace Algorithms {
  * @param beamProfile A reference to the object the beam profile
  * @param sample A reference to the object defining details of the sample
  * @param nevents The number of Monte Carlo events used in the simulation
+ * @param maxScatterPtAttempts The maximum number of tries to generate a random
+ * point within the object.
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(const IBeamProfile &beamProfile,
                                            const API::Sample &sample,
-                                           size_t nevents)
+                                           size_t nevents,
+                                           size_t maxScatterPtAttempts)
     : m_beamProfile(beamProfile),
       m_scatterVol(
           MCInteractionVolume(sample, beamProfile.defineActiveRegion(sample))),
-      m_nevents(nevents), m_error(1.0 / std::sqrt(m_nevents)) {}
+      m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
+      m_error(1.0 / std::sqrt(m_nevents)) {}
 
 /**
  * Compute the correction for a final position of the neutron and wavelengths
@@ -59,9 +58,13 @@ MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
         factor += wgt;
         break;
       }
-      if (attempts == MAX_EVENT_ATTEMPTS) {
+      if (attempts == m_maxScatterAttempts) {
         throw std::runtime_error("Unable to generate valid track through "
-                                 "sample interaction volume.");
+                                 "sample interaction volume after " +
+                                 std::to_string(m_maxScatterAttempts) +
+                                 " attempts. Try increasing the maximum "
+                                 "threshold or if this does not help then "
+                                 "please check the defined shape.");
       }
     } while (true);
   }

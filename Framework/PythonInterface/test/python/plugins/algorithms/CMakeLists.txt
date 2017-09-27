@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CompareSampleLogsTest.py
   ComputeCalibrationCoefVanTest.py
+  ComputeIncoherentDOSTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CorrectTOFTest.py

@@ -437,57 +437,75 @@ void IMWDomainCreator::addFunctionValuesToWS(
   function->function(*domain, *resultValues);
 
   size_t nParams = function->nParams();
-  // and errors
-  SimpleJacobian J(nData, nParams);
-  try {
-    function->functionDeriv(*domain, J);
-  } catch (...) {
-    function->calNumericalDeriv(*domain, J);
-  }
 
   // the function should contain the parameter's covariance matrix
   auto covar = function->getCovarianceMatrix();
+  bool hasErrors = false;
+  if (!covar) {
+    for (size_t j = 0; j < nParams; ++j) {
+      if (function->getError(j) != 0.0) {
+        hasErrors = true;
+        break;
+      }
+    }
+  }
 
-  if (covar) {
-    // if the function has a covariance matrix attached - use it for the errors
-    const Kernel::Matrix<double> &C = *covar;
-    // The formula is E = J * C * J^T
-    // We don't do full 3-matrix multiplication because we only need the
-    // diagonals of E
-    std::vector<double> E(nData);
-    for (size_t k = 0; k < nData; ++k) {
-      double s = 0.0;
-      for (size_t i = 0; i < nParams; ++i) {
-        double tmp = J.get(k, i);
-        s += C[i][i] * tmp * tmp;
-        for (size_t j = i + 1; j < nParams; ++j) {
-          s += J.get(k, i) * C[i][j] * J.get(k, j) * 2;
+  if (covar || hasErrors) {
+    // and errors
+    SimpleJacobian J(nData, nParams);
+    try {
+      function->functionDeriv(*domain, J);
+    } catch (...) {
+      function->calNumericalDeriv(*domain, J);
+    }
+    if (covar) {
+      // if the function has a covariance matrix attached - use it for the
+      // errors
+      const Kernel::Matrix<double> &C = *covar;
+      // The formula is E = J * C * J^T
+      // We don't do full 3-matrix multiplication because we only need the
+      // diagonals of E
+      std::vector<double> E(nData);
+      for (size_t k = 0; k < nData; ++k) {
+        double s = 0.0;
+        for (size_t i = 0; i < nParams; ++i) {
+          double tmp = J.get(k, i);
+          s += C[i][i] * tmp * tmp;
+          for (size_t j = i + 1; j < nParams; ++j) {
+            s += J.get(k, i) * C[i][j] * J.get(k, j) * 2;
+          }
         }
+        E[k] = s;
       }
-      E[k] = s;
-    }
 
-    double chi2 = function->getChiSquared();
-    auto &yValues = ws->mutableY(wsIndex);
-    auto &eValues = ws->mutableE(wsIndex);
-    for (size_t i = 0; i < nData; i++) {
-      yValues[i] = resultValues->getCalculated(i);
-      eValues[i] = std::sqrt(E[i] * chi2);
-    }
+      double chi2 = function->getChiSquared();
+      auto &yValues = ws->mutableY(wsIndex);
+      auto &eValues = ws->mutableE(wsIndex);
+      for (size_t i = 0; i < nData; i++) {
+        yValues[i] = resultValues->getCalculated(i);
+        eValues[i] = std::sqrt(E[i] * chi2);
+      }
 
+    } else {
+      // otherwise use the parameter errors which is OK for uncorrelated
+      // parameters
+      auto &yValues = ws->mutableY(wsIndex);
+      auto &eValues = ws->mutableE(wsIndex);
+      for (size_t i = 0; i < nData; i++) {
+        yValues[i] = resultValues->getCalculated(i);
+        double err = 0.0;
+        for (size_t j = 0; j < nParams; ++j) {
+          double d = J.get(i, j) * function->getError(j);
+          err += d * d;
+        }
+        eValues[i] = std::sqrt(err);
+      }
+    }
   } else {
-    // otherwise use the parameter errors which is OK for uncorrelated
-    // parameters
+    // No errors
     auto &yValues = ws->mutableY(wsIndex);
-    auto &eValues = ws->mutableE(wsIndex);
     for (size_t i = 0; i < nData; i++) {
       yValues[i] = resultValues->getCalculated(i);
-      double err = 0.0;
-      for (size_t j = 0; j < nParams; ++j) {
-        double d = J.get(i, j) * function->getError(j);
-        err += d * d;
-      }
-      eValues[i] = std::sqrt(err);
     }
   }
 }

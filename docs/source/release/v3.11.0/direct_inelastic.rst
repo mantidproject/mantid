@@ -25,10 +25,15 @@ Algorithms
 - A bug was fixed in :ref:`DPDFReduction <algm-DPDFReduction>` to comply with the signature of one of the underlying C-functions.
 - :ref:`algm-ComputeCalibrationCoefVan` uses :ref:`algm-IntegrateEPP` as its backend instead of manual summation when integrating the vanadium peak.
 
+Crystal Field
+#############
+
+- Added new fitting :ref:`function <func-CrystalFieldFunction>` that calculates crystal field spectra and physical properties for a multi-site case.
+
 Other changes
 #############
 
-- New T0 formula for CNCS instrument
+- New :math:`T_0`  formula for CNCS instrument
 
 Instrument definitions
 ----------------------

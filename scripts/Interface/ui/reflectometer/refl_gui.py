@@ -745,27 +745,29 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
-                                two_theta_str = str(self.tableMain.item(row, 1).text())
+                                theta_in_str = str(self.tableMain.item(row, 1).text())
                             try:
-                                two_theta = None
-                                if len(two_theta_str) > 0:
-                                    two_theta = float(two_theta_str)
+                                theta_in = None
+                                if len(theta_in_str) > 0:
+                                    theta_in = float(theta_in_str)
 
                                 # Make sure we only ever run calculate resolution on a non-group workspace.
                                 # If we're given a group workspace, we can just run it on the first member of the group instead
                                 thetaRun = loadedRun
                                 if isinstance(thetaRun, WorkspaceGroup):
                                     thetaRun = thetaRun[0]
-                                dqq, two_theta = CalculateResolution(Workspace=thetaRun, TwoTheta=two_theta)
+                                if not theta_in:
+                                    theta_in = getLogValue(thetaRun, "Theta")
+                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2*theta_in)
 
                                 # Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
                                 resItem.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, resItem)
 
-                                # Update the value for two_theta in the table
+                                # Update the value for theta_in in the table
                                 ttItem = QtGui.QTableWidgetItem()
-                                ttItem.setText(str(two_theta))
+                                ttItem.setText(str(theta_in))
                                 self.tableMain.setItem(row, 1, ttItem)
 
                                 logger.notice("Calculated resolution: " + str(dqq))
@@ -778,7 +780,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        # Check secondary and tertiary two_theta columns, if they're
+                        # Check secondary and tertiary theta_in columns, if they're
                         # blank and their corresponding run columns are set, fill them.
                         for run_col in [5, 10]:
                             tht_col = run_col + 1
