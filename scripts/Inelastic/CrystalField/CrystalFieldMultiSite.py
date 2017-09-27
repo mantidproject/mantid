@@ -38,22 +38,6 @@ def get_parameters(crystal_field, ion_prefix, existing_prefix):
         params[ion_prefix + bparam] = crystal_field[existing_prefix + bparam]
     return params
 
-def read_and_del(key, dict):
-    value = None
-    if key in dict:
-        value = dict[key]
-        del dict[key]
-    return value, dict
-
-
-def iterable_to_string(iterable):
-    values_as_string = ""
-    for element in iterable:
-        values_as_string += ","
-        values_as_string += element
-    values_as_string = values_as_string[1:]
-    return values_as_string
-
 
 class CrystalFieldMultiSite(object):
 
@@ -62,8 +46,8 @@ class CrystalFieldMultiSite(object):
 
         self._makeFunction()
 
-        backgroundPeak, kwargs = read_and_del('BackgroundPeak', kwargs)
-        background, kwargs = read_and_del('Background', kwargs)
+        backgroundPeak = kwargs.pop('BackgroundPeak', None)
+        background = kwargs.pop('Background', None)
         if background is not None or backgroundPeak is not None:
             self._setBackground(backgroundPeak, background)
 
@@ -72,13 +56,13 @@ class CrystalFieldMultiSite(object):
         self._plot_window = {}
         self.chi2 = None
 
-        parameter_dict, kwargs = read_and_del('parameters', kwargs)
-        attribute_dict, kwargs = read_and_del('attributes', kwargs)
+        parameter_dict = kwargs.pop('parameters', None)
+        attribute_dict = kwargs.pop('attributes', None)
 
         kwargs = self._setMandatoryArguments(kwargs)
 
         self._abundances = OrderedDict()
-        abundances, kwargs = read_and_del('abundances', kwargs)
+        abundances= kwargs.pop('abundances', None)
         self._makeAbundances(abundances)
 
         self._setRemainingArguments(kwargs)
@@ -92,14 +76,11 @@ class CrystalFieldMultiSite(object):
 
     def _setMandatoryArguments(self, kwargs):
         if 'Temperatures' in kwargs:
-            self.Temperatures = kwargs['Temperatures']
-            del kwargs['Temperatures']
+            self.Temperatures = kwargs.pop('Temperatures')
             if 'FWHMs' in kwargs:
-                self.FWHMs = kwargs['FWHMs']
-                del kwargs['FWHMs']
+                self.FWHMs = kwargs.pop('FWHMs')
             elif 'ResolutionModel' in kwargs:
-                self.ResolutionModel = kwargs['ResolutionModel']
-                del kwargs['ResolutionModel']
+                self.ResolutionModel = kwargs.pop('ResolutionModel')
             else:
                 raise RuntimeError("If temperatures are set, must also set FWHMs or ResolutionModel")
         return kwargs
@@ -108,7 +89,7 @@ class CrystalFieldMultiSite(object):
         possible_args = ['ToleranceEnergy', 'ToleranceIntensity', 'NPeaks', 'FWHMVariation', 'FixAllPeaks',
                          'PeakShape', 'PhysicalProperty']
         for attribute in possible_args:
-            value, kwargs = read_and_del(attribute, kwargs)
+            value = kwargs.pop(attribute, None)
             if value is not None:
                 setattr(self, attribute, value)
 
@@ -440,7 +421,7 @@ class CrystalFieldMultiSite(object):
         if isinstance(value, str):
             self.function.setAttributeValue('Ions', value)
         else:
-            self.function.setAttributeValue('Ions', iterable_to_string(value))
+            self.function.setAttributeValue('Ions', ','.join(value))
 
     @property
     def Symmetries(self):
@@ -453,7 +434,7 @@ class CrystalFieldMultiSite(object):
         if isinstance(value, str):
             self.function.setAttributeValue('Symmetries', value)
         else:
-            self.function.setAttributeValue('Symmetries', iterable_to_string(value))
+            self.function.setAttributeValue('Symmetries', ','.join(value))
 
     @property
     def ToleranceEnergy(self):
