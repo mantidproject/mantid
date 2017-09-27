@@ -171,6 +171,36 @@ void FilterEvents::init() {
                   "Otherwise, only those specified logs will be split.");
 }
 
+std::map<std::string, std::string> FilterEvents::validateInputs() {
+  const std::string SPLITER_PROP_NAME = "SplitterWorkspace";
+  std::map<std::string, std::string> result;
+
+  // check the splitters workspace for special behavior
+  API::Workspace_const_sptr wksp = this->getProperty(SPLITER_PROP_NAME);
+  // SplittersWorkspace is a special type that needs no further checking
+  if (!bool(boost::dynamic_pointer_cast<const SplittersWorkspace>(wksp))) {
+    const auto table = boost::dynamic_pointer_cast<const TableWorkspace>(wksp);
+    const auto matrix =
+        boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
+    if (bool(table)) {
+      if (table->columnCount() != 3)
+        result[SPLITER_PROP_NAME] = "TableWorkspace must have 3 columns";
+    } else if (bool(matrix)) {
+      if (matrix->getNumberHistograms() == 1) {
+        if (!matrix->isHistogramData())
+          result[SPLITER_PROP_NAME] = "MatrixWorkspace must be histogram";
+      } else {
+        result[SPLITER_PROP_NAME] =
+            "MatrixWorkspace can have only one histogram";
+      }
+    } else {
+      result[SPLITER_PROP_NAME] = "Incompatible workspace type";
+    }
+  }
+
+  return result;
+}
+
 /** Execution body
  */
 void FilterEvents::exec() {
@@ -845,23 +875,24 @@ void FilterEvents::processMatrixSplitterWorkspace() {
   // Check input workspace validity
   assert(m_matrixSplitterWS);
 
-  auto X = m_matrixSplitterWS->binEdges(0);
-  auto &Y = m_matrixSplitterWS->y(0);
-  size_t sizex = X.size();
-  size_t sizey = Y.size();
+  const auto X = m_matrixSplitterWS->binEdges(0);
+  const auto &Y = m_matrixSplitterWS->y(0);
+  const size_t sizex = X.size();
+  const size_t sizey = Y.size();
 
   // Assign vectors for time comparison
-  m_vecSplitterTime.assign(X.size(), 0);
-  m_vecSplitterGroup.assign(Y.size(), -1);
+  m_vecSplitterTime.assign(sizex, static_cast<int64_t>(0));
+  m_vecSplitterGroup.assign(sizey, static_cast<int>(-1));
 
   // Transform vector
   for (size_t i = 0; i < sizex; ++i) {
     m_vecSplitterTime[i] = static_cast<int64_t>(X[i] * 1.E9);
   }
+
   // shift the splitters' time if user specifis that the input times are
   // relative
   if (m_isSplittersRelativeTime) {
-    int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
+    const int64_t time_shift_ns = m_filterStartTime.totalNanoseconds();
     for (size_t i = 0; i < sizex; ++i)
       m_vecSplitterTime[i] += time_shift_ns;
   }

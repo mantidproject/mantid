@@ -147,6 +147,8 @@ public:
   bool isProcessing() const override;
   void setForcedReProcessing(bool forceReProcessing) override;
 
+  void skipProcessing() override;
+
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
   // The table view we're managing
@@ -313,6 +315,7 @@ private:
   bool isProcessed(int position) const;
   bool isProcessed(int position, int parent) const;
   bool m_forceProcessing = false;
+  bool m_skipProcessing = false;
 
   // List of workspaces the user can open
   QSet<QString> m_workspaceList;

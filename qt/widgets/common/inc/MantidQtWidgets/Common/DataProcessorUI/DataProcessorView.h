@@ -113,6 +113,10 @@ public:
   // Methods to emit signals
   virtual void emitProcessClicked() = 0;
   virtual void emitProcessingFinished() = 0;
+
+  //
+  virtual void skipProcessing() = 0;
+
 };
 }
 }

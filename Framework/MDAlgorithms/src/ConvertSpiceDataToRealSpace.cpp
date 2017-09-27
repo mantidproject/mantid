@@ -49,7 +49,7 @@ void ConvertSpiceDataToRealSpace::init() {
                   "input RunInfoWorkspace.");
 
   /// TODO - Add HB2B as it is implemented in future
-  std::vector<std::string> allowedinstruments{"HB2A"};
+  std::array<std::string, 1> allowedinstruments = {{"HB2A"}};
   auto instrumentvalidator =
       boost::make_shared<ListValidator<std::string>>(allowedinstruments);
   declareProperty("Instrument", "HB2A", instrumentvalidator,

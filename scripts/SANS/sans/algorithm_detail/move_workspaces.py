@@ -451,14 +451,15 @@ class SANSMoveSANS2D(SANSMove):
         move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates)
 
     @staticmethod
-    def _move_monitor_4(workspace, move_info):
-        if move_info.monitor_4_offset != 0.0:
-            monitor_4_name = move_info.monitor_names["4"]
+    def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
+        if move_info.monitor_n_offset != 0.0:
+            monitor_spectrum_number_as_string = str(monitor_spectrum_number)
+            monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
             instrument = workspace.getInstrument()
-            monitor_4 = instrument.getComponentByName(monitor_4_name)
+            monitor_n = instrument.getComponentByName(monitor_n_name)
 
-            # Get position of monitor 4
-            monitor_position = monitor_4.getPos()
+            # Get position of monitor n
+            monitor_position = monitor_n.getPos()
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
@@ -468,12 +469,12 @@ class SANSMoveSANS2D(SANSMove):
             detector_position = lab_detector_component.getPos()
             z_position_detector = detector_position.getZ()
 
-            monitor_4_offset = move_info.monitor_4_offset
-            z_new = z_position_detector + monitor_4_offset
+            monitor_n_offset = move_info.monitor_n_offset
+            z_new = z_position_detector + monitor_n_offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
-            move_component(workspace, offset, monitor_4_name)
+            move_component(workspace, offset, monitor_n_name)
 
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
@@ -491,8 +492,9 @@ class SANSMoveSANS2D(SANSMove):
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
-        # Move monitor 4
-        self._move_monitor_4(workspace, move_info)
+        # Move monitor
+        monitor_spectrum_number = 4
+        self._move_monitor_n(workspace, move_info, monitor_spectrum_number=monitor_spectrum_number)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates

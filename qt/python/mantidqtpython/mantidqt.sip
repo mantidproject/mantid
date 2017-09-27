@@ -162,7 +162,7 @@ class InterfaceManager
 %End
 public:
   MantidQt::API::AlgorithmDialog* createDialogFromName(const QString&, const int = -1,
-                                                       QWidget* = 0, bool = false);
+                                                       QWidget* = 0, bool = false) throw(std::exception);
   MantidQt::API::UserSubWindow* createSubWindow(const QString& interface_name, QWidget* parent = 0);
 
   void showHelpPage(const QString & url=QString());
@@ -1565,6 +1565,7 @@ void setCell(const QString &, int, int, int parentRow = 0, int parentColumn = 0)
 QString getCell(int, int, int parentRow = 0, int parentColumn = 0);
 int getNumberOfRows();
 void clearTable();
+void skipProcessing();
 
 signals:
 void runPythonCode(const QString &);

@@ -1701,7 +1701,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  layer = window.activeLayer()";
   s << "  if layer is not None:";
   s << "    kept_fits = 0";
-  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "    for i in range(layer.numCurves() - 1, 0, -1):"; // reversed
   s << "      title = layer.curveTitle(i)";
   s << "      if title == \"CompositeFunction\":";
   s << "        continue"; // keep all guesses
@@ -1764,8 +1764,15 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
   s << "if %FITSTOKEEP% != -1:";
+  // leave the 0th layer -> layer is not empty
   s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
+  // if there is more than one layer delete the oldest one manually
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  layer = win.activeLayer()";
+  s << "  if layer.numCurves()>1:";
+  s << "     layer.removeCurve(0)";
+
   s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
   QString pyS;
@@ -2193,6 +2200,7 @@ void MuonAnalysis::handleGroupBox() {
     updateLabels(names[0]);
   }
   m_fitDataPresenter->handleSelectedDataChanged(true);
+  m_dataSelector->checkForMultiGroupPeriodSelection();
 }
 /**
 * Handle"periods" selected/deselected

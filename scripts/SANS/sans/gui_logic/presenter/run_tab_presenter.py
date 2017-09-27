@@ -47,6 +47,9 @@ class RunTabPresenter(object):
         def on_user_file_load(self):
             self._presenter.on_user_file_load()
 
+        def on_mask_file_add(self):
+            self._presenter.on_mask_file_add()
+
         def on_batch_file_load(self):
             self._presenter.on_batch_file_load()
 
@@ -181,7 +184,8 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except Exception as e:
-            self.sans_logger.error("Loading of the user file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the user file failed. Ensure that the path to your files has been added "
+                                   "to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_batch_file_load(self):
         """
@@ -217,7 +221,8 @@ class RunTabPresenter(object):
             self._settings_diagnostic_tab_presenter.on_update_rows()
 
         except RuntimeError as e:
-            self.sans_logger.error("Loading of the batch file failed. See here for more details: {}".format(str(e)))
+            self.sans_logger.error("Loading of the batch file failed. Ensure that the path to your files has been added"
+                                   " to the Mantid search directories! See here for more details: {}".format(str(e)))
 
     def on_processed_clicked(self):
         """
@@ -236,6 +241,7 @@ class RunTabPresenter(object):
         # 1. Set up the states and convert them into property managers
         states = self.get_states()
         if not states:
+            self._view.halt_process_flag()
             raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                "has been loaded")
         property_manager_service = PropertyManagerService()
@@ -250,6 +256,27 @@ class RunTabPresenter(object):
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
+
+    def on_mask_file_add(self):
+        """
+        We get the added mask file name and add it to the list of masks
+        """
+        new_mask_file = self._view.get_mask_file()
+        if not new_mask_file:
+            return
+        new_mask_file_full_path = FileFinder.getFullPath(new_mask_file)
+        if not new_mask_file_full_path:
+            return
+
+        # Add the new mask file to state model
+        mask_files = self._state_model.mask_files
+
+        mask_files.append(new_mask_file)
+        self._state_model.mask_files = mask_files
+
+        # Make sure that the sub-presenters are up to date with this change
+        self._masking_table_presenter.on_update_rows()
+        self._settings_diagnostic_tab_presenter.on_update_rows()
 
     def _add_to_hidden_options(self, row, property_name, property_value):
         """
@@ -316,6 +343,7 @@ class RunTabPresenter(object):
             if not self.is_empty_row(row):
                 sample_scatter = self._view.get_cell(row, 0)
                 if not sample_scatter:
+                    self._view.halt_process_flag()
                     raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
 
     def get_processing_options(self):
@@ -452,7 +480,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_mask_files")
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
-        self._set_on_view("transmission_m4_shift")
+        self._set_on_view("transmission_mn_shift")
 
         self._set_on_view_transmission_fit()
 
@@ -631,7 +659,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_mask_files", state_model)
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
-        self._set_on_state_model("transmission_m4_shift", state_model)
+        self._set_on_state_model("transmission_mn_shift", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 
@@ -812,9 +840,13 @@ class RunTabPresenter(object):
                     state = gui_state_director.create_state(row)
                     states.update({row: state})
                 except ValueError as e:
-                    self.sans_logger.error("There was a bad entry for row {}. See here for more details: {}".format(row, str(e)))  # noqa
-                    raise RuntimeError("There was a bad entry for row {}. "
-                                       "See here for more details: {}".format(row, str(e)))
+                    self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
+                                           "been added to the Mantid search directories! See here for more "
+                                           "details: {}".format(row, str(e)))
+                    self._view.halt_process_flag()
+                    raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
+                                       "been added to the Mantid search directories! See here for more "
+                                       "details: {}".format(row, str(e)))
         return states
 
     def _populate_row_in_table(self, row):

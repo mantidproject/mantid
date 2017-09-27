@@ -28,15 +28,15 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester)
     _phonon_dispersion_v2 = "MgO-222-DISP_LoadCRYSTAL"
 
     def test_gamma_crystal(self):
-        self._check(name=self._gamma_crystal, loader=AbinsModules.LoadCRYSTAL)
-        self._check(name=self._set_crystal, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._gamma_crystal, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._set_crystal, loader=AbinsModules.LoadCRYSTAL)
 
     def test_molecule(self):
-        self._check(name=self._molecule, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._molecule, loader=AbinsModules.LoadCRYSTAL)
 
     def test_phonon_dispersion_crystal(self):
-        self._check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
-        self._check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
+        self.check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
 
 if __name__ == '__main__':
     unittest.main()

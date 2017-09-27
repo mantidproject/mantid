@@ -615,7 +615,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     elif reduction_mode is ISISReductionMode.HAB:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
                          "OutputWorkspaceHAB", "reduced_hab_name", "reduced_hab_base_name")
-    elif reduction_mode is ISISReductionMode.Both:
+    elif reduction_mode is ISISReductionMode.All:
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.LAB,
                          "OutputWorkspaceLAB", "reduced_lab_name", "reduced_lab_base_name")
         _set_output_name(reduction_alg, reduction_package, is_group, ISISReductionMode.HAB,
@@ -636,7 +636,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         _set_lab(reduction_alg, reduction_package, is_group)
     elif reduction_mode is ISISReductionMode.HAB:
         _set_hab(reduction_alg, reduction_package, is_group)
-    elif reduction_mode is ISISReductionMode.Both:
+    elif reduction_mode is ISISReductionMode.All:
         _set_lab(reduction_alg, reduction_package, is_group)
         _set_hab(reduction_alg, reduction_package, is_group)
     else:
