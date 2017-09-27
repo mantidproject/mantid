@@ -117,6 +117,7 @@ above:
 The following parameters may also be optionally set:
 
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
+- :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
 
 
