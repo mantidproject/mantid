@@ -22,7 +22,7 @@ except ImportError:
 from . import ui_sans_data_processor_window as ui_sans_data_processor_window
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, SampleShape, ReductionMode, FitType)
-from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
+from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection, get_reduction_mode_strings_for_gui,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS, load_file)
 
 
@@ -287,8 +287,14 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         config.setString("default.instrument", instrument_string)
 
     def _handle_instrument_change(self):
+        # Set instrument as the default instrument
         instrument_string = str(self.data_processor_table.getCurrentInstrument())
         self._set_mantid_instrument(instrument_string)
+
+        # Set the reduction mode
+        self._instrument = SANSInstrument.from_string(instrument_string)
+        reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+        self.set_reduction_modes(reduction_mode_list)
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())
@@ -468,10 +474,6 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     # ------------------------------------------------------------------------------------------------------------------
     # Elements which can be set and read by the model
     # ------------------------------------------------------------------------------------------------------------------
-    def handle_instrument_change(self):
-        # TODO need to read it and set it as the default instrument
-        pass
-
     def set_instrument_settings(self, instrument):
         if instrument:
             self._instrument = instrument
@@ -639,8 +641,12 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
     def reduction_mode(self, value):
         # There are two types of values that can be passed:
         # String: we look for string and we set it
-
         # Convert the value to the correct GUI string
+
+        # Set the correct selection of reduction modes which are available
+        reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+        self.set_reduction_modes(reduction_mode_list)
+
         reduction_mode_as_string = get_string_for_gui_from_reduction_mode(value, self._instrument)
         if reduction_mode_as_string:
             index = self.reduction_mode_combo_box.findText(reduction_mode_as_string)

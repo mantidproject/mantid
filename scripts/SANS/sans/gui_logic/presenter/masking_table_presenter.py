@@ -397,7 +397,7 @@ class MaskingTablePresenter(object):
         masks = []
 
         mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)]
+        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)
@@ -408,8 +408,9 @@ class MaskingTablePresenter(object):
         masks.extend(spectrum_masks_lab)
 
         # Add the spectrum masks for HAB
-        spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
-        masks.extend(spectrum_masks_hab)
+        if mask_info_hab:
+            spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
+            masks.extend(spectrum_masks_hab)
 
         # Add the general time mask
         time_masks_general = self._get_time_masks_general(mask_info)
@@ -420,8 +421,9 @@ class MaskingTablePresenter(object):
         masks.extend(time_masks_lab)
 
         # Add the time masks for HAB
-        time_masks_hab = self._get_time_masks(mask_info_hab)
-        masks.extend(time_masks_hab)
+        if mask_info_hab:
+            time_masks_hab = self._get_time_masks(mask_info_hab)
+            masks.extend(time_masks_hab)
 
         # Add arm mask
         arm_mask = self._get_arm_mask(mask_info)
