@@ -1661,9 +1661,7 @@ void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
   m_groupsList = groupNames;
 }
-void MuonFitPropertyBrowser::setTFAsymm(bool state) {
-  m_boolManager->setValue(m_TFAsymmMode, state);
-}
+
 
 } // MantidQt
 } // API

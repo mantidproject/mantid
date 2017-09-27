@@ -121,7 +121,7 @@ public:
   void checkAndUpdateFitLabel(bool sequentialFit);
   /// Generate names of workspaces to be created
   std::vector<std::string> generateWorkspaceNames(bool overwrite) const;
-  void storeNormalization(std::string wsName) const;
+  void storeNormalization(std::string wsName,bool addToTable) const;
   void setTFAsymmState(const bool state) { m_isItTFAsymm = state; };
 signals:
   void setChosenGroupSignal(const QString &group);

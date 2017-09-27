@@ -115,7 +115,7 @@ MuonAnalysisFitDataPresenter::MuonAnalysisFitDataPresenter(
       m_dataSelector(dataSelector), m_dataLoader(dataLoader),
       m_timeZero(timeZero), m_rebinArgs(rebinArgs), m_grouping(grouping),
       m_plotType(plotType), m_fitRawData(fitBrowser->rawData()),
-      m_overwrite(false) {
+      m_overwrite(false),m_isItTFAsymm(false) {
   // Make sure the FitPropertyBrowser passed in implements the required
   // interfaces
   m_fitModel = dynamic_cast<IMuonFitDataModel *>(m_fitBrowser);
@@ -368,10 +368,10 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
 * do nothing.
 * @param name :: the name of the workspace to add.
 */
-void MuonAnalysisFitDataPresenter::storeNormalization(std::string name) const {
+void MuonAnalysisFitDataPresenter::storeNormalization(std::string name,bool addToTable) const {
   // not set correctly.... 
-  std::cout<<"testing "<<m_isItTFAsymm<<std::endl;
-  if (m_isItTFAsymm) {
+  std::cout<<"testing "<<addToTable<<std::endl;
+  if (addToTable) {
   std::cout<<"testing 1 "<<std::endl;
     if (!Mantid::API::AnalysisDataService::Instance().doesExist(
             "MuonAnalysisTFNormalizations")) {
@@ -485,8 +485,14 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
     err << "Failed to create analysis workspace " << name << ": " << ex.what();
     g_log.error(err.str());
   }
-  storeNormalization(name);
-
+  const auto grouping = m_grouping;
+  auto groupName= params.itemName;
+	  if (std::find(grouping.groupNames.begin(), grouping.groupNames.end(), groupName) !=
+		  grouping.groupNames.end()) {
+		  
+		  storeNormalization(name,true);
+	  }
+  
   return outputWS;
 }
 
