@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-#pylint: disable=invalid-name
+
+# pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
@@ -10,7 +11,8 @@ import sys
 
 # Check whether Mantid is available
 try:
-    import mantidplot # noqa
+    import mantidplot  # noqa
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False
@@ -55,7 +57,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                 _val = _line_split[1]
 
                 if _arg == 'Scaling factor file' and scaling_factor_file == '':
-                        scaling_factor_file = _val.strip()
+                    scaling_factor_file = _val.strip()
 
                 elif _arg == 'Run number':
                     run_number.append(_val)
@@ -67,10 +69,10 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
                     tof_range[1] = float(_val)
 
                 elif _arg == 'Incident medium' and incident_medium.strip() == '':
-                        incident_medium = _val[4:-3]
+                    incident_medium = _val[4:-3]
 
                 elif _arg == 'Incident medium index' and incident_medium_index == -1:
-                        incident_medium_index = int(_val)
+                    incident_medium_index = int(_val)
 
                 elif _arg == 'Number of attenuator':
                     attenuator.append(_val)
@@ -156,7 +158,7 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
 
             try:
                 t0 = time.time()
-                exec(script)
+                exec (script)
                 delta_t = time.time() - t0
                 print("SF calculation time: %5.2g sec" % delta_t)
                 # Update scripter

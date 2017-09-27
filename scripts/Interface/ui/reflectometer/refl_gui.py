@@ -758,7 +758,7 @@ class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
                                     thetaRun = thetaRun[0]
                                 if not theta_in:
                                     theta_in = getLogValue(thetaRun, "Theta")
-                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2*theta_in)
+                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2 * theta_in)
 
                                 # Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()

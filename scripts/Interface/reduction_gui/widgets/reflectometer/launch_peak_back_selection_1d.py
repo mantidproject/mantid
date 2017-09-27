@@ -27,8 +27,8 @@ CSS_LOWRES = """QLineEdit{
 class DesignerMainWindow(QtGui.QMainWindow):
     """ Customization for Qt Designer created window """
 
-    peak_back_xlim = [100,160]
-    low_res_xlim = [100,200]
+    peak_back_xlim = [100, 160]
+    low_res_xlim = [100, 200]
     bClick = False
     _peakFromValue = 4.
     _peakToValue = 6.
@@ -39,10 +39,10 @@ class DesignerMainWindow(QtGui.QMainWindow):
     drs = []
     parent = None
     dataType = 'data'  # 'data' or 'norm'
-    x1=None
-    x2=None
-    y1=None
-    y2=None
+    x1 = None
+    x2 = None
+    y1 = None
+    y2 = None
     topHorizontalLayout = None
     topHorizontalLayoutPeak = None
     peakTo = None
@@ -129,66 +129,66 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
     def create_main_frame(self):
 
-        self.resize(932,661)
+        self.resize(932, 661)
         self.setUnifiedTitleAndToolBarOnMac(False)
 
-        #selection mode and axis type
+        # selection mode and axis type
         self.topHorizontalLayout = QtGui.QHBoxLayout()
-        #peak and background input text fields
+        # peak and background input text fields
         self.topHorizontalLayoutPeak = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Peak")
         self.peakFrom = QtGui.QLineEdit("{0:.2f}".format(self._peakFromValue))
-        self.peakFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.peakFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.peakFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.peakFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.peakFrom.setObjectName("peakFrom")
         self.peakTo = QtGui.QLineEdit("{0:.2f}".format(self._peakToValue))
-        self.peakTo.setMinimumSize(QtCore.QSize(60,0))
-        self.peakTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.peakTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.peakTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.peakTo.setObjectName("peakTo")
         self.topHorizontalLayoutPeak.addWidget(self.label)
         self.topHorizontalLayoutPeak.addWidget(self.peakFrom)
         self.topHorizontalLayoutPeak.addWidget(self.peakTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #back
+        # back
         self.topHorizontalLayoutBack = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Background")
         self.backFrom = QtGui.QLineEdit("{0:.2f}".format(self._backFromValue))
-        self.backFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.backFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.backFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.backFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.backFrom.setObjectName("backFrom")
         self.backTo = QtGui.QLineEdit("{0:.2f}".format(self._backToValue))
-        self.backTo.setMinimumSize(QtCore.QSize(60,0))
-        self.backTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.backTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.backTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.backTo.setObjectName("backTo")
         self.topHorizontalLayoutBack.addWidget(self.label)
         self.topHorizontalLayoutBack.addWidget(self.backFrom)
         self.topHorizontalLayoutBack.addWidget(self.backTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #low resolution
+        # low resolution
         self.topHorizontalLayoutLowres = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Low resolution axis")
         self.lowresFrom = QtGui.QLineEdit("{0:.2f}".format(self._lowresFromValue))
-        self.lowresFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.lowresFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.lowresFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.lowresFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.lowresFrom.setObjectName("lowresFrom")
         self.lowresTo = QtGui.QLineEdit("{0:.2f}".format(self._lowresToValue))
-        self.lowresTo.setMinimumSize(QtCore.QSize(60,0))
-        self.lowresTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.lowresTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.lowresTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.lowresTo.setObjectName("lowresTo")
         self.topHorizontalLayoutLowres.addWidget(self.label)
         self.topHorizontalLayoutLowres.addWidget(self.lowresFrom)
         self.topHorizontalLayoutLowres.addWidget(self.lowresTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #linear and log
+        # linear and log
         self.topHorizontalLayoutRight = QtGui.QHBoxLayout()
         self.linear = QtGui.QRadioButton("Linear")
         self.linear.setChecked(True)
@@ -207,7 +207,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.topHorizontalLayout.addItem(spacerItem)
         self.topHorizontalLayout.addLayout(self.topHorizontalLayoutRight)
 
-        #Plot and toolbar
+        # Plot and toolbar
         self.main_frame = QtGui.QWidget(self)
 
         self.dpi = 100
@@ -216,14 +216,14 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
 
-#        self.axes = self.fig.add_subplot(111)
+        #        self.axes = self.fig.add_subplot(111)
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
 
         plot_vbox = QtGui.QVBoxLayout()
         plot_vbox.addWidget(self.canvas)
         plot_vbox.addWidget(self.mpl_toolbar)
 
-        #peak and background input
+        # peak and background input
         self.bottomHorizontalLayout = QtGui.QHBoxLayout()
 
         vbox = QtGui.QVBoxLayout()
@@ -271,7 +271,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.backSwitch.setChecked(not bPeak)
 
         if bPeak:
-#            class_name = self.from_peak_input.__class__.__name__
+            #            class_name = self.from_peak_input.__class__.__name__
             self.peakFrom.setStyleSheet(CSS_ACTIVATED)
             self.peakTo.setStyleSheet(CSS_ACTIVATED)
             self.backFrom.setStyleSheet(CSS_DESACTIVATED)
@@ -321,7 +321,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def parse_file(self, filename):
         """ parse a text file to extract letters frequencies """
         # lower-case letter ordinal numbers
-        for i in range(97,122+1):
+        for i in range(97, 122 + 1):
             letters[chr(i)] = 0
 
         # parse the input file
@@ -329,7 +329,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             for line in f:
                 for char in line:
                     # counts only letters
-                    if ord(char.lower()) in range(97, 122+1):
+                    if ord(char.lower()) in range(97, 122 + 1):
                         letters[char.lower()] += 1
 
         # compute the ordered list of keys and relative values
@@ -385,9 +385,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
         peakx2 = self._peakToValue
         self.peakTo.setText(str(peakx2))
         if bLinear:
-            rectpeakx1 = axes.plot([peakx1,peakx1],[ymin,ymax], '--', color='blue')
+            rectpeakx1 = axes.plot([peakx1, peakx1], [ymin, ymax], '--', color='blue')
         else:
-            rectpeakx1 = axes.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='blue')
+            rectpeakx1 = axes.semilogy([peakx1, peakx1], [ymin, ymax], '--', color='blue')
 
         for rect in rectpeakx1:
             dr = _DraggableRectangle(rect, 'peak_from', self, parent)
@@ -395,9 +395,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
             self.drs.append(dr)
 
         if bLinear:
-            rectpeakx2 = axes.plot([peakx2,peakx2],[ymin,ymax], '--', color='blue')
+            rectpeakx2 = axes.plot([peakx2, peakx2], [ymin, ymax], '--', color='blue')
         else:
-            rectpeakx2 = axes.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='blue')
+            rectpeakx2 = axes.semilogy([peakx2, peakx2], [ymin, ymax], '--', color='blue')
 
         for rect in rectpeakx2:
             dr = _DraggableRectangle(rect, 'peak_to', self, parent)
@@ -410,9 +410,9 @@ class DesignerMainWindow(QtGui.QMainWindow):
         backx2 = self._backToValue
         self.backTo.setText(str(backx2))
         if bLinear:
-            rectbackx1 = axes.plot([backx1,backx1],[ymin,ymax], '--', color='red')
+            rectbackx1 = axes.plot([backx1, backx1], [ymin, ymax], '--', color='red')
         else:
-            rectbackx1 = axes.semilogy([backx1,backx1],[ymin,ymax], '--', color='red')
+            rectbackx1 = axes.semilogy([backx1, backx1], [ymin, ymax], '--', color='red')
 
         for rect in rectbackx1:
             dr = _DraggableRectangle(rect, 'back_from', self, parent)
@@ -420,16 +420,16 @@ class DesignerMainWindow(QtGui.QMainWindow):
             self.drs.append(dr)
 
         if bLinear:
-            rectbackx2 = axes.plot([backx2,backx2],[ymin,ymax], '--', color='red')
+            rectbackx2 = axes.plot([backx2, backx2], [ymin, ymax], '--', color='red')
         else:
-            rectbackx2 = axes.semilogy([backx2,backx2],[ymin,ymax], '--', color='red')
+            rectbackx2 = axes.semilogy([backx2, backx2], [ymin, ymax], '--', color='red')
 
         for rect in rectbackx2:
             dr = _DraggableRectangle(rect, 'back_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
-        #bottom plot will be for low resolution selection
+        # bottom plot will be for low resolution selection
         axes2 = self.fig.add_subplot(212)
 
         x = self.x2
@@ -442,17 +442,17 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         ymax = max(y)
 
-        #low resolution range
+        # low resolution range
         peakx1 = self._lowresFromValue
         self.lowresFrom.setText(str(peakx1))
         peakx2 = self._lowresToValue
         self.lowresTo.setText(str(peakx2))
         if bLinear:
-            rectpeakx1 = axes2.plot([peakx1,peakx1],[ymin,ymax], '--', color='green')
-            rectpeakx2 = axes2.plot([peakx2,peakx2],[ymin,ymax], '--', color='green')
+            rectpeakx1 = axes2.plot([peakx1, peakx1], [ymin, ymax], '--', color='green')
+            rectpeakx2 = axes2.plot([peakx2, peakx2], [ymin, ymax], '--', color='green')
         else:
-            rectpeakx1 = axes2.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='green')
-            rectpeakx2 = axes2.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='green')
+            rectpeakx1 = axes2.semilogy([peakx1, peakx1], [ymin, ymax], '--', color='green')
+            rectpeakx2 = axes2.semilogy([peakx2, peakx2], [ymin, ymax], '--', color='green')
 
         for rect in rectpeakx1:
             dr = _DraggableRectangle(rect, 'lowres_from', self, parent)
@@ -466,7 +466,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
         self.canvas.draw()
 
-        #set the x-axes range visible
+        # set the x-axes range visible
         axes.set_xlim(self.peak_back_xlim)
         axes2.set_xlim(self.low_res_xlim)
 
