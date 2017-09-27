@@ -127,7 +127,8 @@ public:
       }
     }
     HistogramData::Histogram h{edges, counts};
-    API::MatrixWorkspace_sptr ws = DataObjects::create<DataObjects::Workspace2D>(1, h);
+    API::MatrixWorkspace_sptr ws =
+        DataObjects::create<DataObjects::Workspace2D>(1, h);
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
