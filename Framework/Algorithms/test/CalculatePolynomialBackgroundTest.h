@@ -105,6 +105,51 @@ public:
     }
   }
 
+  void test_cubicBackgroundWithNoisyData() {
+    const double xMin{1000.0};
+    const double xMax{5000.0};
+    const double xStep{10.0};
+    const auto nBins = static_cast<size_t>((xMax - xMin) / xStep);
+    HistogramData::BinEdges edges(nBins + 1);
+    {
+      auto &bins = edges.mutableRawData();
+      for (size_t i = 0; i < bins.size(); ++i) {
+        bins[i] = xMin + xStep * static_cast<double>(i);
+      }
+    }
+    HistogramData::Counts counts(nBins);
+    {
+      auto &ys = counts.mutableRawData();
+      for (size_t i = 0; i < ys.size(); ++i) {
+        // The noise is not random, but a high frequency sinusoidal wave.
+        const auto x = edges[i] + xStep / 2;
+        ys[i] = 1000.0 + std::sin(x / 1000.0) + 0.5 * std::sin(x / 40.0);
+      }
+    }
+    HistogramData::Histogram h{edges, counts};
+    API::MatrixWorkspace_sptr ws = DataObjects::create<DataObjects::Workspace2D>(1, h);
+    auto alg = makeAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("Degree", 3))
+    TS_ASSERT_THROWS_NOTHING(alg->execute())
+    TS_ASSERT(alg->isExecuted())
+    API::MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    TS_ASSERT(outWS)
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1)
+    const auto &outH = outWS->histogram(0);
+    TS_ASSERT_EQUALS(outH.size(), h.size())
+    for (size_t i = 0; i < h.size(); ++i) {
+      TS_ASSERT_EQUALS(outH.x()[i], h.x()[i])
+      const auto x = h.x()[i] + xStep / 2;
+      // Now without the "noise".
+      const auto y = 1000.0 + std::sin(x / 1000.0);
+      const auto diff = std::abs(outH.y()[i] - y);
+      TS_ASSERT_LESS_THAN(diff, 0.08)
+      TS_ASSERT_EQUALS(outH.e()[i], 0)
+    }
+  }
+
   void test_rangesWithGap() {
     using namespace WorkspaceCreationHelper;
     const size_t nHist{1};
