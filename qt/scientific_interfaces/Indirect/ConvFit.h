@@ -52,7 +52,7 @@ private slots:
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
-  double getInstrumentResolution(std::string workspaceName);
+  double getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
@@ -86,7 +86,6 @@ private:
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   // Pointer to sample workspace object
   Mantid::API::ITableWorkspace_sptr m_paramWs;
-  QString m_cfInputWSName;
   int m_fittedIndex;
   bool m_confitResFileType;
   QString m_singleFitOutputName;

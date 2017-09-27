@@ -30,8 +30,7 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_cfTree(NULL),
-      m_fixedProps(), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType(),
-      m_runMin(-1), m_runMax(-1) {
+      m_fixedProps(), m_confitResFileType(), m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -564,7 +563,7 @@ void ConvFit::loadSettings(const QSettings &settings) {
  */
 void ConvFit::newDataLoaded(const QString wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      m_cfInputWSName.toStdString());
+      wsName.toStdString());
   setInputWorkspace(inputWs);
 
   const int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
@@ -861,20 +860,17 @@ void ConvFit::createTemperatureCorrection(CompositeFunction_sptr product) {
 
 /**
  * Obtains the instrument resolution from the provided workspace
- * @param workspaceName The name of the workspaces which holds the instrument
- * resolution
+ * @param workspaceName The workspaces which holds the instrument
+ *                      resolution
  * @return The resolution of the instrument. returns 0 if no resolution data
  * could be found
  */
-double ConvFit::getInstrumentResolution(std::string workspaceName) {
+double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
   using namespace Mantid::API;
 
   double resolution = 0.0;
   try {
-    Mantid::Geometry::Instrument_const_sptr inst =
-        AnalysisDataService::Instance()
-            .retrieveWS<MatrixWorkspace>(workspaceName)
-            ->getInstrument();
+    Mantid::Geometry::Instrument_const_sptr inst = workspace->getInstrument();
     std::vector<std::string> analysers = inst->getStringParameter("analyser");
     if (analysers.empty()) {
       g_log.warning("Could not load instrument resolution from parameter file");
@@ -897,7 +893,7 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
       IAlgorithm_sptr loadParamFile =
           AlgorithmManager::Instance().create("LoadParameterFile");
       loadParamFile->initialize();
-      loadParamFile->setProperty("Workspace", workspaceName);
+      loadParamFile->setProperty("Workspace", workspace);
       loadParamFile->setProperty(
           "Filename", idfDirectory + inst->getName() + "_" + analyser + "_" +
                           reflection + "_Parameters.xml");
@@ -909,9 +905,7 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
         return 0.0;
       }
 
-      inst = AnalysisDataService::Instance()
-                 .retrieveWS<MatrixWorkspace>(workspaceName)
-                 ->getInstrument();
+      inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
       resolution = inst->getComponentByName(analyser)->getNumberParameter(
@@ -1170,7 +1164,7 @@ void ConvFit::updatePlot() {
   }
 
   // Default FWHM to resolution of instrument
-  double resolution = getInstrumentResolution(m_cfInputWSName.toStdString());
+  double resolution = getInstrumentResolution(inputWorkspace());
   if (resolution > 0) {
     m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
     m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
@@ -1711,7 +1705,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   // If resolution file has been entered update default FWHM to resolution
   if (m_uiForm.dsResInput->getCurrentDataName().compare("") != 0) {
-    const auto res = getInstrumentResolution(inputWorkspace()->getName());
+    const auto res = getInstrumentResolution(inputWorkspace());
     m_defaultParams["FWHM"] = res;
     m_defaultParams["default_FWHM"] = res;
   }

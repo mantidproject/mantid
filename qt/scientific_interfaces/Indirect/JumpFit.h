@@ -42,7 +42,6 @@ private slots:
   /// Handles plotting and saving
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
 
 private:
   /// Gets a list of parameter names for a given fit function
@@ -60,15 +59,12 @@ private:
   // The UI form
   Ui::JumpFit m_uiForm;
 
-  // Map of axis labels to spectrum number
+  /// Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
   QtTreePropertyBrowser *m_jfTree;
 
   Mantid::API::IAlgorithm_sptr m_fitAlg;
-
-  Mantid::API::MatrixWorkspace_sptr m_jfInputWS;
-  int m_specNo;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

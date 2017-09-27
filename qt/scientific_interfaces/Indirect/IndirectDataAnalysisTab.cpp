@@ -86,7 +86,16 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
-/*
+/**
+ * Retrieves the selected spectrum.
+ *
+ * @return  The selected spectrum.
+ */
+int IndirectDataAnalysisTab::selectedSpectrum() {
+  return m_selectedSpectrum;
+}
+
+/**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
@@ -95,7 +104,7 @@ void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
   m_selectedSpectrum = spectrum;
 }
 
-/*
+/**
  * Plots the current preview workspace, if none is set, plots
  * the selected spectrum of the current input workspace.
  */
