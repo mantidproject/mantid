@@ -112,7 +112,7 @@ class CrystalFieldMultiSite(object):
             ws = arg2
             ws_index = 0
             if self.Temperatures[i] < 0:
-                raise RuntimeError('You must first define a temperature for the spectrum')
+                raise RuntimeError('You must first define a valid temperature for spectrum {}'.format(i))
         elif isinstance(arg2, int):
             i = 0
             ws = arg1
@@ -145,19 +145,11 @@ class CrystalFieldMultiSite(object):
         @return: A tuple of (x, y) arrays
         """
         if len(args) == 3:
-            ws = args[1]
             if self.Temperatures[args[0]] < 0:
                 raise RuntimeError('You must first define a temperature for the spectrum')
-            if isinstance(ws, list) or isinstance(ws, np.ndarray):
-                ws = self._convertToWS(ws)
-            return self._calcSpectrum(args[0], ws, args[2])
-
+            return self._calcSpectrum(args[0], args[1], args[2])
         elif len(args) == 1:
-            ws = args[0]
-            if isinstance(ws, list) or isinstance(ws, np.ndarray):
-                ws = self._convertToWS(ws)
-            return self._calcSpectrum(0, ws, 0)
-
+            return self._calcSpectrum(0, args[0], 0)
         elif len(args) == 2:
             return self._getSpectrumTwoArgs(*args)
         else:
@@ -165,18 +157,24 @@ class CrystalFieldMultiSite(object):
 
 
     def _convertToWS(self, wksp_list):
-        """converts a list or numpy array to workspace"""
+        """
+        converts a list or numpy array to workspace
+        @param wksp_list: A list or ndarray used to make the workspace
+        """
         xArray = wksp_list
         yArray = np.zeros_like(xArray)
         return makeWorkspace(xArray, yArray)
 
-    def _calcSpectrum(self, i, workspace, ws_index, funstr=None):
+    def _calcSpectrum(self, i, workspace, ws_index):
         """Calculate i-th spectrum.
 
         @param i: Index of a spectrum or function string
-        @param workspace: A workspace used to evaluate the spectrum function.
+        @param workspace: A workspace / list / ndarray used to evaluate the spectrum function
         @param ws_index:  An index of a spectrum in workspace to use.
         """
+        if isinstance(workspace, list) or isinstance(workspace, np.ndarray):
+            workspace = self._convertToWS(workspace)
+
         from mantid.api import AlgorithmManager
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.initialize()
@@ -214,7 +212,7 @@ class CrystalFieldMultiSite(object):
                     tie_key = ion + '.IntensityScaling'
                     tie_value = str(factor) + '*' + max_ion + ".IntensityScaling"
                     ties[tie_key] = tie_value
-                    self.ties(ties)
+            self.ties(ties)
         else:
             for ion_index in range(len(self.Ions)):
                 self._abundances['ion{}'.format(ion_index)]  = 1.0
