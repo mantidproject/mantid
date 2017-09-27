@@ -6,6 +6,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -1079,23 +1080,48 @@ void PropertyHandler::fix(const QString &parName) {
 }
 
 /**
- * Remove the tie.
- * @param prop :: The tie property to remove
- */
-void PropertyHandler::removeTie(QtProperty *prop) {
-  QString parName = m_ties.key(prop, "");
-  if (parName.isEmpty())
-    return;
+* Remove the tie.
+* @param prop :: The tie property to remove
+* @param globalName :: Name of the parameter in compoite function
+* (e.g. f1.omega)
+*/
+void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
+	QString parName = m_ties.key(prop, "");
+	if (parName.isEmpty())
+		return;
 
-  QtProperty *parProp = getParameterProperty(parName);
-  if (parProp) {
-    m_browser->m_changeSlotsEnabled = false;
-    m_fun->removeTie(parName.toStdString());
-    parProp->removeSubProperty(prop);
-    m_ties.remove(parName);
-    m_browser->m_changeSlotsEnabled = true;
-    parProp->setEnabled(true);
-  }
+	QtProperty *parProp = getParameterProperty(parName);
+	if (parProp) {
+		m_browser->m_changeSlotsEnabled = false;
+		auto &compositeFunction = *m_browser->compositeFunction();
+		auto index = compositeFunction.parameterIndex(globalName);
+		compositeFunction.removeTie(index);
+		parProp->removeSubProperty(prop);
+		m_ties.remove(QString::fromStdString(globalName));
+		m_ties.remove(parName);
+		m_browser->m_changeSlotsEnabled = true;
+		parProp->setEnabled(true);
+	}
+}
+/**
+* Remove the tie.
+* @param prop :: The tie property to remove
+*/
+void PropertyHandler::removeTie(QtProperty *prop) {
+	QString parName = m_ties.key(prop, "");
+	if (parName.isEmpty())
+		return;
+
+	QtProperty *parProp = getParameterProperty(parName);
+	if (parProp != nullptr) {
+		m_browser->m_changeSlotsEnabled = false;
+		auto tom = parName.toStdString();
+		m_fun->removeTie(parName.toStdString());
+		parProp->removeSubProperty(prop);
+		m_ties.remove(parName);
+		m_browser->m_changeSlotsEnabled = true;
+		parProp->setEnabled(true);
+	}
 }
 
 /**
