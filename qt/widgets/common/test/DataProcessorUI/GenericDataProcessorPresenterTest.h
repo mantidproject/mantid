@@ -104,7 +104,8 @@ private:
     return whitelist;
   }
 
-  const std::map<QString, PreprocessingAlgorithm> createReflectometryPreprocessingStep() {
+  const std::map<QString, PreprocessingAlgorithm>
+  createReflectometryPreprocessingStep() {
     return {{"Run(s)", PreprocessingAlgorithm(
                            "Plus", "TOF_",
                            std::set<QString>{"LHSWorkspace", "RHSWorkspace",
@@ -473,8 +474,7 @@ public:
     presenter->notify(DataProcessorPresenter::OpenTableFlag);
 
     EXPECT_CALL(mockDataProcessorView,
-                askUserString(_, _, QString("Workspace")))
-        .Times(0);
+                askUserString(_, _, QString("Workspace"))).Times(0);
     presenter->notify(DataProcessorPresenter::SaveFlag);
 
     AnalysisDataService::Instance().remove("TestWorkspace");
@@ -1106,67 +1106,60 @@ public:
   }
 
   void testProcessExitsIfSkipProcessingIsTrue() {
-	  NiceMock<MockDataProcessorView> mockDataProcessorView;
-	  NiceMock<MockProgressableView> mockProgress;
-	  NiceMock<MockMainPresenter> mockMainPresenter;
-	  GenericDataProcessorPresenterNoThread presenter(
-		  createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
-		  createReflectometryProcessor(), createReflectometryPostprocessor());
-	  presenter.acceptViews(&mockDataProcessorView, &mockProgress);
-	  presenter.accept(&mockMainPresenter);
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenterNoThread presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
 
-	  presenter.skipProcessing();
+    presenter.skipProcessing();
 
-	  createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
-	  EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
-		  .Times(1)
-		  .WillRepeatedly(Return("TestWorkspace"));
-	  presenter.notify(DataProcessorPresenter::OpenTableFlag);
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
 
-	  std::set<int> grouplist;
-	  grouplist.insert(0);
+    std::set<int> grouplist;
+    grouplist.insert(0);
 
-	  createTOFWorkspace("TOF_12345", "12345");
-	  createTOFWorkspace("TOF_12346", "12346");
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
 
-	  // We should not receive any errors
-	  EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
+    // We should not receive any errors
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
 
-	  // The user hits the "process" button with the first group selected
-	  EXPECT_CALL(mockDataProcessorView, getSelectedChildren())
-		  .Times(0);
-	  EXPECT_CALL(mockDataProcessorView, getSelectedParents())
-		  .Times(0);
-	  EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString())
-		  .Times(0);
-	  EXPECT_CALL(mockMainPresenter, getPreprocessingProperties())
-		  .Times(0);
-	  EXPECT_CALL(mockMainPresenter, getProcessingOptions())
-		  .Times(0);
-	  EXPECT_CALL(mockMainPresenter, getPostprocessingOptions())
-		  .Times(0);
-	  EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
-	  EXPECT_CALL(mockMainPresenter, resume()).Times(0);
-	  EXPECT_CALL(mockDataProcessorView, getEnableNotebook())
-		  .Times(0);
-	  EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
 
-	  presenter.notify(DataProcessorPresenter::ProcessFlag);
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
 
-	  // Tidy up
-	  AnalysisDataService::Instance().remove("TestWorkspace");
-	  AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
-	  AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
-	  AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
-	  AnalysisDataService::Instance().remove("TOF_12345");
-	  AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
-	  AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
-	  AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
-	  AnalysisDataService::Instance().remove("TOF_12346");
-	  AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
 
-	  TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
-	  TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
   }
 
   void testTreeUpdatedAfterProcess() {
@@ -3538,8 +3531,7 @@ public:
     EXPECT_CALL(mockDataProcessorView,
                 setInstrumentList(
                     QString::fromStdString("INTER,SURF,POLREF,OFFSPEC,CRISP"),
-                    QString::fromStdString("INTER")))
-        .Times(1);
+                    QString::fromStdString("INTER"))).Times(1);
     presenter.setInstrumentList(
         QStringList{"INTER", "SURF", "POLREF", "OFFSPEC", "CRISP"}, "INTER");
 

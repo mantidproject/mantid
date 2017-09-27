@@ -119,9 +119,8 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Draw plots **/
 
-    notebook->codeCell(
-        plotsString(output_ws, boost::get<1>(postProcessString), m_processor)
-            .toStdString());
+    notebook->codeCell(plotsString(output_ws, boost::get<1>(postProcessString),
+                                   m_processor).toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());
@@ -282,7 +281,7 @@ boost::tuple<QString, QString>
 postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
                        const PostprocessingStep &postprocessingStep) {
-               
+
   QString stitchString;
 
   stitchString += "#Post-process workspaces\n";

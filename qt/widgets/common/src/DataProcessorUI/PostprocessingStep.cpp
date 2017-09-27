@@ -5,9 +5,9 @@ namespace MantidWidgets {
 namespace DataProcessor {
 PostprocessingStep::PostprocessingStep(const QString &options)
     : m_options(options) {}
-PostprocessingStep::PostprocessingStep(
-    const QString &options, PostprocessingAlgorithm algorithm,
-    std::map<QString, QString> map)
+PostprocessingStep::PostprocessingStep(const QString &options,
+                                       PostprocessingAlgorithm algorithm,
+                                       std::map<QString, QString> map)
     : m_options(options), m_algorithm(algorithm), m_map(map) {}
 
 bool PostprocessingStep::workspaceExists(QString const &workspaceName) {
@@ -26,15 +26,15 @@ void PostprocessingStep::removeIfExists(QString const &workspaceName) {
   }
 }
 
-void PostprocessingStep::ensureRowSizeMatchesColumnCount(const WhiteList& columns, const QStringList& row) {
+void PostprocessingStep::ensureRowSizeMatchesColumnCount(
+    const WhiteList &columns, const QStringList &row) {
   if (row.size() != static_cast<int>(columns.size()))
     throw std::invalid_argument("Can't find reduced workspace name");
 }
 
-QString
-PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
-                                                  const QStringList &data,
-                                                  const QString &prefix) {
+QString PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
+                                                    const QStringList &data,
+                                                    const QString &prefix) {
   ensureRowSizeMatchesColumnCount(whitelist, data);
 
   /* This method calculates, for a given row, the name of the output
@@ -73,9 +73,10 @@ PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
   return wsname;
 }
 
-QString PostprocessingStep::getPostprocessedWorkspaceName(
-    const WhiteList &whitelist, const GroupData &groupData,
-    const QString &prefix) {
+QString
+PostprocessingStep::getPostprocessedWorkspaceName(const WhiteList &whitelist,
+                                                  const GroupData &groupData,
+                                                  const QString &prefix) {
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
 
@@ -95,8 +96,8 @@ QString PostprocessingStep::getPostprocessedWorkspaceName(
   manager
  */
 void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
-                                                const WhiteList &whitelist,
-                                                const GroupData &groupData) {
+                                          const WhiteList &whitelist,
+                                          const GroupData &groupData) {
   // The input workspace names
   QStringList inputNames;
 

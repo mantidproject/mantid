@@ -649,9 +649,8 @@ TwoLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
   auto column = ws->addColumn("str", "Group");
   column->setPlotType(0);
 
-  for (const auto& columnName : whitelist.names()) {
-    auto column =
-        ws->addColumn("str", columnName.toStdString());
+  for (const auto &columnName : whitelist.names()) {
+    auto column = ws->addColumn("str", columnName.toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();

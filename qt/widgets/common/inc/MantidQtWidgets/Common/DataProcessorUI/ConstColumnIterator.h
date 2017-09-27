@@ -37,14 +37,18 @@ private:
   QStringIterator m_prefixes;
 };
 
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
-    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator+(
-    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
-    const ConstColumnIterator &lhs, ConstColumnIterator::difference_type n);
-ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON operator-(
-    ConstColumnIterator::difference_type n, const ConstColumnIterator &rhs);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
+operator+(const ConstColumnIterator &lhs,
+          ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
+operator+(ConstColumnIterator::difference_type n,
+          const ConstColumnIterator &rhs);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
+operator-(const ConstColumnIterator &lhs,
+          ConstColumnIterator::difference_type n);
+ConstColumnIterator EXPORT_OPT_MANTIDQT_COMMON
+operator-(ConstColumnIterator::difference_type n,
+          const ConstColumnIterator &rhs);
 }
 }
 }

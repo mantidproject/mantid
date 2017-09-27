@@ -102,7 +102,6 @@ ConstColumnIterator operator-(const ConstColumnIterator &lhs,
   auto result = lhs;
   result -= n;
   return result;
-
 }
 
 ConstColumnIterator operator-(typename ConstColumnIterator::difference_type n,
