@@ -274,7 +274,7 @@ if __name__ == '__main__':
         print('creating directory', release_root)
         os.makedirs(release_root)
 
-    release_link = '\n`Release {0} <../{1}/>`_'.format(args.release[1:], args.release)
+    release_link = '\n:ref:`Release {0} <{1}>`'.format(args.release[1:], args.release)
 
     for filename in DOCS.keys():
         contents = DOCS[filename].format(milestone=args.milestone, version=args.release[1:])
