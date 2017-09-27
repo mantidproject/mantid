@@ -42,8 +42,12 @@ def load_workspace(state, workspace_name):
 def mask_workspace(state, workspace_name, workspace_to_mask):
     serialized_state = state.property_manager
     masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+    mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
+                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
+                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+
     for detector in detectors:
         masking_algorithm.setProperty("Component", detector)
         masking_algorithm.execute()
