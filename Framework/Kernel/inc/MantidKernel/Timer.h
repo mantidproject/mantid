@@ -9,9 +9,6 @@
 #include <iosfwd>
 #include <string>
 
-// forward declaration
-// class std::chrono::time_point;
-
 namespace Mantid {
 namespace Kernel {
 /** A simple class that provides a wall-clock (not processor time) timer.
@@ -52,7 +49,7 @@ public:
 
 private:
   std::chrono::time_point<std::chrono::high_resolution_clock>
-      m_start; ///< The starting time (implementation dependent format)
+      m_start; ///< The starting time
 };
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);
