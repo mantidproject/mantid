@@ -104,7 +104,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        ws = Integration(ws)
        known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
        peaks_form = 9*[1] # all the peaks are gaussian peaks
-       calib_table = calibrate(ws,'WISH/panel03',known_pos, peaks_form)
+       calibTable = calibrate(ws,'WISH/panel03',known_pos, peaks_form)
 
     In this example, the calibrate framework will consider all the
     tubes (152) from WISH/panel03.
@@ -115,7 +115,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
        # This code will calibrate only the tube indexed as number 3
        # (usually tube0004)
-       calib_table = calibrate(ws,'WISH/panel03',known_pos,
+       calibTable = calibrate(ws,'WISH/panel03',known_pos,
                               peaks_form, rangeList=[3])
 
     **Finding the peaks on each tube**
@@ -175,7 +175,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        # (initial value of fit parameter)
        ExpectedWidth = 10.0
        fitPar = TubeCalibFitParams( eP, ExpectedHeight, ExpectedWidth )
-       calib_table = calibrate(ws, 'WISH/panel03', known_pos, peaks_form, fitPar=fitPar)
+       calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form, fitPar=fitPar)
 
     **Different Function Factors**
 
@@ -190,13 +190,13 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        known_pos = [-0.1 2 2.3]
        # gaussian peak followed by two edges (through)
        form_factor = [1 2 2]
-       calib_table = calibrate(ws,'WISH/panel03',known_pos, form_factor)
+       calibTable = calibrate(ws,'WISH/panel03',known_pos, form_factor)
 
 
     **Override Peaks**
 
     It is possible to scape the finding peaks position steps by providing the
-    peaks through the **override_peaks** parameters. The example below tests
+    peaks through the **overridePeaks** parameters. The example below tests
     the calibration of a single tube (30) but skips the finding peaks step.
 
     .. code-block:: python
@@ -204,12 +204,12 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
        define_peaks = [57.5, 107.0, 156.5, 206.0, 255.5, 305.0, 354.5,
                       404.0, 453.5]
-       calib_table = calibrate(ws, 'WISH/panel03', known_pos, peaks_form,
-                        override_peaks={30:define_peaks}, rangeList=[30])
+       calibTable = calibrate(ws, 'WISH/panel03', known_pos, peaks_form,
+                        overridePeaks={30:define_peaks}, rangeList=[30])
 
     **Output Peaks Positions**
 
-    Enabling the option **output_peak** a WorkspaceTable will be produced with
+    Enabling the option **outputPeak** a WorkspaceTable will be produced with
     the first column as tube name and the following columns with the position
     where corresponding peaks were found. Like the table below.
 
@@ -227,9 +227,9 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     .. code-block:: python
 
-       calib_table, peakTable = calibrate(...)
+       calibTable, peakTable = calibrate(...)
 
-    It is possible to give a peakTable directly to the **output_peak** option,
+    It is possible to give a peakTable directly to the **outputPeak** option,
     which will make the calibration to append the peaks to the given table.
 
     .. hint::
@@ -331,42 +331,42 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        for index in rangelist:
            do_calibrate(tubeSet.getTube(index))
 
-    :param calib_table: Pass the calibration table, it will them append the values to the provided one and return it. \
+    :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. \
     (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-    :param plot_tube: If given, the tube whose index is in plot_tube will be ploted as well as its fitted peaks, it can \
+    :param plotTube: If given, the tube whose index is in plot_tube will be ploted as well as its fitted peaks, it can \
     receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
 
-    :param exclude_short_tubes: Do not calibrate tubes whose length is smaller than given value. (see at \
+    :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at \
     Examples/TubeCalibDemoMerlin_Adjustable.py)
 
-    :param override_peaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific \
+    :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific \
     tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
 
     .. code-block:: python
 
        for index in rangelist:
-         if override_peaks.has_key(index):
-           use_this_peaks = override_peaks[index]
+         if overridePeaks.has_key(index):
+           use_this_peaks = overridePeaks[index]
            # skip finding peaks
            fit_peaks_to_position()
 
-    :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The \
+    :param fitPolyn: Define the order of the polynomial to fit the pixels positions against the known positions. The \
     acceptable values are 1, 2 or 3. Default = 2.
 
 
-    :param output_peak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It \
-    may be passed as a boolean value (output_peak=True) or as a peakTable value. The later case is to inform calibrate \
-    to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. \
+    :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It \
+    may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate \
+    to append the new values to the given peakTable. This is useful when you have to operate in subsets of tubes. \
     (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
 
     .. code-block:: python
 
-      calib_table, peakTable = calibrate(ws, (omitted), rangeList=[1],
-               output_peak=True)
+      calibTable, peakTable = calibrate(ws, (omitted), rangeList=[1],
+               outputPeak=True)
       # appending the result to peakTable
-      calib_table, peakTable = calibrate(ws, (omitted), rangeList=[2],
-               output_peak=peakTable)
+      calibTable, peakTable = calibrate(ws, (omitted), rangeList=[2],
+               outputPeak=peakTable)
       # now, peakTable has information for tube[1] and tube[2]
 
     :rtype: calibrationTable, a TableWorkspace with two columns DetectorID(int) and DetectorPositions(V3D).
