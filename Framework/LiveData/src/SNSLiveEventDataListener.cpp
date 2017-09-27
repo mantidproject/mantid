@@ -801,7 +801,15 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::RunStatusPkt &pkt) {
       setRunDetails(pkt);
     }
   } else if (pkt.status() == ADARA::RunStatus::STATE && !haveRunNumber) {
-    setRunDetails(pkt);
+      // A packet status of STATE and no run number means we've just connected
+      // to the SMS.  Specifically, this is the RunStatus packet that SMS
+      // initially sends out when a client hasn't set the flag to request
+      // historical data.  We may or may not actually be in a run right now.
+      // If we are, then we need to set the run details.  If not, there's
+      // nothing we need to do with this packet.
+      if (pkt.runNumber() != 0) {
+          setRunDetails(pkt);
+      }
   }
 
   // Note: all other possibilities for pkt.status() can be ignored
