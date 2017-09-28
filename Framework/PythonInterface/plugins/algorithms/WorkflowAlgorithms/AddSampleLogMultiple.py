@@ -31,7 +31,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
                              doc='Determine the value type by parsing the string')
 
     def PyExec(self):
-        workspace = self.getPropertyValue('Workspace')
+        workspace = self.getProperty('Workspace').value
         log_names = self.getProperty('LogNames').value
         log_values = self.getProperty('LogValues').value
         log_units = self.getProperty('LogUnits').value
