@@ -192,16 +192,17 @@ void LoadInstrument::exec() {
       // Add to data service for later retrieval
       InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
     }
+    m_workspace->setInstrument(instrument);
+
+    // populate parameter map of workspace
+    m_workspace->populateInstrumentParameters();
+
+    // LoadParameterFile modifies the base instrument stored in the IDS so this
+    // must also be protected by the lock until LoadParameterFile is fixed.
+    // check if default parameter file is also present, unless loading from
+    if (!m_filename.empty())
+      runLoadParameterFile();
   }
-  // Add the instrument to the workspace
-  m_workspace->setInstrument(instrument);
-
-  // populate parameter map of workspace
-  m_workspace->populateInstrumentParameters();
-
-  // check if default parameter file is also present, unless loading from
-  if (!m_filename.empty())
-    runLoadParameterFile();
 
   // Set the monitors output property
   setProperty("MonitorList", instrument->getMonitors());
