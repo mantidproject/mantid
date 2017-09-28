@@ -58,7 +58,7 @@ Usage
     ws = CreateSampleWorkspace(BankPixelWidth=1)
     ws2 = CreateSampleWorkspace(BankPixelWidth=2)
     for wsLoop in [ws,ws2]:
-        print("Workspace '{}' has {} spectra beforehand".format((wsLoop, wsLoop.getNumberHistograms())))
+        print("Workspace '{}' has {} spectra beforehand".format(wsLoop, wsLoop.getNumberHistograms()))
     wsOut = AppendSpectra(ws, ws2)
     print("Workspace '{}' has {} spectra after AppendSpectra".format(wsOut, wsOut.getNumberHistograms()))
 

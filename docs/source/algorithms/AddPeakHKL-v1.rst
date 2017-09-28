@@ -45,7 +45,7 @@ Usage
    # Get info on newly added peak
    peak = peak_ws.getPeak(0)
    print('Peak wavelength {}'.format(round(peak.getWavelength(), 4)))
-   print('Peak detector id {}'.format(peak.getDetectorID())
+   print('Peak detector id {}'.format(peak.getDetectorID()))
    print('Peak run number {}'.format(peak.getRunNumber()))
    print('Peak HKL {}'.format(peak.getHKL()))
 

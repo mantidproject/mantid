@@ -35,7 +35,7 @@ Usage
     log = ws.getRun().getLogData("my_log")
     print("my_log has {} entries".format(log.size()))
     for i in range(log.size()):
-      print("\t{}\t{}".format(log.times[i], log.value[i]))
+      print("\t{}\t{:.6f}".format(log.times[i], log.value[i]))
 
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:00:00", Value=12, Type="int", DeleteExisting=True)
     AddTimeSeriesLog(ws, Name="my_log", Time="2010-01-01T00:50:00", Value=34, Type="int")
