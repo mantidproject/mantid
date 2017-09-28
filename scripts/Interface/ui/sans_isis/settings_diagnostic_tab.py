@@ -84,7 +84,8 @@ class SettingsDiagnosticTab(QtGui.QWidget, ui_settings_diagnostic_tab.Ui_Setting
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_row_changed())
 
     def on_update_rows(self):
-        self._call_settings_diagnostic_listeners(lambda listener: listener.on_update_rows())
+        raise RuntimeError("Something went wrong")
+        # self._call_settings_diagnostic_listeners(lambda listener: listener.on_update_rows())
 
     def on_save_state(self):
         self._call_settings_diagnostic_listeners(lambda listener: listener.on_save_state_to_file())
