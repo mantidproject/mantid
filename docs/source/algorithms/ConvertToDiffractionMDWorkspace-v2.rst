@@ -76,7 +76,7 @@ Usage
 
    # A way to look at these results as a text:
    print("Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims()))
-   print("Workspace Type is: ",md.id())
+   print("Workspace Type is:  {}".format(md.id()))
 
 **Output:**
 

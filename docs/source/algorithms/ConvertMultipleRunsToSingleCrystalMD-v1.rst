@@ -118,7 +118,7 @@ Output:
    print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
    print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
    print("Number of Events = {}".format(ws.getNEvents()))
-   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims() ws.getDimension(0).name ws.getDimension(1).name ws.getDimension(2).name))
+   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims(), ws.getDimension(0).name, ws.getDimension(1).name, ws.getDimension(2).name))
 
 Output:
 

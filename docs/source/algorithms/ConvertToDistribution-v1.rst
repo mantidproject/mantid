@@ -34,7 +34,7 @@ Usage
     ConvertToDistribution(ws_multi)
 
     print("Is the workspace a distribution? {}".format(ws_multi.isDistribution()))
-    print("The workspace has a level background of " + str(ws_multi.readY(0)[0]) + " counts."
+    print("The workspace has a level background of {} counts.".format(ws_multi.readY(0)[0]))
     print("The largest of which is {} counts.".format(ws_multi.readY(0)[60]))
 
 Output:

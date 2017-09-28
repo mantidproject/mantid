@@ -41,7 +41,7 @@ Usage
     SaveGSS(ws2,ws2Path, SplitFiles=False, Append=False)
 
     wsOutput = ConjoinFiles(RunNumbers=[1234,4567], Directory= savePath)
-    print("Number of spectra after ConjoinWorkspaces ".format(wsOutput.getNumberHistograms()))
+    print("Number of spectra after ConjoinWorkspaces {}".format(wsOutput.getNumberHistograms()))
 
     os.remove(ws1Path)
     os.remove(ws2Path)
