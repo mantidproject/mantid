@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -32,11 +33,12 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
+using namespace Kernel::DateAndTimeHelpers;
 using namespace API;
 using Geometry::Instrument;
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
 
 /// Empty default constructor
@@ -395,8 +397,8 @@ void LoadMuonNexus2::loadRunDetails(
   }
 
   { // Duration taken to be stop_time minus stat_time
-    DateAndTime start(start_time);
-    DateAndTime end(stop_time);
+    auto start = createFromSanitizedISO8601(start_time);
+    auto end = createFromSanitizedISO8601(stop_time);
     double duration_in_secs = DateAndTime::secondsFromDuration(end - start);
     runDetails.addProperty("dur_secs", duration_in_secs);
   }

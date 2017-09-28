@@ -54,8 +54,7 @@ public:
   /// Actions/commands
 
   /// Publish actions/commands
-  virtual std::vector<std::unique_ptr<Command>>
-  publishCommands() = 0;
+  virtual std::vector<std::unique_ptr<Command>> publishCommands() = 0;
   /// Append a row
   virtual void appendRow() = 0;
   /// Append a group

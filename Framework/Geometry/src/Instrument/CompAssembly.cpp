@@ -1,5 +1,6 @@
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -356,6 +357,12 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
  */
 void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
+
+    if (hasComponentInfo()) {
+      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
+      return;
+    }
+
     // Check cache for assembly, inside the ParameterMap
     if (m_map->getCachedBoundingBox(this, assemblyBox)) {
       return;

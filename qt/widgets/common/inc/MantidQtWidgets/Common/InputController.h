@@ -103,8 +103,7 @@ private:
 /**
     Controller for picking detectors.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerPick
-    : public InputController {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerPick : public InputController {
   Q_OBJECT
 
 public:
@@ -206,8 +205,7 @@ private:
 /**
     Controller for free drawing on an unwrapped surface.
   */
-class EXPORT_OPT_MANTIDQT_COMMON InputControllerDraw
-    : public InputController {
+class EXPORT_OPT_MANTIDQT_COMMON InputControllerDraw : public InputController {
   Q_OBJECT
 
 public:

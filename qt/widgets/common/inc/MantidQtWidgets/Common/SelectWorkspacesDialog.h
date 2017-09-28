@@ -41,8 +41,7 @@ namespace MantidWidgets {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON SelectWorkspacesDialog
-    : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectWorkspacesDialog : public QDialog {
   Q_OBJECT
 
 public:

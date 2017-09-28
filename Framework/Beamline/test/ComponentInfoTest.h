@@ -71,6 +71,9 @@ makeTreeExampleAndReturnGeometricArguments() {
   auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(
       std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
 
+  // Rectangular bank flag
+  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
+
   ComponentInfo compInfo(
       bankSortedDetectorIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
@@ -78,7 +81,8 @@ makeTreeExampleAndReturnGeometricArguments() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, compPositions, compRotations, scaleFactors, -1, -1);
+      parentIndices, compPositions, compRotations, scaleFactors,
+      isRectangularBank, -1, -1);
 
   compInfo.setDetectorInfo(detectorInfo.get());
 
@@ -129,6 +133,8 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       std::vector<Eigen::Vector3d>(5, Eigen::Vector3d{1, 1, 1}));
   auto detectorInfo =
       boost::make_shared<DetectorInfo>(detPositions, detRotations);
+  // Rectangular bank flag
+  auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
 
   ComponentInfo componentInfo(
       bankSortedDetectorIndices,
@@ -137,7 +143,8 @@ std::tuple<ComponentInfo, boost::shared_ptr<DetectorInfo>> makeTreeExample() {
       bankSortedComponentIndices,
       boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
           componentRanges),
-      parentIndices, positions, rotations, scaleFactors, -1, -1);
+      parentIndices, positions, rotations, scaleFactors, isRectangularBank, -1,
+      -1);
 
   componentInfo.setDetectorInfo(detectorInfo.get());
 
@@ -183,10 +190,11 @@ public:
     auto positions = boost::make_shared<std::vector<Eigen::Vector3d>>();
     auto rotations = boost::make_shared<std::vector<Eigen::Quaterniond>>();
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>(3);
+    auto isRectangularBank = boost::make_shared<std::vector<bool>>();
     ComponentInfo componentInfo(bankSortedDetectorIndices, detectorRanges,
                                 bankSortedComponentIndices, componentRanges,
                                 parentIndices, positions, rotations,
-                                scaleFactors, -1, -1);
+                                scaleFactors, isRectangularBank, -1, -1);
 
     DetectorInfo detectorInfo; // Detector info size 0
     TS_ASSERT_THROWS(componentInfo.setDetectorInfo(&detectorInfo),
@@ -219,10 +227,11 @@ public:
         0); // 0 rotations provided
 
     auto scaleFactors = boost::make_shared<std::vector<Eigen::Vector3d>>();
+    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    bankSortedComponentIndices, componentRanges,
                                    parentIndices, positions, rotations,
-                                   scaleFactors, -1, -1),
+                                   scaleFactors, isRectangularBank, -1, -1),
                      std::invalid_argument &);
   }
 
@@ -256,11 +265,12 @@ public:
     auto componentRanges =
         boost::make_shared<const std::vector<std::pair<size_t, size_t>>>(
             std::vector<std::pair<size_t, size_t>>{{0, 0}});
+    auto isRectangularBank = boost::make_shared<std::vector<bool>>(2, false);
 
     TS_ASSERT_THROWS(ComponentInfo(detectorsInSubtree, detectorRanges,
                                    componentsInSubtree, componentRanges,
                                    parentIndices, positions, rotations,
-                                   scaleFactors, -1, -1),
+                                   scaleFactors, isRectangularBank, -1, -1),
                      std::invalid_argument &);
   }
 
