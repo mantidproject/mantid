@@ -108,7 +108,6 @@ using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
-namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 namespace MantidException = Mantid::Kernel::Exception;
 
 namespace {
