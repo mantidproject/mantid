@@ -371,7 +371,8 @@ void IFunction::removeConstraint(const std::string &parName) {
  * @param parName :: The name of a constraint
  * @param c :: The penalty
  */
-void IFunction::setConstraintPenaltyFactor(const std::string &parName, const double &c) {
+void IFunction::setConstraintPenaltyFactor(const std::string &parName,
+                                           const double &c) {
   size_t iPar = parameterIndex(parName);
   for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
     if (iPar == (**it).getLocalIndex()) {
@@ -379,7 +380,10 @@ void IFunction::setConstraintPenaltyFactor(const std::string &parName, const dou
       return;
     }
   }
-  g_log.warning()<<parName<<" does not have constraint so setConstraintPenaltyFactor failed"<<"\n";
+  g_log.warning()
+      << parName
+      << " does not have constraint so setConstraintPenaltyFactor failed"
+      << "\n";
 }
 
 /// Remove all constraints.
