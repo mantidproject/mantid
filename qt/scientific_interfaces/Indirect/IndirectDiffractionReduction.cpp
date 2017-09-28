@@ -230,55 +230,49 @@ void IndirectDiffractionReduction::plotResults() {
  * Handles saving the reductions from the generic algorithm.
  */
 void IndirectDiffractionReduction::saveReductions() {
+  std::string instName =
+      (m_uiForm.iicInstrumentConfiguration->getInstrumentName()).toStdString();
+  std::string mode =
+      (m_uiForm.iicInstrumentConfiguration->getReflectionName()).toStdString();
+
   for (const auto wsName : m_plotWorkspaces) {
     const auto workspaceExists =
         AnalysisDataService::Instance().doesExist(wsName);
     if (workspaceExists) {
-
-      QString tofWsName = QString::fromStdString(wsName) + "_tof";
-      std::string instName =
-          (m_uiForm.iicInstrumentConfiguration->getInstrumentName())
-              .toStdString();
-      std::string mode =
-          (m_uiForm.iicInstrumentConfiguration->getReflectionName())
-              .toStdString();
-      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromConvUnitsProps;
-      inputFromConvUnitsProps["InputWorkspace"] = tofWsName.toStdString();
-      BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
-      inputFromReductionProps["InputWorkspace"] = (wsName + "_dRange");
+      auto workspace =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
 
       if (m_uiForm.ckGSS->isChecked()) {
-        if (instName == "OSIRIS" && mode == "diffonly") {
+        std::string tofWsName = wsName;
+
+        if (workspace->YUnit() != "TOF") {
+          tofWsName = wsName + "_tof";
           m_batchAlgoRunner->addAlgorithm(
-              saveGSSAlgorithm(tofWsName.toStdString() + ".gss"),
-              inputFromConvUnitsProps);
-        } else {
+              convertUnitsAlgorithm(wsName, tofWsName, "TOF"));
+        }
 
-          // Convert to TOF for GSS
-          IAlgorithm_sptr convertUnits =
-              AlgorithmManager::Instance().create("ConvertUnits");
-          convertUnits->initialize();
-          convertUnits->setProperty("InputWorkspace", wsName);
-          convertUnits->setProperty("OutputWorkspace", tofWsName.toStdString());
-          convertUnits->setProperty("Target", "TOF");
-          m_batchAlgoRunner->addAlgorithm(convertUnits);
+        BatchAlgorithmRunner::AlgorithmRuntimeProps runtimeInput;
+        runtimeInput["InputWorkspace"] = tofWsName;
 
-          // Save GSS
+        if (instName == "OSIRIS" && mode == "diffonly") {
           m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
-                                          inputFromConvUnitsProps);
+                                          runtimeInput);
+        } else {
+          m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
+                                          runtimeInput);
         }
       }
 
       if (m_uiForm.ckNexus->isChecked()) {
         // Save NEXus using SaveNexusProcessed
         m_batchAlgoRunner->addAlgorithm(
-            saveNexusProcessedAlgorithm(wsName, wsName + ".nxs"));
+            saveNexusProcessedAlgorithm(wsName + ".nxs", wsName));
       }
 
       if (m_uiForm.ckAscii->isChecked()) {
         // Save ASCII using SaveAscii version 1
         m_batchAlgoRunner->addAlgorithm(
-            saveASCIIAlgorithm(wsName, wsName + ".dat"));
+            saveASCIIAlgorithm(wsName + ".dat", wsName));
       }
     } else
       showInformationBox(QString::fromStdString(
@@ -288,12 +282,13 @@ void IndirectDiffractionReduction::saveReductions() {
 }
 
 /**
- * Creates an algorithm for saving a workspace in GSS format into the
- * file with the specified name.
+ * Creates an algorithm for saving the workspace with the specified name
+ * in GSS format into the file with the specified name.
  *
- * @param filename  The name of the file to save to.
- * @return          A SaveGSS Algorithm which saves in file with the specified
- *                  name.
+ * @param filename    The name of the file to save to.
+ * @param inputWsName The name of the workspace to save.
+ * @return            A SaveGSS Algorithm which saves in file with the
+ *                    specified name.
  */
 IAlgorithm_sptr
 IndirectDiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
@@ -304,29 +299,28 @@ IndirectDiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
  * Creates an algorithm for saving the workspace with the specified name
  * in ASCII format into the file with the specified name.
  *
- * @param inputWsName The name of the workspace to save.
  * @param filename    The name of the file to save to.
+ * @param inputWsName The name of the workspace to save.
  * @return            A SaveASCII Algorithm which saves in file with the
  *                    specified name.
  */
-IAlgorithm_sptr
-IndirectDiffractionReduction::saveASCIIAlgorithm(const std::string &inputWsName,
-                                                 const std::string &filename) {
-  return saveAlgorithm("SaveAscii", inputWsName, filename, 1);
+IAlgorithm_sptr IndirectDiffractionReduction::saveASCIIAlgorithm(
+    const std::string &filename, const std::string &inputWsName) {
+  return saveAlgorithm("SaveAscii", filename, inputWsName, 1);
 }
 
 /**
  * Creates an algorithm for saving the workspace with the specified name
  * in NexusProcessed format into the file with the specified name.
  *
- * @param inputWsName The name of the workspace to save.
  * @param filename    The name of the file to save to.
+ * @param inputWsName The name of the workspace to save.
  * @return            A NexusProcessed Algorithm which saves in file with
  *                    the specified name.
  */
 IAlgorithm_sptr IndirectDiffractionReduction::saveNexusProcessedAlgorithm(
-    const std::string &inputWsName, const std::string &filename) {
-  return saveAlgorithm("SaveNexusProcessed", inputWsName, filename);
+    const std::string &filename, const std::string &inputWsName) {
+  return saveAlgorithm("SaveNexusProcessed", filename, inputWsName);
 }
 
 /**
@@ -351,9 +345,32 @@ IAlgorithm_sptr IndirectDiffractionReduction::saveAlgorithm(
   if (inputWsName != "") {
     saveAlg->setProperty("InputWorkspace", inputWsName);
   }
-
   saveAlg->setProperty("Filename", filename);
   return saveAlg;
+}
+
+/**
+ * Creates and algorithm for converting the units of the input workspace
+ * with the specified name, to the specified target, storing the result
+ * in an output workspace, with the specified name.
+ *
+ * @param inputWsName   The name of the input workspace, on which to
+ *                      perform the unit conversion.
+ * @param outputWsName  The name of the output workspace, in which to
+ *                      store the result of unit conversion.
+ * @param target        The target units of the conversion algorithm.
+ * @return              A unit conversion algorithm.
+ */
+IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(
+    const std::string &inputWsName, const std::string &outputWsName,
+    const std::string &target) {
+  IAlgorithm_sptr convertUnits =
+      AlgorithmManager::Instance().create("ConvertUnits");
+  convertUnits->initialize();
+  convertUnits->setProperty("InputWorkspace", inputWsName);
+  convertUnits->setProperty("OutputWorkspace", outputWsName);
+  convertUnits->setProperty("Target", target);
+  return convertUnits;
 }
 
 /**

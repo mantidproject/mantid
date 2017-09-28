@@ -50,15 +50,18 @@ private:
 
   Mantid::API::IAlgorithm_sptr saveGSSAlgorithm(const std::string &filename);
   Mantid::API::IAlgorithm_sptr
-  saveASCIIAlgorithm(const std::string &inputWsName,
-                     const std::string &filename);
+  saveASCIIAlgorithm(const std::string &filename,
+                     const std::string &inputWsName);
   Mantid::API::IAlgorithm_sptr
-  saveNexusProcessedAlgorithm(const std::string &inputWsName,
-                              const std::string &filename);
-  Mantid::API::IAlgorithm_sptr saveAlgorithm(const std::string &saveAlgName,
-                                             const std::string &filename,
-                                             const std::string &inputWsName = "",
-                                             const int &version = -1);
+  saveNexusProcessedAlgorithm(const std::string &filename,
+                              const std::string &inputWsName);
+  Mantid::API::IAlgorithm_sptr
+  saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
+                const std::string &inputWsName = "", const int &version = -1);
+  Mantid::API::IAlgorithm_sptr
+  convertUnitsAlgorithm(const std::string &inputWsName,
+                        const std::string &outputWsName,
+                        const std::string &target);
 
   bool validateRebin();
   bool validateVanCal();
