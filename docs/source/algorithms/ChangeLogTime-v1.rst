@@ -28,8 +28,8 @@ Usage
     #get the log times for a particular variable, after change
     modified=w.getRun()['Speed5'].times
     #print times
-    print "OriginalTimes: ", original
-    print "ModifiedTimes: ", modified
+    print("OriginalTimes:  {}".format(original))
+    print("ModifiedTimes:  {}".format(modified))
 
 
 .. testcleanup:: ChangeLogTime
