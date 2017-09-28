@@ -50,8 +50,8 @@ Usage
     wsY=ConvertToYSpace(InputWorkspace='tof_ws',Mass='30')    
     #
     # Look at sample results:
-    print 'part of the converted workspace:'
-    for i in xrange(0,10): print wsY.readX(0)[i],wsY.readY(0)[i],wsY.readE(0)[i]
+    print('part of the converted workspace:')
+    for i in xrange(0,10): print("{} {} {}".format(wsY.readX(0)[i], wsY.readY(0)[i], wsY.readE(0)[i]))
 
 
 
