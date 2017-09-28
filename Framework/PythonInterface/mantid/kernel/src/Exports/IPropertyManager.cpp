@@ -117,6 +117,27 @@ boost::python::list getKeys(IPropertyManager &self) {
 
   return result;
 }
+
+/**
+ * Retrieve the property with the specified name (key) in the
+ * IPropertyManager. If no property exists with the specified
+ * name, return the specified default value.
+ *
+ * @param self  The calling IPropertyManager object
+ * @param name  The name (key) of the property to retrieve
+ * @param value The default value to return if no property
+ *              exists with the specified key.
+ * @return      The property with the specified key. If no
+ *              such property exists, return the default value.
+ */
+Property *get(IPropertyManager &self, const std::string &name,
+              const boost::python::object &value) {
+  try {
+    return self.getPointerToProperty(name);
+  } catch (Exception::NotFoundError) {
+    return Registry::PropertyWithValueFactory::create(name, value, 0).release();
+  }
+}
 }
 
 void export_IPropertyManager() {
@@ -187,5 +208,10 @@ void export_IPropertyManager() {
       .def("keys", &getKeys, arg("self"))
       .def("values", &IPropertyManager::getProperties, arg("self"),
            return_value_policy<copy_const_reference>(),
-           "Returns the list of properties managed by this object");
+           "Returns the list of properties managed by this object")
+      .def("get", &get, (arg("self"), arg("name"), arg("value")),
+           return_value_policy<return_by_value>(),
+           "Returns the property of the given name. Use .value to give the "
+           "value. If property with given name does not exist, returns given "
+           "default value.");
 }

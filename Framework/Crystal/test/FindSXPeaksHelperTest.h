@@ -350,6 +350,48 @@ public:
     TSM_ASSERT("The peaks should not be the same", !result46)
   }
 
+  void
+  testGivenWorkspaceInDSpacingWhenAbsoluteComparisonThatCorrectNumberOfPeaks() {
+    // GIVEN
+    auto workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 2);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+
+    constexpr double degreeToRad = M_PI / 180.;
+    SXPeak peak1(1. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak2(1.5 /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak3(3. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+
+    SXPeak peak4(1. /*TOF*/, degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak5(1. /*TOF*/, 1.5 * degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+    SXPeak peak6(1. /*TOF*/, 3. * degreeToRad /*phi*/, 0.1 /*intensity*/,
+                 std::vector<int>(1, 1), 1, spectrumInfo);
+
+    const auto dResolution = 0.01;
+    const auto thetaResolution = 1.;
+    const auto phiResolution = 1.;
+    auto compareStrategy = Mantid::Kernel::make_unique<AbsoluteCompareStrategy>(
+        dResolution, thetaResolution, phiResolution, XAxisUnit::DSPACING);
+
+    // WHEN
+    auto result12 = compareStrategy->compare(peak1, peak2);
+    auto result13 = compareStrategy->compare(peak1, peak3);
+
+    auto result45 = compareStrategy->compare(peak4, peak5);
+    auto result46 = compareStrategy->compare(peak4, peak6);
+
+    // THEN
+    TSM_ASSERT("The peaks should be the same", result12)
+    TSM_ASSERT("The peaks should not be the same", !result13)
+    TSM_ASSERT("The peaks should be the same", result45)
+    TSM_ASSERT("The peaks should not be the same", !result46)
+  }
+
 private:
   void doRunStrongestPeakTest(BackgroundStrategy *backgroundStrategy) {
     // GIVEN

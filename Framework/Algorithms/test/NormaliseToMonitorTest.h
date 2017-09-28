@@ -1,14 +1,17 @@
 #ifndef NORMALISETOMONITORTEST_H_
 #define NORMALISETOMONITORTEST_H_
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Counts.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -100,7 +103,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
       const auto &x = output->x(i);
       const auto &y = output->y(i);
       const auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_DELTA(y[j], 2, 0.00001)
         TS_ASSERT_DELTA(e[j], 3.05941, 0.00001)
@@ -111,7 +114,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
     const auto &monX = output->x(0);
     const auto &monY = output->y(0);
     const auto &monE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monY.size(); ++k) {
       TS_ASSERT_EQUALS(monX[k], k)
       TS_ASSERT_DELTA(monY[k], 10, 0.00001)
       TS_ASSERT_DELTA(monE[k], 4.24264, 0.00001)
@@ -203,7 +206,7 @@ public:
       auto &x = output->x(i);
       auto &y = output->y(i);
       auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_EQUALS(y[j], 0.04)
         TS_ASSERT_DELTA(e[j], 0.0602, 0.0001)
@@ -214,7 +217,7 @@ public:
     auto &monitorX = output->x(0);
     auto &monitorY = output->y(0);
     auto &monitorE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monitorY.size(); ++k) {
       TS_ASSERT_EQUALS(monitorX[k], k)
       TS_ASSERT_EQUALS(monitorY[k], 0.2)
       TS_ASSERT_DELTA(monitorE[k], 0.0657, 0.0001)
@@ -254,7 +257,7 @@ public:
       auto &x = output->x(i);
       auto &y = output->y(i);
       auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_DELTA(y[j], 0.0323, 0.0001)
         TS_ASSERT_DELTA(e[j], 0.0485, 0.0001)
@@ -265,7 +268,7 @@ public:
     auto &monitorX = output->x(0);
     auto &monitorY = output->y(0);
     auto &monitorE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monitorY.size(); ++k) {
       TS_ASSERT_EQUALS(monitorX[k], k)
       TS_ASSERT_DELTA(monitorY[k], 0.1613, 0.0001)
       TS_ASSERT_DELTA(monitorE[k], 0.0518, 0.0001)
@@ -353,6 +356,7 @@ public:
     TS_ASSERT(!pID->isEnabled(&norm5));
     TS_ASSERT(!pID->isConditionChanged(&norm5));
   }
+
   void testIsConditionChanged() {
     NormaliseToMonitor norm6;
     norm6.initialize();
@@ -368,6 +372,7 @@ public:
     // and second time the monitons should be the same so no changes
     TS_ASSERT(!pID->isConditionChanged(&norm6));
   }
+
   void testAlgoConditionChanged() {
     NormaliseToMonitor norm6;
     norm6.initialize();
@@ -412,6 +417,26 @@ public:
     // it should return the list of allowed monitor ID-s
     monitors = monSpec->allowedValues();
     TS_ASSERT(monitors.empty());
+  }
+
+  void testMonitorWorkspaceNotInADSWorks() {
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    BinEdges xs{-1.0, 1.0};
+    Counts ys{1.0};
+    Histogram h(xs, ys);
+    MatrixWorkspace_sptr monitors = create<Workspace2D>(1, h);
+    NormaliseToMonitor alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", monitors))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_because_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorWorkspace", monitors))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
   }
 };
 

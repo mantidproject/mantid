@@ -247,7 +247,7 @@ public:
     // Check detector tubes are moved as expected
     const double ANGULAR_DETECTOR_SPACING = 1.25;
     const double ANGULAR_SCAN_INCREMENT = 0.05;
-    const double TUBE_1_START_ANGLE = 147.496;
+    const double TUBE_128_FIRST_ANGLE = 147.496;
 
     for (size_t i = 0; i < NUMBER_OF_TUBES; ++i) {
       for (size_t j = 0; j < detInfo.scanCount(i); ++j) {
@@ -263,18 +263,19 @@ public:
         // Check the tube centre is 90 degrees from the y-axis
         TS_ASSERT_DELTA(tubeCentre.angle(V3D(0, 1, 0)) * RAD_2_DEG, 90.0, 1e-6)
         // Check the tube centre is at the expected angle from the z-axis
-        // (incoming beam). The first angle for tube_1 is hard coded here, then
+        // (incoming beam). The last angle for tube_128 is hard coded here, then
         // for each time index the angle increments by ANGULAR_SCAN_INCREMENT
         // (0.05 deg). Then detectors themselves are spaced apart by
         // ANGULARD_DETECTOR_SPACING (1.25 deg).
         //
         // A generous tolerance is required as the NeXus file contains the
         // actual hardware readings, which have a large tolerance.
-        TS_ASSERT_DELTA(tubeCentre.angle(V3D(0, 0, 1)) * RAD_2_DEG,
-                        std::abs(ANGULAR_SCAN_INCREMENT * double(j) +
-                                 TUBE_1_START_ANGLE -
-                                 ANGULAR_DETECTOR_SPACING * double(i)),
-                        1e-2)
+        TS_ASSERT_DELTA(
+            tubeCentre.angle(V3D(0, 0, 1)) * RAD_2_DEG,
+            std::abs(ANGULAR_SCAN_INCREMENT * double(j) + TUBE_128_FIRST_ANGLE -
+                     ANGULAR_DETECTOR_SPACING * (NUMBER_OF_TUBES - 1) +
+                     ANGULAR_DETECTOR_SPACING * double(i)),
+            1e-2)
       }
     }
   }

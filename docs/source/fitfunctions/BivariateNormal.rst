@@ -12,8 +12,7 @@ Description
 Provides a peak shape function interface for a peak on one time slice of
 a Rectangular detector.
 
-Formula: V=Background+Intensity\*Normal( μ\ :sub:`x`, μ\ :sub:`y`,
-σ\ :sub:`x`, σ\ :sub:`y`)
+.. math:: V=\mathrm{Background} + \mathrm{Intensity}\times\mathrm{Normal}( \mu_x, \mu_y,\sigma_x,\sigma_y)
 
 The Normal(..) is the Normal probability density function. Its integral
 over all x(col) and y(row) values is one. This means that Intensity is

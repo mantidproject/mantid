@@ -124,8 +124,7 @@ private:
 Class SliceMDDialog
 Concrete SlicingAlgorithm Dialog geared for SliceMD
 */
-class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog
-    : public SlicingAlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SliceMDDialog : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
   SliceMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}
@@ -139,8 +138,7 @@ public:
 Class BinMDDialog
 Concrete BinMDDialog Dialog geared for BinMD
 */
-class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog
-    : public SlicingAlgorithmDialog {
+class EXPORT_OPT_MANTIDQT_COMMON BinMDDialog : public SlicingAlgorithmDialog {
   Q_OBJECT
 public:
   BinMDDialog(QWidget *parent = NULL) : SlicingAlgorithmDialog(parent) {}

@@ -37,8 +37,9 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
-  void individualGroupingToggled(int state);
+  void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
+  void deleteGroupingWorkspace();
 
 private:
   void initLayout() override;
@@ -57,6 +58,7 @@ private:
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
+  void createGroupingWorkspace(const std::string &outputWsName);
 
 private:
   Ui::IndirectDiffractionReduction
@@ -65,6 +67,7 @@ private:
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
+  std::string m_groupingWsName;
 };
 }
 }

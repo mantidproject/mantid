@@ -209,7 +209,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   }
 
   while (Mantid::Kernel::Strings::extractToEOL(logFileStream, str)) {
-    if (!isDateTimeString(str)) {
+    if (!isDateTimeString(str) && !str.empty()) {
       throw std::invalid_argument("File" + logFileName +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a file starting with DateTime String "
@@ -217,8 +217,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     }
 
     if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) ||
-        (str[0] ==
-         '#')) { // if the line doesn't start with a time read the next line
+        (str.empty() || str[0] == '#')) {
+      // if the line doesn't start with a time read the next line
       continue;
     }
 
@@ -229,6 +229,12 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     std::string blockcolumn;
     line >> blockcolumn;
     l_kind = classify(blockcolumn);
+
+    if (LoadLog::empty == l_kind) {
+      g_log.warning() << "Failed to parse line in log file: " << timecolumn
+                      << "\t" << blockcolumn;
+      continue;
+    }
 
     if (LoadLog::string != l_kind) {
       throw std::invalid_argument(
@@ -404,9 +410,23 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
 
   if (letters.find_first_of(s) != string::npos) {
     return LoadLog::string;
-  } else {
-    return LoadLog::number;
   }
+
+  const auto isNumber = [](const std::string &str) {
+    // try and get stold to parse a number out of the string
+    // if this throws then we don't have a number
+    try {
+      // cppcheck-suppress ignoredReturnValue
+      std::stold(str);
+      return true;
+    } catch (const std::invalid_argument &) {
+      return false;
+    } catch (const std::out_of_range &) {
+      return false;
+    }
+  };
+
+  return (isNumber(s)) ? LoadLog::number : LoadLog::empty;
 }
 
 /**

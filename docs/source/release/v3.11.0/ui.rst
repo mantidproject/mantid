@@ -41,6 +41,9 @@ Workspace History Window
 Documentation
 #############
 
+- Improve documentation for `RewriteSpectraMap` property of the `LoadInstrument`
+  algorithm
+
 Custom Interfaces
 #################
 
@@ -51,6 +54,7 @@ Custom Interfaces
 Bugs Resolved
 -------------
 - Fixed a bug causing table windows with string values to appear truncated if the string contained a space.
+- Fixed a bug where setting a table column's plot type would not be saved to the workspace correctly.
 
 SliceViewer Improvements
 ------------------------

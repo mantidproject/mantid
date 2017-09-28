@@ -1,10 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
-
 import io
-from math import sqrt
-
 import numpy as np
-
 import AbinsModules
 from mantid.kernel import Atom, logger
 
@@ -75,7 +71,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
     def _determine_system(self):
         """
         Determines whether the system is a molecule or a crystal.
-        :return: True if calculation for molecule otherwise False
+        :returns: True if calculation for molecule otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
@@ -98,7 +94,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Checks if we have data for more than one k-point. If data for more than one k-point then calculates
         transformation matrix to primitive unit cell from super cell.
-        :return: True if many k-points included in calculations otherwise False
+        :returns: True if many k-points included in calculations otherwise False
         """
         with io.open(self._clerk.get_input_filename(), "rb") as crystal_file:
             lines = crystal_file.read()
@@ -125,7 +121,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Reads lattice vectors from .out CRYSTAL file.
         :param file_obj:  file object from which we read
-        :return: list with lattice vectors
+        :returns: list with lattice vectors
         """
         self._parser.find_first(file_obj=file_obj, msg="DIRECT LATTICE VECTORS CARTESIAN COMPONENTS (ANGSTROM)")
         file_obj.readline()  # Line: X                    Y                    Z
@@ -142,7 +138,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Reads atomic coordinates from .out CRYSTAL file.
         :param file_obj:  file object from which we read
-        :return: list with atomic coordinates
+        :returns: list with atomic coordinates
         """
         coord_lines = []
         self._parser.find_first(file_obj=file_obj,
@@ -170,7 +166,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         Reads vibrational modes (frequencies and atomic displacements).
         :param phonon_dispersion: True if more then one k-point to parse, otherwise False.
         :param file_obj: file object from which we read
-        :return: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
+        :returns: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of
                  k-points
         """
         # case of more than one k-point
@@ -339,7 +335,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         """
         Checks if end of k-points block.
         :param file_obj: file object from which we read
-        :return: True if end of block otherwise False
+        :returns: True if end of block otherwise False
         """
         allowed_keywords = [b" X ", b" Y ", b" Z ", b"-", b"REAL", b"IMAGINARY", b"MODES", b"DISPERSION"]
 
@@ -400,29 +396,50 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         #     a) Put frequencies into dictionary
         data["frequencies"] = np.asarray(freq).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
 
-        #     b) Normalise atomic displacements and put them into data dictionary
-        all_kpoints = []
-        for k in range(self._num_k):
-            all_kpoints.append(self._create_kpoint_data(freq=freq[k], atomic_displacements=atomic_displacements[k],
-                               atomic_coordinates=atomic_coordinates))
+        #     b) Extract atomic displacements, normalize them and put them into data dictionary
+        # Extract
+        all_k_atomic_disp = [self._create_kpoint_data(freq=freq[k],
+                                                      atomic_displacements=atomic_displacements[k],
+                                                      atomic_coordinates=atomic_coordinates)
+                             for k in range(self._num_k)]
 
-        data["atomic_displacements"] = np.asarray(all_kpoints)
+        # normalise
+        all_k_atomic_disp = np.asarray(all_k_atomic_disp)
+        masses = np.asarray([data["atoms"]["atom_%s" % atom]["mass"] for atom in range(self._num_atoms)])
+
+        # [num_k ,num_freq, num_atoms, dim] -> [num_k, num_freq, num_atoms, dim, dim] -> [num_k, num_freq, num_atoms]
+        temp1 = np.trace(np.einsum("mlki, mlkj->mlkij", all_k_atomic_disp, all_k_atomic_disp.conjugate()),
+                         axis1=3, axis2=4)
+        temp2 = np.einsum("mij, j->mij", temp1, masses)
+
+        # [num_k, num_freq, num_atoms] -> [num_k, num_freq]
+        norm = np.sum(temp2, axis=2)
+
+        # noinspection PyTypeChecker
+        all_k_atomic_disp = np.einsum("mijk,mi->mijk", all_k_atomic_disp, 1.0 / np.sqrt(norm))
+        all_k_atomic_disp = np.einsum("mijk,j->mijk", all_k_atomic_disp, np.sqrt(masses))
+
+        # [num_k, num_freq, num_atoms, dim] ->  [num_k, num_atoms, num_freq, dim]
+        data["atomic_displacements"] = np.transpose(a=all_k_atomic_disp, axes=(0, 2, 1, 3))
+
+        # c) Put weights into dictionary
         data["weights"] = np.asarray(weights).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
+
+        # d) Put k-vectors into dictionary
         data["k_vectors"] = np.asarray(k_coordinates).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE,
                                                              casting="safe")
-
+        # e) put unit cell into dictionary
         temp = np.asarray(unit_cell).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE, casting="safe")
         data["unit_cell"] = np.dot(self._inv_expansion_matrix, temp)
 
     def _create_kpoint_data(self, freq=None, atomic_displacements=None, atomic_coordinates=None):
         """
-        Normalises atomic displacements.
+        Extracts atomic displacements.
         :param freq: normal modes for the given k-point
         :param atomic_displacements: atomic displacements for the given k-point
-        :param atomic_coordinates: atomic coordinates
+        :param atomic_coordinates: atomic coordinates (equilibrium positions)
         :return normalised atomic displacements in the form of numpy array
         """
-        #  Normalise atomic displacements and put them into data dictionary for the given k-point
         column_num = -1
         freq_num = -1
         row_num = 0
@@ -440,18 +457,18 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
             # Parse blocks with default row width (6)
             if row_num <= num_displacements / (default_row_width * num_coordinates) - 1:
-                displacements.extend(self.create_kpoints_data_helper(
-                    atomic_displacements=atomic_displacements, atomic_coordinates=atomic_coordinates, row=row_num,
-                    column=column_num, freq_num=freq_num))
+                displacements.extend(self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
+                                                                     atomic_coordinates=atomic_coordinates, row=row_num,
+                                                                     column=column_num))
 
             # At this point we have parsed all the modes that are
             # part of blocks of 6 in the crystal output; now we need to
             # consider the other blocks
             elif num_displacements % default_row_width != 0:
                 current_row_width = num_displacements % default_row_width
-                displacements.extend(self.create_kpoints_data_helper(
-                    atomic_displacements=atomic_displacements, atomic_coordinates=atomic_coordinates, row=row_num,
-                    column=column_num, freq_num=freq_num, row_width=current_row_width))
+                displacements.extend(self.create_kpoints_data_helper(atomic_displacements=atomic_displacements,
+                                                                     atomic_coordinates=atomic_coordinates, row=row_num,
+                                                                     column=column_num, row_width=current_row_width))
 
         # Reshape displacements so that Abins can use it to create its internal data objects
         # num_atoms: number of atoms in the system
@@ -459,65 +476,39 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # dim: dimension for each atomic displacement (atoms vibrate in 3D space)
         #
         # The following conversion is necessary:
-        # (num_freq * num_atom * dim) -> (num_freq, num_atom, dim) -> (num_atom, num_freq, dim)
+        # (num_freq * num_atom * dim) -> (num_freq, num_atom, dim)
 
         num_freq = len(freq)
         dim = 3
 
-        displacements = np.asarray(a=[displacements], order="C")
-        displacements = np.reshape(a=displacements, newshape=(num_freq, self._num_atoms, dim))
-        displacements = np.transpose(a=displacements, axes=(1, 0, 2))
+        displacements = np.asarray(a=displacements, order="C").reshape(num_freq, self._num_atoms, dim)
 
         return displacements
 
     def create_kpoints_data_helper(self, atomic_displacements=None, atomic_coordinates=None, row=None, column=None,
-                                   freq_num=None, row_width=6):
+                                   row_width=6):
         """
-        Computes normalisation constant for displacements and builds a block of coordinates.
+        Extracts atomic displacements for the given row and column.
         :param atomic_displacements: list with atomic displacements
         :param atomic_coordinates: list with atomic coordinates
         :param row: number of atomic_displacements row to parse
         :param column: number of atomic_displacements column to parse
-        :param freq_num: number of mode (frequency)
         :param row_width: current width of row to parse
         :return normalised atomic displacements
         """
         xdisp = atomic_displacements[0]
         ydisp = atomic_displacements[1]
         zdisp = atomic_displacements[2]
-        atom_num = -1
 
-        # Compute normalisation constant for displacements
-        # and build block of normalised coordinates.
-        normalised_coordinates = []
-        norm_const1 = 0.
-        for line in atomic_coordinates:
-            atom_num += 1
-            l = line.split()
-            indx = row * len(atomic_coordinates) * 6 + atom_num * row_width + column
-            if indx <= len(xdisp) - 1:
-                x, y, z = xdisp[indx], ydisp[indx], zdisp[indx]
-                norm_const1 += (x * x.conjugate() + y * y.conjugate() + z * z.conjugate()).real
-                normalised_coordinates += [[l[2], x, y, z]]
+        atomic_coordinates_length = len(atomic_coordinates)
+        atomic_coordinates_iter = range(atomic_coordinates_length)
+        const = row * atomic_coordinates_length * 6 + column
 
-        # Normalise displacements and multiply displacements by sqrt(mass)-> xn, yn, zn
-        xn = []
-        yn = []
-        zn = []
-        norm_const1 = sqrt(norm_const1)
-        norm = 0.0
+        indices = [const + atom_num * row_width for atom_num in atomic_coordinates_iter]
+        x = [xdisp[indx] for indx in indices]
+        y = [ydisp[indx] for indx in indices]
+        z = [zdisp[indx] for indx in indices]
 
-        for item in normalised_coordinates:
-            atom = Atom(symbol=str(item[0].decode("utf-8").capitalize()))
-            mass = atom.mass
-            x = item[1] / norm_const1 * sqrt(mass)
-            y = item[2] / norm_const1 * sqrt(mass)
-            z = item[3] / norm_const1 * sqrt(mass)
-            xn += [x]
-            yn += [y]
-            zn += [z]
-            norm += (x * x.conjugate() + y * y.conjugate() + z * z.conjugate()).real
+        local_displacements = np.transpose(np.asarray([x, y, z]))
 
-        # Final normalization
-        local_displacements = np.transpose(np.asarray([xn, yn, zn])) / sqrt(norm)
         return local_displacements
