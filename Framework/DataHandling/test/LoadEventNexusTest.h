@@ -54,6 +54,9 @@ void run_MPI_load(const Parallel::Communicator &comm) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+  if (comm.size() != 1) {
+    TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+  }
   const auto eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
   const size_t localSize = eventWS->getNumberHistograms();
   auto localEventCount = eventWS->getNumberEvents();
