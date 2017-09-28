@@ -230,9 +230,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(
-      in.cbegin(), in.cend(), std::inserter(out, out.begin()),
-      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
+  std::transform(in.cbegin(), in.cend(), std::inserter(out, out.begin()),
+                 [](QString const &inStr)
+                     -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
