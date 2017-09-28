@@ -429,7 +429,6 @@ set ( TEST_FILES
 	ThreadPoolTest.h
 	ThreadSchedulerMutexesTest.h
 	ThreadSchedulerTest.h
-	TimeIntervalTest.h
 	TimeSeriesPropertyTest.h
 	TimeSplitterTest.h
 	TimerTest.h
