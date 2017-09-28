@@ -55,10 +55,13 @@ void MSDFit::setup() {
   connect(m_uiForm.cbModelInput, SIGNAL(currentIndexChanged(int)), this,
           SLOT(modelSelection(int)));
   connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
+
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(updatePlot(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -406,9 +409,6 @@ void MSDFit::updateProperties(int specNo) {
   auto parameterNames = m_parameterValues.keys();
 
   if (parameterNames.isEmpty()) {
-    g_log.error(
-        "No MSD parameters found when trying to update the property "
-        "table. Please send this error to the Mantid development team.");
     return;
   }
 
