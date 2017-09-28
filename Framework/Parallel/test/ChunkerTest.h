@@ -10,10 +10,14 @@
 
 using namespace Mantid::Parallel::IO;
 
-namespace {
+namespace Mantid {
+namespace Parallel {
+namespace IO {
 bool operator==(const Chunker::LoadRange &a, const Chunker::LoadRange &b) {
   return a.bankIndex == b.bankIndex && a.eventOffset == b.eventOffset &&
          a.eventCount == b.eventCount;
+}
+}
 }
 }
 
