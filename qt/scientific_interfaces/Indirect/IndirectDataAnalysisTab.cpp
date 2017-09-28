@@ -91,9 +91,7 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() {
-  return m_selectedSpectrum;
-}
+int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
 
 /**
  * Sets the selected spectrum.

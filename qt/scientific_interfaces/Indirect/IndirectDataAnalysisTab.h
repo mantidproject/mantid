@@ -67,7 +67,8 @@ protected:
   Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace();
 
   /// Set preview plot workspace
-  void setPreviewPlotWorkspace(Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+  void setPreviewPlotWorkspace(
+      Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
   int selectedSpectrum();

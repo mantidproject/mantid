@@ -233,8 +233,9 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   scaleAlg->setProperty("Factor", 0.5);
   scaleAlg->execute();
 
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      sample.toStdString());
+  auto ws =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sample.toStdString());
   setInputWorkspace(ws);
 
   findAllWidths(inputWorkspace());
