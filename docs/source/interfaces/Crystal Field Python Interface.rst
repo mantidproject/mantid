@@ -389,7 +389,7 @@ To access parameters of a CrystalFieldMultiSite object, prefix with the ion inde
     b = cfms['ion0.B22']
 
 
-Parameters can be set when creating the object by passing in a dictionary using the `parameters` keyword:
+Parameters can be set when creating the object by passing in a dictionary using the `parameters` keyword::
 
     cfms = CrystalFieldMultiSite(Ions=['Ce', 'Pr'], Symmetries=['C2v', 'C2v'], Temperatures=[44.0], FWHMs=[1.1],
                                  parameters={'ion0.B20': 0.37737, 'ion0.B22': 3.9770, 'ion1.B40':-0.031787,
@@ -399,7 +399,7 @@ A background can also be set this way, or using `cfms.background.` It can be pas
 CompositeFunction object::
 
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2v', Temperatures=[20], FWHMs=[1.0],
-                                   Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
+                              Background='name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0')
 
     cfms = CrystalFieldMultiSite(Ions=['Ce'], Symmetries=['C2v'], Temperatures=[50], FWHMs=[0.9],
                                    Background=LinearBackground(A0=1.0), BackgroundPeak=Gaussian(Height=10, Sigma=0.3))
@@ -440,7 +440,7 @@ Calculating a spectrum can be done with `CrystalFieldMultiSite` in the same way 
 CrystalFieldMultiSite can also be used in the single-site case to use the `CrystalFieldFunction` fitting function. It
 can be used like a `CrystalField` object in this way, although `Temperatures` and `FWHMs` must still be passed as lists::
 
-cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
+    cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
                                      BmolX=1.0, B40=-0.02)
 
 
