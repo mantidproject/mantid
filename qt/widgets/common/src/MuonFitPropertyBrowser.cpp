@@ -1662,7 +1662,7 @@ void MuonFitPropertyBrowser::setGroupNames(
   m_groupsList = groupNames;
 }
 void MuonFitPropertyBrowser::setTFAsymm(bool state) {
-	m_boolManager->setValue(m_TFAsymmMode, state);
+  m_boolManager->setValue(m_TFAsymmMode, state);
 }
 
 } // MantidQt
