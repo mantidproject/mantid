@@ -3,8 +3,8 @@
  */
 
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <sstream>
-#include <math.h>
 
 #include <QThread>
 

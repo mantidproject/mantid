@@ -106,10 +106,10 @@
 #include <qwt_text_label.h>
 
 #include <climits>
-#include <math.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 
 using namespace MantidQt::API;
 using CurveType = GraphOptions::CurveType;

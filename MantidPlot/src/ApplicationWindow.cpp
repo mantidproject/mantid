@@ -130,9 +130,9 @@
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/RemoveErrorsDialog.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <cassert>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 
 #include <qwt_scale_engine.h>

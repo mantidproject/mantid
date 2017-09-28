@@ -100,9 +100,9 @@
 #include <QtGui/QPainter>
 #include <QtGui/QLabel>
 
-#include <limits.h>
-#include <float.h>
-#include <math.h>
+#include <cfloat>
+#include <climits>
+#include <cmath>
 
 #if defined(Q_CC_MSVC)
 #pragma warning(                                                               \

@@ -35,13 +35,13 @@
 #pragma warning disable 181
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-#include <cstring>
-#include <algorithm> //required for std::swap
 #include "OPJFile.h"
+#include <algorithm> //required for std::swap
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 using std::vector;
 using std::string;

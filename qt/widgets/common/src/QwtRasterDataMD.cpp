@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include <math.h>
-#include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <cmath>
 
 namespace MantidQt {
 namespace API {

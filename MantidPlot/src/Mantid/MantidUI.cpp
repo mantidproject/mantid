@@ -72,8 +72,8 @@
 #include <QToolBar>
 
 #include <algorithm>
+#include <ctime>
 #include <qwt_plot_curve.h>
-#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
