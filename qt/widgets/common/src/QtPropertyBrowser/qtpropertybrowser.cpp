@@ -1066,7 +1066,8 @@ class QtBrowserItemPrivate {
 public:
   QtBrowserItemPrivate(QtAbstractPropertyBrowser *browser, QtProperty *property,
                        QtBrowserItem *parent)
-      : m_browser(browser), m_property(property), m_parent(parent), q_ptr(nullptr) {}
+      : m_browser(browser), m_property(property), m_parent(parent),
+        q_ptr(nullptr) {}
 
   void addChild(QtBrowserItem *index, QtBrowserItem *after);
   void removeChild(QtBrowserItem *index);
@@ -1852,7 +1853,8 @@ void QtAbstractPropertyBrowser::removeProperty(QtProperty *property) {
     if (pendingList.at(pos) == property) {
       d_ptr->m_subItems.removeAt(pos); // perhaps this two lines
       d_ptr->removeSubTree(
-          property, nullptr); // should be moved down after propertyRemoved call.
+          property,
+          nullptr); // should be moved down after propertyRemoved call.
       // propertyRemoved(property, 0);
 
       d_ptr->removeBrowserIndexes(property, nullptr);

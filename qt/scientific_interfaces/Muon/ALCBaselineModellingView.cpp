@@ -22,8 +22,8 @@ namespace CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()),
       m_fitCurve(new QwtPlotCurve()), m_correctedCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(nullptr), m_correctedErrorCurve(nullptr), m_rangeSelectors(),
-      m_selectorModifiedMapper(new QSignalMapper(this)) {}
+      m_dataErrorCurve(nullptr), m_correctedErrorCurve(nullptr),
+      m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
 ALCBaselineModellingView::~ALCBaselineModellingView() {
   m_dataCurve->detach();

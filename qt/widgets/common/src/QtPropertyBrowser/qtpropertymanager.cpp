@@ -1783,8 +1783,8 @@ QString QtDatePropertyManager::valueText(const QtProperty *property) const {
     \sa value(), setRange(), valueChanged()
 */
 void QtDatePropertyManager::setValue(QtProperty *property, const QDate &val) {
-  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(QtProperty *,
-                                                            const QDate &) = nullptr;
+  void (QtDatePropertyManagerPrivate::*setSubPropertyValue)(
+      QtProperty *, const QDate &) = nullptr;
   setValueInRange<const QDate &, QtDatePropertyManagerPrivate,
                   QtDatePropertyManager, const QDate>(
       this, d_ptr, &QtDatePropertyManager::propertyChanged,
@@ -2349,7 +2349,8 @@ void QtLocalePropertyManagerPrivate::slotPropertyDestroyed(
   if (QtProperty *subProp = m_languageToProperty.value(property, nullptr)) {
     m_propertyToLanguage[subProp] = nullptr;
     m_languageToProperty.remove(property);
-  } else if (QtProperty *subProp = m_countryToProperty.value(property, nullptr)) {
+  } else if (QtProperty *subProp =
+                 m_countryToProperty.value(property, nullptr)) {
     m_propertyToCountry[subProp] = nullptr;
     m_countryToProperty.remove(property);
   }
@@ -5361,13 +5362,16 @@ void QtSizePolicyPropertyManagerPrivate::slotPropertyDestroyed(
   if (QtProperty *pointProp = m_hStretchToProperty.value(property, nullptr)) {
     m_propertyToHStretch[pointProp] = nullptr;
     m_hStretchToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_vStretchToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_vStretchToProperty.value(property, nullptr)) {
     m_propertyToVStretch[pointProp] = nullptr;
     m_vStretchToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_hPolicyToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_hPolicyToProperty.value(property, nullptr)) {
     m_propertyToHPolicy[pointProp] = nullptr;
     m_hPolicyToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_vPolicyToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_vPolicyToProperty.value(property, nullptr)) {
     m_propertyToVPolicy[pointProp] = nullptr;
     m_vPolicyToProperty.remove(property);
   }
@@ -5712,11 +5716,13 @@ void QtFontPropertyManagerPrivate::slotBoolChanged(QtProperty *property,
     QFont f = m_values[prop];
     f.setItalic(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop = m_underlineToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop =
+                 m_underlineToProperty.value(property, nullptr)) {
     QFont f = m_values[prop];
     f.setUnderline(value);
     q_ptr->setValue(prop, f);
-  } else if (QtProperty *prop = m_strikeOutToProperty.value(property, nullptr)) {
+  } else if (QtProperty *prop =
+                 m_strikeOutToProperty.value(property, nullptr)) {
     QFont f = m_values[prop];
     f.setStrikeOut(value);
     q_ptr->setValue(prop, f);
@@ -5731,22 +5737,28 @@ void QtFontPropertyManagerPrivate::slotPropertyDestroyed(QtProperty *property) {
   if (QtProperty *pointProp = m_pointSizeToProperty.value(property, nullptr)) {
     m_propertyToPointSize[pointProp] = nullptr;
     m_pointSizeToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_familyToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_familyToProperty.value(property, nullptr)) {
     m_propertyToFamily[pointProp] = nullptr;
     m_familyToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_boldToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_boldToProperty.value(property, nullptr)) {
     m_propertyToBold[pointProp] = nullptr;
     m_boldToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_italicToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_italicToProperty.value(property, nullptr)) {
     m_propertyToItalic[pointProp] = nullptr;
     m_italicToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_underlineToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_underlineToProperty.value(property, nullptr)) {
     m_propertyToUnderline[pointProp] = nullptr;
     m_underlineToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_strikeOutToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_strikeOutToProperty.value(property, nullptr)) {
     m_propertyToStrikeOut[pointProp] = nullptr;
     m_strikeOutToProperty.remove(property);
-  } else if (QtProperty *pointProp = m_kerningToProperty.value(property, nullptr)) {
+  } else if (QtProperty *pointProp =
+                 m_kerningToProperty.value(property, nullptr)) {
     m_propertyToKerning[pointProp] = nullptr;
     m_kerningToProperty.remove(property);
   }

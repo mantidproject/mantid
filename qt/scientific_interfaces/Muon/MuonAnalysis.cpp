@@ -89,11 +89,11 @@ const std::string MuonAnalysis::PEAK_RADIUS_CONFIG("curvefitting.peakRadius");
 MuonAnalysis::MuonAnalysis(QWidget *parent)
     : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
       m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
-      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(nullptr),
-      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-      m_updating(false), m_updatingGrouping(false), m_loaded(false),
-      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(nullptr),
-      m_fitDataTab(nullptr),
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+      m_currentTab(nullptr), m_groupNames(),
+      m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false),
+      m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
+      m_textToDisplay(""), m_optionTab(nullptr), m_fitDataTab(nullptr),
       m_resultTableTab(nullptr), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),

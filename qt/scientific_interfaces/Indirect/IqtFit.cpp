@@ -24,9 +24,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr), m_iqtFTree(nullptr),
-      m_iqtFRangeManager(nullptr), m_fixedProps(), m_iqtFInputWS(),
-      m_iqtFOutputWS(), m_previewPlotData(), m_iqtFInputWSName(), m_ties() {
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
+      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
+      m_iqtFInputWS(), m_iqtFOutputWS(), m_previewPlotData(),
+      m_iqtFInputWSName(), m_ties() {
   m_uiForm.setupUi(parent);
 }
 

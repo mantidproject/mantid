@@ -676,7 +676,8 @@ namespace {
  * when the object is destroyed
  */
 struct InstallTrace {
-  explicit InstallTrace(PythonScript &scriptObject) : m_sipWrappedScript(nullptr) {
+  explicit InstallTrace(PythonScript &scriptObject)
+      : m_sipWrappedScript(nullptr) {
     if (scriptObject.reportProgress()) {
       m_sipWrappedScript = scriptObject.createSipInstanceFromMe();
       PyEval_SetTrace((Py_tracefunc)&traceLineNumber, m_sipWrappedScript);

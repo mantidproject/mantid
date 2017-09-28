@@ -45,8 +45,8 @@ bool TextFileIO::save(const QString &txt, const QString &filename) const {
 QString TextFileIO::askWhereToSave() const {
   QString selectedFilter;
   QString filter = m_filters.join(";;");
-  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
+                                                  "", filter, &selectedFilter);
   return MantidQt::API::FileDialogHandler::addExtension(filename,
                                                         selectedFilter);
 }

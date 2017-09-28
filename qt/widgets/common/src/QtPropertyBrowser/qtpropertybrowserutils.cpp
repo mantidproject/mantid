@@ -125,23 +125,23 @@ QtCursorDatabase::QtCursorDatabase() {
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-ibeam.png")));
   appendCursor(Qt::SizeVerCursor,
-               QApplication::translate("QtCursorDatabase", "Size Vertical", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Size Vertical",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-sizev.png")));
   appendCursor(Qt::SizeHorCursor,
-               QApplication::translate("QtCursorDatabase", "Size Horizontal", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Size Horizontal",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-sizeh.png")));
   appendCursor(Qt::SizeFDiagCursor,
-               QApplication::translate("QtCursorDatabase", "Size Backslash", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Size Backslash",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-sizef.png")));
   appendCursor(Qt::SizeBDiagCursor,
-               QApplication::translate("QtCursorDatabase", "Size Slash", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Size Slash",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-sizeb.png")));
   appendCursor(Qt::SizeAllCursor,
@@ -154,8 +154,8 @@ QtCursorDatabase::QtCursorDatabase() {
                                        QApplication::UnicodeUTF8),
                QIcon());
   appendCursor(Qt::SplitVCursor,
-               QApplication::translate("QtCursorDatabase", "Split Vertical", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Split Vertical",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-vsplit.png")));
   appendCursor(Qt::SplitHCursor,
@@ -164,8 +164,8 @@ QtCursorDatabase::QtCursorDatabase() {
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-hsplit.png")));
   appendCursor(Qt::PointingHandCursor,
-               QApplication::translate("QtCursorDatabase", "Pointing Hand", nullptr,
-                                       QApplication::UnicodeUTF8),
+               QApplication::translate("QtCursorDatabase", "Pointing Hand",
+                                       nullptr, QApplication::UnicodeUTF8),
                QIcon(QLatin1String(
                    ":/trolltech/qtpropertybrowser/images/cursor-hand.png")));
   appendCursor(

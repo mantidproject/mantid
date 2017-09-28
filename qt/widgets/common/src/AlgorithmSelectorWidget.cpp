@@ -14,7 +14,8 @@ namespace MantidWidgets {
 /** Constructor
  */
 AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
-    : QWidget(parent), m_tree(nullptr), m_findAlg(nullptr), m_execButton(nullptr),
+    : QWidget(parent), m_tree(nullptr), m_findAlg(nullptr),
+      m_execButton(nullptr),
       m_updateObserver(*this,
                        &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
       m_updateInProgress(false) {

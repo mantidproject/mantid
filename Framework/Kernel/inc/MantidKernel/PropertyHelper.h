@@ -93,7 +93,8 @@ std::string toPrettyString(
     bool collapseLists = true, const std::string &delimiter = ",",
     const std::string &unusedDelimiter = "+",
     typename std::enable_if<!(std::is_integral<T>::value &&
-                              std::is_arithmetic<T>::value)>::type * = nullptr) {
+                              std::is_arithmetic<T>::value)>::type * =
+        nullptr) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter),

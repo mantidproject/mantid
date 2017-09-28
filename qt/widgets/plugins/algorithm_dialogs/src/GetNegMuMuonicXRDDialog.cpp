@@ -17,8 +17,9 @@ DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 */
 
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent), m_periodicTable(nullptr), m_yPosition(nullptr),
-      m_groupWorkspaceNameInput(nullptr), m_showLegendCheck(nullptr) {
+    : API::AlgorithmDialog(parent), m_periodicTable(nullptr),
+      m_yPosition(nullptr), m_groupWorkspaceNameInput(nullptr),
+      m_showLegendCheck(nullptr) {
   m_autoParseOnInit = false;
 }
 

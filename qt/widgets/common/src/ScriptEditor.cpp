@@ -258,8 +258,8 @@ QSize ScriptEditor::sizeHint() const { return QSize(600, 500); }
 void ScriptEditor::saveAs() {
   QString selectedFilter;
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
-  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
+                                                  "", filter, &selectedFilter);
 
   if (filename.isEmpty()) {
     throw SaveCancelledException();

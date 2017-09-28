@@ -1745,13 +1745,17 @@ void ApplicationWindow::plot3DRibbon() {
         tr("You must select exactly one column for plotting!"));
 }
 
-void ApplicationWindow::plot3DWireframe() { plot3DMatrix(nullptr, Qwt3D::WIREFRAME); }
+void ApplicationWindow::plot3DWireframe() {
+  plot3DMatrix(nullptr, Qwt3D::WIREFRAME);
+}
 
 void ApplicationWindow::plot3DHiddenLine() {
   plot3DMatrix(nullptr, Qwt3D::HIDDENLINE);
 }
 
-void ApplicationWindow::plot3DPolygons() { plot3DMatrix(nullptr, Qwt3D::FILLED); }
+void ApplicationWindow::plot3DPolygons() {
+  plot3DMatrix(nullptr, Qwt3D::FILLED);
+}
 
 void ApplicationWindow::plot3DWireSurface() {
   plot3DMatrix(nullptr, Qwt3D::FILLEDMESH);

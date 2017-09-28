@@ -43,9 +43,9 @@
 #include <QComboBox>
 
 FilterDialog::FilterDialog(int type, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr), buttonCancel(nullptr),
-      boxName(nullptr), boxOffset(nullptr), boxStart(nullptr), boxEnd(nullptr),
-      boxColor(nullptr) {
+    : QDialog(parent, fl), graph(nullptr), buttonFilter(nullptr),
+      buttonCancel(nullptr), boxName(nullptr), boxOffset(nullptr),
+      boxStart(nullptr), boxEnd(nullptr), boxColor(nullptr) {
   setWindowTitle(tr("MantidPlot - Filter options"));
   filter_type = type;
 

@@ -50,9 +50,10 @@
 #include <QApplication>
 
 FFTDialog::FFTDialog(int type, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr), forwardBtn(nullptr),
-      backwardBtn(nullptr), boxName(nullptr), boxReal(nullptr), boxImaginary(nullptr),
-      boxSampling(nullptr), boxNormalize(nullptr), boxOrder(nullptr) {
+    : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr),
+      forwardBtn(nullptr), backwardBtn(nullptr), boxName(nullptr),
+      boxReal(nullptr), boxImaginary(nullptr), boxSampling(nullptr),
+      boxNormalize(nullptr), boxOrder(nullptr) {
   setWindowTitle(tr("MantidPlot - FFT Options"));
 
   d_matrix = nullptr;

@@ -234,7 +234,8 @@ private:
 };
 
 QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel)
-    : QTreeWidget(parent), m_editorPrivate(nullptr), m_darkTopLevel(darkTopLevel) {
+    : QTreeWidget(parent), m_editorPrivate(nullptr),
+      m_darkTopLevel(darkTopLevel) {
   connect(header(), SIGNAL(sectionDoubleClicked(int)), this,
           SLOT(resizeColumnToContents(int)));
 }
@@ -589,10 +590,10 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
   const int columnCount = 2 + m_options.size();
   m_treeWidget->setColumnCount(columnCount);
   QStringList labels;
-  labels.append(QApplication::translate("QtTreePropertyBrowser", "Property", nullptr,
-                                        QApplication::UnicodeUTF8));
-  labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", nullptr,
-                                        QApplication::UnicodeUTF8));
+  labels.append(QApplication::translate("QtTreePropertyBrowser", "Property",
+                                        nullptr, QApplication::UnicodeUTF8));
+  labels.append(QApplication::translate("QtTreePropertyBrowser", "Value",
+                                        nullptr, QApplication::UnicodeUTF8));
   // add optional columns
   foreach (auto opt, m_options) {
     labels.append(QApplication::translate("QtTreePropertyBrowser",

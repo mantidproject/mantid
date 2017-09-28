@@ -158,7 +158,8 @@ Constructor
 */
 QPeaksTableModel::QPeaksTableModel(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
-    : QAbstractTableModel(nullptr), m_dataCachePeakIndex(-1), m_peaksWS(peaksWS) {
+    : QAbstractTableModel(nullptr), m_dataCachePeakIndex(-1),
+      m_peaksWS(peaksWS) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
                      {2, H},

@@ -26,7 +26,8 @@ public:
         "Too many output dimensions",
         CoordTransformAligned ct(3, 4, nullptr, nullptr, nullptr););
     TSM_ASSERT_THROWS_ANYTHING(
-        "Null input", CoordTransformAligned ct(1, 1, nullptr, nullptr, nullptr););
+        "Null input",
+        CoordTransformAligned ct(1, 1, nullptr, nullptr, nullptr););
     size_t dimToBinFrom[3] = {4, 1, 0};
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};

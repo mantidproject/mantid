@@ -43,7 +43,8 @@ class EXPORT_OPT_MANTIDQT_COMMON CheckboxHeader : public QHeaderView {
 
 public:
   /// Override QHeaderView constructor.
-  explicit CheckboxHeader(Qt::Orientation orientation, QWidget *parent = nullptr);
+  explicit CheckboxHeader(Qt::Orientation orientation,
+                          QWidget *parent = nullptr);
   void setChecked(bool checked);
 
 signals:

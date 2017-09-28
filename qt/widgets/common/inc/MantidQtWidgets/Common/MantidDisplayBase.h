@@ -84,10 +84,10 @@ public:
                                                        int version = -1) = 0;
   virtual void showAlgorithmDialog(const QString &algName,
                                    int version = -1) = 0;
-  virtual void showAlgorithmDialog(const QString &algName,
-                                   QHash<QString, QString> paramList,
-                                   Mantid::API::AlgorithmObserver *obs = nullptr,
-                                   int version = -1) = 0;
+  virtual void
+  showAlgorithmDialog(const QString &algName, QHash<QString, QString> paramList,
+                      Mantid::API::AlgorithmObserver *obs = nullptr,
+                      int version = -1) = 0;
   virtual void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) = 0;
   virtual bool executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg,
                                      const bool wait = false) = 0;

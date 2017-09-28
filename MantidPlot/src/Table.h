@@ -48,7 +48,8 @@ class MyTable : public QTableWidget {
   Q_OBJECT
 public:
   MyTable(QWidget *parent = nullptr, const char *name = nullptr);
-  MyTable(int numRows, int numCols, QWidget *parent = nullptr, const char *name = nullptr);
+  MyTable(int numRows, int numCols, QWidget *parent = nullptr,
+          const char *name = nullptr);
   void blockResizing(bool yes);
   QString text(int row, int col) const;
   void setText(int row, int col, const QString &txt);

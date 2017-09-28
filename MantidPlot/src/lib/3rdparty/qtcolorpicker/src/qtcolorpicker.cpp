@@ -168,7 +168,8 @@ class ColorPickerItem : public QFrame {
 
 public:
   ColorPickerItem(const QColor &color = Qt::white,
-                  const QString &text = QString::null, QWidget *parent = nullptr);
+                  const QString &text = QString::null,
+                  QWidget *parent = nullptr);
   ~ColorPickerItem();
 
   QColor color() const;

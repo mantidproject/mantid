@@ -50,14 +50,14 @@
 #include <numeric>
 
 Spectrogram::Spectrogram()
-    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false), d_matrix(nullptr),
-      d_funct(nullptr), d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), color_map(QwtLinearColorMap()),
-      d_show_labels(true), d_white_out_labels(false), d_labels_angle(0.0),
-      d_selected_label(nullptr), d_click_pos_x(0.), d_click_pos_y(0.),
-      d_labels_x_offset(0), d_labels_y_offset(0),
-      d_labels_align(Qt::AlignHCenter), m_nRows(0), m_nColumns(0),
-      m_bIntensityChanged(false), d_color_map_autoscale(true) {}
+    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false),
+      d_matrix(nullptr), d_funct(nullptr), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default),
+      color_map(QwtLinearColorMap()), d_show_labels(true),
+      d_white_out_labels(false), d_labels_angle(0.0), d_selected_label(nullptr),
+      d_click_pos_x(0.), d_click_pos_y(0.), d_labels_x_offset(0),
+      d_labels_y_offset(0), d_labels_align(Qt::AlignHCenter), m_nRows(0),
+      m_nColumns(0), m_bIntensityChanged(false), d_color_map_autoscale(true) {}
 
 Spectrogram::Spectrogram(const QString &wsName,
                          const Mantid::API::IMDWorkspace_const_sptr &workspace)
@@ -86,8 +86,9 @@ Spectrogram::Spectrogram(const QString &wsName,
 
 Spectrogram::Spectrogram(Matrix *m)
     : QObject(), QwtPlotSpectrogram(QString(m->objectName())), d_matrix(m),
-      d_funct(nullptr), d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), mColorMap(), d_color_map_autoscale(true) {
+      d_funct(nullptr), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default), mColorMap(),
+      d_color_map_autoscale(true) {
   setData(MatrixData(m));
   double step =
       fabs(data().range().maxValue() - data().range().minValue()) / 5.0;
@@ -103,9 +104,10 @@ Spectrogram::Spectrogram(Matrix *m)
 Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols, double left,
                          double top, double width, double height, double minz,
                          double maxz)
-    : QObject(), QwtPlotSpectrogram(), d_matrix(nullptr), d_funct(f), d_wsData(nullptr),
-      d_wsName(), color_axis(QwtPlot::yRight), color_map_policy(Default),
-      color_map(QwtLinearColorMap()), d_color_map_autoscale(true) {
+    : QObject(), QwtPlotSpectrogram(), d_matrix(nullptr), d_funct(f),
+      d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
+      color_map_policy(Default), color_map(QwtLinearColorMap()),
+      d_color_map_autoscale(true) {
   setData(FunctionData(f, nrows, ncols, left, top, width, height, minz, maxz));
   double step =
       fabs(data().range().maxValue() - data().range().minValue()) / 5.0;
@@ -120,10 +122,11 @@ Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols, double left,
 
 Spectrogram::Spectrogram(Function2D *f, int nrows, int ncols,
                          QwtDoubleRect bRect, double minz, double maxz)
-    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false), d_matrix(nullptr),
-      d_funct(f), d_wsData(nullptr), d_wsName(), color_axis(QwtPlot::yRight),
-      color_map_policy(Default), d_show_labels(true), d_white_out_labels(false),
-      d_labels_angle(0.0), d_selected_label(nullptr), d_labels_color(Qt::black),
+    : QObject(), QwtPlotSpectrogram(), d_color_map_pen(false),
+      d_matrix(nullptr), d_funct(f), d_wsData(nullptr), d_wsName(),
+      color_axis(QwtPlot::yRight), color_map_policy(Default),
+      d_show_labels(true), d_white_out_labels(false), d_labels_angle(0.0),
+      d_selected_label(nullptr), d_labels_color(Qt::black),
       d_labels_x_offset(0), d_labels_y_offset(0),
       d_labels_align(Qt::AlignHCenter), d_labels_font(QFont()), mColorMap(),
       m_nRows(nrows), m_nColumns(ncols), mScaledValues(0),

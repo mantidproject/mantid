@@ -23,7 +23,7 @@ public:
     using namespace Mantid::MDAlgorithms;
 
     TobyFitYVector *yVector(nullptr); // TS_ macro doesn't work with stack
-                                   // construction & no default constructor
+                                      // construction & no default constructor
     TS_ASSERT_THROWS_NOTHING(yVector = new TobyFitYVector);
 
     delete yVector;

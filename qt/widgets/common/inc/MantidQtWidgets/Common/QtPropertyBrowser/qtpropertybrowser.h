@@ -196,7 +196,8 @@ public:
   virtual QWidget *createEditor(QtProperty *property, QWidget *parent) = 0;
 
 protected:
-  explicit QtAbstractEditorFactoryBase(QObject *parent = nullptr) : QObject(parent) {}
+  explicit QtAbstractEditorFactoryBase(QObject *parent = nullptr)
+      : QObject(parent) {}
 
   virtual void breakConnection(QtAbstractPropertyManager *manager) = 0;
 protected Q_SLOTS:

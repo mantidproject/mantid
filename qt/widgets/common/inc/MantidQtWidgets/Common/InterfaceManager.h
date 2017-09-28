@@ -84,8 +84,8 @@ public:
 
   /// Create an algorithm dialog for a given name and version
   AlgorithmDialog *createDialogFromName(
-      const QString &algorithmName, const int version = -1, QWidget *parent = nullptr,
-      bool forScript = false,
+      const QString &algorithmName, const int version = -1,
+      QWidget *parent = nullptr, bool forScript = false,
       const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),

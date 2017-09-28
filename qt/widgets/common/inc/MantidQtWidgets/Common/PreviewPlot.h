@@ -136,8 +136,8 @@ private:
     size_t wsIndex;
 
     PlotCurveConfiguration()
-        : curve(nullptr), errorCurve(nullptr), showErrorsAction(nullptr), label(nullptr),
-          colour(), wsIndex(0) {}
+        : curve(nullptr), errorCurve(nullptr), showErrorsAction(nullptr),
+          label(nullptr), colour(), wsIndex(0) {}
   };
 
   void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);

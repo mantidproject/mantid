@@ -49,7 +49,8 @@ for this is defined by CustomButton.
 SelectWorkspacesDialog::SelectWorkspacesDialog(
     QWidget *parent, const std::string &typeFilter,
     const std::string &customButtonLabel)
-    : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr), m_customButton(nullptr) {
+    : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr),
+      m_customButton(nullptr) {
   setWindowTitle("MantidPlot - Select workspace");
   m_wsList = new QListWidget(parent);
 

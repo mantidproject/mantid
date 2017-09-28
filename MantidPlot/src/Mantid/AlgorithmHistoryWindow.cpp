@@ -39,8 +39,9 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
       m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {}
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
-    : QGroupBox(title, w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
-      m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {
+    : QGroupBox(title, w), m_execDurationlabel(nullptr),
+      m_execDurationEdit(nullptr), m_Datelabel(nullptr),
+      m_execDateTimeEdit(nullptr), m_algexecDuration() {
 
   m_execDurationEdit = new QLineEdit("", this);
   if (m_execDurationEdit)
@@ -188,8 +189,8 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
     : MantidDialog(parent), m_algHist(wsptr->getHistory()),
-      m_histPropWindow(nullptr), m_execSumGrpBox(nullptr), m_envHistGrpBox(nullptr),
-      m_wsName(wsptr->getName().c_str()),
+      m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
+      m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);

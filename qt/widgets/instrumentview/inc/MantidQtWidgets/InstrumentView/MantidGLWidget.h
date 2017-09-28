@@ -21,7 +21,7 @@ class MantidGLWidget : public QGLWidget {
   Q_OBJECT
 public:
   explicit MantidGLWidget(QWidget *parent = nullptr); ///< Constructor
-  ~MantidGLWidget() override;                   ///< Destructor
+  ~MantidGLWidget() override;                         ///< Destructor
   void setSurface(boost::shared_ptr<ProjectionSurface> surface);
   boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 

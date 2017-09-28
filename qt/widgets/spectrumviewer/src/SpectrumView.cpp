@@ -29,7 +29,8 @@ namespace SpectrumView {
  */
 SpectrumView::SpectrumView(QWidget *parent)
     : QMainWindow(parent), WorkspaceObserver(), m_ui(new Ui::SpectrumViewer()),
-      m_sliderHandler(nullptr), m_rangeHandler(nullptr), m_emodeHandler(nullptr) {
+      m_sliderHandler(nullptr), m_rangeHandler(nullptr),
+      m_emodeHandler(nullptr) {
   m_ui->setupUi(this);
   connect(m_ui->imageTabs, SIGNAL(currentChanged(int)), this,
           SLOT(changeSpectrumDisplay(int)));

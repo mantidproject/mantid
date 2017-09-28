@@ -238,7 +238,8 @@ class ScriptCloseDialog : public QWidget {
   Q_OBJECT
 
 public:
-  ScriptCloseDialog(ScriptFileInterpreter &interpreter, QWidget *parent = nullptr);
+  ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                    QWidget *parent = nullptr);
 
   bool shouldScriptClose();
 

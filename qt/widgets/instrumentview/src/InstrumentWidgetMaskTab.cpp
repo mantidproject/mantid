@@ -65,9 +65,9 @@ namespace MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget), m_activity(Select),
       m_hasMaskToApply(false), m_maskBins(false), m_userEditing(true),
-      m_groupManager(nullptr), m_stringManager(nullptr), m_doubleManager(nullptr),
-      m_browser(nullptr), m_left(nullptr), m_top(nullptr), m_right(nullptr),
-      m_bottom(nullptr) {
+      m_groupManager(nullptr), m_stringManager(nullptr),
+      m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
+      m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
 
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);

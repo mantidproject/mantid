@@ -391,8 +391,9 @@ protected:
   void setWorkspaceProperties();
 
   /// Create a double property and set some settings
-  QtProperty *addDoubleProperty(const QString &name,
-                                QtDoublePropertyManager *manager = nullptr) const;
+  QtProperty *
+  addDoubleProperty(const QString &name,
+                    QtDoublePropertyManager *manager = nullptr) const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
   /// Do the fitting

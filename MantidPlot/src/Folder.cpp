@@ -39,7 +39,8 @@ using namespace MantidQt::API;
 Folder::Folder(Folder *parent, const QString &name)
     : QObject(parent),
       birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
-      d_log_info(QString()), myFolderListItem(nullptr), d_active_window(nullptr) {
+      d_log_info(QString()), myFolderListItem(nullptr),
+      d_active_window(nullptr) {
   setObjectName(name);
 }
 

@@ -84,7 +84,8 @@ public:
   Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
          const QString &name = QString(), Qt::WFlags f = nullptr);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
-         QWidget *parent, const QString &name = QString(), Qt::WFlags f = nullptr);
+         QWidget *parent, const QString &name = QString(),
+         Qt::WFlags f = nullptr);
   ~Matrix() override;
 
   enum Operation {

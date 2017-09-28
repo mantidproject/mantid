@@ -37,7 +37,9 @@ template <typename Type> Type *SignalBlocker<Type>::operator->() {
   }
 }
 
-template <typename Type> void SignalBlocker<Type>::release() { m_obj = nullptr; }
+template <typename Type> void SignalBlocker<Type>::release() {
+  m_obj = nullptr;
+}
 
 // Template instances we need.
 template class EXPORT_OPT_MANTIDQT_COMMON SignalBlocker<QObject>;

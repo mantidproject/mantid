@@ -29,8 +29,8 @@ const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";
 
 ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr),
-      m_peakFittingView(nullptr), m_dataLoading(nullptr), m_baselineModelling(nullptr),
-      m_peakFitting(nullptr),
+      m_peakFittingView(nullptr), m_dataLoading(nullptr),
+      m_baselineModelling(nullptr), m_peakFitting(nullptr),
       m_baselineModellingModel(new ALCBaselineModellingModel()),
       m_peakFittingModel(new ALCPeakFittingModel()) {}
 

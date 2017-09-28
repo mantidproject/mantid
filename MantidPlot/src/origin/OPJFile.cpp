@@ -402,9 +402,10 @@ int OPJFile::ParseFormatOld() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(nullptr, "_");           // column name
-    while (char *tmpstr = strtok(nullptr, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
@@ -909,9 +910,10 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(nullptr, "_");           // column name
-    while (char *tmpstr = strtok(nullptr, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);

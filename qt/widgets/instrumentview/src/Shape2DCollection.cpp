@@ -18,8 +18,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 Shape2DCollection::Shape2DCollection()
-    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr), m_currentCP(0),
-      m_overridingCursor(false) {}
+    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr),
+      m_currentCP(0), m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
   foreach (Shape2D *shape, m_shapes) { delete shape; }

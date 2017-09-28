@@ -42,7 +42,8 @@ public:
 
   static PropertyWidget *createWidget(Mantid::Kernel::Property *prop,
                                       QWidget *parent = nullptr,
-                                      QGridLayout *layout = nullptr, int row = -1);
+                                      QGridLayout *layout = nullptr,
+                                      int row = -1);
 };
 
 } // namespace API

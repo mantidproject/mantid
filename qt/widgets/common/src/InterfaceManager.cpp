@@ -210,7 +210,9 @@ void InterfaceManager::registerVatesGuiFactory(
 Getter to determine if vates components have been installed.
 @return true if they are available.
 */
-bool InterfaceManager::hasVatesLibraries() { return nullptr != m_vatesGuiFactory; }
+bool InterfaceManager::hasVatesLibraries() {
+  return nullptr != m_vatesGuiFactory;
+}
 
 VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const {
   if (m_vatesGuiFactory == nullptr) {

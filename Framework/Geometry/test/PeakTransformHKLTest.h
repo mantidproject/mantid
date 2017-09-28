@@ -247,7 +247,8 @@ public:
 
     // Check the type of the output product object.
     TSM_ASSERT("Factory product is the wrong type.",
-               boost::dynamic_pointer_cast<PeakTransformHKL>(product) != nullptr);
+               boost::dynamic_pointer_cast<PeakTransformHKL>(product) !=
+                   nullptr);
 
     // Now test that the benchmark and the factory product are equivalent.
     // Test indirectly via what the transformations produce.

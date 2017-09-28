@@ -1028,7 +1028,8 @@ public slots:
   void appendProject();
   //! Open the specified project file and add it as a subfolder to the
   // parentFolder or to the current folder if no parent folder is specified.
-  Folder *appendProject(const QString &file_name, Folder *parentFolder = nullptr);
+  Folder *appendProject(const QString &file_name,
+                        Folder *parentFolder = nullptr);
   void saveAsProject();
 
   //!  adds a folder list item to the list view "lv"

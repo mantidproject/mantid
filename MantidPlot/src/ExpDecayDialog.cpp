@@ -45,9 +45,10 @@
 
 ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr),
-      buttonCancel(nullptr), boxName(nullptr), boxAmplitude(nullptr), boxFirst(nullptr),
-      boxSecond(nullptr), boxThird(nullptr), boxStart(nullptr), boxYOffset(nullptr),
-      thirdLabel(nullptr), dampingLabel(nullptr), boxColor(nullptr) {
+      buttonCancel(nullptr), boxName(nullptr), boxAmplitude(nullptr),
+      boxFirst(nullptr), boxSecond(nullptr), boxThird(nullptr),
+      boxStart(nullptr), boxYOffset(nullptr), thirdLabel(nullptr),
+      dampingLabel(nullptr), boxColor(nullptr) {
   setObjectName("ExpDecayDialog");
 
   slopes = type;

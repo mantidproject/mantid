@@ -244,8 +244,9 @@ int main(int argc, char **argv) {
                 "to close. Details:\n\n") +
             e.what());
   } catch (...) {
-    QMessageBox::critical(nullptr, "Mantid - Error", "An unhandled exception has "
-                                               "been caught. MantidPlot will "
-                                               "have to close.");
+    QMessageBox::critical(nullptr, "Mantid - Error",
+                          "An unhandled exception has "
+                          "been caught. MantidPlot will "
+                          "have to close.");
   }
 }

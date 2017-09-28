@@ -123,7 +123,8 @@ public:
         FunctionFactory::Instance().createFunction("ProductQuadraticExp");
     TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductQuadraticExp");
-    TS_ASSERT(boost::dynamic_pointer_cast<ProductQuadraticExp>(func) != nullptr);
+    TS_ASSERT(boost::dynamic_pointer_cast<ProductQuadraticExp>(func) !=
+              nullptr);
   }
 
   void test_set_parameters() {

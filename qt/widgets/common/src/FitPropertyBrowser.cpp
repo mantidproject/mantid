@@ -78,9 +78,10 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
       m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
       m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
-      m_fitTree(nullptr), m_currentHandler(nullptr), m_defaultFunction("Gaussian"),
-      m_defaultPeak("Gaussian"), m_defaultBackground("LinearBackground"),
-      m_index_(0), m_peakToolOn(false), m_auto_back(false),
+      m_fitTree(nullptr), m_currentHandler(nullptr),
+      m_defaultFunction("Gaussian"), m_defaultPeak("Gaussian"),
+      m_defaultBackground("LinearBackground"), m_index_(0), m_peakToolOn(false),
+      m_auto_back(false),
       m_autoBgName(QString::fromStdString(
           Mantid::Kernel::ConfigService::Instance().getString(
               "curvefitting.autoBackground"))),

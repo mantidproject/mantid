@@ -35,8 +35,8 @@ using namespace MantidQt::CustomInterfaces;
  * the main MantidPlot window.
  */
 DirectConvertToEnergy::DirectConvertToEnergy(QWidget *parent)
-    : UserSubWindow(parent), m_directInstruments(nullptr), m_curInterfaceSetup(""),
-      m_curEmodeType(DirectConvertToEnergy::Undefined),
+    : UserSubWindow(parent), m_directInstruments(nullptr),
+      m_curInterfaceSetup(""), m_curEmodeType(DirectConvertToEnergy::Undefined),
       m_settingsGroup("CustomInterfaces/DirectConvertToEnergy"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)) {
   // Signals to report load instrument algo result

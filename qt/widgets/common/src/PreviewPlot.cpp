@@ -28,10 +28,10 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     : API::MantidWidget(parent),
       m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
       m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent), m_init(init),
-      m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr), m_zoomTool(nullptr),
-      m_contextMenu(new QMenu(this)), m_showLegendAction(nullptr),
-      m_showErrorsMenuAction(nullptr), m_showErrorsMenu(nullptr),
-      m_errorBarOptionCache() {
+      m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr),
+      m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
+      m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
+      m_showErrorsMenu(nullptr), m_errorBarOptionCache() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
 

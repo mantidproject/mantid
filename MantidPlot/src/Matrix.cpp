@@ -77,26 +77,30 @@ using namespace MantidQt::API;
 
 Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
                const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr),
-      m_bk_color(), d_stack(nullptr), d_table_view(nullptr), imageLabel(nullptr),
-      formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
+      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
+      d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr),
-      m_bk_color(), d_stack(nullptr), d_table_view(nullptr), imageLabel(nullptr),
-      formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
+      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
+      d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initTable(r, c);
@@ -104,13 +108,15 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
 
 Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(nullptr),
-      m_bk_color(), d_stack(nullptr), d_table_view(nullptr), imageLabel(nullptr),
-      formula_str(), txt_format(QChar()), num_precision(0), x_start(0.0),
-      x_end(0.0), y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(),
+      txt_format(QChar()), num_precision(0), x_start(0.0), x_end(0.0),
+      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(nullptr), d_undo_stack(nullptr), d_workspace(nullptr) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initImage(image);
@@ -1076,7 +1082,7 @@ double **Matrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
     QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                 tr("Memory Allocation Error"),
+                                       tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
     return nullptr;
   }
@@ -1089,7 +1095,7 @@ double **Matrix::allocateMatrixData(int rows, int columns) {
       free(data);
 
       QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
-                                   tr("Memory Allocation Error"),
+                                         tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
       return nullptr;
     }

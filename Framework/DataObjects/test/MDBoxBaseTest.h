@@ -108,8 +108,8 @@ public:
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
-  void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
+  void splitAllIfNeeded(
+      Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   void calculateCentroid(coord_t * /*centroid*/) const override{};
