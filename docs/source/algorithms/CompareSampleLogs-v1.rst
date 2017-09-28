@@ -34,7 +34,7 @@ Usage
     # compare sample logs
     result = CompareSampleLogs('ws1,ws2', 'omega,wavelength,polarisation,flipper' , 0.01)
     if result == '':
-        print "All sample logs match!"
+        print("All sample logs match!")
 
 .. testcleanup:: ExCompareSampleLogs
 

@@ -65,9 +65,9 @@ Usage
   expinfows = mtd['ExpInfoTable']
   virtualdetws = mtd['VirtualInstrumentTable']
 
-  print 'Number of input files = %d' % (expinfows.rowCount())
-  print 'Number of detectors in virtual instrument = %d'%(virtualdetws.rowCount())
-  print 'Virtual detectors are from ID = %d to ID = %d'%(virtualdetws.cell(0,0), virtualdetws.cell(131072-1,0))
+  print('Number of input files = {}'.format(expinfows.rowCount()))
+  print('Number of detectors in virtual instrument = {}'.format(virtualdetws.rowCount()))
+  print('Virtual detectors are from ID = {} to ID = {}'.format(virtualdetws.cell(0,0), virtualdetws.cell(131072-1,0)))
 
 
 .. testcleanup:: ExCollect355Info

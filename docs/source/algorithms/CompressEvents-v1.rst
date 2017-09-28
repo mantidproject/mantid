@@ -41,12 +41,12 @@ Usage
 
     ws = CreateSampleWorkspace("Event",BankPixelWidth=1)
 
-    print "The unfiltered workspace %s has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50]) 
+    print("The unfiltered workspace {} has {} events and a peak value of {:.2f}".format(ws, ws.getNumberEvents(), ws.readY(0)[50]))
   
     ws = CompressEvents(ws)
 
-    print "The compressed workspace %s still has %i events and a peak value of %.2f" % (ws, ws.getNumberEvents(),ws.readY(0)[50])     
-    print "However it now takes up less memory."
+    print("The compressed workspace {} still has {} events and a peak value of {:.2f}".format(ws, ws.getNumberEvents(), ws.readY(0)[50]))
+    print("However it now takes up less memory.")
  
 
 Output:
