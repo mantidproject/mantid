@@ -29,7 +29,6 @@ class FFTTransformTest(unittest.TestCase):
         self.view.selection.changeMethodSignal=mock.Mock()
         self.model=mock.create_autospec(model_constructor.ModelConstructor)
         self.model.getModel=mock.Mock()
- 
         #set presenter
         self.presenter=transform_presenter.TransformPresenter(self.view,self.model)
 
