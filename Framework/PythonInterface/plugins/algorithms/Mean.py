@@ -26,6 +26,8 @@ class Mean(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              doc="Output mean workspace")
 
+    def validateInputs(self):
+        input_file_
     def _are_workspaces_compatible(self, ws_a, ws_b):
         sizeA = ws_a.blocksize() * ws_a.getNumberHistograms()
         sizeB = ws_b.blocksize() * ws_b.getNumberHistograms()
