@@ -356,6 +356,5 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument,
   visitor.walkInstrument();
   return visitor.makeWrappers();
 }
-
 } // namespace Geometry
 } // namespace Mantid
