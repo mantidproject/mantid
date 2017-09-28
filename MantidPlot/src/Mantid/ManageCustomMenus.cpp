@@ -82,8 +82,7 @@ void ManageCustomMenus::populateMenuTree() {
 * @return list of selected items
 */
 QList<QTreeWidgetItem *> ManageCustomMenus::getCurrentSelection() {
-  QList<QTreeWidgetItem *> result;
-  result = m_scriptsTree->selectedItems();
+  QList<QTreeWidgetItem *> result = m_scriptsTree->selectedItems();
   return result;
 }
 /**
@@ -91,8 +90,7 @@ QList<QTreeWidgetItem *> ManageCustomMenus::getCurrentSelection() {
 * @return pointer to currently selected menu item
 */
 QTreeWidgetItem *ManageCustomMenus::getCurrentMenuSelection() {
-  QTreeWidgetItem *result = nullptr;
-  result = m_menusTree->currentItem();
+  QTreeWidgetItem *result = m_menusTree->currentItem();
   return result;
 }
 /**
