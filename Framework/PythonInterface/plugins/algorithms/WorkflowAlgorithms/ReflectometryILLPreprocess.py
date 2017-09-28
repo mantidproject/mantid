@@ -127,6 +127,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
                              doc='A list of input numors/files.')
+        # TODO validate input workspace units.
         self.declareProperty(MatrixWorkspaceProperty(Prop.INPUT_WS,
                                                      defaultValue='',
                                                      direction=Direction.Input,

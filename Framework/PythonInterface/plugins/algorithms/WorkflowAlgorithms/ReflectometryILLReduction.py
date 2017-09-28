@@ -102,7 +102,9 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
 
     def _inputWS(self):
         "Return the input workspace."
-        return self.getProperty(Prop.INPUT_WS).value
+        ws = self.getProperty(Prop.INPUT_WS).value
+        self._cleanup.protect(ws)
+        return ws
 
     def _reflectivity(self, ws):
         "Divide ws by the direct beam."
