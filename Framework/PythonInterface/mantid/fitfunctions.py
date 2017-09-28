@@ -164,6 +164,13 @@ class FunctionWrapper(object):
       extractSpectrum = False
       workspaceIndex = 0
       haveXValues = False
+      haveStartX = False
+      haveEndX = False
+      nSteps = 20
+      
+      def inRange(x):
+         return x >= xMin and x <= xMax
+
       for key in kwargs:
         if key == "workspace":
            isWorkspace = True
@@ -175,20 +182,36 @@ class FunctionWrapper(object):
         if key == "xValues":
            xvals = kwargs[key]
            haveXValues = True
+        if key == "startX":
+           xMin = kwargs[key]
+           haveStartX = True
+        if key == "endX":
+           xMax = kwargs[key]
+           haveEndX = True
+        if key == "nSteps":
+           nSteps = kwargs[key]
 
       if isWorkspace:
           if not haveXValues:
               xvals = ws.readX(workspaceIndex)
-          if extractSpectrum or haveXValues:
+              if haveStartX and haveEndX:
+                 xvals = filter(inRange, xvals)
+          if extractSpectrum or haveXValues or (haveStartX and haveEndX):
               spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
           else:
               spectrumWs = ws           
-          outWs = self(spectrumWs)
-          vals = outWs.readY(1)
-          function = CreateWorkspace( DataX=xvals, DataY=vals)
-          plot("function",0)
+      elif haveStartX and haveEndX:
+          if not haveXValues:
+              xvals = [ (xMax - xMin)*x/(nSteps+0.0) + xMin for x in range(nSteps+1)]
+          spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
       else:
           print "Can't plot"
+          return
+      
+      outWs = self(spectrumWs)
+      vals = outWs.readY(1)
+      function = CreateWorkspace( DataX=xvals, DataY=vals)
+      plot("function",0)
          
   def tie (self, *args, **kwargs):
     """ Add ties.
