@@ -22,12 +22,14 @@ class Prop:
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     INPUT_WS = 'InputWorkspace'
     INSTRUMENT_BKG = 'InstrumentBackground'
+    CLEANUP = 'Cleanup'
     LOWER_BKG_OFFSET = 'LowerBackgroundOffset'
     LOWER_BKG_WIDTH = 'LowerBackgroundWidth'
     OUTPUT_WS = 'OutputWorkspace'
     OUTPUT_BEAM_POS = 'OutputBeamPosition'
     RUN = 'Run'
     SLIT_NORM = 'SlitNormalisation'
+    SUBALG_LOGGING = 'SubalgorithmLogging'
     SUM_OUTPUT = 'SumOutput'
     UPPER_BKG_OFFSET = 'UpperBackgroundOffset'
     UPPER_BKG_WIDTH = 'UpperBackgroundWidth'
@@ -43,6 +45,11 @@ class FluxNormMethod:
     MONITOR = 'Normalise To Monitor'
     TIME = 'Normalise To Time'
     OFF = 'Normalisation OFF'
+
+
+class SubalgLogging:
+    OFF = 'Logging OFF'
+    ON = 'Logging ON'
 
 
 class Summation:
@@ -82,8 +89,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        self._subalgLogging = False
-        cleanupMode = common.WSCleanup.OFF
+        self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
+        cleanupMode = self.getProperty(Prop.CLEANUP).value
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
         self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
 
@@ -134,6 +141,14 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      defaultValue='',
                                                      direction=Direction.Output),
                              doc='The preprocessed output workspace')
+        self.declareProperty(Prop.SUBALG_LOGGING,
+                             defaultValue=SubalgLogging.OFF,
+                             validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
+                             doc='Enable or disalbe child algorithm logging.')
+        self.declareProperty(Prop.CLEANUP,
+                             defaultValue=common.WSCleanup.ON,
+                             validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+                             doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(Prop.SUM_OUTPUT,
                              defaultValue=Summation.COHERENT,
                              validator=StringListValidator([Summation.COHERENT, Summation.INCOHERENT, Summation.OFF]),
@@ -246,13 +261,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         lowerStartIndex = peakPos + peakHalfWidth + lowerOffset
         lowerEndIndex = lowerStartIndex + lowerWidth
         lowerRange = [lowerStartIndex + 0.5, lowerEndIndex + 0.5]
-        print(lowerRange)
         upperOffset = self.getProperty(Prop.UPPER_BKG_OFFSET).value
         upperWidth = self.getProperty(Prop.UPPER_BKG_WIDTH).value
         upperEndIndex = peakPos - peakHalfWidth - upperOffset
         upperStartIndex = upperEndIndex - upperWidth
         upperRange = [upperStartIndex - 0.5, upperEndIndex - 0.5]
-        print(upperRange)
         return upperRange + lowerRange
 
     def _foregroundCentre(self, ws, beamPosWS):

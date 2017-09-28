@@ -3,15 +3,22 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode)
-from mantid.kernel import (Direction)
+from mantid.kernel import (Direction, StringListValidator)
 from mantid.simpleapi import (ConvertUnits, Divide, RebinToWorkspace)
 import ReflectometryILL_common as common
 
 
 class Prop:
+    CLEANUP = 'Cleanup'
     DIRECT_BEAM_WS = 'DirectBeamWorkspace'
     INPUT_WS = 'InputWorkspace'
     OUTPUT_WS = 'OutputWorkspace'
+    SUBALG_LOGGING = 'SubalgorithmLogging'
+
+
+class SubalgLogging:
+    OFF = 'Logging OFF'
+    ON = 'Logging ON'
 
 
 class ReflectometryILLReduction(DataProcessorAlgorithm):
@@ -30,8 +37,8 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         """Execute the algorithm."""
-        self._subalgLogging = False
-        cleanupMode = common.WSCleanup.OFF
+        self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
+        cleanupMode = self.getProperty(Prop.CLEANUP).value
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
         self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
 
@@ -51,6 +58,14 @@ class ReflectometryILLReduction(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty(Prop.OUTPUT_WS, defaultValue='',
                                                      direction=Direction.Output),
                              doc='The reduced output workspace')
+        self.declareProperty(Prop.SUBALG_LOGGING,
+                             defaultValue=SubalgLogging.OFF,
+                             validator=StringListValidator([SubalgLogging.OFF, SubalgLogging.ON]),
+                             doc='Enable or disalbe child algorithm logging.')
+        self.declareProperty(Prop.CLEANUP,
+                             defaultValue=common.WSCleanup.ON,
+                             validator=StringListValidator([common.WSCleanup.ON, common.WSCleanup.OFF]),
+                             doc='Enable or disable intermediate workspace cleanup.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.DIRECT_BEAM_WS, defaultValue='',
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
