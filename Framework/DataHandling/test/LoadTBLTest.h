@@ -54,7 +54,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS =
         boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
+    TS_ASSERT_EQUALS(outputWS->columnCount(), 10);
     TS_ASSERT_EQUALS(outputWS->rowCount(), 10);
 
     // test the first three rows, equivalent to the first two rows of the file.
@@ -103,6 +103,7 @@ public:
                     0.01);
     TS_ASSERT_EQUALS(boost::lexical_cast<double>(row.cell<std::string>(0)), 2);
 
+    TS_ASSERT(outputWS->getColumn("HiddenOptions") != nullptr);
     cleanupafterwards();
   }
 
@@ -138,7 +139,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(m_wsName));
     TableWorkspace_sptr outputWS =
         boost::dynamic_pointer_cast<TableWorkspace>(output);
-    TS_ASSERT_EQUALS(outputWS->columnCount(), 9);
+    TS_ASSERT_EQUALS(outputWS->columnCount(), 10);
     TS_ASSERT_EQUALS(outputWS->rowCount(), 10);
 
     // test the first three rows, equivalent to the first two rows of the file.
@@ -217,7 +218,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
-  void testManyColumns() {
+  
+   void testManyColumns() {
     // create a file with each line containing too many columns
     std::ofstream file(m_filename.c_str());
     file << "13460,0.7,13463,0.01,0.06,,,,,,,,,,,0.04,2,,,,0.04,2\n";
