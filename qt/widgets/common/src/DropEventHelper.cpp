@@ -58,7 +58,6 @@ QUrl fixupURL(const QUrl &url) {
 #endif // defined(__APPLE__)
 }
 
-
 /** Extract a list of file names from a drop event.
  *
  * This is a special OSX version because the OSX broke the way Qt decoded
@@ -91,8 +90,7 @@ QStringList DropEventHelper::getFileNames(const QDropEvent *event) {
  * @param event :: the QDropEvent to filter filenames from
  * @return a list of python file names
  */
-QStringList DropEventHelper::extractPythonFiles(const QDropEvent *event)
-{
+QStringList DropEventHelper::extractPythonFiles(const QDropEvent *event) {
   QStringList filenames;
 
   for (const auto &name : getFileNames(event)) {
