@@ -19,7 +19,7 @@ using Mantid::Kernel::V3D;
 class BoundingBoxTest : public CxxTest::TestSuite {
 public:
   void test_That_Construction_With_Six_Valid_Points_Gives_A_BoundingBox() {
-    BoundingBox *bbox = NULL;
+    BoundingBox *bbox = nullptr;
     TS_ASSERT_THROWS_NOTHING(bbox =
                                  new BoundingBox(1.0, 4.0, 5.0, 0.0, 2.0, 3.0));
     if (!bbox) {

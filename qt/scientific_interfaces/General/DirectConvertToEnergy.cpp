@@ -35,7 +35,7 @@ using namespace MantidQt::CustomInterfaces;
  * the main MantidPlot window.
  */
 DirectConvertToEnergy::DirectConvertToEnergy(QWidget *parent)
-    : UserSubWindow(parent), m_directInstruments(NULL), m_curInterfaceSetup(""),
+    : UserSubWindow(parent), m_directInstruments(nullptr), m_curInterfaceSetup(""),
       m_curEmodeType(DirectConvertToEnergy::Undefined),
       m_settingsGroup("CustomInterfaces/DirectConvertToEnergy"),
       m_algRunner(new MantidQt::API::AlgorithmRunner(this)) {
@@ -207,7 +207,7 @@ void DirectConvertToEnergy::instrumentLoadingDone(bool error) {
     return;
   }
 
-  if (m_directInstruments == NULL) {
+  if (m_directInstruments == nullptr) {
     m_directInstruments =
         new Homer(qobject_cast<QWidget *>(this->parent()), m_uiForm);
     m_directInstruments->initLayout();

@@ -55,7 +55,7 @@ class MantidSampleLogDialog : public SampleLogDialogBase {
 public:
   /// Constructor
   MantidSampleLogDialog(const QString &wsname, MantidUI *mui,
-                        Qt::WFlags flags = 0, size_t experimentInfoIndex = 0);
+                        Qt::WFlags flags = nullptr, size_t experimentInfoIndex = 0);
 
   /// Destructor
   virtual ~MantidSampleLogDialog() override;

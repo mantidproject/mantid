@@ -78,7 +78,7 @@ FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject *mantidui)
       m_displayActionPlotGuess(nullptr), m_displayActionQuality(nullptr),
       m_displayActionClearAll(nullptr), m_setupActionCustomSetup(nullptr),
       m_setupActionRemove(nullptr), m_tip(nullptr), m_fitSelector(nullptr),
-      m_fitTree(nullptr), m_currentHandler(0), m_defaultFunction("Gaussian"),
+      m_fitTree(nullptr), m_currentHandler(nullptr), m_defaultFunction("Gaussian"),
       m_defaultPeak("Gaussian"), m_defaultBackground("LinearBackground"),
       m_index_(0), m_peakToolOn(false), m_auto_back(false),
       m_autoBgName(QString::fromStdString(
@@ -1824,7 +1824,7 @@ void FitPropertyBrowser::setEndX(double value) {
 QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
                                             QtProperty *prop) const {
   QList<QtBrowserItem *> children = parent->children();
-  QtBrowserItem *res = 0;
+  QtBrowserItem *res = nullptr;
   for (int i = 0; i < children.size(); i++) {
     if (children[i]->property() == prop) {
       return children[i];
@@ -1835,7 +1835,7 @@ QtBrowserItem *FitPropertyBrowser::findItem(QtBrowserItem *parent,
     if (res)
       return res;
   }
-  return 0;
+  return nullptr;
 }
 
 /**

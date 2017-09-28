@@ -48,7 +48,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
-  explicit IndirectDataAnalysis(QWidget *parent = 0);
+  explicit IndirectDataAnalysis(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout

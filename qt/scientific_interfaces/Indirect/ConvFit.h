@@ -13,7 +13,7 @@ class DLLExport ConvFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  ConvFit(QWidget *parent = 0);
+  ConvFit(QWidget *parent = nullptr);
 
 private:
   void setup() override;

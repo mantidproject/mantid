@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(NULL), m_ElInputWS() {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_ElInputWS() {
   m_uiForm.setupUi(parent);
 }
 

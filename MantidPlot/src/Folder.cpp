@@ -39,7 +39,7 @@ using namespace MantidQt::API;
 Folder::Folder(Folder *parent, const QString &name)
     : QObject(parent),
       birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
-      d_log_info(QString()), myFolderListItem(0), d_active_window(0) {
+      d_log_info(QString()), myFolderListItem(nullptr), d_active_window(nullptr) {
   setObjectName(name);
 }
 
@@ -96,7 +96,7 @@ Folder *Folder::folderBelow() {
     childFolder = parentFolder;
     parentFolder = static_cast<Folder *>(parentFolder->parent());
   }
-  return NULL;
+  return nullptr;
 }
 
 Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
@@ -123,7 +123,7 @@ Folder *Folder::findSubfolder(const QString &s, bool caseSensitive,
         return folder;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
@@ -161,7 +161,7 @@ MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
       }
     }
   }
-  return 0;
+  return nullptr;
 }
 
 MdiSubWindow *Folder::window(const QString &name, const char *cls,
@@ -172,13 +172,13 @@ MdiSubWindow *Folder::window(const QString &name, const char *cls,
   }
 
   if (!recursive)
-    return NULL;
+    return nullptr;
   foreach (QObject *f, children()) {
     MdiSubWindow *w = (static_cast<Folder *>(f))->window(name, cls, true);
     if (w)
       return w;
   }
-  return NULL;
+  return nullptr;
 }
 
 void Folder::addWindow(MdiSubWindow *w) {
@@ -194,7 +194,7 @@ void Folder::removeWindow(MdiSubWindow *w) {
     return;
 
   if (d_active_window && d_active_window == w)
-    d_active_window = NULL;
+    d_active_window = nullptr;
 
   int index = lstWindows.indexOf(w);
   if (index >= 0 && index < lstWindows.size())

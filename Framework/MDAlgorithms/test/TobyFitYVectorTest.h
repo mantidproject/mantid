@@ -22,7 +22,7 @@ public:
   void test_object_construction_does_not_throw() {
     using namespace Mantid::MDAlgorithms;
 
-    TobyFitYVector *yVector(NULL); // TS_ macro doesn't work with stack
+    TobyFitYVector *yVector(nullptr); // TS_ macro doesn't work with stack
                                    // construction & no default constructor
     TS_ASSERT_THROWS_NOTHING(yVector = new TobyFitYVector);
 

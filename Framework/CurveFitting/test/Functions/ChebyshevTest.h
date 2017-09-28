@@ -44,7 +44,7 @@ public:
     cheb.initialize();
 
     TS_ASSERT_THROWS(cheb.setAttributeValue("A1", 3.3), std::invalid_argument);
-    TS_ASSERT_THROWS_NOTHING(cheb.setAttributeValue("n", 0));
+    TS_ASSERT_THROWS_NOTHING(cheb.setAttributeValue("n", nullptr));
   }
 
   void test_wrongStartEnd() {

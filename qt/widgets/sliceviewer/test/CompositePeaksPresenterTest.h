@@ -31,7 +31,7 @@ private:
 
 public:
   void test_construction_throws_if_zoomablePeakView__NULL() {
-    TS_ASSERT_THROWS(CompositePeaksPresenter composite(NULL),
+    TS_ASSERT_THROWS(CompositePeaksPresenter composite(nullptr),
                      std::runtime_error &);
   }
 

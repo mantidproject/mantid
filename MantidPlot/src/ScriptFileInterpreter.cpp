@@ -24,7 +24,7 @@
 ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent,
                                              const QString &settingsGroup)
     : QWidget(parent), m_splitter(new QSplitter(Qt::Vertical, this)),
-      m_editor(new ScriptEditor(this, NULL, settingsGroup)),
+      m_editor(new ScriptEditor(this, nullptr, settingsGroup)),
       m_messages(new ScriptOutputDisplay), m_status(new QStatusBar),
       m_runner() {
 

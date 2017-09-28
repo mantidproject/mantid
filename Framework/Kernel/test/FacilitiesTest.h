@@ -61,7 +61,7 @@ public:
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = getFacility(xmlStr));
 
     // Check that the few required things are set and that everything else has

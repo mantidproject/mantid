@@ -24,8 +24,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
-      m_iqtFRangeManager(NULL), m_fixedProps(), m_iqtFInputWS(),
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr), m_iqtFTree(nullptr),
+      m_iqtFRangeManager(nullptr), m_fixedProps(), m_iqtFInputWS(),
       m_iqtFOutputWS(), m_previewPlotData(), m_iqtFInputWSName(), m_ties() {
   m_uiForm.setupUi(parent);
 }
@@ -567,7 +567,7 @@ void IqtFit::typeSelection(int index) {
     m_uiForm.cbPlotType->setCurrentIndex(0);
   }
 
-  plotGuess(NULL);
+  plotGuess(nullptr);
   m_uiForm.ppPlot->removeSpectrum("Fit");
   m_uiForm.ppPlot->removeSpectrum("Diff");
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
@@ -717,7 +717,7 @@ void IqtFit::plotGuessChanged(bool checked) {
   } else {
     m_uiForm.ppPlot->removeSpectrum("Fit");
     m_uiForm.ppPlot->removeSpectrum("Diff");
-    plotGuess(NULL);
+    plotGuess(nullptr);
   }
 }
 
@@ -944,7 +944,7 @@ void IqtFit::singleFitComplete(bool error) {
           SLOT(plotGuess(QtProperty *)));
 
   // Plot the guess first so that it is under the fit
-  plotGuess(NULL);
+  plotGuess(nullptr);
   // Now show the fitted curve of the mini plot
   m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName + "_Workspace", 1,
                                Qt::red);
@@ -996,7 +996,7 @@ void IqtFit::plotGuess(QtProperty *) {
 }
 
 void IqtFit::fitContextMenu(const QPoint &) {
-  QtBrowserItem *item(NULL);
+  QtBrowserItem *item(nullptr);
 
   item = m_iqtFTree->currentItem();
 

@@ -38,7 +38,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 //----------------------
 /// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent), m_valDbl(NULL),
+    : UserSubWindow(parent), m_valDbl(nullptr),
       m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
@@ -668,7 +668,7 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
  */
 void IndirectDiffractionReduction::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_Diffraction"));
+      nullptr, QString("Indirect_Diffraction"));
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

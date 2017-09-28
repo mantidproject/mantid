@@ -133,10 +133,10 @@ public:
                       g.getTransformToOriginal(0));
     TS_ASSERT_DIFFERS(g2.getTransformToOriginal(1),
                       g.getTransformToOriginal(1));
-    TS_ASSERT(g2.getTransformFromOriginal(0) != NULL);
-    TS_ASSERT(g2.getTransformFromOriginal(1) != NULL);
-    TS_ASSERT(g2.getTransformToOriginal(0) != NULL);
-    TS_ASSERT(g2.getTransformToOriginal(1) != NULL);
+    TS_ASSERT(g2.getTransformFromOriginal(0) != nullptr);
+    TS_ASSERT(g2.getTransformFromOriginal(1) != nullptr);
+    TS_ASSERT(g2.getTransformToOriginal(0) != nullptr);
+    TS_ASSERT(g2.getTransformToOriginal(1) != nullptr);
   }
 
   /** Adding dimension info and searching for it back */

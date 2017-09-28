@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitPropertyBrowser
   Q_OBJECT
 public:
   /// Constructor
-  FitPropertyBrowser(QWidget *parent = NULL, QObject *mantidui = NULL);
+  FitPropertyBrowser(QWidget *parent = nullptr, QObject *mantidui = nullptr);
   /// Destructor
   ~FitPropertyBrowser() override;
   /// Get handler to the root composite function
@@ -208,7 +208,7 @@ public:
 
   /// Creates and adds the autobackground
   void addAutoBackground();
-  bool isAutoBack() const { return m_autoBackground != NULL; }
+  bool isAutoBack() const { return m_autoBackground != nullptr; }
   void setAutoBackgroundName(const QString &aName);
   void refitAutoBackground();
   QString getAutoBackgroundString() const {
@@ -392,7 +392,7 @@ protected:
 
   /// Create a double property and set some settings
   QtProperty *addDoubleProperty(const QString &name,
-                                QtDoublePropertyManager *manager = NULL) const;
+                                QtDoublePropertyManager *manager = nullptr) const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
   /// Do the fitting

@@ -75,7 +75,7 @@ class DLLExport IndirectDataReductionTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent = 0);
+  IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent = nullptr);
   ~IndirectDataReductionTab() override;
 
 public slots:

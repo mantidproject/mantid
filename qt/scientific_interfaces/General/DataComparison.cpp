@@ -25,7 +25,7 @@ using namespace Mantid::API;
 /// Constructor
 DataComparison::DataComparison(QWidget *parent)
     : UserSubWindow(parent), WorkspaceObserver(), m_plot(new QwtPlot(parent)),
-      m_zoomTool(NULL), m_panTool(NULL), m_magnifyTool(NULL),
+      m_zoomTool(nullptr), m_panTool(nullptr), m_magnifyTool(nullptr),
       m_diffWorkspaceNames(qMakePair(QString(), QString())) {
   observeAfterReplace();
   observeRename();

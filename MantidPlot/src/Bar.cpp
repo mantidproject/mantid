@@ -48,7 +48,7 @@ Bar::Bar() { configure(0); }
 Bar::Bar(double rad) { configure(rad); }
 
 void Bar::configure(double rad) {
-  plot = 0;
+  plot = nullptr;
   radius_ = rad;
   diag_ = 0.0;
 }

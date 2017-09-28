@@ -11,7 +11,7 @@ class DLLExport ApplyPaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  ApplyPaalmanPings(QWidget *parent = 0);
+  ApplyPaalmanPings(QWidget *parent = nullptr);
 
 private slots:
   /// Handles the geometry being changed

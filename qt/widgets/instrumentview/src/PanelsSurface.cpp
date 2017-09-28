@@ -31,7 +31,7 @@ namespace MantidWidgets {
 * @param s The surface of the panel
 */
 FlatBankInfo::FlatBankInfo(PanelsSurface *s)
-    : id(0), rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(),
+    : id(nullptr), rotation(), startDetectorIndex(0), endDetectorIndex(0), polygon(),
       surface(s) {}
 
 /**

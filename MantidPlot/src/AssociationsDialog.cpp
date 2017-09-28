@@ -94,7 +94,7 @@ AssociationsDialog::AssociationsDialog(Graph *g, Qt::WFlags fl)
   vl->addLayout(hbox2);
   setLayout(vl);
 
-  active_table = 0;
+  active_table = nullptr;
 
   connect(associations, SIGNAL(currentRowChanged(int)), this,
           SLOT(updateTable(int)));
@@ -193,7 +193,7 @@ QString AssociationsDialog::plotAssociation(const QString &text) {
 
 void AssociationsDialog::initTablesList(QList<MdiSubWindow *> lst, int curve) {
   tables = lst;
-  active_table = 0;
+  active_table = nullptr;
 
   if (curve < 0 || curve >= static_cast<int>(associations->count()))
     curve = 0;
@@ -208,7 +208,7 @@ Table *AssociationsDialog::findTable(int index) {
     if (w->objectName() == lst[0])
       return dynamic_cast<Table *>(w);
   }
-  return 0;
+  return nullptr;
 }
 
 void AssociationsDialog::updateTable(int index) {

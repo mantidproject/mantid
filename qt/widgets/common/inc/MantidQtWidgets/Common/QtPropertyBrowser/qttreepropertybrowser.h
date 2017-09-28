@@ -114,7 +114,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtTreePropertyBrowser
 public:
   enum ResizeMode { Interactive, Stretch, Fixed, ResizeToContents };
 
-  QtTreePropertyBrowser(QWidget *parent = 0,
+  QtTreePropertyBrowser(QWidget *parent = nullptr,
                         const QStringList &options = QStringList(),
                         bool darkTopLevel = true);
   ~QtTreePropertyBrowser() override;

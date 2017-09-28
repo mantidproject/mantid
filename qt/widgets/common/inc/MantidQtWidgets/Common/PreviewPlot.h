@@ -68,7 +68,7 @@ class EXPORT_OPT_MANTIDQT_COMMON PreviewPlot : public API::MantidWidget {
                  setDefaultShownErrorBars)
 
 public:
-  PreviewPlot(QWidget *parent = NULL, bool init = true);
+  PreviewPlot(QWidget *parent = nullptr, bool init = true);
   ~PreviewPlot() override;
 
   QColor canvasColour();
@@ -136,7 +136,7 @@ private:
     size_t wsIndex;
 
     PlotCurveConfiguration()
-        : curve(NULL), errorCurve(NULL), showErrorsAction(NULL), label(NULL),
+        : curve(nullptr), errorCurve(nullptr), showErrorsAction(nullptr), label(nullptr),
           colour(), wsIndex(0) {}
   };
 

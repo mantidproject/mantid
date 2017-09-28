@@ -26,9 +26,9 @@ void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}
  */
 void removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
-  if (layout != 0) {
+  if (layout != nullptr) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != 0) {
+    while ((item = layout->takeAt(0)) != nullptr) {
       layout->removeItem(item);
       delete item->widget();
     }

@@ -46,7 +46,7 @@ class GridDetails : public QWidget {
   Q_OBJECT
 public:
   GridDetails(ApplicationWindow *app, Graph *graph, int alignment,
-              QWidget *parent = 0); // populate and fill in with existing data
+              QWidget *parent = nullptr); // populate and fill in with existing data
   ~GridDetails() override;
   void initWidgets();
   bool modified() { return m_modified; }

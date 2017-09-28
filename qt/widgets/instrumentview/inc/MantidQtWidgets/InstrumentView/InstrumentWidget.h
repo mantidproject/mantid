@@ -126,7 +126,7 @@ public:
   InstrumentWidgetTab *getTab(const Tab tab) const;
   /// Get a filename for saving
   QString getSaveFileName(const QString &title, const QString &filters,
-                          QString *selectedFilter = NULL);
+                          QString *selectedFilter = nullptr);
   /// Get a name for settings group
   QString getSettingsGroupName() const;
   /// Get a name for a instrument-specific settings group
