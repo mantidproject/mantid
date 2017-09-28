@@ -63,6 +63,7 @@ Improved
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>`: Added an option to disable the sorting of the resulting axis making it useful especially for scanning workspaces. Also reduced the complexity of the operation for the default (ordered axis) case from *Nˆ2* to *N*.
 - :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
 - :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
+- :ref:`algm-Mean`: Added error messages if the data is not appropriate.
 
 Deprecated
 ##########
