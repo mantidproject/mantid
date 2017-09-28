@@ -11,6 +11,8 @@ New features
 Algorithms
 ##########
 
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
+
 Vesuvio
 #######
 - Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
@@ -34,17 +36,19 @@ Elwin
 Bugfixes
 --------
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
-- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
-  convolution fitting into their own workspaces.
 
 ConvFit
 ~~~~~~~
+
+Improvements
+------------
+- Added 'ExtractMembers' property to ConvolutionFitSequential algorithm - this allows for extracting the members of the
+  convolution fitting into their own workspaces.
 
 Bugfixes
 --------
 - Correct treatment of the resolution function: convolve sample and resolution spectra with same momentum transfer.
 - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
-
 
 MSDFit
 ~~~~~~
@@ -80,5 +84,10 @@ Bugfixes
 - An issue has been fixed in :ref:`algm-IndirectILLEnergyTransfer` when handling the data with mirror sense, that have shifted 0 monitor counts in the left and right wings. This was causing the left and right workspaces to have different x-axis binning and to fail to sum during the unmirroring step. 
 - An issue has been fixed in :ref:`algm-IndirectILLReductionFWS` when the scaling of the data after vanadium calibration was not applied.
 - :ref:`algm-CalculateSampleTransmission` now divides by the tabulated wavelength when calculating the absorption cross section.
+- The Sum Files option in the Indirect Diffraction Reduction interface now allows for correctly corresponding each sum of
+  sample runs defined with a range (e.g. A-B, where A and B are run numbers) to the corresponding vanadium run, dependent on D-Range.
+- The 'Sample Runs' field in the Indirect Diffraction Interface now recognizes 3 operators: '-', '+', ':'. The '-' operator is used
+  to supply a given range of runs and sum them when SumFiles is checked. The '+' operator is used to supply a given list of runs and
+  sum when SumFiles is checked. The ':' operator is used to supply a range of runs, which will never be summed.
 
 `Full list of changes on GitHub <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+Indirect+Inelastic%22>`_

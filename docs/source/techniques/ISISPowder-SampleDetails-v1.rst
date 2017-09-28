@@ -13,10 +13,10 @@ Introduction
 The sample details object holds the user defined properties of
 the current sample if absorption corrections are required whilst
 focusing. Only specific instruments support sample absorption
-corrections. This can be determined from visiting the 
+corrections. This can be determined from visiting the
 instrument reference:
-:ref:`instrument_doc_links_isis-powder-diffraction-ref`. 
-If the instrument has a *set_sample_details* method it supports sample 
+:ref:`instrument_doc_links_isis-powder-diffraction-ref`.
+If the instrument has a *set_sample_details* method it supports sample
 absorption corrections.
 
 Before you can use absorption corrections you will need to:
@@ -44,8 +44,8 @@ of the sample geometry are required:
 
 - :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample
   shape (in this case a cylinder)
-- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
-  positions of the sample 
+- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z
+  positions of the sample
 - :ref:`height_sampleDetails_isis-powder-diffraction-ref` - Cylinder height
 - :ref:`radius_sampleDetails_isis-powder-diffraction-ref` - Cylinder radius
 
@@ -54,13 +54,13 @@ sample geometry are required:
 
 - :ref:`shape-sampleDetails_isis-powder-diffraction-ref` - The sample
   shape (in this case a slab)
-- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z 
+- :ref:`center_sampleDetails_isis-powder-diffraction-ref` - List of x, y, z
   positions of the sample
 - :ref:`thickness-sampleDetails_isis-powder-diffraction-ref` - Slab thickness
 - :ref:`width-sampleDetails_isis-powder-diffraction-ref` - Slab width
-- :ref:`height-sampleDetails_isis-powder-diffraction_ref` - Slab
+- :ref:`height_sampleDetails_isis-powder-diffraction-ref` - Slab
   height
-- :ref:`sngle-sampleDetails_isis-powder-diffraction_ref` - Slab angle
+- :ref:`angle_sampleDetails_isis-powder-diffraction-ref` - Slab angle
 
 Example
 ^^^^^^^
@@ -145,7 +145,7 @@ Example Input:
 .. code-block:: python
 
    sample_obj = SampleDetails(shape="cylinder", ...)
-    
+
 .. _thickness-sampleDetails_isis-powder-diffraction-ref:
 
 thickness
@@ -169,17 +169,17 @@ Example Input:
 
 .. code-block:: python
 
-   sample_obj = SampleDetails(thickness=1.0, ...)	
+   sample_obj = SampleDetails(thickness=1.0, ...)
 
 .. _set_material_sample_details_isis-powder-diffraction-ref:
 
 Setting the material
 --------------------
-Having successfully defined the geometry 
+Having successfully defined the geometry
 (see: :ref:`create_sampleDetails_object_isis-powder-diffraction-ref`)
-we now must set the material of the sample. 
+we now must set the material of the sample.
 
-This can only be set once per object without explicitly calling 
+This can only be set once per object without explicitly calling
 the reset method or constructing a new object (which is preferred)
 see: :ref:`changing_sample_properties_sampleDetails_isis-powder-diffraction-ref`
 
@@ -203,10 +203,10 @@ Example
 chemical_formula
 ^^^^^^^^^^^^^^^^
 The chemical formula of this material. Isotopes can be defined
-by the ratios as well. For example V 95.1% Nb 4.9% can be 
+by the ratios as well. For example V 95.1% Nb 4.9% can be
 expressed as *V0.951 Nb0.049*.
 
-See: :ref:`SetSampleMaterial <algm-SetSampleMaterial>` for 
+See: :ref:`SetSampleMaterial <algm-SetSampleMaterial>` for
 more details.
 
 Example Input:
@@ -238,10 +238,10 @@ Example Input:
 
 Setting material properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Advanced material properties can be optionally set instead of letting 
+Advanced material properties can be optionally set instead of letting
 Mantid calculate them. For more details see:
 :ref:`SetSampleMaterial<algm-SetSampleMaterial>`
-This can only be set once per object without 
+This can only be set once per object without
 explicitly calling the reset method or constructing a new object (which is preferred)
 see: :ref:`changing_sample_properties_sampleDetails_isis-powder-diffraction-ref`
 
@@ -255,7 +255,7 @@ Example
 
 ..  code-block:: python
 
-        sample_obj.set_material_properties(absorption_cross_section=123, 
+        sample_obj.set_material_properties(absorption_cross_section=123,
                                            scattering_cross_section=456)
 
 .. _absorption_cross_section_sampleDetails_isis-powder-diffraction-ref:
@@ -276,22 +276,22 @@ whilst calculating absorption corrections.
 
 Changing sample properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. warning:: This method is not recommended for changing multiple samples. 
+.. warning:: This method is not recommended for changing multiple samples.
              Instead it is recommended you create a new sample details object
-             if you need to change properties mid way through a script. 
+             if you need to change properties mid way through a script.
              See :ref:`create_sampleDetails_object_isis-powder-diffraction-ref`
              and :ref:`intro_to_objects-isis-powder-diffraction-ref`.
 
-*Note: The geometry of a sample cannot be changed without creating a new 
+*Note: The geometry of a sample cannot be changed without creating a new
 sample details object*
 
-Once you have set a material by calling *set_material* or set 
-the properties by calling *set_material_properties* you will 
+Once you have set a material by calling *set_material* or set
+the properties by calling *set_material_properties* you will
 not be able to change (or set) these details without first
-resetting the object. This is to enforce the sample properties 
-being set only once so that users are guaranteed of the state. 
+resetting the object. This is to enforce the sample properties
+being set only once so that users are guaranteed of the state.
 
-To change the chemical material or its advanced properties all 
+To change the chemical material or its advanced properties all
 *reset_sample_material*. This will reset **all** details (i.e
 advanced properties and chemical properties).
 

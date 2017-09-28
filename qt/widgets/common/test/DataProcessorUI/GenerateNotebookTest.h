@@ -27,13 +27,13 @@ private:
 
     // Reflectometry pre-process map
     return std::map<QString, PreprocessingAlgorithm>{
-        {"Run(s)", PreprocessingAlgorithm("Plus", plusPrefix,
-                                                       std::set<QString>())},
+        {"Run(s)",
+         PreprocessingAlgorithm("Plus", plusPrefix, std::set<QString>())},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm(
-             "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                               "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                std::set<QString>{"FirstTransmissionRun",
+                                                  "SecondTransmissionRun",
+                                                  "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -98,9 +98,7 @@ public:
   static GenerateNotebookTest *createSuite() {
     return new GenerateNotebookTest();
   }
-  static void destroySuite(GenerateNotebookTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(GenerateNotebookTest *suite) { delete suite; }
 
   static QStringList splitIntoLines(QString const &notebook) {
     return notebook.split("\n");
@@ -139,9 +137,8 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
-        std::map<QString, PreprocessingAlgorithm>(),
-        reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
-        "");
+        std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
+        reflPostprocessor(), std::map<QString, QString>(), "", "");
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
@@ -331,8 +328,7 @@ public:
 
     // Create a pre-process map
     std::map<QString, PreprocessingAlgorithm> preprocessMap = {
-        {"Run", PreprocessingAlgorithm("Plus", "RUN_",
-                                                    std::set<QString>())}};
+        {"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}};
     // Specify some pre-processing options
     std::map<QString, QString> userPreProcessingOptions = {
         {"Run", "Property=prop"}};

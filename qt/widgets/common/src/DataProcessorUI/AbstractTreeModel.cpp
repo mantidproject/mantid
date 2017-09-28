@@ -13,9 +13,8 @@ using namespace Mantid::API;
 * @param tableWorkspace : The table workspace to wrap
 * @param whitelist : A WhiteList containing the columns
 */
-AbstractTreeModel::AbstractTreeModel(
-    ITableWorkspace_sptr tableWorkspace,
-    const WhiteList &whitelist)
+AbstractTreeModel::AbstractTreeModel(ITableWorkspace_sptr tableWorkspace,
+                                     const WhiteList &whitelist)
     : m_tWS(tableWorkspace), m_whitelist(whitelist) {}
 
 AbstractTreeModel::~AbstractTreeModel() {}
@@ -23,8 +22,7 @@ AbstractTreeModel::~AbstractTreeModel() {}
 /** Returns the number of columns, i.e. elements in the whitelist
 * @return : The number of columns
 */
-int AbstractTreeModel::columnCount(
-    const QModelIndex & /* parent */) const {
+int AbstractTreeModel::columnCount(const QModelIndex & /* parent */) const {
   return static_cast<int>(m_whitelist.size());
 }
 
@@ -32,8 +30,7 @@ int AbstractTreeModel::columnCount(
 * is always editable.
 * @return : The item flags
 */
-Qt::ItemFlags
-AbstractTreeModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags AbstractTreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
     return 0;
 

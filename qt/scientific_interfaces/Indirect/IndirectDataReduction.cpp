@@ -9,6 +9,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "IndirectMoments.h"
@@ -143,9 +144,8 @@ void IndirectDataReduction::initLayout() {
   // Update the instrument configuration across the UI
   m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 
-  std::string facility =
-      Mantid::Kernel::ConfigService::Instance().getString("default.facility");
-  filterUiForFacility(QString::fromStdString(facility));
+  auto facility = Mantid::Kernel::ConfigService::Instance().getFacility();
+  filterUiForFacility(QString::fromStdString(facility.name()));
   emit newInstrumentConfiguration();
 }
 
@@ -463,7 +463,6 @@ void IndirectDataReduction::saveSettings() {
 void IndirectDataReduction::filterUiForFacility(QString facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
                       << '\n';
-
   QStringList enabledTabs;
   QStringList disabledInstruments;
 
