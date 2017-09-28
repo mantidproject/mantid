@@ -63,10 +63,10 @@ void run_MPI_load(const Parallel::Communicator &comm) {
   Parallel::gather(comm, localEventCount, localEventCounts, 0);
   if (comm.rank() == 0) {
     TS_ASSERT_EQUALS(std::accumulate(localSizes.begin(), localSizes.end(), 0),
-                     51200);
+                     static_cast<size_t>(51200));
     TS_ASSERT_EQUALS(
         std::accumulate(localEventCounts.begin(), localEventCounts.end(), 0),
-        112266);
+        static_cast<size_t>(112266));
   }
 
   const auto &reference = load_reference_workspace(filename);
