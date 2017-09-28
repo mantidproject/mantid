@@ -952,7 +952,7 @@ def _set_store_ads(algm_obj, kwargs):
         :param **kwargs: A dictionary of the keyword arguments passed to the simple function call
     """
     if __STORE_KEYWORD__ in kwargs:
-        algm_obj.setAlwaysStoreInADS(not kwargs[__STORE_KEYWORD__])
+        algm_obj.setAlwaysStoreInADS(kwargs[__STORE_KEYWORD__])
         del kwargs[__STORE_KEYWORD__]
     else:
         algm_obj.setAlwaysStoreInADS(True)
