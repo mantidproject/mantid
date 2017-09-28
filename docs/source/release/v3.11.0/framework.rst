@@ -119,6 +119,7 @@ Bugfixes
 ########
 
 - :ref:`MatchPeaks <algm-MatchPeaks-v1>` is fixed to not to leave temporary hidden workspaces behind.
+- Fix a bug where Mantid could crash when trying to update live data if the network connection is lost.
 
 Python Fit Functions
 ####################
