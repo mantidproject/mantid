@@ -315,7 +315,8 @@ void MantidTable::cellEdited(int row, int col) {
     // Put it back in the stream and let the column deduce the correct
     // type of the number.
     std::stringstream textStream;
-    textStream << std::setprecision(std::numeric_limits<long double>::digits10 + 1)<<number;
+    textStream << std::setprecision(std::numeric_limits<long double>::digits10 +
+                                    1) << number;
     std::istringstream stream(textStream.str());
     c->read(index, stream);
   }
