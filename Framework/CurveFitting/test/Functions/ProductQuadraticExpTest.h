@@ -4,13 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ProductQuadraticExp.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/Quadratic.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionFactory.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
