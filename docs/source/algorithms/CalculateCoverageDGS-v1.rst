@@ -48,7 +48,7 @@ Usage
         Dimension4Min=0, Dimension4Max=3, Dimension4Step=0.1)
 
     # Print the result
-    print "You cover %i MD bins out of %i" %(coverage.getSignalArray().sum(),coverage.getSignalArray().size)
+    print("You cover {:.0f} MD bins out of {}".format(coverage.getSignalArray().sum(),coverage.getSignalArray().size))
 
 Output:
 

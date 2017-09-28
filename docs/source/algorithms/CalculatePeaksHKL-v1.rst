@@ -36,7 +36,7 @@ Usage
   # Run the algorithm
   indexed = CalculatePeaksHKL(PeaksWorkspace=peaks, OverWrite=True)
 
-  print "Number of Indexed Peaks: ", indexed
+  print("Number of Indexed Peaks:  {}".format(indexed))
 
 Output:
 
