@@ -505,6 +505,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         else:
             gui_element.addItem(element)
 
+    def halt_process_flag(self):
+        self.data_processor_table.skipProcessing()
+
     @staticmethod
     def _set_enum_as_element_in_combo_box(gui_element, element, expected_type):
         value_as_string = expected_type.to_string(element)
@@ -1515,17 +1518,17 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                             self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.PlotRowCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorAppendRowCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.AppendRowCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorCopySelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.CopySelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorCutSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.CutSelectedCommand(self.data_processor_table),
                             self.menuEdit)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.PasteSelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorClearSelectedCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ClearSelectedCommand(self.data_processor_table),
                             self.menuEdit)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorDeleteRowCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.DeleteRowCommand(self.data_processor_table),
                             self.menuEdit)
 
         # Actions that go in the 'File' menu
@@ -1539,7 +1542,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.ImportTableCommand(self.data_processor_table),
                             self.menuFile)
-        self._create_action(MantidQt.MantidWidgets.DataProcessor.DataProcessorExportTableCommand(self.data_processor_table),
+        self._create_action(MantidQt.MantidWidgets.DataProcessor.ExportTableCommand(self.data_processor_table),
                             self.menuFile)
         self._create_action(MantidQt.MantidWidgets.DataProcessor.OptionsCommand(self.data_processor_table),
                             self.menuFile)

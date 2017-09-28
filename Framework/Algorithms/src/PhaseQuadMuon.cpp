@@ -111,11 +111,10 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 std::vector<double>
 PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
-  size_t nspec = ws->getNumberHistograms();
-  size_t npoints = ws->blocksize();
+  const size_t nspec = ws->getNumberHistograms();
 
   // Muon life time in microseconds
-  double muLife = PhysicalConstants::MuonLifetime * 1e6;
+  constexpr double muLife = PhysicalConstants::MuonLifetime * 1e6;
 
   std::vector<double> n0(nspec, 0.);
 
@@ -126,8 +125,8 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     const auto &E = ws->getSpectrum(h).e();
 
     double s, sx, sy;
-    s = sx = sy = 0;
-    for (size_t i = 0; i < npoints; i++) {
+    s = sx = sy = 0.;
+    for (size_t i = 0; i < Y.size(); i++) {
 
       if (Y[i] > 0) {
         double sig = E[i] * E[i] / Y[i] / Y[i];
@@ -158,13 +157,12 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // statistics
   // to apply sqrt(N). This is an arbitrary number used in the original code
   // provided by scientists
-  double poissonLimit = 30.;
-
-  size_t nspec = ws->getNumberHistograms();
-  size_t npoints = ws->blocksize();
+  const double poissonLimit = 30.;
 
   // Muon life time in microseconds
-  double muLife = PhysicalConstants::MuonLifetime * 1e6;
+  const double muLife = PhysicalConstants::MuonLifetime * 1e6;
+
+  const size_t nspec = ws->getNumberHistograms();
 
   if (n0.size() != nspec) {
     throw std::invalid_argument("Invalid normalization constants");
@@ -185,37 +183,35 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   {
     // Calculate coefficients aj, bj
 
-    double sxx = 0;
-    double syy = 0;
-    double sxy = 0;
+    double sxx = 0.;
+    double syy = 0.;
+    double sxy = 0.;
 
     for (size_t h = 0; h < nspec; h++) {
-      double asym = phase->Double(h, 1) / maxAsym;
-      double phi = phase->Double(h, 2);
-      double X = n0[h] * asym * cos(phi);
-      double Y = n0[h] * asym * sin(phi);
+      const double asym = phase->Double(h, 1) / maxAsym;
+      const double phi = phase->Double(h, 2);
+      const double X = n0[h] * asym * cos(phi);
+      const double Y = n0[h] * asym * sin(phi);
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
     }
 
-    double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
-    double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
-    double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
-    double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
+    const double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
+    const double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
+    const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
+    const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      double asym = phase->Double(h, 1) / maxAsym;
-      double phi = phase->Double(h, 2);
-      double X = n0[h] * asym * cos(phi);
-      double Y = n0[h] * asym * sin(phi);
+      const double asym = phase->Double(h, 1) / maxAsym;
+      const double phi = phase->Double(h, 2);
+      const double X = n0[h] * asym * cos(phi);
+      const double Y = n0[h] * asym * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
       bj.push_back((lam2 * X + mu2 * Y) * 0.5);
     }
   }
 
-  // First X value
-  double X0 = ws->x(0).front();
-
+  const size_t npoints = ws->blocksize();
   // Create and populate output workspace
   API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 2, npoints + 1, npoints);
@@ -230,15 +226,24 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   auto &realE = ows->mutableE(0);
   auto &imagE = ows->mutableE(1);
 
+  const auto &xPointData = ws->histogram(0).points();
+  // First X value
+  const double X0 = xPointData.front();
+
+  // calculate exponential decay outside of the loop
+  std::vector<double> expDecay = xPointData.rawData();
+  std::transform(expDecay.begin(), expDecay.end(), expDecay.begin(),
+                 [X0, muLife](double x) { return exp(-(x - X0) / muLife); });
+
   for (size_t i = 0; i < npoints; i++) {
     for (size_t h = 0; h < nspec; h++) {
 
       // (X,Y,E) with exponential decay removed
       const double X = ws->x(h)[i];
-      const double Y = ws->y(h)[i] - n0[h] * exp(-(X - X0) / muLife);
-      const double E = (ws->y(h)[i] > poissonLimit)
-                           ? ws->e(h)[i]
-                           : sqrt(n0[h] * exp(-(X - X0) / muLife));
+      const double exponential = n0[h] * exp(-(X - X0) / muLife);
+      const double Y = ws->y(h)[i] - exponential;
+      const double E =
+          (ws->y(h)[i] > poissonLimit) ? ws->e(h)[i] : sqrt(exponential);
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
@@ -249,12 +254,10 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagE[i] = sqrt(imagE[i]);
 
     // Regain exponential decay
-    const double X = ws->getSpectrum(0).x()[i];
-    const double e = exp(-(X - X0) / muLife);
-    realY[i] /= e;
-    imagY[i] /= e;
-    realE[i] /= e;
-    imagE[i] /= e;
+    realY[i] /= expDecay[i];
+    imagY[i] /= expDecay[i];
+    realE[i] /= expDecay[i];
+    imagE[i] /= expDecay[i];
   }
 
   return ows;

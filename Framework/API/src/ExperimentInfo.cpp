@@ -1004,15 +1004,18 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     // find the first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
         continue;
 
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+      std::string l_filenamePart = filePath.getFileName();
       if (regex_match(l_filenamePart, regex)) {
-        g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
+        const auto &pathName = filePath.toString();
+        g_log.debug() << "Found file: '" << pathName << "'\n";
         std::string validFrom, validTo;
-        getValidFromTo(dir_itr->path(), validFrom, validTo);
-        g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '"
+        getValidFromTo(pathName, validFrom, validTo);
+        g_log.debug() << "File '" << pathName << " valid dates: from '"
                       << validFrom << "' to '" << validTo << "'\n";
         DateAndTime from(validFrom);
         // Use a default valid-to date if none was found.
@@ -1028,14 +1031,14 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                         // matching file found
             foundGoodFile = true;
             refDateGoodFile = from;
-            mostRecentIDF = dir_itr->path();
+            mostRecentIDF = pathName;
           }
         }
         if (!foundGoodFile && (from > refDate)) { // Use most recently starting
                                                   // file, in case we don't find
                                                   // a matching file.
           refDate = from;
-          mostRecentIDF = dir_itr->path();
+          mostRecentIDF = pathName;
         }
       }
     }

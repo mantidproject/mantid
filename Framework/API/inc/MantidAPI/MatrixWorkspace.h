@@ -141,7 +141,9 @@ public:
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   virtual std::size_t size() const = 0;
-  /// Returns the size of each block of data returned by the dataY accessors
+  /// Returns the size of each block of data returned by the dataY accessors.
+  /// This throws an exception if the lengths are not identical across the
+  /// spectra.
   virtual std::size_t blocksize() const = 0;
   /// Returns the number of histograms in the workspace
   virtual std::size_t getNumberHistograms() const = 0;
