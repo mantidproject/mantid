@@ -24,7 +24,7 @@ Mantid::Kernel::Logger g_log("IndirectDiffractionReduction");
 std::string toStdString(const QString &qString) {
   return qString.toStdString();
 }
-} // anon namespace
+} // namespace
 
 DECLARE_SUBWINDOW(IndirectDiffractionReduction)
 
@@ -61,8 +61,9 @@ void IndirectDiffractionReduction::initLayout() {
   connect(m_uiForm.iicInstrumentConfiguration,
           SIGNAL(instrumentConfigurationUpdated(
               const QString &, const QString &, const QString &)),
-          this, SLOT(instrumentSelected(const QString &, const QString &,
-                                        const QString &)));
+          this,
+          SLOT(instrumentSelected(const QString &, const QString &,
+                                  const QString &)));
 
   // Update run button based on state of raw files field
   connect(m_uiForm.rfSampleFiles, SIGNAL(fileTextChanged(const QString &)),
@@ -248,13 +249,9 @@ void IndirectDiffractionReduction::saveReductions() {
 
       if (m_uiForm.ckGSS->isChecked()) {
         if (instName == "OSIRIS" && mode == "diffonly") {
-
-          QString gssFilename = tofWsName + ".gss";
-          IAlgorithm_sptr saveGSS =
-              AlgorithmManager::Instance().create("SaveGSS");
-          saveGSS->initialize();
-          saveGSS->setProperty("Filename", gssFilename.toStdString());
-          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+          m_batchAlgoRunner->addAlgorithm(
+              saveGSSAlgorithm(tofWsName.toStdString() + ".gss"),
+              inputFromConvUnitsProps);
         } else {
 
           // Convert to TOF for GSS
@@ -267,41 +264,96 @@ void IndirectDiffractionReduction::saveReductions() {
           m_batchAlgoRunner->addAlgorithm(convertUnits);
 
           // Save GSS
-          std::string gssFilename = wsName + ".gss";
-          IAlgorithm_sptr saveGSS =
-              AlgorithmManager::Instance().create("SaveGSS");
-          saveGSS->initialize();
-          saveGSS->setProperty("Filename", gssFilename);
-          m_batchAlgoRunner->addAlgorithm(saveGSS, inputFromConvUnitsProps);
+          m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
+                                          inputFromConvUnitsProps);
         }
       }
 
       if (m_uiForm.ckNexus->isChecked()) {
         // Save NEXus using SaveNexusProcessed
-        std::string nexusFilename = wsName + ".nxs";
-        IAlgorithm_sptr saveNexus =
-            AlgorithmManager::Instance().create("SaveNexusProcessed");
-        saveNexus->initialize();
-        saveNexus->setProperty("InputWorkspace", wsName);
-        saveNexus->setProperty("Filename", nexusFilename);
-        m_batchAlgoRunner->addAlgorithm(saveNexus);
+        m_batchAlgoRunner->addAlgorithm(
+            saveNexusProcessedAlgorithm(wsName, wsName + ".nxs"));
       }
 
       if (m_uiForm.ckAscii->isChecked()) {
         // Save ASCII using SaveAscii version 1
-        std::string asciiFilename = wsName + ".dat";
-        IAlgorithm_sptr saveASCII =
-            AlgorithmManager::Instance().create("SaveAscii", 1);
-        saveASCII->initialize();
-        saveASCII->setProperty("InputWorkspace", wsName);
-        saveASCII->setProperty("Filename", asciiFilename);
-        m_batchAlgoRunner->addAlgorithm(saveASCII);
+        m_batchAlgoRunner->addAlgorithm(
+            saveASCIIAlgorithm(wsName, wsName + ".dat"));
       }
     } else
       showInformationBox(QString::fromStdString(
           "Workspace '" + wsName + "' not found\nUnable to plot workspace"));
   }
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+/**
+ * Creates an algorithm for saving a workspace in GSS format into the
+ * file with the specified name.
+ *
+ * @param filename  The name of the file to save to.
+ * @return          A SaveGSS Algorithm which saves in file with the specified
+ *                  name.
+ */
+IAlgorithm_sptr
+IndirectDiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
+  return saveAlgorithm("SaveGSS", filename);
+}
+
+/**
+ * Creates an algorithm for saving the workspace with the specified name
+ * in ASCII format into the file with the specified name.
+ *
+ * @param inputWsName The name of the workspace to save.
+ * @param filename    The name of the file to save to.
+ * @return            A SaveASCII Algorithm which saves in file with the
+ *                    specified name.
+ */
+IAlgorithm_sptr
+IndirectDiffractionReduction::saveASCIIAlgorithm(const std::string &inputWsName,
+                                                 const std::string &filename) {
+  return saveAlgorithm("SaveAscii", inputWsName, filename, 1);
+}
+
+/**
+ * Creates an algorithm for saving the workspace with the specified name
+ * in NexusProcessed format into the file with the specified name.
+ *
+ * @param inputWsName The name of the workspace to save.
+ * @param filename    The name of the file to save to.
+ * @return            A NexusProcessed Algorithm which saves in file with
+ *                    the specified name.
+ */
+IAlgorithm_sptr IndirectDiffractionReduction::saveNexusProcessedAlgorithm(
+    const std::string &inputWsName, const std::string &filename) {
+  return saveAlgorithm("SaveNexusProcessed", inputWsName, filename);
+}
+
+/**
+ * Creates a save algorithm with the specified name for saving the
+ * workspace with the specified name into the file with the specified name.
+ *
+ * @param saveAlgName The name of the save algorithm to use.
+ * @param filename    The name of the file to save to.
+ * @param inputWsName The name of the workspace to save.
+ * @param version     The version of the save algorithm to use.
+ * @return            A Save algorithm for saving the workspace with
+ *                    the specified name into the file with the the
+ *                    specified name.
+ */
+IAlgorithm_sptr IndirectDiffractionReduction::saveAlgorithm(
+    const std::string &saveAlgName, const std::string &filename,
+    const std::string &inputWsName, const int &version) {
+  IAlgorithm_sptr saveAlg =
+      AlgorithmManager::Instance().create(saveAlgName, version);
+  saveAlg->initialize();
+
+  if (inputWsName != "") {
+    saveAlg->setProperty("InputWorkspace", inputWsName);
+  }
+
+  saveAlg->setProperty("Filename", filename);
+  return saveAlg;
 }
 
 /**
@@ -342,15 +394,6 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   IAlgorithm_sptr msgDiffReduction =
       AlgorithmManager::Instance().create("ISISIndirectDiffractionReduction");
   msgDiffReduction->initialize();
-
-  // Get save formats
-  std::vector<std::string> saveFormats;
-  if (m_uiForm.ckGSS->isChecked())
-    saveFormats.emplace_back("gss");
-  if (m_uiForm.ckNexus->isChecked())
-    saveFormats.emplace_back("nxs");
-  if (m_uiForm.ckAscii->isChecked())
-    saveFormats.emplace_back("ascii");
 
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
@@ -687,7 +730,8 @@ void IndirectDiffractionReduction::loadSettings() {
   QSettings settings;
   QString dataDir = QString::fromStdString(
                         Mantid::Kernel::ConfigService::Instance().getString(
-                            "datasearch.directories")).split(";")[0];
+                            "datasearch.directories"))
+                        .split(";")[0];
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
@@ -764,10 +808,10 @@ bool IndirectDiffractionReduction::validateVanCal() {
 }
 
 /**
-* Checks to see if the cal file and optional rebin fields are valid.
-*
-* @returns True if calibration file and rebin values are valid, false otherwise
-*/
+ * Checks to see if the cal file and optional rebin fields are valid.
+ *
+ * @returns True if calibration file and rebin values are valid, false otherwise
+ */
 bool IndirectDiffractionReduction::validateCalOnly() {
   // Check Calib file valid
   if (m_uiForm.ckUseCalib->isChecked() && !m_uiForm.rfCalFile_only->isValid())
@@ -864,5 +908,5 @@ void IndirectDiffractionReduction::manualGroupingToggled(int state) {
     return;
   }
 }
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
