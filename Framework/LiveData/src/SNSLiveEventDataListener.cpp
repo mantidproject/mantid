@@ -1086,9 +1086,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::DeviceDescriptorPkt &pkt) {
             prop = new TimeSeriesProperty<std::string>(pvName);
           } else {
             // invalid type string
-            g_log.warning()
-                << "Ignoring process variable " << pvName
-                << " because it had an unrecognized type (" << pvType << ").\n";
+            g_log.warning() << "Ignoring process variable " << pvName
+                            << " because it had an unrecognized type ("
+                            << pvType << ").\n";
           }
 
           if (prop) {
