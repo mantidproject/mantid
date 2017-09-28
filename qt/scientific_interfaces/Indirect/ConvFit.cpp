@@ -593,11 +593,11 @@ void ConvFit::extendResolutionWorkspace() {
   auto inputWs = inputWorkspace();
 
   if (inputWs && m_uiForm.dsResInput->isValid()) {
-    const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+    const std::string resWsName =
+        m_uiForm.dsResInput->getCurrentDataName().toStdString();
     // Check spectra consistency between resolution and sample
     auto resolutionInputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            resWsName.toStdString());
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resWsName);
     size_t resolutionNumHist = resolutionInputWS->getNumberHistograms();
     size_t numHist = inputWs->getNumberHistograms();
     if (resolutionNumHist != 1 && resolutionNumHist != numHist) {
@@ -610,7 +610,7 @@ void ConvFit::extendResolutionWorkspace() {
         AlgorithmManager::Instance().create("CloneWorkspace");
     cloneAlg->setLogging(false);
     cloneAlg->initialize();
-    cloneAlg->setProperty("InputWorkspace", resWsName.toStdString());
+    cloneAlg->setProperty("InputWorkspace", resWsName);
     cloneAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
     cloneAlg->execute();
     // Append to cloned workspace if necessary
@@ -620,7 +620,7 @@ void ConvFit::extendResolutionWorkspace() {
       appendAlg->setLogging(false);
       appendAlg->initialize();
       appendAlg->setPropertyValue("InputWorkspace1", "__ConvFit_Resolution");
-      appendAlg->setPropertyValue("InputWorkspace2", resWsName.toStdString());
+      appendAlg->setPropertyValue("InputWorkspace2", resWsName);
       appendAlg->setProperty("Number", static_cast<int>(numHist - 1));
       appendAlg->setPropertyValue("OutputWorkspace", "__ConvFit_Resolution");
       appendAlg->execute();
@@ -892,6 +892,7 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
 
       IAlgorithm_sptr loadParamFile =
           AlgorithmManager::Instance().create("LoadParameterFile");
+      loadParamFile->setChild(true);
       loadParamFile->initialize();
       loadParamFile->setProperty("Workspace", workspace);
       loadParamFile->setProperty(
@@ -908,8 +909,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1311,8 +1312,9 @@ void ConvFit::plotGuess() {
   CompositeFunction_sptr function = createFunction(tieCentres);
   auto inputWs = inputWorkspace();
 
-  if (inputWs == NULL) {
+  if (!inputWs) {
     updatePlot();
+    return;
   }
 
   const size_t binIndexLow =
