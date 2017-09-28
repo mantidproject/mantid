@@ -26,9 +26,7 @@ public:
   static ProcessingAlgorithmTest *createSuite() {
     return new ProcessingAlgorithmTest();
   }
-  static void destroySuite(ProcessingAlgorithmTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessingAlgorithmTest *suite) { delete suite; }
   ProcessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_valid_algorithms() {
@@ -38,10 +36,8 @@ public:
     // changed
     std::vector<QString> prefix = {"run_"};
     TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("Rebin", prefix));
-    TS_ASSERT_THROWS_NOTHING(
-        ProcessingAlgorithm("ExtractSpectra", prefix));
-    TS_ASSERT_THROWS_NOTHING(
-        ProcessingAlgorithm("ConvertUnits", prefix));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ExtractSpectra", prefix));
+    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm("ConvertUnits", prefix));
   }
 
   void test_invalid_algorithms() {
@@ -64,22 +60,21 @@ public:
     std::vector<QString> prefixes;
     prefixes.emplace_back("IvsQ_binned_");
     // This should throw
-    TS_ASSERT_THROWS(ProcessingAlgorithm(algName, prefixes,
-                                                      std::set<QString>()),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        ProcessingAlgorithm(algName, prefixes, std::set<QString>()),
+        std::invalid_argument);
 
     prefixes.push_back("IvsQ_");
     // This should also throw
-    TS_ASSERT_THROWS(ProcessingAlgorithm(algName, prefixes,
-                                                      std::set<QString>()),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(
+        ProcessingAlgorithm(algName, prefixes, std::set<QString>()),
+        std::invalid_argument);
     // But this should be OK
     prefixes.push_back("IvsLam_");
-    TS_ASSERT_THROWS_NOTHING(ProcessingAlgorithm(
-        algName, prefixes, std::set<QString>()));
+    TS_ASSERT_THROWS_NOTHING(
+        ProcessingAlgorithm(algName, prefixes, std::set<QString>()));
 
-    auto alg = ProcessingAlgorithm(algName, prefixes,
-                                                std::set<QString>());
+    auto alg = ProcessingAlgorithm(algName, prefixes, std::set<QString>());
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 3);
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_binned_");

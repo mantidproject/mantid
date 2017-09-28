@@ -218,8 +218,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
-  
-   void testManyColumns() {
+  void testManyColumns() {
     // create a file with each line containing too many columns
     std::ofstream file(m_filename.c_str());
     file << "13460,0.7,13463,0.01,0.06,,,,,,,,,,,0.04,2,,,,0.04,2\n";

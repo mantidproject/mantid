@@ -25,9 +25,7 @@ public:
   static PostprocessingAlgorithmTest *createSuite() {
     return new PostprocessingAlgorithmTest();
   }
-  static void destroySuite(PostprocessingAlgorithmTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(PostprocessingAlgorithmTest *suite) { delete suite; }
   PostprocessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_invalid_algorithms() {
@@ -35,9 +33,8 @@ public:
     TS_ASSERT_THROWS(PostprocessingAlgorithm("StepScan"),
                      std::invalid_argument);
     // Algorithms with more than one 'str list' property
-    TS_ASSERT_THROWS(
-        PostprocessingAlgorithm("PDDetermineCharacterizations"),
-        std::invalid_argument);
+    TS_ASSERT_THROWS(PostprocessingAlgorithm("PDDetermineCharacterizations"),
+                     std::invalid_argument);
     // Algorithms with invalid output ws properties
     TS_ASSERT_THROWS(PostprocessingAlgorithm("GroupWorkspaces"),
                      std::invalid_argument);

@@ -22,12 +22,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PreprocessMapTest *createSuite() {
-    return new PreprocessMapTest();
-  }
-  static void destroySuite(PreprocessMapTest *suite) {
-    delete suite;
-  }
+  static PreprocessMapTest *createSuite() { return new PreprocessMapTest(); }
+  static void destroySuite(PreprocessMapTest *suite) { delete suite; }
   PreprocessMapTest() { FrameworkManager::Instance(); };
 
   void test_add_element() {
@@ -39,8 +35,7 @@ public:
 
     auto preprocessingInstructions = preprocessMap.asMap();
 
-    PreprocessingAlgorithm algPlus =
-        preprocessingInstructions["Runs"];
+    PreprocessingAlgorithm algPlus = preprocessingInstructions["Runs"];
     TS_ASSERT_EQUALS(algPlus.name(), "Plus");
     TS_ASSERT_EQUALS(algPlus.prefix(), "");
     TS_ASSERT_EQUALS(algPlus.blacklist(), std::set<QString>());

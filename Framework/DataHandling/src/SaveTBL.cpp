@@ -98,13 +98,14 @@ void SaveTBL::exec() {
   file.close();
 }
 
-void SaveTBL::writeColumnNames(std::ofstream& file, std::vector<std::string> const& columnHeadings) {
+void SaveTBL::writeColumnNames(std::ofstream &file,
+                               std::vector<std::string> const &columnHeadings) {
   auto it = columnHeadings.begin();
   for (; it != columnHeadings.end() - 1; ++it) {
     auto const &heading = *it;
     writeVal<std::string>(heading, file);
   }
-  auto const& lastHeading = *it;
+  auto const &lastHeading = *it;
   writeVal<std::string>(lastHeading, file, false, true);
 }
 
@@ -117,7 +118,8 @@ void SaveTBL::writeColumnNames(std::ofstream& file, std::vector<std::string> con
 * @param endline : boolean true to put an EOL at the end of this data value
 */
 template <class T>
-void SaveTBL::writeVal(const T& val, std::ofstream &file, bool endsep, bool endline) {
+void SaveTBL::writeVal(const T &val, std::ofstream &file, bool endsep,
+                       bool endline) {
   std::string valStr = boost::lexical_cast<std::string>(val);
   size_t comPos = valStr.find(',');
   if (comPos != std::string::npos) {

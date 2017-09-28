@@ -188,13 +188,14 @@ public:
     std::ifstream file(m_abspath.c_str());
     std::string line = "";
     getline(file, line);
+    TS_ASSERT_EQUALS(line, "Run(s),ThetaIn,TransRun(s),Qmin,Qmax,dq/"
+                           "q,Scale,StitchGroup,Options,ExtraValues");
+    getline(file, line);
+    TS_ASSERT_EQUALS(line,
+                     "13460,0.7,13463+13464,0.01,0.06,0.04,2.0,4,,Some Value");
+    getline(file, line);
     TS_ASSERT_EQUALS(
-        line,
-        "Run(s),ThetaIn,TransRun(s),Qmin,Qmax,dq/q,Scale,StitchGroup,Options,ExtraValues");
-    getline(file, line);
-    TS_ASSERT_EQUALS(line, "13460,0.7,13463+13464,0.01,0.06,0.04,2.0,4,,Some Value");
-    getline(file, line);
-    TS_ASSERT_EQUALS(line, "13470,2.3,13463+13464,0.035,0.3,0.04,2.0,5,,Some Other Value");
+        line, "13470,2.3,13463+13464,0.035,0.3,0.04,2.0,5,,Some Other Value");
     file.close();
     cleanupafterwards();
   }
