@@ -39,6 +39,7 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
@@ -227,6 +228,7 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
   // colour range
   QwtDoubleInterval fullRange =
       MantidQt::API::SignalRange(*workspace).interval();
+
   if (range) {
     wsData->setRange(*range);
   } else {
@@ -237,6 +239,21 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
   auto dim1 = workspace->getDimension(1);
   Mantid::coord_t minX(dim0->getMinimum()), maxX(dim0->getMaximum()),
       minY(dim1->getMinimum()), maxY(dim1->getMaximum());
+
+  // A MatrixWorkspace can be ragged. Make sure the x axis covers all histograms.
+  auto matrixWorkspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
+  if (matrixWorkspace) {
+    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms(); ++iHisto) {
+      auto &x = matrixWorkspace->x(iHisto);
+      if (x.front() < minX) {
+        minX = x.front();
+      }
+      if (x.back() > maxX) {
+        maxX = x.back();
+      }
+    }
+  }
+
   Mantid::coord_t dx(dim0->getBinWidth()), dy(dim1->getBinWidth());
   const Mantid::coord_t width = (maxX - minX) + dx;
   const Mantid::coord_t height = (maxY - minY) + dy;
