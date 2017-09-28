@@ -240,41 +240,40 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 
   auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
-    /* Already allocated we just need to index into the inital front-detector
-    * part of the collection.
-    * 1. Guarantee on grouping detectors by type such that the first n
-    * components
-    * are detectors.
-    * 2. Guarantee on ordering such that the
-    * detectorIndex == componentIndex for all detectors.
-    */
-    // Record the ID -> component index mapping
-    (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
-    (*m_componentIds)[detectorIndex] = detector.getComponentID();
-    m_assemblySortedDetectorIndices->push_back(detectorIndex);
-    (*m_detectorPositions)[detectorIndex] =
-        Kernel::toVector3d(detector.getPos());
-    (*m_detectorRotations)[detectorIndex] =
-        Kernel::toQuaterniond(detector.getRotation());
-    (*m_shapes)[detectorIndex] = detector.shape();
-    (*m_scaleFactors)[detectorIndex] =
-        Kernel::toVector3d(detector.getScaleFactor());
-    if (m_instrument->isMonitorViaIndex(detectorIndex)) {
-      m_monitorIndices->push_back(detectorIndex);
-    }
-    clearLegacyParameters(m_pmap, detector);
-  }
-  /* Note that positions and rotations for detectors are currently
-  NOT stored! These go into DetectorInfo at present. push_back works for other
-  Component types because Detectors are always come first in the resultant
-  component list
-  forming a contiguous block.
+  /* Already allocated we just need to index into the inital front-detector
+  * part of the collection.
+  * 1. Guarantee on grouping detectors by type such that the first n
+  * components
+  * are detectors.
+  * 2. Guarantee on ordering such that the
+  * detectorIndex == componentIndex for all detectors.
   */
-  markAsSourceOrSample(detector.getComponentID(),
-                       detectorIndex); // TODO. Optimisation. Cannot have a
-                                       // detector that is either source or
-                                       // sample. So delete this.
-  return detectorIndex;
+  // Record the ID -> component index mapping
+  (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
+  (*m_componentIds)[detectorIndex] = detector.getComponentID();
+  m_assemblySortedDetectorIndices->push_back(detectorIndex);
+  (*m_detectorPositions)[detectorIndex] = Kernel::toVector3d(detector.getPos());
+  (*m_detectorRotations)[detectorIndex] =
+      Kernel::toQuaterniond(detector.getRotation());
+  (*m_shapes)[detectorIndex] = detector.shape();
+  (*m_scaleFactors)[detectorIndex] =
+      Kernel::toVector3d(detector.getScaleFactor());
+  if (m_instrument->isMonitorViaIndex(detectorIndex)) {
+    m_monitorIndices->push_back(detectorIndex);
+  }
+  clearLegacyParameters(m_pmap, detector);
+}
+/* Note that positions and rotations for detectors are currently
+NOT stored! These go into DetectorInfo at present. push_back works for other
+Component types because Detectors are always come first in the resultant
+component list
+forming a contiguous block.
+*/
+markAsSourceOrSample(detector.getComponentID(),
+                     detectorIndex); // TODO. Optimisation. Cannot have a
+                                     // detector that is either source or
+                                     // sample. So delete this.
+return detectorIndex;
 }
 
 /**
