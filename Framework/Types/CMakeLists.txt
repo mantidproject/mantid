@@ -31,7 +31,7 @@ set_target_properties ( Types PROPERTIES OUTPUT_NAME MantidTypes
 set_property ( TARGET Types PROPERTY FOLDER "MantidFramework" )
                                           
 target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
-target_include_directories(Types PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Types>)
+target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
 #Auto-generate exports header
 generate_mantid_export_header(Types)
 # Add the unit tests directory

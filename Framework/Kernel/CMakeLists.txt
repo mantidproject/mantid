@@ -109,7 +109,6 @@ set ( SRC_FILES
 	src/ThreadPool.cpp
 	src/ThreadPoolRunnable.cpp
 	src/ThreadSafeLogStream.cpp
-    src/TimeInterval.cpp
 	src/TimeSeriesProperty.cpp
 	src/TimeSplitter.cpp
 	src/Timer.cpp
@@ -287,7 +286,6 @@ set ( INC_FILES
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-	inc/MantidKernel/TimeInterval.h
     inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
