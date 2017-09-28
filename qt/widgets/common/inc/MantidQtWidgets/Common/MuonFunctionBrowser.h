@@ -30,8 +30,7 @@ namespace MantidWidgets {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON MuonFunctionBrowser
-    : public FunctionBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON MuonFunctionBrowser : public FunctionBrowser {
   Q_OBJECT
 
 public:

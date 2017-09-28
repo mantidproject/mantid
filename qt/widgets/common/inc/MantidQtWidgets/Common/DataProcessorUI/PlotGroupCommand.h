@@ -35,8 +35,7 @@ class PlotGroupCommand : public CommandBase {
 public:
   PlotGroupCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  PlotGroupCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  PlotGroupCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~PlotGroupCommand(){};
 
   void execute() override {

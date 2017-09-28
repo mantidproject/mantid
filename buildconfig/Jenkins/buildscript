@@ -95,16 +95,6 @@ if [[ "$CLEANBUILD" == true ]]; then
 fi
 if [ -d $BUILD_DIR ]; then
   rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
-  ###############################################################################
-  # Temporary fix to clean build directories while
-  # https://github.com/mantidproject/mantid/pull/20617 is pushed through
-  ###############################################################################
-  _main_generator=$(grep "CMAKE_GENERATOR:INTERNAL" ${BUILD_DIR}/CMakeCache.txt)
-  _eigen_generator=$(grep "CMAKE_GENERATOR:INTERNAL"  ${BUILD_DIR}/eigen-download/CMakeCache.txt)
-  if [ "${_main_generator}" != "${_eigen_generator}" ]; then
-    echo "External project generator mismatch. Cleaning external projects"
-    CLEAN_EXTERNAL_PROJECTS=true
-  fi
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*

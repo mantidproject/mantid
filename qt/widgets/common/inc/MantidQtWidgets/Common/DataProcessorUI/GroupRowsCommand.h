@@ -35,8 +35,7 @@ class GroupRowsCommand : public CommandBase {
 public:
   GroupRowsCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  GroupRowsCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  GroupRowsCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~GroupRowsCommand(){};
 
   void execute() override {
