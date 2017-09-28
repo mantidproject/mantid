@@ -58,8 +58,7 @@ QString DLLExport titleString(const QString &wsName);
 boost::tuple<QString, QString> DLLExport
 postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
-                       const PostprocessingAlgorithm &postprocessor,
-                       const QString &postprocessingOptions);
+                       const PostprocessingStep &postprocessingStep);
 
 QString DLLExport plotsString(const QStringList &output_ws,
                               const QString &stitched_wsStr,
