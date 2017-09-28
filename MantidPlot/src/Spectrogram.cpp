@@ -240,10 +240,14 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
   Mantid::coord_t minX(dim0->getMinimum()), maxX(dim0->getMaximum()),
       minY(dim1->getMinimum()), maxY(dim1->getMaximum());
 
-  // A MatrixWorkspace can be ragged. Make sure the x axis covers all histograms.
-  auto matrixWorkspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
+  // A MatrixWorkspace can be ragged. Make sure the x axis covers all
+  // histograms.
+  auto matrixWorkspace =
+      boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+          workspace);
   if (matrixWorkspace) {
-    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms(); ++iHisto) {
+    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
+         ++iHisto) {
       auto &x = matrixWorkspace->x(iHisto);
       if (x.front() < minX) {
         minX = x.front();
