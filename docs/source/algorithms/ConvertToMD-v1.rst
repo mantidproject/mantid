@@ -267,11 +267,8 @@ This example produces 3-dimensional dataset, with a temperature axis.
         DeleteWorkspace(current_ws)
     # end loop
    
-   #plotSlice(RezWS)
    # produce some test output
-   print "Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims())
-   #print "MD workspace ID is:\n",md_ws.id    
-   print "--------------------------------------------"
+   print("Resulting MD workspace contains {0} events and {1} dimensions".format(md_ws.getNEvents(),md_ws.getNumDims()))
     
 .. testcleanup:: ExConvertToMD|Q|T
 
@@ -285,7 +282,6 @@ This example produces 3-dimensional dataset, with a temperature axis.
    Target ws  WS_3D  not found in analysis data service
 
    Resulting MD workspace contains 605880 events and 3 dimensions
-   --------------------------------------------
 
 .. categories::
 

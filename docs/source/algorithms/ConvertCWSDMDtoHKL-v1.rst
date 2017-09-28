@@ -84,8 +84,8 @@ Usage
   BinMD(InputWorkspace='HKLMD', AlignedDim0='H,-0.3,0.3,60', AlignedDim1='K,-0.4,0.5,90', AlignedDim2='L,4,8,10', OutputWorkspace='BinndHKL')
   histws = mtd['BinndHKL']
   events_array = histws.getNumEventsArray()
-  print 'events[22, 53, 5] = %.1f' % events_array[22, 53, 5]
-  print 'events[30, 40, 5] = %.1f' % events_array[30, 40, 5]
+  print('events[22, 53, 5] = {:.1f}'.format(events_array[22, 53, 5]))
+  print('events[30, 40, 5] = {:.1f}'.format(events_array[30, 40, 5]))
 
 .. testcleanup::  ExConvertHB3AToHKL
 
