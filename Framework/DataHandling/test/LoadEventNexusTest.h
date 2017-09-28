@@ -90,7 +90,8 @@ void run_MPI_load(const Parallel::Communicator &comm) {
   std::vector<size_t> compared;
   Parallel::gather(comm, localCompared, compared, 0);
   if (comm.rank() == 0) {
-    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(), 0),
+    TS_ASSERT_EQUALS(std::accumulate(compared.begin(), compared.end(),
+                                     static_cast<size_t>(0)),
                      reference->getNumberHistograms());
   }
 }
