@@ -1,6 +1,5 @@
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
-#include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
