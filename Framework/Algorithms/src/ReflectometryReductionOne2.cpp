@@ -1330,9 +1330,10 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
-    throw std::runtime_error(
-        "Cannot process twoTheta=" + std::to_string(twoTheta) +
-        " as it is below the horizon angle=" + std::to_string(theta0()));
+    throw std::runtime_error("Cannot process twoTheta=" +
+                             std::to_string(twoTheta * 180.0 / M_PI) +
+                             " as it is below the horizon angle=" +
+                             std::to_string(theta0() * 180.0 / M_PI));
   }
 
   // Get the angle from twoThetaR to this detector

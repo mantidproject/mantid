@@ -43,9 +43,8 @@ public:
       const QString &name, const QString &prefix = "",
       const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  PostprocessingAlgorithm(const QString &name,
-                                       const QString &prefix,
-                                       const QString &blacklist);
+  PostprocessingAlgorithm(const QString &name, const QString &prefix,
+                          const QString &blacklist);
   // Default constructor
   PostprocessingAlgorithm();
   // Destructor

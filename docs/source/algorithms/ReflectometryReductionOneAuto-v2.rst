@@ -27,11 +27,7 @@ is inferred from other properties, depending on the value of :literal:`AnalysisM
 Note that ProcessingInstructions are workspace indices, not detector IDs. The first few workspaces may correspond
 to monitors, rather than detectors of interest. For the syntax of this property, see :ref:`algm-GroupDetectors`.
 
-Once the algorithm determines the detectors of interest it corrects their positions according to :literal:`ThetaIn`,
-if given, for which it runs :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them
-vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
-If :literal:`ThetaIn` is not set, detectors will not be corrected. However, it is recommended to use this option to
-ensure that :ref:`algm-ReflectometryReductionOne` is able to convert from wavelength to momentum transfer properly.
+:literal:`theta` is calcualted using :literal:`SpecularReflectionCalculateTheta`. This is passed through to :literal:`ReflectometryReductionOne` and :literal:`2 * theta` is passed through to :literal:`CalculateResolution`. :literal:`theta` can be overridden by setting :literal:`ThetaIn` or :literal:`ThetaLogName` (:literal:`ThetaIn` takes precedence if both are given). If :literal:`CorrectDetectors` is also true, then the algorithm corrects the positions of the detectors of interest to :literal:`2 * theta` using :ref:`algm-SpecularReflectionPositionCorrect`. The detectors are moved either by shifting them vertically, or by rotating them around the sample position, as specified by :literal:`DetectorCorrectionType`.
 
 Next, the algorithm will try to populate input properties which have not been set. Specifically, it will search for
 :literal:`LambdaMin`, :literal:`LambdaMax`, :literal:`I0MonitorIndex`, :literal:`MonitorBackgroundMin`, :literal:`MonitorBackgroundMax`,
@@ -153,8 +149,8 @@ Output:
     0.00462
     0.63441
     0.41079
-    0.01248
-    0.00905
+    0.44792
+    0.23703
 
 **Example - Basic reduction with a transmission run**
 
@@ -179,8 +175,8 @@ Output:
     0.00338
     1.16756
     0.89144
-    0.98439
-    1.00991
+    1.46655
+    1.41327
 
 **Example - Reduction overriding some default values**
 
@@ -204,8 +200,8 @@ Output:
     0.00462
     0.64241
     0.41453
-    0.50007
-    0.48771
+    0.51029
+    0.52240
 
 .. categories::
 

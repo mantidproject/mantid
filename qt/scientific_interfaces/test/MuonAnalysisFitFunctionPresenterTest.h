@@ -194,13 +194,6 @@ public:
     m_presenter->handleErrorsEnabled(false);
   }
 
-  void test_handleFunctionLoaded() {
-    const QString funcString("some function string");
-    EXPECT_CALL(*m_funcBrowser, clear()).Times(1);
-    EXPECT_CALL(*m_funcBrowser, setFunction(funcString)).Times(1);
-    m_presenter->handleFunctionLoaded(funcString);
-  }
-
   void test_updateNumberOfDatasets() {
     const int nDatasets(21);
     EXPECT_CALL(*m_funcBrowser, clearErrors()).Times(1);

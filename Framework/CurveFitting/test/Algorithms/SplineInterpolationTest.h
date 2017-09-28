@@ -91,8 +91,9 @@ public:
     NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ows->getAxis(0));
     TS_ASSERT(xAxis);
 
-    for (size_t i = 0; i < ows->blocksize(); i++) {
-      double ref = 1.6 + static_cast<int>(i) * 0.4;
+    const size_t numBins = ows->blocksize();
+    for (size_t i = 0; i < numBins; i++) {
+      double ref = 1.6 + static_cast<double>(i) * 0.4;
       TS_ASSERT_EQUALS((*xAxis)(i), ref);
     }
 
@@ -121,8 +122,9 @@ public:
           dynamic_cast<NumericAxis *>(derivsWs->getAxis(0));
       TS_ASSERT(derivXAxis);
 
-      for (size_t i = 0; i < ows->blocksize(); i++) {
-        double ref = 1.6 + static_cast<int>(i) * 0.4;
+      const size_t numBins = ows->blocksize();
+      for (size_t i = 0; i < numBins; i++) {
+        double ref = 1.6 + static_cast<double>(i) * 0.4;
         TS_ASSERT_EQUALS((*derivXAxis)(i), ref);
       }
 

@@ -35,23 +35,43 @@ namespace Functions {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+class CrystalFieldSusceptibilityBase : public API::IFunction1D {
+public:
+  CrystalFieldSusceptibilityBase();
+  void function1D(double *out, const double *xValues,
+                  const size_t nData) const override;
+
+protected:
+  mutable DoubleFortranVector m_en;
+  mutable ComplexFortranMatrix m_wf;
+  mutable int m_nre;
+};
+
 class MANTID_CURVEFITTING_DLL CrystalFieldSusceptibility
     : public CrystalFieldPeaksBase,
-      public API::IFunction1D {
+      public CrystalFieldSusceptibilityBase {
 public:
   CrystalFieldSusceptibility();
   std::string name() const override { return "CrystalFieldSusceptibility"; }
   const std::string category() const override { return "General"; }
-  void setEigensystem(const DoubleFortranVector &en,
-                      const ComplexFortranMatrix &wf, const int nre);
   void function1D(double *out, const double *xValues,
                   const size_t nData) const override;
+  void setEigensystem(const DoubleFortranVector &en,
+                      const ComplexFortranMatrix &wf, const int nre);
 
 private:
-  DoubleFortranVector m_en;
-  ComplexFortranMatrix m_wf;
-  int m_nre;
   bool m_setDirect;
+};
+
+class MANTID_CURVEFITTING_DLL CrystalFieldSusceptibilityCalculation
+    : public API::ParamFunction,
+      public CrystalFieldSusceptibilityBase {
+public:
+  CrystalFieldSusceptibilityCalculation();
+  std::string name() const override { return "chi"; }
+  const std::string category() const override { return "General"; }
+  void setEigensystem(const DoubleFortranVector &en,
+                      const ComplexFortranMatrix &wf, const int nre);
 };
 
 } // namespace Functions

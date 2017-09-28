@@ -442,6 +442,13 @@ public:
     }
   }
 
+  void testEmptyWorkspace() {
+    WorkspaceTester ws;
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.blocksize(), 0);
+    TS_ASSERT_EQUALS(ws.size(), 0);
+  }
+
   void test_updateSpectraUsing() {
     WorkspaceTester testWS;
     testWS.initialize(3, 1, 1);
@@ -918,16 +925,26 @@ public:
   void test_getSignalAtCoord_pointData() {
     // Create a test workspace
     const auto ws = createTestWorkspace(4, 5, 5);
+    auto normType = Mantid::API::NoNormalization;
 
     // Get signal at coordinates
-    std::vector<coord_t> coords = {0.0, 1.0};
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0,
-        1e-5);
+    std::vector<coord_t> coords = {-1.0, 1.0};
+    coords[0] = -0.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
+    coords[0] = -0.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.0;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.75;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 1.0, 1e-5);
     coords[0] = 1.0;
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0,
-        1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 1.0, 1e-5);
+    coords[0] = 4.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 4.0, 1e-5);
+    coords[0] = 4.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
   }
 
   void test_getCoordAtSignal_regression() {

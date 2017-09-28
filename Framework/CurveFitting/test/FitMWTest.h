@@ -47,9 +47,10 @@ API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
   for (size_t is = 0; is < ws2->getNumberHistograms(); ++is) {
     auto &x = ws2->mutableX(is);
     auto &y = ws2->mutableY(is);
-    for (size_t i = 0; i < ws2->blocksize(); ++i) {
-      x[i] = 0.1 * double(i);
-      y[i] = (10.0 + double(is)) * exp(-(x[i]) / (0.5 * (1 + double(is))));
+    for (size_t i = 0; i < y.size(); ++i) {
+      x[i] = 0.1 * static_cast<double>(i);
+      const double is_d = static_cast<double>(is);
+      y[i] = (10.0 + is_d) * exp(-(x[i]) / (0.5 * (1. + is_d)));
     }
     if (histogram)
       x.back() = x[x.size() - 2] + 0.1;
@@ -98,7 +99,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     const auto &Data = outWS->y(0);
     const auto &Calc = outWS->y(1);
     const auto &Diff = outWS->y(2);
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    for (size_t i = 0; i < Data.size(); ++i) {
       TS_ASSERT_EQUALS(Data[i] - Calc[i], Diff[i]);
     }
 
@@ -407,7 +408,7 @@ public:
       auto &x = ws2->mutableX(is);
       auto &y = ws2->mutableY(is);
       // Mantid::MantidVec& e = ws2->dataE(is);
-      for (size_t i = 0; i < ws2->blocksize(); ++i) {
+      for (size_t i = 0; i < y.size(); ++i) {
         x[i] = 0.1 * double(i);
         if (i < 3) {
           y[i] = 1.0;
@@ -717,7 +718,7 @@ public:
     data->initialize(1, 100, 100);
 
     auto &xData = data->mutableX(0);
-    for (size_t i = 0; i < data->blocksize(); i++) {
+    for (size_t i = 0; i < xData.size(); i++) {
       xData[i] = -10.0 + 0.2 * double(i);
     }
 
@@ -788,7 +789,8 @@ public:
     conv1.addFunction(gaussian1);
     conv1.function(x, gaus1Values);
 
-    for (size_t i = 0; i < data->blocksize(); i++) {
+    const size_t numBins = data->blocksize();
+    for (size_t i = 0; i < numBins; i++) {
       TS_ASSERT_EQUALS(outputWS->y(3)[i], gaus1Values[i]);
       TS_ASSERT_DIFFERS(outputWS->y(3)[i], 0.0);
     }
@@ -798,7 +800,7 @@ public:
     conv2.addFunction(gaussian2);
     conv2.function(x, gaus2Values);
 
-    for (size_t i = 0; i < data->blocksize(); i++) {
+    for (size_t i = 0; i < numBins; i++) {
       TS_ASSERT_EQUALS(outputWS->y(4)[i], gaus2Values[i]);
       TS_ASSERT_DIFFERS(outputWS->y(4)[i], 0.0);
       TS_ASSERT_DIFFERS(outputWS->y(4)[i], outputWS->y(3)[i]);

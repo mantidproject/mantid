@@ -133,7 +133,8 @@ public:
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       const auto &y = outputWS->y(i);
       const auto &e = outputWS->e(i);
-      for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+      const size_t numBins = y.size();
+      for (size_t j = 0; j < numBins; ++j) {
         if (j < 5) {
           TS_ASSERT_DELTA(y[j], 9, epsilon);
         } else {

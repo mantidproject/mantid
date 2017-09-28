@@ -105,6 +105,9 @@ void MantidTable::fillTable() {
     Mantid::API::Column_sptr c = m_ws->getColumn(static_cast<int>(i));
     QString colName = QString::fromStdString(c->name());
     setColName(i, colName);
+    if (c->type() == "str" || c->type() == "V3D") {
+      setColumnType(i, ColType::Text);
+    }
     // Make columns of ITableWorkspaces read only, if specified
     setReadOnlyColumn(i, c->getReadOnly());
 
@@ -282,34 +285,37 @@ void MantidTable::cellEdited(int row, int col) {
     return;
   }
 
-  QString oldText = d_table->text(row, col);
-  Mantid::API::Column_sptr c = m_ws->getColumn(col);
+  const int index = row;
+
+  auto oldText = d_table->text(row, col);
+  auto c = m_ws->getColumn(col);
 
   if (c->type() != "str") {
     oldText.remove(QRegExp("\\s"));
   }
 
-  const std::string text = oldText.toStdString();
+  if (c->type() == "str" || c->type() == "V3D") {
+    std::istringstream textStream(oldText.toStdString());
+    c->read(index, textStream);
+  } else {
+    // We must be dealing with numerical data. Since there semms to be no way
+    // convert between QLocale and std::locale, get the number out
+    // of the Qt locale and put it into default std::locale format.
+    // so we can pass it to the workspace.
 
-  // Have the column convert the text to a value internally
-  int index = row;
-  std::istringstream textStream(text);
-  const std::locale systemLocale("");
-  textStream.imbue(systemLocale);
-  c->read(index, textStream.str());
+    // First convert locale formatted string to native type
+    QTextStream qstream(&oldText);
+    qstream.setLocale(locale());
+    double number;
+    qstream >> number;
 
-  // Set the table view to be the same text after editing.
-  // That way, if the string was stupid, it will be reset to the old value.
-  std::ostringstream s;
-  s.imbue(systemLocale);
-
-  // Avoid losing precision for numeric data
-  if (c->type() == "double") {
-    s.precision(std::numeric_limits<double>::max_digits10);
+    // Put it back in the stream and let the column deduce the correct
+    // type of the number.
+    std::stringstream textStream;
+    textStream << number;
+    std::istringstream stream(textStream.str());
+    c->read(index, stream);
   }
-  c->print(index, s);
-
-  d_table->setText(row, col, QString::fromStdString(s.str()));
 }
 
 void MantidTable::setPlotDesignation(Table::PlotDesignation pd,

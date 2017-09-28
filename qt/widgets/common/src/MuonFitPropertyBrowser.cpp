@@ -1178,8 +1178,6 @@ std::string MuonFitPropertyBrowser::outputName() const {
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
-  modifyFitMenu(m_fitActionEvaluate, !enabled);
-  modifyFitMenu(m_fitActionSeqFit, !enabled);
   // set default selection (all groups)
   if (enabled) {
     setAllGroups();
