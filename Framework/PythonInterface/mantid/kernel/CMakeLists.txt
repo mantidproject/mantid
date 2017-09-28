@@ -55,6 +55,7 @@ set ( EXPORT_FILES
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
+  src/Exports/StringContainsValidator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )

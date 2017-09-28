@@ -33,11 +33,9 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class WorkspaceCommand : public CommandBase {
 public:
-  WorkspaceCommand(DataProcessorPresenter *tablePresenter,
-                                const QString &name)
+  WorkspaceCommand(DataProcessorPresenter *tablePresenter, const QString &name)
       : CommandBase(tablePresenter), m_name(name){};
-  WorkspaceCommand(const QDataProcessorWidget &widget,
-                                const QString &name)
+  WorkspaceCommand(const QDataProcessorWidget &widget, const QString &name)
       : CommandBase(widget), m_name(name){};
   virtual ~WorkspaceCommand(){};
 

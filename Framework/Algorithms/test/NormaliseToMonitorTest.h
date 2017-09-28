@@ -1,14 +1,17 @@
 #ifndef NORMALISETOMONITORTEST_H_
 #define NORMALISETOMONITORTEST_H_
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/Counts.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -353,6 +356,7 @@ public:
     TS_ASSERT(!pID->isEnabled(&norm5));
     TS_ASSERT(!pID->isConditionChanged(&norm5));
   }
+
   void testIsConditionChanged() {
     NormaliseToMonitor norm6;
     norm6.initialize();
@@ -368,6 +372,7 @@ public:
     // and second time the monitons should be the same so no changes
     TS_ASSERT(!pID->isConditionChanged(&norm6));
   }
+
   void testAlgoConditionChanged() {
     NormaliseToMonitor norm6;
     norm6.initialize();
@@ -412,6 +417,26 @@ public:
     // it should return the list of allowed monitor ID-s
     monitors = monSpec->allowedValues();
     TS_ASSERT(monitors.empty());
+  }
+
+  void testMonitorWorkspaceNotInADSWorks() {
+    using namespace Mantid::DataObjects;
+    using namespace Mantid::HistogramData;
+    BinEdges xs{-1.0, 1.0};
+    Counts ys{1.0};
+    Histogram h(xs, ys);
+    MatrixWorkspace_sptr monitors = create<Workspace2D>(1, h);
+    NormaliseToMonitor alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", monitors))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("OutputWorkspace", "unused_because_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorWorkspace", monitors))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
   }
 };
 

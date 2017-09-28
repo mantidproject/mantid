@@ -90,6 +90,19 @@ range given by **NormWavelengthRange** to obtain
 :math:`S_v(i)` and then divide :math:`S_s(\lambda, i)/S_v(i)=S'_s(\lambda, i)`. From this
 point on, the reduction process continues using :math:`S'_s` in place of :math:`S_s`.
 
+Saving NXSPE files
+==================
+NXSPE files are suitable for intensity visualization in :math:`\vec{Q}` space with
+[MSLICE](http://mslice.isis.rl.ac.uk/Main_Page). When using this program, make
+sure you select the *inverse* geometry.
+
+.. image:: /images/BASISReduction_NXSPE.png
+   :width: 50%
+   :alt: Wavelength spectrum.
+
+Also, make sure that the sample rotation angle is stored in the logs of the run,
+since this is a required property of the algorithm.
+
 Dynamic Susceptibility
 ======================
 

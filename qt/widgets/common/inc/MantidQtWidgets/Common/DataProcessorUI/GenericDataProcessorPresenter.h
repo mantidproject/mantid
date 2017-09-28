@@ -77,41 +77,35 @@ public:
   // Constructor: pre-processing and post-processing
   GenericDataProcessorPresenter(
       const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load");
   // Constructor: no pre-processing, post-processing
-  GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor);
+  GenericDataProcessorPresenter(const WhiteList &whitelist,
+                                const ProcessingAlgorithm &processor,
+                                const PostprocessingAlgorithm &postprocessor);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor);
   // Constructor: no pre-processing, no post-processing
-  GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor);
+  GenericDataProcessorPresenter(const WhiteList &whitelist,
+                                const ProcessingAlgorithm &processor);
   // Constructor: only whitelist
   GenericDataProcessorPresenter(const WhiteList &whitelist);
   // Delegating constructor: pre-processing, no post-processing
-  GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const PreprocessMap &preprocessMap,
-      const ProcessingAlgorithm &processor);
+  GenericDataProcessorPresenter(const WhiteList &whitelist,
+                                const PreprocessMap &preprocessMap,
+                                const ProcessingAlgorithm &processor);
   // Delegating Constructor: pre-processing and post-processing
-  GenericDataProcessorPresenter(
-      const WhiteList &whitelist,
-      const PreprocessMap &preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor);
+  GenericDataProcessorPresenter(const WhiteList &whitelist,
+                                const PreprocessMap &preprocessMap,
+                                const ProcessingAlgorithm &processor,
+                                const PostprocessingAlgorithm &postprocessor);
   virtual ~GenericDataProcessorPresenter() override;
   void notify(DataProcessorPresenter::Flag flag) override;
   const std::map<QString, QVariant> &options() const override;
@@ -142,6 +136,8 @@ public:
                        const QString &title) const override;
   bool isProcessing() const override;
   void setForcedReProcessing(bool forceReProcessing) override;
+
+  void skipProcessing() override;
 
 protected:
   template <typename T> using QOrderedSet = QMap<T, std::nullptr_t>;
@@ -236,8 +232,7 @@ private:
                   const QString &prefix, const QString &loader, bool &runFound);
   // prepare a run or list of runs for processing
   Mantid::API::Workspace_sptr
-  prepareRunWorkspace(const QString &run,
-                      const PreprocessingAlgorithm &alg,
+  prepareRunWorkspace(const QString &run, const PreprocessingAlgorithm &alg,
                       const std::map<std::string, std::string> &optionsMap);
   // add row(s) to the model
   void appendRow();
@@ -303,6 +298,7 @@ private:
   bool isProcessed(int position) const;
   bool isProcessed(int position, int parent) const;
   bool m_forceProcessing = false;
+  bool m_skipProcessing = false;
 
   // List of workspaces the user can open
   QSet<QString> m_workspaceList;
