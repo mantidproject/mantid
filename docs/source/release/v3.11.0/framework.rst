@@ -96,6 +96,7 @@ Bug fixes
 
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
 - Fix displayed type name for optional boolean properties.
+- Fix parameters that are tied to functions can now be untied correctly. 
 
 Improved
 ########
@@ -109,6 +110,8 @@ Python
 
 Python Algorithms
 #################
+
+- Exposed `StringContainsValidator` to python to enable python algorithms to place requirement on input string to contain certain substrings.
 
 Bugfixes
 ########

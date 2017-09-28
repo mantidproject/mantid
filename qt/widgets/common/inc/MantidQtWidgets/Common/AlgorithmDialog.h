@@ -90,8 +90,9 @@ class InterfaceManager;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog : public QDialog,
-                                                Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmDialog
+    : public QDialog,
+      Mantid::API::AlgorithmObserver {
 
   Q_OBJECT
 
