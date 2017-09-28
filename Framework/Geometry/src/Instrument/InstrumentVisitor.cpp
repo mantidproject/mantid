@@ -262,18 +262,18 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
     m_monitorIndices->push_back(detectorIndex);
   }
   clearLegacyParameters(m_pmap, detector);
-}
-/* Note that positions and rotations for detectors are currently
-NOT stored! These go into DetectorInfo at present. push_back works for other
-Component types because Detectors are always come first in the resultant
-component list
-forming a contiguous block.
-*/
-markAsSourceOrSample(detector.getComponentID(),
-                     detectorIndex); // TODO. Optimisation. Cannot have a
-                                     // detector that is either source or
-                                     // sample. So delete this.
-return detectorIndex;
+
+  /* Note that positions and rotations for detectors are currently
+  NOT stored! These go into DetectorInfo at present. push_back works for other
+  Component types because Detectors are always come first in the resultant
+  component list
+  forming a contiguous block.
+  */
+  markAsSourceOrSample(detector.getComponentID(),
+                       detectorIndex); // TODO. Optimisation. Cannot have a
+                                       // detector that is either source or
+                                       // sample. So delete this.
+  return detectorIndex;
 }
 
 /**
