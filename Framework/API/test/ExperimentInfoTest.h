@@ -1064,5 +1064,15 @@ public:
     ExperimentInfo expInfo;
     expInfo.setInstrument(m_provisionedInstrument);
   }
+
+  void test_getBoundingBox_once() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
+  }
+
+  void test_getBoundingBox_twice() {
+    BoundingBox box;
+    m_provisionedInstrument->getBoundingBox(box);
+  }
 };
 #endif /* MANTID_API_EXPERIMENTINFOTEST_H_ */
