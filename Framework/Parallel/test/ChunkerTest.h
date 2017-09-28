@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <algorithm>
+#include <numeric>
 
 #include "MantidParallel/IO/Chunker.h"
 
