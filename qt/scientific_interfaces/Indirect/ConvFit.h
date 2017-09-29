@@ -27,6 +27,7 @@ private slots:
   void newDataLoaded(const QString wsName);
   void extendResolutionWorkspace();
   void updatePlot();
+  void updatePlotRange();
   void plotGuess();
   void singleFit();
   void plotSpecChanged(int value);

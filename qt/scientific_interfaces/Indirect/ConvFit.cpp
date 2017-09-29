@@ -179,6 +179,8 @@ void ConvFit::setup() {
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
+          SLOT(updatePlotRange()));
+  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(extendResolutionWorkspace()));
   connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(extendResolutionWorkspace()));
@@ -471,6 +473,7 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
+  updatePlotRange();
 
   std::string paramWsName = outputPrefix + "_Parameters";
 
@@ -909,8 +912,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1143,26 +1146,13 @@ void ConvFit::updatePlot() {
   }
 
   bool plotGuess = m_uiForm.ckPlotGuess->isChecked();
-  m_uiForm.ckPlotGuess->setChecked(false);
+  m_uiForm.ckPlotGuess->setChecked(plotGuess);
 
   int specNo = m_uiForm.spPlotSpectrum->text().toInt();
 
   m_uiForm.ppPlot->clear();
   setPreviewPlotWorkspace(inputWs);
   m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
-
-  try {
-    const QPair<double, double> curveRange =
-        m_uiForm.ppPlot->getCurveRange("Sample");
-    const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
-        ->setRange(range.first, range.second);
-    m_uiForm.ckPlotGuess->setChecked(plotGuess);
-    m_dblManager->setValue(m_properties["StartX"], range.first);
-    m_dblManager->setValue(m_properties["EndX"], range.second);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
 
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
@@ -1180,6 +1170,21 @@ void ConvFit::updatePlot() {
     plotOutput(baseGroupName, specNo);
   } else if (AnalysisDataService::Instance().doesExist(singleGroupName)) {
     plotOutput(singleGroupName, specNo);
+  }
+}
+
+void ConvFit::updatePlotRange() {
+
+  try {
+    const QPair<double, double> curveRange =
+        m_uiForm.ppPlot->getCurveRange("Sample");
+    const std::pair<double, double> range(curveRange.first, curveRange.second);
+    m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
+        ->setRange(range.first, range.second);
+    m_dblManager->setValue(m_properties["StartX"], range.first);
+    m_dblManager->setValue(m_properties["EndX"], range.second);
+  } catch (std::invalid_argument &exc) {
+    showMessageBox(exc.what());
   }
 }
 
@@ -1754,7 +1759,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
   // If there are parameters in the list, add them
   const QStringList parameters = getFunctionParameters(functionName);
-  if (parameters.isEmpty() != true) {
+  if (!parameters.isEmpty()) {
     addParametersToTree(parameters, currentFitFunction);
   }
   m_previousFit = m_uiForm.cbFitType->currentText();
