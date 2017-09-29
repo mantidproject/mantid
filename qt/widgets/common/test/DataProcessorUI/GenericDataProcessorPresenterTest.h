@@ -9,13 +9,14 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace MantidQt::MantidWidgets;
+using namespace MantidQt::MantidWidgets::DataProcessor;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;
@@ -32,11 +33,10 @@ class GenericDataProcessorPresenterNoThread
 public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
-      const DataProcessorWhiteList &whitelist,
-      const std::map<QString, DataProcessorPreprocessingAlgorithm> &
-          preprocessMap,
-      const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor,
+      const WhiteList &whitelist,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+      const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
           std::map<QString, QString>(),
       const QString &loader = "Load")
@@ -45,12 +45,11 @@ public:
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
-      const DataProcessorWhiteList &whitelist,
-      const DataProcessorProcessingAlgorithm &processor,
-      const DataProcessorPostprocessingAlgorithm &postprocessor)
+      const WhiteList &whitelist, const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
-            processor, postprocessor) {}
+            whitelist, std::map<QString, PreprocessingAlgorithm>(), processor,
+            postprocessor) {}
 
   // Destructor
   ~GenericDataProcessorPresenterNoThread() override {}
@@ -92,9 +91,9 @@ private:
 class GenericDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  DataProcessorWhiteList createReflectometryWhiteList() {
+  WhiteList createReflectometryWhiteList() {
 
-    DataProcessorWhiteList whitelist;
+    WhiteList whitelist;
     whitelist.addElement("Run(s)", "InputWorkspace", "", true, "TOF_");
     whitelist.addElement("Angle", "ThetaIn", "");
     whitelist.addElement("Transmission Run(s)", "FirstTransmissionRun", "",
@@ -106,24 +105,23 @@ private:
     return whitelist;
   }
 
-  std::map<QString, DataProcessorPreprocessingAlgorithm>
-  createReflectometryPreprocessMap() {
+  std::map<QString, PreprocessingAlgorithm> createReflectometryPreprocessMap() {
 
-    return std::map<QString, DataProcessorPreprocessingAlgorithm>{
+    return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
-         DataProcessorPreprocessingAlgorithm(
+         PreprocessingAlgorithm(
              "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                "OutputWorkspace"})},
         {"Transmission Run(s)",
-         DataProcessorPreprocessingAlgorithm(
-             "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                               "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                std::set<QString>{"FirstTransmissionRun",
+                                                  "SecondTransmissionRun",
+                                                  "OutputWorkspace"})}};
   }
 
-  DataProcessorProcessingAlgorithm createReflectometryProcessor() {
+  ProcessingAlgorithm createReflectometryProcessor() {
 
-    return DataProcessorProcessingAlgorithm(
+    return ProcessingAlgorithm(
         "ReflectometryReductionOneAuto",
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"},
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
@@ -131,16 +129,15 @@ private:
                           "FirstTransmissionRun", "SecondTransmissionRun"});
   }
 
-  DataProcessorPostprocessingAlgorithm createReflectometryPostprocessor() {
+  PostprocessingAlgorithm createReflectometryPostprocessor() {
 
-    return DataProcessorPostprocessingAlgorithm(
+    return PostprocessingAlgorithm(
         "Stitch1DMany", "IvsQ_",
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const DataProcessorWhiteList &whitelist) {
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -203,9 +200,8 @@ private:
     AnalysisDataService::Instance().addOrReplace(stdWorkspaceName, group);
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const DataProcessorWhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -254,7 +250,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceThreeGroups(const QString &wsName,
-                                      const DataProcessorWhiteList &whitelist) {
+                                      const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -321,7 +317,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledWorkspaceWithTrans(const QString &wsName,
-                                    const DataProcessorWhiteList &whitelist) {
+                                    const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"
@@ -1111,6 +1107,63 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TOF_12346"));
     TS_ASSERT(
         AnalysisDataService::Instance().doesExist("IvsQ_TOF_12345_TOF_12346"));
+
+    // Tidy up
+    AnalysisDataService::Instance().remove("TestWorkspace");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12345");
+    AnalysisDataService::Instance().remove("TOF_12345");
+    AnalysisDataService::Instance().remove("IvsQ_binned_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12346");
+    AnalysisDataService::Instance().remove("IvsLam_TOF_12346");
+    AnalysisDataService::Instance().remove("TOF_12346");
+    AnalysisDataService::Instance().remove("IvsQ_TOF_12345_TOF_12346");
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockMainPresenter));
+  }
+
+  void testProcessExitsIfSkipProcessingIsTrue() {
+    NiceMock<MockDataProcessorView> mockDataProcessorView;
+    NiceMock<MockProgressableView> mockProgress;
+    NiceMock<MockMainPresenter> mockMainPresenter;
+    GenericDataProcessorPresenterNoThread presenter(
+        createReflectometryWhiteList(), createReflectometryPreprocessMap(),
+        createReflectometryProcessor(), createReflectometryPostprocessor());
+    presenter.acceptViews(&mockDataProcessorView, &mockProgress);
+    presenter.accept(&mockMainPresenter);
+
+    presenter.skipProcessing();
+
+    createPrefilledWorkspace("TestWorkspace", presenter.getWhiteList());
+    EXPECT_CALL(mockDataProcessorView, getWorkspaceToOpen())
+        .Times(1)
+        .WillRepeatedly(Return("TestWorkspace"));
+    presenter.notify(DataProcessorPresenter::OpenTableFlag);
+
+    std::set<int> grouplist;
+    grouplist.insert(0);
+
+    createTOFWorkspace("TOF_12345", "12345");
+    createTOFWorkspace("TOF_12346", "12346");
+
+    // We should not receive any errors
+    EXPECT_CALL(mockDataProcessorView, giveUserCritical(_, _)).Times(0);
+
+    // The user hits the "process" button with the first group selected
+    EXPECT_CALL(mockDataProcessorView, getSelectedChildren()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getSelectedParents()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingOptionsAsString()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPreprocessingProperties()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(0);
+    EXPECT_CALL(mockMainPresenter, getPostprocessingOptions()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, resume()).Times(0);
+    EXPECT_CALL(mockMainPresenter, resume()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, getEnableNotebook()).Times(0);
+    EXPECT_CALL(mockDataProcessorView, requestNotebookPath()).Times(0);
+
+    presenter.notify(DataProcessorPresenter::ProcessFlag);
 
     // Tidy up
     AnalysisDataService::Instance().remove("TestWorkspace");

@@ -167,6 +167,7 @@ public:
 
   void addTie(const QString &tieStr);
   void fix(const QString &parName);
+  void removeTie(QtProperty *prop, std::string globalName);
   void removeTie(QtProperty *prop);
   void removeTie(const QString &propName);
   void addConstraint(QtProperty *parProp, bool lo, bool up, double loBound,
@@ -195,6 +196,8 @@ public:
 
   /// Update high-level structure tooltip and return it
   QString updateStructureTooltip();
+
+  QMap<QString, QtProperty *> getTies() { return m_ties; };
 
 protected slots:
 

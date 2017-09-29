@@ -12,7 +12,7 @@ from isis_powder.routines import absorb_corrections, SampleDetails
 class ISISPowderAbsorptionTest(unittest.TestCase):
 
     def test_sample_is_set_correctly(self):
-        sample_details = SampleDetails(height=4.0, radius=0.25, center=[0., 0., 0.])
+        sample_details = SampleDetails(height=4.0, radius=0.25, center=[0., 0., 0.], shape="cylinder")
         sample_details.set_material(chemical_formula="V")
 
         ws = mantid.CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1)

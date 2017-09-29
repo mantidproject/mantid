@@ -137,7 +137,7 @@
 
 <!-- -->
 <parameter name="multirep_tof_specta_list"  type="string">
-    <value val="382,68353"/>
+    <value val="1,129"/>
     <description is="List of two spectra corresponding to the detectors which are closest and furthest from the sample.
     These detectors locations are used to identify TOF range, contributing into each energy range
      in multirep mode"/>
@@ -176,7 +176,7 @@
 </parameter>
 
 
-<!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
+<!--  detector_van_range- integration in E(mev) for detector(white beam) vanadium data [20,100] -->
 <parameter name="wb-integr-min">
   <value val="20"/>
 </parameter>
@@ -189,7 +189,7 @@
 
 
 <!-- integration range for background tests  (in TOF) - composite property 
-  Used in test to reject high backgound (FlatBackground) and in High Background tests integration in Diagnostics
+  Used in test to reject high background (FlatBackground) and in High Background tests integration in Diagnostics
   if diag_background_test_range is not set -->
 <parameter name="bkgd-range-min"> 
   <value val="12000"/>
@@ -284,7 +284,7 @@
 <parameter name="bleed_pixels">
     <value val="80"/>
 </parameter>
-<!--  the maximum framerate allowed in a tube -->
+<!--  the maximum frame rate allowed in a tube -->
 <parameter name="bleed_maxrate">
     <value val="0.01"/>
 </parameter>
@@ -347,16 +347,16 @@
 <parameter name="sample_rmm">
   <value val="1"/>
 </parameter>
-<!-- Vanaduim mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
+<!-- Vanadium mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
 <parameter name="vanadium-mass">
   <value val="7.85"/>
 </parameter>
-<!-- if this value set to true, modo-vanadium run is not analyzed and masks obtained for arbitrary units are used for mono-vanadium -->
+<!-- if this value set to true, modo-vanadium run is not analysed and masks obtained for arbitrary units are used for mono-vanadium -->
 <parameter name="use_sam_msk_on_monovan" type = "bool">
   <value val="False"/>
 </parameter>
 
-<!-- if this value is provided (not None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
+<!-- if this value is provided (not None) it is string representation of the number used instead of calculating mono-vanadium based normalization factor 
    one does not need to provide mono-vanadium run if this value is provided as it will be used instead
   -->
 <parameter name="mono_correction_factor" type="string">
@@ -373,8 +373,8 @@
 <!--  ****************************************  Workflow control **************************** -->
 
 <!-- This parameter controls the format of output data written by reducer. 
-    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
-     Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
+    Three values are currently supported, namely .spe, .nxspe, and nexus (Mantid workspace) (.nxs)
+     Three possible values for this are defined in DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
    <value val="None"/>
@@ -414,13 +414,13 @@
    <value val="False"/>
 </parameter>
 
-<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
-     First found log will be used togethere with motor_offset to identify crystal rotation 
+<!-- The semicolon separated list of possible log names, containing information on crystal rotation.
+     First found log will be used together with motor_offset to identify crystal rotation 
      (psi in Horace) -->
 <parameter name="motor_log_names"  type="string">
    <value val="CCR_ROT;wccr"/>
 </parameter>
-<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<!-- Initial value used to identify crystal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
 <parameter name="motor_offset">
    <value val="None"/>
 </parameter>

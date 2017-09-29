@@ -31,8 +31,12 @@ void PythonInterpreter::finalize() { Py_Finalize(); }
  * @return True if the current thread holds the GIL, false otherwise
  */
 bool PythonGIL::locked() {
-  PyThreadState *ts = GET_CURRENT_THREADSTATE;
+#if PY_VERSION_HEX < 0x03000000
+  PyThreadState *ts = _PyThreadState_Current;
   return (ts && ts == PyGILState_GetThisThreadState());
+#else
+  return (PyGILState_Check() == 1);
+#endif
 }
 
 /**
@@ -51,25 +55,3 @@ void PythonGIL::acquire() { m_state = PyGILState_Ensure(); }
  * Calls PyGILState_Release
  */
 void PythonGIL::release() { PyGILState_Release(m_state); }
-
-//------------------------------------------------------------------------------
-// RecursivePythonGIL public members
-//------------------------------------------------------------------------------
-/**
- * Leaves the lock unlocked. You are strongly encouraged to use
- * the ScopedRecursiveInterpreterLock class to control this
- */
-RecursivePythonGIL::RecursivePythonGIL() : m_count(0), m_lock() {}
-
-void RecursivePythonGIL::acquire() {
-  if (m_count == 0) {
-    m_lock.acquire();
-  }
-  m_count += 1;
-}
-
-void RecursivePythonGIL::release() {
-  if (--m_count == 0) {
-    m_lock.release();
-  }
-}

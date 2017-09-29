@@ -774,6 +774,16 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   }
 }
 
+/// Check if a string attribute is empty
+bool IFunction::Attribute::isEmpty() const {
+  try {
+    return boost::get<std::string>(m_data).empty();
+  } catch (...) {
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute as string");
+  }
+}
+
 namespace {
 /**
  * Attribute visitor setting new value to an attribute

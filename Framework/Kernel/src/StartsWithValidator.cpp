@@ -18,6 +18,7 @@ StartsWithValidator::StartsWithValidator(const std::vector<std::string> &values)
  */
 StartsWithValidator::StartsWithValidator(const std::set<std::string> &values)
     : Kernel::StringListValidator(values) {}
+
 /// Clone the validator
 IValidator_sptr StartsWithValidator::clone() const {
   return boost::make_shared<StartsWithValidator>(*this);

@@ -8,6 +8,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <sstream>
 
 using Mantid::API::ISpectrum;
@@ -134,13 +135,25 @@ size_t Workspace2D::getNumberHistograms() const {
 }
 
 /// get pseudo size
-size_t Workspace2D::size() const { return data.size() * blocksize(); }
+size_t Workspace2D::size() const {
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](const size_t value, const Histogram1D *histo) {
+                           return value + histo->size();
+                         });
+}
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (!data.empty())
-             ? static_cast<ISpectrum const *>(data[0])->dataY().size()
-             : 0;
+  if (data.empty()) {
+    return 0;
+  } else {
+    size_t numBins = data[0]->size();
+    for (const auto *iter : data)
+      if (numBins != iter->size())
+        throw std::length_error(
+            "blocksize undefined because size of histograms is not equal");
+    return numBins;
+  }
 }
 
 /**
@@ -196,7 +209,8 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   if (imageE.empty() && imageY[0].empty())
     return;
 
-  if (!loadAsRectImg && blocksize() != 1) {
+  const size_t numBins = blocksize();
+  if (!loadAsRectImg && numBins != 1) {
     throw std::runtime_error(
         "Cannot set image in workspace: a single bin workspace is "
         "required when initializing a workspace from an "
@@ -214,7 +228,7 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   }
   size_t dataSize = width * height;
 
-  if (start + dataSize > getNumberHistograms() * blocksize()) {
+  if (start + dataSize > getNumberHistograms() * numBins) {
     throw std::runtime_error(
         "Cannot set image: image is bigger than workspace.");
   }
@@ -244,11 +258,11 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
           ") needs to be equal to the height (rows) of the image (" +
           std::to_string(height) + ")");
 
-    if (width != blocksize())
+    if (width != numBins)
       throw std::runtime_error(
           std::string("To load an image into a workspace with one spectrum per "
                       "row, then number of bins (") +
-          std::to_string(blocksize()) +
+          std::to_string(numBins) +
           ") needs to be equal to the width (columns) of the image (" +
           std::to_string(width) + ")");
 

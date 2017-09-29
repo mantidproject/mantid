@@ -402,31 +402,36 @@ public:
         "Cannot merge DetectorInfo: monitor flags mismatch");
   }
 
+  void test_merge_identical_sync() {
+    DetectorInfo a(PosVec(2), RotVec(2));
+    a.setScanInterval({0, 10});
+    auto b(a);
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
+  }
+
   void test_merge_fail_overlap_sync() {
     DetectorInfo a(PosVec(2), RotVec(2));
     a.setScanInterval({0, 10});
     auto b(a);
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
     b = a;
     b.setScanInterval({-1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
     b.setScanInterval({1, 5});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
     b.setScanInterval({1, 11});
-    TS_ASSERT_THROWS_EQUALS(
-        b.merge(a), const std::runtime_error &e, std::string(e.what()),
-        "Cannot merge DetectorInfo: scan intervals overlap in sync scan");
+    TS_ASSERT_THROWS_EQUALS(b.merge(a), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical");
   }
 
-  void test_merge_identical_interval_failures() {
-    DetectorInfo a(PosVec(1), RotVec(1));
-    a.setScanInterval(0, {0, 1});
+  void do_test_merge_identical_interval_failures(DetectorInfo &a) {
     Eigen::Vector3d pos1(1, 0, 0);
     Eigen::Vector3d pos2(2, 0, 0);
     Eigen::Quaterniond rot1(
@@ -467,12 +472,31 @@ public:
     TS_ASSERT_THROWS_NOTHING(b.merge(a));
   }
 
-  void test_merge_identical_interval() {
+  void test_merge_identical_interval_failures_async() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    a.setScanInterval(0, {0, 1});
+    do_test_merge_identical_interval_failures(a);
+  }
+
+  void test_merge_identical_interval_failures_sync() {
+    DetectorInfo a(PosVec(1), RotVec(1));
+    a.setScanInterval({0, 1});
+    do_test_merge_identical_interval_failures(a);
+  }
+
+  void test_merge_identical_interval_async() {
     DetectorInfo a(PosVec(1), RotVec(1));
     a.setScanInterval(0, {0, 1});
     const auto b(a);
     TS_ASSERT_THROWS_NOTHING(a.merge(b));
     TS_ASSERT(a.isEquivalent(b));
+  }
+
+  void test_merge_identical_interval_sync() {
+    DetectorInfo a(PosVec(2), RotVec(2));
+    a.setScanInterval({0, 10});
+    auto b(a);
+    TS_ASSERT_THROWS_NOTHING(b.merge(a));
   }
 
   void test_merge_identical_interval_with_monitor() {

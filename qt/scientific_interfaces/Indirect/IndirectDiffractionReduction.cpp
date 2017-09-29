@@ -81,9 +81,9 @@ void IndirectDiffractionReduction::initLayout() {
   m_uiForm.leRebinWidth_CalibOnly->setValidator(m_valDbl);
   m_uiForm.leRebinEnd_CalibOnly->setValidator(m_valDbl);
 
-  // Update the list of plot options when individual grouping is toggled
-  connect(m_uiForm.ckIndividualGrouping, SIGNAL(stateChanged(int)), this,
-          SLOT(individualGroupingToggled(int)));
+  // Update the list of plot options when manual grouping is toggled
+  connect(m_uiForm.ckManualGrouping, SIGNAL(stateChanged(int)), this,
+          SLOT(manualGroupingToggled(int)));
 
   // Handle plotting
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotResults()));
@@ -112,6 +112,14 @@ void IndirectDiffractionReduction::run() {
     showInformationBox("Sample files input is invalid.");
     return;
   }
+
+  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() &&
+      m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
+    showInformationBox("Use Vanadium File checked but no vanadium files "
+                       "have been supplied.");
+    return;
+  }
+
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
       if (!validateVanCal()) {
@@ -143,8 +151,12 @@ void IndirectDiffractionReduction::run() {
  */
 void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
-             SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
+
+  // Delete grouping workspace, if created.
+  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
+    deleteGroupingWorkspace();
+  }
 
   if (error) {
     showInformationBox(
@@ -304,6 +316,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   QString rebinStart = "";
   QString rebinWidth = "";
   QString rebinEnd = "";
+  bool useManualGrouping = m_uiForm.ckManualGrouping->isChecked();
 
   // Get rebin string
   if (mode == "diffspec") {
@@ -362,8 +375,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
   msgDiffReduction->setProperty(
-      "InputFiles",
-      m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
+      "InputFiles", m_uiForm.rfSampleFiles->getText().toStdString());
   msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("OutputWorkspace",
@@ -378,11 +390,15 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
                                     m_uiForm.spCanScale->value());
   }
 
+  BatchAlgorithmRunner::AlgorithmRuntimeProps diffRuntimeProps;
+  m_groupingWsName = "__Grouping";
   // Add the property for grouping policy if needed
-  if (m_uiForm.ckIndividualGrouping->isChecked())
-    msgDiffReduction->setProperty("GroupingPolicy", "Individual");
-
-  m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
+  if (useManualGrouping) {
+    msgDiffReduction->setProperty("GroupingPolicy", "Workspace");
+    createGroupingWorkspace(m_groupingWsName);
+    diffRuntimeProps["GroupingWorkspace"] = m_groupingWsName;
+  }
+  m_batchAlgoRunner->addAlgorithm(msgDiffReduction, diffRuntimeProps);
 
   // Handles completion of the diffraction algorithm chain
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -444,8 +460,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
 
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if (manualDRange)
-    osirisDiffReduction->setProperty(
-        "DRange", static_cast<long>(m_uiForm.spDRange->value()));
+    osirisDiffReduction->setProperty("DRange",
+                                     m_uiForm.spDRange->text().toStdString());
 
   if (m_uiForm.ckUseCan->isChecked()) {
     osirisDiffReduction->setProperty(
@@ -477,6 +493,33 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction() {
           SLOT(algorithmComplete(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
+}
+
+void IndirectDiffractionReduction::createGroupingWorkspace(
+    const std::string &outputWsName) {
+  IAlgorithm_sptr groupingAlg =
+      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  groupingAlg->initialize();
+
+  auto instrumentConfig = m_uiForm.iicInstrumentConfiguration;
+
+  groupingAlg->setProperty("FixedGroupCount", m_uiForm.spNumberGroups->value());
+  groupingAlg->setProperty("InstrumentName",
+                           instrumentConfig->getInstrumentName().toStdString());
+  groupingAlg->setProperty("ComponentName",
+                           instrumentConfig->getAnalyserName().toStdString());
+  groupingAlg->setProperty("OutputWorkspace", outputWsName);
+
+  m_batchAlgoRunner->addAlgorithm(groupingAlg);
+}
+
+void IndirectDiffractionReduction::deleteGroupingWorkspace() {
+  IAlgorithm_sptr deleteAlg =
+      AlgorithmManager::Instance().create("DeleteWorkspace");
+  deleteAlg->initialize();
+  deleteAlg->setProperty("Workspace", m_groupingWsName);
+  deleteAlg->executeAsync();
+  m_groupingWsName = "";
 }
 
 /**
@@ -585,25 +628,35 @@ void IndirectDiffractionReduction::instrumentSelected(
 
   if (instrumentName == "OSIRIS" && reflectionName == "diffonly") {
     // Disable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip(
+    m_uiForm.ckManualGrouping->setToolTip(
         "OSIRIS cannot group detectors individually in diffonly mode");
-    m_uiForm.ckIndividualGrouping->setEnabled(false);
-    m_uiForm.ckIndividualGrouping->setChecked(false);
+    m_uiForm.ckManualGrouping->setEnabled(false);
+    m_uiForm.ckManualGrouping->setChecked(false);
 
     // Disable sum files
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
+    m_uiForm.ckManualDRange->setToolTip(
+        "D-Ranges corresponding to numeric values can be found in the"
+        " OSIRIS user guide: "
+        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
+    m_uiForm.spDRange->setToolTip(
+        "D-Ranges corresponding to numeric values can be found in the"
+        " OSIRIS user guide: "
+        "https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf");
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
 
   } else {
     // Re-enable sum files
     m_uiForm.ckSumFiles->setToolTip("");
+    m_uiForm.ckManualDRange->setToolTip("");
+    m_uiForm.spDRange->setToolTip("");
     m_uiForm.ckSumFiles->setEnabled(true);
     m_uiForm.ckSumFiles->setChecked(true);
 
     // Re-enable individual grouping
-    m_uiForm.ckIndividualGrouping->setToolTip("");
-    m_uiForm.ckIndividualGrouping->setEnabled(true);
+    m_uiForm.ckManualGrouping->setToolTip("");
+    m_uiForm.ckManualGrouping->setEnabled(true);
 
     // Re-enable spectra range
     m_uiForm.spSpecMin->setEnabled(true);
@@ -785,11 +838,11 @@ void IndirectDiffractionReduction::runFilesFound() {
 }
 
 /**
- * Handles the user toggling the individual grouping check box.
+ * Handles the user toggling the manual grouping check box.
  *
  * @param state The selection state of the check box
  */
-void IndirectDiffractionReduction::individualGroupingToggled(int state) {
+void IndirectDiffractionReduction::manualGroupingToggled(int state) {
   int itemCount = m_uiForm.cbPlotType->count();
 
   switch (state) {
