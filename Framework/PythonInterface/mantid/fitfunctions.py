@@ -209,8 +209,8 @@ class FunctionWrapper(object):
              raise RuntimeError("startX must be defined if no workspace or xValues are defined.") 
           if not haveEndX:
              raise RuntimeError("endX must be defined if no workspace or xValues are defined.")
-          print "Can't plot"
-          return
+          else:
+             raise RuntimeError("insufficient plotting arguments") # Should not occur.
 
       outWs = self(spectrumWs)
       vals = outWs.readY(1)
