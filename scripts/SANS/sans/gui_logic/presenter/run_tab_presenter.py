@@ -847,6 +847,9 @@ class RunTabPresenter(object):
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))
+                except:
+                    self._view.halt_process_flag()
+                    raise
         return states
 
     def _populate_row_in_table(self, row):
