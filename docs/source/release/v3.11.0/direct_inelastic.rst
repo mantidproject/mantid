@@ -29,6 +29,7 @@ Crystal Field
 #############
 
 - Added new fitting :ref:`function <func-CrystalFieldFunction>` that calculates crystal field spectra and physical properties for a multi-site case.
+- Added CrystalFieldMultiSite, a Python wrapper for new CrystalFieldFunction.
 
 Other changes
 #############
