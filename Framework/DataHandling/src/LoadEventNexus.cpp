@@ -70,13 +70,13 @@ void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr &from,
     }
   }
 }
-} // namespace
+}
 
 //==============================================================================================
 // Class LoadBankFromDiskTask
 //==============================================================================================
 /** This task does the disk IO from loading the NXS file,
- * and so will be on a disk IO mutex */
+* and so will be on a disk IO mutex */
 class LoadBankFromDiskTask : public Task {
 
 public:
@@ -116,8 +116,8 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Load the pulse times, if needed. This sets
-   * thisBankPulseTimes to the right pointer.
-   * */
+  * thisBankPulseTimes to the right pointer.
+  * */
   void loadPulseTimes(::NeXus::File &file) {
     try {
       // First, get info about the event_time_zero field in this bank
@@ -185,13 +185,13 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Open the event_id field and validate the contents
-   *
-   * @param file :: File handle for the NeXus file
-   * @param start_event :: set to the index of the first event
-   * @param stop_event :: set to the index of the last event + 1
-   * @param event_index ::  (a list of size of # of pulses giving the index in
-   *the event list for that pulse)
-   */
+  *
+  * @param file :: File handle for the NeXus file
+  * @param start_event :: set to the index of the first event
+  * @param stop_event :: set to the index of the last event + 1
+  * @param event_index ::  (a list of size of # of pulses giving the index in
+  *the event list for that pulse)
+  */
   void prepareEventId(::NeXus::File &file, size_t &start_event,
                       size_t &stop_event, std::vector<uint64_t> &event_index) {
     // Get the list of pixel ID's
@@ -254,7 +254,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Load the event_id field, which has been open
-   */
+  */
   void loadEventId(::NeXus::File &file) {
     // This is the data size
     ::NeXus::Info id_info = file.getInfo();
@@ -319,7 +319,7 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /** Open and load the times-of-flight data
-   */
+  */
   void loadTof(::NeXus::File &file) {
     // Allocate the array
     auto temp = new float[m_loadSize[0]];
@@ -367,7 +367,7 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Load weight of weigthed events
-   */
+  */
   void loadEventWeights(::NeXus::File &file) {
     try {
       // First, get info about the event_weight field in this bank
@@ -573,11 +573,11 @@ public:
 
   //---------------------------------------------------------------------------------------------------
   /**
-   * Interpret the value describing the number of events. If the number is
-   * positive return it unchanged.
-   * If the value is negative (can happen at ISIS) add 2^32 to it.
-   * @param size :: The size of events value.
-   */
+  * Interpret the value describing the number of events. If the number is
+  * positive return it unchanged.
+  * If the value is negative (can happen at ISIS) add 2^32 to it.
+  * @param size :: The size of events value.
+  */
   int64_t recalculateDataSize(const int64_t &size) {
     if (size < 0) {
       const int64_t shift = int64_t(1) << 32;
@@ -629,7 +629,7 @@ private:
 
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
- */
+*/
 LoadEventNexus::LoadEventNexus()
     : IFileLoader<Kernel::NexusDescriptor>(), m_filename(), filter_tof_min(0),
       filter_tof_max(0), m_specList(), m_specMin(0), m_specMax(0),
@@ -653,11 +653,11 @@ LoadEventNexus::~LoadEventNexus() {
 
 //----------------------------------------------------------------------------------------------
 /**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
+* Return the confidence with with this algorithm can load the file
+* @param descriptor A descriptor for the file
+* @returns An integer specifying the confidence level. 0 indicates it will not
+* be used
+*/
 int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
   if (descriptor.classTypeExists("NXevent_data")) {
@@ -671,7 +671,7 @@ int LoadEventNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 
 //----------------------------------------------------------------------------------------------
 /** Initialisation method.
- */
+*/
 void LoadEventNexus::init() {
   const std::vector<std::string> exts{"_event.nxs", ".nxs.h5", ".nxs"};
   this->declareProperty(
@@ -874,7 +874,7 @@ void LoadEventNexus::init() {
 
 //----------------------------------------------------------------------------------------------
 /** set the name of the top level NXentry m_top_entry_name
- */
+*/
 void LoadEventNexus::setTopEntryName() {
   std::string nxentryProperty = getProperty("NXentryName");
   if (!nxentryProperty.empty()) {
@@ -940,8 +940,8 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
 
 //------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
- *  the output workspace
- */
+*  the output workspace
+*/
 void LoadEventNexus::exec() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
@@ -1015,9 +1015,9 @@ void LoadEventNexus::exec() {
 
 //-----------------------------------------------------------------------------
 /** Generate a look-up table where the index = the pixel ID of an event
- * and the value = a pointer to the EventList in the workspace
- * @param vectors :: the array to create the map on
- */
+* and the value = a pointer to the EventList in the workspace
+* @param vectors :: the array to create the map on
+*/
 template <class T>
 void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
   vectors.resize(m_ws->nPeriods());
@@ -1075,16 +1075,16 @@ void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T>> &vectors) {
 }
 
 /**
- * Get the number of events in the currently opened group.
- *
- * @param file The handle to the nexus file opened to the group to look at.
- * @param hasTotalCounts Whether to try looking at the total_counts field. This
- * variable will be changed if the field is not there.
- * @param oldNeXusFileNames Whether to try using old names. This variable will
- * be changed if it is determined that old names are being used.
- *
- * @return The number of events.
- */
+* Get the number of events in the currently opened group.
+*
+* @param file The handle to the nexus file opened to the group to look at.
+* @param hasTotalCounts Whether to try looking at the total_counts field. This
+* variable will be changed if the field is not there.
+* @param oldNeXusFileNames Whether to try using old names. This variable will
+* be changed if it is determined that old names are being used.
+*
+* @return The number of events.
+*/
 std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
                       bool &oldNeXusFileNames) {
   // try getting the value of total_counts
@@ -1136,18 +1136,18 @@ void LoadEventNexus::createWorkspaceIndexMaps(
 }
 
 /** Load the instrument from the nexus file
- *
- * @param nexusfilename :: The name of the nexus file being loaded
- * @param localWorkspace :: Templated workspace in which to put the instrument
- *geometry
- * @param alg :: Handle of the algorithm
- * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
- *otherwise NULL.
- * @param nPeriods : Number of periods (write to)
- * @param periodLog : Period logs DateAndTime to int map.
- *
- * @return Pulse times given in the DAS logs
- */
+*
+* @param nexusfilename :: The name of the nexus file being loaded
+* @param localWorkspace :: Templated workspace in which to put the instrument
+*geometry
+* @param alg :: Handle of the algorithm
+* @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
+*otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
+*
+* @return Pulse times given in the DAS logs
+*/
 template <typename T>
 boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     const std::string &nexusfilename, T localWorkspace, API::Algorithm &alg,
@@ -1230,19 +1230,19 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
 }
 
 /** Load the instrument from the nexus file
- *
- * @param nexusfilename :: The name of the nexus file being loaded
- * @param localWorkspace :: EventWorkspaceCollection in which to put the
- *instrument
- *geometry
- * @param alg :: Handle of the algorithm
- * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
- *otherwise NULL.
- * @param nPeriods : Number of periods (write to)
- * @param periodLog : Period logs DateAndTime to int map.
- *
- * @return Pulse times given in the DAS logs
- */
+*
+* @param nexusfilename :: The name of the nexus file being loaded
+* @param localWorkspace :: EventWorkspaceCollection in which to put the
+*instrument
+*geometry
+* @param alg :: Handle of the algorithm
+* @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
+*otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
+*
+* @return Pulse times given in the DAS logs
+*/
 template <>
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
@@ -1258,15 +1258,15 @@ LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(
 
 //-----------------------------------------------------------------------------
 /**
- * Load events from the file.
- * @param prog :: A pointer to the progress reporting object
- * @param monitors :: If true the events from the monitors are loaded and not
- *the main banks
- *
- * This also loads the instrument, but only if it has not been set in the
- *workspace
- * being used as input (m_ws data member). Same applies to the logs.
- */
+* Load events from the file.
+* @param prog :: A pointer to the progress reporting object
+* @param monitors :: If true the events from the monitors are loaded and not the
+* main banks
+*
+* This also loads the instrument, but only if it has not been set in the
+*workspace
+* being used as input (m_ws data member). Same applies to the logs.
+*/
 void LoadEventNexus::loadEvents(API::Progress *const prog,
                                 const bool monitors) {
   bool metaDataOnly = getProperty("MetaDataOnly");
@@ -1652,15 +1652,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
- *
- *  @param nexusfilename :: The name of the nexus file being loaded
- *  @param localWorkspace :: EventWorkspaceCollection in which to put the
- *instrument
- *geometry
- *  @param top_entry_name :: entry name at the top of the Nexus file
- *  @param alg :: Handle of the algorithm
- *  @return true if successful
- */
+*
+*  @param nexusfilename :: The name of the nexus file being loaded
+*  @param localWorkspace :: EventWorkspaceCollection in which to put the
+*instrument
+*geometry
+*  @param top_entry_name :: entry name at the top of the Nexus file
+*  @param alg :: Handle of the algorithm
+*  @return true if successful
+*/
 template <>
 bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
