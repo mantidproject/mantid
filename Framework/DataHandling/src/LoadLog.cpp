@@ -25,7 +25,7 @@
 #include <fstream> // used to get ifstream
 #include <sstream>
 
-using Mantid::Types::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {

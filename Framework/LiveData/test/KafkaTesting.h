@@ -4,7 +4,7 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
-#include "MantidTypes/DateAndTime.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)

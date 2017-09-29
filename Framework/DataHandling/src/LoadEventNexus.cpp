@@ -29,8 +29,8 @@
 
 #include <functional>
 
-using Mantid::Types::DateAndTime;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::map;
 using std::string;
 using std::vector;
@@ -82,17 +82,17 @@ class LoadBankFromDiskTask : public Task {
 public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
-   *
-   * @param alg :: Handle to the main algorithm
-   * @param entry_name :: The pathname of the bank to load
-   * @param entry_type :: The classtype of the entry to load
-   * @param numEvents :: The number of events in the bank.
-   * @param oldNeXusFileNames :: Identify if file is of old variety.
-   * @param prog :: an optional Progress object
-   * @param ioMutex :: a mutex shared for all Disk I-O tasks
-   * @param scheduler :: the ThreadScheduler that runs this task.
-   * @param framePeriodNumbers :: Period numbers corresponding to each frame
-   */
+  *
+  * @param alg :: Handle to the main algorithm
+  * @param entry_name :: The pathname of the bank to load
+  * @param entry_type :: The classtype of the entry to load
+  * @param numEvents :: The number of events in the bank.
+  * @param oldNeXusFileNames :: Identify if file is of old variety.
+  * @param prog :: an optional Progress object
+  * @param ioMutex :: a mutex shared for all Disk I-O tasks
+  * @param scheduler :: the ThreadScheduler that runs this task.
+  * @param framePeriodNumbers :: Period numbers corresponding to each frame
+  */
   LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
@@ -1674,9 +1674,9 @@ bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
 }
 
 /** method used to return instrument name for some old ISIS files where it is
- * not written properly within the instrument
- * @param hFile :: A reference to the NeXus file opened at the root entry
- */
+* not written properly within the instrument
+* @param hFile :: A reference to the NeXus file opened at the root entry
+*/
 std::string
 LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
   std::string instrumentName;
@@ -1701,16 +1701,16 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file for
- * a EventWorkspaceCollection
- *
- *  @param nexusfilename :: Used to pick the instrument.
- *  @param localWorkspace :: EventWorkspaceCollection in which to put the
- *instrument
- *geometry
- *  @param top_entry_name :: entry name at the top of the NXS file
- *  @param alg :: Handle of the algorithm
- *  @return true if successful
- */
+* a EventWorkspaceCollection
+*
+*  @param nexusfilename :: Used to pick the instrument.
+*  @param localWorkspace :: EventWorkspaceCollection in which to put the
+*instrument
+*geometry
+*  @param top_entry_name :: entry name at the top of the NXS file
+*  @param alg :: Handle of the algorithm
+*  @return true if successful
+*/
 template <>
 bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
@@ -1725,10 +1725,10 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
 
 //-----------------------------------------------------------------------------
 /**
- * Deletes banks for a workspace given the bank names.
- * @param workspace :: The workspace to contain the spectra mapping
- * @param bankNames :: Bank names that are in Nexus file
- */
+* Deletes banks for a workspace given the bank names.
+* @param workspace :: The workspace to contain the spectra mapping
+* @param bankNames :: Bank names that are in Nexus file
+*/
 void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
                                  std::vector<std::string> bankNames) {
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
@@ -1813,15 +1813,15 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 }
 //-----------------------------------------------------------------------------
 /**
- * Create the required spectra mapping. If the file contains an isis_vms_compat
- * block then
- * the mapping is read from there, otherwise a 1:1 map with the instrument is
- * created (along
- * with the associated spectra axis)
- * @param nxsfile :: The name of a nexus file to load the mapping from
- * @param monitorsOnly :: Load only the monitors is true
- * @param bankNames :: An optional bank name for loading specified banks
- */
+* Create the required spectra mapping. If the file contains an isis_vms_compat
+* block then
+* the mapping is read from there, otherwise a 1:1 map with the instrument is
+* created (along
+* with the associated spectra axis)
+* @param nxsfile :: The name of a nexus file to load the mapping from
+* @param monitorsOnly :: Load only the monitors is true
+* @param bankNames :: An optional bank name for loading specified banks
+*/
 void LoadEventNexus::createSpectraMapping(
     const std::string &nxsfile, const bool monitorsOnly,
     const std::vector<std::string> &bankNames) {
@@ -1879,9 +1879,9 @@ void LoadEventNexus::createSpectraMapping(
 
 //-----------------------------------------------------------------------------
 /**
- * Returns whether the file contains monitors with events in them
- * @returns True if the file contains monitors with event data, false otherwise
- */
+* Returns whether the file contains monitors with events in them
+* @returns True if the file contains monitors with event data, false otherwise
+*/
 bool LoadEventNexus::hasEventMonitors() {
   bool result(false);
   // Determine whether to load histograms or events
@@ -1908,16 +1908,16 @@ bool LoadEventNexus::hasEventMonitors() {
 }
 
 /**
- * Load the Monitors from the NeXus file into an event workspace. A
- * new event workspace is created and associated to the data
- * workspace. The name of the new event workspace is contructed by
- * appending '_monitors' to the base workspace name.
- *
- * This is used when the property "MonitorsAsEvents" is enabled, and
- * there are monitors with events.
- *
- * @param prog :: progress reporter
- */
+* Load the Monitors from the NeXus file into an event workspace. A
+* new event workspace is created and associated to the data
+* workspace. The name of the new event workspace is contructed by
+* appending '_monitors' to the base workspace name.
+*
+* This is used when the property "MonitorsAsEvents" is enabled, and
+* there are monitors with events.
+*
+* @param prog :: progress reporter
+*/
 void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
   try {
     // Note the reuse of the m_ws member variable below. Means I need to grab a
@@ -1983,13 +1983,13 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
 
 //-----------------------------------------------------------------------------
 /**
- * Load the Monitors from the NeXus file into a workspace. The original
- * workspace name is used and appended with _monitors.
- *
- * This is used when the property "MonitorsAsEvents" is not
- * enabled, and uses LoadNexusMonitors to load monitor data into a
- * Workspace2D.
- */
+* Load the Monitors from the NeXus file into a workspace. The original
+* workspace name is used and appended with _monitors.
+*
+* This is used when the property "MonitorsAsEvents" is not
+* enabled, and uses LoadNexusMonitors to load monitor data into a
+* Workspace2D.
+*/
 void LoadEventNexus::runLoadMonitors() {
   std::string mon_wsname = this->getProperty("OutputWorkspace");
   mon_wsname.append("_monitors");
@@ -2050,15 +2050,15 @@ void LoadEventNexus::runLoadMonitors() {
 
 //
 /**
- * Load a spectra mapping from the given file. This currently checks for the
- * existence of
- * an isis_vms_compat block in the file, if it exists it pulls out the spectra
- * mapping listed there
- * @param filename :: A filename
- * @param monitorsOnly :: If true then only the monitor spectra are loaded
- * @param entry_name :: name of the NXentry to open.
- * @returns True if the mapping was loaded or false if the block does not exist
- */
+* Load a spectra mapping from the given file. This currently checks for the
+* existence of
+* an isis_vms_compat block in the file, if it exists it pulls out the spectra
+* mapping listed there
+* @param filename :: A filename
+* @param monitorsOnly :: If true then only the monitor spectra are loaded
+* @param entry_name :: name of the NXentry to open.
+* @returns True if the mapping was loaded or false if the block does not exist
+*/
 bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
                                         const bool monitorsOnly,
                                         const std::string &entry_name) {
@@ -2166,10 +2166,10 @@ bool LoadEventNexus::loadSpectraMapping(const std::string &filename,
 }
 
 /**
- * Set the filters on TOF.
- * @param monitors :: If true check the monitor properties else use the standard
- * ones
- */
+* Set the filters on TOF.
+* @param monitors :: If true check the monitor properties else use the standard
+* ones
+*/
 void LoadEventNexus::setTimeFilters(const bool monitors) {
   // Get the limits to the filter
   std::string prefix("Filter");
@@ -2197,12 +2197,12 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 //               ISIS event corrections
 //-----------------------------------------------------------------------------
 /**
- * Check if time_of_flight can be found in the file and load it
- *
- * @param WS :: The event workspace collection which events will be modified.
- * @param entry_name :: An NXentry tag in the file
- * @param classType :: The type of the events: either detector or monitor
- */
+* Check if time_of_flight can be found in the file and load it
+*
+* @param WS :: The event workspace collection which events will be modified.
+* @param entry_name :: An NXentry tag in the file
+* @param classType :: The type of the events: either detector or monitor
+*/
 void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
                                       const std::string &entry_name,
                                       const std::string &classType) {
@@ -2307,14 +2307,14 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
 
 //-----------------------------------------------------------------------------
 /**
- * Load the time of flight data. file must have open the group containing
- * "time_of_flight" data set.
- * @param file :: The nexus file to read from.
- * @param WS :: The event workspace collection to write to.
- * @param binsName :: bins name
- * @param start_wi :: First workspace index to process
- * @param end_wi :: Last workspace index to process
- */
+* Load the time of flight data. file must have open the group containing
+* "time_of_flight" data set.
+* @param file :: The nexus file to read from.
+* @param WS :: The event workspace collection to write to.
+* @param binsName :: bins name
+* @param start_wi :: First workspace index to process
+* @param end_wi :: Last workspace index to process
+*/
 void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
                                           EventWorkspaceCollection_sptr WS,
                                           const std::string &binsName,
@@ -2394,19 +2394,19 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 }
 
 /**
- * Load information of the sample. It is valid only for ISIS it get the
- * information from the group isis_vms_compat.
- *
- * If it does not find this group, it assumes that there is nothing to do.
- * But, if the information is there, but not in the way it was expected, it
- * will log the occurrence.
- *
- * @note: It does essentially the same thing of the
- * method: LoadISISNexus2::loadSampleData
- *
- * @param file : handle to the nexus file
- * @param WS : pointer to the workspace
- */
+* Load information of the sample. It is valid only for ISIS it get the
+* information from the group isis_vms_compat.
+*
+* If it does not find this group, it assumes that there is nothing to do.
+* But, if the information is there, but not in the way it was expected, it
+* will log the occurrence.
+*
+* @note: It does essentially the same thing of the
+* method: LoadISISNexus2::loadSampleData
+*
+* @param file : handle to the nexus file
+* @param WS : pointer to the workspace
+*/
 void LoadEventNexus::loadSampleDataISIScompatibility(
     ::NeXus::File &file, EventWorkspaceCollection &WS) {
   try {
@@ -2439,12 +2439,12 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
 }
 
 /**
- * Check the validity of the optional spectrum range/list provided and identify
- *if partial data should be loaded.
- *
- * @param min :: The minimum spectrum number read from file
- * @param max :: The maximum spectrum number read from file
- */
+* Check the validity of the optional spectrum range/list provided and identify
+*if partial data should be loaded.
+*
+* @param min :: The minimum spectrum number read from file
+* @param max :: The maximum spectrum number read from file
+*/
 
 void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
 

@@ -1,14 +1,14 @@
 #ifndef MANTID_TYPES_DATE_AND_TIME_H
 #define MANTID_TYPES_DATE_AND_TIME_H
 
-#include <DllConfig.h>
+#include <MantidTypes/DllConfig.h>
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
 #include <cstdint>
+#include <ctime>
 #include <iosfwd>
 #include <string>
-#include <ctime>
 #include <vector>
 
 namespace Mantid {

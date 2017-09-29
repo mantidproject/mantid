@@ -165,7 +165,7 @@ void ProcessBankData::run() { // override {
           }
         } else {
           // We have cached the vector of events for this detector ID
-          std::vector<Mantid::Types::TofEvent> *eventVector =
+          std::vector<Mantid::Types::Event::TofEvent> *eventVector =
               alg->eventVectors[periodIndex][detId];
           // NULL eventVector indicates a bad spectrum lookup
           if (eventVector) {

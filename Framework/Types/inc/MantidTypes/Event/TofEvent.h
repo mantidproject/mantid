@@ -2,7 +2,7 @@
 #define MANTID_TYPES_TOFEVENT_H
 
 #include "MantidTypes/Core/DateAndTime.h"
-#include <DllConfig.h>
+#include <MantidTypes/DllConfig.h>
 
 namespace Mantid {
 namespace DataObjects {

@@ -21,7 +21,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
-  Mantid::Types::Core::DateAndTime start(startTime);
+  DateAndTime start(startTime);
   // Load the seconds offsets
   std::vector<double> seconds;
   file.getData(seconds);
@@ -48,8 +48,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 *  Handles a zero-sized vector
 *  @param times
  */
-BankPulseTimes::BankPulseTimes(
-    const std::vector<Mantid::Types::Core::DateAndTime> &times) {
+BankPulseTimes::BankPulseTimes(const std::vector<DateAndTime> &times) {
   numPulses = times.size();
   pulseTimes = nullptr;
   if (numPulses == 0)

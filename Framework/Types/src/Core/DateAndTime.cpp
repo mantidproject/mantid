@@ -4,6 +4,15 @@ namespace Mantid {
 namespace Types {
 namespace Core {
 
+const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
+/// The epoch for GPS times.
+const boost::posix_time::ptime
+    DateAndTime::GPS_EPOCH(boost::gregorian::date(1990, 1, 1));
+
+/// Const of one second time duration
+const time_duration DateAndTime::ONE_SECOND =
+    boost::posix_time::time_duration(0, 0, 1, 0);
+
 namespace {
 /// Max allowed nanoseconds in the time; 2^62-1
 const int64_t MAX_NANOSECONDS = 4611686018427387903LL;
@@ -112,16 +121,6 @@ time_t DateAndTime::utc_mktime(struct tm *utctime) {
   return result;
 }
 
-/// The epoch for GPS times.
-boost::posix_time::ptime DateAndTime::GPS_EPOCH() {
-  return boost::posix_time::ptime(boost::gregorian::date(1990, 1, 1));
-}
-
-/// Const of one second time duration
-time_duration DateAndTime::ONE_SECOND() {
-  return boost::posix_time::time_duration(0, 0, 1, 0);
-}
-
 //------------------------------------------------------------------------------------------------
 /** Default, empty constructor */
 DateAndTime::DateAndTime() : _nanoseconds(0) {}
@@ -222,7 +221,7 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
  * @return a boost::posix_time::ptime.
  */
 boost::posix_time::ptime DateAndTime::to_ptime() const {
-  return GPS_EPOCH() + durationFromNanoseconds(_nanoseconds);
+  return GPS_EPOCH + durationFromNanoseconds(_nanoseconds);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -240,7 +239,7 @@ void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime) {
     if (_ptime.is_not_a_date_time())
       _nanoseconds = MIN_NANOSECONDS;
   } else {
-    _nanoseconds = nanosecondsFromDuration(_ptime - GPS_EPOCH());
+    _nanoseconds = nanosecondsFromDuration(_ptime - GPS_EPOCH);
 
     // Check for overflow
     if (_nanoseconds < 0) {
