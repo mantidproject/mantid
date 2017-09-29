@@ -318,7 +318,7 @@ bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
 void UnwrappedSurface::componentSelected(Mantid::Geometry::ComponentID id) {
   boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
       m_instrActor->getInstrument();
-  if (id == NULL) {
+  if (id == nullptr) {
     id = instr->getComponentID();
   }
   boost::shared_ptr<const Mantid::Geometry::IComponent> comp =

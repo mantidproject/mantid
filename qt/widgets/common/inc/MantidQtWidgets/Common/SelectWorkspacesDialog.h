@@ -50,7 +50,7 @@ public:
                                          // refer to this static constant
 
   /// Constructor
-  SelectWorkspacesDialog(QWidget *parent = NULL,
+  SelectWorkspacesDialog(QWidget *parent = nullptr,
                          const std::string &typeFilter = "",
                          const std::string &customButtonLabel = "");
 

@@ -90,7 +90,7 @@ class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
-  DataSelector(QWidget *parent = 0);
+  DataSelector(QWidget *parent = nullptr);
   ~DataSelector() override;
 
   /// Get the current file path in the MWRunFiles widget

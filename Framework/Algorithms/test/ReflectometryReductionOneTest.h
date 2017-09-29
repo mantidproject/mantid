@@ -169,7 +169,7 @@ public:
     instrument->markAsSamplePos(sample);
 
     // add a detector
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(V3D(0, 1, 1));
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -329,7 +329,7 @@ public:
     instrument->markAsSamplePos(sample);
 
     // add a detector
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(V3D(0, 1, 1));
     instrument->add(det);
     instrument->markAsDetector(det);

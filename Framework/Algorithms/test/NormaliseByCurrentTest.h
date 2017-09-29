@@ -67,7 +67,7 @@ MatrixWorkspace_const_sptr doTest(MatrixWorkspace_sptr inWS,
 
     TS_ASSERT_EQUALS(output->YUnit(), "Counts");
     TS_ASSERT_EQUALS(output->YUnitLabel(), "Counts per microAmp.hour");
-    Kernel::Property *normLog(NULL);
+    Kernel::Property *normLog(nullptr);
     TS_ASSERT_THROWS_NOTHING(
         normLog = output->run().getProperty("NormalizationFactor"));
     Kernel::PropertyWithValue<double> *pFactor =

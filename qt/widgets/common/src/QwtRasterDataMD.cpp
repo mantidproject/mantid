@@ -15,7 +15,7 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-    : m_ws(), m_overlayWS(), m_slicePoint(NULL), m_overlayXMin(0.0),
+    : m_ws(), m_overlayWS(), m_slicePoint(nullptr), m_overlayXMin(0.0),
       m_overlayXMax(0.0), m_overlayYMin(0.0), m_overlayYMax(0.0),
       m_overlayInSlice(false), m_fast(true), m_zerosAsNan(true),
       m_normalization(Mantid::API::VolumeNormalization) {

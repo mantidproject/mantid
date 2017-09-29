@@ -129,9 +129,9 @@ public:
   void test_registered_with_factory() {
     IFunction_sptr func =
         FunctionFactory::Instance().createFunction("ProductLinearExp");
-    TS_ASSERT(func != NULL);
+    TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductLinearExp");
-    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != NULL);
+    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != nullptr);
   }
 
   void test_set_parameters() {

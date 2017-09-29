@@ -956,7 +956,7 @@ public:
     delete bcc;
   }
 
-  void test_addEvents_inParallel() { do_test_addEvents_inParallel(NULL); }
+  void test_addEvents_inParallel() { do_test_addEvents_inParallel(nullptr); }
 
   /** Disabled because parallel RefreshCache is not implemented. Might not be
    * ever? */

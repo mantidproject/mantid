@@ -50,7 +50,7 @@ class MantidSampleMaterialDialog : public QDialog,
 
 public:
   MantidSampleMaterialDialog(const QString &wsName, MantidUI *mtdUI,
-                             Qt::WFlags flags = 0);
+                             Qt::WFlags flags = nullptr);
 
 public slots:
   void updateMaterial();

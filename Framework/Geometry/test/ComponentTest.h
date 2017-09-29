@@ -327,7 +327,7 @@ public:
     TS_ASSERT_EQUALS(child.getRotation(), rot2);
     TS_ASSERT_EQUALS(child.getRotation(), child.getRelativeRot());
     // Or indeed remove the parent completely
-    child.setParent(NULL);
+    child.setParent(nullptr);
     TS_ASSERT_EQUALS(child.getRotation(), rot2);
     TS_ASSERT_EQUALS(child.getRotation(), child.getRelativeRot());
   }

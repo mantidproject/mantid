@@ -35,7 +35,7 @@ class PointGroupBox : public QGroupBox {
 
 public:
   // Default constructor
-  PointGroupBox(QWidget *parent = 0);
+  PointGroupBox(QWidget *parent = nullptr);
 
   /// Write the element tag for a 3D point
   QString write3DElement(const QString &elem_name) const;
@@ -119,7 +119,7 @@ class ShapeDetails : public QWidget {
 
 public:
   /// Constructor
-  ShapeDetails(QWidget *parent = 0)
+  ShapeDetails(QWidget *parent = nullptr)
       : QWidget(parent), m_idvalue(""), m_isComplement(false) {}
   /// Constructor
   ~ShapeDetails() override {}
@@ -163,7 +163,7 @@ private:
 
 public:
   /// Default constructor
-  SphereDetails(QWidget *parent = 0);
+  SphereDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~SphereDetails() override { --g_nspheres; }
@@ -192,7 +192,7 @@ private:
 
 public:
   /// Default constructor
-  CylinderDetails(QWidget *parent = 0);
+  CylinderDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~CylinderDetails() override { --g_ncylinders; }
@@ -221,7 +221,7 @@ private:
 
 public:
   /// Default constructor
-  InfiniteCylinderDetails(QWidget *parent = 0);
+  InfiniteCylinderDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~InfiniteCylinderDetails() override { --g_ninfcyls; }
@@ -250,7 +250,7 @@ private:
 
 public:
   /// Default constructor
-  SliceOfCylinderRingDetails(QWidget *parent = 0);
+  SliceOfCylinderRingDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~SliceOfCylinderRingDetails() override { --g_ncylrings; }
@@ -277,7 +277,7 @@ private:
 
 public:
   /// Default constructor
-  ConeDetails(QWidget *parent = 0);
+  ConeDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~ConeDetails() override { --g_ncones; }
@@ -306,7 +306,7 @@ private:
 
 public:
   /// Default constructor
-  InfiniteConeDetails(QWidget *parent = 0);
+  InfiniteConeDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~InfiniteConeDetails() override { --g_ninfcones; }
@@ -333,7 +333,7 @@ private:
 
 public:
   /// Default constructor
-  InfinitePlaneDetails(QWidget *parent = 0);
+  InfinitePlaneDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~InfinitePlaneDetails() override { --g_ninfplanes; }
@@ -358,7 +358,7 @@ private:
 
 public:
   /// Default constructor
-  CuboidDetails(QWidget *parent = 0);
+  CuboidDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~CuboidDetails() override { --g_ncuboids; }
@@ -384,7 +384,7 @@ private:
 
 public:
   /// Default constructor
-  HexahedronDetails(QWidget *parent = 0);
+  HexahedronDetails(QWidget *parent = nullptr);
 
   /// Default destructor
   ~HexahedronDetails() override { --g_nhexahedrons; }

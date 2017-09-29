@@ -1021,7 +1021,7 @@ int LineViewer::getPlotAxis() const { return m_lineOptions->getPlotAxis(); }
  * @param curveData : Curve Data to read.
  */
 void LineViewer::setupScaleEngine(MantidQwtWorkspaceData &curveData) {
-  QwtScaleEngine *engine = NULL;
+  QwtScaleEngine *engine = nullptr;
   auto from = curveData.getYMin();
   auto to = curveData.getYMax();
 
