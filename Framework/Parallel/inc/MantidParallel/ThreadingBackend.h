@@ -113,10 +113,8 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
     break;
   }
   std::istream is(buf.get());
-  {
-    boost::archive::binary_iarchive ia(is);
-    ia.operator>>(std::forward<T>(args)...);
-  }
+  boost::archive::binary_iarchive ia(is);
+  ia.operator>>(std::forward<T>(args)...);
 }
 
 template <typename... T>
