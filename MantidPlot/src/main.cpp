@@ -43,6 +43,14 @@
 
 #include "Mantid/MantidApplication.h"
 
+#define LOG_POPUP                                                              \
+  g_log.error() << "Popup at " __FILE__ ": " << __LINE__ << '\n';
+
+namespace {
+/// static logger
+Mantid::Kernel::Logger g_log("Main");
+}
+
 // The following stuff is for the doxygen title page
 /**  \mainpage QtiPlot - Data analysis and scientific plotting - API
 documentation
@@ -238,12 +246,14 @@ int main(int argc, char **argv) {
     QTimer::singleShot(0, mw, SLOT(onAboutToStart()));
     return app.exec();
   } catch (std::exception &e) {
+    LOG_POPUP
     QMessageBox::critical(
         0, "Mantid - Error",
         QString("An unhandled exception has been caught. MantidPlot will have "
                 "to close. Details:\n\n") +
             e.what());
   } catch (...) {
+    LOG_POPUP
     QMessageBox::critical(0, "Mantid - Error", "An unhandled exception has "
                                                "been caught. MantidPlot will "
                                                "have to close.");

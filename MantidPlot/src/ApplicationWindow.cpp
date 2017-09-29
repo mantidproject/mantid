@@ -224,6 +224,9 @@
 #include "vtkPVDisplayInformation.h"
 #endif
 
+#define LOG_POPUP                                                              \
+  g_log.error() << "Popup at " __FILE__ ": " << __LINE__ << '\n';
+
 using namespace Qwt3D;
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
@@ -1740,9 +1743,9 @@ void ApplicationWindow::plot3DRibbon() {
       return;
     plotXYZ(table, table->colName(table->selectedColumn()), Graph3D::Ribbon);
   } else
-    QMessageBox::warning(
-        this, tr("MantidPLot - Plot error"),
-        tr("You must select exactly one column for plotting!"));
+    LOG_POPUP
+  QMessageBox::warning(this, tr("MantidPLot - Plot error"),
+                       tr("You must select exactly one column for plotting!"));
 }
 
 void ApplicationWindow::plot3DWireframe() { plot3DMatrix(0, Qwt3D::WIREFRAME); }
@@ -1769,10 +1772,12 @@ void ApplicationWindow::plot3DBars() {
 
     if (table->selectedColumns().count() == 1)
       plotXYZ(table, table->colName(table->selectedColumn()), Graph3D::Bars);
-    else
+    else {
+      LOG_POPUP
       QMessageBox::warning(
           this, tr("MantidPlot - Plot error"),
           tr("You must select exactly one column for plotting!")); // Mantid
+    }
   } else if (w->inherits("Matrix"))
     plot3DMatrix(0, Qwt3D::USER);
 }
@@ -1901,10 +1906,12 @@ void ApplicationWindow::plotVectXYXY() {
   if (s.count() == 4) {
     multilayerPlot(table, s, GraphOptions::VectXYXY, table->topSelectedRow(),
                    table->bottomSelectedRow());
-  } else
+  } else {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
         tr("Please select four columns for this operation!")); // Mantid
+  }
 }
 
 void ApplicationWindow::plotVectXYAM() {
@@ -1918,10 +1925,12 @@ void ApplicationWindow::plotVectXYAM() {
   if (s.count() == 4) {
     multilayerPlot(table, s, GraphOptions::VectXYAM, table->topSelectedRow(),
                    table->bottomSelectedRow());
-  } else
+  } else {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Error"),
         tr("Please select four columns for this operation!")); // Mantid
+  }
 }
 
 QString ApplicationWindow::stemPlot(Table *t, const QString &colName, int power,
@@ -1931,6 +1940,7 @@ QString ApplicationWindow::stemPlot(Table *t, const QString &colName, int power,
 
   int col = t->colIndex(colName);
   if (col < 0) {
+    LOG_POPUP
     QMessageBox::critical(this, tr("MantidPlot - Error"),
                           tr("Data set: %1 doesn't exist!").arg(colName));
     return QString();
@@ -2244,6 +2254,7 @@ void ApplicationWindow::updateMatrixPlots(MdiSubWindow *window) {
 
 void ApplicationWindow::add3DData() {
   if (!hasTable()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no tables available in this project.</h4>"
@@ -2253,6 +2264,7 @@ void ApplicationWindow::add3DData() {
 
   QStringList zColumns = columnsList(Table::Z);
   if ((int)zColumns.count() <= 0) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("There are no available columns with plot designation set to Z!"));
@@ -2310,6 +2322,7 @@ void ApplicationWindow::change3DMatrix(const QString &matrix_name) {
 void ApplicationWindow::add3DMatrixPlot() {
   QStringList matrices = matrixNames();
   if (static_cast<int>(matrices.count()) <= 0) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no matrices available in this project.</h4>"
@@ -2604,6 +2617,7 @@ void ApplicationWindow::exportMatrix() {
 
   QFile file(file_name);
   if (!file.open(QIODevice::WriteOnly)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
@@ -2844,6 +2858,7 @@ MultiLayer *ApplicationWindow::multilayerPlot(
 
   QStringList list = t->selectedYColumns();
   if ((int)list.count() < 1) {
+    LOG_POPUP
     QMessageBox::warning(this, tr("MantidPlot - Plot error"),
                          tr("Please select a Y column to plot!")); // Mantid
     return 0;
@@ -3069,6 +3084,7 @@ Table *ApplicationWindow::newTable(const QString &caption, int r, int c) {
   if (w->objectName() != caption) { // the table was renamed
     renamedTables << caption << w->objectName();
     if (d_inform_rename_table) {
+      LOG_POPUP
       QMessageBox::warning(
           this, tr("MantidPlot - Renamed Window"), // Mantid
           tr("The table '%1' already exists. It has been renamed '%2'.")
@@ -3733,6 +3749,7 @@ void ApplicationWindow::addErrorBars() {
     return;
 
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -3745,6 +3762,7 @@ void ApplicationWindow::addErrorBars() {
     return;
 
   if (!g->curves()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"),
         tr("There are no curves available on this plot!")); // Mantid
@@ -3752,6 +3770,7 @@ void ApplicationWindow::addErrorBars() {
   }
 
   if (g->isPiePlot()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"),
         tr("This functionality is not available for pie plots!")); // Mantid
@@ -3781,6 +3800,7 @@ void ApplicationWindow::removeErrorBars() {
     return;
 
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -3793,6 +3813,7 @@ void ApplicationWindow::removeErrorBars() {
     return;
 
   if (!g->curves()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"),
         tr("There are no curves available on this plot!")); // Mantid
@@ -3800,6 +3821,7 @@ void ApplicationWindow::removeErrorBars() {
   }
 
   if (g->isPiePlot()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"),
         tr("This functionality is not available for pie plots!")); // Mantid
@@ -3853,6 +3875,7 @@ void ApplicationWindow::defineErrorBars(const QString &name, int type,
 
   Table *t = table(name);
   if (!t) { // user defined function
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Error bars error"), // Mantid
         tr("This feature is not available for user defined function curves!"));
@@ -3916,6 +3939,7 @@ void ApplicationWindow::defineErrorBars(const QString &curveName,
                                         int direction) {
   Table *w = table(curveName);
   if (!w) { // user defined function --> no worksheet available
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Error"), // Mantid
         tr("This feature is not available for user defined function curves!"));
@@ -3924,6 +3948,7 @@ void ApplicationWindow::defineErrorBars(const QString &curveName,
 
   Table *errTable = table(errColumnName);
   if (w->numRows() != errTable->numRows()) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Error"), // Mantid
         tr("The selected columns have different numbers of rows!"));
@@ -3934,6 +3959,7 @@ void ApplicationWindow::defineErrorBars(const QString &curveName,
 
   int errCol = errTable->colIndex(errColumnName);
   if (errTable->isEmptyColumn(errCol)) {
+    LOG_POPUP
     QMessageBox::critical(this, tr("MantidPlot - Error"), // Mantid
                           tr("The selected error column is empty!"));
     addErrorBars();
@@ -4412,6 +4438,7 @@ void ApplicationWindow::open() {
       QFileInfo fi(projectname);
       QString pn = fi.absoluteFilePath();
       if (fn == pn) {
+        LOG_POPUP
         QMessageBox::warning(
             this, tr("MantidPlot - File openning error"), // Mantid
             tr("The file: <b>%1</b> is the current file!").arg(fn));
@@ -4429,6 +4456,7 @@ void ApplicationWindow::open() {
         fn.endsWith(".mantid", Qt::CaseInsensitive) ||
         fn.endsWith(".mantid~", Qt::CaseInsensitive)) {
       if (!fi.exists()) {
+        LOG_POPUP
         QMessageBox::critical(this,
                               tr("MantidPlot - File openning error"), // Mantid
                               tr("The file: <b>%1</b> doesn't exist!").arg(fn));
@@ -4448,6 +4476,7 @@ void ApplicationWindow::open() {
         }
       }
     } else {
+      LOG_POPUP
       QMessageBox::critical(
           this, tr("MantidPlot - File openning error"), // Mantid
           tr("The file: <b>%1</b> is not a MantidPlot or Origin project file!")
@@ -4490,6 +4519,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   QFile f(fname);
   QTextStream t(&f);
   if (!f.open(QIODevice::ReadOnly)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - File opening error"),
         tr("The file: <b> %1 </b> could not be opened!").arg(fn));
@@ -4500,6 +4530,7 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
   if (list.count() < 2 || list[0] != "MantidPlot") {
     f.close();
     if (QFile::exists(fname + "~")) {
+      LOG_POPUP
       int choice = QMessageBox::question(
           this, tr("MantidPlot - File opening error"), // Mantid
           tr("The file <b>%1</b> is corrupted, but there exists a backup "
@@ -4508,11 +4539,13 @@ ApplicationWindow *ApplicationWindow::open(const QString &fn,
           QMessageBox::No | QMessageBox::Escape);
       if (choice == QMessageBox::Yes)
         return open(fname + "~");
-      else
+      else {
+        LOG_POPUP
         QMessageBox::critical(
             this, tr("MantidPlot - File opening error"),
             tr("The file: <b> %1 </b> was not created using MantidPlot!")
                 .arg(fn)); // Mantid
+      }
       return 0;
     }
   }
@@ -4541,6 +4574,7 @@ void ApplicationWindow::openRecentFile(QAction *action) {
     fn = fn.right(fn.length() - pos - 1);
     QFile f(fn);
     if (!f.exists()) {
+      LOG_POPUP
       QMessageBox::critical(
           this, tr("MantidPlot - File Open Error"), // Mantid
           tr("The file: <b> %1 </b> <p>is not there anymore!"
@@ -4562,6 +4596,7 @@ void ApplicationWindow::openRecentProject(QAction *action) {
 
   QFile f(fn);
   if (!f.exists()) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - File Open Error"), // Mantid
         tr("The file: <b> %1 </b> <p>does not exist anymore!"
@@ -4576,6 +4611,7 @@ void ApplicationWindow::openRecentProject(QAction *action) {
     QFileInfo fi(projectname);
     QString pn = fi.absoluteFilePath();
     if (fn == pn) {
+      LOG_POPUP
       QMessageBox::warning(
           this, tr("MantidPlot - File open error"), // Mantid
           tr("The file: <p><b> %1 </b><p> is the current file!").arg(fn));
@@ -4731,6 +4767,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
     } else {
       delete newEnv;
       m_bad_script_envs.insert(lang);
+      LOG_POPUP
       QMessageBox::information(this, "MantidPlot",
                                QString("Failed to initialize ") + lang +
                                    ". Please contact support.");
@@ -4761,6 +4798,7 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang) {
 void ApplicationWindow::showScriptingLangDialog() {
   // If a script is currently active, don't let a new one be selected
   if (scriptingWindow->isExecuting()) {
+    LOG_POPUP
     QMessageBox msg_box;
     msg_box.setText(
         "Cannot change scripting language, a script is still running.");
@@ -5700,6 +5738,7 @@ void ApplicationWindow::exportGraph() {
     if (!plot2D)
       return;
     if (plot2D->isEmpty()) {
+      LOG_POPUP
       QMessageBox::critical(
           this, tr("MantidPlot - Export Error"), // Mantid
           tr("<h4>There are no plot layers available in this window!</h4>"));
@@ -5728,6 +5767,7 @@ void ApplicationWindow::exportGraph() {
 
   QFile file(file_name);
   if (!file.open(QIODevice::WriteOnly)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
@@ -5791,6 +5831,7 @@ void ApplicationWindow::exportLayer() {
 
   QFile file(file_name);
   if (!file.open(QIODevice::WriteOnly)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Export error"), // Mantid
         tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that "
@@ -5853,6 +5894,7 @@ void ApplicationWindow::exportAllGraphs() {
         continue;
       if (plot2D->isEmpty()) {
         QApplication::restoreOverrideCursor();
+        LOG_POPUP
         QMessageBox::warning(
             this, tr("MantidPlot - Warning"), // Mantid
             tr("There are no plot layers available in window <b>%1</b>.<br>"
@@ -5875,6 +5917,7 @@ void ApplicationWindow::exportAllGraphs() {
 
       QString msg = tr("A file called: <p><b>%1</b><p>already exists. "
                        "Do you want to overwrite it?").arg(file_name);
+      LOG_POPUP
       QMessageBox msgBox(QMessageBox::Question,
                          tr("MantidPlot - Overwrite file?"), msg, // Mantid
                          QMessageBox::Yes | QMessageBox::YesToAll |
@@ -5901,6 +5944,7 @@ void ApplicationWindow::exportAllGraphs() {
     }
     if (!f.open(QIODevice::WriteOnly)) {
       QApplication::restoreOverrideCursor();
+      LOG_POPUP
       QMessageBox::critical(
           this, tr("MantidPlot - Export error"), // Mantid
           tr("Could not write to file: <br><h4>%1</h4><p>"
@@ -6291,10 +6335,12 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text) {
   QString newName = text;
   newName.replace("-", "_");
   if (newName.isEmpty()) {
+    LOG_POPUP
     QMessageBox::critical(this, tr("MantidPlot - Error"),
                           tr("Please enter a valid name!")); // Mantid
     return false;
   } else if (newName.contains(QRegExp("\\W"))) {
+    LOG_POPUP
     QMessageBox::critical(this, tr("MantidPlot - Error"), // Mantid
                           tr("The name you chose is not valid: only letters "
                              "and digits are allowed!") +
@@ -6305,6 +6351,7 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text) {
   newName.replace("_", "-");
 
   while (alreadyUsedName(newName)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - Error"),
         tr("Name <b>%1</b> already exists!").arg(newName) + // Mantid
@@ -6351,6 +6398,7 @@ void ApplicationWindow::showCurvesDialog() {
     return;
 
   if (ml->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Error"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -6363,6 +6411,7 @@ void ApplicationWindow::showCurvesDialog() {
     return;
 
   if (g->isPiePlot()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Error"), // Mantid
         tr("This functionality is not available for pie plots!"));
@@ -7533,6 +7582,7 @@ void ApplicationWindow::zoomIn() {
     return;
 
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -7542,10 +7592,12 @@ void ApplicationWindow::zoomIn() {
   }
 
   if (dynamic_cast<Graph *>(plot->activeGraph())->isPiePlot()) {
-    if (btnZoomIn->isChecked())
+    if (btnZoomIn->isChecked()) {
+      LOG_POPUP
       QMessageBox::warning(
           this, tr("MantidPlot - Warning"), // Mantid
           tr("This functionality is not available for pie plots!"));
+    }
     btnPointer->setChecked(true);
     return;
   }
@@ -7575,6 +7627,7 @@ void ApplicationWindow::setAutoScale() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"));
@@ -7591,6 +7644,7 @@ void ApplicationWindow::removePoints() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -7606,12 +7660,14 @@ void ApplicationWindow::removePoints() {
   }
 
   if (g->isPiePlot()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("This functionality is not available for pie plots!"));
     btnPointer->setChecked(true);
     return;
   } else {
+    LOG_POPUP
     switch (QMessageBox::warning(
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
@@ -7635,6 +7691,7 @@ void ApplicationWindow::movePoints() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -7650,6 +7707,7 @@ void ApplicationWindow::movePoints() {
   }
 
   if (g->isPiePlot()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("This functionality is not available for pie plots!"));
@@ -7657,6 +7715,7 @@ void ApplicationWindow::movePoints() {
     btnPointer->setChecked(true);
     return;
   } else {
+    LOG_POPUP
     switch (QMessageBox::warning(
         this, tr("MantidPlot"), // Mantid
         tr("This will modify the data in the worksheets!\nAre you sure you "
@@ -7727,6 +7786,7 @@ void ApplicationWindow::print() {
   auto ml = dynamic_cast<MultiLayer *>(w);
   if (std::string(w->metaObject()->className()) == "MultiLayer" && ml &&
       ml->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"));
@@ -8025,6 +8085,7 @@ void ApplicationWindow::drawPoints() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -8046,6 +8107,7 @@ void ApplicationWindow::showRangeSelectors() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"),
         tr("There are no plot layers available in this window!")); // Mantid
@@ -8176,6 +8238,7 @@ void ApplicationWindow::newLegend() {
   if (!plot)
     return;
   if (plot->isEmpty()) {
+    LOG_POPUP
     QMessageBox::warning(
         this, tr("MantidPlot - Warning"), // Mantid
         tr("<h4>There are no plot layers available in this window.</h4>"
@@ -8620,6 +8683,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
   if (!w) {
     w = activeWindow();
     if (!w) {
+      LOG_POPUP
       QMessageBox::critical(
           this, tr("MantidPlot - Duplicate window error"), // Mantid
           tr("There are no windows available in this project!"));
@@ -8665,6 +8729,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
       return NULL;
     if (!g->hasData()) {
       QApplication::restoreOverrideCursor();
+      LOG_POPUP
       QMessageBox::warning(
           this, tr("MantidPlot - Duplicate error"),
           tr("Empty 3D surface plots cannot be duplicated!")); // Mantid
@@ -8680,6 +8745,7 @@ MdiSubWindow *ApplicationWindow::clone(MdiSubWindow *w) {
                          g->yStop(), g->zStart(), g->zStop(), f->columns(),
                          f->rows());
       } else {
+        LOG_POPUP
         QMessageBox::warning(this, "MantidPlot: warning",
                              "Function cannot be cloned.");
         return NULL;
@@ -9084,6 +9150,7 @@ void ApplicationWindow::closeActiveWindow() {
 void ApplicationWindow::closeSimilarWindows() {
   std::string windowType = activeWindow()->getWindowType();
 
+  LOG_POPUP
   QMessageBox::StandardButton pressed = QMessageBox::question(
       this, "MantidPlot",
       QString::fromStdString("All " + windowType +
@@ -9646,11 +9713,12 @@ void ApplicationWindow::showMarkerPopupMenu() {
 }
 
 void ApplicationWindow::showMoreWindows() {
-  if (explorerWindow->isVisible())
+  if (explorerWindow->isVisible()) {
+    LOG_POPUP
     QMessageBox::information(
         this, "MantidPlot",
         tr("Please use the project explorer to select a window!")); // Mantid
-  else
+  } else
     explorerWindow->show();
 }
 
@@ -9774,6 +9842,7 @@ void ApplicationWindow::dragMoveEvent(QDragMoveEvent *e) {
 
 void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   if (scriptingWindow && scriptingWindow->isExecuting()) {
+    LOG_POPUP
     if (!(QMessageBox::question(
               this, tr("MantidPlot"),
               "A script is still running, abort and quit application?",
@@ -9791,6 +9860,7 @@ void ApplicationWindow::closeEvent(QCloseEvent *ce) {
   if (!saved) {
     QString savemsg =
         tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
+    LOG_POPUP
     int result =
         QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"),
                                  tr("No"), tr("Cancel"), 0, 2);
@@ -14055,6 +14125,7 @@ Folder *ApplicationWindow::appendProject(const QString &fn,
   QFileInfo fileInfo(fn);
 
   if (!file.open(QIODevice::ReadOnly)) {
+    LOG_POPUP
     QMessageBox::critical(
         this, tr("MantidPlot - File opening error"),
         tr("The file: <b> %1 </b> could not be opened!").arg(fn));
@@ -14274,6 +14345,7 @@ void ApplicationWindow::projectProperties() {
   } else
     s += tr("Created") + ": " + currentFolder()->birthDate() + "\n\n";
 
+  LOG_POPUP
   QMessageBox *mbox =
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
                       QMessageBox::NoButton, QMessageBox::NoButton, this);
@@ -14299,6 +14371,7 @@ void ApplicationWindow::folderProperties() {
        tr("folders") + "\n\n";
   s += tr("Created") + ": " + currentFolder()->birthDate() + "\n\n";
 
+  LOG_POPUP
   QMessageBox *mbox =
       new QMessageBox(tr("Properties"), s, QMessageBox::NoIcon, QMessageBox::Ok,
                       QMessageBox::NoButton, QMessageBox::NoButton, this);
@@ -14353,6 +14426,7 @@ bool ApplicationWindow::deleteFolder(Folder *f) {
   if (!f)
     return false;
 
+  LOG_POPUP
   if (confirmCloseFolder &&
       QMessageBox::information(
           this, tr("MantidPlot - Delete folder?"), // Mantid
@@ -14375,6 +14449,7 @@ bool ApplicationWindow::deleteFolder(Folder *f) {
     FolderListItem *fi = f->folderListItem();
     foreach (MdiSubWindow *w, f->windowsList()) {
       if (!w->close()) {
+        LOG_POPUP
         QMessageBox::warning(this, "Mantid - Warning",
                              "Folder was not deleted.");
         return false;
@@ -14627,7 +14702,7 @@ void ApplicationWindow::windowProperties() {
   MdiSubWindow *w = it->window();
   if (!w)
     return;
-
+  LOG_POPUP
   QMessageBox *mbox = new QMessageBox(
       tr("Properties"), QString(), QMessageBox::NoIcon, QMessageBox::Ok,
       QMessageBox::NoButton, QMessageBox::NoButton, this);
@@ -14685,7 +14760,7 @@ void ApplicationWindow::find(const QString &s, bool windowNames, bool labels,
       return;
     }
   }
-
+  LOG_POPUP
   QMessageBox::warning(this, tr("MantidPlot - No match found"), // Mantid
                        tr("Sorry, no match found for string: '%1'").arg(s));
 }
@@ -14954,6 +15029,7 @@ ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
   QApplication::restoreOverrideCursor();
   return this;
 #else
+  LOG_POPUP
   QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"), // Mantid
                         tr("MantidPlot was not built with Python scripting "
                            "support included!")); // Mantid
@@ -15624,6 +15700,7 @@ void ApplicationWindow::performCustomAction(QAction *action) {
   if (QFileInfo(action_data).exists()) {
     QFile script_file(action_data);
     if (!script_file.open(QIODevice::ReadOnly)) {
+      LOG_POPUP
       QMessageBox::information(this, "MantidPlot",
                                "Error: There was a problem reading\n" +
                                    action_data);
