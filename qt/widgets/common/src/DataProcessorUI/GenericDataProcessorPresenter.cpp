@@ -916,7 +916,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
       continue;
     }
 
-    if (m_preprocessing.m_map.count(columnName)) {
+    if (m_preprocessing.hasPreprocessing(columnName)) {
       // This column needs pre-processing
 
       // We do not want the associated properties to be set again in

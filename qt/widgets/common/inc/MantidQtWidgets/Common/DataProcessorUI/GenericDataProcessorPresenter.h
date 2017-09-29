@@ -73,6 +73,16 @@ struct PreprocessingAttributes {
       : m_options(options), m_map(map) {}
   QString m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
+
+  bool hasPreprocessing(const QString& columnName) const {
+      return m_map.count(columnName) > 0;
+  }
+
+  // IAlgorithm_sptr createAlgorithmFor(const QString& columnName) const {
+  //     assert(hasPreprocessing(columnName));
+  //     const auto& preprocessor = m_map[columnName];
+  //     
+  // }
 };
 
 class EXPORT_OPT_MANTIDQT_COMMON GenericDataProcessorPresenter
