@@ -12,6 +12,18 @@ using namespace Mantid::API;
 
 // There are only performance tests here as this is not a real algorithm.
 // Functional tests disabled ec34e64616f34f1cf476b65f934272fdfda1212f
+// Unfortunately CxxTest/CTest gets confused if no functional test is present!
+// The following class does precicely nothing.
+class RayTracerTesterTest : public CxxTest::TestSuite {
+public:
+  static RayTracerTesterTest *createSuite() {
+    return new RayTracerTesterTest();
+  }
+  static void destroySuite(RayTracerTesterTest *suite) { delete suite; }
+  void test_dummy() {
+    // No tests. See comments above.
+  }
+};
 
 class RayTracerTesterTestPerformance : public CxxTest::TestSuite {
 public:
