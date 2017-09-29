@@ -1,6 +1,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
@@ -24,6 +25,7 @@
 #include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
+using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::IAlgorithm;
 using Mantid::Kernel::DateAndTime;
 
@@ -999,7 +1001,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
     // String in ISO8601 format
     DateAndTime t = DateAndTime::getCurrentTime();
     try {
-      t.setFromISO8601(value.toStdString());
+      t.setFromISO8601(verifyAndSanitizeISO8601(value.toStdString()));
     } catch (std::exception &) {
     }
     dateEdit->setDate(QDate(t.year(), t.month(), t.day()));

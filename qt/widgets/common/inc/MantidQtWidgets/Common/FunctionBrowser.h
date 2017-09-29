@@ -52,9 +52,8 @@ class CreateAttributePropertyForFunctionBrowser;
  *
  * @date 18/04/2012
  */
-class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser
-    : public QWidget,
-      public IFunctionBrowser {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionBrowser : public QWidget,
+                                                   public IFunctionBrowser {
   Q_OBJECT
 public:
   /// To keep QtProperty and its QtBrowserItem in one place

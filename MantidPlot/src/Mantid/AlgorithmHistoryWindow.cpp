@@ -20,9 +20,9 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <numeric>
+#include <cstdio>
 #include <fstream>
-#include <stdio.h>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

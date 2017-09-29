@@ -24,6 +24,7 @@ Fit Functions
 Bug Fixes
 ---------
 - Mantid would crash when multiple period data was used in single fits (in muon analysis). This has been fixed. 
+- Fixed crash when loading data into MuonAnalysis after using Add/Remove curves.
 
 
 |

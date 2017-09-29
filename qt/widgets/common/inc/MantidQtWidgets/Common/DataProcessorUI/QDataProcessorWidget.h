@@ -55,31 +55,22 @@ public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
                        QWidget *parent = 0);
   QDataProcessorWidget(const WhiteList &, QWidget *parent);
-  QDataProcessorWidget(const WhiteList &,
-                       const ProcessingAlgorithm &,
+  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
                        QWidget *parent);
-  QDataProcessorWidget(const WhiteList &,
-                       const PreprocessMap &,
+  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
+                       const ProcessingAlgorithm &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
+                       const PostprocessingAlgorithm &, QWidget *parent);
+  QDataProcessorWidget(const WhiteList &, const PreprocessMap &,
                        const ProcessingAlgorithm &,
-                       QWidget *parent);
-  QDataProcessorWidget(const WhiteList &,
-                       const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &,
-                       QWidget *parent);
-  QDataProcessorWidget(const WhiteList &,
-                       const PreprocessMap &,
-                       const ProcessingAlgorithm &,
-                       const PostprocessingAlgorithm &,
-                       QWidget *parent);
+                       const PostprocessingAlgorithm &, QWidget *parent);
   ~QDataProcessorWidget() override;
 
   // Add actions to the toolbar
-  void addActions(
-      std::vector<std::unique_ptr<Command>> commands) override;
+  void addActions(std::vector<std::unique_ptr<Command>> commands) override;
 
   // Connect the model
-  void
-  showTable(boost::shared_ptr<AbstractTreeModel> model) override;
+  void showTable(boost::shared_ptr<AbstractTreeModel> model) override;
 
   // Dialog/Prompt methods
   QString requestNotebookPath() override;
@@ -156,6 +147,8 @@ public:
   void emitProcessClicked() override { emit processButtonClicked(); };
 
   void emitProcessingFinished() override { emit processingFinished(); }
+
+  void skipProcessing() override;
 
 signals:
   void processButtonClicked();

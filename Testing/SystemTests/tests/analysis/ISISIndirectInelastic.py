@@ -639,10 +639,12 @@ class ISISIndirectInelasticElwinAndMSDFit(with_metaclass(ABCMeta, ISISIndirectIn
     the other in this test.
     '''
 
-    def _run(self):
-        '''Defines the workflow for the test'''
+    def __init__(self):
+        super(ISISIndirectInelasticElwinAndMSDFit, self).__init__()
         self.tolerance = 1e-7
 
+    def _run(self):
+        '''Defines the workflow for the test'''
         elwin_input = '__ElWinMult_in'
         elwin_results = ['__ElWinMult_q', '__ElWinMult_q2', '__ElWinMult_elf']
 
@@ -699,6 +701,7 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
         ISISIndirectInelasticElwinAndMSDFit.__init__(self)
+        self.tolerance = 5e-6
         self.files = ['osi97935_graphite002_red.nxs',
                       'osi97936_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]

@@ -14,6 +14,11 @@ call cmake.exe --version
 echo %sha1%
 set VS_VERSION=14
 
+:: Find the grep tool for later
+for /f "delims=" %%I in ('where git') do @set GIT_EXE_DIR=%%~dpI
+set GIT_ROOT_DIR=%GIT_EXE_DIR:~0,-4%
+set GREP_EXE=%GIT_ROOT_DIR%\usr\bin\grep.exe
+
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Environment setup
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -75,6 +80,11 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+  if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
+    rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
+    rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src
+    rmdir /S /Q %BUILD_DIR%\python-xmlrunner-download %BUILD_DIR%\python-xmlrunner-src
+  )
 ) else (
   md %BUILD_DIR%
 )

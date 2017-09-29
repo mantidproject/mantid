@@ -138,7 +138,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
   if (hasProperty(start_prop)) {
     try {
       DateAndTime start_time(getProperty(start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/
@@ -149,7 +149,7 @@ const Kernel::DateAndTime LogManager::startTime() const {
   if (hasProperty(run_start_prop)) {
     try {
       DateAndTime start_time(getProperty(run_start_prop)->value());
-      if (start_time != DateAndTimeHelpers::GPS_EPOCH) {
+      if (start_time != DateAndTime::GPS_EPOCH) {
         return start_time;
       }
     } catch (std::invalid_argument &) { /*Swallow and move on*/

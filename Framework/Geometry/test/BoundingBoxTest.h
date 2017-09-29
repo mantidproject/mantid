@@ -318,6 +318,23 @@ public:
                       bbox.maxPoint() == V3D(1, M_SQRT2, 0.5 * M_SQRT2), true);
   }
 
+  void test_grow_by_null() {
+
+    BoundingBox a{};
+    TS_ASSERT(a.isNull());
+    BoundingBox b{};
+    a.grow(b);
+    TSM_ASSERT("Null grown by Null is Null", a.isNull());
+
+    a = BoundingBox(2, 2, 2, 1, 1, 1);
+    TS_ASSERT(!a.isNull());
+    a.grow(b);
+    TSM_ASSERT("Grow by Null (default constructed) is not Null", !a.isNull());
+
+    b.grow(a);
+    TSM_ASSERT("Grow Null by not Null is not Null", !b.isNull());
+  }
+
 private:
   void doPointTest(bool insideTest) {
     const double unit(1.0);
