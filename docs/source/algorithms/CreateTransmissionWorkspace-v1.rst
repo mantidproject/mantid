@@ -55,7 +55,7 @@ Usage
 
     print("The first four transWS Y values are:")
     for i in range (4):
-        print("%.4f" % transWS.readY(0)[i])
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
@@ -91,7 +91,7 @@ Output:
 
     print("The first four transWS Y values are:")
     for i in range (4):
-        print("%.4f" % transWS.readY(0)[i])
+        print("{:.4f}".format(transWS.readY(0)[i]))
 
 Output:
 
