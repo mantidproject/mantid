@@ -5,7 +5,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace MantidQt {
 namespace MantidWidgets {

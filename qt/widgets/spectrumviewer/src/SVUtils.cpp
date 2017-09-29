@@ -1,6 +1,6 @@
+#include <cmath>
 #include <iostream>
 #include <sstream>
-#include <math.h>
 
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 

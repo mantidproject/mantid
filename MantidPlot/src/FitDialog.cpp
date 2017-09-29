@@ -61,7 +61,7 @@
 #include <QTableWidget>
 #include <QWidget>
 #include <QWidgetList>
-#include <stdio.h>
+#include <cstdio>
 
 #include <qwt_plot_curve.h>
 

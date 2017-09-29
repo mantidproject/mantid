@@ -25,15 +25,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "Spectrogram.h"
-#include <math.h>
-#include <QPen>
-#include <qwt_scale_widget.h>
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include <QColor>
+#include <QPainter>
+#include <QPen>
+#include <cmath>
 #include <qwt_painter.h>
 #include <qwt_scale_engine.h>
-#include <QPainter>
+#include <qwt_scale_widget.h>
 #include <qwt_symbol.h>
 
 #include "Mantid/MantidMatrix.h"

@@ -26,22 +26,21 @@ Description          : General plot options dialog
 *   Boston, MA  02110-1301  USA                                           *
 *                                                                         *
 ***************************************************************************/
-#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "AxesDialog.h"
 #include "ApplicationWindow.h"
-#include "TextDialog.h"
 #include "ColorBox.h"
+#include "ColorButton.h"
 #include "Graph.h"
 #include "Grid.h"
-#include "Plot.h"
-#include "MyParser.h"
-#include "ColorButton.h"
-#include "TextFormatButtons.h"
-#include "Table.h"
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
+#include "MyParser.h"
+#include "Plot.h"
 #include "ScaleDraw.h"
-#include <float.h>
-
+#include "Table.h"
+#include "TextDialog.h"
+#include "TextFormatButtons.h"
+#include <cfloat>
 #include <cmath>
 
 #include "MantidKernel/Logger.h"

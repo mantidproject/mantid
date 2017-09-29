@@ -44,8 +44,8 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_errno.h>
 
+#include <cstdlib>
 #include <qwt_color_map.h>
-#include <stdlib.h>
 
 MatrixModel::MatrixModel(QObject *parent)
     : QAbstractTableModel(parent), d_matrix(dynamic_cast<Matrix *>(parent)) {

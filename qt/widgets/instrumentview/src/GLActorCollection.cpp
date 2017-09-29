@@ -4,10 +4,10 @@
 
 #include "MantidKernel/Exception.h"
 
-#include <stdexcept>
-#include <functional>
 #include <algorithm>
-#include <float.h>
+#include <cfloat>
+#include <functional>
+#include <stdexcept>
 
 namespace MantidQt {
 namespace MantidWidgets {

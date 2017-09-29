@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
+from mantid.kernel import config
 
 
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):
@@ -73,23 +74,26 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         """
         Test summing multiple runs.
         """
+        cs = FileFinder.Instance().getCaseSensitive()
 
-        wks = ISISIndirectDiffractionReduction(InputFiles=['IRS26176.RAW', 'IRS26173.RAW'],
+        FileFinder.Instance().setCaseSensitive(False)
+        wks = ISISIndirectDiffractionReduction(InputFiles=['26173-26176'],
                                                SumFiles=True,
                                                Instrument='IRIS',
                                                Mode='diffspec',
                                                SpectraRange=[105, 112])
+        FileFinder.Instance().setCaseSensitive(cs)
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], 'iris26176_multi_diffspec_red')
+        self.assertEqual(wks.getNames()[0], 'iris26173_multi_diffspec_red')
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertTrue('multi_run_numbers' in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26176,26173')
+        self.assertEqual(red_ws.getRun().get('multi_run_numbers').value, '26173,26174,26175,26176')
 
     def test_grouping_individual(self):
         """
