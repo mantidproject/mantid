@@ -20,8 +20,8 @@
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <cmath>
 #include <numeric>
