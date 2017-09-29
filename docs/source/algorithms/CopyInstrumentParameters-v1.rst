@@ -42,8 +42,8 @@ Usage
    # Show positions in 1st workspace
    for i in spectra:
         det = ws1.getDetector(i)
-        print "Position of Detector ID=%i in 1st workspace: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID={} in 1st workspace: {:.0f},{:.0f},{:.0f}". 
+               format(det.getID(), det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
                 
    # Show positions in 2nd workspace before CopyInstrumrentParameters
    for i in spectra:
@@ -59,8 +59,8 @@ Usage
    # Show positions in 2nd workspace after CopyInstrumrentParameters
    for i in spectra:
         det = ws2.getDetector(i)
-        print "Position of Detector ID=%i in 2nd workspace after CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID={} in 2nd workspace after CopyInstrumentParameters: {:.0f},{:.0f},{:.0f}".
+              format(det.getID(), det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
 
 Output:
 

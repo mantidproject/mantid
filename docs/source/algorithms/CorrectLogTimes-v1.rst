@@ -25,12 +25,12 @@ Usage
 .. testcode:: CorrectLogTimes
     
     w=Load('CNCS_7860')
-    print "Original start time for 'proton_charge':", str(w.getRun()['proton_charge'].times[0]).strip()
-    print "Original start time for 'Speed5':", str(w.getRun()['Speed5'].times[0]).strip()
+    print("Original start time for 'proton_charge': {}".format(w.getRun()['proton_charge'].times[0]).strip())
+    print("Original start time for 'Speed5': {}".format(w.getRun()['Speed5'].times[0]).strip())
     #Change the log times
     CorrectLogTimes(w)
     #there should be almost 10 seconds different than before
-    print "Corrected start time for 'Speed5':", str(w.getRun()['Speed5'].times[0]).strip()
+    print("Corrected start time for 'Speed5': {}".format(w.getRun()['Speed5'].times[0]).strip())
 
 
 .. testcleanup:: CorrectLogTimes
