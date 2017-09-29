@@ -1690,7 +1690,7 @@ public:
   }
 
   std::unique_ptr<GenericDataProcessorPresenter> makeDefaultPresenter() {
-    return std::make_unique<GenericDataProcessorPresenter>(
+    return Mantid::Kernel::make_unique<GenericDataProcessorPresenter>(
         createReflectometryWhiteList(), createReflectometryPreprocessingStep(),
         createReflectometryProcessor(), createReflectometryPostprocessor());
   }
