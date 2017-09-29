@@ -402,8 +402,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
     timeRanges.push_back(double(i + firstInterval));
   }
 
-  builder.setTimeRanges(DateAndTime(int(startTime), 0),
-                        timeRanges);
+  builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
   return builder.buildWorkspace();
 }
