@@ -17,7 +17,10 @@ void WhiteList::addElement(const QString &colName, const QString &algProperty,
                            const QString &prefix) {
   m_names.emplace_back(colName);
   m_algorithmProperties.emplace_back(algProperty);
-  m_isShown.emplace_back(isShown);
+  m_isShown.push_back(isShown);
+  /* std::vector<bool> does not have emplace_back until c++14 (currently not
+   * fully supported on RHEL7).
+   * See: http://en.cppreference.com/w/cpp/container/vector/emplace_back */
   m_prefixes.emplace_back(prefix);
   m_descriptions.emplace_back(description);
 }
