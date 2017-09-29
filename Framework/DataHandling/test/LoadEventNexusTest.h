@@ -46,18 +46,25 @@ load_reference_workspace(const std::string &filename) {
   return boost::dynamic_pointer_cast<const EventWorkspace>(out);
 }
 
-void run_MPI_load(const Parallel::Communicator &comm) {
-  auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
-  const std::string filename("CNCS_7860_event.nxs");
-  alg->setProperty("Filename", filename);
-  alg->setProperty("LoadLogs", false);
-  TS_ASSERT_THROWS_NOTHING(alg->execute());
-  TS_ASSERT(alg->isExecuted());
-  Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  if (comm.size() != 1) {
-    TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+void run_MPI_load(const Parallel::Communicator &comm,
+                  boost::shared_ptr<std::mutex> mutex) {
+  boost::shared_ptr<const EventWorkspace> reference;
+  boost::shared_ptr<const EventWorkspace> eventWS;
+  {
+    std::lock_guard<std::mutex> lock(*mutex);
+    const std::string filename("CNCS_7860_event.nxs");
+    reference = load_reference_workspace(filename);
+    auto alg = ParallelTestHelpers::create<LoadEventNexus>(comm);
+    alg->setProperty("Filename", filename);
+    alg->setProperty("LoadLogs", false);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    if (comm.size() != 1) {
+      TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
+    }
+    eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
   }
-  const auto eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
   const size_t localSize = eventWS->getNumberHistograms();
   auto localEventCount = eventWS->getNumberEvents();
   std::vector<size_t> localSizes;
@@ -74,7 +81,6 @@ void run_MPI_load(const Parallel::Communicator &comm) {
                      static_cast<size_t>(112266));
   }
 
-  const auto &reference = load_reference_workspace(filename);
   const auto &indexInfo = eventWS->indexInfo();
   size_t localCompared = 0;
   for (size_t i = 0; i < reference->getNumberHistograms(); ++i) {
@@ -830,7 +836,10 @@ public:
   void test_MPI_load() {
     int threads = 3; // Limited number of threads to avoid long running test.
     ParallelTestHelpers::ParallelRunner runner(threads);
-    runner.run(run_MPI_load);
+    // Test reads from multiple threads, which is not supported by our HDF5
+    // libraries, so we need a mutex.
+    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    runner.run(run_MPI_load, hdf5Mutex);
   }
 
 private:
