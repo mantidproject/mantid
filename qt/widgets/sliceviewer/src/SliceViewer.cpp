@@ -157,6 +157,16 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(m_algoRunner, SIGNAL(algorithmComplete(bool)), this,
                    SLOT(dynamicRebinComplete(bool)));
 
+  // disconnect and reconnect here
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(checkForHKLDimension()));
+  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
+                   SLOT(switchAxis()));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+                   SLOT(switchQWTRaster(bool)));
+  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
+                   SLOT(setNonOrthogonalbtn()));
+
   initMenus();
 
   loadSettings();
@@ -732,15 +742,6 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   m_ws = ws;
 
   m_coordinateTransform = createCoordinateTransform(*ws, m_dimX, m_dimY);
-  // disconnect and reconnect here
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(checkForHKLDimension()));
-  QObject::connect(this, SIGNAL(changedShownDim(size_t, size_t)), this,
-                   SLOT(switchAxis()));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(switchQWTRaster(bool)));
-  QObject::connect(ui.btnNonOrthogonalToggle, SIGNAL(toggled(bool)), this,
-                   SLOT(setNonOrthogonalbtn()));
   m_firstNonOrthogonalWorkspaceOpen = true;
   m_data->setWorkspace(ws);
   m_plot->setWorkspace(ws);
