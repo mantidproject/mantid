@@ -291,14 +291,14 @@ private:
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file.
- *
- *  @param nexusfilename :: Used to pick the instrument.
- *  @param localWorkspace :: Templated workspace in which to put the instrument
- *geometry
- *  @param top_entry_name :: entry name at the top of the NXS file
- *  @param alg :: Handle of the algorithm
- *  @return true if successful
- */
+*
+*  @param nexusfilename :: Used to pick the instrument.
+*  @param localWorkspace :: Templated workspace in which to put the instrument
+*geometry
+*  @param top_entry_name :: entry name at the top of the NXS file
+*  @param alg :: Handle of the algorithm
+*  @return true if successful
+*/
 template <typename T>
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
                                        T localWorkspace,
@@ -546,15 +546,15 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
- *  specified by the info in the Nexus file
- *
- *  @param nexusfilename :: The Nexus file name
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
- *  @param top_entry_name :: entry name at the top of the Nexus file
- *  @param alg :: Handle of the algorithm
- *  @return true if successful
- */
+*  specified by the info in the Nexus file
+*
+*  @param nexusfilename :: The Nexus file name
+*  @param localWorkspace :: templated workspace in which to put the instrument
+*geometry
+*  @param top_entry_name :: entry name at the top of the Nexus file
+*  @param alg :: Handle of the algorithm
+*  @return true if successful
+*/
 template <typename T>
 bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                     T localWorkspace,
@@ -570,14 +570,14 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
- *
- *  @param nexusfilename :: The name of the nexus file being loaded
- *  @param localWorkspace :: templated workspace in which to put the instrument
- *geometry
- *  @param top_entry_name :: entry name at the top of the Nexus file
- *  @param alg :: Handle of the algorithm
- *  @return true if successful
- */
+*
+*  @param nexusfilename :: The name of the nexus file being loaded
+*  @param localWorkspace :: templated workspace in which to put the instrument
+*geometry
+*  @param top_entry_name :: entry name at the top of the Nexus file
+*  @param alg :: Handle of the algorithm
+*  @return true if successful
+*/
 template <typename T>
 bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
                                          T localWorkspace,
