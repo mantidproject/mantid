@@ -348,9 +348,9 @@ class MaskingTablePresenter(object):
         container = []
         beam_stop_arm_width = mask_info.beam_stop_arm_width
         beam_stop_arm_angle = mask_info.beam_stop_arm_angle
-        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
-        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-        if beam_stop_arm_width and beam_stop_arm_angle and beam_stop_arm_pos1 and beam_stop_arm_pos2:
+        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1 if mask_info.beam_stop_arm_pos1 else 0.
+        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2 if mask_info.beam_stop_arm_pos2 else 0.
+        if beam_stop_arm_width and beam_stop_arm_angle:
             detail = "LINE {}, {}, {}, {}".format(beam_stop_arm_width, beam_stop_arm_angle,
                                                   beam_stop_arm_pos1, beam_stop_arm_pos2)
             container.append(masking_information(first="Arm", second="", third=detail))
