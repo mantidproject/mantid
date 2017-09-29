@@ -10,6 +10,26 @@ from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.enums import RebinType, RangeStepType
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 
+from mantid.api import AnalysisDataService
+
+
+def output_intermediate_workspace(state, workspace, workspace_name):
+    if not workspace:
+        return
+    # Clone the workspace
+    clone_name = "CloneWorkspace"
+    clone_options = {"InputWorkspace": workspace,
+                     "OutputWorkspace": "DUMMY"}
+    clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
+    clone_alg.execute()
+    ws_out = clone_alg.getProperty("OutputWorkspace").value
+
+    # Add to ADS
+    base_name = str(state.data.sample_scatter_run_number)
+    wavelength_tag = str(state.wavelength.wavelength_low) + "_" + str(state.wavelength.wavelength_high)
+    total_name = base_name + "__" + wavelength_tag + "__" + workspace_name
+    AnalysisDataService.addOrReplace(total_name, ws_out)
+
 
 class SANSNormalizeToMonitor(DataProcessorAlgorithm):
     def category(self):
@@ -63,6 +83,8 @@ class SANSNormalizeToMonitor(DataProcessorAlgorithm):
         workspace = self._convert_to_wavelength(workspace, normalize_to_monitor_state)
 
         self.setProperty("OutputWorkspace", workspace)
+        output_intermediate_workspace(state, workspace, "normalize_monitor")
+
 
     def _scale(self, workspace, factor):
         """
