@@ -224,7 +224,7 @@ void MaxEnt::exec() {
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points - assumed to be constant between spectra or
   // this will throw an exception
-  size_t npoints = inWS->y(0).blocksize() * resolutionFactor;
+  size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
