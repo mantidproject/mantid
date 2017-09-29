@@ -41,15 +41,15 @@ Usage
         ws.setY(i,np.array(deadDetArray))
         ws.setY(i+1,np.array(noisyDetArray))
 
-    print "With just the default LowThreshold of 0"
+    print("With just the default LowThreshold of 0")
     (wsOut,NumberOfFailures)=FindDetectorsOutsideLimits(ws)
-    print "%i spectra were outside the limits." % NumberOfFailures
-    print
+    print("%i spectra were outside the limits." % NumberOfFailures)
+    print("")
 
-    print "With a High and LowThreshold, as well as restricting the XRange to consider"
+    print("With a High and LowThreshold, as well as restricting the XRange to consider")
     (wsOut2,NumberOfFailures)=FindDetectorsOutsideLimits(ws, HighThreshold=1000, 
         LowThreshold=0, RangeLower=200, RangeUpper=10000)
-    print "%i spectra were outside the limits." % NumberOfFailures
+    print("%i spectra were outside the limits." % NumberOfFailures)
 
     mtd.clear()
 
@@ -81,14 +81,14 @@ Output:
     mws2,nMasked2 = FindDetectorsOutsideLimits(ws,100,startWorkspaceIndex = 200)
 
     print "****************************************"
-    print "full mask ws has {0} masked detectors".format(nMasked1)
-    print "part mask ws  has {0} masked detectors".format(nMasked2)
-    print "****************************************"
+    print("full mask ws has {0} masked detectors".format(nMasked1))
+    print("part mask ws  has {0} masked detectors".format(nMasked2))
+    print("****************************************")
     selected_spec = [99,100,199,200,299,300]
     for spec in selected_spec:
-        print "full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5)
-        print "part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) 
-    print "****************************************"
+        print("full mask ws Spec N{0} is masked: {1}".format(spec,mws1.readY(spec)[0]>0.5))
+        print("part mask ws Spec N{0} is masked: {1}".format(spec,mws2.readY(spec)[0]>0.5) )
+    print("****************************************")
 
 Output:
 

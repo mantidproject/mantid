@@ -34,12 +34,12 @@ Usage
 .. testcode:: ExFindUBUsingMinMaxD
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
     FindUBUsingMinMaxD(ws,MinD=8.0,MaxD=13.0)
-    print "After FindUBUsingMinMaxD does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After FindUBUsingMinMaxD does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
-    print ws.sample().getOrientedLattice().getUB()
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:

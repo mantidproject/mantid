@@ -100,8 +100,7 @@ Usage
 
    row = table.row(0)
 
-   #print row
-   print "Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"])
+   print("Peak 1 {Centre: %.3f, width: %.3f, height: %.3f }" % ( row["centre"],  row["width"], row["height"]))
 
 
 Output:

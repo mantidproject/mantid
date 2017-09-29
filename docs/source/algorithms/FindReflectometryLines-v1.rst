@@ -36,7 +36,7 @@ Usage
     wsOut = FindReflectometryLines(ws)
 
     for i in range(wsOut.columnCount()):
-        print wsOut.getColumnNames()[i], wsOut.column(i)[0]
+        print("{} {}".format(wsOut.getColumnNames()[i], wsOut.column(i)[0]))
     
 Output:
 
