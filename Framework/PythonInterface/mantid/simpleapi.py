@@ -969,10 +969,6 @@ def set_properties(alg_object, *args, **kwargs):
     def do_set_property(name, new_value):
         if new_value is None:
             return
-        # The correct parent/child relationship is not quite set up yet: #5157
-        # ChildAlgorithms in Python are marked as children but their output is in the
-        # ADS meaning we cannot just set DataItem properties by new_value. At the moment
-        # they are just set with strings
         if isinstance(new_value, _kernel.DataItem) and new_value.name():
             alg_object.setPropertyValue(key, new_value.name())
         else:
