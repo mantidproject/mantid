@@ -73,7 +73,7 @@ public:
   void testInitalizeWithNullWorkspaceThrows() {
     vtkMDHexFactory factory(VATES::VolumeNormalization);
 
-    IMDEventWorkspace *ws = NULL;
+    IMDEventWorkspace *ws = nullptr;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
                       factory.initialize(Workspace_sptr(ws)),
                       std::invalid_argument);

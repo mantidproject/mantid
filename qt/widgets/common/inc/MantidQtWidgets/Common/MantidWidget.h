@@ -59,7 +59,7 @@ signals:
 
 protected:
   /// Default constructor
-  MantidWidget(QWidget *parent = NULL);
+  MantidWidget(QWidget *parent = nullptr);
   /// Run python code that is passed to it and, optionally, return
   /// anything it wrote to standard output as a string
   QString runPythonCode(const QString &code, bool no_output = false);

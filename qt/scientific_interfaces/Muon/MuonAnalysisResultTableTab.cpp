@@ -102,7 +102,7 @@ void MuonAnalysisResultTableTab::selectAllLogs(bool state) {
       QTableWidgetItem *temp =
           static_cast<QTableWidgetItem *>(m_uiForm.valueTable->item(i, 0));
       // If there is an item there then check the box
-      if (temp != NULL) {
+      if (temp != nullptr) {
         QCheckBox *includeCell =
             static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(i, 1));
         includeCell->setChecked(true);
@@ -126,7 +126,7 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state) {
       QTableWidgetItem *temp = static_cast<QTableWidgetItem *>(
           m_uiForm.fittingResultsTable->item(i, 0));
       // If there is an item there then check the box
-      if (temp != NULL) {
+      if (temp != nullptr) {
         QCheckBox *includeCell = static_cast<QCheckBox *>(
             m_uiForm.fittingResultsTable->cellWidget(i, 1));
         includeCell->setChecked(true);

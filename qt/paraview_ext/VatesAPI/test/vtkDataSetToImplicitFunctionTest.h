@@ -18,7 +18,7 @@ class vtkDataSetToImplicitFunctionTest : public CxxTest::TestSuite {
 
 public:
   void testThrowIfvtkDataSetNull() {
-    vtkDataSet *nullArg = NULL;
+    vtkDataSet *nullArg = nullptr;
     TS_ASSERT_THROWS(vtkDataSetToImplicitFunction temp(nullArg),
                      std::runtime_error);
   }

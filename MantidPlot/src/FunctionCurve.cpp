@@ -38,13 +38,13 @@
 
 FunctionCurve::FunctionCurve(const QString &name)
     : PlotCurve(name), d_function_type(Normal), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(NULL) {
+      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
   setType(GraphOptions::Function);
 }
 
 FunctionCurve::FunctionCurve(const FunctionType &t, const QString &name)
     : PlotCurve(name), d_function_type(t), d_variable("x"), d_formulas(),
-      d_from(0.0), d_to(0.0), m_identifier(NULL) {
+      d_from(0.0), d_to(0.0), m_identifier(nullptr) {
   // d_variable = "x";
   setType(GraphOptions::Function);
 }

@@ -39,7 +39,7 @@ public:
   // Constructor
   PropertyHandler(Mantid::API::IFunction_sptr fun,
                   boost::shared_ptr<Mantid::API::CompositeFunction> parent,
-                  FitPropertyBrowser *browser, QtBrowserItem *item = NULL);
+                  FitPropertyBrowser *browser, QtBrowserItem *item = nullptr);
 
   /// Destructor
   ~PropertyHandler() override;

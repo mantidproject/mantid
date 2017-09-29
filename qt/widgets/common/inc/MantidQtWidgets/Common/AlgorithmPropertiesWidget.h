@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmPropertiesWidget : public QWidget {
   Q_PROPERTY(QString algorithmName READ getAlgorithmName WRITE setAlgorithmName)
 
 public:
-  AlgorithmPropertiesWidget(QWidget *parent = NULL);
+  AlgorithmPropertiesWidget(QWidget *parent = nullptr);
   ~AlgorithmPropertiesWidget() override;
 
   void

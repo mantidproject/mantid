@@ -155,7 +155,7 @@ public:
   }
 
   void testAddingNullDimensionReturnsFalse() {
-    Mantid::Geometry::IMDDimension *pDim = NULL;
+    Mantid::Geometry::IMDDimension *pDim = nullptr;
     IMDDimension_const_sptr nullDimension(pDim);
     MDGeometryBuilderXML<NoDimensionPolicy> builder;
     TSM_ASSERT("Adding null dimension should return false.",

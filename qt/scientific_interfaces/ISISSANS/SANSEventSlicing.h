@@ -13,7 +13,7 @@ class SANSEventSlicing : public API::UserSubWindow {
 
 public:
   /// Default Constructor
-  explicit SANSEventSlicing(QWidget *parent = 0);
+  explicit SANSEventSlicing(QWidget *parent = nullptr);
   /// Destructor
   ~SANSEventSlicing() override;
 

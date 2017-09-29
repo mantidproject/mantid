@@ -422,7 +422,7 @@ void ScriptingWindow::clearScriptVariables() {
  * Opens the Qt help windows for the scripting window.
  */
 void ScriptingWindow::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL,
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
                                                  QString("ScriptingWindow"));
 }
 
@@ -431,7 +431,7 @@ void ScriptingWindow::showHelp() {
  */
 void ScriptingWindow::showPythonHelp() {
   MantidQt::API::HelpWindow::showPage(
-      NULL, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
+      nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
 }
 
 /**

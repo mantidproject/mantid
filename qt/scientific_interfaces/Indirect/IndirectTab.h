@@ -75,7 +75,7 @@ class DLLExport IndirectTab : public QObject {
   Q_OBJECT
 
 public:
-  IndirectTab(QObject *parent = 0);
+  IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
 public slots:

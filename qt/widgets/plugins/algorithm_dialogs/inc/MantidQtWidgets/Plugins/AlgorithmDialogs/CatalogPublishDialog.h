@@ -37,7 +37,7 @@ class CatalogPublishDialog : public API::AlgorithmDialog {
 
 public:
   /// Constructor
-  CatalogPublishDialog(QWidget *parent = 0);
+  CatalogPublishDialog(QWidget *parent = nullptr);
 
 private:
   /// Create the inital layout.

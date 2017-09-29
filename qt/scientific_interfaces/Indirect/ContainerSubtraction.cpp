@@ -104,7 +104,7 @@ void ContainerSubtraction::run() {
           "Binning on sample and container does not match."
           "Would you like to rebin the container to match the sample?";
 
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+      int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 

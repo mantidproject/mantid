@@ -135,7 +135,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
     boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
@@ -156,7 +156,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Extract the reference frame object
     boost::shared_ptr<const ReferenceFrame> frame = i->getReferenceFrame();
@@ -186,7 +186,7 @@ public:
     } catch (Poco::FileNotFoundException &) {
     }
 
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
     try {
       Poco::File vtpFile(vtpFilename);
       vtpFile.remove();
@@ -480,7 +480,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
     TS_ASSERT_EQUALS(ptrDetShape->getID(), 1100);
@@ -542,7 +542,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "RectangularUnitTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // Now the XY detector in bank1
     boost::shared_ptr<const RectangularDetector> bank1 =
@@ -595,7 +595,7 @@ public:
 
     // Parse the XML
     InstrumentDefinitionParser parser(filename, "AdjustTest", xmlText);
-    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(NULL););
+    TS_ASSERT_THROWS_NOTHING(i = parser.parseXML(nullptr););
 
     // None rotated cuboid
     boost::shared_ptr<const IDetector> ptrNoneRot = i->getDetector(1400);
@@ -708,7 +708,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::ReadFallBack,
                      parser.getAppliedCachingOption()); // Check that the
@@ -755,7 +755,7 @@ public:
                                       instrumentEnv._xmlText);
     RemoveFallbackVTPFile(parser);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteGeomCache,
                      parser.getAppliedCachingOption()); // Check that the
@@ -798,7 +798,7 @@ public:
     InstrumentDefinitionParser parser(idf, cache, instrumentEnv._instName,
                                       instrumentEnv._xmlText);
 
-    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteCacheTemp,
                      parser.getAppliedCachingOption()); // Check that the TEMP
@@ -852,7 +852,7 @@ public:
 
     std::string errorMsg("");
     try {
-      parser.parseXML(NULL);
+      parser.parseXML(nullptr);
       errorMsg = "Exception not thrown";
     } catch (Kernel::Exception::InstrumentDefinitionError &e) {
       errorMsg = e.what();
@@ -880,9 +880,9 @@ public:
     Instrument_sptr instr;
 
     if (rethrow)
-      instr = parser.parseXML(NULL);
+      instr = parser.parseXML(nullptr);
     else
-      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(NULL));
+      TS_ASSERT_THROWS_NOTHING(instr = parser.parseXML(nullptr));
 
     TS_ASSERT_EQUALS(instr->getNumberDetectors(), numDetectors);
 
@@ -1039,7 +1039,7 @@ public:
 
     boost::shared_ptr<const Instrument> instrument;
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(NULL));
+    TS_ASSERT_THROWS_NOTHING(instrument = parser.parseXML(nullptr));
 
     // Clean up VTP file
     const std::string vtpFilename = parser.createVTPFileName();

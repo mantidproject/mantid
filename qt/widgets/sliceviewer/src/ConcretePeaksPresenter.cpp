@@ -154,7 +154,8 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None),
+      m_owningPresenter(nullptr), m_isHidden(false),
+      m_editMode(SliceViewer::None),
       m_hasAddPeaksMode(
           canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.

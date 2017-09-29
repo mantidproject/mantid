@@ -160,7 +160,7 @@ public:
 class EXPORT_OPT_MANTIDQT_COMMON QtAbstractPropertyManager : public QObject {
   Q_OBJECT
 public:
-  explicit QtAbstractPropertyManager(QObject *parent = 0);
+  explicit QtAbstractPropertyManager(QObject *parent = nullptr);
   ~QtAbstractPropertyManager() override;
 
   QSet<QtProperty *> properties() const;
@@ -196,7 +196,8 @@ public:
   virtual QWidget *createEditor(QtProperty *property, QWidget *parent) = 0;
 
 protected:
-  explicit QtAbstractEditorFactoryBase(QObject *parent = 0) : QObject(parent) {}
+  explicit QtAbstractEditorFactoryBase(QObject *parent = nullptr)
+      : QObject(parent) {}
 
   virtual void breakConnection(QtAbstractPropertyManager *manager) = 0;
 protected Q_SLOTS:
@@ -220,7 +221,7 @@ public:
         return createEditorForManager(manager, property, parent);
       }
     }
-    return 0;
+    return nullptr;
   }
   void addPropertyManager(PropertyManager *manager) {
     if (m_managers.contains(manager))
@@ -248,7 +249,7 @@ public:
         return m;
       }
     }
-    return 0;
+    return nullptr;
   }
 
 protected:
@@ -309,7 +310,7 @@ class QtAbstractPropertyBrowserPrivate;
 class EXPORT_OPT_MANTIDQT_COMMON QtAbstractPropertyBrowser : public QWidget {
   Q_OBJECT
 public:
-  explicit QtAbstractPropertyBrowser(QWidget *parent = 0);
+  explicit QtAbstractPropertyBrowser(QWidget *parent = nullptr);
   ~QtAbstractPropertyBrowser() override;
 
   QList<QtProperty *> properties() const;

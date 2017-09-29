@@ -39,7 +39,7 @@ public:
   void test_contstructor_setters() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
 
     size_t CoordSize;
@@ -73,7 +73,7 @@ public:
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     pSaver->setDataType(sizeof(coord_t), "MDLeanEvent");
     std::string FullPathFile;
@@ -112,7 +112,7 @@ public:
   void test_free_space_index_is_written_out_and_read_in() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     std::string FullPathFile;
 
@@ -181,7 +181,7 @@ public:
   template <typename FROM, typename TO> void WriteReadRead() {
     using Mantid::DataObjects::BoxControllerNeXusIO;
 
-    BoxControllerNeXusIO *pSaver(NULL);
+    BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
     pSaver->setDataType(sizeof(FROM), "MDEvent");
     std::string FullPathFile;
