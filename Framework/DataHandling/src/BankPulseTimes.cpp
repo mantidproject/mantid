@@ -1,7 +1,6 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 
 using namespace Mantid::Kernel;
-using Mantid::Types::Core::DateAndTime;
 //===============================================================================================
 // BankPulseTimes
 //===============================================================================================
@@ -21,7 +20,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
-  DateAndTime start(startTime);
+  Mantid::Types::Core::DateAndTime start(startTime);
   // Load the seconds offsets
   std::vector<double> seconds;
   file.getData(seconds);
@@ -38,7 +37,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
     ;
   }
 
-  pulseTimes = new DateAndTime[numPulses];
+  pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = start + seconds[i];
 }
@@ -48,12 +47,13 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
 *  Handles a zero-sized vector
 *  @param times
  */
-BankPulseTimes::BankPulseTimes(const std::vector<DateAndTime> &times) {
+BankPulseTimes::BankPulseTimes(
+    const std::vector<Mantid::Types::Core::DateAndTime> &times) {
   numPulses = times.size();
   pulseTimes = nullptr;
   if (numPulses == 0)
     return;
-  pulseTimes = new DateAndTime[numPulses];
+  pulseTimes = new Mantid::Types::Core::DateAndTime[numPulses];
   periodNumbers = std::vector<int>(
       numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
   for (size_t i = 0; i < numPulses; i++)
