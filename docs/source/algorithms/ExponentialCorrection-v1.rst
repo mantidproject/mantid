@@ -33,8 +33,8 @@ Usage
     ws_divide = ExponentialCorrection(InputWorkspace=ws,C0=2.0,C1=1.0,Operation="Divide")
     ws_multiply = ExponentialCorrection(InputWorkspace=ws,C0=2.0,C1=1.0,Operation="Multiply")
 
-    print "The first Y value after divide correction is: " + str(ws_divide.dataY(0)[1])
-    print "The first Y value after multiply correction is: " + str(ws_multiply.dataY(0)[1])
+    print("The first Y value after divide correction is: {}".format(ws_divide.dataY(0)[1]))
+    print("The first Y value after multiply correction is: {}".format(ws_multiply.dataY(0)[1]))
 
 Output:
 

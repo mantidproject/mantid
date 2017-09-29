@@ -64,10 +64,10 @@ Usage
   propws = ExportTimeSeriesLog(InputWorkspace=dataws, LogName="Temp", IsEventWorkspace=False)
 
   # Check
-  print "Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0)))
-  print "X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0])
-  print "X[20] = %.1f, Y[20] = %.5f" % (propws.readX(0)[20], propws.readY(0)[20])
-  print "X[40] = %.1f, Y[40] = %.5f" % (propws.readX(0)[40], propws.readY(0)[40])
+  print("Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0))))
+  print("X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0]))
+  print("X[20] = %.1f, Y[20] = %.5f" % (propws.readX(0)[20], propws.readY(0)[20]))
+  print("X[40] = %.1f, Y[40] = %.5f" % (propws.readX(0)[40], propws.readY(0)[40]))
 
 .. testcleanup:: ExExpTempWS2D
 
@@ -108,9 +108,9 @@ Output:
   propws = ExportTimeSeriesLog(InputWorkspace=dataws, LogName="Temp", NumberEntriesExport=40, IsEventWorkspace=True)
 
   # Check
-  print "Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0)))
-  print "X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0])
-  print "Number of events = %d" % (propws.getNumberEvents())
+  print("Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0))))
+  print("X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0]))
+  print("Number of events = %d" % (propws.getNumberEvents()))
 
 .. testcleanup:: ExExpTempEvent
 
