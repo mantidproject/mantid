@@ -54,7 +54,7 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     const std::vector<int32_t> &bankOffsets,
     std::vector<std::vector<TofEvent> *> &eventLists)
     : m_rankGroups(rankGroups), m_bankOffsets(bankOffsets),
-      m_eventLists(eventLists), m_posInEventIndex(0), m_currentFuture(0) {}
+      m_eventLists(eventLists), m_posInEventIndex(0) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  *parsing events from file/event stream.
@@ -168,8 +168,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
   if (m_eventTimeZero.empty() || m_eventIndex.empty())
     throw std::runtime_error("Both event_time_zero and event_index must be set "
                              "before running the parser.");
-  m_future = std::async(std::launch::async, doParsing, event_id_start,
-                        event_time_offset_start, range);
+
+  // Wrapped in lambda because std::async is unable to specialize doParsing on
+  // its own
+  m_future = std::async(
+      std::launch::async, [this, event_id_start, event_time_offset_start, &range] {
+        doParsing(event_id_start, event_time_offset_start, range);
+      });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -198,7 +203,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
-  m_future.wait();
+  if(m_future.valid())
+    m_future.wait();
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>

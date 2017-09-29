@@ -24,26 +24,6 @@ public:
         rankGroups, bankOffsets, eventLists)));
   }
 
-  void testConstructorFailZeroLengthBankOffsets() {
-    std::vector<std::vector<int>> rankGroups;
-    std::vector<int32_t> bankOffsets;
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(4);
-
-    TS_ASSERT_THROWS((EventParser<int64_t, int64_t, double>(
-                         rankGroups, bankOffsets, eventLists)),
-                     std::invalid_argument);
-  }
-
-  void testConstructorFailZeroLengthEventLists() {
-    std::vector<std::vector<int>> rankGroups;
-    std::vector<int32_t> bankOffsets{1, 2, 3, 4};
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists;
-
-    TS_ASSERT_THROWS((EventParser<int64_t, int64_t, double>(
-                         rankGroups, bankOffsets, eventLists)),
-                     std::invalid_argument);
-  }
-
   void testConvertEventIDToGlobalSpectrumIndex() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1000};
@@ -53,15 +33,13 @@ public:
                                                  eventLists);
 
     std::vector<int32_t> eventId{1001, 1002, 1004, 1004};
-
+    auto eventIdCopy = eventId;
     parser.eventIdToGlobalSpectrumIndex(eventId.data(), eventId.size(), 0);
-    const auto &specIndex = parser.globalSpectrumIndex();
 
-    TS_ASSERT_EQUALS(specIndex.size(), eventId.size());
-    TS_ASSERT_EQUALS(specIndex[0], eventId[0] - bankOffsets[0]);
-    TS_ASSERT_EQUALS(specIndex[1], eventId[1] - bankOffsets[0]);
-    TS_ASSERT_EQUALS(specIndex[2], eventId[2] - bankOffsets[0]);
-    TS_ASSERT_EQUALS(specIndex[3], eventId[3] - bankOffsets[0]);
+    TS_ASSERT_EQUALS(eventId[0], eventIdCopy[0] - bankOffsets[0]);
+    TS_ASSERT_EQUALS(eventId[1], eventIdCopy[1] - bankOffsets[0]);
+    TS_ASSERT_EQUALS(eventId[2], eventIdCopy[2] - bankOffsets[0]);
+    TS_ASSERT_EQUALS(eventId[3], eventIdCopy[3] - bankOffsets[0]);
   }
 
   void testExtractEventsForRanks_1Rank() {
@@ -74,16 +52,18 @@ public:
     auto parser = createSimpleParser(eventLists);
     parser.setPulseInformation(event_index, event_time_zero);
 
+    size_t bankIndex = 0;
     size_t offset = 20;
     size_t numEvents = 30;
-    size_t bankIndex = 0;
+
     parser.eventIdToGlobalSpectrumIndex(event_id.data() + offset, numEvents,
                                         bankIndex);
-    const auto &specIndex = parser.globalSpectrumIndex();
+    const auto &specIndex = event_id;
 
     std::vector<std::vector<Event>> rankData(1);
-    parser.extractEventsForRanks(rankData, specIndex,
-                                 event_time_offset.data() + offset, offset);
+    parser.extractEventsForRanks(rankData, specIndex.data(),
+                                 event_time_offset.data() + offset,
+                                 LoadRange{bankIndex, offset, numEvents});
 
     TS_ASSERT_EQUALS(rankData[0].size(), numEvents);
 
@@ -125,7 +105,7 @@ public:
                      std::runtime_error);
   }
 
-  void testParsing_1Rank() {
+  void testParsing_1Rank_1Bank() {
     auto eventLists = prepareEventLists(6);
     std::vector<int32_t> event_index{2, 5, 7};
     std::vector<int64_t> event_time_zero{0, 10, 20};
@@ -144,12 +124,18 @@ public:
         event_id.data() + offset, event_time_offset.data() + offset,
         LoadRange{bank, offset, count}));
 
-    std::vector<int32_t> testOutput1{3}, testOutput2{4}, testOutput3{7},
-        testOutput4{1, 2}, testOutput5{8};
+    // Test time offset and time zero
+    std::vector<std::pair<int32_t, int64_t>> testOutput1{{3, 10}},
+        testOutput2{{4, 20}}, testOutput3{{7, 0}}, testOutput4{{1, 0}, {2, 20}},
+        testOutput5{{8, 10}};
 
-    auto testFunc = [](const Types::TofEvent &item, int32_t time_offset) {
-      return item.tof() == static_cast<double>(time_offset);
+    auto testFunc = [](const Types::TofEvent &item,
+                       std::pair<int32_t, int64_t> time_offset) {
+      return item.tof() == static_cast<double>(time_offset.first) &&
+             item.pulseTime() == time_offset.second;
     };
+
+    parser.finalize();
 
     TS_ASSERT(eventLists[0]->empty());
     TS_ASSERT(std::equal(eventLists[1]->cbegin(), eventLists[1]->cend(),
