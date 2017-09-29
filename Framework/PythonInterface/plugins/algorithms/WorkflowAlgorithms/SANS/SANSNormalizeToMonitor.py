@@ -85,7 +85,6 @@ class SANSNormalizeToMonitor(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", workspace)
         output_intermediate_workspace(state, workspace, "normalize_monitor")
 
-
     def _scale(self, workspace, factor):
         """
         The incident monitor is scaled by a factor.
