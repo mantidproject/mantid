@@ -121,7 +121,7 @@ def mask_with_mask_files(mask_info, workspace):
 
         # Masker
         mask_name = "MaskDetectors"
-        mask_options = {}
+        mask_options = {"ForceInstrumentMasking": True}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
