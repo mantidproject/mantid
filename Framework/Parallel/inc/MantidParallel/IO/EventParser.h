@@ -4,6 +4,7 @@
 #include "MantidParallel/DllConfig.h"
 #include "MantidTypes/TofEvent.h"
 #include <cstdint>
+#include <future>
 #include <vector>
 
 namespace Mantid {
@@ -28,47 +29,45 @@ public:
               const std::vector<int32_t> &bankOffsets,
               std::vector<std::vector<Mantid::Types::TofEvent> *> &eventLists);
 
-  void
-  setPulseInformation(const std::vector<IndexType> &event_index,
-                      const std::vector<TimeZeroType> &event_time_zero) const;
+  void setPulseInformation(std::vector<IndexType> event_index,
+                           std::vector<TimeZeroType> event_time_zero);
 
   void startParsing(int32_t *event_id_start,
                     TimeOffsetType *event_time_offset_start,
                     const LoadRange &range);
 
   void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
-                             const std::vector<int32_t> &globalSpectrumIndex,
+                             const int32_t *globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
-                             size_t offset);
+                             const LoadRange &range);
 
   void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                    size_t bankIndex) const;
+                                    size_t bankIndex);
 
   void populateEventList(
       std::vector<std::vector<Mantid::Types::TofEvent> *> &eventList,
       const std::vector<Event> &events);
 
-  const std::vector<int32_t> &globalSpectrumIndex() const {
-    return m_globalSpectrumIndex;
-  }
-
   const std::vector<std::vector<Event>> &rankData() const {
     return m_allRankData;
   }
 
-  void wait();
-  void finalize();
+  void wait() const;
+  void finalize() const;
 
 private:
+  void doParsing(int32_t *event_id_start,
+                 TimeOffsetType *event_time_offset_start,
+                 const LoadRange &range);
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Mantid::Types::TofEvent> *> &m_eventLists;
-  mutable std::vector<IndexType> m_eventIndex;
-  mutable std::vector<TimeZeroType> m_eventTimeZero;
-  mutable std::vector<int32_t> m_globalSpectrumIndex;
+  std::vector<IndexType> m_eventIndex;
+  std::vector<TimeZeroType> m_eventTimeZero;
   std::size_t m_posInEventIndex;
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
+  std::future<void> m_future;
 };
 
 } // namespace IO

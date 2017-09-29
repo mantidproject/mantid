@@ -40,18 +40,21 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
+/** Constructor for EventParser.
+ *NB there is no range checking for these inputs, clients using the class should
+ *ensure they provide sensible data.
+ *@param rankGroups rank grouping for banks which determines how work is
+ *partitioned. Group ordering must be preserved to ensure pulse time ordering.
+ *@param bankOffsets used to convert from detector ID to global spectrum index.
+ *@param eventLists workspace eventlists which will be populated by the parser.
+ */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     std::vector<std::vector<int>> rankGroups,
     const std::vector<int32_t> &bankOffsets,
     std::vector<std::vector<TofEvent> *> &eventLists)
     : m_rankGroups(rankGroups), m_bankOffsets(bankOffsets),
-      m_eventLists(eventLists), m_posInEventIndex(0) {
-  if (m_bankOffsets.empty())
-    throw std::invalid_argument("The bankOffsets vector cannot be empty.");
-  if (m_eventLists.empty())
-    throw std::invalid_argument("The evenLists vector cannot be empty.");
-}
+      m_eventLists(eventLists), m_posInEventIndex(0), m_currentFuture(0) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  *parsing events from file/event stream.
@@ -61,27 +64,26 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
-    const std::vector<IndexType> &event_index,
-    const std::vector<TimeZeroType> &event_time_zero) const {
-  m_eventIndex = event_index;
-  m_eventTimeZero = event_time_zero;
+    std::vector<IndexType> event_index,
+    std::vector<TimeZeroType> event_time_zero) {
+  m_eventIndex = std::move(event_index);
+  m_eventTimeZero = std::move(event_time_zero);
 }
 
 /** Used the detectorIDs supplied to calculate the corresponding global spectrum
- * numbers using the bankOffsets stored at object creation.
+ * numbers using the bankOffsets stored at object creation. NB event_id_start is
+ * transformed to contain the spectrum indices.
  * @param event_id_start Starting position of chunk of data containing detector
- * IDs
+ * IDs. This is transformed in place to save memory bandwidth.
  * @param count Number of items in data chunk
  * @param bankIndex Index into the list of bank offsets.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                 size_t bankIndex) const {
-  m_globalSpectrumIndex.resize(count);
-
+                                 size_t bankIndex) {
   for (size_t i = 0; i < count; i++)
-    m_globalSpectrumIndex[i] = event_id_start[i] - m_bankOffsets[bankIndex];
+    event_id_start[i] -= m_bankOffsets[bankIndex];
 }
 
 /** Extracts event information from the list of time offsets and global spectrum
@@ -96,13 +98,14 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
-                          const std::vector<int32_t> &globalSpectrumIndex,
+                          const int32_t *globalSpectrumIndex,
                           const TimeOffsetType *eventTimeOffset,
-                          size_t offset) {
+                          const LoadRange &range) {
   for (auto &item : rankData)
     item.clear();
 
-  const auto count = globalSpectrumIndex.size();
+  auto offset = range.eventOffset;
+  auto count = range.eventCount;
   // Determine start and end pulse/s for chunk of data provided.
   auto result = findStartAndEndPulses<IndexType>(m_eventIndex, offset, count,
                                                  m_posInEventIndex);
@@ -165,16 +168,24 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
   if (m_eventTimeZero.empty() || m_eventIndex.empty())
     throw std::runtime_error("Both event_time_zero and event_index must be set "
                              "before running the parser.");
+  m_future = std::async(std::launch::async, doParsing, event_id_start,
+                        event_time_offset_start, range);
+}
 
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
+    int32_t *event_id_start, TimeOffsetType *event_time_offset_start,
+    const LoadRange &range) {
+  // change event_id_start in place
   eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
                                range.bankIndex);
 
   // TODO Use MPI Comm to get number of ranks
   int nrank = 1;
   m_allRankData.resize(nrank);
-
-  extractEventsForRanks(m_allRankData, m_globalSpectrumIndex,
-                        event_time_offset_start, range.eventOffset);
+  // event_id_start now contains globalSpectrumIndex
+  extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
+                        range);
 
   // TODO: Redistribute data across MPI Ranks
   // redistributeDataMPI(m_thisRankData, allRankData);
@@ -186,10 +197,14 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() {}
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
+  m_future.wait();
+}
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::finalize() {}
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::finalize() const {
+  wait();
+}
 
 // Template Specialization Exports
 template class DLLExport EventParser<int32_t, int64_t, int32_t>;
