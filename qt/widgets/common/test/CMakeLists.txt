@@ -20,7 +20,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
-	    Types
+            Types
             Kernel
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

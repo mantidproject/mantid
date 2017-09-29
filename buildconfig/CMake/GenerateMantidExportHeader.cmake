@@ -31,8 +31,6 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY )
 #ifndef ${TARGET_NAME}_DEPRECATED\n\
     #define ${TARGET_NAME}_DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
 #endif\n\n\
-#include <cstddef>\n\
-#include <cstdint>\n\
  ")
     
     generate_export_header("${TARGET_LIBRARY}" 
