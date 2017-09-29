@@ -28,8 +28,8 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY )
 #ifndef UNUSED_ARG\n\
     #define UNUSED_ARG(x) (void) x;\n\
 #endif\n\n\
-#ifndef DEPRECATED\n\
-    #define DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
+#ifndef ${TARGET_NAME}_DEPRECATED\n\
+    #define ${TARGET_NAME}_DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
 #endif\n\n\
 #include <cstddef>\n\
 #include <cstdint>\n\
