@@ -63,6 +63,7 @@ private:
   API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
                                    const API::ITableWorkspace_sptr &phase,
                                    const std::vector<double> &n0);
+ size_t findName(const std::string pattern, const std::vector<std::string> &names);
 };
 
 } // namespace Algorithms

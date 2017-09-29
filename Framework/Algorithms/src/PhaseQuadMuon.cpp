@@ -66,33 +66,59 @@ void PhaseQuadMuon::exec() {
 */
 std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
-  std::map<std::string, std::string> result;
+	std::map<std::string, std::string> result;
 
-  // Check that input ws and table ws have compatible dimensions
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  API::ITableWorkspace_const_sptr tabWS = getProperty("PhaseTable");
-  if (!inputWS) {
-    result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
-                               "provide a MatrixWorkspace as the "
-                               "InputWorkspace";
-    return result;
-  }
-  size_t nspec = inputWS->getNumberHistograms();
-  size_t ndet = tabWS->rowCount();
+	// Check that input ws and table ws have compatible dimensions
+	API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+	API::ITableWorkspace_const_sptr tabWS = getProperty("PhaseTable");
+	if (!inputWS) {
+		result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
+			"provide a MatrixWorkspace as the "
+			"InputWorkspace";
+		return result;
+	}
+	size_t nspec = inputWS->getNumberHistograms();
+	size_t ndet = tabWS->rowCount();
 
-  if (tabWS->columnCount() == 0) {
-    result["PhaseTable"] = "Please provide a non-empty PhaseTable.";
-  }
+	if (tabWS->columnCount() == 0) {
+		result["PhaseTable"] = "Please provide a non-empty PhaseTable.";
+	}
 
-  if (nspec != ndet) {
-    result["PhaseTable"] = "PhaseTable must have one row per spectrum";
-  }
+	if (nspec != ndet) {
+		result["PhaseTable"] = "PhaseTable must have one row per spectrum";
+	}
 
-  // PhaseTable should have three columns: (detector, asymmetry, phase)
-  if (tabWS->columnCount() != 3) {
-    result["PhaseTable"] = "PhaseTable must have three columns";
-  }
-
+	// PhaseTable should have three columns: (detector, asymmetry, phase)
+	if (tabWS->columnCount() != 3) {
+		result["PhaseTable"] = "PhaseTable must have three columns";
+	}
+	auto names = tabWS->getColumnNames();
+	for (int j = 0; j < 3; j++) {
+		std::transform(names[j].begin(), names[j].end(), names[j].begin(), ::tolower);
+	}
+	std::vector<std::string> goodNames = {"phase", "asym", "asymm", "asymmetry"};
+	int phaseCount = 0;
+	int asymmetryCount = 0;
+	for (std::string  name : names) {
+		if (name == goodNames[0]) {
+			phaseCount += 1;
+		}
+		if (name == goodNames[1] || name == goodNames[2] || name == goodNames[3]) {
+			asymmetryCount += 1;
+		}
+	}
+	if (phaseCount == 0) {
+		result["PhaseTable"] = "PhaseTable needs phases column";
+   }
+	if (asymmetryCount == 0) {
+		result["PhaseTable"] = "PhaseTable needs a asymmetry/asymm/asym column";
+   }
+	if (phaseCount >1) {
+		result["PhaseTable"] = "PhaseTable has "+std::to_string(phaseCount)+ " phase columns";
+	}
+	if (asymmetryCount > 1) {
+		result["PhaseTable"] = "PhaseTable has "+std::to_string(asymmetryCount)+" asymmetry/asymm/asym columns";
+	}
   // Check units, should be microseconds
   Unit_const_sptr unit = inputWS->getAxis(0)->unit();
   if ((unit->caption() != "Time") || (unit->label().ascii() != "microsecond")) {
@@ -101,6 +127,18 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
   return result;
 }
+
+size_t PhaseQuadMuon::findName(const std::string pattern, const std::vector<std::string> &names) {
+	auto it = std::find_if(names.begin(), names.end(), [pattern](const std::string& s) {
+		if (s == pattern) { return true; }
+		else { return false; } });
+	if (it == names.end()) {
+		return -1;
+	}
+	return std::distance(names.begin(), it);
+}
+
+
 //----------------------------------------------------------------------------------------------
 /** Calculates the normalization constant for the exponential decay
 * @param ws :: [input] Workspace containing the spectra to remove exponential
@@ -168,11 +206,24 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     throw std::invalid_argument("Invalid normalization constants");
   }
 
+  auto names = phase->getColumnNames();
+  for (int j = 0; j < 3; j++) {
+	  std::transform(names[j].begin(), names[j].end(), names[j].begin(), ::tolower); 
+  }
+  auto phaseIndex = findName("phase", names);
+  auto asymmetryIndex = findName("asymmetry", names);
+  if (asymmetryIndex == -1) {
+	  asymmetryIndex = findName("asymm", names);
+	  if (asymmetryIndex == -1) {
+		  asymmetryIndex = findName("asym", names);
+	  }
+  }
+
   // Get the maximum asymmetry
   double maxAsym = 0.;
   for (size_t h = 0; h < nspec; h++) {
-    if (phase->Double(h, 1) > maxAsym) {
-      maxAsym = phase->Double(h, 1);
+    if (phase->Double(h, asymmetryIndex) > maxAsym) {
+      maxAsym = phase->Double(h, asymmetryIndex);
     }
   }
   if (maxAsym == 0.0) {
@@ -188,8 +239,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double sxy = 0.;
 
     for (size_t h = 0; h < nspec; h++) {
-      const double asym = phase->Double(h, 1) / maxAsym;
-      const double phi = phase->Double(h, 2);
+      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+      const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
       sxx += X * X;
@@ -202,8 +253,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     const double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
-      const double asym = phase->Double(h, 1) / maxAsym;
-      const double phi = phase->Double(h, 2);
+      const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
+      const double phi = phase->Double(h, phaseIndex);
       const double X = n0[h] * asym * cos(phi);
       const double Y = n0[h] * asym * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
