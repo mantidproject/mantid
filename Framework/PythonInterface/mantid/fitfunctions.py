@@ -191,23 +191,27 @@ class FunctionWrapper(object):
         if key == "nSteps":
            nSteps = kwargs[key]
 
-      if isWorkspace:
-          if not haveXValues:
-              xvals = ws.readX(workspaceIndex)
-              if haveStartX and haveEndX:
-                 xvals = filter(inRange, xvals)
-          if extractSpectrum or haveXValues or (haveStartX and haveEndX):
+      if haveXValues:
+          spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
+      elif isWorkspace:
+          xvals = ws.readX(workspaceIndex)
+          if haveStartX and haveEndX:
+              xvals = filter(inRange, xvals)
+          if extractSpectrum or (haveStartX and haveEndX):
               spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
           else:
               spectrumWs = ws           
       elif haveStartX and haveEndX:
-          if not haveXValues:
-              xvals = [ (xMax - xMin)*x/(nSteps+0.0) + xMin for x in range(nSteps+1)]
+          xvals = [ (xMax - xMin)*x/(nSteps+0.0) + xMin for x in range(nSteps+1)]
           spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
       else:
+          if not haveStartX:
+             raise RuntimeError("startX must be defined if no workspace or xValues are defined.") 
+          if not haveEndX:
+             raise RuntimeError("endX must be defined if no workspace or xValues are defined.")
           print "Can't plot"
           return
-      
+
       outWs = self(spectrumWs)
       vals = outWs.readY(1)
       function = CreateWorkspace( DataX=xvals, DataY=vals)
