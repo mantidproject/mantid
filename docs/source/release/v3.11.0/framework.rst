@@ -9,6 +9,7 @@ Instrument Definitinons
 -----------------------
 
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
+- The detector efficiency correction formulas for ILL's IN4, IN5 and IN6 spectrometers have been revised. IN4 has now separate formulas for the low and large angle detectors while the previously incorrect IN5 and IN6 formulas were fixed.
 
 Algorithms
 ----------
