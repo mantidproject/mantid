@@ -50,8 +50,8 @@ Usage
   outmaskws = ExtractMaskToTable(InputWorkspace=dataws, Xmin = 12300., Xmax = 24500.)
 
   # Output
-  print "Number of rows: ", outmaskws.rowCount()
-  print "Row 0: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(0, 0), outmaskws.cell(0, 1), outmaskws.cell(0, 2))
+  print("Number of rows:  {}".format(outmaskws.rowCount()))
+  print("Row 0: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(0, 0), outmaskws.cell(0, 1), outmaskws.cell(0, 2)))
 
 .. testcleanup:: ExHistSimple
 
@@ -88,10 +88,10 @@ Output:
   outmaskws = ExtractMaskToTable(InputWorkspace=dataws, MaskTableWorkspace=tws, Xmin = 12300., Xmax = 24500.)
 
   # Write some result
-  print "Number of rows: ", outmaskws.rowCount()
-  print "Row 0: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(0, 0), outmaskws.cell(0, 1), outmaskws.cell(0, 2))
-  print "Row 1: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(1, 0), outmaskws.cell(1, 1), outmaskws.cell(1, 2))
-  print "Row 2: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(2, 0), outmaskws.cell(2, 1), outmaskws.cell(2, 2))
+  print("Number of rows:  {}".format(outmaskws.rowCount()))
+  print("Row 0: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(0, 0), outmaskws.cell(0, 1), outmaskws.cell(0, 2)))
+  print("Row 1: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(1, 0), outmaskws.cell(1, 1), outmaskws.cell(1, 2)))
+  print("Row 2: Xmin = %.5f, Xmax = %.5f, DetectorIDsList = %s." % (outmaskws.cell(2, 0), outmaskws.cell(2, 1), outmaskws.cell(2, 2)))
 
 .. testcleanup:: ExOptTable
 
