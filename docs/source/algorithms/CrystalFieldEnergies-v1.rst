@@ -21,11 +21,11 @@ The algorithm calculates the crystal field energies and wave functions. The exam
       en, wf, ham = energies(1,  B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544)
       
       # a list of crystal field energies
-      print 'energies:\n', en
+      print('energies:\n{}'.format(en))
       # a complex-valued matrix with wave functions
-      print 'wave functions:\n', wf
+      print('wave functions:\n{}'.format(wf))
       # a complex-valued matrix with the Hamiltonian
-      print 'Hamiltonian:\n', ham
+      print('Hamiltonian:\n{}'.format(ham))
 
 .. testoutput::
 

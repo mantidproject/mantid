@@ -157,11 +157,11 @@ _`Usage`
    #Another way we can call CutMD:
    #[out1, out2, out3] = CutMD([to_cut, "some_other_file.nxs", "some_workspace_name"], ...)
 
-   print 'number of dimensions', out_md.getNumDims()
-   print 'number of dimensions not integrated', len(out_md.getNonIntegratedDimensions())
+   print('number of dimensions {}'.format(out_md.getNumDims()))
+   print('number of dimensions not integrated {}'.format(len(out_md.getNonIntegratedDimensions())))
    dim_dE = out_md.getDimension(3)
-   print 'min dE', dim_dE.getMaximum()
-   print 'max dE', dim_dE.getMinimum()
+   print('min dE {}'.format(dim_dE.getMaximum()))
+   print('max dE {}'.format(dim_dE.getMinimum()))
 
 Output:
 
@@ -184,15 +184,15 @@ Output:
    # Cut the MDHistoWorkspace to give a single bin containing half the data              
    cut= CutMD(InputWorkspace=histo_ws, PBins=[[-10, 10], [-5, 5]]) 
 
-   print 'Total signal in input = %0.2f' %  sum(signal)
-   print 'Half the volume should give half the signal = %0.2f' % cut.getSignalArray()
+   print('Total signal in input = {}'.format(sum(signal)))
+   print('Half the volume should give half the signal = {}'.format(cut.getSignalArray()[0][0]))
 
 Output:
 
 .. testoutput:: ExampleMDHisto
 
-   Total signal in input = 100.00
-   Half the volume should give half the signal = 50.00
+   Total signal in input = 100.0
+   Half the volume should give half the signal = 50.0
    
 .. categories::
 
