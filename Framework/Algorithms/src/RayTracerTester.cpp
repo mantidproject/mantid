@@ -55,6 +55,7 @@ void RayTracerTester::exec() {
   int NumAzimuth = getProperty("NumAzimuth");
   int NumZenith = getProperty("NumZenith");
   Progress prog(this, 0.3, 1.0, NumAzimuth);
+  InstrumentRayTracer tracker(ws->getInstrument());
   for (int iaz = 0; iaz < NumAzimuth; iaz++) {
     prog.report();
     double az = double(iaz) * M_PI * 2.0 / double(NumAzimuth);
@@ -66,7 +67,6 @@ void RayTracerTester::exec() {
       V3D beam(x, y, z);
 
       // Create a ray tracer
-      InstrumentRayTracer tracker(ws->getInstrument());
       tracker.traceFromSample(beam);
       IDetector_const_sptr det = tracker.getDetectorResult();
       if (det) {

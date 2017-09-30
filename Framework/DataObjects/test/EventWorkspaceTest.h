@@ -548,9 +548,8 @@ public:
   void test_sortAll_TOF() {
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {
@@ -568,9 +567,8 @@ public:
     int numEvents = 30;
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
 
-    test_in->sortAll(TOF_SORT, prog);
+    test_in->sortAll(TOF_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -586,9 +584,8 @@ public:
     int numEvents = 30;
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(numEvents, 1);
-    Progress *prog = NULL;
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     std::vector<TofEvent> ve = outWS->getSpectrum(0).getEvents();
@@ -600,9 +597,8 @@ public:
   void test_sortAll_ByTime() {
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createRandomEventWorkspace(NUMBINS, NUMPIXELS);
-    Progress *prog = NULL;
 
-    test_in->sortAll(PULSETIME_SORT, prog);
+    test_in->sortAll(PULSETIME_SORT, nullptr);
 
     EventWorkspace_sptr outWS = test_in;
     for (int wi = 0; wi < NUMPIXELS; wi++) {

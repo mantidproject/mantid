@@ -61,7 +61,7 @@
 #include <QTableWidget>
 #include <QWidget>
 #include <QWidgetList>
-#include <stdio.h>
+#include <cstdio>
 
 #include <qwt_plot_curve.h>
 
@@ -73,9 +73,9 @@ FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
   setWindowTitle(tr("MantidPlot - Fit Wizard"));
   setSizeGripEnabled(true);
 
-  d_param_table = 0;
-  d_current_fit = 0;
-  d_preview_curve = 0;
+  d_param_table = nullptr;
+  d_current_fit = nullptr;
+  d_preview_curve = nullptr;
 
   tw = new QStackedWidget();
 
@@ -1453,7 +1453,7 @@ void FitDialog::updatePreview() {
     d_preview_curve->detach();
     d_graph->replot();
     delete d_preview_curve;
-    d_preview_curve = 0;
+    d_preview_curve = nullptr;
     return;
   }
 

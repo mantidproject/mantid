@@ -39,7 +39,7 @@ class QtReflSettingsView : public QWidget, public IReflSettingsView {
   Q_OBJECT
 public:
   /// Constructor
-  explicit QtReflSettingsView(QWidget *parent = 0);
+  explicit QtReflSettingsView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflSettingsView() override;
   /// Returns the presenter managing this view

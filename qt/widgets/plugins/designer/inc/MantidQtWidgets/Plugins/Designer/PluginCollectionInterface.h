@@ -61,7 +61,7 @@ class PluginCollectionInterface
 
 public:
   /// Default constructor
-  PluginCollectionInterface(QObject *parent = 0);
+  PluginCollectionInterface(QObject *parent = nullptr);
   /// Returns a list of the custom widgets within this library
   virtual QList<QDesignerCustomWidgetInterface *> customWidgets() const;
 

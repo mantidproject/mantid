@@ -245,7 +245,7 @@ std::vector<std::string> readStringVector(Group &group,
   DataSpace dataspace = dataset.getSpace();
   DataType datatype = dataset.getDataType();
 
-  dataspace.getSimpleExtentDims(dims, NULL);
+  dataspace.getSimpleExtentDims(dims, nullptr);
 
   rdata = new char *[dims[0]];
   dataset.read(rdata, datatype);

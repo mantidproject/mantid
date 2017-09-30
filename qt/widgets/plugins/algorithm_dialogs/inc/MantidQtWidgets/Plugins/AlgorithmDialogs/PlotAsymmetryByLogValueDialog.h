@@ -54,7 +54,7 @@ class PlotAsymmetryByLogValueDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Constructor
-  PlotAsymmetryByLogValueDialog(QWidget *parent = 0);
+  PlotAsymmetryByLogValueDialog(QWidget *parent = nullptr);
   /// Destructor
   ~PlotAsymmetryByLogValueDialog() override;
 

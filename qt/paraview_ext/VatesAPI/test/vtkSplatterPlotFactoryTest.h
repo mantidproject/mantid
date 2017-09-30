@@ -43,7 +43,7 @@ public:
 
   void testInitializeWithNullWorkspaceThrows() {
     vtkSplatterPlotFactory factory("signal");
-    IMDEventWorkspace *ws = NULL;
+    IMDEventWorkspace *ws = nullptr;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.",
                       factory.initialize(Workspace_sptr(ws)),
                       std::invalid_argument);
@@ -197,7 +197,7 @@ public:
         MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkSplatterPlotFactory factory("signal");
     factory.initialize(ws);
-    vtkDataSet *product = NULL;
+    vtkDataSet *product = nullptr;
 
     // Act
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));

@@ -30,7 +30,7 @@ public:
   static void destroySuite(ParametrizedComponentTest *suite) { delete suite; }
 
   ParametrizedComponentTest()
-      : m_parentComp(NULL), m_childOneComp(NULL), m_childTwoComp(NULL),
+      : m_parentComp(nullptr), m_childOneComp(nullptr), m_childTwoComp(nullptr),
         m_paramMap(), m_strName("StringParam"), m_strValue("test-string"),
         m_dblName("DblParam"), m_dblValue(10.0), m_posName("PosParam"),
         m_posValue(1, 1, 1), m_quatName("QuatParam"), m_quatValue(2, 3, 4, 5) {}
@@ -238,11 +238,11 @@ private:
 
   void cleanUpComponent() {
     delete m_parentComp;
-    m_parentComp = NULL;
+    m_parentComp = nullptr;
     delete m_childOneComp;
-    m_childOneComp = NULL;
+    m_childOneComp = nullptr;
     delete m_childTwoComp;
-    m_childTwoComp = NULL;
+    m_childTwoComp = nullptr;
     // delete m_paramMap;    m_paramMap = NULL;
   }
 

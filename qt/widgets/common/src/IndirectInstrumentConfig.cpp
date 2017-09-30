@@ -22,7 +22,7 @@ IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent)
       m_removeDiffraction(false), m_forceDiffraction(false) {
   m_uiForm.setupUi(this);
 
-  m_instrumentSelector = new InstrumentSelector(0, false);
+  m_instrumentSelector = new InstrumentSelector(nullptr, false);
   m_instrumentSelector->updateInstrumentOnSelection(false);
   m_uiForm.loInstrument->addWidget(m_instrumentSelector);
 

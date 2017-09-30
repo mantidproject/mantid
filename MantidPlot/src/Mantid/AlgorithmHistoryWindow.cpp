@@ -20,9 +20,9 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <numeric>
+#include <cstdio>
 #include <fstream>
-#include <stdio.h>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -35,12 +35,13 @@ Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
 }
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
-    : QGroupBox(w), m_execDurationlabel(NULL), m_execDurationEdit(NULL),
-      m_Datelabel(NULL), m_execDateTimeEdit(NULL), m_algexecDuration() {}
+    : QGroupBox(w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
+      m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {}
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
-    : QGroupBox(title, w), m_execDurationlabel(NULL), m_execDurationEdit(NULL),
-      m_Datelabel(NULL), m_execDateTimeEdit(NULL), m_algexecDuration() {
+    : QGroupBox(title, w), m_execDurationlabel(nullptr),
+      m_execDurationEdit(nullptr), m_Datelabel(nullptr),
+      m_execDateTimeEdit(nullptr), m_algexecDuration() {
 
   m_execDurationEdit = new QLineEdit("", this);
   if (m_execDurationEdit)
@@ -68,23 +69,23 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
 AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox() {
   if (m_execDurationlabel) {
     delete m_execDurationlabel;
-    m_execDurationlabel = NULL;
+    m_execDurationlabel = nullptr;
   }
   if (m_execDurationEdit) {
     delete m_execDurationEdit;
-    m_execDurationEdit = NULL;
+    m_execDurationEdit = nullptr;
   }
   if (m_Datelabel) {
     delete m_Datelabel;
-    m_Datelabel = NULL;
+    m_Datelabel = nullptr;
   }
   if (m_Datelabel) {
     delete m_Datelabel;
-    m_Datelabel = NULL;
+    m_Datelabel = nullptr;
   }
   if (m_execDateTimeEdit) {
     delete m_execDateTimeEdit;
-    m_execDateTimeEdit = NULL;
+    m_execDateTimeEdit = nullptr;
   }
 }
 void AlgExecSummaryGrpBox::setData(const double execDuration,
@@ -111,14 +112,14 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,
 }
 
 AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QWidget *w)
-    : QGroupBox(w), m_osNameLabel(NULL), m_osNameEdit(NULL),
-      m_osVersionLabel(NULL), m_osVersionEdit(NULL),
-      m_frmworkVersionLabel(NULL), m_frmwkVersnEdit(NULL) {}
+    : QGroupBox(w), m_osNameLabel(nullptr), m_osNameEdit(nullptr),
+      m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
+      m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {}
 
 AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
-    : QGroupBox(title, w), m_osNameLabel(NULL), m_osNameEdit(NULL),
-      m_osVersionLabel(NULL), m_osVersionEdit(NULL),
-      m_frmworkVersionLabel(NULL), m_frmwkVersnEdit(NULL) {
+    : QGroupBox(title, w), m_osNameLabel(nullptr), m_osNameEdit(nullptr),
+      m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
+      m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {
   // OS Name Label & Edit Box
   m_osNameEdit = new QLineEdit("", this);
   if (m_osNameEdit) {
@@ -157,39 +158,39 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
 AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
   if (m_osNameLabel) {
     delete m_osNameLabel;
-    m_osNameLabel = NULL;
+    m_osNameLabel = nullptr;
   }
   if (m_osNameEdit) {
     delete m_osNameEdit;
-    m_osNameEdit = NULL;
+    m_osNameEdit = nullptr;
   }
   if (m_osNameEdit) {
     delete m_osNameEdit;
-    m_osNameEdit = NULL;
+    m_osNameEdit = nullptr;
   }
   if (m_osVersionLabel) {
     delete m_osVersionLabel;
-    m_osVersionLabel = NULL;
+    m_osVersionLabel = nullptr;
   }
   if (m_osVersionEdit) {
     delete m_osVersionEdit;
-    m_osVersionEdit = NULL;
+    m_osVersionEdit = nullptr;
   }
   if (m_frmworkVersionLabel) {
     delete m_frmworkVersionLabel;
-    m_frmworkVersionLabel = NULL;
+    m_frmworkVersionLabel = nullptr;
   }
   if (m_frmwkVersnEdit) {
     delete m_frmwkVersnEdit;
-    m_frmwkVersnEdit = NULL;
+    m_frmwkVersnEdit = nullptr;
   }
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
     : MantidDialog(parent), m_algHist(wsptr->getHistory()),
-      m_histPropWindow(NULL), m_execSumGrpBox(NULL), m_envHistGrpBox(NULL),
-      m_wsName(wsptr->getName().c_str()),
+      m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
+      m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
       m_view(wsptr->getHistory().createView()) {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(500);
@@ -292,19 +293,19 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow() {
   if (m_Historytree) {
     delete m_Historytree;
-    m_Historytree = NULL;
+    m_Historytree = nullptr;
   }
   if (m_histPropWindow) {
     delete m_histPropWindow;
-    m_histPropWindow = NULL;
+    m_histPropWindow = nullptr;
   }
   if (m_execSumGrpBox) {
     delete m_execSumGrpBox;
-    m_execSumGrpBox = NULL;
+    m_execSumGrpBox = nullptr;
   }
   if (m_envHistGrpBox) {
     delete m_envHistGrpBox;
-    m_envHistGrpBox = NULL;
+    m_envHistGrpBox = nullptr;
   }
 }
 
@@ -325,7 +326,7 @@ AlgExecSummaryGrpBox *AlgorithmHistoryWindow::createExecSummaryGrpBox() {
     return pgrpBox;
   } else {
     QMessageBox::critical(this, "Mantid", "Invalid Pointer");
-    return 0;
+    return nullptr;
   }
 }
 AlgEnvHistoryGrpBox *
@@ -337,7 +338,7 @@ AlgorithmHistoryWindow::createEnvHistGrpBox(const EnvironmentHistory &envHist) {
     return pEnvGrpBox;
   } else {
     QMessageBox::critical(this, "Mantid", "Invalid Pointer");
-    return 0;
+    return nullptr;
   }
 }
 AlgHistoryProperties *AlgorithmHistoryWindow::createAlgHistoryPropWindow() {
@@ -351,7 +352,7 @@ AlgHistoryProperties *AlgorithmHistoryWindow::createAlgHistoryPropWindow() {
   // AlgHistoryProperties(this,m_algHist);
   if (histProp.empty()) {
     QMessageBox::critical(this, "Mantid", "Properties not set");
-    return 0;
+    return nullptr;
   }
   AlgHistoryProperties *phistPropWindow =
       new AlgHistoryProperties(this, histProp);
@@ -360,7 +361,7 @@ AlgHistoryProperties *AlgorithmHistoryWindow::createAlgHistoryPropWindow() {
     return phistPropWindow;
   } else {
     QMessageBox::critical(this, "Mantid", "Invalid Pointer");
-    return 0;
+    return nullptr;
   }
 }
 
@@ -461,7 +462,7 @@ void AlgorithmHistoryWindow::copytoClipboard() {
 
   // Send to clipboard.
   QClipboard *clipboard = QApplication::clipboard();
-  if (NULL != clipboard) {
+  if (nullptr != clipboard) {
     clipboard->setText(script);
   }
 }

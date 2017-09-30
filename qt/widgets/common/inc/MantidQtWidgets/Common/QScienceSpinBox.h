@@ -16,7 +16,7 @@ namespace API {
 class EXPORT_OPT_MANTIDQT_COMMON QScienceSpinBox : public QDoubleSpinBox {
   Q_OBJECT
 public:
-  QScienceSpinBox(QWidget *parent = 0);
+  QScienceSpinBox(QWidget *parent = nullptr);
 
   int decimals() const;
   void setDecimals(int value);

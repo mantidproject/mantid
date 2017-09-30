@@ -63,7 +63,7 @@ public:
   typedef std::pair<Mantid::API::IAlgorithm_sptr, AlgorithmRuntimeProps>
       ConfiguredAlgorithm;
 
-  explicit BatchAlgorithmRunner(QObject *parent = 0);
+  explicit BatchAlgorithmRunner(QObject *parent = nullptr);
   ~BatchAlgorithmRunner() override;
 
   /// Adds an algorithm to the execution queue

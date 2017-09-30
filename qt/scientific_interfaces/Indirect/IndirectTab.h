@@ -3,15 +3,16 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
-#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
-#include "MantidQtWidgets/Common/RangeSelector.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
+#include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include <QDoubleValidator>
 #include <QMap>
@@ -19,6 +20,8 @@
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
+
+#include <algorithm>
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -72,7 +75,7 @@ class DLLExport IndirectTab : public QObject {
   Q_OBJECT
 
 public:
-  IndirectTab(QObject *parent = 0);
+  IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
 public slots:
@@ -128,6 +131,50 @@ protected:
 
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
+
+  /// Updates the properties in the m_dblManager
+  void updateProperties(const QString &functionName, const QString &prefix,
+                        const QStringList &paramNames,
+                        const QMap<QString, double> &paramValues,
+                        int startOffset, int endOffset);
+
+  /// Extracts a map of column name to value in the specified spectra from the
+  /// specified table workspace
+  QMap<QString, double>
+  extractRowFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
+                      size_t wsIndex);
+
+  /// Extracts the specified columns from the table workspace with the specified
+  /// name, storing them in a map of row index to a map of column name to cell
+  /// value.
+  QHash<QString, QHash<size_t, double>>
+  extractParametersFromTable(const std::string &tableWsName,
+                             const QSet<QString> &columnsToExtract,
+                             size_t minSpectrum, size_t maxSpectrum);
+
+  /// Extracts the specified columns from the table workspace with the specified
+  /// name, storing them in a map of row index to a map of column name to cell
+  /// value.
+  QHash<QString, QHash<size_t, double>>
+  extractParametersFromTable(const std::string &tableWsName,
+                             const QSet<QString> &columnsToExtract,
+                             const std::vector<size_t> &spectraIndices);
+
+  /// Extracts the specified columns from the specified table workspace,
+  /// storing them in a map of row index to a map of column name to cell
+  /// value.
+  QHash<QString, QHash<size_t, double>>
+  extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
+                             const QSet<QString> &columnsToExtract,
+                             const std::vector<size_t> &spectraIndices);
+
+  /// Extracts the column with the specified name from the specified
+  /// table workspace, storing it in a map from spectrum index to cell
+  /// value.
+  QHash<size_t, double>
+  extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
+                         const std::string &columnName,
+                         const std::vector<size_t> &spectraIndices);
 
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector *rs,
@@ -216,6 +263,6 @@ protected:
   std::string m_pythonExportWsName;
 };
 } // namespace CustomInterfaces
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif /* MANTID_CUSTOMINTERFACES_INDIRECTTAB_H_ */

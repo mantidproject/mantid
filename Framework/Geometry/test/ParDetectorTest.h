@@ -11,7 +11,7 @@ using namespace Mantid::Geometry;
 class ParDetectorTest : public CxxTest::TestSuite {
 public:
   void testNameConstructor() {
-    Detector det("det1", 0, 0);
+    Detector det("det1", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -35,7 +35,7 @@ public:
 
   void testId() {
     int id1 = 41;
-    Detector det("det1", id1, 0);
+    Detector det("det1", id1, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -44,7 +44,7 @@ public:
   }
 
   void testType() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -53,7 +53,7 @@ public:
   }
 
   void testMasked() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     boost::shared_ptr<Detector> pdet(det.cloneParameterized(pmap.get()));
@@ -65,7 +65,7 @@ public:
   }
 
   void testGetNumberParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("double", &det, "testparam", 5.0);
@@ -77,7 +77,7 @@ public:
   }
 
   void testGetPositionParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("V3D", &det, "testparam", Mantid::Kernel::V3D(0.5, 1.0, 1.5));
@@ -94,7 +94,7 @@ public:
   }
 
   void testGetRotationParameter() {
-    Detector det("det", 0, 0);
+    Detector det("det", 0, nullptr);
 
     ParameterMap_sptr pmap(new ParameterMap());
     pmap->add("Quat", &det, "testparam",
