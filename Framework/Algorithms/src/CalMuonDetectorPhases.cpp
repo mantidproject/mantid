@@ -209,7 +209,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
     phase = phase - M_PI;
   }
   // Now convert phases to interval [0, 2PI)
-  int factor = static_cast<int>(floor(phase / (2.* M_PI)));
+  int factor = static_cast<int>(floor(phase / (2. * M_PI)));
   if (factor) {
     phase = phase - factor * 2. * M_PI;
   }
