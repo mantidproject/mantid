@@ -205,7 +205,7 @@ public:
             alg.getProperty("Workspace"));
 
     const Run &wSpaceRun = output->run();
-    Property *prop = NULL;
+    Property *prop = nullptr;
     TS_ASSERT_THROWS_NOTHING(prop = wSpaceRun.getLogData(LogName);)
     if (!prop)
       return;

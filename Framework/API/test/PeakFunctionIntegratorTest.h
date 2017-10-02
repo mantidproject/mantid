@@ -95,14 +95,14 @@ public:
   void testDefaultConstruction() {
     TestablePeakFunctionIntegrator integrator;
 
-    TS_ASSERT(integrator.m_integrationWorkspace != 0);
+    TS_ASSERT(integrator.m_integrationWorkspace != nullptr);
     TS_ASSERT_EQUALS(integrator.m_relativePrecision, 1e-8);
   }
 
   void testConstruction() {
     TestablePeakFunctionIntegrator integrator(1e-10);
 
-    TS_ASSERT(integrator.m_integrationWorkspace != 0);
+    TS_ASSERT(integrator.m_integrationWorkspace != nullptr);
     TS_ASSERT_EQUALS(integrator.m_relativePrecision, 1e-10);
   }
 

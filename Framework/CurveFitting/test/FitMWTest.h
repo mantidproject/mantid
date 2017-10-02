@@ -648,7 +648,7 @@ public:
     Mantid::Geometry::ObjComponent *sample =
         new Mantid::Geometry::ObjComponent("sample");
     instrument->markAsSamplePos(sample);
-    auto *det = new Mantid::Geometry::Detector("det", 1, 0);
+    auto *det = new Mantid::Geometry::Detector("det", 1, nullptr);
     instrument->add(det);
     instrument->markAsDetector(det);
 

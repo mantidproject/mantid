@@ -344,7 +344,7 @@ private:
 class FindComponentVisitor : public GLActorVisitor {
 public:
   explicit FindComponentVisitor(const Mantid::Geometry::ComponentID id)
-      : m_id(id), m_actor(NULL) {}
+      : m_id(id), m_actor(nullptr) {}
   using GLActorVisitor::visit;
   bool visit(GLActor *) override;
   ComponentActor *getActor() const { return m_actor; }

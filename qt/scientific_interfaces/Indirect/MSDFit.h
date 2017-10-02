@@ -11,7 +11,7 @@ class DLLExport MSDFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  MSDFit(QWidget *parent = 0);
+  MSDFit(QWidget *parent = nullptr);
 
 private:
   void setup() override;

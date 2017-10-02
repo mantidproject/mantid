@@ -10,7 +10,7 @@ class DLLExport ContainerSubtraction : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  ContainerSubtraction(QWidget *parent = 0);
+  ContainerSubtraction(QWidget *parent = nullptr);
 
 private slots:
   /// Handles a new sample being loaded

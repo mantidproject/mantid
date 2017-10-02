@@ -507,7 +507,7 @@ int user_f(const gsl_vector *x, void *params, gsl_vector *f) {
     }
     delete[] parameters;
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, "MantidPlot - Input function error",
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
                           QString::fromStdString(e.GetMsg()));
     return GSL_EINVAL;
   }
@@ -540,7 +540,7 @@ double user_d(const gsl_vector *x, void *params) {
     }
     delete[] parameters;
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, "MantidPlot - Input function error",
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
                           QString::fromStdString(e.GetMsg()));
     return GSL_EINVAL;
   }

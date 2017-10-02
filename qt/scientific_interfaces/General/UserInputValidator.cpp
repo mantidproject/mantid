@@ -307,7 +307,7 @@ bool UserInputValidator::isAllInputValid() { return m_errorMessages.isEmpty(); }
  */
 void UserInputValidator::setErrorLabel(QLabel *errorLabel, bool valid) {
   // Do nothing if no error label was provided
-  if (errorLabel == NULL)
+  if (errorLabel == nullptr)
     return;
 
   if (!valid) {

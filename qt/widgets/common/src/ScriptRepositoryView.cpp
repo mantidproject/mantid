@@ -327,7 +327,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
 
   if (!index.isValid())
     return;
-  if (painter->device() == 0)
+  if (painter->device() == nullptr)
     return;
 
   QIcon icon;
@@ -449,7 +449,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(
     const QModelIndex &index) const {
   if (!index.isValid())
     return;
-  if (painter->device() == 0)
+  if (painter->device() == nullptr)
     return;
 
   QStyleOptionViewItemV4 modifiedOption(option);
@@ -536,7 +536,7 @@ void ScriptRepositoryView::RemoveEntryDelegate::paint(
 
   if (!index.isValid())
     return;
-  if (painter->device() == 0)
+  if (painter->device() == nullptr)
     return;
 
   QIcon icon;

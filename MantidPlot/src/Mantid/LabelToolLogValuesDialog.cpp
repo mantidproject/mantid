@@ -109,7 +109,7 @@ void LabelToolLogValuesDialog::importItem(QTreeWidgetItem *item) {
   // Dynamic cast up to LegendWidget, which is the class of the
   // one containing the label, in order to use setText
   auto parentWidget = dynamic_cast<LegendWidget *>(m_parentContainer);
-  if (NULL == parentWidget) { // if dynamic cast fails, don't fail silently
+  if (nullptr == parentWidget) { // if dynamic cast fails, don't fail silently
     throw std::bad_cast();
   }
 

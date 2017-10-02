@@ -90,7 +90,7 @@ public:
   }
 
   void testThrowIfInputNull() {
-    vtkUnstructuredGrid *in = NULL;
+    vtkUnstructuredGrid *in = nullptr;
 
     vtkDataSetToScaledDataSet scaler;
 

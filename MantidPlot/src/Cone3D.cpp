@@ -59,7 +59,7 @@ Cone3D::Cone3D(double rad, unsigned quality) {
 Cone3D::~Cone3D() {}
 
 void Cone3D::configure(double rad, unsigned quality) {
-  plot = 0;
+  plot = nullptr;
   radius_ = rad;
   quality_ = quality;
   oldstate_ = GL_FALSE;

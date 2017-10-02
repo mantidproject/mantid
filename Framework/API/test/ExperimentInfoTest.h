@@ -105,7 +105,7 @@ public:
   void test_Setting_A_New_Source_With_NULL_Ptr_Throws() {
     ExperimentInfo ws;
 
-    TS_ASSERT_THROWS(ws.setModeratorModel(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(ws.setModeratorModel(nullptr), std::invalid_argument);
   }
 
   void test_Retrieving_Source_Properties_Before_Set_Throws() {
@@ -192,7 +192,7 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    Property *log(NULL);
+    Property *log(nullptr);
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
     TS_ASSERT_EQUALS(log->name(), actualLogName);
   }
@@ -204,7 +204,7 @@ public:
     addRunWithLog(expt, actualLogName, logValue);
     addInstrumentWithParameter(expt, actualLogName, "some  value");
 
-    Property *log(NULL);
+    Property *log(nullptr);
     TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
     TS_ASSERT_EQUALS(log->name(), actualLogName);
   }

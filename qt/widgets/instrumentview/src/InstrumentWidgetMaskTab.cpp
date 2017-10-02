@@ -65,9 +65,9 @@ namespace MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget), m_activity(Select),
       m_hasMaskToApply(false), m_maskBins(false), m_userEditing(true),
-      m_groupManager(NULL), m_stringManager(NULL), m_doubleManager(NULL),
-      m_browser(NULL), m_left(NULL), m_top(NULL), m_right(NULL),
-      m_bottom(NULL) {
+      m_groupManager(nullptr), m_stringManager(nullptr),
+      m_doubleManager(nullptr), m_browser(nullptr), m_left(nullptr),
+      m_top(nullptr), m_right(nullptr), m_bottom(nullptr) {
 
   // main layout
   QVBoxLayout *layout = new QVBoxLayout(this);
@@ -539,10 +539,10 @@ void InstrumentWidgetMaskTab::clearProperties() {
   m_doublePropertyMap.clear();
   m_pointPropertyMap.clear();
   m_pointComponentsMap.clear();
-  m_left = NULL;
-  m_top = NULL;
-  m_right = NULL;
-  m_bottom = NULL;
+  m_left = nullptr;
+  m_top = nullptr;
+  m_right = nullptr;
+  m_bottom = nullptr;
 }
 
 void InstrumentWidgetMaskTab::setProperties() {

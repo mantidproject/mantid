@@ -41,7 +41,7 @@
 #include <QMessageBox>
 
 LayerDialog::LayerDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), multi_layer(NULL) {
+    : QDialog(parent, fl), multi_layer(nullptr) {
   setObjectName("LayerDialog");
   setWindowTitle(tr("MantidPlot - Arrange Layers"));
 
@@ -224,7 +224,7 @@ void LayerDialog::update() {
   int dn = multi_layer->layers() - graphs;
   if (dn > 0 &&
       QMessageBox::question(
-          0, tr("MantidPlot - Delete Layers?"),
+          nullptr, tr("MantidPlot - Delete Layers?"),
           tr("You are about to delete %1 existing layers.").arg(dn) + "\n" +
               tr("Are you sure you want to continue this operation?"),
           tr("&Continue"), tr("&Cancel"), QString(), 0, 1))

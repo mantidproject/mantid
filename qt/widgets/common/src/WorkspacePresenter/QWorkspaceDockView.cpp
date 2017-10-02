@@ -1107,7 +1107,7 @@ void QWorkspaceDockView::workspaceSelected() {
             SLOT(saveWorkspaceCollection()));
 
     // Don't display as a group
-    m_saveButton->setMenu(NULL);
+    m_saveButton->setMenu(nullptr);
   } else {
     // Don't run the save group function when clicked
     disconnect(m_saveButton, SIGNAL(clicked()), this,

@@ -894,22 +894,13 @@ class RunDescriptor(PropDescriptor):
            workspace which contains monitors.
         """
         if otherWS:
-            data_ws  = otherWS
+            data_ws = otherWS
         else:
             data_ws = self.get_workspace()
         if not data_ws:
             return None
 
-        try:
-            mon_ws = data_ws.getMonitorWorkspace()
-        except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
-            ws_name = data_ws.name()
-            mon_ws_name = ws_name+'_monitors'
-            if mon_ws_name in mtd:
-                mon_ws = mtd[mon_ws_name]
-                data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
-            else:
-                mon_ws = None
+        mon_ws = self.get_monitor_workspace(data_ws)
 
         if mon_ws is None:
             monitors_separate = False
@@ -920,7 +911,6 @@ class RunDescriptor(PropDescriptor):
         spec_to_mon = RunDescriptor._holder.spectra_to_monitors_list
         combined_spec_list = prop_helpers.process_prop_list(mon_ws,"CombinedSpectraIDList")
         if monitors_separate and spec_to_mon:
-            mon_ws_name = mon_ws.name()
 
             for specID in spec_to_mon:
                 if specID not in combined_spec_list:
@@ -964,6 +954,20 @@ class RunDescriptor(PropDescriptor):
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
 
+    def get_monitor_workspace(self, data_ws):
+        mon_ws = None
+        try:
+            mon_ws = data_ws.getMonitorWorkspace()
+        except RuntimeError: # May be old code or some problem connecting workspace with monitor workspace
+            ws_name = data_ws.name()
+            mon_ws_name = ws_name+'_monitors'
+            if mon_ws_name in mtd:
+                mon_ws = mtd[mon_ws_name]
+                data_ws.setMonitorWorkspace(mon_ws) # connect workspace and monitors together
+        return mon_ws
+
+#--------------------------------------------------------------------------------------------------------------------
+
     def is_existing_ws(self):
         """Method verifies if property value relates to workspace, present in ADS"""
         if self._ws_name:
@@ -973,7 +977,7 @@ class RunDescriptor(PropDescriptor):
                 return False
         else:
             return False
-#--------------------------------------------------------------------------------------------------------------------
+
 #--------------------------------------------------------------------------------------------------------------------
 
     def set_file_ext(self,val):

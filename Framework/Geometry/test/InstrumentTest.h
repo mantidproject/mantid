@@ -34,15 +34,15 @@ public:
     ObjComponent *sample = new ObjComponent("sample");
     instrument.add(sample);
     instrument.markAsSamplePos(sample);
-    det = new Detector("det1", 1, 0);
+    det = new Detector("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
     instrument.add(det);
     instrument.markAsDetector(det);
-    det2 = new Detector("det2", 10, 0);
+    det2 = new Detector("det2", 10, nullptr);
     det2->setPos(0.0, 1.0, 0.0);
     instrument.add(det2);
     instrument.markAsDetector(det2);
-    det3 = new Detector("det3", 11, 0);
+    det3 = new Detector("det3", 11, nullptr);
     det->setPos(0.0, 0.0, 1.0);
     instrument.add(det3);
     instrument.markAsMonitor(det3);
@@ -114,7 +114,7 @@ public:
     Instrument *instr = new Instrument("Inst");
     instr->setDefaultViewAxis("Y");
     IComponent *inst = instr;
-    IComponent *copy(NULL);
+    IComponent *copy(nullptr);
     TS_ASSERT_THROWS_NOTHING(copy = inst->clone());
     TS_ASSERT_DIFFERS(&*copy, &*inst);
     TS_ASSERT_EQUALS(copy->getName(), inst->getName());
@@ -247,7 +247,7 @@ public:
     TS_ASSERT_THROWS(instrument.getDetector(0), Exception::NotFoundError);
     TS_ASSERT_EQUALS(instrument.getDetector(1).get(), det);
     TS_ASSERT_THROWS(instrument.getDetector(2), Exception::NotFoundError);
-    Detector *d = new Detector("det", 2, 0);
+    Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument.markAsDetector(d));
     TS_ASSERT_EQUALS(instrument.getDetector(2).get(), d);
     delete d;
@@ -355,7 +355,7 @@ public:
     bank->setRot(q);
     i->add(bank);
 
-    Detector *det = new Detector("det1", 1, 0);
+    Detector *det = new Detector("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
     bank->add(det);
     i->markAsDetector(det);

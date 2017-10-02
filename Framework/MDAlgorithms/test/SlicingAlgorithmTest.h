@@ -326,7 +326,7 @@ public:
 
     // The "reverse" transform does NOT exist
     CoordTransform *transTo = alg->m_transformToOriginal;
-    TS_ASSERT(transTo == NULL);
+    TS_ASSERT(transTo == nullptr);
   }
 
   void test_aligned_ImplicitFunction() {
@@ -755,7 +755,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -776,7 +776,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -795,7 +795,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -813,7 +813,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -834,7 +834,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -853,7 +853,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -872,7 +872,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1025,7 +1025,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1047,7 +1047,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 2);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1071,7 +1071,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 4);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
@@ -1092,7 +1092,7 @@ public:
     TS_ASSERT_EQUALS(alg->m_bases.size(), 3);
 
     // The implicit function
-    MDImplicitFunction *func(NULL);
+    MDImplicitFunction *func(nullptr);
     TS_ASSERT_THROWS_NOTHING(func =
                                  alg->getImplicitFunctionForChunk(NULL, NULL));
     TS_ASSERT(func);
