@@ -14,7 +14,6 @@ public:
   static MostLikelyMeanTest *createSuite() { return new MostLikelyMeanTest(); }
   static void destroySuite( MostLikelyMeanTest *suite ) { delete suite; }
 
-
   void test_Init()
   {
     MostLikelyMean alg;
@@ -24,34 +23,38 @@ public:
 
   void test_exec()
   {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
-
     MostLikelyMean alg;
-    // Don't put output in ADS by default
-    alg.setChild(true);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    std::vector<double> input = {1, 2, 3, 4, 5};
+    alg.initialize();
+    alg.setProperty("InputArray", input);
+    alg.execute();
+    const double mean = alg.getProperty("Output");
+    TS_ASSERT_EQUALS(mean, 3);
   }
-  
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
-
-
 };
 
+class MostLikelyMeanTestPerformance : public CxxTest::TestSuite {
+public:
+  static MostLikelyMeanTestPerformance *createSuite() {
+    return new MostLikelyMeanTestPerformance();
+  }
+  static void destroySuite(MostLikelyMeanTestPerformance *suite) {
+    delete suite;
+  }
+
+  void setUp() {
+    std::vector<double> input(10000);
+    for (size_t i = 0; i < input.size(); ++i) {
+      input[i] = sqrt(i);
+    }
+    m_alg.initialize();
+    m_alg.setProperty("InputArray", input);
+  }
+
+  void test_performance() { m_alg.execute(); }
+
+private:
+  MostLikelyMean m_alg;
+};
 
 #endif /* MANTID_ALGORITHMS_MOSTLIKELYMEANTEST_H_ */

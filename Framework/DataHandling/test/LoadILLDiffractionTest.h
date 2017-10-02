@@ -94,6 +94,7 @@ public:
     TS_ASSERT(run.hasProperty("ScanType"))
     TS_ASSERT(run.hasProperty("PixelSize"))
     TS_ASSERT(run.hasProperty("ResolutionMode"))
+    TS_ASSERT(run.hasProperty("Ei"))
 
     const auto sim = run.getLogData("simulated_d20");
     const auto spy = run.getLogData("AcquisitionSpy");
@@ -101,6 +102,7 @@ public:
     const auto scanType = run.getLogData("ScanType");
     const double pixelSize = run.getLogAsSingleValue("PixelSize");
     const auto resMode = run.getLogData("ResolutionMode");
+    const auto ei = run.getLogAsSingleValue("Ei");
 
     TS_ASSERT_EQUALS(scanType->value(), "NoScan")
     TS_ASSERT_EQUALS(resMode->value(), "Nominal")
@@ -113,6 +115,8 @@ public:
     TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
     TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
+
+    TS_ASSERT_DELTA(ei, 14.09, 0.01)
   }
 
   void test_D20_scan() {
