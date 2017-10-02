@@ -252,14 +252,8 @@ void IndirectDiffractionReduction::saveReductions() {
 
         BatchAlgorithmRunner::AlgorithmRuntimeProps runtimeInput;
         runtimeInput["InputWorkspace"] = tofWsName;
-
-        if (instName == "OSIRIS" && mode == "diffonly") {
-          m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
-                                          runtimeInput);
-        } else {
-          m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
-                                          runtimeInput);
-        }
+        m_batchAlgoRunner->addAlgorithm(saveGSSAlgorithm(wsName + ".gss"),
+                                        runtimeInput);
       }
 
       if (m_uiForm.ckNexus->isChecked()) {
