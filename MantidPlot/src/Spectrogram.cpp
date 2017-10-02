@@ -250,10 +250,10 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
          ++iHisto) {
       auto &x = matrixWorkspace->x(iHisto);
       if (x.front() < minX) {
-        minX = x.front();
+        minX = static_cast<Mantid::coord_t>(x.front());
       }
       if (x.back() > maxX) {
-        maxX = x.back();
+        maxX = static_cast<Mantid::coord_t>(x.back());
       }
     }
   }
