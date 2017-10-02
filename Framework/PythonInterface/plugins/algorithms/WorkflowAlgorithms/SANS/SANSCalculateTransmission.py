@@ -15,6 +15,28 @@ from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id
                                                                  get_region_of_interest)
 
 
+from mantid.api import AnalysisDataService
+
+
+def output_intermediate_workspace(state, workspace, workspace_name, data_type):
+    if not workspace:
+        return
+    # Clone the workspace
+    clone_name = "CloneWorkspace"
+    clone_options = {"InputWorkspace": workspace,
+                     "OutputWorkspace": "DUMMY"}
+    clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
+    clone_alg.execute()
+    ws_out = clone_alg.getProperty("OutputWorkspace").value
+
+    # Add to ADS
+    base_name = str(state.data.sample_scatter_run_number)
+    data_type_tag = "can" if data_type is DataType.Can else "sample"
+    wavelength_tag = str(state.wavelength.wavelength_low) + "_" + str(state.wavelength.wavelength_high)
+    total_name = base_name + "__" + data_type_tag + "__" + wavelength_tag + "__" + workspace_name
+    AnalysisDataService.addOrReplace(total_name, ws_out)
+
+
 class SANSCalculateTransmission(DataProcessorAlgorithm):
     def category(self):
         return 'SANS\\Adjust'
@@ -93,8 +115,11 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
                               detector_id_incident_monitor, calculate_transmission_state, data_type)
 
         self.setProperty("OutputWorkspace", output_workspace)
+        output_intermediate_workspace(state, output_workspace, "fitted_transmission", data_type)
+
         if unfitted_transmission_workspace:
             self.setProperty("UnfittedData", unfitted_transmission_workspace)
+            output_intermediate_workspace(state, unfitted_transmission_workspace, "unfitted_transmission", data_type)
 
     def _perform_fit(self, transmission_workspace, direct_workspace,
                      transmission_roi_detector_ids, transmission_monitor_detector_id,

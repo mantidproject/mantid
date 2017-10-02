@@ -42,8 +42,12 @@ def load_workspace(state, workspace_name):
 def mask_workspace(state, workspace_name, workspace_to_mask):
     serialized_state = state.property_manager
     masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+    mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
+                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
+                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+
     for detector in detectors:
         masking_algorithm.setProperty("Component", detector)
         masking_algorithm.execute()
@@ -344,9 +348,9 @@ class MaskingTablePresenter(object):
         container = []
         beam_stop_arm_width = mask_info.beam_stop_arm_width
         beam_stop_arm_angle = mask_info.beam_stop_arm_angle
-        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
-        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-        if beam_stop_arm_width and beam_stop_arm_angle and beam_stop_arm_pos1 and beam_stop_arm_pos2:
+        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1 if mask_info.beam_stop_arm_pos1 else 0.
+        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2 if mask_info.beam_stop_arm_pos2 else 0.
+        if beam_stop_arm_width and beam_stop_arm_angle:
             detail = "LINE {}, {}, {}, {}".format(beam_stop_arm_width, beam_stop_arm_angle,
                                                   beam_stop_arm_pos1, beam_stop_arm_pos2)
             container.append(masking_information(first="Arm", second="", third=detail))
@@ -397,7 +401,7 @@ class MaskingTablePresenter(object):
         masks = []
 
         mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)]
+        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)
@@ -408,8 +412,9 @@ class MaskingTablePresenter(object):
         masks.extend(spectrum_masks_lab)
 
         # Add the spectrum masks for HAB
-        spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
-        masks.extend(spectrum_masks_hab)
+        if mask_info_hab:
+            spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
+            masks.extend(spectrum_masks_hab)
 
         # Add the general time mask
         time_masks_general = self._get_time_masks_general(mask_info)
@@ -420,8 +425,9 @@ class MaskingTablePresenter(object):
         masks.extend(time_masks_lab)
 
         # Add the time masks for HAB
-        time_masks_hab = self._get_time_masks(mask_info_hab)
-        masks.extend(time_masks_hab)
+        if mask_info_hab:
+            time_masks_hab = self._get_time_masks(mask_info_hab)
+            masks.extend(time_masks_hab)
 
         # Add arm mask
         arm_mask = self._get_arm_mask(mask_info)

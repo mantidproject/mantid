@@ -9,8 +9,30 @@ from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorit
 
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
 from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
+from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag, create_unmanaged_algorithm)
 from sans.common.enums import (DetectorType, DataType)
+
+
+from mantid.api import AnalysisDataService
+
+
+def output_intermediate_workspace(state, workspace, workspace_name, data_type):
+    if not workspace:
+        return
+    # Clone the workspace
+    clone_name = "CloneWorkspace"
+    clone_options = {"InputWorkspace": workspace,
+                     "OutputWorkspace": "DUMMY"}
+    clone_alg = create_unmanaged_algorithm(clone_name, **clone_options)
+    clone_alg.execute()
+    ws_out = clone_alg.getProperty("OutputWorkspace").value
+
+    # Add to ADS
+    base_name = str(state.data.sample_scatter_run_number)
+    data_type_tag = "can" if data_type is DataType.Can else "sample"
+    wavelength_tag = str(state.wavelength.wavelength_low) + "_" + str(state.wavelength.wavelength_high)
+    total_name = base_name + "__" + data_type_tag + "__" + wavelength_tag + "__" + workspace_name
+    AnalysisDataService.addOrReplace(total_name, ws_out)
 
 
 class SANSReductionCore(DataProcessorAlgorithm):
@@ -151,27 +173,33 @@ class SANSReductionCore(DataProcessorAlgorithm):
         #    The detectors in the workspaces are set such that the beam centre is at (0,0). The position is
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
+        data_type = DataType.from_string(data_type_as_string)
         progress.report("Moving ...")
+        output_intermediate_workspace(state, workspace, "before_moving", data_type)
         workspace = self._move(state_serialized, workspace, component_as_string)
         monitor_workspace = self._move(state_serialized, monitor_workspace, component_as_string)
+        output_intermediate_workspace(state, workspace, "after_moving", data_type)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Masking ...")
         workspace = self._mask(state_serialized, workspace, component_as_string)
+        output_intermediate_workspace(state, workspace, "after_masking", data_type)
 
         # --------------------------------------------------------------------------------------------------------------
         # 6. Convert to Wavelength
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Converting to wavelength ...")
         workspace = self._convert_to_wavelength(state_serialized, workspace)
+        output_intermediate_workspace(state, workspace, "after_wavelength_conversion", data_type)
 
         # --------------------------------------------------------------------------------------------------------------
         # 7. Multiply by volume and absolute scale
         # --------------------------------------------------------------------------------------------------------------
         progress.report("Multiplying by volume and absolute scale ...")
         workspace = self._scale(state_serialized, workspace)
+        output_intermediate_workspace(state, workspace, "after_scale", data_type)
 
         # --------------------------------------------------------------------------------------------------------------
         # 8. Create adjustment workspaces, those are
@@ -186,6 +214,8 @@ class SANSReductionCore(DataProcessorAlgorithm):
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace =\
             self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
+        output_intermediate_workspace(state, wavelength_adjustment_workspace, "total_wavelength_adjustment", data_type)
+        output_intermediate_workspace(state, pixel_adjustment_workspace, "total_pixel_adjustment_workspace", data_type)
 
         # ------------------------------------------------------------
         # 9. Convert event workspaces to histogram workspaces
@@ -202,6 +232,10 @@ class SANSReductionCore(DataProcessorAlgorithm):
                                                                     wavelength_adjustment_workspace,
                                                                     pixel_adjustment_workspace,
                                                                     wavelength_and_pixel_adjustment_workspace)
+        output_intermediate_workspace(state, workspace, "after_q_conversion", data_type)
+        output_intermediate_workspace(state, sum_of_counts, "after_q_conversion_sum_of_counts", data_type)
+        output_intermediate_workspace(state, sum_of_norms, "after_q_conversion_sum_of_norms", data_type)
+
         progress.report("Completed SANSReductionCore ...")
 
         # ------------------------------------------------------------

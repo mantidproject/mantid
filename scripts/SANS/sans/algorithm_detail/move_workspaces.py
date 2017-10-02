@@ -245,15 +245,16 @@ def get_detector_component(move_info, component):
 
 def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates):
     # REAR_DET_Z
-    lab_detector_z_tag = "Rear_Det_Z"
-
-    log_names = [lab_detector_z_tag]
-    log_types = [float]
-    log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
-                                                       convert_from_millimeter_to_meter=True)
-
-    lab_detector_z = move_info.lab_detector_z \
-        if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+    # lab_detector_z_tag = "Rear_Det_Z"
+    #
+    # log_names = [lab_detector_z_tag]
+    # log_types = [float]
+    # log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+    #                                                    convert_from_millimeter_to_meter=True)
+    #
+    # lab_detector_z = move_info.lab_detector_z \
+    #     if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+    lab_detector_z = 0.
 
     # Perform x and y tilt
     lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
