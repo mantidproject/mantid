@@ -44,10 +44,17 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
   m_mask_color =
       QApplication::palette().color(QPalette::Disabled, QPalette::Background);
 
-  if (ws->blocksize() != 0)
-    m_colNumCorr = ws->isHistogramData() ? 1 : 0;
-  else
-    m_colNumCorr = 0;
+  m_colNumCorr = 0;
+  const size_t numHist = ws->getNumberHistograms();
+  for (size_t i = 0; i < numHist; ++i) {
+    // anything being non-empty means check it
+    // checking x-means EventWorkspaces aren't
+    // histogramed as part of the check
+    if (!ws->x(i).empty()) {
+      m_colNumCorr = ws->isHistogramData() ? 1 : 0;
+      break;
+    }
+  }
 }
 
 double MantidMatrixModel::data(int row, int col) const {
