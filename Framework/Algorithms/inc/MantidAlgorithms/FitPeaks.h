@@ -5,6 +5,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
@@ -39,7 +40,11 @@ private:
   void init() override;
   void exec() override;
 
+  /// process inputs (main and child algorithms)
   void processInputs();
+  void processInputPeakCenters();
+  void processInputFunctions();
+  void processInputFitRanges();
 
   void fitPeaks();
 
@@ -78,22 +83,49 @@ private:
 
   void setOutputProperties();
 
+  // Peak fitting suite
+  double FitIndividualPeak();
+
+  /// Methods to fit functions (general)
+  double fitFunctionSD(API::IFunction_sptr fitfunc,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       double xmin, double xmax);
+
+  double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       std::vector<double> &vec_xmin,
+                       std::vector<double> &vec_xmax);
+
+  // ------------------------
+
   API::MatrixWorkspace_const_sptr m_inputWS;
   API::MatrixWorkspace_const_sptr m_eventNumberWS;
 
-  std::vector<double> m_peakCenters;
-  std::vector<double> m_peakWindowLeft;
-  std::vector<double> m_peakWindowRight;
+  /// Peak profile name
+  API::IPeakFunction_sptr m_peakFunction;
+  /// Background function
+  API::IBackgroundFunction_sptr m_bkgdFunc;
 
-  std::vector<std::vector<double>> m_peakWindows;
-  std::vector<std::vector<double>> m_peakRangeVec;
+  /// Designed peak positions and tolerance
+  std::vector<double> m_peakCenters;
+  API::MatrixWorkspace_const_sptr m_peakCenterWorkspace;
+  bool m_uniformPeakPositions;
+  bool m_partialSpectra; // flag whether the peak center workspace has only
+                         // spectra to fit
+  std::vector<double> m_peakPosTolerances;
+  size_t m_numPeaksToFit;
+
+  /// peak windows
+  std::vector<std::vector<double>> m_peakWindowVector;
+  API::MatrixWorkspace_const_sptr m_peakWindowWorkspace;
+  bool m_uniformPeakWindows;
+  bool m_partialWindowSpectra;
 
   /// input peak parameters' names
   std::vector<std::string> m_peakParamNames;
   /// input peak parameters' starting values corresponding to above peak parameter names
   std::vector<double> m_initParamValues;
 
-  size_t m_numPeaksToFit;
   double m_minPeakMaxValue;
 
   API::MatrixWorkspace_sptr m_peakPosWS; // output workspace
@@ -103,9 +135,6 @@ private:
 
   size_t m_startWorkspaceIndex;
   size_t m_stopWorkspaceIndex;
-
-  /// peak profile name
-  std::string mPeakProfile;
 };
 
 } // namespace Algorithms
