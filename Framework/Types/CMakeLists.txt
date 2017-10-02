@@ -34,5 +34,13 @@ target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
 target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
 #Auto-generate exports header
 generate_mantid_export_header(Types)
+
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS Types ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+
 # Add the unit tests directory
 add_subdirectory ( test )
