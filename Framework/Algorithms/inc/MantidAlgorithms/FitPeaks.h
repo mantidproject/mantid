@@ -6,6 +6,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
@@ -87,7 +88,7 @@ private:
   double FitIndividualPeak();
 
   /// Methods to fit functions (general)
-  double fitFunctionSD(API::IFunction_sptr fitfunc,
+  double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax);
 
@@ -99,6 +100,7 @@ private:
   // ------------------------
 
   API::MatrixWorkspace_const_sptr m_inputWS;
+  DataObjects::EventWorkspace_const_sptr m_eventWS;
   API::MatrixWorkspace_const_sptr m_eventNumberWS;
 
   /// Peak profile name
