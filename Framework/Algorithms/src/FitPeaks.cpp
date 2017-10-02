@@ -404,85 +404,70 @@ void FitPeaks::fitPeaks() {
 
       PARALLEL_START_INTERUPT_REGION
 
-      std::vector<double> peak_positions;
-      std::vector<std::vector<double>> peak_parameters;
+      // init outputs
+      std::vector<double> peak_positions(m_numPeaksToFit, -1);
+      std::vector<std::vector<double>> peak_parameters(m_numPeaksToFit);
       std::vector<std::vector<double>> fitted_peaks;
       std::vector<std::vector<double>> fitted_peaks_windows;
-      std::vector<double> peak_chi2_vec;
+      std::vector<double> peak_chi2_vec(m_numPeaksToFit, DBL_MAX);
 
-      fitSpectrumPeaks(wi, peak_positions, peak_parameters, peak_chi2_vec,
-                      fitted_peaks, fitted_peaks_windows);
-
-      PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-
-        // set the fitted peaks' value to output workspace
-        for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
-          // set the peak positions
-          if (peak_positions[ipeak] > 0) {
-            m_peakPosWS->dataX(wi)[m_numPeaksToFit - ipeak - 1] =
-                peak_positions[ipeak];
-            m_peakPosWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
-                peak_parameters[ipeak][HEIGHT];
-            m_peakPosWS->dataE(wi)[m_numPeaksToFit - ipeak - 1] =
-                peak_chi2_vec[ipeak];
-          } else {
-            m_peakPosWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
-                peak_positions[ipeak];
-          }
-          // peak parameters
-          size_t xindex = wi - m_startWorkspaceIndex;
-          size_t spec_index = 5 * ipeak;
-          for (size_t ipar = 0; ipar < 5; ++ipar) {
-            //            g_log.notice() << "Data Y size = " <<
-            //            m_peakParamsWS->getNumberHistograms()
-            //                           << "; Working on spectrum " <<
-            //                           spec_index + ipar << " with size "
-            //                           << m_peakParamsWS->histogram(spec_index
-            //                           + ipar).y().size()
-            //                           << " and set value to index " << xindex
-            //                           << "\n"
-            //                           << "Peak parameters size = " <<
-            //                           peak_parameters[ipeak].size();
-            if (peak_parameters[ipeak].size() < 5) {
-              std::stringstream errss;
-              errss << "wsindex: " << wi << "  Data Y size = "
-                    << m_peakParamsWS->getNumberHistograms()
-                    << "; Working on spectrum " << spec_index + ipar
-                    << " with size "
-                    << m_peakParamsWS->histogram(spec_index + ipar).y().size()
-                    << " and set value to index " << xindex << "\n"
-                    << "Peak parameters size = "
-                    << peak_parameters[ipeak].size();
-              throw std::runtime_error(errss.str());
-            }
-
-            m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
-                peak_parameters[ipeak][ipar];
-          }
-
-          // about the peak: if fitting is bad, then the fitted peak window is
-          // empty
-          if (fitted_peaks_windows[ipeak].size() == 2) {
-            auto vec_x = m_fittedPeakWS->histogram(wi).x();
-            double window_left = fitted_peaks_windows[ipeak][0];
-            double window_right = fitted_peaks_windows[ipeak][1];
-            size_t window_left_index = findXIndex(vec_x, window_left);
-            size_t window_right_index = findXIndex(vec_x, window_right);
-            //            g_log.notice() << "Set Y value from index " <<
-            //            window_left_index
-            //                           << " to " << window_right_index <<
-            //                           "\n";
-            for (size_t ix = window_left_index; ix < window_right_index; ++ix)
-              m_fittedPeakWS->dataY(wi)[ix] =
-                  fitted_peaks[ipeak][ix - window_left_index];
-          }
-        }
+      if (m_eventNumberWS && m_eventNumberWS->readX(wi)[0] < 1.0) {
+        // no events in this
+        fitted_peaks.clear();
+      } else if (m_eventWS && m_eventWS->getNumberEvents() < 100) {
+        // too few events in this
+        fitted_peaks.clear();
+      } else {
+        // fit
+        fitSpectrumPeaks(wi, peak_positions, peak_parameters, peak_chi2_vec,
+                         fitted_peaks, fitted_peaks_windows);
       }
+
+      PARALLEL_CRITICAL(FindPeaks_WriteOutput) { writeFitResult(); }
 
       PARALLEL_END_INTERUPT_REGION
     }
 
     PARALLEL_CHECK_INTERUPT_REGION
+}
+
+//----------------------------------------------------------------------------------------------
+/** Fit peaks in a same spectrum
+ * NEW!
+ * @brief FitPeaks::fitSpectrumPeaks
+ */
+void FitPeaks::fitSpectrumPeaks(size_t wi) {
+  // Set up sub algorithm Fit for peak and background
+  IAlgorithm_sptr peak_fitter; // both peak and background (combo)
+  IAlgorithm_sptr bkgd_fitter;
+  try {
+    peak_fitter = createChildAlgorithm("Fit", -1, -1, false);
+    bkgd_fitter = createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // set up
+  peak_fitter->setProperty("Minimizer", m_minimizer);
+  peak_fitter->setProperty("CostFunction", m_costFunction);
+  peak_fitter->setProperty("CalcErrors", true);
+
+  bkgd_fitter->setProperty("Minimizer", m_minimizer);
+  bkgd_fitter->setProperty("CostFunction", "Least squares");
+
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+    // TODO/ISSUE/NOW - Find out the peak position to fit
+
+   // set up Function pointer
+
+   // get xmin and xmax from ...
+
+   fitFunctionSD(peak_fitter, peak_function, m_inputWS, wi, xmin, xmax);
+
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -494,7 +479,7 @@ void FitPeaks::fitPeaks() {
  * @param fitted_functions
  * @param fitted_peak_windows
  */
-void FitPeaks::fitSpectrumPeaks(
+void FitPeaks::fitSpectrumPeaksX(
     size_t wi, std::vector<double> &peak_pos,
     std::vector<std::vector<double>> &peak_params,
     std::vector<double> &peak_chi2_vec,
@@ -609,6 +594,69 @@ void FitPeaks::fitSpectrumPeaks(
   } // END-FOR
 
   return;
+}
+
+void FitPeaks::writeFitResult() {
+  // set the fitted peaks' value to output workspace
+  for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
+    // set the peak positions
+    if (peak_positions[ipeak] > 0) {
+      m_peakPosWS->dataX(wi)[m_numPeaksToFit - ipeak - 1] =
+          peak_positions[ipeak];
+      m_peakPosWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
+          peak_parameters[ipeak][HEIGHT];
+      m_peakPosWS->dataE(wi)[m_numPeaksToFit - ipeak - 1] =
+          peak_chi2_vec[ipeak];
+    } else {
+      m_peakPosWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
+          peak_positions[ipeak];
+    }
+    // peak parameters
+    size_t xindex = wi - m_startWorkspaceIndex;
+    size_t spec_index = 5 * ipeak;
+    for (size_t ipar = 0; ipar < 5; ++ipar) {
+      //            g_log.notice() << "Data Y size = " <<
+      //            m_peakParamsWS->getNumberHistograms()
+      //                           << "; Working on spectrum " <<
+      //                           spec_index + ipar << " with size "
+      //                           << m_peakParamsWS->histogram(spec_index
+      //                           + ipar).y().size()
+      //                           << " and set value to index " << xindex
+      //                           << "\n"
+      //                           << "Peak parameters size = " <<
+      //                           peak_parameters[ipeak].size();
+      if (peak_parameters[ipeak].size() < 5) {
+        std::stringstream errss;
+        errss << "wsindex: " << wi
+              << "  Data Y size = " << m_peakParamsWS->getNumberHistograms()
+              << "; Working on spectrum " << spec_index + ipar << " with size "
+              << m_peakParamsWS->histogram(spec_index + ipar).y().size()
+              << " and set value to index " << xindex << "\n"
+              << "Peak parameters size = " << peak_parameters[ipeak].size();
+        throw std::runtime_error(errss.str());
+      }
+
+      m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
+          peak_parameters[ipeak][ipar];
+    }
+
+    // about the peak: if fitting is bad, then the fitted peak window is
+    // empty
+    if (fitted_peaks_windows[ipeak].size() == 2) {
+      auto vec_x = m_fittedPeakWS->histogram(wi).x();
+      double window_left = fitted_peaks_windows[ipeak][0];
+      double window_right = fitted_peaks_windows[ipeak][1];
+      size_t window_left_index = findXIndex(vec_x, window_left);
+      size_t window_right_index = findXIndex(vec_x, window_right);
+      //            g_log.notice() << "Set Y value from index " <<
+      //            window_left_index
+      //                           << " to " << window_right_index <<
+      //                           "\n";
+      for (size_t ix = window_left_index; ix < window_right_index; ++ix)
+        m_fittedPeakWS->dataY(wi)[ix] =
+            fitted_peaks[ipeak][ix - window_left_index];
+    }
+  }
 }
 
 std::vector<size_t> FitPeaks::getRange(size_t wi,
@@ -856,19 +904,9 @@ double FitPeaks::FitIndividualPeak() {
   * @return :: chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL,
  * return DBL_MAX
   */
-double FitPeaks::fitFunctionSD(IFunction_sptr fitfunc,
+double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit, IFunction_sptr fitfunc,
                                MatrixWorkspace_sptr dataws, size_t wsindex,
                                double xmin, double xmax) {
-  // Set up sub algorithm fit
-  IAlgorithm_sptr fit;
-  try {
-    fit = createChildAlgorithm("Fit", -1, -1, false);
-  } catch (Exception::NotFoundError &) {
-    std::stringstream errss;
-    errss << "The FitPeak algorithm requires the CurveFitting library";
-    g_log.error(errss.str());
-    throw std::runtime_error(errss.str());
-  }
 
   // Set the properties
   fit->setProperty("Function", fitfunc);
@@ -877,9 +915,9 @@ double FitPeaks::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("MaxIterations", 50); // magic number
   fit->setProperty("StartX", xmin);
   fit->setProperty("EndX", xmax);
-  fit->setProperty("Minimizer", m_minimizer);
-  fit->setProperty("CostFunction", m_costFunction);
-  fit->setProperty("CalcErrors", true);
+  //  fit->setProperty("Minimizer", m_minimizer);
+  //  fit->setProperty("CostFunction", m_costFunction);
+  //  fit->setProperty("CalcErrors", true);
 
   // Execute fit and get result of fitting background
   // m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
@@ -962,8 +1000,8 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   fit->setProperty("StartX_1", vec_xmin[1]);
   fit->setProperty("EndX_1", vec_xmax[1]);
   fit->setProperty("MaxIterations", 50);
-  fit->setProperty("Minimizer", m_minimizer);
-  fit->setProperty("CostFunction", "Least squares");
+  //  fit->setProperty("Minimizer", m_minimizer);
+  //  fit->setProperty("CostFunction", "Least squares");
 
   m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": "
             << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and ("
