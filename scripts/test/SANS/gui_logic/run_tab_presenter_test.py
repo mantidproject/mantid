@@ -31,6 +31,9 @@ BATCH_FILE_TEST_CONTENT_2 = "# MANTID_BATCH_FILE add more text here\n" \
                             "sample_direct_beam,SANS2D00022048,output_as,test_file\n" \
                             "sample_sans,SANS2D00022024,output_as,test_file2\n"
 
+BATCH_FILE_TEST_CONTENT_3 = "# MANTID_BATCH_FILE add more text here\n" \
+                            "sample_sans,1p3,output_as,test_file\n"
+
 
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -124,25 +127,41 @@ class RunTabPresenterTest(unittest.TestCase):
             has_raised = True
         self.assertFalse(has_raised)
 
-    def test_that_loads_batch_file_and_places_it_into_table(self):
+    def do_test_that_loads_batch_file_and_places_it_into_table(self, use_multi_period):
         # Arrange
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1,
+                                                                                              is_multi_period=use_multi_period)  # noqa
 
         # Act
         presenter.on_batch_file_load()
 
         # Assert
         self.assertTrue(view.add_row.call_count == 2)
-        expected_first_row = "SampleScatter:1,ssp:,SampleTrans:2,stp:,SampleDirect:3,sdp:," \
-                             "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
-        expected_second_row = "SampleScatter:1,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
-                              "CanScatter:2,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2"
+        if use_multi_period:
+            expected_first_row = "SampleScatter:1,ssp:,SampleTrans:2,stp:,SampleDirect:3,sdp:," \
+                                 "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
+            expected_second_row = "SampleScatter:1,ssp:,SampleTrans:,stp:,SampleDirect:,sdp:," \
+                                  "CanScatter:2,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file2"
+        else:
+            expected_first_row = "SampleScatter:1,SampleTrans:2,SampleDirect:3," \
+                                 "CanScatter:,CanTrans:,CanDirect:,OutputName:test_file"
+            expected_second_row = "SampleScatter:1,SampleTrans:,SampleDirect:," \
+                                  "CanScatter:2,CanTrans:,CanDirect:,OutputName:test_file2"
 
         calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
         view.add_row.assert_has_calls(calls)
 
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+    def test_that_loads_batch_file_and_places_it_into_table(self):
+        self.do_test_that_loads_batch_file_and_places_it_into_table(use_multi_period=True)
+
+    def test_that_loads_batch_file_and_places_it_into_table_when_not_multi_period_enabled(self):
+        self.do_test_that_loads_batch_file_and_places_it_into_table(use_multi_period=False)
+
+    def test_that_loads_batch_file_with_multi_period_settings(self):
+        pass
 
     def test_fails_silently_when_batch_file_does_not_exist(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -357,12 +376,13 @@ class RunTabPresenterTest(unittest.TestCase):
                 PropertyManagerDataService.remove(element)
 
     @staticmethod
-    def _get_files_and_mock_presenter(content):
+    def _get_files_and_mock_presenter(content, is_multi_period=True):
         batch_file_path = save_to_csv(content)
         user_file_path = create_user_file(sample_user_file)
         view, _, _ = create_mock_view(user_file_path, batch_file_path)
         # We just use the sample_user_file since it exists.
         view.get_mask_file = mock.MagicMock(return_value=user_file_path)
+        view.is_multi_period_view = mock.MagicMock(return_value=is_multi_period)
         presenter = RunTabPresenter(SANSFacility.ISIS)
         presenter.set_view(view)
         return batch_file_path, user_file_path, presenter, view
