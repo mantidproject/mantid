@@ -878,6 +878,12 @@ class RunTabPresenter(object):
         can_direct_period = get_string_entry(BatchReductionEntry.CanDirectPeriod, row)
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
+        # If one of the periods is not null, then we should switch the view to multi-period view
+        if sample_scatter_period or sample_transmission_period or sample_direct_period or can_scatter_period or \
+                can_transmission_period or can_direct_period:
+            if not self._view.is_multi_period_view():
+                self._view.switch_to_multi_period_view()
+
         # 2. Create entry that can be understood by table
         if self._view.is_multi_period_view():
             row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \

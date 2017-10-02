@@ -35,6 +35,19 @@ BATCH_FILE_TEST_CONTENT_3 = "# MANTID_BATCH_FILE add more text here\n" \
                             "sample_sans,1p3,output_as,test_file\n"
 
 
+class MultiPeriodMock(object):
+    def __init__(self, call_pattern):
+        self._counter = 0
+        self._call_pattern = call_pattern
+
+    def __call__(self):
+        if self._counter < len(self._call_pattern):
+            return_value = self._call_pattern[self._counter]
+            self._counter += 1
+            return return_value
+        raise RuntimeError("Issue with multi-period mocking.")
+
+
 class RunTabPresenterTest(unittest.TestCase):
     def setUp(self):
         config.setFacility("ISIS")
@@ -161,7 +174,29 @@ class RunTabPresenterTest(unittest.TestCase):
         self.do_test_that_loads_batch_file_and_places_it_into_table(use_multi_period=False)
 
     def test_that_loads_batch_file_with_multi_period_settings(self):
-        pass
+        # Arrange
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
+                                                                                              is_multi_period=False)
+        # The call pattern is
+        # False -- we are in single mode
+        # True -- we switch to multi-period mode
+        # True -- Getting table model
+        # True -- Getting table model
+        multi_period_mock = MultiPeriodMock(call_pattern=[False, True, True, True])
+        view.is_multi_period_view = mock.MagicMock(side_effect=multi_period_mock)
+
+        # Act
+        presenter.on_batch_file_load()
+
+        # Assert
+        self.assertTrue(view.add_row.call_count == 1)
+        self.assertTrue(view.switch_to_multi_period_view.call_count == 1)
+
+        expected_row = "SampleScatter:1,ssp:3,SampleTrans:,stp:,SampleDirect:,sdp:," \
+                       "CanScatter:,csp:,CanTrans:,ctp:,CanDirect:,cdp:,OutputName:test_file"
+
+        calls = [mock.call(expected_row)]
+        view.add_row.assert_has_calls(calls)
 
     def test_fails_silently_when_batch_file_does_not_exist(self):
         presenter = RunTabPresenter(SANSFacility.ISIS)
@@ -312,7 +347,7 @@ class RunTabPresenterTest(unittest.TestCase):
         presenter.on_batch_file_load()
         presenter.on_user_file_load()
 
-        #Set invalid state
+        # Set invalid state
         presenter._state_model.event_slices = 'Hello'
 
         with self.assertRaises(RuntimeError):
@@ -321,7 +356,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         # We should have raised an exception and called halt process flag
         self.assertTrue(view.halt_process_flag.call_count == 1)
-        #self.assertTrue(has_raised)
+
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
@@ -343,7 +378,7 @@ class RunTabPresenterTest(unittest.TestCase):
         # Assert
         # We should have raised an exception and called halt process flag
         self.assertTrue(view.halt_process_flag.call_count == 1)
-        #self.assertTrue(has_raised)
+
         # clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
