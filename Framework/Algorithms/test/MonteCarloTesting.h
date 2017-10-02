@@ -41,7 +41,12 @@ public:
 // -----------------------------------------------------------------------------
 // Create test samples
 // -----------------------------------------------------------------------------
-enum class TestSampleType { SolidSphere, Annulus, SamplePlusContainer };
+enum class TestSampleType {
+  SolidSphere,
+  Annulus,
+  ThinAnnulus,
+  SamplePlusContainer
+};
 
 inline std::string annulusXML(double innerRadius, double outerRadius,
                               double height,
@@ -49,7 +54,9 @@ inline std::string annulusXML(double innerRadius, double outerRadius,
   using Mantid::Kernel::V3D;
 
   // Cylinders oriented along up, with origin at centre of cylinder
-  const V3D centre(0, 0, -0.5 * height);
+  // Assume upAxis is a unit vector
+  V3D centre(upAxis);
+  centre *= -0.5 * height;
   const std::string inner = ComponentCreationHelper::cappedCylinderXML(
       innerRadius, height, centre, upAxis, "inner");
   const std::string outer = ComponentCreationHelper::cappedCylinderXML(
@@ -117,6 +124,8 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
       shape = ComponentCreationHelper::createSphere(0.1);
     } else if (sampleType == TestSampleType::Annulus) {
       shape = createAnnulus(0.1, 0.15, 0.15, V3D(0, 0, 1));
+    } else if (sampleType == TestSampleType::ThinAnnulus) {
+      shape = createAnnulus(0.01, 0.0101, 0.4, V3D(0, 1, 0));
     } else {
       throw std::invalid_argument("Unknown testing shape type requested");
     }

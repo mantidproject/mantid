@@ -52,7 +52,7 @@ class LoadRawDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Constructor
-  LoadRawDialog(QWidget *parent = 0);
+  LoadRawDialog(QWidget *parent = nullptr);
   /// Destructor
   ~LoadRawDialog() override;
 

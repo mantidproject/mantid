@@ -361,7 +361,7 @@ QString MantidMatrixCurve::saveToString() {
 
 /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
 int MantidMatrixCurve::workspaceIndex() const {
-  if (dynamic_cast<const QwtWorkspaceSpectrumData *>(mantidData()) != 0) {
+  if (dynamic_cast<const QwtWorkspaceSpectrumData *>(mantidData()) != nullptr) {
     return m_index;
   }
   return -1;

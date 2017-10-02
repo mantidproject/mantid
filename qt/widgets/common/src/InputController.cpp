@@ -263,7 +263,7 @@ void InputControllerMoveUnwrapped::mouseReleaseEvent(QMouseEvent *event) {
 InputControllerDraw::InputControllerDraw(QObject *parent)
     : InputController(parent), m_max_size(32), m_size(30),
       m_isLeftButtonPressed(false), m_isRightButtonPressed(false),
-      m_isActive(false), m_cursor(NULL) {}
+      m_isActive(false), m_cursor(nullptr) {}
 
 InputControllerDraw::~InputControllerDraw() { delete m_cursor; }
 

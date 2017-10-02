@@ -226,16 +226,14 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   auto &realE = ows->mutableE(0);
   auto &imagE = ows->mutableE(1);
 
+  const auto &xPointData = ws->histogram(0).points();
   // First X value
-  const double X0 = ws->x(0).front();
+  const double X0 = xPointData.front();
 
   // calculate exponential decay outside of the loop
-  std::vector<double> expDecay(ws->histogram(0).size()); // make a copy
-  {                                                      // limit scope
-    const auto &X = ws->readX(0);
-    for (size_t i = 0; i < X.size(); ++i)
-      expDecay[i] = exp(-(X[i] - X0) / muLife);
-  }
+  std::vector<double> expDecay = xPointData.rawData();
+  std::transform(expDecay.begin(), expDecay.end(), expDecay.begin(),
+                 [X0, muLife](double x) { return exp(-(x - X0) / muLife); });
 
   for (size_t i = 0; i < npoints; i++) {
     for (size_t h = 0; h < nspec; h++) {

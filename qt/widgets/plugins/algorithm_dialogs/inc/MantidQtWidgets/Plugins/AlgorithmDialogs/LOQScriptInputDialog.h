@@ -42,7 +42,7 @@ class LOQScriptInputDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  LOQScriptInputDialog(QWidget *parent = 0);
+  LOQScriptInputDialog(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout

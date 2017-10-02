@@ -211,7 +211,7 @@ public:
     static_cast<void>(outputWS->y(0));
 
     // Check the run_start property exists and is right.
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT(outputWS->mutableRun().hasProperty("run_start"));
     TS_ASSERT_THROWS_NOTHING(
         p = outputWS->mutableRun().getProperty("run_start");)
