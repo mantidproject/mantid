@@ -741,7 +741,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
 */
 void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   struct ScopedFlag {
-    ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
+    explicit ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
     ~ScopedFlag() { m_flag = false; }
     bool &value() { return m_flag; }
     bool &m_flag;
