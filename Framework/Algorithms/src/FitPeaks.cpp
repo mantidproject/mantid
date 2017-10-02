@@ -76,51 +76,6 @@ void FitPeaks::init() {
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace for peak fitting.");
-
-  declareProperty(
-      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-          "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Name of an optional workspace, whose each spectrum corresponds to each "
-      "spectrum "
-      "in input workspace. "
-      "It has 1 value of each spectrum, standing for the number of events of "
-      "the corresponding spectrum.");
-
-  std::vector<std::string> peakNames =
-      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
-  declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peakNames));
-
-  declareProperty("StartWorkspaceIndex", 0, "Starting workspace index for fit");
-  declareProperty("StopWorkspaceIndex", 0,
-                  "Last workspace index to fit (not included)");
-  declareProperty(
-        Kernel::make_unique<ArrayProperty<std::string>>("PeakParameterNames"),
-        "List of peak parameters' names");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
-      "List of peak parameters' value");
-
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
-                  "List of peak centers to fit against.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "PeakCentersWorkspace", "MatrixWorkspace containing peak centers"));
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("FitWindowLeftBoundary"),
-      "List of left boundaries of the peak fitting window corresponding to "
-      "PeakCenters.");
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("FitWindowRightBoundary"),
-      "List of right boundaries of the peak fitting window corresponding to "
-      "PeakCenters.");
-
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>("FitPeakWindowWorkspace"),
-                  "MatrixWorkspace for of peak windows");
-
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakRanges"),
-                  "List of double for each peak's range.");
-
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace containing peak centers for "
@@ -134,6 +89,92 @@ void FitPeaks::init() {
                   "-1 for data is zero;  -2 for maximum value is smaller than "
                   "specified minimum value."
                   "and -3 for non-converged fitting.");
+
+  // properties about fitting range and criteria
+  declareProperty("StartWorkspaceIndex", EMPTY_INT(),
+                  "Starting workspace index for fit");
+  declareProperty("StopWorkspaceIndex", EMPTY_INT(),
+                  "Last workspace index to fit (not included)");
+
+  // properties about peak positions to fit
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakCenters"),
+                  "List of peak centers to fit against.");
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "PeakCentersWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "MatrixWorkspace containing peak centers");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
+      "List of tolerance on fitted peak positions against given peak positions."
+      "If there is only one value given, then ");
+
+  std::string peakcentergrp("Peak Positions");
+  setPropertyGroup("PeakCenters", peakcentergrp);
+  setPropertyGroup("PeakCentersWorkspace", peakcentergrp);
+
+  // properties about peak profile
+  std::vector<std::string> peakNames =
+      FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
+  declareProperty("PeakFunction", "Gaussian",
+                  boost::make_shared<StringListValidator>(peakNames));
+  vector<string> bkgdtypes{"Flat", "Linear"};
+  declareProperty("BackgroundType", "Linear",
+                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  "Type of Background.");
+
+  std::string funcgroup("Function Types");
+  setPropertyGroup("PeakFunction", funcgroup);
+  setPropertyGroup("BackgroundType", funcgroup);
+
+  // properties about peak parameters' names and value
+  declareProperty(
+        Kernel::make_unique<ArrayProperty<std::string>>("PeakParameterNames"),
+        "List of peak parameters' names");
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("PeakParameterValues"),
+      "List of peak parameters' value");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "PeakParameterValueTable", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Name of the an optional workspace, whose each column "
+                  "corresponds to given peak parameter names"
+                  ", and each row corresponds to a subset of spectra.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("FitWindowBoundaryList"),
+      "List of left boundaries of the peak fitting window corresponding to "
+      "PeakCenters.");
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "FitPeakWindowWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "MatrixWorkspace for of peak windows");
+
+  std::string startvaluegrp("Fitting Setup");
+  setPropertyGroup("PeakParameterNames", startvaluegrp);
+  setPropertyGroup("PeakParameterValues", startvaluegrp);
+  setPropertyGroup("PeakParameterValueTable", startvaluegrp);
+  setPropertyGroup("FitWindowBoundaryList", startvaluegrp);
+  setPropertyGroup("FitPeakWindowWorkspace", startvaluegrp);
+  setPropertyGroup("", startvaluegrp);
+
+  // other helping information
+  declareProperty(
+      Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+          "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Name of an optional workspace, whose each spectrum corresponds to each "
+      "spectrum "
+      "in input workspace. "
+      "It has 1 value of each spectrum, standing for the number of events of "
+      "the corresponding spectrum.");
+
+  std::string helpgrp("Additional Information");
+  setPropertyGroup("EventNumberWorkspace", helpgrp);
+
+  //  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakRanges"),
+  //                  "List of double for each peak's range.");
+
+  // additional output for reviewing
   declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputPeakParametersWorkspace", "", Direction::Output),
                   "Name of workspace containing all fitted peak parameters.  "
@@ -147,9 +188,17 @@ void FitPeaks::init() {
       "The Y values belonged to peaks to fit are replaced by fitted value. "
       "Values of estimated background are used if peak fails to be fit.");
 
+  std::string addoutgrp("Analysis");
+  setPropertyGroup("OutputPeakParametersWorkspace", addoutgrp);
+  setPropertyGroup("FittedPeaksWorkspace", addoutgrp);
+
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** main method to fit peaks
+ * @brief FitPeaks::exec
+ */
 void FitPeaks::exec() {
   processInputs();
 
@@ -160,7 +209,12 @@ void FitPeaks::exec() {
   setOutputProperties();
 }
 
+//----------------------------------------------------------------------------------------------
+/** process inputs
+ * @brief FitPeaks::processInputs
+ */
 void FitPeaks::processInputs() {
+  // input workspaces
   m_inputWS = getProperty("InputWorkspace");
   std::string event_ws_name = getPropertyValue("EventNumberWorkspace");
   if (event_ws_name.size() > 0)
@@ -168,8 +222,7 @@ void FitPeaks::processInputs() {
   else
     m_eventNumberWS = 0;
 
-  mPeakProfile = getPropertyValue("PeakFunction");
-
+  // fit range
   int start_wi = getProperty("StartWorkspaceIndex");
   int stop_wi = getProperty("StopWorkspaceIndex");
   m_startWorkspaceIndex = static_cast<size_t>(start_wi);
@@ -177,44 +230,172 @@ void FitPeaks::processInputs() {
   if (m_stopWorkspaceIndex == 0)
     m_stopWorkspaceIndex = m_inputWS->getNumberHistograms();
 
-  // Set up peak function
+  // Set up peak and background functions
+  processInputFunctions();
+
+  // Peak centers and tolerance
+  processInputPeakCenters();
+
+  // process peak fitting range
+  processInputFitRanges();
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** process inputs for peak profile and background
+ * @brief FitPeaks::processInputFunctions
+ */
+void FitPeaks::processInputFunctions() {
+  std::string peakfunctiontype = getPropertyValue("PeakFunction");
   m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
-      API::FunctionFactory::Instance().createFunction(m_peakFuncType));
-  m_peakParameterNames = m_peakFunction->getParameterNames();
+      API::FunctionFactory::Instance().createFunction(peakfunctiontype));
 
-  m_peakCenters = getProperty("PeakCenters");
-  m_peakWindowLeft = getProperty("FitWindowLeftBoundary");
-  m_peakWindowRight = getProperty("FitWindowRightBoundary");
-  m_numPeaksToFit = m_peakCenters.size();
+  std::string bkgdfunctiontype = getPropertyValue("BackgroundType");
+  m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
+      API::FunctionFactory::Instance().createFunction(bkgdfunctiontype));
+}
 
-  m_peakParamNames = getProperty("PeakParameterNames");
-  m_initParamValues = getProperty("PeakParameterValues");
+//----------------------------------------------------------------------------------------------
+/** process and check for inputs about peak fitting range (i.e., window)
+ * @brief FitPeaks::processInputFitRanges
+ */
+void FitPeaks::processInputFitRanges() {
 
-  std::vector<double> vecPeakRange = getProperty("PeakRanges");
+  // get peak fit window
+  std::vector<double> peakwindow = getProperty("FitWindowBoundary");
+  std::string peakwindowname = getPropertyValue("FitPeakWindowWorkspace");
 
-  // set up more
-  if (m_peakWindowLeft.size() != m_peakWindowRight.size())
-    throw std::runtime_error("xx");
-  for (size_t i = 0; i < m_peakWindowLeft.size(); ++i) {
-    std::vector<double> window_i;
-    window_i.push_back(m_peakWindowLeft[i]);
-    window_i.push_back(m_peakWindowRight[i]);
-    m_peakWindows.push_back(window_i);
-  }
+  if (peakwindow.size() > 0 && peakwindowname.size() == 0) {
+    // use vector for peak windows
+    m_uniformPeakPositions = true;
+    // check peak positions
+    if (!m_uniformPeakPositions)
+      throw std::invalid_argument(
+          "Uniform peak range/window requires uniform peak positions.");
 
-  if (m_numPeaksToFit != vecPeakRange.size())
-    throw std::runtime_error("xxaere");
+    // check size
+    if (peakwindow.size() != m_numPeaksToFit * 2)
+      throw std::invalid_argument(
+          "Peak window vector must be twice as large as number of peaks.");
+    // check range
+    m_peakWindowVector.resize(m_numPeaksToFit);
+    for (size_t i = 0; i < m_numPeaksToFit; ++i) {
+      std::vector<double> peakranges(2);
+      peakranges[0] = peakwindow[i * 2];
+      peakranges[1] = peakwindow[i * 2 + 1];
+      if (!(peakranges[0] < m_peakCenters[i]) ||
+          !(m_peakCenters[i] < peakranges[1])) {
+        std::stringstream errss;
+        errss << "Peak " << i
+              << ": use specifies an invalid range and peak center against "
+              << peakranges[0] << " < " << m_peakCenters[i] << peakranges[1];
+        throw std::invalid_argument(errss.str());
+      }
+    }
+  } else if (peakwindow.size() == 0 && peakwindowname.size() > 0) {
+    // use matrix workspace for non-uniform peak windows
+    m_peakWindowWorkspace = getProperty("FitPeakWindowWorkspace");
+    m_uniformPeakWindows = false;
 
-  for (size_t i = 0; i < m_numPeaksToFit; ++i) {
-    std::vector<double> range_i;
-    range_i.push_back(m_peakCenters[i] - vecPeakRange[i]);
-    range_i.push_back(m_peakCenters[i] + vecPeakRange[i]);
-    m_peakRangeVec.push_back(range_i);
+    // check size
+    if (m_peakWindowWorkspace->getNumberHistograms() ==
+        m_inputWS->getNumberHistograms())
+      m_partialWindowSpectra = false;
+    else if (m_peakWindowWorkspace->getNumberHistograms() ==
+             (m_stopWorkspaceIndex - m_startWorkspaceIndex))
+      m_partialWindowSpectra = true;
+    else
+      throw std::invalid_argument(
+          "Peak window workspace has unmatched number of spectra");
+
+    // check range for peak windows and peak positions
+    size_t window_index_start(0);
+    if (m_partialWindowSpectra)
+      window_index_start = m_startWorkspaceIndex;
+    size_t center_index_start(0);
+    if (m_partialSpectra)
+      center_index_start = m_startWorkspaceIndex;
+
+    for (size_t wi = 0; wi < m_peakWindowWorkspace->getNumberHistograms();
+         ++wi) {
+      size_t window_index = window_index_start + wi;
+      size_t center_index = center_index_start + wi;
+      if (m_peakWindowWorkspace->x(wi).size() != m_numPeaksToFit * 2)
+        throw std::invalid_argument("FIX ME");
+      // TODO/FIXME/ISSUE - Implement the check each spectrum
+      // ...
+      // ...
+    }
+  } else {
+    // ... ...
+    throw std::invalid_argument("More specific");
   }
 
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** processing peaks centers information from input.  the parameters that are
+ * set including
+ * 1. m_peakCenters/m_peakCenterWorkspace/m_uniformPeakPositions
+ * (bool)/m_partialSpectra (bool)
+ * 2. m_peakPosTolerances (vector)
+ * 3. m_numPeaksToFit
+ * @brief FitPeaks::processInputPeakCenters
+ */
+void FitPeaks::processInputPeakCenters() {
+  // peak centers
+  m_peakCenters = getProperty("PeakCenters");
+  std::string peakpswsname = getPropertyValue("PeakCentersWorkspace");
+  if (m_peakCenters.size() > 0 && peakpswsname.size() == 0) {
+    m_uniformPeakPositions = true;
+    m_numPeaksToFit = m_peakCenters.size();
+  } else if (m_peakCenters.size() == 0 && peakpswsname.size() > 0) {
+    m_uniformPeakPositions = false;
+    m_peakCenterWorkspace = getProperty("PeakCentersWorkspace");
+    m_numPeaksToFit = m_peakCenterWorkspace->x(0).size();
+  } else {
+    std::stringstream errss;
+    errss << "One and only one in 'PeakCenters' (vector) and "
+             "'PeakCentersWorkspace' shall be given. "
+          << "'PeakCenters' has size " << m_peakCenters.size()
+          << ", and name of peak center workspace "
+          << "is " << peakpswsname;
+    throw std::invalid_argument(errss.str());
+  }
+
+  // check matrix worksapce for peak positions
+  if (!m_uniformPeakPositions) {
+    size_t numhist = m_peakCenterWorkspace->getNumberHistograms();
+    if (numhist == m_inputWS->size())
+      m_partialSpectra = false;
+    else if (numhist == m_stopWorkspaceIndex - m_startWorkspaceIndex)
+      m_partialSpectra = true;
+    else
+      throw std::invalid_argument(
+          "Input peak center workspace has wrong number of spectra.");
+  }
+
+  // peak tolerance
+  m_peakPosTolerances = getProperty("PositionTolerance");
+  if (m_peakPosTolerances.size() == 0)
+    throw std::invalid_argument("Peak positions' tolerances must be given!");
+  else if (m_peakPosTolerances.size() == 1) {
+    // single tolerance, expand to all peaks
+    double peaktol = m_peakPosTolerances[0];
+    m_peakPosTolerances.resize(m_numPeaksToFit, peaktol);
+  } else if (m_peakPosTolerances.size() != m_numPeaksToFit)
+    throw std::invalid_argument(
+        "Number of input peak tolerance is different from input peaks to fit.");
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief FitPeaks::fitPeaks
+ */
 void FitPeaks::fitPeaks() {
 
   // cppcheck-suppress syntaxError
@@ -633,15 +814,24 @@ double FitPeaks::findMaxValue(size_t wi, double left_window_boundary,
 }
 
 //----------------------------------------------------------------------------------------------
+/**
+ * @brief FitPeaks::FitIndividualPeak
+ * @return cost of fitting peak
+ */
 double FitPeaks::FitIndividualPeak() {
   // FitSinglePeak version 2.0
 
   // Estimate peak background
+  // TODO/NOW - Implement fit background ASAP
+
+  // TODO/NOW - Implenent
+  double cost(0);
 
   // Fit peak (core)
-  double cost =
-      call_fit_peak(m_inputWS, ws_index, peak_function, m_backgroundFunction,
-                    fit_window, peak_range, init_peak_parameters);
+  //  double cost =
+  //      call_fit_peak(m_inputWS, ws_index, peak_function,
+  //      m_backgroundFunction,
+  //                    fit_window, peak_range, init_peak_parameters);
 
   // check chi^2 and height
   bool good_fit = false;
@@ -652,49 +842,15 @@ double FitPeaks::FitIndividualPeak() {
   if (good_fit && m_applyPeakPositionTolerance &&
       (peak_function->centre() - peak_position) < m_peakPositionTolerance())
     good_fit = true;
+
+  if (!good_fit)
+    cost = DBL_MAX;
+
+  return cost;
 }
 
 //----------------------------------------------------------------------------------------------
-double FitPeaks::call_fit_peak() {
-
-  std::stringstream dbss;
-  dbss << "[Call FitPeak] Fit 1 peak at X = " << peakfunction->centre()
-       << " of spectrum " << wsindex;
-  g_log.information(dbss.str());
-
-  double userFWHM = m_peakFunction->fwhm();
-  bool fitwithsteppedfwhm = (guessedFWHMStep > 0);
-
-  FitOneSinglePeak fitpeak;
-  fitpeak.setChild(true);
-  fitpeak.setWorskpace(dataws, wsindex);
-  fitpeak.setFitWindow(vec_fitwindow[0], vec_fitwindow[1]);
-  fitpeak.setFittingMethod(m_minimizer, m_costFunction);
-  fitpeak.setFunctions(peakfunction, backgroundfunction);
-  fitpeak.setupGuessedFWHM(userFWHM, minGuessFWHM, maxGuessFWHM,
-                           guessedFWHMStep, fitwithsteppedfwhm);
-  fitpeak.setPeakRange(vec_peakrange[0], vec_peakrange[1]);
-
-  if (estBackResult == 1) {
-    g_log.information("simpleFit");
-    fitpeak.simpleFit();
-  } else if (m_highBackground) {
-    g_log.information("highBkgdFit");
-    fitpeak.highBkgdFit();
-  } else {
-    g_log.information("simpleFit");
-    fitpeak.simpleFit();
-  }
-
-  double costfuncvalue = fitpeak.getFitCostFunctionValue();
-  std::string dbinfo = fitpeak.getDebugMessage();
-  g_log.information(dbinfo);
-
-  return costfuncvalue;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Fit function in single domain
+/** Fit function in single domain (mostly applied for fitting peak + backgrund)
   * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
  * be executed)
   * @return :: chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL,
@@ -726,14 +882,14 @@ double FitPeaks::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("CalcErrors", true);
 
   // Execute fit and get result of fitting background
-  m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
+  // m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
 
   fit->executeAsChildAlg();
   if (!fit->isExecuted()) {
     g_log.error("Fit for background is not executed. ");
     throw std::runtime_error("Fit for background is not executed. ");
   }
-  ++m_numFitCalls;
+  // ++m_numFitCalls;
 
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
@@ -746,6 +902,172 @@ double FitPeaks::fitFunctionSD(IFunction_sptr fitfunc,
   // Debug information
   m_sstream << "[F1201] FitSingleDomain Fitted-Function " << fitfunc->asString()
             << ": Fit-status = " << fitStatus << ", chi^2 = " << chi2 << ".\n";
+
+  return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Fit function in multi-domain (mostly applied to fitting background without
+ * peak)
+  * @param mdfunction :: function to fit
+  * @param dataws :: matrix workspace to fit with
+  * @param wsindex :: workspace index of the spectrum in matrix workspace
+  * @param vec_xmin :: minimin values of domains
+  * @param vec_xmax :: maximim values of domains
+  */
+double
+FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
+                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                        std::vector<double> &vec_xmin,
+                        std::vector<double> &vec_xmax) {
+  // Validate
+  if (vec_xmin.size() != vec_xmax.size())
+    throw runtime_error("Sizes of xmin and xmax (vectors) are not equal. ");
+
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("Fit", -1, -1, true);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // This use multi-domain; but does not know how to set up
+  //   IFunction_sptr fitfunc,
+  //  boost::shared_ptr<MultiDomainFunction> funcmd =
+  //      boost::make_shared<MultiDomainFunction>();
+
+  // Set function first
+  funcmd->addFunction(fitfunc);
+
+  // set domain for function with index 0 covering both sides
+  funcmd->clearDomainIndices();
+  std::vector<size_t> ii(2);
+  ii[0] = 0;
+  ii[1] = 1;
+  funcmd->setDomainIndices(0, ii);
+
+  // Set the properties
+  fit->setProperty("Function",
+                   boost::dynamic_pointer_cast<IFunction>(mdfunction));
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", vec_xmin[0]);
+  fit->setProperty("EndX", vec_xmax[0]);
+  fit->setProperty("InputWorkspace_1", dataws);
+  fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
+  fit->setProperty("StartX_1", vec_xmin[1]);
+  fit->setProperty("EndX_1", vec_xmax[1]);
+  fit->setProperty("MaxIterations", 50);
+  fit->setProperty("Minimizer", m_minimizer);
+  fit->setProperty("CostFunction", "Least squares");
+
+  m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": "
+            << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and ("
+            << vec_xmin[1] << ", " << vec_xmax[1] << "); " << funcmd->asString()
+            << "\n";
+
+  // Execute
+  fit->execute();
+  if (!fit->isExecuted()) {
+    throw runtime_error("Fit is not executed on multi-domain function/data. ");
+  }
+  ++m_numFitCalls;
+
+  // Retrieve result
+  std::string fitStatus = fit->getProperty("OutputStatus");
+  m_sstream << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
+
+  double chi2 = EMPTY_DBL();
+  if (fitStatus == "success") {
+    chi2 = fit->getProperty("OutputChi2overDoF");
+    m_sstream << "FitMultidomain: Successfully-Fitted Function "
+              << fitfunc->asString() << ", Chi^2 = " << chi2 << "\n";
+  }
+
+  return chi2;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Fit function in multi-domain
+  * @param fitfunc :: function to fit
+  * @param dataws :: matrix workspace to fit with
+  * @param wsindex :: workspace index of the spectrum in matrix workspace
+  * @param vec_xmin :: minimin values of domains
+  * @param vec_xmax :: maximim values of domains
+  */
+double FitOneSinglePeak::fitFunctionMD(IFunction_sptr fitfunc,
+                                       MatrixWorkspace_sptr dataws,
+                                       size_t wsindex, vector<double> vec_xmin,
+                                       vector<double> vec_xmax) {
+  // Validate
+  if (vec_xmin.size() != vec_xmax.size())
+    throw runtime_error("Sizes of xmin and xmax (vectors) are not equal. ");
+
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("Fit", -1, -1, true);
+  } catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // This use multi-domain; but does not know how to set up
+  boost::shared_ptr<MultiDomainFunction> funcmd =
+      boost::make_shared<MultiDomainFunction>();
+
+  // Set function first
+  funcmd->addFunction(fitfunc);
+
+  // set domain for function with index 0 covering both sides
+  funcmd->clearDomainIndices();
+  std::vector<size_t> ii(2);
+  ii[0] = 0;
+  ii[1] = 1;
+  funcmd->setDomainIndices(0, ii);
+
+  // Set the properties
+  fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(funcmd));
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", vec_xmin[0]);
+  fit->setProperty("EndX", vec_xmax[0]);
+  fit->setProperty("InputWorkspace_1", dataws);
+  fit->setProperty("WorkspaceIndex_1", static_cast<int>(wsindex));
+  fit->setProperty("StartX_1", vec_xmin[1]);
+  fit->setProperty("EndX_1", vec_xmax[1]);
+  fit->setProperty("MaxIterations", 50);
+  fit->setProperty("Minimizer", m_minimizer);
+  fit->setProperty("CostFunction", "Least squares");
+
+  m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": "
+            << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and ("
+            << vec_xmin[1] << ", " << vec_xmax[1] << "); " << funcmd->asString()
+            << "\n";
+
+  // Execute
+  fit->execute();
+  if (!fit->isExecuted()) {
+    throw runtime_error("Fit is not executed on multi-domain function/data. ");
+  }
+  ++m_numFitCalls;
+
+  // Retrieve result
+  std::string fitStatus = fit->getProperty("OutputStatus");
+  m_sstream << "[DB] Multi-domain fit status: " << fitStatus << ".\n";
+
+  double chi2 = EMPTY_DBL();
+  if (fitStatus == "success") {
+    chi2 = fit->getProperty("OutputChi2overDoF");
+    m_sstream << "FitMultidomain: Successfully-Fitted Function "
+              << fitfunc->asString() << ", Chi^2 = " << chi2 << "\n";
+  }
 
   return chi2;
 }
