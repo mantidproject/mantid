@@ -9,6 +9,8 @@ UI & Usability Changes
 User Interface
 --------------
 
+- The First use dialog has been redesigned to use less of the screen to fit better onto laptops with small high resolution screens that use screen scaling.
+
 Scanning workspaces
 ###################
 
