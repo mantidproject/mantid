@@ -12,28 +12,27 @@
  * @param DoubleEditorType :: Double editor class to create
  */
 template <class DoubleManagerType, class DoubleEditorType>
-class DoubleEditorFactoryBase : public QtAbstractEditorFactory<DoubleManagerType>
-{
+class DoubleEditorFactoryBase
+    : public QtAbstractEditorFactory<DoubleManagerType> {
 public:
   DoubleEditorFactoryBase(QObject *parent = 0)
-    : QtAbstractEditorFactory<DoubleManagerType>(parent)
-  {}
+      : QtAbstractEditorFactory<DoubleManagerType>(parent) {}
 
 protected:
   void connectPropertyManager(DoubleManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   void disconnectPropertyManager(DoubleManagerType *manager) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
     // Do nothing
   }
 
   QWidget *createEditorForManager(DoubleManagerType *manager,
                                   QtProperty *property,
                                   QWidget *parent) override {
-    (void) manager; // Unused
+    (void)manager; // Unused
 
     return new DoubleEditorType(property, parent);
   }
@@ -42,31 +41,32 @@ protected:
 /**
  *  Editor for double values
  */
-class EXPORT_OPT_MANTIDQT_COMMON DoubleEditor: public QLineEdit
-{
+class EXPORT_OPT_MANTIDQT_COMMON DoubleEditor : public QLineEdit {
   Q_OBJECT
 public:
   DoubleEditor(QtProperty *property, QWidget *parent);
   ~DoubleEditor() override;
-  void setValue(const double& d);
+  void setValue(const double &d);
 protected slots:
   virtual void updateProperty();
-protected:
-  /// Returns string representation of the value, using the format of the property
-  QString formatValue(const double& d) const;
 
-  QtProperty* m_property;
+protected:
+  /// Returns string representation of the value, using the format of the
+  /// property
+  QString formatValue(const double &d) const;
+
+  QtProperty *m_property;
   int m_decimals;
 };
 
 /**
  *  Specialized version of double editor for parameters
  */
-class EXPORT_OPT_MANTIDQT_COMMON ParameterEditor : public DoubleEditor
-{
+class EXPORT_OPT_MANTIDQT_COMMON ParameterEditor : public DoubleEditor {
   Q_OBJECT
 public:
-  ParameterEditor(QtProperty *property, QWidget *parent) : DoubleEditor(property, parent) {}
+  ParameterEditor(QtProperty *property, QWidget *parent)
+      : DoubleEditor(property, parent) {}
 protected slots:
   void updateProperty() override;
 };
@@ -74,23 +74,26 @@ protected slots:
 /**
  * Concrete double editor factory for double properties
  */
-class EXPORT_OPT_MANTIDQT_COMMON DoubleEditorFactory : public DoubleEditorFactoryBase<QtDoublePropertyManager,DoubleEditor>
-{
+class EXPORT_OPT_MANTIDQT_COMMON DoubleEditorFactory
+    : public DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor> {
   Q_OBJECT
 public:
-  DoubleEditorFactory(QObject* parent = 0)
-    : DoubleEditorFactoryBase<QtDoublePropertyManager,DoubleEditor>(parent) {}
+  DoubleEditorFactory(QObject *parent = 0)
+      : DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor>(parent) {
+  }
 };
 
 /**
  * Concrete double editor factory for parameter properties
  */
-class EXPORT_OPT_MANTIDQT_COMMON ParameterEditorFactory : public DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>
-{
+class EXPORT_OPT_MANTIDQT_COMMON ParameterEditorFactory
+    : public DoubleEditorFactoryBase<ParameterPropertyManager,
+                                     ParameterEditor> {
   Q_OBJECT
 public:
-  ParameterEditorFactory(QObject* parent = 0)
-    : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(parent) {}
+  ParameterEditorFactory(QObject *parent = 0)
+      : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(
+            parent) {}
 };
 
 #endif // DOUBLEEDITORFACTORY_H

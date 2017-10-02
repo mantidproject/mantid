@@ -39,7 +39,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON QtSignalChannel : public QObject,
-                                                public Poco::Channel {
+                                                   public Poco::Channel {
   Q_OBJECT
 
 public:

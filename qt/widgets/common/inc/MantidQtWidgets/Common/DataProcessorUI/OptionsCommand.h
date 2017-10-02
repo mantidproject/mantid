@@ -35,8 +35,7 @@ class OptionsCommand : public CommandBase {
 public:
   OptionsCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  OptionsCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  OptionsCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~OptionsCommand(){};
 
   void execute() override {

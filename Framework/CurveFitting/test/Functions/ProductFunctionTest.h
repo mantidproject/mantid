@@ -4,13 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ProductFunction.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Jacobian.h"
-
 #include "MantidDataObjects/Workspace2D.h"
-
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/FunctionFactory.h"
 
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 using Mantid::CurveFitting::Functions::ProductFunction;
