@@ -778,19 +778,20 @@ class RunTabPresenter(object):
 
         # 2. Iterate over each row, create a table row model and insert it
         number_of_rows = self._view.get_number_of_rows()
+        is_multi_period_view = self._view.is_multi_period_view()
         for row in range(number_of_rows):
             sample_scatter = self._view.get_cell(row=row, column=SAMPLE_SCATTER_INDEX, convert_to=str)
-            sample_scatter_period = self._view.get_cell(row=row, column=SAMPLE_SCATTER_PERIOD_INDEX, convert_to=str)
+            sample_scatter_period = self._view.get_cell(row=row, column=SAMPLE_SCATTER_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             sample_transmission = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_INDEX, convert_to=str)
-            sample_transmission_period = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_PERIOD_INDEX, convert_to=str)  # noqa
+            sample_transmission_period = self._view.get_cell(row=row, column=SAMPLE_TRANSMISSION_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             sample_direct = self._view.get_cell(row=row, column=SAMPLE_DIRECT_INDEX, convert_to=str)
-            sample_direct_period = self._view.get_cell(row=row, column=SAMPLE_DIRECT_PERIOD_INDEX, convert_to=str)
+            sample_direct_period = self._view.get_cell(row=row, column=SAMPLE_DIRECT_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             can_scatter = self._view.get_cell(row=row, column=CAN_SCATTER_INDEX, convert_to=str)
-            can_scatter_period = self._view.get_cell(row=row, column=CAN_SCATTER_PERIOD_INDEX, convert_to=str)
+            can_scatter_period = self._view.get_cell(row=row, column=CAN_SCATTER_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             can_transmission = self._view.get_cell(row=row, column=CAN_TRANSMISSION_INDEX, convert_to=str)
-            can_transmission_period = self._view.get_cell(row=row, column=CAN_TRANSMISSION_PERIOD_INDEX, convert_to=str)
+            can_transmission_period = self._view.get_cell(row=row, column=CAN_TRANSMISSION_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             can_direct = self._view.get_cell(row=row, column=CAN_DIRECT_INDEX, convert_to=str)
-            can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str)
+            can_direct_period = self._view.get_cell(row=row, column=CAN_DIRECT_PERIOD_INDEX, convert_to=str) if is_multi_period_view else ""  # noqa
             output_name = self._view.get_cell(row=row, column=OUTPUT_NAME_INDEX, convert_to=str)
 
             # Get the options string
@@ -878,21 +879,32 @@ class RunTabPresenter(object):
         output_name = get_string_entry(BatchReductionEntry.Output, row)
 
         # 2. Create entry that can be understood by table
-        row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
-                    "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
-                    "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
-                                                               get_string_period(sample_scatter_period),
-                                                               sample_transmission,
-                                                               get_string_period(sample_transmission_period),
-                                                               sample_direct,
-                                                               get_string_period(sample_direct_period),
-                                                               can_scatter,
-                                                               get_string_period(can_scatter_period),
-                                                               can_transmission,
-                                                               get_string_period(can_transmission_period),
-                                                               can_direct,
-                                                               get_string_period(can_direct_period),
-                                                               output_name)
+        if self._view.is_multi_period_view():
+            row_entry = "SampleScatter:{},ssp:{},SampleTrans:{},stp:{},SampleDirect:{},sdp:{}," \
+                        "CanScatter:{},csp:{},CanTrans:{},ctp:{}," \
+                        "CanDirect:{},cdp:{},OutputName:{}".format(sample_scatter,
+                                                                   get_string_period(sample_scatter_period),
+                                                                   sample_transmission,
+                                                                   get_string_period(sample_transmission_period),
+                                                                   sample_direct,
+                                                                   get_string_period(sample_direct_period),
+                                                                   can_scatter,
+                                                                   get_string_period(can_scatter_period),
+                                                                   can_transmission,
+                                                                   get_string_period(can_transmission_period),
+                                                                   can_direct,
+                                                                   get_string_period(can_direct_period),
+                                                                   output_name)
+        else:
+            row_entry = "SampleScatter:{},SampleTrans:{},SampleDirect:{}," \
+                        "CanScatter:{},CanTrans:{}," \
+                        "CanDirect:{},OutputName:{}".format(sample_scatter,
+                                                            sample_transmission,
+                                                            sample_direct,
+                                                            can_scatter,
+                                                            can_transmission,
+                                                            can_direct,
+                                                            output_name)
 
         self._view.add_row(row_entry)
 
