@@ -13,10 +13,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-void populatePhaseTable(ITableWorkspace_sptr phaseTable, std::vector<std::string> names) {
+void populatePhaseTable(ITableWorkspace_sptr phaseTable,
+                        std::vector<std::string> names) {
   phaseTable->addColumn("int", names[0]);
   phaseTable->addColumn("double", names[1]);
-  phaseTable->addColumn("double",names[2]);
+  phaseTable->addColumn("double", names[2]);
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
     phaseRow1 << i << 1. << 0.;
@@ -25,7 +26,7 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable, std::vector<std::string
   }
 }
 void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-  populatePhaseTable(phaseTable,{"DetectorID", "Asymmetry", "Phase"});
+  populatePhaseTable(phaseTable, {"DetectorID", "Asymmetry", "Phase"});
 }
 IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
   // Create and populate a detector table
@@ -107,15 +108,13 @@ public:
   }
   // add test for no phase
 
- // add test for no asymm
+  // add test for no asymm
 
- // add test for two phase
+  // add test for two phase
 
- // add test for two asymm
+  // add test for two asymm
 
- // add test for different order
-
-
+  // add test for different order
 };
 
 class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
