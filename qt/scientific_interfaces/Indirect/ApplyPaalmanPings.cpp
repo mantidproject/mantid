@@ -406,12 +406,12 @@ void ApplyPaalmanPings::postProcessComplete(bool error) {
 
   // Clean up unwanted workspaces
   IAlgorithm_sptr deleteAlg =
-	  AlgorithmManager::Instance().create("DeleteWorkspace");
+      AlgorithmManager::Instance().create("DeleteWorkspace");
   if (AnalysisDataService::Instance().doesExist("__algorithm_can")) {
 
-	  deleteAlg->initialize();
-	  deleteAlg->setProperty("Workspace", "__algorithm_can");
-	  deleteAlg->execute();
+    deleteAlg->initialize();
+    deleteAlg->setProperty("Workspace", "__algorithm_can");
+    deleteAlg->execute();
   }
   const auto conv =
       AnalysisDataService::Instance().doesExist("__algorithm_can_Wavelength");
