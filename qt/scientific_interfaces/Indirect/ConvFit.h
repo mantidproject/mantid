@@ -46,9 +46,12 @@ private slots:
   void showTieCheckbox(QString);
   void sequentialFitComplete(bool error);
   void singleFitComplete(bool error);
-  void fitFunctionSelected(const QString &);
+  void updateFitFunctions(int fitTypeIndex);
+  void fitFunctionSelected(int fitTypeIndex);
   void saveClicked();
   void plotClicked();
+  void updateProperties(int specNo);
+  void addDefaultParametersToTree(const QString& fitFunction);
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -64,12 +67,12 @@ private:
   QString fitTypeString() const;
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
-  QStringList getFunctionParameters(QString);
-  void updateParameters(int specNo);
+  QVector<QString> getFunctionParameters(QString) const;
+  QVector<QString> ConvFit::indexToFitFunctions(const int& fitTypeIndex);
+  void updateProperties(int specNo, const QString &fitFunction);
   void updatePlotOptions();
   void plotOutput(std::string const &outputWs, int specNo);
-  void addParametersToTree(const QStringList &parameters,
-                           const QString &currentFitFunction);
+  void addDefaultParametersToTree(const QVector<QString> &currentFitFunction);
   void addSampleLogsToWorkspace(const std::string &workspaceName,
                                 const std::string &logName,
                                 const std::string &logText,
@@ -81,6 +84,14 @@ private:
                                              const std::string &specMax,
                                              QString &outputWSName);
   void algorithmComplete(bool error, const QString &outputWSName);
+  QHash<QString, QString>
+  createPropertyToParameterMap(const QVector<QString> &functionNames,
+                               const QString &prefixPrefix,
+                               const QString &prefixSuffix);
+  void
+  extendPropertyToParameterMap(const QString &functionName,
+                               const QString &prefix,
+                               QHash<QString, QString> &propertyToParameter);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -91,7 +102,6 @@ private:
   int m_fittedIndex;
   bool m_confitResFileType;
   QString m_singleFitOutputName;
-  QString m_previousFit;
   QString m_baseName;
   int m_runMin;
   int m_runMax;
@@ -102,10 +112,10 @@ private:
   // Used in auto generating defaults for parameters
   QMap<QString, double> m_defaultParams;
   QMap<QString, double> createDefaultParamsMap(QMap<QString, double> map);
-  QMap<QString, double>
-  constructFullPropertyMap(const QMap<QString, double> &defaultMap,
-                           const QStringList &parameters,
-                           const QString &fitFunction);
+
+  QVector<QString> m_fitFunctions;
+  QHash<QString, QHash<size_t, double>> m_parameterValues;
+  QHash<QString, QString> m_propertyToParameter;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

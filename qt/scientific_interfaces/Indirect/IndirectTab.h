@@ -205,6 +205,9 @@ protected:
   bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                 QPair<double, double> &res);
 
+  /// Converts a standard vector of standard strings to a QVector of QStrings.
+  QVector<QString> convertStdStringVector(const std::vector<std::string> &stringVec) const;
+
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 
