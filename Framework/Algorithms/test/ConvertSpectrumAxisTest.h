@@ -70,7 +70,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -106,7 +106,7 @@ public:
                 outputSignedThetaAxisWS));
 
     // Check the signed theta axis
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = outputSignedTheta->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
@@ -152,7 +152,7 @@ public:
             outputWS));
 
     // Should now have a numeric axis up the side, with units of angle
-    const Axis *thetaAxis = 0;
+    const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Energy transfer");

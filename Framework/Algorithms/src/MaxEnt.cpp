@@ -199,38 +199,38 @@ void MaxEnt::exec() {
 
   // MaxEnt parameters
   // Complex data?
-  bool complexData = getProperty("ComplexData");
+  const bool complexData = getProperty("ComplexData");
   // Complex image?
-  bool complexImage = getProperty("ComplexImage");
+  const bool complexImage = getProperty("ComplexImage");
   // Image must be positive?
-  bool positiveImage = getProperty("PositiveImage");
+  const bool positiveImage = getProperty("PositiveImage");
   // Autoshift
-  bool autoShift = getProperty("AutoShift");
+  const bool autoShift = getProperty("AutoShift");
   // Increase the number of points in the image by this factor
-  size_t resolutionFactor = getProperty("ResolutionFactor");
+  const size_t resolutionFactor = getProperty("ResolutionFactor");
   // Background (default level, sky background, etc)
-  double background = getProperty("A");
+  const double background = getProperty("A");
   // Chi target
-  double chiTarget = getProperty("ChiTarget");
+  const double chiTarget = getProperty("ChiTarget");
   // Required precision for Chi arget
-  double chiEps = getProperty("ChiEps");
+  const double chiEps = getProperty("ChiEps");
   // Maximum degree of non-parallelism between S and C
-  double angle = getProperty("MaxAngle");
+  const double angle = getProperty("MaxAngle");
   // Distance penalty for current image
-  double distEps = getProperty("DistancePenalty");
+  const double distEps = getProperty("DistancePenalty");
   // Maximum number of iterations
-  size_t niter = getProperty("MaxIterations");
+  const size_t niter = getProperty("MaxIterations");
   // Maximum number of iterations in alpha chop
-  size_t alphaIter = getProperty("AlphaChopIterations");
+  const size_t alphaIter = getProperty("AlphaChopIterations");
   // Number of spectra and datapoints
   // Read input workspace
-  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
   // Number of data points
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
-  size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+  const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
 
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
@@ -376,10 +376,10 @@ void MaxEnt::exec() {
 * counts
 * @return : Spectrum 'spec' as a complex vector
 */
-std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
+std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors) {
-
-  std::vector<double> result(inWS->blocksize() * 2);
+  const size_t numBins = inWS->blocksize();
+  std::vector<double> result(numBins * 2);
 
   if (inWS->getNumberHistograms() % 2)
     throw std::invalid_argument(
@@ -388,12 +388,12 @@ std::vector<double> MaxEnt::toComplex(const API::MatrixWorkspace_sptr &inWS,
   size_t nspec = inWS->getNumberHistograms() / 2;
 
   if (!errors) {
-    for (size_t i = 0; i < inWS->blocksize(); i++) {
+    for (size_t i = 0; i < numBins; i++) {
       result[2 * i] = inWS->y(spec)[i];
       result[2 * i + 1] = inWS->y(spec + nspec)[i];
     }
   } else {
-    for (size_t i = 0; i < inWS->blocksize(); i++) {
+    for (size_t i = 0; i < numBins; i++) {
       result[2 * i] = inWS->e(spec)[i];
       result[2 * i + 1] = inWS->e(spec + nspec)[i];
     }
@@ -667,7 +667,7 @@ MaxEnt::updateImage(const std::vector<double> &image,
 * @param outWS :: [input] The output workspace to populate
 * @param autoShift :: [input] Whether or not to correct the phase shift
 */
-void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                              size_t nspec, const std::vector<double> &result,
                              bool complex, MatrixWorkspace_sptr &outWS,
                              bool autoShift) {
@@ -755,7 +755,7 @@ void MaxEnt::populateImageWS(const MatrixWorkspace_sptr &inWS, size_t spec,
 * @param complex :: [input] True if result is a complex vector, false otherwise
 * @param outWS :: [input] The output workspace to populate
 */
-void MaxEnt::populateDataWS(const MatrixWorkspace_sptr &inWS, size_t spec,
+void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
                             size_t nspec, const std::vector<double> &result,
                             bool complex, MatrixWorkspace_sptr &outWS) {
 

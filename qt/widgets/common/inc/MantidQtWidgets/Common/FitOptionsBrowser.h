@@ -45,7 +45,8 @@ public:
   enum FittingType { Simultaneous = 0, Sequential, SimultaneousAndSequential };
 
   /// Constructor
-  FitOptionsBrowser(QWidget *parent = NULL, FittingType fitType = Simultaneous);
+  FitOptionsBrowser(QWidget *parent = nullptr,
+                    FittingType fitType = Simultaneous);
   QString getProperty(const QString &name) const;
   void setProperty(const QString &name, const QString &value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm &fit) const;

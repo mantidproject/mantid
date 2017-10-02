@@ -25,19 +25,15 @@ public:
   static PreprocessingAlgorithmTest *createSuite() {
     return new PreprocessingAlgorithmTest();
   }
-  static void destroySuite(PreprocessingAlgorithmTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(PreprocessingAlgorithmTest *suite) { delete suite; }
   PreprocessingAlgorithmTest() { FrameworkManager::Instance(); };
 
   void test_invalid_algorithms() {
     // Algorithm with a single input ws property
-    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("Rebin"), std::invalid_argument);
     // Algorithm with more than two input ws properties
-    TS_ASSERT_THROWS(
-        PreprocessingAlgorithm("ReflectometryReductionOneAuto"),
-        std::invalid_argument);
+    TS_ASSERT_THROWS(PreprocessingAlgorithm("ReflectometryReductionOneAuto"),
+                     std::invalid_argument);
     // Algorithm with two input ws properties but no output ws properties
     TS_ASSERT_THROWS(PreprocessingAlgorithm("ConjoinWorkspaces"),
                      std::invalid_argument);
@@ -53,8 +49,7 @@ public:
     // Default: Plus
     TS_ASSERT_THROWS_NOTHING(PreprocessingAlgorithm());
     // WeightedMean
-    TS_ASSERT_THROWS_NOTHING(
-        PreprocessingAlgorithm("WeightedMean"));
+    TS_ASSERT_THROWS_NOTHING(PreprocessingAlgorithm("WeightedMean"));
   }
 
   void test_default() {
@@ -74,8 +69,7 @@ public:
     // WeightedMean
     std::set<QString> blacklist = {"InputWorkspace1", "InputWorkspace2",
                                    "OutputWorkspace"};
-    auto mean =
-        PreprocessingAlgorithm("WeightedMean", "", blacklist);
+    auto mean = PreprocessingAlgorithm("WeightedMean", "", blacklist);
     TS_ASSERT_EQUALS(mean.lhsProperty(), "InputWorkspace1");
     TS_ASSERT_EQUALS(mean.rhsProperty(), "InputWorkspace2");
     TS_ASSERT_EQUALS(mean.outputProperty(), "OutputWorkspace");

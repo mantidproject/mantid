@@ -13,8 +13,7 @@ class MantidTreeWidget;
 /**A class derived from QTreeWidgetItem, to accomodate
 * sorting on the items in a MantidTreeWidget.
 */
-class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem
-    : public QTreeWidgetItem {
+class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
   explicit MantidTreeWidgetItem(MantidTreeWidget *);
   MantidTreeWidgetItem(QStringList, MantidTreeWidget *);

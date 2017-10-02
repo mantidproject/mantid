@@ -113,7 +113,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem *item) {
   // used in numeric time series below, the default filter value
   int filter = 0;
   int key = item->data(1, Qt::UserRole).toInt();
-  Mantid::Kernel::Property *logData = NULL;
+  Mantid::Kernel::Property *logData = nullptr;
   QString caption = QString::fromStdString(m_wsname) +
                     QString::fromStdString("-") + item->text(0);
   switch (key) {

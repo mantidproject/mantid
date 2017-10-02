@@ -96,7 +96,7 @@ public:
   bool setQObject(QObject *, const char *, PyObject *dict);
   /// Set a reference to a QObject in the global dictionary
   bool setQObject(QObject *val, const char *name) override {
-    return setQObject(val, name, NULL);
+    return setQObject(val, name, nullptr);
   }
   /// Set a reference to an int in the global dictionary
   bool setInt(int, const char *) override;
@@ -113,8 +113,6 @@ public:
   PyObject *globalDict() { return m_globals; }
   /// Return the sys dictionary for this environment
   PyObject *sysDict() { return m_sys; }
-  /// Return a reference to the global lock
-  PythonGIL &gil() { return m_gil; }
 
 private:
   /// Constructor

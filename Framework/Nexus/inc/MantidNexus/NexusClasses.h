@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include <nexus/napi.h>
 
 #include <boost/shared_ptr.hpp>
@@ -682,7 +682,8 @@ private:
     if (start_time.empty()) {
       start_time = "2000-01-01T00:00:00";
     }
-    Kernel::DateAndTime start_t = Kernel::DateAndTime(start_time);
+    auto start_t =
+        Kernel::DateAndTimeHelpers::createFromSanitizedISO8601(start_time);
     NXInfo vinfo = getDataSetInfo("value");
     if (!vinfo)
       return nullptr;
@@ -696,8 +697,7 @@ private:
       value.openLocal();
       value.load();
       for (int i = 0; i < value.dim0(); i++) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         for (int j = 0; j < value.dim1(); j++) {
           char *c = &value(i, j);
           if (!isprint(*c))
@@ -715,8 +715,7 @@ private:
         value.openLocal();
         value.load();
         for (int i = 0; i < value.dim0(); i++) {
-          Kernel::DateAndTime t =
-              start_t + boost::posix_time::seconds(int(times[i]));
+          auto t = start_t + boost::posix_time::seconds(int(times[i]));
           logv->addValue(t, (value[i] == 0 ? false : true));
         }
         return logv;
@@ -748,8 +747,7 @@ private:
     value.load();
     for (int i = 0; i < value.dim0(); i++) {
       if (i == 0 || value[i] != value[i - 1] || times[i] != times[i - 1]) {
-        Kernel::DateAndTime t =
-            start_t + boost::posix_time::seconds(int(times[i]));
+        auto t = start_t + boost::posix_time::seconds(int(times[i]));
         logv->addValue(t, value[i]);
       }
     }

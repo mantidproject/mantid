@@ -42,10 +42,10 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(
 * @param blacklist : The list of properties we don't want to show, as a string
 * algorithm in the processed workspace's name
 */
-PreprocessingAlgorithm::PreprocessingAlgorithm(
-    const QString &name, const QString &prefix, const QString &blacklist)
-    : PreprocessingAlgorithm(name, prefix,
-                                          convertStringToSet(blacklist)) {}
+PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name,
+                                               const QString &prefix,
+                                               const QString &blacklist)
+    : PreprocessingAlgorithm(name, prefix, convertStringToSet(blacklist)) {}
 
 /** Default constructor: do nothing
 */
@@ -56,19 +56,13 @@ PreprocessingAlgorithm::PreprocessingAlgorithm()
 PreprocessingAlgorithm::~PreprocessingAlgorithm() {}
 
 // Returns the name of the lhs input property
-QString PreprocessingAlgorithm::lhsProperty() const {
-  return m_lhs;
-}
+QString PreprocessingAlgorithm::lhsProperty() const { return m_lhs; }
 
 // Returns the name of the rhs input property
-QString PreprocessingAlgorithm::rhsProperty() const {
-  return m_rhs;
-}
+QString PreprocessingAlgorithm::rhsProperty() const { return m_rhs; }
 
 // Returns the name of the output property
-QString PreprocessingAlgorithm::outputProperty() const {
-  return m_outProperty;
-}
+QString PreprocessingAlgorithm::outputProperty() const { return m_outProperty; }
 
 // Returns the prefix to add to the output property
 QString PreprocessingAlgorithm::prefix() const { return m_prefix; }

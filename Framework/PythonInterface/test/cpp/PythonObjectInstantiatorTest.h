@@ -57,7 +57,7 @@ public:
 
 public:
   //
-  PythonObjectInstantiatorTest() : m_creator(NULL) {}
+  PythonObjectInstantiatorTest() : m_creator(nullptr) {}
 
   ~PythonObjectInstantiatorTest() override { delete m_creator; }
 

@@ -1,5 +1,5 @@
 
-#include <math.h>
+#include <cmath>
 
 #include "MantidQtWidgets/SpectrumViewer/ArrayDataSource.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"

@@ -149,8 +149,8 @@ Output:
     0.00462
     0.63441
     0.41079
-    0.01248
-    0.00905
+    0.44792
+    0.23703
 
 **Example - Basic reduction with a transmission run**
 
@@ -175,8 +175,8 @@ Output:
     0.00338
     1.16756
     0.89144
-    0.98439
-    1.00991
+    1.46655
+    1.41327
 
 **Example - Reduction overriding some default values**
 
@@ -200,8 +200,8 @@ Output:
     0.00462
     0.64241
     0.41453
-    0.50007
-    0.48771
+    0.51029
+    0.52240
 
 .. categories::
 

@@ -220,7 +220,7 @@ void CustomActionDialog::updateDisplayList() {
 }
 
 QAction *CustomActionDialog::addAction() {
-  QAction *action = NULL;
+  QAction *action = nullptr;
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
   if (!app)
     return action;
@@ -535,7 +535,7 @@ QAction *CustomActionDialog::actionAt(int row) {
         "The parent of this dialog was not the Application Window");
   QList<QAction *> actions = app->customActionsList();
   if (actions.isEmpty() || row < 0 || row >= actions.count())
-    return 0;
+    return nullptr;
 
   return actions.at(row);
 }
@@ -552,7 +552,7 @@ void CustomActionDialog::setCurrentAction(int row) {
   shortcutBox->setText(action->shortcut().toString());
 
   QList<QWidget *> list = action->associatedWidgets();
-  QWidget *w = NULL;
+  QWidget *w = nullptr;
   if (!list.isEmpty())
     w = list[0];
   if (!w)

@@ -62,14 +62,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     if (willFail) {
       TS_ASSERT(!alg.isExecuted());
-      return NULL;
+      return nullptr;
     } else
       TS_ASSERT(alg.isExecuted());
 
     Run &run = ws->mutableRun();
     TS_ASSERT(run.hasProperty(NewLogName));
     if (!run.hasProperty(NewLogName))
-      return NULL;
+      return nullptr;
     p = dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(NewLogName));
     TS_ASSERT(p);
     return p;

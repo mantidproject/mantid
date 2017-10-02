@@ -97,6 +97,7 @@ private:
   // Overridden Algorithm methods
   void init() override;
   void exec() override;
+  std::map<std::string, std::string> validateInputs() override;
 
 protected: // for testing
   void checkProperties(const API::MatrixWorkspace_sptr &inputWorkspace);

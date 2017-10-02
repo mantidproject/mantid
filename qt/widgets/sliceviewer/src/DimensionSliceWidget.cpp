@@ -104,15 +104,15 @@ void DimensionSliceWidget::setShownDim(int dim) {
 
   // Make the spacer expand to keep the buttons in the same spot
   if (slicing) {
-    if (ui.horizontalSpacer != NULL) {
+    if (ui.horizontalSpacer != nullptr) {
       // Remove the 3rd item (if it's not gone already) = the spacer
       ui.horizontalLayout->removeItem(ui.horizontalLayout->itemAt(3));
       delete ui.horizontalSpacer;
-      ui.horizontalSpacer = NULL;
+      ui.horizontalSpacer = nullptr;
     }
   } else {
     // Put the spacer back, if needed
-    if (ui.horizontalSpacer == NULL) {
+    if (ui.horizontalSpacer == nullptr) {
       ui.horizontalSpacer =
           new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
       ui.horizontalLayout->insertSpacerItem(3, ui.horizontalSpacer);

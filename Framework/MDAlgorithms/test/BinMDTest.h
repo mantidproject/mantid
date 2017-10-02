@@ -59,7 +59,8 @@ private:
   class MockImplicitFunctionParser
       : public Mantid::API::ImplicitFunctionParser {
   public:
-    MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL) {}
+    MockImplicitFunctionParser()
+        : Mantid::API::ImplicitFunctionParser(nullptr) {}
     Mantid::API::ImplicitFunctionBuilder *
     createFunctionBuilder(Poco::XML::Element * /*functionElement*/) override {
       return new MockImplicitFunctionBuilder;

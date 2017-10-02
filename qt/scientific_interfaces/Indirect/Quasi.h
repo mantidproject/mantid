@@ -10,7 +10,7 @@ class DLLExport Quasi : public IndirectBayesTab {
   Q_OBJECT
 
 public:
-  Quasi(QWidget *parent = 0);
+  Quasi(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectBayesTab
   void setup() override;

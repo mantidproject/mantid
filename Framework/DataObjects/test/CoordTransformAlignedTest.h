@@ -21,12 +21,13 @@ public:
   void test_constructor_throws() {
     TSM_ASSERT_THROWS_ANYTHING(
         "Bad number of dimensions",
-        CoordTransformAligned ct(0, 0, NULL, NULL, NULL););
+        CoordTransformAligned ct(0, 0, nullptr, nullptr, nullptr););
     TSM_ASSERT_THROWS_ANYTHING(
         "Too many output dimensions",
-        CoordTransformAligned ct(3, 4, NULL, NULL, NULL););
+        CoordTransformAligned ct(3, 4, nullptr, nullptr, nullptr););
     TSM_ASSERT_THROWS_ANYTHING(
-        "Null input", CoordTransformAligned ct(1, 1, NULL, NULL, NULL););
+        "Null input",
+        CoordTransformAligned ct(1, 1, nullptr, nullptr, nullptr););
     size_t dimToBinFrom[3] = {4, 1, 0};
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};

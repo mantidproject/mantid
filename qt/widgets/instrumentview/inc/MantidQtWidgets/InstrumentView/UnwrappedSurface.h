@@ -91,7 +91,7 @@ public:
 
   /** @name Implemented public virtual methods */
   //@{
-  void componentSelected(Mantid::Geometry::ComponentID = NULL) override;
+  void componentSelected(Mantid::Geometry::ComponentID = nullptr) override;
   void getSelectedDetectors(QList<int> &dets) override;
   void getMaskedDetectors(QList<int> &dets) const override;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
