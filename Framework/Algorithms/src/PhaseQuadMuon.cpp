@@ -128,14 +128,14 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   return result;
 }
 
-size_t PhaseQuadMuon::findName(const std::string pattern, const std::vector<std::string> &names) {
+int PhaseQuadMuon::findName(const std::string pattern, const std::vector<std::string> &names) {
 	auto it = std::find_if(names.begin(), names.end(), [pattern](const std::string& s) {
 		if (s == pattern) { return true; }
 		else { return false; } });
 	if (it == names.end()) {
 		return -1;
 	}
-	return std::distance(names.begin(), it);
+	return static_cast<int>(std::distance(names.begin(), it));
 }
 
 

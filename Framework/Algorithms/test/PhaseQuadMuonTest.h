@@ -13,10 +13,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-  phaseTable->addColumn("int", "DetectorID");
-  phaseTable->addColumn("double", "DetectorAsymmetry");
-  phaseTable->addColumn("double", "DetectorPhase");
+void populatePhaseTable(ITableWorkspace_sptr phaseTable, std::vector<std::string> names) {
+  phaseTable->addColumn("int", names[0]);
+  phaseTable->addColumn("double", names[1]);
+  phaseTable->addColumn("double",names[2]);
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
     phaseRow1 << i << 1. << 0.;
@@ -24,7 +24,9 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
     phaseRow2 << i << 1. << 1.57;
   }
 }
-
+void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
+  populatePhaseTable(phaseTable,{"DetectorID", "Asymmetry", "Phase"});
+}
 IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
@@ -103,6 +105,17 @@ public:
     TS_ASSERT_DELTA(specImE[20], 0.0031, 0.0001);
     TS_ASSERT_DELTA(specImE[50], 0.0035, 0.0001);
   }
+  // add test for no phase
+
+ // add test for no asymm
+
+ // add test for two phase
+
+ // add test for two asymm
+
+ // add test for different order
+
+
 };
 
 class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
