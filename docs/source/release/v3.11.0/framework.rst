@@ -61,6 +61,11 @@ Improved
 - :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
 - :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwitten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
 
+Bugfixes
+########
+
+- :ref:`CalMuonDetectorPhasees <algm-CalMuonDetectorPhases-v1>` now fits a cos instead of a sin function.
+
 Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
