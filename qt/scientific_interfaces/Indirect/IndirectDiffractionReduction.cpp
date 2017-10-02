@@ -229,10 +229,6 @@ void IndirectDiffractionReduction::plotResults() {
  * Handles saving the reductions from the generic algorithm.
  */
 void IndirectDiffractionReduction::saveReductions() {
-  std::string instName =
-      (m_uiForm.iicInstrumentConfiguration->getInstrumentName()).toStdString();
-  std::string mode =
-      (m_uiForm.iicInstrumentConfiguration->getReflectionName()).toStdString();
 
   for (const auto wsName : m_plotWorkspaces) {
     const auto workspaceExists =
