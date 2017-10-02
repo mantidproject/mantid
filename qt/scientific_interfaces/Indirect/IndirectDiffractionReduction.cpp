@@ -281,7 +281,9 @@ void IndirectDiffractionReduction::saveReductions() {
  */
 IAlgorithm_sptr
 IndirectDiffractionReduction::saveGSSAlgorithm(const std::string &filename) {
-  return saveAlgorithm("SaveGSS", filename);
+  auto alg = saveAlgorithm("SaveGSS", filename);
+  alg->setProperty("Append", false);
+  return alg;
 }
 
 /**
