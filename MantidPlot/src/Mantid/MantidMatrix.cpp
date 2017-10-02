@@ -226,7 +226,16 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
                  ? m_workspaceTotalHist - 1
                  : end;
   m_rows = m_endRow - m_startRow + 1;
-  m_cols = static_cast<int>(ws->blocksize());
+  try {
+    // let the workspace do its thing
+    m_cols = static_cast<int>(ws->blocksize());
+  } catch (std::length_error &) {
+    // otherwise get the maximum
+    m_cols = static_cast<int>(ws->y(0).size());
+    for (int i = 0; i < m_workspaceTotalHist; ++i) {
+      m_cols = std::max(m_cols, static_cast<int>(ws->y(i).size()));
+    }
+  }
   if (ws->isHistogramData())
     m_histogram = true;
   connect(this, SIGNAL(needsUpdating()), this, SLOT(repaintAll()));
@@ -587,10 +596,11 @@ QwtDoubleRect MantidMatrix::boundingRect() {
     while (x_start == x_end && i0 <= m_endRow) {
       const auto &X = m_workspace->x(i0);
       x_start = X[0];
-      if (X.size() != m_workspace->y(i0).size())
-        x_end = X[m_workspace->blocksize()];
+      const size_t y_size = m_workspace->y(i0).size();
+      if (X.size() != y_size)
+        x_end = X[y_size];
       else
-        x_end = X[m_workspace->blocksize() - 1];
+        x_end = X[y_size - 1];
       if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
@@ -971,8 +981,8 @@ void MantidMatrix::afterReplaceHandle(
 }
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
-  if (m_cols != static_cast<int>(ws->blocksize()) ||
-      m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms())) {
+  if (m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()) ||
+      m_cols != static_cast<int>(ws->blocksize())) {
     closeDependants();
   }
 
