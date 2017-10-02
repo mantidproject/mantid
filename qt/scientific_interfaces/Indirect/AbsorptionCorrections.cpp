@@ -174,14 +174,14 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg,
     double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
     alg->setProperty("ContainerBackThickness", canBackThickness);
   } else if (shape == "Cylinder") {
-    double canInnerRadius = m_uiForm.spCylCanOuterRadius->value();
+    double canInnerRadius = m_uiForm.spCylCanInnerRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
     double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
     alg->setProperty("ContainerOuterRadius", canOuterRadius);
 
   } else if (shape == "Annulus") {
-    double canInnerRadius = m_uiForm.spAnnCanOuterRadius->value();
+    double canInnerRadius = m_uiForm.spAnnCanInnerRadius->value();
     alg->setProperty("ContainerInnerRadius", canInnerRadius);
 
     double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
