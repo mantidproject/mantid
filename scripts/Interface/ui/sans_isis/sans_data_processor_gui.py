@@ -292,9 +292,10 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self._set_mantid_instrument(instrument_string)
 
         # Set the reduction mode
-        self._instrument = SANSInstrument.from_string(instrument_string)
-        reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
-        self.set_reduction_modes(reduction_mode_list)
+        if instrument_string:
+            self._instrument = SANSInstrument.from_string(instrument_string)
+            reduction_mode_list = get_reduction_mode_strings_for_gui(self._instrument)
+            self.set_reduction_modes(reduction_mode_list)
 
     def get_user_file_path(self):
         return str(self.user_file_line_edit.text())

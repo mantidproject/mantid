@@ -243,17 +243,20 @@ def get_detector_component(move_info, component):
     return component_selection
 
 
-def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates):
+def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=True):
     # REAR_DET_Z
-    lab_detector_z_tag = "Rear_Det_Z"
+    if use_rear_det_z:
+        lab_detector_z_tag = "Rear_Det_Z"
 
-    log_names = [lab_detector_z_tag]
-    log_types = [float]
-    log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
-                                                       convert_from_millimeter_to_meter=True)
+        log_names = [lab_detector_z_tag]
+        log_types = [float]
+        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+                                                           convert_from_millimeter_to_meter=True)
 
-    lab_detector_z = move_info.lab_detector_z \
-        if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+        lab_detector_z = move_info.lab_detector_z \
+            if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+    else:
+        lab_detector_z = 0.
 
     # Perform x and y tilt
     lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
@@ -677,7 +680,7 @@ class SANSMoveLARMORNewStyle(SANSMove):
 class SANSMoveZOOM(SANSMove):
     @staticmethod
     def _move_low_angle_bank(move_info, workspace, coordinates):
-        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates)
+        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
 
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For ZOOM we only have to coordinates
