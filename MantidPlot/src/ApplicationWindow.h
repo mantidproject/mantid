@@ -321,11 +321,11 @@ public slots:
 
   //! Creates a new spectrogram graph
   MultiLayer *plotSpectrogram(Matrix *m, GraphOptions::CurveType type);
-  MultiLayer *plotGrayScale(Matrix *m = 0);
-  MultiLayer *plotContour(Matrix *m = 0);
-  MultiLayer *plotColorMap(Matrix *m = 0);
-  MultiLayer *plotImage(Matrix *m = 0);
-  MultiLayer *plotNoContourColorMap(Matrix *m = 0);
+  MultiLayer *plotGrayScale(Matrix *m = nullptr);
+  MultiLayer *plotContour(Matrix *m = nullptr);
+  MultiLayer *plotColorMap(Matrix *m = nullptr);
+  MultiLayer *plotImage(Matrix *m = nullptr);
+  MultiLayer *plotNoContourColorMap(Matrix *m = nullptr);
 
   //! Rearrange the layersin order to fit to the size of the plot window
   void autoArrangeLayers();
@@ -386,7 +386,7 @@ public slots:
   void plot3DPolygons();
   void plot3DWireSurface();
 
-  Graph3D *plot3DMatrix(Matrix *m = 0, int style = 5);
+  Graph3D *plot3DMatrix(Matrix *m = nullptr, int style = 5);
 
   void plot3DRibbon();
   void plot3DScatter();
@@ -400,7 +400,7 @@ public slots:
                               int points = 100, const QString &var = "x",
                               int type = 0);
 
-  FunctionDialog *functionDialog(Graph *g = NULL);
+  FunctionDialog *functionDialog(Graph *g = nullptr);
   FunctionDialog *showFunctionDialog();
   FunctionDialog *showFunctionDialog(Graph *g, int curve);
   void addFunctionCurve();
@@ -538,7 +538,7 @@ public slots:
   void plotBoxDiagram();
 
   /// Create a stem plot from a table and return a string representation of it
-  QString stemPlot(Table *t = 0, const QString &colName = QString(),
+  QString stemPlot(Table *t = nullptr, const QString &colName = QString(),
                    int power = 0, int startRow = 0, int endRow = -1);
   Note *newStemPlot();
 
@@ -582,7 +582,7 @@ public slots:
 
   //! \name MDI Windows
   //@{
-  MdiSubWindow *clone(MdiSubWindow *w = 0);
+  MdiSubWindow *clone(MdiSubWindow *w = nullptr);
   void rename();
   void renameWindow();
 
@@ -592,10 +592,10 @@ public slots:
   //!  Checks weather the new window name is valid and modifies the name.
   bool setWindowName(MdiSubWindow *w, const QString &text);
 
-  void maximizeWindow(QTreeWidgetItem *lbi = 0);
+  void maximizeWindow(QTreeWidgetItem *lbi = nullptr);
   void activateWindow(QTreeWidgetItem *lbi);
   void maximizeWindow(MdiSubWindow *w);
-  void minimizeWindow(MdiSubWindow *w = 0);
+  void minimizeWindow(MdiSubWindow *w = nullptr);
   //! Changes the geometry of the active MDI window
   void setWindowGeometry(int x, int y, int w, int h);
 
@@ -957,7 +957,7 @@ public slots:
   Folder *currentFolder() const { return d_current_folder; }
   //! Adds a new folder to the project
   void addFolder();
-  Folder *addFolder(QString name, Folder *parent = NULL);
+  Folder *addFolder(QString name, Folder *parent = nullptr);
   //! Deletes the current folder
   void deleteFolder();
 
@@ -1028,7 +1028,8 @@ public slots:
   void appendProject();
   //! Open the specified project file and add it as a subfolder to the
   // parentFolder or to the current folder if no parent folder is specified.
-  Folder *appendProject(const QString &file_name, Folder *parentFolder = 0);
+  Folder *appendProject(const QString &file_name,
+                        Folder *parentFolder = nullptr);
   void saveAsProject();
 
   //!  adds a folder list item to the list view "lv"
@@ -1130,7 +1131,7 @@ protected:
   bool event(QEvent *e) override;
 
 private:
-  QMenu *createPopupMenu() override { return NULL; }
+  QMenu *createPopupMenu() override { return nullptr; }
 
   /// this method saves the data on project save
   void savedatainNexusFormat(const std::string &wsName,
@@ -1200,7 +1201,7 @@ private slots:
 
   void hideSelectedColumns();
   void showAllColumns();
-  void closedLastCopiedLayer() { lastCopiedLayer = NULL; };
+  void closedLastCopiedLayer() { lastCopiedLayer = nullptr; };
   void cleanTextEditor();
   void tileMdiWindows();
   void shakeViewport();

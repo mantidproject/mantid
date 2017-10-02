@@ -225,8 +225,8 @@ struct vectorProperties {
   vectorProperties()
       : color(0), width(0.0), arrow_lenght(0), arrow_angle(0),
         arrow_closed(false), endXColName(), endYColName(), position(0),
-        angleColName(), magnitudeColName(0), multiplier(1.0), const_angle(0),
-        const_magnitude(0){};
+        angleColName(), magnitudeColName(nullptr), multiplier(1.0),
+        const_angle(0), const_magnitude(0){};
 };
 
 struct graphCurve {

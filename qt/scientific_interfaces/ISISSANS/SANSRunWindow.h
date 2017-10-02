@@ -80,7 +80,7 @@ public:
     TwoD  ///< For 2D reductions
   };
   /// Default Constructor
-  explicit SANSRunWindow(QWidget *parent = 0);
+  explicit SANSRunWindow(QWidget *parent = nullptr);
   /// Destructor
   ~SANSRunWindow() override;
 

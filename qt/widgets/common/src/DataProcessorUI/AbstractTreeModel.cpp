@@ -32,7 +32,7 @@ int AbstractTreeModel::columnCount(const QModelIndex & /* parent */) const {
 */
 Qt::ItemFlags AbstractTreeModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
 
   return Qt::ItemIsEditable | QAbstractItemModel::flags(index);
 }

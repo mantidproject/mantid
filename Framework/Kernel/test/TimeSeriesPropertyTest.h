@@ -222,13 +222,13 @@ public:
 
   void test_Casting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<ITimeSeriesProperty *>(iProp),
-                      static_cast<ITimeSeriesProperty *>(0));
+                      static_cast<ITimeSeriesProperty *>(nullptr));
   }
 
   //----------------------------------------------------------------------------

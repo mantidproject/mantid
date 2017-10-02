@@ -957,7 +957,7 @@ private:
 
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
-      Detector *d = new Detector("det", i, 0);
+      Detector *d = new Detector("det", i, nullptr);
       instr->add(d);
       instr->markAsDetector(d);
     }

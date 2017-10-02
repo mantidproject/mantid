@@ -75,7 +75,7 @@ class EXPORT_OPT_MANTIDQT_COMMON InterfaceManager {
 public:
   /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog *createDialog(
-      boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget *parent = 0,
+      boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget *parent = nullptr,
       bool forScript = false,
       const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
       const QString &optional_msg = QString(),
@@ -84,8 +84,8 @@ public:
 
   /// Create an algorithm dialog for a given name and version
   AlgorithmDialog *createDialogFromName(
-      const QString &algorithmName, const int version = -1, QWidget *parent = 0,
-      bool forScript = false,
+      const QString &algorithmName, const int version = -1,
+      QWidget *parent = nullptr, bool forScript = false,
       const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
       const QString &optionalMsg = QString(),
       const QStringList &enabled = QStringList(),
@@ -93,7 +93,7 @@ public:
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow *createSubWindow(const QString &interface_name,
-                                 QWidget *parent = 0);
+                                 QWidget *parent = nullptr);
 
   /**
    * Function that instantiates the Vates simple user interface.

@@ -25,11 +25,11 @@ class RulesCompObjTest : public CxxTest::TestSuite {
 public:
   void testConstructor() {
     CompObj A;
-    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)0);
-    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)0);
+    TS_ASSERT_EQUALS(A.leaf(0), (Rule *)nullptr);
+    TS_ASSERT_EQUALS(A.leaf(1), (Rule *)nullptr);
     TS_ASSERT_EQUALS(A.display(), "#0");
     TS_ASSERT_EQUALS(A.getObjN(), 0);
-    TS_ASSERT_EQUALS(A.getObj(), (Object *)0);
+    TS_ASSERT_EQUALS(A.getObj(), (Object *)nullptr);
     TS_ASSERT_EQUALS(A.isComplementary(), 1);
   }
 
@@ -94,8 +94,8 @@ public:
     A.setObj(&cpCylinder);
     A.setObjN(10);
     CompObj B;
-    TS_ASSERT_EQUALS(A.findKey(10), (Rule *)0); // Always returns 0
-    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)0);
+    TS_ASSERT_EQUALS(A.findKey(10), (Rule *)nullptr); // Always returns 0
+    TS_ASSERT_EQUALS(A.findKey(11), (Rule *)nullptr);
   }
 
   void testIsValid() {

@@ -11,8 +11,8 @@ SpectrumPlotItem::SpectrumPlotItem()
     : m_bufferID(0),
       /* m_dataArray0(NULL), */
       /* m_dataArray1(NULL), */
-      m_positiveColorTable(NULL), m_negativeColorTable(NULL),
-      m_intensityTable(NULL) {}
+      m_positiveColorTable(nullptr), m_negativeColorTable(nullptr),
+      m_intensityTable(nullptr) {}
 
 SpectrumPlotItem::~SpectrumPlotItem() {}
 
@@ -122,7 +122,7 @@ void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
 
   double scale = ((double)m_positiveColorTable->size() - 1) / zc_max;
   double ct_scale = ((double)m_positiveColorTable->size() - 1);
-  if (m_intensityTable != 0) {
+  if (m_intensityTable != nullptr) {
     size_t lut_size = m_intensityTable->size();
     scale = ((double)lut_size - 1.0) / zc_max;
     ct_scale = ((double)m_positiveColorTable->size() - 1);
@@ -136,7 +136,7 @@ void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   double val = 0;
   for (int row = (int)n_rows - 1; row >= 0; row--) {
     size_t data_index = row * n_cols;
-    if (m_intensityTable == 0) // use color tables directly
+    if (m_intensityTable == nullptr) // use color tables directly
     {
       for (int col = 0; col < (int)n_cols; col++) {
         val = data[data_index] * scale;

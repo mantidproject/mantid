@@ -29,7 +29,7 @@ public:
 
 public:
   /// Default Constructor
-  explicit DataComparison(QWidget *parent = 0);
+  explicit DataComparison(QWidget *parent = nullptr);
 
   /// Tests if a workspace is shown in the UI
   bool containsWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws);

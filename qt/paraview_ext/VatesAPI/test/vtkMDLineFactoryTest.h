@@ -160,7 +160,7 @@ public:
     auto product = factory.create(progressAction);
 
     TS_ASSERT(dynamic_cast<vtkUnstructuredGrid *>(product.GetPointer()) !=
-              NULL);
+              nullptr);
     TS_ASSERT_EQUALS(200000, product->GetNumberOfCells());
     TS_ASSERT_EQUALS(400000, product->GetNumberOfPoints());
   }
