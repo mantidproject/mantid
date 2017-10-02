@@ -60,9 +60,8 @@ class MainPresenter(MantidQt.MantidWidgets.DataProcessor.DataProcessorMainPresen
             self._gui_algorithm_name = get_gui_algorithm_name(self._facility)
         return self._gui_algorithm_name
 
-    def get_white_list(self):
-        if self._white_list is None:
-            self._white_list = get_white_list()
+    def get_white_list(self, show_periods=False):
+        self._white_list = get_white_list(show_periods=show_periods)
         return self._white_list
 
     def get_number_of_white_list_items(self):

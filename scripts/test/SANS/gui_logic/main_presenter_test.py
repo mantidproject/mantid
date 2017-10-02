@@ -20,7 +20,7 @@ class MainPresenterTest(unittest.TestCase):
     def test_that_the_white_list_is_correct(self):
         presenter = MainPresenter(SANSFacility.ISIS)
         self.assertTrue(presenter.get_number_of_white_list_items() == 0)
-        white_list = presenter.get_white_list()
+        white_list = presenter.get_white_list(show_periods=True)
         self.assertTrue(presenter.get_number_of_white_list_items() == 16)
         self.assertTrue(white_list[0].algorithm_property == "SampleScatter")
         self.assertTrue(white_list[1].algorithm_property == "SampleScatterPeriod")
