@@ -106,6 +106,9 @@ protected: // for testing
   size_t getInWSMonitorIndex(const API::MatrixWorkspace_sptr &inputWorkspace);
   API::MatrixWorkspace_sptr
   getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWorkspace);
+  API::MatrixWorkspace_sptr
+  extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
+                        const std::vector<size_t> &workspaceIndexes);
   bool setIntegrationProps();
 
   void
@@ -128,7 +131,7 @@ private:
   /// The upper bound of the integration range
   double m_integrationMax = EMPTY_DBL();
   bool m_syncScanInput;
-  std::vector<size_t> m_workspaceIndices;
+  std::vector<size_t> m_workspaceIndexes;
 };
 
 // the internal class to verify and modify interconnected properties affecting

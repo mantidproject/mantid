@@ -18,6 +18,7 @@
 #include <cfloat>
 #include <numeric>
 
+using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using Mantid::Kernel::IPropertyManager;
@@ -42,7 +43,7 @@ bool MonIDPropChanger::isEnabled(const IPropertyManager *algo) const {
 
   // is there the ws property, which describes monitors ws. It also disables the
   // monitors ID property
-  API::MatrixWorkspace_const_sptr monitorsWS =
+  MatrixWorkspace_const_sptr monitorsWS =
       algo->getProperty(MonitorWorkspaceProp);
   if (monitorsWS) {
     is_enabled = false;
@@ -59,7 +60,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
   if (!is_enabled)
     return false;
   // read monitors list from the input workspace
-  API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
+  MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
   bool monitors_changed = monitorIdReader(inputWS);
   return monitors_changed;
 }
@@ -75,7 +76,7 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
   }
 
   if (iExistingAllowedValues.empty()) {
-    API::MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
+    MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
     int spectra_max(-1);
     if (inputWS) {
       // let's assume that detectors IDs correspond to spectraID --
@@ -93,7 +94,7 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
 // read the monitors list from the workspace and try to do it once for any
 // particular ws;
 bool MonIDPropChanger::monitorIdReader(
-    API::MatrixWorkspace_const_sptr inputWS) const {
+    MatrixWorkspace_const_sptr inputWS) const {
   // no workspace
   if (!inputWS)
     return false;
@@ -269,8 +270,26 @@ void NormaliseToMonitor::exec() {
       auto pProp = (this->getPointerToProperty("NormFactorWS"));
       pProp->setValue(norm_ws_name);
     }
-    setProperty("NormFactorWS", m_monitor);
+    const auto &normFactor =
+        extractMonitorSpectra(m_monitor, m_workspaceIndexes);
+    setProperty("NormFactorWS", normFactor);
   }
+}
+
+/** Pulls the monitor spectrum out of a larger workspace
+ *  @param WS :: The workspace containing the spectrum to extract
+ *  @param index :: The index of the spectrum to extract
+ *  @returns A workspace containing the single spectrum requested
+ */
+MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectra(
+    const MatrixWorkspace_sptr &ws,
+    const std::vector<std::size_t> &workspaceIndexes) {
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSpectra");
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", ws);
+  childAlg->setProperty("WorkspaceIndexList", workspaceIndexes);
+  childAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr outWS = childAlg->getProperty("OutputWorkspace");
+  return outWS;
 }
 
 /** Validates input properties.
@@ -329,7 +348,7 @@ std::map<std::string, std::string> NormaliseToMonitor::validateInputs() {
  *  @param inputWorkspace The input workspace
  */
 void NormaliseToMonitor::checkProperties(
-    const API::MatrixWorkspace_sptr &inputWorkspace) {
+    const MatrixWorkspace_sptr &inputWorkspace) {
 
   // Check where the monitor spectrum should come from
   Property *monSpec = getProperty("MonitorSpectrum");
@@ -364,7 +383,7 @@ void NormaliseToMonitor::checkProperties(
   }
 
   // Do a check for common binning and store
-  m_commonBins = API::WorkspaceHelpers::commonBoundaries(*inputWorkspace);
+  m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
   int specNum(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
@@ -373,11 +392,22 @@ void NormaliseToMonitor::checkProperties(
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if
   // not
-  for (const auto workspaceIndex : m_workspaceIndices)
-    if (!m_monitor->spectrumInfo().isMonitor(workspaceIndex))
-      g_log.warning() << "The spectrum N: " << specNum
-                      << " in MonitorWorkspace does not refer to a monitor.\n"
-                      << "Continuing with normalization regardless.";
+  try {
+    const auto &monitorSpecInfo = m_monitor->spectrumInfo();
+    for (const auto workspaceIndex : m_workspaceIndexes)
+      if (!monitorSpecInfo.isMonitor(workspaceIndex))
+        g_log.warning() << "The spectrum N: " << specNum
+                        << " in MonitorWorkspace does not refer to a monitor.\n"
+                        << "Continuing with normalization regardless.";
+  } catch (Kernel::Exception::NotFoundError &) {
+    g_log.warning("Unable to check if the spectrum provided relates to a "
+                  "monitor - the instrument is not fully specified.\n "
+                  "Continuing with normalization regardless.");
+    if (m_syncScanInput)
+      throw std::runtime_error("Can not continue, spectrum can not be obtained "
+                               "for monitor workspace, but the input workspace "
+                               "has a detector scan.");
+  }
 }
 
 /** Checks and retrieves the requested spectrum out of the input workspace
@@ -387,8 +417,8 @@ void NormaliseToMonitor::checkProperties(
  *  @returns spectra number (WS ID) which is used to normalize by.
  *  @throw std::runtime_error If the properties are invalid
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
-    const API::MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
+    const MatrixWorkspace_sptr &inputWorkspace) {
   // this is the index of the spectra within the workspace and we need to
   // identify it either from DetID or from SpecID
   // size_t spectra_num(-1);
@@ -413,7 +443,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("More then one spectra corresponds to the "
                                "requested monitor ID, which is unheard of");
     }
-    m_workspaceIndices = indexList;
+    m_workspaceIndexes = indexList;
   } else { // monitor spectrum is specified.
     if (m_syncScanInput)
       throw std::runtime_error("For a sync-scan input workspace the monitor ID "
@@ -430,7 +460,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
       throw std::runtime_error("Input workspace does not contain spectrum "
                                "number given for MonitorSpectrum");
     }
-    m_workspaceIndices = std::vector<size_t>(1, specs[monitorSpec]);
+    m_workspaceIndexes = std::vector<size_t>(1, specs[monitorSpec]);
   }
   return inputWorkspace;
 }
@@ -440,14 +470,14 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
  *  @param wsID The workspace ID.
  *  @returns A workspace containing the monitor spectrum only
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
-    const API::MatrixWorkspace_sptr &inputWorkspace) {
+MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
+    const MatrixWorkspace_sptr &inputWorkspace) {
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
-  uint64_t wsID = getProperty("MonitorWorkspaceIndex");
-  m_workspaceIndices = std::vector<size_t>(1, wsID);
+  const int wsID = getProperty("MonitorWorkspaceIndex");
+  m_workspaceIndexes = std::vector<size_t>(1, wsID);
   // In this case we need to test whether the bins in the monitor workspace
   // match
-  m_commonBins = (m_commonBins && API::WorkspaceHelpers::matchingBins(
+  m_commonBins = (m_commonBins && WorkspaceHelpers::matchingBins(
                                       *inputWorkspace, *monitorWS, true));
   // Copy the monitor spectrum because it will get changed
   return monitorWS;
@@ -492,31 +522,48 @@ bool NormaliseToMonitor::setIntegrationProps() {
  *  @param outputWorkspace The result workspace
  */
 void NormaliseToMonitor::normaliseByIntegratedCount(
-    const API::MatrixWorkspace_sptr &inputWorkspace,
-    API::MatrixWorkspace_sptr &outputWorkspace) {
-  // Add up all the bins so it's just effectively a single value with an error
+    const MatrixWorkspace_sptr &inputWorkspace,
+    MatrixWorkspace_sptr &outputWorkspace) {
+  m_monitor = extractMonitorSpectra(inputWorkspace, m_workspaceIndexes);
+
+  // Add up all the bins so it's just effectively a series of values with errors
   IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
   integrate->setProperty("RangeLower", m_integrationMin);
   integrate->setProperty("RangeUpper", m_integrationMax);
   integrate->setProperty<bool>("IncludePartialBins",
                                getProperty("IncludePartialBins"));
-
   integrate->executeAsChildAlg();
-
-  // Get back the result
   m_monitor = integrate->getProperty("OutputWorkspace");
 
-  // Run the divide algorithm explicitly to enable progress reporting
-  IAlgorithm_sptr divide = createChildAlgorithm("Divide", 0.0, 1.0);
-  divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
-  divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
-  divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);
+  if (outputWorkspace != inputWorkspace)
+    outputWorkspace = inputWorkspace->clone();
 
-  divide->executeAsChildAlg();
+  for (const auto workspaceIndex : m_workspaceIndexes) {
+    // Errors propagated according to
+    // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
+    // This is similar to that in MantidAlgorithms::Divide
 
-  // Get back the result
-  outputWorkspace = divide->getProperty("OutputWorkspace");
+    const auto divisor = m_monitor->histogram(workspaceIndex).y()[0];
+    const auto divisorError = m_monitor->histogram(workspaceIndex).e()[0];
+
+    for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+      auto hist = outputWorkspace->histogram(i);
+      auto &yValues = hist.mutableY();
+      auto &eValues = hist.mutableE();
+
+      const double newYFactor = 1.0 / divisor;
+      const double rhsFactor = pow(divisorError / divisor, 2);
+
+      for (size_t j = 0; j < eValues.size(); ++j) {
+        eValues[j] = newYFactor * sqrt(eValues[j] * eValues[j] +
+                                       yValues[j] * yValues[j] * rhsFactor);
+        yValues[j] *= newYFactor;
+      }
+
+      outputWorkspace->setHistogram(i, hist);
+    }
+  }
 }
 
 /** Carries out the bin-by-bin normalization
@@ -524,8 +571,8 @@ void NormaliseToMonitor::normaliseByIntegratedCount(
  *  @param outputWorkspace The result workspace
  */
 void NormaliseToMonitor::normaliseBinByBin(
-    const API::MatrixWorkspace_sptr &inputWorkspace,
-    API::MatrixWorkspace_sptr &outputWorkspace) {
+    const MatrixWorkspace_sptr &inputWorkspace,
+    MatrixWorkspace_sptr &outputWorkspace) {
   EventWorkspace_sptr inputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
 
@@ -539,14 +586,17 @@ void NormaliseToMonitor::normaliseBinByBin(
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
-  for (auto &workspaceIndex : m_workspaceIndices) {
+  for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
     const auto &monX = m_monitor->binEdges(workspaceIndex);
     auto monY = m_monitor->counts(workspaceIndex);
     auto monE = m_monitor->countStandardDeviations(workspaceIndex);
     // TODO: is this definitely the same as spectrum index?
-    const auto timeIndex =
-        m_monitor->spectrumInfo().spectrumDefinition(workspaceIndex)[0].second;
+    size_t timeIndex = 0;
+    if (m_syncScanInput)
+      timeIndex = m_monitor->spectrumInfo()
+                      .spectrumDefinition(workspaceIndex)[0]
+                      .second;
     // Calculate the overall normalization just the once if bins are all
     // matching
     if (m_commonBins)
