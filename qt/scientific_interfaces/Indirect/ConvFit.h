@@ -48,12 +48,12 @@ private slots:
   void fitFunctionSelected(const QString &);
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
-  double getInstrumentResolution(std::string workspaceName);
+  double
+  getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
@@ -86,10 +86,7 @@ private:
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   // Pointer to sample workspace object
-  Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewPlotData;
   Mantid::API::ITableWorkspace_sptr m_paramWs;
-  QString m_cfInputWSName;
   int m_fittedIndex;
   bool m_confitResFileType;
   QString m_singleFitOutputName;
