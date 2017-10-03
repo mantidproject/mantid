@@ -10,35 +10,27 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm finds a so-called most-likely mean of an array being the element that has the minimum of the summed square-rooted absolute distances with all the other elements in the array:
 
+.. math:: MostLikelyMean(a) = a[minindex_{j}(\sum{i} \sqrt{|a_{i} - a_{j}|}]
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - MostLikelyMean**
 
 .. testcode:: MostLikelyMeanExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = MostLikelyMean()
-
-   # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+   import numpy
+   array = numpy.arange(100)
+   mlm = MostLikelyMean(array)
+   print mlm
 
 Output:
 
 .. testoutput:: MostLikelyMeanExample
 
-  The output workspace has ?? spectra
+	49.0
 
 .. categories::
 
