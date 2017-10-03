@@ -63,7 +63,7 @@ private:
   API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
                                    const API::ITableWorkspace_sptr &phase,
                                    const std::vector<double> &n0);
-  int findName(const std::string pattern,
+  int findName(const std::vector<std::string> patterns,
                const std::vector<std::string> &names);
 };
 

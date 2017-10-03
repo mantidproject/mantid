@@ -6,6 +6,13 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
+namespace {
+  std::vector<std::string> phaseNames={"phase","phi"};
+  std::vector<std::string> asymmNames={"asymmetry","asymm","asym"};
+
+}
+
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -97,17 +104,23 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     std::transform(names[j].begin(), names[j].end(), names[j].begin(),
                    ::tolower);
   }
-  std::vector<std::string> goodNames = {"phase", "asym", "asymm", "asymmetry"};
   int phaseCount = 0;
   int asymmetryCount = 0;
   for (std::string name : names) {
-    if (name == goodNames[0]) {
+    for(std::string goodName : phaseNames){
+    if (name == goodName) {
       phaseCount += 1;
     }
-    if (name == goodNames[1] || name == goodNames[2] || name == goodNames[3]) {
+  }
+ } 
+  for (std::string name : names) {
+    for(std::string goodName : asymmNames){
+    if (name == goodName) {
+ 
+    if (name == goodName) {
       asymmetryCount += 1;
     }
-  }
+  }}}
   if (phaseCount == 0) {
     result["PhaseTable"] = "PhaseTable needs phases column";
   }
@@ -131,8 +144,9 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   return result;
 }
 
-int PhaseQuadMuon::findName(const std::string pattern,
+int PhaseQuadMuon::findName(const std::vector<std::string> patterns,
                             const std::vector<std::string> &names) {
+for(std::string pattern : patterns){
   auto it =
       std::find_if(names.begin(), names.end(), [pattern](const std::string &s) {
         if (s == pattern) {
@@ -141,10 +155,12 @@ int PhaseQuadMuon::findName(const std::string pattern,
           return false;
         }
       });
-  if (it == names.end()) {
-    return -1;
-  }
+  if (it != names.end()) {
   return static_cast<int>(std::distance(names.begin(), it));
+  }
+
+}
+return -1;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -219,14 +235,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     std::transform(names[j].begin(), names[j].end(), names[j].begin(),
                    ::tolower);
   }
-  auto phaseIndex = findName("phase", names);
-  auto asymmetryIndex = findName("asymmetry", names);
-  if (asymmetryIndex == -1) {
-    asymmetryIndex = findName("asymm", names);
-    if (asymmetryIndex == -1) {
-      asymmetryIndex = findName("asym", names);
-    }
-  }
+  auto phaseIndex = findName(phaseNames,names);
+  auto asymmetryIndex = findName( asymmNames,names);
 
   // Get the maximum asymmetry
   double maxAsym = 0.;
