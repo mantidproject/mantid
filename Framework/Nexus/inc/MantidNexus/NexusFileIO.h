@@ -387,22 +387,22 @@ void NexusFileIO::writeNumericTimeLog(
   if (ipos != std::string::npos)
     logName = logName.substr(ipos + 1);
   // extract values from timeseries
-  std::map<Kernel::DateAndTime, T> dV = timeSeries->valueAsMap();
+  std::map<Types::Core::DateAndTime, T> dV = timeSeries->valueAsMap();
   std::vector<double> values;
   std::vector<double> times;
-  Kernel::DateAndTime t0;
+  Types::Core::DateAndTime t0;
   bool first = true;
-  for (typename std::map<Kernel::DateAndTime, T>::const_iterator dv =
+  for (typename std::map<Types::Core::DateAndTime, T>::const_iterator dv =
            dV.begin();
        dv != dV.end(); dv++) {
     T val = dv->second;
-    Kernel::DateAndTime time = dv->first;
+    Types::Core::DateAndTime time = dv->first;
     values.push_back(val);
     if (first) {
       t0 = time; // start time of log
       first = false;
     }
-    times.push_back(Kernel::DateAndTime::secondsFromDuration(time - t0));
+    times.push_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");

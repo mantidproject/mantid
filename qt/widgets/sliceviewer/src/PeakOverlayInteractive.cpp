@@ -15,7 +15,7 @@ PeakOverlayInteractive::PeakOverlayInteractive(
     PeaksPresenter *const peaksPresenter, QwtPlot *plot, const int plotXIndex,
     const int plotYIndex, QWidget *parent)
     : QWidget(parent), m_presenter(peaksPresenter), m_plot(plot),
-      m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex), m_tool(NULL) {
+      m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex), m_tool(nullptr) {
 
   setAttribute(Qt::WA_NoMousePropagation, false);
   setAttribute(Qt::WA_MouseTracking, true);
@@ -74,7 +74,7 @@ void PeakOverlayInteractive::peakDisplayMode() {
   QApplication::restoreOverrideCursor();
   if (m_tool) {
     delete m_tool;
-    m_tool = NULL;
+    m_tool = nullptr;
   }
 }
 

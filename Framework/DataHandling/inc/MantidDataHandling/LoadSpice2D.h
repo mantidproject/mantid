@@ -120,8 +120,8 @@ private:
   double m_wavelength{0.0};
   double m_dwavelength{0.0};
   double m_sansSpiceXmlFormatVersion{0.0};
-  Mantid::Kernel::DateAndTime m_startTime;
-  Mantid::Kernel::DateAndTime m_endTime;
+  Mantid::Types::Core::DateAndTime m_startTime;
+  Mantid::Types::Core::DateAndTime m_endTime;
 };
 } // namespace DataHandling
 } // namespace Mantid

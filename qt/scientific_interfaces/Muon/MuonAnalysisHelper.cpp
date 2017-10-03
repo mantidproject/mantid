@@ -64,6 +64,7 @@ namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Sets double validator for specified field.
@@ -135,7 +136,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
 
   const Run &run = runWs->run();
 
-  Mantid::Kernel::DateAndTime start, end;
+  Mantid::Types::Core::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";
@@ -161,9 +162,8 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
   out << "\nCounts: ";
   double counts(0.0);
   for (size_t i = 0; i < runWs->getNumberHistograms(); ++i) {
-    for (size_t j = 0; j < runWs->blocksize(); ++j) {
-      counts += runWs->y(i)[j];
-    }
+    const auto &y = runWs->y(i);
+    counts = std::accumulate(y.begin(), y.end(), counts);
   }
   // output this number to three decimal places
   out << std::setprecision(3);

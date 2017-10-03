@@ -302,6 +302,15 @@ class FunctionWrapper(object):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.setChild(True)
     alg.initialize()
+    # Python 3 treats **kwargs as an unordered list meaning it is possible
+    # to pass InputWorkspace into EvaluateFunction before Function.
+    # As a special case has been made for this. This case can be removed
+    # with ordered kwargs change in Python 3.6.
+    if name is 'EvaluateFunction':
+        alg.setProperty('Function', kwargs['Function'])
+        del kwargs['Function']
+        alg.setProperty('InputWorkspace', kwargs['InputWorkspace'])
+        del kwargs['InputWorkspace']
     for param in kwargs:
         alg.setProperty(param, kwargs[param])
     alg.setProperty('OutputWorkspace', 'none')

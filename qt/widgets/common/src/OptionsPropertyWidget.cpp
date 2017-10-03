@@ -27,7 +27,7 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
   // Label at column 0
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
   m_label->setToolTip(m_doc);
-  m_gridLayout->addWidget(m_label, m_row, 0, 0);
+  m_gridLayout->addWidget(m_label, m_row, 0, nullptr);
   m_widgets.push_back(m_label);
 
   // It is a choice of certain allowed values and can use a combination box
@@ -49,7 +49,7 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
           SLOT(userEditedProperty()));
 
   // Put the combo in column 1
-  m_gridLayout->addWidget(m_combo, m_row, 1, 0);
+  m_gridLayout->addWidget(m_combo, m_row, 1, nullptr);
 }
 
 //----------------------------------------------------------------------------------------------

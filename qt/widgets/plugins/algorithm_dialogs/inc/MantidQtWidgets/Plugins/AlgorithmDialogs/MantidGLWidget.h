@@ -55,7 +55,7 @@ class MantidGLWidget : public QGLWidget {
 
 public:
   /// Default constructor
-  MantidGLWidget(QWidget *parent = 0);
+  MantidGLWidget(QWidget *parent = nullptr);
   /// Destructor
   ~MantidGLWidget() override;
 

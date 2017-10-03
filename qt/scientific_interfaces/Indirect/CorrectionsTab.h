@@ -44,7 +44,7 @@ class DLLExport CorrectionsTab : public IndirectTab {
 
 public:
   /// Constructor
-  CorrectionsTab(QWidget *parent = 0);
+  CorrectionsTab(QWidget *parent = nullptr);
 
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);

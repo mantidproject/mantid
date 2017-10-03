@@ -25,6 +25,7 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::FileProperty;
 using std::size_t;
+using Types::Core::DateAndTime;
 
 // Anonymous namespace
 namespace {
@@ -282,10 +283,11 @@ void LoadNexusLogs::exec() {
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
-      std::vector<Mantid::Kernel::DateAndTime> ptime;
+      std::vector<Mantid::Types::Core::DateAndTime> ptime;
       pval.reserve(event_frame_number.size());
       ptime.reserve(event_frame_number.size());
-      std::vector<Mantid::Kernel::DateAndTime> plogt = plog->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> plogt =
+          plog->timesAsVector();
       std::vector<double> plogv = plog->valuesAsVector();
       for (auto number : event_frame_number) {
         ptime.push_back(plogt[number]);
@@ -299,10 +301,10 @@ void LoadNexusLogs::exec() {
   try {
     // Read the start and end time strings
     file.openData("start_time");
-    Kernel::DateAndTime start(file.getStrData());
+    Types::Core::DateAndTime start(file.getStrData());
     file.closeData();
     file.openData("end_time");
-    Kernel::DateAndTime end(file.getStrData());
+    Types::Core::DateAndTime end(file.getStrData());
     file.closeData();
     workspace->mutableRun().setStartAndEndTime(start, end);
   } catch (::NeXus::Exception &) {
@@ -607,7 +609,7 @@ LoadNexusLogs::createTimeSeries(::NeXus::File &file,
   }
 
   // Convert to date and time
-  Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
+  Types::Core::DateAndTime start_time = Types::Core::DateAndTime(start);
   std::string time_units;
   file.getAttr("units", time_units);
   if (time_units.compare("second") < 0 && time_units != "s" &&

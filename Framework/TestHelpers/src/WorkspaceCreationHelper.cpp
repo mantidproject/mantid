@@ -51,6 +51,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
     : m_Progress(
@@ -400,8 +402,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
     timeRanges.push_back(double(i + firstInterval));
   }
 
-  builder.setTimeRanges(Mantid::Kernel::DateAndTime(int(startTime), 0),
-                        timeRanges);
+  builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
   return builder.buildWorkspace();
 }
@@ -879,7 +880,7 @@ void displayDataY(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &y = ws->y(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < y.size(); ++j) {
       std::cout << y[j] << " ";
     }
     std::cout << '\n';
@@ -894,7 +895,7 @@ void displayDataX(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &x = ws->x(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < x.size(); ++j) {
       std::cout << x[j] << " ";
     }
     std::cout << '\n';
@@ -908,7 +909,7 @@ void displayDataE(MatrixWorkspace_const_sptr ws) {
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &e = ws->e(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < e.size(); ++j) {
       std::cout << e[j] << " ";
     }
     std::cout << '\n';

@@ -14,6 +14,7 @@
 #include <string>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 
 // Forward declare

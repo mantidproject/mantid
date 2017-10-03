@@ -37,7 +37,7 @@ Mantid::Kernel::Logger g_log("MantidHelpWindow");
 }
 
 // initialise the help window
-pqHelpWindow *MantidHelpWindow::g_helpWindow = NULL;
+pqHelpWindow *MantidHelpWindow::g_helpWindow = nullptr;
 
 /// Base url for all of the files in the project.
 const QString BASE_URL("qthelp://org.mantidproject/doc/");

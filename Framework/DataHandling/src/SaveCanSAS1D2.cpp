@@ -163,33 +163,29 @@ void SaveCanSAS1D2::createSASTransElement(std::string &sasTrans,
   if (lambda_unit.empty() || lambda_unit == "Angstrom")
     lambda_unit = "A";
 
-  auto xdata = m_ws->points(0);
-  auto &ydata = m_ws->y(0);
-  auto &edata = m_ws->e(0);
-  for (size_t j = 0; j < m_ws->blocksize(); ++j) {
-    // x data is the Lambda in xml. If histogramdata take the mean
-    double lambda = xdata[j];
-    // y data is the T in xml.
-    double trans_value = ydata[j];
-    // e data is the Tdev in xml.
-    double trans_err = edata[j];
-
+  // x data is the Lambda in xml. If histogramdata take the mean
+  const auto lambda = m_ws->points(0);
+  // y data is the T in xml.
+  const auto &trans_value = m_ws->y(0);
+  // e data is the Tdev in xml.
+  const auto &trans_err = m_ws->e(0);
+  for (size_t j = 0; j < trans_value.size(); ++j) {
     trans << "\n\t\t\t<Tdata><Lambda unit=\"" << lambda_unit << "\">";
-    if (lambda == lambda) // check for NAN
-      trans << lambda;
-    else
+    if (std::isnan(lambda[j]))
       trans << "NaN";
+    else
+      trans << lambda[j];
     trans << "</Lambda>"
           << "<T unit=\"" << t_unit << "\">";
-    if (trans_value == trans_value)
-      trans << trans_value;
-    else
+    if (std::isnan(trans_value[j]))
       trans << "NaN";
+    else
+      trans << trans_value[j];
     trans << "</T><Tdev unit=\"none\">";
-    if (trans_err == trans_err)
-      trans << trans_err;
-    else
+    if (std::isnan(trans_err[j]))
       trans << "NaN";
+    else
+      trans << trans_err[j];
     trans << "</Tdev></Tdata>";
   }
   trans << "\n\t\t</SAStransmission_spectrum>";

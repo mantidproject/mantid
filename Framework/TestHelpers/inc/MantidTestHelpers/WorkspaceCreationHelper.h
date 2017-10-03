@@ -306,8 +306,8 @@ createEventWorkspace(int numPixels, int numBins, int numEvents = 100,
 Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
     double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
-    Mantid::Kernel::DateAndTime run_start =
-        Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
+    Mantid::Types::Core::DateAndTime run_start =
+        Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00"));
 
 Mantid::DataObjects::EventWorkspace_sptr
 createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,

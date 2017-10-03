@@ -37,7 +37,7 @@ class EXPORT_OPT_MANTIDQT_COMMON PeriodicTableWidget : public QWidget {
 
 public:
   /// Constructor
-  PeriodicTableWidget(QWidget *parent = 0);
+  PeriodicTableWidget(QWidget *parent = nullptr);
   /// Destructor
   ~PeriodicTableWidget() override{};
   /// Vectors to Hold the QPushButtons of Elements in corresponding Groups

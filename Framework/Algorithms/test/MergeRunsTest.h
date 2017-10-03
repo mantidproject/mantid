@@ -31,6 +31,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:

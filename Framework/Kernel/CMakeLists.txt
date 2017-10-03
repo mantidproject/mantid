@@ -13,8 +13,9 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
 	src/DateAndTime.cpp
+    	src/DataItem.cpp
+	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
@@ -161,9 +162,10 @@ set ( INC_FILES
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+    	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
@@ -236,8 +238,8 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NetworkProxy.h
-        inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NormalDistribution.h
@@ -284,7 +286,7 @@ set ( INC_FILES
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-	inc/MantidKernel/TimeSeriesProperty.h
+    inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
@@ -334,7 +336,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-	DateAndTimeTest.h
+   	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -391,7 +393,7 @@ set ( TEST_FILES
 	MutexTest.h
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
-        NearestNeighboursTest.h
+	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NormalDistributionTest.h

@@ -72,7 +72,7 @@ public:
   }
 
   void testIsValidThrowsWhenNoWorkspace() {
-    IMDWorkspace *nullWorkspace = NULL;
+    IMDWorkspace *nullWorkspace = nullptr;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
 
     vtkMDHistoHexFactory factory(Mantid::VATES::VolumeNormalization);

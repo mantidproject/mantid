@@ -682,6 +682,7 @@ QString QDataProcessorWidget::getCurrentInstrument() const {
   return ui.comboProcessInstrument->currentText();
 }
 
+void QDataProcessorWidget::skipProcessing() { m_presenter->skipProcessing(); }
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace Mantid

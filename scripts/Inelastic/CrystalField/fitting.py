@@ -130,7 +130,8 @@ class CrystalField(object):
         self._resolutionModel = None
         self._physprop = None
 
-        free_parameters = []
+        free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
+
         for key in kwargs:
             if key == 'ToleranceEnergy':
                 self.ToleranceEnergy = kwargs[key]
@@ -150,13 +151,13 @@ class CrystalField(object):
                 self.FixAllPeaks = kwargs[key]
             elif key == 'PhysicalProperty':
                 self.PhysicalProperty = kwargs[key]
-            else:
-                # Crystal field parameters
-                self.function.setParameter(key, kwargs[key])
-                free_parameters.append(key)
+            elif key not in free_parameters:
+                raise RuntimeError('Unknown attribute/parameters %s' % key)
 
         for param in CrystalField.field_parameter_names:
-            if param not in free_parameters:
+            if param in free_parameters:
+                self.function.setParameter(param, free_parameters[param])
+            else:
                 self.function.fixParameter(param)
 
         self._setPeaks()
@@ -889,9 +890,20 @@ class CrystalField(object):
         return x_min, x_max
 
     def __add__(self, other):
-        if isinstance(other, CrystalFieldMulti):
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
-        return CrystalFieldMulti(CrystalFieldSite(self, 1.0), other)
+        if isinstance(other, CrystalField):
+            ions = [self.Ion, other.Ion]
+            symmetries = [self.Symmetry, other.Symmetry]
+            params = {}
+            temperatures = [self._getTemperature(x) for x in range(self.NumberOfSpectra)]
+            fwhms = [self._getFWHM(x) for x in range(self.NumberOfSpectra)]
+            for bparam in CrystalField.field_parameter_names:
+                params['ion0.' + bparam] = self[bparam]
+                params['ion1.' + bparam] = other[bparam]
+            return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures,
+                                         FWHMs = fwhms, parameters=params, abundances=[1.0, 1.0])
 
     def __mul__(self, factor):
         ffactor = float(factor)
@@ -1053,13 +1065,27 @@ class CrystalFieldSite(object):
         self.abundance = abundance
 
     def __add__(self, other):
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         if isinstance(other, CrystalField):
-            return CrystalFieldMulti(self, CrystalFieldSite(other, 1))
+            abundances = [self.abundance, 1.0]
         elif isinstance(other, CrystalFieldSite):
-            return CrystalFieldMulti(self, other)
-        elif isinstance(other, CrystalFieldMulti):
+            abundances = [self.abundance, other.abundance]
+            other = other.crystalField
+        elif isinstance(other, CrystalFieldMultiSite):
             return other.__radd__(self)
-        raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
+        else:
+            raise TypeError('Unsupported operand type(s) for +: CrystalFieldSite and %s' % other.__class__.__name__)
+
+        ions = [self.crystalField.Ion, other.Ion]
+        symmetries = [self.crystalField.Symmetry, other.Symmetry]
+        temperatures = [self.crystalField._getTemperature(x) for x in range(self.crystalField.NumberOfSpectra)]
+        FWHMs = [self.crystalField._getFWHM(x) for x in range(self.crystalField.NumberOfSpectra)]
+        params = {}
+        for bparam in CrystalField.field_parameter_names:
+            params['ion0.' + bparam] = self.crystalField[bparam]
+            params['ion1.' + bparam] = other[bparam]
+        return CrystalFieldMultiSite(Ions=ions, Symmetries=symmetries, Temperatures=temperatures, FWHMs = FWHMs,
+                                     abundances=abundances, parameters=params)
 
 
 class CrystalFieldMulti(object):
@@ -1414,13 +1440,17 @@ class CrystalFieldFit(object):
         Fit when the model has a single spectrum.
         """
         from mantid.api import AlgorithmManager
-        if self._function is None:
-            if self.model.isPhysicalPropertyOnly:
-                fun = self.model.makePhysicalPropertiesFunction()
-            else:
-                fun = self.model.makeSpectrumFunction()
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = str(self.model.function)
         else:
-            fun = str(self._function)
+            if self._function is None:
+                if self.model.isPhysicalPropertyOnly:
+                    fun = self.model.makePhysicalPropertiesFunction()
+                else:
+                    fun = self.model.makeSpectrumFunction()
+            else:
+                fun = str(self._function)
         if 'CrystalFieldMultiSpectrum' in fun:
             fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
@@ -1439,7 +1469,11 @@ class CrystalFieldFit(object):
         Fit when the model has multiple spectra.
         """
         from mantid.api import AlgorithmManager
-        fun = self.model.makeMultiSpectrumFunction()
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+        if isinstance(self.model, CrystalFieldMultiSite):
+            fun = str(self.model.function)
+        else:
+            fun = self.model.makeMultiSpectrumFunction()
         if 'CrystalFieldMultiSpectrum' in fun:
             fun = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun)
         alg = AlgorithmManager.createUnmanaged('Fit')
@@ -1463,6 +1497,7 @@ class CrystalFieldFit(object):
 
     def check_consistency(self):
         """ Checks that list input variables are consistent """
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         num_ws = self.model.NumberOfSpectra
         errmsg = 'Number of input workspaces not consistent with model'
         if islistlike(self._input_workspace):
@@ -1473,7 +1508,7 @@ class CrystalFieldFit(object):
                 self._input_workspace = self._input_workspace[0]
         elif num_ws != 1:
             raise ValueError(errmsg)
-        if not self.model.isPhysicalPropertyOnly:
+        if not isinstance(self.model, CrystalFieldMultiSite) and not self.model.isPhysicalPropertyOnly:
             tt = self.model.Temperature
             if any([val < 0 for val in (tt if islistlike(tt) else [tt])]):
                 raise RuntimeError('You must first define a temperature for the spectrum')

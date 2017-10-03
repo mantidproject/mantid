@@ -78,10 +78,10 @@ static const QString MSG_STARTED = "Script execution started.";
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &name,
                            const InteractionType interact, QObject *context)
-    : Script(env, name, interact, context), m_interp(env), localDict(NULL),
-      stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL),
+    : Script(env, name, interact, context), m_interp(env), localDict(nullptr),
+      stdoutSave(nullptr), stderrSave(nullptr), m_codeFileObject(nullptr),
       m_threadID(-1), isFunction(false), m_isInitialized(false),
-      m_pathHolder(name, *this), m_workspaceHandles() {
+      m_pathHolder(name), m_recursiveAsyncGIL() {
   initialize(name, context);
 }
 
@@ -89,7 +89,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
  * Destructor
  */
 PythonScript::~PythonScript() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   this->abort();
   observeAdd(false);
   observeAfterReplace(false);
@@ -131,7 +131,7 @@ void PythonScript::setIdentifier(const QString &name) {
  */
 PyObject *PythonScript::createSipInstanceFromMe() {
   const sipTypeDef *sipClass = sipFindType("PythonScript");
-  PyObject *sipWrapper = sipConvertFromType(this, sipClass, NULL);
+  PyObject *sipWrapper = sipConvertFromType(this, sipClass, nullptr);
   assert(sipWrapper);
   return sipWrapper;
 }
@@ -142,7 +142,7 @@ PyObject *PythonScript::createSipInstanceFromMe() {
  */
 bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if (PyObject *exception = PyErr_Occurred()) {
     // Certain exceptions still mean the code is complete
@@ -186,7 +186,7 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
  * Create a list autocomplete keywords
  */
 void PythonScript::generateAutoCompleteList() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *keywords = PyObject_CallFunctionObjArgs(
       PyDict_GetItemString(m_interp->globalDict(),
                            "_ScopeInspector_GetFunctionAttributes"),
@@ -206,7 +206,7 @@ void PythonScript::generateAutoCompleteList() {
  */
 void PythonScript::emit_error() {
   // gil is necessary so other things don't continue
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   // return early if nothing happened
   if (!PyErr_Occurred()) {
@@ -214,7 +214,7 @@ void PythonScript::emit_error() {
     return;
   }
   // get the error information out
-  PyObject *exception(NULL), *value(NULL), *traceback(NULL);
+  PyObject *exception(nullptr), *value(nullptr), *traceback(nullptr);
   PyErr_Fetch(&exception, &value, &traceback);
 
   // special check for system exceptions
@@ -335,7 +335,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError) {
  */
 void PythonScript::tracebackToMsg(QTextStream &msgStream,
                                   PyTracebackObject *traceback, bool root) {
-  if (traceback == NULL)
+  if (traceback == nullptr)
     return;
   msgStream << "\n  ";
   if (root)
@@ -380,7 +380,7 @@ void PythonScript::setContext(QObject *context) {
  * the dictionary context back to the default set
  */
 void PythonScript::clearLocals() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
@@ -392,16 +392,10 @@ void PythonScript::clearLocals() {
       PyDict_SetItemString(cleanLocals, "__file__", value);
     // reset locals
     Py_DECREF(localDict);
-    localDict = NULL;
+    localDict = nullptr;
   }
   localDict = cleanLocals;
 }
-
-/**
- * @brief PythonScript::gil
- * @return A reference to the global lock
- */
-PythonGIL &PythonScript::gil() const { return interp()->gil(); }
 
 /**
  * Sets the context for the script and if name points to a file then
@@ -412,7 +406,7 @@ PythonGIL &PythonScript::gil() const { return interp()->gil(); }
 void PythonScript::initialize(const QString &name, QObject *context) {
   clearLocals(); // holds and releases GIL
 
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PythonScript::setIdentifier(name);
   setContext(context);
 
@@ -460,8 +454,8 @@ void PythonScript::endStdoutRedirect() {
  * @return True if the lock was released by this call, false otherwise
  */
 bool PythonScript::recursiveAsyncSetup() {
-  if (gil().locked()) {
-    gil().release();
+  if (PythonGIL::locked()) {
+    m_recursiveAsyncGIL.release();
     return true;
   }
   return false;
@@ -475,7 +469,7 @@ bool PythonScript::recursiveAsyncSetup() {
  */
 void PythonScript::recursiveAsyncTeardown(bool relock) {
   if (relock) {
-    gil().acquire();
+    m_recursiveAsyncGIL.acquire();
   }
 }
 
@@ -487,7 +481,7 @@ void PythonScript::recursiveAsyncTeardown(bool relock) {
 bool PythonScript::compileImpl() {
   PyObject *codeObject = compileToByteCode(false);
 
-  return codeObject != NULL;
+  return codeObject != nullptr;
 }
 
 /**
@@ -495,7 +489,7 @@ bool PythonScript::compileImpl() {
  * @return
  */
 QVariant PythonScript::evaluateImpl() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *compiledCode = this->compileToByteCode(true);
   if (!compiledCode) {
     return QVariant("");
@@ -621,7 +615,7 @@ void PythonScript::abortImpl() {
   // hasn't implemented cancel() checking so that when control returns the
   // Python the
   // interrupt should be picked up.
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   m_interp->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   PyObject *curAlg =
       PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
@@ -636,7 +630,7 @@ void PythonScript::abortImpl() {
  * @return A long int giving a unique ID for the thread
  */
 long PythonScript::getThreadID() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   return PyThreadState_Get()->thread_id;
 }
 
@@ -644,10 +638,10 @@ long PythonScript::getThreadID() {
 bool PythonScript::executeString() {
   emit started(MSG_STARTED);
   bool success(false);
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   PyObject *compiledCode = compileToByteCode(false);
-  PyObject *result(NULL);
+  PyObject *result(nullptr);
   if (compiledCode) {
     result = executeCompiledCode(compiledCode);
   }
@@ -660,7 +654,7 @@ bool PythonScript::executeString() {
     // call Algorithm::cancel to make sure we capture it. The doubling
     // can leave an interrupt in the pipeline so we clear it was we've
     // got the error info out
-    m_interp->raiseAsyncException(m_threadID, NULL);
+    m_interp->raiseAsyncException(m_threadID, nullptr);
   } else {
     emit finished(MSG_FINISHED);
     success = true;
@@ -682,14 +676,15 @@ namespace {
  * when the object is destroyed
  */
 struct InstallTrace {
-  explicit InstallTrace(PythonScript &scriptObject) : m_sipWrappedScript(NULL) {
+  explicit InstallTrace(PythonScript &scriptObject)
+      : m_sipWrappedScript(nullptr) {
     if (scriptObject.reportProgress()) {
       m_sipWrappedScript = scriptObject.createSipInstanceFromMe();
       PyEval_SetTrace((Py_tracefunc)&traceLineNumber, m_sipWrappedScript);
     }
   }
   ~InstallTrace() {
-    PyEval_SetTrace(NULL, NULL);
+    PyEval_SetTrace(nullptr, nullptr);
     Py_XDECREF(m_sipWrappedScript);
   }
 
@@ -706,7 +701,7 @@ private:
  * @return The result python object
  */
 PyObject *PythonScript::executeCompiledCode(PyObject *compiledCode) {
-  PyObject *result(NULL);
+  PyObject *result(nullptr);
   if (!compiledCode)
     return result;
 
@@ -722,7 +717,7 @@ PyObject *PythonScript::executeCompiledCode(PyObject *compiledCode) {
  * @param result The output from a PyEval call
  * @return A boolean indicating success status
  */
-bool PythonScript::checkResult(PyObject *result) { return result != NULL; }
+bool PythonScript::checkResult(PyObject *result) { return result != nullptr; }
 
 /**
  * Compile the code
@@ -787,7 +782,7 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
     // See http://mail.python.org/pipermail/python-list/2001-June/046940.html
     // for why there isn't an easier way to do this in Python.
     PyErr_Clear(); // silently ignore errors
-    PyObject *key(NULL), *value(NULL);
+    PyObject *key(nullptr), *value(nullptr);
     Py_ssize_t i(0);
     QString signature = "";
     while (PyDict_Next(localDict, &i, &key, &value)) {
@@ -806,15 +801,15 @@ PyObject *PythonScript::compileToByteCode(bool for_eval) {
       Py_XINCREF(compiledCode);
       Py_DECREF(tmp);
     }
-    success = (compiledCode != NULL);
+    success = (compiledCode != nullptr);
   } else {
   }
 
   if (success) {
     m_codeFileObject = ((PyCodeObject *)(compiledCode))->co_filename;
   } else {
-    compiledCode = NULL;
-    m_codeFileObject = NULL;
+    compiledCode = nullptr;
+    m_codeFileObject = nullptr;
   }
   return compiledCode;
 }

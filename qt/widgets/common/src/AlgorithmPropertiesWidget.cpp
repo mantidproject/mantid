@@ -28,7 +28,7 @@ namespace API {
 /** Constructor
  */
 AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
-    : QWidget(parent), m_algoName(""), m_algo(), m_inputHistory(NULL) {
+    : QWidget(parent), m_algoName(""), m_algo(), m_inputHistory(nullptr) {
   // Create the grid layout that will have all the widgets
   m_inputGrid = new QGridLayout;
 
@@ -158,7 +158,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
   // Delete all widgets in the layout
   QLayoutItem *child;
-  while ((child = m_inputGrid->takeAt(0)) != 0) {
+  while ((child = m_inputGrid->takeAt(0)) != nullptr) {
     if (child->widget())
       child->widget()->deleteLater();
 

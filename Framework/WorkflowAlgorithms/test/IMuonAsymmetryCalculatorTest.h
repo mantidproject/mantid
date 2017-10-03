@@ -630,16 +630,21 @@ private:
   *
   * X values are 1 2 3 for all the histograms.
   */
-  MatrixWorkspace_sptr createWorkspace(double delta = 0.0) {
+  MatrixWorkspace_sptr createWorkspace(const double delta = 0.0) {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(3, 3);
 
     for (size_t i = 0; i < ws->getNumberHistograms(); i++) {
-      for (size_t j = 0; j < ws->blocksize(); j++) {
-        double v = static_cast<double>(i * ws->blocksize() + j) + 1.0 + delta;
+      auto &x = ws->dataX(i);
+      auto &y = ws->dataY(i);
+      auto &e = ws->dataE(i);
 
-        ws->dataY(i)[j] = v;
-        ws->dataX(i)[j] = static_cast<double>(j + 1);
-        ws->dataE(i)[j] = v * 0.1;
+      const size_t numBins = y.size();
+      for (size_t j = 0; j < numBins; j++) {
+        const double v = static_cast<double>(i * numBins + j) + 1.0 + delta;
+
+        x[j] = static_cast<double>(j + 1);
+        y[j] = v;
+        e[j] = v * 0.1;
       }
     }
 

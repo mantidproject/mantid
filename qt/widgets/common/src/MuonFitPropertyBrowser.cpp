@@ -94,7 +94,7 @@ void MuonFitPropertyBrowser::init() {
 
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty *settingsGroup(NULL);
+  QtProperty *settingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
@@ -103,7 +103,7 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettings.beginGroup("");
 
   /* Create function group */
-  QtProperty *multiFitSettingsGroup(NULL);
+  QtProperty *multiFitSettingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   multiFitSettingsGroup = m_groupManager->addProperty("Data");
@@ -1178,8 +1178,6 @@ std::string MuonFitPropertyBrowser::outputName() const {
 void MuonFitPropertyBrowser::setMultiFittingMode(bool enabled) {
   // First, clear whatever model is currently set
   this->clear();
-  modifyFitMenu(m_fitActionEvaluate, !enabled);
-  modifyFitMenu(m_fitActionSeqFit, !enabled);
   // set default selection (all groups)
   if (enabled) {
     setAllGroups();

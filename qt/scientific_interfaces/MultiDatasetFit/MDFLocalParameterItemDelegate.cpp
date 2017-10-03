@@ -12,7 +12,7 @@ namespace MDF {
 /// Constructor.
 LocalParameterItemDelegate::LocalParameterItemDelegate(
     EditLocalParameterDialog *parent)
-    : QStyledItemDelegate(parent), m_currentEditor(NULL) {}
+    : QStyledItemDelegate(parent), m_currentEditor(nullptr) {}
 
 /// Create a custom editor LocalParameterEditor.
 QWidget *

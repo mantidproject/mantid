@@ -15,36 +15,41 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
+    <widget class="QGroupBox" name="modelBox">
+     <property name="title">
+      <string>Model</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QComboBox" name="modelInput">
+        <item>
+         <property name="text">
+          <string>Gauss</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Peters</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yi</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="gbInput">
      <property name="title">
       <string>Input</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_18">
       <item>
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_eq2</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_eq2.nxs</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-        <property name="ShowGroups" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSampleInput" native="true"/>
       </item>
      </layout>
     </widget>
