@@ -22,7 +22,7 @@ using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::ConfigService;
 
 namespace {

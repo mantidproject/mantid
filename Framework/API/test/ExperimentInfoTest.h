@@ -36,6 +36,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace NeXus;
+using Mantid::Types::Core::DateAndTime;
 
 class FakeChopper : public Mantid::API::ChopperModel {
 public:

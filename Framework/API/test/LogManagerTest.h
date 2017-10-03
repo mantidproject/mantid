@@ -15,6 +15,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using Mantid::Types::Core::DateAndTime;
 
 // Helper class
 namespace {

@@ -71,6 +71,7 @@ target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE ${TCMALLOC_LIBRARIE
             PythonKernelModule
             API
             DataObjects
+	    Types
             Kernel
             HistogramData
             Geometry

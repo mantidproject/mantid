@@ -212,7 +212,7 @@ EventWorkspaceCollection::getDetectorIDToWorkspaceIndexVector(
   return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(offset, dothrow);
 }
 
-Kernel::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
+Types::Core::DateAndTime EventWorkspaceCollection::getFirstPulseTime() const {
   return m_WsVec[0]->getFirstPulseTime();
 }
 void EventWorkspaceCollection::setAllX(const HistogramData::BinEdges &x) {

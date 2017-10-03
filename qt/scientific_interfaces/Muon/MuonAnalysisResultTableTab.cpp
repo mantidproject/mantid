@@ -38,6 +38,7 @@ using namespace Mantid::API;
 
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+using Mantid::Types::Core::DateAndTime;
 
 const std::string MuonAnalysisResultTableTab::WORKSPACE_POSTFIX("_Workspace");
 const std::string MuonAnalysisResultTableTab::PARAMS_POSTFIX("_Parameters");

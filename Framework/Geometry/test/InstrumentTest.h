@@ -419,8 +419,8 @@ public:
   void test_getValidFromDate() {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
-    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    Types::Core::DateAndTime validFrom("1900-01-31T23:59:59");
+    Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);
     inst->setValidToDate(validTo);
     TS_ASSERT_EQUALS(inst->getValidFromDate(), validFrom);

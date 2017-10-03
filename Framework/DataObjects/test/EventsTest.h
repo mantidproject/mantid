@@ -1,13 +1,14 @@
 #ifndef EVENTSTEST_H_
 #define EVENTSTEST_H_ 1
 
-#include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/Events.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 using std::runtime_error;
 using std::size_t;
@@ -20,9 +21,10 @@ public:
 
   void test_Compare() {
     // tof event
-    TofEvent tofEvent1(20.0, Kernel::DateAndTime("1990-01-02 00:00:02.000"));
-    TofEvent tofEvent2(20.05,
-                       Kernel::DateAndTime("1990-01-02 00:00:02.000000001"));
+    TofEvent tofEvent1(20.0,
+                       Types::Core::DateAndTime("1990-01-02 00:00:02.000"));
+    TofEvent tofEvent2(
+        20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"));
 
     TS_ASSERT(tofEvent1 == tofEvent1);
     TS_ASSERT(!(tofEvent1 == tofEvent2));
@@ -30,9 +32,10 @@ public:
 
     // weighted
     WeightedEvent wghtEvent1(
-        20.0, Kernel::DateAndTime("1990-01-02 00:00:02.000"), 1., 1.);
+        20.0, Types::Core::DateAndTime("1990-01-02 00:00:02.000"), 1., 1.);
     WeightedEvent wghtEvent2(
-        20.05, Kernel::DateAndTime("1990-01-02 00:00:02.000000001"), 1.05, 1.);
+        20.05, Types::Core::DateAndTime("1990-01-02 00:00:02.000000001"), 1.05,
+        1.);
 
     TS_ASSERT(wghtEvent1 == wghtEvent1);
     TS_ASSERT(!(wghtEvent1 == wghtEvent2));

@@ -1,6 +1,6 @@
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
 #include <sstream>

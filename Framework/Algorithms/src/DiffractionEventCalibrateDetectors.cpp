@@ -35,6 +35,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
 
 /**
  * The gsl_costFunction is optimized by GSL simplex

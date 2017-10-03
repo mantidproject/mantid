@@ -28,6 +28,7 @@ using Mantid::DataHandling::LoadSpiceAscii;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class ConvertSpiceDataToRealSpaceTest : public CxxTest::TestSuite {
 public:
