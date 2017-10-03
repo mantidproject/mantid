@@ -1590,8 +1590,10 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
              "Reading the parameter maps...");
     local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
-    g_log.information("Error loading Instrument section of nxs file");
-    g_log.information(e.what());
+    g_log.warning("Error loading Instrument section of nxs file");
+    g_log.warning(e.what());
+    g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
+                  "update the geometry");
   }
 
   // Now assign the spectra-detector map
