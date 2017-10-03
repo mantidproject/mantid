@@ -4,7 +4,6 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "IndirectBayesTab.h"
 
-using MantidQt::MantidWidgets::RangeSelector;
 
 namespace MantidQt {
 namespace CustomInterfaces {

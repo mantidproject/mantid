@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <sstream>
 
-using Mantid::API::ISpectrum;
 using Mantid::API::MantidImage;
 
 namespace Mantid {

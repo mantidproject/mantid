@@ -34,7 +34,6 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor

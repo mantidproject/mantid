@@ -3,7 +3,6 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 
 using Mantid::API::IPeaksWorkspace;
-using Mantid::API::WorkspaceProperty;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<IPeaksWorkspace>)
 

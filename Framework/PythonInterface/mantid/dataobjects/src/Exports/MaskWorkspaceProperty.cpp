@@ -3,7 +3,6 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 
 using Mantid::DataObjects::MaskWorkspace;
-using Mantid::API::WorkspaceProperty;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<MaskWorkspace>)
 

@@ -30,7 +30,6 @@
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
-using Mantid::Kernel::Strings::toString;
 
 namespace Mantid {
 namespace API {

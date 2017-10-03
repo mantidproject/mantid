@@ -12,7 +12,6 @@
 #include <stdexcept>
 
 using boost::python::extract;
-using boost::python::object;
 
 namespace Mantid {
 namespace PythonInterface {

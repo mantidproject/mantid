@@ -103,7 +103,6 @@ using namespace Mantid::API;
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
-using MantidQt::MantidWidgets::MantidTreeWidget;
 using Mantid::Kernel::DateAndTime;
 using MantidQt::SliceViewer::SliceViewerWindow;
 

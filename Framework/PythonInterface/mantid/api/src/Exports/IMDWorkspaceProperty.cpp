@@ -3,7 +3,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 
 using Mantid::API::IMDWorkspace;
-using Mantid::API::WorkspaceProperty;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<IMDWorkspace>)
 

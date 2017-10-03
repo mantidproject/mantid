@@ -10,8 +10,6 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::Logger;
-using Mantid::API::IFunction;
 
 namespace Mantid {
 namespace Crystal {

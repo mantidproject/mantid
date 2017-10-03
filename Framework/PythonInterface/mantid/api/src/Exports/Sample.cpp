@@ -10,7 +10,6 @@
 
 using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
-using Mantid::Kernel::Material;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Material)

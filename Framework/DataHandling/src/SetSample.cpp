@@ -26,8 +26,6 @@ using Geometry::Goniometer;
 using Geometry::ReferenceFrame;
 using Geometry::SampleEnvironment;
 using Kernel::Logger;
-using Kernel::PropertyWithValue;
-using Kernel::Quat;
 using Kernel::V3D;
 
 namespace {

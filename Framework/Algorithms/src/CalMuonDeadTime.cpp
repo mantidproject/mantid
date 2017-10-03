@@ -16,7 +16,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CalMuonDeadTime)

@@ -66,8 +66,6 @@ GCC_DIAG_ON(cast-qual)
 #endif
 
 namespace Mantid {
-using Kernel::V3D;
-using Kernel::Quat;
 
 namespace Geometry {
 namespace {

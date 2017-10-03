@@ -3,7 +3,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 
 using Mantid::API::WorkspaceGroup;
-using Mantid::API::WorkspaceProperty;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<WorkspaceGroup>)
 

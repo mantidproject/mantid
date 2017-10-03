@@ -21,7 +21,6 @@ DECLARE_ALGORITHM(Rebin2D)
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
-using Kernel::V2D;
 using namespace Mantid::HistogramData;
 
 //--------------------------------------------------------------------------

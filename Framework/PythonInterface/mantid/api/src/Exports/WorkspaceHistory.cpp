@@ -12,8 +12,6 @@
 #include <boost/python/self.hpp>
 
 using Mantid::API::WorkspaceHistory;
-using Mantid::API::AlgorithmHistory;
-using Mantid::API::IAlgorithm;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 

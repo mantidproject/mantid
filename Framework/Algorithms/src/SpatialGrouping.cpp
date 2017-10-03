@@ -14,7 +14,6 @@
 #include <algorithm>
 #include "MantidAPI/ISpectrum.h"
 
-using Mantid::API::ISpectrum;
 
 namespace {
 /*

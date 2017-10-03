@@ -4,7 +4,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 
-using Mantid::API::SpectraAxis;
 
 namespace Mantid {
 namespace DataObjects {

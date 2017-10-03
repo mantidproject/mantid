@@ -3,7 +3,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::API::MatrixWorkspace;
-using Mantid::API::WorkspaceProperty;
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<MatrixWorkspace>)
 

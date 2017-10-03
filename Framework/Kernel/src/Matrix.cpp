@@ -10,7 +10,6 @@
 #include <memory>
 #include <sstream>
 
-using Mantid::Kernel::TimeSeriesProperty;
 
 namespace Mantid {
 

@@ -28,7 +28,6 @@ using std::vector;
 
 namespace Mantid {
 namespace DataObjects {
-using Kernel::Exception::NotImplementedError;
 using Kernel::DateAndTime;
 using namespace Mantid::API;
 

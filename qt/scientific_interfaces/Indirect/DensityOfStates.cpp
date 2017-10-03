@@ -9,7 +9,6 @@
 #include <QString>
 
 using namespace Mantid::API;
-using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 Mantid::Kernel::Logger g_log("DensityOfStates");
