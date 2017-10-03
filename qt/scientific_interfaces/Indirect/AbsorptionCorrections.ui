@@ -618,6 +618,9 @@
           </item>
           <item row="1" column="3">
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -854,8 +857,8 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>782</x>
-     <y>291</y>
+     <x>783</x>
+     <y>324</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
@@ -874,8 +877,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>60</y>
+     <x>784</x>
+     <y>67</y>
     </hint>
    </hints>
   </connection>
@@ -902,12 +905,12 @@
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>398</x>
-     <y>370</y>
+     <x>402</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>370</y>
+     <x>784</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -922,8 +925,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>149</x>
-     <y>370</y>
+     <x>175</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -938,8 +941,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>398</x>
-     <y>370</y>
+     <x>402</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -954,8 +957,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>590</x>
-     <y>370</y>
+     <x>593</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -970,8 +973,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>370</y>
+     <x>784</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -986,8 +989,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>39</x>
-     <y>328</y>
+     <x>65</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1002,8 +1005,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>65</x>
-     <y>328</y>
+     <x>282</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1018,8 +1021,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>92</x>
-     <y>328</y>
+     <x>501</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1034,8 +1037,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>328</y>
+     <x>718</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1050,8 +1053,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>92</x>
-     <y>310</y>
+     <x>501</x>
+     <y>369</y>
     </hint>
    </hints>
   </connection>
@@ -1066,8 +1069,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>310</y>
+     <x>718</x>
+     <y>369</y>
     </hint>
    </hints>
   </connection>
@@ -1116,6 +1119,38 @@
     <hint type="destinationlabel">
      <x>690</x>
      <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>57</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>408</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>spCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>38</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>646</x>
+     <y>411</y>
     </hint>
    </hints>
   </connection>
