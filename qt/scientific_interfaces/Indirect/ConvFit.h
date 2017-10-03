@@ -67,7 +67,7 @@ private:
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
   QVector<QString> getFunctionParameters(QString) const;
-  QVector<QString> ConvFit::indexToFitFunctions(const int &fitTypeIndex);
+  QVector<QString> indexToFitFunctions(const int &fitTypeIndex);
   void updateProperties(int specNo, const QString &fitFunction);
   void updatePlotOptions();
   void plotOutput(std::string const &outputWs, int specNo);
@@ -87,7 +87,7 @@ private:
   createPropertyToParameterMap(const QVector<QString> &functionNames,
                                const QString &prefixPrefix,
                                const QString &prefixSuffix);
-  void ConvFit::extendPropertyToParameterMap(
+  void extendPropertyToParameterMap(
       const QString &functionName, const int &funcIndex,
       const QString &prefixPrefix, const QString &prefixSuffix,
       QHash<QString, QString> &propertyToParameter);
