@@ -227,7 +227,7 @@ void Spectrogram::checkRaggedMatrixWorkspace(
   if (matrixWorkspace) {
     for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
          ++iHisto) {
-      auto &x = matrixWorkspace->x(iHisto);
+      const auto &x = matrixWorkspace->x(iHisto);
       if (x.front() < minX) {
         minX = static_cast<Mantid::coord_t>(x.front());
       }
