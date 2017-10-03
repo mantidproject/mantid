@@ -157,6 +157,7 @@ class FunctionWrapper(object):
           :param workspace=ws: workspace upon whose x values 
           the function is plotted.
       """
+      from mantid import mtd
       from mantidplot import plot 
       from mantid.simpleapi import CreateWorkspace
       
@@ -175,6 +176,8 @@ class FunctionWrapper(object):
         if key == "workspace":
            isWorkspace = True
            ws = kwargs[key]
+           if type(ws) == type('string'):
+              ws = mtd[ws]
         if key == "workspaceIndex":
            workspaceIndex = kwargs[key]
            if workspaceIndex > 0:
