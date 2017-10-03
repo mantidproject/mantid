@@ -31,16 +31,16 @@ namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
 
-static const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
-static const std::string RUN_NUMBER_PROPERTY = "run_number";
-static const std::string RUN_START_PROPERTY = "run_start";
+const std::string PROTON_CHARGE_PROPERTY = "proton_charge";
+const std::string RUN_NUMBER_PROPERTY = "run_number";
+const std::string RUN_START_PROPERTY = "run_start";
 
 // File identifiers from flatbuffers schema
-static const std::string RUN_MESSAGE_ID = "ba57";
-static const std::string EVENT_MESSAGE_ID = "ev42";
-static const std::string SAMPLE_MESSAGE_ID = "f142";
+const std::string RUN_MESSAGE_ID = "ba57";
+const std::string EVENT_MESSAGE_ID = "ev42";
+const std::string SAMPLE_MESSAGE_ID = "f142";
 
-static const std::chrono::seconds MAX_LATENCY(1);
+const std::chrono::seconds MAX_LATENCY(1);
 
 /**
  * Append sample log data to existing log or create a new log if one with
