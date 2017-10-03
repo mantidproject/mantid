@@ -50,10 +50,15 @@ private:
   void fitPeaks();
 
   void fitSpectrumPeaks(size_t wi, std::vector<double> &peak_pos,
-                       std::vector<std::vector<double>> &peak_params,
-                       std::vector<double> &peak_chi2_vec,
-                       std::vector<std::vector<double>> &fitted_functions,
-                       std::vector<std::vector<double>> &fitted_peak_windows);
+                        std::vector<std::vector<double>> &peak_params,
+                        std::vector<double> &peak_chi2_vec,
+                        std::vector<std::vector<double>> &fitted_functions,
+                        std::vector<std::vector<double>> &fitted_peak_windows);
+
+  void estimateBackground(size_t wi,
+                          const std::pair<double, double> &peak_window,
+                          API::IBackgroundFunction_sptr function,
+                          API::IAlgorithm_sptr fitter);
 
   double fitSinglePeak(size_t wsindex, size_t peakindex,
                        const std::vector<double> &init_peak_values,
@@ -69,8 +74,8 @@ private:
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
-  double findMaxValue(size_t wi, double left_window_boundary,
-                      double right_window_boundary, double b1, double b0,
+  double findMaxValue(size_t wi, const std::pair<double, double> &window,
+                      API::IBackgroundFunction_sptr bkgdfunction,
                       double &peak_center, double &max_value);
 
   std::vector<size_t> getRange(size_t wi,
@@ -85,7 +90,7 @@ private:
   void setOutputProperties();
 
   // Peak fitting suite
-  double FitIndividualPeak();
+  double fitIndividualPeak();
 
   /// Methods to fit functions (general)
   double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
@@ -97,6 +102,12 @@ private:
                        std::vector<double> &vec_xmin,
                        std::vector<double> &vec_xmax);
 
+  /// Write result of peak fit per spectrum to output analysis workspaces
+  void writeFitResult(size_t wi, const std::vector<double> &peak_positions,
+                      std::vector<std::vector<double>> &peak_parameters,
+                      std::vector<std::vector<double>> &fitted_peaks,
+                      std::vector<std::vector<double>> &fitted_peaks_windows);
+
   // ------------------------
 
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -106,7 +117,12 @@ private:
   /// Peak profile name
   API::IPeakFunction_sptr m_peakFunction;
   /// Background function
-  API::IBackgroundFunction_sptr m_bkgdFunc;
+  API::IBackgroundFunction_sptr m_bkgdFunction;
+
+  /// Minimzer
+  std::string m_minimizer;
+  /// Cost function
+  std::string m_costFunction;
 
   /// Designed peak positions and tolerance
   std::vector<double> m_peakCenters;
