@@ -107,11 +107,9 @@ void ConvFit::setup() {
   // Delta Function
   m_properties["Delta Function"] = m_grpManager->addProperty("Delta Function");
   m_properties["UseDeltaFunc"] = m_blnManager->addProperty("Use");
-  m_properties["Delta.Height"] = m_dblManager->addProperty("Height");
-  m_properties["Delta.Centre"] = m_dblManager->addProperty("Centre");
-  m_dblManager->setDecimals(m_properties["DeltaHeight"], NUM_DECIMALS);
   m_properties["Delta Function"]->addSubProperty(m_properties["UseDeltaFunc"]);
-  m_dblManager->setDecimals(m_properties["DeltaCentre"], NUM_DECIMALS);
+  m_properties["Delta Function"] =
+      createFitType(m_properties["Delta Function"], false);
   m_cfTree->addProperty(m_properties["Delta Function"]);
 
   // Fit functions
@@ -131,10 +129,7 @@ void ConvFit::setup() {
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fitFunctionSelected(int)));
-  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateFitFunctions(int)));
   fitFunctionSelected(m_uiForm.cbFitType->currentIndex());
-  updateFitFunctions(m_uiForm.cbFitType->currentIndex());
 
   m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
@@ -175,7 +170,7 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(plotSpecChanged(int)));
+          SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -218,7 +213,6 @@ void ConvFit::setup() {
           SLOT(plotCurrentPreview()));
 
   m_uiForm.ckTieCentres->setChecked(true);
-  m_fittedIndex = -1;
 
   updatePlotOptions();
 }
@@ -299,6 +293,7 @@ void ConvFit::run() {
   m_runMax = m_uiForm.spSpectraMax->value();
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
+  m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
   auto cfs = sequentialFit(specMin, specMax, m_baseName);
 
   // Add to batch alg runner and execute
@@ -311,7 +306,8 @@ void ConvFit::run() {
 IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
                                        const std::string &specMax,
                                        QString &outputWSName) {
-  const auto func = createFunction(m_uiForm.ckTieCentres->isChecked());
+  const auto func = createFunction(m_uiForm.ckTieCentres->isChecked() &&
+                                   m_uiForm.ckTieCentres->isVisible());
   const auto function = std::string(func->asString());
 
   // Construct expected name
@@ -326,7 +322,6 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Add fit specific suffix
   const auto bgType = backgroundString();
   const auto fitType = fitTypeString();
-  m_fittedIndex = m_uiForm.cbFitType->currentIndex();
   outputWSName += "conv_";
   outputWSName += fitType;
   outputWSName += bgType;
@@ -435,7 +430,6 @@ void ConvFit::plotClicked() {
 void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
 
   if (error) {
-    m_fittedIndex = -1;
     return;
   }
 
@@ -492,11 +486,9 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
     m_propertyToParameter = createPropertyToParameterMap(
         m_fitFunctions, prefixPrefix, prefixSuffix);
     m_parameterValues = IndirectTab::extractParametersFromTable(
-        m_baseName.toStdString() + "_Parameters",
-        m_propertyToParameter.values().toSet(), m_runMin, m_runMax);
+        paramWsName, m_propertyToParameter.values().toSet(), m_runMin,
+        m_runMax);
 
-    m_paramWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-        paramWsName);
     updateProperties(m_uiForm.spPlotSpectrum->value());
   }
 
@@ -511,20 +503,40 @@ ConvFit::createPropertyToParameterMap(const QVector<QString> &functionNames,
   QHash<QString, QString> propertyToParameter;
 
   if (functionNames.size() == 1) {
+    QString prefix = prefixPrefix;
+
+    if (functionNames[0] != "Delta Function") {
+      prefix += prefixSuffix;
+    }
+
     extendPropertyToParameterMap(functionNames[0], prefixPrefix + prefixSuffix,
                                  propertyToParameter);
   } else {
 
     for (int i = 0; i < functionNames.size(); ++i) {
-      QString prefix =
-          prefixPrefix + "f" + QString::number(i + 1) + "." + prefixSuffix;
-      extendPropertyToParameterMap(functionNames[i], prefix,
-                                   propertyToParameter);
+      extendPropertyToParameterMap(functionNames[i], i, prefixPrefix,
+                                   prefixSuffix, propertyToParameter);
     }
   }
 
   propertyToParameter["f0.A0"] = "BackgroundA0";
   return propertyToParameter;
+}
+
+void ConvFit::extendPropertyToParameterMap(
+    const QString &functionName, const int &funcIndex,
+    const QString &prefixPrefix, const QString &prefixSuffix,
+    QHash<QString, QString> &propertyToParameter) {
+  QString prefix;
+
+  if (functionName == "Delta Function") {
+    prefix = prefixPrefix + prefixSuffix;
+  } else {
+    prefix =
+        prefixPrefix + "f" + QString::number(funcIndex) + "." + prefixSuffix;
+  }
+
+  extendPropertyToParameterMap(functionName, prefix, propertyToParameter);
 }
 
 void ConvFit::extendPropertyToParameterMap(
@@ -730,7 +742,7 @@ std::string createParName(size_t index, size_t subIndex,
  *      +- Resolution
  *      +- Model (AT LEAST one delta function or one/two lorentzians.)
  *          |
- *          +- DeltaFunction(yes/no)
+ *          +- Delta Function(yes/no)
  *				+- ProductFunction
  *					|
  *					+- Lorentzian 1(yes/no)
@@ -982,18 +994,24 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
  * @return The populated property group representing a fit type
  */
 QtProperty *ConvFit::createFitType(const QString &propName) {
-  QtProperty *fitTypeGroup = m_grpManager->addProperty(propName);
-  QString cbName = propName;
-  auto params = getFunctionParameters(propName);
+  return createFitType(m_grpManager->addProperty(propName));
+}
+
+QtProperty *ConvFit::createFitType(QtProperty *fitTypeGroup,
+                                   const bool &addProperties) {
+  QString cbName = fitTypeGroup->propertyName();
+  auto params = getFunctionParameters(cbName);
 
   for (auto it = params.begin(); it != params.end(); ++it) {
-    QString paramName = propName + "." + *it;
+    QString paramName = cbName + "." + *it;
     m_properties[paramName] = m_dblManager->addProperty(*it);
     m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
     if (QString(*it).compare("FWHM") == 0) {
       m_dblManager->setValue(m_properties[paramName], 0.02);
     }
-    fitTypeGroup->addSubProperty(m_properties[paramName]);
+
+    if (addProperties)
+      fitTypeGroup->addSubProperty(m_properties[paramName]);
   }
   return fitTypeGroup;
 }
@@ -1263,34 +1281,31 @@ void ConvFit::updateProperties(int specNo) {
   size_t index = boost::numeric_cast<size_t>(specNo);
   auto parameterNames = m_propertyToParameter.keys();
 
-  if (specNo < m_runMin || m_runMax > specNo) {
-    addDefaultParametersToTree(
-        indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
-  }
-
-  for (auto &fitFunction : m_fitFunctions) {
+  for (auto &fitFunction :
+       indexToFitFunctions(m_uiForm.cbFitType->currentIndex())) {
     updateProperties(specNo, fitFunction);
   }
 }
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
   bool isTwoLorentzian = fitFunction == "Lorentzian 2";
+  bool specOutOfBounds = specNo < m_runMin || m_runMax < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
     auto propertyName = fitFunction + "." + param;
 
-    if (isTwoLorentzian) {
-      m_dblManager->setValue(m_properties[propertyName],
-                             m_defaultParams["default_" + param]);
-    } else {
-      m_dblManager->setValue(m_properties[propertyName],
-                             m_defaultParams[param]);
-    }
-
-    if (m_propertyToParameter.contains(propertyName)) {
+    if (!specOutOfBounds && m_propertyToParameter.contains(propertyName)) {
       auto paramName = m_propertyToParameter[propertyName];
       m_dblManager->setValue(m_properties[propertyName],
                              m_parameterValues[paramName][specNo]);
+    } else {
+      if (isTwoLorentzian) {
+        m_dblManager->setValue(m_properties[propertyName],
+                               m_defaultParams["default_" + param]);
+      } else {
+        m_dblManager->setValue(m_properties[propertyName],
+                               m_defaultParams[param]);
+      }
     }
   }
 }
@@ -1400,6 +1415,7 @@ void ConvFit::singleFit() {
   m_runMax = specNo;
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
+  m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
   auto cfs = sequentialFit(specNoStr, specNoStr, m_singleFitOutputName);
 
   // Connection to singleFitComplete SLOT (post algorithm completion)
@@ -1420,8 +1436,6 @@ void ConvFit::singleFitComplete(bool error) {
              SLOT(singleFitComplete(bool)));
   algorithmComplete(error, m_singleFitOutputName);
 }
-
-void ConvFit::plotSpecChanged(int value) { updatePlot(); }
 
 /**
  * Handles the user entering a new minimum spectrum index.
@@ -1506,16 +1520,16 @@ void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
     updatePlotOptions();
     if (checked) {
       m_properties["Delta Function"]->addSubProperty(
-          m_properties["DeltaHeight"]);
-      m_dblManager->setValue(m_properties["DeltaHeight"], 1.0000);
+          m_properties["Delta Function.Height"]);
+      m_dblManager->setValue(m_properties["Delta Function.Height"], 1.0000);
       m_properties["Delta Function"]->addSubProperty(
-          m_properties["DeltaCentre"]);
-      m_dblManager->setValue(m_properties["DeltaCentre"], 0.0000);
+          m_properties["Delta Function.Centre"]);
+      m_dblManager->setValue(m_properties["Delta Function.Centre"], 0.0000);
     } else {
       m_properties["Delta Function"]->removeSubProperty(
-          m_properties["DeltaHeight"]);
+          m_properties["Delta Function.Height"]);
       m_properties["Delta Function"]->removeSubProperty(
-          m_properties["DeltaCentre"]);
+          m_properties["Delta Function.Centre"]);
     }
   } else if (prop == m_properties["UseFABADA"]) {
     if (checked) {
@@ -1694,20 +1708,14 @@ QVector<QString> ConvFit::getFunctionParameters(QString functionName) const {
   IFunction_sptr func;
   bool isLorentzian = boost::starts_with(functionName, "Lorentzian");
 
-  if (functionName == "Delta Function") {
-    return {"Height", "Centre"};
-  } else if (isLorentzian) {
+  if (isLorentzian) {
     func = FunctionFactory::Instance().createFunction("Lorentzian");
   } else {
-    func =
-        FunctionFactory::Instance().createFunction(functionName.toStdString());
+    func = FunctionFactory::Instance().createFunction(
+        functionName.replace(" ", "").toStdString());
   }
 
   return IndirectTab::convertStdStringVector(func->getParameterNames());
-}
-
-void ConvFit::updateFitFunctions(int fitTypeIndex) {
-  m_fitFunctions = indexToFitFunctions(fitTypeIndex);
 }
 
 /**
@@ -1722,7 +1730,12 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_defaultParams["default_FWHM"] = res;
   }
 
-  const QString functionName = m_uiForm.cbFitType->itemText(fitTypeIndex);
+  auto fitFunctions = indexToFitFunctions(fitTypeIndex);
+  if (fitFunctions.isEmpty()) {
+    return;
+  }
+
+  auto lastFunction = fitFunctions.last();
 
   // Remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
@@ -1733,19 +1746,18 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
   updatePlotOptions();
 
   // Two Lorentzians Fit
-  if (functionName.compare("Two Lorentzians") == 0) {
+  if (lastFunction.compare("Lorentzian 2") == 0) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
     m_cfTree->addProperty(m_properties["FitFunction2"]);
   } else {
-    m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
+    m_properties["FitFunction1"] = m_grpManager->addProperty(lastFunction);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
   // If there are parameters in the list, add them
-  addDefaultParametersToTree(
-      indexToFitFunctions(m_uiForm.cbFitType->currentIndex()));
+  addDefaultParametersToTree(fitFunctions);
 }
 
 /**
@@ -1762,7 +1774,8 @@ void ConvFit::addDefaultParametersToTree(const QVector<QString> &fitFunctions) {
 
 void ConvFit::addDefaultParametersToTree(const QString &fitFunction) {
   auto paramNames = getFunctionParameters(fitFunction);
-  bool isTwoLorentzian = fitFunction == "Lorentzian 2";
+  bool isDelta = fitFunction == "Delta Function";
+  bool isTwoLorentzian = !isDelta && fitFunction == "Lorentzian 2";
 
   for (auto &paramName : paramNames) {
     QString propertyName = fitFunction + "." + paramName;
@@ -1782,7 +1795,7 @@ void ConvFit::addDefaultParametersToTree(const QString &fitFunction) {
 
     if (isTwoLorentzian) {
       m_properties["FitFunction2"]->addSubProperty(m_properties[propertyName]);
-    } else {
+    } else if (!isDelta) {
       m_properties["FitFunction1"]->addSubProperty(m_properties[propertyName]);
     }
   }

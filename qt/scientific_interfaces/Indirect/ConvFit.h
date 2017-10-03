@@ -30,7 +30,6 @@ private slots:
   void updatePlotRange();
   void plotGuess();
   void singleFit();
-  void plotSpecChanged(int value);
   void specMinChanged(int value);
   void specMaxChanged(int value);
   void minChanged(double);
@@ -46,12 +45,11 @@ private slots:
   void showTieCheckbox(QString);
   void sequentialFitComplete(bool error);
   void singleFitComplete(bool error);
-  void updateFitFunctions(int fitTypeIndex);
   void fitFunctionSelected(int fitTypeIndex);
   void saveClicked();
   void plotClicked();
   void updateProperties(int specNo);
-  void addDefaultParametersToTree(const QString& fitFunction);
+  void addDefaultParametersToTree(const QString &fitFunction);
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -59,6 +57,7 @@ private:
   double
   getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);
+  QtProperty *createFitType(QtProperty*, const bool& = true);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,
@@ -68,7 +67,7 @@ private:
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
   QVector<QString> getFunctionParameters(QString) const;
-  QVector<QString> ConvFit::indexToFitFunctions(const int& fitTypeIndex);
+  QVector<QString> ConvFit::indexToFitFunctions(const int &fitTypeIndex);
   void updateProperties(int specNo, const QString &fitFunction);
   void updatePlotOptions();
   void plotOutput(std::string const &outputWs, int specNo);
@@ -88,6 +87,10 @@ private:
   createPropertyToParameterMap(const QVector<QString> &functionNames,
                                const QString &prefixPrefix,
                                const QString &prefixSuffix);
+  void ConvFit::extendPropertyToParameterMap(
+      const QString &functionName, const int &funcIndex,
+      const QString &prefixPrefix, const QString &prefixSuffix,
+      QHash<QString, QString> &propertyToParameter);
   void
   extendPropertyToParameterMap(const QString &functionName,
                                const QString &prefix,
@@ -97,9 +100,6 @@ private:
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
-  // Pointer to sample workspace object
-  Mantid::API::ITableWorkspace_sptr m_paramWs;
-  int m_fittedIndex;
   bool m_confitResFileType;
   QString m_singleFitOutputName;
   QString m_baseName;
