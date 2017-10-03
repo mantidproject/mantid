@@ -35,7 +35,7 @@ void LoadMappingTable::exec() {
   /// ISISRAW class instance which does raw file reading.
   auto iraw = Kernel::make_unique<ISISRAW2>();
 
-  if (iraw->readFromFile(m_filename.c_str(), 0) !=
+  if (iraw->readFromFile(m_filename.c_str(), false) !=
       0) // ReadFrom File with no data
   {
     g_log.error("Unable to open file " + m_filename);

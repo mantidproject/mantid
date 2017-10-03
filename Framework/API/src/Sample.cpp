@@ -288,7 +288,7 @@ void Sample::addSample(boost::shared_ptr<Sample> childSample) {
  * @param group :: name of the group to create
  */
 void Sample::saveNexus(::NeXus::File *file, const std::string &group) const {
-  file->makeGroup(group, "NXsample", 1);
+  file->makeGroup(group, "NXsample", true);
   file->putAttr("name", m_name);
   file->putAttr("version", 1);
   file->putAttr("shape_xml", m_shape.getShapeXML());

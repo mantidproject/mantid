@@ -463,7 +463,7 @@ void LogManager::clearOutdatedTimeSeriesLogValues() {
  */
 void LogManager::saveNexus(::NeXus::File *file, const std::string &group,
                            bool keepOpen) const {
-  file->makeGroup(group, "NXgroup", 1);
+  file->makeGroup(group, "NXgroup", true);
   file->putAttr("version", 1);
 
   // Save all the properties as NXlog

@@ -874,7 +874,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }
@@ -996,7 +996,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   // Get information from all but data group
   std::string parameterStr;

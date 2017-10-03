@@ -1045,8 +1045,8 @@ bool ImportOPJ::importGraphs(const OPJFile &opj) {
                    translateOrigin2QtiplotLineStyle(grids[3].style))));
 
       grid->setAxis(2, 0);
-      grid->enableZeroLineX(0);
-      grid->enableZeroLineY(0);
+      grid->enableZeroLineX(false);
+      grid->enableZeroLineY(false);
 
       vector<graphAxisFormat> formats = opj.layerAxisFormat(g, l);
       vector<graphAxisTick> ticks = opj.layerAxisTickLabels(g, l);
