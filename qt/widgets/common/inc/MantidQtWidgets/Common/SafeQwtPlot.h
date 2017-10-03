@@ -47,8 +47,8 @@ class EXPORT_OPT_MANTIDQT_COMMON SafeQwtPlot : public QwtPlot {
   Q_OBJECT
 
 public:
-  explicit SafeQwtPlot(QWidget *parent = NULL);
-  explicit SafeQwtPlot(const QwtText &title, QWidget *p = NULL);
+  explicit SafeQwtPlot(QWidget *parent = nullptr);
+  explicit SafeQwtPlot(const QwtText &title, QWidget *p = nullptr);
 
   ~SafeQwtPlot() override;
 

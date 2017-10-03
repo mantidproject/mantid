@@ -140,9 +140,9 @@ public:
   int32_t m_specMax;
 
   /// Filter by start time
-  Kernel::DateAndTime filter_time_start;
+  Mantid::Types::Core::DateAndTime filter_time_start;
   /// Filter by stop time
-  Kernel::DateAndTime filter_time_stop;
+  Mantid::Types::Core::DateAndTime filter_time_stop;
 
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;

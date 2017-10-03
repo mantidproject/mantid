@@ -22,7 +22,8 @@ void CatalogKeepAlive::exec() {
   if (timePeriod <= 0)
     throw std::runtime_error("TimePeriod must be greater than zero.");
 
-  Kernel::DateAndTime lastTimeExecuted = Kernel::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime lastTimeExecuted =
+      Types::Core::DateAndTime::getCurrentTime();
 
   // Keep going until cancelled
   while (true) {
@@ -31,14 +32,14 @@ void CatalogKeepAlive::exec() {
     // Exit if the user presses cancel
     this->interruption_point();
 
-    double secondsSinceExecuted = Kernel::DateAndTime::secondsFromDuration(
-        Kernel::DateAndTime::getCurrentTime() - lastTimeExecuted);
+    double secondsSinceExecuted = Types::Core::DateAndTime::secondsFromDuration(
+        Types::Core::DateAndTime::getCurrentTime() - lastTimeExecuted);
 
     if (secondsSinceExecuted > timePeriod) {
       API::CatalogManager::Instance()
           .getCatalog(getPropertyValue("Session"))
           ->keepAlive();
-      lastTimeExecuted = Kernel::DateAndTime::getCurrentTime();
+      lastTimeExecuted = Types::Core::DateAndTime::getCurrentTime();
     }
   }
 }

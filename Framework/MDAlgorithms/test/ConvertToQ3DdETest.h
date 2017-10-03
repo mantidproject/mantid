@@ -62,14 +62,14 @@ public:
     if (!childAlg) {
       TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
                  false);
-      return NULL;
+      return nullptr;
     }
     childAlg->initialize();
     if (!childAlg->isInitialized()) {
       TSM_ASSERT(
           "Can not initialize child ChildAlgorithm to found min/max values",
           false);
-      return NULL;
+      return nullptr;
     }
     childAlg->setPropertyValue("InputWorkspace", "testWSProcessed");
     childAlg->setPropertyValue("QDimensions", QMode);
@@ -81,7 +81,7 @@ public:
     if (!childAlg->isExecuted()) {
       TSM_ASSERT("Can not execute child ChildAlgorithm to found min/max values",
                  false);
-      return NULL;
+      return nullptr;
     }
     return childAlg;
   }

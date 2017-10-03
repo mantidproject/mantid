@@ -10,7 +10,7 @@ class DLLExport CalculatePaalmanPings : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  CalculatePaalmanPings(QWidget *parent = 0);
+  CalculatePaalmanPings(QWidget *parent = nullptr);
 
 private:
   void setup() override;

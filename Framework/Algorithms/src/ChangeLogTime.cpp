@@ -16,6 +16,7 @@ using std::vector;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Types::Core::DateAndTime;
 
 /// Algorithm's name for identification
 const string ChangeLogTime::name() const { return "ChangeLogTime"; }

@@ -96,7 +96,7 @@ public:
   std::vector<size_t>
   getDetectorIDToWorkspaceIndexVector(Mantid::specnum_t &offset,
                                       bool dothrow) const;
-  Kernel::DateAndTime getFirstPulseTime() const;
+  Types::Core::DateAndTime getFirstPulseTime() const;
   void setAllX(const HistogramData::BinEdges &x);
   size_t getNumberEvents() const;
   void setIndexInfo(const Indexing::IndexInfo &indexInfo);

@@ -37,7 +37,7 @@
 #include <qwt_text_label.h>
 #include <qwt_scale_widget.h>
 
-TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(NULL) {
+TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(nullptr) {
   setAttribute(Qt::WA_DeleteOnClose);
   setFrameShadow(QFrame::Plain);
   setFrameShape(QFrame::Box);
@@ -100,7 +100,7 @@ TextEditor::TextEditor(Graph *g) : QTextEdit(g), d_target(NULL) {
 TextEditor::~TextEditor() { emit textEditorDeleted(); }
 
 void TextEditor::closeEvent(QCloseEvent *e) {
-  if (d_target != NULL) {
+  if (d_target != nullptr) {
     Graph *g = dynamic_cast<Graph *>(parent());
     if (g) {
       QString s = QString();
@@ -108,12 +108,12 @@ void TextEditor::closeEvent(QCloseEvent *e) {
         s = toPlainText();
         legend->setText(s);
         d_target->show();
-        g->setSelectedText(NULL);
+        g->setSelectedText(nullptr);
       } else if (auto pieLabel = dynamic_cast<PieLabel *>(d_target)) {
         s = toPlainText();
         pieLabel->setCustomText(s);
         d_target->show();
-        g->setSelectedText(NULL);
+        g->setSelectedText(nullptr);
       } else if (QString(d_target->metaObject()->className()) ==
                  "QwtTextLabel") {
         QwtText title = g->plotWidget()->title();

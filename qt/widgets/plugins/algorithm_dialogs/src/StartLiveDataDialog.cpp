@@ -22,7 +22,7 @@ using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::Algorithm_sptr;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::ConfigService;
 
 namespace {
@@ -445,7 +445,7 @@ void StartLiveDataDialog::initListenerPropLayout(const QString &listener) {
       layout = listenerPropLayout;
     } else {
       QLayoutItem *child;
-      while ((child = layout->takeAt(0)) != NULL) {
+      while ((child = layout->takeAt(0)) != nullptr) {
         child->widget()->close();
         delete child;
       }

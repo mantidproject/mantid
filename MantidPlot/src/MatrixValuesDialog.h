@@ -50,7 +50,8 @@ class MatrixValuesDialog : public QDialog, public Scripted {
   Q_OBJECT
 
 public:
-  MatrixValuesDialog(ScriptingEnv *env, QWidget *parent = 0, Qt::WFlags fl = 0);
+  MatrixValuesDialog(ScriptingEnv *env, QWidget *parent = nullptr,
+                     Qt::WFlags fl = nullptr);
   void setMatrix(Matrix *m);
 
 private slots:

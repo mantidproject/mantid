@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class CreateLogPropertyTableTest : public CxxTest::TestSuite {
 public:

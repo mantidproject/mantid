@@ -52,8 +52,8 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   // This ends up being owned by the RefImagePlotItem instance
   RefLimitsHandler *limits_handler = new RefLimitsHandler(m_ui);
 
-  m_hGraph = new SpectrumView::GraphDisplay(m_ui->h_graphPlot, NULL, false);
-  m_vGraph = new SpectrumView::GraphDisplay(m_ui->v_graphPlot, NULL, true);
+  m_hGraph = new SpectrumView::GraphDisplay(m_ui->h_graphPlot, nullptr, false);
+  m_vGraph = new SpectrumView::GraphDisplay(m_ui->v_graphPlot, nullptr, true);
 
   m_imageDisplay = new RefImageDisplay(m_ui->imagePlot, m_sliderHandler,
                                        m_rangeHandler, limits_handler, m_hGraph,

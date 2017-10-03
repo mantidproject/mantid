@@ -50,7 +50,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
-  std::vector<std::vector<std::vector<Mantid::DataObjects::TofEvent> *>>
+  std::vector<std::vector<std::vector<Mantid::Types::Event::TofEvent> *>>
       eventVectors;
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>

@@ -2,8 +2,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/operators.hpp> // Also provides self
 
-using Mantid::Kernel::DateAndTime;
-using Mantid::Kernel::time_duration;
+using namespace Mantid::Types::Core;
 using namespace boost::python;
 using boost::python::arg;
 

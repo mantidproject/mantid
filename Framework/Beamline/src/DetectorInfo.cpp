@@ -159,7 +159,7 @@ size_t DetectorInfo::scanCount(const size_t index) const {
 /** Returns the scan interval of the detector with given index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. */
+ * since 1990, as in Types::Core::DateAndTime. */
 std::pair<int64_t, int64_t>
 DetectorInfo::scanInterval(const std::pair<size_t, size_t> &index) const {
   if (!m_scanIntervals)
@@ -180,7 +180,8 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
 /** Set the scan interval of the detector with given detector index.
  *
  * The interval start and end values would typically correspond to nanoseconds
- * since 1990, as in Kernel::DateAndTime. Note that it is currently not possible
+ * since 1990, as in Types::Core::DateAndTime. Note that it is currently not
+ *possible
  * to modify scan intervals for a DetectorInfo with time-dependent detectors,
  * i.e., time intervals must be set with this method before merging individual
  * scans. */

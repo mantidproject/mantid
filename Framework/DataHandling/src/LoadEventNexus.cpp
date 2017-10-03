@@ -2,7 +2,6 @@
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -13,6 +12,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
@@ -28,10 +28,11 @@
 
 #include <functional>
 
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::map;
 using std::string;
 using std::vector;
-
 using namespace ::NeXus;
 
 namespace Mantid {
@@ -40,9 +41,12 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
+using namespace DateAndTimeHelpers;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 namespace {
 
@@ -545,7 +549,7 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     Kernel::TimeSeriesProperty<double> *log =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             localWorkspace->mutableRun().getProperty("proton_charge"));
-    std::vector<Kernel::DateAndTime> temp;
+    std::vector<Types::Core::DateAndTime> temp;
     if (log)
       temp = log->timesAsVector();
     // if (returnpulsetimes) out = new BankPulseTimes(temp);
@@ -554,11 +558,11 @@ boost::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
 
     // Use the first pulse as the run_start time.
     if (!temp.empty()) {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
+      if (temp[0] < Types::Core::DateAndTime("1991-01-01T00:00:00"))
         alg.getLogger().warning() << "Found entries in the proton_charge "
                                      "sample log with invalid pulse time!\n";
 
-      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      Types::Core::DateAndTime run_start = localWorkspace->getFirstPulseTime();
       // add the start of the run as a ISO8601 date/time string. The start =
       // first non-zero time.
       // (this is used in LoadInstrument to find the right instrument file to
@@ -655,7 +659,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       std::string tmp;
       m_file->readData("start_time", tmp);
       m_file->closeGroup();
-      run_start = DateAndTime(tmp);
+      run_start = createFromSanitizedISO8601(tmp);
       m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                      true);
     }
@@ -749,8 +753,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // Default to ALL pulse times
   bool is_time_filtered = false;
-  filter_time_start = Kernel::DateAndTime::minimum();
-  filter_time_stop = Kernel::DateAndTime::maximum();
+  filter_time_start = Types::Core::DateAndTime::minimum();
+  filter_time_stop = Types::Core::DateAndTime::maximum();
 
   if (m_allBanksPulseTimes->numPulses > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from

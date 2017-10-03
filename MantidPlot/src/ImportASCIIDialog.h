@@ -47,8 +47,8 @@ class MatrixModel;
 
 class PreviewTable : public QTableWidget {
 public:
-  PreviewTable(int numRows, int numCols, QWidget *parent = 0,
-               const char *name = 0);
+  PreviewTable(int numRows, int numCols, QWidget *parent = nullptr,
+               const char *name = nullptr);
 
   void importASCII(const QString &fname, const QString &sep, int ignoredLines,
                    bool renameCols, bool stripSpaces, bool simplifySpaces,
@@ -75,7 +75,7 @@ private:
 
 class PreviewMatrix : public QTableView {
 public:
-  PreviewMatrix(QWidget *parent, Matrix *m = 0);
+  PreviewMatrix(QWidget *parent, Matrix *m = nullptr);
 
   void importASCII(const QString &fname, const QString &sep, int ignoredLines,
                    bool stripSpaces, bool simplifySpaces,
@@ -116,8 +116,8 @@ public:
    * @param extended :: flag: show/hide the advanced options on start-up
    * @param flags :: window flags
    */
-  ImportASCIIDialog(bool new_windows_only, QWidget *parent = 0,
-                    bool extended = true, Qt::WFlags flags = 0);
+  ImportASCIIDialog(bool new_windows_only, QWidget *parent = nullptr,
+                    bool extended = true, Qt::WFlags flags = nullptr);
 
   //! Return the selected import mode
   /**

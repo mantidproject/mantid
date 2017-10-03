@@ -285,20 +285,20 @@ public:
   void testCasting() {
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<int>> *>(iProp),
-        static_cast<PropertyWithValue<std::vector<int>> *>(0))
+        static_cast<PropertyWithValue<std::vector<int>> *>(nullptr))
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<double>> *>(dProp),
-        static_cast<PropertyWithValue<std::vector<double>> *>(0))
+        static_cast<PropertyWithValue<std::vector<double>> *>(nullptr))
     TS_ASSERT_DIFFERS(
         dynamic_cast<PropertyWithValue<std::vector<std::string>> *>(sProp),
-        static_cast<PropertyWithValue<std::vector<std::string>> *>(0))
+        static_cast<PropertyWithValue<std::vector<std::string>> *>(nullptr))
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0))
+                      static_cast<Property *>(nullptr))
   }
 
   void testPrettyPrinting() {

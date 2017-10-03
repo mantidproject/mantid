@@ -51,7 +51,7 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectBayes(QWidget *parent = 0);
+  IndirectBayes(QWidget *parent = nullptr);
   /// Destructor
   ~IndirectBayes() override;
   /// Interface name
