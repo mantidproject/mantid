@@ -743,9 +743,9 @@ void Instrument::markAsDetectorFinalize() {
   // Detectors (even when different objects) are NOT allowed to have duplicate
   // ids. This method establishes the presence of duplicates.
   std::sort(m_detectorCache.begin(), m_detectorCache.end(),
-                   [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-                      const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-                       -> bool { return std::get<0>(a) < std::get<0>(b); });
+            [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+               const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+                -> bool { return std::get<0>(a) < std::get<0>(b); });
 
   auto resultIt = std::adjacent_find(
       m_detectorCache.begin(), m_detectorCache.end(),
