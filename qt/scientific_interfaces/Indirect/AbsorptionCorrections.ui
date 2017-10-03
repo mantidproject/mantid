@@ -406,6 +406,18 @@
            </widget>
           </item>
          </layout>
+         <zorder>spFlatSampleHeight</zorder>
+         <zorder>lbFlatSampleThickness</zorder>
+         <zorder>spFlatCanFrontThickness</zorder>
+         <zorder>lbFlatCanFrontThickness</zorder>
+         <zorder>lbFlatSampleWidth</zorder>
+         <zorder>lbFlatSampleHeight</zorder>
+         <zorder>spFlatCanBackThickness</zorder>
+         <zorder>spFlatSampleThickness</zorder>
+         <zorder>lbFlatCanBackThickness</zorder>
+         <zorder>spFlatSampleAngle</zorder>
+         <zorder>lbFlatSampleAngle</zorder>
+         <zorder>spFlatSampleWidth</zorder>
         </widget>
         <widget class="QWidget" name="pgAbsCorAnnulus">
          <layout class="QGridLayout" name="loAnnulus">
@@ -804,24 +816,34 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckUseCan</tabstop>
+  <tabstop>spNumberWavelengths</tabstop>
+  <tabstop>spNumberEvents</tabstop>
+  <tabstop>spBeamWidth</tabstop>
+  <tabstop>spBeamHeight</tabstop>
   <tabstop>cbShape</tabstop>
   <tabstop>spFlatSampleWidth</tabstop>
   <tabstop>spFlatSampleHeight</tabstop>
   <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
-  <tabstop>spAnnSampleInnerRadius</tabstop>
-  <tabstop>spAnnSampleOuterRadius</tabstop>
-  <tabstop>spAnnCanInnerRadius</tabstop>
-  <tabstop>spAnnCanOuterRadius</tabstop>
-  <tabstop>spCylSampleRadius</tabstop>
-  <tabstop>spCylCanInnerRadius</tabstop>
+  <tabstop>cbSampleDensity</tabstop>
   <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
+  <tabstop>cbCanDensity</tabstop>
   <tabstop>spCanDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
+  <tabstop>spAnnCanInnerRadius</tabstop>
+  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanInnerRadius</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
+  <tabstop>spAnnSampleHeight</tabstop>
+  <tabstop>spCylSampleHeight</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
+  <tabstop>spAnnSampleInnerRadius</tabstop>
  </tabstops>
  <resources/>
  <connections>
