@@ -17,7 +17,7 @@ class QwtScaleWidgetExtended : public QwtScaleWidget {
   Q_OBJECT
 
 public:
-  QwtScaleWidgetExtended(QWidget *parent = NULL) : QwtScaleWidget(parent) {
+  QwtScaleWidgetExtended(QWidget *parent = nullptr) : QwtScaleWidget(parent) {
     this->setMouseTracking(true);
   }
 
@@ -43,7 +43,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ColorBarWidget : public QWidget {
   Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum)
 
 public:
-  ColorBarWidget(QWidget *parent = 0);
+  ColorBarWidget(QWidget *parent = nullptr);
   ~ColorBarWidget() override;
 
   enum CheckboxStrategy {

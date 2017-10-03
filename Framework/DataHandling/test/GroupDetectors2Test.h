@@ -36,6 +36,7 @@ using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 class GroupDetectors2Test : public CxxTest::TestSuite {
 public:
@@ -957,7 +958,7 @@ private:
 
     Instrument_sptr instr(new Instrument);
     for (detid_t i = 0; i < NHIST; i++) {
-      Detector *d = new Detector("det", i, 0);
+      Detector *d = new Detector("det", i, nullptr);
       instr->add(d);
       instr->markAsDetector(d);
     }
@@ -979,7 +980,7 @@ private:
       timeRanges.push_back(double(i + 1));
     }
 
-    builder.setTimeRanges(Mantid::Kernel::DateAndTime(0), timeRanges);
+    builder.setTimeRanges(Mantid::Types::Core::DateAndTime(0), timeRanges);
     return builder.buildWorkspace();
   }
 

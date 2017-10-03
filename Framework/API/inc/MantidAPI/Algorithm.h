@@ -423,7 +423,7 @@ private:
 
   bool executeAsyncImpl(const Poco::Void &i);
 
-  bool doCallProcessGroups(Mantid::Kernel::DateAndTime &start_time);
+  bool doCallProcessGroups(Mantid::Types::Core::DateAndTime &start_time);
 
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,

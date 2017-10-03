@@ -1,15 +1,17 @@
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
+
+using namespace Types::Core;
 namespace Kernel {
 
 /// Default constructor
 SplittingInterval::SplittingInterval() : m_start(), m_stop(), m_index(-1) {}
 
 /// Constructor using DateAndTime
-SplittingInterval::SplittingInterval(const DateAndTime &start,
-                                     const DateAndTime &stop, const int index)
+SplittingInterval::SplittingInterval(const Types::Core::DateAndTime &start,
+                                     const Types::Core::DateAndTime &stop,
+                                     const int index)
     : m_start(start), m_stop(stop), m_index(index) {}
 
 /// Return the start time

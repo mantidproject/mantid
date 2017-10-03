@@ -28,7 +28,7 @@ using Mantid::Geometry::Instrument_const_sptr;
 
 MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr,
                const QComboBox *const instru)
-    : MantidWidget(parent), m_dispDialog(NULL), m_instru(instru),
+    : MantidWidget(parent), m_dispDialog(nullptr), m_instru(instru),
       m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1),
       m_sumMono(false) {
   // allows saving and loading the values the user entered on to the form
@@ -274,7 +274,7 @@ void MWDiag::connectSignals(
           SLOT(browseClicked(const QString &)));
 
   // signals connected to the interface that this form is on
-  if (parentInterface != NULL) {
+  if (parentInterface != nullptr) {
     // controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString &)),
             m_designWidg.white_file,
@@ -322,7 +322,7 @@ bool MWDiag::isInputValid() const {
 
 // this function will be replaced a function in a widget
 void MWDiag::browseClicked(const QString &buttonDis) {
-  QLineEdit *editBox(NULL);
+  QLineEdit *editBox(nullptr);
   QStringList extensions;
   bool toSave = false;
   if (buttonDis == "OutputFile") {

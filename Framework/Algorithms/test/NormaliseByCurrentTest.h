@@ -67,7 +67,7 @@ MatrixWorkspace_const_sptr doTest(MatrixWorkspace_sptr inWS,
 
     TS_ASSERT_EQUALS(output->YUnit(), "Counts");
     TS_ASSERT_EQUALS(output->YUnitLabel(), "Counts per microAmp.hour");
-    Kernel::Property *normLog(NULL);
+    Kernel::Property *normLog(nullptr);
     TS_ASSERT_THROWS_NOTHING(
         normLog = output->run().getProperty("NormalizationFactor"));
     Kernel::PropertyWithValue<double> *pFactor =
@@ -118,14 +118,14 @@ void addPChargeLogTo(MatrixWorkspace_sptr ws, const double pChargeAccum) {
   auto pchargeLog =
       Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("proton_charge");
 
-  const Kernel::DateAndTime runstart(20000000000);
+  const Types::Core::DateAndTime runstart(20000000000);
   const int64_t pulsedt = 100 * 1000 * 1000;
   const size_t numpulses = 100;
   const double pCharge = pChargeAccum / static_cast<double>(numpulses);
 
   for (int64_t pid = 0; pid < static_cast<int64_t>(numpulses); pid++) {
     const int64_t pulsetime_i64 = pulsedt + runstart.totalNanoseconds();
-    const Kernel::DateAndTime pulsetime(pulsetime_i64);
+    const Types::Core::DateAndTime pulsetime(pulsetime_i64);
     pchargeLog->addValue(pulsetime, pCharge);
   } // FOR each pulse
 

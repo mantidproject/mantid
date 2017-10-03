@@ -18,7 +18,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop,
   m_label = new QLabel(QString::fromStdString(prop->name()), m_parent);
   m_label->setToolTip(m_doc);
   setLabelFont(prop, m_label);
-  m_gridLayout->addWidget(m_label, m_row, 0, 0);
+  m_gridLayout->addWidget(m_label, m_row, 0, nullptr);
   m_widgets.push_back(m_label);
 
   // Text box at column 1
@@ -27,7 +27,7 @@ TextPropertyWidget::TextPropertyWidget(Mantid::Kernel::Property *prop,
   setFieldPlaceholderText(prop, m_textbox);
   connect(m_textbox, SIGNAL(editingFinished()), this,
           SLOT(userEditedProperty()));
-  m_gridLayout->addWidget(m_textbox, m_row, 1, 0);
+  m_gridLayout->addWidget(m_textbox, m_row, 1, nullptr);
   m_widgets.push_back(m_textbox);
 
   // Check if this is a masked property

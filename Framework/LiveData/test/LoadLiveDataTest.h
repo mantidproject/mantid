@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
@@ -112,6 +113,25 @@ public:
     TS_ASSERT_EQUALS(ws2->getNumberEvents(), 200);
     TSM_ASSERT("Workspace changed when replaced", ws1 != ws2);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 1);
+  }
+
+  //--------------------------------------------------------------------------------------------
+  void test_replace_keeps_original_instrument() {
+    auto ws1 = doExec<EventWorkspace>("Replace");
+    auto &ws1CompInfo = ws1->mutableComponentInfo();
+    // Put the sample somewhere else prior to the next replace
+    const Kernel::V3D newSamplePosition =
+        ws1CompInfo.position(ws1CompInfo.sample()) + V3D(1, 1, 1);
+    ws1CompInfo.setPosition(ws1CompInfo.sample(), newSamplePosition);
+
+    // Second Run of replace
+    auto ws2 = doExec<EventWorkspace>("Replace");
+    const auto &ws2CompInfo = ws2->componentInfo();
+    // Check the sample is where I put it. i.e. Instrument should NOT be
+    // overwritten.
+    TSM_ASSERT_EQUALS("Instrument should NOT have been overwritten",
+                      newSamplePosition,
+                      ws2CompInfo.position(ws2CompInfo.sample()));
   }
 
   //--------------------------------------------------------------------------------------------

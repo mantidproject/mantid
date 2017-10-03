@@ -45,7 +45,7 @@ public:
    * numbers
    * \param parent parent widget (only affects placement of the dialog)
    */
-  LineNumberDisplay(QTextEdit *te, QWidget *parent = 0);
+  LineNumberDisplay(QTextEdit *te, QWidget *parent = nullptr);
 
 public slots:
   void updateLineNumbers(bool force = false);

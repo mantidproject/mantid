@@ -49,6 +49,8 @@ using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument_const_sptr;
+using Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 

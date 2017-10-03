@@ -14,7 +14,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FindDialog : public FindReplaceDialog {
   Q_OBJECT
 
 public:
-  FindDialog(ScriptEditor *editor, Qt::WindowFlags flags = 0);
+  FindDialog(ScriptEditor *editor, Qt::WindowFlags flags = nullptr);
 };
 
 #endif // FINDDIALOG_H_

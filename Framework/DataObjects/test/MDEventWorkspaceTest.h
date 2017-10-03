@@ -577,7 +577,7 @@ public:
 
   void test_maskNULL() {
     // Should do nothing in terms of masking, but should not throw.
-    doTestMasking(NULL, 0); // 0 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 0 out of 1000 bins masked
   }
 
   void test_maskNothing() {

@@ -74,8 +74,8 @@ private:
     auto endTimeExtracted = extractEndTime(fullFilePath);
 
     // Assert
-    Mantid::Kernel::DateAndTime expectedStartTimeString(startTime.c_str());
-    Mantid::Kernel::DateAndTime expectedEndTimeString(endTime.c_str());
+    Mantid::Types::Core::DateAndTime expectedStartTimeString(startTime.c_str());
+    Mantid::Types::Core::DateAndTime expectedEndTimeString(endTime.c_str());
 
     TSM_ASSERT("Should have the same start time",
                startTimeExtracted == expectedStartTimeString);

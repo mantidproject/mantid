@@ -65,7 +65,7 @@ void FFT::init() {
   d_real_col = -1;
   d_imag_col = -1;
   d_sampling = 1.0;
-  d_output_graph = 0;
+  d_output_graph = nullptr;
 }
 
 QString FFT::fftCurve() {
@@ -285,7 +285,7 @@ void FFT::output(const QString &text) {
   d_result_table = app->newHiddenTable(tableName, d_explanation, d_n, 5, text);
 
   if (d_graphics_display) {
-    MultiLayer *ml = 0;
+    MultiLayer *ml = nullptr;
     if (!d_output_graph) {
       ml = createOutputGraph();
       d_output_graph = ml->activeGraph();
@@ -341,8 +341,8 @@ bool FFT::setDataFromTable(Table *t, const QString &realColName,
     delete[] d_y;
   }
 
-  d_graph = 0;
-  d_curve = 0;
+  d_graph = nullptr;
+  d_curve = nullptr;
   d_init_err = false;
 
   d_n = abs(to - from) + 1;

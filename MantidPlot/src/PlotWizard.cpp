@@ -304,7 +304,7 @@ void PlotWizard::setColumnsList(const QStringList &cols) { columns = cols; }
 
 bool PlotWizard::noCurves() {
   if (plotAssociations->count() == 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Error"),
+    QMessageBox::warning(nullptr, tr("MantidPlot - Error"),
                          tr("You must add a new curve first!"));
     return true;
   } else

@@ -113,7 +113,7 @@ ILiveListener::RunStatus FileEventDataListener::runStatus() {
 int FileEventDataListener::runNumber() const { return m_runNumber; }
 
 void FileEventDataListener::start(
-    Kernel::DateAndTime /*startTime*/) // Ignore the start time
+    Types::Core::DateAndTime /*startTime*/) // Ignore the start time
 {
   // Kick off loading the first chunk (which will include loading the instrument
   // etc.)

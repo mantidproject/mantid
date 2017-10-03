@@ -15,7 +15,7 @@ template <class DoubleManagerType, class DoubleEditorType>
 class DoubleEditorFactoryBase
     : public QtAbstractEditorFactory<DoubleManagerType> {
 public:
-  DoubleEditorFactoryBase(QObject *parent = 0)
+  DoubleEditorFactoryBase(QObject *parent = nullptr)
       : QtAbstractEditorFactory<DoubleManagerType>(parent) {}
 
 protected:
@@ -78,7 +78,7 @@ class EXPORT_OPT_MANTIDQT_COMMON DoubleEditorFactory
     : public DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor> {
   Q_OBJECT
 public:
-  DoubleEditorFactory(QObject *parent = 0)
+  DoubleEditorFactory(QObject *parent = nullptr)
       : DoubleEditorFactoryBase<QtDoublePropertyManager, DoubleEditor>(parent) {
   }
 };
@@ -91,7 +91,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ParameterEditorFactory
                                      ParameterEditor> {
   Q_OBJECT
 public:
-  ParameterEditorFactory(QObject *parent = 0)
+  ParameterEditorFactory(QObject *parent = nullptr)
       : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(
             parent) {}
 };

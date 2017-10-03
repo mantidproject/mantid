@@ -68,8 +68,8 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-    : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL) {}
+    : ScriptingEnv(parent, "Python"), m_globals(nullptr), m_math(nullptr),
+      m_sys(nullptr), m_mainThreadState(nullptr) {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -327,7 +327,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
                                  PyObject *dict) {
   if (!val)
     return false;
-  PyObject *pyobj = NULL;
+  PyObject *pyobj = nullptr;
 
   if (!sipAPI__qti) {
     throw std::runtime_error("sipAPI_qti is undefined");
@@ -338,7 +338,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromType(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, nullptr);
 
   if (!pyobj)
     return false;
@@ -352,7 +352,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
 }
 
 bool PythonScripting::setInt(int val, const char *name) {
-  return setInt(val, name, NULL);
+  return setInt(val, name, nullptr);
 }
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
@@ -368,7 +368,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
 }
 
 bool PythonScripting::setDouble(double val, const char *name) {
-  return setDouble(val, name, NULL);
+  return setDouble(val, name, nullptr);
 }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict) {

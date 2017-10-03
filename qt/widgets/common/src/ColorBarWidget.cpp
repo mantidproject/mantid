@@ -38,7 +38,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent) : QWidget(parent) {
   m_colorBar->setAlignment(QwtScaleDraw::RightScale);
   m_colorBar->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
   // m_colorBar->setCursor(Qt::OpenHandCursor);
-  ui.verticalLayout->insertWidget(2, m_colorBar, 1, 0);
+  ui.verticalLayout->insertWidget(2, m_colorBar, 1, nullptr);
 
   // Hook up signals
   QObject::connect(ui.dspnN, SIGNAL(valueChanged(double)), this,

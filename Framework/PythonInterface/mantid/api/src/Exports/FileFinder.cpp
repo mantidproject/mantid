@@ -37,6 +37,11 @@ void export_FileFinder() {
            "The hint can be a comma separated list of run numbers and can also "
            "include ranges of runs, e.g. 123-135 or equivalently 123-35"
            "If no instrument prefix is given then the current default is used.")
+      .def("getCaseSensitive", &FileFinderImpl::getCaseSensitive, (arg("self")),
+           "Option to get if file finder should be case sensitive.")
+      .def("setCaseSensitive", &FileFinderImpl::setCaseSensitive,
+           (arg("self"), arg("cs")),
+           "Option to set if file finder should be case sensitive.")
       .def("Instance", &FileFinder::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FileFinder singleton instance")

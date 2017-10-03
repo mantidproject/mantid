@@ -10,7 +10,7 @@ class DLLExport AbsorptionCorrections : public CorrectionsTab {
   Q_OBJECT
 
 public:
-  AbsorptionCorrections(QWidget *parent = 0);
+  AbsorptionCorrections(QWidget *parent = nullptr);
 
 private:
   void setup() override;

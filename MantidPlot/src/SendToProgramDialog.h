@@ -21,10 +21,10 @@ class SendToProgramDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SendToProgramDialog(QWidget *parent, Qt::WFlags fl = 0);
+  SendToProgramDialog(QWidget *parent, Qt::WFlags fl = nullptr);
   SendToProgramDialog(QWidget *parent, QString programName,
                       std::map<std::string, std::string> programKeysAndDetails,
-                      Qt::WFlags fl = 0);
+                      Qt::WFlags fl = nullptr);
   std::pair<std::string, std::map<std::string, std::string>>
   getSettings() const;
 

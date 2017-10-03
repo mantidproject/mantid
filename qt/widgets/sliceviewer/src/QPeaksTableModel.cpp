@@ -158,7 +158,8 @@ Constructor
 */
 QPeaksTableModel::QPeaksTableModel(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
-    : QAbstractTableModel(NULL), m_dataCachePeakIndex(-1), m_peaksWS(peaksWS) {
+    : QAbstractTableModel(nullptr), m_dataCachePeakIndex(-1),
+      m_peaksWS(peaksWS) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
                      {2, H},
@@ -292,7 +293,7 @@ Provide flags on an index by index basis
 */
 Qt::ItemFlags QPeaksTableModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 

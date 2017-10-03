@@ -1,9 +1,9 @@
 #include "MantidQtWidgets/Common/QwtRasterDataMD.h"
-#include <math.h>
-#include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
+#include <cmath>
 
 namespace MantidQt {
 namespace API {
@@ -15,7 +15,7 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 //-------------------------------------------------------------------------
 /// Constructor
 QwtRasterDataMD::QwtRasterDataMD()
-    : m_ws(), m_overlayWS(), m_slicePoint(NULL), m_overlayXMin(0.0),
+    : m_ws(), m_overlayWS(), m_slicePoint(nullptr), m_overlayXMin(0.0),
       m_overlayXMax(0.0), m_overlayYMin(0.0), m_overlayYMax(0.0),
       m_overlayInSlice(false), m_fast(true), m_zerosAsNan(true),
       m_normalization(Mantid::API::VolumeNormalization) {

@@ -57,7 +57,7 @@ class DLLExport ISISDiagnostics : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISDiagnostics() override;
 
   void setup() override;

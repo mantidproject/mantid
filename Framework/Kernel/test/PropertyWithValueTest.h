@@ -394,7 +394,7 @@ public:
 
   void testCasting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -404,7 +404,7 @@ public:
     TS_ASSERT_EQUALS(i, 10);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -419,7 +419,7 @@ public:
     TS_ASSERT_EQUALS(d, 7.777);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -429,7 +429,7 @@ public:
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));

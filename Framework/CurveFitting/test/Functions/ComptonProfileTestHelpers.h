@@ -151,12 +151,12 @@ createTestInstrumentWithNoFoilChanger(const Mantid::detid_t id,
   inst->markAsSamplePos(sampleHolder);
 
   // Just give it a single detector
-  Detector *det0(NULL);
+  Detector *det0(nullptr);
   if (!detShapeXML.empty()) {
     auto shape = ShapeFactory().createShape(detShapeXML);
     det0 = new Detector("det0", id, shape, NULL);
   } else {
-    det0 = new Detector("det0", id, NULL);
+    det0 = new Detector("det0", id, nullptr);
   }
   det0->setPos(detPos);
   inst->add(det0);
