@@ -160,6 +160,7 @@ class FunctionWrapper(object):
       from mantid import mtd
       from mantidplot import plot 
       from mantid.simpleapi import CreateWorkspace
+      import numpy as np
       
       isWorkspace = False
       extractSpectrum = False
@@ -211,7 +212,7 @@ class FunctionWrapper(object):
           else:
               spectrumWs = ws           
       elif haveStartX and haveEndX:
-          xvals = [ (xMax - xMin)*x/(nSteps+0.0) + xMin for x in range(nSteps+1)]
+          xvals = np.linspace(start=xMin, stop=xMax, num=nSteps)
           spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
       else:
           if not haveStartX:
