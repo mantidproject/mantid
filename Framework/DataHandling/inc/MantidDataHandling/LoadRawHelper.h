@@ -116,10 +116,10 @@ public:
                                    API::Algorithm *const pAlg);
 
   /// Extract the start time from a raw file
-  static Kernel::DateAndTime extractStartTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractStartTime(ISISRAW *isisRaw);
 
   /// Extract the end time from a raw file
-  static Kernel::DateAndTime extractEndTime(ISISRAW *isisRaw);
+  static Types::Core::DateAndTime extractEndTime(ISISRAW *isisRaw);
 
 protected:
   /// Overwrites Algorithm method.

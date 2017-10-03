@@ -10,7 +10,7 @@
 #include <utility>
 #include <unordered_set>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
@@ -49,6 +49,7 @@ using Mantid::Kernel::ConfigServiceImpl;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
+#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 

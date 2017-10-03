@@ -16,6 +16,7 @@
 #include <Poco/File.h>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 
 class LogParserTest : public CxxTest::TestSuite {
 public:

@@ -23,6 +23,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorelliCrossCorrelate)

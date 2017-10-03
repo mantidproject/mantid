@@ -10,8 +10,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <nexus/napi.h>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <map>
 //----------------------------------------------------------------------
 // Forward declaration
@@ -740,7 +740,7 @@ private:
   ///@returns a property pointer
   template <class NX_TYPE, class TIME_TYPE>
   Kernel::Property *loadValues(const std::string &logName, NX_TYPE &value,
-                               Kernel::DateAndTime start_t,
+                               Types::Core::DateAndTime start_t,
                                const TIME_TYPE &times) {
     value.openLocal();
     auto logv = new Kernel::TimeSeriesProperty<double>(logName);

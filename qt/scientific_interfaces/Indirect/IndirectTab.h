@@ -258,8 +258,8 @@ protected:
   /// Overidden by child class.
   virtual bool validate() = 0;
 
-  Mantid::Kernel::DateAndTime m_tabStartTime;
-  Mantid::Kernel::DateAndTime m_tabEndTime;
+  Mantid::Types::Core::DateAndTime m_tabStartTime;
+  Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 };
 } // namespace CustomInterfaces

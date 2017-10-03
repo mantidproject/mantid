@@ -47,6 +47,7 @@ namespace DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Types::Core::DateAndTime;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;

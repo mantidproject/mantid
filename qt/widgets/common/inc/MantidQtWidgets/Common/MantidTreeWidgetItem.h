@@ -24,7 +24,8 @@ public:
 private:
   bool operator<(const QTreeWidgetItem &other) const override;
   MantidTreeWidget *m_parent;
-  static Mantid::Kernel::DateAndTime getLastModified(const QTreeWidgetItem *);
+  static Mantid::Types::Core::DateAndTime
+  getLastModified(const QTreeWidgetItem *);
   int m_sortPos;
 };
 }

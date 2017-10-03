@@ -94,7 +94,7 @@ protected:
                 const detid2index_map &id_to_wi);
 
   /// List of the absolute time of each pulse
-  std::vector<Kernel::DateAndTime> pulseTimes;
+  std::vector<Types::Core::DateAndTime> pulseTimes;
 
   /// Number of bins
   size_t m_numBins;
