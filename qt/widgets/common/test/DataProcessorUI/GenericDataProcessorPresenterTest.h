@@ -34,8 +34,7 @@ public:
   // Standard constructor
   GenericDataProcessorPresenterNoThread(
       const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &
-          preprocessMap,
+      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
       const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor,
       const std::map<QString, QString> &postprocessMap =
@@ -46,12 +45,11 @@ public:
 
   // Delegating constructor (no pre-processing required)
   GenericDataProcessorPresenterNoThread(
-      const WhiteList &whitelist,
-      const ProcessingAlgorithm &processor,
+      const WhiteList &whitelist, const ProcessingAlgorithm &processor,
       const PostprocessingAlgorithm &postprocessor)
       : GenericDataProcessorPresenter(
-            whitelist, std::map<QString, PreprocessingAlgorithm>(),
-            processor, postprocessor) {}
+            whitelist, std::map<QString, PreprocessingAlgorithm>(), processor,
+            postprocessor) {}
 
   // Destructor
   ~GenericDataProcessorPresenterNoThread() override {}
@@ -107,8 +105,7 @@ private:
     return whitelist;
   }
 
-  std::map<QString, PreprocessingAlgorithm>
-  createReflectometryPreprocessMap() {
+  std::map<QString, PreprocessingAlgorithm> createReflectometryPreprocessMap() {
 
     return std::map<QString, PreprocessingAlgorithm>{
         {"Run(s)",
@@ -116,10 +113,10 @@ private:
              "Plus", "TOF_", std::set<QString>{"LHSWorkspace", "RHSWorkspace",
                                                "OutputWorkspace"})},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm(
-             "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                               "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                std::set<QString>{"FirstTransmissionRun",
+                                                  "SecondTransmissionRun",
+                                                  "OutputWorkspace"})}};
   }
 
   ProcessingAlgorithm createReflectometryProcessor() {
@@ -139,9 +136,8 @@ private:
         std::set<QString>{"InputWorkspaces", "OutputWorkspace"});
   }
 
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const WhiteList &whitelist) {
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -204,9 +200,8 @@ private:
     AnalysisDataService::Instance().addOrReplace(stdWorkspaceName, group);
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const WhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     TableRow row = ws->appendRow();
     row << "0"

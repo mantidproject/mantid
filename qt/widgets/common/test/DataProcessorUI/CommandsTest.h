@@ -47,9 +47,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CommandsTest *createSuite() {
-    return new CommandsTest();
-  }
+  static CommandsTest *createSuite() { return new CommandsTest(); }
   static void destroySuite(CommandsTest *suite) { delete suite; }
 
   void test_open_table_command() {
