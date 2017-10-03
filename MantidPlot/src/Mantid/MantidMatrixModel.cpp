@@ -60,19 +60,25 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace *ws, int rows,
 double MantidMatrixModel::data(int row, int col) const {
   Mantid::Kernel::ReadLock _lock(*m_workspace);
 
-  double val;
+  const size_t workspaceIndex = static_cast<size_t>(row + m_startRow);
+
+  double val = 0.; // default value
   switch (m_type) {
   case X:
-    val = m_workspace->x(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->x(workspaceIndex).size()))
+      val = m_workspace->x(workspaceIndex)[col];
     break;
   case Y:
-    val = m_workspace->y(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->y(workspaceIndex).size()))
+      val = m_workspace->y(workspaceIndex)[col];
     break;
   case E:
-    val = m_workspace->e(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->e(workspaceIndex).size()))
+      val = m_workspace->e(workspaceIndex)[col];
     break;
   default:
-    val = m_workspace->dx(row + m_startRow)[col];
+    if (col < static_cast<int>(m_workspace->dx(workspaceIndex).size()))
+      val = m_workspace->dx(workspaceIndex)[col];
     break;
   }
   return val;

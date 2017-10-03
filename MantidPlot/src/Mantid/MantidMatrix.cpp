@@ -539,35 +539,39 @@ void MantidMatrix::goToColumn(int col) {
 }
 
 double MantidMatrix::dataX(int row, int col) const {
-  const auto &x = m_workspace->x(row + m_startRow);
-  if (!m_workspace || row >= numRows() || col >= static_cast<int>(x.size()))
+  if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = x[col];
-  return res;
+  const auto &x = m_workspace->x(row + m_startRow);
+  if (col >= static_cast<int>(x.size()))
+    return 0.;
+  return x[col];
 }
 
 double MantidMatrix::dataY(int row, int col) const {
-  const auto &y = m_workspace->y(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = y[col];
-  return res;
+  const auto &y = m_workspace->y(row + m_startRow);
+  if (col >= static_cast<int>(y.size()))
+    return 0.;
+  return y[col];
 }
 
 double MantidMatrix::dataE(int row, int col) const {
-  const auto &e = m_workspace->e(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = e[col];
-  return res;
+  const auto &e = m_workspace->e(row + m_startRow);
+  if (col >= static_cast<int>(e.size()))
+    return 0.;
+  return e[col];
 }
 
 double MantidMatrix::dataDx(int row, int col) const {
-  const auto &dx = m_workspace->dx(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = dx[col];
-  return res;
+  const auto &dx = m_workspace->dx(row + m_startRow);
+  if (col >= static_cast<int>(dx.size()))
+    return 0.;
+  return dx[col];
 }
 
 QString MantidMatrix::workspaceName() const {
