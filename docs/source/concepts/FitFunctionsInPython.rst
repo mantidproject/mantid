@@ -202,6 +202,22 @@ Also one can put parameters into the function when evaluating.
    p = Polynomial(n=2)
    print p([0,1,2,3], 0.0, 0.5, 0.5) #expect [ 0. 1. 3. 6.]
 
-This enables one to fit the functions with ``scipy.optimize.curve_fit``.   
+This enables one to fit the functions with ``scipy.optimize.curve_fit``.  
+
+Plotting
+--------
+Functions may be plotted by calling the plot method of the function.
+This method can be called in any of the following manners:
+
+.. code:: python
+
+   f.plot(xValues=[0,2,2.5,3,5]) # for these x-values
+   f.plot(workpace=ws) # for the x-values of workspace ws
+   f.plot(workspace=ws, workspaceIndex=i)   # for x-values of workspace index i of ws
+   f.plot(startX=xmin, endX=xmax)  # for 20 x-values between xmin and xmax
+   f.plot(startX=xmin, endX=xmax, nSteps=10) # for 10 x-values between xmin and xmax
+   f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax  
+
+Owing to the way workspaces are named in python, only one plot can be shown at a time.   
 
 .. categories:: Concepts
