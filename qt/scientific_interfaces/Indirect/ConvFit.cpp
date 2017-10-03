@@ -126,6 +126,9 @@ void ConvFit::setup() {
       createFitType("InelasticDiffRotDiscreteCircle");
   m_properties["StretchedExpFT"] = createFitType("StretchedExpFT");
 
+  // Instrument resolution
+  m_properties["InstrumentResolution"] = m_dblManager->addProperty("InstrumentResolution");
+
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(fitFunctionSelected(int)));
@@ -335,7 +338,7 @@ IAlgorithm_sptr ConvFit::sequentialFit(const std::string &specMin,
   // Run ConvolutionFitSequential Algorithm
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->initialize();
-  cfs->setProperty("InputWorkspace", inputWorkspace()->getName());
+  cfs->setProperty("InputWorkspace", inputWorkspace());
   cfs->setProperty("Function", function);
   cfs->setProperty("PassWSIndexToFunction", true);
   cfs->setProperty("BackgroundType",
@@ -477,7 +480,7 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   updatePlot();
   updatePlotRange();
 
-  std::string paramWsName = outputPrefix + "_Parameters";
+  std::string paramWsName = outputPrefix + "_Parameters_new";
 
   if (AnalysisDataService::Instance().doesExist(paramWsName)) {
     QString prefixPrefix = "f1.f1.";
@@ -1218,8 +1221,8 @@ void ConvFit::updatePlot() {
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
   if (resolution > 0) {
-    m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
-    m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
+    m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
+    m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
   }
 
   // If there is a result workspace plot then plot it
@@ -1328,9 +1331,9 @@ QVector<QString> ConvFit::indexToFitFunctions(const int &fitTypeIndex) {
     fitFunctions.push_back("InelasticDiffRotDiscreteCircle");
   else if (fitTypeIndex == 5)
     fitFunctions.push_back("ElasticDiffSphere");
-  else if (fitTypeIndex == 5)
+  else if (fitTypeIndex == 6)
     fitFunctions.push_back("ElasticDiffRotDiscreteCircle");
-  else if (fitTypeIndex == 5) {
+  else if (fitTypeIndex == 7) {
     fitFunctions.push_back("StretchedExpFT");
   }
   return fitFunctions;
@@ -1498,19 +1501,15 @@ void ConvFit::updateRS(QtProperty *prop, double val) {
     fitRangeSelector->setMaximum(val);
   } else if (prop == m_properties["BGA0"]) {
     backRangeSelector->setMinimum(val);
-  } else if (prop == m_properties["Lorentzian 1.FWHM"]) {
+  } else if (prop == m_properties["InstrumentResolution"]) {
     hwhmUpdateRS(val);
-  } else if (prop == m_properties["Lorentzian 1.PeakCentre"]) {
-    hwhmUpdateRS(m_dblManager->value(m_properties["Lorentzian 1.FWHM"]));
   }
 }
 
 void ConvFit::hwhmUpdateRS(double val) {
-  const double peakCentre =
-      m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
   auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
-  hwhmRangeSelector->setMinimum(peakCentre - val / 2);
-  hwhmRangeSelector->setMaximum(peakCentre + val / 2);
+  hwhmRangeSelector->setMinimum(-val / 2);
+  hwhmRangeSelector->setMaximum(+val / 2);
 }
 
 void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
@@ -1746,7 +1745,7 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
   updatePlotOptions();
 
   // Two Lorentzians Fit
-  if (lastFunction.compare("Lorentzian 2") == 0) {
+  if (lastFunction == "Lorentzian 2") {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
