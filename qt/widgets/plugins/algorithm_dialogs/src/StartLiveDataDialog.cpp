@@ -30,7 +30,7 @@ class LiveDataAlgInputHistoryImpl : public AbstractAlgorithmInputHistory {
 private:
   LiveDataAlgInputHistoryImpl()
       : AbstractAlgorithmInputHistory("LiveDataAlgorithms") {}
-  ~LiveDataAlgInputHistoryImpl() {}
+  ~LiveDataAlgInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<LiveDataAlgInputHistoryImpl>;
@@ -49,7 +49,7 @@ class LiveDataPostProcessingAlgInputHistoryImpl
 private:
   LiveDataPostProcessingAlgInputHistoryImpl()
       : AbstractAlgorithmInputHistory("LiveDataPostProcessingAlgorithms") {}
-  ~LiveDataPostProcessingAlgInputHistoryImpl() {}
+  ~LiveDataPostProcessingAlgInputHistoryImpl() override {}
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<
