@@ -4,13 +4,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidLiveData/Exception.h"
+#include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
 GCC_DIAG_OFF(conversion)
 #include "private/Schema/ba57_run_info_generated.h"
@@ -20,12 +17,6 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/f142_logdata_generated.h"
 GCC_DIAG_ON(conversion)
 
-#include <boost/make_shared.hpp>
-
-#include <MantidLiveData/Kafka/KafkaTopicSubscriber.h>
-#include <cassert>
-#include <functional>
-#include <map>
 
 namespace {
 /// Logger
