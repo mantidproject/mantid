@@ -47,7 +47,7 @@ class MeanTest(unittest.TestCase):
         a = CreateWorkspace(DataX=[1,2,1,2],DataY=[1,2,3,4],DataE=[1,1,1,1],UnitX='TOF',NSpec=2)
         b = CreateWorkspace(DataX=[1,2,2,1],DataY=[1,2,3,4],DataE=[1,1,1,1],UnitX='TOF',NSpec=2)
         try:
-            c = Mean(Workspaces='a,b') # 'a' and 'b' are different sizes.
+            c = Mean(Workspaces='a,b') # 'a' and 'b' have different x data.
         except RuntimeError:
             pass
         else:
