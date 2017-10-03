@@ -7,8 +7,28 @@
 #include "MantidKernel/Unit.h"
 
 namespace {
-std::vector<std::string> phaseNames = {"phase", "phi"};
-std::vector<std::string> asymmNames = {"asymmetry", "asymm", "asym"};
+const std::vector<std::string> phaseNames = {"phase", "phi"};
+const std::vector<std::string> asymmNames = {"asymmetry", "asymm", "asym"};
+
+int findName(const std::vector<std::string> &patterns,
+                            const std::vector<std::string> &names) {
+  for (  std::string pattern : patterns){
+    auto it = std::find_if(names.begin(), names.end(),
+                           [pattern](const std::string &s) {
+                             if (s == pattern) {
+                               return true;
+                             } else {
+                               return false;
+                             }
+                           });
+    if (it != names.end()) {
+      return static_cast<int>(std::distance(names.begin(), it));
+    }
+  }
+  return -1;
+}
+
+
 }
 
 namespace Mantid {
@@ -142,24 +162,6 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   }
 
   return result;
-}
-
-int PhaseQuadMuon::findName(const std::vector<std::string> patterns,
-                            const std::vector<std::string> &names) {
-  for (std::string pattern : patterns) {
-    auto it = std::find_if(names.begin(), names.end(),
-                           [pattern](const std::string &s) {
-                             if (s == pattern) {
-                               return true;
-                             } else {
-                               return false;
-                             }
-                           });
-    if (it != names.end()) {
-      return static_cast<int>(std::distance(names.begin(), it));
-    }
-  }
-  return -1;
 }
 
 //----------------------------------------------------------------------------------------------
