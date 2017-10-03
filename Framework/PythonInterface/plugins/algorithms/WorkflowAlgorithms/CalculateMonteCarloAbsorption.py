@@ -367,7 +367,7 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_is_group = isinstance(self._sample_ws, WorkspaceGroup)
         container_is_group = isinstance(self._container_ws, WorkspaceGroup)
 
-        # Currently we cannot support workspace groups because the output of the child 
+        # Currently we cannot support workspace groups because the output of the child
         # algorithm is a workspace group. This causes a crash in the ADS when this
         # algorithm attempts to put a workspace group into another workspace group
         if sample_is_group or container_is_group:
