@@ -467,7 +467,7 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
     def _on_load_mask_file(self):
         load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                        self.__mask_file_input_path_key,  self.get_mask_file)
+                  self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
