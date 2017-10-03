@@ -131,10 +131,11 @@ void AbsorptionCorrections::run() {
  */
 void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
                                                           QString shape) {
-  double sampleHeight = m_uiForm.spFlatSampleHeight->value();
-  alg->setProperty("Height", sampleHeight);
 
   if (shape == "FlatPlate") {
+    double sampleHeight = m_uiForm.spFlatSampleHeight->value();
+    alg->setProperty("Height", sampleHeight);
+
     double sampleWidth = m_uiForm.spFlatSampleWidth->value();
     alg->setProperty("SampleWidth", sampleWidth);
 
@@ -154,6 +155,9 @@ void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg,
   } else if (shape == "Cylinder") {
     double sampleRadius = m_uiForm.spCylSampleRadius->value();
     alg->setProperty("SampleRadius", sampleRadius);
+
+    double sampleHeight = m_uiForm.spCylSampleHeight->value();
+    alg->setProperty("Height", sampleHeight);
   }
 }
 
