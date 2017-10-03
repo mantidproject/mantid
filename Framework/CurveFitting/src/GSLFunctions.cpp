@@ -8,7 +8,6 @@
 namespace Mantid {
 namespace CurveFitting {
 
-
 /** Fit GSL function wrapper
 * @param x :: Input function parameters
 * @param params :: Input data

@@ -23,7 +23,6 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
 
-
 /// Constructor.
 DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable)
     : QObject(parent), m_dataTable(dataTable), m_isFittingRangeGlobal(false) {

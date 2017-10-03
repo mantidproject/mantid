@@ -10,7 +10,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory

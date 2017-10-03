@@ -4,7 +4,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 
-
 namespace Mantid {
 namespace DataObjects {
 // Register the workspace

@@ -16,7 +16,6 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
 
-
 namespace Mantid {
 namespace Algorithms {
 

@@ -10,7 +10,6 @@
 #include <memory>
 #include <sstream>
 
-
 namespace Mantid {
 
 namespace Kernel {

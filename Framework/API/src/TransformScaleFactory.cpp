@@ -2,7 +2,6 @@
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
 
-
 namespace Mantid {
 namespace API {
 namespace {

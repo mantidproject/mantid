@@ -9,7 +9,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 

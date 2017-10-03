@@ -17,7 +17,6 @@
 #include "MantidKernel/Utils.h"
 #include <boost/algorithm/string.hpp>
 
-
 namespace Mantid {
 namespace MDAlgorithms {
 

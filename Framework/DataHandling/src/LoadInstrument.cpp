@@ -23,7 +23,6 @@
 #include <fstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-
 namespace Mantid {
 namespace DataHandling {
 

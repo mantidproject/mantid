@@ -11,7 +11,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Strings.h"
 
-
 namespace Mantid {
 namespace Algorithms {
 

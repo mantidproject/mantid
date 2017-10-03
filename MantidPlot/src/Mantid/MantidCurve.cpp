@@ -12,7 +12,6 @@
 #include "ErrorBarSettings.h"
 #include "MantidKernel/CPUTimer.h"
 
-
 /**
 Constructor
 @param wsName : Name of the workspace
