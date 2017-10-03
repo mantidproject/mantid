@@ -305,6 +305,7 @@ void AbsorptionCorrections::saveClicked() {
  */
 void AbsorptionCorrections::plotClicked() {
 
+
   QStringList plotData = {QString::fromStdString(m_pythonExportWsName),
                           m_uiForm.dsSampleInput->getCurrentDataName()};
   auto outputFactorsWsName =
@@ -314,7 +315,7 @@ void AbsorptionCorrections::plotClicked() {
   if (m_uiForm.ckUseCan->isChecked()) {
     plotCorr.push_back(QString::fromStdString(outputFactorsWsName) + "_acc");
     QString shiftedWs =
-        QString::fromStdString(m_absCorAlgo->getPropertyValue("CanWorkspace"));
+        QString::fromStdString(m_absCorAlgo->getPropertyValue("ContainerWorkspace"));
     plotData.push_back(shiftedWs);
   }
   plotSpectrum(plotCorr, 0);
