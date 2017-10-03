@@ -211,6 +211,30 @@ void Spectrogram::updateData(
 }
 
 /**
+ * Check all histograms in a matrix workspace to make sure that minX and maxX cover all x -values.
+ * @param workspace :: A workspace being plotted.
+ * @param minX :: The minimum value on the Spectrogram's x axis. Updated if workspace is ragged.
+ * @param maxX :: The maximum value on the Spectrogram's x axis. Updated if workspace is ragged.
+ */
+void Spectrogram::checkRaggedMatrixWorkspace(const Mantid::API::Workspace* workspace, Mantid::coord_t& minX, Mantid::coord_t& maxX) {
+  auto matrixWorkspace =
+      dynamic_cast<const Mantid::API::MatrixWorkspace*>(
+          workspace);
+  if (matrixWorkspace) {
+    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
+         ++iHisto) {
+      auto &x = matrixWorkspace->x(iHisto);
+      if (x.front() < minX) {
+        minX = static_cast<Mantid::coord_t>(x.front());
+      }
+      if (x.back() > maxX) {
+        maxX = static_cast<Mantid::coord_t>(x.back());
+      }
+    }
+  }
+}
+
+/**
  * Extracts data from workspace
  * @param workspace :: [input] Pointer to workspace
  * @param range :: [input] (optional) Data range - set null for full range
@@ -242,21 +266,7 @@ MantidQt::API::QwtRasterDataMD *Spectrogram::dataFromWorkspace(
 
   // A MatrixWorkspace can be ragged. Make sure the x axis covers all
   // histograms.
-  auto matrixWorkspace =
-      boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
-          workspace);
-  if (matrixWorkspace) {
-    for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
-         ++iHisto) {
-      auto &x = matrixWorkspace->x(iHisto);
-      if (x.front() < minX) {
-        minX = static_cast<Mantid::coord_t>(x.front());
-      }
-      if (x.back() > maxX) {
-        maxX = static_cast<Mantid::coord_t>(x.back());
-      }
-    }
-  }
+  checkRaggedMatrixWorkspace(workspace.get(), minX, maxX);
 
   Mantid::coord_t dx(dim0->getBinWidth()), dy(dim1->getBinWidth());
   const Mantid::coord_t width = (maxX - minX) + dx;
