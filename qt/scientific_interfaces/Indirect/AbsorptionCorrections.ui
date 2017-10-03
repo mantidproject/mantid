@@ -830,6 +830,15 @@
   <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spAnnSampleInnerRadius</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnSampleHeight</tabstop>
+  <tabstop>spAnnCanInnerRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
+  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanInnerRadius</tabstop>
+  <tabstop>spCylSampleHeight</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
   <tabstop>cbSampleDensity</tabstop>
   <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
@@ -838,15 +847,6 @@
   <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
-  <tabstop>spAnnCanInnerRadius</tabstop>
-  <tabstop>spCylSampleRadius</tabstop>
-  <tabstop>spCylCanInnerRadius</tabstop>
-  <tabstop>spAnnSampleOuterRadius</tabstop>
-  <tabstop>spAnnCanOuterRadius</tabstop>
-  <tabstop>spAnnSampleHeight</tabstop>
-  <tabstop>spCylSampleHeight</tabstop>
-  <tabstop>spCylCanOuterRadius</tabstop>
-  <tabstop>spAnnSampleInnerRadius</tabstop>
  </tabstops>
  <resources/>
  <connections>
