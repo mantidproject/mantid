@@ -49,8 +49,6 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;

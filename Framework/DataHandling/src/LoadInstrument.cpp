@@ -23,14 +23,6 @@
 #include <fstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
-
 namespace Mantid {
 namespace DataHandling {
 

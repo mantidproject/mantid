@@ -2,8 +2,6 @@
 #include "MantidAPI/ITransformScale.h"
 #include "MantidKernel/Logger.h"
 
-using boost::shared_ptr;
-
 namespace Mantid {
 namespace API {
 namespace {

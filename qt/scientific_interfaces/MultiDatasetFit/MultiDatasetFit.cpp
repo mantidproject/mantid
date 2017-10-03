@@ -29,7 +29,6 @@ Mantid::Kernel::Logger g_log("MultiDatasetFit");
 
 namespace MantidQt {
 namespace CustomInterfaces {
-using Mantid::Kernel::Math::StatisticType;
 
 // Register the class with the factory
 DECLARE_SUBWINDOW(MultiDatasetFit)

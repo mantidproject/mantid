@@ -28,10 +28,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::interpolateLinearInplace;
 using Mantid::DataObjects::Workspace2D;
 namespace PhysicalConstants = Mantid::PhysicalConstants;
 

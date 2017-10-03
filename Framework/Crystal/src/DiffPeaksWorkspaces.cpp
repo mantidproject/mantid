@@ -13,7 +13,6 @@ using namespace API;
 using DataObjects::PeaksWorkspace;
 using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
-using DataObjects::Peak;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {

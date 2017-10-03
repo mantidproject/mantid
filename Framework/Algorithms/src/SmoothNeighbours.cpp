@@ -23,7 +23,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using std::map;
 
 typedef std::vector<Mantid::Kernel::Property *> VecProperties;
 typedef const VecProperties ConstVecProperties;

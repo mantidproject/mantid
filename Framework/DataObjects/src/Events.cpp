@@ -8,9 +8,7 @@
 #include <stdexcept>
 
 using std::ostream;
-using std::runtime_error;
 using std::size_t;
-using std::vector;
 
 namespace Mantid {
 namespace DataObjects {

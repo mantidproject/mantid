@@ -21,7 +21,6 @@ namespace Kernel {
 class ProxyInfo;
 
 using namespace Poco::Net;
-using std::map;
 using std::string;
 
 namespace {

@@ -18,7 +18,6 @@ namespace Mantid {
 namespace DataHandling {
 
 using namespace Mantid::Kernel;
-using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckMantidVersion)

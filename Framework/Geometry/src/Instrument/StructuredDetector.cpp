@@ -20,8 +20,6 @@ namespace Mantid {
 namespace Geometry {
 
 using Kernel::V3D;
-using Kernel::Quat;
-using Kernel::Matrix;
 
 /** Empty constructor
 */

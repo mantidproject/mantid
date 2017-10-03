@@ -18,7 +18,6 @@ using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
