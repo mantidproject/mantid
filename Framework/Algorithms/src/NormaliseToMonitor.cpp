@@ -248,16 +248,15 @@ void NormaliseToMonitor::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // First check the inputs
-  this->checkProperties(inputWS);
+  checkProperties(inputWS);
 
   // See if the normalization with integration properties are set.
   const bool integrate = this->setIntegrationProps();
 
-  if (integrate) {
-    this->normaliseByIntegratedCount(inputWS, outputWS);
-  } else {
-    this->normaliseBinByBin(inputWS, outputWS);
-  }
+  if (integrate)
+    normaliseByIntegratedCount(inputWS, outputWS);
+  else
+    normaliseBinByBin(inputWS, outputWS);
 
   setProperty("OutputWorkspace", outputWS);
   std::string norm_ws_name = getPropertyValue("NormFactorWS");
@@ -387,8 +386,8 @@ void NormaliseToMonitor::checkProperties(
 
   int specNum(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
-  m_monitor = sepWS ? this->getMonitorWorkspace(inputWorkspace)
-                    : this->getInWSMonitorSpectrum(inputWorkspace);
+  m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)
+                    : getInWSMonitorSpectrum(inputWorkspace);
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if
   // not
@@ -399,10 +398,11 @@ void NormaliseToMonitor::checkProperties(
         g_log.warning() << "The spectrum N: " << specNum
                         << " in MonitorWorkspace does not refer to a monitor.\n"
                         << "Continuing with normalization regardless.";
-  } catch (Kernel::Exception::NotFoundError &) {
+  } catch (Kernel::Exception::NotFoundError &e) {
     g_log.warning("Unable to check if the spectrum provided relates to a "
                   "monitor - the instrument is not fully specified.\n "
                   "Continuing with normalization regardless.");
+    g_log.warning() << "Error was: " << e.what() << "\n";
     if (m_syncScanInput)
       throw std::runtime_error("Can not continue, spectrum can not be obtained "
                                "for monitor workspace, but the input workspace "
@@ -539,23 +539,39 @@ void NormaliseToMonitor::normaliseByIntegratedCount(
   if (outputWorkspace != inputWorkspace)
     outputWorkspace = inputWorkspace->clone();
 
+  size_t monitorWorkspaceIndex = 0;
+
   for (const auto workspaceIndex : m_workspaceIndexes) {
     // Errors propagated according to
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
 
-    const auto divisor = m_monitor->histogram(workspaceIndex).y()[0];
-    const auto divisorError = m_monitor->histogram(workspaceIndex).e()[0];
+    size_t timeIndex = 0;
+    if (m_syncScanInput)
+      timeIndex = inputWorkspace->spectrumInfo()
+                      .spectrumDefinition(workspaceIndex)[0]
+                      .second;
+
+    const auto newYFactor =
+        1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
+    const auto divisorError =
+        m_monitor->histogram(monitorWorkspaceIndex).e()[0];
+    const double rhsFactor = pow(divisorError * newYFactor, 2);
+    monitorWorkspaceIndex++;
 
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
+      if (m_syncScanInput) {
+        const auto &specDef =
+            inputWorkspace->spectrumInfo().spectrumDefinition(i);
+        if (specDef.size() > 0 && specDef[0].second != timeIndex)
+          continue;
+      }
+
       auto hist = outputWorkspace->histogram(i);
       auto &yValues = hist.mutableY();
       auto &eValues = hist.mutableE();
 
-      const double newYFactor = 1.0 / divisor;
-      const double rhsFactor = pow(divisorError / divisor, 2);
-
-      for (size_t j = 0; j < eValues.size(); ++j) {
+      for (size_t j = 0; j < yValues.size(); ++j) {
         eValues[j] = newYFactor * sqrt(eValues[j] * eValues[j] +
                                        yValues[j] * yValues[j] * rhsFactor);
         yValues[j] *= newYFactor;

@@ -7,6 +7,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
@@ -437,6 +438,89 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorWorkspace", monitors))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
+  }
+
+  void test_with_scanning_workspace_bin_by_bin() {
+    auto testWS = makeTestDetectorScanWorkspace();
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.executeAsChildAlg())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_DELTA(yValues[j], 3.0, 1e-12)
+        else
+          TS_ASSERT_DELTA(yValues[j], 6.0 / double(j + 1), 1e-12)
+      }
+    }
+  }
+
+  void test_with_scanning_workspace_integration_range() {
+    auto testWS = makeTestDetectorScanWorkspace();
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMin", "-1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMax", "99"))
+    TS_ASSERT_THROWS_NOTHING(alg.executeAsChildAlg())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_EQUALS(yValues[j], double(j + 1) / 15.0)
+        else
+          TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)
+      }
+    }
+  }
+
+  void test_with_async_scan_workspace_throws() { TS_ASSERT(true) }
+
+  void test_with_non_histogram_workspace() { TS_ASSERT(true) }
+
+private:
+  MatrixWorkspace_sptr makeTestDetectorScanWorkspace() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 5;
+    const size_t N_TIMEINDEXES = 5;
+
+    MatrixWorkspace_sptr testWS = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(
+            N_DET, N_BINS, N_TIMEINDEXES, 0, 1, true);
+
+    const auto &specInfo = testWS->spectrumInfo();
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      auto hist = testWS->histogram(i);
+      auto &yValues = hist.mutableY();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specInfo.isMonitor(i))
+          yValues[j] = double(j + 1);
+        else
+          TS_ASSERT_EQUALS(yValues[j], 2.0)
+      }
+      testWS->setHistogram(i, hist);
+    }
+    return testWS;
   }
 };
 
