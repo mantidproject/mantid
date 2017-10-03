@@ -11,8 +11,8 @@ const std::vector<std::string> phaseNames = {"phase", "phi"};
 const std::vector<std::string> asymmNames = {"asymmetry", "asymm", "asym"};
 
 int findName(const std::vector<std::string> &patterns,
-                            const std::vector<std::string> &names) {
-  for (  std::string pattern : patterns){
+             const std::vector<std::string> &names) {
+  for (std::string pattern : patterns) {
     auto it = std::find_if(names.begin(), names.end(),
                            [pattern](const std::string &s) {
                              if (s == pattern) {
@@ -27,8 +27,6 @@ int findName(const std::vector<std::string> &patterns,
   }
   return -1;
 }
-
-
 }
 
 namespace Mantid {

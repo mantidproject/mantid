@@ -21,19 +21,20 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable,
   phaseTable->addColumn("int", names[0]);
   phaseTable->addColumn("double", names[1]);
   phaseTable->addColumn("double", names[2]);
- 
+
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << i << 1. << 2.*M_PI*double(i)/16.;
+    phaseRow1 << i << 1. << 2. * M_PI *double(i) / 16.;
     TableRow phaseRow2 = phaseTable->appendRow();
-    phaseRow2 << i << 1. << 2.*M_PI*double(i)/16.;
+    phaseRow2 << i << 1. << 2. * M_PI *double(i) / 16.;
   }
 }
 void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
   populatePhaseTable(phaseTable, {"DetectorID", "Asymmetry", "Phase"});
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,ITableWorkspace_sptr phaseTable ) {
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+                         ITableWorkspace_sptr phaseTable) {
   // Set up PhaseQuad
   IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
   phaseQuad->setChild(isChildAlg);
@@ -44,24 +45,24 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,ITableWor
   return phaseQuad;
 }
 
-
 IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable);
 
-  return setupAlg(inputWs, isChildAlg,phaseTable ); 
+  return setupAlg(inputWs, isChildAlg, phaseTable);
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,std::vector<std::string> names) {
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+                         std::vector<std::string> names) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable(phaseTable,names);
+  populatePhaseTable(phaseTable, names);
 
-  return setupAlg(inputWs, isChildAlg,phaseTable );} 
-
+  return setupAlg(inputWs, isChildAlg, phaseTable);
+}
 
 MatrixWorkspace_sptr loadMuonDataset() {
   IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
@@ -126,36 +127,33 @@ public:
     TS_ASSERT_DELTA(specImE[50], 0.0031, 0.0001);
   }
   void testNoPhase() {
-    std::vector<std::string> names ={"ID","Asym","dummy"};
+    std::vector<std::string> names = {"ID", "Asym", "dummy"};
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true,names);
-    TS_ASSERT_THROWS(phaseQuad->execute(),std::runtime_error);
-
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testNoAsymm() {
-    std::vector<std::string> names ={"ID","AsYMg","phase"};
+    std::vector<std::string> names = {"ID", "AsYMg", "phase"};
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true,names);
-    TS_ASSERT_THROWS(phaseQuad->execute(),std::runtime_error);
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testTwoPhases() {
-    std::vector<std::string> names ={"ID","Phase","phi"};
+    std::vector<std::string> names = {"ID", "Phase", "phi"};
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true,names);
-    TS_ASSERT_THROWS(phaseQuad->execute(),std::runtime_error);
-
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testTwoAsymm() {
-    std::vector<std::string> names ={"ID","Asym","Asymm"};
+    std::vector<std::string> names = {"ID", "Asym", "Asymm"};
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true,names);
-    TS_ASSERT_THROWS(phaseQuad->execute(),std::runtime_error);
-
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
-   void testSwapOrder() {
-    std::vector<std::string> names ={"ID","phase","Asymm"};
+  void testSwapOrder() {
+    std::vector<std::string> names = {"ID", "phase", "Asymm"};
     MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true,names);
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
