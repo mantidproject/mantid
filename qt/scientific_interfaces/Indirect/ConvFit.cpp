@@ -1282,7 +1282,6 @@ void ConvFit::plotOutput(std::string const &outputWsName, int specNo) {
 }
 
 void ConvFit::updateProperties(int specNo) {
-  size_t index = boost::numeric_cast<size_t>(specNo);
   auto parameterNames = m_propertyToParameter.keys();
 
   for (auto &fitFunction :
