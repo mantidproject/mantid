@@ -190,6 +190,8 @@ class FunctionWrapper(object):
            haveEndX = True
         if key == "nSteps":
            nSteps = kwargs[key]
+           if nSteps < 1:
+              raise RuntimeError("nSteps must be at least 1")
            
       if haveStartX and haveEndX:
           if xMin >= xMax:
