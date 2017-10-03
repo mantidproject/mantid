@@ -190,6 +190,10 @@ class FunctionWrapper(object):
            haveEndX = True
         if key == "nSteps":
            nSteps = kwargs[key]
+           
+      if haveStartX and haveEndX:
+          if xMin >= xMax:
+             raise RuntimeError("startX must be less than EndX")
 
       if haveXValues:
           spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)

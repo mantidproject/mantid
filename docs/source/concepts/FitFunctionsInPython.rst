@@ -212,11 +212,14 @@ This method can be called in any of the following manners:
 .. code:: python
 
    f.plot(xValues=[0,2,2.5,3,5]) # for these x-values
-   f.plot(workpace=ws) # for the x-values of workspace ws
+   f.plot(workspace=ws) # for the x-values of workspace ws
    f.plot(workspace=ws, workspaceIndex=i)   # for x-values of workspace index i of ws
    f.plot(startX=xmin, endX=xmax)  # for 20 x-values between xmin and xmax
    f.plot(startX=xmin, endX=xmax, nSteps=10) # for 10 x-values between xmin and xmax
    f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax  
+
+If you use ``xValues``, then the list of x values must be in numerical order. 
+This is not checked and if they are not in order the plot may fail to display properly.
 
 Owing to the way workspaces are named in python, only one plot can be shown at a time.   
 
