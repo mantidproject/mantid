@@ -113,7 +113,12 @@ public:
   const std::string id() const override { return "AxeslessWorkspaceTester"; }
   size_t size() const override { return m_vec.size() * blocksize(); }
   size_t blocksize() const override {
-    return m_vec.empty() ? 0 : m_vec[0].dataY().size();
+    if (m_vec.empty())
+      return 0;
+    else if (m_vec[0].dataY().size() == m_vec[1].dataY().size())
+      return m_vec[0].dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
   }
   ISpectrum &getSpectrum(const size_t index) override {
     m_vec[index].setMatrixWorkspace(this, index);
