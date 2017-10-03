@@ -254,6 +254,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.normalization_incident_monitor = 3
         self.assertTrue(state_gui_model.normalization_incident_monitor == 3)
 
+    def test_that_can_set_only_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.normalization_interpolate = True
+        self.assertTrue(state_gui_model.normalization_incident_monitor is None)
+        self.assertTrue(state_gui_model.normalization_interpolate)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission
     # ------------------------------------------------------------------------------------------------------------------
@@ -271,6 +277,12 @@ class StateGuiModelTest(unittest.TestCase):
         # # Reassign
         state_gui_model.transmission_incident_monitor = 3
         self.assertTrue(state_gui_model.transmission_incident_monitor == 3)
+
+    def test_that_can_set_only_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.transmission_interpolate = True
+        self.assertTrue(state_gui_model.transmission_incident_monitor is None)
+        self.assertTrue(state_gui_model.transmission_interpolate)
 
     def test_that_can_set_normalization_and_transmission_monitor_and_rebin_type_settings(self):
         pass

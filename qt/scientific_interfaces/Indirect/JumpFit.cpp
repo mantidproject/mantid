@@ -17,8 +17,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 JumpFit::JumpFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr), m_jfInputWS(),
-      m_specNo(0) {
+    : IndirectDataAnalysisTab(parent), m_jfTree(nullptr) {
   m_uiForm.setupUi(parent);
 }
 
@@ -76,7 +75,7 @@ void JumpFit::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
 }
 
 /**
@@ -234,20 +233,21 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   scaleAlg->setProperty("Factor", 0.5);
   scaleAlg->execute();
 
-  auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(
-      sample.toStdString());
-  m_jfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  auto ws =
+      Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sample.toStdString());
+  setInputWorkspace(ws);
 
-  findAllWidths(m_jfInputWS);
+  findAllWidths(inputWorkspace());
 
   auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-    m_specNo = m_spectraList[currentWidth];
+    setSelectedSpectrum(m_spectraList[currentWidth]);
     m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", sample, m_specNo);
+    m_uiForm.ppPlot->addSpectrum("Sample", sample, selectedSpectrum());
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -558,17 +558,6 @@ void JumpFit::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/**
-* Plots the current spectrum displayed in the preview plot
-*/
-void JumpFit::plotCurrentPreview() {
-
-  // Check if a workspace has been selected
-  if (m_jfInputWS) {
-    IndirectTab::plotSpectrum(QString::fromStdString(m_jfInputWS->getName()),
-                              m_specNo, m_specNo);
-  }
-}
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

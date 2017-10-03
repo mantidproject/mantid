@@ -21,10 +21,10 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QComboBox" name="modelInput">
+       <widget class="QComboBox" name="cbModelInput">
         <item>
          <property name="text">
-          <string>Gauss</string>
+          <string>Gaussian</string>
          </property>
         </item>
         <item>

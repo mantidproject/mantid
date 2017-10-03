@@ -5,15 +5,11 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
-Concepts
---------
+Instrument Definitinons
+-----------------------
+
 - The reference frame in :ref:`IDF <InstrumentDefinitionFile>` can now be customized in terms of setting the axis defining the 2theta sign.
-- The ``blocksize()`` of a workspace now throws an exception if the number of bins is not constant. ``size()`` has been modified to the sum of the number of bins in each ``Histogram``.
-
-Properties
-----------
-
-- The :ref:`IndexProperty` has been added to the list of property types.
+- The detector efficiency correction formulas for ILL's IN4, IN5 and IN6 spectrometers have been revised. IN4 has now separate formulas for the low and large angle detectors while the previously incorrect IN5 and IN6 formulas were fixed.
 
 Algorithms
 ----------
@@ -63,25 +59,23 @@ Improved
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>`: Added an option to disable the sorting of the resulting axis making it useful especially for scanning workspaces. Also reduced the complexity of the operation for the default (ordered axis) case from *Nˆ2* to *N*.
 - :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
 - :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
-
-Deprecated
-##########
-
-MD Algorithms (VATES CLI)
-#########################
+- :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwitten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
 
 Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
+- Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
 
-Core Framework Changes
-----------------------
+  * Partial loading of event nexus files has improved by 22%.
+  * The LoadNexusMonitors algorithm has improved by 30%.
+  * The ConvertSpectrumAxis algorithm has improved by 8%.
 
-Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
+Core functionality
+------------------
 
-- Partial loading of event nexus files has improved by 22%.
-- The LoadNexusMonitors algorithm has improved by 30%.
-- The ConvertSpectrumAxis algorithm has improved by 8%.
+- The :ref:`IndexProperty` has been added to the list of property types.
+- The ``blocksize()`` of a workspace now throws an exception if the number of bins is not constant. ``size()`` has been modified to the sum of the number of bins in each ``Histogram``.
+
 
 CurveFitting
 ------------
@@ -96,15 +90,15 @@ New
 Bug fixes
 #########
 
-- :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
-- Fix displayed type name for optional boolean properties.
-- Fix parameters that are tied to functions can now be untied correctly.
 - Table workspaces do not have the values changed by viewing them (no rounding).
 
 Improved
 ########
 
 - :ref:`Fit <algm-Fit>` outputs a function object containing the optimized parameter values. See the usage examples for more detail.
+- :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
+- Fix displayed type name for optional boolean properties.
+- Fix parameters that are tied to functions can now be untied correctly.
 
 Python
 ------
@@ -120,6 +114,7 @@ Bugfixes
 ########
 
 - :ref:`MatchPeaks <algm-MatchPeaks-v1>` is fixed to not to leave temporary hidden workspaces behind.
+- Fix a bug where Mantid could crash when trying to update live data if the network connection is lost.
 
 Python Fit Functions
 ####################
@@ -127,6 +122,8 @@ Python Fit Functions
 - A bug that makes it difficult to define and use attributes in python fit functions has been fixed.
 - The usability of the fit functions has been improved, enabling users to construct and modify the functions as objects rather than strings
   as described :ref:`here <FitFunctionsInPython>`.
+
+
 
 |
 
