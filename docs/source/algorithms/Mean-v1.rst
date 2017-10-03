@@ -21,7 +21,7 @@ where *m* is the output workspace. The *x* values are copied from the first inpu
 Restrictions
 ############
 
-All input workspaces must have the same shape.
+All input workspaces must have the same shape and the x axis must be in the same order.
 
 Usage:
 ------

@@ -13,6 +13,7 @@ from PyQt4 import QtGui, QtCore
 
 from mantid.kernel import (Logger, config)
 from mantidqtpython import MantidQt
+
 try:
     from mantidplot import *
     canMantidPlot = True
@@ -235,6 +236,9 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         # Set the list of available instruments in the widget and the default instrument
         instrument_name = SANSInstrument.to_string(self._instrument)
         self.data_processor_table.setInstrumentList(SANSDataProcessorGui.INSTRUMENTS, instrument_name)
+
+        if instrument_name:
+            self._set_mantid_instrument(instrument_name)
 
         # The widget will emit a 'runAsPythonScript' signal to run python code
         self.data_processor_table.runAsPythonScript.connect(self._run_python_code)
@@ -466,8 +470,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         return str(self.mask_file_input_line_edit.text())
 
     def _on_load_mask_file(self):
-        self._load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
-                        self.__mask_file_input_path_key,  self.get_mask_file)
+        load_file(self.mask_file_input_line_edit, "*.*", self.__generic_settings,
+                  self.__mask_file_input_path_key,  self.get_mask_file)
 
     def _on_mask_file_add(self):
         self._call_settings_listeners(lambda listener: listener.on_mask_file_add())
