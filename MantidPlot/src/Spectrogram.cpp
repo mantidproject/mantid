@@ -211,15 +211,19 @@ void Spectrogram::updateData(
 }
 
 /**
- * Check all histograms in a matrix workspace to make sure that minX and maxX cover all x -values.
+ * Check all histograms in a matrix workspace to make sure that minX and maxX
+ * cover all x -values.
  * @param workspace :: A workspace being plotted.
- * @param minX :: The minimum value on the Spectrogram's x axis. Updated if workspace is ragged.
- * @param maxX :: The maximum value on the Spectrogram's x axis. Updated if workspace is ragged.
+ * @param minX :: The minimum value on the Spectrogram's x axis. Updated if
+ * workspace is ragged.
+ * @param maxX :: The maximum value on the Spectrogram's x axis. Updated if
+ * workspace is ragged.
  */
-void Spectrogram::checkRaggedMatrixWorkspace(const Mantid::API::Workspace* workspace, Mantid::coord_t& minX, Mantid::coord_t& maxX) {
+void Spectrogram::checkRaggedMatrixWorkspace(
+    const Mantid::API::Workspace *workspace, Mantid::coord_t &minX,
+    Mantid::coord_t &maxX) {
   auto matrixWorkspace =
-      dynamic_cast<const Mantid::API::MatrixWorkspace*>(
-          workspace);
+      dynamic_cast<const Mantid::API::MatrixWorkspace *>(workspace);
   if (matrixWorkspace) {
     for (size_t iHisto = 0; iHisto < matrixWorkspace->getNumberHistograms();
          ++iHisto) {
