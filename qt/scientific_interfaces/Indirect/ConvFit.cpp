@@ -127,7 +127,8 @@ void ConvFit::setup() {
   m_properties["StretchedExpFT"] = createFitType("StretchedExpFT");
 
   // Instrument resolution
-  m_properties["InstrumentResolution"] = m_dblManager->addProperty("InstrumentResolution");
+  m_properties["InstrumentResolution"] =
+      m_dblManager->addProperty("InstrumentResolution");
 
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(int)), this,
@@ -976,8 +977,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)->getNumberParameter(
-          "resolution")[0];
+      resolution = inst->getComponentByName(analyser)
+                       ->getNumberParameter("resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }

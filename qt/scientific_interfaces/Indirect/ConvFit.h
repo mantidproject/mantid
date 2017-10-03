@@ -57,7 +57,7 @@ private:
   double
   getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);
-  QtProperty *createFitType(QtProperty*, const bool& = true);
+  QtProperty *createFitType(QtProperty *, const bool & = true);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,

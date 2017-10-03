@@ -832,8 +832,8 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
  * @param stringVec The standard vector of standard strings to convert.
  * @return          A QVector of QStrings.
  */
-QVector<QString>
-IndirectTab::convertStdStringVector(const std::vector<std::string> &stringVec) const {
+QVector<QString> IndirectTab::convertStdStringVector(
+    const std::vector<std::string> &stringVec) const {
   QVector<QString> resultVec;
   resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
 
