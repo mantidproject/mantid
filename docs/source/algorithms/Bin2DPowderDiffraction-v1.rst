@@ -100,10 +100,10 @@ Usage
    wsOutNorm = Bin2DPowderDiffraction(wsIn, dSpaceBinning="2,2,6", dPerpendicularBinning="1,2,5", NormalizeByBinArea=True)
 
    # Print the result
-   print "Y values without normalization:"
-   print wsOut.extractY()
-   print "Y values with normalization by bin area:"
-   print wsOutNorm.extractY()
+   print("Y values without normalization:")
+   print(wsOut.extractY())
+   print("Y values with normalization by bin area:")
+   print(wsOutNorm.extractY())
 
 Output:
 
