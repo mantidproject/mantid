@@ -24,7 +24,7 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    return mask_workspace(state, workspace_name, workspace_to_mask)
+    return mask_workspace(state, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
@@ -34,12 +34,12 @@ def load_workspace(state, workspace_name):
     serialized_state = state.property_manager
 
     workspace = perform_load(serialized_state)
-    perform_move(serialized_state, workspace)
+    perform_move(state, workspace)
     store_in_ads_as_hidden(workspace_name, workspace)
     return workspace
 
 
-def mask_workspace(state, workspace_name, workspace_to_mask):
+def mask_workspace(state, workspace_to_mask):
     serialized_state = state.property_manager
     masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
     mask_info = state.mask
@@ -77,8 +77,22 @@ def perform_load(serialized_state):
     return load_algorithm.getProperty("SampleScatterWorkspace").value
 
 
-def perform_move(serialized_state, workspace):
-    create_move_algorithm(serialized_state, workspace).execute()
+def perform_move(state, workspace):
+    move_info = state.move
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
+                if DetectorType.to_string(DetectorType.HAB) in move_info.detectors else\
+                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+
+    serialized_state = state.property_manager
+    move_name = "SANSMove"
+    move_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "InitialMove"}
+    move_alg = create_unmanaged_algorithm(move_name, **move_options)
+
+    for detector in detectors:
+        move_alg.setProperty("Component", detector)
+        move_alg.execute()
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):
@@ -106,14 +120,6 @@ def create_load_algorithm(serialized_state):
                     "CanTransmissionWorkspace": EMPTY_NAME,
                     "CanDirectWorkspace": EMPTY_NAME}
     return create_unmanaged_algorithm(load_name, **load_options)
-
-
-def create_move_algorithm(serialized_state, workspace_to_move):
-    move_name = "SANSMove"
-    move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_move,
-                    "MoveType": "InitialMove"}
-    return create_unmanaged_algorithm(move_name, **move_options)
 
 
 class MaskingTablePresenter(object):
