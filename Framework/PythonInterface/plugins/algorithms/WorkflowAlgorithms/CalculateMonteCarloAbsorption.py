@@ -54,6 +54,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
     def summary(self):
         return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
 
+    def checkGroups(self):
+        return False
+
     def PyInit(self):
         # Sample options
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -363,6 +366,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         self._container_ws = self.getProperty("ContainerWorkspace").value
         sample_is_group = isinstance(self._sample_ws, WorkspaceGroup)
         container_is_group = isinstance(self._container_ws, WorkspaceGroup)
+
+        # Currently we cannot support workspace groups because the output of the child 
+        # algorithm is a workspace group. This causes a crash in the ADS when this
+        # algorithm attempts to put a workspace group into another workspace group
+        if sample_is_group or container_is_group:
+            raise RuntimeError("CalculateMonteCarloAbsorption does not currently support"
+                               " WorkspaceGroups")
 
         if self._container_ws and sample_is_group != container_is_group:
             sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
