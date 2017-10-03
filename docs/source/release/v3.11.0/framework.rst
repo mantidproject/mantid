@@ -88,6 +88,11 @@ New
 - :ref:`GramCharlier <func-GramCharlier>` is a new fit function primarily for use in neutron compton scattering.
 - :ref:`SplineInterpolation <algm-SplineInterpolation>` is extended to support also linear interpolation, if only 2 points are given.
 
+Bug fixes
+#########
+
+- Table workspaces do not have the values changed by viewing them (no rounding).
+
 Improved
 ########
 
