@@ -355,7 +355,7 @@ void NormaliseToMonitor::checkProperties(
   Property *monID = getProperty("MonitorID");
   // Is the monitor spectrum within the main input workspace
   const bool inWS = !monSpec->isDefault();
-  m_syncScanInput = inputWorkspace->detectorInfo().isScanning();
+  m_syncScanInput = inputWorkspace->detectorInfo().isSyncScan();
   // Or is it in a separate workspace
   bool sepWS{monWS};
   // or monitor ID
@@ -639,8 +639,7 @@ void NormaliseToMonitor::normaliseBinByBin(
 
       const auto &X = inputWorkspace->binEdges(i);
       // If not rebinning, just point to our monitor spectra, otherwise create
-      // new
-      // vectors
+      // new vectors
 
       auto Y = (m_commonBins ? monY : Counts(specLength));
       auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));

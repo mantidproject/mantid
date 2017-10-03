@@ -9,15 +9,19 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::HistogramData;
 using Mantid::Geometry::Instrument;
 
 // Anonymous namespace for shared methods between unit and performance test
@@ -421,8 +425,6 @@ public:
   }
 
   void testMonitorWorkspaceNotInADSWorks() {
-    using namespace Mantid::DataObjects;
-    using namespace Mantid::HistogramData;
     BinEdges xs{-1.0, 1.0};
     Counts ys{1.0};
     Histogram h(xs, ys);
@@ -449,7 +451,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
-    TS_ASSERT_THROWS_NOTHING(alg.executeAsChildAlg())
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -477,7 +479,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMin", "-1"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("IntegrationRangeMax", "99"))
-    TS_ASSERT_THROWS_NOTHING(alg.executeAsChildAlg())
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
@@ -494,7 +496,39 @@ public:
     }
   }
 
-  void test_with_async_scan_workspace_throws() { TS_ASSERT(true) }
+  void test_with_async_scan_workspace_throws() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 5;
+
+    // Set up 2 workspaces to be merged
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+    auto &detInfo1 = ws1->mutableDetectorInfo();
+    auto &detInfo2 = ws2->mutableDetectorInfo();
+    for (size_t i = 0; i < N_DET; ++i) {
+      detInfo1.setScanInterval(i, {10, 20});
+      detInfo2.setScanInterval(i, {20, 30});
+    }
+    // Merge
+    auto merged = WorkspaceFactory::Instance().create(ws1, 2 * N_DET);
+    auto &detInfo = merged->mutableDetectorInfo();
+    detInfo.merge(detInfo2);
+    merged->setIndexInfo(Indexing::IndexInfo(merged->getNumberHistograms()));
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", merged))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "More then one spectra corresponds to the "
+                            "requested monitor ID, which is unheard of")
+  }
 
   void test_with_non_histogram_workspace() { TS_ASSERT(true) }
 
