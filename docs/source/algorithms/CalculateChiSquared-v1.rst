@@ -83,11 +83,11 @@ Usage
     chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
     print('Chi squared is {:.13f}'.format(chi2))
-    print('Chi squared / DOF is {:.13f}'.format(chi2dof))
-    print('Chi squared / NDATA is {:.13f}'.format(chi2ndata))
-    print('Chi squared weighted is {:.13f}'.format(chi2W))
-    print('Chi squared weighted / DOF is {:.13f}'.format(chi2Wdof))
-    print('Chi squared weighted / NDATA is {:.13f}'.format(chi2Wndata))
+    print('Chi squared / DOF is {:.14f}'.format(chi2dof))
+    print('Chi squared / NDATA is {:.14f}'.format(chi2ndata))
+    print('Chi squared weighted is {:.11f}'.format(chi2W))
+    print('Chi squared weighted / DOF is {:.14f}'.format(chi2Wdof))
+    print('Chi squared weighted / NDATA is {:.12f}'.format(chi2Wndata))
 
     # Define a function that models the data exactly
     func = 'name=LinearBackground,A0=1.0,A1=2.0'
@@ -109,9 +109,9 @@ Output:
     Chi squared is 0.0351851851852
     Chi squared / DOF is 0.00439814814815
     Chi squared / NDATA is 0.00351851851852
-    Chi squared weighted is 0.0266028783977
+    Chi squared weighted is 0.02660287840
     Chi squared weighted / DOF is 0.00332535979971
-    Chi squared weighted / NDATA is 0.00266028783977
+    Chi squared weighted / NDATA is 0.002660287840
     Chi squared is 0.0
     Chi squared / DOF is 0.0
     Chi squared / NDATA is 0.0
