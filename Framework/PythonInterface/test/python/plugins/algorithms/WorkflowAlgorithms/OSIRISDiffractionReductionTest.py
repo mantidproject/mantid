@@ -45,7 +45,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         Test to ensure reduction with manual dRange list selection completes.
         The run here is for dRange 3-4.
         """
-        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw', 'OSI10204.raw'],
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw', 'OSI10204.RAW'],
                                          CalFile='osiris_041_RES10.cal',
                                          Vanadium=['OSI10156.raw', 'OSI10157.raw'],
                                          SpectraMin=3,
