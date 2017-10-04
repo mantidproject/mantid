@@ -53,7 +53,7 @@ Usage
 
   import random
   random.seed(10)
-  for i in xrange(60):
+  for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
       timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
@@ -65,9 +65,9 @@ Usage
 
   # Check
   print("Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0))))
-  print("X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0]))
-  print("X[20] = %.1f, Y[20] = %.5f" % (propws.readX(0)[20], propws.readY(0)[20]))
-  print("X[40] = %.1f, Y[40] = %.5f" % (propws.readX(0)[40], propws.readY(0)[40]))
+  print("X[0]  = {:.1f}, Y[0]  = {:.5f}".format(propws.readX(0)[0], propws.readY(0)[0]))
+  print("X[20] = {:.1f}, Y[20] = {:.5f}".format(propws.readX(0)[20], propws.readY(0)[20]))
+  print("X[40] = {:.1f}, Y[40] = {:.5f}".format(propws.readX(0)[40], propws.readY(0)[40]))
 
 .. testcleanup:: ExExpTempWS2D
 
@@ -97,7 +97,7 @@ Output:
 
   import random
   random.seed(10)
-  for i in xrange(60):
+  for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
       timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
@@ -108,9 +108,9 @@ Output:
   propws = ExportTimeSeriesLog(InputWorkspace=dataws, LogName="Temp", NumberEntriesExport=40, IsEventWorkspace=True)
 
   # Check
-  print("Length of X = %d, Length of Y = %d." % (len(propws.readX(0)), len(propws.readY(0))))
-  print("X[0]  = %.1f, Y[0]  = %.5f" % (propws.readX(0)[0], propws.readY(0)[0]))
-  print("Number of events = %d" % (propws.getNumberEvents()))
+  print("Length of X = {}, Length of Y = {}.".format(len(propws.readX(0)), len(propws.readY(0))))
+  print("X[0]  = {:.1f}, Y[0]  = {:.5f}".format(propws.readX(0)[0], propws.readY(0)[0]))
+  print("Number of events = {}".format(propws.getNumberEvents()))
 
 .. testcleanup:: ExExpTempEvent
 

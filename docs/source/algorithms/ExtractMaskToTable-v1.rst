@@ -43,7 +43,7 @@ Usage
   dataws = LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
 
   # mask some detectors
-  for i in xrange(100):
+  for i in range(100):
       dataws.maskDetectors(100+i)
 
   # Run algorithm
@@ -73,7 +73,7 @@ Output:
   dataws = LoadNexusProcessed(Filename="PG3_2538_2k.nxs")
 
   # mask some detectors
-  for i in xrange(100):
+  for i in range(100):
       dataws.maskDetectors(100+i)
 
   # create a mask table workspacetws =

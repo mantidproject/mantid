@@ -146,7 +146,7 @@ Output:
    print("Was the file created? {}".format(os.path.exists(pos_filename)))
    with open(pos_filename) as csvf:
       reader = csv.reader(csvf, dialect='excel')
-      reader.next()
+      next(reader)
       calibOK = True
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]

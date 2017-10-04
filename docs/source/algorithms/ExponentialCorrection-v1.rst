@@ -26,7 +26,7 @@ Usage
 
     ws = CreateSampleWorkspace()
 
-    print "The first Y value before correction is: " + str(ws.dataY(0)[1])
+    print("The first Y value before correction is: {}".format((ws.dataY(0)[1])))
 
     # By default, the Divide operation is used to correct the data.
     # The result is saved into another workspace, which can also be itself.
