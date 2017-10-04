@@ -34,7 +34,8 @@ class SPowderSemiEmpiricalCalculator(object):
     Class for calculating S(Q, omega)
     """
 
-    def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None):
+    def __init__(self, filename=None, temperature=None, abins_data=None, instrument=None, quantum_order_num=None,
+                 bin_width=1.0):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
         :param temperature: temperature in K for which calculation of S should be done
@@ -42,6 +43,7 @@ class SPowderSemiEmpiricalCalculator(object):
         :param abins_data: object of type AbinsData with data from phonon file
         :param instrument: name of instrument (str)
         :param quantum_order_num: number of quantum order events taken into account during the simulation
+        :param bin_width: bin width used in rebining in wavenumber
         """
         if not isinstance(temperature, (int, float)):
             raise ValueError("Invalid value of the temperature. Number was expected.")
@@ -96,7 +98,8 @@ class SPowderSemiEmpiricalCalculator(object):
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_THREE: self._calculate_order_three,
                                  AbinsModules.AbinsConstants.QUANTUM_ORDER_FOUR: self._calculate_order_four}
 
-        step = AbinsModules.AbinsParameters.bin_width
+        step = bin_width
+        self._bin_width = bin_width
         start = AbinsModules.AbinsParameters.min_wavenumber + step
         stop = AbinsModules.AbinsParameters.max_wavenumber + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
@@ -505,7 +508,7 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
-        factor = self._weight / AbinsModules.AbinsParameters.bin_width
+        factor = self._weight / self._bin_width
         rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
@@ -657,7 +660,8 @@ class SPowderSemiEmpiricalCalculator(object):
             output_array_x = self._frequencies
             output_array_y = np.asarray(
                 a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / AbinsModules.AbinsParameters.bin_width
+                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / self._bin_width
+
 
         return output_array_x, output_array_y
 
