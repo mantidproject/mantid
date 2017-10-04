@@ -33,7 +33,7 @@ Usage
 
     xs = integrated.readX(0)
     ys = integrated.readY(0)
-    print('Integral from {} to {} yields {:.5}'.format(xs[0], xs[1], ys[0]))
+    print('Integral from {:.6} to {:.6} yields {:.5}'.format(xs[0], xs[1], ys[0]))
 
 Output:
 

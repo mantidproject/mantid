@@ -54,10 +54,10 @@ Usage
    low_d_cut =IntegrateMDHistoWorkspace(InputWorkspace=high_d_cut, P1Bin=[], P2Bin=[-2,2], P3Bin=[-5,5])
 
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
-   print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
+   print('Number of non integrated dimensions after integration are {}'.format(len(non_integrated_dims)))
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.name
-       print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
+       print('Non integrated dimension is {}'.format(dim.name))
+       print('Limits are from {:.2f} to {:.2f}'.format(dim.getMinimum(), dim.getMaximum()))
 
 Output:
 
@@ -86,14 +86,14 @@ maximum and minimum limits may need to be adjusted to ensure no partial binning 
    low_d_cut=IntegrateMDHistoWorkspace(InputWorkspace=high_d_cut,P1Bin=[-9.48,copy_key,9.01], P2Bin=[-2,2], P3Bin=[-5,5])
 
    dim = high_d_cut.getDimension(0)
-   print 'Input bin width is %0.2f' % float((dim.getMaximum() - dim.getMinimum())/dim.getNBins())
+   print('Input bin width is {:.2f}'.format(float((dim.getMaximum() - dim.getMinimum())/dim.getNBins())))
 
    non_integrated_dims = low_d_cut.getNonIntegratedDimensions()
-   print 'Number of non integrated dimensions after integration are %i'  % len(non_integrated_dims)
+   print('Number of non integrated dimensions after integration are {}'.format(len(non_integrated_dims)))
    for dim in non_integrated_dims:
-       print 'Non integrated dimension is %s' % dim.name
-       print 'Limits are from %0.2f to %0.2f' % (dim.getMinimum(), dim.getMaximum())
-       print 'Output bin width is %0.2f' % float((dim.getMaximum() - dim.getMinimum() )/dim.getNBins())  
+       print('Non integrated dimension is {}'.format(dim.name))
+       print('Limits are from {:.2f} to {:.2f}'.format(dim.getMinimum(), dim.getMaximum()))
+       print('Output bin width is {:.2f}'.format(float((dim.getMaximum() - dim.getMinimum() )/dim.getNBins())))
 
 Output:
 
