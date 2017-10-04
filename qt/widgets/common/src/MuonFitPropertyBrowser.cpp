@@ -348,6 +348,12 @@ void MuonFitPropertyBrowser::setWorkspaceName(const QString &wsName) {
 * @param prop :: A pointer to the function name property
 */
 void MuonFitPropertyBrowser::enumChanged(QtProperty *prop) {
+  if (m_workspaceNames.empty()) {
+    if (this->isVisible()) {
+      g_log.error("No Data available. Please load Some data.");
+    }
+    return;
+  }
   if (!m_changeSlotsEnabled)
     return;
   if (prop == m_groupsToFit) {

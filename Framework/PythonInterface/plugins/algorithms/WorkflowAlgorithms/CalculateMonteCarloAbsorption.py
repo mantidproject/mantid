@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode,
-                        WorkspaceGroupProperty, Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty,
+                        Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
 
@@ -53,6 +53,9 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def summary(self):
         return "Calculates indirect absorption corrections for a given sample shape, using a MonteCarlo simulation."
+
+    def checkGroups(self):
+        return False
 
     def PyInit(self):
         # Sample options
@@ -364,17 +367,12 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_is_group = isinstance(self._sample_ws, WorkspaceGroup)
         container_is_group = isinstance(self._container_ws, WorkspaceGroup)
 
-        if self._container_ws and sample_is_group != container_is_group:
-            sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
-            container_type = "WorkspaceGroup" if container_is_group else "MatrixWorkspace"
-            raise RuntimeError("Mismatch between SampleWorkspace (" + sample_type + ") and"
-                               " ContainerWorkspace (" + container_type + ").")
-        elif sample_is_group and (container_is_group or not self._container_ws):
-
-            if self._container_ws and len(self._sample_ws) != len(self._container_ws):
-                raise RuntimeError("SampleWorkspace group and ContainerWorkspace group do not"
-                                   " have the same number of workspaces.")
-            return
+        # Currently we cannot support workspace groups because the output of the child
+        # algorithm is a workspace group. This causes a crash in the ADS when this
+        # algorithm attempts to put a workspace group into another workspace group
+        if sample_is_group or container_is_group:
+            raise RuntimeError("CalculateMonteCarloAbsorption does not currently support"
+                               " WorkspaceGroups")
 
         self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
                                 'BeamWidth': self.getProperty('BeamWidth').value,

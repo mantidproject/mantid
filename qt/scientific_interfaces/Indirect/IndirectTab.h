@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/PreviewPlot.h"
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtIntPropertyManager"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
@@ -132,6 +133,10 @@ protected:
   /// Plot a contour plot of a given workspace
   void plot2D(const QString &workspaceName);
 
+  /// Resizes the specified plot range
+  void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview,
+                       QPair<double, double> range);
+
   /// Updates the properties in the m_dblManager
   void updateProperties(const QString &functionName, const QString &prefix,
                         const QStringList &paramNames,
@@ -199,6 +204,10 @@ protected:
   /// pointer
   bool getResolutionRangeFromWs(Mantid::API::MatrixWorkspace_const_sptr ws,
                                 QPair<double, double> &res);
+
+  /// Converts a standard vector of standard strings to a QVector of QStrings.
+  QVector<QString>
+  convertStdStringVector(const std::vector<std::string> &stringVec) const;
 
   /// Function to run an algorithm on a seperate thread
   void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
