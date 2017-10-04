@@ -61,7 +61,7 @@ public:
   }
 
   static EventParser<IndexType, TimeZeroType, TimeOffsetType>
-  createSimpleParser(std::vector<std::vector<Types::TofEvent> *> &eventLists,
+  createSimpleParser(std::vector<std::vector<TofEvent> *> &eventLists,
                      std::vector<int32_t> bankOffsets) {
     std::vector<std::vector<int>> rankGroups;
 
@@ -69,17 +69,17 @@ public:
         rankGroups, bankOffsets, eventLists);
   }
 
-  static std::vector<std::vector<Types::TofEvent> *>
+  static std::vector<std::vector<TofEvent> *>
   prepareEventLists(size_t numLists) {
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(numLists);
+    std::vector<std::vector<TofEvent> *> eventLists(numLists);
     for (int i = 0; i < numLists; i++)
-      eventLists[i] = new std::vector<Types::TofEvent>();
+      eventLists[i] = new std::vector<TofEvent>();
 
     return eventLists;
   }
 
   static void
-  cleanupEventLists(std::vector<std::vector<Types::TofEvent> *> &eventLists) {
+  cleanupEventLists(std::vector<std::vector<TofEvent> *> &eventLists) {
     for (auto *list : eventLists) {
       if (list != nullptr)
         delete list;
@@ -401,7 +401,7 @@ public:
     auto eventLists = gen.prepareEventLists(gen.eventLists().size());
     auto parser = gen.createSimpleParser(eventLists, gen.bankOffsets());
 
-    for (int bank = 0; bank < numBanks; bank++) {
+    for (size_t bank = 0; bank < numBanks; bank++) {
       parser.setPulseInformation(gen.eventIndex(bank), gen.eventTimeZero());
       auto event_id = gen.eventId(bank);
       auto event_time_offset = gen.eventTimeOffset(bank);
@@ -442,12 +442,10 @@ private:
         gen.eventIndex(0), range.eventOffset, range.eventCount, cur);
 
     for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
-      auto start =
-          std::max(pulse == 0
-                       ? 0
-                       : static_cast<size_t>(gen.eventIndex(0)[pulse - 1]),
-                   range.eventOffset) -
-          range.eventOffset;
+      auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
+                                                 gen.eventIndex(0)[pulse - 1]),
+                            range.eventOffset) -
+                   range.eventOffset;
       auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
                           range.eventOffset + range.eventCount) -
                  range.eventOffset;
