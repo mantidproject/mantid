@@ -50,11 +50,10 @@ digraph CalculateMonteCarloAbsorption {
 
   subgraph processes {
     $process_style
-    update_instrument_angles                    [label="update_instrument_angles\nUpdates the instrument angles\nin a given workspace from\nQ-Values and wavelength"]
+    update_instrument_angles                    [label="Update the instrument angles\nin a given workspace from\nQ-Values and wavelength"]
     load_elastic_instrument_definition          [label="Load the elastic instrument\ndefinition file into the\nworkspace using the\nLoadInstrument algorithm"]
     set_efixed                                  [label="Sets the EFixed parameter\nin the workspace using\nthe SetInstrumentParameter algorithm"]
     calculate_wavelengths                       [label="Calculate wavelengths for\nthe workspace"]
-    multiply_workspaces                         [label="Multiples two workspaces together"]
     calculate_offset_front                      [label="Calculate average of two\ninputs and take negative"]
     calculate_offset_back                       [label="Average the two inputs"]
   }
@@ -72,7 +71,6 @@ digraph CalculateMonteCarloAbsorption {
     Transpose_indirect                          [label="Transpose"]
     ConvertUnits_energy                         [label="ConvertUnits"]
     ConvertUnits_direct                         [label="ConvertUnits"]
-    ConvertSpectraAxis
     AddSampleLogMultiple
     GroupWorkspaces
     Multiply
@@ -83,7 +81,6 @@ digraph CalculateMonteCarloAbsorption {
   subgraph values {
     $value_style
     Wavelength
-    Thickness
     FlatPlate_sample                            [label="Flat Plate"]
     Annulus_sample                              [label="Annulus"]
     Cylinder_sample                             [label="Cylinder"]
@@ -127,6 +124,11 @@ digraph CalculateMonteCarloAbsorption {
   Transpose_wave                        -> SimpleShapeMonteCarloAbsorption_sample
   ConvertUnits_direct                   -> SimpleShapeMonteCarloAbsorption_sample
 
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_sample
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_sample
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_sample
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_sample
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_sample
   SampleChemicalFormula                 -> SimpleShapeMonteCarloAbsorption_sample
   SampleDensityType                     -> SimpleShapeMonteCarloAbsorption_sample
   SampleDensity                         -> SimpleShapeMonteCarloAbsorption_sample
@@ -142,10 +144,19 @@ digraph CalculateMonteCarloAbsorption {
   SampleThickness                       -> FlatPlate_sample
   SampleAngle                           -> FlatPlate_sample
   SampleCenter                          -> FlatPlate_sample
+  SampleRadius                          -> Cylinder_sample
+  SampleInnerRadius                     -> Annulus_sample
+  SampleOuterRadius                     -> Annulus_sample
 
-  SimpleShapeMonteCarloAbsorption_sample -> CorrectionsWorkspace
+  SimpleShapeMonteCarloAbsorption_sample -> AddSampleLogMultiple
+  AddSampleLogMultiple                   -> GroupWorkspaces
   SimpleShapeMonteCarloAbsorption_sample -> container_supplied
 
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_container
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_container
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_container
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_container
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_container
   container_supplied                    -> SimpleShapeMonteCarloAbsorption_container    [label="Yes"]
   ContainerChemicalFormula              -> SimpleShapeMonteCarloAbsorption_container
   ContainerDensityType                  -> SimpleShapeMonteCarloAbsorption_container
@@ -157,10 +168,22 @@ digraph CalculateMonteCarloAbsorption {
   shape_value_container                 -> FlatPlate_container                          [label="Flat Plate"]
   shape_value_container                 -> Annulus_container                            [label="Annulus"]
   shape_value_container                 -> Annulus_container                            [label="Cylinder"]
-  CylinderInnerRadius                   -> Annulus_container
-  CylinderOuterRadius                   -> Annulus_container
-  CylinderInnerRadius                   -> Cylinder_container
-  CylinderOuterRadius                   -> Cylinder_container
+  ContainerInnerRadius                  -> Annulus_container
+  ContainerOuterRadius                  -> Annulus_container
+  ContainerInnerRadius                  -> Cylinder_container
+  ContainerOuterRadius                  -> Cylinder_container
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_containerm1
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_containerm1
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_containerm1
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_containerm1
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_containerm1
+
+  BeamHeight                            -> SimpleShapeMonteCarloAbsorption_containerm2
+  BeamWidth                             -> SimpleShapeMonteCarloAbsorption_containerm2
+  NumberOfWavelengthPoints              -> SimpleShapeMonteCarloAbsorption_containerm2
+  EventsPerPoint                        -> SimpleShapeMonteCarloAbsorption_containerm2
+  Interpolation                         -> SimpleShapeMonteCarloAbsorption_containerm2
 
   FlatPlate_container                   -> SimpleShapeMonteCarloAbsorption_containerm1
   FlatPlate_container                   -> SimpleShapeMonteCarloAbsorption_containerm2
@@ -171,7 +194,9 @@ digraph CalculateMonteCarloAbsorption {
   ContainerBackThickness                -> SimpleShapeMonteCarloAbsorption_containerm2
   calculate_offset_back                 -> SimpleShapeMonteCarloAbsorption_containerm2
 
-  SimpleShapeMonteCarloAbsorption_containerm1 -> multiply_workspaces
-  SimpleShapeMonteCarloAbsorption_containerm2 -> multiply_workspaces
-  multiply_workspaces                         -> CorrectionsWorkspace
+  SimpleShapeMonteCarloAbsorption_containerm1 -> Multiply
+  SimpleShapeMonteCarloAbsorption_containerm2 -> Multiply
+
+  Multiply                              -> GroupWorkspaces
+  GroupWorkspaces                       -> CorrectionsWorkspace
 }
