@@ -24,9 +24,9 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable,
 
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << i << 1. << 2. * M_PI *double(i) / 16.;
+    phaseRow1 << i << 1. << 2.;
     TableRow phaseRow2 = phaseTable->appendRow();
-    phaseRow2 << i << 1. << 2. * M_PI *double(i) / 16.;
+    phaseRow2 << i << 1. << 2.;
   }
 }
 void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
@@ -110,21 +110,21 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], -0.0531, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.0013, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 0.0048, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], 2.1969, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], 0.0510, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], -0.0525, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0016, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0025, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0029, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0024, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0041, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0047, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.7030, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], -0.0096, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0254, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -0.1035, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0006, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0047, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0012, 0.0001);
-    TS_ASSERT_DELTA(specImE[20], 0.0027, 0.0001);
-    TS_ASSERT_DELTA(specImE[50], 0.0031, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0002, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.0004, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.0005, 0.0001);
   }
   void testNoPhase() {
     std::vector<std::string> names = {"ID", "Asym", "dummy"};
@@ -172,21 +172,21 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], -3.9473, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.1183, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 0.0504, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], -0.9358, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], -0.0236, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], 0.0197, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0054, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0081, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0093, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0009, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0018, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0020, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], 0.4317, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], 0.0058, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0058, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -0.6379, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0129, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0159, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0017, 0.0001);
-    TS_ASSERT_DELTA(specImE[20], 0.0034, 0.0001);
-    TS_ASSERT_DELTA(specImE[50], 0.0039, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0006, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.0012, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.0014, 0.0001);
   }
   // add test for different order
 };
