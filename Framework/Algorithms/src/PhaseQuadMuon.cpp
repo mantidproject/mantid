@@ -128,14 +128,9 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
         phaseCount += 1;
       }
     }
-  }
-  for (std::string name : names) {
     for (std::string goodName : asymmNames) {
       if (name == goodName) {
-
-        if (name == goodName) {
           asymmetryCount += 1;
-        }
       }
     }
   }
@@ -295,7 +290,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   auto &realE = ows->mutableE(0);
   auto &imagE = ows->mutableE(1);
 
-  const auto &xPointData = ws->histogram(0).points();
+  const auto xPointData = ws->histogram(0).points();
   // First X value
   const double X0 = xPointData.front();
 
