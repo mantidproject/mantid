@@ -47,13 +47,13 @@ Usage
     
     #check the results
     ol=w.sample().getOrientedLattice()
-    print "a=",ol.a()
-    print "b=",ol.b()    
-    print "c=",ol.c()   
-    print "alpha=",ol.alpha()
-    print "beta=",ol.beta()
-    print "gamma=",ol.gamma() 
-    print "The following vectors are in the horizontal plane: ", ol.getuVector(),ol.getvVector()
+    print("a= {}".format(ol.a()))
+    print("b= {}".format(ol.b()))
+    print("c= {}".format(ol.c()))
+    print("alpha= {}".format(ol.alpha()))
+    print("beta= {}".format(ol.beta()))
+    print("gamma= {}".format(ol.gamma() ))
+    print("The following vectors are in the horizontal plane:  {} {}".format(ol.getuVector(), ol.getvVector()))
     
 .. testcleanup:: LoadIsawUB
 

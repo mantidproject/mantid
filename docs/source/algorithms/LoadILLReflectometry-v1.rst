@@ -158,7 +158,7 @@ Usage
    # Load ILL D17 data file (TOF mode) into a workspace 2D using default input options:
    ws1 = Load('ILL/D17/317370.nxs')
 
-   print("Workspace {} has {} dimensions and {} histograms.").format(ws1.name(), ws1.getNumDims(), ws1.getNumberHistograms())
+   print("Workspace {} has {} dimensions and {} histograms.".format(ws1.name(), ws1.getNumDims(), ws1.getNumberHistograms()))
 
 Output:
 
@@ -185,7 +185,7 @@ Output:
    # The Sample Log entry stheta will be the user defined angle of 30 degrees:
    angleBragg = ws2.getRun().getProperty("stheta").value * 180. / numpy.pi
 
-   print("The detector of workspace {} was rotated to {} degrees.").format(ws2.name(), 2. * angleBragg)
+   print("The detector of workspace {} was rotated to {:.1f} degrees.".format(ws2.name(), 2. * angleBragg))
    print("The nominal angle in the NeXus file was {:.2} degrees.".format(angleOrig))
 
 Output:
