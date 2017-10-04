@@ -22,9 +22,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(wks.getNumberHistograms(), 1)
 
-    def test_reduction_with_manual_drange_completes(self):
+    def test_reduction_with_single_manual_drange_completes(self):
         """
-        Test to ensure reduction with manual dRange selection completes.
+        Test to ensure reduction with single manual dRange selection completes.
         The run here is for dRange 3.
         """
 
