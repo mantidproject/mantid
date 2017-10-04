@@ -340,9 +340,9 @@ class TOFTOFScriptElement(BaseScriptElement):
         self.l("for ws in {}:".format(wsgroup))
         self.l("    name = ws.getComment() + {}".format(suffix))
         if self.saveNXSPE and self.binEon:
-            self.l("    SaveNXSPE(ws, join('{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
+            self.l("    SaveNXSPE(ws, join(r'{}', name + '.nxspe'), Efixed=Ei)".format(self.saveDir))
         if self.saveNexus:
-            self.l("    SaveNexus(ws, join('{}', name + '.nxs'))".format(self.saveDir))
+            self.l("    SaveNexus(ws, join(r'{}', name + '.nxs'))".format(self.saveDir))
         self.l()
 
     def normalize_data(self, gPrefix, gDataRuns, wsEC='', wsVan=''):
