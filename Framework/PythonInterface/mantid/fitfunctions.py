@@ -202,18 +202,18 @@ class FunctionWrapper(object):
              raise RuntimeError("startX must be less than EndX")
 
       if haveXValues:
-          spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
+          spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
       elif isWorkspace:
           xvals = ws.readX(workspaceIndex)
           if haveStartX and haveEndX:
               xvals = filter(inRange, xvals)
           if extractSpectrum or (haveStartX and haveEndX):
-              spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
+              spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
           else:
               spectrumWs = ws           
       elif haveStartX and haveEndX:
           xvals = np.linspace(start=xMin, stop=xMax, num=nSteps)
-          spectrumWs = CreateWorkspace( DataX=xvals, DataY=xvals)
+          spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
       else:
           if not haveStartX:
              raise RuntimeError("startX must be defined if no workspace or xValues are defined.") 
