@@ -32,7 +32,7 @@ Usage
 
   # Check source mask workspace
   nummasked = 0
-  for i in xrange(maskws.getNumberHistograms()):
+  for i in range(maskws.getNumberHistograms()):
     if maskws.readY(i)[0] > 0.5:
       nummasked += 1
 
@@ -41,7 +41,7 @@ Usage
 
   # Check target mask workspace
   nummasked2 = 0
-  for i in xrange(invmaskws.getNumberHistograms()):
+  for i in range(invmaskws.getNumberHistograms()):
     if invmaskws.readY(i)[0] > 0.5:
       nummasked2 += 1
 
