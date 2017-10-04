@@ -224,7 +224,7 @@ void WorkspaceGroup::print() const {
   }
 }
 
-/** 
+/**
  * Returns an iterator pointing to the first element in the group.
  *
  * @return  A non-const iterator pointing to the first workspace in this
