@@ -33,35 +33,35 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
   populatePhaseTable(phaseTable, {"DetectorID", "Asymmetry", "Phase"});
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
                          ITableWorkspace_sptr phaseTable) {
   // Set up PhaseQuad
   IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
   phaseQuad->setChild(isChildAlg);
   phaseQuad->initialize();
-  phaseQuad->setProperty("InputWorkspace", inputWs);
+  phaseQuad->setProperty("InputWorkspace", m_loadedData);
   phaseQuad->setProperty("PhaseTable", phaseTable);
   phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
   return phaseQuad;
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable);
 
-  return setupAlg(inputWs, isChildAlg, phaseTable);
+  return setupAlg(m_loadedData, isChildAlg, phaseTable);
 }
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
                          std::vector<std::string> names) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
   populatePhaseTable(phaseTable, names);
 
-  return setupAlg(inputWs, isChildAlg, phaseTable);
+  return setupAlg(m_loadedData, isChildAlg, phaseTable);
 }
 
 MatrixWorkspace_sptr loadMuonDataset() {
@@ -72,14 +72,26 @@ MatrixWorkspace_sptr loadMuonDataset() {
   loader->setPropertyValue("OutputWorkspace", "outputWs");
   loader->execute();
   Workspace_sptr temp = loader->getProperty("OutputWorkspace");
-  MatrixWorkspace_sptr inputWs =
+  MatrixWorkspace_sptr m_loadedData =
       boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-  return inputWs;
+  return m_loadedData;
 }
 }
 
 class PhaseQuadMuonTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PhaseQuadMuonTest *createSuite() { return new PhaseQuadMuonTest(); }
+
+  static void destroySuite(PhaseQuadMuonTest *suite) { delete suite; }
+
+  void setUp() {
+    if (!m_loadedData) {
+      m_loadedData = loadMuonDataset();
+    }
+  }
+
   void testTheBasics() {
     IAlgorithm_sptr phaseQuad =
         AlgorithmManager::Instance().create("PhaseQuad");
@@ -90,8 +102,7 @@ public:
   }
 
   void testExecPhaseTable() {
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -101,9 +112,9 @@ public:
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(
         outputWs->getSpectrum(0).readX(),
-        inputWs->getSpectrum(0).readX()); // Check outputWs X values
+        m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
     TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
-                     inputWs->getSpectrum(1).readX());
+                     m_loadedData->getSpectrum(1).readX());
 
     const auto specReY = outputWs->getSpectrum(0).y();
     const auto specReE = outputWs->getSpectrum(0).e();
@@ -128,32 +139,28 @@ public:
   }
   void testNoPhase() {
     std::vector<std::string> names = {"ID", "Asym", "dummy"};
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
     TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testNoAsymm() {
     std::vector<std::string> names = {"ID", "AsYMg", "phase"};
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    MatrixWorkspace_sptr m_loadedData = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
     TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testTwoPhases() {
     std::vector<std::string> names = {"ID", "Phase", "phi"};
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
     TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testTwoAsymm() {
     std::vector<std::string> names = {"ID", "Asym", "Asymm"};
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
     TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
   }
   void testSwapOrder() {
     std::vector<std::string> names = {"ID", "phase", "Asymm"};
-    MatrixWorkspace_sptr inputWs = loadMuonDataset();
-    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -163,9 +170,9 @@ public:
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS(
         outputWs->getSpectrum(0).readX(),
-        inputWs->getSpectrum(0).readX()); // Check outputWs X values
+        m_loadedData->getSpectrum(0).readX()); // Check outputWs X values
     TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
-                     inputWs->getSpectrum(1).readX());
+                     m_loadedData->getSpectrum(1).readX());
 
     const auto specReY = outputWs->getSpectrum(0).y();
     const auto specReE = outputWs->getSpectrum(0).e();
@@ -189,6 +196,9 @@ public:
     TS_ASSERT_DELTA(specImE[50], 0.0014, 0.0001);
   }
   // add test for different order
+
+private:
+  MatrixWorkspace_sptr m_loadedData;
 };
 
 class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {
@@ -205,8 +215,8 @@ public:
   }
 
   void setUp() override {
-    inputWs = loadMuonDataset();
-    phaseQuad = setupAlg(inputWs, false);
+    m_loadedData = loadMuonDataset();
+    phaseQuad = setupAlg(m_loadedData, false);
   }
 
   void tearDown() override {
@@ -216,7 +226,7 @@ public:
   void testPerformanceWs() { phaseQuad->execute(); }
 
 private:
-  MatrixWorkspace_sptr inputWs;
+  MatrixWorkspace_sptr m_loadedData;
   IAlgorithm_sptr phaseQuad;
 };
 

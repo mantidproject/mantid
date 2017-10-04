@@ -7,12 +7,12 @@
 #include "MantidKernel/Unit.h"
 
 namespace {
-const std::vector<std::string> phaseNames = {"phase", "phi"};
-const std::vector<std::string> asymmNames = {"asymmetry", "asymm", "asym"};
+const std::array<std::string, 2> phaseNames = {{"phase", "phi"}};
+const std::array<std::string, 3> asymmNames = {{"asymmetry", "asymm", "asym"}};
 
-int findName(const std::vector<std::string> &patterns,
-             const std::vector<std::string> &names) {
-  for (std::string pattern : patterns) {
+template <typename T1, typename T2>
+int findName(const T1 &patterns, const T2 &names) {
+  for (const std::string &pattern : patterns) {
     auto it = std::find_if(names.begin(), names.end(),
                            [pattern](const std::string &s) {
                              if (s == pattern) {
@@ -116,19 +116,18 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
   auto names = tabWS->getColumnNames();
-  for (int j = 0; j < 3; j++) {
-    std::transform(names[j].begin(), names[j].end(), names[j].begin(),
-                   ::tolower);
+  for (auto &name : names) {
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   }
   int phaseCount = 0;
   int asymmetryCount = 0;
-  for (std::string name : names) {
-    for (std::string goodName : phaseNames) {
+  for (const std::string &name : names) {
+    for (const std::string &goodName : phaseNames) {
       if (name == goodName) {
         phaseCount += 1;
       }
     }
-    for (std::string goodName : asymmNames) {
+    for (const std::string &goodName : asymmNames) {
       if (name == goodName) {
         asymmetryCount += 1;
       }
@@ -225,9 +224,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   }
 
   auto names = phase->getColumnNames();
-  for (int j = 0; j < 3; j++) {
-    std::transform(names[j].begin(), names[j].end(), names[j].begin(),
-                   ::tolower);
+  for (auto &name : names) {
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
   }
   auto phaseIndex = findName(phaseNames, names);
   auto asymmetryIndex = findName(asymmNames, names);
