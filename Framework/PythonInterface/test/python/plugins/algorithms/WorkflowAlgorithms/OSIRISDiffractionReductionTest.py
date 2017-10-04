@@ -22,9 +22,9 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(wks.getNumberHistograms(), 1)
 
-    def test_reduction_with_manual_drange_completes(self):
+    def test_reduction_with_single_manual_drange_completes(self):
         """
-        Test to ensure reduction with manual dRange selection completes.
+        Test to ensure reduction with single manual dRange selection completes.
         The run here is for dRange 3.
         """
 
@@ -35,6 +35,23 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
                                          SpectraMax=361,
                                          DetectDRange=False,
                                          DRange="3")
+
+        self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(wks.getNumberHistograms(), 1)
+
+    def test_reduction_with_manual_range_list(self):
+        """
+        Test to ensure reduction with manual dRange list selection completes.
+        The run here is for dRange 3-4.
+        """
+        wks = OSIRISDiffractionReduction(Sample=['OSI10203.raw', 'OSI10204.raw'],
+                                         CalFile='osiris_041_RES10.cal',
+                                         Vanadium=['OSI10156.raw', 'OSI10157.raw'],
+                                         SpectraMin=3,
+                                         SpectraMax=361,
+                                         DetectDRange=False,
+                                         DRange="3-4")
 
         self.assertTrue(isinstance(wks, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
         self.assertEqual(wks.getAxis(0).getUnit().unitID(), 'dSpacing')
