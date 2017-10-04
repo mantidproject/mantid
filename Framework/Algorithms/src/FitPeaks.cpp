@@ -269,13 +269,37 @@ void FitPeaks::processInputs() {
  * @brief FitPeaks::processInputFunctions
  */
 void FitPeaks::processInputFunctions() {
+  // peak functions
   std::string peakfunctiontype = getPropertyValue("PeakFunction");
   m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
       API::FunctionFactory::Instance().createFunction(peakfunctiontype));
 
+  // background functions
   std::string bkgdfunctiontype = getPropertyValue("BackgroundType");
   m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
       API::FunctionFactory::Instance().createFunction(bkgdfunctiontype));
+
+  // input peak parameters
+  std::string partablename = getPropertyValue("PeakParameterValueTable");
+  m_peakParamNames = getProperty("PeakParameterNames");
+  if (partablename.size() == 0 && m_peakParamNames.size() > 0)
+  {
+    // use uniform starting value of peak parameters
+    m_uniformProfileStartingValue = true;
+    m_peakParamValues = getProperty("PeakParameterValues");
+    // convert the parameter name in string to parameter name in integer index
+    EMPTY_DBL();
+    convert_parameter_name_to_index();
+  }
+  else if (partablename.size() > 0 && m_peakParamNames.size() == 0)
+  {
+    // use non-uniform starting value of peak parameters
+    m_uniformProfileStartingValue = false;
+    m_profileStartingValueTable = getProperty("partablename");
+  }
+
+  API::ITableWorkspace_const_sptr
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -339,19 +363,40 @@ void FitPeaks::processInputFitRanges() {
     if (m_partialSpectra)
       center_index_start = m_startWorkspaceIndex;
 
+    // check each spectrum whether the window is defined with the correct size
     for (size_t wi = 0; wi < m_peakWindowWorkspace->getNumberHistograms();
          ++wi) {
+      // check size
+      if (m_peakWindowWorkspace->y(wi).size() != m_numPeaksToFit * 2)
+      {
+        std::stringstream errss;
+        errss << "Peak window workspace index " << wi << " has incompatible number of fit windows (x2) " << m_peakWindowWorkspace->y(wi).size()
+              << "with the number of peaks " << m_numPeaksToFit << " to fit.";
+        throw std::invalid_argument(errss.str());
+      }
+
+      // check window range against peak center
       size_t window_index = window_index_start + wi;
-      size_t center_index = center_index_start + wi;
-      if (m_peakWindowWorkspace->x(wi).size() != m_numPeaksToFit * 2)
-        throw std::invalid_argument("FIX ME");
-      // TODO/FIXME/ISSUE - Implement the check each spectrum
-      // ...
-      // ...
+      size_t center_index = window_index - center_index_start;
+
+      for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak)
+      {
+        double left_w_bound = m_peakWindowWorkspace->y(wi)[ipeak*2];
+        double right_w_bound = m_peakWindowWorkspace->y(wi)[ipeak*2+1];
+        double center = m_peakCenterWorkspace->x(center_index)[ipeak];
+        if (!(left_w_bound < center && center < right_w_bound))
+        {
+          std::stringstream errss;
+          errss << "Workspace index " << wi << " has incompatible peak window (" << left_w_bound << ", " << right_w_bound
+                << ") with " << ipeak << "-th expected peak's center " << center;
+          throw std::runtime_error(errss.str());
+        }
+
+      }
     }
   } else {
-    // ... ...
-    throw std::invalid_argument("More specific");
+    // non-supported situation
+    throw std::invalid_argument("One and only one of peak window array and peak window workspace can be specified.");
   }
 
   return;
@@ -864,6 +909,85 @@ void FitPeaks::generateOutputWorkspaces() {
   }
 }
 
+//----------------------------------------------------------------------------------------------
+/** Get the expected peak's position
+ * @brief FitPeaks::getExpectedPeakPosition
+ * @param wi
+ * @param ipeak
+ * @return
+ */
+double FitPeaks::getExpectedPeakPosition(size_t wi, size_t ipeak)
+{
+  // check input
+  if (ipeak >= m_numPeaksToFit)
+  {
+    std::stringstream errss;
+    errss << "Peak index " << ipeak << " is out of range (" << m_numPeaksToFit << ")";
+    throw std::runtime_error(errss.str());
+  }
+
+  double expected_center(0);
+  if (m_uniformPeakPositions)
+    expected_center = m_peakCenters[ipeak];
+  else
+  {
+    // no uniform peak center.  locate peak in the workspace
+    // check
+    if (wi >= m_peakCenterWorkspace->getNumberHistograms())
+    {
+      std::stringstream errss;
+      errss << "Workspace index " << wi << " is out of range (" << m_peakCenterWorkspace->getNumberHistograms() << ")";
+      throw std::runtime_error(errss.str());
+    }
+
+    expected_center = m_peakCenterWorkspace->y(wi)[ipeak];
+  }
+
+  return expected_center;
+}
+
+//----------------------------------------------------------------------------------------------
+/** get the peak fit window
+ * @brief FitPeaks::getPeakFitWindow
+ * @param wi
+ * @param ipeak
+ * @return
+ */
+std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak)
+{
+  // check input
+  if (ipeak >= m_numPeaksToFit)
+  {
+    std::stringstream errss;
+    errss << "Peak index " << ipeak << " is out of range (" << m_numPeaksToFit << ")";
+    throw std::runtime_error(errss.str());
+  }
+
+  double left(0), right(0);
+  if (m_uniformPeakWindows)
+  {
+    left = m_peakWindowVector[ipeak*2];
+    right = m_peakWindowVector[ipeak*2+1];
+  }
+  else
+  {
+    // no uniform peak fit window.  locate peak in the workspace
+    // check
+    if (wi >= m_peakWindowWorkspace->getNumberHistograms())
+    {
+      std::stringstream errss;
+      errss << "Workspace index " << wi << " is out of range (" << m_peakWindowWorkspace->getNumberHistograms() << ")";
+      throw std::runtime_error(errss.str());
+    }
+
+    left = m_peakWindowWorkspace->y(wi)[ipeak*2];
+    right = m_peakWindowWorkspace->y(wi)[ipeak*2+1];
+  }
+
+  return std::make_pair<double, double>(left, right);
+}
+
+//----------------------------------------------------------------------------------------------
 /**
  * @brief FitPeaks::processFitResult
  * @param param_table
