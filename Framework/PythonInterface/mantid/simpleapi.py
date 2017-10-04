@@ -253,23 +253,30 @@ def StartLiveData(*args, **kwargs):
     """
     instrument, = _get_mandatory_args('StartLiveData', ["Instrument"], *args, **kwargs)
 
-    # Create and execute
+    # Create algorithm
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
     algm = _create_algorithm_object('StartLiveData',
                                     startProgress=_startProgress,
                                     endProgress=_endProgress)
     _set_logging_option(algm, kwargs)
-    try:
-        algm.setProperty('Instrument', instrument)  # Must be set first
-    except ValueError as ve:
-        raise ValueError('Problem when setting Instrument. This is the detailed error '
-                         'description: ' + str(ve))
 
-    # Remove from keywords so it is not set twice
-    try:
-        del kwargs['Instrument']
-    except KeyError:
-        pass
+    # Some properties have side effects and must be set separately
+    def handleSpecialProperty(name, value=None):
+        try:
+            if value is None:
+                value = kwargs[name]
+            algm.setProperty(name, value)
+            kwargs.pop(name, None)
+        except ValueError as ve:
+            raise ValueError('Problem when setting %s. This is the detailed error '
+                             'description: %s' % (name, str(ve)))
+        except KeyError:
+            pass  # ignore if kwargs[name] doesn't exist
+
+    # Listener properties depend on these values, so they must be set first
+    handleSpecialProperty('Instrument', instrument)
+    handleSpecialProperty('Connection')
+    handleSpecialProperty('Listener')
 
     # LHS Handling currently unsupported for StartLiveData
     lhs = _kernel.funcinspect.lhs_info()
