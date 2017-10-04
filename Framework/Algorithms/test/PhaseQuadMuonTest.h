@@ -17,16 +17,19 @@ using namespace Mantid::API;
 namespace {
 
 void populatePhaseTable(ITableWorkspace_sptr phaseTable,
-                        std::vector<std::string> names) {
+                        std::vector<std::string> names, bool swap = false) {
   phaseTable->addColumn("int", names[0]);
   phaseTable->addColumn("double", names[1]);
   phaseTable->addColumn("double", names[2]);
-
+  double asym(1.), phase(2.);
+  if(swap) {
+    std::swap(asym, phase);
+  }
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << i << 1. << 2.;
+    phaseRow1 << i << asym << phase;
     TableRow phaseRow2 = phaseTable->appendRow();
-    phaseRow2 << i << 1. << 2.;
+    phaseRow2 << i << asym << phase;
   }
 }
 void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
@@ -55,11 +58,11 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg) {
 }
 
 IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr m_loadedData, bool isChildAlg,
-                         std::vector<std::string> names) {
+                         std::vector<std::string> names, bool swap = false) {
   // Create and populate a detector table
   boost::shared_ptr<ITableWorkspace> phaseTable(
       new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable(phaseTable, names);
+  populatePhaseTable(phaseTable, names, swap);
 
   return setupAlg(m_loadedData, isChildAlg, phaseTable);
 }
@@ -86,7 +89,7 @@ public:
 
   static void destroySuite(PhaseQuadMuonTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     if (!m_loadedData) {
       m_loadedData = loadMuonDataset();
     }
@@ -160,7 +163,7 @@ public:
   }
   void testSwapOrder() {
     std::vector<std::string> names = {"ID", "phase", "Asymm"};
-    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names);
+    IAlgorithm_sptr phaseQuad = setupAlg(m_loadedData, true, names, true);
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());
 
@@ -179,21 +182,21 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], -0.9358, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.0236, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 0.0197, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], 2.1969, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], 0.0510, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], -0.0525, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0009, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0018, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0020, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0024, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0041, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0047, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.6379, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], -0.0129, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0159, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -0.1035, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0006, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0047, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0006, 0.0001);
-    TS_ASSERT_DELTA(specImE[20], 0.0012, 0.0001);
-    TS_ASSERT_DELTA(specImE[50], 0.0014, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0002, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.0004, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.0005, 0.0001);
   }
   // add test for different order
 
