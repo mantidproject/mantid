@@ -79,7 +79,7 @@ Usage
   # Examine
   mdws = mtd['QSampleMD']
   hklws = mtd['HKLMD']
-  print 'Output QSample and HKL workspaces have %d and %d events.'%(mdws.getNEvents(), hklws.getNEvents())
+  print('Output QSample and HKL workspaces have %d and %d events.'%(mdws.getNEvents(), hklws.getNEvents()))
 
   BinMD(InputWorkspace='HKLMD', AlignedDim0='H,-0.3,0.3,60', AlignedDim1='K,-0.4,0.5,90', AlignedDim2='L,4,8,10', OutputWorkspace='BinndHKL')
   histws = mtd['BinndHKL']
