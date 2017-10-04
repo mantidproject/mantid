@@ -81,6 +81,7 @@ Improvements
 - EISF is now generated when performing a Single Fit, with a delta function, in the ConvFit interface.
 - :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>` now supports `Direct` and `Indirect` modes.
 - Plot Current Preview is now an available option across all Indirect interfaces, where a mini-plot is shown within the interface.
+- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
 
 Dropped
 ~~~~~~~
