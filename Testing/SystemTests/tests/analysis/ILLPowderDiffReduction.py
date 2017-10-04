@@ -4,7 +4,7 @@ import os.path
 import stresstesting
 import tempfile
 from mantid.simpleapi import PowderDiffILLReduction, PowderDiffILLCalibration, \
-SaveNexusProcessed, SaveFocusedXYE
+    SaveNexusProcessed, SaveFocusedXYE
 from mantid import config, mtd
 
 
@@ -36,7 +36,7 @@ class ILLPowderDiffReductionTest(stresstesting.MantidStressTest):
 
     def test_calib_default_options(self):
         PowderDiffILLCalibration(CalibrationRun=self._calib_run,
-        OutputWorkspace='calib',OutputResponseWorkspace='response')
+                                 OutputWorkspace='calib',OutputResponseWorkspace='response')
         self.assertTrue(mtd['calib'])
         self.assertTrue(mtd['response'])
         self._check_calibration_output(mtd['calib'])
@@ -47,7 +47,7 @@ class ILLPowderDiffReductionTest(stresstesting.MantidStressTest):
         SaveNexusProcessed(InputWorkspace='calib',Filename=tmp_calib_file)
         self.assertTrue(os.path.exists(tmp_calib_file))
         PowderDiffILLReduction(Run=self._sample_runs,CalibrationFile=tmp_calib_file,
-        OutputWorkspace='calibrated')
+                               OutputWorkspace='calibrated')
         self._check_calibrated_sample(mtd['calibrated'])
         tmp_fullprof_export = self._get_tmp_file_name('fullprof.dat')
         SaveFocusedXYE(InputWorkspace='calibrated',Filename=tmp_fullprof_export)

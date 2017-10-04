@@ -12,8 +12,10 @@ class PowderDiffILLReductionTest(unittest.TestCase):
     def setUP(self):
         config.appendDataSearchSubDir('ILL/D20')
         config.setFacility('ILL')
+
     def tearDown(self):
         mtd.remove('red')
+
     def test_default_options(self):
         red = PowderDiffILLReduction(Run=self._runs)
         self.assertTrue(red)
@@ -31,37 +33,44 @@ class PowderDiffILLReductionTest(unittest.TestCase):
         self.assertAlmostEqual(spectrumaxis[1],242.82001,5)
         self.assertEquals(red.readY(0)[1400],32538)
         self.assertEquals(red.readY(1)[2100],9038)
+
     def test_sort_temperature_axis(self):
         red = PowderDiffILLReduction(Run=self._runs,SortObservableAxis=True)
         self.assertTrue(red)
         spectrumaxis = red.getAxis(1).extractValues()
         self.assertAlmostEqual(spectrumaxis[0],242.82001,5)
         self.assertAlmostEqual(spectrumaxis[1],253.924,5)
+
     def test_momentum_transfer(self):
         red = PowderDiffILLReduction(Run=self._runs,Unit='MomentumTransfer')
         self.assertTrue(red)
         xunit = red.getAxis(0).getUnit().unitID()
         self.assertEquals(xunit,'MomentumTransfer')
+
     def test_dspacing(self):
         red = PowderDiffILLReduction(Run=self._runs,Unit='dSpacing')
         self.assertTrue(red)
         xunit = red.getAxis(0).getUnit().unitID()
         self.assertEquals(xunit,'dSpacing')
+
     def test_normalise_monitor(self):
         red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='Monitor')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],0.01186,5)
         self.assertAlmostEquals(red.readY(1)[2100],0.0031,5)
+
     def test_normalise_time(self):
         red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='Time')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],108.46,2)
         self.assertAlmostEquals(red.readY(1)[2100],30.13,2)
+
     def test_normalise_roi(self):
         red = PowderDiffILLReduction(Run=self._runs,NormaliseTo='ROI',ROI='0,100')
         self.assertTrue(red)
         self.assertAlmostEquals(red.readY(0)[1400],0.00189,5)
         self.assertAlmostEquals(red.readY(1)[2100],0.00049,5)
+
     def test_fullprof(self):
         red = PowderDiffILLReduction(Run=self._runs,PrepareToSaveAs='FullProf')
         self.assertTrue(red)
