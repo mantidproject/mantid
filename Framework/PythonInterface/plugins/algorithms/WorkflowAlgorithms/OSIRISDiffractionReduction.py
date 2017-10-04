@@ -609,7 +609,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
         if len(divided) > 1:
-            logger.warning("moo "+str(sample_ws_names))
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
             merge_runs_alg.setProperty("InputWorkspaces", sample_ws_names)
