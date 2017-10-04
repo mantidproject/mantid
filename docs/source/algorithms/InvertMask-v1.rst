@@ -46,9 +46,9 @@ Usage
       nummasked2 += 1
 
   # Print out
-  print "Number of histogram: ", maskws.getNumberHistograms()
-  print "Source Mask workspace # Detectors masked = ", nummasked
-  print "Source Mask workspace # Detectors masked = ", nummasked2
+  print("Number of histogram:  {}".format(maskws.getNumberHistograms()))
+  print("Source Mask workspace # Detectors masked =  {}".format(nummasked))
+  print("Source Mask workspace # Detectors masked =  {}".format(nummasked2))
 
 Output:
 
