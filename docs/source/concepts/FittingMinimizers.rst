@@ -7,7 +7,7 @@ Below are listed the current recommendations for which minimizers to use with Ma
 
 * By default Mantid uses Levenberg-Marquardt
 
-  We can also recommend Trust Region, in particular where stability is important
+  We can also recommend Trust Region, in particular where accuracy is important
 
 The above recommendations are based on the results presented in sections below.
 
