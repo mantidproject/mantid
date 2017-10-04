@@ -258,7 +258,6 @@ class RunTabPresenter(object):
             self._view.halt_process_flag()
             raise
 
-
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
 
