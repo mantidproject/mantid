@@ -14,7 +14,8 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(WorkspaceGroup)
 
-/** Returns an iterator pointing to the first element in the group.
+/**
+ * Returns an iterator pointing to the first element in the group.
  *
  * @param self :: handle to the workspace group.
  * @return A non-const iterator pointing at start of workspace group,
@@ -24,7 +25,8 @@ std::vector<Workspace_sptr>::iterator group_begin(WorkspaceGroup &self) {
   return self.begin();
 }
 
-/** Returns an iterator pointing to the past-the-end element in the group.
+/**
+ * Returns an iterator pointing to the past-the-end element in the group.
  *
  * @param self :: handle to the workspace group.
  * @return A non-const iterator pointing at end of workspace group,

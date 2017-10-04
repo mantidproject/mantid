@@ -276,16 +276,7 @@
         </property>
         <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="1" column="3">
@@ -415,19 +406,22 @@
            </widget>
           </item>
          </layout>
+         <zorder>spFlatSampleHeight</zorder>
+         <zorder>lbFlatSampleThickness</zorder>
+         <zorder>spFlatCanFrontThickness</zorder>
+         <zorder>lbFlatCanFrontThickness</zorder>
+         <zorder>lbFlatSampleWidth</zorder>
+         <zorder>lbFlatSampleHeight</zorder>
+         <zorder>spFlatCanBackThickness</zorder>
+         <zorder>spFlatSampleThickness</zorder>
+         <zorder>lbFlatCanBackThickness</zorder>
+         <zorder>spFlatSampleAngle</zorder>
+         <zorder>lbFlatSampleAngle</zorder>
+         <zorder>spFlatSampleWidth</zorder>
         </widget>
         <widget class="QWidget" name="pgAbsCorAnnulus">
          <layout class="QGridLayout" name="loAnnulus">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="1" column="0">
@@ -546,20 +540,11 @@
         </widget>
         <widget class="QWidget" name="pgAbsCorCylinder">
          <layout class="QGridLayout" name="loCylinder">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item row="0" column="3">
-           <widget class="QDoubleSpinBox" name="spCylCanRadius">
+           <widget class="QDoubleSpinBox" name="spCylCanInnerRadius">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -588,12 +573,12 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="lbCylCanRadius">
+           <widget class="QLabel" name="lbCylCanInnerRadius">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Container Radius:</string>
+             <string>Container Inner Radius:</string>
             </property>
            </widget>
           </item>
@@ -621,6 +606,29 @@
            <widget class="QLabel" name="lbCylSampleHeight">
             <property name="text">
              <string>Sample Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="text">
+             <string>Container Outer Radius</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -696,14 +704,21 @@
       <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="4" column="2">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
+      <item row="2" column="0">
+       <widget class="QComboBox" name="cbCanDensity">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spCanDensity">
         <property name="enabled">
          <bool>false</bool>
@@ -722,7 +737,14 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="3">
+      <item row="2" column="2">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
        <widget class="QLineEdit" name="leCanChemicalFormula">
         <property name="enabled">
          <bool>false</bool>
@@ -733,79 +755,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="spCanScale">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="decimals">
-         <number>5</number>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QCheckBox" name="ckScaleCan">
-        <property name="text">
-         <string>Scale:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="3">
-       <widget class="QDoubleSpinBox" name="spCanShift">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="decimals">
-         <number>5</number>
-        </property>
-        <property name="minimum">
-         <double>-1000.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>999.999990000000025</double>
-        </property>
-        <property name="singleStep">
-         <double>0.010000000000000</double>
-        </property>
-        <property name="value">
-         <double>0.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QCheckBox" name="ckShiftCan">
-        <property name="text">
-         <string>Shift x-values of container by adding:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="ckUseCanCorrections">
-        <property name="text">
-         <string>Use Container Corrections</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QComboBox" name="cbCanDensity">
-        <item>
-         <property name="text">
-          <string>Mass Density</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Number Density</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
@@ -823,26 +772,6 @@
       <string>Output Options</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QCheckBox" name="ckKeepFactors">
-        <property name="text">
-         <string>Keep Correction Factors</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item>
        <widget class="QPushButton" name="pbPlot">
         <property name="enabled">
@@ -890,28 +819,32 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckUseCan</tabstop>
+  <tabstop>spNumberWavelengths</tabstop>
+  <tabstop>spNumberEvents</tabstop>
+  <tabstop>spBeamWidth</tabstop>
+  <tabstop>spBeamHeight</tabstop>
   <tabstop>cbShape</tabstop>
   <tabstop>spFlatSampleWidth</tabstop>
   <tabstop>spFlatSampleHeight</tabstop>
   <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
   <tabstop>spAnnSampleInnerRadius</tabstop>
   <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnSampleHeight</tabstop>
   <tabstop>spAnnCanInnerRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spCylSampleRadius</tabstop>
-  <tabstop>spCylCanRadius</tabstop>
+  <tabstop>spCylCanInnerRadius</tabstop>
+  <tabstop>spCylSampleHeight</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
+  <tabstop>cbSampleDensity</tabstop>
   <tabstop>spSampleDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
-  <tabstop>ckUseCanCorrections</tabstop>
-  <tabstop>ckScaleCan</tabstop>
-  <tabstop>spCanScale</tabstop>
-  <tabstop>ckShiftCan</tabstop>
-  <tabstop>spCanShift</tabstop>
+  <tabstop>cbCanDensity</tabstop>
   <tabstop>spCanDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
-  <tabstop>ckKeepFactors</tabstop>
   <tabstop>pbPlot</tabstop>
   <tabstop>pbSave</tabstop>
  </tabstops>
@@ -924,44 +857,12 @@
    <slot>setCurrentIndex(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>782</x>
-     <y>291</y>
+     <x>783</x>
+     <y>324</y>
     </hint>
     <hint type="destinationlabel">
      <x>315</x>
      <y>370</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckScaleCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spCanScale</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>549</x>
-     <y>507</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>783</x>
-     <y>509</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckShiftCan</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spCanShift</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>549</x>
-     <y>533</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>783</x>
-     <y>535</y>
     </hint>
    </hints>
   </connection>
@@ -976,8 +877,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>60</y>
+     <x>784</x>
+     <y>67</y>
     </hint>
    </hints>
   </connection>
@@ -998,50 +899,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>ckUseCanCorrections</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>leCanChemicalFormula</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>175</x>
-     <y>507</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>783</x>
-     <y>561</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ckUseCanCorrections</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>spCanDensity</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>175</x>
-     <y>507</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>386</x>
-     <y>561</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>spFlatCanFrontThickness</sender>
    <signal>valueChanged(double)</signal>
    <receiver>spFlatCanBackThickness</receiver>
    <slot>setValue(double)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>398</x>
-     <y>370</y>
+     <x>402</x>
+     <y>424</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>370</y>
+     <x>784</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1056,8 +925,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>149</x>
-     <y>370</y>
+     <x>175</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1072,8 +941,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>398</x>
-     <y>370</y>
+     <x>402</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1088,8 +957,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>590</x>
-     <y>370</y>
+     <x>593</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1104,8 +973,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>783</x>
-     <y>370</y>
+     <x>784</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1120,8 +989,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>39</x>
-     <y>328</y>
+     <x>65</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1136,8 +1005,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>65</x>
-     <y>328</y>
+     <x>282</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1152,8 +1021,8 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>92</x>
-     <y>328</y>
+     <x>501</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
@@ -1168,15 +1037,15 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>328</y>
+     <x>718</x>
+     <y>424</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ckUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>lbCylCanRadius</receiver>
+   <receiver>lbCylCanInnerRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1184,15 +1053,15 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>92</x>
-     <y>310</y>
+     <x>501</x>
+     <y>369</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>ckUseCan</sender>
    <signal>toggled(bool)</signal>
-   <receiver>spCylCanRadius</receiver>
+   <receiver>spCylCanInnerRadius</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1200,8 +1069,88 @@
      <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>118</x>
-     <y>310</y>
+     <x>718</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>cbCanDensity</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>112</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanDensity</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>305</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leCanChemicalFormula</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>208</x>
+     <y>71</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>690</x>
+     <y>579</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>57</x>
+     <y>67</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>532</x>
+     <y>408</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>spCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>38</x>
+     <y>66</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>646</x>
+     <y>411</y>
     </hint>
    </hints>
   </connection>

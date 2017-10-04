@@ -374,18 +374,6 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             raise RuntimeError("CalculateMonteCarloAbsorption does not currently support"
                                " WorkspaceGroups")
 
-        if self._container_ws and sample_is_group != container_is_group:
-            sample_type = "WorkspaceGroup" if sample_is_group else "MatrixWorkspace"
-            container_type = "WorkspaceGroup" if container_is_group else "MatrixWorkspace"
-            raise RuntimeError("Mismatch between SampleWorkspace (" + sample_type + ") and"
-                               " ContainerWorkspace (" + container_type + ").")
-        elif sample_is_group and (container_is_group or not self._container_ws):
-
-            if self._container_ws and len(self._sample_ws) != len(self._container_ws):
-                raise RuntimeError("SampleWorkspace group and ContainerWorkspace group do not"
-                                   " have the same number of workspaces.")
-            return
-
         self._general_kwargs = {'BeamHeight': self.getProperty('BeamHeight').value,
                                 'BeamWidth': self.getProperty('BeamWidth').value,
                                 'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,

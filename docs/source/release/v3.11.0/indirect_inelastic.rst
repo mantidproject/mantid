@@ -54,6 +54,11 @@ ConvolutionFitSequential
 Data Analysis Interfaces
 ########################
 
+AbsorptionCorrections
+~~~~~~~~~~~~~~~~~~~~~
+- Absorption Corrections interface replaced with Calculate Monte Carlo Absorption Corrections; using the new CalculateMonteCarloAbsorption
+  algorithm.
+
 Elwin
 ~~~~~
 - Save Result now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
