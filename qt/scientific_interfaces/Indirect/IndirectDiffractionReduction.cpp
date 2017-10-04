@@ -38,7 +38,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 //----------------------
 /// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent), m_valDbl(NULL),
+    : UserSubWindow(parent), m_valDbl(nullptr),
       m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
@@ -112,6 +112,14 @@ void IndirectDiffractionReduction::run() {
     showInformationBox("Sample files input is invalid.");
     return;
   }
+
+  if (mode == "diffspec" && m_uiForm.ckUseVanadium->isChecked() &&
+      m_uiForm.rfVanFile_only->getFilenames().isEmpty()) {
+    showInformationBox("Use Vanadium File checked but no vanadium files "
+                       "have been supplied.");
+    return;
+  }
+
   if (instName == "OSIRIS") {
     if (mode == "diffonly") {
       if (!validateVanCal()) {
@@ -145,7 +153,10 @@ void IndirectDiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
   disconnect(m_batchAlgoRunner, 0, this, SLOT(algorithmComplete(bool)));
 
-  deleteGroupingWorkspace();
+  // Delete grouping workspace, if created.
+  if (AnalysisDataService::Instance().doesExist(m_groupingWsName)) {
+    deleteGroupingWorkspace();
+  }
 
   if (error) {
     showInformationBox(
@@ -364,8 +375,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName,
   msgDiffReduction->setProperty("LoadLogFiles",
                                 m_uiForm.ckLoadLogs->isChecked());
   msgDiffReduction->setProperty(
-      "InputFiles",
-      m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
+      "InputFiles", m_uiForm.rfSampleFiles->getText().toStdString());
   msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("OutputWorkspace",
@@ -668,7 +678,7 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
  */
 void IndirectDiffractionReduction::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_Diffraction"));
+      nullptr, QString("Indirect_Diffraction"));
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

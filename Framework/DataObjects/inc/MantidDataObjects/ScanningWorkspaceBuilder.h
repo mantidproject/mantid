@@ -63,14 +63,14 @@ public:
 
   void setHistogram(HistogramData::Histogram histogram);
 
-  void
-  setTimeRanges(std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>>
-                    timeRanges);
-  void setTimeRanges(const Kernel::DateAndTime &startTime,
+  void setTimeRanges(
+      std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+          timeRanges);
+  void setTimeRanges(const Types::Core::DateAndTime &startTime,
                      const std::vector<double> &durations);
   void setPositions(std::vector<std::vector<Kernel::V3D>> positions);
   void setRotations(std::vector<std::vector<Kernel::Quat>> rotations);
-  void setRelativeRotationsForScans(const std::vector<double> instrumentAngles,
+  void setRelativeRotationsForScans(const std::vector<double> relativeRotations,
                                     const Kernel::V3D &rotationPosition,
                                     const Kernel::V3D &rotationAxis);
 
@@ -87,7 +87,8 @@ private:
 
   HistogramData::Histogram m_histogram;
 
-  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> m_timeRanges;
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+      m_timeRanges;
   std::vector<std::vector<Kernel::V3D>> m_positions;
   std::vector<std::vector<Kernel::Quat>> m_rotations;
 

@@ -41,8 +41,7 @@ namespace MantidWidgets {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON SelectWorkspacesDialog
-    : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectWorkspacesDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -51,7 +50,7 @@ public:
                                          // refer to this static constant
 
   /// Constructor
-  SelectWorkspacesDialog(QWidget *parent = NULL,
+  SelectWorkspacesDialog(QWidget *parent = nullptr,
                          const std::string &typeFilter = "",
                          const std::string &customButtonLabel = "");
 

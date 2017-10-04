@@ -274,7 +274,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   // Process 2theta
   bool return_true = true;
@@ -833,7 +833,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   size_t numrows = spicetablews->rowCount();
   std::vector<std::string> colnames = spicetablews->getColumnNames();
   // FIXME - Shouldn't give a better value?
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {

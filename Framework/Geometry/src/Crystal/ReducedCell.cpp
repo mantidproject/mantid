@@ -6,7 +6,6 @@
 
 namespace Mantid {
 namespace Geometry {
-using Mantid::Kernel::V3D;
 using Mantid::Kernel::DblMatrix;
 
 /**

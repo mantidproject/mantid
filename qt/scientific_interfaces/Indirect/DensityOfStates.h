@@ -10,7 +10,7 @@ class DLLExport DensityOfStates : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
-  DensityOfStates(QWidget *parent = 0);
+  DensityOfStates(QWidget *parent = nullptr);
 
   QString help() { return "DensityOfStates"; };
 

@@ -16,6 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 void addToInstrument(MatrixWorkspace_sptr testWS,

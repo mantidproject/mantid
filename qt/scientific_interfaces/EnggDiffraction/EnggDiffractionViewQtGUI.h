@@ -63,7 +63,7 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffractionViewQtGUI
 
 public:
   /// Default Constructor
-  EnggDiffractionViewQtGUI(QWidget *parent = 0);
+  EnggDiffractionViewQtGUI(QWidget *parent = nullptr);
   /// Destructor
   ~EnggDiffractionViewQtGUI() override;
 

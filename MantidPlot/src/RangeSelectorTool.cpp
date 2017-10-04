@@ -47,16 +47,16 @@ using namespace MantidQt::API;
 RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
                                      const char *status_slot)
     : QwtPlotPicker(graph->plotWidget()->canvas()), PlotToolInterface(graph),
-      d_active_point(0), d_inactive_point(0), d_selected_curve(NULL),
+      d_active_point(0), d_inactive_point(0), d_selected_curve(nullptr),
       d_enabled(false), d_visible(false) {
-  d_selected_curve = NULL;
+  d_selected_curve = nullptr;
   for (int i = d_graph->curves(); i >= 0; --i) {
     d_selected_curve = d_graph->curve(i);
     if (d_selected_curve &&
         d_selected_curve->rtti() == QwtPlotItem::Rtti_PlotCurve &&
         d_selected_curve->dataSize() > 0)
       break;
-    d_selected_curve = NULL;
+    d_selected_curve = nullptr;
   }
   if (!d_selected_curve) {
     QMessageBox::critical(d_graph, tr("MantidPlot - Warning"),

@@ -3,7 +3,7 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 
 using Mantid::DataObjects::MaskWorkspace;
-using Mantid::API::WorkspaceProperty;
+using Mantid::API::WorkspaceProperty; // NOLINT
 
 GET_POINTER_SPECIALIZATION(WorkspaceProperty<MaskWorkspace>)
 

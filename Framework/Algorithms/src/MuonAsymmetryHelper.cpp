@@ -29,7 +29,6 @@ constexpr double MUON_LIFETIME_MICROSECONDS{
 namespace Mantid {
 
 using namespace Kernel;
-using API::Progress;
 using std::size_t;
 
 /**

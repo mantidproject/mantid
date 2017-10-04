@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateMuonAsymmetry.cpp
+	src/CalculatePolynomialBackground.cpp
 	src/CalculateSlits.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -196,11 +197,11 @@ set ( SRC_FILES
 	src/MultiplyRange.cpp
 	src/MuonAsymmetryHelper.cpp
 	src/MuonGroupDetectors.cpp
-	src/NRCalculateSlitResolution.cpp
 	src/NormaliseByCurrent.cpp
 	src/NormaliseByDetector.cpp
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
+	src/NRCalculateSlitResolution.cpp
 	src/OneMinusExponentialCor.cpp
 	src/PDCalibration.cpp
 	src/PDDetermineCharacterizations.cpp
@@ -352,6 +353,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateMuonAsymmetry.h
+	inc/MantidAlgorithms/CalculatePolynomialBackground.h
 	inc/MantidAlgorithms/CalculateSlits.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -525,11 +527,11 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MultiplyRange.h
 	inc/MantidAlgorithms/MuonAsymmetryHelper.h
 	inc/MantidAlgorithms/MuonGroupDetectors.h
-	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
+	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PDCalibration.h
 	inc/MantidAlgorithms/PDDetermineCharacterizations.h
@@ -692,6 +694,7 @@ set ( TEST_FILES
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateMuonAsymmetryTest.h
+	CalculatePolynomialBackgroundTest.h
 	CalculateSlitsTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
@@ -857,10 +860,10 @@ set ( TEST_FILES
 	MultiplyRangeTest.h
 	MultiplyTest.h
 	MuonGroupDetectorsTest.h
-	NRCalculateSlitResolutionTest.h
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
+	NRCalculateSlitResolutionTest.h
 	OneMinusExponentialCorTest.h
 	PDCalibrationTest.h
 	PDDetermineCharacterizationsTest.h

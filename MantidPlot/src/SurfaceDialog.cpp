@@ -88,7 +88,7 @@ SurfaceDialog::SurfaceDialog(QWidget *parent, Qt::WFlags fl)
     boxZ->setCompleter(new QCompleter(app->d_param_surface_func));
   }
 
-  d_graph = 0;
+  d_graph = nullptr;
   setFocusProxy(boxFunction);
 
   connect(boxType, SIGNAL(activated(int)), optionStack,
@@ -510,7 +510,7 @@ void SurfaceDialog::acceptFunction() {
     y = toY;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxFunction->setFocus();
     error = true;

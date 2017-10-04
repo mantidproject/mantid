@@ -31,6 +31,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:

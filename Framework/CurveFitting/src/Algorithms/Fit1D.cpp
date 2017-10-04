@@ -28,10 +28,8 @@ namespace Algorithms {
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Axis;
 using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
-using API::Algorithm;
 using API::Progress;
 using API::Jacobian;
 

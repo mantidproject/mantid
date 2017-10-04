@@ -62,7 +62,8 @@ public:
    * \param parent parent widget
    * \param fl window flags
    */
-  SymbolDialog(CharSet charSet, QWidget *parent = 0, Qt::WFlags fl = 0);
+  SymbolDialog(CharSet charSet, QWidget *parent = nullptr,
+               Qt::WFlags fl = nullptr);
 
 private:
   //! Show lowercase Greek characters

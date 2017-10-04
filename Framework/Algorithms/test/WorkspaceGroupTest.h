@@ -192,7 +192,7 @@ public:
       }
       work_in1->getSpectrum(i).setSpectrumNo(i);
       Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, NULL);
+          new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
     }

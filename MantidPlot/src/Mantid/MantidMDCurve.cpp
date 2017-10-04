@@ -173,7 +173,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
 
   if (!mws)
     return;
-  const MantidQwtIMDWorkspaceData *new_mantidData(NULL);
+  const MantidQwtIMDWorkspaceData *new_mantidData(nullptr);
   try {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);

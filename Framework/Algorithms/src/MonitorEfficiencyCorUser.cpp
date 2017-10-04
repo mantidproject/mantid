@@ -9,10 +9,6 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 
-using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::HistogramY;
-using Mantid::HistogramData::HistogramE;
-
 namespace Mantid {
 namespace Algorithms {
 

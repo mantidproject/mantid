@@ -46,13 +46,13 @@
 #include <boost/regex.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
 #include <utility>
-#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -242,8 +242,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   g_log.information() << "This is Mantid version " << MantidVersion::version()
                       << " revision " << MantidVersion::revision() << '\n';
   g_log.information() << "running on " << getComputerName() << " starting "
-                      << DateAndTime::getCurrentTime().toFormattedString(
-                             "%Y-%m-%dT%H:%MZ") << "\n";
+                      << Types::Core::DateAndTime::getCurrentTime()
+                             .toFormattedString("%Y-%m-%dT%H:%MZ") << "\n";
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList
                       << '\n';
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build

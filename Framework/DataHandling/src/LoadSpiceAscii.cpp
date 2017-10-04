@@ -21,6 +21,7 @@ using namespace boost::algorithm;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {

@@ -35,13 +35,13 @@
 #pragma warning disable 181
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-#include <cstring>
-#include <algorithm> //required for std::swap
 #include "OPJFile.h"
+#include <algorithm> //required for std::swap
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 using std::vector;
 using std::string;
@@ -246,7 +246,7 @@ filepre +
 /* parse file "filename" completely and save values */
 int OPJFile::Parse() {
   FILE *f;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
@@ -285,12 +285,12 @@ int OPJFile::Parse() {
 int OPJFile::ParseFormatOld() {
   int i;
   FILE *f, *debug;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
 
-  if ((debug = fopen("opjfile.log", "w")) == NULL) {
+  if ((debug = fopen("opjfile.log", "w")) == nullptr) {
     printf("Could not open log file!\n");
     fclose(f); // f is still open, so close it before returning
     return -1;
@@ -402,9 +402,10 @@ int OPJFile::ParseFormatOld() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(NULL, "_");           // column name
-    while (char *tmpstr = strtok(NULL, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
@@ -437,7 +438,7 @@ int OPJFile::ParseFormatOld() {
             current_col, cname, (unsigned int)ftell(f));
     fflush(debug);
 
-    if (cname == 0) {
+    if (cname == nullptr) {
       fprintf(debug, "NO COLUMN NAME FOUND! Must be a matrix or function.\n");
       ////////////////////////////// READ MATRIX or FUNCTION
       ///////////////////////////////////////
@@ -757,12 +758,12 @@ int OPJFile::ParseFormatOld() {
 int OPJFile::ParseFormatNew() {
   int i;
   FILE *f, *debug;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
 
-  if ((debug = fopen("opjfile.log", "w")) == NULL) {
+  if ((debug = fopen("opjfile.log", "w")) == nullptr) {
     printf("Could not open log file!\n");
     fclose(f);
     return -1;
@@ -909,15 +910,16 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(NULL, "_");           // column name
-    while (char *tmpstr = strtok(NULL, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
     }
     int spread = 0;
-    if (cname == 0) {
+    if (cname == nullptr) {
       fprintf(debug, "NO COLUMN NAME FOUND! Must be a matrix or function.\n");
       ////////////////////////////// READ MATRIX or FUNCTION
       ///////////////////////////////////////
@@ -1217,7 +1219,7 @@ int OPJFile::ParseFormatNew() {
     fprintf(debug, "\n");
     fflush(debug);
 
-    if (nbytes > 0 || cname == 0)
+    if (nbytes > 0 || cname == nullptr)
       CHECKED_FSEEK(debug, f, 1, SEEK_CUR);
 
     int tailsize;

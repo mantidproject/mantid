@@ -394,8 +394,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         num_samples = len(self._sample_runs)
         num_vanadium = len(self._vanadium_runs)
-        if num_samples != num_vanadium:
-            run_num_mismatch = 'You must input the same number of sample and vanadium runs'
+
+        if num_samples > num_vanadium:
+            run_num_mismatch = 'You must input at least as many vanadium files as sample files'
             issues['Sample'] = run_num_mismatch
             issues['Vanadium'] = run_num_mismatch
         if self._container_files:

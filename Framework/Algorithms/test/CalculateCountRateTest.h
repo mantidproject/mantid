@@ -172,8 +172,8 @@ public:
 
     // Check time series log outside of the data range
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
-    Kernel::DateAndTime first("2015-11-30T16:17:10");
-    std::vector<Kernel::DateAndTime> times(140);
+    Types::Core::DateAndTime first("2015-11-30T16:17:10");
+    std::vector<Types::Core::DateAndTime> times(140);
     std::vector<double> values(140);
 
     for (size_t i = 0; i < 140; ++i) {
@@ -194,7 +194,7 @@ public:
     TS_ASSERT(!alg.useLogDerivative());
 
     // Check correct date and time
-    first = Kernel::DateAndTime("2010-01-01T00:00:00");
+    first = Types::Core::DateAndTime("2010-01-01T00:00:00");
     times.resize(240);
     values.resize(240);
     for (size_t i = 0; i < 240; ++i) {
@@ -468,8 +468,8 @@ public:
     }
 
     auto pTime_log = new Kernel::TimeSeriesProperty<double>("proton_charge");
-    Kernel::DateAndTime first("2010-01-01T00:00:00");
-    std::vector<Kernel::DateAndTime> times(240);
+    Types::Core::DateAndTime first("2010-01-01T00:00:00");
+    std::vector<Types::Core::DateAndTime> times(240);
     std::vector<double> values(240);
 
     for (size_t i = 0; i < values.size(); ++i) {

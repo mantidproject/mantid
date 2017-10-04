@@ -53,7 +53,7 @@ public:
 protected:
   void initProps();
 
-  Mantid::Kernel::DateAndTime getStartTime() const;
+  Mantid::Types::Core::DateAndTime getStartTime() const;
 
   Mantid::API::IAlgorithm_sptr makeAlgorithm(bool postProcessing);
 

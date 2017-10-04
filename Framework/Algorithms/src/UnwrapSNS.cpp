@@ -21,10 +21,7 @@ DECLARE_ALGORITHM(UnwrapSNS)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::EventList;
 using DataObjects::EventWorkspace;
-using Kernel::Exception::InstrumentDefinitionError;
-using Kernel::Exception::NotFoundError;
 using std::size_t;
 
 /// Default constructor

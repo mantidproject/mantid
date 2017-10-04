@@ -23,11 +23,14 @@ class Value;
 }
 
 namespace Mantid {
-
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 
 class DataItem;
-class DateAndTime;
 class IPropertySettings;
 class OptionalBool;
 class Property;
@@ -217,8 +220,8 @@ public:
   /// Get the list of managed properties in a given group.
   std::vector<Property *> getPropertiesInGroup(const std::string &group) const;
 
-  virtual void filterByTime(const DateAndTime & /*start*/,
-                            const DateAndTime & /*stop*/) = 0;
+  virtual void filterByTime(const Types::Core::DateAndTime & /*start*/,
+                            const Types::Core::DateAndTime & /*stop*/) = 0;
   virtual void
   splitByTime(std::vector<SplittingInterval> & /*splitter*/,
               std::vector<PropertyManager *> /* outputs*/) const = 0;

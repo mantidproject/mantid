@@ -1,12 +1,9 @@
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+#ifndef MANTID_CURVEFITTING_Jacobian_H_
+#define MANTID_CURVEFITTING_Jacobian_H_
 
 #include "MantidAPI/Jacobian.h"
-#include "MantidKernel/Exception.h"
-#include <gsl/gsl_matrix.h>
 
 #include <vector>
-#include <stdexcept>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,7 +13,7 @@ An implementation of Jacobian using std::vector.
 @author Roman Tolchenov
 @date 17/02/2012
 
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+Copyright &copy; 2010-2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -96,4 +93,4 @@ public:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/
+#endif /*MANTID_CURVEFITTING_Jacobian_H_*/

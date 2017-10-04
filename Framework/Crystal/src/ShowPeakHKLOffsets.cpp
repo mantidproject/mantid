@@ -8,7 +8,6 @@
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
-using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::PeaksWorkspace_sptr;
 using Mantid::DataObjects::TableWorkspace_sptr;
 using Mantid::DataObjects::Peak;

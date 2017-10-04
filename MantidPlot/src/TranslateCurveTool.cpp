@@ -45,8 +45,8 @@ TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app,
                                        Direction dir,
                                        const QObject *status_target,
                                        const char *status_slot)
-    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(NULL),
-      d_selected_curve(NULL), d_curve_point(), d_app(app) {
+    : PlotToolInterface(graph), d_dir(dir), d_sub_tool(nullptr),
+      d_selected_curve(nullptr), d_curve_point(), d_app(app) {
   if (status_target)
     connect(this, SIGNAL(statusText(const QString &)), status_target,
             status_slot);
@@ -81,7 +81,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
           tr("The column '%1' is read-only! Operation aborted!")
               .arg(c->xColumnName()));
       delete d_sub_tool;
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     } else if (d_dir == Vertical &&
                t->isReadOnlyColumn(t->colIndex(c->title().text()))) {
@@ -90,7 +90,7 @@ void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve,
           tr("The column '%1' is read-only! Operation aborted!")
               .arg(c->title().text()));
       delete d_sub_tool;
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     }
   }
@@ -136,7 +136,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
           func->loadData();
         }
       }
-      d_graph->setActiveTool(NULL);
+      d_graph->setActiveTool(nullptr);
       return;
     }
   } else if (DataCurve *c = dynamic_cast<DataCurve *>(d_selected_curve)) {
@@ -187,7 +187,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point) {
     }
     d_app->updateCurves(tab, col_name);
     d_app->modifiedProject();
-    d_graph->setActiveTool(NULL);
+    d_graph->setActiveTool(nullptr);
     // attention: I'm now deleted. Maybe there is a cleaner solution...*/
   }
 }

@@ -35,8 +35,7 @@ class ExpandCommand : public CommandBase {
 public:
   ExpandCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  ExpandCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  ExpandCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~ExpandCommand(){};
 
   void execute() override {

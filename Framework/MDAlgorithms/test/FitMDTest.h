@@ -36,10 +36,10 @@ public:
   signal_t getNormalizedError() const override;
   signal_t getSignal() const override { return 0; }
   signal_t getError() const override { return 0; }
-  coord_t *getVertexesArray(size_t &) const override { return NULL; }
+  coord_t *getVertexesArray(size_t &) const override { return nullptr; }
   coord_t *getVertexesArray(size_t &, const size_t,
                             const bool *) const override {
-    return NULL;
+    return nullptr;
   }
   Mantid::Kernel::VMD getCenter() const override;
   size_t getNumEvents() const override { return 0; }
