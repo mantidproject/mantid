@@ -11,8 +11,8 @@ template <class IndexType>
 std::pair<size_t, size_t>
 findStartAndEndPulses(const std::vector<IndexType> &eventIndex,
                       size_t rangeStart, size_t count, size_t &curr) {
-  size_t startPulse = 0;
-  size_t endPulse = 0;
+  size_t startPulse = curr;
+  size_t endPulse = curr;
 
   size_t pulse = curr;
 
@@ -68,6 +68,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
     std::vector<TimeZeroType> event_time_zero) {
   m_eventIndex = std::move(event_index);
   m_eventTimeZero = std::move(event_time_zero);
+  m_posInEventIndex = 0;
 }
 
 /** Used the detectorIDs supplied to calculate the corresponding global spectrum
@@ -110,17 +111,19 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   auto result = findStartAndEndPulses<IndexType>(m_eventIndex, offset, count,
                                                  m_posInEventIndex);
 
-  for (size_t pulse = result.first; pulse < result.second; ++pulse) {
+  for (size_t pulse = result.first; pulse <= result.second; ++pulse) {
     const auto start =
-        std::max(offset, static_cast<hsize_t>(m_eventIndex[pulse])) - offset;
-    const auto end =
-        std::min(offset + count,
-                 static_cast<hsize_t>(pulse != m_eventIndex.size() - 1
-                                          ? m_eventIndex[pulse + 1]
-                                          : offset + count)) -
+        std::max(
+            (pulse == 0 ? 0 : static_cast<size_t>(m_eventIndex[pulse - 1])),
+            offset) -
         offset;
+    const auto end = std::min(static_cast<size_t>(pulse == m_eventIndex.size()
+                                                      ? offset + count
+                                                      : m_eventIndex[pulse]),
+                              offset + count) -
+                     offset;
 
-    for (size_t i = start; i < end; ++i) {
+    for (IndexType i = start; i < end; ++i) {
       // TODO: select appropriate ranks round robin?
       // int rank = global_spectrum_index[i] % nrank;
       // rank_data[rank].push_back(...)
@@ -171,10 +174,10 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
-  m_future = std::async(
-      std::launch::async, [this, event_id_start, event_time_offset_start, &range] {
-        doParsing(event_id_start, event_time_offset_start, range);
-      });
+  m_future = std::async(std::launch::async, [this, event_id_start,
+                                             event_time_offset_start, &range] {
+    doParsing(event_id_start, event_time_offset_start, range);
+  });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -203,7 +206,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
-  if(m_future.valid())
+  if (m_future.valid())
     m_future.wait();
 }
 
