@@ -6,36 +6,6 @@
 using namespace Mantid::Parallel::IO;
 using Mantid::Types::TofEvent;
 
-namespace {
-template <class IndexType>
-std::pair<size_t, size_t>
-findStartAndEndPulses(const std::vector<IndexType> &eventIndex,
-                      size_t rangeStart, size_t count, size_t &curr) {
-  size_t startPulse = curr;
-  size_t endPulse = curr;
-
-  size_t pulse = curr;
-
-  const auto rangeEnd = rangeStart + count;
-
-  for (; pulse < eventIndex.size(); ++pulse) {
-    size_t icount =
-        (pulse != eventIndex.size() - 1 ? eventIndex[pulse + 1] : rangeEnd) -
-        eventIndex[pulse];
-    if (rangeStart >= static_cast<size_t>(eventIndex[pulse]) &&
-        rangeStart < static_cast<size_t>(eventIndex[pulse]) + icount)
-      startPulse = pulse;
-    if (rangeEnd > static_cast<size_t>(eventIndex[pulse]) &&
-        rangeEnd <= static_cast<size_t>(eventIndex[pulse]) + icount)
-      endPulse = pulse + 1;
-  }
-
-  curr = pulse;
-
-  return {startPulse, endPulse};
-}
-} // namespace
-
 namespace Mantid {
 namespace Parallel {
 namespace IO {
@@ -87,6 +57,35 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     event_id_start[i] -= m_bankOffsets[bankIndex];
 }
 
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+std::pair<size_t, size_t>
+EventParser<IndexType, TimeZeroType, TimeOffsetType>::findStartAndEndPulses(
+    const std::vector<IndexType> &eventIndex, size_t rangeStart, size_t count,
+    size_t &curr) {
+  size_t startPulse = std::min(rangeStart, curr);
+  size_t endPulse = curr;
+
+  size_t pulse = startPulse;
+
+  const auto rangeEnd = rangeStart + count;
+
+  for (; pulse < eventIndex.size(); ++pulse) {
+    size_t icount =
+        (pulse != eventIndex.size() - 1 ? eventIndex[pulse + 1] : rangeEnd) -
+        eventIndex[pulse];
+    if (rangeStart >= static_cast<size_t>(eventIndex[pulse]) &&
+        rangeStart < static_cast<size_t>(eventIndex[pulse]) + icount)
+      startPulse = pulse;
+    if (rangeEnd > static_cast<size_t>(eventIndex[pulse]) &&
+        rangeEnd <= static_cast<size_t>(eventIndex[pulse]) + icount)
+      endPulse = pulse + 1;
+  }
+
+  curr = endPulse;
+
+  return {startPulse, endPulse};
+}
+
 /** Extracts event information from the list of time offsets and global spectrum
  * indices using the event_index and event_time_offset tables provided from
  * file. These events are separated according to MPI ranks.
@@ -108,8 +107,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   auto offset = range.eventOffset;
   auto count = range.eventCount;
   // Determine start and end pulse/s for chunk of data provided.
-  auto result = findStartAndEndPulses<IndexType>(m_eventIndex, offset, count,
-                                                 m_posInEventIndex);
+  auto result =
+      findStartAndEndPulses(m_eventIndex, offset, count, m_posInEventIndex);
 
   for (size_t pulse = result.first; pulse <= result.second; ++pulse) {
     const auto start =
@@ -123,7 +122,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
                               offset + count) -
                      offset;
 
-    for (IndexType i = start; i < end; ++i) {
+    for (size_t i = static_cast<size_t>(start); i < static_cast<size_t>(end);
+         ++i) {
       // TODO: select appropriate ranks round robin?
       // int rank = global_spectrum_index[i] % nrank;
       // rank_data[rank].push_back(...)
@@ -216,8 +216,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::finalize() const {
 }
 
 // Template Specialization Exports
+template class DLLExport EventParser<int32_t, int32_t, int32_t>;
+template class DLLExport EventParser<int32_t, int32_t, int64_t>;
 template class DLLExport EventParser<int32_t, int64_t, int32_t>;
+template class DLLExport EventParser<int32_t, int64_t, int64_t>;
 template class DLLExport EventParser<int64_t, int64_t, double>;
+template class DLLExport EventParser<int32_t, int64_t, double>;
+template class DLLExport EventParser<int32_t, int32_t, double>;
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
