@@ -21,6 +21,13 @@ Powder Diffraction
 Single Crystal Diffraction
 --------------------------
 
+.. figure:: ../../images/SingleCrystalDiffuseReduction_corelli_multiple_sym_bkg.png
+   :class: screenshot
+   :width: 385px
+   :align: center
+
+   SingleCrystalDiffuseReduction output from CORELLI data.
+
 - New algorithm :ref:`SingleCrystalDiffuseReduction <algm-SingleCrystalDiffuseReduction>` which performs the most common reductions done on Corelli (and elsewhere) for single crystal diffuse scattering.
 - New algorithm :ref:`ConvertMultipleRunsToSingleCrystalMD <algm-ConvertMultipleRunsToSingleCrystalMD>` which loads, converts to single crystal MDWorkspace and combines a series of runs.
 - :ref:`FindPeaksMD <algm-FindPeaksMD>` has been modified to only add peaks to runs that contributed to that peak. This is a lot faster when multiple runs are in the same MDworkspace.
