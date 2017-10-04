@@ -325,7 +325,7 @@ def fitting_algorithm(f):
         # Deal with case where function is a FunctionWrapper.
         if isinstance(function,FunctionWrapper):
             function = function.__str__()
-
+            
         # Create and execute
         algm = _create_algorithm_object(function_name)
         _set_logging_option(algm, kwargs)
