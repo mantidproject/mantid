@@ -416,7 +416,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             num_runs = len(self._sample_runs)
 
             if num_runs % num_ranges == 0:
-                self._man_d_range = list(itertools.repeat(self._man_d_range, (num_runs / num_ranges)))
+                self._man_d_range = list(self._man_d_range * (num_runs / num_ranges))
             elif num_runs != num_ranges:
                 raise ValueError("Less D-Ranges supplied than Sample Runs. Expected " + str(num_runs)
                                  + ", Received " + str(num_ranges) + ".")
@@ -430,7 +430,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                 self._get_properties()
             except ValueError as exc:
                 issues['DRange'] = str(exc)
-
         num_samples = len(self._sample_runs)
         num_vanadium = len(self._vanadium_runs)
 
