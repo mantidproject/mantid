@@ -48,8 +48,8 @@ Usage
    # Show positions in 2nd workspace before CopyInstrumrentParameters
    for i in spectra:
         det = ws2.getDetector(i)
-        print "Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
-                det.getPos().X(), det.getPos().Y(), det.getPos().Z())
+        print("Position of Detector ID=%i in 2nd workspace before CopyInstrumentParameters: %.0f,%.0f,%.0f" % (det.getID(), 
+                det.getPos().X(), det.getPos().Y(), det.getPos().Z()))
   
   
    # Copy paremeters from 1st workspace to 2nd workspace

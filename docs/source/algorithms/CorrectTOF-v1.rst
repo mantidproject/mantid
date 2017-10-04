@@ -63,7 +63,7 @@ Usage
     # apply correction
     wscorr = CorrectTOF(ws, table)
 
-    print("Correction term dt = t_el - t_table =  {}".format(8190.02 - 8128.59, 2))
+    print("Correction term dt = t_el - t_table =  {:.2f}".format(8190.02 - 8128.59, 2))
     difference = wscorr.readX(0) - ws.readX(0)
     print("Difference between input and corrected workspaces:  {}".format(round(difference[10],2)))
 
