@@ -422,14 +422,15 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                                  + ", Received " + str(num_ranges) + ".")
 
     def validateInputs(self):
-
         issues = dict()
 
-        if self._man_d_range is not None:
-            try:
-                self._get_properties()
-            except ValueError as exc:
-                issues['DRange'] = str(exc)
+        try:
+            self._get_properties()
+        except ValueError as exc:
+            issues['DRange'] = str(exc)
+        except RuntimeError as exc:
+            issues['Sample'] = str(exc)
+
         num_samples = len(self._sample_runs)
         num_vanadium = len(self._vanadium_runs)
 
