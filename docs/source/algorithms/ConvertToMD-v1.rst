@@ -230,7 +230,7 @@ This example produces 3-dimensional dataset, with a temperature axis.
    try:
         DeleteWorkspace(RezWS)
    except ValueError:
-        print("Target ws ",RezWS," not found in analysis data service\n")
+        print("Target ws  {}  not found in analysis data service\n".format(RezWS))
    
    # define convert to MD parameters
    pars = dict();
