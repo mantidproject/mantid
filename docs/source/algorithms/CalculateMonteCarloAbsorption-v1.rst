@@ -41,12 +41,19 @@ Usage
                                       XMin=-0.5,
                                       XMax=0.5,
                                       BinWidth=0.01)
+    # Efixed is generally defined as part of the IDF for real data.
+    # Fake it here
+    inst_name = sample_ws.getInstrument().getName()
+    SetInstrumentParameter(sample_ws, ComponentName=inst_name, 
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     container_ws = CreateSampleWorkspace(Function="Quasielastic",
                                          XUnit="Wavelength",
                                          XMin=-0.5,
                                          XMax=0.5,
                                          BinWidth=0.01)
+    SetInstrumentParameter(container_ws, ComponentName=inst_name,
+        ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     corrections = CalculateMonteCarloAbsorption(SampleWorkspace = sample_ws,
                                                 SampleChemicalFormula = 'H2-O',
