@@ -47,6 +47,11 @@ class FluxNormMethod:
     OFF = 'Normalisation OFF'
 
 
+class SlitNorm:
+    OFF = 'Slit Normalisation OFF'
+    ON = 'Slit Normalisation ON'
+
+
 class SubalgLogging:
     OFF = 'Logging OFF'
     ON = 'Logging ON'
@@ -56,11 +61,6 @@ class Summation:
     COHERENT = 'Coherent'
     INCOHERENT = 'Incoherent'
     OFF = 'Summation OFF'
-
-
-class SlitNorm:
-    OFF = 'Slit Normalisation OFF'
-    ON = 'Slit Normalisation ON'
 
 
 def normalisationMonitorWorkspaceIndex(ws):
@@ -160,8 +160,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='A beam position table from a direct beam measurement.')
         self.declareProperty(Prop.SLIT_NORM,
-                             defaultValue=SlitNorm.ON,
-                             validator=StringListValidator([SlitNorm.ON, SlitNorm.OFF]),
+                             defaultValue=SlitNorm.OFF,
+                             validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
                              doc='Enable or disable slit normalisation.')
         self.declareProperty(Prop.FLUX_NORM_METHOD,
                              defaultValue=FluxNormMethod.MONITOR,
