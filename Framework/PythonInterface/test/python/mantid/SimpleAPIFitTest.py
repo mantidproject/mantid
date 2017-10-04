@@ -6,8 +6,11 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 import platform
+
 from mantid.simpleapi import CreateWorkspace, Fit, FitDialog, FunctionWrapper
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, IFunction
+
+
 import numpy as np
 from testhelpers import run_algorithm
 
@@ -47,9 +50,8 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         retvals = Fit("name=FlatBackground", self._raw_ws)
-        self.assertEquals(len(retvals), 2)
-        self.assertTrue(isinstance(retvals[0], str))
-        self.assertTrue(isinstance(retvals[1], float))
+        self.assertTrue(isinstance(retvals.OutputStatus, str))
+        self.assertTrue(isinstance(retvals.OutputChi2overDoF, float))
 
     def test_function_accepts_all_arguments_as_keywords(self):
         if  platform.system() == 'Darwin': # crashes
@@ -83,13 +85,13 @@ class SimpleAPIFitTest(unittest.TestCase):
         self.assertTrue(output_name + '_Workspace' in mtd)
 
     def _check_returns_are_correct_type_with_workspaces(self, retvals):
-        self.assertEquals(len(retvals), 5)
-        self.assertTrue(isinstance(retvals[0], str))
-        self.assertTrue(isinstance(retvals[1], float))
-        self.assertTrue(isinstance(retvals[2], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[3], ITableWorkspace))
-        self.assertTrue(isinstance(retvals[4], MatrixWorkspace))
-
+        self.assertTrue(isinstance(retvals.OutputStatus, str))
+        self.assertTrue(isinstance(retvals.OutputChi2overDoF, float))
+        self.assertTrue(isinstance(retvals.OutputNormalisedCovarianceMatrix, ITableWorkspace))
+        self.assertTrue(isinstance(retvals.OutputParameters, ITableWorkspace))
+        self.assertTrue(isinstance(retvals.OutputWorkspace, MatrixWorkspace))
+        self.assertTrue(isinstance(retvals.Function, FunctionWrapper))
+        self.assertTrue(isinstance(retvals.CostFunction, str))
 
     def test_that_dialog_call_raises_runtime_error(self):
         try:

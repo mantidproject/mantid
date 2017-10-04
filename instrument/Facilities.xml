@@ -363,6 +363,11 @@
     </livedata>
   </instrument>
 
+  <instrument name="ZOOM">
+    <technique>Small Angle Scattering</technique>
+    <zeropadding size="8"/>
+  </instrument>
+
 </facility>
 
 
@@ -650,6 +655,10 @@
     <technique>Reflectometry</technique>
   </instrument>
 
+  <instrument name="Figaro">
+    <technique>Reflectometry</technique>
+  </instrument>
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
@@ -816,11 +825,6 @@
     <livedata>
       <connection name="kafka_event" address="sakura:9092" listener="KafkaEventListener" />
     </livedata>
-  </instrument>
-
-  <instrument name="ZOOM">
-    <technique>Small Angle Scattering</technique>
-    <zeropadding size="8"/>
   </instrument>
 
 </facility>

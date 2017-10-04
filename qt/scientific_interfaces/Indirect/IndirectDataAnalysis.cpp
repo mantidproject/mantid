@@ -3,12 +3,12 @@
 //----------------------
 #include "IndirectDataAnalysis.h"
 
+#include "ConvFit.h"
 #include "Elwin.h"
-#include "MSDFit.h"
 #include "Iqt.h"
 #include "IqtFit.h"
 #include "JumpFit.h"
-#include "ConvFit.h"
+#include "MSDFit.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"

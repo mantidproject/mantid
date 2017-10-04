@@ -306,15 +306,16 @@ void LineProfile::init() {
   declareProperty(PropertyNames::HALF_WIDTH, EMPTY_DBL(),
                   mandatoryPositiveDouble,
                   "Half of the width over which to calcualte the profile.");
-  const std::set<std::string> directions{DirectionChoices::HORIZONTAL,
-                                         DirectionChoices::VERTICAL};
+  const std::array<std::string, 2> directions = {
+      {DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL}};
   declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
                   boost::make_shared<ListValidator<std::string>>(directions),
                   "Orientation of the profile line.");
   declareProperty(PropertyNames::START, EMPTY_DBL(),
                   "Starting point of the line.");
   declareProperty(PropertyNames::END, EMPTY_DBL(), "End point of the line.");
-  const std::set<std::string> modes{ModeChoices::AVERAGE, ModeChoices::SUM};
+  const std::array<std::string, 2> modes = {
+      {ModeChoices::AVERAGE, ModeChoices::SUM}};
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
                   boost::make_shared<ListValidator<std::string>>(modes),
                   "How the profile is calculated over the line width.");
@@ -413,9 +414,13 @@ void LineProfile::exec() {
   // specified.
   Box actualBounds;
   actualBounds.top = verticalBins[vertInterval.first];
-  actualBounds.bottom = verticalBins[vertInterval.second];
+  actualBounds.bottom = vertInterval.second < verticalBins.size()
+                            ? verticalBins[vertInterval.second]
+                            : verticalBins.back();
   actualBounds.left = horizontalBins[horInterval.first];
-  actualBounds.right = horizontalBins[horInterval.second];
+  actualBounds.right = horInterval.second < horizontalBins.size()
+                           ? horizontalBins[horInterval.second]
+                           : horizontalBins.back();
   setAxesAndUnits(*outWS, *ws, actualBounds, dir);
   setProperty(PropertyNames::OUTPUT_WORKSPACE, outWS);
 }

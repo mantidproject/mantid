@@ -1209,9 +1209,8 @@ class TransParser(UserFileComponentParser):
 
         # Trans Spec Shift
         self._shift = "\\s*/\\s*SHIFT\\s*=\\s*"
-        self._trans_spec_4 = self._trans_spec + "4"
-        self._trans_spec_shift_pattern = re.compile(start_string + self._trans_spec_4 + self._shift + float_number +
-                                                    end_string)
+        self._trans_spec_shift_pattern = re.compile(start_string + self._trans_spec + integer_number + self._shift +
+                                                    float_number + end_string)
 
         # Radius
         self._radius = "\\s*RADIUS\\s*=\\s*"
@@ -1288,10 +1287,20 @@ class TransParser(UserFileComponentParser):
         return {TransId.spec: trans_spec}
 
     def _extract_trans_spec_shift(self, line):
-        trans_spec_shift_string = re.sub(self._trans_spec_4, "", line)
+        # Get the transpec
+        trans_spec_string = re.sub(self._trans_spec, "", line)
+        to_remove = re.compile(self._shift + float_number)
+        trans_spec_string = re.sub(to_remove, "", trans_spec_string)
+        trans_spec_string = re.sub(" ", "", trans_spec_string)
+        trans_spec = int(trans_spec_string)
+
+        # Get the shift
+        to_remove = re.compile(self._trans_spec + integer_number)
+        trans_spec_shift_string = re.sub(to_remove, "", line)
         trans_spec_shift_string = re.sub(self._shift, "", trans_spec_shift_string)
+        trans_spec_shift_string = re.sub(" ", "", trans_spec_shift_string)
         trans_spec_shift = convert_string_to_float(trans_spec_shift_string)
-        return {TransId.spec_shift: trans_spec_shift, TransId.spec: 4}
+        return {TransId.spec_shift: trans_spec_shift, TransId.spec: trans_spec}
 
     def _extract_radius(self, line):
         radius_string = re.sub(self._radius, "", line)

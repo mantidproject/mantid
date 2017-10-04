@@ -1701,7 +1701,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   s << "  layer = window.activeLayer()";
   s << "  if layer is not None:";
   s << "    kept_fits = 0";
-  s << "    for i in range(layer.numCurves() - 1, -1, -1):"; // reversed
+  s << "    for i in range(layer.numCurves() - 1, 0, -1):"; // reversed
   s << "      title = layer.curveTitle(i)";
   s << "      if title == \"CompositeFunction\":";
   s << "        continue"; // keep all guesses
@@ -1712,6 +1712,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
 
   // Plot data in the given window with given options
   s << "def plot_data(ws_name,errors, connect, window_to_use):";
+  bool addToTable = false;
   if (parsePlotType(m_uiForm.frontPlotFuncs) == PlotType::Asymmetry) {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1721,6 +1722,8 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
          "type = connect,"
          "window = window_to_use)";
     // clang-format on
+    // set if TFAsymm is on or off
+    addToTable = getIfTFAsymmStore();
   } else {
     // clang-format off
     s << "  w = plotSpectrum(source = ws_name,"
@@ -1764,8 +1767,15 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   // Plot the data!
   s << "win = get_window('%WSNAME%', '%PREV%', %USEPREV%)";
   s << "if %FITSTOKEEP% != -1:";
+  // leave the 0th layer -> layer is not empty
   s << "  remove_data(win, %FITSTOKEEP%)";
   s << "g = plot_data('%WSNAME%', %ERRORS%, %CONNECT%, win)";
+  // if there is more than one layer delete the oldest one manually
+  s << "if %FITSTOKEEP% != -1:";
+  s << "  layer = win.activeLayer()";
+  s << "  if layer.numCurves()>1:";
+  s << "     layer.removeCurve(0)";
+
   s << "format_graph(g, '%WSNAME%', %LOGSCALE%, %YAUTO%, '%YMIN%', '%YMAX%')";
 
   QString pyS;
@@ -1797,7 +1807,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
   }
 
   runPythonCode(pyS);
-  m_fitDataPresenter->storeNormalization(safeWSName.toStdString());
+  m_fitDataPresenter->storeNormalization(safeWSName.toStdString(), addToTable);
 }
 
 /**
@@ -2193,6 +2203,7 @@ void MuonAnalysis::handleGroupBox() {
     updateLabels(names[0]);
   }
   m_fitDataPresenter->handleSelectedDataChanged(true);
+  m_dataSelector->checkForMultiGroupPeriodSelection();
 }
 /**
 * Handle"periods" selected/deselected
@@ -2939,7 +2950,6 @@ Workspace_sptr
 MuonAnalysis::groupWorkspace(const std::string &wsName,
                              const std::string &groupingName) const {
   ScopedWorkspace outputEntry;
-
   // Use MuonProcess in "correct and group" mode.
   // No dead time correction so all it does is group the workspaces.
   try {
@@ -2959,7 +2969,8 @@ MuonAnalysis::groupWorkspace(const std::string &wsName,
     groupAlg->setProperty("xmax", m_dataSelector->getEndTime());
 
     groupAlg->execute();
-    m_fitDataPresenter->storeNormalization(wsName);
+    bool addToTable = getIfTFAsymmStore();
+    m_fitDataPresenter->storeNormalization(wsName, addToTable);
 
   } catch (std::exception &e) {
     throw std::runtime_error("Unable to group workspace:\n\n" +
@@ -3191,6 +3202,13 @@ void MuonAnalysis::setAnalysisTabsEnabled(const bool enabled) {
     const auto &index = m_uiForm.tabWidget->indexOf(tab);
     m_uiForm.tabWidget->setTabEnabled(index, enabled);
   }
+}
+
+bool MuonAnalysis::getIfTFAsymmStore() const {
+  Muon::AnalysisOptions options(m_groupingHelper.parseGroupingTable());
+  bool value =
+      m_dataLoader.isContainedIn(m_groupPairName, options.grouping.groupNames);
+  return value;
 }
 
 } // namespace MantidQt

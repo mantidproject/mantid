@@ -39,7 +39,7 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        from Interface.reduction_gui.reduction.inelastic import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         SampleSetupScript.monitor1_specid = str(int(ip.get_parameter("ei-mon1-spec")))
         SampleSetupScript.monitor2_specid = str(int(ip.get_parameter("ei-mon2-spec")))

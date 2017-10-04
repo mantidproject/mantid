@@ -1,6 +1,8 @@
 #ifndef MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_
 #define MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_
 
+#include <math.h>
+
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -13,24 +15,26 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace {
-void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
-  phaseTable->addColumn("int", "DetectorID");
-  phaseTable->addColumn("double", "DetectorAsymmetry");
-  phaseTable->addColumn("double", "DetectorPhase");
+
+void populatePhaseTable(ITableWorkspace_sptr phaseTable,
+                        std::vector<std::string> names) {
+  phaseTable->addColumn("int", names[0]);
+  phaseTable->addColumn("double", names[1]);
+  phaseTable->addColumn("double", names[2]);
+
   for (int i = 0; i < 16; i++) {
     TableRow phaseRow1 = phaseTable->appendRow();
-    phaseRow1 << i << 1. << 0.;
+    phaseRow1 << i << 1. << 2. * M_PI *double(i) / 16.;
     TableRow phaseRow2 = phaseTable->appendRow();
-    phaseRow2 << i << 1. << 1.57;
+    phaseRow2 << i << 1. << 2. * M_PI *double(i) / 16.;
   }
 }
+void populatePhaseTable(ITableWorkspace_sptr phaseTable) {
+  populatePhaseTable(phaseTable, {"DetectorID", "Asymmetry", "Phase"});
+}
 
-IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
-  // Create and populate a detector table
-  boost::shared_ptr<ITableWorkspace> phaseTable(
-      new Mantid::DataObjects::TableWorkspace);
-  populatePhaseTable(phaseTable);
-
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+                         ITableWorkspace_sptr phaseTable) {
   // Set up PhaseQuad
   IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
   phaseQuad->setChild(isChildAlg);
@@ -39,6 +43,25 @@ IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
   phaseQuad->setProperty("PhaseTable", phaseTable);
   phaseQuad->setPropertyValue("OutputWorkspace", "outputWs");
   return phaseQuad;
+}
+
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg) {
+  // Create and populate a detector table
+  boost::shared_ptr<ITableWorkspace> phaseTable(
+      new Mantid::DataObjects::TableWorkspace);
+  populatePhaseTable(phaseTable);
+
+  return setupAlg(inputWs, isChildAlg, phaseTable);
+}
+
+IAlgorithm_sptr setupAlg(MatrixWorkspace_sptr inputWs, bool isChildAlg,
+                         std::vector<std::string> names) {
+  // Create and populate a detector table
+  boost::shared_ptr<ITableWorkspace> phaseTable(
+      new Mantid::DataObjects::TableWorkspace);
+  populatePhaseTable(phaseTable, names);
+
+  return setupAlg(inputWs, isChildAlg, phaseTable);
 }
 
 MatrixWorkspace_sptr loadMuonDataset() {
@@ -87,22 +110,85 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], -0.9982, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.0252, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 0.0264, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], -0.0531, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], -0.0013, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], 0.0048, 0.0001);
     // Check real E values
-    TS_ASSERT_DELTA(specReE[0], 0.0010, 0.0001);
-    TS_ASSERT_DELTA(specReE[20], 0.0021, 0.0001);
-    TS_ASSERT_DELTA(specReE[50], 0.0024, 0.0001);
+    TS_ASSERT_DELTA(specReE[0], 0.0016, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0025, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0029, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.9974, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], 0.0115, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0316, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -0.7030, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], -0.0096, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0254, 0.0001);
     // Check imaginary E values
-    TS_ASSERT_DELTA(specImE[0], 0.0029, 0.0001);
-    TS_ASSERT_DELTA(specImE[20], 0.0031, 0.0001);
-    TS_ASSERT_DELTA(specImE[50], 0.0035, 0.0001);
+    TS_ASSERT_DELTA(specImE[0], 0.0012, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.0027, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.0031, 0.0001);
   }
+  void testNoPhase() {
+    std::vector<std::string> names = {"ID", "Asym", "dummy"};
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+  }
+  void testNoAsymm() {
+    std::vector<std::string> names = {"ID", "AsYMg", "phase"};
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+  }
+  void testTwoPhases() {
+    std::vector<std::string> names = {"ID", "Phase", "phi"};
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+  }
+  void testTwoAsymm() {
+    std::vector<std::string> names = {"ID", "Asym", "Asymm"};
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS(phaseQuad->execute(), std::runtime_error);
+  }
+  void testSwapOrder() {
+    std::vector<std::string> names = {"ID", "phase", "Asymm"};
+    MatrixWorkspace_sptr inputWs = loadMuonDataset();
+    IAlgorithm_sptr phaseQuad = setupAlg(inputWs, true, names);
+    TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
+    TS_ASSERT(phaseQuad->isExecuted());
+
+    // Get the output ws
+    MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(
+        outputWs->getSpectrum(0).readX(),
+        inputWs->getSpectrum(0).readX()); // Check outputWs X values
+    TS_ASSERT_EQUALS(outputWs->getSpectrum(1).readX(),
+                     inputWs->getSpectrum(1).readX());
+
+    const auto specReY = outputWs->getSpectrum(0).y();
+    const auto specReE = outputWs->getSpectrum(0).e();
+    const auto specImY = outputWs->getSpectrum(1).y();
+    const auto specImE = outputWs->getSpectrum(1).e();
+    // Check real Y values
+    TS_ASSERT_DELTA(specReY[0], -3.9473, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], -0.1183, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], 0.0504, 0.0001);
+    // Check real E values
+    TS_ASSERT_DELTA(specReE[0], 0.0054, 0.0001);
+    TS_ASSERT_DELTA(specReE[20], 0.0081, 0.0001);
+    TS_ASSERT_DELTA(specReE[50], 0.0093, 0.0001);
+    // Check imaginary Y values
+    TS_ASSERT_DELTA(specImY[0], 0.4317, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], 0.0058, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0058, 0.0001);
+    // Check imaginary E values
+    TS_ASSERT_DELTA(specImE[0], 0.0017, 0.0001);
+    TS_ASSERT_DELTA(specImE[20], 0.0034, 0.0001);
+    TS_ASSERT_DELTA(specImE[50], 0.0039, 0.0001);
+  }
+  // add test for different order
 };
 
 class PhaseQuadMuonTestPerformance : public CxxTest::TestSuite {

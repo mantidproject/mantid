@@ -458,15 +458,15 @@ class StateDirectorISIS(object):
         # Monitor 4 offset; for now this is only SANS2D
         # ---------------------------
         if TransId.spec_shift in user_file_items:
-            monitor_4_shift = user_file_items[TransId.spec_shift]
+            monitor_n_shift = user_file_items[TransId.spec_shift]
             # Should the user have chosen several values, then the last element is selected
-            check_if_contains_only_one_element(monitor_4_shift, TransId.spec_shift)
-            monitor_4_shift = monitor_4_shift[-1]
-            set_monitor_4_offset = getattr(self._move_builder, "set_monitor_4_offset", None)
-            if isinstance(set_monitor_4_offset, collections.Callable):
-                self._move_builder.set_monitor_4_offset(convert_mm_to_m(monitor_4_shift))
+            check_if_contains_only_one_element(monitor_n_shift, TransId.spec_shift)
+            monitor_n_shift = monitor_n_shift[-1]
+            set_monitor_n_offset = getattr(self._move_builder, "set_monitor_n_offset", None)
+            if isinstance(set_monitor_n_offset, collections.Callable):
+                self._move_builder.set_monitor_n_offset(convert_mm_to_m(monitor_n_shift))
             else:
-                log_non_existing_field("set_monitor_4_offset")
+                log_non_existing_field("set_monitor_n_offset")
 
         # ---------------------------
         # Beam Centre, this can be for HAB and LAB
@@ -1056,11 +1056,16 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if not spec.is_trans]
-            mon_spec = mon_spec[-1]
+
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._normalize_to_monitor_builder.set_rebin_type(rebin_type)
-                self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
+
+                #  We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The prompt peak correction values
         set_prompt_peak_correction(self._normalize_to_monitor_builder, user_file_items)
@@ -1104,11 +1109,15 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
-            mon_spec = mon_spec[-1]
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._calculate_transmission_builder.set_rebin_type(rebin_type)
-                self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
+
+                # We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The general background settings
         set_background_tof_general(self._calculate_transmission_builder, user_file_items)

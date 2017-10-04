@@ -424,6 +424,8 @@ private:
   AspectRatioType m_lastRatioState;
   QwtScaleDrawNonOrthogonal *m_nonOrthAxis0;
   QwtScaleDrawNonOrthogonal *m_nonOrthAxis1;
+
+  bool m_holdDisplayUpdates;
 };
 
 } // namespace SliceViewer

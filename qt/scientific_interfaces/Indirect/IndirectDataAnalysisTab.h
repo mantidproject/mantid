@@ -1,10 +1,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+
+#include <boost/weak_ptr.hpp>
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -15,7 +17,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class RangeSelector;
 }
-}
+} // namespace MantidQt
 
 // Suppress a warning coming out of code that isn't ours
 #if defined(__INTEL_COMPILER)
@@ -26,10 +28,10 @@ class RangeSelector;
 #endif
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -55,6 +57,25 @@ protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
 
+  /// Retrieve input workspace
+  Mantid::API::MatrixWorkspace_sptr inputWorkspace();
+
+  /// Set input workspace
+  void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
+
+  /// Retrieve preview plot workspace
+  Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace();
+
+  /// Set preview plot workspace
+  void setPreviewPlotWorkspace(
+      Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+
+  /// Retrieve the selected spectrum
+  int selectedSpectrum();
+
+  /// Sets the selected spectrum
+  void setSelectedSpectrum(int spectrum);
+
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
@@ -63,6 +84,9 @@ protected:
 protected slots:
   /// Slot that can be called when a user eidts an input.
   void inputChanged();
+
+  /// Plots the current preview data
+  void plotCurrentPreview();
 
 private:
   /// Overidden by child class.
@@ -77,6 +101,9 @@ private:
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
+  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  int m_selectedSpectrum;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

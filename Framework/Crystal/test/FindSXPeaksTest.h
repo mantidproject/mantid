@@ -1,13 +1,19 @@
 #ifndef FIND_SX_PEAKSTEST_H_
 #define FIND_SX_PEAKSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/GroupDetectors2.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidCrystal/FindSXPeaks.h"
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
@@ -35,6 +41,23 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
   overWriteSpectraY(histo, workspace, peaksInY);
 }
 
+/**
+ * Helper function to create the FindSXPeaks algorithm.
+ *
+ * @param workspace :: the workspace to run the algorithm on
+ * @param startIndex :: the workspace index to start searching from
+ * @param endIndex :: the workspace index to stop searching from
+ */
+std::unique_ptr<FindSXPeaks> createFindSXPeaks(Workspace2D_sptr workspace) {
+  auto alg = Mantid::Kernel::make_unique<FindSXPeaks>();
+  alg->setRethrows(true);
+  alg->initialize();
+  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty("OutputWorkspace", "found_peaks");
+
+  return alg;
+}
+
 //=====================================================================================
 // Functional tests
 //=====================================================================================
@@ -45,14 +68,10 @@ public:
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
-    FindSXPeaks alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.setProperty("StartWorkspaceIndex", 3);
-    alg.setProperty("EndWorkspaceIndex", 2);
-    TSM_ASSERT_THROWS("Cannot have start index > end index", alg.execute(),
+    auto alg = createFindSXPeaks(workspace);
+    alg->setProperty("StartWorkspaceIndex", 3);
+    alg->setProperty("EndWorkspaceIndex", 2);
+    TSM_ASSERT_THROWS("Cannot have start index > end index", alg->execute(),
                       std::invalid_argument);
   }
 
@@ -61,12 +80,9 @@ public:
     Workspace2D_sptr workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -82,12 +98,9 @@ public:
     // Stick a peak in histoIndex = 1.
     makeOnePeak(1, 40, 5, workspace);
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -103,17 +116,14 @@ public:
     // Stick a peak in histoIndex = 1.
     makeOnePeak(1, 40, 5, workspace);
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
+    auto alg = createFindSXPeaks(workspace);
     double theresholdIntensity = 40;
-    alg.setProperty("SignalBackground",
-                    theresholdIntensity); // Boost the background intensity
-                                          // threshold level to be the same as
-                                          // that of the peak
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    alg->setProperty("SignalBackground",
+                     theresholdIntensity); // Boost the background intensity
+                                           // threshold level to be the same as
+                                           // that of the peak
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -131,12 +141,9 @@ public:
     makeOnePeak(1, 40, 4, workspace);
     makeOnePeak(1, 60, 6, workspace); // This is the biggest!
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -154,12 +161,9 @@ public:
     makeOnePeak(2, 60, 2, workspace);
     makeOnePeak(3, 45, 2, workspace); // This is the biggest!
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -193,13 +197,9 @@ public:
     grouping.execute();
     MatrixWorkspace_sptr grouped = grouping.getProperty("OutputWorkspace");
     std::cout << grouped->getNumberHistograms() << '\n';
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", grouped);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.setRethrows(true);
-    TSM_ASSERT_THROWS_NOTHING("FindSXPeak should have thrown.", alg.execute());
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    TSM_ASSERT_THROWS_NOTHING("FindSXPeak should have thrown.", alg->execute());
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
   }
 
   void testUseWorkspaceRangeCropping() {
@@ -211,17 +211,14 @@ public:
     // One peak at a late part (bin) in range
     makeOnePeak(1, 40, 9, workspace);
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
+    auto alg = createFindSXPeaks(workspace);
 
     double rangeLower = 2;
     double rangeUpper = 8;
-    alg.setProperty("RangeLower", rangeLower);
-    alg.setProperty("RangeUpper", rangeUpper);
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    alg->setProperty("RangeLower", rangeLower);
+    alg->setProperty("RangeUpper", rangeUpper);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -238,18 +235,16 @@ public:
     makeOnePeak(1, 40, 5, workspace);
     makeOnePeak(9, 40, 5, workspace);
 
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
+    auto alg = createFindSXPeaks(workspace);
+
     // Crop leaving only the narrow few histos in the center of the workspace.
     int startIndex = 2;
     int endIndex = 4;
-    alg.setProperty("StartWorkspaceIndex", startIndex);
-    alg.setProperty("EndWorkspaceIndex", endIndex);
+    alg->setProperty("StartWorkspaceIndex", startIndex);
+    alg->setProperty("EndWorkspaceIndex", endIndex);
 
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -265,12 +260,9 @@ public:
     makeOnePeak(1, 40, 5, workspace);
 
     // Get baseline for Q of Peak
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", workspace);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -285,12 +277,9 @@ public:
     workspace->mutableRun().setGoniometer(gonio, false);
 
     // Find peaks again
-    FindSXPeaks alg2;
-    alg2.initialize();
-    alg2.setProperty("InputWorkspace", workspace);
-    alg2.setProperty("OutputWorkspace", "found_peaks");
-    alg2.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg2.isExecuted());
+    alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
@@ -305,6 +294,81 @@ public:
     TSM_ASSERT_DELTA("Q_y should be inverted!", qNoRot.Y(), qRot.Y() * (-1),
                      10e-10);
     TSM_ASSERT_DELTA("Q_z should be unchanged!", qNoRot.Z(), qRot.Z(), 10e-10);
+  }
+
+  void testFindBiggestPeakInSpectraWithDSpacing() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+
+    // Change units of workspace
+    const auto xAxis = workspace->getAxis(0);
+    xAxis->setUnit("dSpacing");
+
+    // Stick three peaks in histoIndex = 1.
+    makeOnePeak(1, 30, 2, workspace);
+    makeOnePeak(1, 40, 4, workspace);
+    makeOnePeak(1, 60, 6, workspace); // This is the biggest!
+
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found one peak!", 1, result->rowCount());
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
+                      result->getPeak(0).getIntensity());
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 821.43,
+                     result->getPeak(0).getTOF(), 1e-2);
+  }
+
+  void testFindManyPeaksInSpectraWithDSpacing() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace =
+        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+
+    const auto xAxis = workspace->getAxis(0);
+    xAxis->setUnit("dSpacing");
+
+    // Stick three peaks in different histograms.
+    makeOnePeak(1, 40, 2, workspace);
+    makeOnePeak(4, 60, 5, workspace);
+    makeOnePeak(8, 45, 8, workspace);
+
+    auto alg = createFindSXPeaks(workspace);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
+
+    IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
+
+    std::array<double, 3> results;
+    results[0] = result->getPeak(0).getIntensity();
+    results[1] = result->getPeak(1).getIntensity();
+    results[2] = result->getPeak(2).getIntensity();
+    std::sort(results.begin(), results.end(), std::less<double>());
+
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 40,
+                      results[0]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 45,
+                      results[1]);
+    TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60,
+                      results[2]);
+
+    std::array<double, 3> tof;
+    tof[0] = result->getPeak(0).getTOF();
+    tof[1] = result->getPeak(1).getTOF();
+    tof[2] = result->getPeak(2).getTOF();
+    std::sort(tof.begin(), tof.end(), std::less<double>());
+
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 315.938, tof[0],
+                     1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 2775.689, tof[1],
+                     1e-1);
+    TSM_ASSERT_DELTA("Wrong peak TOF matched on found peak", 8534.953, tof[2],
+                     1e-1);
   }
 };
 
@@ -335,12 +399,9 @@ public:
   }
 
   void testSXPeakFinding() {
-    FindSXPeaks alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", m_workspace2D);
-    alg.setProperty("OutputWorkspace", "found_peaks");
-    alg.execute();
-    TSM_ASSERT("FindSXPeak should have been executed.", alg.isExecuted());
+    auto alg = createFindSXPeaks(m_workspace2D);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
 
     IPeaksWorkspace_sptr result = boost::dynamic_pointer_cast<IPeaksWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));

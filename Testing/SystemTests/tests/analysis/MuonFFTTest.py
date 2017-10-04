@@ -14,8 +14,8 @@ class MuonFFTTest(stresstesting.MantidStressTest):
         # create a PhaseTable with detector information
         tab = CreateEmptyTableWorkspace()
         tab.addColumn('int', 'DetID')
-        tab.addColumn('double', 'Phase')
         tab.addColumn('double', 'Asym')
+        tab.addColumn('double', 'Phase')
         for i in range(0,32):
             phi = 2*pi*i/32.
             tab.addRow([i + 1, 0.2, phi])

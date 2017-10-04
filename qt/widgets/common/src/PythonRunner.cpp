@@ -47,7 +47,9 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   QString tmpstring = tmp_file.fileName();
   tmp_file.close();
   QString code_to_run =
-      "import sys; sys.stdout = open(\"" + tmpstring + "\", 'w');\n" + code;
+      "from __future__ import (absolute_import, division, print_function)\n"
+      "import sys; sys.stdout = open(\"" +
+      tmpstring + "\", 'w');\n" + code;
   emit runAsPythonScript(code_to_run, true);
 
   // Now get the output

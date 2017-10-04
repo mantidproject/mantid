@@ -48,7 +48,8 @@ class IBeamProfile;
 class MANTID_ALGORITHMS_DLL MCInteractionVolume {
 public:
   MCInteractionVolume(const API::Sample &sample,
-                      const Geometry::BoundingBox &activeRegion);
+                      const Geometry::BoundingBox &activeRegion,
+                      const size_t maxScatterAttempts = 5000);
   // No creation from temporaries as we store a reference to the object in
   // the sample
   MCInteractionVolume(const API::Sample &&sample,
@@ -64,6 +65,7 @@ private:
   const Geometry::Object &m_sample;
   const Geometry::SampleEnvironment *m_env;
   const Geometry::BoundingBox m_activeRegion;
+  const size_t m_maxScatterAttempts;
 };
 
 } // namespace Algorithms

@@ -100,7 +100,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
       const auto &x = output->x(i);
       const auto &y = output->y(i);
       const auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_DELTA(y[j], 2, 0.00001)
         TS_ASSERT_DELTA(e[j], 3.05941, 0.00001)
@@ -111,7 +111,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
     const auto &monX = output->x(0);
     const auto &monY = output->y(0);
     const auto &monE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monY.size(); ++k) {
       TS_ASSERT_EQUALS(monX[k], k)
       TS_ASSERT_DELTA(monY[k], 10, 0.00001)
       TS_ASSERT_DELTA(monE[k], 4.24264, 0.00001)
@@ -203,7 +203,7 @@ public:
       auto &x = output->x(i);
       auto &y = output->y(i);
       auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_EQUALS(y[j], 0.04)
         TS_ASSERT_DELTA(e[j], 0.0602, 0.0001)
@@ -214,7 +214,7 @@ public:
     auto &monitorX = output->x(0);
     auto &monitorY = output->y(0);
     auto &monitorE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monitorY.size(); ++k) {
       TS_ASSERT_EQUALS(monitorX[k], k)
       TS_ASSERT_EQUALS(monitorY[k], 0.2)
       TS_ASSERT_DELTA(monitorE[k], 0.0657, 0.0001)
@@ -254,7 +254,7 @@ public:
       auto &x = output->x(i);
       auto &y = output->y(i);
       auto &e = output->e(i);
-      for (size_t j = 0; j < output->blocksize(); ++j) {
+      for (size_t j = 0; j < y.size(); ++j) {
         TS_ASSERT_EQUALS(x[j], j)
         TS_ASSERT_DELTA(y[j], 0.0323, 0.0001)
         TS_ASSERT_DELTA(e[j], 0.0485, 0.0001)
@@ -265,7 +265,7 @@ public:
     auto &monitorX = output->x(0);
     auto &monitorY = output->y(0);
     auto &monitorE = output->e(0);
-    for (size_t k = 0; k < output->blocksize(); ++k) {
+    for (size_t k = 0; k < monitorY.size(); ++k) {
       TS_ASSERT_EQUALS(monitorX[k], k)
       TS_ASSERT_DELTA(monitorY[k], 0.1613, 0.0001)
       TS_ASSERT_DELTA(monitorE[k], 0.0518, 0.0001)

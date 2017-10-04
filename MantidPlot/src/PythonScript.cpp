@@ -81,7 +81,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
     : Script(env, name, interact, context), m_interp(env), localDict(NULL),
       stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL),
       m_threadID(-1), isFunction(false), m_isInitialized(false),
-      m_pathHolder(name, *this), m_workspaceHandles() {
+      m_pathHolder(name), m_recursiveAsyncGIL() {
   initialize(name, context);
 }
 
@@ -89,7 +89,7 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name,
  * Destructor
  */
 PythonScript::~PythonScript() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   this->abort();
   observeAdd(false);
   observeAfterReplace(false);
@@ -142,7 +142,7 @@ PyObject *PythonScript::createSipInstanceFromMe() {
  */
 bool PythonScript::compilesToCompleteStatement(const QString &code) const {
   bool result(false);
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if (PyObject *exception = PyErr_Occurred()) {
     // Certain exceptions still mean the code is complete
@@ -186,7 +186,7 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error) {
  * Create a list autocomplete keywords
  */
 void PythonScript::generateAutoCompleteList() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *keywords = PyObject_CallFunctionObjArgs(
       PyDict_GetItemString(m_interp->globalDict(),
                            "_ScopeInspector_GetFunctionAttributes"),
@@ -206,7 +206,7 @@ void PythonScript::generateAutoCompleteList() {
  */
 void PythonScript::emit_error() {
   // gil is necessary so other things don't continue
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   // return early if nothing happened
   if (!PyErr_Occurred()) {
@@ -380,7 +380,7 @@ void PythonScript::setContext(QObject *context) {
  * the dictionary context back to the default set
  */
 void PythonScript::clearLocals() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
@@ -398,12 +398,6 @@ void PythonScript::clearLocals() {
 }
 
 /**
- * @brief PythonScript::gil
- * @return A reference to the global lock
- */
-PythonGIL &PythonScript::gil() const { return interp()->gil(); }
-
-/**
  * Sets the context for the script and if name points to a file then
  * sets the __file__ variable
  * @param name A string identifier for the script
@@ -412,7 +406,7 @@ PythonGIL &PythonScript::gil() const { return interp()->gil(); }
 void PythonScript::initialize(const QString &name, QObject *context) {
   clearLocals(); // holds and releases GIL
 
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PythonScript::setIdentifier(name);
   setContext(context);
 
@@ -460,8 +454,8 @@ void PythonScript::endStdoutRedirect() {
  * @return True if the lock was released by this call, false otherwise
  */
 bool PythonScript::recursiveAsyncSetup() {
-  if (gil().locked()) {
-    gil().release();
+  if (PythonGIL::locked()) {
+    m_recursiveAsyncGIL.release();
     return true;
   }
   return false;
@@ -475,7 +469,7 @@ bool PythonScript::recursiveAsyncSetup() {
  */
 void PythonScript::recursiveAsyncTeardown(bool relock) {
   if (relock) {
-    gil().acquire();
+    m_recursiveAsyncGIL.acquire();
   }
 }
 
@@ -495,7 +489,7 @@ bool PythonScript::compileImpl() {
  * @return
  */
 QVariant PythonScript::evaluateImpl() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *compiledCode = this->compileToByteCode(true);
   if (!compiledCode) {
     return QVariant("");
@@ -621,7 +615,7 @@ void PythonScript::abortImpl() {
   // hasn't implemented cancel() checking so that when control returns the
   // Python the
   // interrupt should be picked up.
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   m_interp->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   PyObject *curAlg =
       PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
@@ -636,7 +630,7 @@ void PythonScript::abortImpl() {
  * @return A long int giving a unique ID for the thread
  */
 long PythonScript::getThreadID() {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   return PyThreadState_Get()->thread_id;
 }
 
@@ -644,7 +638,7 @@ long PythonScript::getThreadID() {
 bool PythonScript::executeString() {
   emit started(MSG_STARTED);
   bool success(false);
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   PyObject *compiledCode = compileToByteCode(false);
   PyObject *result(NULL);

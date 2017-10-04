@@ -38,6 +38,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
         # Hook up signal and slots
         self.connect_signals()
         self._masking_tab_listeners = []
+        self.masking_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
 
     def add_listener(self, listener):
         if not isinstance(listener, MaskingTable.MaskingTableListener):
@@ -55,7 +56,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
         self._call_masking_tab_listeners(lambda listener: listener.on_row_changed())
 
     def on_update_rows(self):
-        self._call_masking_tab_listeners(lambda listener: listener.update_rows())
+        self._call_masking_tab_listeners(lambda listener: listener.on_update_rows())
 
     def on_display(self):
         self._call_masking_tab_listeners(lambda listener: listener.on_display())
@@ -63,6 +64,7 @@ class MaskingTable(QtGui.QWidget, ui_masking_table.Ui_MaskingTable):
     def connect_signals(self):
         self.select_row_combo_box.currentIndexChanged.connect(self.on_row_changed)
         self.display_mask_push_button.clicked.connect(self.on_display)
+        self.select_row_push_button.clicked.connect(self.on_update_rows)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions

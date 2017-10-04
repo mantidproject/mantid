@@ -24,7 +24,7 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    return mask_workspace(state, workspace_name, workspace_to_mask)
+    return mask_workspace(state, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
@@ -34,16 +34,20 @@ def load_workspace(state, workspace_name):
     serialized_state = state.property_manager
 
     workspace = perform_load(serialized_state)
-    perform_move(serialized_state, workspace)
+    perform_move(state, workspace)
     store_in_ads_as_hidden(workspace_name, workspace)
     return workspace
 
 
-def mask_workspace(state, workspace_name, workspace_to_mask):
+def mask_workspace(state, workspace_to_mask):
     serialized_state = state.property_manager
     masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+    mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
+                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
+                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+
     for detector in detectors:
         masking_algorithm.setProperty("Component", detector)
         masking_algorithm.execute()
@@ -73,8 +77,22 @@ def perform_load(serialized_state):
     return load_algorithm.getProperty("SampleScatterWorkspace").value
 
 
-def perform_move(serialized_state, workspace):
-    create_move_algorithm(serialized_state, workspace).execute()
+def perform_move(state, workspace):
+    move_info = state.move
+    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
+                if DetectorType.to_string(DetectorType.HAB) in move_info.detectors else\
+                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+
+    serialized_state = state.property_manager
+    move_name = "SANSMove"
+    move_options = {"SANSState": serialized_state,
+                    "Workspace": workspace,
+                    "MoveType": "InitialMove"}
+    move_alg = create_unmanaged_algorithm(move_name, **move_options)
+
+    for detector in detectors:
+        move_alg.setProperty("Component", detector)
+        move_alg.execute()
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):
@@ -102,14 +120,6 @@ def create_load_algorithm(serialized_state):
                     "CanTransmissionWorkspace": EMPTY_NAME,
                     "CanDirectWorkspace": EMPTY_NAME}
     return create_unmanaged_algorithm(load_name, **load_options)
-
-
-def create_move_algorithm(serialized_state, workspace_to_move):
-    move_name = "SANSMove"
-    move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_move,
-                    "MoveType": "InitialMove"}
-    return create_unmanaged_algorithm(move_name, **move_options)
 
 
 class MaskingTablePresenter(object):
@@ -344,9 +354,9 @@ class MaskingTablePresenter(object):
         container = []
         beam_stop_arm_width = mask_info.beam_stop_arm_width
         beam_stop_arm_angle = mask_info.beam_stop_arm_angle
-        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
-        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-        if beam_stop_arm_width and beam_stop_arm_angle and beam_stop_arm_pos1 and beam_stop_arm_pos2:
+        beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1 if mask_info.beam_stop_arm_pos1 else 0.
+        beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2 if mask_info.beam_stop_arm_pos2 else 0.
+        if beam_stop_arm_width and beam_stop_arm_angle:
             detail = "LINE {}, {}, {}, {}".format(beam_stop_arm_width, beam_stop_arm_angle,
                                                   beam_stop_arm_pos1, beam_stop_arm_pos2)
             container.append(masking_information(first="Arm", second="", third=detail))
@@ -397,7 +407,7 @@ class MaskingTablePresenter(object):
         masks = []
 
         mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)]
+        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)
@@ -408,8 +418,9 @@ class MaskingTablePresenter(object):
         masks.extend(spectrum_masks_lab)
 
         # Add the spectrum masks for HAB
-        spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
-        masks.extend(spectrum_masks_hab)
+        if mask_info_hab:
+            spectrum_masks_hab = self._get_spectrum_masks(mask_info_hab)
+            masks.extend(spectrum_masks_hab)
 
         # Add the general time mask
         time_masks_general = self._get_time_masks_general(mask_info)
@@ -420,8 +431,9 @@ class MaskingTablePresenter(object):
         masks.extend(time_masks_lab)
 
         # Add the time masks for HAB
-        time_masks_hab = self._get_time_masks(mask_info_hab)
-        masks.extend(time_masks_hab)
+        if mask_info_hab:
+            time_masks_hab = self._get_time_masks(mask_info_hab)
+            masks.extend(time_masks_hab)
 
         # Add arm mask
         arm_mask = self._get_arm_mask(mask_info)

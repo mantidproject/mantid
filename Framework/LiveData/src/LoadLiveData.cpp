@@ -20,6 +20,39 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace LiveData {
 
+namespace {
+
+/**
+ * Copy the Instrument from source workspace to target workspace if possible
+ *
+ * Handles cases where source does not exist, or are not forms of
+ *ExperimentInfo.
+ * Expects source and target workspaces to be the same type and size (if
+ *workspace group)
+ *
+ * @param source : Source workspace containing instrument
+ * @param target : Target workspace to write instrument to
+ */
+void copyInstrument(const API::Workspace *source, API::Workspace &target) {
+
+  // Special handling for Worspace Groups.
+  if (auto *sourceGroup = dynamic_cast<const API::WorkspaceGroup *>(source)) {
+    auto &targetGroup = dynamic_cast<API::WorkspaceGroup &>(target);
+    for (size_t index = 0;
+         index < std::min(sourceGroup->size(), targetGroup.size()); ++index) {
+      copyInstrument(sourceGroup->getItem(index).get(),
+                     *targetGroup.getItem(index));
+    }
+  } else {
+    if (auto *sourceExpInfo =
+            dynamic_cast<const API::ExperimentInfo *>(source)) {
+      dynamic_cast<API::ExperimentInfo &>(target)
+          .setInstrument(sourceExpInfo->getInstrument());
+    }
+  }
+}
+}
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadLiveData)
 
@@ -273,9 +306,14 @@ void LoadLiveData::addMatrixWSChunk(const std::string &algoName,
  * @param chunkWS :: processed live data chunk workspace
  */
 void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
+  // We keep a temporary to the orignal workspace containing the instrument
+  auto instrumentWS = m_accumWS;
   // When the algorithm exits the chunk workspace will be renamed
   // and overwrite the old one
   m_accumWS = chunkWS;
+  // Put the original instrument back. Otherwise geometry changes will not be
+  // persistent
+  copyInstrument(instrumentWS.get(), *m_accumWS);
 }
 
 //----------------------------------------------------------------------------------------------
