@@ -22,7 +22,7 @@ void populatePhaseTable(ITableWorkspace_sptr phaseTable,
   phaseTable->addColumn("double", names[1]);
   phaseTable->addColumn("double", names[2]);
   double asym(1.), phase(2.);
-  if(swap) {
+  if (swap) {
     std::swap(asym, phase);
   }
   for (int i = 0; i < 16; i++) {
