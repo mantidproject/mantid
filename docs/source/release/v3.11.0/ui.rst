@@ -9,6 +9,23 @@ UI & Usability Changes
 User Interface
 --------------
 
+VSI Improvements
+################
+
+- ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
+
+.. figure:: ../../images/LaNaF4_3D_Slices.png
+   :class: screenshot
+   :align: right
+
+- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
+  sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
+
+SliceViewer Improvements
+########################
+
+- SliceViewer input of number of bins, thickness, and slice point now waits until the editing is finished to rebin or changing slice point instead of changing with each digit entered.
+
 Scanning workspaces
 ###################
 
@@ -29,25 +46,6 @@ Custom Interfaces
 - General > Multi dataset fitting interface and the general fitting dock now display the status string returned by the `Fit` algorithm. If an error occured during fitting it will be reported in this string.
 - Indirect ILL calibration tab, deprecated since v3.9 is now dropped.
 - SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
-
-
-SliceViewer Improvements
-########################
-
-- SliceViewer input of number of bins, thickness, and slice point now waits until the editing is finished to rebin or changing slice point instead of changing with each digit entered.
-
-VSI Improvements
-################
-
-- ParaView has been updated to to `v5.4.0 <https://blog.kitware.com/paraview-5-4-0-release-notes/>`_.
-
-.. figure:: ../../images/LaNaF4_3D_Slices.png
-   :class: screenshot
-   :align: right
-
-- Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
-  sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
-
 
 Bugs Resolved
 -------------
