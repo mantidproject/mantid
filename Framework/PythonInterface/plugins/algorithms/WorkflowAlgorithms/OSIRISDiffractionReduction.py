@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import itertools
+from six import iteritems
 
 from IndirectReductionCommon import load_files
 
@@ -174,9 +175,33 @@ def average_ws_list(ws_list):
 
     if len(ws_list) == 1:
         return ws_list[0]
+    
+    def do_binary_op(name,inputs):
+        alg=AlgorithmManager.createUnmanaged(name)
+        alg.initialize()
+        alg.setChild(True)
+        for name,value in iteritems(inputs):
+            alg.setProperty(name,value)
+        alg.setProperty("OutputWorkspace","__unused__")
+        alg.execute()
+        return alg.getProperty('OutputWorkspace').value
 
-    return sum(ws_list) / len(ws_list)
-
+    def localSum(ws_list):
+        sum = ws_list[0]
+        for j in range(1,len(ws_list)):
+            inputs={}
+            inputs["LHSWorkspace"]=sum
+            inputs["RHSWorkspace"]=ws_list[j]
+            sum=do_binary_op("Plus",inputs)
+        return sum
+    sum=localSum(ws_list)
+    inputs={}
+    inputs["InputWorkspace"]=localSum(ws_list)
+    inputs["Factor"]=1./float(len(ws_list))   
+    inputs["Operation"]="Multiply" 
+    logger.warning("RHS "+str(type(sum)))
+    logger.warning("LHS "+str(type(len(ws_list))))
+    return do_binary_op("Scale",inputs)
 
 def find_intersection_of_ranges(rangeA, rangeB):
     if rangeA[0] >= rangeA[1] or rangeB[0] >= rangeB[1]:
@@ -584,7 +609,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
         if len(divided) > 1:
-
+            logger.warning("moo "+str(sample_ws_names))
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
             merge_runs_alg.setProperty("InputWorkspaces", sample_ws_names)
