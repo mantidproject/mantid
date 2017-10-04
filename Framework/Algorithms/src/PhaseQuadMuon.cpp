@@ -130,7 +130,7 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
     }
     for (std::string goodName : asymmNames) {
       if (name == goodName) {
-          asymmetryCount += 1;
+        asymmetryCount += 1;
       }
     }
   }
