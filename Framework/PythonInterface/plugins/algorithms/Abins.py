@@ -68,12 +68,12 @@ class Abins(PythonAlgorithm):
                              extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Temperature [K]",
+        self.declareProperty(name="TemperatureInKelvin",
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
 
-        self.declareProperty(name="BinWidth",  defaultValue=1.0, doc="Width of bins used during rebining.")
+        self.declareProperty(name="BinWidthInWavenumber",  defaultValue=1.0, doc="Width of bins used during rebining.")
 
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
@@ -125,17 +125,17 @@ class Abins(PythonAlgorithm):
 
         issues = dict()
 
-        temperature = self.getProperty("Temperature [K]").value
+        temperature = self.getProperty("TemperatureInKelvin").value
         if temperature < 0:
-            issues["Temperature [K]"] = "Temperature must be positive."
+            issues["TemperatureInKelvin"] = "Temperature must be positive."
 
         scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        bin_width =  self.getProperty("BinWidth [cm^-1]")
+        bin_width =  self.getProperty("BinWidthInWavenumber")
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            issues["BinWidth"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
+            issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
         dft_program = self.getProperty("DFTprogram").value
         phonon_filename = self.getProperty("PhononFile").value
@@ -726,8 +726,8 @@ class Abins(PythonAlgorithm):
         self._dft_program = self.getProperty("DFTprogram").value
         self._phonon_file = self.getProperty("PhononFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
-        self._temperature = self.getProperty("Temperature [K]").value
-        self._bin_width = self.getProperty("BinWidth [cm^-1]")
+        self._temperature = self.getProperty("TemperatureInKelvin").value
+        self._bin_width = self.getProperty("BinWidthInWavenumber").value
         self._scale = self.getProperty("Scale").value
         self._sample_form = self.getProperty("SampleForm").value
 
