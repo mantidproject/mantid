@@ -17,6 +17,7 @@ class HelperTestingClass(object):
         self._output_name = "output_workspace"
         self._ref = "reference_workspace"
         self._scale = 1.0
+        self._bin_width = 1.0
 
         self._dft_program = None
         self._quantum_order_event = None
@@ -70,7 +71,8 @@ class HelperTestingClass(object):
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
         """
         Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
@@ -88,21 +90,24 @@ class HelperTestingClass(object):
 
         # T = 10 K
         Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "init")
 
         # T = 20 K
         Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=wrk_name + "_mod")
 
         # T = 10 K
         Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(self._quantum_order_event),
               ScaleByCrossSection=self._cross_section_factor, OutputWorkspace=self._output_name)
@@ -117,7 +122,8 @@ class HelperTestingClass(object):
         self.case_from_scratch()
         DeleteWorkspace(self._output_name)
         Abins(DFTprogram=self._dft_program, PhononFile=self._system_name + self._extension[self._dft_program],
-              Temperature=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
+              BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
               QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
               OutputWorkspace=self._output_name)
