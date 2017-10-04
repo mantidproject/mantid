@@ -1,10 +1,9 @@
 #include "MantidParallel/IO/EventParser.h"
-#include "MantidTypes/TofEvent.h"
 #include <H5Cpp.h>
 #include <xmmintrin.h>
 
 using namespace Mantid::Parallel::IO;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace Parallel {

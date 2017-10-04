@@ -2,7 +2,7 @@
 #define MANTID_PARALLEL_IO_EVENT_PARSER_H
 
 #include "MantidParallel/DllConfig.h"
-#include "MantidTypes/TofEvent.h"
+#include "MantidTypes/Event/TofEvent.h"
 #include <cstdint>
 #include <future>
 #include <vector>
@@ -19,7 +19,7 @@ struct DLLExport LoadRange {
 
 struct DLLExport Event {
   int32_t index; // global spectrum index
-  Mantid::Types::TofEvent tofEvent;
+  Types::Event::TofEvent tofEvent;
 };
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -27,7 +27,7 @@ class MANTID_PARALLEL_DLL EventParser { // TODO
 public:
   EventParser(std::vector<std::vector<int>> rankGroups,
               const std::vector<int32_t> &bankOffsets,
-              std::vector<std::vector<Mantid::Types::TofEvent> *> &eventLists);
+              std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 
   void setPulseInformation(std::vector<IndexType> event_index,
                            std::vector<TimeZeroType> event_time_zero);
@@ -49,7 +49,7 @@ public:
                         size_t rangeStart, size_t count, size_t &curr);
 
   void populateEventList(
-      std::vector<std::vector<Mantid::Types::TofEvent> *> &eventList,
+      std::vector<std::vector<Types::Event::TofEvent> *> &eventList,
       const std::vector<Event> &events);
 
   const std::vector<std::vector<Event>> &rankData() const {
@@ -65,7 +65,7 @@ private:
                  const LoadRange &range);
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
-  std::vector<std::vector<Mantid::Types::TofEvent> *> &m_eventLists;
+  std::vector<std::vector<Types::Event::TofEvent> *> &m_eventLists;
   std::vector<IndexType> m_eventIndex;
   std::vector<TimeZeroType> m_eventTimeZero;
   std::size_t m_posInEventIndex;

@@ -9,8 +9,8 @@
 
 using namespace Mantid;
 using namespace Parallel::IO;
-using Mantid::Types::DateAndTime;
-using Mantid::Types::TofEvent;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace detail {
 template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
@@ -172,7 +172,7 @@ public:
   void testConstruct() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1, 2, 3, 4};
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(4);
+    std::vector<std::vector<TofEvent> *> eventLists(4);
 
     TS_ASSERT_THROWS_NOTHING((EventParser<int64_t, int64_t, double>(
         rankGroups, bankOffsets, eventLists)));
@@ -181,7 +181,7 @@ public:
   void testConvertEventIDToGlobalSpectrumIndex() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1000};
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(10);
+    std::vector<std::vector<TofEvent> *> eventLists(10);
 
     EventParser<int64_t, int64_t, double> parser(rankGroups, bankOffsets,
                                                  eventLists);
@@ -199,7 +199,7 @@ public:
   void testFindFirstAndLastPulses() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1000};
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(10);
+    std::vector<std::vector<TofEvent> *> eventLists(10);
 
     EventParser<int64_t, int64_t, double> parser(rankGroups, bankOffsets,
                                                  eventLists);
@@ -283,7 +283,7 @@ public:
   void testParsingFailsNoEventIndexVector() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets(2);
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(4);
+    std::vector<std::vector<TofEvent> *> eventLists(4);
 
     EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
                                                   eventLists);
@@ -295,7 +295,7 @@ public:
   void testParsingFailNoEventTimeZeroVector() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets(2);
-    std::vector<std::vector<Mantid::Types::TofEvent> *> eventLists(4);
+    std::vector<std::vector<TofEvent> *> eventLists(4);
 
     EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
                                                   eventLists);
