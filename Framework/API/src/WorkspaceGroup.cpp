@@ -234,6 +234,16 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
   return m_workspaces.begin();
 }
 
+/** 
+ * Returns a const iterator pointing to the first element in the group.
+ *
+ * @return  A const iterator pointing to the first workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const {
+  return m_workspaces.begin();
+}
+
 /** Returns a const iterator pointing to the past-the-end element in the group.
  *
  * @return  A const iterator pointing to the last workspace in this
@@ -241,6 +251,16 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
  */
 std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const {
   return m_workspaces.end();
+}
+    
+/** 
+ * Returns an iterator pointing to the past-the-end element in the group.
+ *
+ * @return  A non-const iterator pointing to the last workspace in this
+ *          workspace group.
+ */
+std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
+   return m_workspaces.end();
 }
 
 /**
