@@ -47,19 +47,21 @@ private:
   void processInputFunctions();
   void processInputFitRanges();
 
-  void fitPeaks();
+  /// methods to retrieve fit range and peak centers
+  double getExpectedPeakPosition(size_t wi, size_t ipeak);
+  std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
 
+  /// suites of method to fit peaks
+  void fitPeaks();
   void fitSpectrumPeaks(size_t wi, std::vector<double> &peak_pos,
                         std::vector<std::vector<double>> &peak_params,
                         std::vector<double> &peak_chi2_vec,
                         std::vector<std::vector<double>> &fitted_functions,
                         std::vector<std::vector<double>> &fitted_peak_windows);
-
   void estimateBackground(size_t wi,
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr function,
                           API::IAlgorithm_sptr fitter);
-
   double fitSinglePeak(size_t wsindex, size_t peakindex,
                        const std::vector<double> &init_peak_values,
                        const std::vector<double> &init_bkgd_values,
