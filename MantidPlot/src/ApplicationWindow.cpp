@@ -6566,7 +6566,7 @@ void ApplicationWindow::exportASCII(const QString &tableName,
   if (!fname.isEmpty()) {
     QFileInfo fi(fname);
     QString baseName = fi.fileName();
-    if (baseName.contains(".") == false)
+    if (!baseName.contains("."))
       fname.append(selectedFilter.remove("*"));
 
     asciiDirPath = fi.absolutePath();
