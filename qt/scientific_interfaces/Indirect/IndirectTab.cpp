@@ -826,5 +826,22 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
   return columnValues;
 }
 
+/*
+ * Converts a standard vector of standard strings to a QVector of QStrings.
+ *
+ * @param stringVec The standard vector of standard strings to convert.
+ * @return          A QVector of QStrings.
+ */
+QVector<QString> IndirectTab::convertStdStringVector(
+    const std::vector<std::string> &stringVec) const {
+  QVector<QString> resultVec;
+  resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
+
+  for (auto &str : stringVec) {
+    resultVec.push_back(QString::fromStdString(str));
+  }
+  return resultVec;
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

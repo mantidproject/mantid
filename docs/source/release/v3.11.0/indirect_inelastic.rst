@@ -11,7 +11,12 @@ New features
 Algorithms
 ##########
 
-- :ref:`BASISReduction <algm-BASISReduction>` can save to NXSPE format.
+CalculateMonteCarloAbsorptionCorrection
+#######################################
+
+- New algorithm in Mantid 3.11.0; provides functionality for calculating shape-specific absorption corrections,
+  using monte carlo methods
+- Currently supports the following shapes: Flat Plate, Annulus, Cylinder
 
 Vesuvio
 #######

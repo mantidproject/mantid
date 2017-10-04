@@ -31,6 +31,10 @@
       <value val="0" />
     </parameter>
 
+    <parameter name="Workflow.NamingConvention" type="string">
+      <value val="RunTitle" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>

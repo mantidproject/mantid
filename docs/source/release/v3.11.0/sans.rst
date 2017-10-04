@@ -8,12 +8,13 @@ SANS Changes
 Interfaces
 ----------
 
-- SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
-
 .. figure:: ../../images/sans_isis_v2_whole_gui.png
    :class: screenshot
    :align: right
-   :width: 300 px
+   :width: 400 px
+   
+- SANS > ISIS SANS v2 experimental interface has become available. It has basic reduction functionalities and makes use of the new reduction backend.
+
 
 EQSANS
 ######

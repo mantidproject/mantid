@@ -71,8 +71,7 @@ QwtDoubleInterval SignalRange::getRange(
       PRAGMA_OMP( parallel for schedule(dynamic, 1))
       for (int i = 0; i < int(iterators.size()); i++) {
         Mantid::API::IMDIterator *it = iterators[i];
-        QwtDoubleInterval range = this->getRange(it);
-        intervals[i] = range;
+        intervals[i] = this->getRange(it);
         // don't delete iterator in parallel. MSVC doesn't like it
         // when the iterator points to a mock object.
       }
@@ -87,14 +86,12 @@ QwtDoubleInterval SignalRange::getRange(
         signal = intervals[i].minValue();
         if (!std::isfinite(signal))
           continue;
-        if (signal < minSignal)
-          minSignal = signal;
+        minSignal = std::min(signal, minSignal);
 
         signal = intervals[i].maxValue();
         if (!std::isfinite(signal))
           continue;
-        if (signal > maxSignal)
-          maxSignal = signal;
+        maxSignal = std::max(signal, maxSignal);
       }
 
       if (minSignal == DBL_MAX) {
@@ -118,10 +115,9 @@ QwtDoubleInterval SignalRange::getRange(
  * @return the min/max range, or INFINITY if not found
  */
 QwtDoubleInterval SignalRange::getRange(Mantid::API::IMDIterator *it) {
-  if (!it)
+  if ((it == nullptr) || (!it->valid()))
     return QwtDoubleInterval(0., 1.0);
-  if (!it->valid())
-    return QwtDoubleInterval(0., 1.0);
+
   // Use the current normalization
   it->setNormalization(m_normalization);
 

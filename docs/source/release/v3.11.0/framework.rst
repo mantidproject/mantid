@@ -62,6 +62,11 @@ Improved
 - :ref:`algm-Mean`: Added error messages if the data is not appropriate.
 - :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwitten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
 
+Bugfixes
+########
+
+- :ref:`CalMuonDetectorPhasees <algm-CalMuonDetectorPhases-v1>` now fits a cos instead of a sin function.
+
 Performance
 -----------
 - Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.

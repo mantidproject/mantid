@@ -247,7 +247,7 @@ void ConvolutionFitSequential::exec() {
   deleteProgress.report("Deleting PlotPeak Output");
 
   const auto paramTableName = outputWsName + "_Parameters";
-  AnalysisDataService::Instance().add(paramTableName, outputWs);
+  AnalysisDataService::Instance().addOrReplace(paramTableName, outputWs);
 
   // Construct output workspace
   const auto resultWsName = outputWsName + "_Result";
