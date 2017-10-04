@@ -82,12 +82,12 @@ Usage
     # Calculate the chi squared
     chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
-    print('Chi squared is {}'.format(chi2))
-    print('Chi squared / DOF is {}'.format(chi2dof))
-    print('Chi squared / NDATA is {}'.format(chi2ndata))
-    print('Chi squared weighted is {}'.format(chi2W))
-    print('Chi squared weighted / DOF is {}'.format(chi2Wdof))
-    print('Chi squared weighted / NDATA is {}'.format(chi2Wndata))
+    print('Chi squared is {:.13f}'.format(chi2))
+    print('Chi squared / DOF is {:.13f}'.format(chi2dof))
+    print('Chi squared / NDATA is {:.13f}'.format(chi2ndata))
+    print('Chi squared weighted is {:.13f}'.format(chi2W))
+    print('Chi squared weighted / DOF is {:.13f}'.format(chi2Wdof))
+    print('Chi squared weighted / NDATA is {:.13f}'.format(chi2Wndata))
 
     # Define a function that models the data exactly
     func = 'name=LinearBackground,A0=1.0,A1=2.0'
@@ -95,12 +95,12 @@ Usage
     # Calculate the chi squared
     chi2,chi2dof,chi2ndata,chi2W,chi2Wdof,chi2Wndata = CalculateChiSquared(func,ws)
 
-    print('Chi squared is {}'.format(chi2))
-    print('Chi squared / DOF is {}'.format(chi2dof))
-    print('Chi squared / NDATA is {}'.format(chi2ndata))
-    print('Chi squared weighted is {}'.format(chi2W))
-    print('Chi squared weighted / DOF is {}'.format(chi2Wdof))
-    print('Chi squared weighted / NDATA is {}'.format(chi2Wndata))
+    print('Chi squared is {:.1f}'.format(chi2))
+    print('Chi squared / DOF is {:.1f}'.format(chi2dof))
+    print('Chi squared / NDATA is {:.1f}'.format(chi2ndata))
+    print('Chi squared weighted is {:.1f}'.format(chi2W))
+    print('Chi squared weighted / DOF is {:.1f}'.format(chi2Wdof))
+    print('Chi squared weighted / NDATA is {:.1f}'.format(chi2Wndata))
 
 Output:
 
