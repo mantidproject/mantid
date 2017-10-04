@@ -26,6 +26,8 @@ The location and orientation of the sample can be defined with *SampleCenter* an
 Workflow
 --------
 
+.. diagram:: CalculateMonteCarloAbsorption-v1_wkflw.dot
+
 
 Usage
 -----
