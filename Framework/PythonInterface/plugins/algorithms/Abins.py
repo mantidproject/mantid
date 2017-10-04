@@ -753,7 +753,7 @@ class Abins(PythonAlgorithm):
         # AbinsModules.AbinsParameters.min_wavenumber
         # AbinsModules.AbinsParameters.max_wavenumber
         # with bin width AbinsModules.AbinsParameters.bin_width
-        step = AbinsModules.AbinsParameters.bin_width
+        step = self._bin_width
         start = AbinsModules.AbinsParameters.min_wavenumber + step / 2.0
         stop = AbinsModules.AbinsParameters.max_wavenumber + step / 2.0
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)

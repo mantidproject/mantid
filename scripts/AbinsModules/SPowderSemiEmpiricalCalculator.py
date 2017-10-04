@@ -284,6 +284,7 @@ class SPowderSemiEmpiricalCalculator(object):
 
         # put data to SData object
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set_bin_width(width=self._bin_width)
         s_data.set(items=data)
 
         return s_data
@@ -729,6 +730,7 @@ class SPowderSemiEmpiricalCalculator(object):
             data["datasets"]["data"] = temp_data
 
         s_data = AbinsModules.SData(temperature=self._temperature, sample_form=self._sample_form)
+        s_data.set_bin_width(width=self._bin_width)
         s_data.set(items=data["datasets"]["data"])
 
         return s_data
