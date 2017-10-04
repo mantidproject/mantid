@@ -216,11 +216,14 @@ This method can be called in any of the following manners:
    f.plot(workspace=ws, workspaceIndex=i)   # for x-values of workspace index i of ws
    f.plot(startX=xmin, endX=xmax)  # for 20 x-values between xmin and xmax
    f.plot(startX=xmin, endX=xmax, nSteps=10) # for 10 x-values between xmin and xmax
-   f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax  
+   f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax
+   f.plot(workspace=ws, name='Fred') # for plot & its workspace to be called 'Fred'  
 
 If you use ``xValues``, then the list of x values must be in numerical order. 
 This is not checked and if they are not in order the plot may fail to display properly.
 
-Owing to the way workspaces are named in python, only one plot can be shown at a time.   
+If you want to display multiple plots of the same function, then use
+``name`` to give each plot a unique name. The default value of ``name`` 
+is the name of the function. 
 
 .. categories:: Concepts

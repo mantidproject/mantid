@@ -169,6 +169,7 @@ class FunctionWrapper(object):
       haveStartX = False
       haveEndX = False
       nSteps = 20
+      plotName = self.name
       
       def inRange(x):
          return x >= xMin and x <= xMax
@@ -196,6 +197,8 @@ class FunctionWrapper(object):
            nSteps = kwargs[key]
            if nSteps < 1:
               raise RuntimeError("nSteps must be at least 1")
+        if key == "name":
+           plotName = kwargs[key]
            
       if haveStartX and haveEndX:
           if xMin >= xMax:
@@ -224,8 +227,8 @@ class FunctionWrapper(object):
 
       outWs = self(spectrumWs)
       vals = outWs.readY(1)
-      function = CreateWorkspace( DataX=xvals, DataY=vals)
-      plot("function",0)
+      function = CreateWorkspace( DataX=xvals, DataY=vals, OutputWorkspace=plotName)
+      plot(plotName,0)
          
   def tie (self, *args, **kwargs):
     """ Add ties.
