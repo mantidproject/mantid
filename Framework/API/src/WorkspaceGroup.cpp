@@ -224,7 +224,8 @@ void WorkspaceGroup::print() const {
   }
 }
 
-/*
+/** Returns an iterator pointing to the first element in the group.
+ *
  * @return  A non-const iterator pointing to the first workspace in this
  *          workspace group.
  */
@@ -232,33 +233,36 @@ std::vector<Workspace_sptr>::iterator WorkspaceGroup::begin() {
   return m_workspaces.begin();
 }
 
-/*
-* @return  A non-const iterator pointing to the last workspace in this
-*          workspace group.
-*/
+/** Returns an iterator pointing to the past-the-end element in the group.
+ *
+ * @return  A non-const iterator pointing to the last workspace in this
+ *          workspace group.
+ */
 std::vector<Workspace_sptr>::iterator WorkspaceGroup::end() {
   return m_workspaces.end();
 }
 
-/*
-* @return  A const iterator pointing to the first workspace in this
-*          workspace group.
-*/
+/** Returns a const iterator pointing to the first element in the group.
+ *
+ * @return  A const iterator pointing to the first workspace in this
+ *          workspace group.
+ */
 std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::begin() const {
   return m_workspaces.begin();
 }
 
-/*
-* @return  A const iterator pointing to the last workspace in this
-*          workspace group.
-*/
+/** Returns a const iterator pointing to the past-the-end element in the group.
+ *
+ * @return  A const iterator pointing to the last workspace in this
+ *          workspace group.
+ */
 std::vector<Workspace_sptr>::const_iterator WorkspaceGroup::end() const {
   return m_workspaces.end();
 }
 
 /**
  * Remove a workspace pointed to by an index. The workspace remains in the ADS
- *if it was there
+ * if it was there
  *
  * @param index :: Index of a workspace to delete.
  */
