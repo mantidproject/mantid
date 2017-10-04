@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadLogTest : public CxxTest::TestSuite {
 public:
@@ -170,7 +171,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
 
-    Property *prop = 0;
+    Property *prop = nullptr;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
     std::vector<DateAndTime> times;

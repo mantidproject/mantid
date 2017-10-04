@@ -37,6 +37,8 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace { // anonymous namespace
 // Time we'll wait on a receive call (in seconds)
@@ -49,7 +51,8 @@ const std::string SCAN_PROPERTY("scan_index");
 const std::string PROTON_CHARGE_PROPERTY("proton_charge");
 
 // Helper function to get a DateAndTime value from an ADARA packet header
-Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
+Mantid::Types::Core::DateAndTime
+timeFromPacket(const ADARA::PacketHeader &hdr) {
   const uint32_t seconds = static_cast<uint32_t>(hdr.pulseId() >> 32);
   const uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
@@ -177,7 +180,7 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// @param startTime Specifies how much historical data the SMS should send
 /// before continuing the current 'live' data.  Use 0 to indicate no
 /// historical data.
-void SNSLiveEventDataListener::start(const Kernel::DateAndTime startTime) {
+void SNSLiveEventDataListener::start(const Types::Core::DateAndTime startTime) {
   // Save the startTime and kick off the background thread
   // (Can't really do anything else until we send the hello packet and the SMS
   // sends us back the various metadata packets
@@ -396,7 +399,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BankedEventPkt &pkt) {
     std::lock_guard<std::mutex> scopedLock(m_mutex);
 
     // Timestamp for the events
-    Mantid::Kernel::DateAndTime eventTime = timeFromPacket(pkt);
+    Mantid::Types::Core::DateAndTime eventTime = timeFromPacket(pkt);
 
     // Save the pulse charge in the logs (*10 because we want the units to be
     // picoCulombs, and ADARA sends them out in units of 10pC)
@@ -509,7 +512,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
           // Add the event. Note that they're in units of 100 ns in the packet,
           // need to change to microseconds.
           monitorBuffer->getSpectrum(it->second)
-              .addEventQuickly(DataObjects::TofEvent(tof / 10.0, pktTime));
+              .addEventQuickly(Types::Event::TofEvent(tof / 10.0, pktTime));
         }
       } else {
         g_log.error() << "Event from unknown monitor ID (" << monitorID
@@ -1316,7 +1319,7 @@ bool SNSLiveEventDataListener::haveRequiredLogs() {
 /// Adds an event to the workspace
 void SNSLiveEventDataListener::appendEvent(
     const uint32_t pixelId, const double tof,
-    const Mantid::Kernel::DateAndTime pulseTime)
+    const Mantid::Types::Core::DateAndTime pulseTime)
 // NOTE: This function does NOT lock the mutex!  Make sure you do that
 // before calling this function!
 {
@@ -1325,7 +1328,7 @@ void SNSLiveEventDataListener::appendEvent(
   const auto it = m_indexMap.find(pixelId);
   if (it != m_indexMap.end()) {
     const std::size_t workspaceIndex = it->second;
-    Mantid::DataObjects::TofEvent event(tof, pulseTime);
+    Types::Event::TofEvent event(tof, pulseTime);
     m_eventBuffer->getSpectrum(workspaceIndex).addEventQuickly(event);
   } else {
     g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: " << tof
@@ -1446,7 +1449,7 @@ ILiveListener::RunStatus SNSLiveEventDataListener::runStatus() {
       // Don't clear this for BeginRun because it was set up in the parser
       // for the RunStatus packet that signaled the beginning of a new
       // run and is thus already set to the correct value.
-      m_dataStartTime = Kernel::DateAndTime();
+      m_dataStartTime = Types::Core::DateAndTime();
     }
 
     // NOTE: It's probably not necessary to clear the instrument name

@@ -51,7 +51,7 @@ public:
   QString domXml() const override;
 
   /// Default constructor
-  DesignerPlugin(QObject *parent = 0);
+  DesignerPlugin(QObject *parent = nullptr);
   /// Initialize the plugin
   void initialize(QDesignerFormEditorInterface *core) override;
   /// Returns if the plugin is initliaized

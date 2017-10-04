@@ -9,8 +9,6 @@
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt;
 using namespace RefDetectorViewer;
-using Mantid::API::WorkspaceProperty;
-using Mantid::API::Algorithm;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -18,7 +16,7 @@ using namespace Mantid::API;
  * Construct an ImageView for the specified matrix workspace
  */
 RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
-    : m_imageView(NULL) {
+    : m_imageView(nullptr) {
   return;
   //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
   //  image_view = new RefImageView( source );  // this is the QMainWindow

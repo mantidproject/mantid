@@ -51,7 +51,7 @@ class LoadDAEDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Constructor
-  LoadDAEDialog(QWidget *parent = 0);
+  LoadDAEDialog(QWidget *parent = nullptr);
   /// Destruktor
   ~LoadDAEDialog() override;
 

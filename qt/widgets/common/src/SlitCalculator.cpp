@@ -29,7 +29,8 @@ SlitCalculator::~SlitCalculator() {}
 void SlitCalculator::setInstrument(std::string instrumentName) {
   // we want to get the most up-to-date definition, so we use the current
   // date/time
-  auto date = Mantid::Kernel::DateAndTime::getCurrentTime().toISO8601String();
+  auto date =
+      Mantid::Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   // find the full path to the definition file
   auto filename =
       Mantid::API::ExperimentInfo::getInstrumentFilename(instrumentName, date);

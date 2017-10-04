@@ -75,7 +75,7 @@ class DLLExport IndirectTab : public QObject {
   Q_OBJECT
 
 public:
-  IndirectTab(QObject *parent = 0);
+  IndirectTab(QObject *parent = nullptr);
   ~IndirectTab() override;
 
 public slots:
@@ -258,8 +258,8 @@ protected:
   /// Overidden by child class.
   virtual bool validate() = 0;
 
-  Mantid::Kernel::DateAndTime m_tabStartTime;
-  Mantid::Kernel::DateAndTime m_tabEndTime;
+  Mantid::Types::Core::DateAndTime m_tabStartTime;
+  Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;
 };
 } // namespace CustomInterfaces

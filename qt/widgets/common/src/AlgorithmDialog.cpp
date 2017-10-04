@@ -1,25 +1,24 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/MantidWidget.h"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QHBoxLayout>
 #include <QIcon>
 #include <QLabel>
-#include <QMessageBox>
 #include <QLineEdit>
-#include <QComboBox>
-#include <QCheckBox>
+#include <QMessageBox>
 #include <QPushButton>
-#include <QHBoxLayout>
-#include <QCheckBox>
 #include <QtGui>
 
 #include <Poco/ActiveResult.h>
@@ -27,7 +26,7 @@
 using namespace MantidQt::API;
 using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::IAlgorithm;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("AlgorithmDialog");
@@ -46,7 +45,7 @@ AlgorithmDialog::AlgorithmDialog(QWidget *parent)
       m_keepOpen(false), m_msgAvailable(false), m_isInitialized(false),
       m_autoParseOnInit(true), m_validators(), m_noValidation(),
       m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(),
-      m_keepOpenCheckBox(NULL), m_okButton(NULL), m_exitButton(NULL),
+      m_keepOpenCheckBox(nullptr), m_okButton(nullptr), m_exitButton(nullptr),
       m_observers(), m_btnTimer(), m_statusTracked(false) {
   m_btnTimer.setSingleShot(true);
 }
@@ -212,7 +211,7 @@ AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
   if (m_algProperties.contains(propName)) {
     return m_algorithm->getProperty(propName.toStdString());
   } else
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -249,8 +248,8 @@ QString AlgorithmDialog::getInputValue(const QString &propName) const {
  */
 QLabel *AlgorithmDialog::getValidatorMarker(const QString &propname) {
   if (m_noValidation.contains(propname))
-    return NULL;
-  QLabel *validLbl(NULL);
+    return nullptr;
+  QLabel *validLbl(nullptr);
   if (!m_validators.contains(propname)) {
     validLbl = new QLabel("*", this);
     QPalette pal = validLbl->palette();
@@ -478,10 +477,10 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
       return true;
 
     /**
-    * The control is disabled if
-    *   (1) It is contained in the disabled list or
-    *   (2) A user passed a value into the dialog
-    */
+     * The control is disabled if
+     *   (1) It is contained in the disabled list or
+     *   (2) A user passed a value into the dialog
+     */
 
     return !(m_disabled.contains(propName) ||
              m_python_arguments.contains(propName));
@@ -531,7 +530,7 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
 
   // If the widget's layout has been given then assume that a validator is
   // required, else assume not
-  QWidget *validlbl(NULL);
+  QWidget *validlbl(nullptr);
   if (parent_layout) {
     // Check if the validator is already there
     validlbl = getValidatorMarker(property);
@@ -820,10 +819,10 @@ void AlgorithmDialog::parse() {
 
 //-------------------------------------------------------------------------------------------------
 /**
-  * Set a list of values for the properties
-  * @param presetValues :: A string containing a list of "name=value" pairs with
+ * Set a list of values for the properties
+ * @param presetValues :: A string containing a list of "name=value" pairs with
  * each separated by an '|' character
-  */
+ */
 void AlgorithmDialog::setPresetValues(
     const QHash<QString, QString> &presetValues) {
   if (presetValues.isEmpty())

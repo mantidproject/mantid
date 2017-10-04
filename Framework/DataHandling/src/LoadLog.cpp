@@ -6,6 +6,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -24,6 +25,8 @@
 #include <fstream> // used to get ifstream
 #include <sstream>
 
+using Mantid::Types::Core::DateAndTime;
+
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
@@ -34,8 +37,8 @@ using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadLog::LoadLog() {}
@@ -472,7 +475,7 @@ bool LoadLog::isAscii(const std::string &filename) {
  * @returns true if the strings format matched the expected date format
  */
 bool LoadLog::isDateTimeString(const std::string &str) const {
-  return Kernel::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
+  return DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
 }
 
 /**

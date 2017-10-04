@@ -46,7 +46,7 @@ class DLLExport IndirectSimulationTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectSimulationTab(QWidget *parent = 0);
+  IndirectSimulationTab(QWidget *parent = nullptr);
   ~IndirectSimulationTab() override;
 
   virtual void loadSettings(const QSettings &settings) = 0;

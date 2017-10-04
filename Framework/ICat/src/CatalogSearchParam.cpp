@@ -222,7 +222,7 @@ time_t CatalogSearchParam::getTimevalue(const std::string &inputDate) {
   std::string isoDate = dateSegments.at(2) + "-" + dateSegments.at(1) + "-" +
                         dateSegments.at(0) + " 0:00:00.000";
   // Return the date as time_t value.
-  return Kernel::DateAndTime(isoDate).to_time_t();
+  return Types::Core::DateAndTime(isoDate).to_time_t();
 }
 }
 }

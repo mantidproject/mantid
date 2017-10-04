@@ -67,7 +67,7 @@ public:
   }
 
   void testThrowsIfNullFieldData() {
-    vtkFieldData *nullFieldData = NULL;
+    vtkFieldData *nullFieldData = nullptr;
     FieldDataToMetadata function;
     TSM_ASSERT_THROWS("Should not be able to execute with null field data.",
                       function.execute(nullFieldData, "x"), std::runtime_error);

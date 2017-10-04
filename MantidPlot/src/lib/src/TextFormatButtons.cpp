@@ -49,7 +49,7 @@ TextFormatButtons::TextFormatButtons(QTextEdit *textEdit, Buttons buttons,
 void TextFormatButtons::init(Buttons buttons) {
   QHBoxLayout *layout = (QHBoxLayout *)this->layout();
   QLayoutItem *child;
-  while ((child = layout->takeAt(0)) != 0) {
+  while ((child = layout->takeAt(0)) != nullptr) {
     if (child->widget())
       delete child->widget();
   }

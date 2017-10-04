@@ -20,9 +20,7 @@
 
 using Mantid::Kernel::Property;
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::std_vector_exporter;
-using Mantid::PythonInterface::PythonObjectInstantiator;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Property)

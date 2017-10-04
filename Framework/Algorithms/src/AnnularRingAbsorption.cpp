@@ -24,8 +24,6 @@
 namespace Mantid {
 namespace Algorithms {
 using namespace Mantid::API;
-using Mantid::Geometry::ObjComponent;
-using Mantid::Geometry::SampleEnvironment;
 using namespace Mantid::Kernel;
 
 // Register the algorithm into the AlgorithmFactory

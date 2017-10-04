@@ -474,7 +474,7 @@ QwtPlotCurve *Plot::curve(int index) {
   if (it && it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     return static_cast<QwtPlotCurve *>(it);
   else
-    return 0;
+    return nullptr;
 }
 
 /**
@@ -737,7 +737,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
                  const QwtPlotPrintFilter &pfilter) const {
   int axisId;
 
-  if (painter == 0 || !painter->isActive() || !plotRect.isValid() ||
+  if (painter == nullptr || !painter->isActive() || !plotRect.isValid() ||
       size().isNull())
     return;
 

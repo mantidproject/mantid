@@ -10,10 +10,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory

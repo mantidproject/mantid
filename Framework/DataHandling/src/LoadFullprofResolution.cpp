@@ -29,10 +29,8 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {
@@ -784,7 +782,7 @@ void LoadFullprofResolution::putParametersIntoWorkspace(
   writer.setOptions(XMLWriter::PRETTY_PRINT);
 
   //   Get current time
-  Kernel::DateAndTime date = Kernel::DateAndTime::getCurrentTime();
+  Types::Core::DateAndTime date = Types::Core::DateAndTime::getCurrentTime();
   std::string ISOdate = date.toISO8601String();
   std::string ISOdateShort =
       ISOdate.substr(0, 19); // Remove fraction of seconds

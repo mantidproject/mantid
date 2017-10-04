@@ -1152,8 +1152,8 @@ void Instrument::setDefaultView(const std::string &type) {
 /// @param val :: date and time
 /// @throw InstrumentDefinitionError Thrown if date is earlier than 1900-01-31
 /// 23:59:01
-void Instrument::setValidFromDate(const Kernel::DateAndTime &val) {
-  Kernel::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
+void Instrument::setValidFromDate(const Types::Core::DateAndTime &val) {
+  Types::Core::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
   if (val < earliestAllowedDate) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "The valid-from <instrument> tag date must be from 1900-01-31 23:59:01 "

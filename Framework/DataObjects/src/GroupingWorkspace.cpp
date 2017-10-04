@@ -4,8 +4,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 
-using Mantid::API::SpectraAxis;
-
 using std::size_t;
 using namespace Mantid::API;
 

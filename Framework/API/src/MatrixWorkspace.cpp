@@ -28,9 +28,8 @@
 #include <functional>
 #include <numeric>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
-using Mantid::Kernel::Strings::toString;
 
 namespace Mantid {
 namespace API {
@@ -1158,7 +1157,7 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
 
@@ -1184,7 +1183,7 @@ Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
   return log->lastTime();

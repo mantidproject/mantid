@@ -13,6 +13,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class ChangeLogTimeTest : public CxxTest::TestSuite {
 public:

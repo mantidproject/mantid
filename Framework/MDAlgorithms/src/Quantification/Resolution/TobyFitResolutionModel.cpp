@@ -17,11 +17,9 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-using Geometry::Instrument;
 using Geometry::Instrument_const_sptr;
 using Geometry::IObjComponent_const_sptr;
 using Geometry::IDetector_const_sptr;
-using API::Run;
 using API::IFunction;
 
 DECLARE_MDRESOLUTIONCONVOLUTION(TobyFitResolutionModel,

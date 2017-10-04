@@ -37,7 +37,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ManageCustomMenus : public QDialog {
   Q_OBJECT
 public:
-  explicit ManageCustomMenus(QWidget *parent = 0);
+  explicit ManageCustomMenus(QWidget *parent = nullptr);
 
 private:
   void initLayout();

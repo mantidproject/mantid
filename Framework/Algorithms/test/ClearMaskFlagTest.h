@@ -41,7 +41,7 @@ public:
     const int nummask = 5;
     Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(
         ComponentCreationHelper::createTestInstrumentCylindrical(1));
-    Detector *d = new Detector("det", 0, 0);
+    Detector *d = new Detector("det", 0, nullptr);
     instr->add(d);
     instr->markAsDetector(d);
 

@@ -11,7 +11,7 @@ class DLLExport JumpFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  JumpFit(QWidget *parent = 0);
+  JumpFit(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectDataAnalysisTab
   void setup() override;

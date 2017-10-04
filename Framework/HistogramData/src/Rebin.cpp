@@ -12,7 +12,6 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {

@@ -35,7 +35,7 @@ public:
     // Get Current Date Time
     namespace pt = boost::posix_time;
     auto dateTimeObj =
-        Mantid::Kernel::DateAndTime(pt::second_clock::local_time());
+        Mantid::Types::Core::DateAndTime(pt::second_clock::local_time());
     std::string time = dateTimeObj.toISO8601String();
     std::string timeOffset = time;
     TS_ASSERT_THROWS_NOTHING(
@@ -109,7 +109,7 @@ private:
                                const int &logEndTime,
                                const std::string logValue,
                                const size_t position) {
-    using Mantid::Kernel::DateAndTime;
+    using Mantid::Types::Core::DateAndTime;
     using Mantid::Kernel::TimeSeriesProperty;
 
     const auto &run = testWS->run();

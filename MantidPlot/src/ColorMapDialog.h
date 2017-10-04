@@ -38,7 +38,7 @@ class ColorMapDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ColorMapDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  ColorMapDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
   void setMatrix(Matrix *m);
 
 protected slots:

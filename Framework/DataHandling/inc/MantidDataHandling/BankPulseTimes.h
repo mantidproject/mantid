@@ -21,7 +21,7 @@ public:
   BankPulseTimes(::NeXus::File &file, const std::vector<int> &pNumbers);
 
   /// Constructor with vector of DateAndTime
-  BankPulseTimes(const std::vector<Mantid::Kernel::DateAndTime> &times);
+  BankPulseTimes(const std::vector<Mantid::Types::Core::DateAndTime> &times);
 
   /// Destructor
   ~BankPulseTimes();
@@ -36,7 +36,7 @@ public:
   size_t numPulses;
 
   /// Array of the pulse times
-  Mantid::Kernel::DateAndTime *pulseTimes;
+  Mantid::Types::Core::DateAndTime *pulseTimes;
 
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;

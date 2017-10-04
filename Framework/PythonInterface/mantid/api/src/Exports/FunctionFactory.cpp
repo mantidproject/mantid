@@ -19,7 +19,6 @@ using Mantid::API::FunctionFactoryImpl;
 using Mantid::API::FunctionFactory;
 using Mantid::API::IFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
-using Mantid::Kernel::AbstractInstantiator;
 
 using namespace boost::python;
 

@@ -49,11 +49,11 @@ struct TimeSeriesPropertyStatistics {
  */
 template <class TYPE> class TimeValueUnit {
 private:
-  Kernel::DateAndTime mtime;
+  Types::Core::DateAndTime mtime;
   TYPE mvalue;
 
 public:
-  TimeValueUnit(const Kernel::DateAndTime &time, TYPE value) {
+  TimeValueUnit(const Types::Core::DateAndTime &time, TYPE value) {
     mtime = time;
     mvalue = value;
   }
@@ -78,9 +78,9 @@ public:
     return (lhs.mtime < rhs.mtime);
   }
 
-  Kernel::DateAndTime time() const { return mtime; }
+  Types::Core::DateAndTime time() const { return mtime; }
 
-  void setTime(Kernel::DateAndTime newtime) { mtime = newtime; }
+  void setTime(Types::Core::DateAndTime newtime) { mtime = newtime; }
 
   TYPE value() const { return mvalue; }
 
@@ -154,8 +154,8 @@ public:
   void setName(const std::string name);
 
   /// Filter out a run by time.
-  void filterByTime(const Kernel::DateAndTime &start,
-                    const Kernel::DateAndTime &stop) override;
+  void filterByTime(const Types::Core::DateAndTime &start,
+                    const Types::Core::DateAndTime &stop) override;
   /// Filter by a range of times
   void filterByTimes(const std::vector<SplittingInterval> &splittervec);
 
@@ -165,9 +165,10 @@ public:
                    bool isPeriodic) const override;
 
   /// New split method
-  void splitByTimeVector(std::vector<DateAndTime> &splitter_time_vec,
-                         std::vector<int> &target_vec,
-                         std::vector<TimeSeriesProperty *> outputs);
+  void
+  splitByTimeVector(std::vector<Types::Core::DateAndTime> &splitter_time_vec,
+                    std::vector<int> &target_vec,
+                    std::vector<TimeSeriesProperty *> outputs);
 
   /// Fill a TimeSplitterType that will filter the events by matching
   void makeFilterByValue(std::vector<SplittingInterval> &split, double min,
@@ -183,47 +184,47 @@ public:
   /// Calculate the time-weighted average of a property
   double timeAverageValue() const override;
   /// generate constant time-step histogram from the property values
-  void histogramData(const Kernel::DateAndTime &tMin,
-                     const Kernel::DateAndTime &tMax,
+  void histogramData(const Types::Core::DateAndTime &tMin,
+                     const Types::Core::DateAndTime &tMax,
                      std::vector<double> &counts) const;
 
   ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All
   ///  values
-  std::map<DateAndTime, TYPE> valueAsCorrectMap() const;
+  std::map<Types::Core::DateAndTime, TYPE> valueAsCorrectMap() const;
   ///  Return the time series's values (unfiltered) as a vector<TYPE>
   std::vector<TYPE> valuesAsVector() const;
   ///  Return the time series as a correct C++ multimap<DateAndTime, TYPE>. All
   ///  values
-  std::multimap<DateAndTime, TYPE> valueAsMultiMap() const;
+  std::multimap<Types::Core::DateAndTime, TYPE> valueAsMultiMap() const;
   /// Get filtered values as a vector
   std::vector<TYPE> filteredValuesAsVector() const;
 
   /// Return the time series's times as a vector<DateAndTime>
-  std::vector<DateAndTime> timesAsVector() const override;
+  std::vector<Types::Core::DateAndTime> timesAsVector() const override;
   /// Return the series as list of times, where the time is the number of
   /// seconds since the start.
   std::vector<double> timesAsVectorSeconds() const;
 
   /// Add a value to the map using a DateAndTime object
-  void addValue(const Kernel::DateAndTime &time, const TYPE value);
+  void addValue(const Types::Core::DateAndTime &time, const TYPE value);
   /// Add a value to the map using a string time
   void addValue(const std::string &time, const TYPE value);
   /// Add a value to the map using a time_t
   void addValue(const std::time_t &time, const TYPE value);
   /// Adds vectors of values to the map. Should be much faster than repeated
   /// calls to addValue.
-  void addValues(const std::vector<Kernel::DateAndTime> &times,
+  void addValues(const std::vector<Types::Core::DateAndTime> &times,
                  const std::vector<TYPE> &values);
   /// Replaces the time series with new values time series values
-  void replaceValues(const std::vector<Kernel::DateAndTime> &times,
+  void replaceValues(const std::vector<Types::Core::DateAndTime> &times,
                      const std::vector<TYPE> &values);
 
   /// Returns the last time
-  DateAndTime lastTime() const;
+  Types::Core::DateAndTime lastTime() const;
   /// Returns the first value regardless of filter
   TYPE firstValue() const;
   /// Returns the first time regardless of filter
-  DateAndTime firstTime() const;
+  Types::Core::DateAndTime firstTime() const;
   /// Returns the last value
   TYPE lastValue() const;
 
@@ -244,7 +245,7 @@ public:
   /// New method to return time series value pairs as std::vector<std::string>
   std::vector<std::string> time_tValue() const;
   /// Return the time series as a C++ map<DateAndTime, TYPE>
-  std::map<DateAndTime, TYPE> valueAsMap() const;
+  std::map<Types::Core::DateAndTime, TYPE> valueAsMap() const;
   // ============================================================================================
 
   /// Set a property from a string
@@ -257,24 +258,24 @@ public:
   /// Deletes all but the 'last entry' in the property
   void clearOutdated() override;
   /// Clears and creates a TimeSeriesProperty from these parameters
-  void create(const Kernel::DateAndTime &start_time,
+  void create(const Types::Core::DateAndTime &start_time,
               const std::vector<double> &time_sec,
               const std::vector<TYPE> &new_values);
   /// Clears and creates a TimeSeriesProperty from these parameters
-  void create(const std::vector<DateAndTime> &new_times,
+  void create(const std::vector<Types::Core::DateAndTime> &new_times,
               const std::vector<TYPE> &new_values);
 
   /// Returns the value at a particular time
-  TYPE getSingleValue(const DateAndTime &t) const;
+  TYPE getSingleValue(const Types::Core::DateAndTime &t) const;
   /// Returns the value at a particular time
-  TYPE getSingleValue(const DateAndTime &t, int &index) const;
+  TYPE getSingleValue(const Types::Core::DateAndTime &t, int &index) const;
 
   /// Returns n-th valid time interval, in a very inefficient way.
   TimeInterval nthInterval(int n) const;
   /// Returns n-th value of n-th interval in an incredibly inefficient way.
   TYPE nthValue(int n) const;
   /// Returns n-th time. NOTE: Complexity is order(n)! regardless of filter
-  Kernel::DateAndTime nthTime(int n) const;
+  Types::Core::DateAndTime nthTime(int n) const;
 
   /// Divide the property into  allowed and disallowed time intervals according
   /// to \a filter.
@@ -306,8 +307,8 @@ public:
   std::string toString() const;
 
   /**Reserve memory for efficient adding values to existing property
-    * makes sense only when you have reasonably precise estimate of the
-    * total size you'll need easily available in advance.  */
+   * makes sense only when you have reasonably precise estimate of the
+   * total size you'll need easily available in advance.  */
   void reserve(size_t size) { m_values.reserve(size); };
 
   /// If filtering by log, get the time intervals for splitting
@@ -320,9 +321,9 @@ private:
   /// Sort the property into increasing times, if not already sorted
   void sortIfNecessary() const;
   ///  Find the index of the entry of time t in the mP vector (sorted)
-  int findIndex(Kernel::DateAndTime t) const;
+  int findIndex(Types::Core::DateAndTime t) const;
   ///  Find the upper_bound of time t in container.
-  int upperBound(Kernel::DateAndTime t, int istart, int iend) const;
+  int upperBound(Types::Core::DateAndTime t, int istart, int iend) const;
   /// Apply a filter
   void applyFilter() const;
   /// A new algorithm to find Nth index.  It is simple and leave a lot work to
@@ -331,7 +332,7 @@ private:
   /// Set a value from another property
   std::string setValueFromProperty(const Property &right) override;
   /// Find if time lies in a filtered region
-  bool isTimeFiltered(const Kernel::DateAndTime &time) const;
+  bool isTimeFiltered(const Types::Core::DateAndTime &time) const;
 
   /// Holds the time series data
   mutable std::vector<TimeValueUnit<TYPE>> m_values;
@@ -344,7 +345,7 @@ private:
   mutable TimeSeriesSortStatus m_propSortedFlag;
 
   /// The filter
-  mutable std::vector<std::pair<Kernel::DateAndTime, bool>> m_filter;
+  mutable std::vector<std::pair<Types::Core::DateAndTime, bool>> m_filter;
   /// Quick reference regions for filter
   mutable std::vector<std::pair<size_t, size_t>> m_filterQuickRef;
   /// True if a filter has been applied

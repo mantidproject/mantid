@@ -38,7 +38,7 @@
 #include <QSpinBox>
 
 MatrixDialog::MatrixDialog(QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), d_matrix(0) {
+    : QDialog(parent, fl), d_matrix(nullptr) {
   setWindowTitle(tr("MantidPlot - Matrix Properties"));
 
   QGridLayout *topLayout = new QGridLayout();

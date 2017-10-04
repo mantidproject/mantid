@@ -9,7 +9,7 @@ class SmoothNeighboursDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Constructor
-  SmoothNeighboursDialog(QWidget *parent = 0);
+  SmoothNeighboursDialog(QWidget *parent = nullptr);
 
 protected:
   /// Overridden to enable validators

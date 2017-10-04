@@ -4,7 +4,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -23,6 +23,8 @@ GCC_DIAG_ON(conversion)
 #include <cassert>
 #include <functional>
 #include <map>
+
+using namespace Mantid::Types;
 
 namespace {
 /// Logger
@@ -44,7 +46,7 @@ std::string RUN_START_PROPERTY = "run_start";
  */
 template <typename T>
 void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
-                 const Mantid::Kernel::DateAndTime &time, T value) {
+                 const Mantid::Types::Core::DateAndTime &time, T value) {
   if (mutableRunInfo.hasProperty(name)) {
     auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
     property->addValue(time, value);
@@ -100,8 +102,8 @@ void addSampleEnvLogs(
 
 namespace Mantid {
 namespace LiveData {
-using DataObjects::TofEvent;
-using Kernel::DateAndTime;
+using Types::Event::TofEvent;
+using Types::Core::DateAndTime;
 
 // -----------------------------------------------------------------------------
 // Public members
