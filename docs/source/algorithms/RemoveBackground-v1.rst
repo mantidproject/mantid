@@ -206,9 +206,9 @@ Usage
    ER = Result .dataE(0);
    
    # print first spectra, Note invalid error calculations
-   print "| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|"
+   print("| x sampl  | x result | S sample | S no bg  | Err samp | Err no_bg|")
    for i in xrange(0,20):
-      print "|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]);
+      print("|{0:10}|{1:10}|{2:10.4f}|{3:10.3f}|{4:10.3f}|{5:10.3f}|".format(XS[i],XR[i],YS[i],YR[i],ES[i],ER[i]))
    
 .. testoutput:: ExFlatBkgRemoval
 
