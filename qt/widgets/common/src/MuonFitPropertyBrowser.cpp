@@ -1527,7 +1527,6 @@ void MuonFitPropertyBrowser::setChosenPeriods(
   for (auto selected : chosenPeriods) {
     for (auto iter = m_periodBoxes.constBegin();
          iter != m_periodBoxes.constEnd(); ++iter) {
-      const auto &tmp = iter.key();
       if (iter.key() == selected) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1542,7 +1541,6 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
-    const auto &tmp = iter.key();
     if (iter.key() == period) {
       m_boolManager->setValue(iter.value(), true);
     }
