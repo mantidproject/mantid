@@ -84,17 +84,24 @@ private:
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr function,
                           API::IAlgorithm_sptr fitter);
-  void estimatePeakParameters(size_t wi,
-                              const std::pair<double, double> &peak_window,
-                              API::IPeakFunction_sptr peakfunction,
-                              API::IBackgroundFunction_sptr bkgdfunction);
+  int estimatePeakParameters(size_t wi,
+                             const std::pair<double, double> &peak_window,
+                             API::IPeakFunction_sptr peakfunction,
+                             API::IBackgroundFunction_sptr bkgdfunction);
+
+  void reduceBackground(const std::vector<double> &vec_x,
+                        const std::vector<double> &vec_y, double &bkgd_a,
+                        double &bkgd_b);
 
   double findMaxValue(size_t wi, const std::pair<double, double> &window,
                       API::IBackgroundFunction_sptr bkgdfunction,
-                      double &peak_center, double &max_value);
+                      size_t &center_index, double &peak_center,
+                      double &max_value);
 
   std::vector<size_t> getRange(size_t wi,
                                const std::vector<double> &peak_window);
+
+  size_t getXIndex(size_t wi, double x);
 
   void generateOutputWorkspaces();
 
