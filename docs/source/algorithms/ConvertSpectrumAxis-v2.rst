@@ -33,8 +33,8 @@ Usage
    theta = ConvertSpectrumAxis(dataws, Target="Theta")
 
    vertical_axis = theta.getAxis(1)
-   print "There are %d axis values" % vertical_axis.length()
-   print "Final theta value: %f (degrees)" % vertical_axis.getValue(vertical_axis.length() - 1)
+   print("There are {} axis values".format(vertical_axis.length()))
+   print("Final theta value: {:.6f} (degrees)".format(vertical_axis.getValue(vertical_axis.length() - 1)))
 
 .. testoutput::
 
@@ -51,8 +51,8 @@ Usage
    qws = ConvertSpectrumAxis(dataws, Target="ElasticQ", EFixed=15., EMode="Direct")
 
    vertical_axis = qws.getAxis(1)
-   print "There are %d axis values" % vertical_axis.length()
-   print "Final Q value: %f (A^-1)" % vertical_axis.getValue(vertical_axis.length() - 1)
+   print("There are {} axis values".format(vertical_axis.length()))
+   print("Final Q value: {:.6f} (A^-1)".format(vertical_axis.getValue(vertical_axis.length() - 1)))
 
 .. testoutput::
 

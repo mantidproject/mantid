@@ -53,10 +53,10 @@ Usage
                                         SetGoniometer=True,
                                         Axis0="huber,0,1,0,1")
    ws=mtd['output']
-   print "The workspace is in", ws.getSpecialCoordinateSystem()
-   print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
-   print "Number of Events =", ws.getNEvents()
-   print "There are",ws.getNumDims(),"dimensions with names:",ws.getDimension(0).name,ws.getDimension(1).name,ws.getDimension(2).name
+   print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
+   print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
+   print("Number of Events = {}".format(ws.getNEvents()))
+   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims(), ws.getDimension(0).name, ws.getDimension(1).name, ws.getDimension(2).name))
 
 Output:
 
@@ -78,10 +78,10 @@ Output:
                                         SetGoniometer=True,
                                         Axis0="BL9:Mot:Sample:Axis1,0,1,0,1")
    ws=mtd['output']
-   print "The workspace is in", ws.getSpecialCoordinateSystem()
-   print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
-   print "Number of Events =", ws.getNEvents()
-   print "There are",ws.getNumDims(),"dimensions with names:",ws.getDimension(0).name,ws.getDimension(1).name,ws.getDimension(2).name
+   print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
+   print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
+   print("Number of Events = {}".format(ws.getNEvents()))
+   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims(), ws.getDimension(0).name, ws.getDimension(1).name, ws.getDimension(2).name))
 
 Output:
 
@@ -115,10 +115,10 @@ Output:
                                         Axis0="huber,0,1,0,1",
                                         UBMatrix=UBfilename)
    ws=mtd['output']
-   print "The workspace is in", ws.getSpecialCoordinateSystem()
-   print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
-   print "Number of Events =", ws.getNEvents()
-   print "There are",ws.getNumDims(),"dimensions with names:",ws.getDimension(0).name,ws.getDimension(1).name,ws.getDimension(2).name
+   print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
+   print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
+   print("Number of Events = {}".format(ws.getNEvents()))
+   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims(), ws.getDimension(0).name, ws.getDimension(1).name, ws.getDimension(2).name))
 
 Output:
 
@@ -141,10 +141,10 @@ Output:
                                         Axis0="BL9:Mot:Sample:Axis1,0,1,0,1",
                                         UBMatrix="/SNS/CORELLI/IPTS-15526/shared/benzil_Hexagonal.mat")
    ws=mtd['output']
-   print "The workspace is in", ws.getSpecialCoordinateSystem()
-   print "There are", ws.getNumExperimentInfo(), "experiment runs in the workspace"
-   print "Number of Events =", ws.getNEvents()
-   print "There are",ws.getNumDims(),"dimensions with names:",ws.getDimension(0).name,ws.getDimension(1).name,ws.getDimension(2).name
+   print("The workspace is in {}".format(ws.getSpecialCoordinateSystem()))
+   print("There are {} experiment runs in the workspace".format(ws.getNumExperimentInfo()))
+   print("Number of Events = {}".format(ws.getNEvents()))
+   print("There are {} dimensions with names: {} {} {}".format(ws.getNumDims(), ws.getDimension(0).name, ws.getDimension(1).name, ws.getDimension(2).name))
 
 Output:
 
