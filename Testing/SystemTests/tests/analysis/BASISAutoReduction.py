@@ -69,7 +69,7 @@ class BASISAutoReductionTest(stresstesting.MantidStressTest):
                 # Need to disable checking of the Spectra-Detector map because it isn't
                 # fully saved out to the nexus file; some masked detectors should be picked
                 # up with by the mask values in the spectra
-        self.tolerance = 1e-7
+        self.tolerance = 5e-5
         self.disableChecking.append('Axes')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')

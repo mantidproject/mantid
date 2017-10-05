@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.simpleapi import ComputeIncoherentDOS, CreateSampleWorkspace, LoadInstrument, ScaleX, Scale, SetSampleMaterial, SofQW, Transpose
+from mantid.simpleapi import ComputeIncoherentDOS, CreateSampleWorkspace, LoadInstrument, ScaleX, Scale, SetSampleMaterial, SofQW3, Transpose
 import numpy as np
 from scipy import constants
 
@@ -14,7 +14,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap = True)
         with self.assertRaises(RuntimeError):
             ws_DOS = ComputeIncoherentDOS(ws)
-        ws = SofQW(ws, [0, 0.05, 8], 'Direct', 25)
+        ws = SofQW3(ws, [0, 0.05, 8], 'Direct', 25)
         qq = np.arange(0, 8, 0.05)+0.025
         for i in range(ws.getNumberHistograms()):
             ws.setY(i, ws.readY(i)*qq[i]**2)

@@ -46,13 +46,13 @@ public:
     TS_ASSERT_DELTA(result->e(0)[1160], 0.2568965638, delta);
 
     TS_ASSERT_DELTA(result->y(1)[1145], 7.5942160104, delta);
-    TS_ASSERT_DELTA(result->e(1)[1145], 0.1490079010, delta);
+    TS_ASSERT_DELTA(result->e(1)[1145], 0.2413193155, delta);
 
     TS_ASSERT_DELTA(result->y(2)[1200], 2.0249626546, delta);
-    TS_ASSERT_DELTA(result->e(2)[1200], 0.0752776593, delta);
+    TS_ASSERT_DELTA(result->e(2)[1200], 0.0925193880, delta);
 
     TS_ASSERT_DELTA(result->y(3)[99], 0.0419939169, delta);
-    TS_ASSERT_DELTA(result->e(3)[99], 0.0175106375, delta);
+    TS_ASSERT_DELTA(result->e(3)[99], 0.0226037551, delta);
 
     TS_ASSERT_DELTA(result->y(4)[1654], 0.0167189448, delta);
     TS_ASSERT_DELTA(result->e(4)[1654], 0.0056801131, delta);
