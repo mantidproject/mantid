@@ -290,10 +290,11 @@ void NormaliseToMonitor::exec() {
   }
 }
 
-/** Pulls the monitor spectrum out of a larger workspace
- *  @param WS :: The workspace containing the spectrum to extract
- *  @param index :: The index of the spectrum to extract
- *  @returns A workspace containing the single spectrum requested
+/**
+ * Pulls the monitor spectra out of a larger workspace
+ * @param ws
+ * @param workspaceIndexes The indexes of the spectra to extract
+ * @return A workspace containing the spectra requested
  */
 MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectra(
     const MatrixWorkspace_sptr &ws,
@@ -426,10 +427,10 @@ void NormaliseToMonitor::checkProperties(
 }
 
 /** Checks and retrieves the requested spectrum out of the input workspace
- *  @param inputWorkspace The input workspace.
- *  @param spectra_num The spectra number.
- *  @returns A workspace containing the monitor spectrum only.
- *  @returns spectra number (WS ID) which is used to normalize by.
+ *
+ *  @param inputWorkspace The input workspace
+ *  @returns The unchanged input workspace (so that signature is the same as
+ *getMonitorWorkspace)
  *  @throw std::runtime_error If the properties are invalid
  */
 MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
@@ -498,9 +499,18 @@ MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
   return monitorWS;
 }
 
-/** Sets the maximum and minimum X values of the monitor spectrum to use for
- * integration
+/**
  *  @return True if the maximum or minimum values are set
+ */
+
+/**
+ * Sets the maximum and minimum X values of the monitor spectrum to use for
+ * integration
+ *
+ * @param isSingleCountWorkspace Whether or not the input workspace is point
+ *data with single counts per spectrum
+ * @return True if the maximum or minimum values are set, or it is a single
+ *count workspace
  */
 bool NormaliseToMonitor::setIntegrationProps(
     const bool isSingleCountWorkspace) {
