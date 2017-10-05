@@ -183,7 +183,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
                   << std::endl;
 
     size_t idx = 0;
-    for (const auto Xbins : fileXbins) {
+    for (const auto &Xbins : fileXbins) {
       g_log.debug() << "Xbins size: " << Xbins.size() << std::endl;
       BinEdges binEdges(Xbins);
       outputWS->setBinEdges(idx, binEdges);

@@ -1551,7 +1551,7 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
  */
 void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
   const auto paramNames = fun.getParameterNames();
-  for (const auto parameter : paramNames) {
+  for (const auto &parameter : paramNames) {
     const QString qName = QString::fromStdString(parameter);
     setParameter(qName, fun.getParameter(parameter));
     const size_t index = fun.parameterIndex(parameter);

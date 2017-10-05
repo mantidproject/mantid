@@ -716,7 +716,7 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it : faclist) {
+  for (const auto &it : faclist) {
     facility->addItem(QString::fromStdString(it));
   }
 
@@ -1197,7 +1197,7 @@ void ConfigDialog::populateProgramTree() {
 
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     // creating the map of kvps needs to happen first as createing the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
@@ -1223,7 +1223,7 @@ void ConfigDialog::updateChildren(
     QTreeWidgetItem *program) {
   program->takeChildren();
   // get the current program's (itr) keys and values (pItr)
-  for (const auto pItr : programKeysAndDetails) {
+  for (const auto &pItr : programKeysAndDetails) {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
     QString itemText = QString("   ")
                            .append(QString::fromStdString(pItr.first))
@@ -1242,7 +1242,7 @@ void ConfigDialog::updateSendToTab() {
   std::vector<std::string> programNames =
       cfgSvc.getKeys("workspace.sendto.name");
 
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     for (size_t i = 0; i < programNames.size(); ++i) {
       if (programNames[i] == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
@@ -1255,7 +1255,7 @@ void ConfigDialog::updateSendToTab() {
 
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
-    for (const auto pItr : programKeysAndDetails) {
+    for (const auto &pItr : programKeysAndDetails) {
       if (pItr.second != "")
         cfgSvc.setString("workspace.sendto." + itr.first + "." + pItr.first,
                          pItr.second);
@@ -1289,7 +1289,7 @@ void ConfigDialog::refreshTreeCategories() {
   widgetMap categories; // Keeps track of categories added to the tree
 
   // Loop over all categories loaded into Mantid
-  for (const auto i : categoryMap) {
+  for (const auto &i : categoryMap) {
 
     QString catNames = QString::fromStdString(i.first);
     // Start recursion down building tree from names
@@ -2872,7 +2872,7 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent) {
     }
 
     QStringList childResults = buildHiddenCategoryString(item);
-    for (const auto it : childResults) {
+    for (const auto &it : childResults) {
       results.append(item->text(0) + "\\" + it);
     }
   }

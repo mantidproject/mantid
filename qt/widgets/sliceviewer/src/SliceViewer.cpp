@@ -2894,7 +2894,7 @@ void SliceViewer::loadFromProject(const std::string &lines) {
     API::TSVSerialiser peaks(peaksViewerLines);
 
     QStringList names;
-    for (auto section : peaks.sections("peaksworkspace")) {
+    for (const auto &section : peaks.sections("peaksworkspace")) {
       API::TSVSerialiser sec(section);
       QString name;
 
