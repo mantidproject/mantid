@@ -509,7 +509,8 @@ class SPowderSemiEmpiricalCalculator(object):
             rebined_broad_spectrum = self._fix_empty_array()
 
         # multiply by k-point weight and scaling constant
-        factor = self._weight / self._bin_width
+        # factor = self._weight / self._bin_width
+        factor = self._weight
         rebined_broad_spectrum = rebined_broad_spectrum * factor
         return local_freq, local_coeff, rebined_broad_spectrum
 
@@ -659,10 +660,8 @@ class SPowderSemiEmpiricalCalculator(object):
         else:
             inds = np.digitize(x=array_x, bins=self._bins) - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
             output_array_x = self._frequencies
-            output_array_y = np.asarray(
-                a=[array_y[inds == i].sum() for i in range(self._freq_size)],
-                dtype=AbinsModules.AbinsConstants.FLOAT_TYPE) / self._bin_width
-
+            output_array_y = np.asarray(a=[array_y[inds == i].sum() for i in range(self._freq_size)],
+                                        dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
         return output_array_x, output_array_y
 
