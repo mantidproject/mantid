@@ -133,7 +133,7 @@ class Abins(PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-        bin_width =  self.getProperty("BinWidthInWavenumber")
+        bin_width =  self.getProperty("BinWidthInWavenumber").value
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
