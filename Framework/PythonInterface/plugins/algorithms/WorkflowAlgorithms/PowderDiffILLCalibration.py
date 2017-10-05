@@ -93,17 +93,17 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         issues = dict()
         return issues
 
-    '''
-        Merges the response of the current pixel with the current combined reference in the
-        overlapping region, taking into account the relative scale factor.
-        Updates the reference workspace to contain the weighted sum of the two, or the clone
-        of one or the other if the scale factor is pathological.
-        @param ws: workspace containing data from the current pixel
-        @param cropped_ws: same as ws, but last bins cropped to match the size of the reference
-        @param ref_ws: current reference workspace
-        @param factor: relative efficiency factor for the current pixel
-    '''
     def _update_reference(self, ws, cropped_ws, ref_ws, factor):
+        """
+            Merges the response of the current pixel with the current combined reference in the
+            overlapping region, taking into account the relative scale factor.
+            Updates the reference workspace to contain the weighted sum of the two, or the clone
+            of one or the other if the scale factor is pathological.
+            @param ws: workspace containing data from the current pixel
+            @param cropped_ws: same as ws, but last bins cropped to match the size of the reference
+            @param ref_ws: current reference workspace
+            @param factor: relative efficiency factor for the current pixel
+        """
 
         ws_y = mtd[ws].extractY().flatten()[-self._bin_offset:]
         ws_e = mtd[ws].extractE().flatten()[-self._bin_offset:]
@@ -128,15 +128,15 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=ws_out, OutputWorkspace=ref_ws)
         DeleteWorkspace(cropped_ws)
 
-    '''
-        Exctract the subarrays from ratios and errors, where angles are
-        outside the given list of ranges
-        @param ratios: input array of response ratios
-        @param errors: errors on the ratios
-        @param angles: 2theta angles corresponding to the ratios
-        @returns: a tuple of extracted ratios, errors, angles
-    '''
     def _exclude_ranges(self, ratios, errors, angles):
+        """
+            Exctract the subarrays from ratios and errors, where angles are
+            outside the given list of ranges
+            @param ratios: input array of response ratios
+            @param errors: errors on the ratios
+            @param angles: 2theta angles corresponding to the ratios
+            @returns: a tuple of extracted ratios, errors, angles
+        """
 
         for range in np.split(self._excluded_ranges, len(self._excluded_ranges) / 2):
             cond = (angles < range[0]) | (angles > range[1])
@@ -145,14 +145,13 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             angles = angles[cond]
         return [ratios, errors, angles]
 
-    '''
-        Calculates the relative detector efficiency from the workspace containing response ratios.
-        Implements mean, median and most likely mean methods.
-        @param ratio: input workspace containing response ratios
-        @returns: relative calibration factor
-
-    '''
     def _compute_relative_factor(self, ratio):
+        """
+            Calculates the relative detector efficiency from the workspace containing response ratios.
+            Implements mean, median and most likely mean methods.
+            @param ratio: input workspace containing response ratios
+            @returns: relative calibration factor
+        """
 
         ratios = mtd[ratio].extractY()
         errors = mtd[ratio].extractE()
@@ -171,12 +170,12 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             factor = MostLikelyMean(ratios)
         return factor
 
-    '''
-        Ensures that the input workspace corresponds to a detector scan
-        @param scan_ws: input detector scan workspace
-        @throws: RuntimeError if the workspace is not a detector scan
-    '''
     def _validate_scan(self, scan_ws):
+        """
+            Ensures that the input workspace corresponds to a detector scan
+            @param scan_ws: input detector scan workspace
+            @throws: RuntimeError if the workspace is not a detector scan
+        """
 
         is_scanned = False
         try:
@@ -186,11 +185,12 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         if not is_scanned:
             raise RuntimeError('The input run does not correspond to a detector scan.')
 
-    '''
-        Applies previously derived calibration to the vanadium detector scan.
-        @param raw_ws: the raw loaded workspace
-    '''
     def _calibrate(self, raw_ws):
+        """
+            Applies previously derived calibration to the vanadium detector scan.
+            @param raw_ws: the raw loaded workspace
+        """
+
         calib_ws = self._hide('calib')
         LoadNexusProcessed(Filename=self._calib_file, OutputWorkspace=calib_ws)
 
@@ -206,12 +206,12 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                         NSpec=self._scan_points * self._n_det, OutputWorkspace=calib_ws)
         Multiply(LHSWorkspace=raw_ws, RHSWorkspace=calib_ws, OutputWorkspace=raw_ws)
 
-    '''
-        Normalises the input data to monitor
-        @param raw_ws: raw input workspace
-        @param mon_ws: monitor workspace
-    '''
     def _normalise_to_monitor(self, raw_ws, mon_ws):
+        """
+            Normalises the input data to monitor
+            @param raw_ws: raw input workspace
+            @param mon_ws: monitor workspace
+        """
 
         mon_counts = mtd[mon_ws].extractY()
         mon_errors = mtd[mon_ws].extractE()

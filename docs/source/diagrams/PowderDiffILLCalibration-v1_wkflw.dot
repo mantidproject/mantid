@@ -1,0 +1,80 @@
+digraph PowderDiffILLCalibration {
+  label="PowderDiffILLCalibration flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+    reference
+    factor
+    single_cell_response
+    factors
+  }
+
+  subgraph decision {
+    $decision_style
+    CalibrationMethod
+    CalibrationProvided
+    NormaliseTo
+  }
+
+  subgraph params {
+  	$param_style
+    CalibrationRun
+    CalibrationFile
+    ExcludedRange
+    OutputWorkspace
+    OutputResponseWorkspace
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+    LoadILLDiffraction
+    MostLikelyMean
+    WeightedMean
+    ConvertSpectrumAxis
+    Divide
+    Scale
+  }
+
+  subgraph process {
+    $process_style
+    normalise
+    calibrate
+    absolute_normalise
+    exclude_ranges
+    extract_single_cell
+    mean
+    median
+  }
+
+  CalibrationRun -> LoadILLDiffraction [label="DetectorScan"]
+  LoadILLDiffraction -> CalibrationProvided
+  CalibrationProvided -> calibrate [label="Yes"]
+  CalibrationFile -> calibrate
+  calibrate -> normalise
+  CalibrationProvided -> normalise [label="No"]
+  NormaliseTo -> normalise
+  normalise -> ConvertSpectrumAxis
+  ConvertSpectrumAxis -> extract_single_cell [label="i-th"]
+  extract_single_cell -> single_cell_response
+  reference -> Divide [label="LHS"]
+  single_cell_response -> Divide [label="RHS"]
+  Divide -> exclude_ranges
+  ExcludedRange -> exclude_ranges
+  exclude_ranges -> CalibrationMethod
+  CalibrationMethod -> MostLikelyMean [label="MostLikelyMean"]
+  CalibrationMethod -> mean [label="Mean"]
+  CalibrationMethod -> median [label="Median"]
+  MostLikelyMean -> factor
+  mean -> factor
+  median -> factor
+  Scale -> single_cell_response
+  factor -> single_cell_response
+  single_cell_response -> WeightedMean
+  reference -> WeightedMean
+  WeightedMean -> reference
+  factor -> factors
+  factors -> absolute_normalise
+  absolute_normalise -> OutputWorkspace
+  reference -> OutputResponseWorkspace
+}

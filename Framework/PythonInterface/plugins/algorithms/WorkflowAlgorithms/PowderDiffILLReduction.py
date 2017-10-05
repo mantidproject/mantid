@@ -159,7 +159,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             Multiply(LHSWorkspace=joined_ws, RHSWorkspace=calib_ws, OutputWorkspace=joined_ws)
             DeleteWorkspace(calib_ws)
 
-        #TODO ROC normalisation goes here
+        # TODO: ROC normalisation goes here
 
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
@@ -179,11 +179,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
-    '''
-        Crops out the part of the workspace corresponding to negative signed 2theta
-        @param ws: the input workspace
-    '''
     def _crop_negative_2theta(self, ws):
+        """
+            Crops out the part of the workspace corresponding to negative signed 2theta
+            @param ws: the input workspace
+        """
         theta_ws = self._hide('2theta')
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta', OrderAxis=False)
         positive_index = np.where(mtd[theta_ws].getAxis(1).extractValues() > 0)[0][0]
@@ -191,10 +191,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
         CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, StartWorkspaceIndex=positive_index)
         DeleteWorkspace(theta_ws)
 
-    '''
-        Crops out the spectra corresponding to zero counting pixels
-    '''
     def _crop_dead_pixels(self, ws):
+        """
+            Crops out the spectra corresponding to zero counting pixels
+            @param ws: the input workspace
+        """
         dead_pixels = []
         for spectrum in range(mtd[ws].getNumberHistograms()):
             counts = mtd[ws].readY(spectrum)
@@ -204,11 +205,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
         MaskDetectors(Workspace=ws, WorkspaceIndexList=dead_pixels)
         ExtractUnmaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
 
-    '''
-        Normalises counts to the sum of counts in the region-of-interest
-        @param ws : input workspace with raw spectrum axis
-    '''
     def _normalise_to_roi(self, ws):
+        """
+            Normalises counts to the sum of counts in the region-of-interest
+            @param ws : input workspace with raw spectrum axis
+        """
         theta_ws = self._hide('theta')
         roi_ws = self._hide('roi')
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta')
@@ -219,12 +220,12 @@ class PowderDiffILLReduction(PythonAlgorithm):
         DeleteWorkspace(roi_ws)
         DeleteWorkspace(theta_ws)
 
-    '''
-        Parses the regions of interest string from 2theta ranges to workspace indices
-        @param ws : input workspace with 2theta as spectrum axis
-        Returns: roi as workspace indices, e.g. 7-20,100-123
-    '''
     def _parse_roi(self, ws):
+        """
+            Parses the regions of interest string from 2theta ranges to workspace indices
+            @param ws : input workspace with 2theta as spectrum axis
+            Returns: roi as workspace indices, e.g. 7-20,100-123
+        """
         result = ''
         axis = mtd[ws].getAxis(1).extractValues()
         index = 0
@@ -239,5 +240,5 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self.log().information('ROI summing pattern is '+result[:-1])
         return result[:-1]
 
-#Register the algorithm with Mantid
+# Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderDiffILLReduction)

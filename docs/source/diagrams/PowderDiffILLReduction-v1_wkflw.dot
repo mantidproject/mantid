@@ -1,0 +1,71 @@
+digraph PowderDiffILLReduction {
+  label="PowderDiffILLReduction flowchart"
+  $global_style
+
+  subgraph values {
+    $value_style
+  }
+
+  subgraph decision {
+    $decision_style
+    CalibrationProvided
+    NormaliseTo
+    SortObservableAxis
+    Unit
+    PrepareToSaveAs
+  }
+
+  subgraph params {
+  	$param_style
+    Run
+    ROI
+    Observable
+    CalibrationFile
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+  	$algorithm_style
+    LoadILLDiffraction
+    ConjoinXRuns
+    SortXAxis
+    ConvertSpectrumAxis
+    Transpose
+  }
+
+  subgraph processes {
+    $process_style
+    normalise_to_monitor
+    normalise_to_ROI
+    normalise_to_time
+    calibrate
+    crop_negative_2theta
+    crop_zero_counting_cells
+  }
+
+  Run -> LoadILLDiffraction
+  LoadILLDiffraction -> ConjoinXRuns
+  Observable -> ConjoinXRuns
+  ConjoinXRuns -> NormaliseTo
+  NormaliseTo -> normalise_to_monitor [label="Monitor"]
+  NormaliseTo -> normalise_to_ROI [label="ROI"]
+  ROI -> normalise_to_ROI
+  NormaliseTo -> normalise_to_time [label="Time"]
+  normalise_to_time -> CalibrationProvided
+  normalise_to_ROI -> CalibrationProvided
+  normalise_to_monitor -> CalibrationProvided
+  CalibrationProvided -> calibrate [label="Yes"]
+  CalibrationFile -> calibrate
+  CalibrationProvided -> SortObservableAxis [label="No"]
+  calibrate -> SortObservableAxis
+  SortObservableAxis -> SortXAxis [label="Yes"]
+  SortXAxis -> PrepareToSaveAs
+  SortObservableAxis -> PrepareToSaveAs [label="No"]
+  PrepareToSaveAs -> crop_negative_2theta [label="FullProf"]
+  crop_negative_2theta -> crop_zero_counting_cells
+  crop_zero_counting_cells -> ConvertSpectrumAxis
+  PrepareToSaveAs -> ConvertSpectrumAxis [label="NexusProcessed"]
+  Unit -> ConvertSpectrumAxis
+  ConvertSpectrumAxis -> Transpose
+  Transpose -> OutputWorkspace
+}
