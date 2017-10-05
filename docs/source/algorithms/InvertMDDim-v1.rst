@@ -26,7 +26,7 @@ Usage
         print("Name   Bins   Min     Max")
         for dim_index in range(num_dims):
             dim = ws.getDimension(dim_index)
-            print("{}      {}      {.2f}   {.2f}".format(
+            print("{}      {}      {:.2f}   {:.2f}".format(
                   dim.name, dim.getNBins(), dim.getMinimum(), dim.getMaximum()))
 
     #create a test MD event workspace
