@@ -9,15 +9,10 @@
 #include <boost/python/dict.hpp>
 
 using boost::python::dict;
-using boost::python::handle;
-using boost::python::len;
 using boost::python::object;
 
 namespace Mantid {
-using Kernel::Direction;
-using Kernel::PropertyManager;
 using Kernel::PropertyManager_sptr;
-using Kernel::PropertyWithValue;
 namespace PythonInterface {
 namespace Registry {
 

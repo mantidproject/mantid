@@ -79,6 +79,7 @@ def create_mock_view(user_file_path, batch_file_path=None):
     masking_table = create_mock_masking_table()
     view.masking_table = masking_table
 
+    view.halt_process_flag = mock.MagicMock()
     # ---------------------
     # Mocking properties
     # ---------------------

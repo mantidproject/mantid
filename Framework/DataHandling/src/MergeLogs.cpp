@@ -69,8 +69,8 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   Kernel::TimeSeriesProperty<double> *p1 = getTimeSeriesLog(ilogname1);
   Kernel::TimeSeriesProperty<double> *p2 = getTimeSeriesLog(ilogname2);
 
-  std::vector<Kernel::DateAndTime> times1 = p1->timesAsVector();
-  std::vector<Kernel::DateAndTime> times2 = p2->timesAsVector();
+  std::vector<Types::Core::DateAndTime> times1 = p1->timesAsVector();
+  std::vector<Types::Core::DateAndTime> times2 = p2->timesAsVector();
 
   auto rp = new Kernel::TimeSeriesProperty<double>(ologname);
 
@@ -79,7 +79,7 @@ void Merge2WorkspaceLogs::mergeLogs(std::string ilogname1,
   size_t index2 = 0;
   bool icont = true;
 
-  Kernel::DateAndTime tmptime;
+  Types::Core::DateAndTime tmptime;
   double tmpvalue;
   bool launch1 = true;
   ;

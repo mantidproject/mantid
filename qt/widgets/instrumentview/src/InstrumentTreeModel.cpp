@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::IObjComponent;

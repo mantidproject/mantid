@@ -16,9 +16,7 @@ public:
   static ProcessingAlgorithmBaseTest *createSuite() {
     return new ProcessingAlgorithmBaseTest();
   }
-  static void destroySuite(ProcessingAlgorithmBaseTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(ProcessingAlgorithmBaseTest *suite) { delete suite; }
   ProcessingAlgorithmBaseTest() { FrameworkManager::Instance(); };
 
   void test_MatrixWorkspace_properties() {

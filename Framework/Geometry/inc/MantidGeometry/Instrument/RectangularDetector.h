@@ -11,6 +11,8 @@
 
 namespace Mantid {
 namespace Geometry {
+
+class ComponentVisitor;
 /**
  *  RectangularDetector is a type of CompAssembly, an assembly of components.
  *  It is designed to be an easy way to specify a rectangular (XY) array of
@@ -152,6 +154,9 @@ public:
   const boost::shared_ptr<const Object> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
+
+  virtual size_t
+  registerContents(class ComponentVisitor &componentVisitor) const override;
 
   // ------------ End of IObjComponent methods ----------------
 

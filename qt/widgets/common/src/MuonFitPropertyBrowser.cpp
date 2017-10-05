@@ -94,7 +94,7 @@ void MuonFitPropertyBrowser::init() {
 
   /* Create function group */
   QtProperty *functionsGroup = m_groupManager->addProperty("Functions");
-  QtProperty *settingsGroup(NULL);
+  QtProperty *settingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   settingsGroup = m_groupManager->addProperty("Data");
@@ -103,7 +103,7 @@ void MuonFitPropertyBrowser::init() {
   multiFitSettings.beginGroup("");
 
   /* Create function group */
-  QtProperty *multiFitSettingsGroup(NULL);
+  QtProperty *multiFitSettingsGroup(nullptr);
 
   // Seperates the data and the settings into two seperate categories
   multiFitSettingsGroup = m_groupManager->addProperty("Data");

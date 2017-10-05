@@ -88,7 +88,7 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
-    : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
+    : MdiSubWindow(parent, label, name, nullptr), WorkspaceObserver(),
       m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
       m_max(0), m_are_min_max_set(false), m_boundingRect(),
       m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
@@ -462,7 +462,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
     QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                  tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
-    return NULL;
+    return nullptr;
   }
 
   for (int i = 0; i < rows; ++i) {
@@ -475,7 +475,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
       QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                    tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
-      return NULL;
+      return nullptr;
     }
   }
   return data;
@@ -724,7 +724,7 @@ MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
-    return NULL;
+    return nullptr;
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -736,7 +736,7 @@ MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   // menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph *plot = g->activeGraph();
-  plotSpectrogram(plot, a, type, false, NULL);
+  plotSpectrogram(plot, a, type, false, nullptr);
   // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;

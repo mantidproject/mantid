@@ -47,8 +47,7 @@ public:
   virtual QString whatsthis() = 0;
   virtual QString shortcut() = 0;
   virtual bool hasChild() final { return !m_child.empty(); };
-  virtual void
-  setChild(std::vector<std::unique_ptr<Command>> child) final {
+  virtual void setChild(std::vector<std::unique_ptr<Command>> child) final {
     m_child = std::move(child);
   }
   virtual std::vector<std::unique_ptr<Command>> &getChild() final {

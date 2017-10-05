@@ -49,6 +49,8 @@ using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument_const_sptr;
+using Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 
@@ -1582,18 +1584,20 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     local_workspace->loadExperimentInfoNexus(
         getPropertyValue("Filename"), m_cppFile,
         parameterStr); // REQUIRED PER PERIOD
+
+    // Parameter map parsing only if instrument loaded OK.
+    progress(progressStart + 0.11 * progressRange,
+             "Reading the parameter maps...");
+    local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
-    g_log.information("Error loading Instrument section of nxs file");
-    g_log.information(e.what());
+    g_log.warning("Error loading Instrument section of nxs file");
+    g_log.warning(e.what());
+    g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
+                  "update the geometry");
   }
 
   // Now assign the spectra-detector map
   readInstrumentGroup(mtd_entry, local_workspace);
-
-  // Parameter map parsing
-  progress(progressStart + 0.11 * progressRange,
-           "Reading the parameter maps...");
-  local_workspace->readParameterMap(parameterStr);
 
   if (!local_workspace->getAxis(1)
            ->isSpectra()) { // If not a spectra axis, load the axis data into

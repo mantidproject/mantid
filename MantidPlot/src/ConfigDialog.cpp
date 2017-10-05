@@ -1968,7 +1968,7 @@ void ConfigDialog::initFittingPage() {
 
   lblPeaksColor = new QLabel();
   multiPeakLayout->addWidget(lblPeaksColor);
-  boxPeaksColor = new ColorBox(0);
+  boxPeaksColor = new ColorBox(nullptr);
   boxPeaksColor->setCurrentIndex(app->peakCurvesColor);
   multiPeakLayout->addWidget(boxPeaksColor);
 
@@ -2466,7 +2466,7 @@ void ConfigDialog::apply() {
   sep.replace("\\s", " ");
 
   if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+    QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
     return;

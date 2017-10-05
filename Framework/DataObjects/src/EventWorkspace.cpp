@@ -24,7 +24,7 @@
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataObjects {
@@ -192,7 +192,7 @@ double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
  */
 DateAndTime EventWorkspace::getPulseTimeMin() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -211,7 +211,7 @@ DateAndTime EventWorkspace::getPulseTimeMin() const {
  */
 DateAndTime EventWorkspace::getPulseTimeMax() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -229,8 +229,8 @@ Get the maximum and mimumum pulse time for events accross the entire workspace.
 @param Tmax maximal pulse time as a DateAndTime.
 */
 void EventWorkspace::getPulseTimeMinMax(
-    Mantid::Kernel::DateAndTime &Tmin,
-    Mantid::Kernel::DateAndTime &Tmax) const {
+    Mantid::Types::Core::DateAndTime &Tmin,
+    Mantid::Types::Core::DateAndTime &Tmax) const {
 
   Tmax = DateAndTime::minimum();
   Tmin = DateAndTime::maximum();
@@ -267,7 +267,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
 
@@ -294,7 +294,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;

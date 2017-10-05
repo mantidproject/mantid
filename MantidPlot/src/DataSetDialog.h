@@ -45,8 +45,8 @@ class DataSetDialog : public QDialog {
   Q_OBJECT
 
 public:
-  DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = NULL,
-                Qt::WFlags fl = 0);
+  DataSetDialog(const QString &text, ApplicationWindow *app, Graph *g = nullptr,
+                Qt::WFlags fl = nullptr);
 
 public slots:
   void accept() override;

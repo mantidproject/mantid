@@ -51,7 +51,7 @@ public: // public constants and enums
 
 public: // public constructor, destructor and functions
   /// Default Constructor
-  IndirectSimulation(QWidget *parent = 0);
+  IndirectSimulation(QWidget *parent = nullptr);
   /// Destructor
   ~IndirectSimulation() override;
   /// Interface name
