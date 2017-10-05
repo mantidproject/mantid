@@ -65,7 +65,6 @@ public:
 
   /// Returns if finalize has been called
   bool isFinalized() const { return m_finalized != 0; }
-  bool finalizeUsedFracSquared() const { return m_finalized < 0; }
 
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;

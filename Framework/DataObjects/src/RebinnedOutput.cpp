@@ -133,7 +133,7 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
     g_log.debug() << '\n';
   }
   // Sets flag so subsequent algorithms know to correctly treat data
-  m_finalized = hasSqrdErrs ? -1 : 1;
+  m_finalized = 1;
 }
 
 } // namespace Mantid
