@@ -171,12 +171,13 @@ const std::string MatrixWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n"
      << "Title: " << getTitle() << "\n"
-     << "Histograms: " << getNumberHistograms() << "\n";
+     << "Histograms: " << getNumberHistograms() << "\n"
+     << "Bins: ";
 
   try {
-    os << "Bins: " << blocksize() << "\n";
+    os << blocksize() << "\n";
   } catch (std::length_error &) {
-    os << "Bins: variable\n"; // TODO shouldn't use try/catch
+    os << "variable\n"; // TODO shouldn't use try/catch
   }
 
   if (isHistogramData())

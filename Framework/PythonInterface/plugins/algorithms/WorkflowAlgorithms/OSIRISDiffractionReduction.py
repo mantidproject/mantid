@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import itertools
+from six import iteritems
 
 from IndirectReductionCommon import load_files
 
@@ -159,6 +160,13 @@ class DRangeToWorkspaceMap(object):
         """
         return d_range in self._map
 
+    def __str__(self):
+        str_output = "{\n"
+
+        for d_range, workspaces in self._map.items():
+            str_output += str(d_range) + ": " + str(workspaces) + "\n"
+        return str_output + "}"
+
 
 def average_ws_list(ws_list):
     """
@@ -169,31 +177,54 @@ def average_ws_list(ws_list):
     :return:        The name of the workspace containing the average.
     """
     # Assert we have some ws in the list, and if there is only one then return it.
-    if len(ws_list) == 0:
+    num_workspaces = len(ws_list)
+
+    if num_workspaces == 0:
         raise RuntimeError("getAverageWs: Trying to take an average of nothing")
 
-    if len(ws_list) == 1:
+    if num_workspaces == 1:
         return ws_list[0]
 
-    return sum(ws_list) / len(ws_list)
+    def do_binary_op(name, operands):
+        alg = AlgorithmManager.createUnmanaged(name)
+        alg.initialize()
+        alg.setChild(True)
+        for prop_name, value in iteritems(operands):
+            alg.setProperty(prop_name, value)
+        alg.setProperty("OutputWorkspace", "__unused__")
+        alg.execute()
+        return alg.getProperty('OutputWorkspace').value
+
+    def local_sum(operand_list):
+        total = operand_list[0]
+        for j in range(1, num_workspaces):
+            operands = {"LHSWorkspace": total,
+                        "RHSWorkspace": operand_list[j]}
+            total = do_binary_op("Plus", operands)
+        return total
+
+    inputs = {"InputWorkspace": local_sum(ws_list),
+              "Factor": 1. / float(num_workspaces),
+              "Operation": "Multiply"}
+    return do_binary_op("Scale", inputs)
 
 
-def find_intersection_of_ranges(rangeA, rangeB):
-    if rangeA[0] >= rangeA[1] or rangeB[0] >= rangeB[1]:
+def find_intersection_of_ranges(range_a, range_b):
+    if range_a[0] >= range_a[1] or range_b[0] >= range_b[1]:
         raise RuntimeError("Malformed range")
 
-    if rangeA[0] <= rangeA[1] <= rangeB[0] <= rangeB[1]:
+    if range_a[0] <= range_a[1] <= range_b[0] <= range_b[1]:
         return
-    if rangeB[0] <= rangeB[1] <= rangeA[0] <= rangeA[1]:
+    if range_b[0] <= range_b[1] <= range_a[0] <= range_a[1]:
         return
-    if rangeA[0] <= rangeB[0] <= rangeB[1] <= rangeA[1]:
-        return rangeB
-    if rangeB[0] <= rangeA[0] <= rangeA[1] <= rangeB[1]:
-        return rangeA
-    if rangeA[0] <= rangeB[0] <= rangeA[1] <= rangeB[1]:
-        return [rangeB[0], rangeA[1]]
-    if rangeB[0] <= rangeA[0] <= rangeB[1] <= rangeA[1]:
-        return [rangeA[0], rangeB[1]]
+    if range_a[0] <= range_b[0] <= range_b[1] <= range_a[1]:
+        return range_b
+    if range_b[0] <= range_a[0] <= range_a[1] <= range_b[1]:
+        return range_a
+    if range_a[0] <= range_b[0] <= range_a[1] <= range_b[1]:
+        return [range_b[0], range_a[1]]
+    if range_b[0] <= range_a[0] <= range_b[1] <= range_a[1]:
+        return [range_a[0], range_b[1]]
 
     # Should never reach here
     raise RuntimeError()
@@ -379,18 +410,26 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._man_d_range = None
 
         if not self.getProperty("DetectDRange").value:
-            self._man_d_range = self.getProperty("DRange").value
+            self._man_d_range = self._parse_string_array(self.getProperty("DRange").value)
+            self._man_d_range = [x - 1 for x in self._man_d_range]
+            num_ranges = len(self._man_d_range)
+            num_runs = len(self._sample_runs)
+
+            if num_runs % num_ranges == 0:
+                self._man_d_range = list(self._man_d_range * int(num_runs / num_ranges))
+            elif num_runs != num_ranges:
+                raise ValueError("Less D-Ranges supplied than Sample Runs. Expected " + str(num_runs)
+                                 + ", Received " + str(num_ranges) + ".")
 
     def validateInputs(self):
-        self._get_properties()
         issues = dict()
 
-        if self._man_d_range is not None:
-            try:
-                self._man_d_range = self._parse_string_array(self._man_d_range)
-                self._man_d_range = [x - 1 for x in self._man_d_range]
-            except BaseException as exc:
-                issues['DRange'] = str(exc)
+        try:
+            self._get_properties()
+        except ValueError as exc:
+            issues['DRange'] = str(exc)
+        except RuntimeError as exc:
+            issues['Sample'] = str(exc)
 
         num_samples = len(self._sample_runs)
         num_vanadium = len(self._vanadium_runs)
@@ -584,7 +623,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             mtd.addOrReplace(sample_ws_name, sample_ws)
 
         if len(divided) > 1:
-
             # Merge the sample files into one.
             merge_runs_alg = self.createChildAlgorithm("MergeRuns", enableLogging=False)
             merge_runs_alg.setProperty("InputWorkspaces", sample_ws_names)

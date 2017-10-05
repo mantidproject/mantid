@@ -40,6 +40,7 @@ class ISIS1DMerger(Merger):
             get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_sample)
 
         # Get the relevant workspaces from the reduction settings. For this we need to first understand what the
+        # We can have merged reductions
         can_count_primary, can_norm_primary, can_count_secondary, can_norm_secondary = \
             get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_can)
 
@@ -140,14 +141,14 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
     # Get primary reduction information for specified data type, i.e. sample or can
     primary = reduction_mode_vs_output_bundles[primary_detector]
     primary_for_data_type = next((setting for setting in primary if is_data_type(setting)), None)
-    primary_count = primary_for_data_type.output_workspace_count
-    primary_norm = primary_for_data_type.output_workspace_norm
+    primary_count = None if primary_for_data_type is None else primary_for_data_type.output_workspace_count
+    primary_norm = None if primary_for_data_type is None else primary_for_data_type.output_workspace_norm
 
     # Get secondary reduction information for specified data type, i.e. sample or can
     secondary = reduction_mode_vs_output_bundles[secondary_detector]
     secondary_for_data_type = next((setting for setting in secondary if is_data_type(setting)), None)
-    secondary_count = secondary_for_data_type.output_workspace_count
-    secondary_norm = secondary_for_data_type.output_workspace_norm
+    secondary_count = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_count
+    secondary_norm = None if secondary_for_data_type is None else secondary_for_data_type.output_workspace_norm
     return primary_count, primary_norm, secondary_count, secondary_norm
 
 
