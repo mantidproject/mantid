@@ -1505,7 +1505,7 @@ void FilterEvents::setupCustomizedTOFCorrection() {
       // If there are more than 1 spectrum, it is very likely to have problem
       // with correction factor
       const DataObjects::EventList events = m_eventWS->getSpectrum(i);
-      auto detids = events.getDetectorIDs();
+      const auto &detids = events.getDetectorIDs();
       if (detids.size() != 1) {
         // Check whether there are more than 1 detector per spectra.
         stringstream errss;
