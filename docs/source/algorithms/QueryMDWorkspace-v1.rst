@@ -42,18 +42,18 @@ Usage
    col_names=table.keys();
    name0=col_names[0];
    nRows = len(table.column(name0));
-   print "Table contains {0} rows".format(nRows)
-   print "first 11 of them are:"
-   print '{0}'.format("--------------------------------------------------------------------------------------------------------------")
+   print("Table contains {0} rows".format(nRows))
+   print("first 11 of them are:")
+   print("--------------------------------------------------------------------------------------------------------------")
    for name in col_names:
-      print '| {0:19}'.format(name),
-   print '|'
-   print '{0}'.format("--------------------------------------------------------------------------------------------------------------")
-   for i in xrange(0,11):
+      print('| {0:19} '.format(name), end='')
+   print('|')
+   print("--------------------------------------------------------------------------------------------------------------")
+   for i in range(0,11):
      for name in col_names:
         col = table.column(name);
-        print '| {0:>19.4f}'.format(col[i]),
-     print '|'
+        print('| {0:>19.4f} '.format(col[i]), end='')
+     print('|')
     
     
 **Output:**
