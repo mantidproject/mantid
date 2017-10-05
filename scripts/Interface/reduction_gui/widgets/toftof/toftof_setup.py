@@ -188,6 +188,14 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_rbtCorrectTOFVan = ''
     TIP_rbtCorrectTOFSample = ''
 
+    def dir_browse_dialog(self):
+        """
+            Pop up a directory dialog box.
+        """
+        dirname = str(QFileDialog.getExistingDirectory(self, "Select Directory", '', QFileDialog.DontUseNativeDialog))
+
+        return dirname
+
     def __init__(self, settings):
         BaseWidget.__init__(self, settings = settings)
 
