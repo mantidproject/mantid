@@ -22,6 +22,8 @@ Please contact the Mantid Team if you experience any further problems as a resul
 Algorithms
 ----------
 
+:ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports workspaces with detector scans and workspaces with single-count point data.
+
 Data Objects
 ------------
 
