@@ -75,7 +75,7 @@ Output:
     ifile = open(finalfile, 'r')
     lines = ifile.readlines()
     ifile.close()
-    print("Number of peaks in table {}".format(len(lines))
+    print("Number of peaks in table {}".format(len(lines)))
 
 Output:
 
