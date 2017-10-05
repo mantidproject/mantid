@@ -70,7 +70,7 @@ Usage
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
 
-    print('workspaces instantiated:  {}.format(', '.join(ws.getNames())))
+    print('workspaces instantiated:  {}.format(', '.join(ws.getNames()))
 
     sqt = ws[3] # S(Q,E)
     # I(Q,t) is a Gaussian, thus S(Q,E) is a Gaussian too (at high temperatures)

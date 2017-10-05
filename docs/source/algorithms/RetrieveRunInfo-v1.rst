@@ -55,9 +55,9 @@ Usage
    info_table = RetrieveRunInfo(Runs="IRS21360,IRS26173")
 
    print("The table contains information about {} runs.".format(info_table.rowCount()))
-   print "The first has run number {}.".format(info_table.cell("run_number", 0)))
-   print "The second has run number {}.".format(info_table.cell("run_number", 1)))
-   print "The title of the second run is \"{}.\"".format(info_table.cell("run_title", 1).strip()))
+   print("The first has run number {}.".format(info_table.cell("run_number", 0)))
+   print("The second has run number {}.".format(info_table.cell("run_number", 1)))
+   print("The title of the second run is \"{}.\"".format(info_table.cell("run_title", 1).strip()))
 
 .. testcleanup:: ExSingleRun
 
