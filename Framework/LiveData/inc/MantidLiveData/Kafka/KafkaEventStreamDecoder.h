@@ -151,6 +151,14 @@ private:
   std::atomic<bool> m_extractedEndRunData;
 
   void waitForDataExtraction();
+
+  std::unordered_map<std::string, std::vector<int64_t>> getStopOffsets(
+      std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+      std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+      uint64_t stopTime, bool &checkOffsets) const;
+
+  void checkIfAllStopOffsetsReached(
+      const std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 };
 
 } // namespace LiveData

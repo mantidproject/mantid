@@ -248,12 +248,10 @@ void KafkaEventStreamDecoder::captureImplExcept() {
   std::string topicName;
   std::unordered_map<std::string, std::vector<int64_t>> stopOffsets;
   std::unordered_map<std::string, std::vector<bool>> reachedEnd;
-  // Set to true when a runStop message has been received and we need to start
-  // checking if we have reached the last message in the run for each partition
+  // True when should be checking if run stop offsets have been reached
   bool checkOffsets = false;
+
   while (!m_interrupt) {
-    // If extractData method is waiting for access to the buffer workspace
-    // then we wait for it to finish
     waitForDataExtraction();
 
     // Pull in events
@@ -265,7 +263,9 @@ void KafkaEventStreamDecoder::captureImplExcept() {
     if (checkOffsets) {
       if (reachedEnd.count(topicName) &&
           offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
+
         reachedEnd[topicName][static_cast<size_t>(partition)] = true;
+
         if (offset > stopOffsets[topicName][static_cast<size_t>(partition)]) {
           continue;
         }
@@ -275,24 +275,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
                       << " stopOffset: "
                       << stopOffsets[topicName][static_cast<size_t>(partition)]
                       << std::endl;
-        // Check if we've reached the stop offset on every partition of every
-        // topic
-        if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
-                        [](std::pair<std::string, std::vector<bool>> kv) {
-                          return std::all_of(
-                              kv.second.cbegin(), kv.second.cend(),
-                              [](bool partitionEnd) { return partitionEnd; });
-                        })) {
-          m_endRun = true;
-          // If we've reached the end of a run then set m_extractWaiting to true
-          // so that we wait until the buffer is emptied before continuing.
-          // Otherwise we can end up with data from two different runs in the
-          // same buffer workspace which is problematic if the user wanted the
-          // "Stop" or "Rename" run transition option.
-          m_extractWaiting = true;
-          m_extractedEndRunData = false;
-          g_log.debug() << "Reached end of run in data stream." << std::endl;
-        }
+        checkIfAllStopOffsetsReached(reachedEnd);
       }
     }
 
@@ -311,52 +294,90 @@ void KafkaEventStreamDecoder::captureImplExcept() {
       sampleDataFromMessage(buffer);
     }
 
-    // Check if we have a runMessage if we don't already have a run stop
+    // Check if we have a runMessage if we don't already have run stop
     // information
     if (!checkOffsets && flatbuffers::BufferHasIdentifier(
                              reinterpret_cast<const uint8_t *>(buffer.c_str()),
                              RUN_MESSAGE_ID.c_str())) {
-      // Check if we have a runStop message
       auto runMsg =
           GetRunInfo(reinterpret_cast<const uint8_t *>(buffer.c_str()));
       if (runMsg->info_type_type() == InfoTypes_RunStop) {
         auto runStopMsg = static_cast<const RunStop *>(runMsg->info_type());
         auto stopTime = runStopMsg->stop_time();
-        g_log.debug() << "stopTime is " << stopTime << std::endl;
-        // Wait for max latency so that we don't miss any late messages
-        std::this_thread::sleep_for(MAX_LATENCY);
+        g_log.debug() << "Received an end-of-run message with stop time = "
+                      << stopTime << std::endl;
         stopOffsets =
-            m_eventStream->getOffsetsForTimestamp(static_cast<int64_t>(
-                (stopTime / 1000000) +
-                1)); // Convert nanoseconds to milliseconds and round up
-        // Set reachedEnd to false for each topic and partition
-        for (auto keyValue : stopOffsets) {
-          // Ignore the runInfo topic
-          if (keyValue.first.substr(
-                  keyValue.first.length() -
-                  KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
-              KafkaTopicSubscriber::RUN_TOPIC_SUFFIX) {
-            g_log.debug() << "TOPIC: " << keyValue.first
-                          << " PARTITIONS: " << keyValue.second.size()
-                          << std::endl;
-            reachedEnd.insert(
-                {keyValue.first,
-                 std::vector<bool>(keyValue.second.size(), false)});
-            // If the stopOffset is negative then there are no messages for us
-            // to collect on this topic, so mark reachedEnd as true already
-            for (auto partition_offset : keyValue.second) {
-              reachedEnd[keyValue.first][partition_offset < 0];
-            }
-          }
-        }
-        checkOffsets = true;
-        g_log.debug("Received an end-of-run message");
+            getStopOffsets(stopOffsets, reachedEnd, stopTime, checkOffsets);
       }
     }
   }
   g_log.debug("Event capture finished");
 }
 
+/**
+ * Check if we've reached the stop offset on every partition of every topic
+ *
+ * @param reachedEnd : Bool for each topic and partition to mark when stop
+ * offset reached
+ */
+void KafkaEventStreamDecoder::checkIfAllStopOffsetsReached(
+    const std::unordered_map<std::string, std::vector<bool>> &reachedEnd) {
+
+  if (all_of(reachedEnd.cbegin(), reachedEnd.cend(),
+             [](std::pair<std::__cxx11::string, std::vector<bool>> kv) {
+               return all_of(kv.second.cbegin(), kv.second.cend(),
+                             [](bool partitionEnd) { return partitionEnd; });
+             })) {
+    m_endRun = true;
+    // If we've reached the end of a run then set m_extractWaiting to true
+    // so that we wait until the buffer is emptied before continuing.
+    // Otherwise we can end up with data from two different runs in the
+    // same buffer workspace which is problematic if the user wanted the
+    // "Stop" or "Rename" run transition option.
+    m_extractWaiting = true;
+    m_extractedEndRunData = false;
+    g_log.debug() << "Reached end of run in data stream." << std::endl;
+  }
+}
+
+std::unordered_map<std::string, std::vector<int64_t>>
+KafkaEventStreamDecoder::getStopOffsets(
+    std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
+    std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
+    uint64_t stopTime, bool &checkOffsets) const {
+  // Wait for max latency so that we don't miss any late messages
+  std::this_thread::sleep_for(MAX_LATENCY);
+  stopOffsets = m_eventStream->getOffsetsForTimestamp(static_cast<int64_t>(
+      (stopTime / 1000000) +
+      1)); // Convert nanoseconds to milliseconds and round up
+
+  // Set reachedEnd to false for each topic and partition
+  for (auto keyValue : stopOffsets) {
+    // Ignore the runInfo topic
+    if (keyValue.first.substr(
+            keyValue.first.length() -
+            KafkaTopicSubscriber::RUN_TOPIC_SUFFIX.length()) !=
+        KafkaTopicSubscriber::RUN_TOPIC_SUFFIX) {
+      g_log.debug() << "TOPIC: " << keyValue.first
+                    << " PARTITIONS: " << keyValue.second.size() << std::endl;
+      reachedEnd.insert(
+          {keyValue.first, std::vector<bool>(keyValue.second.size(), false)});
+
+      // If the stopOffset is negative then there are no messages for us
+      // to collect on this topic, so mark reachedEnd as true already
+      for (auto partition_offset : keyValue.second) {
+        reachedEnd[keyValue.first][partition_offset < 0];
+      }
+    }
+  }
+  checkOffsets = true;
+  return stopOffsets;
+}
+
+/**
+ * If extractData method is waiting for access to the buffer workspace
+ * then we wait for it to finish
+ */
 void KafkaEventStreamDecoder::waitForDataExtraction() {
   std::unique_lock<std::mutex> readyLock(m_waitMutex);
   if (m_extractWaiting) {
