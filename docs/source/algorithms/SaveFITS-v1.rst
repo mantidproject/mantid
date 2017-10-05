@@ -79,7 +79,7 @@ Usage
         print("Could not find the keywords '{}' and '{}' in this FITS file".format(axis1_log, axis2_log))
 
     pos_x, pos_y = 22, 33
-    print("Pixel value at coordinates ({0},{1}), first image: {2}, second image: {3}".
+    print("Pixel value at coordinates ({0},{1}), first image: {2:.1f}, second image: {3:.1f}".
            format(pos_x, pos_y, ws.readY(pos_y)[pos_x], ws_reload.readY(pos_y)[pos_x]))
                 
 .. testcleanup:: LoadSaveLoadFITS
