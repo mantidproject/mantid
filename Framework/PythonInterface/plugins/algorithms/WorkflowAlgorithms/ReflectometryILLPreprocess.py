@@ -5,9 +5,9 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
 from mantid.kernel import (Direction, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, CreateSingleValuedWorkspace, CropWorkspace,
-                              Divide, ExtractMonitors, GroupDetectors, Integration, LoadILLReflectometry, MergeRuns, Minus, mtd,
-                              NormaliseToMonitor, Plus, Scale, SumSpectra, Transpose)
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
+                              Divide, ExtractMonitors, GroupDetectors, LoadILLReflectometry, MergeRuns, Minus, mtd,
+                              NormaliseToMonitor, Scale, Transpose)
 import numpy
 import os.path
 import ReflectometryILL_common as common
