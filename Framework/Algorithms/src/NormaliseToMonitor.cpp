@@ -482,8 +482,7 @@ MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
 }
 
 /** Checks and retrieves the monitor spectrum out of the input workspace
- *  @param inputWorkspace The input workspace.
- *  @param wsID The workspace ID.
+ *  @param inputWorkspace The input workspace
  *  @returns A workspace containing the monitor spectrum only
  */
 MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
@@ -545,8 +544,10 @@ bool NormaliseToMonitor::setIntegrationProps(
 
 /** Carries out a normalization based on the integrated count of the monitor
  * over a range
- *  @param inputWorkspace The input workspace
- *  @param outputWorkspace The result workspace
+ * @param inputWorkspace The input workspace
+ * @param outputWorkspace The result workspace
+ * @param isSingleCountWorkspace Whether or not the input workspace is point
+ *data with single counts per spectrum
  */
 void NormaliseToMonitor::normaliseByIntegratedCount(
     const MatrixWorkspace_sptr &inputWorkspace,

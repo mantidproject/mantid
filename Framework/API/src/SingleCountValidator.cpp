@@ -19,7 +19,7 @@ Kernel::IValidator_sptr SingleCountValidator::clone() const {
 
 /** Checks if the workspace contains a single counts when it should not and
  * vice-versa
- *  @param value The workspace to validate
+ *  @param ws The workspace to validate
  *  @return A user level description if a problem exists, otherwise an empty
  * string
  */
