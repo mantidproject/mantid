@@ -102,11 +102,10 @@ void Rebin2D::exec() {
   MatrixWorkspace_sptr outputWS =
       createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
   if (useFractionalArea &&
-      !boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)) {
+      !boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS)) {
     g_log.warning("Fractional area tracking requires the input workspace to "
                   "contain calculated bin fractions from a parallelpiped rebin "
-                  "like SofQW"
-                  "Continuing without fractional area tracking");
+                  "like SofQW. Continuing without fractional area tracking");
     useFractionalArea = false;
   }
 

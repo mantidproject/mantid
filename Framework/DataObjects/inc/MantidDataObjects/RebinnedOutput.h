@@ -63,6 +63,10 @@ public:
   /// Create final representation
   void finalize(bool hasSqrdErrs = true);
 
+  /// Returns if finalize has been called
+  bool isFinalized() const { return m_finalized != 0; }
+  bool finalizeUsedFracSquared() const { return m_finalized < 0; }
+
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;
 
@@ -81,6 +85,9 @@ protected:
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
+
+  /// Flag to indicate if finalize has been called, and if errors/variance used
+  int m_finalized = 0;
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }

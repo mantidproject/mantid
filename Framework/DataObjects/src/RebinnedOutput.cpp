@@ -132,6 +132,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
               std::ostream_iterator<double>(g_log.debug(), " "));
     g_log.debug() << '\n';
   }
+  // Sets flag so subsequent algorithms know to correctly treat data
+  m_finalized = hasSqrdErrs ? -1 : 1;
 }
 
 } // namespace Mantid

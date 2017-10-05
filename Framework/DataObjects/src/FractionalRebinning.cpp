@@ -87,11 +87,11 @@ void normaliseOutput(MatrixWorkspace_sptr outputWS,
     for (size_t j = 0; j < outputY.size(); ++j) {
       if (progress)
         progress->report("Calculating errors");
-      const double binWidth = outputX[j + 1] - outputX[j];
       double eValue = std::sqrt(outputE[j]);
       // Don't do this for a RebinnedOutput workspace. The fractions
       // take care of such things.
       if (inputWS->isDistribution() && inputWS->id() != "RebinnedOutput") {
+        const double binWidth = outputX[j + 1] - outputX[j];
         outputY[j] /= binWidth;
         eValue /= binWidth;
       }
@@ -172,6 +172,8 @@ void rebinToOutput(const Quadrilateral &inputQ,
  * @param i The indexiin the vertical axis direction that inputQ references
  * @param j The index in the horizontal axis direction that inputQ references
  * @param outputWS A pointer to the output workspace that accumulates the data
+ *        Note that the error array of the output workspace contains the
+ *        **variance** and not the errors (standard deviations).
  * @param verticalAxis A vector containing the output vertical axis bin
  * boundaries
  */
@@ -179,6 +181,12 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              MatrixWorkspace_const_sptr inputWS, const size_t i,
                              const size_t j, RebinnedOutput_sptr outputWS,
                              const std::vector<double> &verticalAxis) {
+  const auto &inX = inputWS->x(i);
+  const auto &inY = inputWS->y(i);
+  const auto &inE = inputWS->e(i);
+  if (std::isnan(inY[j]))
+    return;
+
   const auto &X = outputWS->x(0);
   size_t qstart(0), qend(verticalAxis.size() - 1), x_start(0),
       x_end(X.size() - 1);
@@ -186,16 +194,29 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              x_start, x_end))
     return;
 
-  const auto &inX = inputWS->x(i);
-  const auto &inY = inputWS->y(i);
-  const auto &inE = inputWS->e(i);
   // Don't do the overlap removal if already RebinnedOutput.
   // This wreaks havoc on the data.
   const bool removeBinWidth(inputWS->isDistribution() &&
                             inputWS->id() != "RebinnedOutput");
+
+  // For the error calculation, we need the variance not the std. dev.
+  double variance = inE[j] * inE[j];
+  const double overlapWidth = inX[j + 1] - inX[j];
+
+  // If the input is a RebinnedOutput workspace with frac. area and has been
+  // "finalized" we need to undo this for the correct calculation
+  double inputArea = inputQ.area();
+  auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
+  if (inputRB && inputRB->isFinalized()) {
+    const auto &inF = inputRB->dataF(i);
+    // Need to chain the area of current input to its own fractional area
+    // This also takes care of part of the "unfinalization" of [y,e]Value.
+    inputArea /= inF[j]; // yValue was scaled by 1/inputFraction
+    variance *= inF[j];  // eValue (variance) was scaled by 1/inputFraction**2
+  }
+
   // It seems to be more efficient to construct this once and clear it before
-  // each calculation
-  // in the loop
+  // each calculation in the loop
   ConvexPolygon intersectOverlap;
   for (size_t yi = qstart; yi < qend; ++yi) {
     const double vlo = verticalAxis[yi];
@@ -207,24 +228,17 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
       const V2D ul(X[xi], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
-      double yValue = inY[j];
-      if (std::isnan(yValue)) {
-        continue;
-      }
       intersectOverlap.clear();
       if (intersection(outputQ, inputQ, intersectOverlap)) {
-        const double weight = intersectOverlap.area() / inputQ.area();
-        yValue *= weight;
-        double eValue = inE[j] * weight;
+        const double weight = intersectOverlap.area() / inputArea;
+        double yValue = inY[j] * weight;
+        double eValue = variance * weight;
         if (removeBinWidth) {
           // If the input workspace was normalized by the bin width, we need to
-          // recover the original Y value, we do it by 'removing' the bin
-          // width
-          const double overlapWidth = inX[j + 1] - inX[j];
+          // recover the original Y value, we do it by 'removing' the bin width
           yValue *= overlapWidth;
-          eValue *= overlapWidth;
+          eValue *= overlapWidth * overlapWidth;
         }
-        eValue *= eValue;
         PARALLEL_CRITICAL(overlap) {
           outputWS->mutableY(yi)[xi] += yValue;
           outputWS->mutableE(yi)[xi] += eValue;
