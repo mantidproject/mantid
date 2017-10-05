@@ -38,10 +38,10 @@ Usage
   lines = gfile.readlines()
   gfile.close()
 
-  print "[GSAS File Start]"
+  print("[GSAS File Start]")
   for i in xrange(11):
-      print lines[i].rstrip()
-  print "... ..."
+      print(lines[i].rstrip())
+  print("... ...")
 
   
 .. testcleanup:: ExSaveVulcanGSAS
