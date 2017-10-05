@@ -52,6 +52,8 @@ public:
                               int32_t &partition, std::string &topic) = 0;
   virtual std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) = 0;
+  virtual void seek(const std::string &topic, uint32_t partition,
+                    int64_t offset) = 0;
 };
 
 } // namespace LiveData

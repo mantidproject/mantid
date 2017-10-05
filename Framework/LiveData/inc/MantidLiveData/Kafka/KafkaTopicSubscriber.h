@@ -43,16 +43,18 @@ class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
   KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics,
                        SubscribeAtOption subscribeOption);
-  ~KafkaTopicSubscriber();
+  ~KafkaTopicSubscriber() override;
 
   std::vector<std::string> topics() const;
 
-  virtual void subscribe() override;
-  virtual void subscribe(int64_t offset) override;
-  virtual void consumeMessage(std::string *payload, int64_t &offset,
-                              int32_t &partition, std::string &topic) override;
-  virtual std::unordered_map<std::string, std::vector<int64_t>>
+  void subscribe() override;
+  void subscribe(int64_t offset) override;
+  void consumeMessage(std::string *payload, int64_t &offset, int32_t &partition,
+                      std::string &topic) override;
+  std::unordered_map<std::string, std::vector<int64_t>>
   getOffsetsForTimestamp(int64_t timestamp) override;
+  void seek(const std::string &topic, uint32_t partition,
+            int64_t offset) override;
 
   static const std::string EVENT_TOPIC_SUFFIX;
   static const std::string RUN_TOPIC_SUFFIX;

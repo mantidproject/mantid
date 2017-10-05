@@ -224,6 +224,28 @@ int64_t KafkaTopicSubscriber::getCurrentOffset(const std::string &topic,
 }
 
 /**
+ * Seek to given offset on specified topic and partition
+ *
+ * @param topic : topic name
+ * @param partition : partition number
+ * @param offset : offset to seek to
+ */
+void KafkaTopicSubscriber::seek(const std::string &topic, uint32_t partition,
+                                int64_t offset) {
+  auto topicPartition = RdKafka::TopicPartition::create(topic, partition);
+  topicPartition->set_offset(offset);
+  auto error = m_consumer->seek(*topicPartition, 2000);
+  if (error) {
+    std::ostringstream os;
+    os << "Offset seek failed with error: '" << err2str(error) << "'";
+    throw std::runtime_error(os.str());
+  }
+  LOGGER().debug() << "Successful seek of topic: " << topic
+                   << ", partition: " << partition << " to offset: " << offset
+                   << std::endl;
+}
+
+/**
  * Create the KafkaConsumer for required configuration
  */
 void KafkaTopicSubscriber::createConsumer() {

@@ -79,6 +79,7 @@ private:
     int runNumber;
     uint64_t startTime;
     size_t nPeriods;
+    int64_t runStartMsgOffset;
   };
   void captureImpl() noexcept;
   void captureImplExcept();
@@ -92,7 +93,7 @@ private:
   createBufferWorkspace(const DataObjects::EventWorkspace_sptr &parent);
   void loadInstrument(const std::string &name,
                       DataObjects::EventWorkspace_sptr workspace);
-  void getRunInfoMessage(std::string &rawMsgBuffer);
+  int64_t getRunInfoMessage(std::string &rawMsgBuffer);
   RunStartStruct getRunStartMessage(std::string &rawMsgBuffer);
 
   void eventDataFromMessage(const std::string &buffer);
@@ -148,6 +149,8 @@ private:
   /// EndRun
   bool m_runStatusSeen;
   std::atomic<bool> m_extractedEndRunData;
+
+  void waitForDataExtraction();
 };
 
 } // namespace LiveData
