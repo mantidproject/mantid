@@ -109,11 +109,12 @@ protected: // for testing
   API::MatrixWorkspace_sptr
   extractMonitorSpectra(const API::MatrixWorkspace_sptr &ws,
                         const std::vector<size_t> &workspaceIndexes);
-  bool setIntegrationProps();
+  bool setIntegrationProps(const bool isSingleCountWorkspace);
 
   void
   normaliseByIntegratedCount(const API::MatrixWorkspace_sptr &inputWorkspace,
-                             API::MatrixWorkspace_sptr &outputWorkspace);
+                             API::MatrixWorkspace_sptr &outputWorkspace,
+                             const bool isSingleCountWorkspace);
 
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);

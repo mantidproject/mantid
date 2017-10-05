@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/RawCountValidator.h"
+#include "MantidAPI/SingleCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -159,14 +160,19 @@ using namespace API;
 using std::size_t;
 
 void NormaliseToMonitor::init() {
-  auto val = boost::make_shared<CompositeValidator>();
-  val->add<HistogramValidator>();
-  val->add<RawCountValidator>();
-  // It's been said that we should restrict the unit to being wavelength, but
-  // I'm not sure about that...
+  // Must be histograms OR one count per bin
+  // Must be raw counts
+  auto validatorHistSingle =
+      boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+  validatorHistSingle->add<HistogramValidator>();
+  validatorHistSingle->add<SingleCountValidator>();
+  auto validator = boost::make_shared<CompositeValidator>();
+  validator->add(validatorHistSingle);
+  validator->add<RawCountValidator>();
+
   declareProperty(
       make_unique<WorkspaceProperty<>>("InputWorkspace", "", Direction::Input,
-                                       val),
+                                       validator),
       "Name of the input workspace. Must be a non-distribution histogram.");
 
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -197,11 +203,11 @@ void NormaliseToMonitor::init() {
                                        "MonitorWorkspace"));
 
   // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
-  declareProperty(make_unique<WorkspaceProperty<>>("MonitorWorkspace", "",
-                                                   Direction::Input,
-                                                   PropertyMode::Optional, val),
-                  "A workspace containing one or more spectra to normalize the "
-                  "InputWorkspace by.");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("MonitorWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional, validator),
+      "A workspace containing one or more spectra to normalize the "
+      "InputWorkspace by.");
   setPropertySettings("MonitorWorkspace",
                       Kernel::make_unique<Kernel::EnabledWhenProperty>(
                           "MonitorSpectrum", IS_DEFAULT));
@@ -250,11 +256,19 @@ void NormaliseToMonitor::exec() {
   // First check the inputs
   checkProperties(inputWS);
 
+  bool isSingleCountWorkspace = false;
+  try {
+    isSingleCountWorkspace =
+        (!inputWS->isHistogramData()) && (inputWS->blocksize() == 1);
+  } catch (std::length_error &) {
+    // inconsistent bin size, not a single count workspace
+  }
+
   // See if the normalization with integration properties are set.
-  const bool integrate = this->setIntegrationProps();
+  const bool integrate = setIntegrationProps(isSingleCountWorkspace);
 
   if (integrate)
-    normaliseByIntegratedCount(inputWS, outputWS);
+    normaliseByIntegratedCount(inputWS, outputWS, isSingleCountWorkspace);
   else
     normaliseBinByBin(inputWS, outputWS);
 
@@ -487,13 +501,15 @@ MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(
  * integration
  *  @return True if the maximum or minimum values are set
  */
-bool NormaliseToMonitor::setIntegrationProps() {
+bool NormaliseToMonitor::setIntegrationProps(
+    const bool isSingleCountWorkspace) {
   m_integrationMin = getProperty("IntegrationRangeMin");
   m_integrationMax = getProperty("IntegrationRangeMax");
 
   // Check if neither of these have been changed from their defaults
   // (EMPTY_DBL())
-  if (isEmpty(m_integrationMin) && isEmpty(m_integrationMax)) {
+  if ((isEmpty(m_integrationMin) && isEmpty(m_integrationMax)) &&
+      !isSingleCountWorkspace) {
     // Nothing has been set so the user doesn't want to use integration so let's
     // move on
     return false;
@@ -523,18 +539,23 @@ bool NormaliseToMonitor::setIntegrationProps() {
  */
 void NormaliseToMonitor::normaliseByIntegratedCount(
     const MatrixWorkspace_sptr &inputWorkspace,
-    MatrixWorkspace_sptr &outputWorkspace) {
+    MatrixWorkspace_sptr &outputWorkspace, const bool isSingleCountWorkspace) {
   m_monitor = extractMonitorSpectra(inputWorkspace, m_workspaceIndexes);
 
-  // Add up all the bins so it's just effectively a series of values with errors
-  IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
-  integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
-  integrate->setProperty("RangeLower", m_integrationMin);
-  integrate->setProperty("RangeUpper", m_integrationMax);
-  integrate->setProperty<bool>("IncludePartialBins",
-                               getProperty("IncludePartialBins"));
-  integrate->executeAsChildAlg();
-  m_monitor = integrate->getProperty("OutputWorkspace");
+  // If single counting no need to integrate, monitor already guaranteed to be a
+  // single count
+  if (!isSingleCountWorkspace) {
+    // Add up all the bins so it's just effectively a series of values with
+    // errors
+    IAlgorithm_sptr integrate = createChildAlgorithm("Integration");
+    integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
+    integrate->setProperty("RangeLower", m_integrationMin);
+    integrate->setProperty("RangeUpper", m_integrationMax);
+    integrate->setProperty<bool>("IncludePartialBins",
+                                 getProperty("IncludePartialBins"));
+    integrate->executeAsChildAlg();
+    m_monitor = integrate->getProperty("OutputWorkspace");
+  }
 
   if (outputWorkspace != inputWorkspace)
     outputWorkspace = inputWorkspace->clone();

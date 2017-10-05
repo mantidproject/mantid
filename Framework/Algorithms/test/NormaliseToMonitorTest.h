@@ -489,7 +489,7 @@ public:
       const auto &yValues = outWS->histogram(i).y();
       for (size_t j = 0; j < yValues.size(); ++j) {
         if (specOutInfo.isMonitor(i))
-          TS_ASSERT_EQUALS(yValues[j], double(j + 1) / 15.0)
+          TS_ASSERT_DELTA(yValues[j], double(j + 1) / 15.0, 1e-12)
         else
           TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)
       }
@@ -530,7 +530,50 @@ public:
                             "requested monitor ID, which is unheard of")
   }
 
-  void test_with_non_histogram_workspace() { TS_ASSERT(true) }
+  void test_with_single_count_point_data_workspace() {
+    const size_t N_DET = 10;
+    const size_t N_BINS = 1;
+    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        N_DET, N_BINS, true);
+
+    Points points({0.0});
+
+    const auto &specInfo = testWS->spectrumInfo();
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      auto hist = testWS->histogram(i);
+      auto &yValues = hist.mutableY();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specInfo.isMonitor(i))
+          yValues[j] = 3.0;
+        else
+          TS_ASSERT_EQUALS(yValues[j], 2.0)
+      }
+      testWS->setHistogram(i, hist);
+      testWS->setPoints(i, points);
+    }
+
+    NormaliseToMonitor alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", testWS))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    const auto &specOutInfo = outWS->spectrumInfo();
+    for (size_t i = 0; i < specOutInfo.size(); ++i) {
+      const auto &yValues = outWS->histogram(i).y();
+      for (size_t j = 0; j < yValues.size(); ++j) {
+        if (specOutInfo.isMonitor(i))
+          TS_ASSERT_DELTA(yValues[j], 1.0, 1e-12)
+        else
+          TS_ASSERT_DELTA(yValues[j], 2.0 / 3.0, 1e-12)
+      }
+    }
+  }
 
 private:
   MatrixWorkspace_sptr makeTestDetectorScanWorkspace() {
