@@ -26,7 +26,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
                     NOMOC ${INC_FILES}
                     DEFS QSCINTILLA_DLL
                     QT_PLUGIN MantidWidgetPlugins
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${POCO_LIBRARIES}
@@ -34,7 +34,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
                         ${QSCINTILLA_LIBRARIES}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                         MantidQtWidgetsSliceViewer
                     EXCLUDE_FROM_ALL

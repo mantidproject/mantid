@@ -41,14 +41,14 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
                     NOMOC ${INC_FILES}
                     UI ${UI_FILES}
                     DEFS IN_MANTIDQT_REFDETECTORVIEWER
-                    LINK_LIBRARIES 
+                    LINK_LIBS 
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsSpectrumViewer
 )
 
@@ -61,12 +61,12 @@ endif ()
 ###########################################################################
 mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
                         SRC src/RefDetectorViewDemo.cpp
-                        LINK_LIBRARIES 
+                        LINK_LIBS 
                             ${TCMALLOC_LIBRARIES_LINKTIME}
                             ${Boost_LIBRARIES}
                             ${POCO_LIBRARIES}
                             ${QT_LIBRARIES}
-                        MTD_QT_LINK_LIBRARIES
+                        MTD_QT_LINK_LIBS
                             MantidQtWidgetsRefDetectorView
                             MantidQtWidgetsSpectrumViewer
                         EXCLUDE_FROM_ALL

@@ -33,19 +33,27 @@ endfunction()
 # keyword: QT_PLUGIN If included, the target is a Qt plugin. The value is the name of the plugin library
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
 # keyword: PRECOMPILED A name of the precompiled header
-# keyword: LINK_LIBRARIES A list of additional libraries to link to the
+# keyword: LINK_LIBS A list of additional libraries to link to the
 #          target that are not dependent on Qt
-# keyword: MTD_QT_LINK_LIBRARIES A list of additional libraries to link to the
+# keyword: QT4_LINK_LIBS A list of additional Qt libraries to link to.
+#          QtGui islinked to by default
+# keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to.
+#          QtWidgets islinked to by default
+# keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
 #          target. It is assumed each was produced with this function and
 #          will have the -Qt{QT_VERSION} suffix appended.
 # keyword: INSTALL_DIR A destination directory for the install command.
 # keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
-  set (oneValueArgs TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
-  set (multiValueArgs SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBRARIES MTD_QT_LINK_LIBRARIES)
+  set (oneValueArgs
+    TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
+  set (multiValueArgs
+    SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBS
+    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
+
   if (${PARSED_LIBRARY} AND ${PARSED_EXECUTABLE})
     message (FATAL_ERROR "Both LIBRARY and EXECUTABLE options specified. Please choose only one.")
   endif()
@@ -57,12 +65,12 @@ function (mtd_add_qt_target)
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
     qt4_wrap_cpp (MOC_GENERATED ${PARSED_MOC})
     qt4_add_resources (RES_FILES ${PARSED_RES})
-    set (_qt_link_libraries Qt4::QtGui)
+    set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
   elseif (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
     qt5_wrap_cpp (MOC_GENERATED ${PARSED_MOC})
     qt5_add_resources (RES_FILES ${PARSED_RES})
-    set (_qt_link_libraries Qt5::Widgets)
+    set (_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
   else ()
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
@@ -95,19 +103,18 @@ function (mtd_add_qt_target)
   target_include_directories (${_target} PUBLIC ${_base_binary_dir} PUBLIC ${PARSED_INCLUDE_DIRS})
   # Append suffix to libraries created with these functions
   set (_mtd_qt_libs)
-  foreach (_lib ${PARSED_MTD_QT_LINK_LIBRARIES})
+  foreach (_lib ${PARSED_MTD_QT_LINK_LIBS})
     list (APPEND _mtd_qt_libs ${_lib}${_target_suffix})
   endforeach ()
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
-                         ${PARSED_LINK_LIBRARIES} ${_mtd_qt_libs})
+                         ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(PARSED_DEFS)
-    set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS ${PARSED_DEFS} )
+    set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${PARSED_DEFS}" )
   endif()
   if (OSX_VERSION VERSION_GREATER 10.8)
-    if (NOT ${PARSED_OSX_INSTALL_RPATH})
-        set(PARSED_OSX_INSTALL_RPATH "@loader_path/../MacOS")
+    if (PARSED_OSX_INSTALL_RPATH)
+      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH ${PARSED_OSX_INSTALL_RPATH})
     endif()
-    set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH ${PARSED_OSX_INSTALL_RPATH})
   endif ()
 
   if (PARSED_QT_PLUGIN)

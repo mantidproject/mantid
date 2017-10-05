@@ -144,7 +144,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
                     UI ${UI_FILES}
                     RES ../../resources/icons/SliceViewerIcons.qrc
                     DEFS IN_MANTIDQT_SLICEVIEWER
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         DataObjects
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
@@ -152,7 +152,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
                         ${Boost_LIBRARIES}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
 )
 

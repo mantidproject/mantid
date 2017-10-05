@@ -51,7 +51,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
                     RES ../../resources/icons/MultiDatasetFitIcons.qrc
                     DEFS IN_MANTIDQT_MULTIDATASETFIT
                     PERECOMPILED PrecompiledHeader.h
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${QT_LIBRARIES}
@@ -59,7 +59,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${JSONCPP_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                     INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
                     OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"

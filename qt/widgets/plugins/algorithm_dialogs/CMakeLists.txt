@@ -54,26 +54,22 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
 include_directories ( inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    LINK_LIBRARIES
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${CORE_MANTIDLIBS}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${QT_LIBRARIES}
-                        ${OPENGL_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
-                        MantidQtWidgetsCommon
-                    INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  PRECOMPILED
+    inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${CORE_MANTIDLIBS}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${QT_LIBRARIES}
+      ${OPENGL_LIBRARIES}
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+  OSX_INSTALL_RPATH
+    "@loader_path/../../../Contents/MacOS"
+  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
 )
-
-# Use a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h ALL_SRC )
-#add_library ( MantidQtWidgetsPluginsAlgorithmDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsPluginsAlgorithmDialogsQt4 PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
-endif () 

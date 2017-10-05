@@ -37,7 +37,7 @@
 	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-        src/QwtHelper.cpp
+  src/QwtHelper.cpp
 	src/QwtRasterDataMD.cpp
 	src/QwtRasterDataMDNonOrthogonal.cpp
 	src/QwtWorkspaceBinData.cpp
@@ -112,8 +112,8 @@
 	src/PeriodicTableWidget.cpp
 	src/PreviewPlot.cpp
 	src/ProcessingAlgoWidget.cpp
-    src/ProjectSavePresenter.cpp
-    src/ProjectSaveModel.cpp
+  src/ProjectSavePresenter.cpp
+  src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
 	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
@@ -145,7 +145,7 @@
 	src/QtPropertyBrowser/DoubleDialogEditor.cpp
 	src/QtPropertyBrowser/DoubleEditorFactory.cpp
 	src/QtPropertyBrowser/FilenameDialogEditor.cpp
-    src/QtPropertyBrowser/FormulaDialogEditor.cpp
+  src/QtPropertyBrowser/FormulaDialogEditor.cpp
 	src/QtPropertyBrowser/ParameterPropertyManager.cpp
 	src/QtPropertyBrowser/StringDialogEditor.cpp
 	src/QtPropertyBrowser/StringEditorFactory.cpp
@@ -193,8 +193,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/DiagResults.h
   inc/MantidQtWidgets/Common/DisplayCurveFit.h
@@ -344,6 +342,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/ToStdStringMap.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
@@ -392,9 +392,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h
-  inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
 
@@ -467,20 +465,6 @@ set( TEST_FILES
    WorkspacePresenter/ADSAdapterTest.h
    WorkspacePresenter/WorkspacePresenterTest.h
 )
-# moc'd files will end up in build directory, so add to include path
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
-find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
-include(${QT_USE_FILE})
-
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
-add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
-
-# Python includes
-include_directories ( ${PYTHON_INCLUDE_PATH})
-
-# Use a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidQtWidgets/Common/PrecompiledHeader.h ALL_SRC )
 
 set ( TARGET_LIBRARIES
   ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -498,17 +482,22 @@ endif()
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    DEFS IN_MANTIDQT_COMMON
-                    LINK_LIBRARIES  ${TARGET_LIBRARIES}
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS
+    IN_MANTIDQT_COMMON QSCINTILLA_DLL
+  INCLUDE_DIRS
+    ${PYTHON_INCLUDE_PATH}
+    ${QSCINTILLA_INCLUDE_DIR}
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::QtHelp Qt4::QtWebKit Qt4::QtNetwork
+  OSX_INSTALL_RPATH
+    "@loader_path/../MacOS;@loader_path/../Libraries"
 )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsCommonQt4 PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
-endif ()
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt

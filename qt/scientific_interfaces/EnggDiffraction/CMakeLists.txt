@@ -45,7 +45,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
                     UI ${UI_FILES}
                     DEFS IN_MANTIDQT_ENGGDIFFRACTION
                     PERECOMPILED PrecompiledHeader.h
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${QT_LIBRARIES}
@@ -53,7 +53,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${JSONCPP_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                         MantidScientificInterfacesMuon
                     INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid

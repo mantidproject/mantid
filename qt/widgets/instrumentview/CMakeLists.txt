@@ -135,7 +135,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
                     NOMOC ${INC_FILES}
                     UI ${UI_FILES}
                     DEFS IN_MANTIDQT_INSTRUMENTVIEW
-                    LINK_LIBRARIES 
+                    LINK_LIBS 
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       ${QT_LIBRARIES}
@@ -144,7 +144,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
                       ${Boost_LIBRARIES}
                       ${PYTHON_LIBRARIES}
                       ${OPENGL_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES MantidQtWidgetsCommon
+                    MTD_QT_LINK_LIBS MantidQtWidgetsCommon
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

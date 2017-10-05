@@ -40,13 +40,13 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
                     RES ${RES_FILES}
                     DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
                     INCLUDE_DIRS ${QWT_INCLUDE_DIR}
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${POCO_LIBRARIES}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
                         ${MANTID_SUBPROJECT_LIBS}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                     INSTALL_DIR ${PVPLUGINS_DIR}
                     OSX_INSTALL_RPATH "@loader_path/../Contents/Libraries;@loader_path/../Contents/MacOS"

@@ -63,14 +63,14 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
                     NOMOC ${INC_FILES}
                     UI ${UI_FILES}
                     DEFS IN_MANTIDQT_SPECTRUMVIEWER
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
 )
 

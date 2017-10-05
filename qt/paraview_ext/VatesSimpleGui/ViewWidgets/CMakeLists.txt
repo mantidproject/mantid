@@ -118,7 +118,7 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
                     RES ${RES_FILES}
                     DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
                     INCLUDE_DIRS ${QWT_INCLUDE_DIR}
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         pqApplicationComponents
                         pqComponents
@@ -133,7 +133,7 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
                         ${Boost_LIBRARIES}
                         ${CORE_MANTIDLIBS}
                         DataObjects
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                         VatesSimpleGuiQtWidgets
                         MantidQtWidgetsFactory

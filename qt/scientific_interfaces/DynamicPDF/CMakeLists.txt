@@ -49,7 +49,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
                     UI ${UI_FILES}
                     DEFS IN_MANTIDQT_DYNAMICPDF
                     PERECOMPILED PrecompiledHeader.h
-                    LINK_LIBRARIES
+                    LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${CORE_MANTIDLIBS}
                         ${POCO_LIBRARIES}
@@ -57,7 +57,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
                         ${QT_LIBRARIES}
                         ${QWT_LIBRARIES}
                         ${OPENGL_LIBRARIES}
-                    MTD_QT_LINK_LIBRARIES
+                    MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
                     INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
                     OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
