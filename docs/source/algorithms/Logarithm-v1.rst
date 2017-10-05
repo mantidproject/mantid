@@ -33,7 +33,7 @@ Usage
 
 .. testcode:: ExLogarithm
 
-    dataX = range(0,10)*10 # define 10 x-spectra
+    dataX = list(range(0,10))*10 # define 10 x-spectra
     dataY =([1]*10)*10     # with values 1
     dataY[0]=-10           # make first value not suitable for logarithm
     dataY[1]=10            # make second value different
