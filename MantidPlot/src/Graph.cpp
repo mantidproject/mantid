@@ -1006,7 +1006,7 @@ void Graph::initScaleLimits() { // We call this function the first time we add
       continue;
 
     const QwtPlotCurve *c = dynamic_cast<const QwtPlotCurve *>(item);
-    const QwtSymbol s = c->symbol();
+    const QwtSymbol &s = c->symbol();
     if (s.style() != QwtSymbol::NoSymbol && s.size().width() >= maxSymbolSize)
       maxSymbolSize = s.size().width();
 
@@ -1845,7 +1845,7 @@ void Graph::updateCurvesData(Table *w, const QString &yColName) {
 
 QColor Graph::canvasFrameColor() {
   QwtPlotCanvas *canvas = (QwtPlotCanvas *)d_plot->canvas();
-  QPalette pal = canvas->palette();
+  const QPalette &pal = canvas->palette();
   return pal.color(QPalette::Active, QPalette::Foreground);
 }
 
@@ -1988,7 +1988,7 @@ QString Graph::saveCurveLayout(int index) {
     s += QString::number(c->pen().style() - 1) + "\t";
     s += QString::number(c->pen().widthF()) + "\t";
 
-    const QwtSymbol symbol = c->symbol();
+    const QwtSymbol &symbol = c->symbol();
     s += QString::number(symbol.size().width()) + "\t";
     s += QString::number(SymbolBox::symbolIndex(symbol.style())) + "\t";
     s += QString::number(ColorBox::colorIndex(symbol.pen().color())) + "\t";
@@ -4619,7 +4619,7 @@ void Graph::guessUniqueCurveLayout(int &colorIndex, int &symbolIndex) {
     if (c) {
       colorIndex = std::max(ColorBox::colorIndex(c->pen().color()), colorIndex);
 
-      QwtSymbol symb = c->symbol();
+      const QwtSymbol &symb = c->symbol();
       symbolIndex = std::max(SymbolBox::symbolIndex(symb.style()), symbolIndex);
     }
   }

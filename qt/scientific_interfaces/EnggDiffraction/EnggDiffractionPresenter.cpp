@@ -869,7 +869,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   ceriaNo = "";
 
   Poco::Path fullPath(path);
-  const std::string filename = fullPath.getFileName();
+  const std::string &filename = fullPath.getFileName();
   if (filename.empty()) {
     return;
   }

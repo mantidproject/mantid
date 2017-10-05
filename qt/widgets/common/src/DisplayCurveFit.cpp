@@ -115,7 +115,7 @@ QPair<double, double> DisplayCurveFit::getCurveRange(
 void DisplayCurveFit::addSpectrum(
     const curveType &aType, const Mantid::API::MatrixWorkspace_sptr workspace,
     const size_t specIndex) {
-  const QString curveName{m_curveTypeToQString.at(aType)};
+  const QString &curveName{m_curveTypeToQString.at(aType)};
   const QColor curveColor(m_curveTypeToColor.at(aType));
   m_plotPanel.at(aType)
       ->addSpectrum(curveName, workspace, specIndex, curveColor);
@@ -149,7 +149,7 @@ bool DisplayCurveFit::hasCurve(const curveType &aType) {
 void DisplayCurveFit::addRangeSelector(const dcRange &adcRange,
                                        RangeSelector::SelectType aType) {
   if (m_rangeSelector.find(adcRange) == m_rangeSelector.end()) {
-    const QString dcRangeName(m_dcRangeToQString.at(adcRange));
+    const QString &dcRangeName(m_dcRangeToQString.at(adcRange));
     m_rangeSelector.emplace(
         adcRange, m_uiForm.fitPlot->addRangeSelector(dcRangeName, aType));
     switch (adcRange) {
