@@ -123,7 +123,6 @@
     0 failures in setup code
     0 failures in cleanup code
 """
-from functools import reduce
 import re
 try:
     import lxml.etree as ElementTree
