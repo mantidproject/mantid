@@ -55,8 +55,8 @@ Usage
                                 TimeMin = 0.55,
                                 TimeMax = 12.0);
 
-   print "Y values (asymmetry):", ws.readY(0)
-   print "X values (sample magn. field):", ws.readX(0)
+   print("Y values (asymmetry): {}".format(ws.readY(0)))
+   print("X values (sample magn. field): {}".format(ws.readX(0)))
 
 Output:
 
