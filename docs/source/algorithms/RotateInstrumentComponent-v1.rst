@@ -53,8 +53,8 @@ Example 1: Rotating a bank around the Y Axis
   print('Original positions of detectors 1 and 2')
   opos1 = ws.getInstrument().getDetector(1).getPos()
   opos2 = ws.getInstrument().getDetector(2).getPos()
-  print('Det 1: {0:.6f}'.format(pos3D_as_str(opos1)))
-  print('Det 2: {0:.6f}'.format(pos3D_as_str(opos2)))
+  print('Det 1: {0}'.format(pos3D_as_str(opos1)))
+  print('Det 2: {0}'.format(pos3D_as_str(opos2)))
 
   # Rotate bank 'back' around the Z axis by 90
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=1,Z=0, Angle=90.0 )
@@ -62,8 +62,8 @@ Example 1: Rotating a bank around the Y Axis
   print('Positions of detectors 1 and 2 after rotation')
   pos1 = ws.getInstrument().getDetector(1).getPos()
   pos2 = ws.getInstrument().getDetector(2).getPos()
-  print('Det 1: {0:.6f}'.format(pos3D_as_str(pos1)))
-  print('Det 2: {0:.6f}'.format(pos3D_as_str(pos2)))
+  print('Det 1: {0}'.format(pos3D_as_str(pos1)))
+  print('Det 2: {0}'.format(pos3D_as_str(pos2)))
 
 
 Output
@@ -111,15 +111,15 @@ Example 2: Rotating a bank around the Z Axis
   print('Original positions of detectors 1 and 4')
   opos1 = ws.getInstrument().getDetector(1).getPos()
   opos4 = ws.getInstrument().getDetector(4).getPos()
-  print('Det 1: {0:.6f}'.format(pos3D_as_str(opos1)))
-  print('Det 4: {0:.6f}'.format(pos3D_as_str(opos4)))
+  print('Det 1: {0}'.format(pos3D_as_str(opos1)))
+  print('Det 4: {0}'.format(pos3D_as_str(opos4)))
 
   # Rotate bank 'back' around the Z axis by 3 detectors.
   RotateInstrumentComponent( ws, ComponentName='back', X=0,Y=0,Z=1, Angle=3*360.0 / 32 )
 
   print('Positions of detector 1 after rotation')
   pos1 = ws.getInstrument().getDetector(1).getPos()
-  print('Det 1: {0:.6f}'.format(pos3D_as_str(pos1)))
+  print('Det 1: {0}'.format(pos3D_as_str(pos1)))
   print('Detector 1 took place of detector 4')
 
 Output
