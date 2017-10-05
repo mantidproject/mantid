@@ -122,5 +122,37 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             else:
                 numpy.testing.assert_equal(ys, -5)
 
+    def testWaterReference(self):
+        inWSName = 'ReflectometryILLPreprocess_test_ws'
+        args = {
+            'OutputWorkspace': inWSName,
+            'Function': 'Flat background',
+            'NumBanks': 1,
+        }
+        alg = create_algorithm('CreateSampleWorkspace', **args)
+        alg.execute()
+        # Add a peak to the sample workspace.
+        ws = mtd[inWSName]
+        for i in range(ws.getNumberHistograms()):
+            ys = ws.dataY(i)
+            ys.fill(10.27)
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'WaterReference': inWSName,
+            'FluxNormalisation': 'Normalisation OFF',
+            'FlatBackground': 'Background OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 100)
+        for i in range(outWS.getNumberHistograms()):
+            ys = outWS.readY(i)
+            numpy.testing.assert_equal(ys, 1.0)
+
+
 if __name__ == "__main__":
     unittest.main()

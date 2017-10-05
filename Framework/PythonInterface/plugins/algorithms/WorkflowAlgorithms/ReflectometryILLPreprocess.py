@@ -33,6 +33,7 @@ class Prop:
     SUM_OUTPUT = 'SumOutput'
     UPPER_BKG_OFFSET = 'UpperBackgroundOffset'
     UPPER_BKG_WIDTH = 'UpperBackgroundWidth'
+    WATER_REFERENCE = 'WaterReference'
 
 
 class BkgMethod:
@@ -100,8 +101,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         ws, monWS = self._extractMonitors(ws)
 
-        # TODO Add calibration to water measurement.
-        self.log().warning('Skipping water calibration as it is not yet implemented.')
+        ws = self._waterCalibration(ws)
 
         ws = self._normaliseToSlits(ws)
 
@@ -159,6 +159,11 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                      direction=Direction.Input,
                                                      optional=PropertyMode.Optional),
                              doc='A beam position table from a direct beam measurement.')
+        self.declareProperty(MatrixWorkspaceProperty(Prop.WATER_REFERENCE,
+                                                     defaultValue='',
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional),
+                             doc='A (water) calibration workspace.')
         self.declareProperty(Prop.SLIT_NORM,
                              defaultValue=SlitNorm.OFF,
                              validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
@@ -457,6 +462,19 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return self._groupForeground(ws, peakPosWS)
         else:
             raise RuntimeError('Selected output summation method is not implemented.')
+
+    def _waterCalibration(self, ws):
+        """Divide ws by a (water) reference workspace."""
+        if self.getProperty(Prop.WATER_REFERENCE).isDefault:
+            return ws
+        waterWS = self.getProperty(Prop.WATER_REFERENCE).value
+        calibratedWSName = self._names.withSuffix('water_calibrated')
+        calibratedWS = Divide(LHSWorkspace=ws,
+                              RHSWorkspace=waterWS,
+                              OutputWorkspace=calibratedWSName,
+                              EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return calibratedWS
 
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)
