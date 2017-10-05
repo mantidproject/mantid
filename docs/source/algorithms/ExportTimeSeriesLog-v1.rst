@@ -94,7 +94,7 @@ Output:
   # Create a new log
   testprop = mk.FloatTimeSeriesProperty("Temp")
 
-  import random
+  from numpy import random
   random.seed(10)
   for i in range(60):
       randsec = random.randint(0, 59)
@@ -121,7 +121,7 @@ Output:
 .. testoutput:: ExExpTempEvent
 
   Length of X = 2, Length of Y = 1.
-  X[0]  = 26089828000000.0, Y[0]  = 2095.98009
+  X[0]  = 26089801000000.0, Y[0]  = 1958.93574
   Number of events = 40
 
 .. categories::
