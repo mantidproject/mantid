@@ -241,6 +241,7 @@ class RunTabPresenter(object):
         # 1. Set up the states and convert them into property managers
         states = self.get_states()
         if not states:
+            self._view.halt_process_flag()
             raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
                                "has been loaded")
         property_manager_service = PropertyManagerService()
@@ -342,6 +343,7 @@ class RunTabPresenter(object):
             if not self.is_empty_row(row):
                 sample_scatter = self._view.get_cell(row, 0)
                 if not sample_scatter:
+                    self._view.halt_process_flag()
                     raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
 
     def get_processing_options(self):
@@ -841,6 +843,7 @@ class RunTabPresenter(object):
                     self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
                                            "been added to the Mantid search directories! See here for more "
                                            "details: {}".format(row, str(e)))
+                    self._view.halt_process_flag()
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))

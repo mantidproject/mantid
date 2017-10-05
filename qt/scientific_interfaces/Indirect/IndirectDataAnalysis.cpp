@@ -27,7 +27,7 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis)
  * @param parent :: the parent QWidget.
  */
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
-    : UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL),
+    : UserSubWindow(parent), m_valInt(nullptr), m_valDbl(nullptr),
       m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange) {
   m_uiForm.setupUi(this);
 
@@ -140,7 +140,7 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  */
 void IndirectDataAnalysis::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_DataAnalysis"));
+      nullptr, QString("Indirect_DataAnalysis"));
 }
 
 /**

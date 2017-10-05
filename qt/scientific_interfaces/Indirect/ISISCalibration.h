@@ -39,7 +39,7 @@ class DLLExport ISISCalibration : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~ISISCalibration() override;
 
   void setup() override;

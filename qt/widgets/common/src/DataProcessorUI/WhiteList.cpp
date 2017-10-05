@@ -14,10 +14,9 @@ namespace DataProcessor {
 * @param prefix : the prefix to be added to the value of this column
 * @param description : a description of this column
 */
-void WhiteList::addElement(const QString &colName,
-                                        const QString &algProperty,
-                                        const QString &description,
-                                        bool showValue, const QString &prefix) {
+void WhiteList::addElement(const QString &colName, const QString &algProperty,
+                           const QString &description, bool showValue,
+                           const QString &prefix) {
 
   m_colIndexToColName.push_back(colName);
   m_colIndexToAlgProp.push_back(algProperty);
@@ -57,25 +56,19 @@ QString WhiteList::description(int index) const {
 
 /** Returns the size of this whitelist, i.e. the number of columns
 */
-size_t WhiteList::size() const {
-  return m_colNameToColIndex.size();
-}
+size_t WhiteList::size() const { return m_colNameToColIndex.size(); }
 
 /** Returns true if the contents of this column should be used to generate the
  * name of the output ws
  * @param index : The column index
 */
-bool WhiteList::showValue(int index) const {
-  return m_showValue.at(index);
-}
+bool WhiteList::showValue(int index) const { return m_showValue.at(index); }
 
 /** Returns the column prefix used to generate the name of the output ws (will
 * only be used if showValue is true for this column
 * @param index : The column index
 */
-QString WhiteList::prefix(int index) const {
-  return m_prefix.at(index);
-}
+QString WhiteList::prefix(int index) const { return m_prefix.at(index); }
 }
 }
 }

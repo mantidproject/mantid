@@ -51,6 +51,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 MockAlgorithm::MockAlgorithm(size_t nSteps)
     : m_Progress(
@@ -400,8 +402,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
     timeRanges.push_back(double(i + firstInterval));
   }
 
-  builder.setTimeRanges(Mantid::Kernel::DateAndTime(int(startTime), 0),
-                        timeRanges);
+  builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
   auto returnWorkspace = builder.buildWorkspace();
 

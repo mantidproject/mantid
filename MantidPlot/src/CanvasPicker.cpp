@@ -42,7 +42,7 @@
 
 CanvasPicker::CanvasPicker(Graph *graph) : QObject(graph) {
   pointSelected = false;
-  d_editing_marker = 0;
+  d_editing_marker = nullptr;
 
   plotWidget = graph->plotWidget();
 
@@ -210,7 +210,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e) {
 void CanvasPicker::disableEditing() {
   if (d_editing_marker) {
     d_editing_marker->setEditable(false);
-    d_editing_marker = 0;
+    d_editing_marker = nullptr;
   }
 }
 

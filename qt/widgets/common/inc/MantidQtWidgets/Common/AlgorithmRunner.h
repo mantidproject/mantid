@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmRunner : public QObject {
   Q_OBJECT
 
 public:
-  explicit AlgorithmRunner(QObject *parent = 0);
+  explicit AlgorithmRunner(QObject *parent = nullptr);
   ~AlgorithmRunner() override;
 
   void cancelRunningAlgorithm();

@@ -41,8 +41,9 @@ public:
   virtual ~PropertyWidgetFactory();
 
   static PropertyWidget *createWidget(Mantid::Kernel::Property *prop,
-                                      QWidget *parent = NULL,
-                                      QGridLayout *layout = NULL, int row = -1);
+                                      QWidget *parent = nullptr,
+                                      QGridLayout *layout = nullptr,
+                                      int row = -1);
 };
 
 } // namespace API

@@ -10,7 +10,7 @@ class DLLExport IndirectSassena : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
-  IndirectSassena(QWidget *parent = 0);
+  IndirectSassena(QWidget *parent = nullptr);
 
   void setup() override;
   bool validate() override;

@@ -47,7 +47,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public QDialog {
   /// Delegate to show the icons Download and Upload
   class RepoDelegate : public QStyledItemDelegate {
   public:
-    RepoDelegate(QObject *parent = 0);
+    RepoDelegate(QObject *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public QDialog {
   /// Delegate to show the checkbox for configuring the auto update
   class CheckBoxDelegate : public QStyledItemDelegate {
   public:
-    CheckBoxDelegate(QObject *parent = 0);
+    CheckBoxDelegate(QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
     bool editorEvent(QEvent *event, QAbstractItemModel *model,
@@ -71,7 +71,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public QDialog {
   /// repository
   class RemoveEntryDelegate : public QStyledItemDelegate {
   public:
-    RemoveEntryDelegate(QObject *parent = 0);
+    RemoveEntryDelegate(QObject *parent = nullptr);
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
     bool editorEvent(QEvent *event, QAbstractItemModel *model,
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_COMMON ScriptRepositoryView : public QDialog {
 
 public:
   // constuctor
-  ScriptRepositoryView(QWidget *parent = 0);
+  ScriptRepositoryView(QWidget *parent = nullptr);
   // destructor - not virtual, because this is not intended to be base
   ~ScriptRepositoryView() override;
 

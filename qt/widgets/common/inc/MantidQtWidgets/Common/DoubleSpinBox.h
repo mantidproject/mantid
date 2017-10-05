@@ -40,8 +40,7 @@
 /**
  * It allows the user to specify a custom display format.
  */
-class EXPORT_OPT_MANTIDQT_COMMON DoubleSpinBox
-    : public QAbstractSpinBox {
+class EXPORT_OPT_MANTIDQT_COMMON DoubleSpinBox : public QAbstractSpinBox {
   Q_OBJECT
 
 public:
@@ -51,7 +50,7 @@ public:
    * QLocale::toString ( double i, char f = 'g', int prec = 6 )
    * \param parent parent widget (only affects placement of the dialog)
    */
-  DoubleSpinBox(const char format = 'g', QWidget *parent = 0);
+  DoubleSpinBox(const char format = 'g', QWidget *parent = nullptr);
 
   void setSingleStep(double val);
   void setMaximum(double max);
@@ -112,7 +111,7 @@ class EXPORT_OPT_MANTIDQT_COMMON RangeLimitBox : public QWidget {
 public:
   enum LimitType { LeftLimit, RightLimit };
 
-  RangeLimitBox(LimitType type, QWidget *parent = 0);
+  RangeLimitBox(LimitType type, QWidget *parent = nullptr);
   void setDecimals(int prec) { d_spin_box->setDecimals(prec); };
   double value();
   bool isChecked() { return d_checkbox->isChecked(); };

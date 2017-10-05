@@ -9,7 +9,6 @@
 
 using Mantid::PhysicalConstants::Atom;
 using Mantid::PhysicalConstants::getAtom;
-using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
 
 namespace {

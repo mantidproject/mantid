@@ -184,7 +184,6 @@ set ( TEST_FILES
 	TableColumnTest.h
 	TableWorkspacePropertyTest.h
 	TableWorkspaceTest.h
-	TofEventTest.h
 	VectorColumnTest.h
 	WeightedEventNoTimeTest.h
 	WeightedEventTest.h

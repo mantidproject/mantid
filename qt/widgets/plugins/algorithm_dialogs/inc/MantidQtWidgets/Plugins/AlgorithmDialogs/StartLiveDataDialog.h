@@ -18,7 +18,7 @@ class StartLiveDataDialog : public MantidQt::API::AlgorithmDialog {
 
 public:
   /// Default Constructor
-  StartLiveDataDialog(QWidget *parent = 0);
+  StartLiveDataDialog(QWidget *parent = nullptr);
   ~StartLiveDataDialog() override;
 
 public slots:

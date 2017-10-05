@@ -354,8 +354,8 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum Nos cannot be empty, must be a"
-          "valid range or a Bank Name can be selected instead");
+          "The Spectrum Numbers field cannot be empty, must be a "
+          "valid range or a Bank Name can be selected instead.");
     }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for cropped calibration",
@@ -1326,8 +1326,9 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
-                                "focusing in 'cropped' mode.");
+    throw std::invalid_argument(
+        "The Spectrum Numbers field cannot be empty when "
+        "focusing in 'cropped' mode.");
   }
 
   inputChecksBanks(banks);

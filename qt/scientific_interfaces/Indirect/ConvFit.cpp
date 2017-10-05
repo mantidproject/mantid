@@ -29,9 +29,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_cfTree(NULL),
-      m_fixedProps(), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType(),
-      m_runMin(-1), m_runMax(-1) {
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
+      m_cfTree(nullptr), m_fixedProps(), m_cfInputWS(), m_cfInputWSName(),
+      m_confitResFileType(), m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -1237,14 +1237,8 @@ void ConvFit::updateParameters(int specNo) {
     return;
 
   size_t row = boost::numeric_cast<size_t>(specNo - m_runMin);
-
-  std::vector<std::string> columnNames = m_paramWs->getColumnNames();
-  QMap<QString, double> parameters;
-
-  for (size_t column = 0; column < columnNames.size(); ++column) {
-    double value = m_paramWs->Double(row, column);
-    parameters.insert(QString::fromStdString(columnNames[column]), value);
-  }
+  QMap<QString, double> parameters =
+      IndirectTab::extractRowFromTable(m_paramWs, row);
 
   QString functionName = m_uiForm.cbFitType->currentText();
 
@@ -1299,7 +1293,7 @@ void ConvFit::updateParameters(int specNo) {
 
   if (fitTypeIndex == 2 && m_fittedIndex == 2) {
     functionName = "Lorentzian 1";
-    updateParameters(functionName, pref, params, parameters, 0, 3);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 0, 3);
 
     funcIndex++;
     pref = prefBase;
@@ -1307,52 +1301,14 @@ void ConvFit::updateParameters(int specNo) {
             QString::number(subIndex) + ".";
 
     functionName = "Lorentzian 2";
-    updateParameters(functionName, pref, params, parameters, 3, 0);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 3, 0);
   } else {
 
     if (fitTypeIndex == 2 && m_fittedIndex == 1) {
       functionName = "Lorentzian 1";
     }
 
-    updateParameters(functionName, pref, params, parameters);
-  }
-}
-
-/*
- * Updates the values of the function parameters for the function with the
- *specified name,
- * in the parameters table.
- *
- * @param functionName  The name of the function whose parameters to update in
- *the parameters
- *                      table.
- *
- * @param prefix        The prefixes of the names of the parameters, to be used
- *to find the
- *                      correct parameter in the specified parameter values map.
- * @param paramNames    The names of the function parameters to update.
- * @param paramValues   The updated parameter values stored in a map from the
- *name of the
- *                      function parameter (preceded by prefix) to the updated
- *value of that
- *                      parameter.
- * @param startOffset   The start offset, if set to N, the first N parameters
- *won't be updated.
- * @param endOffset     The end offset, if set to N, the last N parameters won't
- *be updated.
- */
-void ConvFit::updateParameters(const QString &functionName,
-                               const QString &prefix,
-                               const QStringList &paramNames,
-                               const QMap<QString, double> &paramValues,
-                               int startOffset, int endOffset) {
-
-  for (auto it = paramNames.begin() + startOffset;
-       it != paramNames.end() - endOffset; ++it) {
-    const QString functionParam = functionName + "." + *it;
-    const QString paramValue = prefix + *it;
-    double value = paramValues[paramValue];
-    m_dblManager->setValue(m_properties[functionParam], value);
+    IndirectTab::updateProperties(functionName, pref, params, parameters, 0, 0);
   }
 }
 
@@ -1654,7 +1610,7 @@ void ConvFit::hideFABADA() {
 }
 
 void ConvFit::fitContextMenu(const QPoint &) {
-  QtBrowserItem *item(NULL);
+  QtBrowserItem *item(nullptr);
 
   item = m_cfTree->currentItem();
 
