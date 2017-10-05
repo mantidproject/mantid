@@ -23,6 +23,11 @@ class HelperTestingClass(object):
         self._quantum_order_event = None
         self._system_name = None
 
+    def set_bin_width(self, width):
+        if not (isinstance(width, float) and 1.0 <= width <= 10.0):
+            raise ValueError("Invalid bin width: {}. ".format(width) + "Valid range is [1.0, 10.0] cm^-1")
+        self._bin_width = width
+
     def set_instrument_name(self, instrument_name=None):
 
         if instrument_name in AbinsConstants.ALL_INSTRUMENTS:
@@ -416,6 +421,31 @@ class AbinsGAUSSIANestScratch(stresstesting.MantidStressTest, HelperTestingClass
 
     def excludeInPullRequests(self):
         return True
+
+    def validate(self):
+        self.tolerance = 1e-2
+        return self._output_name, self.ref_result
+
+
+class AbinsBinWidth(stresstesting.MantidStressTest, HelperTestingClass):
+    """
+    In this benchmark it is tested if calculation with bin width different than the default value is correct.
+    Calculation performed for crystalline benzene for 1st and 2nd quantum event for output from CASTEP and bin width
+    3 cm^-1. This system test should be fast so no need for excludeInPullRequests flag.
+    """
+    tolerance = None
+    ref_result = None
+
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+        name = "BenzeneBinWidthCASTEP"
+        self.ref_result = name + ".nxs"
+        self.set_dft_program("CASTEP")
+        self.set_name(name)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
+        self.set_cross_section(cross_section="Incoherent")
+        self.set_bin_width(width=3.0)
+        self.case_from_scratch()
 
     def validate(self):
         self.tolerance = 1e-2
