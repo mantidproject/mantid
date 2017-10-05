@@ -82,6 +82,19 @@ Related Algorithms
 Usage
 -----
 
+**Example - PowderDiffILLCalibration**
+
+.. code-block:: python
+
+   calib = PowderDiffILLCalibration(CalibrationRun='967076', OutputWorkspace='constants')
+   print("Reduced workspace contains {0} constants, one for each cell.".format(calib.getNumberHistograms()))
+
+Output:
+
+.. code-block:: python
+
+   Reduced workspace contains 3072 constants, one for each cell.
+
 .. categories::
 
 .. sourcelink::
