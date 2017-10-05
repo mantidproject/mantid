@@ -75,7 +75,7 @@ Output:
     ws = ReplaceSpecialValues(ws, SmallNumberThreshold=1e-6)
     
     print("Before\t\t After")
-    print("{0}\t{1}".format(wsYArray[0], ws.readY(0)[0]))
+    print("{0}\t{1:.1f}".format(wsYArray[0], ws.readY(0)[0]))
     
 Output:
 
