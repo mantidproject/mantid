@@ -16,7 +16,7 @@ Mantid 3.11.0 Release Notes
 
 We are proud to announce version 3.11.0 of Mantid. This release celebrates 10 years of the Mantid project supporting Neutron and Muon research.
 
-This release includes improvements to allow Mantid to handle Scanning workspaces, where detectors may be in several locations for difrferent time periods, and updates to the VSI improving the performance of slicing regularly binned data. There have also been some significant performance enhancements for various algorithms with the framework due to the continued on improving our handling of he instrument geometry.
+This release includes improvements to allow Mantid to handle Scanning workspaces, where detectors may be in several locations for different time periods, and updates to the VSI improving the performance of slicing regularly binned data. There have also been some significant performance enhancements for various algorithms with the framework due to the continued on improving our handling of he instrument geometry.
 
 This is just one of many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
