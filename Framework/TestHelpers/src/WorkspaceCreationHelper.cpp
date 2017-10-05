@@ -404,26 +404,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
-  auto returnWorkspace = builder.buildWorkspace();
-
-  double x0 = 0.0;
-  double deltax = 1.0;
-
-  BinEdges x(nbins + 1, LinearGenerator(x0, deltax));
-  Counts y(nbins, 2.0);
-  Counts monitor(nbins, 5.0);
-  CountStandardDeviations e(nbins, M_SQRT2);
-  const auto &specInfo = returnWorkspace->spectrumInfo();
-  for (size_t i = 0; i < nhist * nTimeIndexes; i++) {
-    returnWorkspace->setBinEdges(i, x);
-    if (specInfo.isMonitor(i))
-      returnWorkspace->setCounts(i, monitor);
-    else
-      returnWorkspace->setCounts(i, y);
-    returnWorkspace->setCountStandardDeviations(i, e);
-  }
-
-  return returnWorkspace;
+  return builder.buildWorkspace();
 }
 
 //================================================================================================================

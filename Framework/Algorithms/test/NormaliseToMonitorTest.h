@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -585,17 +586,25 @@ private:
         create2DDetectorScanWorkspaceWithFullInstrument(
             N_DET, N_BINS, N_TIMEINDEXES, 0, 1, true);
 
+    double x0 = 0.0;
+    double deltax = 1.0;
+
+    BinEdges x(N_BINS + 1, LinearGenerator(x0, deltax));
+    Counts y(N_BINS, 2.0);
+    Counts yMonitor(N_BINS, 2.0);
+    for (size_t j = 0; j < y.size(); ++j) {
+      y.mutableRawData()[j] = 2.0;
+      yMonitor.mutableRawData()[j] = double(j + 1);
+    }
+    CountStandardDeviations e(N_BINS, M_SQRT2);
     const auto &specInfo = testWS->spectrumInfo();
-    for (size_t i = 0; i < specInfo.size(); ++i) {
-      auto hist = testWS->histogram(i);
-      auto &yValues = hist.mutableY();
-      for (size_t j = 0; j < yValues.size(); ++j) {
-        if (specInfo.isMonitor(i))
-          yValues[j] = double(j + 1);
-        else
-          TS_ASSERT_EQUALS(yValues[j], 2.0)
-      }
-      testWS->setHistogram(i, hist);
+    for (size_t i = 0; i < N_DET * N_TIMEINDEXES; i++) {
+      testWS->setBinEdges(i, x);
+      if (specInfo.isMonitor(i))
+        testWS->setCounts(i, yMonitor);
+      else
+        testWS->setCounts(i, y);
+      testWS->setCountStandardDeviations(i, e);
     }
     return testWS;
   }
