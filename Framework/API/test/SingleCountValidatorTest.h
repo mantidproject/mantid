@@ -53,7 +53,7 @@ public:
   }
 
   void test_variable_bin_workspace_failure() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = boost::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
     Counts counts{1.0};
@@ -68,7 +68,7 @@ public:
   }
 
   void test_variable_bin_workspace_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = boost::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
     Counts counts{1.0};
