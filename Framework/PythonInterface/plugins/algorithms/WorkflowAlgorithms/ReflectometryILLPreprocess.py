@@ -219,6 +219,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOWER_BKG_WIDTH).value == 0 and self.getProperty(Prop.UPPER_BKG_WIDTH).value == 0:
                 issues[Prop.BKG_METHOD] = 'Cannot calculate flat background if both upper and lower background widths are zero.'
+            if not self.getProperty(Prop.INPUT_WS).isDefault and self.getProperty(Prop.BEAM_POS).isDefault \
+                    and self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
+                issues[Prop.BEAM_POS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+                issues[Prop.FOREGROUND_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
         return issues
 
     def _convertToWavelength(self, ws):
