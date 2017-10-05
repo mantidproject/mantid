@@ -67,7 +67,7 @@ This small usage example merges two compatible POLDI-files which have been loade
     total_summed = SumSpectra(spectra_summed)
 
     print("6903+6904 contains a total of {} counts.".format(int(total_summed.dataY(0)[0])))
-    print("Summing the counts of the single data files leads to {} counts.".format(counts_6903 + counts_6904))
+    print("Summing the counts of the single data files leads to {} counts.".format(int(counts_6903 + counts_6904)))
 
 Output:
 
