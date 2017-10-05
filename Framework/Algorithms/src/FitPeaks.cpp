@@ -1101,36 +1101,91 @@ void FitPeaks::writeFitResult(
 
 //----------------------------------------------------------------------------------------------
 // TODO/NOW/TONIGHT - Implement
-void FitPeaks::reduceBackground() {
+void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
   // calculate the area
-  // blabla();
+  double area = 0;
+  for (size_t i = 1; i < vec_y.size(); ++i) {
+    double y_0 = vec_y[i - 1];
+    double y_f = vec_y[i];
+    double dx = vec_x[i] - vec_x[i - 1];
+    area += 0.5 * (y_0 + y_f) * dx;
+  }
 
   // find out the local minima
-  // blabla();
   std::vector<size_t> local_min_indices;
+  if (vec_y[0] <= vec_y[1])
+    local_min_indices.push_back(0);
+  for (size_t i = 1; i < vec_y.size() - 1; ++i) {
+    if (vec_y[i] <= vec_y[i_1] && vec_y[i] <= vec_y[i + 1])
+      local_min_indices.push_back(i);
+  }
+  size_t lastindex = vec_y.size() - 1;
+  if (vec_y[lastindex] <= vec_y[lastindex - 1])
+    local_min_indices.push_back(lastindex);
 
-  // loop around to find the pari
+  if (local_min_indices.size() < 2)
+    throw std::runtime_error(
+        "It is not possible to have less than 2 local minima for a peak");
+
+  // loop around to find the pair
+  double min_area = DBL_MAX;
+  double min_bkgd_a, min_bkgd_b;
+  double x_0 = vec_x[0];
+  double x_f = vec_x.back();
+  double y_0 = vec_y.front();
+  double y_f = vec_y.back();
+
   for (size_t i = 0; i < local_min_indices.size(); ++i) {
+    size_t index_i = local_min_indices[i];
+    double x_i = vec_x[i];
+    double y_i = vec_y[i];
     for (size_t j = i + 1; j < local_min_indices.size(); ++j) {
+      // get x and y
+      size_t index_j = local_min_indices[j];
+      double x_j = vec_x[j];
+      double y_j = vec_y[j];
 
       // calculate a and b
-      // blabla()
+      double a_ij = (y_i - y_j) / (x_i - x_j);
+      double b_ij = (y_i * x_j - y_j * x_j) / (x_j - x_i);
 
       // verify no other local minimum being negative after background removed
-      // blabla()
-      if (true)
+      bool all_non_negative = true;
+      for (size_t ilm = 0; ilm < local_min_indices.size(); ++ilm) {
+        if (ilm == i || ilm == j)
+          continue;
+
+        double y_no_bkgd = vec_y[ilm] - (a_ij * vec_x[ilm] + b_ij);
+        if (y_no_bkgd < -0.) {
+          all_non_negative = false;
+          break;
+        }
+      }
+
+      // not all local minima are non-negative with this background removed
+      if (!all_non_negative)
         continue;
 
       // calculate background area
-      // (y_0 + y_f) * dx * 0.5
+      double area_no_bkgd = (y_0 - (a_ij * x_0 + b_ij) + y_f -
+                             (a_ij * x_f + b_ij) * (x_f - x_0)) *
+                            0.5;
 
-      // update record
-      if (true) {
-        // update
-        ;
+      // update record if it is the minimum
+      if (area_no_bkgd < min_area) {
+        min_area = area_no_bkgd;
+        min_bkgd_a = a_ij;
+        min_bkgd_b = b_ij;
       }
     }
   }
+
+  // check
+  if (min_area = DBL_MAX - 1)
+    throw std::runtime_error("It is impossible not to find any background");
+
+  bkgd_a = min_bkgd_a;
+  bkgd_b = min_bkgd_b;
 
   return;
 }
