@@ -46,5 +46,5 @@ Output:
 
 .. categories::
 
-.. sourcelink:
+.. sourcelink::
       :h: /Framework/Algorithms/inc/MantidAlgorithms/Transpose.h
