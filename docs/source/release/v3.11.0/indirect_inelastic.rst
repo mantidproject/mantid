@@ -10,13 +10,13 @@ Algorithms
 
 New
 ###
-- :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
+- :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption.
 - :ref:`algm-CalculateMonteCarloAbsorption` calculates Paalman Pings absorption factors from a sample and container workspace, given shape specific input.
 
 Improved
 ########
 - The following changes were made to the :ref:`algm-MSDFit` algorithm:
-   - Added model selection to the :ref:`algm-MSDFit` algorithm, with three current models: MsdPeters, MsdYi and MsdPeters. New models now work with workspaces in Q not Q^2 (e.g. _eq workspaces 'Elastic Q')
+   - Added model selection to the :ref:`algm-MSDFit` algorithm, with three current models: MsdPeters, MsdYi and MsdPeters. New models now work with workspaces in Q not Q^2 (e.g. _eq workspaces 'Elastic Q').
 - The following changes were made to the the :ref:`algm-ConvolutionFitSequential` algorithm:
    - Added 'ExtractMembers' property to :ref:`algm-ConvolutionFitSequential` - this allows for extracting the members of the convolution fitting into their own workspaces.
    - Property to pass the workspace index added to :ref:`algm-ConvolutionFitSequential`.
@@ -40,7 +40,7 @@ Bugfixes
 Indirect Interfaces
 -------------------
 - The Indirect Absorption Corrections interface has been replaced with Calculate Monte Carlo Absorption Corrections; using the new :ref:`algm-CalculateMonteCarloAbsorption` algorithm.
-- In the Indirect ConvFit interface, EISF is now extracted as a parameter when performing a single fit using 'Fit Single Spectrum'
+- In the Indirect ConvFit interface, EISF is now extracted as a parameter when performing a single fit using 'Fit Single Spectrum'.
 - The Indirect *S(Q, W)* interface now automatically replaces NaN values with 0.
 - The Save Result option in the Indirect Elwin interface now writes to file the temperature-dependent elastic intensity normalized to the lowest temperature.
 - Model selection is available in the Indirect MSDFit interface, providing the option to choose one of the three models available in the :ref:`algm-MSDFit` algorithm. 
@@ -50,9 +50,9 @@ Indirect Interfaces
 
 Vesuvio
 -------
-- Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled']
-- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O for oxygen
-- Multiple scattering corrections for back-scattering spectra now approximate the hydrogen peak, this is done in the :ref:`algm-VesuvioCorrections` algorithm. This feature is incomplete for 3.11
+- Added flag for disabling multiple scattering corrections: flags['ms_flags']['ms_enabled'].
+- Added method for specifying a mass by chemical symbol e.g. H for hydrogen, O for oxygen.
+- Multiple scattering corrections for back-scattering spectra now approximate the hydrogen peak, this is done in the :ref:`algm-VesuvioCorrections` algorithm. This feature is incomplete for 3.11.
 - :ref:`algm-VesuvioCorrections` has the additional property: 'MassIndexToSymbolMap'. MassIndexToSymbolMap is used to map from an index of mass in the 'Masses' property to a chemical symbol.
 - :ref:`algm-VesuvioCorrections` takes the additional property: 'HydrogenConstraints'. HydrogenConstraints are used to constrain the hydrogen peak for multiple scattering corrections in back-scattering spectra.
 - Gamma Corrections are no longer done for back-scattering spectra in the :ref:`algm-VesuvioCorrections` algorithm.
