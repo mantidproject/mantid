@@ -206,7 +206,9 @@ This enables one to fit the functions with ``scipy.optimize.curve_fit``.
 
 Plotting
 --------
-Functions may be plotted by calling the plot method of the function.
+Functions may be plotted by calling the ``plot`` method of the function.
+``mantidplot`` must be available to import for ``plot`` to work.
+
 This method can be called in any of the following manners:
 
 .. code:: python

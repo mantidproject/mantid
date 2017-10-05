@@ -158,7 +158,10 @@ class FunctionWrapper(object):
           the function is plotted.
       """
       from mantid import mtd
-      from mantidplot import plot 
+      try:
+          from mantidplot import plot 
+      except:
+          raise RuntimeError("mantidplot must be importable to plot functions.")
       from mantid.simpleapi import CreateWorkspace
       import numpy as np
       
