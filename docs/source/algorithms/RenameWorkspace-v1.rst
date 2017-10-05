@@ -56,7 +56,7 @@ Usage
    obj_inADS.sort()
    print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
 
-   print("Old pointer to myWs refers to workspace with new name:  ".format(myWs.name()))
+   print("Old pointer to myWs refers to workspace with new name:  {}".format(myWs.name()))
    print("*********************************************************************")
    print("***** After renaming workspace and monitors workspace together:")
    #
