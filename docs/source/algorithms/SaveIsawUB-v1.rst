@@ -37,13 +37,13 @@ Usage
     f=open(filename,"r")
     x,y,z=map(float,f.readline().split())
     if (x==0) and (y==0.5) and (z==0):
-        print "The first line is 0 0.5 0"
+        print("The first line is 0 0.5 0")
     x,y,z=map(float,f.readline().split())
     if (x==0) and (y==0) and (z==0.25):
-        print "The second line is 0 0 0.25"
+        print("The second line is 0 0 0.25")
     x,y,z=map(float,f.readline().split())
     if (x==0.2) and (y==0) and (z==0):
-        print "The third line is 0.2 0 0"
+        print("The third line is 0.2 0 0")
     f.close()
   
 
