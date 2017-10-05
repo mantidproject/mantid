@@ -581,13 +581,16 @@ void FitPeaks::estimateBackground(size_t wi,
   // background
 
   // call algorithm FindPeakBackground
-  // blabla ...
+  // blabla()
 
-  // if it does not work, then fit!  refer to FitPeak()
-  fitFunctionMD(fitter, m_inputWS, wi, function);
+  // step 2 ... (refer to documentation)
+
+  // step 3 ... blabla
 
   return;
 }
+
+enum { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
 //----------------------------------------------------------------------------------------------
 /** Estimate peak profile's parameters values via observation
@@ -599,53 +602,27 @@ void FitPeaks::estimateBackground(size_t wi,
  * @param peakfunction
  * @param bgkdfunction
  */
-void FitPeaks::estimatePeakParameters(
+int FitPeaks::estimatePeakParameters(
     size_t wi, const std::pair<double, double> &peak_window,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction) {
-  // TODO/ISSUE/NOW - Implement!
-  double real_max =
-      findMaxValue(wi, m_peakWindowLeft[ipeak], m_peakWindowRight[ipeak],
-                   bkgd_a, bkgd_b, peak_center, max_value);
+  // TODO/ISSUE/NOW - In development!
 
-  if (real_max < 1.0) {
-    // none-event, but no signal within region
-    peak_pos[ipeak] = -1;
-    peak_i_no_fit = true;
-  } else if (max_value < m_minPeakMaxValue) {
-    peak_i_no_fit = true;
-    peak_pos[ipeak] = -2;
-  } else {
-    lastPeakParameters[X0] = peak_center;
-    lastPeakParameters[HEIGHT] = max_value;
-  }
+  // find the maximum value with and without background
+  //  double max_value(0);
+  //  double peak_center(DBL_MAX);
+  //  size_t peak_center_index(INT_MAX);
+  //  double real_max =
+  //      findMaxValue(wi, peak_window, bkgdfunction, peak_center_index,
+  //      peak_center, max_value);
 
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** find the maximum value in a range
- * @brief FitPeaks::findMaxValue
- * @param wi
- * @param left_window_boundary
- * @param right_window_boundary
- * @param b1
- * @param b0
- * @param peak_center
- * @param max_value
- * @return
- */
-double FitPeaks::findMaxValue(size_t wi,
-                              const std::pair<double, double> &window,
-                              API::IBackgroundFunction_sptr bkgdfunction,
-                              double &peak_center, double &max_value) {
-
+  // copied from FindMaxValue
   double left_window_boundary = window.first;
   double right_window_boundary = window.second;
 
   auto vecY = m_inputWS->y(wi);
 
-  double abs_max = 0;
+  double real_y_max = 0;
   max_value = 0;
 
   // get the range of start and stop to construct a function domain
@@ -667,13 +644,99 @@ double FitPeaks::findMaxValue(size_t wi,
     if (y > max_value) {
       max_value = y;
       peak_center = vec_x[i + start_index];
+      center_index = i + start_index;
     }
-    if (vecY[i] > abs_max)
-      abs_max = y;
+    if (vecY[i] > real_y_max)
+      real_y_max = y;
   }
 
-  return abs_max;
+  // check peak position
+  size_t ileft = getXIndex(wi, peak_window.first);
+  size_t iright = getXIndex(wi, peak_window.second);
+
+  // check peak height
+  const size_t MAGIC3(3);
+
+  int result(0);
+  if (real_max < 1.0) {
+    // none-event, but no signal within region
+    result = NOSIGNAL;
+  } else if (max_value < m_minPeakMaxValue) {
+    // peak too low
+    result = LOWPEAK;
+  } else if ((peak_center_index - ileft) < MAGIC3 ||
+             (iright - peak_center_index) < MAGIC3) {
+    // peak not at center
+    result = OUTOFBOUND;
+  } else {
+    result = GOOD;
+    //    lastPeakParameters[X0] = peak_center;
+    //    lastPeakParameters[HEIGHT] = max_value;
+  }
+
+  // estimate FWHM (left and right) by observation
+  if (result == GOOD) {
+    // TODO - Implement!
+    // use values from background to locate FWHM
+  }
+
+  return result;
 }
+
+////----------------------------------------------------------------------------------------------
+///** find the maximum value in a range
+// * @brief FitPeaks::findMaxValue
+// * @param wi
+// * @param left_window_boundary
+// * @param right_window_boundary
+// * @param b1
+// * @param b0
+// * @param center_index
+// * @param peak_center
+// * @param max_value
+// * @return
+// */
+// double FitPeaks::findMaxValue(size_t wi,
+//                              const std::pair<double, double> &window,
+//                              API::IBackgroundFunction_sptr bkgdfunction,
+//                              size_t &center_index,
+//                              double &peak_center, double &max_value) {
+
+//  double left_window_boundary = window.first;
+//  double right_window_boundary = window.second;
+
+//  auto vecY = m_inputWS->y(wi);
+
+//  double abs_max = 0;
+//  max_value = 0;
+
+//  // get the range of start and stop to construct a function domain
+//  auto vec_x = m_inputWS->x(wi);
+//  std::vector<double>::const_iterator istart =
+//      std::lower_bound(vec_x.begin(), vec_x.end(), left_window_boundary);
+//  std::vector<double>::const_iterator istop =
+//      std::lower_bound(vec_x.begin(), vec_x.end(), right_window_boundary);
+
+//  // FunctionDomain1DVector domain(m_inputWS->x(wi).begin(),
+//  // m_inputWS->x(wi).end());
+//  FunctionDomain1DVector domain(istart, istop);
+//  FunctionValues values(domain);
+//  bkgdfunction->function(domain, values);
+
+//  size_t start_index = static_cast<size_t>(istart - vec_x.begin());
+//  for (size_t i = 0; i < values.size(); ++i) {
+//    double y = vecY[i + start_index] - values.getCalculated(i);
+//    if (y > max_value) {
+//      max_value = y;
+//      peak_center = vec_x[i + start_index];
+//      center_index = i + start_index;
+//    }
+//    if (vecY[i] > abs_max)
+//      abs_max = y;
+//  }
+
+//  return abs_max;
+//}
 
 //----------------------------------------------------------------------------------------------
 /** Fit a specific peak with estimated peak and background parameters
@@ -687,6 +750,16 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                                    const std::pair<double, double> &fitwindow,
                                    const double &exppeakcenter,
                                    const double &postol) {
+
+  //
+  bool high(false);
+
+  if (high) {
+
+    // if it does not work, then fit!  refer to FitPeak()
+    // fit to background
+    fitFunctionMD(fitter, m_inputWS, wi, function);
+  }
 
   // fit peak and background
   double cost = fitFunctionSD(fitter, peakbkgdfunc, m_inputWS, wi,
@@ -1049,6 +1122,9 @@ void FitPeaks::writeFitResult(
     std::vector<std::vector<double>> &peak_parameters,
     std::vector<std::vector<double>> &fitted_peaks,
     std::vector<std::vector<double>> &fitted_peaks_windows) {
+
+  // TODO - Refine this part!
+
   // set the fitted peaks' value to output workspace
   for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
     // set the peak positions
@@ -1100,8 +1176,9 @@ void FitPeaks::writeFitResult(
 }
 
 //----------------------------------------------------------------------------------------------
-// TODO/NOW/TONIGHT - Implement
-void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
+void FitPeaks::reduceBackground(const std::vector<double> &vec_x,
+                                const std::vector<double> &vec_y,
+                                double &bkgd_a, double &bkgd_b) {
   // calculate the area
   double area = 0;
   for (size_t i = 1; i < vec_y.size(); ++i) {
@@ -1116,7 +1193,7 @@ void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
   if (vec_y[0] <= vec_y[1])
     local_min_indices.push_back(0);
   for (size_t i = 1; i < vec_y.size() - 1; ++i) {
-    if (vec_y[i] <= vec_y[i_1] && vec_y[i] <= vec_y[i + 1])
+    if (vec_y[i] <= vec_y[i - 1] && vec_y[i] <= vec_y[i + 1])
       local_min_indices.push_back(i);
   }
   size_t lastindex = vec_y.size() - 1;
@@ -1137,13 +1214,13 @@ void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
 
   for (size_t i = 0; i < local_min_indices.size(); ++i) {
     size_t index_i = local_min_indices[i];
-    double x_i = vec_x[i];
-    double y_i = vec_y[i];
+    double x_i = vec_x[index_i];
+    double y_i = vec_y[index_i];
     for (size_t j = i + 1; j < local_min_indices.size(); ++j) {
       // get x and y
       size_t index_j = local_min_indices[j];
-      double x_j = vec_x[j];
-      double y_j = vec_y[j];
+      double x_j = vec_x[index_j];
+      double y_j = vec_y[index_j];
 
       // calculate a and b
       double a_ij = (y_i - y_j) / (x_i - x_j);
@@ -1152,7 +1229,7 @@ void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
       // verify no other local minimum being negative after background removed
       bool all_non_negative = true;
       for (size_t ilm = 0; ilm < local_min_indices.size(); ++ilm) {
-        if (ilm == i || ilm == j)
+        if (ilm == index_j || ilm == index_j)
           continue;
 
         double y_no_bkgd = vec_y[ilm] - (a_ij * vec_x[ilm] + b_ij);
@@ -1181,13 +1258,18 @@ void FitPeaks::reduceBackground(double &bkgd_a, double &bkgd_b) {
   }
 
   // check
-  if (min_area = DBL_MAX - 1)
+  if (min_area > DBL_MAX - 1)
     throw std::runtime_error("It is impossible not to find any background");
 
   bkgd_a = min_bkgd_a;
   bkgd_b = min_bkgd_b;
 
   return;
+}
+
+size_t FitPeaks::getXIndex() {
+  // TODO - Implement NOW
+  return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1311,9 +1393,9 @@ double FitPeaks::fitSinglePeakX(size_t wsindex, size_t peakindex,
   return chi2;
 }
 
-void estimateLinearBackground(size_t wi, double left_window_boundary,
-                              double right_window_boundary, double &bkgd_a1,
-                              double &bkgd_a0) {
+void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
+                                        double right_window_boundary,
+                                        double &bkgd_a1, double &bkgd_a0) {
 
   bkgd_a0 = 0.;
   bkgd_a1 = 0.;
@@ -1344,6 +1426,7 @@ void estimateLinearBackground(size_t wi, double left_window_boundary,
   return;
 }
 
+/// convert peak window from value to index
 std::vector<size_t> getRange(size_t wi,
                              const std::vector<double> &peak_window) {
   if (peak_window.size() != 2)
