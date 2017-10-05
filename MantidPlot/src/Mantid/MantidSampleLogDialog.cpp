@@ -72,7 +72,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString &wsname,
   for (size_t i = 0; i < NUM_STATS; i++) {
     statLabels[i] = new QLabel(stats[i].c_str());
     statValues[i] = new QLineEdit("");
-    statValues[i]->setReadOnly(1);
+    statValues[i]->setReadOnly(true);
     statsBoxLayout->addRow(statLabels[i], statValues[i]);
   }
   statsBox->setLayout(statsBoxLayout);

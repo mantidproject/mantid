@@ -2754,7 +2754,7 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
     if (!xval.isEmpty() && !yval.isEmpty()) {
       bool valid_data = true;
       if (xColType == Table::Text) {
-        if (xLabels.contains(xval) == 0)
+        if (!xLabels.contains(xval))
           xLabels << xval;
         X[size] = (double)(xLabels.indexOf(xval) + 1);
       } else if (xColType == Table::Time) {

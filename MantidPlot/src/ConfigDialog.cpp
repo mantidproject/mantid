@@ -2465,7 +2465,7 @@ void ConfigDialog::apply() {
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
 
-  if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
+  if (sep.contains(QRegExp("[0-9.eE+-]"))) {
     QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
