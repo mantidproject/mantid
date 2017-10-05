@@ -57,7 +57,7 @@ Usage
    print("Contents of the first spectrum = " + str(in_ws.readY(0)) + ".")
    print("Initial and loaded workspaces comparison is: {}".format(str(ws_comparison_rez[0])))
    run = in_ws.getRun();
-   print("Loaded workspace has attached incident energy Ei={0:5} and rotation angle Psi={1:5}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value))
+   print("Loaded workspace has attached incident energy Ei={0:.1f} and rotation angle Psi={1:.1f}deg".format(run.getLogData('Ei').value,run.getLogData('psi').value))
    
 
 .. testcleanup:: ExSimpleSavingRoundtrip
