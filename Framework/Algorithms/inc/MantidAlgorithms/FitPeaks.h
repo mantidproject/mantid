@@ -47,8 +47,12 @@ private:
   void processInputFunctions();
   void processInputFitRanges();
 
+  /// TODO - Implment .. convert peak function's parameter names to parameter
+  /// index for fast access
+  void convert_parameter_name_to_index();
+
   /// methods to retrieve fit range and peak centers
-  double getExpectedPeakPosition(size_t wi, size_t ipeak);
+  std::vector<double> getExpectedPeakPositions(size_t wi);
   std::pair<double, double> getPeakFitWindow(size_t wi, size_t ipeak);
 
   /// suites of method to fit peaks
@@ -58,23 +62,32 @@ private:
                         std::vector<double> &peak_chi2_vec,
                         std::vector<std::vector<double>> &fitted_functions,
                         std::vector<std::vector<double>> &fitted_peak_windows);
+  // Peak fitting suite
+  double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
+                           API::IFunction_sptr peakbkgdfunc,
+                           API::IPeakFunction_sptr peakfunction,
+                           API::IBackgroundFunction_sptr bkgdfunc,
+                           const std::pair<double, double> &fitwindow,
+                           const double &exppeakcenter, const double &postol);
+
+  /// Methods to fit functions (general)
+  double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       double xmin, double xmax);
+
+  double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
+                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       std::vector<double> &vec_xmin,
+                       std::vector<double> &vec_xmax);
+
   void estimateBackground(size_t wi,
                           const std::pair<double, double> &peak_window,
                           API::IBackgroundFunction_sptr function,
                           API::IAlgorithm_sptr fitter);
-  double fitSinglePeak(size_t wsindex, size_t peakindex,
-                       const std::vector<double> &init_peak_values,
-                       const std::vector<double> &init_bkgd_values,
-                       const std::vector<double> &fit_window,
-                       const std::vector<double> &peak_range,
-                       std::vector<double> &fitted_params_values,
-                       std::vector<double> &fitted_params_errors,
-                       std::vector<double> &fitted_window,
-                       std::vector<double> &fitted_data);
-
-  void estimateLinearBackground(size_t wi, double left_window_boundary,
-                                double right_window_boundary, double &bkgd_a1,
-                                double &bkgd_a0);
+  void estimatePeakParameters(size_t wi,
+                              const std::pair<double, double> &peak_window,
+                              API::IPeakFunction_sptr peakfunction,
+                              API::IBackgroundFunction_sptr bkgdfunction);
 
   double findMaxValue(size_t wi, const std::pair<double, double> &window,
                       API::IBackgroundFunction_sptr bkgdfunction,
@@ -91,18 +104,6 @@ private:
 
   void setOutputProperties();
 
-  // Peak fitting suite
-  double fitIndividualPeak();
-
-  /// Methods to fit functions (general)
-  double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax);
-
-  double fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
-                       API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       std::vector<double> &vec_xmin,
-                       std::vector<double> &vec_xmax);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(size_t wi, const std::vector<double> &peak_positions,
@@ -110,7 +111,10 @@ private:
                       std::vector<std::vector<double>> &fitted_peaks,
                       std::vector<std::vector<double>> &fitted_peaks_windows);
 
-  // ------------------------
+  // ------------------------ May not be used --------------
+  void estimateLinearBackground(size_t wi, double left_window_boundary,
+                                double right_window_boundary, double &bkgd_a1,
+                                double &bkgd_a0);
 
   API::MatrixWorkspace_const_sptr m_inputWS;
   DataObjects::EventWorkspace_const_sptr m_eventWS;
@@ -145,7 +149,13 @@ private:
   std::vector<std::string> m_peakParamNames;
   /// input peak parameters' starting values corresponding to above peak parameter names
   std::vector<double> m_initParamValues;
+  /// table workspace for profile parameters' starting value
+  API::ITableWorkspace_const_sptr m_profileStartingValueTable;
+  /// flag for profile startng value being uniform or not
+  bool m_uniformProfileStartingValue;
 
+  // Peak information
+  double m_minHeight; // TODO - Implement in init() and processInput()
   double m_minPeakMaxValue;
 
   API::MatrixWorkspace_sptr m_peakPosWS; // output workspace
