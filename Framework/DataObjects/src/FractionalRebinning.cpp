@@ -184,7 +184,8 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   const auto &inX = inputWS->x(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
-  if (std::isnan(inY[j]))
+  double signal = inY[j];
+  if (std::isnan(signal))
     return;
 
   const auto &X = outputWS->x(0);
@@ -203,16 +204,21 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
   double variance = inE[j] * inE[j];
   const double overlapWidth = inX[j + 1] - inX[j];
 
-  // If the input is a RebinnedOutput workspace with frac. area and has been
-  // "finalized" we need to undo this for the correct calculation
-  double inputArea = inputQ.area();
+  // If the input is a RebinnedOutput workspace with frac. area we need
+  // to account for the weight of the input bin in the output bin weights
+  // but _not_ in the signal / error calculations (so that the "finalize"
+  // procedure divides by the correct weight).
+  double inputWeight = 1.;
   auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
-  if (inputRB && inputRB->isFinalized()) {
+  if (inputRB) {
     const auto &inF = inputRB->dataF(i);
-    // Need to chain the area of current input to its own fractional area
-    // This also takes care of part of the "unfinalization" of [y,e]Value.
-    inputArea /= inF[j]; // yValue was scaled by 1/inputFraction
-    variance *= inF[j];  // eValue (variance) was scaled by 1/inputFraction**2
+    inputWeight = inF[j];
+    // If the signal/error has been "finalized" (scaled by 1/inF) then
+    // we need to undo this before carrying on.
+    if (inputRB->isFinalized()) {
+      signal *= inF[j];
+      variance *= inF[j] * inF[j]; // It was the _error_ which was scaled.
+    }
   }
 
   // It seems to be more efficient to construct this once and clear it before
@@ -230,19 +236,19 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
       intersectOverlap.clear();
       if (intersection(outputQ, inputQ, intersectOverlap)) {
-        const double weight = intersectOverlap.area() / inputArea;
-        double yValue = inY[j] * weight;
+        const double weight = intersectOverlap.area() / inputQ.area();
+        double yValue = signal * weight;
         double eValue = variance * weight;
         if (removeBinWidth) {
           // If the input workspace was normalized by the bin width, we need to
           // recover the original Y value, we do it by 'removing' the bin width
           yValue *= overlapWidth;
-          eValue *= overlapWidth * overlapWidth;
+          eValue *= overlapWidth * overlapWidth; // eValue is actually variance
         }
         PARALLEL_CRITICAL(overlap) {
           outputWS->mutableY(yi)[xi] += yValue;
           outputWS->mutableE(yi)[xi] += eValue;
-          outputWS->dataF(yi)[xi] += weight;
+          outputWS->dataF(yi)[xi] += weight * inputWeight;
         }
       }
     }

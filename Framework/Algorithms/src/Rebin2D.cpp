@@ -98,16 +98,30 @@ void Rebin2D::exec() {
   BinEdges newYBins(oldXEdges.size());
 
   // Flag for using a RebinnedOutput workspace
+  // NB. This is now redundant because if the input is a MatrixWorkspace,
+  // useFractionArea=false is forced since there is no fractional area info.
+  // But if the input is RebinnedOutput, useFractionalArea=true is forced to
+  // give correct signal/errors. It is kept for compatibility with old scripts.
   bool useFractionalArea = getProperty("UseFractionalArea");
-  MatrixWorkspace_sptr outputWS =
-      createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
-  if (useFractionalArea &&
-      !boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS)) {
+  auto inputHasFA = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
+  // For MatrixWorkspace, only UseFractionalArea=False makes sense.
+  if (useFractionalArea && !inputHasFA) {
     g_log.warning("Fractional area tracking requires the input workspace to "
                   "contain calculated bin fractions from a parallelpiped rebin "
                   "like SofQW. Continuing without fractional area tracking");
     useFractionalArea = false;
   }
+  // For RebinnedOutput, should always use useFractionalArea to get the
+  // correct signal and errors (so that weights of input ws is accounted for).
+  if (inputHasFA && !useFractionalArea) {
+    g_log.warning("Input workspace has bin fractions (e.g. from a "
+                  "parallelpiped rebin like SofQW3). To give accurate results, "
+                  "fractional area tracking has been turn on.");
+    useFractionalArea = true;
+  }
+
+  MatrixWorkspace_sptr outputWS =
+      createOutputWorkspace(inputWS, newXBins, newYBins, useFractionalArea);
 
   // Progress reports & cancellation
   const size_t nreports(static_cast<size_t>(numYBins));
