@@ -86,9 +86,6 @@ private:
   boost::shared_ptr<std::unordered_map<Mantid::Geometry::IComponent *, size_t>>
       m_componentIdToIndexMap;
 
-  /// Counter for dropped detectors
-  size_t m_droppedDetectors = 0;
-
   /// Detector ID -> index mappings
   boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
       m_detectorIdToIndexMap;
