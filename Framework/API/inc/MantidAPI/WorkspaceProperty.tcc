@@ -251,12 +251,14 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::isValid();
 }
 
-/** Indicates if the object is still pointing to the same workspace, using the
-* workspace name
+/** Indicates if the object is still pointing to the same workspace
 *  @return true if the value is the same as the initial value or false
 * otherwise
 */
 template <typename TYPE> bool WorkspaceProperty<TYPE>::isDefault() const {
+  if (m_initialWSName.empty()) {
+    return !(!m_workspaceName.empty() || static_cast<bool>(this->m_value));
+  }
   return m_initialWSName == m_workspaceName;
 }
 

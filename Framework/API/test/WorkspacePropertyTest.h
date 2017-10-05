@@ -176,6 +176,16 @@ public:
     TS_ASSERT_EQUALS(wsp2->getDefault(), "")
   }
 
+  void testIsDefaultWorksOnUnnamedWorkspaces() {
+    const std::string defaultWSName{""};
+    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName, Direction::InOut);
+    TS_ASSERT(p.isDefault())
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT_EQUALS(p.value(), defaultWSName)
+  }
+
   void testAllowedValues() {
     std::vector<std::string> vals;
     TS_ASSERT_THROWS_NOTHING(vals = wsp1->allowedValues())
