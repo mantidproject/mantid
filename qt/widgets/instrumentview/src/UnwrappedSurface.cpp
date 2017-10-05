@@ -24,7 +24,6 @@
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
-using Mantid::Kernel::Exception::NotFoundError;
 
 namespace MantidQt {
 namespace MantidWidgets {

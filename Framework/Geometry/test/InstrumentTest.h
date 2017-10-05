@@ -419,8 +419,8 @@ public:
   void test_getValidFromDate() {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
-    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    Types::Core::DateAndTime validFrom("1900-01-31T23:59:59");
+    Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);
     inst->setValidToDate(validTo);
     TS_ASSERT_EQUALS(inst->getValidFromDate(), validFrom);
@@ -666,6 +666,40 @@ public:
     TS_ASSERT(instrument.isEmptyInstrument());
     instrument.add(new CompAssembly{});
     TS_ASSERT(!instrument.isEmptyInstrument());
+  }
+
+  void test_duplicate_detectors_throw_via_mark_as_detector() {
+
+    // Create a very basic instrument to visit
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+        ,
+        V3D(11, 0, 0) /*detector position*/);
+
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    instrument->add(det);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw",
+                      instrument->markAsDetector(det), std::runtime_error &);
+  }
+
+  void test_duplicate_detectors_throw_via_mark_as_detector_finalize() {
+
+    // Create a very basic instrument to visit
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+        ,
+        V3D(11, 0, 0) /*detector position*/);
+
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    instrument->add(det);
+    instrument->markAsDetectorIncomplete(det);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw",
+                      instrument->markAsDetectorFinalize(),
+                      std::runtime_error &);
   }
 
 private:

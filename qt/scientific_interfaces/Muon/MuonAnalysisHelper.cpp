@@ -64,6 +64,7 @@ namespace MuonAnalysisHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 /**
  * Sets double validator for specified field.
@@ -135,7 +136,7 @@ void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
 
   const Run &run = runWs->run();
 
-  Mantid::Kernel::DateAndTime start, end;
+  Mantid::Types::Core::DateAndTime start, end;
 
   // Add the start time for the run
   out << "\nStart: ";

@@ -170,7 +170,7 @@ public:
   ColorPickerItem(const QColor &color = Qt::white,
                   const QString &text = QString::null,
                   QWidget *parent = nullptr);
-  ~ColorPickerItem();
+  ~ColorPickerItem() override;
 
   QColor color() const;
   QString text() const;
@@ -204,7 +204,7 @@ class ColorPickerPopup : public QFrame {
 
 public:
   ColorPickerPopup(int width, bool withColorDialog, QWidget *parent = nullptr);
-  ~ColorPickerPopup();
+  ~ColorPickerPopup() override;
 
   void insertColor(const QColor &col, const QString &text, int index);
   void exec();

@@ -227,7 +227,8 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["mantidSha1"] = MantidVersion::revisionFull();
 
   // mantid version and sha1
-  message["dateTime"] = DateAndTime::getCurrentTime().toISO8601String();
+  message["dateTime"] =
+      Types::Core::DateAndTime::getCurrentTime().toISO8601String();
 
   message["application"] = m_application;
 
