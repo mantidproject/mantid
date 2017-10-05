@@ -46,7 +46,7 @@ Usage
    print("First 4 rows of OutputTableWorkspace")
    for i in [0,1,2,3]:
       row = tws.row(i)
-      print("\{'Name': '{}', 'Value_3': {:.2f}, 'Value_5': {:.2f}\}".format(row["Name"], row["Value_3"], row["Value_5"]))
+      print("{{'Name': '{}', 'Value_3': {:.2f}, 'Value_5': {:.2f}}}".format(row["Name"], row["Value_3"], row["Value_5"]))
 
    # Get the instrument with the parameters
    inst = ws[0][0].getInstrument()

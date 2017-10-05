@@ -30,7 +30,7 @@ Usage
    #Print first four rows
    for i in [0,1,2,3]:
       row = tws.row(i)
-      print("\{'Name': '{}','Value_1': {:.2f}, 'Value_2': {:.2f}\}".format(row["Name"], row["Value_1"],  row["Value_2"] ))
+      print("{{'Name': '{}','Value_1': {:.2f}, 'Value_2': {:.2f}}}".format(row["Name"], row["Value_1"],  row["Value_2"] ))
 
 Output:
 
