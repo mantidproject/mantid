@@ -291,40 +291,6 @@ public:
     TS_ASSERT_EQUALS(visitor.detectorIds()->at(0), 1); // index 0 is ID 1
   }
 
-  void test_visitor_drops_detectors_without_id() {
-    /*
-     We have to go via DetectorInfo::indexOf to get the index of a detector.
-     if this throws because the detector has an invalid id, we are forced to
-     drop it.
-     Some IDFs i.e. SNAP have montiors with detector ids <  0.
-    */
-
-    // Create a very basic instrument to visit
-    auto visitee = createMinimalInstrument(V3D(0, 0, 0) /*source pos*/,
-                                           V3D(10, 0, 0) /*sample pos*/
-                                           ,
-                                           V3D(11, 0, 0) /*detector position*/);
-
-    // Create an add a duplicate detector
-    Detector *det =
-        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
-    visitee->add(det);
-    visitee->markAsDetector(det);
-
-    InstrumentVisitor visitor(visitee);
-
-    // Visit everything
-    visitor.walkInstrument();
-
-    size_t expectedSize = 0;
-    ++expectedSize; // only detector
-    ++expectedSize; // source
-    ++expectedSize; // sample
-    ++expectedSize; // instrument
-    // Note no second detector counted
-    TS_ASSERT_EQUALS(visitor.size(), expectedSize);
-  }
-
   void test_visitation_of_rectangular_detector() {
 
     // Need confidence that this works properly for RectangularDetectors

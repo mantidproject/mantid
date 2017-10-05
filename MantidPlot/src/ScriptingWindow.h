@@ -145,9 +145,6 @@ private:
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
 
-  /// Extract py files from urllist
-  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
-
 private:
   /// The script editors' manager
   MultiTabScriptInterpreter *m_manager;
