@@ -42,10 +42,10 @@ Usage
     BigNumberThreshold=1000, BigNumberValue=1000, 
     SmallNumberThreshold=1e-6, SmallNumberValue=200)
 
-   print "i\tBefore\tAfter"   
-   print "-\t------\t-----"
+   print("i\tBefore\tAfter")
+   print("-\t------\t-----")
    for i in range(5):
-       print "%i\t%s\t%s" % (i, yArray[i],ws.readY(0)[i])     
+       print("{}\t{}\t{}".format(i, yArray[i],ws.readY(0)[i]))
  
 Output:
 
