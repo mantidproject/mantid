@@ -1,6 +1,7 @@
 #ifndef MANTID_PARALLEL_IO_EVENT_PARSER_H
 #define MANTID_PARALLEL_IO_EVENT_PARSER_H
 
+#include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidTypes/Event/TofEvent.h"
 #include <cstdint>
@@ -36,6 +37,9 @@ public:
                     TimeOffsetType *event_time_offset_start,
                     const LoadRange &range);
 
+  void redistributeDataMPI(std::vector<Event> &thisRankData,
+                           std::vector<std::vector<Event>> &allRankData);
+
   void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
                              const int32_t *globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
@@ -45,8 +49,8 @@ public:
                                     size_t bankIndex);
 
   std::pair<size_t, size_t>
-  findStartAndEndPulses(const std::vector<IndexType> &eventIndex,
-                        size_t rangeStart, size_t count, size_t &curr);
+  findStartAndEndPulseIndices(const std::vector<IndexType> &eventIndex,
+                              size_t rangeStart, size_t count, size_t &curr);
 
   void populateEventList(
       std::vector<std::vector<Types::Event::TofEvent> *> &eventList,
@@ -72,6 +76,7 @@ private:
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
   std::future<void> m_future;
+  Communicator m_comm;
 };
 
 } // namespace IO

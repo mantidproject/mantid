@@ -23,7 +23,7 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     const std::vector<int32_t> &bankOffsets,
     std::vector<std::vector<TofEvent> *> &eventLists)
     : m_rankGroups(rankGroups), m_bankOffsets(bankOffsets),
-      m_eventLists(eventLists), m_posInEventIndex(0) {}
+      m_eventLists(eventLists), m_posInEventIndex(0), m_comm() {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  *parsing events from file/event stream.
@@ -40,7 +40,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
   m_posInEventIndex = 0;
 }
 
-/** Used the detectorIDs supplied to calculate the corresponding global spectrum
+/** Uses the detectorIDs supplied to calculate the corresponding global spectrum
  * numbers using the bankOffsets stored at object creation. NB event_id_start is
  * transformed to contain the spectrum indices.
  * @param event_id_start Starting position of chunk of data containing detector
@@ -56,11 +56,18 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     event_id_start[i] -= m_bankOffsets[bankIndex];
 }
 
+/** Finds the start and end pulse indices within the event_index given an offset
+ * into the event_id/event_time_offset array and a chunk size. Returns the
+ * indices which correspond to the start and end pulses covering the data chunk.
+ * @param eventIndex index list which is searched
+ * @param rangeStart Offset into event_time_offset/event_id
+ * @param count Size of data chunk.
+ * @param curr Current search position
+ */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-std::pair<size_t, size_t>
-EventParser<IndexType, TimeZeroType, TimeOffsetType>::findStartAndEndPulses(
-    const std::vector<IndexType> &eventIndex, size_t rangeStart, size_t count,
-    size_t &curr) {
+std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
+    findStartAndEndPulseIndices(const std::vector<IndexType> &eventIndex,
+                                size_t rangeStart, size_t count, size_t &curr) {
   size_t startPulse = std::min(rangeStart, curr);
   size_t endPulse = curr;
 
@@ -106,8 +113,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   auto offset = range.eventOffset;
   auto count = range.eventCount;
   // Determine start and end pulse/s for chunk of data provided.
-  auto result =
-      findStartAndEndPulses(m_eventIndex, offset, count, m_posInEventIndex);
+  auto result = findStartAndEndPulseIndices(m_eventIndex, offset, count,
+                                            m_posInEventIndex);
 
   for (size_t pulse = result.first; pulse <= result.second; ++pulse) {
     const auto start =
@@ -123,16 +130,26 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
     for (size_t i = static_cast<size_t>(start); i < static_cast<size_t>(end);
          ++i) {
-      // TODO: select appropriate ranks round robin?
-      // int rank = global_spectrum_index[i] % nrank;
-      // rank_data[rank].push_back(...)
-      int rank = 0;
+      int rank = globalSpectrumIndex[i] % m_comm.size();
       rankData[rank].push_back(
           Event{globalSpectrumIndex[i],
                 TofEvent{static_cast<double>(eventTimeOffset[i]),
                          m_eventTimeZero[pulse]}});
     }
   }
+}
+
+/** Uses MPI calls to redistribute chunks which must be processed on certain
+ *ranks.
+ *@param thisRankData output data which must be processed on current rank. (May
+ *be updated by other ranks)
+ *@param allRankData Data on this rank which belongs to several other ranks.
+ */
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
+    std::vector<Event> &thisRankData,
+    std::vector<std::vector<Event>> &allRankData) {
+  thisRankData = allRankData[m_comm.rank()];
 }
 
 /** Fills the workspace EventList with extracted events
@@ -144,7 +161,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
     std::vector<std::vector<TofEvent> *> &eventList,
     const std::vector<Event> &events) {
   for (const auto &event : events) {
-    // TODO calculate local index
+    // TODO: calculate local index
     auto index = event.index;
     eventList[index]->emplace_back(event.tofEvent);
     _mm_prefetch(reinterpret_cast<char *>(&eventList[index]->back() + 1),
@@ -173,11 +190,10 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
-  m_future =
-      std::async(std::launch::async,
-                 [this, event_id_start, event_time_offset_start, &range] {
-                   doParsing(event_id_start, event_time_offset_start, range);
-                 });
+  m_future = std::async(std::launch::async, [this, event_id_start,
+                                             event_time_offset_start, &range] {
+    doParsing(event_id_start, event_time_offset_start, range);
+  });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -187,19 +203,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
   // change event_id_start in place
   eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
                                range.bankIndex);
-
-  // TODO Use MPI Comm to get number of ranks
-  int nrank = 1;
+  int nrank = m_comm.size();
   m_allRankData.resize(nrank);
   // event_id_start now contains globalSpectrumIndex
   extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
                         range);
 
-  // TODO: Redistribute data across MPI Ranks
-  // redistributeDataMPI(m_thisRankData, allRankData);
-  // populateEventList(m_eventLists, m_thisRankData);
-  m_thisRankData = m_allRankData[0]; // TODO Remove
-
+  redistributeDataMPI(m_thisRankData, m_allRankData);
   // TODO: accept something which translates from global to local spectrum index
   populateEventList(m_eventLists, m_thisRankData);
 }

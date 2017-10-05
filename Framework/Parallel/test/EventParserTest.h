@@ -55,10 +55,11 @@ public:
     return range;
   }
 
-  std::vector<LoadRange> generateMPIRanges(size_t bank, int rank,
-                                           int numRanks) {
-    return std::vector<LoadRange>{};
-  }
+  // TODO: Generate load ranges for different MPI ranks
+  // std::vector<LoadRange> generateMPIRanges(size_t bank, int rank,
+  //                                         int numRanks) {
+  //  return std::vector<LoadRange>{};
+  //}
 
   static EventParser<IndexType, TimeZeroType, TimeOffsetType>
   createSimpleParser(std::vector<std::vector<TofEvent> *> &eventLists,
@@ -72,7 +73,7 @@ public:
   static std::vector<std::vector<TofEvent> *>
   prepareEventLists(size_t numLists) {
     std::vector<std::vector<TofEvent> *> eventLists(numLists);
-    for (int i = 0; i < numLists; i++)
+    for (size_t i = 0; i < numLists; i++)
       eventLists[i] = new std::vector<TofEvent>();
 
     return eventLists;
@@ -98,7 +99,7 @@ private:
     std::generate_n(std::back_inserter(m_event_lists), numPixels,
                     []() { return new std::vector<TofEvent>(); });
 
-    for (int pulse = 0; pulse < numPulses; ++pulse) {
+    for (size_t pulse = 0; pulse < numPulses; ++pulse) {
       m_event_time_zero[pulse] = static_cast<TimeZeroType>(pulse * 100000);
       size_t pulseEventSize = 0;
       int bank = 0;
@@ -131,8 +132,8 @@ private:
   void initOffsetsAndIndices(const size_t numBanks, const size_t numPulses) {
     m_bank_offsets.resize(numBanks);
     m_event_indices.resize(numBanks);
-    for (int bank = 0; bank < numBanks; ++bank) {
-      m_bank_offsets[bank] = (bank * 1000) + 1000;
+    for (size_t bank = 0; bank < numBanks; ++bank) {
+      m_bank_offsets[bank] = static_cast<int32_t>(bank * 1000) + 1000;
       m_event_indices[bank].resize(numPulses);
     }
   }
@@ -206,25 +207,25 @@ public:
 
     std::vector<int64_t> event_index{10, 20, 40, 60, 100, 150, 210};
     size_t curr = 0;
-    auto res = parser.findStartAndEndPulses(event_index, 0, 50, curr);
+    auto res = parser.findStartAndEndPulseIndices(event_index, 0, 50, curr);
     TS_ASSERT_EQUALS(res.first, 0);
     TS_ASSERT_EQUALS(res.second, 3);
     TS_ASSERT_EQUALS(curr, 3);
 
     curr = 0; // reset "current position" for new set of indices
-    res = parser.findStartAndEndPulses(event_index, 30, 50, curr);
+    res = parser.findStartAndEndPulseIndices(event_index, 30, 50, curr);
     TS_ASSERT_EQUALS(res.first, 1);
     TS_ASSERT_EQUALS(res.second, 4);
     TS_ASSERT_EQUALS(curr, 4);
 
     // instead of resetting curr allow search to start from this position
-    res = parser.findStartAndEndPulses(event_index, 105, 98, curr);
+    res = parser.findStartAndEndPulseIndices(event_index, 105, 98, curr);
     TS_ASSERT_EQUALS(res.first, 4);
     TS_ASSERT_EQUALS(res.second, 6);
     TS_ASSERT_EQUALS(curr, 6);
 
     // starting from an offset which may be lower than curr
-    res = parser.findStartAndEndPulses(event_index, 0, 100, curr);
+    res = parser.findStartAndEndPulseIndices(event_index, 0, 100, curr);
     TS_ASSERT_EQUALS(res.first, 0);
     TS_ASSERT_EQUALS(res.second, 4);
     TS_ASSERT_EQUALS(curr, 4);
@@ -318,9 +319,7 @@ public:
                         gen.generateBasicRange(0));
 
     parser.finalize();
-    for (int i = 0; i < gen.eventLists().size(); ++i)
-      TS_ASSERT_EQUALS(*eventLists[i], *gen.eventLists()[i]);
-
+    compareEventLists(gen.eventLists(), eventLists);
     gen.cleanupEventLists(eventLists);
   }
 
@@ -336,9 +335,7 @@ public:
                         gen.generateBasicRange(0));
 
     parser.finalize();
-    for (int i = 0; i < gen.eventLists().size(); ++i)
-      TS_ASSERT_EQUALS(*eventLists[i], *gen.eventLists()[i]);
-
+    compareEventLists(gen.eventLists(), eventLists);
     gen.cleanupEventLists(eventLists);
   }
 
@@ -359,9 +356,7 @@ public:
       parser.wait();
     }
     parser.finalize();
-
-    for (int i = 0; i < gen.eventLists().size(); ++i)
-      TS_ASSERT_EQUALS(*eventLists[i], *gen.eventLists()[i]);
+    compareEventLists(gen.eventLists(), eventLists);
     gen.cleanupEventLists(eventLists);
   }
 
@@ -390,8 +385,7 @@ public:
       parser.wait();
     }
     parser.finalize();
-    for (int i = 0; i < gen.eventLists().size(); ++i)
-      TS_ASSERT_EQUALS(*eventLists[i], *gen.eventLists()[i]);
+    compareEventLists(gen.eventLists(), eventLists);
     gen.cleanupEventLists(eventLists);
   }
 
@@ -423,13 +417,17 @@ public:
       }
     }
     parser.finalize();
-    for (int i = 0; i < gen.eventLists().size(); ++i)
-      TS_ASSERT_EQUALS(*eventLists[i], *gen.eventLists()[i]);
-
+    compareEventLists(gen.eventLists(), eventLists);
     gen.cleanupEventLists(eventLists);
   }
 
 private:
+  void compareEventLists(const std::vector<std::vector<TofEvent> *> &lhs,
+                         const std::vector<std::vector<TofEvent> *> &rhs) {
+    for (size_t i = 0; i < lhs.size(); ++i)
+      TS_ASSERT_EQUALS(*rhs[i], *lhs[i]);
+  }
+
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
   void
   doTestRankData(const std::vector<std::vector<Event>> &rankData,
@@ -438,14 +436,16 @@ private:
                                                  TimeOffsetType> &gen,
                  const LoadRange &range) {
     size_t cur = 0;
-    auto res = parser.findStartAndEndPulses(
+    auto res = parser.findStartAndEndPulseIndices(
         gen.eventIndex(0), range.eventOffset, range.eventCount, cur);
 
     for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
-      auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
-                                                 gen.eventIndex(0)[pulse - 1]),
-                            range.eventOffset) -
-                   range.eventOffset;
+      auto start =
+          std::max(pulse == 0
+                       ? 0
+                       : static_cast<size_t>(gen.eventIndex(0)[pulse - 1]),
+                   range.eventOffset) -
+          range.eventOffset;
       auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
                           range.eventOffset + range.eventCount) -
                  range.eventOffset;
