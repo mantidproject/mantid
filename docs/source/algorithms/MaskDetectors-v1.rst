@@ -190,34 +190,34 @@ Example 1: specifying spectrum numbers
   # Get the 1st spectrum in the workspace
   spec = ws.getSpectrum(0)
   detid = spec.getDetectorIDs()[0]
-  print 'Spectrum number is',spec.getSpectrumNo()
-  print 'Detector of this spectrum is masked:',ws.getInstrument().getDetector(detid).isMasked()
+  print('Spectrum number is {}'.format(spec.getSpectrumNo()))
+  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
   y = ws.readY(0)
-  print 'All counts in the spectrum are 0:   ',np.all( y == 0.0 )
+  print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 2nd spectrum in the workspace
   spec = ws.getSpectrum(1)
   detid = spec.getDetectorIDs()[0]
-  print 'Spectrum number is',spec.getSpectrumNo()
-  print 'Detector of this spectrum is masked:',ws.getInstrument().getDetector(detid).isMasked()
+  print('Spectrum number is {}'.format(spec.getSpectrumNo()))
+  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
   y = ws.readY(1)
-  print 'All counts in the spectrum are 0:   ',np.all( y == 0.0 )
+  print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 3rd spectrum in the workspace
   spec = ws.getSpectrum(2)
   detid = spec.getDetectorIDs()[0]
-  print 'Spectrum number is',spec.getSpectrumNo()
-  print 'Detector of this spectrum is masked:',ws.getInstrument().getDetector(detid).isMasked()
+  print('Spectrum number is {}'.format(spec.getSpectrumNo()))
+  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
   y = ws.readY(2)
-  print 'All counts in the spectrum are 0:   ',np.all( y == 0.0 )
+  print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
   # Get the 4th spectrum in the workspace
   spec = ws.getSpectrum(3)
   detid = spec.getDetectorIDs()[0]
-  print 'Spectrum number is',spec.getSpectrumNo()
-  print 'Detector of this spectrum is masked:',ws.getInstrument().getDetector(detid).isMasked()
+  print('Spectrum number is {}'.format(spec.getSpectrumNo()))
+  print('Detector of this spectrum is masked: {}'.format(ws.getInstrument().getDetector(detid).isMasked()))
   y = ws.readY(3)
-  print 'All counts in the spectrum are 0:   ',np.all( y == 0.0 )
+  print('All counts in the spectrum are 0:    {}'.format(np.all( y == 0.0 )))
 
 Output
 ^^^^^^
