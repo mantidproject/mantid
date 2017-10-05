@@ -85,7 +85,7 @@ Usage
    for i in range(3):
         print(round(coefs.readY(i),2))
 
-   print("Is first detector masked?".format(coefs.getInstrument().getDetector(1).isMasked()))
+   print("Is first detector masked? {}".format(coefs.getInstrument().getDetector(1).isMasked()))
 
    # load sample data 
    rawdata = LoadDNSLegacy('oi196012pbi.d_dat', Normalization='duration', CoilCurrentsTable=curtable)
@@ -97,6 +97,8 @@ Usage
         print(round(corrected_data.readY(i),2))
 
 Output:
+
+.. code-block:: python
 
    First 3 correction coefficients:
 
