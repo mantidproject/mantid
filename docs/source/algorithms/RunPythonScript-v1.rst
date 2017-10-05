@@ -41,7 +41,7 @@ Usage
     RunPythonScript(InputWorkspace=ws,Code=script,OutputWorkspace="wsOut")
 
     wsOut = mtd["wsOut"]
-    print "The workspace contained a total of %i counts" % wsOut.readY(0)[0]
+    print("The workspace contained a total of {} counts".format(wsOut.readY(0)[0]))
 
 Output:
 
