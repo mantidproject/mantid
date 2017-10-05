@@ -44,7 +44,7 @@ Usage
     print("Detectors masked")
     print("Step 1: 50 * 3 * 128 = {0.size}".format(a))
     print("Step 2: 11 * 8 * 10 = {0.size}".format(b))
-    print "Step 3: 1 * 8 * 128 = {0.size}".format(c))
+    print("Step 3: 1 * 8 * 128 = {0.size}".format(c))
 
     print("Here are some of the masked detectors:")
     instrument=mtd['CNCSMaskBTP'].getInstrument()
