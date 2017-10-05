@@ -178,14 +178,17 @@ public:
 
   void testIsDefaultWorksOnUnnamedWorkspaces() {
     std::string defaultWSName{""};
-    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName, Direction::InOut);
+    WorkspaceProperty<Workspace> p("PropertyName", defaultWSName,
+                                   Direction::InOut);
     TS_ASSERT(p.isDefault())
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    MatrixWorkspace_sptr ws =
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     p.setDataItem(ws);
     TS_ASSERT(!p.isDefault())
     TS_ASSERT_EQUALS(p.value(), defaultWSName)
     defaultWSName = "default";
-    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName, Direction::Input);
+    WorkspaceProperty<Workspace> p2("PropertyName", defaultWSName,
+                                    Direction::Input);
     TS_ASSERT(p2.isDefault())
     p2.setDataItem(ws);
     TS_ASSERT(!p2.isDefault())
