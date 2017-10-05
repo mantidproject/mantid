@@ -36,13 +36,15 @@ Usage
 
    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-   print "Lattice before SelectCellOfType:"
+   print("Lattice before SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
    SelectCellOfType(PeaksWorkspace=ws, CellType='Monoclinic', Centering='C', Apply=True)
-   print "\nLattice after SelectCellOfType:"
+   print("\nLattice after SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
 
 
 Output:
