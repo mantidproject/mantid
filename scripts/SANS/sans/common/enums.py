@@ -327,3 +327,14 @@ class BatchReductionEntry(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
+# ------------------------------
+# Entries of batch reduction file
+# -------------------------------
+@string_convertible
+@serializable_enum("Left", "Right", "Top", "Bottom")
+class MaskingQuadrant(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
