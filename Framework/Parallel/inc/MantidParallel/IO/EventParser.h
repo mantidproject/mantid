@@ -28,7 +28,8 @@ class MANTID_PARALLEL_DLL EventParser { // TODO
 public:
   EventParser(std::vector<std::vector<int>> rankGroups,
               const std::vector<int32_t> &bankOffsets,
-              std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
+              std::vector<std::vector<Types::Event::TofEvent> *> &eventLists,
+              std::vector<int32_t> globalToLocalSpectrumIndex = {});
 
   void setPulseInformation(std::vector<IndexType> event_index,
                            std::vector<TimeZeroType> event_time_zero);
@@ -37,8 +38,8 @@ public:
                     TimeOffsetType *event_time_offset_start,
                     const LoadRange &range);
 
-  void redistributeDataMPI(std::vector<Event> &thisRankData,
-                           std::vector<std::vector<Event>> &allRankData);
+  void redistributeDataMPI(std::vector<Event> &result,
+                           std::vector<std::vector<Event>> &data);
 
   void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
                              const int32_t *globalSpectrumIndex,
@@ -73,6 +74,7 @@ private:
   std::vector<IndexType> m_eventIndex;
   std::vector<TimeZeroType> m_eventTimeZero;
   std::size_t m_posInEventIndex;
+  std::vector<int32_t> m_globalToLocalSpectrumIndex;
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
   std::future<void> m_future;

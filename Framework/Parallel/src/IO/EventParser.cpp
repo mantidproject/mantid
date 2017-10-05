@@ -2,6 +2,10 @@
 #include <H5Cpp.h>
 #include <xmmintrin.h>
 
+#ifdef MPI_EXPERIMENTAL
+#include <mpi.h>
+#endif
+
 using namespace Mantid::Parallel::IO;
 using Mantid::Types::Event::TofEvent;
 
@@ -16,14 +20,18 @@ namespace IO {
  *partitioned. Group ordering must be preserved to ensure pulse time ordering.
  *@param bankOffsets used to convert from detector ID to global spectrum index.
  *@param eventLists workspace eventlists which will be populated by the parser.
+ *@param globalToLocalSpectrumIndex lookup table which converts a global
+ *spectrum index to a spectrum index local to a given mpi rank
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     std::vector<std::vector<int>> rankGroups,
     const std::vector<int32_t> &bankOffsets,
-    std::vector<std::vector<TofEvent> *> &eventLists)
+    std::vector<std::vector<TofEvent> *> &eventLists,
+    std::vector<int32_t> globalToLocalSpectrumIndex)
     : m_rankGroups(rankGroups), m_bankOffsets(bankOffsets),
-      m_eventLists(eventLists), m_posInEventIndex(0), m_comm() {}
+      m_eventLists(eventLists), m_posInEventIndex(0),
+      m_globalToLocalSpectrumIndex(std::move(globalToLocalSpectrumIndex)) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  *parsing events from file/event stream.
@@ -141,15 +149,48 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
 /** Uses MPI calls to redistribute chunks which must be processed on certain
  *ranks.
- *@param thisRankData output data which must be processed on current rank. (May
+ *@param result output data which must be processed on current rank. (May
  *be updated by other ranks)
- *@param allRankData Data on this rank which belongs to several other ranks.
+ *@param data Data on this rank which belongs to several other ranks.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
-    std::vector<Event> &thisRankData,
-    std::vector<std::vector<Event>> &allRankData) {
-  thisRankData = allRankData[m_comm.rank()];
+    std::vector<Event> &result, std::vector<std::vector<Event>> &data) {
+#ifndef MPI_EXPERIMENTAL
+  result = data[m_comm.rank()];
+#else
+  std::vector<size_t> sizes(data.size());
+  std::transform(data.cbegin(), data.cend(), sizes.begin(),
+                 [](const std::vector<Event> &vec) { return vec.size(); });
+  MPI_Alltoall(sizes.data(), 1, MPI_UNSIGNED_LONG, rec_sizes.data(), 1,
+               MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+
+  auto total_size = std::accumulate(rec_sizes.begin(), rec_sizes.end(),
+                                    static_cast<size_t>(0));
+  result.resize(total_size);
+  size_t offset = 0;
+  std::vector<MPI_Request> recv_requests(data.size());
+  for (int rank = 0; rank < data.size(); ++rank) {
+    int tag = 0;
+    MPI_Irecv(result.data() + offset, rec_sizes[rank] * sizeof(T), MPI_CHAR,
+              rank2, tag, MPI_COMM_WORLD, &recv_requests[rank]);
+    offset += rec_sizes[rank2];
+    // TODO:
+    // 1. do work between sending and receiving (next range, or insert into
+    // workspace after first data was received?).
+  }
+
+  std::vector<MPI_Request> send_requests(data.size());
+  for (int rank = 0; rank < data.size(); ++rank) {
+    const auto &vec = data[rank];
+    int tag = 0;
+    MPI_Isend(vec.data(), vec.size() * sizeof(T), MPI_CHAR, rank, tag,
+              MPI_COMM_WORLD, &send_requests[rank2]);
+  }
+
+  MPI_Waitall(data.size(), send_requests.data(), MPI_STATUSES_IGNORE);
+  MPI_Waitall(data.size(), recv_requests.data(), MPI_STATUSES_IGNORE);
+#endif
 }
 
 /** Fills the workspace EventList with extracted events
@@ -162,8 +203,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
     const std::vector<Event> &events) {
   for (const auto &event : events) {
     // TODO: calculate local index
+#ifdef MPI_EXPERIMENTAL
+    auto index = m_globalToLocalSpectrumIndex[event.index];
+#else
     auto index = event.index;
+#endif
     eventList[index]->emplace_back(event.tofEvent);
+    // Prefetch data into L1 Cache for faster access
     _mm_prefetch(reinterpret_cast<char *>(&eventList[index]->back() + 1),
                  _MM_HINT_T1);
   }
