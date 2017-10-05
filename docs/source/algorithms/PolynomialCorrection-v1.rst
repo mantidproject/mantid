@@ -59,7 +59,7 @@ Usage
    data_ws = PolynomialCorrection(data_ws, coefficients, Operation="Multiply")
 
    print("First 5 y values: {}".format(data_ws.readY(0)[0:5]))
-   print "First 5 error values: {}".format(data_ws.readE(0)[0:5]))
+   print("First 5 error values: {}".format(data_ws.readE(0)[0:5]))
 
 .. testoutput::
 

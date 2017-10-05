@@ -38,7 +38,7 @@ Usage
    result_ws = Power(data_ws, 2)
 
    print("Squared values of first spectrum: {}".format(result_ws.readY(0)))
-   print "Squared values of second spectrum: {}".format(result_ws.readY(1)))
+   print("Squared values of second spectrum: {}".format(result_ws.readY(1)))
 
 Output:
 
