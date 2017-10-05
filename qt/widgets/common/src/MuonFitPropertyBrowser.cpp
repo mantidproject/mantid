@@ -1099,7 +1099,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 
   // Group output together
   std::string groupName = fitAlg->getPropertyValue("Output");
-  std::string baseName = groupName;
+  const std::string &baseName = groupName;
   if (ads.doesExist(groupName)) {
     ads.deepRemoveGroup(groupName);
   }
@@ -1527,7 +1527,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(
   for (auto selected : chosenPeriods) {
     for (auto iter = m_periodBoxes.constBegin();
          iter != m_periodBoxes.constEnd(); ++iter) {
-      auto tmp = iter.key();
+      const auto &tmp = iter.key();
       if (iter.key() == selected) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1542,7 +1542,7 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
-    auto tmp = iter.key();
+    const auto &tmp = iter.key();
     if (iter.key() == period) {
       m_boolManager->setValue(iter.value(), true);
     }

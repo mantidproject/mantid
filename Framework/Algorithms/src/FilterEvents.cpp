@@ -1894,7 +1894,7 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
 
     // append to vector if it is either double TimeSeries or int TimeSeries
     if (dbltimeprop || inttimeprop || booltimeprop) {
-      std::string pname = ip->name();
+      const std::string &pname = ip->name();
       lognames.push_back(pname);
     }
   }

@@ -734,7 +734,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
                      const bool showErrors, MultiLayer *plotWindow,
                      bool clearWindow) {
   ScopedOverrideCursor waitCursor;
-  auto firstName = wsNames.at(0);
+  const auto &firstName = wsNames.at(0);
 
   bool isGraphNew = false;
   MultiLayer *ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow,
@@ -744,7 +744,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   try {
     for (int i = 0; i < wsNames.size(); ++i) {
       // Create the curve with defaults
-      auto wsName = wsNames.at(i);
+      const auto &wsName = wsNames.at(i);
       MantidMDCurve *curve = new MantidMDCurve(wsName, g, showErrors);
       MantidQwtIMDWorkspaceData *data = curve->mantidData();
 

@@ -174,7 +174,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
     Mantid::API::BinEdgeAxis *binEdgeAxis =
         dynamic_cast<Mantid::API::BinEdgeAxis *>(axis);
     if (binEdgeAxis && axisIndex == 1) {
-      const Mantid::MantidVec axisBinEdges = binEdgeAxis->getValues();
+      const Mantid::MantidVec &axisBinEdges = binEdgeAxis->getValues();
       double binCentreValue =
           (axisBinEdges[section] + axisBinEdges[section + 1]) / 2.0;
 
