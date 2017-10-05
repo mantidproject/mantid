@@ -262,6 +262,7 @@ void NormaliseToMonitor::exec() {
         (!inputWS->isHistogramData()) && (inputWS->blocksize() == 1);
   } catch (std::length_error &) {
     // inconsistent bin size, not a single count workspace
+    isSingleCountWorkspace = false;
   }
 
   // See if the normalization with integration properties are set.
