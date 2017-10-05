@@ -24,13 +24,13 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>3</number>
       </property>
-       <widget class="QWidget" name="tabContainerSubtraction">
-         <attribute name="title">
-           <string>Container Subtraction</string>
-         </attribute>
-       </widget>
+      <widget class="QWidget" name="tabContainerSubtraction">
+       <attribute name="title">
+        <string>Container Subtraction</string>
+       </attribute>
+      </widget>
       <widget class="QWidget" name="tabCalculatePaalmanPings">
        <attribute name="title">
         <string>Calculate Paalman Pings</string>
@@ -43,7 +43,7 @@
       </widget>
       <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
-        <string>Absorption</string>
+        <string>Calculate Monte Carlo Absorption</string>
        </attribute>
       </widget>
      </widget>

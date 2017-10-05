@@ -25,9 +25,8 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
-      m_iqtFInputWS(), m_previewPlotData(), m_ties(), m_runMin(-1),
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr), m_iqtFTree(nullptr),
+      m_iqtFRangeManager(nullptr), m_fixedProps(), m_ties(), m_runMin(-1),
       m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
@@ -134,6 +133,8 @@ void IqtFit::setup() {
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -154,21 +155,23 @@ void IqtFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspace()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveResult()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(plotCurrentPreview()));
+          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
 }
 
 void IqtFit::run() {
+  auto inputWs = inputWorkspace();
 
-  if (!m_iqtFInputWS.lock()) {
-    return;
+  if (!inputWs) {
+    QString msg = "Input workspace was deleted from the Analysis Data Service "
+                  "before Algorithm could run.";
+    showMessageBox(msg);
   }
 
   m_runMin = boost::numeric_cast<size_t>(m_uiForm.spSpectraMin->value());
   m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg =
-      iqtFitAlgorithm(m_iqtFInputWS.lock(), m_runMin, m_runMax);
+  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(inputWs, m_runMin, m_runMax);
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -272,8 +275,8 @@ void IqtFit::saveResult() {
  * Plots the current spectrum displayed in the preview plot
  */
 void IqtFit::plotCurrentPreview() {
-  auto inputWs = m_iqtFInputWS.lock();
-  auto previewWs = m_previewPlotData.lock();
+  auto inputWs = inputWorkspace();
+  auto previewWs = previewPlotWorkspace();
 
   if (!inputWs || !previewWs) {
     return;
@@ -382,7 +385,8 @@ void IqtFit::loadSettings(const QSettings &settings) {
 void IqtFit::newDataLoaded(const QString wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
-  m_iqtFInputWS = inputWs;
+  setInputWorkspace(inputWs);
+  setPreviewPlotWorkspace(inputWs);
 
   int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 
@@ -605,7 +609,7 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  auto inputWs = m_iqtFInputWS.lock();
+  auto inputWs = inputWorkspace();
 
   if (!inputWs) {
     g_log.error("No workspace loaded, cannot create preview plot.");
@@ -622,7 +626,7 @@ void IqtFit::updatePlot() {
       specNo <= m_runMax && specNo >= m_runMin) {
     plotResult(groupName, specNo);
   } else if (inputWs) {
-    m_previewPlotData = m_iqtFInputWS;
+    setPreviewPlotWorkspace(inputWs);
     m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
   }
 
@@ -657,7 +661,7 @@ void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
       m_uiForm.ckPlotGuess->setChecked(false);
     }
 
-    m_previewPlotData = ws;
+    setPreviewPlotWorkspace(ws);
 
     m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
     m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
@@ -675,7 +679,7 @@ void IqtFit::setDefaultParameters(const QString &name) {
   // intensity is always 1-background
   m_dblManager->setValue(m_properties[name + ".Intensity"], 1.0 - background);
 
-  auto inputWs = m_iqtFInputWS.lock();
+  auto inputWs = inputWorkspace();
   double tau = 0;
 
   if (inputWs) {
@@ -886,7 +890,7 @@ void IqtFit::singleFit() {
 
   updateFitFunctions();
   size_t specNo = m_uiForm.spPlotSpectrum->text().toULongLong();
-  m_singleFitAlg = iqtFitAlgorithm(m_iqtFInputWS.lock(), specNo, specNo);
+  m_singleFitAlg = iqtFitAlgorithm(inputWorkspace(), specNo, specNo);
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(singleFitComplete(bool)));
@@ -921,7 +925,7 @@ void IqtFit::updateGuessPlot() {
 
 void IqtFit::plotGuess(QtProperty *) {
   CompositeFunction_sptr function = createFunction(true);
-  auto inputWs = m_iqtFInputWS.lock();
+  auto inputWs = inputWorkspace();
 
   // Create the double* array from the input workspace
   const size_t binIndxLow =

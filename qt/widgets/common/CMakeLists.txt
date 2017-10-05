@@ -5,6 +5,7 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+        src/DropEventHelper.cpp
 	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -261,7 +262,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
 	inc/MantidQtWidgets/Common/DllOption.h
-	inc/MantidQtWidgets/Common/FileDialogHandler.h
+        inc/MantidQtWidgets/Common/DropEventHelper.h
+  inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
 	inc/MantidQtWidgets/Common/DistributionOptions.h
@@ -574,6 +576,11 @@ add_library ( MantidQtWidgetsCommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 set_target_properties ( MantidQtWidgetsCommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
 
+# Add support for OSX system libraries if this is an OSX machine
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+ SET( APPLE_SYSTEM_LIBRARIES "-framework CoreFoundation")
+endif()
+
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtWidgetsCommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
@@ -581,6 +588,7 @@ endif ()
 target_link_libraries ( MantidQtWidgetsCommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
+  ${APPLE_SYSTEM_LIBRARIES}
 )
 
 if(MAKE_VATES AND ParaView_FOUND)
