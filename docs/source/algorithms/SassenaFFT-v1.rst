@@ -70,7 +70,7 @@ Usage
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
     SassenaFFT(ws, FFTonlyRealPart=1, Temp=1000, DetailedBalance=1)
 
-    print('workspaces instantiated: ', ', '.join(ws.getNames()))
+    print('workspaces instantiated:  {}.format(', '.join(ws.getNames())))
 
     sqt = ws[3] # S(Q,E)
     # I(Q,t) is a Gaussian, thus S(Q,E) is a Gaussian too (at high temperatures)
@@ -88,10 +88,10 @@ Usage
     paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
     fitWorkspace = fit_output.OutputWorkspace
 
-    print("The fit was: " + fit_output.OutputStatus)
-    print("Fitted Height value is: %.1f" % paramTable.column(1)[0])
-    print("Fitted centre value is: %.1f" % abs(paramTable.column(1)[1]))
-    print("Fitted sigma value is: %.4f" % paramTable.column(1)[2])
+    print("The fit was: " + str(fit_output.OutputStatus))
+    print("Fitted Height value is: {:.1f}".format(paramTable.column(1)[0]))
+    print("Fitted centre value is: {:.1f}".format(abs(paramTable.column(1)[1])))
+    print("Fitted sigma value is: {:.4f}".format(paramTable.column(1)[2]))
     # fitWorkspace contains the data, the calculated and the difference patterns
     print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
 
