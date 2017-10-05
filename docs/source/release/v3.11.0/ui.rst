@@ -10,7 +10,6 @@ User Interface
 --------------
 
 - Fixed the ability to drag & drop files into Mantid OSX >=10.10
-- The First use dialog has been redesigned to use less of the screen to fit better onto laptops with small high resolution screens that use screen scaling.
 - The welcome dialog has been redesigned to use less of the screen to fit better onto laptops with small high resolution screens that use screen scaling.
 
 Scanning workspaces
