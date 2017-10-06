@@ -267,22 +267,9 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 MWRunFiles::~MWRunFiles() {
   // Before destruction, make sure the file finding thread has stopped running.
   // Wait if necessary. This can freeze up Mantid.
-  try {
-    QEventLoop eventLoop(QApplication::instance());
-    QTimer timer;
-    connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
-    if (m_thread->isRunning()) {
-        m_thread->exit(-1);
-        // While the thread is quiting keep the application responsive
-        while (m_thread->isRunning()) {
-          timer.start(50);
-          eventLoop.exec();
-          timer.stop();
-        }
-    }
-  } catch(...) {
-    g_log.error("There seems to have been an expection when closing the MWRunFiles instance.");
-  }
+
+  m_thread->exit(-1);
+  m_thread->wait(50);
 }
 
 /**
