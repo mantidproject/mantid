@@ -284,9 +284,9 @@ void NormaliseToMonitor::exec() {
       auto pProp = (this->getPointerToProperty("NormFactorWS"));
       pProp->setValue(norm_ws_name);
     }
-    const auto &normFactor =
-        extractMonitorSpectra(m_monitor, m_workspaceIndexes);
-    setProperty("NormFactorWS", normFactor);
+    if (!integrate)
+      m_monitor = extractMonitorSpectra(m_monitor, m_workspaceIndexes);
+    setProperty("NormFactorWS", m_monitor);
   }
 }
 
@@ -569,6 +569,37 @@ void NormaliseToMonitor::normaliseByIntegratedCount(
     m_monitor = integrate->getProperty("OutputWorkspace");
   }
 
+  EventWorkspace_sptr inputEvent =
+      boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
+
+  if (inputEvent) {
+    // Run the divide algorithm explicitly to enable progress reporting
+    IAlgorithm_sptr divide = createChildAlgorithm("Divide", 0.0, 1.0);
+    divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
+    divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
+    divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",
+                                              outputWorkspace);
+    divide->executeAsChildAlg();
+
+    // Get back the result
+    outputWorkspace = divide->getProperty("OutputWorkspace");
+  } else {
+    performHistogramDivision(inputWorkspace, outputWorkspace);
+  }
+}
+
+/**
+ * This performs a similar operation to divide, but is a separate algorithm so
+ *that the correct spectra are used in the case of detector scans. This
+ *currently does not support event workspaces properly, but should be made to in
+ *the future.
+ *
+ * @param inputWorkspace The workspace with the spectra to divide by the monitor
+ * @param outputWorkspace The resulting workspace
+ */
+void NormaliseToMonitor::performHistogramDivision(
+    const MatrixWorkspace_sptr &inputWorkspace,
+    MatrixWorkspace_sptr &outputWorkspace) {
   if (outputWorkspace != inputWorkspace)
     outputWorkspace = inputWorkspace->clone();
 
@@ -678,7 +709,8 @@ void NormaliseToMonitor::normaliseBinByBin(
       auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
 
       if (!m_commonBins) {
-        // ConvertUnits can give X vectors of all zeros - skip these, they cause
+        // ConvertUnits can give X vectors of all zeros - skip these, they
+        // cause
         // problems
         if (X.back() == 0.0 && X.front() == 0.0)
           continue;
@@ -714,7 +746,8 @@ void NormaliseToMonitor::normaliseBinByBin(
           }
 
           // Calculate result and store in local variable to avoid overwriting
-          // original data if output workspace is same as one of the input ones
+          // original data if output workspace is same as one of the input
+          // ones
           const double newY = leftY / rightY;
 
           if (fabs(rightY) > 1.0e-12 && fabs(newY) > 1.0e-12) {
@@ -744,7 +777,8 @@ void NormaliseToMonitor::normaliseBinByBin(
 }
 
 /** Calculates the overall normalization factor.
- *  This multiplies result by (bin width * sum of monitor counts) / total frame
+ *  This multiplies result by (bin width * sum of monitor counts) / total
+ * frame
  * width.
  *  @param X The BinEdges of the workspace
  *  @param Y The Counts of the workspace

@@ -116,6 +116,9 @@ protected: // for testing
                              API::MatrixWorkspace_sptr &outputWorkspace,
                              const bool isSingleCountWorkspace);
 
+  void performHistogramDivision(const API::MatrixWorkspace_sptr &inputWorkspace,
+                                API::MatrixWorkspace_sptr &outputWorkspace);
+
   void normaliseBinByBin(const API::MatrixWorkspace_sptr &inputWorkspace,
                          API::MatrixWorkspace_sptr &outputWorkspace);
   void normalisationFactor(const HistogramData::BinEdges &X,
