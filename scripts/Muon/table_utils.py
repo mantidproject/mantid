@@ -72,4 +72,5 @@ def setTableHeaders(table):
                 +"background-color:white;"\
                 +"}"
             table.setStyleSheet(styleSheet)
-        return styleSheet
+            return styleSheet
+        return 
