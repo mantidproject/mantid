@@ -71,6 +71,7 @@ Bugs Resolved
 - We have improved the documentation for the `RewriteSpectraMap` property of the `LoadInstrument`
   algorithm
 - Fixed a bug where replacing a workspace with X errors with a workspace without would cause a crash if the workspace's data view was open.
+- Fixed a bug where replacing a workspace with X errors with a workspace without the errors while Data View was open would result in a crash.
 
 Full list of
 `GUI <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.11%22+is%3Amerged+label%3A%22Component%3A+GUI%22>`_
