@@ -357,11 +357,11 @@ Kernel::V3D Component::getPos() const {
 
         Quat parentRot;
         V3D parentPos;
-          boost::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-            parentPos = parParent->getPos();
-          }
+        boost::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
+          parentPos = parParent->getPos();
+        }
 
         parentRot.rotate(absPos);
         absPos += parentPos;
@@ -407,11 +407,11 @@ Kernel::Quat Component::getRotation() const {
         return getRelativeRot();
       } else {
         Quat parentRot;
-          // Get the parent's rotation
-          boost::shared_ptr<const IComponent> parParent = getParent();
-          if (parParent) {
-            parentRot = parParent->getRotation();
-          }
+        // Get the parent's rotation
+        boost::shared_ptr<const IComponent> parParent = getParent();
+        if (parParent) {
+          parentRot = parParent->getRotation();
+        }
         return parentRot * getRelativeRot();
       }
     }

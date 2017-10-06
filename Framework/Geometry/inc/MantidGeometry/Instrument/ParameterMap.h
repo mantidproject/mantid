@@ -103,14 +103,10 @@ public:
   bool operator==(const ParameterMap &rhs) const;
 
   /// Clears the map
-  inline void clear() {
-    m_map.clear();
-  }
+  inline void clear() { m_map.clear(); }
   /// method swaps two parameter maps contents  each other. All caches contents
   /// is nullified (TO DO: it can be efficiently swapped too)
-  void swap(ParameterMap &other) {
-    m_map.swap(other.m_map);
-  }
+  void swap(ParameterMap &other) { m_map.swap(other.m_map); }
   /// Clear any parameters with the given name
   void clearParametersByName(const std::string &name);
 
