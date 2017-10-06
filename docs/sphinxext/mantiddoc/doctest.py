@@ -140,6 +140,11 @@ TEST_FAILURE_TYPE = "UsageFailure"
 # Package name
 PACKAGE_NAME = "docs"
 
+# No Test found error message
+NO_TEST_ERROR = "\n*************************************************\n"\
+                "* No test code has been found in given file(s). * \n"\
+                "*************************************************"
+
 #-------------------------------------------------------------------------------
 # Define parts of lines that denote a document
 DOCTEST_DOCUMENT_BEGIN = "Document:"
@@ -283,7 +288,10 @@ class DocTestOutputParser(object):
                 continue
             if line.startswith(DOCTEST_SUMMARY_TITLE): # end of tests
                 in_doc = False
-                cases.extend(self.__parse_document(document_txt))
+                if document_txt:
+                    cases.extend(self.__parse_document(document_txt))
+                else:
+                    raise RuntimeError(NO_TEST_ERROR)
                 document_txt = None
             if in_doc and line != "":
                 document_txt.append(line)
@@ -302,6 +310,7 @@ class DocTestOutputParser(object):
           list: List of test cases in the document
         """
         fullname = self.__extract_fullname(results[0])
+
         if not results[1].startswith("-"):
             raise ValueError("Invalid second line of output: '%s'. "\
                              "Expected a title underline."
