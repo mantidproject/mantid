@@ -28,7 +28,7 @@ Usage
   print('Input workspace bin width       {:.1f}'.format(ws.readX(0)[1] - ws.readX(0)[0]))
   print('"Rebunched" workspace bin width {:.1f}'.format(rebunched.readX(0)[1] - rebunched.readX(0)[0]))
   print('Input workspace values          {:.1f} {:.1f} {:.1f}'.format(ws.readY(0)[0], ws.readY(0)[50], ws.readY(0)[70]))
-  print('"Rebunched" workspace values    {:.1f} {:.1f} {:.1f}'.format(rebunched.readY(0)[0], rebunched.readY(0)[50/3], rebunched.readY(0)[70/3]))
+  print('"Rebunched" workspace values    {:.1f} {:.1f} {:.1f}'.format(rebunched.readY(0)[0], rebunched.readY(0)[50//3], rebunched.readY(0)[70//3]))
 
 Output
 ######
