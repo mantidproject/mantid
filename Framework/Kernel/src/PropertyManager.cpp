@@ -499,7 +499,13 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
   const size_t count = propertyCount();
   for (size_t i = 0; i < count; ++i) {
     Property *p = getPointerToPropertyOrdinal(static_cast<int>(i));
-    if (withDefaultValues || !(p->isDefault())) {
+    // There are special cases where Property::isDefault() returns false but
+    // we still shouldn't write the value to jsonMap, e.g. workspace
+    // properties with non-ADS workspaces. We need to compare the string
+    // values instead.
+    const auto v = p->value();
+    const bool isStrValueDefault{v == p->getDefault()};
+    if (withDefaultValues || !(isStrValueDefault)) {
       jsonMap[p->name()] = p->value();
     }
   }
