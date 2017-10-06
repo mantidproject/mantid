@@ -25,12 +25,12 @@ namespace IO {
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
-    std::vector<std::vector<int>> rankGroups,
-    const std::vector<int32_t> &bankOffsets,
+    std::vector<std::vector<int>> rankGroups, std::vector<int32_t> bankOffsets,
     std::vector<std::vector<TofEvent> *> &eventLists,
     std::vector<int32_t> globalToLocalSpectrumIndex)
-    : m_rankGroups(rankGroups), m_bankOffsets(bankOffsets),
-      m_eventLists(eventLists), m_posInEventIndex(0),
+    : m_rankGroups(std::move(rankGroups)),
+      m_bankOffsets(std::move(bankOffsets)), m_eventLists(eventLists),
+      m_posInEventIndex(0),
       m_globalToLocalSpectrumIndex(std::move(globalToLocalSpectrumIndex)) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
@@ -48,19 +48,20 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
   m_posInEventIndex = 0;
 }
 
-/** Uses the detectorIDs supplied to calculate the corresponding global spectrum
- * numbers using the bankOffsets stored at object creation. NB event_id_start is
- * transformed to contain the spectrum indices.
+/** Uses the event_ids (detectorIDs) supplied to calculate the corresponding
+ * global spectrum numbers using the bankOffsets stored at object creation. NB
+ * event_id_start is transformed in-place to contain the spectrum indices.
  * @param event_id_start Starting position of chunk of data containing detector
- * IDs. This is transformed in place to save memory bandwidth.
+ * IDs. This is modified in place to store global spectrum indices to save
+ * memory bandwidth.
  * @param count Number of items in data chunk
  * @param bankIndex Index into the list of bank offsets.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                 size_t bankIndex) {
-  for (size_t i = 0; i < count; i++)
+                                 size_t bankIndex) const {
+  for (size_t i = 0; i < count; ++i)
     event_id_start[i] -= m_bankOffsets[bankIndex];
 }
 
@@ -77,13 +78,10 @@ std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     findStartAndEndPulseIndices(const std::vector<IndexType> &eventIndex,
                                 size_t rangeStart, size_t count, size_t &curr) {
   size_t startPulse = std::min(rangeStart, curr);
-  size_t endPulse = curr;
-
-  size_t pulse = startPulse;
-
+  size_t endPulse = startPulse;
   const auto rangeEnd = rangeStart + count;
 
-  for (; pulse < eventIndex.size(); ++pulse) {
+  for (size_t pulse = startPulse; pulse < eventIndex.size(); ++pulse) {
     size_t icount =
         (pulse != eventIndex.size() - 1 ? eventIndex[pulse + 1] : rangeEnd) -
         eventIndex[pulse];
@@ -92,7 +90,7 @@ std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
       startPulse = pulse;
     if (rangeEnd > static_cast<size_t>(eventIndex[pulse]) &&
         rangeEnd <= static_cast<size_t>(eventIndex[pulse]) + icount)
-      endPulse = pulse + 1;
+      endPulse = (pulse + 1) == eventIndex.size() ? pulse : pulse + 1;
   }
 
   curr = endPulse;
@@ -111,12 +109,14 @@ std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
+    extractEventsForRanks(std::vector<std::vector<EventListEntry>> &rankData,
                           const int32_t *globalSpectrumIndex,
                           const TimeOffsetType *eventTimeOffset,
                           const LoadRange &range) {
   for (auto &item : rankData)
     item.clear();
+
+  rankData.resize(m_comm.size());
 
   auto offset = range.eventOffset;
   auto count = range.eventCount;
@@ -140,9 +140,9 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
          ++i) {
       int rank = globalSpectrumIndex[i] % m_comm.size();
       rankData[rank].push_back(
-          Event{globalSpectrumIndex[i],
-                TofEvent{static_cast<double>(eventTimeOffset[i]),
-                         m_eventTimeZero[pulse]}});
+          EventListEntry{globalSpectrumIndex[i],
+                         TofEvent{static_cast<double>(eventTimeOffset[i]),
+                                  m_eventTimeZero[pulse]}});
     }
   }
 }
@@ -155,7 +155,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
-    std::vector<Event> &result, std::vector<std::vector<Event>> &data) {
+    std::vector<EventListEntry> &result,
+    const std::vector<std::vector<EventListEntry>> &data) const {
 #ifndef MPI_EXPERIMENTAL
   result = data[m_comm.rank()];
 #else
@@ -200,13 +201,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
     std::vector<std::vector<TofEvent> *> &eventList,
-    const std::vector<Event> &events) {
+    const std::vector<EventListEntry> &events) {
   for (const auto &event : events) {
-    // TODO: calculate local index
+// TODO: calculate local index
 #ifdef MPI_EXPERIMENTAL
     auto index = m_globalToLocalSpectrumIndex[event.index];
 #else
-    auto index = event.index;
+    auto index = event.globalIndex;
 #endif
     eventList[index]->emplace_back(event.tofEvent);
     // Prefetch data into L1 Cache for faster access
@@ -249,8 +250,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
   // change event_id_start in place
   eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
                                range.bankIndex);
-  int nrank = m_comm.size();
-  m_allRankData.resize(nrank);
+
   // event_id_start now contains globalSpectrumIndex
   extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
                         range);
