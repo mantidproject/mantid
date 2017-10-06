@@ -43,6 +43,7 @@ Usage
 
    print("The expected value of each bin should be {:.11e}.".format(0.1/(49152*0.1)/(49152*0.1)))
    print("The actual value of the first bin is {:.11e}.".format(corrected[0].readY(0)[0]))
+   
 
 Output:
 
