@@ -18,7 +18,7 @@ using Mantid::Kernel::PropertyManager_sptr;
 
 using namespace boost::python;
 
-//GET_POINTER_SPECIALIZATION(PropertyManager)
+// GET_POINTER_SPECIALIZATION(PropertyManager)
 
 void export_PropertyManager() {
 

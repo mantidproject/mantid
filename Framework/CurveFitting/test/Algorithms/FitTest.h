@@ -75,7 +75,6 @@ private:
 
 DECLARE_FUNCMINIMIZER(TestMinimizer, TestMinimizer)
 
-
 class FitTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically

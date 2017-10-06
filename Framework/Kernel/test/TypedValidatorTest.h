@@ -7,7 +7,6 @@
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 
-
 #define DECLARE_TEST_VALIDATOR(ClassName, HeldType)                            \
   class ClassName : public Mantid::Kernel::TypedValidator<HeldType> {          \
   public:                                                                      \

@@ -32,7 +32,6 @@ public:
 };
 DECLARE_ALGORITHM(TestAlgorithm)
 
-
 class MultiPeriodGroupWorkerTest : public CxxTest::TestSuite,
                                    public MultiPeriodGroupTestBase {
 public:

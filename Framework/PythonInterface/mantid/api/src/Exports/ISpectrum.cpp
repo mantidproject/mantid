@@ -8,7 +8,7 @@ using Mantid::API::ISpectrum;
 using Mantid::detid_t;
 using namespace boost::python;
 
-//GET_POINTER_SPECIALIZATION(ISpectrum)
+// GET_POINTER_SPECIALIZATION(ISpectrum)
 
 void export_ISpectrum() {
   register_ptr_to_python<ISpectrum *>();
