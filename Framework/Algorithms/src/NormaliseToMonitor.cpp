@@ -605,6 +605,7 @@ void NormaliseToMonitor::performHistogramDivision(
 
   size_t monitorWorkspaceIndex = 0;
 
+  const auto &specInfo = inputWorkspace->spectrumInfo();
   for (const auto workspaceIndex : m_workspaceIndexes) {
     // Errors propagated according to
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
@@ -612,9 +613,7 @@ void NormaliseToMonitor::performHistogramDivision(
 
     size_t timeIndex = 0;
     if (m_syncScanInput)
-      timeIndex = inputWorkspace->spectrumInfo()
-                      .spectrumDefinition(workspaceIndex)[0]
-                      .second;
+      timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
 
     const auto newYFactor =
         1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
@@ -625,8 +624,7 @@ void NormaliseToMonitor::performHistogramDivision(
 
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
       if (m_syncScanInput) {
-        const auto &specDef =
-            inputWorkspace->spectrumInfo().spectrumDefinition(i);
+        const auto &specDef = specInfo.spectrumDefinition(i);
         if (specDef.size() > 0 && specDef[0].second != timeIndex)
           continue;
       }
