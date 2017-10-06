@@ -413,22 +413,20 @@ private:
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
   void doTestRankData(
       const std::vector<std::vector<EventListEntry>> &rankData,
-      boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>>
-          &parser,
-      detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType>
-          &gen,
+      boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>> &
+          parser,
+      detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
+          gen,
       const LoadRange &range) {
     size_t cur = 0;
     auto res = parser->findStartAndEndPulseIndices(
         gen.eventIndex(0), range.eventOffset, range.eventCount, cur);
 
     for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
-      auto start =
-          std::max(pulse == 0
-                       ? 0
-                       : static_cast<size_t>(gen.eventIndex(0)[pulse - 1]),
-                   range.eventOffset) -
-          range.eventOffset;
+      auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
+                                                 gen.eventIndex(0)[pulse - 1]),
+                            range.eventOffset) -
+                   range.eventOffset;
       auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
                           range.eventOffset + range.eventCount) -
                  range.eventOffset;
