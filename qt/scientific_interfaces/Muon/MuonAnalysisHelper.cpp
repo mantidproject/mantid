@@ -973,19 +973,11 @@ Muon::DatasetParams parseWorkspaceName(const std::string &wsName) {
  */
 void parseRunLabel(const std::string &label, std::string &instrument,
                    std::vector<int> &runNumbers) {
-  size_t path = label.find_last_of("/");
-  if (path == std::string::npos) {
-	  size_t path = label.find_last_of('\\');
-  }
-  std::string useThisLabel = label;
-  if (path != std::string::npos) {
-	  useThisLabel = label.substr(0, path);
-  }
-  const size_t instPos = useThisLabel.find_first_of("0123456789");
-  instrument = useThisLabel.substr(0, instPos);
-  const size_t numPos = useThisLabel.find_first_not_of('0', instPos);
+  const size_t instPos = label.find_first_of("0123456789");
+  instrument = label.substr(0, instPos);
+  const size_t numPos = label.find_first_not_of('0', instPos);
   if (numPos != std::string::npos) {
-    std::string runString = useThisLabel.substr(numPos, useThisLabel.size());
+    std::string runString = label.substr(numPos, label.size());
     // sets of continuous ranges
     Mantid::Kernel::StringTokenizer rangeTokenizer(
         runString, ",", Mantid::Kernel::StringTokenizer::TOK_TRIM);
