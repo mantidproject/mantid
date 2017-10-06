@@ -3,7 +3,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
@@ -26,9 +25,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-namespace {
-  Mantid::Kernel::Logger g_log("MWRunFiles");
-}
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
