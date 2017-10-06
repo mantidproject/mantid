@@ -879,37 +879,6 @@ public:
         compInfo.detectorsInSubtree(compInfo.indexOf(sourceId)).size(), 0);
   }
 
-  void test_component_info_stripped_of_invalid_detectors() {
-    using namespace Mantid::Geometry;
-
-    auto instrument = boost::make_shared<Mantid::Geometry::Instrument>();
-    int id = 1;
-    Detector *det1 =
-        new Detector("pixel1", id /*detector id*/, instrument.get());
-    Detector *det2 =
-        new Detector("pixel2", id /*same detector id*/, instrument.get());
-    // Add detector to the instrument
-    instrument->add(det1);
-    // Add other detector to the instrument
-    instrument->add(det2);
-    instrument->markAsDetector(det1);
-    // The following should fail. Same id is reused!
-    instrument->markAsDetector(det2);
-
-    // A source
-    ObjComponent *source = new ObjComponent("source");
-    instrument->add(source);
-    instrument->markAsSource(source);
-
-    // A sample
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
-    instrument->add(sample);
-    instrument->markAsSamplePos(sample);
-
-    ExperimentInfo expInfo;
-    TS_ASSERT_THROWS_NOTHING(expInfo.setInstrument(instrument));
-  }
-
   void test_component_info_source_sample_l1() {
 
     auto inst = ComponentCreationHelper::createMinimalInstrument(

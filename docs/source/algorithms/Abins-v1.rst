@@ -53,7 +53,7 @@ Usage
 
 
     for name in benzene_wrk.getNames():
-        print name
+        print(name)
 
 Output:
 
@@ -71,7 +71,7 @@ Output:
     wrk=Abins(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
-        print name
+        print(name)
 
 Output:
 
@@ -97,7 +97,7 @@ Output:
                     QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
 
     for name in wrk_verbose.getNames():
-        print name
+        print(name)
 
 Output:
 

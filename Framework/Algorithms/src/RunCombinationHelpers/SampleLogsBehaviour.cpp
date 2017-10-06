@@ -676,7 +676,7 @@ void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
  * @param addeeWS the workspace being merged
  */
 void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
-  for (auto item : m_addeeLogMap) {
+  for (const auto &item : m_addeeLogMap) {
     auto property = std::unique_ptr<Kernel::Property>(item->clone());
     addeeWS.mutableRun().addProperty(std::move(property));
   }

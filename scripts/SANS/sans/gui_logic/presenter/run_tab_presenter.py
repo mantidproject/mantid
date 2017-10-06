@@ -233,26 +233,30 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-        self.sans_logger.information("Starting processing of batch table.")
-        # 0. Validate rows
-        self._create_dummy_input_workspace()
-        self._validate_rows()
 
-        # 1. Set up the states and convert them into property managers
-        states = self.get_states()
-        if not states:
+        try:
+            self.sans_logger.information("Starting processing of batch table.")
+            # 0. Validate rows
+            self._create_dummy_input_workspace()
+            self._validate_rows()
+
+            # 1. Set up the states and convert them into property managers
+            states = self.get_states()
+            if not states:
+                raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
+                                   "has been loaded")
+            property_manager_service = PropertyManagerService()
+            property_manager_service.add_states_to_pmds(states)
+
+            # 2. Add dummy input workspace to Options column
+            self._remove_dummy_workspaces_and_row_index()
+            self._set_dummy_workspace()
+
+            # 3. Add dummy row index to Options column
+            self._set_indices()
+        except:
             self._view.halt_process_flag()
-            raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                               "has been loaded")
-        property_manager_service = PropertyManagerService()
-        property_manager_service.add_states_to_pmds(states)
-
-        # 2. Add dummy input workspace to Options column
-        self._remove_dummy_workspaces_and_row_index()
-        self._set_dummy_workspace()
-
-        # 3. Add dummy row index to Options column
-        self._set_indices()
+            raise
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()
@@ -343,7 +347,6 @@ class RunTabPresenter(object):
             if not self.is_empty_row(row):
                 sample_scatter = self._view.get_cell(row, 0)
                 if not sample_scatter:
-                    self._view.halt_process_flag()
                     raise RuntimeError("Row {} has not SampleScatter specified. Please correct this.".format(row))
 
     def get_processing_options(self):
@@ -843,7 +846,6 @@ class RunTabPresenter(object):
                     self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
                                            "been added to the Mantid search directories! See here for more "
                                            "details: {}".format(row, str(e)))
-                    self._view.halt_process_flag()
                     raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
                                        "been added to the Mantid search directories! See here for more "
                                        "details: {}".format(row, str(e)))

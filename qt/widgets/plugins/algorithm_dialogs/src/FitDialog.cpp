@@ -216,8 +216,8 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent)
     if (ws) {
       m_workspaceIndex->setRange(0,
                                  static_cast<int>(ws->getNumberHistograms()));
-      if (ws->blocksize() > 0) {
-        const Mantid::MantidVec &x = ws->readX(0);
+      const Mantid::MantidVec &x = ws->readX(0);
+      if (!x.empty()) {
         m_startX->setText(QString::number(x.front()));
         m_endX->setText(QString::number(x.back()));
       }

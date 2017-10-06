@@ -1033,7 +1033,7 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
  */
 void PeakPickerTool::addExistingFitsAndGuess(const QStringList &curvesList) {
   bool hasGuess = false;
-  for (const auto curveName : curvesList) {
+  for (const auto &curveName : curvesList) {
     if (curveName.contains(QRegExp("Workspace-[Calc|Diff]"))) { // fit
       m_curveNames.append(curveName);
     } else if (curveName == "CompositeFunction") { // guess

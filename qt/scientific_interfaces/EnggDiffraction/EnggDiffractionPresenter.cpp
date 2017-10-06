@@ -729,7 +729,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
   if (paths.empty() || paths.front().empty())
     return multi_run_number;
 
-  for (auto path : paths) {
+  for (const auto &path : paths) {
     std::string run_number;
     try {
       if (Poco::File(path).exists()) {
@@ -869,7 +869,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   ceriaNo = "";
 
   Poco::Path fullPath(path);
-  const std::string filename = fullPath.getFileName();
+  const std::string &filename = fullPath.getFileName();
   if (filename.empty()) {
     return;
   }

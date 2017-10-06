@@ -107,7 +107,7 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
 
   auto names = m_instrumentTree->findExpandedComponents();
   tab.writeLine("ExpandedItems");
-  for (auto name : names) {
+  for (const auto &name : names) {
     tab << name;
   }
 

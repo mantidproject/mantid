@@ -874,7 +874,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }
@@ -996,7 +996,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   // Get information from all but data group
   std::string parameterStr;
@@ -1584,18 +1584,20 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     local_workspace->loadExperimentInfoNexus(
         getPropertyValue("Filename"), m_cppFile,
         parameterStr); // REQUIRED PER PERIOD
+
+    // Parameter map parsing only if instrument loaded OK.
+    progress(progressStart + 0.11 * progressRange,
+             "Reading the parameter maps...");
+    local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
-    g_log.information("Error loading Instrument section of nxs file");
-    g_log.information(e.what());
+    g_log.warning("Error loading Instrument section of nxs file");
+    g_log.warning(e.what());
+    g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
+                  "update the geometry");
   }
 
   // Now assign the spectra-detector map
   readInstrumentGroup(mtd_entry, local_workspace);
-
-  // Parameter map parsing
-  progress(progressStart + 0.11 * progressRange,
-           "Reading the parameter maps...");
-  local_workspace->readParameterMap(parameterStr);
 
   if (!local_workspace->getAxis(1)
            ->isSpectra()) { // If not a spectra axis, load the axis data into
