@@ -237,10 +237,11 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
-  m_future = std::async(std::launch::async, [this, event_id_start,
-                                             event_time_offset_start, &range] {
-    doParsing(event_id_start, event_time_offset_start, range);
-  });
+  m_future =
+      std::async(std::launch::async,
+                 [this, event_id_start, event_time_offset_start, &range] {
+                   doParsing(event_id_start, event_time_offset_start, range);
+                 });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
