@@ -17,7 +17,6 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QMimeData>
-#include <QTimer>
 #include <QUrl>
 #include <QtConcurrentRun>
 #include <Poco/File.h>
