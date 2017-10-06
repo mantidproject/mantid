@@ -14,9 +14,6 @@
 #include <typeinfo>
 
 namespace Mantid {
-namespace Kernel {
-template <class KEYTYPE, class VALUETYPE> class Cache;
-}
 namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
@@ -108,13 +105,11 @@ public:
   /// Clears the map
   inline void clear() {
     m_map.clear();
-    clearPositionSensitiveCaches();
   }
   /// method swaps two parameter maps contents  each other. All caches contents
   /// is nullified (TO DO: it can be efficiently swapped too)
   void swap(ParameterMap &other) {
     m_map.swap(other.m_map);
-    clearPositionSensitiveCaches();
   }
   /// Clear any parameters with the given name
   void clearParametersByName(const std::string &name);
@@ -305,19 +300,6 @@ public:
   /// Returns a string with all component names, parameter names and values
   std::string asString() const;
 
-  /// Clears the location, rotation & bounding box caches
-  void clearPositionSensitiveCaches();
-  /// Sets a cached location on the location cache
-  void setCachedLocation(const IComponent *comp,
-                         const Kernel::V3D &location) const;
-  /// Attempts to retrieve a location from the location cache
-  bool getCachedLocation(const IComponent *comp, Kernel::V3D &location) const;
-  /// Sets a cached rotation on the rotation cache
-  void setCachedRotation(const IComponent *comp,
-                         const Kernel::Quat &rotation) const;
-  /// Attempts to retrieve a rotation from the rotation cache
-  bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
-  /// Persist a representation of the Parameter map to the open Nexus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
   /// newComp->id
@@ -367,10 +349,6 @@ private:
 
   /// internal parameter map instance
   pmap m_map;
-  /// internal cache map instance for cached position values
-  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
-  /// internal cache map instance for cached rotation values
-  std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
 
   /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
