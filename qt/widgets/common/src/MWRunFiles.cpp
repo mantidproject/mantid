@@ -262,7 +262,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 MWRunFiles::~MWRunFiles() {
   // Before destruction, make sure the file finding thread has stopped running.
   // Wait if necessary. This can freeze up Mantid.
-
   m_thread->exit(-1);
   m_thread->wait(50);
 }
@@ -704,18 +703,9 @@ void MWRunFiles::findFiles() {
     m_uiForm.fileEditor->setModified(false);
 
     // If the thread is running, cancel it.
-    QEventLoop eventLoop(QApplication::instance());
-    QTimer timer;
-    connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
     if (m_thread->isRunning()) {
-      // Quit the thread
       m_thread->exit(-1);
-      // While the thread is quiting keep the application responsive
-      while (m_thread->isRunning()) {
-        timer.start(50);
-        eventLoop.exec();
-        timer.stop();
-      }
+      m_thread->wait();
     }
 
     emit findingFiles();
@@ -820,7 +810,6 @@ void MWRunFiles::inspectThreadResult() {
 void MWRunFiles::readSettings(const QString &group) {
   QSettings settings;
   settings.beginGroup(group);
-
   m_lastDir = settings.value("last_directory", "").toString();
 
   if (m_lastDir == "") {
