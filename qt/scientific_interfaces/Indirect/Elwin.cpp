@@ -19,7 +19,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Elwin::Elwin(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(NULL), m_ElInputWS() {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_ElInputWS() {
   m_uiForm.setupUi(parent);
 }
 
@@ -493,7 +493,7 @@ void Elwin::plotClicked() {
     plotSpectrum(workspaceBaseName + "_elf");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   true))
+                                   true, false))
     plotSpectrum(workspaceBaseName + "_elt");
 }
 
@@ -518,7 +518,7 @@ void Elwin::saveClicked() {
     addSaveWorkspaceToQueue(workspaceBaseName + "_elf");
 
   if (checkADSForPlotSaveWorkspace((workspaceBaseName + "_elt").toStdString(),
-                                   false))
+                                   false, false))
     addSaveWorkspaceToQueue(workspaceBaseName + "_elt");
 
   m_batchAlgoRunner->executeBatchAsync();

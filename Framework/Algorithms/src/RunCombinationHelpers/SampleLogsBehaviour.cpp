@@ -510,7 +510,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
   } catch (std::invalid_argument &) {
     auto timeSeriesProp =
         outWS.mutableRun().getTimeSeriesProperty<double>(name);
-    Kernel::DateAndTime startTime = addeeWS.mutableRun().startTime();
+    Types::Core::DateAndTime startTime = addeeWS.mutableRun().startTime();
     double value = addeeWS.mutableRun().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
     // Remove this to supress a warning, we will put it back after adding the

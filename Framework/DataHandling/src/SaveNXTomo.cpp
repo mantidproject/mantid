@@ -25,7 +25,6 @@ DECLARE_ALGORITHM(SaveNXTomo)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-using Geometry::RectangularDetector;
 
 const std::string SaveNXTomo::NXTOMO_VER = "2.0";
 

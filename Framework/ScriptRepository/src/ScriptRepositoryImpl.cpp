@@ -10,12 +10,10 @@
 #include <utility>
 #include <unordered_set>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::Logger;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::ProxyInfo;
-using Mantid::Kernel::NetworkProxy;
 
 // from poco
 #include <Poco/Path.h>
@@ -51,6 +49,7 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/DateTimeFormatter.h>
 
 // from boost
+#include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 

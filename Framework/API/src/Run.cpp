@@ -81,8 +81,8 @@ boost::shared_ptr<Run> Run::clone() {
  * @param stop :: Absolute stop time. Any log entries at times < than this time
  *are kept.
  */
-void Run::filterByTime(const Kernel::DateAndTime start,
-                       const Kernel::DateAndTime stop) {
+void Run::filterByTime(const Types::Core::DateAndTime start,
+                       const Types::Core::DateAndTime stop) {
   LogManager::filterByTime(start, stop);
   // Re-integrate proton charge
   this->integrateProtonCharge();

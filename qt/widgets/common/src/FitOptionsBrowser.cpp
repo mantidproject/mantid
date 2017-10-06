@@ -75,7 +75,7 @@ void FitOptionsBrowser::createBrowser() {
   QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
 
-  m_browser = new QtTreePropertyBrowser(NULL, QStringList(), false);
+  m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   // assign factories to property managers
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleEditorFactory);
@@ -416,7 +416,7 @@ void FitOptionsBrowser::displayNormalFitProperties() {
 QtProperty *
 FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
   QString propName = QString::fromStdString(property->name());
-  QtProperty *prop = NULL;
+  QtProperty *prop = nullptr;
   if (auto prp =
           dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
     prop = m_boolManager->addProperty(propName);
@@ -452,7 +452,7 @@ FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
     QMessageBox::warning(this, "MantidPlot - Error",
                          "Type of minimizer's property " + propName +
                              " is not yet supported by the browser.");
-    return NULL;
+    return nullptr;
   }
 
   // Something bad happened in QtPropertyBrowser.

@@ -25,7 +25,7 @@ private:
 
 public:
   void testThrowIfvtkDataSetNull() {
-    vtkDataSet *nullArg = NULL;
+    vtkDataSet *nullArg = nullptr;
     TS_ASSERT_THROWS(vtkDataSetToWsName temp(nullArg), std::runtime_error);
   }
 

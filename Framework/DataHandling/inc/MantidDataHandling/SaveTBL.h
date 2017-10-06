@@ -59,8 +59,10 @@ private:
   void exec() override;
   /// Writes a value to the file
   template <class T>
-  void writeVal(T &val, std::ofstream &file, bool endsep = true,
+  void writeVal(const T &val, std::ofstream &file, bool endsep = true,
                 bool endline = false);
+  void writeColumnNames(std::ofstream &file,
+                        std::vector<std::string> const &columnHeadings);
   /// the separator
   const char m_sep;
   // populates the map and vector containing grouping information

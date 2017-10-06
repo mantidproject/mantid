@@ -39,7 +39,6 @@ crystal_data_group = "SingleCrystal"  # name of the group where SingleCrystalDat
 s_data_group = "S"  # name of the group where dynamical factor is stored
 
 pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
-bin_width = 1.0  # defines width of bins used in rebinning of S
 max_wavenumber = 4100.0  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 acoustic_vibrational_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.

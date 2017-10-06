@@ -6,6 +6,7 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -33,8 +34,8 @@ PropertyHandler::PropertyHandler(Mantid::API::IFunction_sptr fun,
     : FunctionHandler(fun), m_browser(browser),
       m_cf(boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
       m_pf(boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
-      m_parent(parent), m_type(NULL), m_item(item), m_isMultispectral(false),
-      m_workspace(NULL), m_workspaceIndex(NULL), m_base(0), m_ci(0),
+      m_parent(parent), m_type(nullptr), m_item(item), m_isMultispectral(false),
+      m_workspace(nullptr), m_workspaceIndex(nullptr), m_base(0), m_ci(0),
       m_hasPlot(false) {}
 
 /// Destructor
@@ -45,7 +46,7 @@ void PropertyHandler::init() {
   m_browser->m_changeSlotsEnabled = false;
   if (m_parent == NULL) { // the root composite function
     m_item = m_browser->m_functionsGroup;
-  } else if (m_item == NULL) {
+  } else if (m_item == nullptr) {
     if (!m_parent->getHandler()) {
       throw std::runtime_error("Parent function handler does not exist");
     }
@@ -62,7 +63,7 @@ void PropertyHandler::init() {
         break;
       }
     }
-    if (m_item == 0)
+    if (m_item == nullptr)
       throw std::runtime_error("Browser item not found");
 
     if (!m_cf) {
@@ -266,8 +267,8 @@ void PropertyHandler::initParameters() {
       } else {
         continue;
       }
-      QtProperty *loProp = NULL;
-      QtProperty *upProp = NULL;
+      QtProperty *loProp = nullptr;
+      QtProperty *upProp = nullptr;
       if (lo) {
         loProp = m_browser->addDoubleProperty("LowerBound");
         m_browser->m_doubleManager->setValue(loProp, loBound);
@@ -324,7 +325,7 @@ void PropertyHandler::initWorkspace() {
     //  m_browser->m_intManager->setValue(m_workspaceIndex,iWorkspaceIndex);
     //}
   } else {
-    m_workspace = m_workspaceIndex = NULL;
+    m_workspace = m_workspaceIndex = nullptr;
   }
 }
 
@@ -335,7 +336,7 @@ void PropertyHandler::initWorkspace() {
   */
 PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   if (!m_cf)
-    return NULL;
+    return nullptr;
   m_browser->disableUndo();
   Mantid::API::IFunction_sptr f;
   // Create new function
@@ -407,7 +408,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
 
   if (m_cf->nFunctions() != nFunctions) { // this may happen
     m_browser->reset();
-    return NULL;
+    return nullptr;
   }
 
   PropertyHandler *h = new PropertyHandler(f, m_cf, m_browser);
@@ -435,7 +436,7 @@ void PropertyHandler::removeFunction() {
   PropertyHandler *ph = parentHandler();
   if (ph) {
     if (this == m_browser->m_autoBackground) {
-      m_browser->m_autoBackground = NULL;
+      m_browser->m_autoBackground = nullptr;
     }
     ph->item()->property()->removeSubProperty(m_item->property());
     Mantid::API::CompositeFunction_sptr cf = ph->cfun();
@@ -512,14 +513,14 @@ QString PropertyHandler::functionPrefix() const {
 // Return the parent handler
 PropertyHandler *PropertyHandler::parentHandler() const {
   if (!m_parent)
-    return 0;
+    return nullptr;
   PropertyHandler *ph = static_cast<PropertyHandler *>(m_parent->getHandler());
   return ph;
 }
 // Return the child's handler
 PropertyHandler *PropertyHandler::getHandler(std::size_t i) const {
   if (!m_cf || i >= m_cf->nFunctions())
-    return 0;
+    return nullptr;
   PropertyHandler *ph =
       static_cast<PropertyHandler *>(m_cf->getFunction(i)->getHandler());
   return ph;
@@ -561,8 +562,8 @@ PropertyHandler::findFunction(QtBrowserItem *item) const {
 }
 
 PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
-  if (prop == NULL)
-    return NULL;
+  if (prop == nullptr)
+    return nullptr;
   if (prop == m_item->property())
     return this;
   if (prop == m_type)
@@ -589,13 +590,13 @@ PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
     }
   }
   if (!m_cf)
-    return 0;
+    return nullptr;
   for (size_t i = 0; i < m_cf->nFunctions(); i++) {
     PropertyHandler *h = getHandler(i)->findHandler(prop);
-    if (h != NULL)
+    if (h != nullptr)
       return h;
   }
-  return NULL;
+  return nullptr;
 }
 
 PropertyHandler *
@@ -609,7 +610,7 @@ PropertyHandler::findHandler(Mantid::API::IFunction_const_sptr fun) {
         return h;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 PropertyHandler *
@@ -623,7 +624,7 @@ PropertyHandler::findHandler(const Mantid::API::IFunction *fun) {
         return h;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -973,7 +974,7 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
         m_browser->m_autoBackground = h;
         h->fit();
       } else {
-        m_browser->m_autoBackground = NULL;
+        m_browser->m_autoBackground = nullptr;
       }
     }
     if (m_parent) {
@@ -1010,7 +1011,7 @@ PropertyHandler::getParameterProperty(const QString &parName) const {
       return parProp;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 QtProperty *PropertyHandler::getParameterProperty(QtProperty *prop) const {
@@ -1020,7 +1021,7 @@ QtProperty *PropertyHandler::getParameterProperty(QtProperty *prop) const {
       return parProp;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 void PropertyHandler::addTie(const QString &tieStr) {
@@ -1079,10 +1080,12 @@ void PropertyHandler::fix(const QString &parName) {
 }
 
 /**
- * Remove the tie.
- * @param prop :: The tie property to remove
- */
-void PropertyHandler::removeTie(QtProperty *prop) {
+* Remove the tie.
+* @param prop :: The tie property to remove
+* @param globalName :: Name of the parameter in compoite function
+* (e.g. f1.omega)
+*/
+void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
   QString parName = m_ties.key(prop, "");
   if (parName.isEmpty())
     return;
@@ -1090,6 +1093,29 @@ void PropertyHandler::removeTie(QtProperty *prop) {
   QtProperty *parProp = getParameterProperty(parName);
   if (parProp) {
     m_browser->m_changeSlotsEnabled = false;
+    auto &compositeFunction = *m_browser->compositeFunction();
+    auto index = compositeFunction.parameterIndex(globalName);
+    compositeFunction.removeTie(index);
+    parProp->removeSubProperty(prop);
+    m_ties.remove(QString::fromStdString(globalName));
+    m_ties.remove(parName);
+    m_browser->m_changeSlotsEnabled = true;
+    parProp->setEnabled(true);
+  }
+}
+/**
+* Remove the tie.
+* @param prop :: The tie property to remove
+*/
+void PropertyHandler::removeTie(QtProperty *prop) {
+  QString parName = m_ties.key(prop, "");
+  if (parName.isEmpty())
+    return;
+
+  QtProperty *parProp = getParameterProperty(parName);
+  if (parProp != nullptr) {
+    m_browser->m_changeSlotsEnabled = false;
+    auto tom = parName.toStdString();
     m_fun->removeTie(parName.toStdString());
     parProp->removeSubProperty(prop);
     m_ties.remove(parName);

@@ -87,17 +87,17 @@ public:
     const auto specImY = outputWs->getSpectrum(1).y();
     const auto specImE = outputWs->getSpectrum(1).e();
     // Check real Y values
-    TS_ASSERT_DELTA(specReY[0], -0.9982, 0.0001);
-    TS_ASSERT_DELTA(specReY[20], -0.0252, 0.0001);
-    TS_ASSERT_DELTA(specReY[50], 0.0264, 0.0001);
+    TS_ASSERT_DELTA(specReY[0], -1.0019, 0.0001);
+    TS_ASSERT_DELTA(specReY[20], -0.0289, 0.0001);
+    TS_ASSERT_DELTA(specReY[50], 0.0227, 0.0001);
     // Check real E values
     TS_ASSERT_DELTA(specReE[0], 0.0010, 0.0001);
     TS_ASSERT_DELTA(specReE[20], 0.0021, 0.0001);
     TS_ASSERT_DELTA(specReE[50], 0.0024, 0.0001);
     // Check imaginary Y values
-    TS_ASSERT_DELTA(specImY[0], -0.9974, 0.0001);
-    TS_ASSERT_DELTA(specImY[20], 0.0115, 0.0001);
-    TS_ASSERT_DELTA(specImY[50], 0.0316, 0.0001);
+    TS_ASSERT_DELTA(specImY[0], -1.0011, 0.0001);
+    TS_ASSERT_DELTA(specImY[20], 0.0079, 0.0001);
+    TS_ASSERT_DELTA(specImY[50], 0.0280, 0.0001);
     // Check imaginary E values
     TS_ASSERT_DELTA(specImE[0], 0.0029, 0.0001);
     TS_ASSERT_DELTA(specImE[20], 0.0031, 0.0001);

@@ -10,7 +10,7 @@ class DLLExport ResNorm : public IndirectBayesTab {
   Q_OBJECT
 
 public:
-  ResNorm(QWidget *parent = 0);
+  ResNorm(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectBayesTab
   void setup() override;

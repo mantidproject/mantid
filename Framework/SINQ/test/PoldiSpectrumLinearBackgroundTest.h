@@ -3,9 +3,9 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

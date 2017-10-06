@@ -5,14 +5,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
+#include <QMessageBox>
 #include <QPalette>
 #include <QPushButton>
 #include <QRegExp>
 #include <QtAlgorithms>
-#include <QMessageBox>
 #include <boost/lexical_cast.hpp>
+#include <cstdlib>
 #include <exception>
-#include <stdlib.h>
 
 namespace MantidQt {
 namespace MantidWidgets {

@@ -34,15 +34,15 @@ public:
     ObjComponent *sample = new ObjComponent("sample");
     instrument.add(sample);
     instrument.markAsSamplePos(sample);
-    det = new Detector("det1", 1, 0);
+    det = new Detector("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
     instrument.add(det);
     instrument.markAsDetector(det);
-    det2 = new Detector("det2", 10, 0);
+    det2 = new Detector("det2", 10, nullptr);
     det2->setPos(0.0, 1.0, 0.0);
     instrument.add(det2);
     instrument.markAsDetector(det2);
-    det3 = new Detector("det3", 11, 0);
+    det3 = new Detector("det3", 11, nullptr);
     det->setPos(0.0, 0.0, 1.0);
     instrument.add(det3);
     instrument.markAsMonitor(det3);
@@ -114,7 +114,7 @@ public:
     Instrument *instr = new Instrument("Inst");
     instr->setDefaultViewAxis("Y");
     IComponent *inst = instr;
-    IComponent *copy(NULL);
+    IComponent *copy(nullptr);
     TS_ASSERT_THROWS_NOTHING(copy = inst->clone());
     TS_ASSERT_DIFFERS(&*copy, &*inst);
     TS_ASSERT_EQUALS(copy->getName(), inst->getName());
@@ -247,7 +247,7 @@ public:
     TS_ASSERT_THROWS(instrument.getDetector(0), Exception::NotFoundError);
     TS_ASSERT_EQUALS(instrument.getDetector(1).get(), det);
     TS_ASSERT_THROWS(instrument.getDetector(2), Exception::NotFoundError);
-    Detector *d = new Detector("det", 2, 0);
+    Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument.markAsDetector(d));
     TS_ASSERT_EQUALS(instrument.getDetector(2).get(), d);
     delete d;
@@ -355,7 +355,7 @@ public:
     bank->setRot(q);
     i->add(bank);
 
-    Detector *det = new Detector("det1", 1, 0);
+    Detector *det = new Detector("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
     bank->add(det);
     i->markAsDetector(det);
@@ -419,8 +419,8 @@ public:
   void test_getValidFromDate() {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    Kernel::DateAndTime validFrom("1900-01-31T23:59:59");
-    Kernel::DateAndTime validTo("2100-01-31 23:59:59");
+    Types::Core::DateAndTime validFrom("1900-01-31T23:59:59");
+    Types::Core::DateAndTime validTo("2100-01-31 23:59:59");
     inst->setValidFromDate(validFrom);
     inst->setValidToDate(validTo);
     TS_ASSERT_EQUALS(inst->getValidFromDate(), validFrom);
@@ -666,6 +666,40 @@ public:
     TS_ASSERT(instrument.isEmptyInstrument());
     instrument.add(new CompAssembly{});
     TS_ASSERT(!instrument.isEmptyInstrument());
+  }
+
+  void test_duplicate_detectors_throw_via_mark_as_detector() {
+
+    // Create a very basic instrument to visit
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+        ,
+        V3D(11, 0, 0) /*detector position*/);
+
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    instrument->add(det);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw",
+                      instrument->markAsDetector(det), std::runtime_error &);
+  }
+
+  void test_duplicate_detectors_throw_via_mark_as_detector_finalize() {
+
+    // Create a very basic instrument to visit
+    auto instrument = ComponentCreationHelper::createMinimalInstrument(
+        V3D(0, 0, 0) /*source pos*/, V3D(10, 0, 0) /*sample pos*/
+        ,
+        V3D(11, 0, 0) /*detector position*/);
+
+    // Create an add a duplicate detector
+    Detector *det =
+        new Detector("invalid_detector", 1 /*DUPLICATE detector id*/, nullptr);
+    instrument->add(det);
+    instrument->markAsDetectorIncomplete(det);
+    TSM_ASSERT_THROWS("Duplicate ID, should throw",
+                      instrument->markAsDetectorFinalize(),
+                      std::runtime_error &);
   }
 
 private:

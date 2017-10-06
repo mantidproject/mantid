@@ -127,14 +127,11 @@ public:
   static TwoLevelTreeManagerTest *createSuite() {
     return new TwoLevelTreeManagerTest();
   }
-  static void destroySuite(TwoLevelTreeManagerTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(TwoLevelTreeManagerTest *suite) { delete suite; }
 
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    TwoLevelTreeManager manager(&presenter,
-                                             WhiteList());
+    TwoLevelTreeManager manager(&presenter, WhiteList());
 
     auto comm = manager.publishCommands();
 
@@ -154,8 +151,7 @@ public:
     TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[12].get()));
     TS_ASSERT(dynamic_cast<ExpandCommand *>(comm[13].get()));
     TS_ASSERT(dynamic_cast<ExpandGroupsCommand *>(comm[14].get()));
-    TS_ASSERT(
-        dynamic_cast<CollapseGroupsCommand *>(comm[15].get()));
+    TS_ASSERT(dynamic_cast<CollapseGroupsCommand *>(comm[15].get()));
     TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[16].get()));
     TS_ASSERT(dynamic_cast<PlotRowCommand *>(comm[17].get()));
     TS_ASSERT(dynamic_cast<PlotGroupCommand *>(comm[18].get()));
@@ -166,10 +162,8 @@ public:
     TS_ASSERT(dynamic_cast<GroupRowsCommand *>(comm[23].get()));
     TS_ASSERT(dynamic_cast<CopySelectedCommand *>(comm[24].get()));
     TS_ASSERT(dynamic_cast<CutSelectedCommand *>(comm[25].get()));
-    TS_ASSERT(
-        dynamic_cast<PasteSelectedCommand *>(comm[26].get()));
-    TS_ASSERT(
-        dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
+    TS_ASSERT(dynamic_cast<PasteSelectedCommand *>(comm[26].get()));
+    TS_ASSERT(dynamic_cast<ClearSelectedCommand *>(comm[27].get()));
     TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[28].get()));
     TS_ASSERT(dynamic_cast<DeleteRowCommand *>(comm[29].get()));
     TS_ASSERT(dynamic_cast<DeleteGroupCommand *>(comm[30].get()));

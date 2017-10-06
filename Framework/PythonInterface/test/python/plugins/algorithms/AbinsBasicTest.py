@@ -52,14 +52,15 @@ class AbinsBasicTest(unittest.TestCase):
                           AllKpointsGiven=False, OutputWorkspace=self._workspace_name)
 
         # no name for workspace
-        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon", Temperature=self._temperature)
+        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon",
+                          TemperatureInKelvin=self._temperature)
 
         # keyword total in the name of the workspace
-        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon", Temperature=self._temperature,
-                          OutputWorkspace=self._workspace_name + "total")
+        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon",
+                          TemperatureInKelvin=self._temperature, OutputWorkspace=self._workspace_name + "total")
 
         # negative temperature in K
-        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon", Temperature=-1.0,
+        self.assertRaises(RuntimeError, Abins, VibrationalDataFile=self._si2 + ".phonon", TemperatureInKelvin=-1.0,
                           OutputWorkspace=self._workspace_name)
 
         # negative scale
@@ -89,7 +90,7 @@ class AbinsBasicTest(unittest.TestCase):
         """
         wrk_ref = Abins(AbInitioProgram=self._ab_initio_program,
                         VibrationalDataFile=self._squaricn + ".phonon",
-                        Temperature=self._temperature,
+                        TemperatureInKelvin=self._temperature,
                         SampleForm=self._sample_form,
                         Instrument=self._instrument_name,
                         Atoms=self._atoms,
@@ -101,7 +102,7 @@ class AbinsBasicTest(unittest.TestCase):
 
         wrk = Abins(AbInitioProgram=self._ab_initio_program,
                     VibrationalDataFile=self._squaricn + ".phonon",
-                    Temperature=self._temperature,
+                    TemperatureInKelvin=self._temperature,
                     SampleForm=self._sample_form,
                     Instrument=self._instrument_name,
                     Atoms=self._atoms,
@@ -124,7 +125,7 @@ class AbinsBasicTest(unittest.TestCase):
         Abins(AbInitioProgram=self._ab_initio_program,
               VibrationalDataFile="benzene_Abins.phonon",
               ExperimentalFile="benzene_Abins.dat",
-              Temperature=self._temperature,
+              TemperatureInKelvin=self._temperature,
               SampleForm=self._sample_form,
               Instrument=self._instrument_name,
               Atoms=self._atoms,
@@ -151,7 +152,7 @@ class AbinsBasicTest(unittest.TestCase):
         wrk_ref = Abins(AbInitioProgram=self._ab_initio_program,
                         VibrationalDataFile=self._squaricn + ".phonon",
                         ExperimentalFile=experimental_file,
-                        Temperature=self._temperature,
+                        TemperatureInKelvin=self._temperature,
                         SampleForm=self._sample_form,
                         Instrument=self._instrument_name,
                         Atoms=self._atoms,

@@ -29,11 +29,11 @@
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 //#include <MyParser.h>
-#include <QLineEdit>
-#include <QHBoxLayout>
 #include <QCloseEvent>
-#include <float.h>
-#include <math.h>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <cfloat>
+#include <cmath>
 
 DoubleSpinBox::DoubleSpinBox(const char format, QWidget *parent)
     : QAbstractSpinBox(parent), d_format(format), d_min_val(-DBL_MAX),

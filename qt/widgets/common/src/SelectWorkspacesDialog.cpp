@@ -30,7 +30,7 @@ public:
     if (m_type.empty())
       return false;
     if (m_isMatrixWorkspace) {
-      return dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) == NULL;
+      return dynamic_cast<Mantid::API::MatrixWorkspace *>(ws.get()) == nullptr;
     }
     return ws->id() != m_type;
   }
@@ -49,7 +49,8 @@ for this is defined by CustomButton.
 SelectWorkspacesDialog::SelectWorkspacesDialog(
     QWidget *parent, const std::string &typeFilter,
     const std::string &customButtonLabel)
-    : QDialog(parent), m_wsList(NULL), m_okButton(NULL), m_customButton(NULL) {
+    : QDialog(parent), m_wsList(nullptr), m_okButton(nullptr),
+      m_customButton(nullptr) {
   setWindowTitle("MantidPlot - Select workspace");
   m_wsList = new QListWidget(parent);
 

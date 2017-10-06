@@ -64,7 +64,7 @@ class LoadDialog : public API::AlgorithmDialog {
 
 public:
   /// Default constructor
-  LoadDialog(QWidget *parent = NULL);
+  LoadDialog(QWidget *parent = nullptr);
 
 private slots:
   /// Create the widgets and layouts that are dynamic, i.e they depend on

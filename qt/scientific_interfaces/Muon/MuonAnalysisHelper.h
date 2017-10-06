@@ -202,7 +202,8 @@ class MANTIDQT_MUONINTERFACE_DLL DoubleOrEmptyValidator
   Q_OBJECT
 
 public:
-  DoubleOrEmptyValidator(QObject *parent = NULL) : QDoubleValidator(parent) {}
+  DoubleOrEmptyValidator(QObject *parent = nullptr)
+      : QDoubleValidator(parent) {}
 
   // See QValidator
   QValidator::State validate(QString &input, int &pos) const override {

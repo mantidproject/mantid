@@ -31,6 +31,7 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:

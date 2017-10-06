@@ -11,6 +11,7 @@ using Mantid::Algorithms::SumEventsByLogValue;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class SumEventsByLogValueTest : public CxxTest::TestSuite {
 public:

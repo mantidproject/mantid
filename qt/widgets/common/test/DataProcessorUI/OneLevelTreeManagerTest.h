@@ -115,14 +115,11 @@ public:
   static OneLevelTreeManagerTest *createSuite() {
     return new OneLevelTreeManagerTest();
   }
-  static void destroySuite(OneLevelTreeManagerTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(OneLevelTreeManagerTest *suite) { delete suite; }
 
   void test_publish_commands() {
     NiceMock<MockDataProcessorPresenter> presenter;
-    OneLevelTreeManager manager(&presenter,
-                                             WhiteList());
+    OneLevelTreeManager manager(&presenter, WhiteList());
 
     auto comm = manager.publishCommands();
 
@@ -146,10 +143,8 @@ public:
     TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[16].get()));
     TS_ASSERT(dynamic_cast<CopySelectedCommand *>(comm[17].get()));
     TS_ASSERT(dynamic_cast<CutSelectedCommand *>(comm[18].get()));
-    TS_ASSERT(
-        dynamic_cast<PasteSelectedCommand *>(comm[19].get()));
-    TS_ASSERT(
-        dynamic_cast<ClearSelectedCommand *>(comm[20].get()));
+    TS_ASSERT(dynamic_cast<PasteSelectedCommand *>(comm[19].get()));
+    TS_ASSERT(dynamic_cast<ClearSelectedCommand *>(comm[20].get()));
     TS_ASSERT(dynamic_cast<SeparatorCommand *>(comm[21].get()));
     TS_ASSERT(dynamic_cast<DeleteRowCommand *>(comm[22].get()));
   }

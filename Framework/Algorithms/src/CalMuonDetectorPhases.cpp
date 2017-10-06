@@ -19,7 +19,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalMuonDetectorPhases)

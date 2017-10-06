@@ -15,7 +15,7 @@ class DLLExport IndirectLoadILL : public IndirectToolsTab {
   Q_OBJECT
 
 public:
-  IndirectLoadILL(QWidget *parent = 0);
+  IndirectLoadILL(QWidget *parent = nullptr);
 
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;

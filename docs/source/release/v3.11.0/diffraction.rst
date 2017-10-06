@@ -22,6 +22,7 @@ Powder Diffraction
 - LoadILLAscii, which could be used to load D2B ASCII data into an MD workspace, has been removed. :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` should be used instead.
 - :ref:`LoadILLDiffraction <algm-LoadILLDiffraction>` now supports loading D2B data with detector scans. The D2B IDF has been updated, as previously it contained some errors in the positions of the tubes and size of the pixels.
 - :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now correctly supports overloading the grouping file in the presence of a masking workspace.
+- New algorithm :ref:`Bin2DPowderDiffraction <algm-Bin2DPowderDiffraction>` to bin TOF powder diffraction event data in :math:`(d,\,d_{\perp})` space has been developed.
 - :ref:`PDCalibration <algm-PDCalibration>` has changed how it calculates constants from peak positions to use a simplex optimization rather than Gauss-Markov method.
 - :ref:`ResampleX <algm-ResampleX>` has a bug fix in how it automatically determines the data range for a workspace with multiple spectra.
 - The powder diffraction GUI has had numerous bugfixes and now has an option to override the detector grouping.
