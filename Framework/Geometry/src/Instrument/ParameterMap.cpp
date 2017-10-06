@@ -55,9 +55,7 @@ void checkIsNotMaskingParameter(const std::string &name) {
 /**
  * Default Constructor
  */
-ParameterMap::ParameterMap()
-{
-}
+ParameterMap::ParameterMap() {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
