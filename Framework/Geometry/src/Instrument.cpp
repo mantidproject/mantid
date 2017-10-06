@@ -999,7 +999,7 @@ const std::string &Instrument::getXmlText() const {
  */
 void Instrument::saveNexus(::NeXus::File *file,
                            const std::string &group) const {
-  file->makeGroup(group, "NXinstrument", 1);
+  file->makeGroup(group, "NXinstrument", true);
   file->putAttr("version", 1);
 
   file->writeData("name", getName());

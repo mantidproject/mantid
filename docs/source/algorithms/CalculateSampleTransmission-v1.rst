@@ -29,8 +29,8 @@ Usage
     ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
                                      ChemicalFormula='H2-O')
 
-    print 'Transmission: %f, %f, %f ...' % tuple(ws.readY(0)[:3])
-    print 'Scattering: %f, %f, %f ...' % tuple(ws.readY(1)[:3])
+    print('Transmission: {:.6f}, {:.6f}, {:.6f} ...'.format(*ws.readY(0)[:3]))
+    print('Scattering: {:.6f}, {:.6f}, {:.6f} ...'.format(*ws.readY(1)[:3]))
 
 
 Output:
@@ -51,8 +51,8 @@ Output:
                                      Density=0.2,
                                      Thickness=0.58)
 
-    print 'Transmission: %f, %f, %f ...' % tuple(ws.readY(0)[:3])
-    print 'Scattering: %f, %f, %f ...' % tuple(ws.readY(1)[:3])
+    print('Transmission: {:.6f}, {:.6f}, {:.6f} ...'.format(*ws.readY(0)[:3]))
+    print('Scattering: {:.6f}, {:.6f}, {:.6f} ...'.format(*ws.readY(1)[:3]))
 
 Output:
 

@@ -168,9 +168,11 @@ PeakRepresentation_sptr PeakViewFactory::createPeakRepresentationEllipsoid(
       dynamic_cast<const Mantid::DataObjects::PeakShapeEllipsoid &>(shape);
 
   // Ellipsoidd paramters
-  const auto abcRadii = ellipsoidShape.abcRadii();
-  const auto abcRadiiBackgroundInner = ellipsoidShape.abcRadiiBackgroundInner();
-  const auto abcRadiiBackgroundOuter = ellipsoidShape.abcRadiiBackgroundOuter();
+  const auto &abcRadii = ellipsoidShape.abcRadii();
+  const auto &abcRadiiBackgroundInner =
+      ellipsoidShape.abcRadiiBackgroundInner();
+  const auto &abcRadiiBackgroundOuter =
+      ellipsoidShape.abcRadiiBackgroundOuter();
 
   // Extract directions for the displayed frame
   const auto dimension0 = m_mdWS->getDimension(0);
