@@ -42,7 +42,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(
   // Create a test workspace with test data with a well defined peak
   // The test instrument has two monitor channels
   Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace123(
-      nBins * nBins + nMonitors, 1, 1);
+      nBins * nBins + nMonitors, 1, true);
   AnalysisDataService::Instance().addOrReplace(workspace, ws);
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create("Wavelength");

@@ -20,8 +20,9 @@ namespace IDA {
  * @param parent :: the parent widget (an IndirectDataAnalysis object).
  */
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
-    : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr), m_parent(nullptr),
-      m_inputWorkspace(), m_previewPlotWorkspace(), m_selectedSpectrum(0) {
+    : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
+      m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
+      m_selectedSpectrum(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories

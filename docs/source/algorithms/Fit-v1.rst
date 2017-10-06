@@ -382,7 +382,6 @@ Usage
 
 .. testcode:: ExFitPeak
 
-   from __future__ import print_function
    # create a workspace with a gaussian peak sitting on top of a linear (here flat) background
    ws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction="name=LinearBackground, \
       A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7", NumBanks=1, BankPixelWidth=1, XMin=0, XMax=10, BinWidth=0.1)
@@ -406,14 +405,14 @@ Usage
    paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
    fitWorkspace = fit_output.OutputWorkspace
 
-   print("The fit was: " + fit_output.OutputStatus)
-   print("chi-squared of fit is: %.2f" % fit_output.OutputChi2overDoF)
-   print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-   print("Fitted centre value is: %.2f" % paramTable.column(1)[1])
-   print("Fitted sigma value is: %.2f" % paramTable.column(1)[2])
+   print("The fit was: {}".format(fit_output.OutputStatus))
+   print("chi-squared of fit is: {:.2f}".format(fit_output.OutputChi2overDoF))
+   print("Fitted Height value is: {:.2f}".format(paramTable.column(1)[0]))
+   print("Fitted centre value is: {:.2f}".format(paramTable.column(1)[1]))
+   print("Fitted sigma value is: {:.2f}".format(paramTable.column(1)[2]))
    # fitWorkspace contains the data, the calculated and the difference patterns
-   print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
-   print("The 20th y-value of the calculated pattern: %.4f" % fitWorkspace.readY(1)[19])
+   print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
+   print("The 20th y-value of the calculated pattern: {:.4f}".format(fitWorkspace.readY(1)[19]))
 
 Output:
 
@@ -431,7 +430,6 @@ Output:
 
 .. testcode:: simFit
 
-    from __future__ import print_function
     import math
     import numpy as np
 
@@ -470,7 +468,6 @@ Output:
 
 .. testcode:: shareFit
 
-    from __future__ import print_function
     import math
     import numpy as np
 
@@ -508,7 +505,6 @@ Output:
 
 .. testcode:: shareFit2
 
-    from __future__ import print_function
     import math
     import numpy as np
 

@@ -1105,7 +1105,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
 
   // Group output together
   std::string groupName = fitAlg->getPropertyValue("Output");
-  std::string baseName = groupName;
+  const std::string &baseName = groupName;
   if (ads.doesExist(groupName)) {
     ads.deepRemoveGroup(groupName);
   }
@@ -1268,7 +1268,7 @@ void MuonFitPropertyBrowser::setAvailableGroups(const QStringList &groups) {
   }
   clearGroupCheckboxes();
   QSettings settings;
-  for (const auto group : groups) {
+  for (const auto &group : groups) {
     addGroupCheckbox(group);
   }
 }
@@ -1342,7 +1342,7 @@ void MuonFitPropertyBrowser::setAllGroups() {
   clearChosenGroups();
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
-    for (auto group : m_groupsList) {
+    for (const auto &group : m_groupsList) {
       if (iter.key().toStdString() == group) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1357,7 +1357,7 @@ void MuonFitPropertyBrowser::setAllPairs() {
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
     bool isItGroup = false;
-    for (auto group : m_groupsList) {
+    for (const auto &group : m_groupsList) {
       if (iter.key().toStdString() == group) {
         isItGroup = true;
       }
@@ -1455,7 +1455,7 @@ void MuonFitPropertyBrowser::setAvailablePeriods(const QStringList &periods) {
 
   clearPeriodCheckboxes();
 
-  for (const auto group : periods) {
+  for (const auto &group : periods) {
     addPeriodCheckbox(group);
   }
 }
@@ -1530,10 +1530,9 @@ QStringList MuonFitPropertyBrowser::getChosenPeriods() const {
 void MuonFitPropertyBrowser::setChosenPeriods(
     const QStringList &chosenPeriods) {
   clearChosenPeriods();
-  for (auto selected : chosenPeriods) {
+  for (const auto &selected : chosenPeriods) {
     for (auto iter = m_periodBoxes.constBegin();
          iter != m_periodBoxes.constEnd(); ++iter) {
-      auto tmp = iter.key();
       if (iter.key() == selected) {
         m_boolManager->setValue(iter.value(), true);
       }
@@ -1548,7 +1547,6 @@ void MuonFitPropertyBrowser::setChosenPeriods(const QString &period) {
   clearChosenPeriods();
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
-    auto tmp = iter.key();
     if (iter.key() == period) {
       m_boolManager->setValue(iter.value(), true);
     }

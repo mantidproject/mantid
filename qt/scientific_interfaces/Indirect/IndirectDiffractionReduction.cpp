@@ -229,8 +229,7 @@ void IndirectDiffractionReduction::plotResults() {
  * Handles saving the reductions from the generic algorithm.
  */
 void IndirectDiffractionReduction::saveReductions() {
-
-  for (const auto wsName : m_plotWorkspaces) {
+  for (const auto &wsName : m_plotWorkspaces) {
     const auto workspaceExists =
         AnalysisDataService::Instance().doesExist(wsName);
     if (workspaceExists) {

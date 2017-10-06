@@ -25,7 +25,7 @@ GET_POINTER_SPECIALIZATION(WorkspaceHistory)
  */
 boost::python::object getHistoriesAsList(WorkspaceHistory &self) {
   boost::python::list names;
-  const auto histories = self.getAlgorithmHistories();
+  const auto &histories = self.getAlgorithmHistories();
   for (const auto &historie : histories) {
     names.append(historie);
   }
