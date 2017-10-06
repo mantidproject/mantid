@@ -29,6 +29,7 @@ Usage
 
     import os
     import numpy as np
+    from sys import stdout
 
     # create x and y data
     dataX = np.arange(12).reshape(3, 4)
@@ -55,7 +56,7 @@ Usage
 
     with open(filename,'r') as f:
         for i in range(12):
-            print(f.readline(), end='')
+            stdout.write(f.readline())
 
 **Output:**
 
