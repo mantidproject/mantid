@@ -65,16 +65,10 @@ void FindPeakBackground::init() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Execute body
-  */
-void FindPeakBackground::exec() {
-  // Get input and validate
+void FindPeakBackground::processInputProperties() {
+  // process input workspace and workspace index
   MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
   int inpwsindex = getProperty("WorkspaceIndex");
-  std::vector<double> m_vecFitWindows = getProperty("FitWindow");
-  m_backgroundType = getPropertyValue("BackgroundType");
-  double k = getProperty("SigmaConstant");
-
   if (isEmpty(inpwsindex)) {
     // Default
     if (inpWS->getNumberHistograms() == 1) {
@@ -91,10 +85,94 @@ void FindPeakBackground::exec() {
     throw runtime_error(errss.str());
   }
 
+  setHistogram(inputWS->histogram(wi));
+
+  std::vector<double> fitwindow = getProperty("FitWindow");
+  setFitWindow(fitwindow);
+
+  // background
+  m_backgroundType = getPropertyValue("BackgroundType");
+  size_t bkgdorder = 0;
+  if (m_backgroundType.compare("Linear") == 0)
+    bkgdorder = 1;
+  else if (m_backgroundType.compare("Quadratic") == 0)
+    bkgdorder = 2;
+  setBackgroundOrder(bkgdorder);
+
+  // sigma constant
+  double k = getProperty("SigmaConstant");
+  setSigma(k);
+}
+
+/// set histogram data to find background
+void FindPeakBackground::setHistogram(HistogramData &histogram) {
+  m_histogram = histogram;
+}
+
+/// set sigma constant
+void FindPeakBackground::setSigma(const double &sigma) {
+  m_sigmaConstant = sigma;
+}
+
+/// set background order
+void FindPeakBackground::setBackgroundOrder(size_t order) {
+  m_backgroundOrder = order;
+}
+
+//----------------------------------------------------------------------------------------------
+/** find background (main algorithm)
+ * @brief FindPeakBackground::findPeakBackground
+ */
+void FindPeakBackground::findPeakBackground() {}
+
+/// get result
+void getBackgroundResult();
+
+//----------------------------------------------------------------------------------------------
+/** set fit window
+ * @brief FindPeakBackground::setFitWindow
+ * @param fitwindow
+ */
+void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
+  // validate input
+  if (m_vecFitWindows.size() != 2 || m_vecFitWindows[0] >= m_vecFitWindows[1])
+    throw std::invalid_argument("Fit window has either wrong item number or "
+                                "window value is not in ascending order.");
+
+  // m_vecFitWindows.resize(2);
+  // copy the input to class variable
+  m_vecFitWindows = fitwindow;
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief FindPeakBackground::createOutputWorkspaces
+ */
+void FindPeakBackground::createOutputWorkspaces() {
+  // Set up output table workspace
+  m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  m_outPeakTableWS->addColumn("int", "wksp_index");
+  m_outPeakTableWS->addColumn("int", "peak_min_index");
+  m_outPeakTableWS->addColumn("int", "peak_max_index");
+  m_outPeakTableWS->addColumn("double", "bkg0");
+  m_outPeakTableWS->addColumn("double", "bkg1");
+  m_outPeakTableWS->addColumn("double", "bkg2");
+  m_outPeakTableWS->addColumn("int", "GoodFit");
+
+  m_outPeakTableWS->appendRow();
+}
+
+void FindPeakBackground::findStartStopIndex(size_t &istart, size_t &istop) {
   // Generate output
-  auto &inpX = inpWS->x(inpwsindex);
-  size_t sizex = inpWS->x(inpwsindex).size();
-  size_t sizey = inpWS->y(inpwsindex).size();
+  //  auto &inpX = inpWS->x(inpwsindex);
+  auto inpX = m_histogram.x();
+  auto inpY = m_histogram.y();
+  size_t sizex = inpX.size();
+  size_t sizey = inpY.size();
+
+  // initial value of start and stop x index
   size_t n = sizey;
   size_t l0 = 0;
 
@@ -106,18 +184,72 @@ void FindPeakBackground::exec() {
       n++;
   }
 
-  // Set up output table workspace
-  API::ITableWorkspace_sptr m_outPeakTableWS =
-      WorkspaceFactory::Instance().createTable("TableWorkspace");
-  m_outPeakTableWS->addColumn("int", "wksp_index");
-  m_outPeakTableWS->addColumn("int", "peak_min_index");
-  m_outPeakTableWS->addColumn("int", "peak_max_index");
-  m_outPeakTableWS->addColumn("double", "bkg0");
-  m_outPeakTableWS->addColumn("double", "bkg1");
-  m_outPeakTableWS->addColumn("double", "bkg2");
-  m_outPeakTableWS->addColumn("int", "GoodFit");
+  istart = l0;
+  istop = n;
+}
 
-  m_outPeakTableWS->appendRow();
+//----------------------------------------------------------------------------------------------
+/** Execute body
+  */
+void FindPeakBackground::exec() {
+  // get input and validate
+  processInputProperties();
+  // Get input and validate
+  //  MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
+  //  int inpwsindex = getProperty("WorkspaceIndex");
+  //  std::vector<double> m_vecFitWindows = getProperty("FitWindow");
+  //  m_backgroundType = getPropertyValue("BackgroundType");
+  //  double k = getProperty("SigmaConstant");
+
+  //  if (isEmpty(inpwsindex)) {
+  //    // Default
+  //    if (inpWS->getNumberHistograms() == 1) {
+  //      inpwsindex = 0;
+  //    } else {
+  //      throw runtime_error("WorkspaceIndex must be given. ");
+  //    }
+  //  } else if (inpwsindex < 0 ||
+  //             inpwsindex >= static_cast<int>(inpWS->getNumberHistograms())) {
+  //    stringstream errss;
+  //    errss << "Input workspace " << inpWS->getName() << " has "
+  //          << inpWS->getNumberHistograms() << " spectra.  Input workspace
+  //          index "
+  //          << inpwsindex << " is out of boundary. ";
+  //    throw runtime_error(errss.str());
+  //  }
+
+  //  // Generate output
+  //  auto &inpX = inpWS->x(inpwsindex);
+  //  size_t sizex = inpWS->x(inpwsindex).size();
+  //  size_t sizey = inpWS->y(inpwsindex).size();
+  //  size_t n = sizey;
+  //  size_t l0 = 0;
+
+  //  if (m_vecFitWindows.size() > 1) {
+  //    Mantid::Algorithms::FindPeaks fp;
+  //    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
+  //    n = fp.getIndex(inpX, m_vecFitWindows[1]);
+  //    if (n < sizey)
+  //      n++;
+  //  }
+
+  createOutputWorkspaces();
+
+  size_t istart, istop;
+  findStartStopIndex(istart, istop);
+
+  //  // Set up output table workspace
+  //  API::ITableWorkspace_sptr m_outPeakTableWS =
+  //      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  //  m_outPeakTableWS->addColumn("int", "wksp_index");
+  //  m_outPeakTableWS->addColumn("int", "peak_min_index");
+  //  m_outPeakTableWS->addColumn("int", "peak_max_index");
+  //  m_outPeakTableWS->addColumn("double", "bkg0");
+  //  m_outPeakTableWS->addColumn("double", "bkg1");
+  //  m_outPeakTableWS->addColumn("double", "bkg2");
+  //  m_outPeakTableWS->addColumn("int", "GoodFit");
+
+  //  m_outPeakTableWS->appendRow();
 
   // 3. Get Y values
   Progress prog(this, 0.0, 1.0, 1);
@@ -130,6 +262,12 @@ void FindPeakBackground::exec() {
   MantidVec maskedY;
   auto in = std::min_element(inpY.cbegin(), inpY.cend());
   double bkg0 = inpY[in - inpY.begin()];
+
+  // WZ:
+  size_t l0 = istart;
+  size_t n = istop;
+  // -----
+
   for (size_t l = l0; l < n; ++l) {
     maskedY.push_back(inpY[l] - bkg0);
   }
