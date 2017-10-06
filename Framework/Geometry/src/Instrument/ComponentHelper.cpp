@@ -13,7 +13,6 @@ namespace Mantid {
 namespace Geometry {
 namespace ComponentHelper {
 using Kernel::V3D;
-using Kernel::Quat;
 
 /**
  * createOneDetectorInstrument, creates the most simple possible definition of

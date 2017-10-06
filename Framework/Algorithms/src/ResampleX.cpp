@@ -17,7 +17,6 @@ using namespace DataObjects;
 using namespace Kernel;
 using HistogramData::BinEdges;
 using std::map;
-using std::pair;
 using std::string;
 using std::stringstream;
 using std::vector;

@@ -762,7 +762,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
     if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
-      auto const valueStr = data.at(col);
+      auto const &valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
@@ -983,7 +983,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                            runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data->at(i);
+      const auto &propertyValue = data->at(i);
       if (!propertyValue.isEmpty())
         alg->setPropertyValue(propertyName.toStdString(),
                               propertyValue.toStdString());

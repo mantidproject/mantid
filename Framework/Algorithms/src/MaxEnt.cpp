@@ -22,9 +22,6 @@ namespace Algorithms {
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 using Mantid::HistogramData::Points;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 
 using namespace API;

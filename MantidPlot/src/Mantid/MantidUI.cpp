@@ -1,5 +1,6 @@
 // Python header must go first
 #include "MantidQtWidgets/Common/PythonThreading.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
@@ -734,7 +735,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
                      const bool showErrors, MultiLayer *plotWindow,
                      bool clearWindow) {
   ScopedOverrideCursor waitCursor;
-  auto firstName = wsNames.at(0);
+  const auto &firstName = wsNames.at(0);
 
   bool isGraphNew = false;
   MultiLayer *ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow,
@@ -744,7 +745,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   try {
     for (int i = 0; i < wsNames.size(); ++i) {
       // Create the curve with defaults
-      auto wsName = wsNames.at(i);
+      const auto &wsName = wsNames.at(i);
       MantidMDCurve *curve = new MantidMDCurve(wsName, g, showErrors);
       MantidQwtIMDWorkspaceData *data = curve->mantidData();
 
@@ -1563,8 +1564,8 @@ bool MantidUI::drop(QDropEvent *e) {
     foreach (const auto &wsName, wsNames) { importWorkspace(wsName, false); }
     return true;
   } else if (e->mimeData()->hasUrls()) {
-    QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
-    if (pyFiles.size() > 0) {
+    const auto pyFiles = DropEventHelper::extractPythonFiles(e);
+    if (!pyFiles.empty()) {
       try {
         MantidQt::API::ProjectSerialiser serialiser(m_appWindow);
         serialiser.openScriptWindow(pyFiles);
@@ -1596,22 +1597,6 @@ bool MantidUI::drop(QDropEvent *e) {
   }
 
   return false;
-}
-
-/// extracts the files from a mimedata object that have a .py extension
-QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().toUpper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
 }
 
 /**

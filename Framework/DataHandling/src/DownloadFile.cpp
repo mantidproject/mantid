@@ -18,7 +18,6 @@ namespace DataHandling {
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::StringListValidator;
-using Mantid::API::WorkspaceProperty;
 using Mantid::API::FileProperty;
 
 // Register the algorithm into the AlgorithmFactory

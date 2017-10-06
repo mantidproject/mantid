@@ -27,7 +27,6 @@ using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 

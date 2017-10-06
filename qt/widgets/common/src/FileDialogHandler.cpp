@@ -156,7 +156,7 @@ QString getCaption(const std::string &dialogName,
   // generate the dialog title
   auto dialogTitle = QString::fromStdString(dialogName);
   if (bool(prop)) {
-    const auto name = prop->name();
+    const auto &name = prop->name();
     if (name != "Filename" && prop->name() != "Directory" &&
         prop->name() != "Dir") {
       dialogTitle.append(" - ");

@@ -136,7 +136,7 @@ void IndirectMolDyn::plotClicked() {
     auto names = diffResultsGroup->getNames();
     auto plotType = m_uiForm.cbPlot->currentText();
 
-    for (const auto wsName : names) {
+    for (const auto &wsName : names) {
       if (plotType == "Spectra" || plotType == "Both")
         plotSpectrum(QString::fromStdString(wsName));
 
