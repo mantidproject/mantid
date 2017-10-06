@@ -53,7 +53,7 @@ def setTableHeaders(table):
         if os.name != "nt":
             return
         version=QtCore.QSysInfo.WindowsVersion
-        windows10=160 # version code?
+        windows10=QtCore.QSysInfo.WindowsVersion
         if(version==windows10):
             styleSheet= \
                 "QHeaderView::section{"\
