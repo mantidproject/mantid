@@ -52,13 +52,13 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="DFTprogram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
                              doc="DFT program which was used for a phonon calculation.")
 
         self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
-                             extensions=["phonon", "out"]),
+                             extensions=["phonon", "out", "outmol", "log", "LOG"]),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -116,7 +116,9 @@ class Abins(PythonAlgorithm):
         """
 
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
-                                 "CRYSTAL": self._validate_crystal_input_file}
+                                 "CRYSTAL": self._validate_crystal_input_file,
+                                 "DMOL3": self._validate_dmol3_input_file,
+                                 "GAUSSIAN": self._validate_gaussian_input_file}
 
         issues = dict()
 
@@ -165,7 +167,8 @@ class Abins(PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read DFT data
-        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL}
+        dft_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
+                       "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
         dft_reader = dft_loaders[self._dft_program](input_dft_filename=self._phonon_file)
         dft_data = dft_reader.get_formatted_data()
         prog_reporter.report("Phonon data has been read.")
@@ -235,9 +238,9 @@ class Abins(PythonAlgorithm):
         """
         Creates workspaces for all types of atoms. Creates both partial and total workspaces for all types of atoms.
 
-        @param atoms_symbols: list of atom types for which S should be created
-        @param s_data: dynamical factor data of type SData
-        @return: workspaces for list of atoms types, S for the particular type of atom
+        :param atoms_symbols: list of atom types for which S should be created
+        :param s_data: dynamical factor data of type SData
+        :returns: workspaces for list of atoms types, S for the particular type of atom
         """
         s_data_extracted = s_data.extract()
         shape = [self._num_quantum_order_events]
@@ -289,9 +292,9 @@ class Abins(PythonAlgorithm):
         Creates workspaces for all types of atoms. Each workspace stores quantum order events for S for the given
         type of atom. It also stores total workspace for the given type of atom.
 
-        @param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
-        @param s_data: dynamical factor data of type SData
-        @return: workspaces for list of atoms types, each workspace contains  quantum order events of
+        :param atoms_symbols: list of atom types for which quantum order events of S  should be calculated
+        :param s_data: dynamical factor data of type SData
+        :returns: workspaces for list of atoms types, each workspace contains  quantum order events of
                  S for the particular atom type
         """
 
@@ -300,8 +303,8 @@ class Abins(PythonAlgorithm):
     def _fill_s_workspace(self, s_points=None, workspace=None, atom_name=None):
         """
         Puts S into workspace(s).
-        @param s_points: dynamical factor for the given atom
-        @param workspace:  workspace to be filled with S
+        :param s_points: dynamical factor for the given atom
+        :param workspace:  workspace to be filled with S
         """
         if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
             # only FUNDAMENTALS
@@ -337,8 +340,8 @@ class Abins(PythonAlgorithm):
         :param atom_name: name of atom (for example H for hydrogen)
         """
         if atom_name is not None:
-            width = AbinsModules.AbinsParameters.bin_width
-            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name) * width
+
+            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
 
         dim = 1
         length = s_points.size
@@ -356,7 +359,7 @@ class Abins(PythonAlgorithm):
         """
         Calculates cross section for the given element.
         :param atom_name: symbol of element
-        :return: cross section for that element
+        :returns: cross section for that element
         """
         atom = Atom(symbol=atom_name)
         cross_section = None
@@ -374,7 +377,7 @@ class Abins(PythonAlgorithm):
         """
         Sets workspace with total S.
         :param partial_workspaces: list of workspaces which should be summed up to obtain total workspace
-        :return: workspace with total S from partial_workspaces
+        :returns: workspace with total S from partial_workspaces
                 """
         total_workspace = self._out_ws_name + "_total"
 
@@ -411,11 +414,11 @@ class Abins(PythonAlgorithm):
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
-        @param atom_name: symbol of atom for which workspace should be created
-        @param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
-        @param s_points: S(Q, omega)
-        @param optional_name: optional part of workspace name
-        @return: workspace for the given frequency and S data
+        :param atom_name: symbol of atom for which workspace should be created
+        :param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
+        :param s_points: S(Q, omega)
+        :param optional_name: optional part of workspace name
+        :returns: workspace for the given frequency and S data
         """
 
         ws_name = self._out_ws_name + "_" + atom_name + optional_name
@@ -426,7 +429,7 @@ class Abins(PythonAlgorithm):
     def _create_experimental_data_workspace(self):
         """
         Loads experimental data into workspaces.
-        @return: workspace with experimental data
+        :returns: workspace with experimental data
         """
         experimental_wrk = Load(self._experimental_file)
         self._set_workspace_units(wrk=experimental_wrk.name())
@@ -596,26 +599,56 @@ class Abins(PythonAlgorithm):
             if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
-    def _validate_crystal_input_file(self, filename_full_path=None):
+    def _validate_dft_file_extension(self, filename_full_path=None, expected_file_extension=None):
         """
-        Method to validate input file for CRYSTAL DFT program.
-        @param filename_full_path: full path of a file to check.
-        @return: True if file is valid otherwise false.
+        Checks consistency between name of DFT program and extension.
+        :param dft_program: name of DFT program in the form of string
+        :param expected_file_extension: file extension
+        :returns: dictionary with error message
         """
-        logger.information("Validate CRYSTAL phonon file: ")
-
-        output = {"Invalid": False, "Comment": ""}
+        dft_program = self.getProperty("DFTprogram").value
         msg_err = "Invalid %s file. " % filename_full_path
         msg_rename = "Please rename your file and try again."
 
         # check  extension of a file
-        filename_ext = os.path.splitext(filename_full_path)[1]
-        if filename_ext != ".out":
+        found_filename_ext = os.path.splitext(filename_full_path)[1]
+        if found_filename_ext.lower() != expected_file_extension:
             return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
-                        " The expected extension of file is .out . (found: " + filename_ext + ") " +
-                        msg_rename)
-        return output
+                        Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
+                                          " The expected extension of file is ." + expected_file_extension +
+                                          ".  Found: " + found_filename_ext + ". " + msg_rename)
+        else:
+            return dict(Invalid=False, Comment="")
+
+    def _validate_dmol3_input_file(self, filename_full_path=None):
+        """
+        Method to validate input file for DMOL3 DFT program.
+        :param filename_full_path: full path of a file to check.
+        :returns: True if file is valid otherwise false.
+        """
+        logger.information("Validate DMOL3 phonon file: ")
+        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
+                                                 expected_file_extension=".outmol")
+
+    def _validate_gaussian_input_file(self, filename_full_path=None):
+        """
+        Method to validate input file for GAUSSIAN DFT program.
+        :param filename_full_path: full path of a file to check.
+        :returns: True if file is valid otherwise false.
+        """
+        logger.information("Validate GAUSSIAN file with vibration data: ")
+        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
+                                                 expected_file_extension=".log")
+
+    def _validate_crystal_input_file(self, filename_full_path=None):
+        """
+        Method to validate input file for CRYSTAL DFT program.
+        :param filename_full_path: full path of a file to check.
+        :returns: True if file is valid otherwise false.
+        """
+        logger.information("Validate CRYSTAL phonon file: ")
+        return self._validate_dft_file_extension(filename_full_path=filename_full_path,
+                                                 expected_file_extension=".out")
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """
@@ -624,22 +657,15 @@ class Abins(PythonAlgorithm):
 
 
         :param filename_full_path: full path of a file to check
-        :return: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
+        :returns: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
                  comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
         logger.information("Validate CASTEP phonon file: ")
-
-        output = {"Invalid": False, "Comment": ""}
         msg_err = "Invalid %s file. " % filename_full_path
-        msg_rename = "Please rename your file and try again."
-
-        # check  extension of a file
-        filename_ext = os.path.splitext(filename_full_path)[1]
-        if filename_ext != ".phonon":
-            return dict(Invalid=True,
-                        Comment=msg_err + "Output from DFT program " + self._dft_program + " is expected." +
-                        " The expected extension of file is .phonon . (found: " + filename_ext + ") " +
-                        msg_rename)
+        output = self._validate_dft_file_extension(filename_full_path=filename_full_path,
+                                                   expected_file_extension=".phonon")
+        if output["Invalid"]:
+            return output
 
         # check a structure of the header part of file.
         # Here fortran convention is followed: case of letter does not matter
@@ -672,7 +698,7 @@ class Abins(PythonAlgorithm):
         """
 
         :param file_obj:  file object from which reading is done
-        :return: string containing one non empty line
+        :returns: string containing one non empty line
         """
         line = file_obj.readline().replace(" ", "").lower()
 
@@ -687,7 +713,7 @@ class Abins(PythonAlgorithm):
         :param one_line:  line in the for mof string to be compared
         :param pattern: string which should be present in the line after removing white spaces and setting all
                         letters to lower case
-        :return:  True is pattern present in the line, otherwise False
+        :returns:  True is pattern present in the line, otherwise False
         """
         return one_line and pattern in one_line.replace(" ", "")
 

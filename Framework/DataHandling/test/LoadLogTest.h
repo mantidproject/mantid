@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class LoadLogTest : public CxxTest::TestSuite {
 public:
@@ -170,7 +171,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
 
-    Property *prop = 0;
+    Property *prop = nullptr;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
     std::vector<DateAndTime> times;
@@ -222,6 +223,20 @@ public:
       TS_ASSERT_EQUALS(tsp->units(), expectedLastUnit);
     TS_ASSERT_EQUALS(tsp->size(), 33);
   }
+
+  void test_ISISTextFile_withRubbishLogFileInput_fails() {
+    auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+
+    LoadLog alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", "ENGINX00275776_ICPputlog.txt");
+    alg.setProperty("Workspace", ws);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    const auto props = ws->run().getProperties();
+    TS_ASSERT_EQUALS(props.size(), 2);
+  };
 
   void test_SNSTextFile_noNames_fails() { do_test_SNSTextFile("", "", true); }
 

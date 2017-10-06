@@ -58,7 +58,8 @@ void setup_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -93,7 +94,8 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -752,9 +754,9 @@ public:
       }
     } else if (sortType == PULSETIME_SORT) {
       // Check directly that it is indeed increasing
-      Mantid::Kernel::DateAndTime last_x;
+      Mantid::Types::Core::DateAndTime last_x;
       for (size_t i = 0; i < el.getNumberEvents(); i++) {
-        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        Mantid::Types::Core::DateAndTime x = el.getEvent(i).pulseTime();
         TS_ASSERT(x >= last_x);
         last_x = x;
       }

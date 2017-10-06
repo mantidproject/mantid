@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 /** Constructor */
 QtDataProcessorOptionsDialog::QtDataProcessorOptionsDialog(
     DataProcessorView *view, DataProcessorPresenter *presenter)
@@ -90,5 +91,6 @@ void QtDataProcessorOptionsDialog::loadOptions() {
   }
 }
 
+} // DataProcessor
 } // MantidWidgets
 } // MantidQt

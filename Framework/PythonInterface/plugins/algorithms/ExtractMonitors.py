@@ -88,4 +88,5 @@ class ExtractMonitors(DataProcessorAlgorithm):
         if detector_ws_name and detectors and monitor_ws_name and monitors:
             detector_ws.setMonitorWorkspace(monitor_ws)
 
+
 AlgorithmFactory.subscribe(ExtractMonitors)

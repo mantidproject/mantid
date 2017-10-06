@@ -1,10 +1,12 @@
 #pylint: disable=C0103,W0403
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import sys
 import numpy as np
 from PyQt4 import QtGui, QtCore
 
-import ui_View3DWidget
-import guiutility
+from . import ui_View3DWidget
+from HFIR_4Circle_Reduction import guiutility
 
 __author__ = 'wzz'
 
@@ -110,7 +112,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         if threshold_lower is None:
             threshold_lower = 0
         if threshold_upper is None:
-            threshold_upper = sys.maxint
+            threshold_upper = sys.maxsize
         assert 0 <= threshold_lower < threshold_upper
 
         # get data key
@@ -123,7 +125,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         assert points is not None
         num_within_threshold = 0
         array_size = len(intensity_array)
-        for index in xrange(array_size):
+        for index in range(array_size):
             if threshold_lower <= intensity_array[index] <= threshold_upper:
                 num_within_threshold += 1
         # END-FOR
@@ -199,7 +201,7 @@ class Plot3DWindow(QtGui.QMainWindow):
         if thresholds[0] is None:
             thresholds[0] = 0
         if thresholds[1] is None:
-            thresholds[1] = sys.maxint
+            thresholds[1] = sys.maxsize
         assert 0 <= thresholds[0] < thresholds[1]
 
         # data key
@@ -258,7 +260,7 @@ class Plot3DWindow(QtGui.QMainWindow):
 
         # Format intensity to color map
         color_list = guiutility.map_to_color(intensities, base_color, change_color)
-        # print color_list
+        # print(color_list)
         assert len(color_list) == len(points)
 
         # self.ui.graphicsView.plot_scatter(data_key, base_color)
@@ -306,7 +308,7 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     # calculate data size
     raw_array_size = len(intensities)
     new_array_size = 0
-    for index in xrange(raw_array_size):
+    for index in range(raw_array_size):
         if lower_boundary <= intensities[index] <= upper_boundary:
             new_array_size += 1
     # END-FOR
@@ -315,7 +317,7 @@ def filter_points_by_intensity(points, intensities, lower_boundary, upper_bounda
     new_points = np.ndarray(shape=(new_array_size, 3), dtype='float')
     new_intensities = np.ndarray(shape=(new_array_size,), dtype='float')
     new_index = 0
-    for raw_index in xrange(raw_array_size):
+    for raw_index in range(raw_array_size):
         if lower_boundary <= intensities[raw_index] <= upper_boundary:
             assert new_index < new_array_size
             new_points[new_index] = points[raw_index]

@@ -35,6 +35,7 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+using Types::Core::DateAndTime;
 
 /**
  * The gsl_costFunction is optimized by GSL simplex
@@ -299,7 +300,7 @@ void DiffractionEventCalibrateDetectors::exec() {
   std::vector<boost::shared_ptr<RectangularDetector>> detList;
   // --------- Loading only one bank ----------------------------------
   std::string onebank = getProperty("BankName");
-  bool doOneBank = (onebank != "");
+  bool doOneBank = (!onebank.empty());
   for (int i = 0; i < inst->nelements(); i++) {
     boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;

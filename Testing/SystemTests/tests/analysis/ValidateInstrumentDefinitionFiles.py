@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 from mantid import config
 import os
 import stresstesting
@@ -26,7 +27,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
     def __getDataFileList__(self):
         # get a list of directories to look in
         direc = config['instrumentDefinition.directory']
-        print "Looking for instrument definition files in: %s" % direc
+        print("Looking for instrument definition files in: %s" % direc)
         cwd = os.getcwd()
         os.chdir(direc)
         myFiles = glob.glob("*Definition*.xml")
@@ -78,24 +79,25 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
         failed = []
         for filename in files:
             try:
-                print "----------------------------------------"
-                print "Validating '%s'" % filename
+                print("----------------------------------------")
+                print("Validating '%s'" % filename)
                 parseAndValidateXmlInputForceReadFile(filename, xsdFile=self.xsdFile)
-            except Exception, e:
-                print "VALIDATION OF '%s' FAILED WITH ERROR:" % filename
-                print e
+            except Exception as e:
+                print("VALIDATION OF '%s' FAILED WITH ERROR:" % filename)
+                print(e)
                 failed.append(filename)
 
         # final say on whether or not it 'worked'
-        print "----------------------------------------"
+        print("----------------------------------------")
         if len(failed) != 0:
-            print "SUMMARY OF FAILED FILES"
+            print("SUMMARY OF FAILED FILES")
             for filename in failed:
-                print filename
+                print(filename)
             raise RuntimeError("Failed Validation for %d of %d files"
                                % (len(failed), len(files)))
         else:
-            print "Succesfully Validated %d files" % len(files)
+            print("Succesfully Validated %d files" % len(files))
+
 
 if __name__ == '__main__':
 

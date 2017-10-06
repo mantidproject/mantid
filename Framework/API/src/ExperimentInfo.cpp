@@ -52,6 +52,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using namespace Poco::XML;
 
 namespace Mantid {
@@ -901,13 +902,13 @@ std::string ExperimentInfo::getWorkspaceStartDate() const {
   } catch (std::runtime_error &) {
     g_log.information("run_start/start_time not stored in workspace. Default "
                       "to current date.");
-    date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   }
   return date;
 }
 
 /** Return workspace start date as a formatted string (strftime, as
- *  returned by Kernel::DateAndTime) string, if available. If
+ *  returned by Types::Core::DateAndTime) string, if available. If
  *  unavailable, an empty string is returned
  *
  *  @return workspace start date as a string (empty if no date available)
@@ -966,7 +967,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
-        Kernel::DateAndTime::getCurrentTime().toISO8601String();
+        Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.
     return ExperimentInfo::getInstrumentFilename(instrumentName, now);
   }
@@ -1000,15 +1001,18 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     // find the first beat file
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter;
          ++dir_itr) {
-      if (!Poco::File(dir_itr->path()).isFile())
+
+      const auto &filePath = dir_itr.path();
+      if (!filePath.isFile())
         continue;
 
-      std::string l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+      const std::string &l_filenamePart = filePath.getFileName();
       if (regex_match(l_filenamePart, regex)) {
-        g_log.debug() << "Found file: '" << dir_itr->path() << "'\n";
+        const auto &pathName = filePath.toString();
+        g_log.debug() << "Found file: '" << pathName << "'\n";
         std::string validFrom, validTo;
-        getValidFromTo(dir_itr->path(), validFrom, validTo);
-        g_log.debug() << "File '" << dir_itr->path() << " valid dates: from '"
+        getValidFromTo(pathName, validFrom, validTo);
+        g_log.debug() << "File '" << pathName << " valid dates: from '"
                       << validFrom << "' to '" << validTo << "'\n";
         DateAndTime from(validFrom);
         // Use a default valid-to date if none was found.
@@ -1024,14 +1028,14 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
                                         // matching file found
             foundGoodFile = true;
             refDateGoodFile = from;
-            mostRecentIDF = dir_itr->path();
+            mostRecentIDF = pathName;
           }
         }
         if (!foundGoodFile && (from > refDate)) { // Use most recently starting
                                                   // file, in case we don't find
                                                   // a matching file.
           refDate = from;
-          mostRecentIDF = dir_itr->path();
+          mostRecentIDF = pathName;
         }
       }
     }

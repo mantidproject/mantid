@@ -6,7 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-using Mantid::API::SpectraAxis;
 using std::set;
 using std::size_t;
 

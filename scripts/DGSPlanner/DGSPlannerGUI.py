@@ -362,6 +362,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
             return 1.*x-y/numpy.tan(angle),  y/numpy.sin(angle)
 
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)

@@ -47,8 +47,8 @@ Usage
 
     (result, messages) = CompareWorkspaces(ws1, ws2)
 
-    print "Result:", result
-    print messages.rowCount()
+    print("Result: {}".format(result))
+    print(messages.rowCount())
 
 
 Output:
@@ -75,14 +75,14 @@ Output:
     ws2 = CreateWorkspace(dataX, dataY2)
 
     (result, messages) = CompareWorkspaces(ws1, ws2) # Fails, they're not the same
-    print "Result:", result
-    print "Displaying", messages.rowCount(), "messages:"
-    for row in messages: print row
+    print("Result: {}".format(result))
+    print("Displaying {} messages:".format(messages.rowCount()))
+    for row in messages: print(row)
 
     (result, messages) = CompareWorkspaces(ws1, ws2, Tolerance=0.1) # Passes, they're close enough
-    print "Result:", result
-    print "Displaying", messages.rowCount(), "messages:"
-    for row in messages: print row
+    print("Result: {}".format(result))
+    print("Displaying {} messages:".format(messages.rowCount()))
+    for row in messages: print(row)
 
 
 Output:

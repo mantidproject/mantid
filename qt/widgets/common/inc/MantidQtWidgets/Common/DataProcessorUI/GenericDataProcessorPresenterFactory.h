@@ -5,6 +5,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /** @class GenericDataProcessorPresenterFactory
 
@@ -44,6 +45,7 @@ public:
   */
   virtual std::unique_ptr<GenericDataProcessorPresenter> create() = 0;
 };
+}
 }
 }
 #endif /*MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTERFACTORY_H*/

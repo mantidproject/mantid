@@ -7,7 +7,6 @@ from mantid.simpleapi import RotateInstrumentComponent
 import struct
 import numpy as np
 import copy
-import types
 
 
 class LoadEXED(PythonAlgorithm):
@@ -85,9 +84,7 @@ class LoadEXED(PythonAlgorithm):
         for i in range(nrows):
             ws.getSpectrum(i).setDetectorID(det_udet[i])
         #Sample_logs the header values are written into the sample logs
-        log_names=[sl.encode('ascii','ignore') for sl in parms_dict.keys()]
-        log_values=[sl.encode('ascii','ignore') if isinstance(sl,types.UnicodeType) else str(sl) for sl in parms_dict.values()]
-        AddSampleLogMultiple(Workspace=wsn, LogNames=log_names,LogValues=log_values)
+        AddSampleLogMultiple(Workspace=wsn, LogNames=list(parms_dict.keys()), LogValues=list(parms_dict.values()))
         SetGoniometer(Workspace=wsn, Goniometers='Universal')
         if (self.fxml == ""):
             LoadInstrument(Workspace=wsn, InstrumentName = "Exed", RewriteSpectraMap= True)

@@ -53,10 +53,6 @@ class Polaris(AbstractInst):
                 ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
                 sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
 
-    @staticmethod
-    def _can_auto_gen_vanadium_cal():
-        return True
-
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)
 
@@ -69,9 +65,6 @@ class Polaris(AbstractInst):
         cropped_ws = common.crop_banks_using_crop_list(bank_list=van_ws_to_crop,
                                                        crop_values_list=self._inst_settings.van_crop_values)
         return cropped_ws
-
-    def _generate_auto_vanadium_calibration(self, run_details):
-        self.create_vanadium(run_in_range=run_details.run_number)
 
     @staticmethod
     def _generate_input_file_name(run_number):
@@ -96,9 +89,6 @@ class Polaris(AbstractInst):
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
             return prefix + str(run_number)
-
-    def _generate_output_file_name(self, run_number_string):
-        return self._generate_input_file_name(run_number=run_number_string)
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode

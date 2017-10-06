@@ -11,7 +11,6 @@ from mantid.kernel import ConfigService, Direction, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, \
     PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-# Use xrange in Python 2
 from six.moves import range #pylint: disable=redefined-builtin
 
 if AlgorithmFactory.exists('GatherWorkspaces'):
@@ -1500,6 +1499,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         # END-FOR
 
         return out_ws_name_list
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SNSPowderReduction)

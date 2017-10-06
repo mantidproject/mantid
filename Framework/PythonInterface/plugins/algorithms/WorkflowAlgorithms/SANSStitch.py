@@ -437,5 +437,6 @@ class QErrorCorrectionForMergedWorkspaces(object):
         comment.setProperty('Text', message)
         comment.execute()
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSStitch)

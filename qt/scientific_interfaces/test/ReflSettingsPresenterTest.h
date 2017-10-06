@@ -199,10 +199,8 @@ public:
     TS_ASSERT_EQUALS(optionsVec[8], "MomentumTransferStep=-0.02");
     TS_ASSERT_EQUALS(optionsVec[9], "StartOverlap=10");
     TS_ASSERT_EQUALS(optionsVec[10], "EndOverlap=12");
-    TS_ASSERT_EQUALS(optionsVec[11],
-                     "FirstTransmissionRun=TRANS_INTER00013463");
-    TS_ASSERT_EQUALS(optionsVec[12],
-                     "SecondTransmissionRun=TRANS_INTER00013464");
+    TS_ASSERT_EQUALS(optionsVec[11], "FirstTransmissionRun=INTER00013463");
+    TS_ASSERT_EQUALS(optionsVec[12], "SecondTransmissionRun=INTER00013464");
     TS_ASSERT_EQUALS(optionsVec[13], "NormalizeByIntegratedMonitors=True");
     TS_ASSERT_EQUALS(optionsVec[14], "MonitorIntegrationWavelengthMin=4");
     TS_ASSERT_EQUALS(optionsVec[15], "MonitorIntegrationWavelengthMax=10");

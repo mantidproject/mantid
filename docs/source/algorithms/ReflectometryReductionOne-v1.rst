@@ -159,7 +159,7 @@ Where :math:`\lambda_{min}` is the minimum extent of the `IvsLambda` Workspace
 and :math:`\lambda_{max}` is the maximum extent of the `IvsLambda` Workspace.
 
 If you have not provided a value for `MomentumTransferStep` then the algorithm
-will use :ref:`algm-CalculateResolution` to calculate this value for you.
+will use :ref:`algm-NRCalculateSlitResolution` to calculate this value for you.
 
 Scaling
 =======
@@ -237,7 +237,7 @@ Output:
 .. testoutput:: ExReflRedOneSimple
 
    The first four IvsLam Y values are: [ 0.0000e+00, 0.0000e+00, 7.8118e-07, 1.9346e-06 ]
-   The first four IvsQ Y values are: [ 6.2615e-04, 7.8498e-04, 9.2155e-04, 1.1042e-03 ]
+   The first four IvsQ Y values are: [ 1.3845e-03, 1.9717e-03, 2.7579e-03, 4.1467e-03 ]
    Theta out is the same as theta in: 0.7
 
 

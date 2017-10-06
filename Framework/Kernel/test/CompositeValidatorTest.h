@@ -16,17 +16,18 @@ class CompositeValidatorTest : public CxxTest::TestSuite {
 public:
   /** Is valid does an AND of the components */
   void test_isValid() {
-    BoundedValidator<int> *val1 = new BoundedValidator<int>(100, 1000);
-    BoundedValidator<int> *val2 = new BoundedValidator<int>(900, 2000);
+    auto val1 = boost::make_shared<BoundedValidator<int>>(100, 1000);
+    auto val2 = boost::make_shared<BoundedValidator<int>>(900, 2000);
+
     CompositeValidator comp;
-    comp.add(IValidator_sptr(val1));
+    comp.add(val1);
     //
     TS_ASSERT(comp.allowedValues().empty());
 
     TS_ASSERT_EQUALS(comp.isValid(150), "");
     TS_ASSERT_EQUALS(comp.isValid(950), "");
     TS_ASSERT_DIFFERS(comp.isValid(1200), "");
-    comp.add(IValidator_sptr(val2));
+    comp.add(val2);
     TS_ASSERT_DIFFERS(comp.isValid(150),
                       ""); // This one is now blocked by validator 2
     TS_ASSERT_EQUALS(comp.isValid(950), "");
@@ -47,9 +48,9 @@ public:
     allowed_val1[1] = "b2";
     allowed_val1[2] = "c";
 
-    StringListValidator *val1 = new StringListValidator(allowed_val1);
+    auto val1 = boost::make_shared<StringListValidator>(allowed_val1);
     CompositeValidator comp;
-    comp.add(IValidator_sptr(val1));
+    comp.add(val1);
 
     std::vector<std::string> allowed = comp.allowedValues();
     TS_ASSERT_EQUALS(allowed_val1.size(), allowed.size());
@@ -59,12 +60,28 @@ public:
     allowed_val2[1] = "b2";
     allowed_val2[2] = "c2";
 
-    StringListValidator *val2 = new StringListValidator(allowed_val2);
-    comp.add(IValidator_sptr(val2));
+    auto val2 = boost::make_shared<StringListValidator>(allowed_val2);
+    comp.add(val2);
 
     std::vector<std::string> allowed2 = comp.allowedValues();
     TS_ASSERT_EQUALS(1, allowed2.size());
     TS_ASSERT_EQUALS("b2", *(allowed2.begin()));
+  }
+
+  void
+  test_Given_TwoValidators_When_CheckIsValid_That_ValidValuesReturnValid() {
+    // Arrange
+    auto val1 = boost::make_shared<BoundedValidator<int>>(1, 50);
+    auto val2 = boost::make_shared<BoundedValidator<int>>(60, 100);
+
+    CompositeValidator comp(CompositeRelation::OR);
+    comp.add(val1);
+    comp.add(val2);
+
+    // Assert
+    TS_ASSERT_EQUALS(comp.isValid(30), "");  // In range of val1
+    TS_ASSERT_EQUALS(comp.isValid(70), "");  // In range of val2
+    TS_ASSERT_DIFFERS(comp.isValid(55), ""); // Not in range
   }
 };
 

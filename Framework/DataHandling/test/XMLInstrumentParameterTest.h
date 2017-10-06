@@ -82,7 +82,7 @@ public:
   // the test here simply
   // checks that this is done ok
   void testParsing() {
-    IComponent *comp(NULL);
+    IComponent *comp(nullptr);
     boost::shared_ptr<Interpolation> interpolation =
         boost::make_shared<Interpolation>();
     std::vector<std::string> constraint;
@@ -97,7 +97,7 @@ public:
         constraint, penaltyFactor, fitFunc, extractSingleValueAs, eq, comp,
         angleConvert, "bla bla bla");
 
-    TimeSeriesProperty<double> *dummy = NULL;
+    TimeSeriesProperty<double> *dummy = nullptr;
     TS_ASSERT_DELTA(testParamEntry.createParamValue(dummy), 1000.0, 0.0001);
 
     interpolation->addPoint(201.0, 60);

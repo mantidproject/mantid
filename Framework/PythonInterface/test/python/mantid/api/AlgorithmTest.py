@@ -5,7 +5,6 @@ import unittest
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
 
-
 class AlgorithmTest(unittest.TestCase):
 
     _load = None

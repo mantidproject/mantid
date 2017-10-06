@@ -130,7 +130,7 @@ void LoadILLIndirect2::exec() {
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
 
-  if (instrumentNamePath == "") {
+  if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
     throw std::runtime_error(message);

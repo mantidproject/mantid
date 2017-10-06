@@ -9,9 +9,9 @@ HintingLineEdit::HintingLineEdit(
     QWidget *parent, const std::map<std::string, std::string> &hints)
     : QLineEdit(parent), m_hints(hints), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
-  m_hintLabel->setMargin(
-      1 +
-      style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, 0, m_hintLabel));
+  m_hintLabel->setMargin(1 +
+                         style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth,
+                                              nullptr, m_hintLabel));
   m_hintLabel->setFrameStyle(QFrame::StyledPanel);
   m_hintLabel->setAlignment(Qt::AlignLeft);
   m_hintLabel->setWordWrap(true);

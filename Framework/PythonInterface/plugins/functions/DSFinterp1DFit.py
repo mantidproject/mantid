@@ -184,6 +184,7 @@ class DSFinterp1DFit(IFunction1D):
         intensities_interpolator = scipy.interpolate.interp1d(self._xvalues, p['Intensity']*dsf.intensities, kind='linear')
         return intensities_interpolator(xvals)  # can we pass by reference?
 
+
 # Required to have Mantid recognize the new function
 #pylint: disable=unused-import
 try:

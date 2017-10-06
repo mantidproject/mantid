@@ -12,7 +12,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems
+from six import types, iteritems, PY3
 import numpy as np
 import h5py as h5
 
@@ -365,7 +365,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def sliceParser(str_to_parser):
+def sliceParser(str_to_parser): # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:
@@ -727,9 +727,16 @@ def check_if_is_event_data(file_name):
         # Open instrument group
         is_event_mode = False
         for value in list(first_entry.values()):
-            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
-                is_event_mode = True
-                break
+            if "NX_class" in value.attrs:
+                if PY3:
+                    if "NXevent_data" == value.attrs["NX_class"].decode() :
+                        is_event_mode = True
+                        break
+                else:
+                    if "NXevent_data" == value.attrs["NX_class"]:
+                        is_event_mode = True
+                        break
+
     return is_event_mode
 
 
@@ -2317,6 +2324,7 @@ class RunDetails(object):
 ###############################################################################
 ########################## End of Deprecated Code #############################
 ###############################################################################
+
 
 if __name__ == '__main__':
     pass

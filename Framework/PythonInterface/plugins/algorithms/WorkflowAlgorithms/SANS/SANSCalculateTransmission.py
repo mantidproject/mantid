@@ -143,7 +143,7 @@ class SANSCalculateTransmission(DataProcessorAlgorithm):
 
         # Get the fit setting for the correct data type, ie either for the Sample of the Can
         fit_type = calculate_transmission_state.fit[DataType.to_string(data_type)].fit_type
-        if fit_type is FitType.Log:
+        if fit_type is FitType.Logarithmic:
             fit_string = "Log"
         elif fit_type is FitType.Polynomial:
             fit_string = "Polynomial"

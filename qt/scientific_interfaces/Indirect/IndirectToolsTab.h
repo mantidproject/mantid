@@ -44,7 +44,7 @@ class DLLExport IndirectToolsTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectToolsTab(QWidget *parent = 0);
+  IndirectToolsTab(QWidget *parent = nullptr);
   ~IndirectToolsTab() override;
 
   /// Base methods implemented in derived classes

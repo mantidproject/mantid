@@ -1,10 +1,12 @@
 #pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import numpy
 import sys
-import fourcircle_utility
-import guiutility
+from HFIR_4Circle_Reduction import fourcircle_utility
+from HFIR_4Circle_Reduction import guiutility
 
-import NTableWidget as tableBase
+import HFIR_4Circle_Reduction.NTableWidget as tableBase
 
 
 class KShiftTableWidget(tableBase.NTableWidget):
@@ -212,7 +214,7 @@ class PeaksIntegrationSpreadSheet(tableBase.NTableWidget):
         row_list = [None] * len(self.Table_Setup)
         status, msg = self.append_row(row_list)
         if not status:
-            print '[ERROR] Unable to append a new row due to {0}.'.format(msg)
+            print('[ERROR] Unable to append a new row due to {0}.'.format(msg))
         else:
             row_list[0] = 123
             row_list[1] = ''
@@ -409,7 +411,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
         signal = -1
 
         num_rows = len(pt_vec)
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             pt = int(pt_vec[i_row])
             intensity = intensity_vec[i_row]
             item_list = [pt, hkl, q, signal, intensity]
@@ -428,7 +430,7 @@ class PeakIntegrationTableWidget(tableBase.NTableWidget):
 
         # locate
         index_q_x = self.Table_Setup.index(('Q_x', 'float'))
-        for j in xrange(3):
+        for j in range(3):
             col_index = j + index_q_x
             self.update_cell_value(row_index, col_index, vec_q[j])
         # END-FOR (j)
@@ -469,8 +471,8 @@ class UBMatrixTable(tableBase.NTableWidget):
 
         # Matrix
         self._matrix = numpy.ndarray((3, 3), float)
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 self._matrix[i][j] = 0.
 
         return
@@ -480,8 +482,8 @@ class UBMatrixTable(tableBase.NTableWidget):
         Set values in holder '_matrix' to TableWidget
         :return:
         """
-        for i_row in xrange(3):
-            for j_col in xrange(3):
+        for i_row in range(3):
+            for j_col in range(3):
                 self.update_cell_value(i_row, j_col, self._matrix[i_row][j_col])
 
         return
@@ -522,8 +524,8 @@ class UBMatrixTable(tableBase.NTableWidget):
 
         # Set value
         i_array = 0
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 self._matrix[i][j] = element_array[i_array]
                 i_array += 1
 
@@ -542,8 +544,8 @@ class UBMatrixTable(tableBase.NTableWidget):
         assert isinstance(matrix, numpy.ndarray), 'Input matrix must be numpy.ndarray, but not %s' % str(type(matrix))
         assert matrix.shape == (3, 3)
 
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 self._matrix[i][j] = matrix[i][j]
 
         self._set_to_table()
@@ -557,8 +559,8 @@ class UBMatrixTable(tableBase.NTableWidget):
         """
         # self.init_size(3, 3)
 
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 self.set_value_cell(i, j)
 
         self._set_to_table()
@@ -1043,7 +1045,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
             '' % (str(scan_number), type(scan_number))
         num_rows = self.rowCount()
         ret_row_number = None
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             tmp_scan_no = self.get_cell_value(i_row, self._colIndexScan)
             if scan_number == tmp_scan_no:
                 ret_row_number = i_row
@@ -1069,7 +1071,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         # Loop around to check
         return_list = list()
         num_rows = self.rowCount()
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             status_i = self.get_cell_value(i_row, self._colIndexStatus)
             if status_i == target_state:
                 return_list.append(i_row)
@@ -1141,7 +1143,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         scan_list = list()
         num_rows = self.rowCount()
 
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             scan_num = self.get_cell_value(i_row, self._colIndexScan)
             if output_row_number:
                 scan_list.append((scan_num, i_row))
@@ -1159,7 +1161,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         num_rows = self.rowCount()
         col_select_index = self._myColumnNameList.index('Select')
 
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             if self.get_cell_value(i_row, col_select_index) is True:
                 scan_num = self.get_cell_value(i_row, self._colIndexScan)
                 scan_list.append((scan_num, i_row))
@@ -1395,7 +1397,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self._myScanSummaryList = list()
 
         self._currStartScan = 0
-        self._currEndScan = sys.maxint
+        self._currEndScan = sys.maxsize
         self._currMinCounts = 0.
         self._currMaxCounts = sys.float_info.max
 
@@ -1457,7 +1459,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         self.remove_all_rows()
 
         # go through all rows in the original list and then reconstruct
-        for index in xrange(len(self._myScanSummaryList)):
+        for index in range(len(self._myScanSummaryList)):
             sum_item = self._myScanSummaryList[index]
             # check
             assert isinstance(sum_item, list)
@@ -1561,7 +1563,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         assert num_rows > 0
         assert len(self._myScanSummaryList) > 0
 
-        for i_ref in xrange(min(num_rows, len(self._myScanSummaryList))):
+        for i_ref in range(min(num_rows, len(self._myScanSummaryList))):
             # get counts
             scan_summary = self._myScanSummaryList[i_ref]
             # check

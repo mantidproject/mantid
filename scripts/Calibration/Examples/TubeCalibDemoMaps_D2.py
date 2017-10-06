@@ -4,7 +4,8 @@
 #
 # Here we run the calibration of a selected part of MAPS
 
-#
+from __future__ import absolute_import, division, print_function
+
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
 import mantid.simpleapi as mantid
@@ -53,5 +54,5 @@ mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
 print("Applied calibration")
 
 # == Save workspace ==
-# SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
-# print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
+# mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMapsResult.nxs', "Result of Running TCDemoMaps.py")
+# print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")

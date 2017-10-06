@@ -47,7 +47,7 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
  * @param histogram A histogram with bin edges defined
  */
 void ScanningWorkspaceBuilder::setHistogram(
-    const HistogramData::Histogram histogram) {
+    HistogramData::Histogram histogram) {
   if (histogram.size() != m_nBins)
     throw std::logic_error(
         "Histogram supplied does not have the correct size.");
@@ -61,8 +61,8 @@ void ScanningWorkspaceBuilder::setHistogram(
  * @param timeRanges A vector of DateAndTime pairs, corresponding to the start
  *and end times
  */
-void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
-    std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges) {
+void ScanningWorkspaceBuilder::setTimeRanges(std::vector<
+    std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>> timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = std::move(timeRanges);
 }
@@ -75,19 +75,21 @@ void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
  * @param durations A vector of doubles containing the duration in seconds
  */
 void ScanningWorkspaceBuilder::setTimeRanges(
-    const Kernel::DateAndTime &startTime,
+    const Types::Core::DateAndTime &startTime,
     const std::vector<double> &durations) {
   verifyTimeIndexSize(durations.size(), "time durations");
 
-  std::vector<std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges =
-      {std::pair<Kernel::DateAndTime, Kernel::DateAndTime>(
-          startTime, startTime + durations[0])};
+  std::vector<std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>>
+      timeRanges = {
+          std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
+              startTime, startTime + durations[0])};
 
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {
     const auto newStartTime = timeRanges[i - 1].second;
     const auto endTime = newStartTime + durations[i];
-    timeRanges.push_back(std::pair<Kernel::DateAndTime, Kernel::DateAndTime>(
-        newStartTime, endTime));
+    timeRanges.push_back(
+        std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime>(
+            newStartTime, endTime));
   }
 
   setTimeRanges(std::move(timeRanges));
@@ -101,7 +103,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  * @param positions A vector of vectors containing positions
  */
 void ScanningWorkspaceBuilder::setPositions(
-    const std::vector<std::vector<Kernel::V3D>> positions) {
+    std::vector<std::vector<Kernel::V3D>> positions) {
 
   if (!m_positions.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set positions, as positions or instrument "
@@ -123,7 +125,7 @@ void ScanningWorkspaceBuilder::setPositions(
  * @param rotations A vector of vectors containing rotations
  */
 void ScanningWorkspaceBuilder::setRotations(
-    const std::vector<std::vector<Kernel::Quat>> rotations) {
+    std::vector<std::vector<Kernel::Quat>> rotations) {
 
   if (!m_rotations.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set rotations, as rotations or instrument "
@@ -154,8 +156,8 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotate the instrument in the horizontal plane
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> relativeRotations,
-    const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
+    std::vector<double> relativeRotations, const Kernel::V3D &rotationPosition,
+    const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "
@@ -192,6 +194,7 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
       m_instrument, m_nDetectors * m_nTimeIndexes, m_histogram);
 
   auto &outputDetectorInfo = outputWorkspace->mutableDetectorInfo();
+  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
 
   buildOutputDetectorInfo(outputDetectorInfo);
 
@@ -222,7 +225,6 @@ MatrixWorkspace_sptr ScanningWorkspaceBuilder::buildWorkspace() const {
 
 void ScanningWorkspaceBuilder::buildOutputDetectorInfo(
     Geometry::DetectorInfo &outputDetectorInfo) const {
-  outputDetectorInfo.setScanInterval(m_timeRanges[0]);
   auto mergeWorkspace =
       create<Workspace2D>(m_instrument, m_nDetectors, m_histogram.binEdges());
   for (size_t i = 1; i < m_nTimeIndexes; ++i) {

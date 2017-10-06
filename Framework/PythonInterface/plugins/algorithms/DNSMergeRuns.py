@@ -188,5 +188,6 @@ class DNSMergeRuns(PythonAlgorithm):
         self.setProperty("OutputWorkspace", outws)
         return
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSMergeRuns)

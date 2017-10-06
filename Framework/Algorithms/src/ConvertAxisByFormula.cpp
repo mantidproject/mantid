@@ -105,7 +105,7 @@ void ConvertAxisByFormula::exec() {
   RefAxis *refAxisPtr = dynamic_cast<RefAxis *>(axisPtr);
   if (refAxisPtr != nullptr) {
     CommonBinsValidator sameBins;
-    if (sameBins.isValid(outputWs) != "") {
+    if (!sameBins.isValid(outputWs).empty()) {
       isRaggedBins = true;
     }
     isRefAxis = true;
@@ -150,7 +150,7 @@ void ConvertAxisByFormula::exec() {
   mu::Parser p;
   try {
     // set parameter lookups for the axis value
-    for (auto variable : variables) {
+    for (const auto &variable : variables) {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
@@ -245,14 +245,14 @@ void ConvertAxisByFormula::exec() {
   }
 
   // Set the Unit of the Axis
-  if ((axisUnits != "") || (axisTitle != "")) {
+  if ((!axisUnits.empty()) || (!axisTitle.empty())) {
     try {
       axisPtr->unit() = UnitFactory::Instance().create(axisUnits);
     } catch (Exception::NotFoundError &) {
-      if (axisTitle == "") {
+      if (axisTitle.empty()) {
         axisTitle = axisPtr->unit()->caption();
       }
-      if (axisUnits == "") {
+      if (axisUnits.empty()) {
         axisUnits = axisPtr->unit()->label();
       }
       axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
@@ -262,7 +262,7 @@ void ConvertAxisByFormula::exec() {
 
 void ConvertAxisByFormula::setAxisValue(const double &value,
                                         std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (!variable->isGeometric) {
       variable->value = value;
     }
@@ -281,7 +281,7 @@ void ConvertAxisByFormula::calculateValues(
 void ConvertAxisByFormula::setGeometryValues(
     const API::SpectrumInfo &specInfo, const size_t index,
     std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {
         variable->value = specInfo.twoTheta(index);

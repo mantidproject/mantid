@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 import stresstesting
 import os.path
@@ -31,8 +32,8 @@ class WISHDiffractionFocussingReductionTest(stresstesting.MantidStressTest):
 
         run_numbers = [35991]
 
-        min_run = min(map(lambda x: x if type(x) == int else min(x), run_numbers))
-        max_run = max(map(lambda x: x if type(x) == int else max(x), run_numbers))
+        min_run = min([x if type(x) == int else min(x) for x in run_numbers])
+        max_run = max([x if type(x) == int else max(x) for x in run_numbers])
         group_name = str(min_run) + '-' + str(max_run) + focused_suffix
 
         self._focused_workspaces = []
@@ -88,9 +89,6 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
                 "35993-foc-h00.nxs",
                 "WISHDiffractionFocussingResult.nxs"]
 
-    def requiredMemoryMB(self):
-        pass
-
     def cleanup(self):
         pass
 
@@ -104,10 +102,8 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
         suffix = "-foc-h00"
         integrate_suffix = "-int"
 
-        min_run = min(map(lambda x: x if type(x) == int else min(x),
-                          run_numbers))
-        max_run = max(map(lambda x: x if type(x) == int else max(x),
-                          run_numbers))
+        min_run = min([x if type(x) == int else min(x) for x in run_numbers])
+        max_run = max([x if type(x) == int else max(x) for x in run_numbers])
 
         group_name = str(min_run) + '-' + str(max_run)
         group_name += suffix + integrate_suffix
@@ -117,7 +113,7 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
         integration_range = {"RangeLower": 16.2, "RangeUpper": 17.2}
 
         table = create_table(table_name, log_names, len(run_numbers))
-        run_names = map(lambda x: convert_run_to_name(x, suffix), run_numbers)
+        run_names = [convert_run_to_name(x, suffix) for x in run_numbers]
 
         output_names = []
         for i, run in enumerate(run_names):
@@ -143,7 +139,7 @@ class WISHDiffractionFocussingAnalysisTest(stresstesting.MantidStressTest):
             # add to table
             row = [get_log(w1, name) for name in log_names]
             row.extend([w1.readY(0), w1.readE(0) ])
-            row = map(float, row)
+            row = list(map(float, row))
             table.addRow(row)
 
             # add to workspace group

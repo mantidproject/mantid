@@ -4,18 +4,22 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 
@@ -35,27 +39,6 @@ namespace {
 double getDetectorTwoTheta(const SpectrumInfo *spectrumInfo,
                            const size_t spectrumIdx) {
   return spectrumInfo->signedTwoTheta(spectrumIdx);
-}
-
-/** Get the twoTheta angle range for the top/bottom of the detector associated
-* with the given spectrum
-*
-* @param spectrumInfo : the spectrum info
-* @param spectrumIdx : the workspace index of the spectrum
-* @return : the twoTheta angle in radians
-*/
-double getDetectorTwoThetaRange(const SpectrumInfo *spectrumInfo,
-                                const size_t spectrumIdx) {
-  // Assume the range covered by this pixel is the diff between this
-  // pixel's twoTheta and the next/prev pixel)
-  double twoTheta = getDetectorTwoTheta(spectrumInfo, spectrumIdx);
-  double bTwoTheta = 0;
-
-  if (spectrumIdx + 1 < spectrumInfo->size()) {
-    bTwoTheta = getDetectorTwoTheta(spectrumInfo, spectrumIdx + 1) - twoTheta;
-  }
-
-  return bTwoTheta;
 }
 
 /** Get the start/end of the lambda range for the detector associated
@@ -111,7 +94,7 @@ void translateAdd(const std::string &instructions,
 
   std::vector<size_t> outSpectra;
   outSpectra.reserve(spectra.count());
-  for (auto spectrum : spectra) {
+  for (const auto &spectrum : spectra) {
     // add this spectrum to the group we're about to add
     outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
   }
@@ -328,6 +311,34 @@ std::string createProcessingCommandsFromDetectorWS(
 
   return result;
 }
+
+/**
+* Get the topbottom extent of a detector for the given axis
+*
+* @param axis [in] : the axis to get the extent for
+* @param top [in] : if true, get the max extent, or min otherwise
+* @return : the max/min extent on the given axis
+*/
+double getBoundingBoxExtent(const BoundingBox &boundingBox,
+                            const PointingAlong axis, const bool top) {
+
+  double result = 0.0;
+  switch (axis) {
+  case X:
+    result = top ? boundingBox.xMax() : boundingBox.xMin();
+    break;
+  case Y:
+    result = top ? boundingBox.yMax() : boundingBox.yMin();
+    break;
+  case Z:
+    result = top ? boundingBox.zMax() : boundingBox.zMin();
+    break;
+  default:
+    throw std::runtime_error("Axis is not X/Y/Z");
+    break;
+  }
+  return result;
+}
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -434,7 +445,10 @@ void ReflectometryReductionOne2::exec() {
     throw std::invalid_argument(
         "InputWorkspace must have units of TOF or Wavelength");
 
+  // Cache the spectrum info and reference frame
   m_spectrumInfo = &m_runWS->spectrumInfo();
+  auto instrument = m_runWS->getInstrument();
+  m_refFrame = instrument->getReferenceFrame();
 
   // Find and cache detector groups and theta0
   findDetectorGroups();
@@ -461,6 +475,44 @@ void ReflectometryReductionOne2::exec() {
 
   setProperty("OutputWorkspaceWavelength", IvsLam);
   setProperty("OutputWorkspace", IvsQ);
+}
+
+/** Get the twoTheta angle range for the top/bottom of the detector associated
+* with the given spectrum
+*
+* @param spectrumIdx : the workspace index of the spectrum
+* @return : the twoTheta range in radians
+*/
+double
+ReflectometryReductionOne2::getDetectorTwoThetaRange(const size_t spectrumIdx) {
+
+  double bTwoTheta = 0;
+
+  // Get the sample->detector distance along the beam
+  const V3D detSample =
+      m_spectrumInfo->position(spectrumIdx) - m_spectrumInfo->samplePosition();
+  const double beamOffset =
+      m_refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+  // Get the bounding box for this detector/group
+  BoundingBox boundingBox;
+  auto detector = m_runWS->getDetector(spectrumIdx);
+  detector->getBoundingBox(boundingBox);
+  // Get the top and bottom on the axis pointing up
+  const double top =
+      getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), true);
+  const double bottom =
+      getBoundingBoxExtent(boundingBox, m_refFrame->pointingUp(), false);
+  // Calculate the difference in twoTheta between the top and bottom
+  const double twoThetaTop = std::atan(top / beamOffset);
+  const double twoThetaBottom = std::atan(bottom / beamOffset);
+  bTwoTheta = twoThetaTop - twoThetaBottom;
+
+  // We must have non-zero width to project a range
+  if (bTwoTheta < Tolerance) {
+    throw std::runtime_error("Error calculating pixel size.");
+  }
+
+  return bTwoTheta;
 }
 
 /**
@@ -856,8 +908,18 @@ void ReflectometryReductionOne2::findDetectorGroups() {
               return a.front() < b.front();
             });
 
-  if (m_detectorGroups.size() == 0) {
+  if (m_detectorGroups.empty()) {
     throw std::runtime_error("Invalid processing instructions");
+  }
+
+  for (const auto &group : m_detectorGroups) {
+    for (const auto &spIdx : group) {
+      if (spIdx > m_spectrumInfo->size() - 1) {
+        throw std::runtime_error(
+            "ProcessingInstructions contains an out-of-range index: " +
+            std::to_string(spIdx));
+      }
+    }
   }
 }
 
@@ -993,8 +1055,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
 
   const size_t spIdxMin = detectors.front();
   const double twoThetaMin = getDetectorTwoTheta(m_spectrumInfo, spIdxMin);
-  const double bTwoThetaMin =
-      getDetectorTwoThetaRange(m_spectrumInfo, spIdxMin);
+  const double bTwoThetaMin = getDetectorTwoThetaRange(spIdxMin);
   // For bLambda, use the average bin size for this spectrum
   auto xValues = detectorWS->x(spIdxMin);
   double bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
@@ -1004,8 +1065,7 @@ void ReflectometryReductionOne2::findIvsLamRange(
 
   const size_t spIdxMax = detectors.back();
   const double twoThetaMax = getDetectorTwoTheta(m_spectrumInfo, spIdxMax);
-  const double bTwoThetaMax =
-      getDetectorTwoThetaRange(m_spectrumInfo, spIdxMax);
+  const double bTwoThetaMax = getDetectorTwoThetaRange(spIdxMax);
   xValues = detectorWS->x(spIdxMax);
   bLambda = (xValues[xValues.size() - 1] - xValues[0]) /
             static_cast<int>(xValues.size());
@@ -1092,7 +1152,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
     for (auto spIdx : detectors) {
       // Get the angle of this detector and its size in twoTheta
       const double twoTheta = getDetectorTwoTheta(m_spectrumInfo, spIdx);
-      const double bTwoTheta = getDetectorTwoThetaRange(m_spectrumInfo, spIdx);
+      const double bTwoTheta = getDetectorTwoThetaRange(spIdx);
 
       // Check X length is Y length + 1
       const auto &inputX = detectorWS->x(spIdx);
@@ -1228,11 +1288,19 @@ void ReflectometryReductionOne2::sumInQShareCounts(
     }
     // Add a share of the input counts to this bin based on the proportion of
     // overlap.
-    const double overlapWidth =
-        std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
-    const double fraction = overlapWidth / totalWidth;
-    outputY[outIdx] += inputCounts * fraction;
-    outputE[outIdx] += inputErr * fraction;
+    if (totalWidth > Tolerance) {
+      // Share counts out proportionally based on the overlap of this range
+      const double overlapWidth =
+          std::min({bLambda, lambdaMax - binStart, binEnd - lambdaMin});
+      const double fraction = overlapWidth / totalWidth;
+      outputY[outIdx] += inputCounts * fraction;
+      outputE[outIdx] += inputErr * fraction;
+    } else {
+      // Projection to a single value. Put all counts in the overlapping output
+      // bin.
+      outputY[outIdx] += inputCounts;
+      outputE[outIdx] += inputCounts;
+    }
   }
 }
 
@@ -1262,9 +1330,10 @@ void ReflectometryReductionOne2::getProjectedLambdaRange(
 
   // We cannot project pixels below the horizon angle
   if (twoTheta <= theta0()) {
-    throw std::runtime_error(
-        "Cannot process twoTheta=" + std::to_string(twoTheta) +
-        " as it is below the horizon angle=" + std::to_string(theta0()));
+    throw std::runtime_error("Cannot process twoTheta=" +
+                             std::to_string(twoTheta * 180.0 / M_PI) +
+                             " as it is below the horizon angle=" +
+                             std::to_string(theta0() * 180.0 / M_PI));
   }
 
   // Get the angle from twoThetaR to this detector

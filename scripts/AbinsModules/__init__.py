@@ -22,12 +22,15 @@ from .FrequencyPowderGenerator import FrequencyPowderGenerator
 from .GeneralDFTProgram import GeneralDFTProgram
 from .LoadCASTEP import LoadCASTEP
 from .LoadCRYSTAL import LoadCRYSTAL
+from .LoadDMOL3 import LoadDMOL3
+from .LoadGAUSSIAN import LoadGAUSSIAN
+from .GeneralDFTParser import GeneralDFTParser
 
 # Calculating modules
 from .CalculatePowder import CalculatePowder
 from .CalculateSingleCrystal import CalculateSingleCrystal
 from .CalculateDWSingleCrystal import CalculateDWSingleCrystal
-from .CalculateS import  CalculateS
+from .CalculateS import CalculateS
 from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 
 # Data
@@ -47,3 +50,4 @@ from . import AbinsParameters
 from . import AbinsConstants
 from . import AbinsTestHelpers
 
+from .GeneralLoadDFTTester import GeneralLoadDFTTester

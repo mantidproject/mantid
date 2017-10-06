@@ -1,9 +1,16 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 import AbinsModules
+import six
+
+
+class GeneralDFTProgramName(type):
+    def __str__(self):
+        return self.__name__
 
 
 # noinspection PyMethodMayBeStatic
+@six.add_metaclass(GeneralDFTProgramName)
 class GeneralDFTProgram(object):
     """
     A general class which groups all methods which should be inherited or implemented by a DFT program used
@@ -52,7 +59,7 @@ class GeneralDFTProgram(object):
 
               The datasets should be a dictionary with the following entries:
 
-                        "frequencies"  - frequencies for all k-points grouped in one numpy.array
+                        "frequencies"  - frequencies for all k-points grouped in one numpy.array in cm^-1
 
                         "weights"      - weights of all k-points in one numpy.array
 
@@ -63,7 +70,7 @@ class GeneralDFTProgram(object):
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
 
-                        "unit_cell"      -   numpy array with unit cell vectors
+                        "unit_cell"      -   numpy array with unit cell vectors in Angstroms
 
               The following structured datasets should be also defined:
 
@@ -82,8 +89,8 @@ class GeneralDFTProgram(object):
                                                           **Notice at the moment this parameter is not functional
                                                             in LoadCastep**
 
-                                               "fract_coord" - equilibrium position of atom; it has a form of numpy
-                                                               array with three floats
+                                               "coord" - equilibrium position of atom in Angstroms;
+                                                         it has a form of numpy array with three floats
 
                                                "mass" - mass of atom
 
@@ -98,7 +105,7 @@ class GeneralDFTProgram(object):
 
           For more details about these fields please look at the documentation of IOmodule class.
 
-        @return: Method should return an object of type AbinsData.
+        :returns: Method should return an object of type AbinsData.
 
         """
         return None
@@ -106,7 +113,7 @@ class GeneralDFTProgram(object):
     def load_formatted_data(self):
         """
         Loads data from hdf file. After data is loaded it is put into AbinsData object.
-        @return:
+        :returns: object of type AbinsData
         """
         data = self._clerk.load(list_of_datasets=["frequencies", "weights", "k_vectors",
                                                   "atomic_displacements", "unit_cell", "atoms"])
@@ -127,7 +134,7 @@ class GeneralDFTProgram(object):
     def _recover_symmetry_points(self, data=None):
         """
         This method reconstructs symmetry equivalent k-points.
-        @param data: dictionary with the data for only symmetry inequivalent k-points. This methods
+        :param data: dictionary with the data for only symmetry inequivalent k-points. This methods
         adds to this dictionary phonon data for symmetry equivalent k-points.
         """
 
@@ -138,8 +145,8 @@ class GeneralDFTProgram(object):
         This method rearranges data read from phonon DFT file. It converts  masses and frequencies Hartree atomic units.
         It converts atomic displacements from atomic units to Angstroms
 
-        @param data: dictionary with the data to rearrange
-        @return: Returns an object of type AbinsData
+        :param data: dictionary with the data to rearrange
+        :returns: Returns an object of type AbinsData
         """
 
         k_points = AbinsModules.KpointsData(num_atoms=self._num_atoms, num_k=self._num_k)

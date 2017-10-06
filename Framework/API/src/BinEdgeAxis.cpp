@@ -1,5 +1,6 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid {
 namespace API {
@@ -76,10 +77,9 @@ void BinEdgeAxis::setValue(const std::size_t &index, const double &value) {
  * the value falls into. The maximum value will always be length() - 1
  * @param value A value on the axis
  * @return The index closest to given value
- * @throws std::out_of_range if the value is out of range of the axis
  */
 size_t BinEdgeAxis::indexOfValue(const double value) const {
-  return NumericAxis::indexOfValue(value, m_values);
+  return Mantid::Kernel::VectorHelper::indexOfValueFromEdges(m_values, value);
 }
 
 } // namespace API

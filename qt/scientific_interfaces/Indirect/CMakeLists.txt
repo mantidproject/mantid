@@ -6,8 +6,7 @@ set ( SRC_FILES
 	ConvFit.cpp
 	CorrectionsTab.cpp
 	DensityOfStates.cpp
-	Elwin.cpp
-	ILLCalibration.cpp
+        Elwin.cpp
 	ILLEnergyTransfer.cpp
 	ISISCalibration.cpp
 	ISISDiagnostics.cpp
@@ -53,8 +52,7 @@ set ( INC_FILES
 	ConvFit.h
 	CorrectionsTab.h
 	DensityOfStates.h
-	Elwin.h
-	ILLCalibration.h
+        Elwin.h
 	ILLEnergyTransfer.h
 	ISISCalibration.h
 	ISISDiagnostics.h
@@ -98,7 +96,6 @@ set ( MOC_FILES
     CorrectionsTab.h
     DensityOfStates.h
     Elwin.h
-    ILLCalibration.h
     ILLEnergyTransfer.h
     IndirectBayes.h
     IndirectBayesTab.h
@@ -141,7 +138,6 @@ set ( UI_FILES
    ConvFit.ui
    DensityOfStates.ui
    Elwin.ui
-   ILLCalibration.ui
    ILLEnergyTransfer.ui
    IndirectBayes.ui
    IndirectCorrections.ui

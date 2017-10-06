@@ -1125,7 +1125,7 @@ void ParameterMap::saveNexus(::NeXus::File *file,
   file->putAttr("version", 1);
   file->writeData("author", "");
   file->writeData("date",
-                  Kernel::DateAndTime::getCurrentTime().toISO8601String());
+                  Types::Core::DateAndTime::getCurrentTime().toISO8601String());
   file->writeData("description", "A string representation of the parameter "
                                  "map. The format is either: "
                                  "|detID:id-value;param-type;param-name;param-"

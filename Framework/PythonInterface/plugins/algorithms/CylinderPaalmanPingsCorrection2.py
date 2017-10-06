@@ -696,5 +696,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
 #------------------------------------------------------------------------------
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CylinderPaalmanPingsCorrection)

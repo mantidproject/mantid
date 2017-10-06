@@ -104,6 +104,24 @@ for a given sample log.
         <value val="0, 0.1, 2" />
     </parameter>
 
+Merging Workspaces with Detector Scans
+######################################
+
+If the workspaces being merged contain detector scans then there are currently two options:
+
+1. The workspaces have identical scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case the workspaces will be merged as they normally would be by MergeRuns,
+that is the counts in the two workspaces are summed. The detectors must have the same
+positions, rotations etc. for all time intervals, else the algorithm will throw.
+
+2. The workspaces have different scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For this case the scan intervals must not overlap. The merged workspace histograms are
+appended to the end of the first workspace.
+
 
 ChildAlgorithms used
 ####################

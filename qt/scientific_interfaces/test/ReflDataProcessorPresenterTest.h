@@ -9,7 +9,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "../ISISReflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -25,9 +25,8 @@ std::ostream &operator<<(std::ostream &os, QString const &str) {
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const DataProcessorWhiteList &whitelist) {
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
     ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
 
     const int ncols = static_cast<int>(whitelist.size());
@@ -47,9 +46,8 @@ private:
     return ws;
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const DataProcessorWhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
     const std::vector<std::string> run{"13460", "13462", "13469", "13470"};
@@ -70,7 +68,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMixedWorkspace(const QString &wsName,
-                                const DataProcessorWhiteList &whitelist) {
+                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";
     const std::vector<std::string> run{"38415", "38417"};
@@ -91,7 +89,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMinimalWorkspace(const QString &wsName,
-                                  const DataProcessorWhiteList &whitelist) {
+                                  const WhiteList &whitelist) {
 
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";

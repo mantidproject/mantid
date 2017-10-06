@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 from sans.state.state_base import (StateBase, BoolParameter, StringListParameter, StringParameter,
-                                   PositiveFloatParameter, FloatParameter, FloatListParameter,
+                                   PositiveFloatParameter, FloatParameter, FloatListParameter, FloatWithNoneParameter,
                                    DictParameter, PositiveIntegerListParameter, rename_descriptor_names)
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
 from sans.state.automatic_setters import (automatic_setters)
@@ -160,7 +160,7 @@ class StateMaskDetector(StateBase):
                     is_invalid, "spectrum_range_start", "spectrum_range_stop", "spectrum_range")
 
         if is_invalid:
-            raise ValueError("StateMoveDetectorISIS: The provided inputs are illegal. "
+            raise ValueError("StateMaskDetector: The provided inputs are illegal. "
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
@@ -178,8 +178,8 @@ class StateMask(StateBase):
     mask_files = StringListParameter()
 
     # Angle masking
-    phi_min = FloatParameter()
-    phi_max = FloatParameter()
+    phi_min = FloatWithNoneParameter()
+    phi_max = FloatWithNoneParameter()
     use_mask_phi_mirror = BoolParameter()
 
     # Beam stop
@@ -200,10 +200,6 @@ class StateMask(StateBase):
 
     def __init__(self):
         super(StateMask, self).__init__()
-        # Setup the detectors
-        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
-                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
-
         # IDF Path
         self.idf_path = ""
 
@@ -252,6 +248,52 @@ class StateMask(StateBase):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
+@rename_descriptor_names
+class StateMaskSANS2D(StateMask):
+    def __init__(self):
+        super(StateMaskSANS2D, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
+
+    def validate(self):
+        super(StateMaskSANS2D, self).validate()
+
+
+@rename_descriptor_names
+class StateMaskLOQ(StateMask):
+    def __init__(self):
+        super(StateMaskLOQ, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector(),
+                          DetectorType.to_string(DetectorType.HAB): StateMaskDetector()}
+
+    def validate(self):
+        super(StateMaskLOQ, self).validate()
+
+
+@rename_descriptor_names
+class StateMaskLARMOR(StateMask):
+    def __init__(self):
+        super(StateMaskLARMOR, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector()}
+
+    def validate(self):
+        super(StateMaskLARMOR, self).validate()
+
+
+@rename_descriptor_names
+class StateMaskZOOM(StateMask):
+    def __init__(self):
+        super(StateMaskZOOM, self).__init__()
+        # Setup the detectors
+        self.detectors = {DetectorType.to_string(DetectorType.LAB): StateMaskDetector()}
+
+    def validate(self):
+        super(StateMaskZOOM, self).validate()
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
@@ -267,10 +309,10 @@ def setup_idf_and_ipf_content(move_info, data_info):
 
 class StateMaskBuilder(object):
     @automatic_setters(StateMask)
-    def __init__(self, data_info):
+    def __init__(self, data_info, state):
         super(StateMaskBuilder, self).__init__()
         self._data = data_info
-        self.state = StateMask()
+        self.state = state
         setup_idf_and_ipf_content(self.state, data_info)
 
     def set_single_spectra_on_detector(self, single_spectra):
@@ -327,11 +369,17 @@ class StateMaskBuilder(object):
 
 
 def get_mask_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
-    # the instrument is of relevance.
+    # The data state has most of the information that we require to define the mask. For the factory method, only
+    # the facility/instrument is of relevance.
     instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
-        return StateMaskBuilder(data_info)
+    if instrument is SANSInstrument.SANS2D:
+        return StateMaskBuilder(data_info, StateMaskSANS2D())
+    elif instrument is SANSInstrument.LOQ:
+        return StateMaskBuilder(data_info, StateMaskLOQ())
+    elif instrument is SANSInstrument.LARMOR:
+        return StateMaskBuilder(data_info, StateMaskLARMOR())
+    elif instrument is SANSInstrument.ZOOM:
+        return StateMaskBuilder(data_info, StateMaskZOOM())
     else:
         raise NotImplementedError("StateMaskBuilder: Could not find any valid mask builder for the "
                                   "specified StateData object {0}".format(str(data_info)))

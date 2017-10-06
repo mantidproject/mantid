@@ -199,7 +199,7 @@ class AdvancedSetupScript(BaseScriptElement):
                                                    AdvancedSetupScript.filterbadpulses)
 
             self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
-                                                                     "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
+                                                                     "backgroundsmoothparams", default=AdvancedSetupScript.bkgdsmoothpars)
 
             self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
                                                                        "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)

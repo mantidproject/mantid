@@ -677,7 +677,7 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
   bool foundAllRuns = true;
 
-  for (const auto runNumber : RunNumberVec) {
+  for (const auto &runNumber : RunNumberVec) {
     // Get full path for every run selected
     std::vector<std::string> foundFileNames;
     if (findFilePathFromBaseName(workingDirectory, runNumber, foundFileNames)) {
@@ -760,7 +760,7 @@ void EnggDiffFittingPresenter::processFitAllPeaks() {
   const std::string fitPeaksData = validateFittingexpectedPeaks(fittingPeaks);
 
   g_log.debug() << "Focused files found are: " << fitPeaksData << '\n';
-  for (auto dir : g_multi_run_directories) {
+  for (const auto &dir : g_multi_run_directories) {
     g_log.debug() << dir << '\n';
   }
 
@@ -1599,7 +1599,7 @@ void EnggDiffFittingPresenter::setBankItems(
   try {
     // Keep track of current loop iteration for banks
     int index = 0;
-    for (const auto filePath : bankFiles) {
+    for (const auto &filePath : bankFiles) {
 
       const Poco::Path bankFile(filePath);
       const std::string strVecFile = bankFile.toString();
@@ -1705,7 +1705,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
   // can be assigned to text-field when number is given
   else if (!m_view->getFittingRunNumVec().empty()) {
     auto firstDir = m_view->getFittingRunNumVec().at(0);
-    auto intialDir = firstDir;
+    const auto &intialDir = firstDir;
     m_view->setFittingRunNo(intialDir);
   }
   // if nothing found related to text-field input

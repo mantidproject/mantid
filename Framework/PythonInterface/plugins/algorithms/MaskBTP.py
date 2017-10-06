@@ -193,4 +193,6 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 return self.instrument.getComponentByName("bank"+str(banknum))
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")
+
+
 mantid.api.AlgorithmFactory.subscribe(MaskBTP)

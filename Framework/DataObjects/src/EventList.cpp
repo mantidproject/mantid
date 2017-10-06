@@ -29,7 +29,8 @@ using std::vector;
 namespace Mantid {
 namespace DataObjects {
 using Kernel::Exception::NotImplementedError;
-using Kernel::DateAndTime;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 using namespace Mantid::API;
 
 namespace {
@@ -2713,7 +2714,7 @@ std::vector<double> EventList::getWeightErrors() const {
 template <class T>
 void EventList::getPulseTimesHelper(
     const std::vector<T> &events,
-    std::vector<Mantid::Kernel::DateAndTime> &times) {
+    std::vector<Mantid::Types::Core::DateAndTime> &times) {
   times.clear();
   for (const auto &event : events) {
     times.push_back(event.pulseTime());
@@ -2724,8 +2725,8 @@ void EventList::getPulseTimesHelper(
  *
  * @return by copy a vector of DateAndTime times
  */
-std::vector<Mantid::Kernel::DateAndTime> EventList::getPulseTimes() const {
-  std::vector<Mantid::Kernel::DateAndTime> times;
+std::vector<Mantid::Types::Core::DateAndTime> EventList::getPulseTimes() const {
+  std::vector<Mantid::Types::Core::DateAndTime> times;
   // Set the capacity of the vector to avoid multiple resizes
   times.reserve(this->getNumberEvents());
 
@@ -2924,8 +2925,9 @@ DateAndTime EventList::getPulseTimeMax() const {
   return tMax;
 }
 
-void EventList::getPulseTimeMinMax(Mantid::Kernel::DateAndTime &tMin,
-                                   Mantid::Kernel::DateAndTime &tMax) const {
+void EventList::getPulseTimeMinMax(
+    Mantid::Types::Core::DateAndTime &tMin,
+    Mantid::Types::Core::DateAndTime &tMax) const {
   // set up as the minimum available date time.
   tMax = DateAndTime::minimum();
   tMin = DateAndTime::maximum();
@@ -3620,9 +3622,9 @@ void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop,
   }
 }
 
-void EventList::filterByTimeAtSample(Kernel::DateAndTime start,
-                                     Kernel::DateAndTime stop, double tofFactor,
-                                     double tofOffset,
+void EventList::filterByTimeAtSample(Types::Core::DateAndTime start,
+                                     Types::Core::DateAndTime stop,
+                                     double tofFactor, double tofOffset,
                                      EventList &output) const {
   if (this == &output) {
     throw std::invalid_argument("In-place filtering is not allowed");
@@ -4277,7 +4279,7 @@ void EventList::splitByPulseTimeHelper(Kernel::TimeSplitterType &splitter,
   // Prepare to TimeSplitter Iterate through the splitter at the same time
   auto itspl = splitter.begin();
   auto itspl_end = splitter.end();
-  Kernel::DateAndTime start, stop;
+  Types::Core::DateAndTime start, stop;
 
   // Prepare to Events Iterate through all events (sorted by tof)
   auto itev = events.begin();
@@ -4403,7 +4405,7 @@ void EventList::splitByPulseTimeWithMatrix(
   }
 
   // Split
-  if (vec_target.size() == 0) {
+  if (vec_target.empty()) {
     // No splitter: copy all events to group workspace = -1
     (*outputs[-1]) = (*this);
   } else {

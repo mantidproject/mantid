@@ -126,7 +126,7 @@ class PieLabel : public LegendWidget {
   Q_OBJECT
 
 public:
-  PieLabel(Plot *, QwtPieCurve *pie = 0);
+  PieLabel(Plot *, QwtPieCurve *pie = nullptr);
 
   QString customText();
   void setCustomText(const QString &s) { d_custom_text = s; };

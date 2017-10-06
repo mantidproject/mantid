@@ -1810,5 +1810,6 @@ class LARMOR(ISISInstrument):
     def get_m4_monitor_det_ID(self):
         return self._m4_det_id
 
+
 if __name__ == '__main__':
     pass

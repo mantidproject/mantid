@@ -22,7 +22,7 @@ public:
 
     boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo =
         createTestCachedExperimentInfo();
-    ModeratorChopperResolution *modChop(NULL);
+    ModeratorChopperResolution *modChop(nullptr);
 
     TS_ASSERT_THROWS_NOTHING(
         modChop = new ModeratorChopperResolution(*testCachedExperimentInfo));

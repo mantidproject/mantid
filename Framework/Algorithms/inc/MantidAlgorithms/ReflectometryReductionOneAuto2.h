@@ -60,7 +60,8 @@ private:
   /// Correct detector positions vertically
   Mantid::API::MatrixWorkspace_sptr
   correctDetectorPositions(const std::string &instructions,
-                           Mantid::API::MatrixWorkspace_sptr inputWS);
+                           Mantid::API::MatrixWorkspace_sptr inputWS,
+                           const double twoTheta);
   /// Calculate theta
   double calculateTheta(const std::string &instructions,
                         Mantid::API::MatrixWorkspace_sptr inputWS);

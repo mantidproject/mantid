@@ -148,9 +148,9 @@ class plot(data,insert):
             plt.xlim([self.xrange["start"],self.xrange["end"]])
         if  self.yrange["start"]!=0.0 or self.yrange["end"]!=0.0:
             plt.xlim([self.yrange["start"],self.yrange["end"]])
-        if self.logs['x']==True:
+        if self.logs['x']:
             plt.xscale("log")
-        if self.logs['y']==True:
+        if self.logs['y']:
             plt.yscale("log")
         plt.tight_layout()
         if save=="":

@@ -6,11 +6,11 @@ import mantid
 
 from sans.user_file.state_director import StateDirectorISIS
 from sans.common.enums import (SANSFacility, ISISReductionMode, RangeStepType, RebinType, DataType, FitType,
-                               DetectorType)
+                               DetectorType, SampleShape)
 from sans.common.configurations import Configurations
 from sans.state.data import get_data_builder
 
-from user_file_test_helper import create_user_file, sample_user_file
+from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 
 
 # -----------------------------------------------------------------
@@ -38,7 +38,7 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(hab.rotation_correction == 0.0)
 
         # SANS2D-specific
-        self.assertTrue(move.monitor_4_offset == -70.0/1000.)
+        self.assertTrue(move.monitor_n_offset == -70.0/1000.)
 
     def _assert_mask(self, state):
         mask = state.mask
@@ -139,11 +139,11 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         self.assertTrue(calculate_transmission.background_TOF_monitor_stop["2"] == 98000)
         self.assertTrue(calculate_transmission.background_TOF_roi_start == 123)
         self.assertTrue(calculate_transmission.background_TOF_roi_stop == 466)
-        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type is FitType.Log)
+        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].fit_type is FitType.Logarithmic)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Sample)].polynomial_order == 0)
-        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type is FitType.Log)
+        self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].fit_type is FitType.Logarithmic)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_low == 1.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].wavelength_high == 12.5)
         self.assertTrue(calculate_transmission.fit[DataType.to_string(DataType.Can)].polynomial_order == 0)
@@ -202,14 +202,24 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         user_file_path = create_user_file(sample_user_file)
         director.set_user_file(user_file_path)
 
-        # Act
+        # Set additional items
         director.set_mask_builder_radius_min(0.001298)
         director.set_mask_builder_radius_max(0.003298)
+        director.set_scale_builder_width(1.)
+        director.set_scale_builder_height(1.5)
+        director.set_scale_builder_thickness(12.)
+        director.set_scale_builder_shape(SampleShape.Cuboid)
+
+        # Act
         state = director.construct()
 
         # Assert
         self.assertTrue(state.mask.radius_min == 0.001298)
         self.assertTrue(state.mask.radius_max == 0.003298)
+        self.assertTrue(state.scale.width == 1.)
+        self.assertTrue(state.scale.height == 1.5)
+        self.assertTrue(state.scale.thickness == 12.)
+        self.assertTrue(state.scale.shape is SampleShape.Cuboid)
 
         # clean up
         if os.path.exists(user_file_path):

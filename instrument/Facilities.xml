@@ -363,6 +363,11 @@
     </livedata>
   </instrument>
 
+  <instrument name="ZOOM">
+    <technique>Small Angle Scattering</technique>
+    <zeropadding size="8"/>
+  </instrument>
+
 </facility>
 
 
@@ -492,6 +497,9 @@
 
    <instrument name="VULCAN" beamline="7">
 	<technique>Neutron Diffraction</technique>
+        <livedata>
+      <connection name="event" address="bl7-daq1.sns.gov:31415" listener="SNSLiveEventDataListener" />
+    </livedata>
    </instrument>
 
    <instrument name="CORELLI" beamline="9">
@@ -644,6 +652,10 @@
   </instrument>
 
   <instrument name="D17">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="Figaro">
     <technique>Reflectometry</technique>
   </instrument>
 
@@ -807,7 +819,7 @@
       <connection name="fake" address="127.0.0.1:0" listener="FakeEventDataListener" />
     </livedata>
   </instrument>
-  
+
   <instrument name="ISIS_Kafka_Event">
     <technique>Test Listener</technique>
     <livedata>

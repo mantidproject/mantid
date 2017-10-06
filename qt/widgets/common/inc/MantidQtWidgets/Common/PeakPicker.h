@@ -38,7 +38,7 @@ namespace MantidWidgets {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTIDQT_COMMON PeakPicker : public QwtPlotPicker,
-                                                     public QwtPlotItem {
+                                              public QwtPlotItem {
   Q_OBJECT
 
 public:

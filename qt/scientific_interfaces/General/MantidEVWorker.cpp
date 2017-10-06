@@ -604,7 +604,7 @@ bool MantidEVWorker::optimizePhiChiOmega(const std::string &peaks_ws_name,
   alg->setProperty("MaxAngularChange", max_change);
   alg->setProperty("MaxIndexingError", 0.20);
   alg->setProperty("MaxHKLPeaks2Use", -1.0);
-  alg->setProperty("MaxSamplePositionChange_meters", 0.05);
+  alg->setProperty("MaxSamplePositionChangeMeters", 0.05);
 
   return alg->execute();
 }

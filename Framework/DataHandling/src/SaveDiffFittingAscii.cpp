@@ -86,6 +86,7 @@ bool SaveDiffFittingAscii::processGroups() {
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
+    input_ws.reserve(inputGroup->getNumberOfEntries());
     for (int i = 0; i < inputGroup->getNumberOfEntries(); ++i) {
       input_ws.push_back(
           boost::dynamic_pointer_cast<ITableWorkspace>(inputGroup->getItem(i)));

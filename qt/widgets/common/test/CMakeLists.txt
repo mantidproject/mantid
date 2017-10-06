@@ -21,6 +21,7 @@ if ( CXXTEST_FOUND )
             Geometry
             HistogramData
             Indexing
+            Types
             Kernel
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}

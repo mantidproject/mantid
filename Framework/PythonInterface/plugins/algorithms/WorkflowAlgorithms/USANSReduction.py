@@ -326,5 +326,7 @@ def _execute(algorithm_name, **parameters):
         Logger("USANSReduction").error("Error executing [%s]" % str(alg))
         Logger("USANSReduction").error(str(sys.exc_info()[1]))
     return alg
+
+
 #############################################################################################
 AlgorithmFactory.subscribe(USANSReduction())

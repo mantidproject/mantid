@@ -437,7 +437,7 @@ bool Algorithm::execute() {
   }
 
   notificationCenter().postNotification(new StartedNotification(this));
-  Mantid::Kernel::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime startTime;
 
   // Return a failure if the algorithm hasn't been initialized
   if (!isInitialized()) {
@@ -549,7 +549,7 @@ bool Algorithm::execute() {
         m_running = true;
       }
 
-      startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+      startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Start a timer
       Timer timer;
       // Call the concrete algorithm's exec method
@@ -1205,13 +1205,14 @@ bool Algorithm::checkGroups() {
  *
  * @return whether processGroups succeeds.
  */
-bool Algorithm::doCallProcessGroups(Mantid::Kernel::DateAndTime &startTime) {
+bool Algorithm::doCallProcessGroups(
+    Mantid::Types::Core::DateAndTime &startTime) {
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
   // CheckWorkspacesMatch, RenameWorkspace)
 
-  startTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+  startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer
   Timer timer;
 
@@ -1711,7 +1712,7 @@ void Algorithm::execMasterOnly() {
  * non-master ranks in master-only execution. */
 void Algorithm::execNonMaster() {
   // If there is no output we can simply do nothing.
-  if (m_pureOutputWorkspaceProps.size() == 0)
+  if (m_pureOutputWorkspaceProps.empty())
     return;
   // Does Algorithm have exactly one input and one output workspace property?
   if (m_inputWorkspaceProps.size() == 1 &&

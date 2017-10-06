@@ -7,7 +7,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "../ISISReflectometry/ReflRunsTabPresenter.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "ReflMockObjects.h"
 

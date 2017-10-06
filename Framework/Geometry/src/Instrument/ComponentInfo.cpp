@@ -1,12 +1,16 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/make_unique.h"
 #include <exception>
 #include <string>
 #include <Eigen/Geometry>
+#include <stack>
+#include <iterator>
 
 namespace Mantid {
 namespace Geometry {
@@ -127,6 +131,10 @@ bool ComponentInfo::hasParent(const size_t componentIndex) const {
   return m_componentInfo->hasParent(componentIndex);
 }
 
+bool ComponentInfo::hasShape(const size_t componentIndex) const {
+  return (*m_shapes)[componentIndex].get() != nullptr;
+}
+
 Kernel::V3D ComponentInfo::sourcePosition() const {
   return Kernel::toV3D(m_componentInfo->sourcePosition());
 }
@@ -134,6 +142,10 @@ Kernel::V3D ComponentInfo::sourcePosition() const {
 Kernel::V3D ComponentInfo::samplePosition() const {
   return Kernel::toV3D(m_componentInfo->samplePosition());
 }
+
+bool ComponentInfo::hasSource() const { return m_componentInfo->hasSource(); }
+
+bool ComponentInfo::hasSample() const { return m_componentInfo->hasSample(); }
 
 size_t ComponentInfo::source() const { return m_componentInfo->source(); }
 
@@ -170,7 +182,9 @@ void ComponentInfo::setScaleFactor(const size_t componentIndex,
 
 double ComponentInfo::solidAngle(const size_t componentIndex,
                                  const Kernel::V3D &observer) const {
-
+  if (!hasShape(componentIndex))
+    throw Kernel::Exception::NullPointerException("ComponentInfo::solidAngle",
+                                                  "shape");
   // This is the observer position in the shape's coordinate system.
   const Kernel::V3D relativeObserver =
       toShapeFrame(observer, *m_componentInfo, componentIndex);
@@ -183,5 +197,137 @@ double ComponentInfo::solidAngle(const size_t componentIndex,
     return shape(componentIndex).solidAngle(relativeObserver, scaleFactor);
   }
 }
+
+/**
+ * Calculates the absolute bounding box for the leaf item at index
+ *
+ * @param index : Component index
+ * @param reference : Optional reference for coordinate system for non-axis
+ *aligned bounding boxes
+ * @return Absolute bounding box.
+ */
+BoundingBox
+ComponentInfo::componentBoundingBox(const size_t index,
+                                    const BoundingBox *reference) const {
+  // Check that we have a valid shape here
+  if (!hasShape(index)) {
+    return BoundingBox(); // Return null bounding box
+  }
+  const auto &s = this->shape(index);
+  BoundingBox absoluteBB = s.getBoundingBox();
+
+  // modify in place for speed
+  const Eigen::Vector3d scaleFactor = m_componentInfo->scaleFactor(index);
+  // Scale
+  absoluteBB.xMin() *= scaleFactor[0];
+  absoluteBB.xMax() *= scaleFactor[0];
+  absoluteBB.yMin() *= scaleFactor[1];
+  absoluteBB.yMax() *= scaleFactor[1];
+  absoluteBB.zMin() *= scaleFactor[2];
+  absoluteBB.zMax() *= scaleFactor[2];
+  // Rotate
+  (this->rotation(index))
+      .rotateBB(absoluteBB.xMin(), absoluteBB.yMin(), absoluteBB.zMin(),
+                absoluteBB.xMax(), absoluteBB.yMax(), absoluteBB.zMax());
+
+  // Shift
+  const Eigen::Vector3d localPos = m_componentInfo->position(index);
+  absoluteBB.xMin() += localPos[0];
+  absoluteBB.xMax() += localPos[0];
+  absoluteBB.yMin() += localPos[1];
+  absoluteBB.yMax() += localPos[1];
+  absoluteBB.zMin() += localPos[2];
+  absoluteBB.zMax() += localPos[2];
+
+  if (reference && !reference->isAxisAligned()) { // copy coordinate system
+
+    std::vector<Kernel::V3D> coordSystem;
+    coordSystem.assign(reference->getCoordSystem().begin(),
+                       reference->getCoordSystem().end());
+
+    // realign to reference coordinate system
+    absoluteBB.realign(&coordSystem);
+  }
+  return absoluteBB;
+}
+
+/**
+ * Compute the bounding box for the component with componentIndex taking into
+ *account
+ * all sub components.
+ *
+ * @param componentIndex : Component index to get the bounding box for
+ * @param reference : Optional reference for coordinate system for non-axis
+ *aligned bounding boxes
+ * @return Absolute bounding box
+ */
+BoundingBox ComponentInfo::boundingBox(const size_t componentIndex,
+                                       const BoundingBox *reference) const {
+  if (isDetector(componentIndex)) {
+    return componentBoundingBox(componentIndex, reference);
+  }
+  BoundingBox absoluteBB;
+  auto rangeComp = m_componentInfo->componentRangeInSubtree(componentIndex);
+  std::stack<std::pair<size_t, size_t>> detExclusions{};
+  auto compIterator = rangeComp.rbegin();
+  while (compIterator != rangeComp.rend()) {
+    const size_t index = *compIterator;
+    if (hasSource() && index == source()) {
+      ++compIterator;
+    } else if (isStructuredBank(index)) {
+      auto innerRangeComp = m_componentInfo->componentRangeInSubtree(index);
+      // nSubComponents, subtract off self hence -1. nSubComponents = number of
+      // horizontal columns.
+      auto nSubComponents = innerRangeComp.end() - innerRangeComp.begin() - 1;
+      auto innerRangeDet = m_componentInfo->detectorRangeInSubtree(index);
+      auto nSubDetectors =
+          std::distance(innerRangeDet.begin(), innerRangeDet.end());
+      auto nY = nSubDetectors / nSubComponents;
+      size_t bottomLeft = *innerRangeDet.begin();
+      size_t topRight = bottomLeft + nSubDetectors - 1;
+      size_t topLeft = bottomLeft + (nY - 1);
+      size_t bottomRight = topRight - (nY - 1);
+
+      absoluteBB.grow(componentBoundingBox(bottomLeft, reference));
+      absoluteBB.grow(componentBoundingBox(topRight, reference));
+      absoluteBB.grow(componentBoundingBox(topLeft, reference));
+      absoluteBB.grow(componentBoundingBox(bottomRight, reference));
+
+      // Get bounding box for rectangular bank.
+      // Record detector ranges to skip
+      // Skip all sub components.
+      detExclusions.emplace(std::make_pair(bottomLeft, topRight));
+      compIterator = innerRangeComp.rend();
+    } else {
+      absoluteBB.grow(componentBoundingBox(index, reference));
+      ++compIterator;
+    }
+  }
+
+  // Now deal with bounding boxes for detectors
+  auto rangeDet = m_componentInfo->detectorRangeInSubtree(componentIndex);
+  auto detIterator = rangeDet.begin();
+  auto *exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
+  while (detIterator != rangeDet.end()) {
+
+    // Handle detectors in exclusion ranges
+    if (exclusion && (*detIterator) >= exclusion->first &&
+        (*detIterator) <= exclusion->second) {
+      detIterator += (exclusion->second - exclusion->first +
+                      1); // Jump the iterator forward
+      detExclusions.pop();
+      exclusion = detExclusions.empty() ? nullptr : &detExclusions.top();
+    } else if (detIterator != rangeDet.end()) {
+      absoluteBB.grow(componentBoundingBox(*detIterator, reference));
+      ++detIterator;
+    }
+  }
+  return absoluteBB;
+}
+
+bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
+  return m_componentInfo->isStructuredBank(componentIndex);
+}
+
 } // namespace Geometry
 } // namespace Mantid

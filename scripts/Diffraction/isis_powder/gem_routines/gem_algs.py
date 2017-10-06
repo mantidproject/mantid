@@ -8,7 +8,7 @@ from isis_powder.routines.run_details import create_run_details_object, \
 from isis_powder.gem_routines import gem_advanced_config
 
 
-def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering):
+def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
     # First 100 detectors are monitors or not connected to DAE
     mantid.MaskDetectors(ws_to_correct, SpectraList=range(1, 101))
 
