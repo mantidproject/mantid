@@ -148,7 +148,8 @@ class BayesQuasi(PythonAlgorithm):
         o_w1 = int(self._width)
         o_res = int(self._res_norm)
 
-        o_bgd = self.fortran_background_encoding(setup_prog)
+        # fortran code uses background choices defined using the following numbers
+        o_bgd = ['Zero', 'Flat', 'Sloping'].index(self._background)
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
         setup_prog.report('Establishing save path')
@@ -374,16 +375,6 @@ class BayesQuasi(PythonAlgorithm):
                               + " please view the algorithm documentation to see" \
                               + " what platforms are currently supported"
             raise RuntimeError(unsupported_msg)
-
-    def fortran_background_encoding(self, setup_prog):
-        # fortran code uses background choices defined using the following numbers
-        setup_prog.report('Encoding input options')
-        if self._background == 'Sloping':
-            return 2
-        if self._background == 'Flat':
-            return 1
-        if self._background == 'Zero':
-            return 0
 
     def check_energy_range_for_zeroes(self, first_data_point, last_data_point):
         if first_data_point > self._e_min:
