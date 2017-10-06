@@ -2448,7 +2448,7 @@ QString QtLocalePropertyManager::valueText(const QtProperty *property) const {
   if (it == d_ptr->m_values.constEnd())
     return QString();
 
-  QLocale loc = it.value();
+  const QLocale &loc = it.value();
 
   int langIdx = 0;
   int countryIdx = 0;

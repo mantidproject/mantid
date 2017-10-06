@@ -620,9 +620,6 @@ private:
                              bool useAbsoluteDate,
                              Mantid::Types::Core::DateAndTime start);
 
-  /// extracts the files from a mimedata object that have a .py extension
-  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
-
   // Whether new plots shoul re-use the same plot instance (for every
   // different
   // type of plot).

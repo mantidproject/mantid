@@ -741,7 +741,7 @@ void Shape2DCollection::eraseFree(const QPolygonF &polygon) {
  */
 void Shape2DCollection::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tsv(lines);
-  for (auto shapeLines : tsv.sections("shape")) {
+  for (const auto &shapeLines : tsv.sections("shape")) {
     Shape2D *shape = Shape2D::loadFromProject(shapeLines);
     m_shapes.push_back(shape);
     emit shapeCreated();

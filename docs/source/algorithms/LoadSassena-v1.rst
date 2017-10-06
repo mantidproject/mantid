@@ -56,7 +56,7 @@ Usage
 
     from __future__ import print_function
     ws = LoadSassena("loadSassenaExample.h5", TimeUnit=1.0)
-    print('workspaces instantiated: ', ', '.join(ws.getNames()))
+    print('workspaces instantiated:  {}'.format(', '.join(ws.getNames())))
     fqtReal = ws[1] # Real part of F(Q,t)
     # Let's fit it to a Gaussian. We start with an initial guess
     intensity = 0.5
@@ -71,13 +71,13 @@ Usage
     paramTable = fit_output.OutputParameters  # table containing the optimal fit parameters
     fitWorkspace = fit_output.OutputWorkspace
 
-    print("The fit was: " + fit_output.OutputStatus)
-    print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-    print("Fitted centre value is: %.2f" % abs(paramTable.column(1)[1]))
-    print("Fitted sigma value is: %.1f" % paramTable.column(1)[2])
+    print("The fit was: {}".format(fit_output.OutputStatus))
+    print("Fitted Height value is: {:.2f}".format(paramTable.column(1)[0]))
+    print("Fitted centre value is: {:.2f}".format(abs(paramTable.column(1)[1])))
+    print("Fitted sigma value is: {:.1f}".format(paramTable.column(1)[2]))
     # fitWorkspace contains the data, the calculated and the difference patterns
-    print("Number of spectra in fitWorkspace is: " +  str(fitWorkspace.getNumberHistograms()))
-    print("The 989th y-value of the fitted curve: %.3f" % fitWorkspace.readY(1)[989])
+    print("Number of spectra in fitWorkspace is: {}".format(fitWorkspace.getNumberHistograms()))
+    print("The 989th y-value of the fitted curve: {:.3f}".format(fitWorkspace.readY(1)[989]))
 
 Output:
 

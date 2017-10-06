@@ -839,7 +839,7 @@ void PreviewPlot::handleAxisTypeSelect() {
   // Hide range selectors on X axis when X axis scale is X^2
   bool xIsSquared = xAxisType == "Squared";
   for (auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it) {
-    QString rsName = it.key();
+    const QString &rsName = it.key();
     RangeSelector *rs = it.value();
     RangeSelector::SelectType type = rs->getType();
 

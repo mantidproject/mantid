@@ -1010,7 +1010,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       if (!filePath.isFile())
         continue;
 
-      std::string l_filenamePart = filePath.getFileName();
+      const std::string &l_filenamePart = filePath.getFileName();
       if (regex_match(l_filenamePart, regex)) {
         const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";

@@ -46,7 +46,8 @@ Usage
 
     #do a quick check
     ol=data.sample().getOrientedLattice()
-    print "Data lattice parameters are:",ol.a(),ol.b(),ol.c(),ol.alpha(),ol.beta(),ol.gamma()
+    print("Data lattice parameters are: {} {} {} {} {} {}".format(
+	   ol.a(), ol.b(), ol.c(), ol.alpha(), ol.beta(), ol.gamma()))
     
 .. testcleanup:: CopySample
 
