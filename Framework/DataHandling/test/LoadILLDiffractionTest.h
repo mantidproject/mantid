@@ -86,7 +86,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(3072)[0], 7848.)
     TS_ASSERT_DELTA(outputWS->e(3072)[0], 88.58, 0.01)
 
-    const auto& run = outputWS->run();
+    const auto &run = outputWS->run();
 
     TS_ASSERT(run.hasProperty("simulated_d20"))
     TS_ASSERT(run.hasProperty("AcquisitionSpy"))

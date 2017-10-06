@@ -12,17 +12,15 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static MostLikelyMeanTest *createSuite() { return new MostLikelyMeanTest(); }
-  static void destroySuite( MostLikelyMeanTest *suite ) { delete suite; }
+  static void destroySuite(MostLikelyMeanTest *suite) { delete suite; }
 
-  void test_Init()
-  {
+  void test_Init() {
     MostLikelyMean alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
   }
 
-  void test_exec()
-  {
+  void test_exec() {
     MostLikelyMean alg;
     std::vector<double> input = {1, 2, 3, 4, 5};
     alg.initialize();

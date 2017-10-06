@@ -25,9 +25,7 @@ const std::string MostLikelyMean::name() const { return "MostLikelyMean"; }
 int MostLikelyMean::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MostLikelyMean::category() const {
-  return "Arithmetic";
-}
+const std::string MostLikelyMean::category() const { return "Arithmetic"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string MostLikelyMean::summary() const {
@@ -39,9 +37,9 @@ const std::string MostLikelyMean::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MostLikelyMean::init() {
-    auto nullValidator = boost::make_shared<NullValidator>();
-  declareProperty(Kernel::make_unique<ArrayProperty<double>>("InputArray", nullValidator,
-                                                             Direction::Input),
+  auto nullValidator = boost::make_shared<NullValidator>();
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "InputArray", nullValidator, Direction::Input),
                   "An input array.");
   declareProperty(Kernel::make_unique<PropertyWithValue<double>>(
                       "Output", 0., Direction::Output),

@@ -256,8 +256,7 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan) {
   g_log.debug() << "Last time index ends at:"
                 << (m_startTime + std::accumulate(timeDurations.begin(),
                                                   timeDurations.end(), 0.0))
-                       .toISO8601String()
-                << "\n";
+                       .toISO8601String() << "\n";
 
   // Angles in the NeXus files are the absolute position for tube 1
   std::vector<double> tubeAngles =
