@@ -9,7 +9,7 @@ UI & Usability Changes
 User Interface
 --------------
 
-- Fixed the ability to drag & drop files into Mantid OSX >=10.10
+- Fixed the ability to drag & drop files into Mantid on OSX >=10.10
 - The welcome dialog has been redesigned to use less of the screen to fit better onto laptops with small high resolution screens that use screen scaling.
 
 Scanning workspaces
@@ -50,17 +50,17 @@ VSI Improvements
 
 - Upstream ParaView Contributions
 
- - Fix scaling, orientation and position inputs when nonorthogonal axes are present.
- - Speed up MultiSlice view by avoiding repeated allocating and freeing memory.
- - Fix the resample to image mapper, which was failing when input contains cell data.
- - Expose the SamplingDimensions property when using the resample to image mapper with vtkStructuredGrids.
+  - Fix scaling, orientation and position inputs when nonorthogonal axes are present.
+  - Speed up MultiSlice view by avoiding repeated allocating and freeing memory.
+  - Fix the resample to image mapper, which was failing when input contains cell data.
+  - Expose the SamplingDimensions property when using the resample to image mapper with vtkStructuredGrids.
 
 - Upstream VTK Contributions
 
- - Improve surface filter performance using vtkSMPTools
- - Refactor the vtkDataSetTriangleFilter for better performance.
- - Refactor the threshold filter to take advantage of structured data.
- - Minimize duplicate code in vtkDataArrayPrivate and parallelize range calculation.
+  - Improve surface filter performance using vtkSMPTools
+  - Refactor the vtkDataSetTriangleFilter for better performance.
+  - Refactor the threshold filter to take advantage of structured data.
+  - Minimize duplicate code in vtkDataArrayPrivate and parallelize range calculation.
 
 - Multislice view uses a custom `representation <https://www.paraview.org/ParaView/index.php/Views_And_Representations>`_ to speed up slicing by taking advantage of the consistent bin 
   sizes in a MDHistoWorkspace. Smooth interaction with typical data sizes (< 10 million cells) is now possible.
