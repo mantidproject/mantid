@@ -58,7 +58,7 @@ Usage
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveNexusProcessed(ws, path)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
