@@ -25,7 +25,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -709,14 +708,14 @@ void MWRunFiles::findFiles() {
     QTimer timer;
     connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
     if (m_thread->isRunning()) {
-        // Quit the thread
-        m_thread->exit(-1);
-        // While the thread is quiting keep the application responsive
-        while (m_thread->isRunning()) {
-          timer.start(50);
-          eventLoop.exec();
-          timer.stop();
-        }
+      // Quit the thread
+      m_thread->exit(-1);
+      // While the thread is quiting keep the application responsive
+      while (m_thread->isRunning()) {
+        timer.start(50);
+        eventLoop.exec();
+        timer.stop();
+      }
     }
 
     emit findingFiles();
