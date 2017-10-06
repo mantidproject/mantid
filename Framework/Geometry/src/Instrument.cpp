@@ -830,9 +830,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       return;
     }
 
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
-      return;
-    }
     // Loop over the children and define a box large enough for all of them
     ComponentID sourceID = getSource()->getComponentID();
     assemblyBox =
@@ -846,9 +843,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
         assemblyBox.grow(compBox);
       }
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
-
   } else {
 
     if (!m_cachedBoundingBox) {
