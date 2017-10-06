@@ -45,15 +45,11 @@ Usage
    print("Table contains {0} rows".format(nRows))
    print("first 11 of them are:")
    print("--------------------------------------------------------------------------------------------------------------")
-   for name in col_names:
-      print('| {0:19} '.format(name), end='')
-   print('|')
+   print(' '.join('| {0:19}'.format(name) for name in col_names) + ' |')
+	      
    print("--------------------------------------------------------------------------------------------------------------")
    for i in range(0,11):
-     for name in col_names:
-        col = table.column(name);
-        print('| {0:>19.4f} '.format(col[i]), end='')
-     print('|')
+      print(' '.join('| {0:>19.4f}'.format(table.column(name)[i]) for name in col_names) + ' |')
     
     
 **Output:**
