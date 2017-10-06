@@ -178,7 +178,7 @@ Example 3: Rotating a single detector
   # Take element by element difference of the solid angles
   diff = sa2 - sa1
   print(diff)
-  print('The non-zero difference {} is due to detector {}'.format(diff[32], ws.getDetector(32).getID()))
+  print('The non-zero difference {:.13f} is due to detector {}'.format(diff[32], ws.getDetector(32).getID()))
 
 Output
 ^^^^^^
