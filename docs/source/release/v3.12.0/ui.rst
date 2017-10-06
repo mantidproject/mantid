@@ -15,6 +15,9 @@ Installation
 Workbench
 ---------
 
+- Fixed a bug where replacing a workspace with X errors with a workspace without the errors while Data View was open would result in a crash.
+
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
