@@ -55,7 +55,7 @@ Usage
 
     with open(filename,'r') as f:
         for i in range(12):
-            print(f.readline())
+            print(f.readline(), end='')
 
 **Output:**
 

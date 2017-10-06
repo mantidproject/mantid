@@ -39,7 +39,7 @@ Usage
   gfile.close()
 
   print("[GSAS File Start]")
-  for i in xrange(11):
+  for i in range(11):
       print(lines[i].rstrip())
   print("... ...")
 
