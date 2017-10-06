@@ -162,7 +162,7 @@ Usage
     wsnames = wsgroup.getNames()
     for name in sorted(wsnames):
         tmpws = mtd[name]
-        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
 
 Output:
@@ -207,9 +207,9 @@ Output:
     wsnames = wsgroup.getNames()
     for name in sorted(wsnames):
         tmpws = mtd[name]
-        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
         split_log = tmpws.run().getProperty('splitter')
-        print 'event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0], split_log.times[1])
+        print('event splitter log: entry 0 and entry 1 are {0} and {1}.'.format(split_log.times[0], split_log.times[1]))
 
 
 Output:
@@ -251,7 +251,7 @@ Output:
     wsnames = wsgroup.getNames()
     for name in sorted(wsnames):
         tmpws = mtd[name]
-        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
 
 Output:
@@ -290,7 +290,7 @@ Output:
     wsnames = wsgroup.getNames()
     for name in sorted(wsnames):
         tmpws = mtd[name]
-        print "workspace %s has %d events" % (name, tmpws.getNumberEvents())
+        print("workspace %s has %d events" % (name, tmpws.getNumberEvents()))
 
 
 Output:

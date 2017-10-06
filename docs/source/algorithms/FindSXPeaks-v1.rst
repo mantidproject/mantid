@@ -73,7 +73,7 @@ Usage
    
    wsPeaks = FindSXPeaks(ws)
 
-   print "Peaks found: " + str(wsPeaks.getNumberPeaks())
+   print("Peaks found: {}".format(wsPeaks.getNumberPeaks()))
 
 Output:
 

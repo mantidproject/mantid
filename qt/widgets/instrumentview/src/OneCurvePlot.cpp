@@ -23,7 +23,7 @@ namespace MantidWidgets {
 
 OneCurvePlot::OneCurvePlot(QWidget *parent)
     : QwtPlot(parent), m_curve(nullptr), m_xUnits("") {
-  QFont font = parent->font();
+  const QFont &font = parent->font();
   setAxisFont(QwtPlot::xBottom, font);
   setAxisFont(QwtPlot::yLeft, font);
   QwtText dummyText;

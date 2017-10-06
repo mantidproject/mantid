@@ -56,7 +56,7 @@ Usage
     LoadIsawUB(ws,"ls5637.mat")
     wsd = OptimizeCrystalPlacement(ws)
     (wsPeakOut,fitInfoTable,chi2overDoF,nPeaks,nParams,nIndexed,covrianceInfoTable) = OptimizeCrystalPlacement(ws)
-    print "Chi2: %.4f" % chi2overDoF
+    print("Chi2: {:.4f}".format(chi2overDoF))
 
 Output:
 

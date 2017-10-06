@@ -150,7 +150,7 @@ void ConvertAxisByFormula::exec() {
   mu::Parser p;
   try {
     // set parameter lookups for the axis value
-    for (auto variable : variables) {
+    for (const auto &variable : variables) {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
@@ -262,7 +262,7 @@ void ConvertAxisByFormula::exec() {
 
 void ConvertAxisByFormula::setAxisValue(const double &value,
                                         std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (!variable->isGeometric) {
       variable->value = value;
     }
@@ -281,7 +281,7 @@ void ConvertAxisByFormula::calculateValues(
 void ConvertAxisByFormula::setGeometryValues(
     const API::SpectrumInfo &specInfo, const size_t index,
     std::vector<Variable_ptr> &variables) {
-  for (auto variable : variables) {
+  for (const auto &variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {
         variable->value = specInfo.twoTheta(index);
