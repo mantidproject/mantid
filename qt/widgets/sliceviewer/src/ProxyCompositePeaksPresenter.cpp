@@ -7,12 +7,12 @@ Constructor
 */
 ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter(
     boost::shared_ptr<CompositePeaksPresenter> composite)
-    : m_compositePresenter(composite), m_updateableView(NULL) {
+    : m_compositePresenter(composite), m_updateableView(nullptr) {
   m_compositePresenter->registerOwningPresenter(this);
 }
 
 ProxyCompositePeaksPresenter::ProxyCompositePeaksPresenter()
-    : m_updateableView(NULL) {}
+    : m_updateableView(nullptr) {}
 
 /**
 Destructor

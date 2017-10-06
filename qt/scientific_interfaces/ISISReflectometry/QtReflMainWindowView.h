@@ -46,7 +46,7 @@ class QtReflMainWindowView : public MantidQt::API::UserSubWindow,
                              public IReflMainWindowView {
 public:
   /// Constructor
-  explicit QtReflMainWindowView(QWidget *parent = 0);
+  explicit QtReflMainWindowView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflMainWindowView() override;
   /// Name of the interface

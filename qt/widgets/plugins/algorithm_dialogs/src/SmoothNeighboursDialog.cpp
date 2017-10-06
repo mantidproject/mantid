@@ -19,7 +19,8 @@ const QString SmoothNeighboursDialog::RECTANGULAR_GROUP =
 const QString SmoothNeighboursDialog::INPUT_WORKSPACE = "InputWorkspace";
 
 SmoothNeighboursDialog::SmoothNeighboursDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_propertiesWidget(NULL), m_dialogLayout(NULL) {}
+    : AlgorithmDialog(parent), m_propertiesWidget(nullptr),
+      m_dialogLayout(nullptr) {}
 
 void SmoothNeighboursDialog::initLayout() {
   // Create main layout

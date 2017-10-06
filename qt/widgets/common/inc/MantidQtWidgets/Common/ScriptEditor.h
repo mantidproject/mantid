@@ -97,7 +97,7 @@ public:
 
 public:
   /// Constructor
-  ScriptEditor(QWidget *parent = 0, QsciLexer *lexer = NULL,
+  ScriptEditor(QWidget *parent = nullptr, QsciLexer *lexer = nullptr,
                const QString &settingsGroup = "");
   /// Destructor
   ~ScriptEditor() override;

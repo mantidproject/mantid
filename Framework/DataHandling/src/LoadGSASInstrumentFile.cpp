@@ -30,10 +30,8 @@ using namespace Mantid::Kernel;
 using namespace std;
 using namespace Poco::XML;
 
-using Geometry::Instrument;
 using Geometry::Instrument_sptr;
 using Geometry::Instrument_const_sptr;
-using Mantid::Geometry::InstrumentDefinitionParser;
 
 namespace Mantid {
 namespace DataHandling {

@@ -58,7 +58,7 @@ class Abins(PythonAlgorithm):
         self.declareProperty(FileProperty("PhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
-                             extensions=["phonon", "out", "outmol", "log"]),
+                             extensions=["phonon", "out", "outmol", "log", "LOG"]),
                              doc="File with the data from a phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -610,7 +610,7 @@ class Abins(PythonAlgorithm):
 
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
-        if found_filename_ext != expected_file_extension:
+        if found_filename_ext.lower() != expected_file_extension:
             return dict(Invalid=True,
                         Comment=msg_err + "Output from DFT program " + dft_program + " is expected." +
                                           " The expected extension of file is ." + expected_file_extension +

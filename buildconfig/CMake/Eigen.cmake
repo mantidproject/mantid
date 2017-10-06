@@ -19,7 +19,7 @@ else()
   # for static libraries, object libraries, and executables without exports.
   cmake_policy(SET CMP0063 "OLD")
 
-  execute_process(COMMAND ${CMAKE_COMMAND} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
+  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
   execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/eigen-download )
 
   set(EIGEN3_INCLUDE_DIR "${CMAKE_BINARY_DIR}/eigen-src" CACHE PATH "Eigen include directory")

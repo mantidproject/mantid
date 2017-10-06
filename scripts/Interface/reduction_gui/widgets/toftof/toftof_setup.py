@@ -145,7 +145,9 @@ class TOFTOFSetupWidget(BaseWidget):
     # tooltips
     TIP_prefix  = ''
     TIP_dataDir = ''
+    TIP_saveDir = ''
     TIP_btnDataDir = ''
+    TIP_btnSaveDir = ''
 
     TIP_vanRuns = ''
     TIP_vanCmnt = ''
@@ -168,6 +170,15 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_dataRunsView = ''
 
     TIP_chkSubtractECVan = ''
+    TIP_chkReplaceNaNs = 'Replace NaNs with 0'
+    TIP_chkCreateDiff = ''
+    TIP_chkKeepSteps = ''
+
+    TIP_chkSofQW = ''
+    TIP_chkSofTW = ''
+    TIP_chkNxspe = 'Save for MSlice'
+    TIP_chkNexus = 'Save for Mantid'
+    TIP_chkAscii = 'Will be available soon'
 
     TIP_rbtNormaliseNone = ''
     TIP_rbtNormaliseMonitor = ''
@@ -195,6 +206,7 @@ class TOFTOFSetupWidget(BaseWidget):
         # ui data elements
         self.prefix    = tip(QLineEdit(), self.TIP_prefix)
         self.dataDir   = tip(QLineEdit(), self.TIP_dataDir)
+        self.saveDir   = tip(QLineEdit(), self.TIP_saveDir)
 
         self.vanRuns   = tip(QLineEdit(), self.TIP_vanRuns)
         self.vanCmnt   = tip(QLineEdit(), self.TIP_vanCmnt)
@@ -233,8 +245,18 @@ class TOFTOFSetupWidget(BaseWidget):
 
         # ui controls
         self.btnDataDir          = tip(QPushButton('Browse'), self.TIP_btnDataDir)
+        self.btnSaveDir          = tip(QPushButton('Browse'), self.TIP_btnSaveDir)
 
         self.chkSubtractECVan    = tip(QCheckBox('Subtract empty can from vanadium'), self.TIP_chkSubtractECVan)
+        self.chkReplaceNaNs      = tip(QCheckBox('Replace special values in S(Q,W) with 0'), self.TIP_chkReplaceNaNs)
+        self.chkCreateDiff       = tip(QCheckBox('Create diffractograms'), self.TIP_chkCreateDiff)
+        self.chkKeepSteps        = tip(QCheckBox('Keep intermediate steps'), self.TIP_chkKeepSteps)
+
+        self.chkSofQW            = tip(QCheckBox('S(Q,W)'), self.TIP_chkSofQW)
+        self.chkSofTW            = tip(QCheckBox('S(2theta,W)'), self.TIP_chkSofTW)
+        self.chkNxspe            = tip(QCheckBox('NXSPE'), self.TIP_chkNxspe)
+        self.chkNexus            = tip(QCheckBox('NeXus'), self.TIP_chkNexus)
+        self.chkAscii            = tip(QCheckBox('Ascii'), self.TIP_chkAscii)
 
         self.rbtNormaliseNone    = tip(QRadioButton('none'), self.TIP_rbtNormaliseNone)
         self.rbtNormaliseMonitor = tip(QRadioButton('to monitor'), self.TIP_rbtNormaliseMonitor)
@@ -271,6 +293,7 @@ class TOFTOFSetupWidget(BaseWidget):
         gbDataDir = QGroupBox('Data search directory')
         gbPrefix  = QGroupBox('Workspace prefix')
         gbOptions = QGroupBox('Options')
+        gbSave    = QGroupBox('Save reduced data')
         gbInputs  = QGroupBox('Inputs')
         gbBinning = QGroupBox('Binning')
         gbData    = QGroupBox('Data')
@@ -279,7 +302,7 @@ class TOFTOFSetupWidget(BaseWidget):
         self._layout.addLayout(box)
 
         box.addLayout(hbox((gbDataDir, gbPrefix)))
-        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), gbData)))
+        box.addLayout(hbox((vbox((gbInputs, gbBinning, gbOptions, 1)), vbox((gbData, gbSave)))))
 
         gbDataDir.setLayout(hbox((self.dataDir, self.btnDataDir)))
         gbPrefix.setLayout(hbox((self.prefix,)))
@@ -294,6 +317,9 @@ class TOFTOFSetupWidget(BaseWidget):
         grid.addWidget(self.rbtCorrectTOFNone,  2, 1)
         grid.addWidget(self.rbtCorrectTOFVan,   2, 2)
         grid.addWidget(self.rbtCorrectTOFSample,2, 3)
+        grid.addWidget(self.chkReplaceNaNs,   3, 0, 1, 4)
+        grid.addWidget(self.chkCreateDiff,    4, 0, 1, 4)
+        grid.addWidget(self.chkKeepSteps,     5, 0, 1, 4)
         grid.setColumnStretch(4, 1)
 
         gbOptions.setLayout(grid)
@@ -347,8 +373,24 @@ class TOFTOFSetupWidget(BaseWidget):
 
         gbData.setLayout(hbox((self.dataRunsView,)))
 
+        grid = QGridLayout()
+        grid.addWidget(QLabel('Workspaces'),  0, 0)
+        grid.addWidget(self.chkSofQW,         1, 0)
+        grid.addWidget(self.chkSofTW,         1, 1)
+        grid.addWidget(QLabel('Format'),      2, 0)
+        grid.addWidget(self.chkNxspe,         3, 0)
+        grid.addWidget(self.chkNexus,         3, 1)
+        grid.addWidget(self.chkAscii,         3, 2)
+        grid.setColumnStretch(3, 1)
+
+        # disable save Ascii, it is not available for the moment
+        self.chkAscii.setEnabled(False)
+
+        gbSave.setLayout(vbox((label('Directory',''), hbox((self.saveDir, self.btnSaveDir)), grid)))
+
         # handle signals
         self.btnDataDir.clicked.connect(self._onDataDir)
+        self.btnSaveDir.clicked.connect(self._onSaveDir)
         self.binEon.clicked.connect(self._onBinEon)
         self.binQon.clicked.connect(self._onBinQon)
         self.runDataModel.selectCell.connect(self._onSelectedCell)
@@ -358,12 +400,22 @@ class TOFTOFSetupWidget(BaseWidget):
         if dirname:
             self.dataDir.setText(dirname)
 
+    def _onSaveDir(self):
+        dirname = self.dir_browse_dialog()
+        if dirname:
+            self.saveDir.setText(dirname)
+
     def _onBinEon(self, onVal):
-        for widget in (self.binEstart, self.binEstep, self.binEend):
+        if not onVal:
+            self.chkNxspe.setChecked(False)
+            self.chkReplaceNaNs.setChecked(False)
+            self.binQon.setChecked(False)
+        for widget in (self.binEstart, self.binEstep, self.binEend, self.chkCreateDiff, self.chkNxspe, self.binQon,
+                       self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
             widget.setEnabled(onVal)
 
     def _onBinQon(self, onVal):
-        for widget in (self.binQstart, self.binQstep, self.binQend):
+        for widget in (self.binQstart, self.binQstep, self.binQend, self.chkReplaceNaNs, self.chkSofQW):
             widget.setEnabled(onVal)
 
     def _onSelectedCell(self, index):
@@ -403,6 +455,16 @@ class TOFTOFSetupWidget(BaseWidget):
         elem.maskDetectors = line_text(self.maskDetectors)
 
         elem.subtractECVan = self.chkSubtractECVan.isChecked()
+        elem.replaceNaNs   = self.chkReplaceNaNs.isChecked()
+        elem.createDiff    = self.chkCreateDiff.isChecked()
+        elem.keepSteps     = self.chkKeepSteps.isChecked()
+
+        elem.saveDir       = line_text(self.saveDir)
+        elem.saveSofQW     = self.chkSofQW.isChecked()
+        elem.saveSofTW     = self.chkSofTW.isChecked()
+        elem.saveNXSPE     = self.chkNxspe.isChecked()
+        elem.saveNexus     = self.chkNexus.isChecked()
+        elem.saveAscii     = self.chkAscii.isChecked()
 
         elem.normalise     = elem.NORM_MONITOR    if self.rbtNormaliseMonitor.isChecked() else \
             elem.NORM_TIME       if self.rbtNormaliseTime.isChecked()    else \
@@ -446,6 +508,16 @@ class TOFTOFSetupWidget(BaseWidget):
         self.maskDetectors.setText(elem.maskDetectors)
 
         self.chkSubtractECVan.setChecked(elem.subtractECVan)
+        self.chkReplaceNaNs.setChecked(elem.replaceNaNs)
+        self.chkCreateDiff.setChecked(elem.createDiff)
+        self.chkKeepSteps.setChecked(elem.keepSteps)
+
+        self.saveDir.setText(elem.saveDir)
+        self.chkSofQW.setChecked(elem.saveSofQW)
+        self.chkSofTW.setChecked(elem.saveSofTW)
+        self.chkNxspe.setChecked(elem.saveNXSPE)
+        self.chkNexus.setChecked(elem.saveNexus)
+        self.chkAscii.setChecked(elem.saveAscii)
 
         if elem.normalise == elem.NORM_MONITOR:
             self.rbtNormaliseMonitor.setChecked(True)

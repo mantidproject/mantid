@@ -85,8 +85,7 @@ public:
   transfer(const std::vector<std::map<QString, QString>> &runs) = 0;
   virtual void setInstrumentList(const QStringList &instruments,
                                  const QString &defaultInstrument) = 0;
-  virtual std::vector<std::unique_ptr<Command>>
-  publishCommands() = 0;
+  virtual std::vector<std::unique_ptr<Command>> publishCommands() = 0;
   virtual void accept(DataProcessorMainPresenter *mainPresenter) = 0;
   virtual void acceptViews(DataProcessorView *tableView,
                            ProgressableView *progressView) = 0;
@@ -105,6 +104,8 @@ public:
                               int parentColumn) = 0;
   virtual int getNumberOfRows() = 0;
   virtual void clearTable() = 0;
+
+  virtual void skipProcessing() = 0;
 };
 }
 }

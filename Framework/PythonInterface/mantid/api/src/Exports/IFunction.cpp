@@ -1,6 +1,8 @@
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunctionAdapter.h"
+#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidAPI/CompositeFunction.h"
 
 #include <boost/python/class.hpp>
@@ -9,7 +11,9 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::IFunction;
+using Mantid::API::IFunction_sptr;
 using Mantid::PythonInterface::IFunctionAdapter;
+using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(IFunction)
@@ -244,4 +248,6 @@ void export_IFunction() {
       //-- Python special methods --
       .def("__repr__", &IFunction::asString, arg("self"),
            "Return a string representation of the function");
+
+  TypeRegistry::subscribe<TypedPropertyValueHandler<IFunction_sptr>>();
 }

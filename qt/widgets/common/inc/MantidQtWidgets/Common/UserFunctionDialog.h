@@ -20,7 +20,7 @@ class EXPORT_OPT_MANTIDQT_COMMON UserFunctionDialog : public QDialog {
   Q_OBJECT
 
 public:
-  UserFunctionDialog(QWidget *parent = NULL, const QString &formula = "");
+  UserFunctionDialog(QWidget *parent = nullptr, const QString &formula = "");
   ~UserFunctionDialog() override;
   QStringList categories() const;
   QString getFormula() const { return m_uiForm.teUserFunction->toPlainText(); }

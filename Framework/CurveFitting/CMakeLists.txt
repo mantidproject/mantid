@@ -58,6 +58,13 @@ set ( SRC_FILES
 	src/Functions/ComptonScatteringCountRate.cpp
 	src/Functions/Convolution.cpp
 	src/Functions/CrystalElectricField.cpp
+	src/Functions/CrystalFieldControl.cpp
+	src/Functions/CrystalFieldFunction.cpp
+	src/Functions/CrystalFieldPeaks.cpp
+	src/Functions/CrystalFieldPeaksBase.cpp
+	src/Functions/CrystalFieldMultiSpectrum.cpp
+	src/Functions/CrystalFieldPeakUtils.cpp
+	src/Functions/CrystalFieldSpectrum.cpp
 	src/Functions/CrystalFieldHeatCapacity.cpp
 	src/Functions/CrystalFieldMagnetisation.cpp
 	src/Functions/CrystalFieldMoment.cpp
@@ -215,6 +222,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Functions/Convolution.h
 	inc/MantidCurveFitting/Functions/CrystalElectricField.h
+	inc/MantidCurveFitting/Functions/CrystalFieldControl.h
+	inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
 	inc/MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMagnetisation.h
 	inc/MantidCurveFitting/Functions/CrystalFieldMoment.h
@@ -369,7 +378,9 @@ set ( TEST_FILES
 	Functions/ComptonProfileTest.h
 	Functions/ComptonScatteringCountRateTest.h
 	Functions/ConvolutionTest.h
+	Functions/CrystalFieldControlTest.h
 	Functions/CrystalFieldEnergiesTest.h
+	Functions/CrystalFieldFunctionTest.h
 	Functions/CrystalFieldHeatCapacityTest.h
 	Functions/CrystalFieldMagnetisationTest.h
 	Functions/CrystalFieldMomentTest.h

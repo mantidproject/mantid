@@ -761,8 +761,8 @@ void MantidEV::getSavePeaksFileName() {
   QString file_path = getFilePath(last_peaks_file);
   QString Qfile_name = QFileDialog::getSaveFileName(
       this, tr("Save peaks file"), file_path,
-      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"), 0,
-      QFileDialog::DontConfirmOverwrite);
+      tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*)"),
+      nullptr, QFileDialog::DontConfirmOverwrite);
 
   if (Qfile_name.length() > 0) {
     last_peaks_file = Qfile_name.toStdString();

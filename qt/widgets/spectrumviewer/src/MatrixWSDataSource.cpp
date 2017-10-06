@@ -3,8 +3,8 @@
  */
 
 #include <boost/lexical_cast.hpp>
+#include <cmath>
 #include <sstream>
-#include <math.h>
 
 #include <QThread>
 
@@ -42,7 +42,7 @@ namespace SpectrumView {
  */
 MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
     : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
-      m_emodeHandler(NULL), m_spectrumInfo(m_matWs->spectrumInfo()) {
+      m_emodeHandler(nullptr), m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();
   m_totalXMax = matWs->getXMax();
 
@@ -292,7 +292,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     double delta = 0.0;
 
     // First try to get emode & efixed from the user
-    if (m_emodeHandler != NULL) {
+    if (m_emodeHandler != nullptr) {
       efixed = m_emodeHandler->getEFixed();
       if (efixed != 0) {
         emode = m_emodeHandler->getEMode();
@@ -346,7 +346,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
     if (efixed == 0)
       emode = 0;
 
-    if (m_emodeHandler != NULL) {
+    if (m_emodeHandler != nullptr) {
       m_emodeHandler->setEFixed(efixed);
       m_emodeHandler->setEMode(emode);
     }

@@ -9,7 +9,7 @@
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;

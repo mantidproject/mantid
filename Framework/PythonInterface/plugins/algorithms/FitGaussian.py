@@ -83,17 +83,17 @@ class FitGaussian(PythonAlgorithm):
         endX   = tryCentre + 3.0*fwhm
 
         # pylint: disable = unpacking-non-sequence, assignment-from-none
-        fitStatus, _, _, paramTable = Fit(
+        fit_output = Fit(
             InputWorkspace=workspace, WorkspaceIndex=index,
             Function=fitFun, CreateOutput=True, OutputParametersOnly=True,
             StartX=startX, EndX=endX)
 
-        if not 'success' == fitStatus:
+        if not 'success' == fit_output.OutputStatus:
             self._warning("For detector " + str(index) + " in workspace " + workspace.name() +
                           "fit was not successful. Input guess parameters were " + str(fitFun))
             return
 
-        fitParams = paramTable.column(1)
+        fitParams = fit_output.OutputParameters.column(1)
         self._setOutput(fitParams[1],fitParams[2]) # [peakCentre,sigma]
 
 

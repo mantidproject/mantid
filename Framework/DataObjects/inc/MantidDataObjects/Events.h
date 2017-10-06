@@ -4,15 +4,15 @@
 #ifdef _WIN32 /* _WIN32 */
 #include <time.h>
 #endif
+#include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
+#include "MantidKernel/System.h"
+#include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/cow_ptr.h"
+#include "MantidTypes/Event/TofEvent.h"
 #include <cstddef>
 #include <iosfwd>
-#include <vector>
-#include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSplitter.h"
 #include <set>
+#include <vector>
 
 namespace Mantid {
 // Forward declaration needed while this needs to be a friend of TofEvent (see
@@ -22,76 +22,6 @@ class LoadEventNexus;
 }
 
 namespace DataObjects {
-
-//==========================================================================================
-/** Info about a single neutron detection event:
- *
- *  - the time of flight of the neutron (can be converted to other units)
- *  - the absolute time of the pulse at which it was produced
- */
-#pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class DLLExport TofEvent {
-
-  /// EventList has the right to mess with TofEvent.
-  friend class EventList;
-  friend class WeightedEvent;
-  friend class WeightedEventNoTime;
-  friend class tofGreaterOrEqual;
-  friend class tofGreater;
-  friend class DataHandling::LoadEventNexus; // Needed while the ISIS hack of
-                                             // spreading events out in a bin
-                                             // remains
-
-protected:
-  /** The 'x value' of the event. This will be in a unit available from the
-   * UnitFactory.
-   *  Initially (prior to any unit conversion on the holding workspace), this
-   * will have
-   *  the unit of time-of-flight in microseconds.
-   */
-  double m_tof;
-
-  /**
-   * The absolute time of the start of the pulse that generated this event.
-   * This is saved as the number of ticks (1 nanosecond if boost is compiled
-   * for nanoseconds) since a specified epoch: we use the GPS epoch of Jan 1,
-   *1990.
-   *
-   * 64 bits gives 1 ns resolution up to +- 292 years around 1990. Should be
-   *enough.
-   */
-  Mantid::Kernel::DateAndTime m_pulsetime;
-
-public:
-  /// Constructor, specifying only the time of flight in microseconds
-  TofEvent(double tof);
-
-  /// Constructor, specifying the time of flight in microseconds and the frame
-  /// id
-  TofEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime);
-
-  /// Empty constructor
-  TofEvent();
-
-  bool operator==(const TofEvent &rhs) const;
-  bool operator<(const TofEvent &rhs) const;
-  bool operator<(const double rhs_tof) const;
-  bool operator>(const TofEvent &rhs) const;
-  bool equals(const TofEvent &rhs, const double tolTof,
-              const int64_t tolPulse) const;
-
-  double operator()() const;
-  double tof() const;
-  Mantid::Kernel::DateAndTime pulseTime() const;
-  double weight() const;
-  double error() const;
-  double errorSquared() const;
-
-  /// Output a string representation of the event to a stream
-  friend std::ostream &operator<<(std::ostream &os, const TofEvent &event);
-};
-#pragma pack(pop)
-
 //==========================================================================================
 /** Info about a single neutron detection event, including a weight and error
  *value:
@@ -101,7 +31,7 @@ public:
  *  - weight of the neutron (float, can be
  */
 #pragma pack(push, 4) // Ensure the structure is no larger than it needs to
-class DLLExport WeightedEvent : public TofEvent {
+class DLLExport WeightedEvent : public Types::Event::TofEvent {
 
   /// EventList has the right to mess with WeightedEvent.
   friend class EventList;
@@ -121,9 +51,9 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
-  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
                 double weight, double errorSquared);
-  WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+  WeightedEvent(double tof, const Mantid::Types::Core::DateAndTime pulsetime,
                 float weight, float errorSquared);
 
   WeightedEvent(const TofEvent &, double weight, double errorSquared);
@@ -182,17 +112,21 @@ public:
   WeightedEventNoTime(double tof, double weight, double errorSquared);
   WeightedEventNoTime(double tof, float weight, float errorSquared);
 
-  WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+  WeightedEventNoTime(double tof,
+                      const Mantid::Types::Core::DateAndTime pulsetime,
                       double weight, double errorSquared);
-  WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime,
+  WeightedEventNoTime(double tof,
+                      const Mantid::Types::Core::DateAndTime pulsetime,
                       float weight, float errorSquared);
 
-  WeightedEventNoTime(const TofEvent &, double weight, double errorSquared);
-  WeightedEventNoTime(const TofEvent &, float weight, float errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &, double weight,
+                      double errorSquared);
+  WeightedEventNoTime(const Types::Event::TofEvent &, float weight,
+                      float errorSquared);
 
   WeightedEventNoTime(const WeightedEvent &);
 
-  WeightedEventNoTime(const TofEvent &);
+  WeightedEventNoTime(const Types::Event::TofEvent &);
 
   WeightedEventNoTime();
 
@@ -204,7 +138,7 @@ public:
 
   double operator()() const;
   double tof() const;
-  Mantid::Kernel::DateAndTime pulseTime() const;
+  Mantid::Types::Core::DateAndTime pulseTime() const;
   double weight() const;
   double error() const;
   double errorSquared() const;
@@ -213,36 +147,6 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const WeightedEvent &event);
 };
 #pragma pack(pop)
-
-//==========================================================================================
-// TofEvent inlined member function definitions
-//==========================================================================================
-
-/** () operator: return the tof (X value) of the event.
- *  This is useful for std operations like comparisons and std::lower_bound
- *  @return :: double, the tof (X value) of the event.
- */
-inline double TofEvent::operator()() const { return m_tof; }
-
-/** @return The 'x value'. Despite the name, this can be in any unit in the
- * UnitFactory.
- *  If it is time-of-flight, it will be in microseconds.
- */
-inline double TofEvent::tof() const { return m_tof; }
-
-/// Return the pulse time
-inline Mantid::Kernel::DateAndTime TofEvent::pulseTime() const {
-  return m_pulsetime;
-}
-
-/// Return the weight of the event - exactly 1.0 always
-inline double TofEvent::weight() const { return 1.0; }
-
-/// Return the error of the event - exactly 1.0 always
-inline double TofEvent::error() const { return 1.0; }
-
-/// Return the errorSquared of the event - exactly 1.0 always
-inline double TofEvent::errorSquared() const { return 1.0; }
 
 //==========================================================================================
 // WeightedEvent inlined member function definitions
@@ -277,7 +181,9 @@ inline double WeightedEventNoTime::tof() const { return m_tof; }
 /** Return the pulse time; this returns 0 since this
  *  type of Event has no time associated.
  */
-inline Kernel::DateAndTime WeightedEventNoTime::pulseTime() const { return 0; }
+inline Types::Core::DateAndTime WeightedEventNoTime::pulseTime() const {
+  return 0;
+}
 
 /// Return the weight of the neutron, as a double (it is saved as a float).
 inline double WeightedEventNoTime::weight() const { return m_weight; }
@@ -292,6 +198,6 @@ inline double WeightedEventNoTime::errorSquared() const {
   return m_errorSquared;
 }
 
-} // DataObjects
-} // Mantid
+} // namespace DataObjects
+} // namespace Mantid
 #endif /// MANTID_DATAOBJECTS_EVENTS_H_

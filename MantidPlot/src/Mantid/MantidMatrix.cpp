@@ -88,7 +88,7 @@ int modelTypeToInt(MantidMatrixModel::Type type) {
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws,
                            QWidget *parent, const QString &label,
                            const QString &name, int start, int end)
-    : MdiSubWindow(parent, label, name, 0), WorkspaceObserver(),
+    : MdiSubWindow(parent, label, name, nullptr), WorkspaceObserver(),
       m_workspace(ws), y_start(0.0), y_end(0.0), m_histogram(false), m_min(0),
       m_max(0), m_are_min_max_set(false), m_boundingRect(),
       m_strName(name.toStdString()), m_selectedRows(), m_selectedCols() {
@@ -226,7 +226,16 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start,
                  ? m_workspaceTotalHist - 1
                  : end;
   m_rows = m_endRow - m_startRow + 1;
-  m_cols = static_cast<int>(ws->blocksize());
+  try {
+    // let the workspace do its thing
+    m_cols = static_cast<int>(ws->blocksize());
+  } catch (std::length_error &) {
+    // otherwise get the maximum
+    m_cols = static_cast<int>(ws->y(0).size());
+    for (int i = 0; i < m_workspaceTotalHist; ++i) {
+      m_cols = std::max(m_cols, static_cast<int>(ws->y(i).size()));
+    }
+  }
   if (ws->isHistogramData())
     m_histogram = true;
   connect(this, SIGNAL(needsUpdating()), this, SLOT(repaintAll()));
@@ -462,7 +471,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
     QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                  tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
-    return NULL;
+    return nullptr;
   }
 
   for (int i = 0; i < rows; ++i) {
@@ -475,7 +484,7 @@ double **MantidMatrix::allocateMatrixData(int rows, int columns) {
       QMessageBox::critical(0, tr("MantidPlot") + " - " +
                                    tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
-      return NULL;
+      return nullptr;
     }
   }
   return data;
@@ -530,35 +539,39 @@ void MantidMatrix::goToColumn(int col) {
 }
 
 double MantidMatrix::dataX(int row, int col) const {
-  const auto &x = m_workspace->x(row + m_startRow);
-  if (!m_workspace || row >= numRows() || col >= static_cast<int>(x.size()))
+  if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = x[col];
-  return res;
+  const auto &x = m_workspace->x(row + m_startRow);
+  if (col >= static_cast<int>(x.size()))
+    return 0.;
+  return x[col];
 }
 
 double MantidMatrix::dataY(int row, int col) const {
-  const auto &y = m_workspace->y(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = y[col];
-  return res;
+  const auto &y = m_workspace->y(row + m_startRow);
+  if (col >= static_cast<int>(y.size()))
+    return 0.;
+  return y[col];
 }
 
 double MantidMatrix::dataE(int row, int col) const {
-  const auto &e = m_workspace->e(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = e[col];
-  return res;
+  const auto &e = m_workspace->e(row + m_startRow);
+  if (col >= static_cast<int>(e.size()))
+    return 0.;
+  return e[col];
 }
 
 double MantidMatrix::dataDx(int row, int col) const {
-  const auto &dx = m_workspace->dx(row + m_startRow);
   if (!m_workspace || row >= numRows() || col >= numCols())
     return 0.;
-  double res = dx[col];
-  return res;
+  const auto &dx = m_workspace->dx(row + m_startRow);
+  if (col >= static_cast<int>(dx.size()))
+    return 0.;
+  return dx[col];
 }
 
 QString MantidMatrix::workspaceName() const {
@@ -587,10 +600,11 @@ QwtDoubleRect MantidMatrix::boundingRect() {
     while (x_start == x_end && i0 <= m_endRow) {
       const auto &X = m_workspace->x(i0);
       x_start = X[0];
-      if (X.size() != m_workspace->y(i0).size())
-        x_end = X[m_workspace->blocksize()];
+      const size_t y_size = m_workspace->y(i0).size();
+      if (X.size() != y_size)
+        x_end = X[y_size];
       else
-        x_end = X[m_workspace->blocksize() - 1];
+        x_end = X[y_size - 1];
       if (!std::isfinite(x_start) || !std::isfinite(x_end)) {
         x_start = x_end = 0;
       }
@@ -724,7 +738,7 @@ MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   if (numRows() == 1) {
     QMessageBox::critical(0, "MantidPlot - Error",
                           "Cannot plot a workspace with only one spectrum.");
-    return NULL;
+    return nullptr;
   }
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -736,7 +750,7 @@ MultiLayer *MantidMatrix::plotGraph2D(GraphOptions::CurveType type) {
   // menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph *plot = g->activeGraph();
-  plotSpectrogram(plot, a, type, false, NULL);
+  plotSpectrogram(plot, a, type, false, nullptr);
   // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;
@@ -971,8 +985,8 @@ void MantidMatrix::afterReplaceHandle(
 }
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
-  if (m_cols != static_cast<int>(ws->blocksize()) ||
-      m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms())) {
+  if (m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()) ||
+      m_cols != static_cast<int>(ws->blocksize())) {
     closeDependants();
   }
 
