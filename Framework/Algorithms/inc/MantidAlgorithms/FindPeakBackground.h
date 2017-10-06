@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -37,7 +38,6 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class DLLExport FindPeakBackground : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -50,29 +50,8 @@ public:
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
 
-  /// process inputs
-  void processInputProperties();
-
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Calculation"; }
-
-  /// set histogram data to find background
-  // void setHistogram(HistogramData &histogram);
-
-  /// set sigma constant
-  void setSigma(const double &sigma);
-
-  /// set background order
-  void setBackgroundOrder(size_t order);
-
-  /// set fit window
-  void setFitWindow(const std::vector<double> &window);
-
-  /// find background (main algorithm)
-  void findPeakBackground();
-
-  /// get result
-  void getBackgroundResult();
 
 private:
   std::string m_backgroundType; //< The type of background to fit
@@ -89,8 +68,46 @@ private:
                           const bool hasPeak, double &out_bg0, double &out_bg1,
                           double &out_bg2);
 
+  /// process inputs
+  void processInputProperties();
+
   /// create output workspace
   void createOutputWorkspaces();
+
+  void findStartStopIndex(size_t &istart, size_t &istop);
+
+  /// set histogram data to find background
+  void setHistogram(const HistogramData::Histogram &histogram);
+
+  /// set sigma constant
+  void setSigma(const double &sigma);
+
+  /// set background order
+  void setBackgroundOrder(size_t order);
+
+  /// set fit window
+  void setFitWindow(const std::vector<double> &window);
+
+  /// histogram data to find peak background
+  boost::shared_ptr<const HistogramData::Histogram> m_histogram;
+
+  //  HistogramData::Histogram& m_histogram;
+  /// fit window
+  std::vector<double> m_vecFitWindows;
+  /// background order: 0 for flat, 1 for linear, 2 for quadratic
+  size_t m_backgroundOrder;
+  /// constant sigma
+  double m_sigmaConstant;
+  /// output workspace (table of result)
+  API::ITableWorkspace_sptr m_outPeakTableWS;
+
+  size_t m_inputWSIndex;
+
+  //  /// find background (main algorithm)
+  //  void findPeakBackground();
+
+  //  /// get result
+  //  void getBackgroundResult();
 
   struct cont_peak {
     size_t start;
@@ -102,21 +119,6 @@ private:
       return a.maxY > b.maxY;
     }
   };
-
-  void findStartStopIndex(size_t &istart, size_t &istop);
-
-  // define parameters
-
-  /// histogram data to find peak background
-  // HistogramData::Histogram m_histogram;
-  /// fit window
-  std::vector<double> m_vecFitWindows;
-  /// background order: 0 for flat, 1 for linear, 2 for quadratic
-  size_t m_backgroundOrder;
-  /// constant sigma
-  double m_sigmaConstant;
-  /// output workspace (table of result)
-  API::ITableWorkspace_sptr m_outPeakTableWS;
 };
 
 } // namespace Algorithms
