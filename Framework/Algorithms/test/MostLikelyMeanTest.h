@@ -40,10 +40,10 @@ public:
     delete suite;
   }
 
-  void setUp() {
+  void setUp() override {
     std::vector<double> input(10000);
     for (size_t i = 0; i < input.size(); ++i) {
-      input[i] = sqrt(i);
+      input[i] = double(sqrt(i));
     }
     m_alg.initialize();
     m_alg.setProperty("InputArray", input);
