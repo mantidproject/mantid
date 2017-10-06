@@ -47,9 +47,9 @@ Usage
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
    print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
-   #
+   
    NameA = RenameWorkspace(myWs)
-   #
+   
    print("***** After simple rename:")
    print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameA.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
@@ -59,18 +59,18 @@ Usage
    print("Old pointer to myWs refers to workspace with new name:  {}".format(myWs.name()))
    print("*********************************************************************")
    print("***** After renaming workspace and monitors workspace together:")
-   #
+   
    NameB = RenameWorkspace(myWs,RenameMonitors=True)
-   #
+   
    print("{0:20}|{1:>20}|{2:>20}|".format("Existing WS names: ",NameB.name(),mon_ws.name()))
    obj_inADS = AnalysisDataService.getObjectNames()
    obj_inADS.sort()
    print("{0:20}|{1:>6}| With Names: |{2:>20}|{3:>20}|".format("Exist in ADS: ",len(obj_inADS),obj_inADS[0],obj_inADS[1]))
-   # 
+    
    mon_ws1 = NameB.getMonitorWorkspace()
-   print("The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".\
+   print("The name of the monitor workspace attached to workspace:{0:>6}| Is:  {1:>10}|".
             format(NameB.name(),mon_ws1.name()))
-   print "*********************************************************************"  
+   print("*********************************************************************")
              
 Output:
 
