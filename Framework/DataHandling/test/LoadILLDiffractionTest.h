@@ -155,7 +155,7 @@ public:
       }
     }
 
-    const auto& run = outputWS->run();
+    const auto &run = outputWS->run();
 
     TS_ASSERT(run.hasProperty("Omega"))
     TS_ASSERT(run.hasProperty("Detector"))
