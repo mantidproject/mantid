@@ -61,9 +61,9 @@ public:
   void setPulseInformation(std::vector<IndexType> event_index,
                            std::vector<TimeZeroType> event_time_zero);
 
-  void startParsing(int32_t *event_id_start,
-                    TimeOffsetType *event_time_offset_start,
-                    const LoadRange &range);
+  void startAsync(int32_t *event_id_start,
+                  TimeOffsetType *event_time_offset_start,
+                  const LoadRange &range);
 
   void redistributeDataMPI(
       std::vector<EventListEntry> &result,
@@ -94,7 +94,6 @@ public:
   }
 
   void wait() const;
-  void finalize() const;
 
 private:
   void doParsing(int32_t *event_id_start,

@@ -203,7 +203,6 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
     std::vector<std::vector<TofEvent> *> &eventList,
     const std::vector<EventListEntry> &events) {
   for (const auto &event : events) {
-// TODO: calculate local index
 #ifdef MPI_EXPERIMENTAL
     auto index = m_globalToLocalSpectrumIndex[event.index];
 #else
@@ -219,7 +218,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
 /** Accepts raw data from file which has been pre-treated and sorted into chunks
  * for parsing. The parser extracts event data from the provided buffers,
  * separates then according to MPI ranks and then appends them to the workspace
- * event list.
+ * event list. Asynchronously starts parsing wait() must be called before
+ * attempting to invoke this method subsequently.
  * @param event_id_start Buffer containing detector IDs.
  * @param event_time_offset_start Buffer containing TOD.
  * @param range contains information on the detector bank which corresponds to
@@ -227,7 +227,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
  * number of elements in the data array.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, TimeOffsetType *event_time_offset_start,
     const LoadRange &range) {
 
@@ -237,11 +237,10 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startParsing(
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
-  m_future =
-      std::async(std::launch::async,
-                 [this, event_id_start, event_time_offset_start, &range] {
-                   doParsing(event_id_start, event_time_offset_start, range);
-                 });
+  m_future = std::async(std::launch::async, [this, event_id_start,
+                                             event_time_offset_start, &range] {
+    doParsing(event_id_start, event_time_offset_start, range);
+  });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -265,11 +264,6 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
   if (m_future.valid())
     m_future.wait();
-}
-
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::finalize() const {
-  wait();
 }
 
 // Template Specialization Exports

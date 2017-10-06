@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidParallel/IO/EventParser.h"
-
+#include <boost/make_shared.hpp>
 #include <numeric>
 
 using namespace Mantid;
@@ -282,7 +282,7 @@ public:
     EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
                                                   eventLists);
 
-    TS_ASSERT_THROWS(parser.startParsing(nullptr, nullptr, LoadRange{0, 0, 0}),
+    TS_ASSERT_THROWS(parser.startAsync(nullptr, nullptr, LoadRange{0, 0, 0}),
                      std::runtime_error);
   }
 
@@ -296,7 +296,7 @@ public:
 
     parser.setPulseInformation({10, 4, 4}, {});
 
-    TS_ASSERT_THROWS(parser.startParsing(nullptr, nullptr, LoadRange{0, 0, 0}),
+    TS_ASSERT_THROWS(parser.startAsync(nullptr, nullptr, LoadRange{0, 0, 0}),
                      std::runtime_error);
   }
 
@@ -307,10 +307,10 @@ public:
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
-    parser->startParsing(event_id.data(), event_time_offset.data(),
-                         gen.generateBasicRange(0));
+    parser->startAsync(event_id.data(), event_time_offset.data(),
+                       gen.generateBasicRange(0));
 
-    parser->finalize();
+    parser->wait();
     compareEventLists(gen.eventLists(), parser->eventLists());
   }
 
@@ -321,10 +321,10 @@ public:
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
-    parser->startParsing(event_id.data(), event_time_offset.data(),
-                         gen.generateBasicRange(0));
+    parser->startAsync(event_id.data(), event_time_offset.data(),
+                       gen.generateBasicRange(0));
 
-    parser->finalize();
+    parser->wait();
     compareEventLists(gen.eventLists(), parser->eventLists());
   }
 
@@ -339,11 +339,10 @@ public:
       auto event_id = gen.eventId(i);
       auto event_time_offset = gen.eventTimeOffset(i);
 
-      parser->startParsing(event_id.data(), event_time_offset.data(),
-                           gen.generateBasicRange(i));
+      parser->startAsync(event_id.data(), event_time_offset.data(),
+                         gen.generateBasicRange(i));
       parser->wait();
     }
-    parser->finalize();
     compareEventLists(gen.eventLists(), parser->eventLists());
   }
 
@@ -365,11 +364,10 @@ public:
         portion = event_id.size() - offset;
 
       LoadRange range{0, offset, portion};
-      parser->startParsing(event_id.data() + offset,
-                           event_time_offset.data() + offset, range);
+      parser->startAsync(event_id.data() + offset,
+                         event_time_offset.data() + offset, range);
       parser->wait();
     }
-    parser->finalize();
     compareEventLists(gen.eventLists(), parser->eventLists());
   }
 
@@ -394,12 +392,11 @@ public:
           portion = event_id.size() - offset;
 
         LoadRange range{bank, offset, portion};
-        parser->startParsing(event_id.data() + offset,
-                             event_time_offset.data() + offset, range);
+        parser->startAsync(event_id.data() + offset,
+                           event_time_offset.data() + offset, range);
         parser->wait();
       }
     }
-    parser->finalize();
     compareEventLists(gen.eventLists(), parser->eventLists());
   }
 
@@ -413,20 +410,22 @@ private:
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
   void doTestRankData(
       const std::vector<std::vector<EventListEntry>> &rankData,
-      boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>> &
-          parser,
-      detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
-          gen,
+      boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>>
+          &parser,
+      detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType>
+          &gen,
       const LoadRange &range) {
     size_t cur = 0;
     auto res = parser->findStartAndEndPulseIndices(
         gen.eventIndex(0), range.eventOffset, range.eventCount, cur);
 
     for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
-      auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
-                                                 gen.eventIndex(0)[pulse - 1]),
-                            range.eventOffset) -
-                   range.eventOffset;
+      auto start =
+          std::max(pulse == 0
+                       ? 0
+                       : static_cast<size_t>(gen.eventIndex(0)[pulse - 1]),
+                   range.eventOffset) -
+          range.eventOffset;
       auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
                           range.eventOffset + range.eventCount) -
                  range.eventOffset;
@@ -474,12 +473,11 @@ public:
 
   void testCompletePerformance() {
     for (size_t i = 0; i < NUM_BANKS; ++i) {
-      parser->wait();
       parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero());
-      parser->startParsing(event_ids[i].data(), event_time_offsets[i].data(),
-                           gen.generateBasicRange(i));
+      parser->startAsync(event_ids[i].data(), event_time_offsets[i].data(),
+                         gen.generateBasicRange(i));
+      parser->wait();
     }
-    parser->finalize();
   }
 
   void testExtractEventsPerformance() {
