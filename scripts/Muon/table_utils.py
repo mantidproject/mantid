@@ -53,8 +53,8 @@ def setTableHeaders(table):
         if os.name != "nt":
             return
         version=QtCore.QSysInfo.WindowsVersion
-        windows10=160 # version code?
-        if(version==windows10):
+        WINDOWS_10=160
+        if(version==WINDOWS_10):
             styleSheet= \
                 "QHeaderView::section{"\
                 +"border-top:0px solid #D8D8D8;"\
@@ -72,4 +72,5 @@ def setTableHeaders(table):
                 +"background-color:white;"\
                 +"}"
             table.setStyleSheet(styleSheet)
-        return styleSheet
+            return styleSheet
+        return 
