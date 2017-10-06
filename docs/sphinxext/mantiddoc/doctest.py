@@ -310,7 +310,6 @@ class DocTestOutputParser(object):
           list: List of test cases in the document
         """
         fullname = self.__extract_fullname(results[0])
-
         if not results[1].startswith("-"):
             raise ValueError("Invalid second line of output: '%s'. "\
                              "Expected a title underline."
