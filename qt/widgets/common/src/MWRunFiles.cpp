@@ -3,6 +3,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
@@ -17,12 +18,17 @@
 #include <QDropEvent>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QTimer>
 #include <QUrl>
 #include <QtConcurrentRun>
 #include <Poco/File.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+
+namespace {
+  Mantid::Kernel::Logger g_log("MWRunFiles");
+}
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -260,9 +266,23 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 
 MWRunFiles::~MWRunFiles() {
   // Before destruction, make sure the file finding thread has stopped running.
-  // Wait if necessary.
-  m_thread->exit(-1);
-  m_thread->wait();
+  // Wait if necessary. This can freeze up Mantid.
+  try {
+    QEventLoop eventLoop(QApplication::instance());
+    QTimer timer;
+    connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+    if (m_thread->isRunning()) {
+        m_thread->exit(-1);
+        // While the thread is quiting keep the application responsive
+        while (m_thread->isRunning()) {
+          timer.start(50);
+          eventLoop.exec();
+          timer.stop();
+        }
+    }
+  } catch(...) {
+    g_log.error("There seems to have been an expection when closing the MWRunFiles instance.");
+  }
 }
 
 /**
@@ -702,9 +722,18 @@ void MWRunFiles::findFiles() {
     m_uiForm.fileEditor->setModified(false);
 
     // If the thread is running, cancel it.
+    QEventLoop eventLoop(QApplication::instance());
+    QTimer timer;
+    connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
     if (m_thread->isRunning()) {
-      m_thread->exit(-1);
-      m_thread->wait();
+        // Quit the thread
+        m_thread->exit(-1);
+        // While the thread is quiting keep the application responsive
+        while (m_thread->isRunning()) {
+          timer.start(50);
+          eventLoop.exec();
+          timer.stop();
+        }
     }
 
     emit findingFiles();
