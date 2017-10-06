@@ -3,7 +3,6 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
@@ -52,23 +51,16 @@ void checkIsNotMaskingParameter(const std::string &name) {
                              "ParameterMap. Use DetectorInfo instead");
 }
 }
+
 /**
- * Default constructor
+ * Default Constructor
  */
 ParameterMap::ParameterMap()
-    : m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
-      m_cacheRotMap(Kernel::make_unique<
-          Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
+{
+}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
-      m_cacheLocMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>(
-              *other.m_cacheLocMap)),
-      m_cacheRotMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
-              *other.m_cacheRotMap)),
       m_instrument(other.m_instrument) {
   if (m_instrument)
     std::tie(m_componentInfo, m_detectorInfo) =
@@ -304,9 +296,6 @@ void ParameterMap::clearParametersByName(const std::string &name) {
       ++itr;
     }
   }
-  // Check if the caches need invalidating
-  if (name == pos() || name == rot())
-    clearPositionSensitiveCaches();
 }
 
 /**
@@ -327,10 +316,6 @@ void ParameterMap::clearParametersByName(const std::string &name,
         ++it;
       }
     }
-
-    // Check if the caches need invalidating
-    if (name == pos() || name == rot())
-      clearPositionSensitiveCaches();
   }
 }
 
@@ -441,8 +426,6 @@ void ParameterMap::addPositionCoordinate(
     return;
   }
 
-  // clear the position cache
-  clearPositionSensitiveCaches();
   // finally add or update "pos" parameter
   addV3D(comp, pos(), position, pDescription);
 }
@@ -502,9 +485,6 @@ void ParameterMap::addRotationParam(const IComponent *comp,
         << name;
     return;
   }
-
-  // clear the position cache
-  clearPositionSensitiveCaches();
 
   // finally add or update "pos" parameter
   addQuat(comp, rot(), quat, pDescription);
@@ -668,7 +648,6 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
                           const std::string &value,
                           const std::string *const pDescription) {
   add(pV3D(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -686,7 +665,6 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
                           const V3D &value,
                           const std::string *const pDescription) {
   add(pV3D(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -704,7 +682,6 @@ void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
                            const Quat &value,
                            const std::string *const pDescription) {
   add(pQuat(), comp, name, value, pDescription);
-  clearPositionSensitiveCaches();
 }
 
 /**
@@ -1022,48 +999,6 @@ std::string ParameterMap::asString() const {
     }
   }
   return out.str();
-}
-
-/**
- * Clears the location, rotation & bounding box caches
- */
-void ParameterMap::clearPositionSensitiveCaches() {
-  m_cacheLocMap->clear();
-  m_cacheRotMap->clear();
-}
-
-/// Sets a cached location on the location cache
-/// @param comp :: The Component to set the location of
-/// @param location :: The location
-void ParameterMap::setCachedLocation(const IComponent *comp,
-                                     const V3D &location) const {
-  m_cacheLocMap->setCache(comp->getComponentID(), location);
-}
-
-/// Attempts to retrieve a location from the location cache
-/// @param comp :: The Component to find the location of
-/// @param location :: If the location is found it's value will be set here
-/// @returns true if the location is in the map, otherwise false
-bool ParameterMap::getCachedLocation(const IComponent *comp,
-                                     V3D &location) const {
-  return m_cacheLocMap->getCache(comp->getComponentID(), location);
-}
-
-/// Sets a cached rotation on the rotation cache
-/// @param comp :: The Component to set the rotation of
-/// @param rotation :: The rotation as a quaternion
-void ParameterMap::setCachedRotation(const IComponent *comp,
-                                     const Quat &rotation) const {
-  m_cacheRotMap->setCache(comp->getComponentID(), rotation);
-}
-
-/// Attempts to retrieve a rotation from the rotation cache
-/// @param comp :: The Component to find the rotation of
-/// @param rotation :: If the rotation is found it's value will be set here
-/// @returns true if the rotation is in the map, otherwise false
-bool ParameterMap::getCachedRotation(const IComponent *comp,
-                                     Quat &rotation) const {
-  return m_cacheRotMap->getCache(comp->getComponentID(), rotation);
 }
 
 /**
