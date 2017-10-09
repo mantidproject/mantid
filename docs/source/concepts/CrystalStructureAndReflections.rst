@@ -110,7 +110,7 @@ string representations of those three arguments.
 
     unitCell = silicon.getUnitCell()
     print('Crystal structure of silicon:')
-    print('  Unit cell: {0]} {1} {2} {3} {4} {5}'.format(unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()))
+    print('  Unit cell: {0} {1} {2} {3} {4} {5}'.format(unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()))
 
     spaceGroup = silicon.getSpaceGroup()
     print('  Space group: {0}'.format(spaceGroup.getHMSymbol()))

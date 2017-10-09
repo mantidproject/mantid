@@ -76,15 +76,15 @@ You can access workspaces using the ``mtd["worskpace_name"]`` command for a spec
 
     # You can get a python variable pointing to the workspace with the command
     myWS = mtd["MyNewWorkspace"]
-    print("The variable myWS now points to the workspace called ", myWS)
+    print("The variable myWS now points to the workspace called " + str(myWS))
 
     # You can also ask Mantid to create matching python variables for all of it's workspaces
     mtd.importAll()
-    print("MyNewWorkspace has been created that also points to the workspace called ", MyNewWorkspace)
+    print("MyNewWorkspace has been created that also points to the workspace called " + str(MyNewWorkspace))
 
     # You can assign a python variable when calling an algorithm and the workspace will match the variable name
     myOtherWS = CreateSampleWorkspace()
-    print("myOtherWS now points to the workspace called ", myOtherWS)
+    print("myOtherWS now points to the workspace called " + str(myOtherWS))
 
 Output:
 

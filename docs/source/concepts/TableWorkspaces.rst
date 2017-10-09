@@ -98,7 +98,7 @@ Table Workspace Properties
     #setup as above
 
     # Rows
-    print("Row count:", tableWS.rowCount())
+    print("Row count: {}".format(tableWS.rowCount()))
     print(tableWS.row(0)) # row values as a dictionary
     # Resize the table
     tableWS.setRowCount(4)
@@ -111,8 +111,8 @@ Table Workspace Properties
     tableWS.addRow ( nextRow )
 
     # Columns
-    print("Column count:", tableWS.columnCount())
-    print("Column names:", tableWS.getColumnNames())
+    print("Column count: {}".format(tableWS.columnCount()))
+    print("Column names: {}".foramt(tableWS.getColumnNames()))
     columnValuesList = tableWS.column(0)
     # To remove a column
     tableWS.removeColumn("Detector Name")

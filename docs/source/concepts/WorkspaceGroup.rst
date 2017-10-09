@@ -94,13 +94,13 @@ Looping over all of the members of a group
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
 
-    print("Number of members:", wsGroup.getNumberOfEntries())
-    print("List of names:", wsGroup.getNames())
+    print("Number of members: " + str(wsGroup.getNumberOfEntries()))
+    print("List of names: " + str(wsGroup.getNames()))
 
     # Get the member workspaces in a loop
     for i in range(wsGroup.getNumberOfEntries()):
         wsLoop = wsGroup.getItem(i)
-        print("Member", i, wsLoop)
+        print("Member {0} {1}".format(i, wsLoop.getName()))
 
 
 Output:

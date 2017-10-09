@@ -129,7 +129,7 @@ Another common task is to find all symmetry equivalents of a reflection, for exa
 
     print("Number of reflections equivalent to [2,0,0]: {}".format(len(equivalents1)))
     print("Equivalents: {}".format(equivalents1))
-    print()
+
 
     hkl2 = [1, 1, 1]
     equivalents2 = pg.getEquivalents(hkl2)
@@ -143,7 +143,6 @@ Executing this code results in the following output:
 
     Number of reflections equivalent to [2,0,0]: 6
     Equivalents: [[2,0,0], [0,2,0], [0,0,2], [0,0,-2], [0,-2,0], [-2,0,0]]
-
     Number of reflections equivalent to [1,1,1]: 8
     Equivalents: [[1,1,1], [1,1,-1], [1,-1,1], [1,-1,-1], [-1,1,1], [-1,1,-1], [-1,-1,1], [-1,-1,-1]]
 
@@ -165,7 +164,7 @@ Sometimes, a list of reflections needs to be reduced to a set of symmetry indepe
         independent.add(pg.getReflectionFamily(hkl)) # getReflectionFamily returns the same hkl for all symmetry equivalents
 
     print("Number of independent reflections: {}".format(len(independent)))
-    print("Reflections {}".format(list(independent)))
+    print("Reflections: {}".format(list(independent)))
 
 This example code produces the output below upon execution:
 
@@ -291,7 +290,7 @@ Closely related to the generation of equivalent coordinates is the site symmetry
     siteSymmetryGroup = sg.getSiteSymmetryGroup(position)
 
     print("Order of the site symmetry group: {}".format(siteSymmetryGroup.getOrder()))
-    print"Group elements:")
+    print("Group elements:")
     for i, op in enumerate(siteSymmetryGroup.getSymmetryOperations()):
         element = SymmetryElementFactory.createSymElement(op)
         print("{0}: {1} ({2})".format(str(i + 1), op.getIdentifier(), getFullElementSymbol(element)))
@@ -441,8 +440,8 @@ While this can be interesting for informational purposes, it's more useful to ob
     symOpMax1 = getMaximumOrderOperation(sg1)
     symOpMax2 = getMaximumOrderOperation(sg2)
 
-    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".foramt(sg1.getNumber(),symOpMax1.getIdentifier(),symOpMax1.getOrder()))
-    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".foramt(sg2.getNumber(),symOpMax2.getIdentifier(),symOpMax2.getOrder()))
+    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".format(sg1.getNumber(),symOpMax1.getIdentifier(),symOpMax1.getOrder()))
+    print("The symmetry operation with highest order in space group no. {0} is: {1} (k={2})".format(sg2.getNumber(),symOpMax2.getIdentifier(),symOpMax2.getOrder()))
 
 
 Which produces the following output:
@@ -493,7 +492,7 @@ Another way to extract more information about the symmetry in a space group is t
     print("Symmetry in each direction:")
 
     for axis in sorted(axes):
-        print("{0}:  {1}".format(axis, sorted([x.getHMSymbol() for x in symElementsByAxis[axis]]))
+        print("{0}:  {1}".format(axis, sorted([x.getHMSymbol() for x in symElementsByAxis[axis]])))
 
 This prints the following information:
 
@@ -642,7 +641,7 @@ Building on the example above which showed how to check whether a reflection is 
         sgStatus = sgPair[1]
         print("    {0}: {1} absence violations, {2: >2} additional absences, {3: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0)))
 
-    print("The best matching space group is: ".format(finalSpaceGroupMatchList[0][0]))
+    print("The best matching space group is: {}".format(finalSpaceGroupMatchList[0][0]))
 
 The script should produce the following output:
 

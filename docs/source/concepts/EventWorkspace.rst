@@ -169,7 +169,7 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    print("First tof before scaleTof: {}".format(evList.getTofs()[0]))
    factor = 1.5
    evList.scaleTof(factor)
-   print( )"First tof after scaleTof:{}".format(evList.getTofs()[0]))
+   print("First tof after scaleTof:{}".format(evList.getTofs()[0]))
 
    # Multiply the weights in this event list by a scalar with an error.
    print("First event weight before multiply: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))

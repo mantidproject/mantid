@@ -132,7 +132,7 @@ As a generic multi dimensional container being able to access information about 
    print("The dimension assigned to X = {}".format(ws.getXDimension().name))
    print("The dimension assigned to Y = {}".format(ws.getYDimension().name))
    try:
-     print("The dimension assigned to Z = {}".format(ws.getZDimension().name))
+     print("The dimension assigned to Z = " + format(ws.getZDimension().name))
    except RuntimeError:
       # if the dimension does not exist you will get a RuntimeError
      print("Workspace does not have a Z dimension")
