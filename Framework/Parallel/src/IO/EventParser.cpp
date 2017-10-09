@@ -1,5 +1,4 @@
 #include "MantidParallel/IO/EventParser.h"
-#include <H5Cpp.h>
 #include <xmmintrin.h>
 
 #ifdef MPI_EXPERIMENTAL
