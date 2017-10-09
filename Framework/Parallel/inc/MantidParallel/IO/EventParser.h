@@ -56,8 +56,7 @@ class EventParser {
 public:
   EventParser(std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> bankOffsets,
-              std::vector<std::vector<Types::Event::TofEvent> *> &eventLists,
-              std::vector<int32_t> globalToLocalSpectrumIndex = {});
+              std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 
   void setPulseInformation(std::vector<IndexType> event_index,
                            std::vector<TimeZeroType> event_time_zero);
@@ -105,8 +104,7 @@ private:
   std::vector<std::vector<Types::Event::TofEvent> *> &m_eventLists;
   std::vector<IndexType> m_eventIndex;
   std::vector<TimeZeroType> m_eventTimeZero;
-  std::size_t m_posInEventIndex;
-  std::vector<int32_t> m_globalToLocalSpectrumIndex;
+  std::size_t m_posInEventIndex{0};
   std::vector<std::vector<EventListEntry>> m_allRankData;
   std::vector<EventListEntry> m_thisRankData;
   std::future<void> m_future;

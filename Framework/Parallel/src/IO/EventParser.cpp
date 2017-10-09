@@ -28,12 +28,9 @@ namespace IO {
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     std::vector<std::vector<int>> rankGroups, std::vector<int32_t> bankOffsets,
-    std::vector<std::vector<TofEvent> *> &eventLists,
-    std::vector<int32_t> globalToLocalSpectrumIndex)
+    std::vector<std::vector<TofEvent> *> &eventLists)
     : m_rankGroups(std::move(rankGroups)),
-      m_bankOffsets(std::move(bankOffsets)), m_eventLists(eventLists),
-      m_posInEventIndex(0),
-      m_globalToLocalSpectrumIndex(std::move(globalToLocalSpectrumIndex)) {}
+      m_bankOffsets(std::move(bankOffsets)), m_eventLists(eventLists) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  * parsing events from file/event stream.
@@ -208,13 +205,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
     std::vector<std::vector<TofEvent> *> &eventList,
     const std::vector<EventListEntry> &events) {
   for (const auto &event : events) {
-#ifdef MPI_EXPERIMENTAL
-    auto index = m_globalToLocalSpectrumIndex[event.index];
-#else
-    auto index = event.globalIndex;
-#endif
+    // Currently this supports only a hard-code round-robin partitioning.
+    auto index = event.globalIndex / m_comm.size();
     eventList[index]->emplace_back(event.tofEvent);
-    // Prefetch data into L1 Cache for faster access
+    // In general `index` is random so this loop suffers from frequent cache
+    // misses (probably because the hardware prefetchers cannot keep up with the
+    // number of different memory locations that are getting accessed). We
+    // manually prefetch into L2 cache to reduce the amount of misses.
     _mm_prefetch(reinterpret_cast<char *>(&eventList[index]->back() + 1),
                  _MM_HINT_T1);
   }
