@@ -74,14 +74,14 @@ struct PreprocessingAttributes {
   QString m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
-  bool hasPreprocessing(const QString& columnName) const {
-      return m_map.count(columnName) > 0;
+  bool hasPreprocessing(const QString &columnName) const {
+    return m_map.count(columnName) > 0;
   }
 
   // IAlgorithm_sptr createAlgorithmFor(const QString& columnName) const {
   //     assert(hasPreprocessing(columnName));
   //     const auto& preprocessor = m_map[columnName];
-  //     
+  //
   // }
 };
 
