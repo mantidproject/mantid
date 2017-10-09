@@ -52,7 +52,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-class MANTID_PARALLEL_DLL EventParser {
+class EventParser {
 public:
   EventParser(std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> bankOffsets,

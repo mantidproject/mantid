@@ -272,14 +272,14 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
     m_future.wait();
 }
 
-// Template Specialization Exports
-template class DLLExport EventParser<int32_t, int32_t, int32_t>;
-template class DLLExport EventParser<int32_t, int32_t, int64_t>;
-template class DLLExport EventParser<int32_t, int64_t, int32_t>;
-template class DLLExport EventParser<int32_t, int64_t, int64_t>;
-template class DLLExport EventParser<int64_t, int64_t, double>;
-template class DLLExport EventParser<int32_t, int64_t, double>;
-template class DLLExport EventParser<int32_t, int32_t, double>;
+// Explicit instantiations
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int32_t, int32_t>;
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int32_t, int64_t>;
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int64_t, int32_t>;
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int64_t, int64_t>;
+template class MANTID_PARALLEL_DLL EventParser<int64_t, int64_t, double>;
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int64_t, double>;
+template class MANTID_PARALLEL_DLL EventParser<int32_t, int32_t, double>;
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
