@@ -17,6 +17,13 @@
 using namespace Mantid::Kernel;
 
 namespace {
+class MockNonSerializableProperty : public PropertyWithValue<int> {
+public:
+  MockNonSerializableProperty(const std::string &name, const int defaultValue) : PropertyWithValue<int>(name, defaultValue, Direction::InOut) {}
+  bool isValueSerializable() const override { return false; }
+  using PropertyWithValue<int>::operator =;
+};
+
 /// Create the test source property
 std::unique_ptr<Mantid::Kernel::TimeSeriesProperty<double>>
 createTestSeries(const std::string &name) {
@@ -397,8 +404,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -429,8 +434,6 @@ public:
     ::Json::Reader reader;
     ::Json::Value value;
 
-    /// TSM_ASSERT_EQUALS("Empty string when all are default", mgr.asString(),
-    /// "");
     TSM_ASSERT("value was not valid JSON", reader.parse(mgr.asString(), value));
 
     TSM_ASSERT_EQUALS("value was not empty", value.size(), 0);
@@ -448,6 +451,18 @@ public:
 
     TSM_ASSERT("value was not valid JSON",
                reader.parse(mgr.asString(false), value));
+  }
+
+  void test_asStringWithNonSerializableProperty() {
+    using namespace Mantid::Kernel;
+    PropertyManagerHelper mgr;
+    TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(make_unique<MockNonSerializableProperty>("PropertyName", 0)));
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
+    // Set to non-default value.
+    mgr.setProperty("PropertyName", 1);
+    TS_ASSERT_EQUALS(mgr.asString(true), "null\n")
+    TS_ASSERT_EQUALS(mgr.asString(false), "null\n")
   }
 
   //-----------------------------------------------------------------------------------------------------------
