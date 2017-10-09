@@ -133,13 +133,13 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   if (m_uiTabCalib.MWRunFiles_new_vanadium_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_vanadium_num->setFileTextWithoutSearch(
+    m_uiTabCalib.MWRunFiles_new_vanadium_num->setUserInput(
         QString::fromStdString(vanadiumRun));
   }
   if (m_uiTabCalib.MWRunFiles_new_ceria_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_ceria_num->setFileTextWithoutSearch(
+    m_uiTabCalib.MWRunFiles_new_ceria_num->setUserInput(
         QString::fromStdString(ceriaRun));
   }
 

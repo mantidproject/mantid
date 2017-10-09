@@ -260,9 +260,9 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 
 MWRunFiles::~MWRunFiles() {
   // Before destruction, make sure the file finding thread has stopped running.
-  // Wait if necessary. This can freeze up Mantid.
+  // Wait if necessary.
   m_thread->exit(-1);
-  m_thread->wait(50);
+  m_thread->wait();
 }
 
 /**
@@ -809,6 +809,7 @@ void MWRunFiles::inspectThreadResult() {
 void MWRunFiles::readSettings(const QString &group) {
   QSettings settings;
   settings.beginGroup(group);
+
   m_lastDir = settings.value("last_directory", "").toString();
 
   if (m_lastDir == "") {
