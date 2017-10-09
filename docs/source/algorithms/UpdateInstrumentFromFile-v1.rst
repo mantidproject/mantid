@@ -82,7 +82,7 @@ Usage
        ''' print first 10 detectors from given instrument '''
         # get first 10 detectors using detector ID 
 
-       print "{0} {1} instrument".format(instr_type, instr.getName())
+       print("{0} {1} instrument".format(instr_type, instr.getName()))
        for i in xrange(0,10):
          if i<3:
              detBase = 1
@@ -91,8 +91,8 @@ Usage
          detID = detBase+i
          det1 = instr.getDetector(detID);
          pos = det1.getPos();
-         print 'det with ID: {0:5} is monitor? {1:5}, polar angle: {2:10.3f}, position: | {3:<10.3f} | {4:<10.3f} | {5:<10.3f}|\n'.format(\
-                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z()),
+         print('det with ID: {0:5} is monitor? {1:5}, polar angle: {2:10.3f}, position: | {3:<10.3f} | {4:<10.3f} | {5:<10.3f}|'.format(\
+                detID,det1.isMonitor(),(det1.getPhi()*(180/math.pi)),pos.X(),pos.Y(),pos.Z()))
        print '*********************************************************************************'
         
    #--------------------------------------------------------------------------------------      

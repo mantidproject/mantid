@@ -100,7 +100,7 @@ Usage
     # To access individual outputs use result[i] where i is the index of the required output.
     result = UnwrapMonitor(InputWorkspace=ws,LRef=11)
 
-    print "JoinWaveLength is: " + str(result[1])
+    print("JoinWaveLength is: " + str(result[1]))
 
 Output:
 
