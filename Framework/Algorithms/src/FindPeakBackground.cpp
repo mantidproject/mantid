@@ -231,7 +231,9 @@ int FindPeakBackground::findBackground(
       // save endpoints
       min_peak = peaks[0].start;
       // extra point for histogram input
-      max_peak = peaks[0].stop + sizex - sizey;
+      //  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
+      //  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
+      max_peak = peaks[0].stop + inpX.size() - inpY.size();
       goodfit = 1;
     } else {
       // assume the whole thing is background
@@ -571,29 +573,6 @@ void FindPeakBackground::createOutputWorkspaces() {
   m_outPeakTableWS->addColumn("int", "GoodFit");
 
   m_outPeakTableWS->appendRow();
-}
-
-void FindPeakBackground::findStartStopIndex(size_t &istart, size_t &istop) {
-  // Generate output
-  auto inpX = m_histogram->x();
-  auto inpY = m_histogram->y();
-  // size_t sizex = inpX.size();
-  size_t sizey = inpY.size();
-
-  // initial value of start and stop x index
-  size_t n = sizey;
-  size_t l0 = 0;
-
-  if (m_vecFitWindows.size() > 1) {
-    Mantid::Algorithms::FindPeaks fp;
-    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
-    n = fp.getIndex(inpX, m_vecFitWindows[1]);
-    if (n < sizey)
-      n++;
-  }
-
-  istart = l0;
-  istop = n;
 }
 
 } // namespace Algorithms
