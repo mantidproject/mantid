@@ -105,8 +105,9 @@ Usage
 Output:
 
 .. testoutput:: UnwrapMonitor
+   :options: +ELLIPSIS
 
-    JoinWaveLength is: 1.42417223264
+    JoinWaveLength is: 1.4241722...
 
 .. categories::
 
