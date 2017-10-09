@@ -458,6 +458,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   DEFS
     IN_MANTIDQT_COMMON QSCINTILLA_DLL
   INCLUDE_DIRS
+    inc
     ${PYTHON_INCLUDE_PATH}
     ${QSCINTILLA_INCLUDE_DIR}
   LINK_LIBS
@@ -530,7 +531,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     ${POCO_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
 )
 
 ###########################################################################

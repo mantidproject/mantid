@@ -44,25 +44,28 @@ set ( UI_FILES
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    RES ../../resources/icons/MultiDatasetFitIcons.qrc
-                    DEFS IN_MANTIDQT_MULTIDATASETFIT
-                    PERECOMPILED PrecompiledHeader.h
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${CORE_MANTIDLIBS}
-                        ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${JSONCPP_LIBRARIES}
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
-                    INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-                    OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  RES ../../resources/icons/MultiDatasetFitIcons.qrc
+  DEFS IN_MANTIDQT_MULTIDATASETFIT
+  PRECOMPILED PrecompiledHeader.h
+  INCLUDE_DIRS
+    # required to populate the public interface includes property
+    ..
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${CORE_MANTIDLIBS}
+      ${QT_LIBRARIES}
+      ${QWT_LIBRARIES}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${JSONCPP_LIBRARIES}
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )
 
 if ( MSVC_IDE )

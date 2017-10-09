@@ -49,7 +49,7 @@ function (mtd_add_qt_target)
   set (oneValueArgs
     TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
   set (multiValueArgs
-    SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS LINK_LIBS
+    SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS UI_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -57,10 +57,13 @@ function (mtd_add_qt_target)
   if (${PARSED_LIBRARY} AND ${PARSED_EXECUTABLE})
     message (FATAL_ERROR "Both LIBRARY and EXECUTABLE options specified. Please choose only one.")
   endif()
-  set (_base_src_dir ${CMAKE_CURRENT_LIST_DIR})
+
+  # uic needs to run against the correct version of Qt. Keep the generated files in
+  # a subdirectory of the binary directory labelled by the version
   set (_binary_dir_on_entry ${CMAKE_CURRENT_BINARY_DIR})
-  set (_base_binary_dir ${CMAKE_CURRENT_BINARY_DIR}/qt${PARSED_QT_VERSION})
-  set (CMAKE_CURRENT_BINARY_DIR ${_base_binary_dir})
+  _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _ui_dir
+                     ${CMAKE_CURRENT_BINARY_DIR})
+  set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   if (PARSED_QT_VERSION EQUAL 4)
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
     qt4_wrap_cpp (MOC_GENERATED ${PARSED_MOC})
@@ -75,12 +78,15 @@ function (mtd_add_qt_target)
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
   set (CMAKE_CURRENT_BINARY_DIR ${_binary_dir_on_entry})
+
   if (${PARSED_NO_SUFFIX})
     set (_target ${PARSED_TARGET_NAME})
   else()
-    _append_qt_suffix (${PARSED_QT_VERSION} _target ${PARSED_TARGET_NAME})
+    _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target
+                       ${PARSED_TARGET_NAME})
   endif()
-  _append_qt_suffix (${PARSED_QT_VERSION} _mtd_qt_libs ${PARSED_MTD_QT_LINK_LIBS})
+  _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
+                     ${PARSED_MTD_QT_LINK_LIBS})
 
   if (${PARSED_EXCLUDE_FROM_ALL})
     set(_target_exclude_from_all "EXCLUDE_FROM_ALL")
@@ -101,12 +107,17 @@ function (mtd_add_qt_target)
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
-  target_include_directories (${_target} PUBLIC ${_base_binary_dir} PUBLIC ${PARSED_INCLUDE_DIRS})
+
+  _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
+  # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
+  target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
+                              ${_mtd_includes} ${PARSED_INCLUDE_DIRS})
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(PARSED_DEFS)
     set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${PARSED_DEFS}" )
   endif()
+
   if (OSX_VERSION VERSION_GREATER 10.8)
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH ${PARSED_OSX_INSTALL_RPATH})
@@ -159,18 +170,23 @@ function (mtd_add_qt_test_executable)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
 
-  _append_qt_suffix (${PARSED_QT_VERSION} _target_name ${PARSED_TARGET_NAME})
+  _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target_name
+                     ${PARSED_TARGET_NAME})
   # cxxtest_add_test expects this
   set (TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
   cxxtest_add_test ( ${_target_name} ${PARSED_SRC} )
 
-  # client and system headers
-  target_include_directories ( ${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS} )
-  target_include_directories ( ${_target_name} SYSTEM PRIVATE ${PARSED_INCLUDE_DIRS}
-    ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
-
   # libraries
-  _append_qt_suffix (${PARSED_QT_VERSION} _mtd_qt_libs ${PARSED_MTD_QT_LINK_LIBS})
+  _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
+                     ${PARSED_MTD_QT_LINK_LIBS})
+  _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
+
+  # client and system headers
+  target_include_directories ( ${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS}
+                               ${_mtd_includes} )
+  target_include_directories ( ${_target_name} SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR}
+                               ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
   if (PARSED_QT_VERSION EQUAL 4)
     set (_link_libs Qt4::QtGui ${_link_libs})
@@ -187,12 +203,35 @@ endfunction ()
 # version: Version number of the library
 # output_variable: The name of an output variable. This will be set
 #                 on the parent scope
-# ARGN: A list of library names
-function (_append_qt_suffix version output_variable)
-  set (_target_suffix "Qt${version}")
-  set (_libs)
-  foreach (_lib ${ARGN})
-    list (APPEND _libs ${_lib}${_target_suffix})
+# option: as_dir If true then treat the inputs as directories at append a subdirectory
+# ARGN: A list of strings to process
+function (_append_qt_suffix)
+  set (options AS_DIR)
+  set (oneValueArgs VERSION OUTPUT_VARIABLE)
+  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+                         "${multiValueArgs}" ${ARGN})
+
+ set (_target_suffix "Qt${PARSED_VERSION}")
+  if(PARSED_AS_DIR)
+    set (_sep "/")
+  else()
+    set (_sep "")
+  endif()
+  set (_out)
+  foreach (_item ${PARSED_UNPARSED_ARGUMENTS})
+      list (APPEND _out ${_item}${_sep}${_target_suffix})
   endforeach ()
-  set (${output_variable} ${_libs} PARENT_SCOPE)
+  set (${PARSED_OUTPUT_VARIABLE} ${_out} PARENT_SCOPE)
 endfunction ()
+
+# Given a list of target libraries extract the INTERFACE_INCLUDE_DIRECTORIES
+# output_variable: The name of the variable to set in the parent scope
+# argn: A list of existing target names
+function (_extract_interface_includes output_variable)
+  set (_out)
+  foreach (_item ${ARGN})
+    get_target_property (_interface_inc ${_item} INTERFACE_INCLUDE_DIRECTORIES)
+    list (APPEND _out ${_interface_inc})
+  endforeach()
+  set (${output_variable} ${_out} PARENT_SCOPE)
+endfunction()

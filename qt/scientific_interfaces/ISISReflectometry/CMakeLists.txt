@@ -96,24 +96,24 @@ set ( UI_FILES
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    DEFS IN_MANTIDQT_ISISREFLECTOMETRY
-                    PERECOMPILED PrecompiledHeader.h
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${CORE_MANTIDLIBS}
-                        ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${JSONCPP_LIBRARIES}
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
-                    INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-                    OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_ISISREFLECTOMETRY
+  PRECOMPILED PrecompiledHeader.h
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${CORE_MANTIDLIBS}
+      ${QT_LIBRARIES}
+      ${QWT_LIBRARIES}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${JSONCPP_LIBRARIES}
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )
 
 if ( MSVC_IDE )

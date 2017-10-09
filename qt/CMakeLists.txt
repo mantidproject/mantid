@@ -9,9 +9,6 @@ include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 # Utilities for defining targets
 include (QtTargetFunctions)
 
-# Any MantidQt package can depend on widgets/common, so add the includes to the path here
-include_directories ( widgets/common/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/widgets/common )
 add_subdirectory ( widgets )
 add_subdirectory ( python )
 add_subdirectory ( scientific_interfaces )
