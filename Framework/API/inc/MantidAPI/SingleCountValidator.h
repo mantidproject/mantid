@@ -7,7 +7,8 @@ namespace Mantid {
 namespace API {
 
 /** SingleCountValidator : This validator checks that there is only a single
-  entry per spectrum, the counts, so no Time-of-Flight data.
+  entry per spectrum, the counts, so no Time-of-Flight data. Warning: only the
+  first bin of the workspace is checked, for performance reasons.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

@@ -52,7 +52,8 @@ public:
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
-  void test_variable_bin_workspace_failure() {
+  // The next two tests serve as a warning - only the first bin is checked!
+  void test_variable_bin_workspace_actually_succeeds() {
     auto ws = boost::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
@@ -62,12 +63,10 @@ public:
     ws->setHistogram(0, hist);
 
     SingleCountValidator validator(true);
-    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must contain single "
-                                            "counts for all spectra, but it is "
-                                            "variably sized");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
-  void test_variable_bin_workspace_success() {
+  void test_variable_bin_workspace_actually_fails() {
     auto ws = boost::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
@@ -77,7 +76,9 @@ public:
     ws->setHistogram(0, hist);
 
     SingleCountValidator validator(false);
-    TS_ASSERT_EQUALS(validator.isValid(ws), "");
+    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must contain single "
+                                            "counts for all spectra, but it is "
+                                            "variably sized");
   }
 };
 

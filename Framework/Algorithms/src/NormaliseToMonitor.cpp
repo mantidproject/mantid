@@ -62,8 +62,7 @@ bool MonIDPropChanger::isConditionChanged(const IPropertyManager *algo) const {
     return false;
   // read monitors list from the input workspace
   MatrixWorkspace_const_sptr inputWS = algo->getProperty(hostWSname);
-  bool monitors_changed = monitorIdReader(inputWS);
-  return monitors_changed;
+  return monitorIdReader(inputWS);
 }
 
 // function which modifies the allowed values for the list of monitors.
@@ -116,7 +115,10 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  // Skip this for performance if number of histograms is large.
+  std::vector<size_t> indexList;
+
+  indexList = inputWS->getIndicesFromDetectorIDs(mon);
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -125,28 +127,26 @@ bool MonIDPropChanger::monitorIdReader(
       return true;
     }
   }
-  // index list can be less or equal to the mon list size (some monitors do not
+  // index list can be less or equal to the mon list size (some monitors do
+  // not
   // have spectra)
   size_t mon_count =
       (mon.size() < indexList.size()) ? mon.size() : indexList.size();
-  std::vector<int> allowed_values(mon_count);
-  for (size_t i = 0; i < mon_count; i++) {
-    allowed_values[i] = mon[i];
-  }
+  mon.resize(mon_count);
 
   // are known values the same as the values we have just identified?
-  if (iExistingAllowedValues.size() != mon_count) {
+  if (iExistingAllowedValues.size() != mon.size()) {
     iExistingAllowedValues.clear();
-    iExistingAllowedValues.assign(allowed_values.begin(), allowed_values.end());
+    iExistingAllowedValues.assign(mon.begin(), mon.end());
     return true;
   }
   // the monitor list has the same size as before. Is it equivalent to the
   // existing one?
   bool values_redefined = false;
-  for (size_t i = 0; i < mon_count; i++) {
-    if (iExistingAllowedValues[i] != allowed_values[i]) {
+  for (size_t i = 0; i < mon.size(); i++) {
+    if (iExistingAllowedValues[i] != mon[i]) {
       values_redefined = true;
-      iExistingAllowedValues[i] = allowed_values[i];
+      iExistingAllowedValues[i] = mon[i];
     }
   }
   return values_redefined;
