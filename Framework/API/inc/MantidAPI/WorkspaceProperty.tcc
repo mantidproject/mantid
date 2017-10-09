@@ -139,6 +139,14 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
   return m_workspaceName;
 }
 
+/** Returns true if the workspace is in the ADS or there is none.
+ * @return true if the string returned by value() is valid
+ */
+template<typename TYPE>
+bool WorkspaceProperty<TYPE>::isValueSerializable() const {
+  return !m_workspaceName.empty() || (m_workspaceName.empty() && !this->m_value);
+}
+
 /** Get the value the property was initialised with -its default value
 *  @return The default value
 */

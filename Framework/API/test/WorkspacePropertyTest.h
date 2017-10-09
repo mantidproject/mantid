@@ -54,6 +54,10 @@ public:
         "workspace5", "", Direction::Input, PropertyMode::Optional);
     wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest", "",
                                             Direction::Output);
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
+        "WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
+        "WorkspacePropertyTest2");
   }
 
   ~WorkspacePropertyTest() override {
@@ -74,6 +78,19 @@ public:
     TS_ASSERT_EQUALS(wsp1->value(), "ws1")
     TS_ASSERT_EQUALS(wsp2->value(), "")
     TS_ASSERT_EQUALS(wsp3->value(), "ws3")
+  }
+
+  void testIsValueSerializable() {
+    WorkspaceProperty<Workspace> p("PropertyName", "", Direction::InOut);
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("WorkspaceName");
+    TS_ASSERT(p.isValueSerializable());
+    p.setValue("");
+    MatrixWorkspace_sptr ws =
+      WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+    p.setDataItem(ws);
+    TS_ASSERT(!p.isDefault())
+    TS_ASSERT(!p.isValueSerializable());
   }
 
   void testSetValue() {
@@ -122,11 +139,6 @@ public:
     TS_ASSERT_EQUALS(wsp6->setValue("ws6-1"), error);
     TS_ASSERT_EQUALS(wsp6->isValid(), error);
     AnalysisDataService::Instance().setIllegalCharacterList("");
-
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester1>(
-        "WorkspacePropertyTest");
-    WorkspaceFactory::Instance().subscribe<WorkspaceTester2>(
-        "WorkspacePropertyTest2");
 
     // The other three need the input workspace to exist in the ADS
     Workspace_sptr space;
