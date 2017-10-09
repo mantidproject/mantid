@@ -69,7 +69,7 @@ Usage
     statistics = statistics_table.row(0)
 
     peak = sorted.getPeak(0)
-    print("HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL())
+    print("HKL of first peak in table {} {} {}".format(peak.getH(),peak.getK(),peak.getL()))
     print("Multiplicity = %.2f" % statistics['Multiplicity'])
     print("Resolution Min = %.2f" % statistics['Resolution Min'])
     print("Resolution Max = %.2f" % statistics['Resolution Max'])

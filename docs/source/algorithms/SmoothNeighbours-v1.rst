@@ -251,7 +251,7 @@ Output:
    # Run the algorithm
    output = SmoothNeighbours(ws, AdjX=1, AdjY=3)
 
-   print('Number of histograms:'.format(output.getNumberHistograms()))
+   print('Number of histograms: {}'.format(output.getNumberHistograms()))
    print('Smoothed values:')
    print(output.extractY())
 
@@ -294,7 +294,7 @@ Output:
    # Run the algorithm
    output = SmoothNeighbours(ws, SumPixelsX=3, SumPixelsY=1)
 
-   print('Number of histograms:'.format(output.getNumberHistograms()))
+   print('Number of histograms: {}'.format(output.getNumberHistograms()))
    print('Smoothed values:')
    print(output.extractY())
 
