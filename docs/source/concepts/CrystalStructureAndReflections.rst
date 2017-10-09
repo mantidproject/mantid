@@ -109,18 +109,18 @@ string representations of those three arguments.
     silicon = CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.05")
 
     unitCell = silicon.getUnitCell()
-    print 'Crystal structure of silicon:'
-    print '  Unit cell:', unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()
+    print('Crystal structure of silicon:')
+    print('  Unit cell: {0]} {1} {2} {3} {4} {5}'.format(unitCell.a(), unitCell.b(), unitCell.c(), unitCell.alpha(), unitCell.beta(), unitCell.gamma()))
 
     spaceGroup = silicon.getSpaceGroup()
-    print '  Space group:', spaceGroup.getHMSymbol()
-    print '  Point group:', spaceGroup.getPointGroup().getHMSymbol()
+    print('  Space group: {0}'.format(spaceGroup.getHMSymbol()))
+    print('  Point group: {0}'.format(spaceGroup.getPointGroup().getHMSymbol()))
 
     scatterers = silicon.getScatterers()
-    print '  Total number of scatterers:', len(scatterers)
+    print('  Total number of scatterers: {0}'.format(len(scatterers)))
 
     for i, scatterer in enumerate(scatterers):
-        print '    ' + str(i) + ':', scatterer
+        print('    {0}: {1}'.format(i,scatterer))
 
 The above script produces the following output:
 
@@ -155,8 +155,8 @@ from a CrystalStructure-object:
     # Create list of unique reflections between 0.7 and 3.0 Angstrom
     hkls = generator.getUniqueHKLs(0.7, 3.0)
 
-    print 'There are', len(hkls), 'unique reflections for Si in the specified resolution range.'
-    print 'The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.'
+    print('There are {} unique reflections for Si in the specified resolution range.'.format(len(hkls)))
+    print('The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.')
 
 .. testoutput:: ExReflectionGeneratorConstruction
 
@@ -186,9 +186,9 @@ there are very small values present.
     # Find HKLs with very small structure factors:
     zeroFSquared = [(hkl, sf) for hkl, sf in zip(hkls, fSquared) if sf < 1e-9]
 
-    print 'HKL        F^2'
+    print('HKL        F^2')
     for hkl, sf in zeroFSquared:
-        print hkl, '  ', np.round(sf, 2)
+        print ('{0}    {1}'.format(hkl, np.round(sf, 2)))
 
 The output of the above script should show three reflections with very small values for :math:`F^2`. Their indices
 violate the special conditions mentioned in the previous paragraph, so the reflections are actually extinct:
@@ -217,8 +217,8 @@ to the constructor of ReflectionGenerator or by passing it to the actual generat
     # Create list of unique reflections between 0.7 and 3.0 Angstrom, use structure factors for filtering
     hkls = generator.getUniqueHKLsUsingFilter(0.7, 3.0, ReflectionConditionFilter.StructureFactor)
 
-    print 'There are', len(hkls), 'unique reflections for Si in the specified resolution range.'
-    print 'The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.'
+    print('There are {} unique reflections for Si in the specified resolution range.'.format(len(hkls)))
+    print('The reflection [222] is' + (' not' if not V3D(2, 2, 2) in hkls else '') + ' contained in the list.')
 
 With this option, the three reflections from the example above are missing and as an indicator, the [222] reflection
 is actually checked:
@@ -255,9 +255,9 @@ to the process for :math:`F^2`:
     reflections = sorted([(hkl, d, fsq, len(pg.getEquivalents(hkl))) for hkl, d, fsq in zip(hkls, dValues, fSquared)],
                                     key=lambda x: x[1], reverse=True)
 
-    print '{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M')
+    print('{0:<8}{1:>8}{2:>8}{3:>4}'.format('HKL', 'd', 'F^2', 'M'))
     for reflection in reflections:
-        print '{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection)
+        print('{0!s:<8}{1:>8.5f}{2:>8.2f}{3:>4}'.format(*reflection))
 
 This script will print a table with the reflections including their :math:`d`-value, :math:`F^2` and multiplicity due to point group
 symmetry:
