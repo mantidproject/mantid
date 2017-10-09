@@ -1,4 +1,6 @@
 #include "MantidParallel/IO/EventParser.h"
+#include "MantidParallel/Collectives.h"
+#include "MantidParallel/Nonblocking.h"
 #include <xmmintrin.h>
 
 #ifdef MPI_EXPERIMENTAL
@@ -159,41 +161,42 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
     std::vector<EventListEntry> &result,
     const std::vector<std::vector<EventListEntry>> &data) const {
-#ifndef MPI_EXPERIMENTAL
-  result = data[m_comm.rank()];
-#else
-  std::vector<size_t> sizes(data.size());
-  std::transform(data.cbegin(), data.cend(), sizes.begin(),
-                 [](const std::vector<Event> &vec) { return vec.size(); });
-  MPI_Alltoall(sizes.data(), 1, MPI_UNSIGNED_LONG, rec_sizes.data(), 1,
-               MPI_UNSIGNED_LONG, MPI_COMM_WORLD);
+  if (m_comm.size() == 1) {
+    result = data.front();
+    return;
+  }
 
-  auto total_size = std::accumulate(rec_sizes.begin(), rec_sizes.end(),
+  std::vector<size_t> sizes(data.size());
+  std::transform(
+      data.cbegin(), data.cend(), sizes.begin(),
+      [](const std::vector<EventListEntry> &vec) { return vec.size(); });
+  std::vector<size_t> recv_sizes(data.size());
+  Parallel::all_to_all(m_comm, sizes, recv_sizes);
+
+  auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(),
                                     static_cast<size_t>(0));
   result.resize(total_size);
   size_t offset = 0;
-  std::vector<MPI_Request> recv_requests(data.size());
-  for (int rank = 0; rank < data.size(); ++rank) {
+  std::vector<Parallel::Request> recv_requests;
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
     int tag = 0;
-    MPI_Irecv(result.data() + offset, rec_sizes[rank] * sizeof(T), MPI_CHAR,
-              rank2, tag, MPI_COMM_WORLD, &recv_requests[rank]);
-    offset += rec_sizes[rank2];
-    // TODO:
-    // 1. do work between sending and receiving (next range, or insert into
-    // workspace after first data was received?).
+    auto buffer = reinterpret_cast<char *>(result.data() + offset);
+    auto size = recv_sizes[rank] * sizeof(EventListEntry);
+    recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
+    offset += recv_sizes[rank];
   }
 
-  std::vector<MPI_Request> send_requests(data.size());
-  for (int rank = 0; rank < data.size(); ++rank) {
+  std::vector<Parallel::Request> send_requests;
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
     const auto &vec = data[rank];
     int tag = 0;
-    MPI_Isend(vec.data(), vec.size() * sizeof(T), MPI_CHAR, rank, tag,
-              MPI_COMM_WORLD, &send_requests[rank2]);
+    send_requests.emplace_back(
+        m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
+                     vec.size() * sizeof(EventListEntry)));
   }
 
-  MPI_Waitall(data.size(), send_requests.data(), MPI_STATUSES_IGNORE);
-  MPI_Waitall(data.size(), recv_requests.data(), MPI_STATUSES_IGNORE);
-#endif
+  Parallel::wait_all(send_requests.begin(), send_requests.end());
+  Parallel::wait_all(recv_requests.begin(), recv_requests.end());
 }
 
 /** Fills the workspace EventList with extracted events
