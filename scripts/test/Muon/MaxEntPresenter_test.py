@@ -3,10 +3,10 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 
 from  Muon import load_utils
-from  Muon import MaxEnt_presenter
-from  Muon import MaxEnt_view
-from  Muon import MaxEnt_model
-from  Muon import ThreadModel
+from  Muon import maxent_presenter
+from  Muon import maxent_view
+from  Muon import maxent_model
+from  Muon import thread_model
 
 import unittest
 if sys.version_info.major == 3:
@@ -20,9 +20,9 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
         self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
         
-        self.model=mock.create_autospec(MaxEnt_model.MaxEntModel,spec_set=True)
+        self.model=mock.create_autospec(maxent_model.MaxEntModel,spec_set=True)
 
-        self.view=mock.create_autospec(MaxEnt_view.MaxEntView,spec_set=True)
+        self.view=mock.create_autospec(maxent_view.MaxEntView,spec_set=True)
         #signals
         #needed for connect in presenter
         self.view.maxEntButtonSignal=mock.Mock()
@@ -35,9 +35,9 @@ class MaxEntPresenterTest(unittest.TestCase):
         self.view.deactivateButton=mock.Mock()
         self.view.activateButton=mock.Mock()
          #set presenter
-        self.presenter=MaxEnt_presenter.MaxEntPresenter(self.view,self.model,self.load)
+        self.presenter=maxent_presenter.MaxEntPresenter(self.view,self.model,self.load)
  
-        self.thread=mock.create_autospec(ThreadModel.ThreadModel)
+        self.thread=mock.create_autospec(thread_model.ThreadModel)
         self.thread.start=mock.Mock()
         self.thread.started=mock.Mock()
         self.thread.finished=mock.Mock()
