@@ -14,14 +14,17 @@ namespace Parallel {
 namespace IO {
 
 /** Constructor for EventParser.
- *NB there is no range checking for these inputs, clients using the class should
- *ensure they provide sensible data.
- *@param rankGroups rank grouping for banks which determines how work is
- *partitioned. Group ordering must be preserved to ensure pulse time ordering.
- *@param bankOffsets used to convert from detector ID to global spectrum index.
- *@param eventLists workspace eventlists which will be populated by the parser.
- *@param globalToLocalSpectrumIndex lookup table which converts a global
- *spectrum index to a spectrum index local to a given mpi rank
+ *
+ * @param rankGroups rank grouping for banks which determines how work is
+ * partitioned. The EventParser guarantees to process data obtained from ranks
+ * in the same group in-order to ensure pulse time ordering.
+ * @param bankOffsets used to convert from event ID to global spectrum index.
+ * This assumes that all event IDs within a bank a contiguous.
+ * @param eventLists workspace event lists which will be populated by the
+ * parser. The parser assumes that there always is a matching event list for any
+ * event ID that will be passed in via `startAsync`.
+ * @param globalToLocalSpectrumIndex lookup table which converts a global
+ * spectrum index to a spectrum index local to a given mpi rank
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
@@ -34,10 +37,10 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
       m_globalToLocalSpectrumIndex(std::move(globalToLocalSpectrumIndex)) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
- *parsing events from file/event stream.
- *@param event_index
- *@param event_time_zero
+ * parsing events from file/event stream.
  *
+ * @param event_index The event_index entry from the NXevent_data group.
+ * @param event_time_zero The event_time_zero entry from the NXevent_data group.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
@@ -48,12 +51,13 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
   m_posInEventIndex = 0;
 }
 
-/** Uses the event_ids (detectorIDs) supplied to calculate the corresponding
- * global spectrum numbers using the bankOffsets stored at object creation. NB
- * event_id_start is transformed in-place to contain the spectrum indices.
- * @param event_id_start Starting position of chunk of data containing detector
- * IDs. This is modified in place to store global spectrum indices to save
- * memory bandwidth.
+/** Transform event IDs to global spectrum numbers using the bankOffsets stored
+ * at object creation.
+ *
+ * The transformation is in-place to save memory bandwidth and modifies the
+ * range pointed to by `event_id_start`.
+ * @param event_id_start Starting position of chunk of data containing event
+ * IDs.
  * @param count Number of items in data chunk
  * @param bankIndex Index into the list of bank offsets.
  */
@@ -66,8 +70,10 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 }
 
 /** Finds the start and end pulse indices within the event_index given an offset
- * into the event_id/event_time_offset array and a chunk size. Returns the
- * indices which correspond to the start and end pulses covering the data chunk.
+ * into the event_id/event_time_offset array and a chunk size.
+ *
+ * Returns the indices which correspond to the start and end pulses covering the
+ * data chunk.
  * @param eventIndex index list which is searched
  * @param rangeStart Offset into event_time_offset/event_id
  * @param count Size of data chunk.
@@ -101,7 +107,7 @@ std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 /** Extracts event information from the list of time offsets and global spectrum
  * indices using the event_index and event_time_offset tables provided from
  * file. These events are separated according to MPI ranks.
- * @param rankData vector which stores vectors of data for each mpi rank.
+ * @param rankData vector which stores vectors of data for each MPI rank.
  * @param globalSpectrumIndex list of spectrum indices corresponding to tof data
  * @param eventTimeOffset tof data
  * @param offset File offset (index) for tof data. Used to track event_index and
@@ -148,10 +154,10 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 }
 
 /** Uses MPI calls to redistribute chunks which must be processed on certain
- *ranks.
- *@param result output data which must be processed on current rank. (May
- *be updated by other ranks)
- *@param data Data on this rank which belongs to several other ranks.
+ * ranks.
+ * @param result output data which must be processed on current rank. (May
+ * be updated by other ranks)
+ * @param data Data on this rank which belongs to several other ranks.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
@@ -220,7 +226,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
  * separates then according to MPI ranks and then appends them to the workspace
  * event list. Asynchronously starts parsing wait() must be called before
  * attempting to invoke this method subsequently.
- * @param event_id_start Buffer containing detector IDs.
+ * @param event_id_start Buffer containing event IDs.
  * @param event_time_offset_start Buffer containing TOD.
  * @param range contains information on the detector bank which corresponds to
  * the data in the buffers, the file index offset where data starts and the

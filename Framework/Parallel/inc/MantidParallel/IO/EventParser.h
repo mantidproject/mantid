@@ -23,8 +23,9 @@ struct DLLExport EventListEntry {
   Types::Event::TofEvent tofEvent;
 };
 
-/** Distrubuted (MPI) parsing of Nexus events from a data stream. Data is
-distributed accross MPI ranks for writing to a event lists.
+/** Distributed (MPI) parsing of Nexus events from a data stream. Data is
+distributed accross MPI ranks for writing to event lists on the correct target
+rank.
 
 @author Lamar Moore
 @date 2017
