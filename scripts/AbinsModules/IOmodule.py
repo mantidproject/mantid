@@ -458,8 +458,8 @@ class IOmodule(object):
 
     def calculate_ab_initio_file_hash(self):
         """
-        This method calculates hash of the file with vibrational data according to SHA-2 algorithm from hashlib
-        library: sha512.
+        This method calculates hash of the file with vibrational or phonon data according to SHA-2 algorithm from
+        hashlib library: sha512.
         :returns: string representation of hash for file with vibrational data which contains only hexadecimal digits
         """
 

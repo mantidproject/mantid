@@ -126,8 +126,8 @@ class GeneralLoadAbInitioTester(object):
         """
         Reads data from .{extension} file.
         :param loader: ab initio loader
-        :param filename: name of file with vibrational data (name + extension)
-        :returns: vibrational data
+        :param filename: name of file with vibrational or phonon data (name + extension)
+        :returns: vibrational or phonon data
         """
         # 1) Read data
         try:

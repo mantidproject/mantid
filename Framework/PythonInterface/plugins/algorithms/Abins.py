@@ -23,7 +23,7 @@ import AbinsModules
 class Abins(PythonAlgorithm):
 
     _ab_initio_program = None
-    _vibrational_data_file = None
+    _vibrational_or_phonon_data_file = None
     _experimental_file = None
     _temperature = None
     _bin_width = None
@@ -54,13 +54,13 @@ class Abins(PythonAlgorithm):
                              direction=Direction.Input,
                              defaultValue="CASTEP",
                              validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
-                             doc="An ab initio program which was used for vibrational calculation.")
+                             doc="An ab initio program which was used for vibrational or phonon calculation.")
 
-        self.declareProperty(FileProperty("VibrationalDataFile", "",
+        self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
                              action=FileAction.Load,
                              direction=Direction.Input,
                              extensions=["phonon", "out", "outmol", "log", "LOG"]),
-                             doc="File with the data from a vibrational calculation.")
+                             doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
                              action=FileAction.OptionalLoad,
@@ -134,14 +134,14 @@ class Abins(PythonAlgorithm):
             issues["Scale"] = "Scale must be positive."
 
         ab_initio_program = self.getProperty("AbInitioProgram").value
-        vibrational_data_filename = self.getProperty("VibrationalDataFile").value
-        output = input_file_validators[ab_initio_program](filename_full_path=vibrational_data_filename)
-        bin_width =  self.getProperty("BinWidthInWavenumber").value
+        vibrational_or_phonon_data_filename = self.getProperty("VibrationalOrPhononFile").value
+        output = input_file_validators[ab_initio_program](filename_full_path=vibrational_or_phonon_data_filename)
+        bin_width = self.getProperty("BinWidthInWavenumber").value
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
         if output["Invalid"]:
-            issues["VibrationalDataFile"] = output["Comment"]
+            issues["VibrationalOrPhononFile"] = output["Comment"]
 
         workspace_name = self.getPropertyValue("OutputWorkspace")
         # list of special keywords which cannot be used in the name of workspace
@@ -176,12 +176,13 @@ class Abins(PythonAlgorithm):
         # 2) read ab initio data
         ab_initio_loaders = {"CASTEP": AbinsModules.LoadCASTEP, "CRYSTAL": AbinsModules.LoadCRYSTAL,
                              "DMOL3": AbinsModules.LoadDMOL3, "GAUSSIAN": AbinsModules.LoadGAUSSIAN}
-        ab_reader = ab_initio_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_data_file)
-        ab_initio_data = ab_reader.get_formatted_data()
-        prog_reporter.report("Vibrational data has been read.")
+        rdr = ab_initio_loaders[self._ab_initio_program](input_ab_initio_filename=self._vibrational_or_phonon_data_file)
+        ab_initio_data = rdr.get_formatted_data()
+        prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S
-        s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_data_file, temperature=self._temperature,
+        s_calculator = AbinsModules.CalculateS.init(filename=self._vibrational_or_phonon_data_file,
+                                                    temperature=self._temperature,
                                                     sample_form=self._sample_form, abins_data=ab_initio_data,
                                                     instrument=self._instrument,
                                                     quantum_order_num=self._num_quantum_order_events,
@@ -192,7 +193,8 @@ class Abins(PythonAlgorithm):
         # 4) get atoms for which S should be plotted
         self._extracted_ab_initio_data = ab_initio_data.get_atoms_data().extract()
         num_atoms = len(self._extracted_ab_initio_data)
-        all_atms_smbls = list(set([self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] for atom in range(num_atoms)]))
+        all_atms_smbls = list(set([self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]
+                                   for atom in range(num_atoms)]))
         all_atms_smbls.sort()
 
         if len(self._atoms) == 0:  # case: all atoms
@@ -422,7 +424,6 @@ class Abins(PythonAlgorithm):
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
         :param atom_name: symbol of atom for which workspace should be created
-        :param frequencies: frequencies in the form of numpy array for which S(Q, omega) can be plotted
         :param s_points: S(Q, omega)
         :param optional_name: optional part of workspace name
         :returns: workspace for the given frequency and S data
@@ -566,12 +567,12 @@ class Abins(PythonAlgorithm):
 
     def _check_threshold(self, message_end=None):
         """
-        Checks acoustic vibrational threshold.
+        Checks threshold for frequencies.
         :param message_end: closing part of the error message.
         """
-        acoustic_threshold = AbinsModules.AbinsParameters.acoustic_vibrational_threshold
-        if not (isinstance(acoustic_threshold, float) and acoustic_threshold >= 0.0):
-            raise RuntimeError("Invalid value of acoustic_vibrational_threshold" + message_end)
+        freq_threshold = AbinsModules.AbinsParameters.frequencies_threshold
+        if not (isinstance(freq_threshold, float) and freq_threshold >= 0.0):
+            raise RuntimeError("Invalid value of frequencies_threshold" + message_end)
 
         # check s threshold
         s_absolute_threshold = AbinsModules.AbinsParameters.s_absolute_threshold
@@ -647,19 +648,19 @@ class Abins(PythonAlgorithm):
         :param filename_full_path: full path of a file to check.
         :returns: True if file is valid otherwise false.
         """
-        logger.information("Validate CRYSTAL file with vibrational data.")
+        logger.information("Validate CRYSTAL file with vibrational or phonon data.")
         return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
                                                        expected_file_extension=".out")
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """
-        Check if input  DFT phonon (ab initio vibrational) file has been produced by CASTEP. Currently the crucial
+        Check if ab initio input vibrational or phonon file has been produced by CASTEP. Currently the crucial
         keywords in the first few lines are checked (to be modified if a better validation is found...)
         :param filename_full_path: full path of a file to check
         :returns: Dictionary with two entries "Invalid", "Comment". Valid key can have two values: True/ False. As it
                   comes to "Comment" it is an empty string if Valid:True, otherwise stores description of the problem.
         """
-        logger.information("Validate CASTEP file with vibrational data.")
+        logger.information("Validate CASTEP file with vibrational or phonon data.")
         msg_err = "Invalid %s file. " % filename_full_path
         output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
                                                          expected_file_extension=".phonon")
@@ -722,7 +723,7 @@ class Abins(PythonAlgorithm):
         """
 
         self._ab_initio_program = self.getProperty("AbInitioProgram").value
-        self._vibrational_data_file = self.getProperty("VibrationalDataFile").value
+        self._vibrational_or_phonon_data_file = self.getProperty("VibrationalOrPhononFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._temperature = self.getProperty("TemperatureInKelvin").value
         self._bin_width = self.getProperty("BinWidthInWavenumber").value

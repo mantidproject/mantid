@@ -76,7 +76,7 @@ class HelperTestingClass(object):
         User performs calculation from scratch (not loaded from hdf file). All data is calculated.
         """
         Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalDataFile=self._system_name + self._extension[self._ab_initio_program],
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
               TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
               QuantumOrderEventsNumber=str(self._quantum_order_event), Scale=self._scale,
@@ -95,7 +95,7 @@ class HelperTestingClass(object):
 
         # T = 10 K
         Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalDataFile=self._system_name + self._extension[self._ab_initio_program],
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
               TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
               Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
@@ -103,7 +103,7 @@ class HelperTestingClass(object):
 
         # T = 20 K
         Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalDataFile=self._system_name + self._extension[self._ab_initio_program],
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
               TemperatureInKelvin=temperature_for_test, SampleForm=self._sample_form, Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width,
               Atoms=self._atoms, SumContributions=self._sum_contributions, Scale=self._scale,
@@ -112,7 +112,7 @@ class HelperTestingClass(object):
 
         # T = 10 K
         Abins(AbInitioProgram=self._ab_initio_program,
-              VibrationalDataFile=self._system_name + self._extension[self._ab_initio_program],
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
               TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
               Scale=self._scale, QuantumOrderEventsNumber=str(self._quantum_order_event),
@@ -127,7 +127,8 @@ class HelperTestingClass(object):
         """
         self.case_from_scratch()
         DeleteWorkspace(self._output_name)
-        Abins(AbInitioProgram=self._ab_initio_program, VibrationalDataFile=self._system_name + self._extension[self._ab_initio_program],
+        Abins(AbInitioProgram=self._ab_initio_program,
+              VibrationalOrPhononFile=self._system_name + self._extension[self._ab_initio_program],
               TemperatureInKelvin=self._temperature, SampleForm=self._sample_form, Instrument=self._instrument_name,
               BinWidthInWavenumber=self._bin_width, Atoms=self._atoms, SumContributions=self._sum_contributions,
               Scale=self._scale, QuantumOrderEventsNumber=str(order), ScaleByCrossSection=self._cross_section_factor,
