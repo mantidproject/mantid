@@ -13,7 +13,7 @@ if ( CXXTEST_FOUND )
     Parallel
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
-    ${HDF5_CXX_LIBRARIES}
+    ${HDF5_LIBRARIES}
     )
 
   add_dependencies ( FrameworkTests ParallelTest )
