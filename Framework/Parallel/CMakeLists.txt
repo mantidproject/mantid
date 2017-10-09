@@ -11,21 +11,23 @@ set ( INC_FILES
 	inc/MantidParallel/Collectives.h
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
 	inc/MantidParallel/ThreadingBackend.h
-        inc/MantidParallel/IO/EventParser.h
 )
 
 set ( TEST_FILES
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventParserTest.h
 	ExecutionModeTest.h
+	NonblockingTest.h
 	ParallelRunnerTest.h
 	RequestTest.h
 	StorageModeTest.h
 	ThreadingBackendTest.h
-        EventParserTest.h
 )
 
 if (COVERALLS)
