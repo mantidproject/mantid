@@ -205,8 +205,7 @@ protected:
   virtual void plotGroup();
   void plotWorkspaces(const QOrderedSet<QString> &workspaces);
   // Get the name of a post-processed workspace
-  QString getPostprocessedWorkspaceName(const GroupData &groupData,
-                                        const QString &prefix = "");
+  QString getPostprocessedWorkspaceName(const GroupData &groupData);
 protected slots:
   void reductionError(QString ex);
   void threadFinished(const int exitCode);

@@ -29,7 +29,6 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
-#include <iterator>
 
 #include <iostream>
 
@@ -230,9 +229,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(in.cbegin(), in.cend(), std::inserter(out, out.begin()),
-                 [](QString const &inStr)
-                     -> std::string { return inStr.toStdString(); });
+  std::transform(
+      in.cbegin(), in.cend(), std::inserter(out, out.begin()),
+      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -301,13 +300,14 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   auto settingsChanged =
       m_preprocessing.m_options != newPreprocessingOptions ||
       m_processingOptions != newProcessingOptions ||
-      (hasPostprocessing() && m_postprocessing->m_options != newPostprocessingOptions);
+      (hasPostprocessing() &&
+       m_postprocessing->m_options != newPostprocessingOptions);
 
   m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
 
-  if(hasPostprocessing())
-      m_postprocessing->m_options = newPostprocessingOptions;
+  if (hasPostprocessing())
+    m_postprocessing->m_options = newPostprocessingOptions;
 
   return settingsChanged;
 }
@@ -339,8 +339,9 @@ void GenericDataProcessorPresenter::process() {
   int maxProgress = 0;
 
   for (const auto &group : m_selectedData) {
-    auto groupOutputNotFound = hasPostprocessing() && !workspaceExists(getPostprocessedWorkspaceName(
-        group.second, m_postprocessing->m_algorithm.prefix()));
+    auto groupOutputNotFound =
+        hasPostprocessing() &&
+        !workspaceExists(getPostprocessedWorkspaceName(group.second));
 
     if (settingsHaveChanged || groupOutputNotFound)
       m_manager->setProcessed(false, group.first);
@@ -552,6 +553,7 @@ there
 @param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
+  assert(hasPostprocessing() && "Postprocessing details required by notebook generator.");
 
   QString filename = m_view->requestNotebookPath();
   if (!filename.isEmpty()) {
@@ -722,11 +724,11 @@ Returns the name of the reduced workspace for a given group
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
-    const GroupData &groupData, const QString &prefix) {
+    const GroupData &groupData) {
   assert(hasPostprocessing() &&
          "Only call this function if you have postprocessing.");
-  return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist, groupData,
-                                                         prefix);
+  return m_postprocessing->getPostprocessedWorkspaceName(m_whitelist,
+                                                         groupData);
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -951,9 +953,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   auto isUnrestrictedProperty =
       [&restrictedProps](QString const &propertyName) -> bool {
-        return std::find(restrictedProps.begin(), restrictedProps.end(),
-                         propertyName) != restrictedProps.end();
-      };
+    return std::find(restrictedProps.begin(), restrictedProps.end(),
+                     propertyName) != restrictedProps.end();
+  };
 
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
@@ -1003,8 +1005,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0, propValue.indexOf(".") +
-                                   m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0,
+                            propValue.indexOf(".") +
+                                m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1452,8 +1455,7 @@ void GenericDataProcessorPresenter::plotGroup() {
   if (hasPostprocessing()) {
     for (const auto &item : items) {
       if (item.second.size() > 1) {
-        auto const wsName = getPostprocessedWorkspaceName(
-            item.second, m_postprocessing->m_algorithm.prefix());
+        auto const wsName = getPostprocessedWorkspaceName(item.second);
 
         if (workspaceExists(wsName))
           workspaces.insert(wsName, nullptr);

@@ -22,8 +22,7 @@ public:
   void postProcessGroup(const QString &processorPrefix,
                         const WhiteList &whitelist, const GroupData &groupData);
   QString getPostprocessedWorkspaceName(const WhiteList &whitelist,
-                                        const GroupData &groupData,
-                                        const QString &prefix = "");
+                                        const GroupData &groupData);
   QString getReducedWorkspaceName(const WhiteList &whitelist,
                                   const QStringList &data,
                                   const QString &prefix = "");

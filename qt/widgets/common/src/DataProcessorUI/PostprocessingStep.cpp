@@ -75,8 +75,7 @@ QString PostprocessingStep::getReducedWorkspaceName(const WhiteList &whitelist,
 
 QString
 PostprocessingStep::getPostprocessedWorkspaceName(const WhiteList &whitelist,
-                                                  const GroupData &groupData,
-                                                  const QString &prefix) {
+                                                  const GroupData &groupData) {
   /* This method calculates, for a given set of rows, the name of the output
   * (post-processed) workspace */
 
@@ -85,7 +84,7 @@ PostprocessingStep::getPostprocessedWorkspaceName(const WhiteList &whitelist,
   for (const auto &data : groupData) {
     outputNames.append(getReducedWorkspaceName(whitelist, data.second));
   }
-  return prefix + outputNames.join("_");
+  return m_algorithm.prefix() + outputNames.join("_");
 }
 
 /**
@@ -103,7 +102,7 @@ void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
 
   // The name to call the post-processed ws
   auto const outputWSName =
-      getPostprocessedWorkspaceName(whitelist, groupData, m_algorithm.prefix());
+      getPostprocessedWorkspaceName(whitelist, groupData);
 
   // Go through each row and get the input ws names
   for (auto const &row : groupData) {
