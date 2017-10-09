@@ -301,11 +301,13 @@ bool GenericDataProcessorPresenter::areOptionsUpdated() {
   auto settingsChanged =
       m_preprocessing.m_options != newPreprocessingOptions ||
       m_processingOptions != newProcessingOptions ||
-      m_postprocessing->m_options != newPostprocessingOptions;
+      (hasPostprocessing() && m_postprocessing->m_options != newPostprocessingOptions);
 
   m_preprocessing.m_options = newPreprocessingOptions;
   m_processingOptions = newProcessingOptions;
-  m_postprocessing->m_options = newPostprocessingOptions;
+
+  if(hasPostprocessing())
+      m_postprocessing->m_options = newPostprocessingOptions;
 
   return settingsChanged;
 }
@@ -337,7 +339,7 @@ void GenericDataProcessorPresenter::process() {
   int maxProgress = 0;
 
   for (const auto &group : m_selectedData) {
-    auto groupOutputNotFound = !workspaceExists(getPostprocessedWorkspaceName(
+    auto groupOutputNotFound = hasPostprocessing() && !workspaceExists(getPostprocessedWorkspaceName(
         group.second, m_postprocessing->m_algorithm.prefix()));
 
     if (settingsHaveChanged || groupOutputNotFound)
