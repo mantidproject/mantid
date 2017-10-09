@@ -45,9 +45,10 @@ Usage
   print('Fit quality is {}'.format(np.sum( (y - yout)**2 )))
 
 .. testoutput:: ExampleSpline
+   :options: +ELLIPSIS
 
-  Fit quality is 0.0253975992834
-  Fit quality is 1.53267607188e-07
+  Fit quality is ...
+  Fit quality is ...
 
 
 .. categories::

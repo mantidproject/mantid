@@ -35,11 +35,12 @@ Usage
 Output:
 
 .. testoutput:: SortDetectors
+   :options: +ELLIPSIS
 
    Type of upID: <type 'numpy.ndarray'>
    Number of upDistances: 0
    First few values of downIDs: [ 0  1 10 11  2]
-   First few values of downDistances: 5.0 5.0000064 5.0000064 5.00001279998 5.00002559993
+   First few values of downDistances: 5.0 5.000006... 5.000006... 5.00001279... 5.00002559...
    
 .. categories::
 

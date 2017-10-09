@@ -148,8 +148,8 @@ Usage
 
     try:
         captureLive()
-    except Exception, exc:
-        print "Error occurred starting live data"
+    except Exception:
+        print("Error occurred starting live data")
     finally:
         thread.join() # this must get hit
 

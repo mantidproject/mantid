@@ -6,16 +6,17 @@ from mantid.kernel import Direction, Stats
 import mantid.simpleapi as ms
 from mantid import mtd, logger
 import numpy as np
+import collections
 from six import iteritems
 
 
 def _stats_to_dict(stats):
     """
-    Converts a Statstics object to a dictionary.
+    Converts a Statstics object to an ordered dictionary.
     @param stats Statistics object to convertToWaterfall
     @return Dictionary of statistics
     """
-    stat_dict = dict()
+    stat_dict = collections.OrderedDict()
     stat_dict['standard_deviation'] = stats.standard_deviation
     stat_dict['maximum'] = stats.maximum
     stat_dict['minimum'] = stats.minimum

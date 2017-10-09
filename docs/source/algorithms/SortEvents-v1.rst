@@ -32,7 +32,7 @@ Usage
   ev1 = ws.getSpectrum(1)
   ptimes = ev1.getPulseTimes()
   tofs = ev1.getTofs()
-  for eindex in xrange(10):
+  for eindex in range(10):
     print("Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex]))
 
 .. testcleanup:: ExSortByX
@@ -65,7 +65,7 @@ Output:
   ev1 = ws.getSpectrum(1)
   ptimes = ev1.getPulseTimes()
   tofs = ev1.getTofs()
-  for eindex in xrange(10):
+  for eindex in range(10):
     print("Spectrum 1: Event %d, Pulse Time = %s, TOF = %d" % (eindex, str(ptimes[eindex]), tofs[eindex]))
 
 

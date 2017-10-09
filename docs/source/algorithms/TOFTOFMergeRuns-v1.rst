@@ -64,34 +64,34 @@ Usage
     ws3 = TOFTOFMergeRuns('ws1,ws2')
 
     # Temperature 
-    print "Temperature of experiment for 1st workspace (in K): ", ws1.getRun().getLogData('temperature').value
-    print "Temperature of experiment for 2nd workspace (in K): ", ws2.getRun().getLogData('temperature').value
-    print "Temperature of experiment for merged workspaces = average over workspaces (in K): ",  ws3.getRun().getLogData('temperature').value
+    print("Temperature of experiment for 1st workspace (in K): ", ws1.getRun().getLogData('temperature').value)
+    print("Temperature of experiment for 2nd workspace (in K): ", ws2.getRun().getLogData('temperature').value)
+    print("Temperature of experiment for merged workspaces = average over workspaces (in K): ",  ws3.getRun().getLogData('temperature').value)
 
     # Duration
-    print "Duration of experiment for 1st workspace (in s): ",  ws1.getRun().getLogData('duration').value
-    print "Duration of experiment for 2nd workspace (in s): ",  ws2.getRun().getLogData('duration').value
-    print "Duration of experiment for merged workspaces = sum of all durations (in s): ",  ws3.getRun().getLogData('duration').value
+    print("Duration of experiment for 1st workspace (in s): ",  ws1.getRun().getLogData('duration').value)
+    print("Duration of experiment for 2nd workspace (in s): ",  ws2.getRun().getLogData('duration').value)
+    print("Duration of experiment for merged workspaces = sum of all durations (in s): ",  ws3.getRun().getLogData('duration').value)
 
     # Run start 
-    print "Start of experiment for 1st workspace: ",  ws1.getRun().getLogData('run_start').value
-    print "Start of experiment for 2nd workspace: ",  ws2.getRun().getLogData('run_start').value
-    print "Start of experiment for merged workspaces = miminum of all workspaces: ",  ws3.getRun().getLogData('run_start').value
+    print("Start of experiment for 1st workspace: ",  ws1.getRun().getLogData('run_start').value)
+    print("Start of experiment for 2nd workspace: ",  ws2.getRun().getLogData('run_start').value)
+    print("Start of experiment for merged workspaces = miminum of all workspaces: ",  ws3.getRun().getLogData('run_start').value)
 
     # Run end 
-    print "End of experiment for 1st workspace: ",  ws1.getRun().getLogData('run_end').value
-    print "End of experiment for 2nd workspace: ",  ws2.getRun().getLogData('run_end').value
-    print "End of experiment for merged workspaces = maximum of all workspaces: ",  ws3.getRun().getLogData('run_end').value
+    print("End of experiment for 1st workspace: ",  ws1.getRun().getLogData('run_end').value)
+    print("End of experiment for 2nd workspace: ",  ws2.getRun().getLogData('run_end').value)
+    print("End of experiment for merged workspaces = maximum of all workspaces: ",  ws3.getRun().getLogData('run_end').value)
     
     # Run number 
-    print "Run number for 1st workspace: ",  ws1.getRun().getLogData('run_number').value
-    print "Run number for 2nd workspace: ",  ws2.getRun().getLogData('run_number').value
-    print "Run number for merged workspaces = list of all workspaces: ",  ws3.getRun().getLogData('run_number').value      
+    print("Run number for 1st workspace: ",  ws1.getRun().getLogData('run_number').value)
+    print("Run number for 2nd workspace: ",  ws2.getRun().getLogData('run_number').value)
+    print("Run number for merged workspaces = list of all workspaces: ",  ws3.getRun().getLogData('run_number').value)
  
     # Monitor counts
-    print "Monitor counts for 1st workspace: ",  ws1.getRun().getLogData('monitor_counts').value
-    print "Monitor counts for 2nd workspace: ",  ws2.getRun().getLogData('monitor_counts').value
-    print "Monitor counts for merged workspaces = sum over all workspaces: ",  ws3.getRun().getLogData('monitor_counts').value      
+    print("Monitor counts for 1st workspace: ",  ws1.getRun().getLogData('monitor_counts').value)
+    print("Monitor counts for 2nd workspace: ",  ws2.getRun().getLogData('monitor_counts').value)
+    print("Monitor counts for merged workspaces = sum over all workspaces: ",  ws3.getRun().getLogData('monitor_counts').value)
    
 
 Output:
@@ -132,9 +132,9 @@ Output:
 
     group=GroupWorkspaces('ws1,ws2')
     groupmerged=TOFTOFMergeRuns(group)
-    print "Monitor counts for 1st workspace: ",  ws1.getRun().getLogData('monitor_counts').value
-    print "Monitor counts for 2nd workspace: ",  ws2.getRun().getLogData('monitor_counts').value
-    print "Monitor counts for merged workspaces = sum over all workspaces: ",  groupmerged.getRun().getLogData('monitor_counts').value         
+    print("Monitor counts for 1st workspace: ",  ws1.getRun().getLogData('monitor_counts').value)
+    print("Monitor counts for 2nd workspace: ",  ws2.getRun().getLogData('monitor_counts').value)
+    print("Monitor counts for merged workspaces = sum over all workspaces: ",  groupmerged.getRun().getLogData('monitor_counts').value)
 
 Output:
 
