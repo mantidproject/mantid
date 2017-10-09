@@ -37,6 +37,11 @@ Single Crystal Diffraction
 - :ref:`SCDCalibratePanels <algm-SCDCalibratePanels>` has CalibrateSnapPanels option to calibrate 3X3 banks of SNAP instrument for single crystal data.
 - :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>` has not correctly aligned the detectors for SNAP since release 3.9. This bug that only impacted SNAP has been fixed.
 
+Engineering Diffraction
+-----------------------
+ 
+- The ISIS engineering diffraction interface has temporarily been disabled due to an issue with file search freezing Mantid when opening the interface.
+
 Imaging
 -------
 
