@@ -721,7 +721,6 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
 /**
 Returns the name of the reduced workspace for a given group
 @param groupData : The data in a given group
-@param prefix : A prefix to be appended to the generated ws name
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
