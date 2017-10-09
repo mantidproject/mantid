@@ -101,7 +101,7 @@ void load(
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(const H5::Group &group, const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
-          std::vector<std::vector<TofEvent> *> eventLists) {
+          std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
   // TODO automatically(?) determine good chunk size
   // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
