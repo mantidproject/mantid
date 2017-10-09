@@ -74,7 +74,9 @@ private:
   /// create output workspace
   void createOutputWorkspaces();
 
-  void findStartStopIndex(size_t &istart, size_t &istop);
+  /// main method to find peak background
+  int findBackground(std::vector<size_t> &peak_min_max_indexes,
+                     std::vector<double> &bkgd3);
 
   /// set histogram data to find background
   void setHistogram(const HistogramData::Histogram &histogram);
@@ -88,12 +90,19 @@ private:
   /// set fit window
   void setFitWindow(const std::vector<double> &window);
 
+  /// add result to output workpsace
+  void addResultToOutput(const int &goodfit,
+                         const std::vector<size_t> &peakindexes,
+                         const std::vector<double> &bkgdparams);
+
   /// histogram data to find peak background
   boost::shared_ptr<const HistogramData::Histogram> m_histogram;
 
   //  HistogramData::Histogram& m_histogram;
   /// fit window
   std::vector<double> m_vecFitWindows;
+  size_t m_iStartX; /// l0 in original code
+  size_t m_iStopX;  /// n in original code
   /// background order: 0 for flat, 1 for linear, 2 for quadratic
   size_t m_backgroundOrder;
   /// constant sigma
