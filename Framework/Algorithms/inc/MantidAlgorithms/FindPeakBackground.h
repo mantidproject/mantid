@@ -75,7 +75,7 @@ private:
   void createOutputWorkspaces();
 
   /// set histogram data to find background
-  void setHistogram(const HistogramData::Histogram &histogram);
+  //  void setHistogram(const HistogramData::Histogram &histogram);
 
   /// set sigma constant
   void setSigma(const double &sigma);
@@ -86,12 +86,15 @@ private:
   /// set fit window
   void setFitWindow(const std::vector<double> &window);
 
-  int findBackground(const size_t &l0, const size_t &n,
+  int findBackground(const HistogramData::Histogram &histogram,
+                     const size_t &l0, const size_t &n,
                      std::vector<size_t> &peak_min_max_indexes,
                      std::vector<double> &bkgd3);
 
+  /// Histogram cannot be defined due to lack of default constructor. shared_ptr
+  /// will do the copy
   /// histogram data to find peak background
-  boost::shared_ptr<const HistogramData::Histogram> m_histogram;
+  /// boost::shared_ptr<const HistogramData::Histogram> m_histogram;
 
   //  HistogramData::Histogram& m_histogram;
   /// fit window
@@ -102,7 +105,9 @@ private:
   double m_sigmaConstant;
   /// output workspace (table of result)
   API::ITableWorkspace_sptr m_outPeakTableWS;
-
+  /// Input workspace
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  /// workspace index
   size_t m_inputWSIndex;
 
   //  /// find background (main algorithm)
@@ -111,7 +116,8 @@ private:
   //  /// get result
   //  void getBackgroundResult();
 
-  void findWindowIndex(size_t &l0, size_t &n);
+  void findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0,
+                       size_t &n);
 
   struct cont_peak {
     size_t start;

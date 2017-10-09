@@ -64,9 +64,10 @@ void FindPeakBackground::init() {
       "quadratic terms.");
 }
 
-void FindPeakBackground::findWindowIndex(size_t &l0, size_t &n) {
-  auto &inpX = m_histogram->x();
-  auto &inpY = m_histogram->y();
+void FindPeakBackground::findWindowIndex(
+    const HistogramData::Histogram &histogram, size_t &l0, size_t &n) {
+  auto &inpX = histogram.x();
+  auto &inpY = histogram.y();
   size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
 
   // determine the fit window with their index in X (or Y)
@@ -87,9 +88,10 @@ void FindPeakBackground::findWindowIndex(size_t &l0, size_t &n) {
 void FindPeakBackground::exec() {
   // Get input and validate
   processInputProperties();
+  auto histogram = m_inputWS->histogram(m_inputWSIndex);
 
   size_t l0, n;
-  findWindowIndex(l0, n);
+  findWindowIndex(histogram, l0, n);
 
   // m_vecFitWindows won't be used again form this point till end.
 
@@ -101,7 +103,7 @@ void FindPeakBackground::exec() {
 
   std::vector<size_t> peak_min_max_indexes;
   std::vector<double> bkgd3;
-  int goodfit = findBackground(l0, n, peak_min_max_indexes, bkgd3);
+  int goodfit = findBackground(histogram, l0, n, peak_min_max_indexes, bkgd3);
 
   if (goodfit > 0) {
     size_t min_peak = peak_min_max_indexes[0];
@@ -121,10 +123,11 @@ void FindPeakBackground::exec() {
 }
 
 int FindPeakBackground::findBackground(
-    const size_t &l0, const size_t &n,
-    std::vector<size_t> &peak_min_max_indexes, std::vector<double> &bkgd3) {
-  auto &inpX = m_histogram->x();
-  auto &inpY = m_histogram->y();
+    const HistogramData::Histogram &histogram, const size_t &l0,
+    const size_t &n, std::vector<size_t> &peak_min_max_indexes,
+    std::vector<double> &bkgd3) {
+  auto &inpX = histogram.x();
+  auto &inpY = histogram.y();
   size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
   size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
 
@@ -411,27 +414,26 @@ double FindPeakBackground::moment4(MantidVec &X, size_t n, double mean) {
 //----------------------------------------------------------------------------------------------
 void FindPeakBackground::processInputProperties() {
   // process input workspace and workspace index
-  MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
+  m_inputWS = getProperty("InputWorkspace");
 
   int inpwsindex = getProperty("WorkspaceIndex");
   if (isEmpty(inpwsindex)) {
     // Default
-    if (inpWS->getNumberHistograms() == 1) {
+    if (m_inputWS->getNumberHistograms() == 1) {
       inpwsindex = 0;
     } else {
       throw runtime_error("WorkspaceIndex must be given. ");
     }
   } else if (inpwsindex < 0 ||
-             inpwsindex >= static_cast<int>(inpWS->getNumberHistograms())) {
+             inpwsindex >= static_cast<int>(m_inputWS->getNumberHistograms())) {
     stringstream errss;
-    errss << "Input workspace " << inpWS->getName() << " has "
-          << inpWS->getNumberHistograms() << " spectra.  Input workspace index "
-          << inpwsindex << " is out of boundary. ";
+    errss << "Input workspace " << m_inputWS->getName() << " has "
+          << m_inputWS->getNumberHistograms()
+          << " spectra.  Input workspace index " << inpwsindex
+          << " is out of boundary. ";
     throw runtime_error(errss.str());
   }
   m_inputWSIndex = static_cast<size_t>(inpwsindex);
-
-  setHistogram(inpWS->histogram(inpwsindex));
 
   std::vector<double> fitwindow = getProperty("FitWindow");
   setFitWindow(fitwindow);
@@ -448,12 +450,6 @@ void FindPeakBackground::processInputProperties() {
   // sigma constant
   double k = getProperty("SigmaConstant");
   setSigma(k);
-}
-
-/// set histogram data to find background
-void FindPeakBackground::setHistogram(
-    const HistogramData::Histogram &histogram) {
-  m_histogram = boost::make_shared<HistogramData::Histogram>(histogram);
 }
 
 /// set sigma constant
@@ -473,12 +469,7 @@ void FindPeakBackground::setBackgroundOrder(size_t order) {
  */
 void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
   // validate input
-  if (m_vecFitWindows.size() == 0) {
-    m_vecFitWindows.resize(2);
-    m_vecFitWindows[0] = m_histogram->y().front();
-    m_vecFitWindows[1] = m_histogram->y().back();
-  } else if (m_vecFitWindows.size() != 2 ||
-             m_vecFitWindows[0] >= m_vecFitWindows[1]) {
+  if ((fitwindow.size() == 2) && fitwindow[0] >= fitwindow[1]) {
     throw std::invalid_argument("Fit window has either wrong item number or "
                                 "window value is not in ascending order.");
   }
