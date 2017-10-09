@@ -149,6 +149,7 @@ class BayesQuasi(PythonAlgorithm):
         o_res = int(self._res_norm)
 
         # fortran code uses background choices defined using the following numbers
+        setup_prog.report('Encoding input options')
         o_bgd = ['Zero', 'Flat', 'Sloping'].index(self._background)
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
