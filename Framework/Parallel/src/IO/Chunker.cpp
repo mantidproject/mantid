@@ -9,7 +9,7 @@ namespace IO {
 
 namespace {
 /// Helper to build partition (subgroup of ranks with subgroup of banks).
-std::pair<size_t, std::vector<size_t>>
+std::pair<int, std::vector<size_t>>
 buildPartition(const int totalWorkers, const size_t totalSize,
                std::vector<std::tuple<size_t, size_t, bool>> &sortedSizes) {
   const size_t perWorkerSize = (totalSize + totalWorkers - 1) / totalWorkers;
