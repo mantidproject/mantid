@@ -82,7 +82,7 @@ Output:
 
 .. testoutput:: ExStatisticsOfPeaksWorkspaceOption
 
-    HKL of first peak in table -10 5.0 42.0
+    HKL of first peak in table -10.0 5.0 42.0
     Multiplicity = 1.21
     Resolution Min = 0.21
     Resolution Max = 2.08
