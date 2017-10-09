@@ -167,7 +167,7 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
 
             return found
 
-    def read_vibrational_data(self):
+    def read_vibrational_or_phonon_data(self):
         """
         Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic

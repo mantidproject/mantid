@@ -150,7 +150,7 @@ class GeneralLoadAbInitioTester(object):
         :param ab_initio_reader: object of type  GeneralAbInitioProgram
         :returns: read data
         """
-        abins_type_data = ab_initio_reader.read_vibrational_data()
+        abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
         data = {"datasets": abins_type_data.extract(),
                 "attributes": ab_initio_reader._clerk._attributes
                 }

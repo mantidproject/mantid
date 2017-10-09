@@ -25,12 +25,13 @@ class GeneralAbInitioProgram(object):
         self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
                                             group_name=AbinsModules.AbinsParameters.ab_initio_group)
 
-    def read_vibrational_data(self):
+    def read_vibrational_or_phonon_data(self):
         """
         This method is different for different ab initio programs. It has to be overridden by inheriting class.
+        This method reads vibrational or phonon data produced by an ab initio program.
         This method should do the following:
 
-          1) Open file with vibrational data (CASTEP: foo.phonon). Name of a file should be stored in
+          1) Open file with vibrational or phonon data (CASTEP: foo.phonon). Name of a file should be stored in
           self._input_filename. There must be no spaces in the name
           of a file. Extension of a file (part of a name after '.') is arbitrary.
 
@@ -46,9 +47,9 @@ class GeneralAbInitioProgram(object):
 
               **Notice: this step is not implemented now.**
 
-          5) Method should calculate hash of a file with vibrational data (protected method _calculateHash).
+          5) Method should calculate hash of a file with vibrational or phonon data (protected method _calculateHash).
 
-          6) Method should store vibrational data in an hdf file (inherited method save()). The name of an hdf file is
+          6) Method should store vibrational or phonon data in an hdf file (inherited method save()). The name of an hdf file is
           foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to save the data to hdf file the following fields
           should be set:
 
@@ -96,10 +97,11 @@ class GeneralAbInitioProgram(object):
 
               The attributes should be a dictionary with the following entries:
 
-                        "hash"  - hash of a file with the vibrational data. It should be a string representation of hash.
+                        "hash"  - hash of a file with the vibrational or phonon data. It should be a string
+                                  representation of hash.
 
-                        "ab_initio_program" - name of the ab initio program which was used to obtain vibrational data
-                                              (for CASTEP -> CASTEP).
+                        "ab_initio_program" - name of the ab initio program which was used to obtain vibrational or
+                                              phonon data (for CASTEP -> CASTEP).
 
                         "filename" - name of input ab initio file
 
@@ -130,12 +132,12 @@ class GeneralAbInitioProgram(object):
 
         return self._rearrange_data(data=loaded_data)
 
-    # Protected methods which should be reused by classes which read ab initio vibrational data
+    # Protected methods which should be reused by classes which read ab initio phonon data
     def _recover_symmetry_points(self, data=None):
         """
         This method reconstructs symmetry equivalent k-points.
         :param data: dictionary with the data for only symmetry inequivalent k-points. This methods
-        adds to this dictionary vibrational data for symmetry equivalent k-points.
+        adds to this dictionary phonon data for symmetry equivalent k-points.
         """
 
         pass
@@ -197,7 +199,7 @@ class GeneralAbInitioProgram(object):
 
             logger.notice(str(err))
             self._clerk.erase_hdf_file()
-            ab_initio_data = self.read_vibrational_data()
+            ab_initio_data = self.read_vibrational_or_phonon_data()
             logger.notice(str(ab_initio_data) + " from ab initio input file has been loaded.")
 
         return ab_initio_data

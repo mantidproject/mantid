@@ -24,7 +24,7 @@ class AbinsCalculatePowderTest(unittest.TestCase):
         full_path_filename = AbinsModules.AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
 
         castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename=full_path_filename)
-        good_data = castep_reader.read_vibrational_data()
+        good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
         self.assertRaises(ValueError, AbinsModules.CalculatePowder,
@@ -71,7 +71,7 @@ class AbinsCalculatePowderTest(unittest.TestCase):
             input_ab_initio_filename=AbinsModules.AbinsTestHelpers.find_file(filename + ".phonon"))
         powder = self._prepare_data(filename=AbinsModules.AbinsTestHelpers.find_file(filename + "_powder.txt"))
 
-        return {"DFT": castep_reader.read_vibrational_data(), "powder": powder}
+        return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "powder": powder}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

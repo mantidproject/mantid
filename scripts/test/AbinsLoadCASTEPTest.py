@@ -10,7 +10,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTes
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
             bad_castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename="NonExistingFile.txt")
-            bad_castep_reader.read_vibrational_data()
+            bad_castep_reader.read_vibrational_or_phonon_data()
 
         with self.assertRaises(ValueError):
             # noinspection PyUnusedLocal

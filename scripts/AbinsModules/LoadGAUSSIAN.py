@@ -19,7 +19,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
         self._num_atoms = None
         self._num_read_freq = 0
 
-    def read_vibrational_data(self):
+    def read_vibrational_or_phonon_data(self):
         """
         Reads vibrational data from GAUSSIAN output files. Saves frequencies and atomic displacements (only molecular
         calculations), hash of file with vibrational data to <>.hdf5.

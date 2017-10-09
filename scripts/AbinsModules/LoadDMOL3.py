@@ -19,10 +19,10 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         self._norm = 0
         self._parser = AbinsModules.GeneralAbInitioParser()
 
-    def read_vibrational_data(self):
+    def read_vibrational_or_phonon_data(self):
         """
-        Reads vibrational data from DMOL3 output files. Saves frequencies, weights of k-point vectors, k-point vectors,
-        amplitudes of atomic displacements, hash of file  with vibrational data to <>.hdf5
+        Reads vibrational data from DMOL3 output files. Saves frequencies, weights of k-point vectors,
+        k-point vectors, amplitudes of atomic displacements, hash of file  with vibrational data to <>.hdf5
         :returns: object of type AbinsData.
         """
         data = {}  # container to store read data
@@ -30,8 +30,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
 
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
-            # geometry optimization. The last calculation in the file is expected to be calculation of vibrational
-            # data. There may be some intermediate resume calculations.
+            # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
+            # There may be some intermediate resume calculations.
             self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
 
             # read lattice vectors
