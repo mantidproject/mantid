@@ -229,9 +229,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(
-      in.cbegin(), in.cend(), std::inserter(out, out.begin()),
-      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
+  std::transform(in.cbegin(), in.cend(), std::inserter(out, out.begin()),
+                 [](QString const &inStr)
+                     -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -553,7 +553,8 @@ there
 @param data : the processed data
 */
 void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
-  assert(hasPostprocessing() && "Postprocessing details required by notebook generator.");
+  assert(hasPostprocessing() &&
+         "Postprocessing details required by notebook generator.");
 
   QString filename = m_view->requestNotebookPath();
   if (!filename.isEmpty()) {
@@ -953,9 +954,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   auto isUnrestrictedProperty =
       [&restrictedProps](QString const &propertyName) -> bool {
-    return std::find(restrictedProps.begin(), restrictedProps.end(),
-                     propertyName) != restrictedProps.end();
-  };
+        return std::find(restrictedProps.begin(), restrictedProps.end(),
+                         propertyName) != restrictedProps.end();
+      };
 
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
@@ -1005,9 +1006,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0,
-                            propValue.indexOf(".") +
-                                m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0, propValue.indexOf(".") +
+                                   m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 

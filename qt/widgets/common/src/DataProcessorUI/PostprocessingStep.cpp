@@ -101,8 +101,7 @@ void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
   QStringList inputNames;
 
   // The name to call the post-processed ws
-  auto const outputWSName =
-      getPostprocessedWorkspaceName(whitelist, groupData);
+  auto const outputWSName = getPostprocessedWorkspaceName(whitelist, groupData);
 
   // Go through each row and get the input ws names
   for (auto const &row : groupData) {
