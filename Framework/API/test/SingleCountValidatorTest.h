@@ -76,9 +76,8 @@ public:
     ws->setHistogram(0, hist);
 
     SingleCountValidator validator(false);
-    TS_ASSERT_EQUALS(validator.isValid(ws), "The workspace must contain single "
-                                            "counts for all spectra, but it is "
-                                            "variably sized");
+    TS_ASSERT_EQUALS(validator.isValid(ws),
+                     "The workspace must not contain single counts");
   }
 };
 
