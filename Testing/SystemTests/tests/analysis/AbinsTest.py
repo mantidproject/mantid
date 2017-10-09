@@ -441,7 +441,7 @@ class AbinsBinWidth(stresstesting.MantidStressTest, HelperTestingClass):
         HelperTestingClass.__init__(self)
         name = "BenzeneBinWidthCASTEP"
         self.ref_result = name + ".nxs"
-        self.set_dft_program("CASTEP")
+        self.set_ab_initio_program("CASTEP")
         self.set_name(name)
         self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Incoherent")
