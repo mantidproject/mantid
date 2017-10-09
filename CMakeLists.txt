@@ -150,7 +150,7 @@ set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests
   add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidQtCommonTest)
+  add_dependencies ( GUITests MantidQtWidgetsCommonTestQt4)
   add_dependencies ( check GUITests )
   # Collect all tests together
   add_custom_target ( AllTests )

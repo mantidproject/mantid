@@ -432,39 +432,6 @@ set ( TEST_PY_FILES
   test/MWRunFilesTest.py
 )
 
-set( TEST_FILES
-   BatchAlgorithmRunnerTest.h
-   FileDialogHandlerTest.h
-   InterfaceManagerTest.h
-   MantidColorMapTest.h
-   NonOrthogonalTest.h
-   PlotAxisTest.h
-   QwtWorkspaceBinDataTest.h
-   QwtWorkspaceSpectrumDataTest.h
-   SelectionNotificationServiceTest.h
-   SignalRangeTest.h
-   SignalBlockerTest.h
-   AlgorithmHintStrategyTest.h
-   TrackedActionTest.h
-   DataProcessorUI/CommandsTest.h
-   DataProcessorUI/GenerateNotebookTest.h
-   DataProcessorUI/OneLevelTreeManagerTest.h
-   DataProcessorUI/PostprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessingAlgorithmTest.h
-   DataProcessorUI/PreprocessMapTest.h
-   DataProcessorUI/ProcessingAlgorithmBaseTest.h
-   DataProcessorUI/ProcessingAlgorithmTest.h
-   DataProcessorUI/TwoLevelTreeManagerTest.h
-   DataProcessorUI/WhiteListTest.h
-   DataProcessorUI/GenericDataProcessorPresenterTest.h
-   ParseKeyValueStringTest.h
-   DataProcessorUI/QOneLevelTreeModelTest.h
-   DataProcessorUI/QTwoLevelTreeModelTest.h
-   ProjectSaveModelTest.h
-   ProjectSavePresenterTest.h
-   WorkspacePresenter/ADSAdapterTest.h
-   WorkspacePresenter/WorkspacePresenterTest.h
-)
 
 set ( TARGET_LIBRARIES
   ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -480,7 +447,9 @@ if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list ( APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
 
-# Target
+###########################################################################
+# Testing
+###########################################################################
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
@@ -500,6 +469,71 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
 )
 
 ###########################################################################
+# Testing
+###########################################################################
+set( TEST_FILES
+  test/BatchAlgorithmRunnerTest.h
+  test/FileDialogHandlerTest.h
+  test/InterfaceManagerTest.h
+  test/MantidColorMapTest.h
+  test/NonOrthogonalTest.h
+  test/PlotAxisTest.h
+  test/QwtWorkspaceBinDataTest.h
+  test/QwtWorkspaceSpectrumDataTest.h
+  test/SelectionNotificationServiceTest.h
+  test/SignalRangeTest.h
+  test/SignalBlockerTest.h
+  test/AlgorithmHintStrategyTest.h
+  test/TrackedActionTest.h
+  test/DataProcessorUI/CommandsTest.h
+  test/DataProcessorUI/GenerateNotebookTest.h
+  test/DataProcessorUI/OneLevelTreeManagerTest.h
+  test/DataProcessorUI/PostprocessingAlgorithmTest.h
+  test/DataProcessorUI/PreprocessingAlgorithmTest.h
+  test/DataProcessorUI/PreprocessMapTest.h
+  test/DataProcessorUI/ProcessingAlgorithmBaseTest.h
+  test/DataProcessorUI/ProcessingAlgorithmTest.h
+  test/DataProcessorUI/TwoLevelTreeManagerTest.h
+  test/DataProcessorUI/WhiteListTest.h
+  test/DataProcessorUI/GenericDataProcessorPresenterTest.h
+  test/ParseKeyValueStringTest.h
+  test/DataProcessorUI/QOneLevelTreeModelTest.h
+  test/DataProcessorUI/QTwoLevelTreeModelTest.h
+  test/ProjectSaveModelTest.h
+  test/ProjectSavePresenterTest.h
+  test/WorkspacePresenter/ADSAdapterTest.h
+  test/WorkspacePresenter/WorkspacePresenterTest.h
+)
+
+mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
+  SRC ${TEST_FILES}
+  INCLUDE_DIRS
+    ../../../Framework/TestHelpers/inc
+    ../../../Framework/DataObjects/inc
+    ../../../Framework/Crystal/inc
+  TEST_HELPER_SRCS
+    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
+    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
+    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    Crystal
+    API
+    DataObjects
+    Geometry
+    HistogramData
+    Kernel
+    ${QT_LIBRARIES}
+    ${QWT_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${GMOCK_LIBRARIES}
+    ${GTEST_LIBRARIES}
+  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
+)
+
+###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt
 # plugins in third party. Done in two steps to get it into the build
 # directory that is selected at build time.
@@ -515,12 +549,3 @@ if ( WIN32 )
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
 endif()
 
-###########################################################################
-# Testing
-###########################################################################
-
-add_subdirectory ( test )
-
-set ( TEST_FILES
-	ScriptRepositoryViewTest.h
-)

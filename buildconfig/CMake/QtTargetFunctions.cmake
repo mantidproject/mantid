@@ -75,12 +75,13 @@ function (mtd_add_qt_target)
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
   set (CMAKE_CURRENT_BINARY_DIR ${_binary_dir_on_entry})
-  set (_target_suffix "Qt${PARSED_QT_VERSION}")
   if (${PARSED_NO_SUFFIX})
     set (_target ${PARSED_TARGET_NAME})
   else()
-    set (_target ${PARSED_TARGET_NAME}${_target_suffix})
+    _append_qt_suffix (${PARSED_QT_VERSION} _target ${PARSED_TARGET_NAME})
   endif()
+  _append_qt_suffix (${PARSED_QT_VERSION} _mtd_qt_libs ${PARSED_MTD_QT_LINK_LIBS})
+
   if (${PARSED_EXCLUDE_FROM_ALL})
     set(_target_exclude_from_all "EXCLUDE_FROM_ALL")
   else()
@@ -101,11 +102,6 @@ function (mtd_add_qt_target)
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
   target_include_directories (${_target} PUBLIC ${_base_binary_dir} PUBLIC ${PARSED_INCLUDE_DIRS})
-  # Append suffix to libraries created with these functions
-  set (_mtd_qt_libs)
-  foreach (_lib ${PARSED_MTD_QT_LINK_LIBS})
-    list (APPEND _mtd_qt_libs ${_lib}${_target_suffix})
-  endforeach ()
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(PARSED_DEFS)
@@ -123,9 +119,8 @@ function (mtd_add_qt_target)
     #set( LIB_NAME MantidWidgetPlugins )
     add_definitions( -DLIBRARY_NAME=${PARSED_QT_PLUGIN} )
 
-    # Change the destination of the target as Qt expects this in a directory called "designer"
-    # if you set QT_PLUGIN_PATH environment variable this might put it there???
-    SET_TARGET_OUTPUT_DIRECTORY( ${_target} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
+    # change the destination of the target as Qt expects this in a directory called "designer"
+    set_target_output_directory( ${_target} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
 
     # Set the name of the generated library
     set_target_properties ( ${_target} PROPERTIES OUTPUT_NAME ${PARSED_QT_PLUGIN} )
@@ -140,3 +135,64 @@ function (mtd_add_qt_target)
     install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${INSTALL_DESTINATION_DIR} )
   endif()
 endfunction()
+
+function (mtd_add_qt_tests)
+  mtd_add_qt_test_executable (QT_VERSION 4 ${ARGN})
+endfunction()
+
+# Create an executable target for running a set of unit tests
+# linked to Qt
+# keyword: TEST_NAME The name of the test suite. The version of Qt will be appended to it
+# keyword: SRC The list of test headers containing the unit test code
+# keyword: QT_VERSION The major version of Qt to build against
+# keyword: INCLUDE_DIRS A list of include directories to add to the target
+# keyword: TEST_HELPER_SRCS A list of test helper files to compile in with the target
+# keyword: LINK_LIBS A list of additional libraries to link to the
+#          target that are not dependent on Qt
+# keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
+#          target. It is assumed each was produced with this function and
+#          will have the Qt{QT_VERSION} suffix appended.
+function (mtd_add_qt_test_executable)
+  set (options)
+  set (oneValueArgs TARGET_NAME QT_VERSION)
+  set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS MTD_QT_LINK_LIBS)
+  cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
+                         "${multiValueArgs}" ${ARGN})
+
+  _append_qt_suffix (${PARSED_QT_VERSION} _target_name ${PARSED_TARGET_NAME})
+  # cxxtest_add_test expects this
+  set (TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
+  cxxtest_add_test ( ${_target_name} ${PARSED_SRC} )
+
+  # client and system headers
+  target_include_directories ( ${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS} )
+  target_include_directories ( ${_target_name} SYSTEM PRIVATE ${PARSED_INCLUDE_DIRS}
+    ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
+  # libraries
+  _append_qt_suffix (${PARSED_QT_VERSION} _mtd_qt_libs ${PARSED_MTD_QT_LINK_LIBS})
+  set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
+  if (PARSED_QT_VERSION EQUAL 4)
+    set (_link_libs Qt4::QtGui ${_link_libs})
+  elseif (PARSED_QT_VERSION EQUAL 5)
+    set (_link_libs Qt5::Widgets ${_link_libs})
+  else ()
+    message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
+  endif()
+  target_link_libraries( ${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs} )
+endfunction ()
+
+# Appends a string to the given variable to define the Qt version
+# the library is built against.
+# version: Version number of the library
+# output_variable: The name of an output variable. This will be set
+#                 on the parent scope
+# ARGN: A list of library names
+function (_append_qt_suffix version output_variable)
+  set (_target_suffix "Qt${version}")
+  set (_libs)
+  foreach (_lib ${ARGN})
+    list (APPEND _libs ${_lib}${_target_suffix})
+  endforeach ()
+  set (${output_variable} ${_libs} PARENT_SCOPE)
+endfunction ()
