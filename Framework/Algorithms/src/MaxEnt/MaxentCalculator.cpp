@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
 #include <cmath>
 
+#include "D:/Work/mantid_stuff/Testing/class/MyTest.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -179,6 +181,8 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   std::vector<double> metric =
       m_entropy->secondDerivative(m_image, m_background);
 
+  //std::fill(metric.begin(), metric.end(), 1.0);
+
   if (cgrad.size() != npoints || sgrad.size() != npoints ||
       metric.size() != npoints)
     throw std::runtime_error(
@@ -282,6 +286,21 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.c2[k][l] = m_coeffs.c2[l][k];
     }
   }
+
+  //_(sgrad);
+  //_(cgrad);
+  //_n(chigrad, calculateChiGrad());
+  //_(m_angle);
+  //_(metric);
+  //_n(im0, m_directionsIm[0]);
+  //_n(im1, m_directionsIm[1]);
+  //_n(dat0, directionsDat[0]);
+  //_n(dat1, directionsDat[1]);
+  //_matr(m_coeffs.c1);
+  //_matr(m_coeffs.c2);
+  //_matr(m_coeffs.s1);
+  //_matr(m_coeffs.s2);
+
 }
 
 /**

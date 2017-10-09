@@ -16,6 +16,8 @@
 #include <gsl/gsl_linalg.h>
 #include <numeric>
 
+#include "D:/Work/mantid_stuff/Testing/class/MyTestDef.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -47,6 +49,16 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"MHz", "microsecond"},
                                                    {"Angstrom", "Angstrom^-1"},
                                                    {"Angstrom^-1", "Angstrom"}};
+
+double calcEntropy(const std::vector<double> &image, double a) {
+  double entropy = 0.0;
+  for(auto f: image) {
+    auto fa = f / a;
+    auto root = sqrt(fa*fa + 1.0);
+    entropy += a * root - f * log(fa + root);
+  }
+  return entropy;
+}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -273,6 +285,8 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
+  
+  _start_filter([](size_t it){return it < 500 && it % 1 == 0;});
 
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
@@ -300,6 +314,10 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
+      _item;
+      //_(data);
+      //_(image);
+
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
       maxentCalculator.iterate(data, errors, image, background);
@@ -319,11 +337,13 @@ void MaxEnt::exec() {
       // Record the evolution of Chi-square and angle(S,C)
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
-      evolTest[it] = currAngle;
+      //evolTest[it] = currAngle;
+      evolTest[it] = calcEntropy(image, background);
 
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
           (currAngle < angle)) {
+        std::cerr << "Stopped after " << it << " iterations" << std::endl;
         break;
       }
 
@@ -331,6 +351,15 @@ void MaxEnt::exec() {
       if (!(it % 1000)) {
         interruption_point();
       }
+
+
+      //// old (unupdated data)
+      //_n(rec, maxentCalculator.getReconstructedData());
+      //// updated image
+      //_n(image1, image);
+      //_(delta);
+      _(currChisq);
+      _(it);
 
       progress.report();
 
@@ -420,6 +449,12 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   double chiMin = calculateChi(coeffs, aMin, deltaMin); // Chi at alpha min
   double chiMax = calculateChi(coeffs, aMax, deltaMax); // Chi at alpha max
+  //return deltaMin;
+
+  _(deltaMin);
+  _(deltaMax);
+  _(chiMin);
+  _(chiMax);
 
   double dchiMin = chiMin - chiTarget; // max - target
   double dchiMax = chiMax - chiTarget; // min - target
@@ -643,12 +678,18 @@ MaxEnt::updateImage(const std::vector<double> &image,
     throw std::runtime_error("Cannot calculate new image");
   }
 
+  newImage.assign(image.size(), 0.0);
+
   // Calculate the new image
   for (size_t i = 0; i < image.size(); i++) {
     for (size_t k = 0; k < delta.size(); k++) {
       newImage[i] = newImage[i] + delta[k] * dirs[k][i];
     }
   }
+//  _(newImage);
+  //for (size_t i = 0; i < image.size(); i++) {
+  //  newImage[i] += image[i];
+  //}
   return newImage;
 }
 
