@@ -133,19 +133,13 @@ class Abins(PythonAlgorithm):
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
 
-<<<<<<< HEAD
         ab_initio_program = self.getProperty("AbInitioProgram").value
         vibrational_data_filename = self.getProperty("VibrationalDataFile").value
         output = input_file_validators[ab_initio_program](filename_full_path=vibrational_data_filename)
-=======
         bin_width =  self.getProperty("BinWidthInWavenumber").value
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
-        dft_program = self.getProperty("DFTprogram").value
-        phonon_filename = self.getProperty("PhononFile").value
-        output = input_file_validators[dft_program](filename_full_path=phonon_filename)
->>>>>>> abins_minor_fixes_4_10
         if output["Invalid"]:
             issues["VibrationalDataFile"] = output["Comment"]
 
