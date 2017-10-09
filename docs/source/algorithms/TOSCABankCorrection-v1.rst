@@ -89,7 +89,7 @@ Output:
       TOSCABankCorrection(InputWorkspace=original_reduction,
                           PeakPosition='715')
 
-    print( )'Target peak centre: %.f' % peak_position)
+    print('Target peak centre: %.f' % peak_position)
 
 Output:
 
