@@ -55,7 +55,7 @@ set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
 target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_CXX_LIBRARIES} )
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
