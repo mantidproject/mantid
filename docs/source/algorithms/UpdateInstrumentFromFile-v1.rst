@@ -83,7 +83,7 @@ Usage
         # get first 10 detectors using detector ID 
 
        print("{0} {1} instrument".format(instr_type, instr.getName()))
-       for i in xrange(0,10):
+       for i in range(0,10):
          if i<3:
              detBase = 1
          else:
@@ -111,7 +111,7 @@ Usage
    # prepare through each spectra in the test workspace and change its detector calibration parameters
    f.write(' Test calibration file \n')   
    f.write(' detID  theta  delay source_dist detector_dist\n')
-   for i in xrange(0,6):
+   for i in range(0,6):
       f.write('{0}  {1}  {2}  {3}  {4}  {5}\n'.format(i+1,(i+1)*3.1415926/200,0.5,100,(i+1)*3.1415926/5,10))
     
    f.close();
