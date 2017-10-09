@@ -34,7 +34,7 @@ If you want to check if a variable points to something that is an Table Workspac
     tableWS = CreateEmptyTableWorkspace()
 
     if tableWS is ITableWorkspace:
-        print tableWS.getName() + " is a " + tableWS.id()
+        print(tableWS.getName() + " is a " + tableWS.id())
 
 Output:
 
@@ -98,8 +98,8 @@ Table Workspace Properties
     #setup as above
 
     # Rows
-    print "Row count:", tableWS.rowCount()
-    print tableWS.row(0) # row values as a dictionary
+    print("Row count:", tableWS.rowCount())
+    print(tableWS.row(0)) # row values as a dictionary
     # Resize the table
     tableWS.setRowCount(4)
     # Add Rows
@@ -111,8 +111,8 @@ Table Workspace Properties
     tableWS.addRow ( nextRow )
 
     # Columns
-    print "Column count:", tableWS.columnCount()
-    print "Column names:", tableWS.getColumnNames()
+    print("Column count:", tableWS.columnCount())
+    print("Column names:", tableWS.getColumnNames())
     columnValuesList = tableWS.column(0)
     # To remove a column
     tableWS.removeColumn("Detector Name")

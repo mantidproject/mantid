@@ -55,10 +55,10 @@ If you want to check if a variable points to something that is a Matrix Workspac
     histoWS = CreateSampleWorkspace(WorkspaceType="Histogram")
 
     if isinstance(histoWS, MatrixWorkspace):
-        print histoWS.name() + " is a " + histoWS.id() + \
-                 " and can be treated as a MatrixWorkspace"
+        print(histoWS.name() + " is a " + histoWS.id() + \
+                 " and can be treated as a MatrixWorkspace")
 
-    print "\nFor more workspace types"
+    print("\nFor more workspace types")
     eventWS = CreateSampleWorkspace(WorkspaceType="Event")
     svWS = CreateSingleValuedWorkspace()
     tableWS = CreateEmptyTableWorkspace()
@@ -68,9 +68,9 @@ If you want to check if a variable points to something that is a Matrix Workspac
                                NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
     myWorkspaceList = [histoWS,eventWS,svWS,tableWS,mdWS,mdHistoWS]
-    print "MatrixWorkspace?","Type"
+    print("MatrixWorkspace? Type")
     for ws in myWorkspaceList:
-        print "  ", isinstance(ws, MatrixWorkspace), "\t     ", ws.id()
+        print("   {0}\t      {1}".format(isinstance(ws, MatrixWorkspace), ws.id()))
 
 
 Output:
@@ -99,18 +99,18 @@ Matrix Workspace Properties
 .. testcode:: MatrixWorkspaceProperties
 
   # find out the number of histograms on a workspace use getNumberHistograms()
-  print "number of histograms = {0}".format(ws.getNumberHistograms())
+  print("number of histograms = {0}".format(ws.getNumberHistograms()))
 
   # To find out the number of bins use blocksize()
-  print "number of bins = {0}".format(ws.blocksize())
+  print("number of bins = {0}".format(ws.blocksize()))
   # To find out the bin containing a value use binIndexOf()
-  print "bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.binIndexOf(502.2))
-  print "bin index containing 997.1 for histogram 272 = {0}".format(ws.binIndexOf(997.1,272))
+  print("bin index containing 502.2 for a histogram (0 by default) = {0}".format(ws.binIndexOf(502.2)))
+  print("bin index containing 997.1 for histogram 272 = {0}".format(ws.binIndexOf(997.1,272)))
 
   # To find a workspace index from a spectrum number
-  print "workspace index for histogram 272 = {0}".format(ws.getIndexFromSpectrumNumber(272))
+  print("workspace index for histogram 272 = {0}".format(ws.getIndexFromSpectrumNumber(272)))
   # To get the Run Number use getRunNumber()
-  print "run number = {0}".format(ws.getRunNumber())
+  print("run number = {0}".format(ws.getRunNumber()))
 
 Output:
 
@@ -164,14 +164,14 @@ You can list out the axes of a workspace using the following code.
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
-      print "Axis {0} is a {1}{2}{3}".format(i,
+      print("Axis {0} is a {1}{2}{3}".format(i,
                                              "Spectrum Axis" if axis.isSpectra() else "",
                                              "Text Axis" if axis.isText() else "",
-                                             "Numeric Axis" if axis.isNumeric() else "")
+                                             "Numeric Axis" if axis.isNumeric() else ""))
 
       unit = axis.getUnit()
-      print "\t caption:{0}".format(unit.caption())
-      print "\t symbol:{0}".format(unit.symbol())
+      print("\t caption:{0}".format(unit.caption()))
+      print("\t symbol:{0}".format(unit.symbol()))
 
 Output:
 
@@ -198,8 +198,8 @@ Output:
   axis.setUnit("Label").setLabel('Temperature', 'K')
 
   unit = axis.getUnit()
-  print "New caption:{0}".format(unit.caption())
-  print "New symbol:{0}".format(unit.symbol())
+  print("New caption:{0}".format(unit.caption()))
+  print("New symbol:{0}".format(unit.symbol()))
 
 Output:
 
@@ -223,8 +223,8 @@ Output:
 
   axis = ws.getAxis(1)
   unit = axis.getUnit()
-  print "Old caption:{0}".format(unit.caption())
-  print "Old symbol:{0}".format(unit.symbol())
+  print("Old caption:{0}".format(unit.caption()))
+  print("Old symbol:{0}".format(unit.symbol()))
 
   # Create a new axis
   newAxis = NumericAxis.create(ws.getNumberHistograms())
@@ -240,9 +240,9 @@ Output:
 
   axis = ws.getAxis(1)
   unit = axis.getUnit()
-  print "New caption:{0}".format(unit.caption())
-  print "New symbol:{0}".format(unit.symbol())
-  print "New values: {0}".format(axis.extractValues())
+  print("New caption:{0}".format(unit.caption()))
+  print("New symbol:{0}".format(unit.symbol()))
+  print("New values: {0}".format(axis.extractValues()))
 
 Output:
 
@@ -269,9 +269,9 @@ Output:
 
 .. testcode:: MatrixWorkspaceYUnit
 
-  print ws.YUnitLabel()
+  print(ws.YUnitLabel())
   ws.setYUnitLabel("Elephants")
-  print ws.YUnitLabel()
+  print(ws.YUnitLabel())
 
 Output:
 
@@ -297,11 +297,11 @@ Matrix Workspace Operations
 
   # To check if two variables point to the same workspace
   if ws == wsClone:
-      print "They are the same workspace"
+      print("They are the same workspace")
 
   # To check if two workspaces have equal values
   if ws.equals(wsClone, tolerance = 0.05):
-      print "They have the same data"
+      print("They have the same data")
 
   # To create a copy of a workspace
   wsWavelength = ws.convertUnits(Target="Wavelength")
@@ -347,12 +347,12 @@ The data is accessed using the ``readX()``, ``readY()`` and ``readE()`` commands
   # Get the Y vector for the second row of data
   y_data2 = ws.readY(1)
   for y in y_data2:
-      print y
+      print(y)
 
   # Or in loop access. Print the first value in all spectra
   for index in range(0, ws.getNumberHistograms()):
       #Note the round brackets followed by the square brackets
-      print ws.readY(index)[0]
+      print(ws.readY(index)[0])
 
 .. testoutput:: MatrixWorkspaceData
     :hide:
