@@ -53,6 +53,25 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "Utility\\Calculation"; }
 
+  /// set sigma constant
+  void setSigma(const double &sigma);
+
+  /// set background order
+  void setBackgroundOrder(size_t order);
+
+  /// set fit window
+  void setFitWindow(const std::vector<double> &window);
+
+  /// find fit window's data point index
+  void findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0,
+                       size_t &n);
+
+  /// main method to calculate background
+  int findBackground(const HistogramData::Histogram &histogram,
+                     const size_t &l0, const size_t &n,
+                     std::vector<size_t> &peak_min_max_indexes,
+                     std::vector<double> &bkgd3);
+
 private:
   std::string m_backgroundType; //< The type of background to fit
 
@@ -74,29 +93,9 @@ private:
   /// create output workspace
   void createOutputWorkspaces();
 
-  /// set histogram data to find background
-  //  void setHistogram(const HistogramData::Histogram &histogram);
+  // Histogram cannot be defined due to lack of default constructor. shared_ptr
+  // will do the copy
 
-  /// set sigma constant
-  void setSigma(const double &sigma);
-
-  /// set background order
-  void setBackgroundOrder(size_t order);
-
-  /// set fit window
-  void setFitWindow(const std::vector<double> &window);
-
-  int findBackground(const HistogramData::Histogram &histogram,
-                     const size_t &l0, const size_t &n,
-                     std::vector<size_t> &peak_min_max_indexes,
-                     std::vector<double> &bkgd3);
-
-  /// Histogram cannot be defined due to lack of default constructor. shared_ptr
-  /// will do the copy
-  /// histogram data to find peak background
-  /// boost::shared_ptr<const HistogramData::Histogram> m_histogram;
-
-  //  HistogramData::Histogram& m_histogram;
   /// fit window
   std::vector<double> m_vecFitWindows;
   /// background order: 0 for flat, 1 for linear, 2 for quadratic
@@ -109,15 +108,6 @@ private:
   API::MatrixWorkspace_const_sptr m_inputWS;
   /// workspace index
   size_t m_inputWSIndex;
-
-  //  /// find background (main algorithm)
-  //  void findPeakBackground();
-
-  //  /// get result
-  //  void getBackgroundResult();
-
-  void findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0,
-                       size_t &n);
 
   struct cont_peak {
     size_t start;

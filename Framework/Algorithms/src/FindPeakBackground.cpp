@@ -122,6 +122,16 @@ void FindPeakBackground::exec() {
   setProperty("OutputWorkspace", m_outPeakTableWS);
 }
 
+//----------------------------------------------------------------------------------------------
+/**
+ * @brief FindPeakBackground::findBackground
+ * @param histogram
+ * @param l0
+ * @param n
+ * @param peak_min_max_indexes
+ * @param bkgd3
+ * @return
+ */
 int FindPeakBackground::findBackground(
     const HistogramData::Histogram &histogram, const size_t &l0,
     const size_t &n, std::vector<size_t> &peak_min_max_indexes,
