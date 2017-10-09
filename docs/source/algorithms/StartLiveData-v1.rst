@@ -158,7 +158,7 @@ Usage
 
     #get the ouput workspace
     wsOut = mtd["wsOut"]
-    print "The workspace contains %i events" % wsOut.getNumberEvents()
+    print("The workspace contains %i events" % wsOut.getNumberEvents())
 
 Output:
 

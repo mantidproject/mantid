@@ -36,13 +36,13 @@ Usage
   out = SplineBackground(ws, WorkspaceIndex=0, NCoeff=4)
   yout = out.readY(0)
   # Sum the squares of the differences of elements of arrays y and yout
-  print 'Fit quality is',np.sum( (y - yout)**2 )
+  print('Fit quality is {}'.format(np.sum( (y - yout)**2 )))
 
   # Increase the number of spline coefficients
   out = SplineBackground(ws, WorkspaceIndex=0, NCoeff=20)
   yout = out.readY(0)
   # Sum the squares of the differences of elements of arrays y and yout
-  print 'Fit quality is',np.sum( (y - yout)**2 )
+  print('Fit quality is {}'.format(np.sum( (y - yout)**2 )))
 
 .. testoutput:: ExampleSpline
 
