@@ -20,7 +20,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget {
   Q_OBJECT
 
 public:
-  LineViewer(QWidget *parent = 0);
+  LineViewer(QWidget *parent = nullptr);
   ~LineViewer() override;
 
   void setWorkspace(Mantid::API::IMDWorkspace_sptr ws);

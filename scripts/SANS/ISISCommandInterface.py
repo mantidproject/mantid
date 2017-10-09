@@ -371,7 +371,7 @@ def GetMismatchedDetList():
 # pylint: disable = too-many-branches
 
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, # noqa: C901
                       resetSetup=True, out_fit_settings=dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics

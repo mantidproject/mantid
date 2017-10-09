@@ -27,12 +27,12 @@ Usage
 .. testcode:: ExFindUBUsingIndexedPeaks
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
     FindUBUsingIndexedPeaks(ws)
-    print "After FindUBUsingIndexedPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After FindUBUsingIndexedPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
-    print ws.sample().getOrientedLattice().getUB()
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:

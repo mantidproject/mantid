@@ -57,7 +57,7 @@ public:
    * during initialization, before there's any other chance of connecting to it.
    */
   TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir,
-                     const QObject *status_target = NULL,
+                     const QObject *status_target = nullptr,
                      const char *status_slot = "");
 
   int rtti() const override {

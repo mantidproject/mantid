@@ -132,7 +132,7 @@ QString InputHistoryImpl::getDirectoryFromFilePath(const QString &filePath) {
 }
 
 QString InputHistoryImpl::getNameOnlyFromFilePath(const QString &filePath) {
-  QString s = filePath;
+  const QString &s = filePath;
   int i = s.lastIndexOf('\\');
   if (i < 0)
     i = s.lastIndexOf('/');

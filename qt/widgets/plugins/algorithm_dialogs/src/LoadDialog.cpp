@@ -217,8 +217,8 @@ void LoadDialog::removeOldInputWidgets(QVBoxLayout *layout) {
       if (QWidget *w = child->widget()) {
         w->deleteLater();
       } else if (QLayout *l = child->layout()) {
-        QLayoutItem *subChild(NULL);
-        while ((subChild = l->takeAt(0)) != NULL) {
+        QLayoutItem *subChild(nullptr);
+        while ((subChild = l->takeAt(0)) != nullptr) {
           subChild->widget()->deleteLater();
         }
       }
@@ -314,8 +314,8 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
   using MantidQt::API::MWRunFiles;
 
   QString propName = QString::fromStdString(prop->name());
-  QWidget *inputWidget(NULL);
-  QHBoxLayout *widgetLayout(NULL);
+  QWidget *inputWidget(nullptr);
+  QHBoxLayout *widgetLayout(nullptr);
   bool addValidator(true);
 
   // Boolean properties use the name labels differently

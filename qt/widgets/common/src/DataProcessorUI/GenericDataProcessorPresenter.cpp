@@ -701,8 +701,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
       auto const runNumbers = *runNumbersIt;
 
       if (!runNumbers.isEmpty()) {
-        // But we may have things like '1+2' which we want to replace with
-        // '1_2'
+        // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = runNumbers.split("+", QString::SkipEmptyParts);
         names.append(column.prefix() + value.join("_"));
       }

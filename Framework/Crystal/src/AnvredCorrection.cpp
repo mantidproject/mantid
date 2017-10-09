@@ -237,7 +237,7 @@ void AnvredCorrection::exec() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
+    run.addProperty<bool>("LorentzCorrection", true, true);
   setProperty("OutputWorkspace", correctionFactors);
 }
 
@@ -330,7 +330,7 @@ void AnvredCorrection::execEvent() {
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
   if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
-    run.addProperty<bool>("LorentzCorrection", 1, true);
+    run.addProperty<bool>("LorentzCorrection", true, true);
   setProperty("OutputWorkspace", std::move(correctionFactors));
 
   // Now do some cleaning-up since destructor may not be called immediately

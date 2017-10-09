@@ -36,7 +36,7 @@ using namespace MantidQt::CustomDialogs;
  * Constructor
  */
 CreateSampleShapeDialog::CreateSampleShapeDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_shapeTree(NULL), m_setup_map(),
+    : AlgorithmDialog(parent), m_shapeTree(nullptr), m_setup_map(),
       m_details_map(), m_ops_map() {
   m_object_viewer = new MantidGLWidget;
 }
@@ -312,7 +312,7 @@ BinaryTreeWidgetItem *CreateSampleShapeDialog::getSelectedItem() {
     QMessageBox::information(this, "CreateSampleShape",
                              "Please select an item in the list as a parent.");
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -453,7 +453,7 @@ void CreateSampleShapeDialog::setupDetailsBox() {
     return;
   QString shapename = item->text(0);
   if (m_setup_map.contains(shapename)) {
-    ShapeDetails *obj = NULL;
+    ShapeDetails *obj = nullptr;
     if (m_details_map.contains(item)) {
       obj = m_details_map.value(item);
     } else {
@@ -475,7 +475,7 @@ CreateSampleShapeDialog::createDetailsWidget(const QString &shapename) const {
   if (m_setup_map.contains(shapename)) {
     return m_setup_map.value(shapename)->createInstance();
   }
-  return NULL;
+  return nullptr;
 }
 
 /**

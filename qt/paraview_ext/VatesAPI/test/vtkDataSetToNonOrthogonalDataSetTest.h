@@ -187,7 +187,7 @@ public:
   }
 
   void testThrowIfVtkDatasetNull() {
-    vtkDataSet *dataset = NULL;
+    vtkDataSet *dataset = nullptr;
     auto workspaceProvider = Mantid::Kernel::make_unique<
         ADSWorkspaceProvider<Mantid::API::IMDWorkspace>>();
     TS_ASSERT_THROWS(vtkDataSetToNonOrthogonalDataSet temp(

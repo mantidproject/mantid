@@ -326,6 +326,7 @@ void LoadTBL::exec() {
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
     auto colOptions = ws->addColumn("str", "Options");
+    auto colHiddenOptions = ws->addColumn("str", "HiddenOptions");
 
     for (size_t i = 0; i < ws->columnCount(); i++) {
       auto col = ws->getColumn(i);

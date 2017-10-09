@@ -40,9 +40,9 @@ public:
   SeqDomainSpectrumCreatorTest() { FrameworkManager::Instance(); }
 
   void testConstructor() {
-    TS_ASSERT_THROWS_NOTHING(SeqDomainSpectrumCreator creator(NULL, ""));
+    TS_ASSERT_THROWS_NOTHING(SeqDomainSpectrumCreator creator(nullptr, ""));
 
-    TestableSeqDomainSpectrumCreator otherCreator(NULL, "Test");
+    TestableSeqDomainSpectrumCreator otherCreator(nullptr, "Test");
 
     TS_ASSERT_EQUALS(otherCreator.m_workspacePropertyName,
                      otherCreator.m_workspacePropertyNames.front());
@@ -50,7 +50,7 @@ public:
   }
 
   void testSetMatrixWorkspace() {
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     TS_ASSERT_THROWS_NOTHING(creator.setMatrixWorkspace(
         WorkspaceCreationHelper::create2DWorkspace(5, 5)));
 
@@ -61,7 +61,7 @@ public:
   }
 
   void testGetDomainSize() {
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(
         WorkspaceCreationHelper::create2DWorkspace123(4, 12));
 
@@ -79,7 +79,7 @@ public:
   }
 
   void testHistogramIsUsable() {
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
 
     TS_ASSERT_THROWS(creator.histogramIsUsable(0), std::invalid_argument);
 
@@ -100,7 +100,7 @@ public:
   }
 
   void testCreateDomain() {
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(
         WorkspaceCreationHelper::create2DWorkspace123(4, 12, true));
 
@@ -128,7 +128,7 @@ public:
   }
 
   void testCreateDomainMaskedDetectors() {
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
 
     // Workspace with 4 histograms, one of which is masked (No. 2)
     std::set<int64_t> masked;
@@ -171,7 +171,7 @@ public:
     MatrixWorkspace_sptr matrixWs =
         WorkspaceCreationHelper::create2DWorkspace123(4, 12);
 
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(matrixWs);
 
     FunctionDomain_sptr domain;
@@ -216,7 +216,7 @@ public:
     MatrixWorkspace_sptr matrixWs =
         WorkspaceCreationHelper::create2DWorkspace123(4, 12, false, masked);
 
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(matrixWs);
 
     FunctionDomain_sptr domain;
@@ -264,7 +264,7 @@ public:
         WorkspaceCreationHelper::create2DWorkspace123(4, 12, true);
     Mantid::API::WorkspaceHelpers::makeDistribution(matrixWs);
 
-    TestableSeqDomainSpectrumCreator creator(NULL, "");
+    TestableSeqDomainSpectrumCreator creator(nullptr, "");
     creator.setMatrixWorkspace(matrixWs);
 
     FunctionDomain_sptr domain;

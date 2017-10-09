@@ -10,6 +10,7 @@
 #include <cmath>
 
 using Mantid::Algorithms::RebinByTimeAtSample;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 

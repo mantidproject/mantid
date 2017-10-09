@@ -95,9 +95,9 @@ Usage
     wsOut = AbsorptionCorrection(ws, NumberOfWavelengthPoints=5, ElementSize=3)
     wsCorrected = ws / wsOut
 
-    print "The created workspace has one entry for each spectra: %i" % wsOut.getNumberHistograms()
-    print "Original y values: ", ws.readY(0)
-    print "Corrected y values: ", wsCorrected.readY(0)
+    print("The created workspace has one entry for each spectra: {}".format(wsOut.getNumberHistograms()))
+    print("Original y values:  {}".format(ws.readY(0)))
+    print("Corrected y values:  {}".format(wsCorrected.readY(0)))
 
 Output:
 
