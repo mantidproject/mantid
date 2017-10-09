@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
-from Muon import MaxEnt_model
+from Muon import maxent_model
 
-from Muon import FFT_model
+from Muon import fft_model
 
 
 class ModelConstructor(object):
@@ -18,10 +18,10 @@ class ModelConstructor(object):
         if includeTransform:
             self.transformModels={}
 
-            MaxEnt =MaxEnt_model.MaxEntModel()
+            MaxEnt =maxent_model.MaxEntModel()
             self.transformModels["MaxEnt"]=MaxEnt
-            FFT =FFT_model.FFTModel()
-            FFTWrapper=FFT_model.FFTWrapper(FFT)
+            FFT =fft_model.FFTModel()
+            FFTWrapper=fft_model.FFTWrapper(FFT)
             self.transformModels[FFT.getName()]=FFTWrapper
 
     def getModel(self,name):

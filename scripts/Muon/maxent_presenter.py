@@ -1,6 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon import ThreadModel
+from Muon import thread_model
 
 
 class MaxEntPresenter(object):
@@ -29,7 +29,7 @@ class MaxEntPresenter(object):
 
     #functions
     def createThread(self):
-        return ThreadModel.ThreadModel(self.alg)
+        return thread_model.ThreadModel(self.alg)
 
     def handleMaxEntButton(self):
         self.thread=self.createThread()
