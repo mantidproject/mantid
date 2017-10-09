@@ -64,6 +64,23 @@ void FindPeakBackground::init() {
       "quadratic terms.");
 }
 
+void FindPeakBackground::findWindowIndex(size_t &l0, size_t &n) {
+  auto &inpX = m_histogram->x();
+  auto &inpY = m_histogram->y();
+  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
+
+  // determine the fit window with their index in X (or Y)
+  n = sizey;
+  l0 = 0;
+  if (m_vecFitWindows.size() > 1) {
+    Mantid::Algorithms::FindPeaks fp;
+    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
+    n = fp.getIndex(inpX, m_vecFitWindows[1]);
+    if (n < sizey)
+      n++;
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute body
   */
@@ -71,36 +88,31 @@ void FindPeakBackground::exec() {
   // Get input and validate
   processInputProperties();
 
-  //  auto &inpX = m_histogram->x();
-  //  auto &inpY = m_histogram->y();
-  //  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
-  //  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
+  size_t l0, n;
+  findWindowIndex(l0, n);
 
-  //  // determine the fit window with their index in X (or Y)
-  //  size_t n = sizey;
-  //  size_t l0 = 0;
-  //  if (m_vecFitWindows.size() > 1) {
-  //    Mantid::Algorithms::FindPeaks fp;
-  //    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
-  //    n = fp.getIndex(inpX, m_vecFitWindows[1]);
-  //    if (n < sizey)
-  //      n++;
-  //  }
-  //  // m_vecFitWindows won't be used again form this point till end.
+  // m_vecFitWindows won't be used again form this point till end.
 
   // Set up output table workspace
   createOutputWorkspaces();
 
-  // set progress 10%
+  // 3. Get Y values
   Progress prog(this, 0.0, 1.0, 1);
 
-  // Find background
-  std::vector<size_t> peakindexes;
-  std::vector<double> bkgdparams;
-  int goodfit = findBackground(peakindexes, bkgdparams);
+  std::vector<size_t> peak_min_max_indexes;
+  std::vector<double> bkgd3;
+  int goodfit = findBackground(l0, n, peak_min_max_indexes, bkgd3);
 
-  // add to output workspace
-  addResultToOutput(goodfit, peakindexes, bkgdparams);
+  if (goodfit > 0) {
+    size_t min_peak = peak_min_max_indexes[0];
+    size_t max_peak = peak_min_max_indexes[1];
+    double a0 = bkgd3[0];
+    double a1 = bkgd3[1];
+    double a2 = bkgd3[2];
+    API::TableRow t = m_outPeakTableWS->getRow(0);
+    t << static_cast<int>(m_inputWSIndex) << static_cast<int>(min_peak)
+      << static_cast<int>(max_peak) << a0 << a1 << a2 << goodfit;
+  }
 
   prog.report();
 
@@ -108,48 +120,17 @@ void FindPeakBackground::exec() {
   setProperty("OutputWorkspace", m_outPeakTableWS);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * @brief FindPeakBackground::addResultToOutput
- * @param goodfit
- * @param peakindexes
- * @param bkgdparams
- */
-void FindPeakBackground::addResultToOutput(
-    const int &goodfit, const std::vector<size_t> &peakindexes,
-    const std::vector<double> &bkgdparams) {
-  if (goodfit > 0) {
-    int min_peak = static_cast<int>(peakindexes[0]);
-    int max_peak = static_cast<int>(peakindexes[1]);
-    double a0 = bkgdparams[0];
-    double a1 = bkgdparams[1];
-    double a2 = bkgdparams[2];
-
-    API::TableRow t = m_outPeakTableWS->getRow(0);
-    t << static_cast<int>(m_inputWSIndex) << min_peak << max_peak << a0 << a1
-      << a2 << goodfit;
-  }
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Main method to process find peak background
- * Note: all inputs shall be set up by this method
- * @brief FindPeakBackground::findBackground
- * @param peak_min_max_indexes
- * @param bkgd3
- * @return integer as good fit or not!
- */
 int FindPeakBackground::findBackground(
+    const size_t &l0, const size_t &n,
     std::vector<size_t> &peak_min_max_indexes, std::vector<double> &bkgd3) {
-  // get something from previously set up class variable
   auto &inpX = m_histogram->x();
   auto &inpY = m_histogram->y();
-  size_t l0 = m_iStartX;
-  size_t n = m_iStopX;
+  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
+  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
 
   int goodfit(0);
+
+  // Find background
   double Ymean, Yvariance, Ysigma;
   MantidVec maskedY;
   auto in = std::min_element(inpY.cbegin(), inpY.cend());
@@ -217,8 +198,7 @@ int FindPeakBackground::findBackground(
         if (inpY[l + l0] > peaks[ipeak].maxY)
           peaks[ipeak].maxY = inpY[l + l0];
       }
-    } // END-FOR (l)
-
+    }
     size_t min_peak, max_peak;
     double a0 = 0., a1 = 0., a2 = 0.;
     if (!peaks.empty()) {
@@ -231,9 +211,7 @@ int FindPeakBackground::findBackground(
       // save endpoints
       min_peak = peaks[0].start;
       // extra point for histogram input
-      //  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
-      //  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
-      max_peak = peaks[0].stop + inpX.size() - inpY.size();
+      max_peak = peaks[0].stop + sizex - sizey;
       goodfit = 1;
     } else {
       // assume the whole thing is background
@@ -243,16 +221,11 @@ int FindPeakBackground::findBackground(
 
       goodfit = 2;
     }
+
     estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, (!peaks.empty()),
                        a0, a1, a2);
 
     // Add a new row
-
-    //    API::TableRow t = m_outPeakTableWS->getRow(0);
-    //    t << static_cast<int>(m_inputWSIndex) << static_cast<int>(min_peak)
-    //      << static_cast<int>(max_peak) << a0 << a1 << a2 << goodfit;
-
-    // set up good fit result
     peak_min_max_indexes.resize(2);
     peak_min_max_indexes[0] = min_peak;
     peak_min_max_indexes[1] = max_peak;
@@ -261,8 +234,7 @@ int FindPeakBackground::findBackground(
     bkgd3[0] = a0;
     bkgd3[1] = a1;
     bkgd3[2] = a2;
-
-  } // END-IF: if (n - l0 > 5)
+  }
 
   return goodfit;
 }
@@ -467,9 +439,9 @@ void FindPeakBackground::processInputProperties() {
   // background
   m_backgroundType = getPropertyValue("BackgroundType");
   size_t bkgdorder = 0;
-  if (m_backgroundType.compare("Linear") == 0)
+  if (m_backgroundType == "Linear")
     bkgdorder = 1;
-  else if (m_backgroundType.compare("Quadratic") == 0)
+  else if (m_backgroundType == "Quadratic")
     bkgdorder = 2;
   setBackgroundOrder(bkgdorder);
 
@@ -494,25 +466,12 @@ void FindPeakBackground::setBackgroundOrder(size_t order) {
   m_backgroundOrder = order;
 }
 
-////----------------------------------------------------------------------------------------------
-///** find background (main algorithm)
-// * @brief FindPeakBackground::findPeakBackground
-// */
-// void FindPeakBackground::findPeakBackground() {return;}
-
-///// get result
-// void getBackgroundResult();
-
 //----------------------------------------------------------------------------------------------
 /** set fit window
  * @brief FindPeakBackground::setFitWindow
  * @param fitwindow
  */
 void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
-
-  size_t l0 = 0;
-  size_t n = m_histogram->y().size();
-
   // validate input
   if (m_vecFitWindows.size() == 0) {
     m_vecFitWindows.resize(2);
@@ -522,39 +481,11 @@ void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
              m_vecFitWindows[0] >= m_vecFitWindows[1]) {
     throw std::invalid_argument("Fit window has either wrong item number or "
                                 "window value is not in ascending order.");
-  } else {
-    Mantid::Algorithms::FindPeaks fp;
-    l0 = fp.getIndex(m_histogram->x(), m_vecFitWindows[0]);
-    n = fp.getIndex(m_histogram->x(), m_vecFitWindows[1]);
-    if (n < m_histogram->y().size())
-      n++;
   }
 
+  // m_vecFitWindows.resize(2);
   // copy the input to class variable
   m_vecFitWindows = fitwindow;
-  m_iStartX = l0;
-  m_iStopX = n;
-
-  // ---- from here .. all from original code
-
-  //  auto &inpX = m_histogram->x();
-  //  auto &inpY = m_histogram->y();
-  //  size_t sizex = inpX.size(); // inpWS->x(inpwsindex).size();
-  //  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
-
-  // determine the fit window with their index in X (or Y)
-  // size_t n = sizey;
-  // size_t l0 = 0;
-  //  if (m_vecFitWindows.size() > 1) {
-  //    Mantid::Algorithms::FindPeaks fp;
-  //    l0 = fp.getIndex(inpX, m_vecFitWindows[0]);
-  //    n = fp.getIndex(inpX, m_vecFitWindows[1]);
-  //    if (n < sizey)
-  //      n++;
-  //  }
-  // m_vecFitWindows won't be used again form this point till end.
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------

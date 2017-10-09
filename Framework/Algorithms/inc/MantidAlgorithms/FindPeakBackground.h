@@ -74,10 +74,6 @@ private:
   /// create output workspace
   void createOutputWorkspaces();
 
-  /// main method to find peak background
-  int findBackground(std::vector<size_t> &peak_min_max_indexes,
-                     std::vector<double> &bkgd3);
-
   /// set histogram data to find background
   void setHistogram(const HistogramData::Histogram &histogram);
 
@@ -90,10 +86,9 @@ private:
   /// set fit window
   void setFitWindow(const std::vector<double> &window);
 
-  /// add result to output workpsace
-  void addResultToOutput(const int &goodfit,
-                         const std::vector<size_t> &peakindexes,
-                         const std::vector<double> &bkgdparams);
+  int findBackground(const size_t &l0, const size_t &n,
+                     std::vector<size_t> &peak_min_max_indexes,
+                     std::vector<double> &bkgd3);
 
   /// histogram data to find peak background
   boost::shared_ptr<const HistogramData::Histogram> m_histogram;
@@ -101,8 +96,6 @@ private:
   //  HistogramData::Histogram& m_histogram;
   /// fit window
   std::vector<double> m_vecFitWindows;
-  size_t m_iStartX; /// l0 in original code
-  size_t m_iStopX;  /// n in original code
   /// background order: 0 for flat, 1 for linear, 2 for quadratic
   size_t m_backgroundOrder;
   /// constant sigma
@@ -117,6 +110,8 @@ private:
 
   //  /// get result
   //  void getBackgroundResult();
+
+  void findWindowIndex(size_t &l0, size_t &n);
 
   struct cont_peak {
     size_t start;
