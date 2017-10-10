@@ -39,13 +39,13 @@ std::string MantidVersion::releaseNotes()
   // for now the code assumes that the next main release version number will be one minor version higher
 
   std::stringstream versionLabel;
-  
-  if(( patchVersion < 100 ) && ( patchVersion != 0 )) {
+
+  if ( patchVersion < 100 ) {
     versionLabel << versionShort();
     versionLabel << "." << patchVersion;
   }
   else {
-  	const unsigned int minorVersion = static_cast<unsigned int>(@VERSION_MINOR@);
+    const unsigned int minorVersion = static_cast<unsigned int>(@VERSION_MINOR@);
     versionLabel << "@VERSION_MAJOR@." << minorVersion + 1  << "." << "0";
   }
 

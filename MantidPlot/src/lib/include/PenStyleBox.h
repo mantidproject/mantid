@@ -43,7 +43,7 @@ public:
   /**
    * \param parent parent widget (only affects placement of the widget)
    */
-  PenStyleBox(QWidget *parent = 0);
+  PenStyleBox(QWidget *parent = nullptr);
   void setStyle(const Qt::PenStyle &style);
   Qt::PenStyle style() const;
 

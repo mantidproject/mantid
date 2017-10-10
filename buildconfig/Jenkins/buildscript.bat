@@ -80,12 +80,6 @@ if "!CLEANBUILD!" == "yes" (
 
 if EXIST %BUILD_DIR% (
   rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
-  call "%GREP_EXE%" CMAKE_GENERATOR:INTERNAL %BUILD_DIR%\eigen-download\CMakeCache.txt > eigen_generator.log
-  call "%GREP_EXE%" "%CM_GENERATOR%" eigen_generator.log
-  if ERRORLEVEL 1 (
-    echo External project generator mismatch. Cleaning external projects
-    set CLEAN_EXTERNAL_PROJECTS=true
-  )
   if "!CLEAN_EXTERNAL_PROJECTS!" == "true" (
     rmdir /S /Q %BUILD_DIR%\eigen-download %BUILD_DIR%\eigen-src
     rmdir /S /Q %BUILD_DIR%\googletest-download %BUILD_DIR%\googletest-src

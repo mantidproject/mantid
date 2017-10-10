@@ -10,9 +10,9 @@ namespace DataProcessor {
 * workspaces' names
 * @param blacklist : The list of properties we do not want to show
 */
-ProcessingAlgorithm::ProcessingAlgorithm(
-    const QString &name, const std::vector<QString> &prefix,
-    const std::set<QString> &blacklist)
+ProcessingAlgorithm::ProcessingAlgorithm(const QString &name,
+                                         const std::vector<QString> &prefix,
+                                         const std::set<QString> &blacklist)
     : ProcessingAlgorithmBase(name, blacklist), m_prefix(prefix) {
 
   m_inputProperties = getInputWsProperties();
@@ -43,10 +43,11 @@ ProcessingAlgorithm::ProcessingAlgorithm(
 * workspaces' names, as a string
 * @param blacklist : The list of properties we do not want to show, as a string
 */
-ProcessingAlgorithm::ProcessingAlgorithm(
-    const QString &name, const QString &prefix, const QString &blacklist)
+ProcessingAlgorithm::ProcessingAlgorithm(const QString &name,
+                                         const QString &prefix,
+                                         const QString &blacklist)
     : ProcessingAlgorithm(name, convertStringToVector(prefix),
-                                       convertStringToSet(blacklist)) {}
+                          convertStringToSet(blacklist)) {}
 
 /**
  * Constructor
@@ -72,16 +73,14 @@ QString ProcessingAlgorithm::prefix(size_t index) const {
 /** Returns the name of an input property specified by its index
  *@param index : The property index
  */
-QString
-ProcessingAlgorithm::inputPropertyName(size_t index) const {
+QString ProcessingAlgorithm::inputPropertyName(size_t index) const {
   return m_inputProperties[index];
 }
 
 /** Returns the name of an output ws property specified by its index
  *@param index : The property index
  */
-QString
-ProcessingAlgorithm::outputPropertyName(size_t index) const {
+QString ProcessingAlgorithm::outputPropertyName(size_t index) const {
   return m_outputProperties[index];
 }
 }

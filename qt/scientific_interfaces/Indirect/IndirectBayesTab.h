@@ -77,7 +77,7 @@ class DLLExport IndirectBayesTab : public IndirectTab {
   Q_OBJECT
 
 public:
-  IndirectBayesTab(QWidget *parent = 0);
+  IndirectBayesTab(QWidget *parent = nullptr);
   ~IndirectBayesTab() override;
 
   /// Base methods implemented in derived classes

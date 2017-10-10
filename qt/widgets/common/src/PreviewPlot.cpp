@@ -28,10 +28,10 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
     : API::MantidWidget(parent),
       m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
       m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent), m_init(init),
-      m_curves(), m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-      m_contextMenu(new QMenu(this)), m_showLegendAction(NULL),
-      m_showErrorsMenuAction(NULL), m_showErrorsMenu(NULL),
-      m_errorBarOptionCache() {
+      m_curves(), m_magnifyTool(nullptr), m_panTool(nullptr),
+      m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
+      m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
+      m_showErrorsMenu(nullptr), m_errorBarOptionCache() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
 
@@ -675,7 +675,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
         new ErrorCurve(curveConfig.curve, ws->e(wsIndex).rawData());
     curveConfig.errorCurve->attach(m_uiForm.plot);
   } else {
-    curveConfig.errorCurve = NULL;
+    curveConfig.errorCurve = nullptr;
   }
 }
 
@@ -689,11 +689,11 @@ void PreviewPlot::removeCurve(QwtPlotItem *curve) {
     return;
 
   // Take it off the plot
-  curve->attach(NULL);
+  curve->attach(nullptr);
 
   // Delete it
   delete curve;
-  curve = NULL;
+  curve = nullptr;
 }
 
 /**
@@ -739,7 +739,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
  */
 QString PreviewPlot::getAxisType(int axisID) {
   QString axisType("Linear");
-  QAction *selectedAxisType = NULL;
+  QAction *selectedAxisType = nullptr;
 
   if (axisID == QwtPlot::xBottom)
     selectedAxisType = m_xAxisTypeGroup->checkedAction();
@@ -808,8 +808,8 @@ void PreviewPlot::handleAxisTypeSelect() {
   QString xAxisType = getAxisType(QwtPlot::xBottom);
   QString yAxisType = getAxisType(QwtPlot::yLeft);
 
-  QwtScaleEngine *xEngine = NULL;
-  QwtScaleEngine *yEngine = NULL;
+  QwtScaleEngine *xEngine = nullptr;
+  QwtScaleEngine *yEngine = nullptr;
 
   // Get the X axis engine
   if (xAxisType == "Linear") {
@@ -839,7 +839,7 @@ void PreviewPlot::handleAxisTypeSelect() {
   // Hide range selectors on X axis when X axis scale is X^2
   bool xIsSquared = xAxisType == "Squared";
   for (auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it) {
-    QString rsName = it.key();
+    const QString &rsName = it.key();
     RangeSelector *rs = it.value();
     RangeSelector::SelectType type = rs->getType();
 

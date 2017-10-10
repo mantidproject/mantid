@@ -50,9 +50,8 @@ void clearLegacyParameters(ParameterMap *pmap, const IComponent &comp) {
 }
 
 /**
- * @brief InstrumentVisitor::registerComponentAssembly
+ * Constructor
  * @param instrument : Instrument being visited
- * @return Component index of this component
  */
 InstrumentVisitor::InstrumentVisitor(
     boost::shared_ptr<const Instrument> instrument)
@@ -85,7 +84,8 @@ InstrumentVisitor::InstrumentVisitor(
       m_shapes(boost::make_shared<std::vector<boost::shared_ptr<const Object>>>(
           m_orderedDetectorIds->size(), m_nullShape)),
       m_scaleFactors(boost::make_shared<std::vector<Eigen::Vector3d>>(
-          m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})) {
+          m_orderedDetectorIds->size(), Eigen::Vector3d{1, 1, 1})),
+      m_isStructuredBank(boost::make_shared<std::vector<bool>>()) {
 
   if (m_instrument->isParametrized()) {
     m_pmap = m_instrument->getParameterMap().get();
@@ -158,6 +158,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   markAsSourceOrSample(assembly.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
+  m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(assembly.getScaleFactor()));
   clearLegacyParameters(m_pmap, assembly);
   return componentIndex;
@@ -191,18 +192,10 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   m_parentComponentIndices->push_back(componentIndex);
   markAsSourceOrSample(component.getComponentID(), componentIndex);
   m_shapes->emplace_back(m_nullShape);
+  m_isStructuredBank->push_back(false);
   m_scaleFactors->emplace_back(Kernel::toVector3d(component.getScaleFactor()));
   clearLegacyParameters(m_pmap, component);
   return componentIndex;
-}
-
-void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
-                                             const size_t componentIndex) {
-  if (componentId == m_sampleId) {
-    m_sampleIndex = componentIndex;
-  } else if (componentId == m_sourceId) {
-    m_sourceIndex = componentIndex;
-  }
 }
 
 /**
@@ -218,49 +211,58 @@ size_t InstrumentVisitor::registerGenericObjComponent(
 }
 
 /**
+ * @brief InstrumentVisitor::registerStructuredBank
+ * @param bank : Rectangular Detector
+ * @return
+ */
+size_t InstrumentVisitor::registerStructuredBank(const ICompAssembly &bank) {
+  auto index = registerComponentAssembly(bank);
+  size_t rangesIndex = index - m_orderedDetectorIds->size();
+  (*m_isStructuredBank)[rangesIndex] = true;
+  return index;
+}
+
+void InstrumentVisitor::markAsSourceOrSample(ComponentID componentId,
+                                             const size_t componentIndex) {
+  if (componentId == m_sampleId) {
+    m_sampleIndex = componentIndex;
+  } else if (componentId == m_sourceId) {
+    m_sourceIndex = componentIndex;
+  }
+}
+
+/**
  * @brief InstrumentVisitor::registerDetector
  * @param detector : IDetector being visited
  * @return Component index of this component
  */
 size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
 
-  size_t detectorIndex = 0;
-  try {
-    detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
-  } catch (std::out_of_range &) {
-    /*
-     Do not register a detector with an invalid id. if we can't determine
-     the index, we cannot register it in the right place!
-    */
-    ++m_droppedDetectors;
-    return detectorIndex;
-  }
-  if (m_componentIds->at(detectorIndex) == nullptr) {
+  auto detectorIndex = m_detectorIdToIndexMap->at(detector.getID());
 
-    /* Already allocated we just need to index into the inital front-detector
-    * part of the collection.
-    * 1. Guarantee on grouping detectors by type such that the first n
-    * components
-    * are detectors.
-    * 2. Guarantee on ordering such that the
-    * detectorIndex == componentIndex for all detectors.
-    */
-    // Record the ID -> component index mapping
-    (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
-    (*m_componentIds)[detectorIndex] = detector.getComponentID();
-    m_assemblySortedDetectorIndices->push_back(detectorIndex);
-    (*m_detectorPositions)[detectorIndex] =
-        Kernel::toVector3d(detector.getPos());
-    (*m_detectorRotations)[detectorIndex] =
-        Kernel::toQuaterniond(detector.getRotation());
-    (*m_shapes)[detectorIndex] = detector.shape();
-    (*m_scaleFactors)[detectorIndex] =
-        Kernel::toVector3d(detector.getScaleFactor());
-    if (m_instrument->isMonitorViaIndex(detectorIndex)) {
-      m_monitorIndices->push_back(detectorIndex);
-    }
-    clearLegacyParameters(m_pmap, detector);
+  /* Already allocated we just need to index into the inital front-detector
+  * part of the collection.
+  * 1. Guarantee on grouping detectors by type such that the first n
+  * components
+  * are detectors.
+  * 2. Guarantee on ordering such that the
+  * detectorIndex == componentIndex for all detectors.
+  */
+  // Record the ID -> component index mapping
+  (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
+  (*m_componentIds)[detectorIndex] = detector.getComponentID();
+  m_assemblySortedDetectorIndices->push_back(detectorIndex);
+  (*m_detectorPositions)[detectorIndex] = Kernel::toVector3d(detector.getPos());
+  (*m_detectorRotations)[detectorIndex] =
+      Kernel::toQuaterniond(detector.getRotation());
+  (*m_shapes)[detectorIndex] = detector.shape();
+  (*m_scaleFactors)[detectorIndex] =
+      Kernel::toVector3d(detector.getScaleFactor());
+  if (m_instrument->isMonitorViaIndex(detectorIndex)) {
+    m_monitorIndices->push_back(detectorIndex);
   }
+  clearLegacyParameters(m_pmap, detector);
+
   /* Note that positions and rotations for detectors are currently
   NOT stored! These go into DetectorInfo at present. push_back works for other
   Component types because Detectors are always come first in the resultant
@@ -291,9 +293,7 @@ InstrumentVisitor::componentIds() const {
  * @return The total size of the components visited.
  * This will be the same as the number of IDs.
  */
-size_t InstrumentVisitor::size() const {
-  return m_componentIds->size() - m_droppedDetectors;
-}
+size_t InstrumentVisitor::size() const { return m_componentIds->size(); }
 
 bool InstrumentVisitor::isEmpty() const { return size() == 0; }
 
@@ -314,7 +314,7 @@ InstrumentVisitor::componentInfo() const {
       m_assemblySortedDetectorIndices, m_detectorRanges,
       m_assemblySortedComponentIndices, m_componentRanges,
       m_parentComponentIndices, m_positions, m_rotations, m_scaleFactors,
-      m_sourceIndex, m_sampleIndex);
+      m_isStructuredBank, m_sourceIndex, m_sampleIndex);
 }
 
 std::unique_ptr<Beamline::DetectorInfo>
@@ -356,6 +356,5 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument,
   visitor.walkInstrument();
   return visitor.makeWrappers();
 }
-
 } // namespace Geometry
 } // namespace Mantid

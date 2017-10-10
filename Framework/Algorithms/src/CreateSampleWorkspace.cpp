@@ -35,6 +35,8 @@ using namespace HistogramData;
 using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -337,7 +339,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
     timeRanges.push_back(double(i + 1));
   }
 
-  builder.setTimeRanges(Kernel::DateAndTime(0), timeRanges);
+  builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);
   builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
                                        V3D(0, 1, 0));
 

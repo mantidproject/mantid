@@ -44,10 +44,11 @@
 #include <QCloseEvent>
 
 ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, Qt::WFlags fl)
-    : QDialog(parent, fl), fitter(NULL), graph(NULL), buttonFit(NULL),
-      buttonCancel(NULL), boxName(NULL), boxAmplitude(NULL), boxFirst(NULL),
-      boxSecond(NULL), boxThird(NULL), boxStart(NULL), boxYOffset(NULL),
-      thirdLabel(NULL), dampingLabel(NULL), boxColor(NULL) {
+    : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr),
+      buttonCancel(nullptr), boxName(nullptr), boxAmplitude(nullptr),
+      boxFirst(nullptr), boxSecond(nullptr), boxThird(nullptr),
+      boxStart(nullptr), boxYOffset(nullptr), thirdLabel(nullptr),
+      dampingLabel(nullptr), boxColor(nullptr) {
   setObjectName("ExpDecayDialog");
 
   slopes = type;
@@ -144,7 +145,7 @@ void ExpDecayDialog::setGraph(Graph *g) {
   if (!g)
     return;
 
-  fitter = 0;
+  fitter = nullptr;
   graph = g;
 
   boxName->addItems(graph->analysableCurvesList());

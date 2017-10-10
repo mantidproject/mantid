@@ -87,13 +87,8 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 #include <QtCore/QSet>
-#include <QtGui/QIcon>
-#include <QtGui/QTreeWidget>
-#include <QtGui/QItemDelegate>
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
-#include <QtGui/QPainter>
-#include <QtGui/QApplication>
 #include <QtGui/QFocusEvent>
 #include <QtGui/QStyle>
 #include <QtGui/QPalette>
@@ -105,132 +100,9 @@
 QT_BEGIN_NAMESPACE
 #endif
 
-class PropertyOptionCheckBox: public QWidget
-{
-  Q_OBJECT
-public:
-  PropertyOptionCheckBox(QWidget *parent,QtProperty *property, const QString &optionName):
-    QWidget(parent),
-    m_property(property),
-    m_optionName(optionName),
-    m_checked(property->checkOption(optionName))
-  {
-    setFocusPolicy(Qt::StrongFocus);
-  }
-  void paintEvent(QPaintEvent *) override {
-      QStyleOptionButton opt;
-      auto state = isChecked() ? QStyle::State_On : QStyle::State_Off;
-      opt.state |= state;
-      opt.rect = rect();
-      opt.rect.setWidth(opt.rect.height());
-      QPainter painter(this);
-      QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&opt,&painter);
-  }
-  void mousePressEvent(QMouseEvent *event) override {
-    event->accept();
-    setChecked( ! isChecked() );
-    m_property->setOption( m_optionName, isChecked() );
-    update();
-    emit optionChanged(m_property, m_optionName, isChecked());
-  }
-  void setChecked(bool on){m_checked = on;}
-  bool isChecked() const {return m_checked;}
-signals:
-  void optionChanged(QtProperty*, const QString&, bool);
-private:
-  QtProperty *m_property;
-  QString m_optionName;
-  bool m_checked;
-};
-
 class QtPropertyEditorView;
 
-class QtTreePropertyBrowserPrivate
-{
-    QtTreePropertyBrowser *q_ptr;
-    Q_DECLARE_PUBLIC(QtTreePropertyBrowser)
-
-public:
-    QtTreePropertyBrowserPrivate();
-    void init(QWidget *parent, const QStringList &options, bool darkTopLevel);
-
-    void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
-    void propertyRemoved(QtBrowserItem *index);
-    void propertyChanged(QtBrowserItem *index);
-    QWidget *createEditor(QtProperty *property, QWidget *parent) const
-        { return q_ptr->createEditor(property, parent); }
-    QtProperty *indexToProperty(const QModelIndex &index) const;
-    QTreeWidgetItem *indexToItem(const QModelIndex &index) const;
-    QtBrowserItem *indexToBrowserItem(const QModelIndex &index) const;
-    bool lastColumn(int column) const;
-    void disableItem(QTreeWidgetItem *item) const;
-    void enableItem(QTreeWidgetItem *item) const;
-    bool hasValue(QTreeWidgetItem *item) const;
-
-    void slotCollapsed(const QModelIndex &index);
-    void slotExpanded(const QModelIndex &index);
-
-    QColor calculatedBackgroundColor(QtBrowserItem *item) const;
-
-    QtPropertyEditorView *treeWidget() const { return m_treeWidget; }
-    bool markPropertiesWithoutValue() const { return m_markPropertiesWithoutValue; }
-
-    QtBrowserItem *currentItem() const;
-    void setCurrentItem(QtBrowserItem *browserItem, bool block);
-    void editItem(QtBrowserItem *browserItem);
-    void disableItem(QtBrowserItem *item);
-
-    void slotCurrentBrowserItemChanged(QtBrowserItem *item);
-    void slotCurrentTreeItemChanged(QTreeWidgetItem *newItem, QTreeWidgetItem *);
-
-    QTreeWidgetItem *editedItem() const;
-    void closeEditor();
-
-    const QStringList& options() const {return m_options;}
-    void setColumnSizes(int s0, int s1, int s2);
-
-private:
-    void updateItem(QTreeWidgetItem *item);
-
-    QMap<QtBrowserItem *, QTreeWidgetItem *> m_indexToItem;
-    QMap<QTreeWidgetItem *, QtBrowserItem *> m_itemToIndex;
-
-    QMap<QtBrowserItem *, QColor> m_indexToBackgroundColor;
-
-    QtPropertyEditorView *m_treeWidget;
-
-    bool m_headerVisible;
-    QtTreePropertyBrowser::ResizeMode m_resizeMode;
-    class QtPropertyEditorDelegate *m_delegate;
-    bool m_markPropertiesWithoutValue;
-    bool m_browserChangedBlocked;
-    QIcon m_expandIcon;
-    QStringList m_options; // options that can be associated with QtProperties
-};
-
 // ------------ QtPropertyEditorView
-class QtPropertyEditorView : public QTreeWidget
-{
-    Q_OBJECT
-public:
-    QtPropertyEditorView(QWidget *parent, bool darkTopLevel);
-
-    void setEditorPrivate(QtTreePropertyBrowserPrivate *editorPrivate)
-        { m_editorPrivate = editorPrivate; }
-
-    QTreeWidgetItem *indexToItem(const QModelIndex &index) const
-        { return itemFromIndex(index); }
-
-protected:
-  void keyPressEvent(QKeyEvent *event) override;
-  void mousePressEvent(QMouseEvent *event) override;
-  void drawRow(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const override;
-
-private:
-    QtTreePropertyBrowserPrivate *m_editorPrivate;
-    bool m_darkTopLevel;
-};
 
 QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel) :
     QTreeWidget(parent),
@@ -322,58 +194,6 @@ void QtPropertyEditorView::mousePressEvent(QMouseEvent *event)
 }
 
 // ------------ QtPropertyEditorDelegate
-class QtPropertyEditorDelegate : public QItemDelegate
-{
-    Q_OBJECT
-public:
-    QtPropertyEditorDelegate(QObject *parent = 0)
-        : QItemDelegate(parent), m_editorPrivate(0), m_editedItem(0), m_editedWidget(0)
-        {}
-
-    void setEditorPrivate(QtTreePropertyBrowserPrivate *editorPrivate)
-        { m_editorPrivate = editorPrivate; }
-
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const override;
-
-    void updateEditorGeometry(QWidget *editor,
-                              const QStyleOptionViewItem &option,
-                              const QModelIndex &index) const override;
-
-    void paint(QPainter *painter, const QStyleOptionViewItem &option,
-               const QModelIndex &index) const override;
-
-    QSize sizeHint(const QStyleOptionViewItem &option,
-                   const QModelIndex &index) const override;
-
-    void setModelData(QWidget *, QAbstractItemModel *,
-                      const QModelIndex &) const override {}
-
-    void setEditorData(QWidget *, const QModelIndex &) const override {}
-
-    bool eventFilter(QObject *object, QEvent *event) override;
-    void closeEditor(QtProperty *property);
-
-    QTreeWidgetItem *editedItem() const { return m_editedItem; }
-
-signals:
-    void optionChanged(QtProperty*, const QString&, bool);
-
-private slots:
-    void slotEditorDestroyed(QObject *object);
-
-private:
-    int indentation(const QModelIndex &index) const;
-
-    typedef QMap<QWidget *, QtProperty *> EditorToPropertyMap;
-    mutable EditorToPropertyMap m_editorToProperty;
-
-    typedef QMap<QtProperty *, QWidget *> PropertyToEditorMap;
-    mutable PropertyToEditorMap m_propertyToEditor;
-    QtTreePropertyBrowserPrivate *m_editorPrivate;
-    mutable QTreeWidgetItem *m_editedItem;
-    mutable QWidget *m_editedWidget;
-};
 
 int QtPropertyEditorDelegate::indentation(const QModelIndex &index) const
 {
@@ -1244,6 +1064,3 @@ void QtTreePropertyBrowser::closeEditor()
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
 #endif
-
-#include "moc_qttreepropertybrowser.cpp"
-#include "qttreepropertybrowser.moc"

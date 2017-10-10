@@ -172,7 +172,7 @@ void GraphDisplay::setRangeScale(double rangeScale) {
  */
 void GraphDisplay::setPointedAtPoint(QPoint point) {
   m_mousePoint = point;
-  if (m_dataSource == 0) {
+  if (m_dataSource == nullptr) {
     return;
   }
   double x = m_graphPlot->invTransform(QwtPlot::xBottom, point.x());
@@ -204,11 +204,11 @@ void GraphDisplay::setPointedAtPoint(QPoint point) {
 void GraphDisplay::showInfoList(double x, double y) {
   // This whole method is a no-op if no table object was injected on
   // construction
-  if (m_graphTable != NULL) {
+  if (m_graphTable != nullptr) {
     int n_infos = 0;
     int n_rows = 1;
     std::vector<std::string> info_list;
-    if (m_dataSource != 0) {
+    if (m_dataSource != nullptr) {
       if (m_isVertical) {
         info_list = m_dataSource->getInfoList(m_imageX, y);
       } else {

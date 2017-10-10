@@ -1,14 +1,11 @@
 #ifndef MDPLOTTINGCMAPSPROVIDER_H_
 #define MDPLOTTINGCMAPSPROVIDER_H_
 
-#include "DllOption.h"
 #include <QString>
 #include <vector>
 
 class QStringList;
 
-namespace MantidQt {
-namespace API {
 /**
   *
   This helper class allows for reading and processing the names of the available
@@ -38,7 +35,7 @@ namespace API {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class EXPORT_OPT_MANTIDQT_COMMON MdPlottingCmapsProvider {
+class MdPlottingCmapsProvider {
 public:
   MdPlottingCmapsProvider();
 
@@ -86,7 +83,5 @@ private:
   getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
                                           QStringList colorMapNamesVsi);
 };
-}
-}
 
 #endif

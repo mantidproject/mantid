@@ -41,13 +41,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel
-    : public AbstractTreeModel {
+class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QOneLevelTreeModel(
-      Mantid::API::ITableWorkspace_sptr tableWorkspace,
-      const WhiteList &whitelist);
+  QOneLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+                     const WhiteList &whitelist);
   ~QOneLevelTreeModel() override;
 
   // Functions to read data from the model
@@ -93,8 +91,7 @@ private:
 };
 
 /// Typedef for a shared pointer to \c QOneLevelTreeModel
-using QOneLevelTreeModel_sptr =
-    boost::shared_ptr<QOneLevelTreeModel>;
+using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 
 } // namespace DataProcessor
 } // namespace MantidWidgets

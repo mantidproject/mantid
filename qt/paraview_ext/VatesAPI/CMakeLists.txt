@@ -176,13 +176,7 @@ test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} ${PARAVIEW_INCLUDE_DIRS})
-
-set( SRC_UNITY_IGNORE_FILES )
-if( UNITY_BUILD )
-  include( UnityBuild )
-  enable_unity_build( VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10 )
-endif( UNITY_BUILD )
+include_directories ( SYSTEM ${PARAVIEW_INCLUDE_DIRS})
 
 # For Windows:
 add_definitions( -DIN_MANTID_VATESAPI )
@@ -205,11 +199,8 @@ vtkFiltersExtraction
 vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
-${QWT_LIBRARIES}
-Qt4::QtCore
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
-${NEXUS_LIBRARIES}
 )
 
 if ( MSVC )
@@ -259,8 +250,6 @@ target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES}
   ${GTEST_LIBRARIES}
-  ${QWT_LIBRARIES}
-  Qt4::QtCore
   )
 add_dependencies( AllTests VatesAPITest )
 # Add to the 'UnitTests' group in VS

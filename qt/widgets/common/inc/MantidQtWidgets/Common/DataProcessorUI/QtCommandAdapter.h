@@ -61,9 +61,8 @@ public:
       // Add the actions
       auto &child = m_adaptee->getChild();
       for (auto &ch : child) {
-        m_adapter.push_back(
-            Mantid::Kernel::make_unique<QtCommandAdapter>(
-                submenu, std::move(ch)));
+        m_adapter.push_back(Mantid::Kernel::make_unique<QtCommandAdapter>(
+            submenu, std::move(ch)));
       }
     } else {
       // We are dealing with an action
@@ -76,8 +75,7 @@ public:
   * @param toolbar :: The toolbar where actions will be added
   * @param adaptee :: The action to add
   */
-  QtCommandAdapter(QToolBar *toolbar,
-                              Command_uptr adaptee)
+  QtCommandAdapter(QToolBar *toolbar, Command_uptr adaptee)
       : m_adaptee(std::move(adaptee)) {
 
     if (!m_adaptee->hasChild()) {
@@ -115,8 +113,7 @@ private:
   std::vector<std::unique_ptr<QtCommandAdapter>> m_adapter;
 };
 
-using QtCommandAdapter_uptr =
-    std::unique_ptr<QtCommandAdapter>;
+using QtCommandAdapter_uptr = std::unique_ptr<QtCommandAdapter>;
 }
 }
 }
