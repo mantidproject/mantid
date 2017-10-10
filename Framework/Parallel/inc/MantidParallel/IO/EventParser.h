@@ -77,9 +77,8 @@ public:
   void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
                                     size_t bankIndex) const;
 
-  std::pair<size_t, size_t>
-  findStartAndEndPulseIndices(const std::vector<IndexType> &eventIndex,
-                              size_t rangeStart, size_t count, size_t &curr);
+  std::pair<size_t, size_t> findStartAndEndPulseIndices(size_t rangeStart,
+                                                        size_t count);
 
   void populateEventList(
       std::vector<std::vector<Types::Event::TofEvent> *> &eventList,

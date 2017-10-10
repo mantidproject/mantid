@@ -71,34 +71,33 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 /** Finds the start and end pulse indices within the event_index given an offset
  * into the event_id/event_time_offset array and a chunk size.
  *
- * Returns the indices which correspond to the start and end pulses covering the
+ * Returns the indices which correspond to the first and last pulse covering the
  * data chunk.
- * @param eventIndex index list which is searched
  * @param rangeStart Offset into event_time_offset/event_id
  * @param count Size of data chunk.
- * @param curr Current search position
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-std::pair<size_t, size_t> EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    findStartAndEndPulseIndices(const std::vector<IndexType> &eventIndex,
-                                size_t rangeStart, size_t count, size_t &curr) {
-  size_t startPulse = std::min(rangeStart, curr);
+std::pair<size_t, size_t>
+EventParser<IndexType, TimeZeroType,
+            TimeOffsetType>::findStartAndEndPulseIndices(size_t rangeStart,
+                                                         size_t count) {
+  size_t startPulse = m_posInEventIndex;
   size_t endPulse = startPulse;
   const auto rangeEnd = rangeStart + count;
 
-  for (size_t pulse = startPulse; pulse < eventIndex.size(); ++pulse) {
-    size_t icount =
-        (pulse != eventIndex.size() - 1 ? eventIndex[pulse + 1] : rangeEnd) -
-        eventIndex[pulse];
-    if (rangeStart >= static_cast<size_t>(eventIndex[pulse]) &&
-        rangeStart < static_cast<size_t>(eventIndex[pulse]) + icount)
+  for (size_t pulse = startPulse; pulse < m_eventIndex.size(); ++pulse) {
+    size_t icount = (pulse != m_eventIndex.size() - 1 ? m_eventIndex[pulse + 1]
+                                                      : rangeEnd) -
+                    m_eventIndex[pulse];
+    if (rangeStart >= static_cast<size_t>(m_eventIndex[pulse]) &&
+        rangeStart < static_cast<size_t>(m_eventIndex[pulse]) + icount)
       startPulse = pulse;
-    if (rangeEnd > static_cast<size_t>(eventIndex[pulse]) &&
-        rangeEnd <= static_cast<size_t>(eventIndex[pulse]) + icount)
-      endPulse = (pulse + 1) == eventIndex.size() ? pulse : pulse + 1;
+    if (rangeEnd > static_cast<size_t>(m_eventIndex[pulse]) &&
+        rangeEnd <= static_cast<size_t>(m_eventIndex[pulse]) + icount)
+      endPulse = (pulse + 1) == m_eventIndex.size() ? pulse : pulse + 1;
   }
 
-  curr = endPulse;
+  m_posInEventIndex = endPulse;
 
   return {startPulse, endPulse};
 }
@@ -125,9 +124,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
   auto offset = range.eventOffset;
   auto count = range.eventCount;
-  // Determine start and end pulse/s for chunk of data provided.
-  auto result = findStartAndEndPulseIndices(m_eventIndex, offset, count,
-                                            m_posInEventIndex);
+  auto result = findStartAndEndPulseIndices(offset, count);
 
   for (size_t pulse = result.first; pulse <= result.second; ++pulse) {
     const auto start =

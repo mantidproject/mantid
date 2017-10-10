@@ -185,29 +185,22 @@ public:
                                                  eventLists);
 
     std::vector<int64_t> event_index{10, 20, 40, 60, 100, 150, 210};
-    size_t curr = 0;
-    auto res = parser.findStartAndEndPulseIndices(event_index, 0, 50, curr);
+    std::vector<int64_t> event_time_zero{10, 20, 30, 40, 50, 60, 70};
+    parser.setPulseInformation(event_index, event_time_zero);
+    auto res = parser.findStartAndEndPulseIndices(0, 50);
     TS_ASSERT_EQUALS(res.first, 0);
     TS_ASSERT_EQUALS(res.second, 3);
-    TS_ASSERT_EQUALS(curr, 3);
 
-    curr = 0; // reset "current position" for new set of indices
-    res = parser.findStartAndEndPulseIndices(event_index, 30, 50, curr);
+    // reset "current position" for new set of indices
+    parser.setPulseInformation(event_index, event_time_zero);
+    res = parser.findStartAndEndPulseIndices(30, 50);
     TS_ASSERT_EQUALS(res.first, 1);
     TS_ASSERT_EQUALS(res.second, 4);
-    TS_ASSERT_EQUALS(curr, 4);
 
-    // instead of resetting curr allow search to start from this position
-    res = parser.findStartAndEndPulseIndices(event_index, 105, 98, curr);
+    // instead of resetting allow search to start from this position
+    res = parser.findStartAndEndPulseIndices(105, 98);
     TS_ASSERT_EQUALS(res.first, 4);
     TS_ASSERT_EQUALS(res.second, 6);
-    TS_ASSERT_EQUALS(curr, 6);
-
-    // starting from an offset which may be lower than curr
-    res = parser.findStartAndEndPulseIndices(event_index, 0, 100, curr);
-    TS_ASSERT_EQUALS(res.first, 0);
-    TS_ASSERT_EQUALS(res.second, 4);
-    TS_ASSERT_EQUALS(curr, 4);
   }
 
   void testExtractEventsFull() {
@@ -397,9 +390,9 @@ private:
       detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
           gen,
       const LoadRange &range) {
-    size_t cur = 0;
-    auto res = parser->findStartAndEndPulseIndices(
-        gen.eventIndex(0), range.eventOffset, range.eventCount, cur);
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    auto res = parser->findStartAndEndPulseIndices(range.eventOffset,
+                                                   range.eventCount);
 
     for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
       auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
