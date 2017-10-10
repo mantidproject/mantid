@@ -48,16 +48,16 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
   INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      ${CORE_MANTIDLIBS}
-      ${QT_LIBRARIES}
-      ${QWT_LIBRARIES}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${JSONCPP_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${QT_LIBRARIES}
+    ${QWT_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
-      MantidScientificInterfacesMuon
+    MantidQtWidgetsCommon
+    MantidScientificInterfacesMuon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )

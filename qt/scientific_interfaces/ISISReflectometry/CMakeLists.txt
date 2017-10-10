@@ -105,13 +105,13 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
   INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      ${CORE_MANTIDLIBS}
-      ${QT_LIBRARIES}
-      ${QWT_LIBRARIES}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${JSONCPP_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${QT_LIBRARIES}
+    ${QWT_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS
       MantidQtWidgetsCommon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid

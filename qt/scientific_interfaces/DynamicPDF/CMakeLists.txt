@@ -52,15 +52,15 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
   INCLUDE_DIRS
     ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      ${CORE_MANTIDLIBS}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${QT_LIBRARIES}
-      ${QWT_LIBRARIES}
-      ${OPENGL_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${QT_LIBRARIES}
+    ${QWT_LIBRARIES}
+    ${OPENGL_LIBRARIES}
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
+    MantidQtWidgetsCommon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )

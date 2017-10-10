@@ -92,16 +92,16 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMuon
   DEFS IN_MANTIDQT_MUONINTERFACE
   PRECOMPILED PrecompiledHeader.h
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      ${CORE_MANTIDLIBS}
-      ${QT_LIBRARIES}
-      ${QWT_LIBRARIES}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${JSONCPP_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${QT_LIBRARIES}
+    ${QWT_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
-      MantidScientificInterfacesMultiDatasetFit
+    MantidQtWidgetsCommon
+    MantidScientificInterfacesMultiDatasetFit
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )
