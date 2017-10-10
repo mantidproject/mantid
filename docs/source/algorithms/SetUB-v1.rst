@@ -28,16 +28,16 @@ Usage
 .. testcode:: SetUB
 
     # create a workspace (or you can load one)
-    ws=CreateSingleValuedWorkspace(5)
+    ws = CreateSingleValuedWorkspace(5)
     
     #set a UB matrix using the vector along k_i as 1,1,0, and the 0,0,1 vector in the horizontal plane
-    SetUB(ws,a=5,b=6,c=7,alpha=90, beta=90, gamma=90, u="1,1,0", v="0,0,1")
+    SetUB(ws, a=5, b=6, c=7, alpha=90, beta=90, gamma=90, u="1,1,0", v="0,0,1")
     
     #check that it works
-    from numpy import *
-    mat=array(ws.sample().getOrientedLattice().getUB())
-    print "UB matrix"
-    print array_str(mat,precision=3, suppress_small=True)
+    from numpy import array, array_str
+    mat = array(ws.sample().getOrientedLattice().getUB())
+    print("UB matrix")
+    print(array_str(mat, precision=3, suppress_small=True))
 
 .. testcleanup:: SetUB
     

@@ -37,7 +37,6 @@ public:
     instrument->markAsDetector(det2);
     det3 = new Detector("det3", 11, nullptr);
     instrument->add(det3);
-    instrument->markAsDetector(det3);
     instrument->markAsMonitor(det3);
 
     pmap.reset(new ParameterMap);

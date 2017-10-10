@@ -19,8 +19,6 @@
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
-using boost::algorithm::is_any_of;
-using boost::algorithm::split;
 
 #ifdef _WIN32
 #pragma warning(push)

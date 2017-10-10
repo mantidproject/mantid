@@ -229,7 +229,7 @@ void ALCDataLoadingView::setAvailableItems(
   }
 
   // Add new items
-  for (const auto item : items) {
+  for (const auto &item : items) {
     if (item != previousValue) { // has already been added
       comboBox->addItem(QString::fromStdString(item));
     }

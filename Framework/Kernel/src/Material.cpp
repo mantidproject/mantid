@@ -384,7 +384,7 @@ double Material::totalScatterLengthSqrd(const double lambda) const {
  * @param group :: name of the group to create
  */
 void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
-  file->makeGroup(group, "NXdata", 1);
+  file->makeGroup(group, "NXdata", true);
   file->putAttr("version", 2);
   file->putAttr("name", m_name);
 

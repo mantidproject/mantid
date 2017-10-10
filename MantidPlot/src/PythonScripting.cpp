@@ -291,7 +291,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
   Py_ssize_t length = static_cast<Py_ssize_t>(items.length());
   PyObject *pylist = PyList_New((length));
   for (Py_ssize_t i = 0; i < length; ++i) {
-    QString item = items.at(static_cast<int>(i));
+    const QString &item = items.at(static_cast<int>(i));
     PyList_SetItem(pylist, i, FROM_CSTRING(item.toAscii()));
   }
   return pylist;

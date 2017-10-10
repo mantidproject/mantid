@@ -17,8 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType(),
-      m_IqtInputWS() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 
@@ -390,25 +389,14 @@ void Iqt::plotInput(const QString &wsname) {
     }
 
     // Set saved workspace
-    m_IqtInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+    auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
         wsname.toStdString());
+    setInputWorkspace(inputWs);
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
 
   calculateBinning();
-}
-
-/**
-* Plots the current spectrum displayed in the preview plot
-*/
-void Iqt::plotCurrentPreview() {
-
-  // Check whether an input workspace has been selected and exists
-  if (m_IqtInputWS) {
-    IndirectTab::plotSpectrum(QString::fromStdString(m_IqtInputWS->getName()),
-                              0, 0);
-  }
 }
 
 /**
