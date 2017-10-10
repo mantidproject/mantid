@@ -11,7 +11,7 @@ import os
 try:
     import urllib.request as urllib
 except ImportError:
-    import  urllib
+    import urllib
 
 
 from .ui_MainWindow import Ui_MainWindow #import line for the UI python class
@@ -399,8 +399,8 @@ class MainWindow(QtGui.QMainWindow):
         # pylint: disable=protected-access
         self.collectionFile=os.path.join(mantid._bindir,'../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
-        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/HFIRPowderReduction.html'
-        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/HFIRPowderReduction.html'
+        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/HFIR Powder Reduction.html'
+        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/HFIR Powder Reduction.html'
 
         # Initial setup for tab
         self.ui.tabWidget.setCurrentIndex(0)
@@ -597,20 +597,21 @@ class MainWindow(QtGui.QMainWindow):
         """ Show help
         Copied from DGSPlanner
         """
-        self.assistantProcess.close()
-        self.assistantProcess.waitForFinished()
-        helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
-        helpapp += 'assistant'
-        args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
-        if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
+        try:
+            import pymantidplot
+            pymantidplot.proxies.showCustomInterfaceHelp('HFIR Powder Reduction')
+        except ImportError:
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
-            self.assistantProcess.start(helpapp, args)
-            print("Show help from (app) ", helpapp)
-        else:
-            mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
-            print("Show help from (url)", QtCore.QUrl(self.externalUrl))
-
+            helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
+            helpapp += 'assistant'
+            args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
+            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
+                self.assistantProcess.close()
+                self.assistantProcess.waitForFinished()
+                self.assistantProcess.start(helpapp, args)
+            else:
+                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
         return
 
     def doLoadData(self, exp=None, scan=None):
