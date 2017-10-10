@@ -169,8 +169,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              validator=StringListValidator([SlitNorm.OFF, SlitNorm.ON]),
                              doc='Enable or disable slit normalisation.')
         self.declareProperty(Prop.FLUX_NORM_METHOD,
-                             defaultValue=FluxNormMethod.MONITOR,
-                             validator=StringListValidator([FluxNormMethod.MONITOR, FluxNormMethod.TIME, FluxNormMethod.OFF]),
+                             defaultValue=FluxNormMethod.TIME,
+                             validator=StringListValidator([FluxNormMethod.TIME, FluxNormMethod.MONITOR, FluxNormMethod.OFF]),
                              doc='Neutron flux normalisation method.')
         self.declareProperty(MatrixWorkspaceProperty(Prop.INSTRUMENT_BKG,
                                                      defaultValue='',
