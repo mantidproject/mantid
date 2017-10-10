@@ -1,5 +1,4 @@
-#pylint: disable=no-init
-#pylint: disable=line-too-long
+#pylint: disable=too-many-branches
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -16,22 +15,20 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         AnalysisDataService)
 from mantid.simpleapi import (DeleteWorkspaces, LoadEventNexus, SetGoniometer,
                               SetUB, ModeratorTzeroLinear, SaveNexus,
-                              ConvertToMD, MergeMD, SaveMD, LoadMask,
-                              MaskDetectors, MDNormSCDPreprocessIncoherent,
-                              ConvertToMDMinMaxLocal, MDNormSCD, MultiplyMD,
+                              ConvertToMD, LoadMask, MaskDetectors, LoadNexus,
+                              MDNormSCDPreprocessIncoherent, MDNormSCD,
+                              MultiplyMD, CreateSingleValuedWorkspace,
                               ConvertUnits, CropWorkspace, DivideMD, MinusMD,
-                              CreateSingleValuedWorkspace, CloneMDWorkspace,
-                              RenameWorkspace, GroupWorkspaces, Rebin,
-                              ConvertToMDMinMaxGlobal, CreateWorkspace,
-                              LoadEmptyInstrument, LoadInstrument, LoadNexus)
+                              RenameWorkspace, ConvertToMDMinMaxGlobal,
+                              ClearMaskFlag)
 from mantid.kernel import (Direction, EnabledWhenProperty, PropertyCriterion,
                            IntArrayProperty, FloatArrayProperty,
                            FloatArrayLengthValidator)
 
-from pdb import set_trace as tr
 
 _SOLID_ANGLE_WS_ = '/tmp/solid_angle_diff.nxs'
 _FLUX_WS_ = '/tmp/int_flux.nxs'
+
 
 @contextmanager
 def pyexec_setup(new_options):
@@ -39,7 +36,7 @@ def pyexec_setup(new_options):
     Backup keys of mantid.config and clean up temporary files and workspaces
     upon algorithm completion or exception raised.
     :param new_options: dictionary of mantid configuration options
-     to be modified. 
+     to be modified.
     """
     # Hold in this tuple all temporary objects to be removed after completion
     temp_objects = namedtuple('temp_objects', 'files workspaces')
@@ -70,6 +67,7 @@ def pyexec_setup(new_options):
             else:
                 to_be_removed.add(workspace.name())
         DeleteWorkspaces(list(to_be_removed))
+
 
 class BASISDiffraction(DataProcessorAlgorithm):
 
@@ -126,8 +124,8 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
-                             doc='Output Workspace. If background is '+ \
-                                 'subtracted, _data and _background '+ \
+                             doc='Output Workspace. If background is '+
+                                 'subtracted, _data and _background '+
                                  'workspaces will also be generated')
 
         #
@@ -137,7 +135,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRun', '', 'Background run number')
         self.setPropertyGroup('BackgroundRun', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this '+\
+                             doc='The background will be scaled by this '+
                                  'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         #
@@ -170,7 +168,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
                                                 [90.0, 90.0, 90.0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated ' +\
+                             doc='three item comma-separated ' +
                                  'list "alpha, beta, gamma"')
         #    Reciprocal vector to be aligned with incoming beam
         self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0],
@@ -221,10 +219,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
 
         # implement with ContextDecorator after python2 is deprecated)
         with pyexec_setup(config_new_options) as self._temps:
-        
             # Load the mask to a workspace
             self._t_mask = LoadMask(Instrument='BASIS',
-                                    InputFile=self.getProperty("MaskFile").\
+                                    InputFile=self.getProperty("MaskFile").
                                     value,
                                     OutputWorkspace='_t_mask')
 
@@ -345,19 +342,19 @@ class BASISDiffraction(DataProcessorAlgorithm):
             MDNormSCD(_t_md,
                       OutputWorkspace='_t_data',
                       OutputNormalizationWorkspace='_t_norm',
-                      TemporaryDataWorkspace='_t_data' if \
-                          mtd.doesExist('_t_data') else None,
-                      TemporaryNormalizationWorkspace='_t_norm' if \
-                          mtd.doesExist('_t_norm') else None,
+                      TemporaryDataWorkspace='_t_data' if
+                      mtd.doesExist('_t_data') else None,
+                      TemporaryNormalizationWorkspace='_t_norm' if
+                      mtd.doesExist('_t_norm') else None,
                       **mdn_args)
             if self._bkg:
                 MDNormSCD(_t_bkg_md,
                           OutputWorkspace='_t_bkg_data',
                           OutputNormalizationWorkspace='_t_bkg_norm',
-                          TemporaryDataWorkspace='_t_bkg_data' if \
-                              mtd.doesExist('_t_bkg_data') else None,
-                          TemporaryNormalizationWorkspace='_t_bkg_norm' \
-                              if mtd.doesExist('_t_bkg_norm') else None,
+                          TemporaryDataWorkspace='_t_bkg_data' if
+                          mtd.doesExist('_t_bkg_data') else None,
+                          TemporaryNormalizationWorkspace='_t_bkg_norm'
+                          if mtd.doesExist('_t_bkg_norm') else None,
                           **mdn_args)
         self._temps.workspaces.append('PreprocessedDetectorsWS')  # to remove
         # Iteration over the sample runs is done.
@@ -403,9 +400,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
          2. Delayed emission time from  moderator removed
          3. Conversion of units to momentum
          4. Remove events outside the valid momentum range
-        :param run_number: 
+        :param run_number: BASIS run number
         :param name: name for the output workspace
-        :return: 
+        :return: workspace object
         """
         ws = LoadEventNexus(Filename=self._makeRunFile(run_number),
                             NXentryName='entry-diff',
@@ -461,7 +458,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
 
     def nominal_solid_angle(self, name):
         """
-        Generate an isotropic solid angle 
+        Generate an isotropic solid angle
         :param name: Name of the output workspace
         :return: reference to solid angle workspace
         """
@@ -477,7 +474,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         """
         Generate a flux independent of momentum
         :param name: Name of the output workspace
-        :return: reference to flux workspace 
+        :return: reference to flux workspace
         """
         ws = LoadNexus(Filename=self._flux_ws_, OutputWorkspace=name)
         ClearMaskFlag(ws)

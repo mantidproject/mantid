@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import BASISDiffraction
 
+
 class OrientedSampleTest(stresstesting.MantidStressTest):
     """
     Run a reduction for a scan of runs probing different orientations
