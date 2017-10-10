@@ -22,13 +22,21 @@ script_params = {
     "spline_coefficient": 100,
 }
 
-focused_cropping_values = [
+pdf_focused_cropping_values = [
     (1500, 19900),  # Bank 1
     (1500, 19900),  # Bank 2
     (1500, 19900),  # Bank 3
     (1500, 19900),  # Bank 4
     (1500, 19900),  # Bank 5
     ]
+
+rietveld_focused_cropping_values = [
+    (700,  30000),  # Bank 1
+    (1200, 24900),  # Bank 2
+    (1100, 19950),  # Bank 3
+    (1100, 19950),  # Bank 4
+    (1100, 19950),  # Bank 5
+]
 
 focused_bin_widths = [
     # Note you want these to be negative for logarithmic (dt / t) binning
@@ -41,11 +49,11 @@ focused_bin_widths = [
 ]
 
 vanadium_cropping_values = [
-    (800, 19995),  # Bank 1
-    (800, 19995),  # Bank 2
-    (800, 19995),  # Bank 3
-    (800, 19995),  # Bank 4
-    (800, 19995),  # Bank 5
+    (600, 31000),  # Bank 1
+    (1000, 24950),  # Bank 2
+    (1000, 19975),  # Bank 3
+    (900, 19975),  # Bank 4
+    (800, 19975),  # Bank 5
 ]
 
 sample_empty_scale = 1.0
@@ -78,8 +86,20 @@ variables = {
     # Used by the script to find the dictionaries in advanced config.
     "file_names_dict": file_names,
     "script_params": script_params,
-    "focused_cropping_values": focused_cropping_values,
     "vanadium_cropping_values": vanadium_cropping_values,
     "focused_bin_widths": focused_bin_widths,
     "sample_empty_scale": sample_empty_scale
 }
+
+
+def get_mode_specific_dict(mode):
+    return {"focused_cropping_values":
+            pdf_focused_cropping_values if mode == "PDF"
+            else rietveld_focused_cropping_values}
+
+
+def get_all_adv_variables(mode="PDF"):
+    advanced_config_dict = {}
+    advanced_config_dict.update(variables)
+    advanced_config_dict.update(get_mode_specific_dict(mode))
+    return advanced_config_dict
