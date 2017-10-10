@@ -36,13 +36,15 @@ Usage
     ws=Load(Filename='TOFTOFTestdata.nxs')
 
     print("Input workspace")
-    print("Total number of time channels: " + str(len(ws.readX(0))))
-    print("Number of filled time channels: " + str(ws.getRun().getLogData('full_channels').value))
+
+    print("Total number of time channels: {}".format(len(ws.readX(0))))
+    print ("Number of filled time channels: {}".format(ws.getRun().getLogData('full_channels').value))
 
     wscropped = TOFTOFCropWorkspace(ws)
 
     print("Output workspace")
-    print("Total number of time channels: " + str(len(wscropped.readX(0))))
+    print("Total number of time channels: {}".format(len(wscropped.readX(0))))
+
 
 Output:
 
