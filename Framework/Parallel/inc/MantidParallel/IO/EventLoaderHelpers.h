@@ -5,6 +5,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
+#include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 
 namespace Mantid {
@@ -59,42 +60,33 @@ H5::DataType readDataType(const H5::Group &group,
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(
     const Chunker &chunker,
-    NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource) {
+    NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource,
+    EventDataSink<IndexType, TimeZeroType, TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
-  // const auto &rankGroups = chunker.makeRankGroups();
-  std::vector<int32_t> event_id(2 * chunkSize);
-  std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
+  std::vector<int32_t> event_id(chunkSize);
+  std::vector<TimeOffsetType> event_time_offset(chunkSize);
 
-  // TODO Create parser. Constructor arguments:
-  // - rankGroups (parser must insert events received from ranks within group
-  //   always in that order, to preserve pulse time ordering)
-  // - m_bankOffsets (use to translate from event_id to global spectrum index)
-  // - m_eventLists (index is workspace index)
-  // - Later: Pass something to translate (global spectrum index -> (rank,
-  //   workspace index))
   int64_t previousBank = -1;
   for (const auto &range : ranges) {
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
       dataSource.setBankIndex(range.bankIndex);
-      // TODO
-      // parser.setEventIndex(dataSource->eventIndex());
-      // parser.setEventTimeZero(dataSource->eventTimeZero());
+      dataSink.setPulseInformation(dataSource.eventIndex(),
+                                   dataSource.eventTimeZero());
     }
     // TODO use double buffer or something
-    // parser.wait()
     // TODO use and manage bufferOffset
+    size_t bufferOffset{0};
     dataSource.readEventID(event_id.data(), range.eventOffset,
                            range.eventCount);
     dataSource.readEventTimeOffset(event_time_offset.data(), range.eventOffset,
                                    range.eventCount);
-    // TODO
-    // parser.startProcessChunk(event_id.data() + bufferOffset,
-    //                          event_time_offset.data() + bufferOffset,
-    //                          range.eventCount);
     // parser can assume that event_index and event_time_zero stay the same and
     // chunks are ordered, i.e., current position in event_index can be reused,
     // no need to iterate in event_index from the start for every chunk.
+    dataSink.startAsync(event_id.data() + bufferOffset,
+                        event_time_offset.data() + bufferOffset, range);
+    dataSink.wait();
   }
 }
 
@@ -110,10 +102,34 @@ void load(const H5::Group &group, const std::vector<std::string> &bankNames,
                         readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType> loader(group,
                                                                     bankNames);
-  // EventParser consumer(bankOffsets, eventLists);
-  static_cast<void>(bankOffsets);
-  static_cast<void>(eventLists);
-  load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader);
+  // TODO use comm in consumer
+  EventParser<IndexType, TimeZeroType, TimeOffsetType> consumer(
+      chunker.makeRankGroups(), bankOffsets, eventLists);
+  load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader, consumer);
+}
+
+template <class... T1, class... T2>
+void load(const H5::DataType &type, T2 &&... args);
+
+template <class... T1> struct ConditionalFloat {
+  template <class... T2>
+  static void forward_load(const H5::DataType &type, T2 &&... args) {
+    if (type == H5::PredType::NATIVE_FLOAT)
+      return load<T1..., float>(args...);
+    if (type == H5::PredType::NATIVE_DOUBLE)
+      return load<T1..., double>(args...);
+    throw std::runtime_error(
+        "Unsupported H5::DataType for entry in NXevent_data");
+  }
+};
+
+// Specialization for empty T1, i.e., first type argument `event_index`, which
+// must be integer.
+template <>
+template <class... T2>
+void ConditionalFloat<>::forward_load(const H5::DataType &type, T2 &&... args) {
+  throw std::runtime_error("Unsupported H5::DataType for event_index in "
+                           "NXevent_data, must be integer");
 }
 
 template <class... T1, class... T2>
@@ -133,12 +149,8 @@ void load(const H5::DataType &type, T2 &&... args) {
     return load<T1..., uint32_t>(args...);
   if (type == H5::PredType::NATIVE_UINT64)
     return load<T1..., uint64_t>(args...);
-  if (type == H5::PredType::NATIVE_FLOAT)
-    return load<T1..., float>(args...);
-  if (type == H5::PredType::NATIVE_DOUBLE)
-    return load<T1..., double>(args...);
-  throw std::runtime_error(
-      "Unsupported H5::DataType for entry in NXevent_data");
+  // Compile-time branching for float types.
+  ConditionalFloat<T1...>::forward_load(type, args...);
 }
 }
 

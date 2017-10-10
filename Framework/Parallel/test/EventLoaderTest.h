@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidParallel/IO/Chunker.h"
+#include "MantidParallel/IO/EventDataSink.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
 
@@ -20,6 +21,11 @@ template <> void load<uint32_t>() { throw std::runtime_error("uint32_t"); }
 template <> void load<uint64_t>() { throw std::runtime_error("uint64_t"); }
 template <> void load<float>() { throw std::runtime_error("float"); }
 template <> void load<double>() { throw std::runtime_error("double"); }
+template <class T1, class T2> void load() {
+  throw std::runtime_error("unknown");
+}
+template <> void load<int32_t, float>() { throw std::runtime_error("float"); }
+template <> void load<int32_t, double>() { throw std::runtime_error("double"); }
 }
 }
 }
@@ -62,6 +68,23 @@ private:
   std::vector<int64_t> m_index;
   std::vector<int64_t> m_time_zero;
 };
+
+class FakeDataSink : public EventDataSink<int64_t, int64_t, int32_t> {
+public:
+  void setPulseInformation(std::vector<int64_t> event_index,
+                           std::vector<int64_t> event_time_zero) override {
+    static_cast<void>(event_index);
+    static_cast<void>(event_time_zero);
+  }
+  void startAsync(int32_t *event_id_start,
+                  const int32_t *event_time_offset_start,
+                  const Chunker::LoadRange &range) override {
+    static_cast<void>(event_id_start);
+    static_cast<void>(event_time_offset_start);
+    static_cast<void>(range);
+  }
+  void wait() const override {}
+};
 }
 
 class EventLoaderTest : public CxxTest::TestSuite {
@@ -90,15 +113,25 @@ public:
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT64),
                             const std::runtime_error &e, std::string(e.what()),
                             "uint64_t");
+    // Only integers accepted for first argument since this is the event index.
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_FLOAT),
                             const std::runtime_error &e, std::string(e.what()),
-                            "float");
+                            "Unsupported H5::DataType for event_index in "
+                            "NXevent_data, must be integer");
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_DOUBLE),
                             const std::runtime_error &e, std::string(e.what()),
-                            "double");
+                            "Unsupported H5::DataType for event_index in "
+                            "NXevent_data, must be integer");
+    // Other arguments (event_time_zero and event_time_offset) can be floats.
     TS_ASSERT_THROWS_EQUALS(
-        load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
-        std::string(e.what()),
+        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT),
+        const std::runtime_error &e, std::string(e.what()), "float");
+    TS_ASSERT_THROWS_EQUALS(
+        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_DOUBLE),
+        const std::runtime_error &e, std::string(e.what()), "double");
+    TS_ASSERT_THROWS_EQUALS(
+        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_CHAR),
+        const std::runtime_error &e, std::string(e.what()),
         "Unsupported H5::DataType for entry in NXevent_data");
   }
 
@@ -107,8 +140,9 @@ public:
     const size_t chunkSize{37};
     Chunker chunker(1, 0, bankSizes, chunkSize);
     ::detail::FakeDataSource dataSource;
-    TS_ASSERT_THROWS_NOTHING(
-        (EventLoader::load<int64_t, int64_t, int32_t>(chunker, dataSource)));
+    ::detail::FakeDataSink dataSink;
+    TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
+        chunker, dataSource, dataSink)));
     // TODO cannot test anything useful before we have the parser.
   }
 };
