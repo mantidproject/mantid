@@ -8,7 +8,6 @@
 #include <mpi.h>
 #endif
 
-using namespace Mantid::Parallel::IO;
 using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
