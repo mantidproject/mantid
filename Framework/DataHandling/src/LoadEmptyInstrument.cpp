@@ -114,13 +114,15 @@ void LoadEmptyInstrument::exec() {
   Indexing::IndexInfo indexInfo(number_spectra);
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
   if (MakeEventWorkspace) {
-    setProperty("OutputWorkspace",
-                create<EventWorkspace>(*ws, indexInfo, BinEdges(2)));
+    setProperty(
+        "OutputWorkspace",
+        create<EventWorkspace>(
+            *ws, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
     auto ws2D = create<MatrixWorkspace>(
-        *ws, indexInfo, Histogram(BinEdges(2), Counts(1, detector_value),
+        *ws, indexInfo, Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value),
                                   CountStandardDeviations(1, detector_value)));
 
     Counts v_monitor_y(1, monitor_value);
