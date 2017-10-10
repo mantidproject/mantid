@@ -1114,7 +1114,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
 
 void EnggDiffractionViewQtGUI::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Engineering_Diffraction"));
+      nullptr, QString("Engineering Diffraction"));
 }
 
 void EnggDiffractionViewQtGUI::updateTabsInstrument(

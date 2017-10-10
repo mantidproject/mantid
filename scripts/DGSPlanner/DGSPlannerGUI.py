@@ -132,7 +132,7 @@ class DGSPlannerGUI(QtGui.QWidget):
     def help(self):
         try:
             import pymantidplot
-            pymantidplot.proxies.showCustomInterfaceHelp('DGSPlanner')
+            pymantidplot.proxies.showCustomInterfaceHelp('DGS Planner')
         except ImportError:
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
