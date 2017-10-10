@@ -20,9 +20,7 @@ Examples:
 
 - 2144-2147,2149,2156  is a single set. All runs jointly reduced.
 
-- 2144-2147,2149;2156  is set 2144-2147,2149 and set 2156. The sets are
-reduced separately from each other (except for the
-*Determine Sample Orientation* job).
+- 2144-2147,2149;2156  is set 2144-2147,2149 and set 2156. The sets are reduced separately from each other (except for the *Determine Sample Orientation* job).
 
 **Mask file**: The default mask (BASIS_Mask_default_diff.xml) covers all
 inelastic detectors as well as the tips of the diffraction tubes. The file
