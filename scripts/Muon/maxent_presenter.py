@@ -4,7 +4,11 @@ from Muon import thread_model
 
 
 class MaxEntPresenter(object):
-
+    """
+    This is the presenter for the maximum entropy widget.
+    It connects the view and model together and deals with
+    logic. 
+    """
     def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
@@ -14,20 +18,11 @@ class MaxEntPresenter(object):
         #connect
         self.view.maxEntButtonSignal.connect(self.handleMaxEntButton)
 
-    # only get ws that are groups or pairs
-    # ignore raw
-    # move the generating of the list to a helper?
+    #functions
     def getWorkspaceNames(self):
-        # gets all WS in the ADS
-        runName,options = self.load.getCurrentWS()
-        final_options=[]
-        # only keep the relevant WS (same run as Muon Analysis)
-        for pick in options:
-            if ";" in pick and "Raw" not in pick and runName in pick:
-                final_options.append(pick)
+        final_options=self.load.getWorkspaceNames()
         self.view.addItems(final_options)
 
-    #functions
     def createThread(self):
         return thread_model.ThreadModel(self.alg)
 
@@ -42,8 +37,9 @@ class MaxEntPresenter(object):
         self.thread.start()
 
     def handleFinished(self):
-        self.thread.deleteLater
         self.activate()
+        self.thread.deleteLater
+        self.thread=None
 
     def activate(self):
         self.view.activateButton()

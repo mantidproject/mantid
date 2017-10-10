@@ -19,6 +19,7 @@ class ViewConstructor(object):
             self.transformMethods = {}
             self.transformMethods["FFT"] = fft_view.FFTView(parent)
             self.transformMethods["MaxEnt"] = maxent_view.MaxEntView(parent)
+            # create default transform selection widget
             self.transformSelector = transform_selection_view.TransformSelectionView(parent)
 
     def getTransformMethods(self):

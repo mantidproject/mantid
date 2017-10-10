@@ -31,14 +31,8 @@ class FFTPresenter(object):
     def deactivate(self):
         self.view.deactivateButton()
 
-    # only get ws that are groups or pairs
-    # ignore raw
     def getWorkspaceNames(self):
-        runName,options = self.load.getCurrentWS()
-        final_options = []
-        for pick in options:
-            if ";" in pick and "Raw" not in pick and runName in pick:
-                final_options.append(pick)
+        final_options=self.load.getWorkspaceNames()
         self.view.addItems(final_options)
 
     #functions

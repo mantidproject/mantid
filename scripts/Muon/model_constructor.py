@@ -12,17 +12,18 @@ class ModelConstructor(object):
      Only need to pass a single object to all
      presenters
     """
-
     def __init__(self,includeTransform):
         # construct transformation memebers
         if includeTransform:
             self.transformModels={}
-
+            # generate the models
             MaxEnt =maxent_model.MaxEntModel()
-            self.transformModels["MaxEnt"]=MaxEnt
             FFT =fft_model.FFTModel()
             FFTWrapper=fft_model.FFTWrapper(FFT)
+            # adds the models to the transformation tab
+            self.transformModels["MaxEnt"]=MaxEnt
             self.transformModels[FFT.getName()]=FFTWrapper
 
+    # gets the model
     def getModel(self,name):
         return self.transformModels[name]

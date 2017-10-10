@@ -7,8 +7,6 @@ import os
 This module contains the methods for
 adding information to tables.
 """
-
-
 def setRowName(table,row,name):
     text = QtGui.QTableWidgetItem((name))
     text.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -48,8 +46,11 @@ def addSpinBoxToTable(table,default,row):
     table.setCellWidget(row,1,box)
     return box
 
-
+# This is a work around a Windows 10
+# bug that stops tables having underlines for
+# the headers. 
 def setTableHeaders(table):
+        # is it not windows
         if os.name != "nt":
             return
         version=QtCore.QSysInfo.WindowsVersion
