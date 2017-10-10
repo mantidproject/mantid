@@ -1974,6 +1974,8 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   const auto &allDetIDs = detInfo.detectorIDs();
   const auto &specDefs = m_indexInfo->spectrumDefinitions();
   const auto size = static_cast<int64_t>(m_indexInfo->size());
+  std::atomic<bool> parallelException{false};
+  std::string error;
 #pragma omp parallel for
   for (int64_t i = 0; i < size; ++i) {
     auto &spec = getSpectrum(i);
@@ -1984,20 +1986,24 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
     for (const auto &index : (*specDefs)[i]) {
       const size_t detIndex = index.first;
       const size_t timeIndex = index.second;
-      if (detIndex >= allDetIDs.size())
-        throw std::invalid_argument("MatrixWorkspace: SpectrumDefinition "
-                                    "contains an out-of-range detector index, "
-                                    "i.e., the spectrum definition does not "
-                                    "match the instrument in the workspace.");
-      if (timeIndex >= detInfo.scanCount(detIndex))
-        throw std::invalid_argument(
-            "MatrixWorkspace: SpectrumDefinition contains an out-of-range time "
-            "index for a detector, i.e., the spectrum definition does not "
-            "match the instrument in the workspace.");
-      detIDs.insert(allDetIDs[detIndex]);
+      if (detIndex >= allDetIDs.size()) {
+        parallelException = true;
+        error = "MatrixWorkspace: SpectrumDefinition contains an out-of-range "
+                "detector index, i.e., the spectrum definition does not match "
+                "the instrument in the workspace.";
+      } else if (timeIndex >= detInfo.scanCount(detIndex)) {
+        parallelException = true;
+        error = "MatrixWorkspace: SpectrumDefinition contains an out-of-range "
+                "time index for a detector, i.e., the spectrum definition does "
+                "not match the instrument in the workspace.";
+      } else {
+        detIDs.insert(allDetIDs[detIndex]);
+      }
     }
     spec.setDetectorIDs(std::move(detIDs));
   }
+  if (parallelException)
+    throw std::invalid_argument(error);
 }
 
 } // namespace API
