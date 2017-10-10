@@ -340,7 +340,7 @@ void MuonAnalysis::setChosenGroupAndPeriods(const QString &wsName) {
 */
 void MuonAnalysis::muonAnalysisHelpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Muon_Analysis"));
+                                                 QString("Muon Analysis"));
 }
 
 /**
@@ -348,7 +348,7 @@ void MuonAnalysis::muonAnalysisHelpClicked() {
 */
 void MuonAnalysis::muonAnalysisHelpGroupingClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon_Analysis"), QString("grouping-options"));
+      nullptr, QString("Muon Analysis"), QString("grouping-options"));
 }
 
 /**
@@ -1718,7 +1718,7 @@ void MuonAnalysis::plotSpectrum(const QString &wsName, bool logScale) {
     s << "  w = plotSpectrum(source = ws_name,"
          "indices = 0,"
          "distribution = mantidqtpython.MantidQt.DistributionFalse,"
-         "error_bars = errors," 
+         "error_bars = errors,"
          "type = connect,"
          "window = window_to_use)";
     // clang-format on

@@ -140,7 +140,7 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  */
 void IndirectDataAnalysis::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect_DataAnalysis"));
+      NULL, QString("Indirect Data Analysis"));
 }
 
 /**

@@ -425,7 +425,7 @@ void ScriptingWindow::clearScriptVariables() {
  */
 void ScriptingWindow::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(NULL,
-                                                 QString("ScriptingWindow"));
+                                                 QString("Scripting Window"));
 }
 
 /**

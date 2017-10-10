@@ -104,8 +104,8 @@ class DGSPlannerGUI(QtGui.QWidget):
         # pylint: disable=protected-access
         self.collectionFile=os.path.join(mantid._bindir,'../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
-        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/DGSPlanner.html'
-        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/DGSPlanner.html'
+        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/DGS Planner.html'
+        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/DGS Planner.html'
         #control for cancel button
         self.iterations=0
         self.progress_canceled=False
@@ -132,7 +132,7 @@ class DGSPlannerGUI(QtGui.QWidget):
     def help(self):
         try:
             import pymantidplot
-            pymantidplot.proxies.showCustomInterfaceHelp('DGSPlanner')
+            pymantidplot.proxies.showCustomInterfaceHelp('DGS Planner')
         except ImportError:
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
