@@ -176,7 +176,7 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    factor = 10.0
    error = 5.0
    evList.multiply(factor,error)
-   print("First event weight after multiply:: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
+   print("First event weight after multiply: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(vList.getWeightErrors()[0])))
 
    # Divide the weights in this event list by a scalar with an error.
    print("First event weight before divide: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
