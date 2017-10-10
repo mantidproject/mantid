@@ -72,12 +72,15 @@ axes. Typically, **Wproj** is perpendicular both to Uproj and Vproj.
 Nbins x Nbins grid, each grid rectangle assigned a particular scattered
 intensity.
 
-**OutputWorkspace**: an MDWorkspace containing the scattered intensities of the
-reciprocal slice. Can be visualized with the Slice Viewer. If a background
-run is provided, two additional workspaces are generated. Workspace *_bkg*
-will contain the scattered intensity by the background, and workspace *_dat*
-will contain the scattered intensity by the sample with *no* background
-subtracted.
+**OutputWorkspace**: a :ref:`MDHistoWorkspace <MDHistoWorkspace>` containing
+the intensities projected onto the reciprocal slice, integrated over the
+independent axis *Wproj*. The reciprocal slice can be visualized with
+the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
+
+If a background run is provided, two additional workspaces
+are generated. Workspace *_bkg* will contain the scattered intensity by the
+background, and workspace *_dat* will contain the scattered intensity by
+the sample with *no* background subtracted.
 
 *Timing*: 10 to 15 seconds per sample run. A typical scan made up of 50 runs will take
 about 10 minutes to complete.
@@ -98,7 +101,7 @@ Usage
                      PsiOffset=-27.0,
                      LatticeSizes=[10.71, 10.71, 10.71],
                      LatticeAngles=[90.0, 90.0, 90.0],
-                     VectorU=[1, 1, 0],
+                          VectorU=[1, 1, 0],
                      VectorV=[0, 0, 1],
                      Uproj=[1, 1, 0],
                      Vproj=[0, 0, 1],
