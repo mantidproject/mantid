@@ -39,7 +39,6 @@ public:
     }
     auto *mon = new Detector("monitor", 666, nullptr);
     instrument->add(mon);
-    instrument->markAsDetector(mon);
     instrument->markAsMonitor(mon);
     m_ws = create<WorkspaceTester>(instrument, 1, HistogramData::BinEdges(2));
   }
