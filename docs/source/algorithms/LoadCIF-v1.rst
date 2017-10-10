@@ -73,7 +73,7 @@ The following script loads a CIF-file and prints the space group of the crystal 
     # Get the space group from the crystal structure that was loaded
     crystal_structure = sample_ws.sample().getCrystalStructure()
 
-    print 'Space group:', crystal_structure.getSpaceGroup().getHMSymbol()
+    print('Space group: {}'.format(crystal_structure.getSpaceGroup().getHMSymbol()))
 
 The output is:
 

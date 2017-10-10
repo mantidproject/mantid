@@ -19,10 +19,8 @@
 namespace Mantid {
 namespace Algorithms {
 
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::HistogramData::Points;
 
 using namespace API;
 using namespace Kernel;
@@ -224,7 +222,8 @@ void MaxEnt::exec() {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
   // Number of spectra
   size_t nspec = inWS->getNumberHistograms();
-  // Number of data points
+  // Number of data points - assumed to be constant between spectra or
+  // this will throw an exception
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
@@ -375,7 +374,7 @@ void MaxEnt::exec() {
 */
 std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
                                       size_t spec, bool errors) {
-  const size_t numBins = inWS->blocksize();
+  const size_t numBins = inWS->y(0).size();
   std::vector<double> result(numBins * 2);
 
   if (inWS->getNumberHistograms() % 2)
@@ -684,11 +683,11 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec,
   double dx = dataPoints[1] - x0;
 
   double delta = 1. / dx / npoints;
-  int isOdd = (inWS->blocksize() % 2) ? 1 : 0;
+  const int isOdd = (inWS->y(0).size() % 2) ? 1 : 0;
 
-  double shift = x0 * 2 * M_PI;
+  double shift = x0 * 2. * M_PI;
   if (!autoShift)
-    shift = 0;
+    shift = 0.;
 
   // X values
   for (int i = 0; i < npoints; i++) {

@@ -1,4 +1,5 @@
 #include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -26,6 +27,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 ////////////////////////////////////////////////////////////////////
 // FindFilesThread
@@ -258,9 +260,9 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 
 MWRunFiles::~MWRunFiles() {
   // Before destruction, make sure the file finding thread has stopped running.
-  // Wait if necessary.
+  // Wait if necessary. This can freeze up Mantid.
   m_thread->exit(-1);
-  m_thread->wait();
+  m_thread->wait(50);
 }
 
 /**
@@ -807,7 +809,6 @@ void MWRunFiles::inspectThreadResult() {
 void MWRunFiles::readSettings(const QString &group) {
   QSettings settings;
   settings.beginGroup(group);
-
   m_lastDir = settings.value("last_directory", "").toString();
 
   if (m_lastDir == "") {
@@ -1064,9 +1065,9 @@ void MWRunFiles::checkEntry() {
   */
 void MWRunFiles::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    auto url_list = mimeData->urls();
-    m_uiForm.fileEditor->setText(url_list[0].toLocalFile());
+  const auto filenames = DropEventHelper::getFileNames(de);
+  if (!filenames.empty()) {
+    m_uiForm.fileEditor->setText(filenames[0]);
     de->acceptProposedAction();
   } else if (mimeData->hasText()) {
     QString text = mimeData->text();

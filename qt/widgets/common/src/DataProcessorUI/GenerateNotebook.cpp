@@ -363,7 +363,7 @@ QString getReducedWorkspaceName(const RowData &data, const WhiteList &whitelist,
     // Do we want to use this column to generate the name of the output ws?
     if (whitelist.showValue(col)) {
       // Get what's in the column
-      const QString valueStr = data.at(col);
+      const QString &valueStr = data.at(col);
       if (!valueStr.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = valueStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
@@ -433,13 +433,13 @@ reduceRowString(const RowData &data, const QString &instrument,
       // instructions
 
       // Get the runs
-      const QString runStr = data.at(col);
+      const QString &runStr = data.at(col);
 
       if (!runStr.isEmpty()) {
         // Some runs were given for pre-processing
 
         // The pre-processing alg
-        const PreprocessingAlgorithm preprocessor = preprocessMap.at(colName);
+        const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
         // The pre-processing options
         const QString options = preprocessingOptionsMap.count(colName) > 0
                                     ? preprocessingOptionsMap.at(colName)
@@ -457,7 +457,7 @@ reduceRowString(const RowData &data, const QString &instrument,
       // No pre-processing
 
       // Just read the property value from the table
-      const QString propStr = data.at(col);
+      const QString &propStr = data.at(col);
 
       if (!propStr.isEmpty()) {
         // If it was not empty, we used it as an input property to the reduction
@@ -469,14 +469,14 @@ reduceRowString(const RowData &data, const QString &instrument,
 
   auto options = parseKeyValueString(processingOptions.toStdString());
 
-  const auto hiddenOptionsStr = data.back();
+  const auto &hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
   auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr.toStdString());
   // Options specified via 'Hidden Options' column will be preferred
   addProperties(algProperties, hiddenOptionsMap);
 
   // 'Options' specified either via 'Options' column or HintinLineEdit
-  const auto optionsStr = data.at(ncols - 2);
+  const auto &optionsStr = data.at(ncols - 2);
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred
