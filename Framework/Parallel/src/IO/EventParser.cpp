@@ -225,7 +225,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
-    int32_t *event_id_start, TimeOffsetType *event_time_offset_start,
+    int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const LoadRange &range) {
 
   if (m_eventTimeZero.empty() || m_eventIndex.empty())
@@ -243,7 +243,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
-    int32_t *event_id_start, TimeOffsetType *event_time_offset_start,
+    int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const LoadRange &range) {
   // change event_id_start in place
   eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,

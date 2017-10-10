@@ -62,7 +62,7 @@ public:
                            std::vector<TimeZeroType> event_time_zero);
 
   void startAsync(int32_t *event_id_start,
-                  TimeOffsetType *event_time_offset_start,
+                  const TimeOffsetType *event_time_offset_start,
                   const LoadRange &range);
 
   void redistributeDataMPI(
@@ -90,7 +90,7 @@ public:
 
 private:
   void doParsing(int32_t *event_id_start,
-                 TimeOffsetType *event_time_offset_start,
+                 const TimeOffsetType *event_time_offset_start,
                  const LoadRange &range);
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
