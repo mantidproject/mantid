@@ -30,9 +30,10 @@ namespace IO {
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
     std::vector<std::vector<int>> rankGroups, std::vector<int32_t> bankOffsets,
-    std::vector<std::vector<TofEvent> *> &eventLists)
+    std::vector<std::vector<TofEvent> *> eventLists)
     : m_rankGroups(std::move(rankGroups)),
-      m_bankOffsets(std::move(bankOffsets)), m_eventLists(eventLists) {}
+      m_bankOffsets(std::move(bankOffsets)),
+      m_eventLists(std::move(eventLists)) {}
 
 /** Sets the event_index and event_time_zero read from I/O which is used for
  * parsing events from file/event stream.

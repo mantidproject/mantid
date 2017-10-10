@@ -21,12 +21,6 @@ public:
     generateTestData(numBanks, pixelsPerBank, numPulses, maxEventsPerPixel);
   }
 
-  ~FakeParserDataGenerator() {
-    cleanupEventLists(m_event_lists);
-    for (auto &lists : test_event_lists)
-      cleanupEventLists(lists);
-  }
-
   const std::vector<int32_t> &bankOffsets() const { return m_bank_offsets; }
 
   const std::vector<IndexType> &eventIndex(size_t bank) const {
@@ -43,8 +37,11 @@ public:
     return m_event_ids[bank];
   }
 
-  const std::vector<std::vector<TofEvent> *> &eventLists() const {
-    return m_event_lists;
+  std::vector<const std::vector<TofEvent> *> eventLists() const {
+    std::vector<const std::vector<TofEvent> *> eventListPtrs;
+    for (auto &eventList : m_event_lists)
+      eventListPtrs.emplace_back(&eventList);
+    return eventListPtrs;
   }
 
   LoadRange generateBasicRange(size_t bank) {
@@ -58,20 +55,13 @@ public:
 
   boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>>
   generateTestParser() {
-    // create test parser
-    test_event_lists.push_back(prepareEmptyEventLists(m_event_lists.size()));
+    test_event_lists.emplace_back(m_event_lists.size());
+    std::vector<std::vector<TofEvent> *> eventLists;
+    for (auto &eventList : test_event_lists.back())
+      eventLists.emplace_back(&eventList);
     return boost::make_shared<
         EventParser<IndexType, TimeZeroType, TimeOffsetType>>(
-        std::vector<std::vector<int>>{}, m_bank_offsets,
-        test_event_lists.back());
-  }
-
-  static void
-  cleanupEventLists(std::vector<std::vector<TofEvent> *> &eventLists) {
-    for (auto *list : eventLists) {
-      if (list != nullptr)
-        delete list;
-    }
+        std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
   }
 
 private:
@@ -84,8 +74,8 @@ private:
 
     m_event_ids.resize(numBanks);
     m_event_time_offsets.resize(numBanks);
-    std::generate_n(std::back_inserter(m_event_lists), numPixels,
-                    []() { return new std::vector<TofEvent>(); });
+    m_event_lists.clear();
+    m_event_lists.resize(numPixels);
 
     for (size_t pulse = 0; pulse < numPulses; ++pulse) {
       m_event_time_zero[pulse] = static_cast<TimeZeroType>(pulse * 100000);
@@ -94,15 +84,15 @@ private:
       for (size_t pixel = 0; pixel < numPixels; ++pixel) {
         auto eventSize = getRandEventSize(1, maxEventsPerPixel / numPulses);
         pulseEventSize += eventSize;
-        auto *list = m_event_lists[pixel];
-        auto prev_end = list->size();
-        std::generate_n(std::back_inserter(*list), eventSize, [this, pulse]() {
+        auto &list = m_event_lists[pixel];
+        auto prev_end = list.size();
+        std::generate_n(std::back_inserter(list), eventSize, [this, pulse]() {
           return TofEvent(getRandomTimeOffset(100000),
                           m_event_time_zero[pulse]);
         });
         std::fill_n(std::back_inserter(m_event_ids[bank]), eventSize,
                     static_cast<IndexType>(m_bank_offsets[bank] + pixel));
-        std::transform(list->cbegin() + prev_end, list->cend(),
+        std::transform(list.cbegin() + prev_end, list.cend(),
                        std::back_inserter(m_event_time_offsets[bank]),
                        [this](const TofEvent &event) {
                          return static_cast<TimeOffsetType>(event.tof());
@@ -142,21 +132,13 @@ private:
     return static_cast<double>(rand() % pulseWidth);
   }
 
-  std::vector<std::vector<TofEvent> *> prepareEmptyEventLists(size_t numLists) {
-    std::vector<std::vector<TofEvent> *> eventLists(numLists);
-    for (size_t i = 0; i < numLists; i++)
-      eventLists[i] = new std::vector<TofEvent>();
-
-    return eventLists;
-  }
-
   std::vector<int32_t> m_bank_offsets;
   std::vector<std::vector<int32_t>> m_event_ids;
   std::vector<std::vector<TimeOffsetType>> m_event_time_offsets;
   std::vector<std::vector<IndexType>> m_event_indices;
   std::vector<TimeZeroType> m_event_time_zero;
-  std::vector<std::vector<TofEvent> *> m_event_lists;
-  std::vector<std::vector<std::vector<TofEvent> *>> test_event_lists;
+  std::vector<std::vector<TofEvent>> m_event_lists;
+  std::vector<std::vector<std::vector<TofEvent>>> test_event_lists;
 };
 } // namespace detail
 
@@ -401,7 +383,7 @@ public:
   }
 
 private:
-  void compareEventLists(const std::vector<std::vector<TofEvent> *> &lhs,
+  void compareEventLists(const std::vector<const std::vector<TofEvent> *> &lhs,
                          const std::vector<std::vector<TofEvent> *> &rhs) {
     for (size_t i = 0; i < lhs.size(); ++i)
       TS_ASSERT_EQUALS(*rhs[i], *lhs[i]);
@@ -452,7 +434,7 @@ public:
     event_time_offsets.resize(NUM_BANKS);
     // Copy here so this does not have to happen
     // in performance test
-    for (int i = 0; i < NUM_BANKS; ++i) {
+    for (size_t i = 0; i < NUM_BANKS; ++i) {
       event_time_offsets[i] = gen.eventTimeOffset(i);
       event_ids[i] = gen.eventId(i);
     }
@@ -460,13 +442,8 @@ public:
     parser = gen.generateTestParser();
 
     partEventLists.resize(gen.eventLists().size());
-    for (size_t i = 0; i < partEventLists.size(); i++)
-      partEventLists[i] = new std::vector<TofEvent>();
-  }
-
-  ~EventParserTestPerformance() {
-    for (auto *list : partEventLists)
-      delete list;
+    for (auto &eventList : partEventLists)
+      partEventListPtrs.emplace_back(&eventList);
   }
 
   void testCompletePerformance() {
@@ -487,14 +464,15 @@ public:
   }
 
   void testPopulateEventListPerformance() {
-    parser->populateEventList(partEventLists, parser->rankData()[0]);
+    parser->populateEventList(partEventListPtrs, parser->rankData()[0]);
   }
 
 private:
   const size_t NUM_BANKS = 7;
   std::vector<std::vector<int32_t>> event_ids;
   std::vector<std::vector<double>> event_time_offsets;
-  std::vector<std::vector<TofEvent> *> partEventLists;
+  std::vector<std::vector<TofEvent>> partEventLists;
+  std::vector<std::vector<TofEvent> *> partEventListPtrs;
   detail::FakeParserDataGenerator<int32_t, int64_t, double> gen;
   boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
 };
