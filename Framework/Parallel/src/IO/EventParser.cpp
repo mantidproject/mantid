@@ -4,10 +4,6 @@
 #include <numeric>
 #include <xmmintrin.h>
 
-#ifdef MPI_EXPERIMENTAL
-#include <mpi.h>
-#endif
-
 using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
