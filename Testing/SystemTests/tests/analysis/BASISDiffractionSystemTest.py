@@ -13,10 +13,10 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
         """
         Override parent method, does the work of running the test
         """
-        BASISDiffraction(RunNumbers='74799-74804',
+        BASISDiffraction(SampleOrientation=True,
+                         RunNumbers='74799-74804',
                          VanadiumRuns='64642',
                          BackgroundRun='75527',
-                         SampleOrientation=True,
                          PsiAngleLog='SE50Rot',
                          PsiOffset=-27.0,
                          LatticeSizes=[10.71, 10.71, 10.71],
@@ -35,5 +35,6 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
         compare to.
         :return: strings for workspace and file name
         """
-        self.tolerance = 1.0
+
+        self.tolerance = 0.1
         return 'peaky', 'BASISOrientedSample.nxs'
