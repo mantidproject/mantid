@@ -1,6 +1,7 @@
 #include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Nonblocking.h"
+#include <numeric>
 #include <xmmintrin.h>
 
 #ifdef MPI_EXPERIMENTAL
