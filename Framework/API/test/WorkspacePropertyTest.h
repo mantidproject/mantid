@@ -87,7 +87,7 @@ public:
     TS_ASSERT(p.isValueSerializable());
     p.setValue("");
     MatrixWorkspace_sptr ws =
-      WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
+        WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1);
     p.setDataItem(ws);
     TS_ASSERT(!p.isDefault())
     TS_ASSERT(!p.isValueSerializable());

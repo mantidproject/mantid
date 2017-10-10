@@ -77,9 +77,7 @@ public:
     TS_ASSERT_EQUALS(p->briefDocumentation(), "Brief");
   }
 
-  void testIsValueSerializable() {
-    TS_ASSERT(p->isValueSerializable())
-  }
+  void testIsValueSerializable() { TS_ASSERT(p->isValueSerializable()) }
 
   void testAllowedValues() { TS_ASSERT(p->allowedValues().empty()); }
 
