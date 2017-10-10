@@ -108,8 +108,6 @@ class BASISDiffraction(DataProcessorAlgorithm):
         # Properties
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
 
-        self.declareProperty('DoIndividual', True, 'Do each run individually')
-
         self.declareProperty(FileProperty(name='MaskFile',
                                           defaultValue=self._mask_file,
                                           action=FileAction.OptionalLoad,
