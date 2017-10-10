@@ -48,11 +48,11 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         out_ws.addColumn('str', 'statistic')
 
         stats = {
-            'standard_deviation': dict(),
-            'maximum': dict(),
-            'minimum': dict(),
-            'mean': dict(),
-            'median': dict(),
+            'standard_deviation': collections.OrderedDict(),
+            'maximum': collections.OrderedDict(),
+            'minimum': collections.OrderedDict(),
+            'mean': collections.OrderedDict(),
+            'median': collections.OrderedDict(),
         }
 
         for name in in_ws.getColumnNames():
@@ -65,7 +65,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
 
         for name, stat in iteritems(stats):
-            stat1 = dict(stat)
+            stat1 = collections.OrderedDict(stat)
             stat1['statistic'] = name
             out_ws.addRow(stat1)
 

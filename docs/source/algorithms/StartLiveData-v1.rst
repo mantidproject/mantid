@@ -212,7 +212,7 @@ Output:
 
     try:
         captureLive()
-    except Exception, exc:
+    except Exception:
         print "Error occurred starting live data"
     finally:
         thread.join() # this must get hit
