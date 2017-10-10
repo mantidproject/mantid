@@ -7,7 +7,7 @@ class MaxEntPresenter(object):
     """
     This is the presenter for the maximum entropy widget.
     It connects the view and model together and deals with
-    logic. 
+    logic.
     """
     def __init__(self,view,alg,load):
         self.view=view

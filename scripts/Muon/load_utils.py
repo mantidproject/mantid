@@ -3,7 +3,7 @@ import mantid.simpleapi as mantid
 
 
 class LoadUtils(object):
-    """ 
+    """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
     The current run is the same as the one in MonAnalysis
@@ -50,5 +50,3 @@ class LoadUtils(object):
             if ";" in pick and "Raw" not in pick and runName in pick:
                 final_options.append(pick)
         return final_options
-
-

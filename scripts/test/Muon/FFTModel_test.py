@@ -17,7 +17,7 @@ class FFTModelTest(unittest.TestCase):
         self.model.preAlg=mock.Mock()
         self.model.FFTAlg=mock.Mock()
         self.model.makePhaseQuadTable=mock.Mock()
-        self.model.PhaseQuad=mock.Mock()       
+        self.model.PhaseQuad=mock.Mock()
 
         #set presenter
         self.wrapper=fft_model.FFTWrapper(self.model)

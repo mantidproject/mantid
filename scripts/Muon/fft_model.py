@@ -8,9 +8,9 @@ import mantid.simpleapi as mantid
 
 class FFTWrapper(object):
     """
-    A class to wrap the different parts 
+    A class to wrap the different parts
     of the FFT and its preprocessing.
-    This keeps the main FFT class simple. 
+    This keeps the main FFT class simple.
     """
     def __init__(self,FFT):
         self.name="FFT"
@@ -39,7 +39,7 @@ class FFTWrapper(object):
     #runs the relevant parts of the FFT and the preprocessing
     def execute(self):
         if self.phaseTable is not None:
-            if self.phaseTable["newTable"] == True:
+            if self.phaseTable["newTable"] is True:
                 self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
             self.model.PhaseQuad()
 
@@ -59,8 +59,8 @@ class FFTWrapper(object):
 class FFTModel(object):
     """
     A simple class which executes
-    the relevant algorithms for 
-    the analysis. 
+    the relevant algorithms for
+    the analysis.
     """
     def __init__(self):
         self.name="FFT"
@@ -93,7 +93,7 @@ class FFTModel(object):
         group.add(ws)
 
     # generates a phase table based on the detector setup
-    # need to become an algorithm 
+    # need to become an algorithm
     def makePhaseQuadTable(self,axis,instrument):
         wsAlg=mantid.AlgorithmManager.create("CreateSimulationWorkspace")
         wsAlg.initialize()

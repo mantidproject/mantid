@@ -48,7 +48,7 @@ class FFTPresenterTest(unittest.TestCase):
         # setup model
         self.model1=mock.create_autospec(fft_model.FFTModel,spec_set=False)
         self.model=mock.create_autospec(fft_model.FFTWrapper,spec_set=False)
-        
+
         #set presenter
         self.presenter=fft_presenter.FFTPresenter(self.view,self.model,self.load)
 
@@ -60,7 +60,6 @@ class FFTPresenterTest(unittest.TestCase):
         self.thread.setInputs=mock.Mock()
         self.thread.loadData=mock.Mock()
         self.presenter.createThread=mock.Mock(return_value=self.thread)
-
 
     def sendSignal(self):
         row,col=self.view.tableClickSignal()

@@ -7,8 +7,6 @@ from Muon import thread_model
 
 
 class FFTPresenter(object):
-
-
     """
     This class links the FFT model to the GUI
     """
@@ -53,7 +51,7 @@ class FFTPresenter(object):
 
     # constructs the inputs for the FFT algorithms
     # then executes them (see fft_model to see the order
-    # of execution 
+    # of execution
     def handleButton(self):
         # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
