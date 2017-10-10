@@ -552,7 +552,7 @@ bool NormaliseToMonitor::setIntegrationProps(
 void NormaliseToMonitor::normaliseByIntegratedCount(
     const MatrixWorkspace_sptr &inputWorkspace,
     MatrixWorkspace_sptr &outputWorkspace, const bool isSingleCountWorkspace) {
-  m_monitor = extractMonitorSpectra(inputWorkspace, m_workspaceIndexes);
+  m_monitor = extractMonitorSpectra(m_monitor, m_workspaceIndexes);
 
   // If single counting no need to integrate, monitor already guaranteed to be a
   // single count
