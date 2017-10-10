@@ -112,7 +112,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
     extractEventsForRanks(std::vector<std::vector<EventListEntry>> &rankData,
                           const int32_t *globalSpectrumIndex,
                           const TimeOffsetType *eventTimeOffset,
-                          const LoadRange &range) {
+                          const Chunker::LoadRange &range) {
   for (auto &item : rankData)
     item.clear();
 
@@ -226,7 +226,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
-    const LoadRange &range) {
+    const Chunker::LoadRange &range) {
 
   if (m_eventTimeZero.empty() || m_eventIndex.empty())
     throw std::runtime_error("Both event_time_zero and event_index must be set "
@@ -244,7 +244,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
-    const LoadRange &range) {
+    const Chunker::LoadRange &range) {
   // change event_id_start in place
   eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
                                range.bankIndex);

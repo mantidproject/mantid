@@ -37,8 +37,8 @@ public:
     return m_event_ids[bank];
   }
 
-  LoadRange generateBasicRange(size_t bank) {
-    LoadRange range;
+  Chunker::LoadRange generateBasicRange(size_t bank) {
+    Chunker::LoadRange range;
     range.eventOffset = 0;
     range.eventCount = m_event_ids[bank].size();
     range.bankIndex = bank;
@@ -231,7 +231,7 @@ public:
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
-    auto range = LoadRange{0, 5, 100};
+    auto range = Chunker::LoadRange{0, 5, 100};
 
     parser->eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, range.bankIndex);
@@ -256,8 +256,9 @@ public:
     EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
                                                   eventLists);
 
-    TS_ASSERT_THROWS(parser.startAsync(nullptr, nullptr, LoadRange{0, 0, 0}),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        parser.startAsync(nullptr, nullptr, Chunker::LoadRange{0, 0, 0}),
+        std::runtime_error);
   }
 
   void testParsingFailNoEventTimeZeroVector() {
@@ -270,8 +271,9 @@ public:
 
     parser.setPulseInformation({10, 4, 4}, {});
 
-    TS_ASSERT_THROWS(parser.startAsync(nullptr, nullptr, LoadRange{0, 0, 0}),
-                     std::runtime_error);
+    TS_ASSERT_THROWS(
+        parser.startAsync(nullptr, nullptr, Chunker::LoadRange{0, 0, 0}),
+        std::runtime_error);
   }
 
   void testParsingFull_1Pulse_1Bank() {
@@ -337,7 +339,7 @@ public:
       if (i == (parts - 1))
         portion = event_id.size() - offset;
 
-      LoadRange range{0, offset, portion};
+      Chunker::LoadRange range{0, offset, portion};
       parser->startAsync(event_id.data() + offset,
                          event_time_offset.data() + offset, range);
       parser->wait();
@@ -365,7 +367,7 @@ public:
         if (i == (parts - 1))
           portion = event_id.size() - offset;
 
-        LoadRange range{bank, offset, portion};
+        Chunker::LoadRange range{bank, offset, portion};
         parser->startAsync(event_id.data() + offset,
                            event_time_offset.data() + offset, range);
         parser->wait();
@@ -382,7 +384,7 @@ private:
           parser,
       detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
           gen,
-      const LoadRange &range) {
+      const Chunker::LoadRange &range) {
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
     auto res = parser->findStartAndEndPulseIndices(range.eventOffset,
                                                    range.eventCount);

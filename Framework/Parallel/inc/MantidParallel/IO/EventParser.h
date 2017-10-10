@@ -3,6 +3,7 @@
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
+#include "MantidParallel/IO/Chunker.h"
 #include "MantidTypes/Event/TofEvent.h"
 #include <cstdint>
 #include <future>
@@ -11,14 +12,8 @@
 namespace Mantid {
 namespace Parallel {
 namespace IO {
-// TODO: replace with Chunker::LoadRange
-struct DLLExport LoadRange {
-  size_t bankIndex;
-  size_t eventOffset;
-  size_t eventCount;
-};
 
-struct DLLExport EventListEntry {
+struct MANTID_PARALLEL_DLL EventListEntry {
   int32_t globalIndex; // global spectrum index
   Types::Event::TofEvent tofEvent;
 };
@@ -63,7 +58,7 @@ public:
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
-                  const LoadRange &range);
+                  const Chunker::LoadRange &range);
 
   void redistributeDataMPI(
       std::vector<EventListEntry> &result,
@@ -72,7 +67,7 @@ public:
   void extractEventsForRanks(std::vector<std::vector<EventListEntry>> &rankData,
                              const int32_t *globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
-                             const LoadRange &range);
+                             const Chunker::LoadRange &range);
 
   void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
                                     size_t bankIndex) const;
@@ -91,7 +86,7 @@ public:
 private:
   void doParsing(int32_t *event_id_start,
                  const TimeOffsetType *event_time_offset_start,
-                 const LoadRange &range);
+                 const Chunker::LoadRange &range);
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
