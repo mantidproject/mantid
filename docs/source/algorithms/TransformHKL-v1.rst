@@ -30,13 +30,13 @@ Usage
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
     FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
 
-    print "Before Transformation:"
-    print ws.sample().getOrientedLattice().getUB()
+    print("Before Transformation:")
+    print(ws.sample().getOrientedLattice().getUB())
 
     #This HKLTransform is a matrix that will swap H and K and negate L
     TransformHKL(ws,HKLTransform="0,1,0,1,0,0,0,0,-1")
-    print "\nAfter Transformation:"
-    print ws.sample().getOrientedLattice().getUB()
+    print("\nAfter Transformation:")
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:
