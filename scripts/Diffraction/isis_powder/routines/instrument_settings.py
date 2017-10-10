@@ -92,7 +92,6 @@ class InstrumentSettings(object):
             # Update attributes from said dictionary
             found_param_entry = next((param_entry for param_entry in self._param_map
                                       if config_key == param_entry.ext_name), None)
-
             if found_param_entry:
                 # Update the internal parameter entry
                 self._update_attribute(
