@@ -154,5 +154,52 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
             numpy.testing.assert_equal(ys, 1.0)
 
 
+    def testWavelengthRange(self):
+        inWSName = 'ReflectometryILLPreprocess_test_ws'
+        args = {
+            'OutputWorkspace': inWSName,
+            'Function': 'Flat background',
+            'NumBanks': 1,
+        }
+        alg = create_algorithm('CreateSampleWorkspace', **args)
+        alg.execute()
+        # Check range begin only.
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'WavelengthRange': [2.0],
+            'ForegroundCentre': 50,
+            'ForegroundHalfWidth': 1,
+            'FluxNormalisation': 'Normalisation OFF',
+            'FlatBackground': 'Background OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 1)
+        self.assertAlmostEquals(outWS.readX(0)[0], 2.0, places=2)
+        # Check both range begin and end.
+        args = {
+            'InputWorkspace': inWSName,
+            'OutputWorkspace': 'unused_for_child',
+            'WavelengthRange': [2.0, 4.0],
+            'ForegroundCentre': 50,
+            'ForegroundHalfWidth':1,
+            'FluxNormalisation': 'Normalisation OFF',
+            'FlatBackground': 'Background OFF',
+            'rethrow': True,
+            'child': True
+        }
+        alg = create_algorithm('ReflectometryILLPreprocess', **args)
+        assertRaisesNothing(self, alg.execute)
+        outWS = alg.getProperty('OutputWorkspace').value
+        self.assertEquals(outWS.getNumberHistograms(), 1)
+        xs = outWS.readX(0)
+        self.assertAlmostEquals(xs[0], 2.0, places=2)
+        self.assertAlmostEquals(xs[-1], 4.0, places=1)
+
+
 if __name__ == "__main__":
     unittest.main()

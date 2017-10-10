@@ -4,8 +4,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
-from mantid.kernel import (Direction, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits,
+from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator, Property, StringListValidator)
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, CropWorkspace,
                               Divide, ExtractMonitors, GroupDetectors, LoadILLReflectometry, MergeRuns, Minus, mtd,
                               NormaliseToMonitor, Scale, Transpose)
 import numpy
@@ -21,7 +21,6 @@ class Prop:
     FOREGROUND_CENTRE = 'ForegroundCentre'
     FOREGROUND_HALF_WIDTH = 'ForegroundHalfWidth'
     INPUT_WS = 'InputWorkspace'
-    INSTRUMENT_BKG = 'InstrumentBackground'
     CLEANUP = 'Cleanup'
     LOWER_BKG_OFFSET = 'LowerBackgroundOffset'
     LOWER_BKG_WIDTH = 'LowerBackgroundWidth'
@@ -34,6 +33,7 @@ class Prop:
     UPPER_BKG_OFFSET = 'UpperBackgroundOffset'
     UPPER_BKG_WIDTH = 'UpperBackgroundWidth'
     WATER_REFERENCE = 'WaterReference'
+    WAVELENGTH_RANGE = 'WavelengthRange'
 
 
 class BkgMethod:
@@ -108,14 +108,14 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ws = self._normaliseToFlux(ws, monWS)
         self._cleanup.cleanup(monWS)
 
-        ws = self._subtractInstrumentBkg(ws)
-
         ws = self._subtractFlatBkg(ws, beamPosWS)
 
         ws = self._sumForeground(ws, beamPosWS)
         self._cleanup.cleanup(beamPosWS)
 
         ws = self._convertToWavelength(ws)
+
+        ws = self._applyWavelengthRange(ws)
 
         self._finalize(ws)
 
@@ -172,11 +172,17 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=FluxNormMethod.TIME,
                              validator=StringListValidator([FluxNormMethod.TIME, FluxNormMethod.MONITOR, FluxNormMethod.OFF]),
                              doc='Neutron flux normalisation method.')
-        self.declareProperty(MatrixWorkspaceProperty(Prop.INSTRUMENT_BKG,
-                                                     defaultValue='',
-                                                     optional=PropertyMode.Optional,
-                                                     direction=Direction.Input),
-                             doc='A workspace containing the instrument background measurement.')
+        self.declareProperty(FloatArrayProperty(Prop.WAVELENGTH_RANGE,
+                                                validator=FloatArrayLengthValidator(0, 2)),
+                             doc='The wavelength bounds of the output workspace.')
+        self.declareProperty(Prop.FOREGROUND_CENTRE,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=positiveInt,
+                             doc='Spectrum number of the foreground centre pixel.')
+        self.declareProperty(Prop.FOREGROUND_HALF_WIDTH,
+                             defaultValue=Property.EMPTY_INT,
+                             validator=nonnegativeInt,
+                             doc='Number of pixels to include to the foreground region on either side of the centre pixel.')
         self.declareProperty(Prop.BKG_METHOD,
                              defaultValue=BkgMethod.CONSTANT,
                              validator=StringListValidator([BkgMethod.CONSTANT, BkgMethod.LINEAR, BkgMethod.OFF]),
@@ -198,14 +204,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              defaultValue=5,
                              validator=nonnegativeInt,
                              doc='Width of flat background region towards larger detector angles from the foreground centre, in pixels.')
-        self.declareProperty(Prop.FOREGROUND_CENTRE,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=positiveInt,
-                             doc='Spectrum number of the foreground centre pixel.')
-        self.declareProperty(Prop.FOREGROUND_HALF_WIDTH,
-                             defaultValue=Property.EMPTY_INT,
-                             validator=nonnegativeInt,
-                             doc='Number of pixels to include to the foreground region on either side of the centre pixel.')
         self.declareProperty(ITableWorkspaceProperty(Prop.OUTPUT_BEAM_POS,
                                                      defaultValue='',
                                                      direction=Direction.Output,
@@ -223,7 +221,30 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                     and self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
                 issues[Prop.BEAM_POS] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
                 issues[Prop.FOREGROUND_CENTRE] = 'Cannot subtract flat background without knowledge of peak position/foreground centre.'
+        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
+        if len(wRange) == 2 and wRange[1] < wRange[0]:
+            issues[Prop.WAVELENGTH_RANGE] = 'Upper limit is smaller than the lower limit.'
         return issues
+
+    def _applyWavelengthRange(self, ws):
+        """Cut wavelengths outside the wavelength range from ws."""
+        wRange = self.getProperty(Prop.WAVELENGTH_RANGE).value
+        if len(wRange) == 0:
+            return ws
+        croppedWSName = self._names.withSuffix('cropped')
+        if len(wRange) == 1:
+            croppedWS = CropWorkspace(InputWorkspace=ws,
+                                      OutputWorkspace=croppedWSName,
+                                      XMin=wRange[0],
+                                      EnableLogging=self._subalgLogging)
+        else:
+            croppedWS = CropWorkspace(InputWorkspace=ws,
+                                      OutputWorkspace=croppedWSName,
+                                      XMin=wRange[0],
+                                      XMax=wRange[1],
+                                      EnableLogging=self._subalgLogging)
+        self._cleanup.cleanup(ws)
+        return croppedWS
 
     def _convertToWavelength(self, ws):
         """Convert the X units of ws to wavelength."""
@@ -442,19 +463,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                              OutputWorkspace=subtractedWSName,
                              EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(bkgWS)
-        return subtractedWS
-
-    def _subtractInstrumentBkg(self, ws):
-        """Return a workspace where instrument background has been subtracted from ws."""
-        if self.getProperty(Prop.INSTRUMENT_BKG).isDefault:
-            return ws
-        bkgWS = self.getProperty(Prop.INSTRUMENT_BKG).value
-        subtractedWSName = self._names.withSuffix('instr_bkg_subtracted')
-        subtractedWS = Minus(LHSWorkspace=ws,
-                             RHSWorkspace=bkgWS,
-                             OutputWorkspace=subtractedWSName,
-                             EnableLogging=self._subalgLogging)
-        self._cleanup.cleanup(ws)
         return subtractedWS
 
     def _sumForeground(self, ws, peakPosWS):
