@@ -173,6 +173,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_INDIRECT
   PRECOMPILED PrecompiledHeader.h
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}
       ${CORE_MANTIDLIBS}

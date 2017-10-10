@@ -49,6 +49,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_DYNAMICPDF
   PRECOMPILED PrecompiledHeader.h
+  INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}
       ${CORE_MANTIDLIBS}

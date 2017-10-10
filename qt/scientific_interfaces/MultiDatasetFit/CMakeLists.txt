@@ -52,7 +52,6 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
   DEFS IN_MANTIDQT_MULTIDATASETFIT
   PRECOMPILED PrecompiledHeader.h
   INCLUDE_DIRS
-    # required to populate the public interface includes property
     ..
   LINK_LIBS
       ${TCMALLOC_LIBRARIES_LINKTIME}
