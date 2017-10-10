@@ -10,7 +10,7 @@ from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, 
 class Polaris(AbstractInst):
     def __init__(self, **kwargs):
         self._inst_settings = instrument_settings.InstrumentSettings(
-            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.variables,
+            param_map=polaris_param_mapping.attr_mapping, adv_conf_dict=polaris_advanced_config.get_all_adv_variables(),
             kwargs=kwargs)
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
@@ -24,12 +24,14 @@ class Polaris(AbstractInst):
     # Public API
 
     def focus(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
@@ -37,6 +39,7 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def set_sample_details(self, **kwargs):
+        self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         kwarg_name = "sample"
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs, key=kwarg_name,
@@ -125,3 +128,7 @@ class Polaris(AbstractInst):
                                                             spline_number=spline_coeff,
                                                             mask_path=masking_file_path)
         return output
+
+    def _switch_mode_specific_inst_settings(self, mode):
+        self._inst_settings.update_attributes(advanced_config=polaris_advanced_config.get_mode_specific_dict(mode),
+                                              suppress_warnings=True)
