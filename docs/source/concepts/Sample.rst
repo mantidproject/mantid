@@ -43,15 +43,15 @@ Sample Properties
   s.setHeight(0.1)
   s.setWidth(0.2)
   s.setThickness(0.3)
-  print("Height:" + str(s.getHeight()))
-  print("Width:" + str(s.getWidth()))
-  print("Thickness:" + str(s.getThickness()))
+  print("Height: " + str(s.getHeight()))
+  print("Width: " + str(s.getWidth()))
+  print("Thickness: " + str(s.getThickness()))
 
   # Material
   SetSampleMaterial(ws,ChemicalFormula="V")
   m = s.getMaterial()
-  print("Material Name" + str(m.name()))
-  print("Total scattering X-Section:" + str(m.totalScatterXSection()))
+  print("Material Name " + str(m.name()))
+  print("Total scattering X-Section: " + str(m.totalScatterXSection()))
 
   # Crystal Structure
   SetUB(ws,a=2,b=3,c=4,alpha=90,beta=90,gamma=90,u="1,0,0",v="0,0,1")

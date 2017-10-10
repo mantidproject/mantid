@@ -179,11 +179,11 @@ Please note these should only be done as part of a Python Algorithm, otherwise t
    print("First event weight after multiply:: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
 
    # Divide the weights in this event list by a scalar with an error.
-   print "First event weight before divide: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
+   print("First event weight before divide: {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
    factor = 1.5
    error = 0.0
    evList.divide(factor,error)
-   print "First event weight after divide:" {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
+   print("First event weight after divide:" {0} +/- {1}".format(evList.getWeights()[0], math.sqrt(evList.getWeightErrors()[0])))
 
    # Mask out events that have a tof between tofMin and tofMax (inclusively)
    print("Number of events before masking: ".format(evList.getNumberEvents()))

@@ -112,7 +112,7 @@ Table Workspace Properties
 
     # Columns
     print("Column count: {}".format(tableWS.columnCount()))
-    print("Column names: {}".foramt(tableWS.getColumnNames()))
+    print("Column names: {}".format(tableWS.getColumnNames()))
     columnValuesList = tableWS.column(0)
     # To remove a column
     tableWS.removeColumn("Detector Name")

@@ -485,7 +485,7 @@ Another way to extract more information about the symmetry in a space group is t
 
     noAxisSymbols = [x.getHMSymbol() for x in symElementsNoAxis]
     print("There are {} element(s) with no characteristic axis.".format(len(symElementsNoAxis)))
-    print("Are there translations? " + "Yes" if 't' in noAxisSymbols else "No")
+    print("Are there translations? {}".format("Yes" if 't' in noAxisSymbols else "No"))
 
     axes = symElementsByAxis.keys()
     print("There is a total of {} different characteristic axes.".format(len(axes)))
