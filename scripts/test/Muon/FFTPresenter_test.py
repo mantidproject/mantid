@@ -52,13 +52,13 @@ class FFTPresenterTest(unittest.TestCase):
         #set presenter
         self.presenter=fft_presenter.FFTPresenter(self.view,self.model,self.load)
 
+        # mock thread
         self.thread=mock.create_autospec(thread_model.ThreadModel)
         self.thread.start=mock.Mock()
         self.thread.started=mock.Mock()
         self.thread.finished=mock.Mock()
         self.thread.setInputs=mock.Mock()
         self.thread.loadData=mock.Mock()
-       
         self.presenter.createThread=mock.Mock(return_value=self.thread)
 
 

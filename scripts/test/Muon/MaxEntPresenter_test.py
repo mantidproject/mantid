@@ -37,6 +37,7 @@ class MaxEntPresenterTest(unittest.TestCase):
          #set presenter
         self.presenter=maxent_presenter.MaxEntPresenter(self.view,self.model,self.load)
  
+        # make thread
         self.thread=mock.create_autospec(thread_model.ThreadModel)
         self.thread.start=mock.Mock()
         self.thread.started=mock.Mock()
@@ -62,6 +63,14 @@ class MaxEntPresenterTest(unittest.TestCase):
         assert(self.view.addRaw.call_count==0)
         assert(self.thread.start.call_count==1)
 
- 
+    def test_activateButton(self):
+        self.presenter.activate()
+        assert(self.view.activateButton.call_count==1)
+
+    def test_deactivateButton(self):
+        self.presenter.deactivate()
+        assert(self.view.deactivateButton.call_count==1)
+
+
 if __name__ == '__main__':
     unittest.main()
