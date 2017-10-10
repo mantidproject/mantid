@@ -80,16 +80,10 @@ public:
   std::pair<size_t, size_t> findStartAndEndPulseIndices(size_t rangeStart,
                                                         size_t count);
 
-  void populateEventList(
-      std::vector<std::vector<Types::Event::TofEvent> *> &eventList,
-      const std::vector<EventListEntry> &events);
+  void populateEventList(const std::vector<EventListEntry> &events);
 
   const std::vector<std::vector<EventListEntry>> &rankData() const {
     return m_allRankData;
-  }
-
-  const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists() const {
-    return m_eventLists;
   }
 
   void wait() const;

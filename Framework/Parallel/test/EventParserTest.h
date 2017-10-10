@@ -37,13 +37,6 @@ public:
     return m_event_ids[bank];
   }
 
-  std::vector<const std::vector<TofEvent> *> eventLists() const {
-    std::vector<const std::vector<TofEvent> *> eventListPtrs;
-    for (auto &eventList : m_event_lists)
-      eventListPtrs.emplace_back(&eventList);
-    return eventListPtrs;
-  }
-
   LoadRange generateBasicRange(size_t bank) {
     LoadRange range;
     range.eventOffset = 0;
@@ -55,13 +48,19 @@ public:
 
   boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>>
   generateTestParser() {
-    test_event_lists.emplace_back(m_event_lists.size());
+    test_event_lists.clear();
+    test_event_lists.resize(m_referenceEventLists.size());
     std::vector<std::vector<TofEvent> *> eventLists;
-    for (auto &eventList : test_event_lists.back())
+    for (auto &eventList : test_event_lists)
       eventLists.emplace_back(&eventList);
     return boost::make_shared<
         EventParser<IndexType, TimeZeroType, TimeOffsetType>>(
         std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
+  }
+
+  void checkEventLists() const {
+    for (size_t i = 0; i < m_referenceEventLists.size(); ++i)
+      TS_ASSERT_EQUALS(m_referenceEventLists[i], test_event_lists[i]);
   }
 
 private:
@@ -74,8 +73,8 @@ private:
 
     m_event_ids.resize(numBanks);
     m_event_time_offsets.resize(numBanks);
-    m_event_lists.clear();
-    m_event_lists.resize(numPixels);
+    m_referenceEventLists.clear();
+    m_referenceEventLists.resize(numPixels);
 
     for (size_t pulse = 0; pulse < numPulses; ++pulse) {
       m_event_time_zero[pulse] = static_cast<TimeZeroType>(pulse * 100000);
@@ -84,7 +83,7 @@ private:
       for (size_t pixel = 0; pixel < numPixels; ++pixel) {
         auto eventSize = getRandEventSize(1, maxEventsPerPixel / numPulses);
         pulseEventSize += eventSize;
-        auto &list = m_event_lists[pixel];
+        auto &list = m_referenceEventLists[pixel];
         auto prev_end = list.size();
         std::generate_n(std::back_inserter(list), eventSize, [this, pulse]() {
           return TofEvent(getRandomTimeOffset(100000),
@@ -137,8 +136,8 @@ private:
   std::vector<std::vector<TimeOffsetType>> m_event_time_offsets;
   std::vector<std::vector<IndexType>> m_event_indices;
   std::vector<TimeZeroType> m_event_time_zero;
-  std::vector<std::vector<TofEvent>> m_event_lists;
-  std::vector<std::vector<std::vector<TofEvent>>> test_event_lists;
+  std::vector<std::vector<TofEvent>> m_referenceEventLists;
+  std::vector<std::vector<TofEvent>> test_event_lists;
 };
 } // namespace detail
 
@@ -286,7 +285,7 @@ public:
                        gen.generateBasicRange(0));
 
     parser->wait();
-    compareEventLists(gen.eventLists(), parser->eventLists());
+    gen.checkEventLists();
   }
 
   void testParsingFull_1Rank_1Bank() {
@@ -300,7 +299,7 @@ public:
                        gen.generateBasicRange(0));
 
     parser->wait();
-    compareEventLists(gen.eventLists(), parser->eventLists());
+    gen.checkEventLists();
   }
 
   void testParsingFull_1Rank_2Banks() {
@@ -318,7 +317,7 @@ public:
                          gen.generateBasicRange(i));
       parser->wait();
     }
-    compareEventLists(gen.eventLists(), parser->eventLists());
+    gen.checkEventLists();
   }
 
   void testParsingFull_InParts_1Rank_1Bank() {
@@ -343,7 +342,7 @@ public:
                          event_time_offset.data() + offset, range);
       parser->wait();
     }
-    compareEventLists(gen.eventLists(), parser->eventLists());
+    gen.checkEventLists();
   }
 
   void testParsingFull_InParts_1Rank_3Banks() {
@@ -372,16 +371,10 @@ public:
         parser->wait();
       }
     }
-    compareEventLists(gen.eventLists(), parser->eventLists());
+    gen.checkEventLists();
   }
 
 private:
-  void compareEventLists(const std::vector<const std::vector<TofEvent> *> &lhs,
-                         const std::vector<std::vector<TofEvent> *> &rhs) {
-    for (size_t i = 0; i < lhs.size(); ++i)
-      TS_ASSERT_EQUALS(*rhs[i], *lhs[i]);
-  }
-
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
   void doTestRankData(
       const std::vector<std::vector<EventListEntry>> &rankData,
@@ -433,10 +426,6 @@ public:
     }
 
     parser = gen.generateTestParser();
-
-    partEventLists.resize(gen.eventLists().size());
-    for (auto &eventList : partEventLists)
-      partEventListPtrs.emplace_back(&eventList);
   }
 
   void testCompletePerformance() {
@@ -457,15 +446,13 @@ public:
   }
 
   void testPopulateEventListPerformance() {
-    parser->populateEventList(partEventListPtrs, parser->rankData()[0]);
+    parser->populateEventList(parser->rankData()[0]);
   }
 
 private:
   const size_t NUM_BANKS = 7;
   std::vector<std::vector<int32_t>> event_ids;
   std::vector<std::vector<double>> event_time_offsets;
-  std::vector<std::vector<TofEvent>> partEventLists;
-  std::vector<std::vector<TofEvent> *> partEventListPtrs;
   detail::FakeParserDataGenerator<int32_t, int64_t, double> gen;
   boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
 };

@@ -194,22 +194,20 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
 }
 
 /** Fills the workspace EventList with extracted events
- * @param eventList Workspace event list to be populated
  * @param events Events extracted from file according to mpi rank.
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
-    std::vector<std::vector<TofEvent> *> &eventList,
     const std::vector<EventListEntry> &events) {
   for (const auto &event : events) {
     // Currently this supports only a hard-code round-robin partitioning.
     auto index = event.globalIndex / m_comm.size();
-    eventList[index]->emplace_back(event.tofEvent);
+    m_eventLists[index]->emplace_back(event.tofEvent);
     // In general `index` is random so this loop suffers from frequent cache
     // misses (probably because the hardware prefetchers cannot keep up with the
     // number of different memory locations that are getting accessed). We
     // manually prefetch into L2 cache to reduce the amount of misses.
-    _mm_prefetch(reinterpret_cast<char *>(&eventList[index]->back() + 1),
+    _mm_prefetch(reinterpret_cast<char *>(&m_eventLists[index]->back() + 1),
                  _MM_HINT_T1);
   }
 }
@@ -257,7 +255,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
 
   redistributeDataMPI(m_thisRankData, m_allRankData);
   // TODO: accept something which translates from global to local spectrum index
-  populateEventList(m_eventLists, m_thisRankData);
+  populateEventList(m_thisRankData);
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
