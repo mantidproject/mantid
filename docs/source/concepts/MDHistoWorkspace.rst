@@ -152,7 +152,7 @@ As a generic multi dimensional container being able to access information about 
       Dimension 1 Name: Dim2 id: Dim2 Range: -10.0-10.0 EnergyTransfer
    The dimension assigned to X = Dim1
    The dimension assigned to Y = Dim2
-   The dimension assigned to Z = Workspace does not have a Z dimension
+   Workspace does not have a Z dimension
 
 Accessing the Data
 ##################
