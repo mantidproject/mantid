@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <H5Cpp.h>
-
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
+
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace Parallel {

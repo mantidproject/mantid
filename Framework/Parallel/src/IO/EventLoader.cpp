@@ -1,7 +1,7 @@
-#include <H5Cpp.h>
-
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/EventLoaderHelpers.h"
+
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace Parallel {
