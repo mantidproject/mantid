@@ -99,7 +99,10 @@ Table Workspace Properties
 
     # Rows
     print("Row count: {}".format(tableWS.rowCount()))
-    print(tableWS.row(0)) # row values as a dictionary
+    print("Detector Position: {0}, Detector Name: {1}, Detector ID: {2}".format(
+                    tableWS.row(0)["Detector Position"],
+                    tableWS.row(0)["Detector Name"],
+                    tableWS.row(0)["Detector ID"])) # row values as a dictionary
     # Resize the table
     tableWS.setRowCount(4)
     # Add Rows
@@ -122,7 +125,7 @@ Table Workspace Properties
     :options: +NORMALIZE_WHITESPACE
 
     Row count: 3
-    {'Detector Position': [9,0,0], 'Detector Name': 'Detector 1', 'Detector ID': 1}
+    Detector Position: [9,0,0], Detector Name: Detector 1, Detector ID: 1
     Column count: 3
     Column names: ['Detector ID', 'Detector Name', 'Detector Position']
 

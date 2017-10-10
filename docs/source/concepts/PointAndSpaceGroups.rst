@@ -150,28 +150,29 @@ Sometimes, a list of reflections needs to be reduced to a set of symmetry indepe
 
 .. testcode :: ExIndependentReflections
 
-    from mantid.geometry import PointGroupFactory
+   from mantid.geometry import PointGroupFactory
 
-    pg = PointGroupFactory.createPointGroup("m-3m")
+   pg = PointGroupFactory.createPointGroup("m-3m")
 
-    hklList = [[1, 0, 0], [0, 1, 0], [-1, 0, 0],    # Equivalent to [1,0,0]
-               [1, 1, 1], [-1, 1, 1],               # Equivalent to [1,1,1]
-               [-3, 1, 1], [1, -3, 1], [-1, 1, 3]]  # Equivalent to [3,1,1]
+   hklList = [[1, 0, 0], [0, 1, 0], [-1, 0, 0],    # Equivalent to [1,0,0]
+              [1, 1, 1], [-1, 1, 1],               # Equivalent to [1,1,1]
+              [-3, 1, 1], [1, -3, 1], [-1, 1, 3]]  # Equivalent to [3,1,1]
 
-    independent = set()
+   independent = set()
 
-    for hkl in hklList:
-        independent.add(pg.getReflectionFamily(hkl)) # getReflectionFamily returns the same hkl for all symmetry equivalents
+   for hkl in hklList:
+       independent.add(pg.getReflectionFamily(hkl)) # getReflectionFamily returns the same hkl for all symmetry equivalents
 
-    print("Number of independent reflections: {}".format(len(independent)))
-    print("Reflections: {}".format(list(independent)))
+   print("Number of independent reflections: {}".format(len(independent)))
+   print("Reflections: {}".format(list(independent)))
 
 This example code produces the output below upon execution:
 
 .. testoutput:: ExIndependentReflections
+   :options: +ELLIPSIS
 
-    Number of independent reflections: 3
-    Reflections: [[1,1,1], [1,0,0], [3,1,1]]
+   Number of independent reflections: 3
+   Reflections: [...]
 
 Symmetry imposes restrictions on the metric of the unit cell. Cubic symmetry for example implies that all cell edges have the same length and all angles are 90 degrees. The ``Group``-class (and thus, by inheritance also ``PointGroup``) provides a method that checks is a metric tensor is compatible with the symmetry operations of the group:
 
@@ -550,7 +551,7 @@ With the space group information it's also possible to derive information about 
     print("Site symmetry group fulfills group axioms: {}".format(siteSymmGroup.isGroup()))
     print("Order of site symmetry group: {}".format(siteSymmGroup.getOrder()))
     print("Order of space group: {}".format(sg.getOrder()))
-    print("Site multiplicity: {}".format(sg.getOrder() / siteSymmGroup.getOrder()))
+    print("Site multiplicity: {}".format(sg.getOrder() // siteSymmGroup.getOrder()))
 
 The script produces the following output:
 
