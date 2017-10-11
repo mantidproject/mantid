@@ -27,8 +27,12 @@ buildPartition(const int totalWorkers, const size_t totalSize,
 
   // 2. Number of workers needed for that item.
   const size_t size = std::get<0>(*largest);
-  const int workers = static_cast<int>(
-      (static_cast<size_t>(totalWorkers) * size + totalSize - 1) / totalSize);
+  const int workers =
+      totalSize != 0
+          ? static_cast<int>(
+                (static_cast<size_t>(totalWorkers) * size + totalSize - 1) /
+                totalSize)
+          : totalWorkers;
   size_t remainder = workers * perWorkerSize - size;
 
   // 3. Fill remainder with next largest fitting size(s)
@@ -39,8 +43,6 @@ buildPartition(const int totalWorkers, const size_t totalSize,
       std::get<2>(item) = true;
       itemsInPartition.push_back(std::get<1>(item));
       remainder -= std::get<0>(item);
-      if (remainder == 0)
-        break;
     }
   }
   return {workers, itemsInPartition};
