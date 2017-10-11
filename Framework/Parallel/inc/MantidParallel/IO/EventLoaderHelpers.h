@@ -72,7 +72,8 @@ void load(
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
       dataSource.setBankIndex(range.bankIndex);
       dataSink.setPulseInformation(dataSource.eventIndex(),
-                                   dataSource.eventTimeZero());
+                                   dataSource.eventTimeZero(),
+                                   dataSource.eventTimeZeroOffset());
     }
     // TODO use double buffer or something
     // TODO use and manage bufferOffset

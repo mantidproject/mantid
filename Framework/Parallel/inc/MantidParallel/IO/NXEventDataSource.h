@@ -46,6 +46,7 @@ public:
 
   virtual const std::vector<IndexType> &eventIndex() const = 0;
   virtual const std::vector<TimeZeroType> &eventTimeZero() const = 0;
+  virtual int64_t eventTimeZeroOffset() const = 0;
   virtual void readEventID(int32_t *event_id, size_t start,
                            size_t count) const = 0;
   virtual void readEventTimeOffset(TimeOffsetType *event_time_offset,

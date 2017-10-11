@@ -17,7 +17,7 @@ void load(const std::string &filename, const std::string &groupName,
   load(readDataType(group, bankNames, "event_index"),
        readDataType(group, bankNames, "event_time_zero"),
        readDataType(group, bankNames, "event_time_offset"), group, bankNames,
-       bankOffsets, eventLists);
+       bankOffsets, std::move(eventLists));
 }
 }
 

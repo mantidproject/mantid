@@ -43,11 +43,12 @@ public:
   virtual ~EventDataSink() = default;
 
   virtual void setPulseInformation(std::vector<IndexType> event_index,
-                                   std::vector<TimeZeroType> event_time_zero);
+                                   std::vector<TimeZeroType> event_time_zero,
+                                   const int64_t event_time_zero_offset) = 0;
   virtual void startAsync(int32_t *event_id_start,
                           const TimeOffsetType *event_time_offset_start,
-                          const Chunker::LoadRange &range);
-  virtual void wait() const;
+                          const Chunker::LoadRange &range) = 0;
+  virtual void wait() const = 0;
 };
 
 } // namespace IO

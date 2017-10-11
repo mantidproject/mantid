@@ -2,6 +2,7 @@
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -447,6 +448,7 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
+  m_file->close();
 }
 
 /**
@@ -855,13 +857,28 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  bool precount = getProperty("Precount");
-  int chunk = getProperty("ChunkNumber");
-  int totalChunks = getProperty("TotalChunks");
-  DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
-                           bankNames, periodLog->valuesAsVector(), classType,
-                           bankNumEvents, oldNeXusFileNames, precount, chunk,
-                           totalChunks);
+  bool loaded{false};
+  if (canUseParallelLoader(haveWeights, oldNeXusFileNames, classType)) {
+    auto ws = m_ws->getSingleHeldWorkspace();
+    m_file->close();
+    try {
+      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
+      loaded = true;
+    } catch (const std::runtime_error &) {
+    }
+    safeOpenFile(m_filename);
+    shortest_tof = 0.0;
+    longest_tof = 1e10;
+  }
+  if (!loaded) {
+    bool precount = getProperty("Precount");
+    int chunk = getProperty("ChunkNumber");
+    int totalChunks = getProperty("TotalChunks");
+    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
+                             bankNames, periodLog->valuesAsVector(), classType,
+                             bankNumEvents, oldNeXusFileNames, precount, chunk,
+                             totalChunks);
+  }
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
@@ -1644,6 +1661,31 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+}
+
+bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
+                                          const bool oldNeXusFileNames,
+                                          const std::string &classType) const {
+  if (m_ws->nPeriods() != 1)
+    return false;
+  if (haveWeights)
+    return false;
+  if (event_id_is_spec)
+    return false;
+  if (oldNeXusFileNames)
+    return false;
+  if (filter_tof_min != -1e20 || filter_tof_max != 1e20)
+    return false;
+  if (filter_time_start != Types::Core::DateAndTime::minimum() ||
+      filter_time_stop != Types::Core::DateAndTime::maximum())
+    return false;
+  if (!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+      !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+      !isDefault("ChunkNumber"))
+    return false;
+  if (classType != "NXevent_data")
+    return false;
+  return true;
 }
 
 Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(

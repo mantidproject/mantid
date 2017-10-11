@@ -82,6 +82,11 @@ private:
       int bank = 0;
       for (size_t pixel = 0; pixel < numPixels; ++pixel) {
         auto eventSize = getRandEventSize(1, maxEventsPerPixel / numPulses);
+        if ((pixel % pixelsPerBank) == 0) {
+          m_event_indices[bank][pulse] = static_cast<int32_t>(pulseEventSize);
+          pulseEventSize = 0;
+          bank++;
+        }
         pulseEventSize += eventSize;
         auto &list = m_referenceEventLists[pixel];
         auto prev_end = list.size();
@@ -96,11 +101,6 @@ private:
                        [this](const TofEvent &event) {
                          return static_cast<TimeOffsetType>(event.tof());
                        });
-        if (((pixel + 1) % pixelsPerBank) == 0) {
-          m_event_indices[bank][pulse] = static_cast<int32_t>(pulseEventSize);
-          pulseEventSize = 0;
-          bank++;
-        }
       }
     }
     calculateEventIndicesPartialSums(numBanks);
@@ -183,29 +183,33 @@ public:
     EventParser<int64_t, int64_t, double> parser(rankGroups, bankOffsets,
                                                  eventLists);
 
-    std::vector<int64_t> event_index{10, 20, 40, 60, 100, 150, 210};
+    std::vector<int64_t> event_index{0, 20, 40, 60, 100, 150, 210};
     std::vector<int64_t> event_time_zero{10, 20, 30, 40, 50, 60, 70};
-    parser.setPulseInformation(event_index, event_time_zero);
+    parser.setPulseInformation(event_index, event_time_zero, 0);
     auto res = parser.findStartAndEndPulseIndices(0, 50);
     TS_ASSERT_EQUALS(res.first, 0);
     TS_ASSERT_EQUALS(res.second, 3);
 
     // reset "current position" for new set of indices
-    parser.setPulseInformation(event_index, event_time_zero);
+    parser.setPulseInformation(event_index, event_time_zero, 0);
     res = parser.findStartAndEndPulseIndices(30, 50);
     TS_ASSERT_EQUALS(res.first, 1);
     TS_ASSERT_EQUALS(res.second, 4);
 
     // instead of resetting allow search to start from this position
-    res = parser.findStartAndEndPulseIndices(105, 98);
+    res = parser.findStartAndEndPulseIndices(105, 100);
     TS_ASSERT_EQUALS(res.first, 4);
     TS_ASSERT_EQUALS(res.second, 6);
+
+    res = parser.findStartAndEndPulseIndices(209, 1000);
+    TS_ASSERT_EQUALS(res.first, 5);
+    TS_ASSERT_EQUALS(res.second, 7);
   }
 
   void testExtractEventsFull() {
     detail::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = gen.generateBasicRange(0);
@@ -228,7 +232,7 @@ public:
   void testExtractEventsPartial() {
     detail::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = Chunker::LoadRange{0, 5, 100};
@@ -269,7 +273,7 @@ public:
     EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
                                                   eventLists);
 
-    parser.setPulseInformation({10, 4, 4}, {});
+    parser.setPulseInformation({10, 4, 4}, {}, 0);
 
     TS_ASSERT_THROWS(
         parser.startAsync(nullptr, nullptr, Chunker::LoadRange{0, 0, 0}),
@@ -279,7 +283,7 @@ public:
   void testParsingFull_1Pulse_1Bank() {
     detail::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -293,7 +297,7 @@ public:
   void testParsingFull_1Rank_1Bank() {
     detail::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -311,7 +315,7 @@ public:
     auto parser = gen.generateTestParser();
 
     for (int i = 0; i < numBanks; i++) {
-      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero());
+      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero(), 0);
       auto event_id = gen.eventId(i);
       auto event_time_offset = gen.eventTimeOffset(i);
 
@@ -325,7 +329,7 @@ public:
   void testParsingFull_InParts_1Rank_1Bank() {
     detail::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -353,7 +357,7 @@ public:
     auto parser = gen.generateTestParser();
 
     for (size_t bank = 0; bank < numBanks; bank++) {
-      parser->setPulseInformation(gen.eventIndex(bank), gen.eventTimeZero());
+      parser->setPulseInformation(gen.eventIndex(bank), gen.eventTimeZero(), 0);
       auto event_id = gen.eventId(bank);
       auto event_time_offset = gen.eventTimeOffset(bank);
 
@@ -385,13 +389,13 @@ private:
       detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
           gen,
       const Chunker::LoadRange &range) {
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero());
+    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto res = parser->findStartAndEndPulseIndices(range.eventOffset,
                                                    range.eventCount);
 
-    for (size_t pulse = res.first; pulse <= res.second; ++pulse) {
+    for (size_t pulse = res.first; pulse < res.second; ++pulse) {
       auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
-                                                 gen.eventIndex(0)[pulse - 1]),
+                                                 gen.eventIndex(0)[pulse]),
                             range.eventOffset) -
                    range.eventOffset;
       auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
@@ -432,7 +436,7 @@ public:
 
   void testCompletePerformance() {
     for (size_t i = 0; i < NUM_BANKS; ++i) {
-      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero());
+      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero(), 0);
       parser->startAsync(event_ids[i].data(), event_time_offsets[i].data(),
                          gen.generateBasicRange(i));
       parser->wait();

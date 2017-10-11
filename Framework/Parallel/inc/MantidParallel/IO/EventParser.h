@@ -63,7 +63,8 @@ public:
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
   void setPulseInformation(std::vector<IndexType> event_index,
-                           std::vector<TimeZeroType> event_time_zero) override;
+                           std::vector<TimeZeroType> event_time_zero,
+                           const int64_t event_time_zero_offset) override;
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
@@ -101,6 +102,7 @@ private:
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
   std::vector<IndexType> m_eventIndex;
   std::vector<TimeZeroType> m_eventTimeZero;
+  Types::Core::DateAndTime m_eventTimeZeroOffset;
   std::size_t m_posInEventIndex{0};
   std::vector<std::vector<EventListEntry>> m_allRankData;
   std::vector<EventListEntry> m_thisRankData;
@@ -138,9 +140,11 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
     std::vector<IndexType> event_index,
-    std::vector<TimeZeroType> event_time_zero) {
+    std::vector<TimeZeroType> event_time_zero,
+    const int64_t event_time_zero_offset) {
   m_eventIndex = std::move(event_index);
   m_eventTimeZero = std::move(event_time_zero);
+  m_eventTimeZeroOffset = Types::Core::DateAndTime(event_time_zero_offset);
   m_posInEventIndex = 0;
 }
 
@@ -183,17 +187,45 @@ EventParser<IndexType, TimeZeroType,
     size_t icount = (pulse != m_eventIndex.size() - 1 ? m_eventIndex[pulse + 1]
                                                       : rangeEnd) -
                     static_cast<size_t>(m_eventIndex[pulse]);
+    fprintf(stderr, "%lu %lu\n", pulse, icount);
     if (rangeStart >= static_cast<size_t>(m_eventIndex[pulse]) &&
         rangeStart < static_cast<size_t>(m_eventIndex[pulse]) + icount)
       startPulse = pulse;
     if (rangeEnd > static_cast<size_t>(m_eventIndex[pulse]) &&
-        rangeEnd <= static_cast<size_t>(m_eventIndex[pulse]) + icount)
-      endPulse = (pulse + 1) == m_eventIndex.size() ? pulse : pulse + 1;
+        rangeEnd <= static_cast<size_t>(m_eventIndex[pulse]) + icount) {
+      endPulse = pulse + 1;
+      break;
+    }
   }
 
-  m_posInEventIndex = endPulse;
+  m_posInEventIndex = endPulse - 1;
 
   return {startPulse, endPulse};
+}
+
+template <class TimeZeroType>
+Types::Core::DateAndTime getPulseTime(const Types::Core::DateAndTime &offset,
+                                      const TimeZeroType &eventTimeZero) {
+  return offset + eventTimeZero;
+}
+
+template <>
+inline Types::Core::DateAndTime getPulseTime<uint64_t>(const Types::Core::DateAndTime &offset,
+                                      const uint64_t &eventTimeZero) {
+  return offset + static_cast<int64_t>(eventTimeZero);
+}
+
+template <>
+inline Types::Core::DateAndTime
+getPulseTime<int32_t>(const Types::Core::DateAndTime &offset,
+                      const int32_t &eventTimeZero) {
+  return offset + static_cast<int64_t>(eventTimeZero);
+}
+
+template <>
+inline Types::Core::DateAndTime getPulseTime<uint32_t>(const Types::Core::DateAndTime &offset,
+                                      const uint32_t &eventTimeZero) {
+  return offset + static_cast<int64_t>(eventTimeZero);
 }
 
 /** Extracts event information from the list of time offsets and global spectrum
@@ -220,27 +252,31 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   auto count = range.eventCount;
   auto result = findStartAndEndPulseIndices(offset, count);
 
-  for (size_t pulse = result.first; pulse <= result.second; ++pulse) {
+  size_t actual{0};
+  for (size_t pulse = result.first; pulse < result.second; ++pulse) {
     const auto start =
-        std::max(
-            (pulse == 0 ? 0 : static_cast<size_t>(m_eventIndex[pulse - 1])),
-            offset) -
+        std::max(offset, static_cast<size_t>(m_eventIndex[pulse])) - offset;
+    const auto end =
+        std::min(offset + count,
+                 static_cast<size_t>(pulse != m_eventIndex.size() - 1
+                                         ? m_eventIndex[pulse + 1]
+                                         : count)) -
         offset;
-    const auto end = std::min(static_cast<size_t>(pulse == m_eventIndex.size()
-                                                      ? offset + count
-                                                      : m_eventIndex[pulse]),
-                              offset + count) -
-                     offset;
+    //fprintf(stderr, "pulse %lu start %lu end %lu\n", pulse, start, end);
 
+    const auto pulseTime =
+        getPulseTime(m_eventTimeZeroOffset, m_eventTimeZero[pulse]);
     for (size_t i = static_cast<size_t>(start); i < static_cast<size_t>(end);
          ++i) {
+      ++actual;
       int rank = globalSpectrumIndex[i] % m_comm.size();
-      rankData[rank].push_back(EventListEntry{
+      rankData[rank].emplace_back(EventListEntry{
           globalSpectrumIndex[i],
-          TofEvent{static_cast<double>(eventTimeOffset[i]),
-                   static_cast<int64_t>(m_eventTimeZero[pulse])}});
+          TofEvent{static_cast<double>(eventTimeOffset[i]), pulseTime}});
     }
   }
+  if(actual != count)
+    fprintf(stderr, "aaaa\n");
 }
 
 /** Uses MPI calls to redistribute chunks which must be processed on certain
@@ -258,22 +294,22 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
     return;
   }
 
-  std::vector<size_t> sizes(data.size());
-  std::transform(
-      data.cbegin(), data.cend(), sizes.begin(),
-      [](const std::vector<EventListEntry> &vec) { return vec.size(); });
-  std::vector<size_t> recv_sizes(data.size());
+  std::vector<int> sizes(data.size());
+  std::transform(data.cbegin(), data.cend(), sizes.begin(),
+                 [](const std::vector<EventListEntry> &vec) {
+                   return static_cast<int>(vec.size());
+                 });
+  std::vector<int> recv_sizes(data.size());
   Parallel::all_to_all(m_comm, sizes, recv_sizes);
 
-  auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(),
-                                    static_cast<size_t>(0));
+  auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(), 0);
   result.resize(total_size);
   size_t offset = 0;
   std::vector<Parallel::Request> recv_requests;
   for (int rank = 0; rank < m_comm.size(); ++rank) {
     int tag = 0;
     auto buffer = reinterpret_cast<char *>(result.data() + offset);
-    auto size = recv_sizes[rank] * sizeof(EventListEntry);
+    int size = recv_sizes[rank] * static_cast<int>(sizeof(EventListEntry));
     recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
     offset += recv_sizes[rank];
   }
@@ -284,7 +320,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
     int tag = 0;
     send_requests.emplace_back(
         m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
-                     vec.size() * sizeof(EventListEntry)));
+                     static_cast<int>(vec.size() * sizeof(EventListEntry))));
   }
 
   Parallel::wait_all(send_requests.begin(), send_requests.end());
@@ -325,6 +361,7 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
+  fprintf(stderr, "parsing %lu events from bank %lu\n", range.eventCount, range.bankIndex);
 
   if (m_eventTimeZero.empty() || m_eventIndex.empty())
     throw std::runtime_error("Both event_time_zero and event_index must be set "

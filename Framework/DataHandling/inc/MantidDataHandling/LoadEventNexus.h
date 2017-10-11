@@ -180,6 +180,10 @@ private:
   /// Execution code
   void exec() override;
 
+  bool canUseParallelLoader(const bool haveWeights,
+                            const bool oldNeXusFileNames,
+                            const std::string &classType) const;
+
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   void loadEvents(API::Progress *const prog, const bool monitors);

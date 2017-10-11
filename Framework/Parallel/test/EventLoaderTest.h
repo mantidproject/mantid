@@ -50,6 +50,7 @@ public:
   const std::vector<int64_t> &eventTimeZero() const override {
     return m_time_zero;
   }
+  int64_t eventTimeZeroOffset() const override { return 123456789; }
   void readEventID(int32_t *event_id, size_t start,
                    size_t count) const override {
     for (size_t i = 0; i < count; ++i)
@@ -72,9 +73,11 @@ private:
 class FakeDataSink : public EventDataSink<int64_t, int64_t, int32_t> {
 public:
   void setPulseInformation(std::vector<int64_t> event_index,
-                           std::vector<int64_t> event_time_zero) override {
+                           std::vector<int64_t> event_time_zero,
+                           const int64_t event_time_zero_offset) override {
     static_cast<void>(event_index);
     static_cast<void>(event_time_zero);
+    static_cast<void>(event_time_zero_offset);
   }
   void startAsync(int32_t *event_id_start,
                   const int32_t *event_time_offset_start,
