@@ -19,11 +19,12 @@ TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
                   "Initial radius of the trust region.");
 }
 
-/// Initialise the minimizer.
-/// @param costFunction :: The cost function to minimize. Must be the least
-/// squares.
-/// @param maxIterations :: Maximum number of iterations that the minimiser will
-/// do.
+/** Initialise the minimizer.
+ *  @param costFunction :: The cost function to minimize. Must be the least
+ *  squares.
+ *  @param maxIterations :: Maximum number of iterations that the minimiser will
+ *  do.
+ */
 void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
                                       size_t maxIterations) {
   m_leastSquares =
@@ -57,9 +58,10 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
   m_options.initial_radius = getProperty("InitialRadius");
 }
 
-/// Evaluate the fitting function and calculate the residuals.
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The output fortran vector with the weighted residuals.
+/** Evaluate the fitting function and calculate the residuals.
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param f :: The output fortran vector with the weighted residuals.
+ */
 void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
                                  DoubleFortranVector &f) const {
   m_leastSquares->setParameters(x);
@@ -76,9 +78,10 @@ void TrustRegionMinimizer::evalF(const DoubleFortranVector &x,
   }
 }
 
-/// Evaluate the Jacobian
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param J :: The output fortran matrix with the weighted Jacobian.
+/** Evaluate the Jacobian
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param J :: The output fortran matrix with the weighted Jacobian.
+ */
 void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
                                  DoubleFortranMatrix &J) const {
   m_leastSquares->setParameters(x);
@@ -99,10 +102,11 @@ void TrustRegionMinimizer::evalJ(const DoubleFortranVector &x,
   }
 }
 
-/// Evaluate the Hessian
-/// @param x :: The fitting parameters as a fortran 1d array.
-/// @param f :: The fortran vector with the weighted residuals.
-/// @param h :: The fortran matrix with the Hessian.
+/** Evaluate the Hessian
+ *  @param x :: The fitting parameters as a fortran 1d array.
+ *  @param f :: The fortran vector with the weighted residuals.
+ *  @param h :: The fortran matrix with the Hessian.
+ */
 void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
                                   const DoubleFortranVector &f,
                                   DoubleFortranMatrix &h) const {
@@ -117,7 +121,8 @@ void TrustRegionMinimizer::evalHF(const DoubleFortranVector &x,
   h.zero();
 }
 
-/// Perform a single iteration.
+/** Perform a single iteration.
+ */
 bool TrustRegionMinimizer::iterate(size_t) {
   int max_tr_decrease = 100;
   auto &w = m_workspace;
@@ -404,7 +409,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
   return true;
 }
 
-/// Return the current value of the cost function.
+/** Return the current value of the cost function.
+ */
 double TrustRegionMinimizer::costFunctionVal() { return m_leastSquares->val(); }
 
 } // namespace FuncMinimisers

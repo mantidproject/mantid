@@ -27,15 +27,16 @@ std::string MoreSorensenMinimizer::name() const { return "More-Sorensen"; }
 
 namespace {
 
-/// Solve a system of linear equations. The system's matrix must be
-/// positive-definite.
-/// @param A :: A matrix of a system of equations. Must be positive-definite
-/// otherwise
-///     the solution will not be found and an error code returned.
-/// @param b :: A vector of the right-hand side.
-/// @param LtL :: A work matrix.
-/// @param x :: A vector that receives the solution.
-/// @param inform :: The information struct.
+/** Solve a system of linear equations. The system's matrix must be
+  * positive-definite.
+  * @param A :: A matrix of a system of equations. Must be positive-definite
+  * otherwise
+  *     the solution will not be found and an error code returned.
+  * @param b :: A vector of the right-hand side.
+  * @param LtL :: A work matrix.
+  * @param x :: A vector that receives the solution.
+  * @param inform :: The information struct.
+ */
 void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
               DoubleFortranMatrix &LtL, DoubleFortranVector &x,
               nlls_inform &inform) {
@@ -51,11 +52,12 @@ void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
   gsl_linalg_cholesky_solve(LtL.gsl(), b.gsl(), x.gsl());
 }
 
-/// Calculate the leftmost eigenvalue of a matrix.
-/// @param A :: A matrix to analyse.
-/// @param sigma :: A variable to receive the value of the smallest
-///        eigenvalue.
-/// @param y :: A vector that receives the corresponding eigenvector.
+/** Calculate the leftmost eigenvalue of a matrix.
+ *  @param A :: A matrix to analyse.
+ *  @param sigma :: A variable to receive the value of the smallest
+ *        eigenvalue.
+ *  @param y :: A vector that receives the corresponding eigenvector.
+ */
 void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
                 DoubleFortranVector &y) {
   auto M = A;
@@ -72,9 +74,10 @@ void minEigSymm(const DoubleFortranMatrix &A, double &sigma,
   }
 }
 
-/// Calculate AplusSigma = A + sigma * I
-/// @param sigma :: The value of the diagonal shift.
-/// @param AplusSigma :: The resulting matrix.
+/** Calculate AplusSigma = A + sigma * I
+ *  @param sigma :: The value of the diagonal shift.
+ *  @param AplusSigma :: The resulting matrix.
+ */
 void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
                  DoubleFortranMatrix &AplusSigma) {
   AplusSigma = A;
@@ -84,22 +87,24 @@ void shiftMatrix(const DoubleFortranMatrix &A, double sigma,
   }
 }
 
-/// Negate a vector
-/// @param v :: A vector.
+/** Negate a vector
+ *  @param v :: A vector.
+ */
 DoubleFortranVector negative(const DoubleFortranVector &v) {
   DoubleFortranVector neg = v;
   neg *= -1.0;
   return neg;
 }
 
-/// Given an indefinite matrix w.A, find a shift sigma
-/// such that (A + sigma I) is positive definite.
-/// @param sigma :: The result (shift).
-/// @param d :: A solution vector to the system of linear equations
-///    with the found positive defimnite matrix. The RHS vector is -w.v.
-/// @param options :: The options.
-/// @param inform :: The inform struct.
-/// @param w :: The work struct.
+/** Given an indefinite matrix w.A, find a shift sigma
+ *  such that (A + sigma I) is positive definite.
+ *  @param sigma :: The result (shift).
+ *  @param d :: A solution vector to the system of linear equations
+ *     with the found positive defimnite matrix. The RHS vector is -w.v.
+ *  @param options :: The options.
+ *  @param inform :: The inform struct.
+ *  @param w :: The work struct.
+ */
 void getPdShift(double &sigma, DoubleFortranVector &d,
                 const nlls_options &options, nlls_inform &inform,
                 more_sorensen_work &w) {
@@ -125,17 +130,18 @@ void getPdShift(double &sigma, DoubleFortranVector &d,
   }
 }
 
-///  A subroutine to find the optimal beta such that
-///   || d || = Delta, where d = a + beta * b
-///
-///   uses the approach from equation (3.20b),
-///    "Methods for non-linear least squares problems" (2nd edition, 2004)
-///    by Madsen, Nielsen and Tingleff
-/// @param a :: The first vector.
-/// @param b :: The second vector.
-/// @param Delta :: The Delta.
-/// @param beta :: The beta.
-/// @param inform :: The inform struct.
+/**  A subroutine to find the optimal beta such that
+ *    || d || = Delta, where d = a + beta * b
+ * 
+ *    uses the approach from equation (3.20b),
+ *     "Methods for non-linear least squares problems" (2nd edition, 2004)
+ *     by Madsen, Nielsen and Tingleff
+ *  @param a :: The first vector.
+ *  @param b :: The second vector.
+ *  @param Delta :: The Delta.
+ *  @param beta :: The beta.
+ *  @param inform :: The inform struct.
+ */
 void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
               double Delta, double &beta, nlls_inform &inform) {
 
@@ -158,23 +164,24 @@ void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   }
 }
 
-/// Solve the trust-region subproblem using
-/// the method of More and Sorensen
-///
-/// Using the implementation as in Algorithm 7.3.6
-/// of Trust Region Methods
-///
-/// main output  d, the soln to the TR subproblem
-/// @param J :: The Jacobian.
-/// @param f :: The residuals.
-/// @param hf :: The Hessian (sort of).
-/// @param Delta :: The raduis of the trust region.
-/// @param d :: The output vector of corrections to the parameters giving the
-///       solution to the TR subproblem.
-/// @param nd :: The 2-norm of d.
-/// @param options :: The options.
-/// @param inform :: The inform struct.
-/// @param w :: The work struct.
+/** Solve the trust-region subproblem using
+ *  the method of More and Sorensen
+ * 
+ *  Using the implementation as in Algorithm 7.3.6
+ *  of Trust Region Methods
+ * 
+ *  main output  d, the soln to the TR subproblem
+ *  @param J :: The Jacobian.
+ *  @param f :: The residuals.
+ *  @param hf :: The Hessian (sort of).
+ *  @param Delta :: The raduis of the trust region.
+ *  @param d :: The output vector of corrections to the parameters giving the
+ *        solution to the TR subproblem.
+ *  @param nd :: The 2-norm of d.
+ *  @param options :: The options.
+ *  @param inform :: The inform struct.
+ *  @param w :: The work struct.
+ */
 void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                   const DoubleFortranMatrix &hf, double Delta,
                   DoubleFortranVector &d, double &nd,
@@ -321,7 +328,8 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
 } // namespace
 
-/// Implements the abstarct method of TrustRegionMinimizer.
+/** Implements the abstract method of TrustRegionMinimizer.
+ */
 void MoreSorensenMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
