@@ -163,10 +163,13 @@ endfunction()
 # keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
 #          target. It is assumed each was produced with this function and
 #          will have the Qt{QT_VERSION} suffix appended.
+# keyword: PARENT_DEPENDENCIES Any targets listed here will have this new target
+#          as a dependency
 function (mtd_add_qt_test_executable)
   set (options)
   set (oneValueArgs TARGET_NAME QT_VERSION)
-  set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS MTD_QT_LINK_LIBS)
+  set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
+       MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
 
@@ -195,7 +198,12 @@ function (mtd_add_qt_test_executable)
   else ()
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()
-  target_link_libraries( ${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs} )
+  target_link_libraries (${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs})
+
+  # Add dependency to any parents
+  foreach (_dep ${PARSED_PARENT_DEPENDENCIES})
+    add_dependencies (${_dep} ${_target_name})
+  endforeach()
 endfunction ()
 
 # Appends a string to the given variable to define the Qt version

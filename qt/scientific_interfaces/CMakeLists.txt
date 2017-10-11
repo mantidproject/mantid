@@ -87,4 +87,6 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     MantidScientificInterfacesEnggDiffraction
     MantidScientificInterfacesMultiDatasetFit
     MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
 )

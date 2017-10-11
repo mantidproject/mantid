@@ -147,16 +147,6 @@ include_directories ( Framework/Types/inc )
 
 set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 
-if (ENABLE_MANTIDPLOT)
-  # Add a target for all GUI tests
-  add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidQtWidgetsCommonTestQt4)
-  add_dependencies ( check GUITests )
-  # Collect all tests together
-  add_custom_target ( AllTests )
-  add_dependencies ( AllTests FrameworkTests GUITests )
-endif()
-
 if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
   if (NOT APPLE)
@@ -186,8 +176,12 @@ if ( MSVC )
 endif ()
 
 if (ENABLE_MANTIDPLOT)
+  add_custom_target ( GUITests )
+  add_dependencies ( check GUITests )
+  # Collect all tests together
+  add_custom_target ( AllTests )
+  add_dependencies ( AllTests FrameworkTests GUITests )
   add_subdirectory ( qt )
-
   add_subdirectory ( MantidPlot )
 endif()
 

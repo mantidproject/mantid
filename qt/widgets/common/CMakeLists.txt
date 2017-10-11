@@ -533,6 +533,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     ${GTEST_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES
+    GUITests
 )
 
 ###########################################################################
