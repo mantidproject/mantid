@@ -8,7 +8,6 @@
 
 #include <QPointer>
 #include <QWidget>
-#include <QWidgetAction>
 
 class pqMultiSliceView;
 
