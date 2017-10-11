@@ -52,6 +52,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using namespace Poco::XML;
 
 namespace Mantid {
@@ -490,16 +491,12 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  // Wrap translation in check for detector count as an optimization of
-  // otherwise slow failures via exceptions.
-  if (detectorInfo().size() > 0) {
-    for (const auto detID : detIDs) {
-      try {
-        const size_t detIndex = detectorInfo().indexOf(detID);
-        specDef.add(detIndex);
-      } catch (std::out_of_range &) {
-        // Silently strip bad detector IDs
-      }
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
@@ -905,13 +902,13 @@ std::string ExperimentInfo::getWorkspaceStartDate() const {
   } catch (std::runtime_error &) {
     g_log.information("run_start/start_time not stored in workspace. Default "
                       "to current date.");
-    date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   }
   return date;
 }
 
 /** Return workspace start date as a formatted string (strftime, as
- *  returned by Kernel::DateAndTime) string, if available. If
+ *  returned by Types::Core::DateAndTime) string, if available. If
  *  unavailable, an empty string is returned
  *
  *  @return workspace start date as a string (empty if no date available)
@@ -970,7 +967,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
     // Just use the current date
     g_log.debug() << "No date specified, using current date and time.\n";
     const std::string now =
-        Kernel::DateAndTime::getCurrentTime().toISO8601String();
+        Types::Core::DateAndTime::getCurrentTime().toISO8601String();
     // Recursively call this method, but with both parameters.
     return ExperimentInfo::getInstrumentFilename(instrumentName, now);
   }
@@ -1009,7 +1006,7 @@ ExperimentInfo::getInstrumentFilename(const std::string &instrumentName,
       if (!filePath.isFile())
         continue;
 
-      std::string l_filenamePart = filePath.getFileName();
+      const std::string &l_filenamePart = filePath.getFileName();
       if (regex_match(l_filenamePart, regex)) {
         const auto &pathName = filePath.toString();
         g_log.debug() << "Found file: '" << pathName << "'\n";

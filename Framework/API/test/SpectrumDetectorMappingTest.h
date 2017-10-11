@@ -20,7 +20,7 @@ public:
   static void destroySuite(SpectrumDetectorMappingTest *suite) { delete suite; }
 
   void test_workspace_constructor_null_pointer() {
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(NULL), std::invalid_argument);
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr), std::invalid_argument);
   }
 
   void test_workspace_constructor_fills_map() {
@@ -114,9 +114,9 @@ public:
   void test_array_constructor_null_inputs() {
     specnum_t specs[2];
     detid_t detids[2];
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(NULL, detids, 10),
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr, detids, 10),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, NULL, 10),
+    TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, nullptr, 10),
                      std::invalid_argument);
   }
 

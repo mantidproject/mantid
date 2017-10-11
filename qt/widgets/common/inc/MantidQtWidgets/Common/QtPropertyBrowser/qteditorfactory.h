@@ -100,7 +100,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtSpinBoxFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtSpinBoxFactory(QObject *parent = 0);
+  QtSpinBoxFactory(QObject *parent = nullptr);
   ~QtSpinBoxFactory() override;
 
 protected:
@@ -127,7 +127,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtSliderFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtSliderFactory(QObject *parent = 0);
+  QtSliderFactory(QObject *parent = nullptr);
   ~QtSliderFactory() override;
 
 protected:
@@ -154,7 +154,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtScrollBarFactory
     : public QtAbstractEditorFactory<QtIntPropertyManager> {
   Q_OBJECT
 public:
-  QtScrollBarFactory(QObject *parent = 0);
+  QtScrollBarFactory(QObject *parent = nullptr);
   ~QtScrollBarFactory() override;
 
 protected:
@@ -181,7 +181,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCheckBoxFactory
     : public QtAbstractEditorFactory<QtBoolPropertyManager> {
   Q_OBJECT
 public:
-  QtCheckBoxFactory(QObject *parent = 0);
+  QtCheckBoxFactory(QObject *parent = nullptr);
   ~QtCheckBoxFactory() override;
 
 protected:
@@ -206,7 +206,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDoubleSpinBoxFactory
     : public QtAbstractEditorFactory<QtDoublePropertyManager> {
   Q_OBJECT
 public:
-  QtDoubleSpinBoxFactory(QObject *parent = 0);
+  QtDoubleSpinBoxFactory(QObject *parent = nullptr);
   ~QtDoubleSpinBoxFactory() override;
 
 protected:
@@ -234,7 +234,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtLineEditFactory
     : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  QtLineEditFactory(QObject *parent = 0);
+  QtLineEditFactory(QObject *parent = nullptr);
   ~QtLineEditFactory() override;
 
 protected:
@@ -262,7 +262,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDateEditFactory
     : public QtAbstractEditorFactory<QtDatePropertyManager> {
   Q_OBJECT
 public:
-  QtDateEditFactory(QObject *parent = 0);
+  QtDateEditFactory(QObject *parent = nullptr);
   ~QtDateEditFactory() override;
 
 protected:
@@ -290,7 +290,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtTimeEditFactory
     : public QtAbstractEditorFactory<QtTimePropertyManager> {
   Q_OBJECT
 public:
-  QtTimeEditFactory(QObject *parent = 0);
+  QtTimeEditFactory(QObject *parent = nullptr);
   ~QtTimeEditFactory() override;
 
 protected:
@@ -316,7 +316,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtDateTimeEditFactory
     : public QtAbstractEditorFactory<QtDateTimePropertyManager> {
   Q_OBJECT
 public:
-  QtDateTimeEditFactory(QObject *parent = 0);
+  QtDateTimeEditFactory(QObject *parent = nullptr);
   ~QtDateTimeEditFactory() override;
 
 protected:
@@ -342,7 +342,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtKeySequenceEditorFactory
     : public QtAbstractEditorFactory<QtKeySequencePropertyManager> {
   Q_OBJECT
 public:
-  QtKeySequenceEditorFactory(QObject *parent = 0);
+  QtKeySequenceEditorFactory(QObject *parent = nullptr);
   ~QtKeySequenceEditorFactory() override;
 
 protected:
@@ -369,7 +369,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCharEditorFactory
     : public QtAbstractEditorFactory<QtCharPropertyManager> {
   Q_OBJECT
 public:
-  QtCharEditorFactory(QObject *parent = 0);
+  QtCharEditorFactory(QObject *parent = nullptr);
   ~QtCharEditorFactory() override;
 
 protected:
@@ -395,7 +395,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtEnumEditorFactory
     : public QtAbstractEditorFactory<QtEnumPropertyManager> {
   Q_OBJECT
 public:
-  QtEnumEditorFactory(QObject *parent = 0);
+  QtEnumEditorFactory(QObject *parent = nullptr);
   ~QtEnumEditorFactory() override;
 
 protected:
@@ -424,7 +424,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtCursorEditorFactory
     : public QtAbstractEditorFactory<QtCursorPropertyManager> {
   Q_OBJECT
 public:
-  QtCursorEditorFactory(QObject *parent = 0);
+  QtCursorEditorFactory(QObject *parent = nullptr);
   ~QtCursorEditorFactory() override;
 
 protected:
@@ -450,7 +450,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtColorEditorFactory
     : public QtAbstractEditorFactory<QtColorPropertyManager> {
   Q_OBJECT
 public:
-  QtColorEditorFactory(QObject *parent = 0);
+  QtColorEditorFactory(QObject *parent = nullptr);
   ~QtColorEditorFactory() override;
 
 protected:
@@ -476,7 +476,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtFontEditorFactory
     : public QtAbstractEditorFactory<QtFontPropertyManager> {
   Q_OBJECT
 public:
-  QtFontEditorFactory(QObject *parent = 0);
+  QtFontEditorFactory(QObject *parent = nullptr);
   ~QtFontEditorFactory() override;
 
 protected:

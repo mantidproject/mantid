@@ -55,7 +55,7 @@ Usage
 
     # Does the file exist
     path = os.path.join(os.path.expanduser("~"), file_name)
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -93,7 +93,7 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
     SaveGSS(ws, path, SplitFiles=False, ExtendedHeader=True, UseSpectrumNumberAsBankID=True)
 
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
         
 Output:
 

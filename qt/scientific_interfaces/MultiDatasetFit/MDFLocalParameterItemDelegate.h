@@ -22,7 +22,8 @@ class LocalParameterEditor;
 class LocalParameterItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 public:
-  explicit LocalParameterItemDelegate(EditLocalParameterDialog *parent = NULL);
+  explicit LocalParameterItemDelegate(
+      EditLocalParameterDialog *parent = nullptr);
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const override;
   void setEditorData(QWidget *editor, const QModelIndex &index) const override;

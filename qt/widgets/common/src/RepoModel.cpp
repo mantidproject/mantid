@@ -214,7 +214,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
     return QVariant();
   RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
   try {
-    QString path = item->path();
+    const QString &path = item->path();
     Mantid::API::ScriptInfo inf;
     Mantid::API::SCRIPTSTATUS status;
     // return the data for the display role
@@ -519,7 +519,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
     if (box->exec() != QMessageBox::Yes) {
       // the user gave up deleting this entry, release memory
       delete box;
-      box = 0;
+      box = nullptr;
       return false;
     }
 
@@ -527,7 +527,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
     QString comment(box->comment());
     { // release memory
       delete box;
-      box = 0;
+      box = nullptr;
     }
 
     // remove from central repository
@@ -590,7 +590,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
  */
 Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const {
   if (!index.isValid())
-    return 0;
+    return nullptr;
   if (index.column() == 0)
     return QAbstractItemModel::flags(index);
   // define that setData will accept the EditRole.
@@ -1042,7 +1042,7 @@ RepoModel::DeleteQueryBox::DeleteQueryBox(const QString &path, QWidget *parent)
           "font-style:italic;\">" << path << "</span></p></body></html>";
 
   // creation of the new widgets
-  comment_te = NULL;
+  comment_te = nullptr;
 
   setText(info_str);
 

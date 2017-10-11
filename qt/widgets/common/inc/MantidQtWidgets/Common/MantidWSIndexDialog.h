@@ -230,7 +230,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
     /// constructor to join together the QLineEdit and an 'invisible'
     /// *
     /// label.
-    explicit QLineEditWithErrorMark(QWidget *parent = 0);
+    explicit QLineEditWithErrorMark(QWidget *parent = nullptr);
     /// virtual destructor to allow Qt to deallocate all objects
     ~QLineEditWithErrorMark() override{};
     /// provide acess to the QLineEdit

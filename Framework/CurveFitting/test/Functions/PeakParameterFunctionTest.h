@@ -4,11 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -62,7 +62,7 @@ public:
     fn->setParameter("Height", 4.0);
 
     FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
-    Mantid::API::BasicJacobian jacobian(4, 3);
+    Mantid::CurveFitting::Jacobian jacobian(4, 3);
 
     TS_ASSERT_THROWS_NOTHING(fn->functionDeriv(domain, jacobian));
 
@@ -93,7 +93,7 @@ public:
 
     FunctionDomain1DVector domain(std::vector<double>(3, 0.0));
     FunctionValues values(domain);
-    Mantid::API::BasicJacobian jacobian(domain.size(), 3);
+    Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
     TS_ASSERT_THROWS(fn->function(domain, values), std::invalid_argument);
     TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian),
@@ -110,7 +110,7 @@ public:
 
     FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
     FunctionValues values(domain);
-    Mantid::API::BasicJacobian jacobian(domain.size(), 3);
+    Mantid::CurveFitting::Jacobian jacobian(domain.size(), 3);
 
     TS_ASSERT_THROWS(fn->function(domain, values), std::runtime_error);
     TS_ASSERT_THROWS(fn->functionDeriv(domain, jacobian), std::runtime_error);

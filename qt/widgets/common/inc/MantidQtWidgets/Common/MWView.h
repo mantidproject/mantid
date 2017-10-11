@@ -72,7 +72,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MWView
   Q_OBJECT
 
 public:
-  MWView(QWidget *parent = 0);
+  MWView(QWidget *parent = nullptr);
   ~MWView() override;
   void loadColorMap(QString filename = QString());
   void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);

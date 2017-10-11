@@ -1,11 +1,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -230,7 +230,7 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
   function->function(*domain, *values);
   size_t np = function->nParams(); // number of parameters
   size_t ny = values->size();      // number of data points
-  API::BasicJacobian jacobian(ny, np);
+  Jacobian jacobian(ny, np);
   function->functionDeriv(*domain, jacobian);
 
   size_t iActiveP = 0;

@@ -262,13 +262,13 @@ private:
   void plotTubeIntegrals(int detid);
   void prepareDataForSinglePlot(int detid, std::vector<double> &x,
                                 std::vector<double> &y,
-                                std::vector<double> *err = NULL);
+                                std::vector<double> *err = nullptr);
   void prepareDataForSumsPlot(int detid, std::vector<double> &x,
                               std::vector<double> &y,
-                              std::vector<double> *err = NULL);
+                              std::vector<double> *err = nullptr);
   void prepareDataForIntegralsPlot(int detid, std::vector<double> &x,
                                    std::vector<double> &y,
-                                   std::vector<double> *err = NULL);
+                                   std::vector<double> *err = nullptr);
   static double getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
                                    const Mantid::Kernel::V3D &origin,
                                    const Mantid::Kernel::V3D &normal);

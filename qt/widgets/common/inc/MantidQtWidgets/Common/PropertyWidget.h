@@ -71,8 +71,8 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyWidget : public QWidget {
 public:
   enum Info { INVALID, REPLACE, RESTORE };
 
-  PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = NULL,
-                 QGridLayout *layout = NULL, int row = -1);
+  PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
+                 QGridLayout *layout = nullptr, int row = -1);
   ~PropertyWidget() override;
 
   bool inGrid() const;

@@ -46,14 +46,16 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   input->getSpectrum(2).setSpectrumNo(2);
   boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
   Mantid::Geometry::Detector *mon =
-      new Mantid::Geometry::Detector("monitor", 0, NULL);
+      new Mantid::Geometry::Detector("monitor", 0, nullptr);
   instr->add(mon);
   instr->markAsMonitor(mon);
   Mantid::Geometry::Detector *det =
-      new Mantid::Geometry::Detector("NOTmonitor", 1, NULL);
+      new Mantid::Geometry::Detector("NOTmonitor", 1, nullptr);
   instr->add(det);
   instr->markAsDetector(det);
   input->setInstrument(instr);
+  input->getSpectrum(0).setDetectorID(0);
+  input->getSpectrum(1).setDetectorID(1);
 
   AnalysisDataService::Instance().addOrReplace("normMon", input);
 
@@ -65,6 +67,7 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   // Now need to set up a minimal instrument and spectra-detector map
   input->getSpectrum(0).setSpectrumNo(0);
   monWS->setInstrument(input->getInstrument());
+  monWS->getSpectrum(0).setDetectorID(0);
 
   AnalysisDataService::Instance().addOrReplace("monWS", monWS);
 }
@@ -387,7 +390,7 @@ public:
     TS_ASSERT(monSpec->getSettings()->isConditionChanged(&norm6));
     // this funciton is called by gui when the above is true. It should not
     // throw and change the validator
-    IPropertySettings *pSett(NULL);
+    IPropertySettings *pSett(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSett = monSpec->getSettings());
     TS_ASSERT_THROWS_NOTHING(pSett->applyChanges(&norm6, monSpec));
     // it should return the list of allowed monitor ID-s

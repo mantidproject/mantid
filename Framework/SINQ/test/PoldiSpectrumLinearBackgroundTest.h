@@ -4,9 +4,9 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -95,7 +95,7 @@ public:
     function->setParameter("A1", 2.0);
 
     FunctionDomain1DSpectrum domainOne(1, m_xValues);
-    Mantid::API::BasicJacobian jacobian(domainOne.size(),
+    Mantid::CurveFitting::Jacobian jacobian(domainOne.size(),
                                             function->nParams());
     function->functionDeriv(domainOne, jacobian);
 

@@ -23,6 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::Algorithms::Bin2DPowderDiffraction;
+using Mantid::Types::Event::TofEvent;
 
 class Bin2DPowderDiffractionTest : public CxxTest::TestSuite {
 public:

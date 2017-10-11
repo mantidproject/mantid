@@ -47,7 +47,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MuonFitPropertyBrowser
 
 public:
   /// Constructor.
-  MuonFitPropertyBrowser(QWidget *parent = NULL, QObject *mantidui = NULL);
+  MuonFitPropertyBrowser(QWidget *parent = nullptr,
+                         QObject *mantidui = nullptr);
   /// Initialise the layout.
   void init() override;
   /// Set the input workspace name
@@ -104,7 +105,6 @@ public:
 
   QStringList getChosenGroups() const;
   QStringList getChosenPeriods() const;
-
   void setTFAsymm(bool state);
   /// Clear list of selected groups
   void clearChosenGroups() const;

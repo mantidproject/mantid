@@ -6,11 +6,11 @@
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/UserFunction.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -207,7 +207,7 @@ public:
     FunctionValues y(x);
     fun.function(x, y);
 
-    Mantid::API::BasicJacobian jac(x.size(), 3);
+    Mantid::CurveFitting::Jacobian jac(x.size(), 3);
     fun.functionDeriv(x, jac);
 
     for (size_t i = 0; i < x.size(); ++i) {

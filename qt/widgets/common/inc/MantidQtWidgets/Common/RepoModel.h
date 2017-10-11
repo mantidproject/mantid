@@ -105,7 +105,7 @@ class RepoModel : public QAbstractItemModel {
   public:
     // construct the RepoItem passing the script repository path
     RepoItem(const QString &label, const QString &path = "/",
-             RepoItem *parent = 0);
+             RepoItem *parent = nullptr);
 
     ~RepoItem();
     // append child to build the directory tree
@@ -145,7 +145,7 @@ class RepoModel : public QAbstractItemModel {
 
   class UploadForm : public QDialog {
   public:
-    UploadForm(const QString &file2upload, QWidget *parent = 0);
+    UploadForm(const QString &file2upload, QWidget *parent = nullptr);
     ~UploadForm() override;
     QString email();
     QString author();
@@ -170,7 +170,7 @@ class RepoModel : public QAbstractItemModel {
    */
   class DeleteQueryBox : public QMessageBox {
   public:
-    DeleteQueryBox(const QString &path, QWidget *parent = 0);
+    DeleteQueryBox(const QString &path, QWidget *parent = nullptr);
     ~DeleteQueryBox() override;
     QString comment();
 
@@ -180,7 +180,7 @@ class RepoModel : public QAbstractItemModel {
 
 public:
   /// constructor
-  RepoModel(QObject *parent = 0);
+  RepoModel(QObject *parent = nullptr);
   /// destructor
   ~RepoModel() override;
   /// access to the ScriptRepository data

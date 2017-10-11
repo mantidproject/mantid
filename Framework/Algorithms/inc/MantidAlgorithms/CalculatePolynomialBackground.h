@@ -7,7 +7,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** CalculatePolynomialBackground : TODO: DESCRIPTION
+/** CalculatePolynomialBackground : This algorithm fits a polynomial
+  background to an input workspace and returns the evaluated background as
+  the output workspace.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -30,7 +32,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculatePolynomialBackground
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -40,8 +43,6 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::vector<double> includedRanges(const std::pair<double, double> &totalRange) const;
-  std::pair<double, double> totalRange(API::MatrixWorkspace &ws, const size_t wsIndex) const;
 };
 
 } // namespace Algorithms

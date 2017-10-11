@@ -5,9 +5,9 @@
 
 #include "MantidCurveFitting/Functions/Voigt.h"
 
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -79,7 +79,7 @@ public:
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
 
-    Mantid::API::BasicJacobian jacobian(g_domainSize, 4);
+    Mantid::CurveFitting::Jacobian jacobian(g_domainSize, 4);
     voigtFn->functionDeriv(*m_domain, jacobian);
     const size_t nValues(g_domainSize);
     for (size_t i = 0; i < nValues; ++i) {

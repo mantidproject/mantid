@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/Lorentzian.h"
-#include "MantidAPI/BasicJacobian.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 #include <boost/make_shared.hpp>
 using Mantid::CurveFitting::Functions::Lorentzian;
@@ -29,7 +29,7 @@ public:
     const size_t nData(1);
     std::vector<double> xValues(nData, 2.5);
 
-    Mantid::API::BasicJacobian jacobian(nData, 3);
+    Mantid::CurveFitting::Jacobian jacobian(nData, 3);
     func->functionDerivLocal(&jacobian, xValues.data(), nData);
 
     double dfda = jacobian.get(0, 0);

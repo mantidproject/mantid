@@ -105,9 +105,6 @@ protected:
   void init(const std::size_t &NVectors,
             const HistogramData::Histogram &histogram) override;
 
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
-
   /// a vector holding workspace index of monitors in the workspace
   std::vector<specnum_t> m_monitorList;
 

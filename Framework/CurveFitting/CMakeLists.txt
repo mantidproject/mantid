@@ -304,6 +304,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/HistogramDomainCreator.h
 	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IMWDomainCreator.h
+	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/MSVesuvioHelpers.h

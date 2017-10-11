@@ -10,7 +10,6 @@ namespace DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Quat;
-using Mantid::Kernel::V3D;
 using Mantid::API::WorkspaceProperty;
 
 // Register the algorithm into the AlgorithmFactory

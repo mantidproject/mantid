@@ -1,9 +1,10 @@
 #ifndef MANTID_LIVEDATA_ISISKAFKATESTING_H_
 #define MANTID_LIVEDATA_ISISKAFKATESTING_H_
 
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <gmock/gmock.h>
 
 GCC_DIAG_OFF(conversion)
@@ -135,7 +136,7 @@ public:
     assert(buffer);
 
     // Convert date to time_t
-    auto mantidTime = Mantid::Kernel::DateAndTime(m_startTime, false);
+    auto mantidTime = Mantid::Types::Core::DateAndTime(m_startTime);
     auto tmb = mantidTime.to_tm();
     uint64_t startTime = static_cast<uint64_t>(std::mktime(&tmb));
 
@@ -186,6 +187,6 @@ private:
   // These match the detector numbers in HRPDTEST_Definition.xml
   std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
 };
-}
+} // namespace ISISKafkaTesting
 
 #endif // MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTESTMOCKS_H_

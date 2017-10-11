@@ -55,10 +55,7 @@ bool greaterIsLess(double x1, double x2) { return x1 > x2; }
 
 using namespace Kernel;
 using API::Workspace;
-using API::Axis;
 using API::MatrixWorkspace;
-using API::Algorithm;
-using API::Jacobian;
 
 /**
  * Constructor.
