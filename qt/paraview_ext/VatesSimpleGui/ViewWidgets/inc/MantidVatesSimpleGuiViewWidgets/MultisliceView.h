@@ -116,9 +116,9 @@ private:
 
   QPointer<pqMultiSliceView> m_mainView; ///< The main view class
   Ui::MultiSliceViewClass m_ui;          ///< The view's UI form
+
   QMenu *m_contextMenu;
   QLineEdit *m_edit;
-  QWidgetAction *m_action;
   int m_axisIndex;
   double m_sliceOffsetOnAxis;
 };

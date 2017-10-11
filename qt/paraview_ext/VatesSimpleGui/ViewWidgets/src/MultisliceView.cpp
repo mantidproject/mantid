@@ -66,13 +66,19 @@ MultiSliceView::MultiSliceView(QWidget *parent,
                                bool createRenderProxy)
     : ViewBase(parent, rebinnedSourcesManager),
       m_contextMenu(new QMenu(tr("Context menu"), this)),
-      m_edit(new QLineEdit(this)), m_action(new QWidgetAction(this)) {
+      m_edit(new QLineEdit(this)) {
   this->m_ui.setupUi(this);
 
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   m_edit->setPlaceholderText(QString("Slice Position"));
-  m_action->setDefaultWidget(m_edit);
-  m_contextMenu->addAction(m_action);
+  auto action = new QWidgetAction(this);
+  action->setDefaultWidget(m_edit);
+  m_contextMenu->addAction(action);
+
+  QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this,
+                   SLOT(checkState(const QString &)));
+  QObject::connect(this->m_edit, SIGNAL(editingFinished()), this,
+                   SLOT(setSlicePosition()));
 
   if (createRenderProxy) {
     pqRenderView *tmp =
@@ -82,11 +88,6 @@ MultiSliceView::MultiSliceView(QWidget *parent,
     QObject::connect(this->m_mainView,
                      SIGNAL(sliceClicked(int, double, int, int)), this,
                      SLOT(checkSliceClicked(int, double, int, int)));
-
-    QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this,
-                     SLOT(checkState(const QString &)));
-    QObject::connect(this->m_edit, SIGNAL(editingFinished()), this,
-                     SLOT(setSlicePosition()));
   }
 }
 
