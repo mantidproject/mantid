@@ -151,7 +151,7 @@ void SaveIsawPeaks::exec() {
     // TODO: The experiment date might be more useful than the instrument date.
     // For now, this allows the proper instrument to be loaded back after
     // saving.
-    Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
+    Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out << expDate.toISO8601String() << '\n';
 
     out << "6         L1    T0_SHIFT\n";

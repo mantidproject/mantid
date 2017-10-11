@@ -66,8 +66,8 @@ class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  Graph3D(const QString &label, QWidget *parent, const char *name = 0,
-          Qt::WFlags f = 0);
+  Graph3D(const QString &label, QWidget *parent, const char *name = nullptr,
+          Qt::WFlags f = nullptr);
   ~Graph3D() override;
 
   void initPlot();

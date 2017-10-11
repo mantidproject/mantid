@@ -12,7 +12,7 @@ class DLLExport Elwin : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Elwin(QWidget *parent = 0);
+  Elwin(QWidget *parent = nullptr);
 
 private:
   void setup() override;
@@ -34,12 +34,10 @@ private slots:
   void unGroupInput(bool error);
   void saveClicked();
   void plotClicked();
-  void plotCurrentPreview();
 
 private:
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
-  Mantid::API::MatrixWorkspace_sptr m_ElInputWS;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

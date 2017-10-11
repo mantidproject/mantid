@@ -41,6 +41,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Indexing::IndexInfo;
+using Mantid::Types::Core::DateAndTime;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -440,6 +441,13 @@ public:
       TS_ASSERT_EQUALS(testWS.getSpectrum(i).getSpectrumNo(), specnum_t(i + 1));
       TS_ASSERT(testWS.getSpectrum(i).hasDetectorID(detid_t(i)));
     }
+  }
+
+  void testEmptyWorkspace() {
+    WorkspaceTester ws;
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.blocksize(), 0);
+    TS_ASSERT_EQUALS(ws.size(), 0);
   }
 
   void test_updateSpectraUsing() {

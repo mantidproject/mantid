@@ -56,7 +56,7 @@ class GenericDialog : public AlgorithmDialog {
 
 public:
   // Constructor
-  GenericDialog(QWidget *parent = 0);
+  GenericDialog(QWidget *parent = nullptr);
   // Destructor
   ~GenericDialog() override;
 

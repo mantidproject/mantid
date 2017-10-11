@@ -5,6 +5,7 @@ digraph MSDFit {
   subgraph params {
     $param_style
     InputWorkspace
+    Model
     XStart
     XEnd
     SpecMin
@@ -29,6 +30,7 @@ digraph MSDFit {
   }
 
   InputWorkspace              -> FitFunction
+  Model                       -> FitFunction
   SpecMin                     -> FitFunction
   SpecMax                     -> FitFunction
   FitFunction                 -> PlotPeakByLogValue

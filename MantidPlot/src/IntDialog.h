@@ -44,7 +44,8 @@ class IntDialog : public QDialog {
   Q_OBJECT
 
 public:
-  IntDialog(QWidget *parent = 0, Graph *g = 0, Qt::WFlags fl = 0);
+  IntDialog(QWidget *parent = nullptr, Graph *g = nullptr,
+            Qt::WFlags fl = nullptr);
 
 public slots:
   void accept() override;

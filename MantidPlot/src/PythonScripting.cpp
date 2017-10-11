@@ -68,8 +68,8 @@ ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) {
 
 /** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-    : ScriptingEnv(parent, "Python"), m_globals(NULL), m_math(NULL),
-      m_sys(NULL), m_mainThreadState(NULL), m_gil() {}
+    : ScriptingEnv(parent, "Python"), m_globals(nullptr), m_math(nullptr),
+      m_sys(nullptr), m_mainThreadState(nullptr) {}
 
 PythonScripting::~PythonScripting() {}
 
@@ -77,7 +77,7 @@ PythonScripting::~PythonScripting() {}
  * @param args A list of strings that denoting command line arguments
  */
 void PythonScripting::setSysArgs(const QStringList &args) {
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
   PyObject *argv = toPyList(args);
   if (argv && m_sys) {
     PyDict_SetItemString(m_sys, "argv", argv);
@@ -138,7 +138,7 @@ bool PythonScripting::start() {
   PyImport_AppendInittab("_qti", &init_qti);
 #endif
   PythonInterpreter::initialize();
-  ScopedPythonGIL lock(gil());
+  ScopedPythonGIL lock;
 
   // Keep a hold of the globals, math and sys dictionary objects
   PyObject *mainmod = PyImport_AddModule("__main__");
@@ -291,7 +291,7 @@ PyObject *PythonScripting::toPyList(const QStringList &items) {
   Py_ssize_t length = static_cast<Py_ssize_t>(items.length());
   PyObject *pylist = PyList_New((length));
   for (Py_ssize_t i = 0; i < length; ++i) {
-    QString item = items.at(static_cast<int>(i));
+    const QString &item = items.at(static_cast<int>(i));
     PyList_SetItem(pylist, i, FROM_CSTRING(item.toAscii()));
   }
   return pylist;
@@ -327,7 +327,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
                                  PyObject *dict) {
   if (!val)
     return false;
-  PyObject *pyobj = NULL;
+  PyObject *pyobj = nullptr;
 
   if (!sipAPI__qti) {
     throw std::runtime_error("sipAPI_qti is undefined");
@@ -338,7 +338,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
   const sipTypeDef *klass = sipFindType(val->metaObject()->className());
   if (!klass)
     return false;
-  pyobj = sipConvertFromType(val, klass, NULL);
+  pyobj = sipConvertFromType(val, klass, nullptr);
 
   if (!pyobj)
     return false;
@@ -352,7 +352,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name,
 }
 
 bool PythonScripting::setInt(int val, const char *name) {
-  return setInt(val, name, NULL);
+  return setInt(val, name, nullptr);
 }
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
@@ -368,7 +368,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict) {
 }
 
 bool PythonScripting::setDouble(double val, const char *name) {
-  return setDouble(val, name, NULL);
+  return setDouble(val, name, nullptr);
 }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict) {

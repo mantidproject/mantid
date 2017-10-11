@@ -111,8 +111,24 @@ public:
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
   const std::string id() const override { return "AxeslessWorkspaceTester"; }
-  size_t size() const override { return m_vec.size() * blocksize(); }
+  size_t size() const override {
+    size_t total_size = 0;
+    for (const auto &it : m_vec) {
+      total_size += it.dataY().size();
+    }
+    return total_size;
+  }
   size_t blocksize() const override {
+    if (m_vec.empty()) {
+      return 0;
+    } else {
+      size_t numY = m_vec[0].dataY().size();
+      for (const auto &it : m_vec) {
+        if (it.dataY().size() != numY)
+          throw std::logic_error("non-constant number of bins");
+      }
+      return numY;
+    }
     return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
   ISpectrum &getSpectrum(const size_t index) override {

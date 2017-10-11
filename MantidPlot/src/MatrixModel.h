@@ -48,7 +48,7 @@ protected:
   explicit MatrixModel(QObject *parent);
 
 public:
-  MatrixModel(int rows = 32, int cols = 32, QObject *parent = 0);
+  MatrixModel(int rows = 32, int cols = 32, QObject *parent = nullptr);
   MatrixModel(const QImage &image, QObject *parent);
   ~MatrixModel() override;
 

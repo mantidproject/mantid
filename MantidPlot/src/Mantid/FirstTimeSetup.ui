@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>990</width>
-    <height>712</height>
+    <width>745</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>990</width>
-    <height>712</height>
+    <width>745</width>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>990</width>
-    <height>712</height>
+    <width>745</width>
+    <height>600</height>
    </size>
   </property>
   <property name="font">
@@ -41,24 +41,28 @@
 	background-color: rgb(190, 230, 190);
 	background-image: url(:/First_use_Background.png);
     background-repeat: no-repeat;
-	image: url(:/mantid.png);
+	image: url(:/mantid_smaller.png);
 	image-position: right bottom
 }
 QDialog#FirstTimeSetup QLabel{
 	font: 14px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QCheckbox{
-	font: 18px &quot;Open Sans&quot;;
+	font: 16px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QPushButton{
 	font: 14px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QCommandLinkButton{
-	font: 28px &quot;Open Sans&quot;;
+	font: 22px &quot;Open Sans&quot;;
+
 }
 </string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <property name="spacing">
+    <number>2</number>
+   </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_8">
      <property name="topMargin">
@@ -115,6 +119,9 @@ font-size: 28px</string>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_5">
+     <property name="spacing">
+      <number>6</number>
+     </property>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <property name="topMargin">
@@ -154,8 +161,8 @@ font-size: 28px</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -192,8 +199,8 @@ font-size: 28px</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -227,8 +234,8 @@ font-size: 28px</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -262,8 +269,8 @@ font-size: 28px</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -297,8 +304,8 @@ font-size: 28px</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -319,7 +326,7 @@ font-size: 28px</string>
            </property>
            <property name="styleSheet">
             <string notr="true">color: rgb(45, 105, 45);
-font-size: 32px;</string>
+font-size: 28px;</string>
            </property>
            <property name="text">
             <string>Tutorials</string>
@@ -353,8 +360,8 @@ color: rgb(0, 0, 0);</string>
            </property>
            <property name="iconSize">
             <size>
-             <width>48</width>
-             <height>48</height>
+             <width>40</width>
+             <height>40</height>
             </size>
            </property>
            <property name="checkable">
@@ -378,7 +385,7 @@ color: rgb(0, 0, 0);</string>
            </property>
            <property name="styleSheet">
             <string notr="true">color: rgb(45, 105, 45);
-font-size: 32px;</string>
+font-size: 28px;</string>
            </property>
            <property name="text">
             <string>Welcome</string>
@@ -406,18 +413,18 @@ font-size: 32px;</string>
 	background-color: rgb(240, 240, 240);
  }
 QGroupBox#grpPersonalSetup QLabel{
-	font: 16px &quot;Open Sans&quot;;
+	font: 12px &quot;Open Sans&quot;;
 	color: rgb(121, 121, 121);
 }
 QGroupBox#grpPersonalSetup QCheckBox{
-	font: 16px &quot;Open Sans&quot;;
+	font: 12px &quot;Open Sans&quot;;
 	color: rgb(121, 121, 121);
 }
 QGroupBox#grpPersonalSetup QPushButton{
-	font: 14px &quot;Open Sans&quot;;
+	font: 12px &quot;Open Sans&quot;;
 }
 QGroupBox#grpPersonalSetup QComboBox{
-	font: 14px &quot;Open Sans&quot;;
+	font: 12px &quot;Open Sans&quot;;
 }</string>
            </property>
            <property name="title">
@@ -428,7 +435,7 @@ QGroupBox#grpPersonalSetup QComboBox{
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
             <property name="spacing">
-             <number>12</number>
+             <number>0</number>
             </property>
             <property name="topMargin">
              <number>1</number>
@@ -436,7 +443,8 @@ QGroupBox#grpPersonalSetup QComboBox{
             <item>
              <widget class="QLabel" name="label_3">
               <property name="styleSheet">
-               <string notr="true">color: rgb(38, 128, 20);</string>
+               <string notr="true">color: rgb(38, 128, 20);
+font-size: 18px;</string>
               </property>
               <property name="text">
                <string>Personal Setup</string>
@@ -457,8 +465,11 @@ QGroupBox#grpPersonalSetup QComboBox{
               <property name="formAlignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
               </property>
+              <property name="horizontalSpacing">
+               <number>5</number>
+              </property>
               <property name="verticalSpacing">
-               <number>12</number>
+               <number>5</number>
               </property>
               <item row="0" column="0">
                <widget class="QLabel" name="label">
@@ -538,7 +549,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
                  <string notr="true"/>
                 </property>
                 <property name="text">
-                 <string>Set local data directories</string>
+                 <string>Set data directories</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -548,8 +559,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
               <item row="2" column="1">
                <widget class="QPushButton" name="pbMUD">
                 <property name="styleSheet">
-                 <string notr="true">color: rgb(0, 0, 0);
-</string>
+                 <string notr="true"/>
                 </property>
                 <property name="text">
                  <string>Manage User Directories</string>
@@ -630,7 +640,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
           <widget class="QLabel" name="lbUpdate">
            <property name="minimumSize">
             <size>
-             <width>600</width>
+             <width>400</width>
              <height>0</height>
             </size>
            </property>
@@ -644,7 +654,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
             </font>
            </property>
            <property name="styleSheet">
-            <string notr="true">font: 16px &quot;Open Sans&quot;;
+            <string notr="true">font: 12px &quot;Open Sans&quot;;
 color: rgb(25,125,25);</string>
            </property>
            <property name="text">
@@ -711,7 +721,7 @@ color: rgb(25,125,25);</string>
            <item>
             <widget class="QLabel" name="label_4">
              <property name="styleSheet">
-              <string notr="true">font: 16px &quot;Open Sans&quot;;
+              <string notr="true">font: 12px &quot;Open Sans&quot;;
 color: rgb(25,125,25);</string>
              </property>
              <property name="text">
@@ -746,7 +756,7 @@ color: rgb(25,125,25);</string>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>15</height>
             </size>
            </property>
           </spacer>
@@ -793,7 +803,7 @@ color: rgb(25,125,25);</string>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>180</width>
+           <width>100</width>
            <height>20</height>
           </size>
          </property>

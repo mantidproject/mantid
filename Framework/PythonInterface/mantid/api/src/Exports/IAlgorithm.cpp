@@ -176,6 +176,25 @@ object getOutputProperties(IAlgorithm &self) {
 }
 
 /**
+ * Returns a list of inout property names in the order they were declared
+ * @param self :: A pointer to the python object wrapping and Algorithm.
+ * @return A Python list of strings
+ */
+object getInOutProperties(IAlgorithm &self) {
+  const PropertyVector &properties(self.getProperties()); // No copy
+
+  Environment::GlobalInterpreterLock gil;
+  list names;
+  ToPyString toPyStr;
+  for (const auto &p : properties) {
+    if (p->direction() == Direction::InOut) {
+      names.append(handle<>(toPyStr(p->name())));
+    }
+  }
+  return names;
+}
+
+/**
  * Create a doc string for the simple API
  * @param self :: A pointer to the python object wrapping and Algorithm
  * @return A string that documents an algorithm
@@ -374,6 +393,8 @@ void export_ialgorithm() {
            "optional ones.")
       .def("outputProperties", &getOutputProperties, arg("self"),
            "Returns a list of the output properties on the algorithm")
+      .def("inoutProperties", &getInOutProperties, arg("self"),
+           "Returns a list of the inout properties on the algorithm")
       .def("isInitialized", &IAlgorithm::isInitialized, arg("self"),
            "Returns True if the algorithm is initialized, False otherwise")
       .def("isExecuted", &IAlgorithm::isExecuted, arg("self"),

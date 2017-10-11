@@ -22,7 +22,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
+// Temporarily disabled to prevent freezing when opening the file dialog.
+// DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
@@ -133,13 +134,13 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   if (m_uiTabCalib.MWRunFiles_new_vanadium_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_vanadium_num->setUserInput(
+    m_uiTabCalib.MWRunFiles_new_vanadium_num->setFileTextWithoutSearch(
         QString::fromStdString(vanadiumRun));
   }
   if (m_uiTabCalib.MWRunFiles_new_ceria_num->getUserInput()
           .toString()
           .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_ceria_num->setUserInput(
+    m_uiTabCalib.MWRunFiles_new_ceria_num->setFileTextWithoutSearch(
         QString::fromStdString(ceriaRun));
   }
 

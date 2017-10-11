@@ -80,7 +80,7 @@ void FunctionBrowser::createBrowser() {
   if (m_multiDataset) {
     options << globalOptionName;
   }
-  m_browser = new QtTreePropertyBrowser(NULL, options);
+  m_browser = new QtTreePropertyBrowser(nullptr, options);
 
   /* Create property managers: they create, own properties, get and set values
    */
@@ -106,7 +106,7 @@ void FunctionBrowser::createBrowser() {
   ParameterEditorFactory *paramEditorFactory = new ParameterEditorFactory(this);
 
   QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(
-      NULL);
+      nullptr);
   if (m_multiDataset) {
     auto buttonFactory = new DoubleDialogEditorFactory(this);
     auto compositeFactory =
@@ -268,7 +268,7 @@ void FunctionBrowser::setFunction(const QString &funStr) {
  */
 void FunctionBrowser::setFunction(Mantid::API::IFunction_sptr fun) {
   clear();
-  addFunction(NULL, fun);
+  addFunction(nullptr, fun);
   emit functionStructureChanged();
 }
 
@@ -281,7 +281,7 @@ FunctionBrowser::AProperty
 FunctionBrowser::addProperty(QtProperty *parent, QtProperty *subproperty) {
   AProperty ap;
   ap.prop = subproperty;
-  if (parent == NULL) {
+  if (parent == nullptr) {
     ap.item = m_browser->addProperty(subproperty);
   } else {
     parent->addSubProperty(subproperty);
@@ -331,14 +331,14 @@ void FunctionBrowser::removeProperty(QtProperty *prop) {
         if (!cp.upper) {
           m_constraints.erase(it);
         } else {
-          cp.lower = NULL;
+          cp.lower = nullptr;
         }
         break;
       } else if (cp.upper == prop) {
         if (!cp.lower) {
           m_constraints.erase(it);
         } else {
-          cp.upper = NULL;
+          cp.upper = nullptr;
         }
         break;
       }
@@ -423,7 +423,7 @@ void FunctionBrowser::addFunction(QtProperty *prop,
                                   Mantid::API::IFunction_sptr fun) {
   if (!prop) {
     AProperty ap =
-        addFunctionProperty(NULL, QString::fromStdString(fun->name()));
+        addFunctionProperty(nullptr, QString::fromStdString(fun->name()));
     setFunction(ap.prop, fun);
   } else {
     Mantid::API::IFunction_sptr parentFun = getFunction(prop);
@@ -463,7 +463,7 @@ public:
 protected:
   /// Create string property
   FunctionBrowser::AProperty apply(const std::string &str) const override {
-    QtProperty *prop = NULL;
+    QtProperty *prop = nullptr;
     if (m_attName == "FileName") {
       prop = m_browser->m_filenameManager->addProperty(m_attName);
       m_browser->m_filenameManager->setValue(prop, QString::fromStdString(str));
@@ -669,9 +669,9 @@ void FunctionBrowser::addAttributeAndParameterProperties(
  */
 FunctionBrowser::AProperty FunctionBrowser::addIndexProperty(QtProperty *prop) {
   AProperty ap;
-  ap.item = NULL;
-  ap.parent = NULL;
-  ap.prop = NULL;
+  ap.item = nullptr;
+  ap.parent = nullptr;
+  ap.prop = nullptr;
   if (!prop)
     return ap;
   if (!isFunction(prop))
@@ -694,7 +694,7 @@ FunctionBrowser::AProperty FunctionBrowser::addIndexProperty(QtProperty *prop) {
  * @param index :: The parent function's index
  */
 void FunctionBrowser::updateFunctionIndices(QtProperty *prop, QString index) {
-  if (prop == NULL) {
+  if (prop == nullptr) {
     auto top = m_browser->properties();
     if (top.isEmpty())
       return;
@@ -719,9 +719,9 @@ FunctionBrowser::AProperty FunctionBrowser::getFunctionProperty() const {
   auto props = m_browser->properties();
   if (props.isEmpty()) {
     AProperty ap;
-    ap.item = NULL;
-    ap.parent = NULL;
-    ap.prop = NULL;
+    ap.item = nullptr;
+    ap.parent = nullptr;
+    ap.prop = nullptr;
     return ap;
   }
   QtProperty *prop = props[0];
@@ -912,7 +912,7 @@ QtProperty *FunctionBrowser::getFunctionProperty(const QString &index) const {
   }
 
   // No function with such index
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -925,9 +925,9 @@ void FunctionBrowser::addTieProperty(QtProperty *prop, QString tie) {
     throw std::runtime_error("FunctionBrowser: null property pointer");
   }
   AProperty ap;
-  ap.item = NULL;
-  ap.prop = NULL;
-  ap.parent = NULL;
+  ap.item = nullptr;
+  ap.prop = nullptr;
+  ap.parent = nullptr;
 
   if (!isParameter(prop))
     return;
@@ -1084,7 +1084,7 @@ FunctionBrowser::addConstraintProperties(QtProperty *prop, QString constraint) {
   AConstraint ac;
   // ac.constraint = constraint;
   ac.paramProp = prop;
-  ac.lower = ac.upper = NULL;
+  ac.lower = ac.upper = nullptr;
   if (!lowerBoundStr.isEmpty()) {
     auto ap = addProperty(prop, m_constraintManager->addProperty("LowerBound"));
     plist << ap;
@@ -1184,7 +1184,7 @@ void FunctionBrowser::popupMenu(const QPoint &) {
         Mantid::API::FunctionFactory::Instance().createFunction(
             prop->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
-    if (cf || m_properties[prop].parent == NULL) {
+    if (cf || m_properties[prop].parent == nullptr) {
       context.addAction(m_actionAddFunction);
     }
     context.addAction(m_actionRemoveFunction);
@@ -1231,7 +1231,7 @@ void FunctionBrowser::addFunction() {
   QString newFunction;
 
   auto item = m_browser->currentItem();
-  QtProperty *prop = NULL;
+  QtProperty *prop = nullptr;
   if (item) {
     prop = item->property();
     if (!isFunction(prop))
@@ -1275,7 +1275,7 @@ void FunctionBrowser::addFunction() {
       setFunction(cf);
     }
   } else { // the browser is empty - add first function
-    addFunction(NULL, f);
+    addFunction(nullptr, f);
   }
   emit functionStructureChanged();
 }
@@ -1322,7 +1322,7 @@ void FunctionBrowser::setAttributeToFunction(Mantid::API::IFunction &fun,
  */
 Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty *prop,
                                                          bool attributesOnly) {
-  if (prop == NULL) { // get overall function
+  if (prop == nullptr) { // get overall function
     auto props = m_browser->properties();
     if (props.isEmpty())
       return Mantid::API::IFunction_sptr();
@@ -1551,7 +1551,7 @@ FunctionBrowser::getParameterProperty(const QString &funcIndex,
  */
 void FunctionBrowser::updateParameters(const Mantid::API::IFunction &fun) {
   const auto paramNames = fun.getParameterNames();
-  for (const auto parameter : paramNames) {
+  for (const auto &parameter : paramNames) {
     const QString qName = QString::fromStdString(parameter);
     setParameter(qName, fun.getParameter(parameter));
     const size_t index = fun.parameterIndex(parameter);
@@ -1658,7 +1658,7 @@ QtProperty *FunctionBrowser::getTieProperty(QtProperty *prop) const {
       return child;
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /**

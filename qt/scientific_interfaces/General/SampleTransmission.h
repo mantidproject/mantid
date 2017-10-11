@@ -23,7 +23,7 @@ public:
 
 public:
   /// Default Constructor
-  explicit SampleTransmission(QWidget *parent = 0);
+  explicit SampleTransmission(QWidget *parent = nullptr);
 
 private slots:
   /// Opens the Qt help page for the interface

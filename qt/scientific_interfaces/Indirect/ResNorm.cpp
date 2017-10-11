@@ -295,8 +295,7 @@ void ResNorm::previewSpecChanged(int value) {
       fit->setSharedY(0, fitWs->sharedY(1));
       fit->setSharedE(0, fitWs->sharedE(1));
 
-      for (size_t i = 0; i < fit->blocksize(); i++)
-        fit->mutableY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
+      fit->mutableY(0) /= scaleFactors->cell<double>(m_previewSpec);
 
       m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
 

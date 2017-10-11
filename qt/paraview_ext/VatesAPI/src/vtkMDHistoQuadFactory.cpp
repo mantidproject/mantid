@@ -109,8 +109,10 @@ vtkMDHistoQuadFactory::create(ProgressAction &progressUpdating) const {
     // The following represent actual calculated positions.
 
     float signalScalar;
-    const int nPointsX = nBinsX + 1;
-    const int nPointsY = nBinsY + 1;
+    const int nPointsX =
+        static_cast<int>(m_workspace->getXDimension()->getNBoundaries());
+    const int nPointsY =
+        static_cast<int>(m_workspace->getYDimension()->getNBoundaries());
 
     /* The idea of the next chunk of code is that you should only
     create the points that will be needed; so an array of pointNeeded

@@ -47,8 +47,9 @@ class QTableWidgetItem;
 class MyTable : public QTableWidget {
   Q_OBJECT
 public:
-  MyTable(QWidget *parent = 0, const char *name = 0);
-  MyTable(int numRows, int numCols, QWidget *parent = 0, const char *name = 0);
+  MyTable(QWidget *parent = nullptr, const char *name = nullptr);
+  MyTable(int numRows, int numCols, QWidget *parent = nullptr,
+          const char *name = nullptr);
   void blockResizing(bool yes);
   QString text(int row, int col) const;
   void setText(int row, int col, const QString &txt);
@@ -116,7 +117,7 @@ public:
   };
 
   Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-        const QString &name = QString(), Qt::WFlags f = 0);
+        const QString &name = QString(), Qt::WFlags f = nullptr);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }

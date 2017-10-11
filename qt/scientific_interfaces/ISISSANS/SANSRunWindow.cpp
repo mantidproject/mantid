@@ -35,7 +35,6 @@
 #include <Poco/Message.h>
 #include <Poco/StringTokenizer.h>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -225,17 +224,17 @@ bool checkSaveOptions(QString &message, bool is1D, bool isCanSAS,
 //----------------------------------------------
 /// Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent)
-    : UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL),
-      m_diagnosticsTab(NULL), m_saveWorkspaces(NULL), m_ins_defdir(""),
+    : UserSubWindow(parent), m_addFilesTab(nullptr), m_displayTab(nullptr),
+      m_diagnosticsTab(nullptr), m_saveWorkspaces(nullptr), m_ins_defdir(""),
       m_last_dir(""), m_cfg_loaded(true), m_userFname(false), m_sample_file(),
-      m_reducemapper(NULL), m_warnings_issued(false), m_force_reload(false),
+      m_reducemapper(nullptr), m_warnings_issued(false), m_force_reload(false),
       m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
       m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
       m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
       m_have_reducemodule(false), m_dirty_batch_grid(false),
-      m_tmp_batchfile(""), m_batch_paste(NULL), m_batch_clear(NULL),
-      m_mustBeDouble(NULL), m_doubleValidatorZeroToMax(NULL),
-      m_intValidatorZeroToMax(NULL), slicingWindow(NULL) {
+      m_tmp_batchfile(""), m_batch_paste(nullptr), m_batch_clear(nullptr),
+      m_mustBeDouble(nullptr), m_doubleValidatorZeroToMax(nullptr),
+      m_intValidatorZeroToMax(nullptr), slicingWindow(nullptr) {
   ConfigService::Instance().addObserver(m_newInDir);
 }
 
@@ -547,7 +546,7 @@ void SANSRunWindow::saveWorkspacesDialog() {
 */
 void SANSRunWindow::saveWorkspacesClosed() {
   m_uiForm.saveSel_btn->setEnabled(true);
-  m_saveWorkspaces = NULL;
+  m_saveWorkspaces = nullptr;
 }
 /** Connection the buttons to their signals
 */
@@ -1842,7 +1841,7 @@ void SANSRunWindow::setSANS2DGeometry(
   const double distance = workspace->spectrumInfo().l1() * unitconv;
 
   // Moderator-sample
-  QLabel *dist_label(NULL);
+  QLabel *dist_label(nullptr);
   if (wscode == 0) {
     dist_label = m_uiForm.dist_sample_ms_s2d;
   } else if (wscode == 1) {
@@ -2139,7 +2138,7 @@ bool SANSRunWindow::handleLoadButtonClick() {
       // Populate the sample geometry fields, but replace any zero values with
       // 1.0, and
       // warn the user where this has occured.
-      BOOST_FOREACH (auto info, sampleInfoList) {
+      for (auto info : sampleInfoList) {
         const auto value = info.get<1>()(&sample);
         if (value == 0.0)
           g_log.warning("The sample geometry " + info.get<2>() +
@@ -2785,7 +2784,7 @@ void SANSRunWindow::handleRunFindCentre() {
   } else {
     coordinates_python_code =
         "print(i.ReductionSingleton().get_beam_center('front')[0]);print("
-        "i.ReductionSingleton().get_beam_center('front')[1]";
+        "i.ReductionSingleton().get_beam_center('front')[1])";
     m_uiForm.detbank_sel->setCurrentIndex(
         1); // FRONT selected -> detbank_sel <- FRONT
     beam_x = m_uiForm.front_beam_x;

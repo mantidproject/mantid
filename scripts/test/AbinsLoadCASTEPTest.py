@@ -27,7 +27,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
     _gamma_sum = "squaricn_sum_LoadCASTEP"
 
     def test_gamma_sum_correction(self):
-        self._check(name=self._gamma_sum, loader=AbinsModules.LoadCASTEP)
+        self.check(name=self._gamma_sum, loader=AbinsModules.LoadCASTEP)
 
     # ===================================================================================
     # |     Use case: Gamma point calculation and no sum correction for Gamma point     |
@@ -35,7 +35,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
     _gamma_no_sum = "squaricn_no_sum_LoadCASTEP"
 
     def test_gamma_no_sum_correction(self):
-        self._check(name=self._gamma_no_sum, loader=AbinsModules.LoadCASTEP)
+        self.check(name=self._gamma_no_sum, loader=AbinsModules.LoadCASTEP)
 
     # ===================================================================================
     # | Use case: more than one k-point and sum correction       |
@@ -43,7 +43,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
     _many_k_sum = "Si2-phonon_LoadCASTEP"
 
     def test_sum_correction_single_crystal(self):
-        self._check(name=self._many_k_sum, loader=AbinsModules.LoadCASTEP)
+        self.check(name=self._many_k_sum, loader=AbinsModules.LoadCASTEP)
 
     # ===================================================================================
     # |   Use case: more than one k-point without sum correction                        |
@@ -52,7 +52,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
     _many_k_no_sum = "Si2-sc_LoadCASTEP"
 
     def test_no_sum_correction_single_crystal(self):
-        self._check(name=self._many_k_no_sum, loader=AbinsModules.LoadCASTEP)
+        self.check(name=self._many_k_no_sum, loader=AbinsModules.LoadCASTEP)
 
 if __name__ == '__main__':
     unittest.main()

@@ -67,6 +67,7 @@ public:
 
   // Processing options
   MOCK_METHOD1(setForcedReProcessing, void(bool));
+  MOCK_METHOD0(skipProcessing, void());
 
   // Accessor
   MOCK_CONST_METHOD0(getCurrentInstrument, QString());
@@ -74,9 +75,7 @@ public:
   // Actions/commands
   // Gmock requires parameters and return values of mocked methods to be
   // copyable which means we have to mock addActions() via a proxy method
-  void addActions(std::vector<Command_uptr>) override {
-    addActionsProxy();
-  }
+  void addActions(std::vector<Command_uptr>) override { addActionsProxy(); }
   MOCK_METHOD0(addActionsProxy, void());
 
   // Calls we don't care about
@@ -144,6 +143,7 @@ public:
   MOCK_CONST_METHOD2(giveUserWarning,
                      void(const QString &prompt, const QString &title));
   MOCK_METHOD0(publishCommandsMocked, void());
+  MOCK_METHOD0(skipProcessing, void());
   MOCK_METHOD1(setForcedReProcessing, void(bool));
 
 private:
@@ -155,8 +155,7 @@ private:
   std::vector<Command_uptr> publishCommands() override {
     std::vector<Command_uptr> commands;
     for (size_t i = 0; i < 31; i++)
-      commands.push_back(
-          Mantid::Kernel::make_unique<AppendRowCommand>(this));
+      commands.push_back(Mantid::Kernel::make_unique<AppendRowCommand>(this));
     publishCommandsMocked();
     return commands;
   };

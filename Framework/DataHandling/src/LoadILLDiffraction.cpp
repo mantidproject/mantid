@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/make_unique.h"
@@ -29,6 +30,7 @@ using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
+using Types::Core::DateAndTime;
 
 namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
@@ -92,6 +94,10 @@ void LoadILLDiffraction::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
+  std::vector<std::string> calibrationOptions{"Raw", "Calibrated"};
+  declareProperty("DataType", "Raw",
+                  boost::make_shared<StringListValidator>(calibrationOptions),
+                  "Type of data, with or without calibration already applied.");
 }
 
 /**
@@ -130,8 +136,13 @@ void LoadILLDiffraction::loadDataScan() {
       m_loadHelper.dateTimeInIsoFormat(firstEntry.getString("start_time")));
 
   // read the detector data
-  NXData dataGroup = firstEntry.openNXData("data_scan/detector_data");
-  NXUInt data = dataGroup.openUIntData();
+
+  std::string dataName;
+  if (getPropertyValue("DataType") == "Calibrated")
+    dataName = "data_scan/detector_data/data";
+  else
+    dataName = "data_scan/detector_data/raw_data";
+  NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
   data.load();
 
   // read the scan data
@@ -182,7 +193,6 @@ void LoadILLDiffraction::loadDataScan() {
   fillDataScanMetaData(scan);
 
   scanGroup.close();
-  dataGroup.close();
   firstEntry.close();
   dataRoot.close();
 }

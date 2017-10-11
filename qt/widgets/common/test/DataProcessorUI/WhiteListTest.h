@@ -20,9 +20,7 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static WhiteListTest *createSuite() {
-    return new WhiteListTest();
-  }
+  static WhiteListTest *createSuite() { return new WhiteListTest(); }
   static void destroySuite(WhiteListTest *suite) { delete suite; }
 
   void test_column_index() {

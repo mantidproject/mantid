@@ -31,7 +31,7 @@ public:
                                 "  <technique>Measuring Stuff</technique>"
                                 "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -61,7 +61,7 @@ public:
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -85,7 +85,7 @@ public:
         "  </facility>"
         "</facilities>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createFacility(xmlStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -109,7 +109,7 @@ public:
         "  <technique>Doing Stuff</technique>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -146,7 +146,7 @@ public:
         "  <zeropadding size=\"20\" startRunNumber=\"321\"/>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     InstrumentInfo inst = fac->instruments().front();
@@ -232,7 +232,7 @@ public:
         "  <technique>Doing Stuff</technique>"
         "</instrument>";
 
-    FacilityInfo *fac = NULL;
+    FacilityInfo *fac = nullptr;
     TS_ASSERT_THROWS_NOTHING(fac = createInstInfoInMinimalFacility(instStr));
 
     TS_ASSERT(fac->instruments()[0] == fac->instruments()[0]);

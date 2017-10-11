@@ -1,17 +1,21 @@
 #include "MantidCrystal/FindSXPeaks.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/HistogramValidator.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <vector>
 
 using namespace Mantid::DataObjects;
+using namespace Mantid::API;
 using namespace Mantid::Crystal::FindSXPeaksHelper;
 
 namespace Mantid {
@@ -41,7 +45,13 @@ FindSXPeaks::FindSXPeaks()
 void FindSXPeaks::init() {
   auto wsValidation = boost::make_shared<CompositeValidator>();
   wsValidation->add<HistogramValidator>();
-  wsValidation->add<WorkspaceUnitValidator>("TOF");
+
+  auto unitValidation =
+      boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+  unitValidation->add<WorkspaceUnitValidator>("TOF");
+  unitValidation->add<WorkspaceUnitValidator>("dSpacing");
+
+  wsValidation->add(unitValidation);
 
   declareProperty(make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidation),
@@ -49,13 +59,14 @@ void FindSXPeaks::init() {
   declareProperty("RangeLower", EMPTY_DBL(),
                   "The X value to search from (default 0)");
   declareProperty("RangeUpper", EMPTY_DBL(),
-                  "The X value to search to (default FindSXPeaks)");
+                  "The X value to search to (default total number of bins)");
   auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
-                  "Start spectrum number (default 0)");
-  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
-                  "End spectrum number  (default FindSXPeaks)");
+                  "Start workspace index (default 0)");
+  declareProperty(
+      "EndWorkspaceIndex", EMPTY_INT(), mustBePositive,
+      "End workspace index (default to total number of histograms)");
 
   // ---------------------------------------------------------------
   // Peak strategies + Threshold
@@ -124,21 +135,22 @@ void FindSXPeaks::init() {
                   "1. RelativeResolution: This defines a relative tolerance "
                   "needed to avoid peak duplication in number of pixels. "
                   "This selection will enable the Resolution property and "
-                  "disable the TofResolution, PhiResolution, ThetaResolution.\n"
+                  "disable the XResolution, PhiResolution, ThetaResolution.\n"
                   "1. AbsoluteResolution: This defines an absolute tolerance "
                   "needed to avoid peak duplication in number of pixels. "
                   "This selection will disable the Resolution property and "
-                  "enable the TofResolution, PhiResolution, "
+                  "enable the XResolution, PhiResolution, "
                   "ThetaResolution.\n");
 
   declareProperty(
       "Resolution", 0.01, mustBePositiveDouble,
       "Tolerance needed to avoid peak duplication in number of pixels");
 
-  declareProperty("TofResolution", 5000., mustBePositiveDouble,
-                  "Absolute tolerance in time-of-flight needed to avoid peak "
-                  "duplication in number of pixels. The values are specified "
-                  "in microseconds.");
+  declareProperty(
+      "XResolution", 0., mustBePositiveDouble,
+      "Absolute tolerance in time-of-flight or d-spacing needed to avoid peak "
+      "duplication in number of pixels. The values are specified "
+      "in either microseconds or angstroms.");
 
   declareProperty("PhiResolution", 1., mustBePositiveDouble,
                   "Absolute tolerance in the phi "
@@ -158,7 +170,7 @@ void FindSXPeaks::init() {
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           relativeResolutionStrategy));
 
-  setPropertySettings("TofResolution",
+  setPropertySettings("XResolution",
                       make_unique<EnabledWhenProperty>(
                           "ResolutionStrategy",
                           Mantid::Kernel::ePropertyCriterion::IS_EQUAL_TO,
@@ -185,12 +197,34 @@ void FindSXPeaks::init() {
   const std::string resolutionGroup = "Resolution Settings";
   setPropertyGroup("ResolutionStrategy", resolutionGroup);
   setPropertyGroup("Resolution", resolutionGroup);
-  setPropertyGroup("TofResolution", resolutionGroup);
+  setPropertyGroup("XResolution", resolutionGroup);
   setPropertyGroup("PhiResolution", resolutionGroup);
   setPropertyGroup("TwoThetaResolution", resolutionGroup);
 
   // Create the output peaks workspace
   m_peaks.reset(new PeaksWorkspace);
+}
+
+/*
+ * Validate the input parameters
+ * @returns map with keys corresponding to properties with errors and values
+ * containing the error messages.
+ */
+std::map<std::string, std::string> FindSXPeaks::validateInputs() {
+  // create the map
+  std::map<std::string, std::string> validationOutput;
+  const std::string resolutionStrategy = getProperty("ResolutionStrategy");
+  const auto xResolutionProperty = getPointerToProperty("XResolution");
+
+  // Check that the user has set a valid value for the x resolution when
+  // in absolute resolution mode.
+  if (resolutionStrategy == FindSXPeaks::absoluteResolutionPeaksStrategy &&
+      xResolutionProperty->isDefault()) {
+    validationOutput["XResolution"] =
+        "XResolution must be set to a value greater than 0";
+  }
+
+  return validationOutput;
 }
 
 /** Executes the algorithm
@@ -245,8 +279,9 @@ void FindSXPeaks::exec() {
   auto backgroundStrategy = getBackgroundStrategy();
 
   // Get the peak finding strategy
+  const auto xUnit = getWorkspaceXAxisUnit(localworkspace);
   auto peakFindingStrategy = getPeakFindingStrategy(
-      backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange);
+      backgroundStrategy.get(), spectrumInfo, m_MinRange, m_MaxRange, xUnit);
 
   peakvector entries;
   entries.reserve(m_MaxWsIndex - m_MinWsIndex);
@@ -320,6 +355,26 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
   }
 }
 
+/** Get the x-axis units of the workspace
+ *
+ * This will return either TOF or DSPACING depending on unit ID of
+ * the workspace.
+ *
+ * @param workspace :: the workspace to check x-axis units on
+ * @return enum of type XAxisUnit with the value of TOF or DSPACING
+ */
+XAxisUnit
+FindSXPeaks::getWorkspaceXAxisUnit(MatrixWorkspace_const_sptr workspace) const {
+  const auto xAxis = workspace->getAxis(0);
+  const auto unitID = xAxis->unit()->unitID();
+
+  if (unitID == "TOF") {
+    return XAxisUnit::TOF;
+  } else {
+    return XAxisUnit::DSPACING;
+  }
+}
+
 std::unique_ptr<BackgroundStrategy> FindSXPeaks::getBackgroundStrategy() const {
   const std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   if (peakFindingStrategy == strongestPeakStrategy) {
@@ -339,15 +394,15 @@ std::unique_ptr<FindSXPeaksHelper::PeakFindingStrategy>
 FindSXPeaks::getPeakFindingStrategy(
     const BackgroundStrategy *backgroundStrategy,
     const API::SpectrumInfo &spectrumInfo, const double minValue,
-    const double maxValue) const {
+    const double maxValue, const XAxisUnit tofUnits) const {
   // Get the peak finding stratgy
   std::string peakFindingStrategy = getProperty("PeakFindingStrategy");
   if (peakFindingStrategy == strongestPeakStrategy) {
     return Mantid::Kernel::make_unique<StrongestPeaksStrategy>(
-        backgroundStrategy, spectrumInfo, minValue, maxValue);
+        backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
   } else if (peakFindingStrategy == allPeaksStrategy) {
     return Mantid::Kernel::make_unique<AllPeaksStrategy>(
-        backgroundStrategy, spectrumInfo, minValue, maxValue);
+        backgroundStrategy, spectrumInfo, minValue, maxValue, tofUnits);
   } else {
     throw std::invalid_argument(
         "The selected peak finding strategy has not been implemented yet.");
@@ -378,14 +433,15 @@ FindSXPeaks::getCompareStrategy() const {
     return Mantid::Kernel::make_unique<
         FindSXPeaksHelper::RelativeCompareStrategy>(resolution);
   } else {
-    double tofResolution = getProperty("TofResolution");
+    double xUnitResolution = getProperty("XResolution");
     double phiResolution = getProperty("PhiResolution");
     double twoThetaResolution = getProperty("TwoThetaResolution");
+    const auto tofUnits = getWorkspaceXAxisUnit(getProperty("InputWorkspace"));
     return Mantid::Kernel::make_unique<
         FindSXPeaksHelper::AbsoluteCompareStrategy>(
-        tofResolution, phiResolution, twoThetaResolution);
+        xUnitResolution, phiResolution, twoThetaResolution, tofUnits);
   }
 }
 
-} // namespace Algorithms
+} // namespace Crystal
 } // namespace Mantid

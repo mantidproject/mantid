@@ -23,6 +23,7 @@ DECLARE_ALGORITHM(ChangeTimeZero)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Types::Core::DateAndTime;
 using std::size_t;
 
 namespace {

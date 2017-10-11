@@ -19,7 +19,7 @@ AlgorithmRunner::AlgorithmRunner(QObject *parent)
                          &AlgorithmRunner::handleAlgorithmProgressNotification),
       m_errorObserver(*this,
                       &AlgorithmRunner::handleAlgorithmErrorNotification),
-      m_asyncResult(NULL) {}
+      m_asyncResult(nullptr) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -47,7 +47,7 @@ void AlgorithmRunner::cancelRunningAlgorithm() {
     if (m_asyncResult) {
       m_asyncResult->tryWait(1000);
       delete m_asyncResult;
-      m_asyncResult = NULL;
+      m_asyncResult = nullptr;
     }
     m_asyncAlg->removeObserver(m_finishedObserver);
     m_asyncAlg->removeObserver(m_errorObserver);

@@ -7,6 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 namespace ApodizationFunctions {
+
 /**
 * Returns the evaluation of the Lorentz
 * (an exponential decay)

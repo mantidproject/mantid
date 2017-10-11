@@ -20,20 +20,17 @@ PreprocessMap::~PreprocessMap() {}
 * @param blacklist :: the list of algorithm properties to black list, as a
 * string
 */
-void PreprocessMap::addElement(const QString &column,
-                                            const QString &algorithm,
-                                            const QString &prefix,
-                                            const QString &blacklist) {
+void PreprocessMap::addElement(const QString &column, const QString &algorithm,
+                               const QString &prefix,
+                               const QString &blacklist) {
 
-  m_map[column] =
-      PreprocessingAlgorithm(algorithm, prefix, blacklist);
+  m_map[column] = PreprocessingAlgorithm(algorithm, prefix, blacklist);
 }
 
 /** Return a map where keys are columns and values pre-processing algorithms
 * @return :: Pre-processing instructions as a map
 */
-std::map<QString, PreprocessingAlgorithm>
-PreprocessMap::asMap() const {
+std::map<QString, PreprocessingAlgorithm> PreprocessMap::asMap() const {
   return m_map;
 }
 }

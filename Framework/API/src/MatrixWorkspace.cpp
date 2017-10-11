@@ -28,9 +28,8 @@
 #include <functional>
 #include <numeric>
 
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
-using Mantid::Kernel::Strings::toString;
 
 namespace Mantid {
 namespace API {
@@ -173,7 +172,13 @@ const std::string MatrixWorkspace::toString() const {
   os << id() << "\n"
      << "Title: " << getTitle() << "\n"
      << "Histograms: " << getNumberHistograms() << "\n"
-     << "Bins: " << blocksize() << "\n";
+     << "Bins: ";
+
+  try {
+    os << blocksize() << "\n";
+  } catch (std::length_error &) {
+    os << "variable\n"; // TODO shouldn't use try/catch
+  }
 
   if (isHistogramData())
     os << "Histogram\n";
@@ -670,7 +675,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
   // determine the data range
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra;
        workspaceIndex++) {
-    const MantidVec &dataX = this->readX(workspaceIndex);
+    const auto &dataX = this->x(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
     if (std::isfinite(xfront) && std::isfinite(xback)) {
@@ -706,7 +711,7 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
        wksp_index++) {
     // Get Handle to data
     const Mantid::MantidVec &x = this->readX(wksp_index);
-    const Mantid::MantidVec &y = this->readY(wksp_index);
+    const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
     if ((x.size() <= 2) && (!y.empty())) {
       out[wksp_index] = y[0];
@@ -932,7 +937,8 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  *  @return whether the workspace contains histogram data
  */
 bool MatrixWorkspace::isHistogramData() const {
-  bool isHist = (readX(0).size() != blocksize());
+  // all spectra *should* have the same behavior
+  bool isHist = (x(0).size() != y(0).size());
   // TODOHIST temporary sanity check
   if (isHist) {
     if (getSpectrum(0).histogram().xMode() !=
@@ -958,26 +964,38 @@ bool MatrixWorkspace::isCommonBins() const {
   if (!m_isCommonBinsFlagSet) {
     m_isCommonBinsFlag = true;
 
+    const size_t numHist = getNumberHistograms();
     // there being only one or zero histograms is accepted as not being an error
-    if (blocksize() || getNumberHistograms() > 1) {
-      // otherwise will compare some of the data, to save time just check two
-      // the first and the last
-      const size_t lastSpec = getNumberHistograms() - 1;
-      // Quickest check is to see if they are actually the same vector
-      if (&(readX(0)[0]) != &(readX(lastSpec)[0])) {
-        // Now check numerically
-        const double first =
-            std::accumulate(readX(0).begin(), readX(0).end(), 0.);
-        const double last =
-            std::accumulate(readX(lastSpec).begin(), readX(lastSpec).end(), 0.);
-        if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
+    if (numHist > 1) {
+      const size_t numBins = x(0).size();
+      for (size_t i = 1; i < numHist; ++i) {
+        if (x(i).size() != numBins) {
           m_isCommonBinsFlag = false;
+          break;
         }
+      }
 
-        // handle Nan's and inf's
-        if ((std::isinf(first) != std::isinf(last)) ||
-            (std::isnan(first) != std::isnan(last))) {
-          m_isCommonBinsFlag = false;
+      // there being only one or zero histograms is accepted as not being an
+      // error
+      if (m_isCommonBinsFlag) {
+        // otherwise will compare some of the data, to save time just check two
+        // the first and the last
+        const size_t lastSpec = numHist - 1;
+        // Quickest check is to see if they are actually the same vector
+        if (&(x(0)[0]) != &(x(lastSpec)[0])) {
+          // Now check numerically
+          const double first = std::accumulate(x(0).begin(), x(0).end(), 0.);
+          const double last =
+              std::accumulate(x(lastSpec).begin(), x(lastSpec).end(), 0.);
+          if (std::abs(first - last) / std::abs(first + last) > 1.0E-9) {
+            m_isCommonBinsFlag = false;
+          }
+
+          // handle Nan's and inf's
+          if ((std::isinf(first) != std::isinf(last)) ||
+              (std::isnan(first) != std::isnan(last))) {
+            m_isCommonBinsFlag = false;
+          }
         }
       }
     }
@@ -1009,8 +1027,8 @@ void MatrixWorkspace::maskBin(const size_t &workspaceIndex,
         workspaceIndex, this->getNumberHistograms(),
         "MatrixWorkspace::maskBin,workspaceIndex");
   // Then check the bin index
-  if (binIndex >= this->blocksize())
-    throw Kernel::Exception::IndexError(binIndex, this->blocksize(),
+  if (binIndex >= y(workspaceIndex).size())
+    throw Kernel::Exception::IndexError(binIndex, y(workspaceIndex).size(),
                                         "MatrixWorkspace::maskBin,binIndex");
 
   // this function is marked parallel critical
@@ -1140,7 +1158,7 @@ size_t MatrixWorkspace::getMemorySizeForXAxes() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
 
@@ -1166,7 +1184,7 @@ Kernel::DateAndTime MatrixWorkspace::getFirstPulseTime() const {
  * @throw invalid_argument if the log is not a double TimeSeriesProperty (should
  *be impossible)
  */
-Kernel::DateAndTime MatrixWorkspace::getLastPulseTime() const {
+Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
   TimeSeriesProperty<double> *log =
       this->run().getTimeSeriesProperty<double>("proton_charge");
   return log->lastTime();
@@ -1287,6 +1305,9 @@ public:
       return m_axis.length();
   }
 
+  /// number of bin boundaries (axis points)
+  size_t getNBoundaries() const override { return m_axis.length(); }
+
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
     throw std::runtime_error("Not implemented");
@@ -1370,6 +1391,9 @@ public:
   size_t getNBins() const override {
     return (m_ws->isHistogramData()) ? m_X.size() - 1 : m_X.size();
   }
+
+  /// number of axis points (bin boundaries)
+  size_t getNBoundaries() const override { return m_X.size(); }
 
   /// Change the extents and number of bins
   void setRange(size_t /*nBins*/, coord_t /*min*/, coord_t /*max*/) override {
@@ -1530,7 +1554,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(
       else
         i = Kernel::VectorHelper::indexOfValueFromCenters(xVals.rawData(),
                                                           xCoord);
-    } catch (std::out_of_range &e) {
+    } catch (std::out_of_range &) {
       return std::numeric_limits<double>::quiet_NaN();
     }
 
@@ -1710,14 +1734,14 @@ std::pair<size_t, size_t>
 MatrixWorkspace::getImageStartEndXIndices(size_t i, double startX,
                                           double endX) const {
   if (startX == EMPTY_DBL())
-    startX = readX(i).front();
+    startX = x(i).front();
   auto pStart = getXIndex(i, startX, true);
   if (pStart.second != 0.0) {
     throw std::runtime_error(
         "Start X value is required to be on bin boundary.");
   }
   if (endX == EMPTY_DBL())
-    endX = readX(i).back();
+    endX = x(i).back();
   auto pEnd = getXIndex(i, endX, false, pStart.first);
   if (pEnd.second != 0.0) {
     throw std::runtime_error("End X value is required to be on bin boundary.");
@@ -1772,7 +1796,7 @@ MantidImage_sptr MatrixWorkspace::getImageE(size_t start, size_t stop,
 std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x,
                                                      bool isLeft,
                                                      size_t start) const {
-  auto &X = readX(i);
+  auto &X = this->x(i);
   auto nx = X.size();
 
   // if start out of range - search failed

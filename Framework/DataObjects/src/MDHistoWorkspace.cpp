@@ -710,7 +710,8 @@ MDHistoWorkspace::getBinBoundariesOnLine(const VMD &start, const VMD &end,
     coord_t lineStartX = start[d];
 
     if (dir[d] != 0.0) {
-      for (size_t i = 0; i <= dim->getNBins(); i++) {
+      auto nbounds = dim->getNBoundaries();
+      for (size_t i = 0; i < nbounds; i++) {
         // Position in this coordinate
         coord_t thisX = dim->getX(i);
         // Position along the line. Is this between the start and end of it?
