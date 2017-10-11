@@ -68,7 +68,7 @@ inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 struct dtrs_control_type {
   //!  maximum degree of Taylor approximant allowed
-  int taylor_MAX_DEGREE = 3;
+  int taylor_max_degree = 3;
 
   //!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as
   // zero
@@ -634,7 +634,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
   }
 
   //  the iterates will all be in the L region. Prepare for the main loop
-  auto max_order = std::max(1, std::min(MAX_DEGREE, control.taylor_MAX_DEGREE));
+  auto max_order = std::max(1, std::min(MAX_DEGREE, control.taylor_max_degree));
 
   //  start the main loop
   for (;;) {
