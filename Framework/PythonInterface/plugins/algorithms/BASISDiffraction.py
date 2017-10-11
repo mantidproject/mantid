@@ -13,7 +13,7 @@ from mantid import config as mantid_config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         WorkspaceProperty, FileAction, PropertyMode, mtd,
                         AnalysisDataService)
-from mantid.simpleapi import (DeleteWorkspaces, LoadEventNexus, SetGoniometer,
+from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
                               SetUB, ModeratorTzeroLinear, SaveNexus,
                               ConvertToMD, LoadMask, MaskDetectors, LoadNexus,
                               MDNormSCDPreprocessIncoherent, MDNormSCD,
@@ -66,7 +66,8 @@ def pyexec_setup(new_options):
                 to_be_removed.add(workspace)
             else:
                 to_be_removed.add(workspace.name())
-        DeleteWorkspaces(list(to_be_removed))
+        for name in to_be_removed:
+            DeleteWorkspace(name)
 
 
 class BASISDiffraction(DataProcessorAlgorithm):
