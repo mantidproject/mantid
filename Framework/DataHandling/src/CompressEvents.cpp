@@ -61,8 +61,7 @@ void CompressEvents::exec() {
         API::WorkspaceFactory::Instance().create(
             "EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS,
-                                                           false);
+    API::WorkspaceFactory::Instance().initializeFromParent(*inputWS, *outputWS);
     // We DONT copy the data though
     // Loop over the histograms (detector spectra)
     tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),

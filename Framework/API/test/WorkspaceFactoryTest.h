@@ -66,8 +66,7 @@ public:
 #endif
   }
 
-  /** Make a parent, have the child be created with the same sizes */
-  void testCreateFromParent() {
+  void testCreateFromParent1D() {
     MatrixWorkspace_sptr ws_child(new Workspace1DTest);
     ws_child->initialize(3, 1, 1);
     ws_child->getSpectrum(0).setSpectrumNo(123);
@@ -113,7 +112,9 @@ public:
     // Monitor workspace
     TSM_ASSERT("The workspace factory should not propagate a monitor workspace",
                !child->monitorWorkspace());
+  }
 
+  void testCreateFromParent2D() {
     MatrixWorkspace_sptr ws2D(new Workspace2DTest);
     ws2D->initialize(3, 1, 1);
     MatrixWorkspace_sptr child2;
@@ -121,9 +122,23 @@ public:
                                  WorkspaceFactory::Instance().create(ws2D));
     TS_ASSERT(child2);
     TS_ASSERT_EQUALS(child2->id(), "Workspace2DTest");
+  }
 
+  void testCreateFromParent2DNumVectorsDiffers() {
+    MatrixWorkspace_sptr ws2D(new Workspace2DTest);
+    ws2D->initialize(3, 1, 1);
+    MatrixWorkspace_sptr child2;
+    TS_ASSERT_THROWS_NOTHING(child2 =
+                                 WorkspaceFactory::Instance().create(ws2D, 5));
+    TS_ASSERT(child2);
+    TS_ASSERT_EQUALS(child2->id(), "Workspace2DTest");
+    TS_ASSERT_EQUALS(child2->getAxis(1)->length(), 5);
+  }
+
+  void testCreateFromParentFailsWhenParentNotInFactory() {
     MatrixWorkspace_sptr nif(new NotInFactory);
     nif->initialize(1, 1, 1);
+    MatrixWorkspace_sptr child;
     TS_ASSERT_THROWS(child = WorkspaceFactory::Instance().create(nif),
                      std::runtime_error);
   }

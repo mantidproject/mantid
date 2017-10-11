@@ -480,7 +480,7 @@ void TOPAZLiveEventDataListener::initWorkspace() {
 
   auto tmp = createWorkspace<DataObjects::EventWorkspace>(
       m_eventBuffer->getInstrument()->getDetectorIDs(true).size(), 2, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp, true);
+  WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *tmp);
   if (m_eventBuffer->getNumberHistograms() != tmp->getNumberHistograms()) {
     // need to generate the spectra to detector map
     tmp->rebuildSpectraMapping();
@@ -507,7 +507,7 @@ void TOPAZLiveEventDataListener::initMonitorWorkspace() {
   auto monitorsBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitors.size(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer,
-                                                    *monitorsBuffer, true);
+                                                    *monitorsBuffer);
   // Set the id numbers
   for (size_t i = 0; i < monitors.size(); ++i) {
     monitorsBuffer->getSpectrum(i).setDetectorID(monitors[i]);
@@ -569,8 +569,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
           "EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
   // Copy geometry over.
-  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp,
-                                                         false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *temp);
 
   // Clear out the old logs, except for the most recent entry
   temp->mutableRun().clearOutdatedTimeSeriesLogValues();
@@ -589,7 +588,7 @@ boost::shared_ptr<Workspace> TOPAZLiveEventDataListener::extractData() {
   auto newMonitorBuffer = WorkspaceFactory::Instance().create(
       "EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer,
-                                                    *newMonitorBuffer, false);
+                                                    *newMonitorBuffer);
   temp->setMonitorWorkspace(newMonitorBuffer);
 
   // Lock the mutex and swap the workspaces

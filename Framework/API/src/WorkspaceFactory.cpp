@@ -51,16 +51,15 @@ MatrixWorkspace_sptr
 WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
                              size_t NVectors, size_t XLength,
                              size_t YLength) const {
-  bool differentSize(true);
   // Use the parent sizes if new ones are not specified
   if (NVectors == size_t(-1))
     NVectors = parent->getNumberHistograms();
+
   if (XLength == size_t(-1))
     XLength = parent->dataX(0).size();
-  if (YLength == size_t(-1)) {
-    differentSize = false;
+
+  if (YLength == size_t(-1))
     YLength = parent->blocksize();
-  }
 
   // If the parent is an EventWorkspace, we want it to spawn a Workspace2D (or
   // managed variant) as a child
@@ -72,7 +71,7 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
   MatrixWorkspace_sptr ws = create(id, NVectors, XLength, YLength);
 
   // Copy over certain parent data members
-  initializeFromParent(*parent, *ws, differentSize);
+  initializeFromParent(*parent, *ws);
 
   return ws;
 }
@@ -86,11 +85,9 @@ WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr &parent,
  * @brief WorkspaceFactoryImpl::initializeFromParentWithoutLogs
  * @param parent
  * @param child
- * @param differentSize
  */
 void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
+    const MatrixWorkspace &parent, MatrixWorkspace &child) const {
   child.setTitle(parent.getTitle());
   child.setComment(parent.getComment());
   child.setInstrument(parent.getInstrument()); // This call also copies the
@@ -106,7 +103,7 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
   child.setDistribution(parent.isDistribution());
 
   // Only copy the axes over if new sizes are not given
-  if (!differentSize) {
+  if (child.blocksize() == parent.blocksize()) {
     // Only copy mask map if same size for now. Later will need to check
     // continued validity.
     child.m_masks = parent.m_masks;
@@ -128,7 +125,7 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
     const size_t newAxisLength = child.getAxis(i)->length();
     const size_t oldAxisLength = parent.getAxis(i)->length();
 
-    if (!differentSize || newAxisLength == oldAxisLength) {
+    if (newAxisLength == oldAxisLength) {
       // Need to delete the existing axis created in init above
       delete child.m_axes[i];
       // Now set to a copy of the parent workspace's axis
@@ -150,13 +147,10 @@ void WorkspaceFactoryImpl::initializeFromParentWithoutLogs(
  *
  * @param parent :: the parent workspace
  * @param child :: the child workspace
- * @param differentSize :: A flag to indicate if the two workspace will be
- *different sizes
  */
-void WorkspaceFactoryImpl::initializeFromParent(
-    const MatrixWorkspace &parent, MatrixWorkspace &child,
-    const bool differentSize) const {
-  initializeFromParentWithoutLogs(parent, child, differentSize);
+void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace &parent,
+                                                MatrixWorkspace &child) const {
+  initializeFromParentWithoutLogs(parent, child);
   child.m_run = parent.m_run;
 }
 

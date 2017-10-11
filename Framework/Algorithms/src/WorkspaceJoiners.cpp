@@ -40,7 +40,7 @@ MatrixWorkspace_sptr WorkspaceJoiners::execWS2D(const MatrixWorkspace &ws1,
       "Workspace2D", totalHists, ws1.x(0).size(), ws1.y(0).size());
   // Copy over stuff from first input workspace. This will include the spectrum
   // masking
-  WorkspaceFactory::Instance().initializeFromParent(ws1, *output, true);
+  WorkspaceFactory::Instance().initializeFromParent(ws1, *output);
 
   // Create the X values inside a cow pointer - they will be shared in the
   // output workspace

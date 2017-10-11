@@ -501,8 +501,7 @@ DataObjects::EventWorkspace_sptr KafkaEventStreamDecoder::createBufferWorkspace(
       API::WorkspaceFactory::Instance().create(
           "EventWorkspace", parent->getNumberHistograms(), 2, 1));
   // Copy meta data
-  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer,
-                                                         false);
+  API::WorkspaceFactory::Instance().initializeFromParent(*parent, *buffer);
   // Clear out the old logs, except for the most recent entry
   buffer->mutableRun().clearOutdatedTimeSeriesLogValues();
   return buffer;

@@ -262,8 +262,8 @@ void GatherWorkspaces::execEvent() {
         API::WorkspaceFactory::Instance().create("EventWorkspace", sumSpec,
                                                  numBins + hist, numBins));
     // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(
-        *eventW, *outputWorkspace, true);
+    API::WorkspaceFactory::Instance().initializeFromParent(*eventW,
+                                                           *outputWorkspace);
     setProperty("OutputWorkspace", outputWorkspace);
     ExperimentInfo_sptr inWS = inputWorkspace;
     outputWorkspace->copyExperimentInfoFrom(inWS.get());
