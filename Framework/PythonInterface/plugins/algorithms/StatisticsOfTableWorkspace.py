@@ -47,13 +47,13 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
 
         out_ws.addColumn('str', 'statistic')
 
-        stats = {
-            'standard_deviation': collections.OrderedDict(),
-            'maximum': collections.OrderedDict(),
-            'minimum': collections.OrderedDict(),
-            'mean': collections.OrderedDict(),
-            'median': collections.OrderedDict(),
-        }
+        stats = collections.OrderedDict([
+            ('standard_deviation', collections.OrderedDict()),
+            ('minimum', collections.OrderedDict()),
+            ('median', collections.OrderedDict()),
+            ('maximum', collections.OrderedDict()),
+            ('mean', collections.OrderedDict()),
+        ])
 
         for name in in_ws.getColumnNames():
             try:
