@@ -39,7 +39,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
 
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
     auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
@@ -58,7 +58,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
     auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
@@ -138,7 +138,8 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
-    if (it->second < m_noVectors) // don't let it generate an exception
+    if (it->second <
+        getNumberHistograms()) // don't let it generate an exception
     {
       return this->dataY(it->second)[0];
     } else {

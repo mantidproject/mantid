@@ -491,16 +491,12 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  // Wrap translation in check for detector count as an optimization of
-  // otherwise slow failures via exceptions.
-  if (detectorInfo().size() > 0) {
-    for (const auto detID : detIDs) {
-      try {
-        const size_t detIndex = detectorInfo().indexOf(detID);
-        specDef.add(detIndex);
-      } catch (std::out_of_range &) {
-        // Silently strip bad detector IDs
-      }
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));

@@ -267,8 +267,12 @@ void MaxEnt::exec() {
   nspec = complexData ? nspec / 2 : nspec;
   outImageWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npoints, npoints);
+  for (size_t i = 0; i < outImageWS->getNumberHistograms(); ++i)
+    outImageWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outDataWS =
       WorkspaceFactory::Instance().create(inWS, 2 * nspec, npointsX, npoints);
+  for (size_t i = 0; i < outDataWS->getNumberHistograms(); ++i)
+    outDataWS->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   outEvolChi = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
