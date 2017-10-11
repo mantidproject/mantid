@@ -229,7 +229,6 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
 
     # Get function definitions for the problem - one for each starting point
     function_defs = get_function_definitions(prob)
-    print("WAAA", function_defs)
     # search for lowest chi2
     min_sum_err_sq = 1.e20
     # Loop over the different starting points
@@ -238,7 +237,6 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         for minimizer_name in minimizers:
             t_start = time.clock()
 
-            #status, chi2, fit_wks, params, errors = run_fit(wks, prob, function=user_func,
             status, chi2, fit_wks, params, errors = run_fit(wks, prob, function=user_func,
                                                             minimizer=minimizer_name,
                                                             cost_function=cost_function)
@@ -268,7 +266,6 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
             result.errors = errors
             result.sum_err_sq = sum_err_sq
             # If the fit has failed, also set the runtime to NaN
-            #print ("mooo ",type(chi2))
             result.runtime = t_end - t_start if not np.isnan(chi2) else np.nan
             print("Result object: {0}".format(result))
             results_problem_start.append(result)
@@ -356,7 +353,6 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
                                                                 CostFunction=cost_function,
                                                                 IgnoreInvalidData=ignore_invalid,
                                                                 StartX=prob.start_x, EndX=prob.end_x)
-        print("mooo ",status)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
