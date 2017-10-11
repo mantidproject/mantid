@@ -4,12 +4,15 @@ set ( SRC_FILES
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
+        src/IO/EventParser.cpp
 )
 
 set ( INC_FILES
 	inc/MantidParallel/Collectives.h
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
 	inc/MantidParallel/ThreadingBackend.h
@@ -18,7 +21,9 @@ set ( INC_FILES
 set ( TEST_FILES
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventParserTest.h
 	ExecutionModeTest.h
+	NonblockingTest.h
 	ParallelRunnerTest.h
 	RequestTest.h
 	StorageModeTest.h

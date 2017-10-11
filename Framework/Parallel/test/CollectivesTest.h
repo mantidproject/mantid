@@ -39,6 +39,18 @@ void run_gather_short_version(const Communicator &comm) {
     TS_ASSERT_THROWS_NOTHING(Parallel::gather(comm, value, root));
   }
 }
+
+void run_all_to_all(const Communicator &comm) {
+  std::vector<int> data;
+  for (int rank = 0; rank < comm.size(); ++rank)
+    data.emplace_back(1000 * comm.rank() + rank);
+  std::vector<int> result;
+  TS_ASSERT_THROWS_NOTHING(Parallel::all_to_all(comm, data, result));
+  TS_ASSERT_EQUALS(result.size(), comm.size());
+  for (int i = 0; i < comm.size(); ++i) {
+    TS_ASSERT_EQUALS(result[i], 1000 * i + comm.rank());
+  }
+}
 }
 
 class CollectivesTest : public CxxTest::TestSuite {
@@ -53,6 +65,8 @@ public:
   void test_gather_short_version() {
     ParallelTestHelpers::runParallel(run_gather_short_version);
   }
+
+  void test_all_to_all() { ParallelTestHelpers::runParallel(run_all_to_all); }
 };
 
 #endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */

@@ -77,6 +77,38 @@ private:
   std::mutex m_mutex;
 };
 
+namespace detail {
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa, const T &data) {
+  oa.operator<<(data);
+}
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa,
+                  const std::vector<T> &data) {
+  oa.operator<<(data);
+}
+template <class T>
+void saveToStream(boost::archive::binary_oarchive &oa, const T *data,
+                  const size_t count) {
+  for (size_t i = 0; i < count; ++i)
+    oa.operator<<(data[i]);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, T &data) {
+  ia.operator>>(data);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, std::vector<T> &data) {
+  ia.operator>>(data);
+}
+template <class T>
+void loadFromStream(boost::archive::binary_iarchive &ia, T *data,
+                    const size_t count) {
+  for (size_t i = 0; i < count; ++i)
+    ia.operator>>(data[i]);
+}
+}
+
 template <typename... T>
 void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
   // Must wrap std::stringbuf in a unique_ptr since gcc on RHEL7 does not
@@ -90,7 +122,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
     // though, since it is *not* writing to the buffer, somehow the oarchive
     // destructor must be doing something that requires the buffer.
     boost::archive::binary_oarchive oa(os);
-    oa.operator<<(std::forward<T>(args)...);
+    detail::saveToStream(oa, std::forward<T>(args)...);
   }
   std::lock_guard<std::mutex> lock(m_mutex);
   m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
@@ -114,7 +146,7 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   }
   std::istream is(buf.get());
   boost::archive::binary_iarchive ia(is);
-  ia.operator>>(std::forward<T>(args)...);
+  detail::loadFromStream(ia, std::forward<T>(args)...);
 }
 
 template <typename... T>
@@ -126,7 +158,7 @@ Request ThreadingBackend::isend(int source, int dest, int tag, T &&... args) {
 template <typename... T>
 Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
   return Request(std::bind(&ThreadingBackend::recv<T...>, this, dest, source,
-                           tag, std::ref(std::forward<T>(args)...)));
+                           tag, std::ref(std::forward<T>(args))...));
 }
 
 } // namespace detail
