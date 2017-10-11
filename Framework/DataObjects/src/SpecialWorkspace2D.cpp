@@ -82,15 +82,14 @@ void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
   Workspace2D::init(NVectors, XLength, YLength);
 }
 
-void SpecialWorkspace2D::init(const size_t &NVectors,
-                              const HistogramData::Histogram &histogram) {
+void SpecialWorkspace2D::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::Points)
     throw std::runtime_error(
         "SpecialWorkspace2D can only be initialized with XMode::Points");
   if (histogram.x().size() != 1)
     throw std::runtime_error(
         "SpecialWorkspace2D can only be initialized with length 1");
-  Workspace2D::init(NVectors, histogram);
+  Workspace2D::init(histogram);
 }
 
 /**
