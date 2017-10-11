@@ -5,7 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, ITableWorkspaceProperty, MatrixWorkspaceProperty,
                         MultipleFileProperty, PropertyMode)
 from mantid.kernel import (Direction, FloatArrayLengthValidator, FloatArrayProperty, IntBoundedValidator, Property, StringListValidator)
-from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertUnits, CropWorkspace,
+from mantid.simpleapi import (CalculatePolynomialBackground, CloneWorkspace, ConvertToDistribution, ConvertUnits, CropWorkspace,
                               Divide, ExtractMonitors, GroupDetectors, LoadILLReflectometry, MergeRuns, Minus, mtd,
                               NormaliseToMonitor, Scale, Transpose)
 import numpy
@@ -471,7 +471,10 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         if method == Summation.OFF:
             return ws
         elif method == Summation.COHERENT:
-            return self._groupForeground(ws, peakPosWS)
+            ws = self._groupForeground(ws, peakPosWS)
+            ConvertToDistribution(Workspace=ws,
+                                  EnableLogging=self._subalgLogging)
+            return ws
         else:
             raise RuntimeError('Selected output summation method is not implemented.')
 
