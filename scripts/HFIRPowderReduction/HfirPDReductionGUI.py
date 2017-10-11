@@ -407,14 +407,14 @@ class MainWindow(QtGui.QMainWindow):
         cache_dir = str(self.ui.lineEdit_cache.text()).strip()
         if len(cache_dir) == 0 or os.path.exists(cache_dir) is False:
             invalid_cache = cache_dir
-            if False:
-                cache_dir = os.path.expanduser('~')
-            else:
-                cache_dir = os.getcwd()
+            cache_dir = os.path.expanduser('~')
             self.ui.lineEdit_cache.setText(cache_dir)
-            self._logWarning("Cache directory %s is not valid. "
-                             "Using current workspace directory %s as cache." %
-                             (invalid_cache, cache_dir))
+            if len(invalid_cache) == 0:
+                warning_msg = 'Cache directory is not set. '
+            else:
+                warning_msg = 'Cache directory {0} does not exist. '.format(invalid_cache)
+            warning_msg += 'Using {0} for caching dowloaded file instead.'.format(cache_dir)
+            print ('[WARNING] {0}'.format(warning_msg))
 
         # Get on hold of raw data file
         useserver = self.ui.radioButton_useServer.isChecked()
@@ -2141,7 +2141,7 @@ class MainWindow(QtGui.QMainWindow):
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = urllib.downloadFile(fullurl, srcFileName)
+            status, errmsg = HfirPDReductionControl.downloadFile(fullurl, srcFileName)
             if status is False:
                 self._logError(errmsg)
                 srcFileName = None
