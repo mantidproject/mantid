@@ -19,6 +19,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using ScopedFileHelper::ScopedFile;
 
+namespace {
 /**
 Helper function. Runs LoadParameterAlg, to get an instrument parameter
 definition from a file onto a workspace.
@@ -34,6 +35,213 @@ void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws,
   loadParameterAlg.setPropertyValue("Filename", file.getFileName());
   loadParameterAlg.setProperty("Workspace", ws);
   loadParameterAlg.execute();
+}
+/** Helper function, creates a histogram workspace with an instrument with 2
+detectors, and 2 spectra.
+Y-values are flat accross the x bins. Which makes it easy to calculate the
+expected value for any fit function applied to the X-data.
+*/
+MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
+  const std::string outWSName = "test_ws";
+  IAlgorithm *workspaceAlg =
+      FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+  workspaceAlg->initialize();
+  workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
+  workspaceAlg->setPropertyValue(
+      "DataY", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 Y values
+  workspaceAlg->setPropertyValue(
+      "DataE", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 E values
+  workspaceAlg->setPropertyValue("NSpec", "2");
+  workspaceAlg->setPropertyValue("UnitX", "Wavelength");
+  workspaceAlg->setPropertyValue("OutputWorkspace", outWSName);
+  workspaceAlg->execute();
+  MatrixWorkspace_sptr ws =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+  ws->setInstrument(
+      ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+  return ws;
+}
+
+/**
+Helper function, applies fit functions from a fabricated, fake instrument
+parameter file ontop of an existing instrument definition.
+The fit function is set at the instrument level.
+*/
+MatrixWorkspace_sptr create_workspace_with_fitting_functions(
+    const std::string result_unit = "Wavelength") {
+  // Create a default workspace with no-fitting functions.
+  MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
+  const std::string instrumentName = ws->getInstrument()->getName();
+
+  // Create a parameter file, with a root equation that will apply to all
+  // detectors.
+  const std::string parameterFileContents =
+      boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
+          <component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"1\" result-unit=\"%2%\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"2\" result-unit=\"%2%\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n\
+        </parameter-file>\n") %
+                 instrumentName % result_unit);
+
+  // Create a temporary Instrument Parameter file.
+  ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
+
+  // Apply parameter file to workspace.
+  apply_instrument_parameter_file_to_workspace(ws, file);
+
+  return ws;
+}
+
+/**
+Helper function, applies fit functions from a fabricated, fake instrument
+parameter file ontop of an existing instrument definition.
+The fit function is set at the instrument level. HOWEVER, this instrument
+definition is corrupted in that at the instrument level, ONLY ONE OF THE TWO
+PARAMETERS FOR LINEARFIT (A0) IS PROVIDED.
+*/
+MatrixWorkspace_sptr
+create_workspace_with_incomplete_instrument_level_fitting_functions() {
+  // Create a default workspace with no-fitting functions.
+  MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
+  const std::string instrumentName = ws->getInstrument()->getName();
+
+  // Create a parameter file, with a root equation that will apply to all
+  // detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
+  const std::string parameterFileContents =
+      boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
+          <component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"3\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n\
+        </parameter-file>\n") %
+                 instrumentName);
+
+  // Create a temporary Instrument Parameter file.
+  ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
+
+  // Apply parameter file to workspace.
+  apply_instrument_parameter_file_to_workspace(ws, file);
+
+  return ws;
+}
+
+/**
+Helper function, applies fit functions from a fabricated, fake instrument
+parameter file ontop of an existing instrument definition.
+The fit function is different for every detector.
+*/
+MatrixWorkspace_sptr create_workspace_with_detector_level_only_fit_functions() {
+  // Create a default workspace with no-fitting functions.
+  MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
+  const std::string instrumentName = ws->getInstrument()->getName();
+
+  const double A1 = 1;
+  std::string componentLinks;
+  for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
+    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+
+    // A0, will vary with workspace index, from detector to detector, A1 is
+    // constant = 1.
+    componentLinks += boost::str(boost::format("<component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"%3%\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n") %
+                                 det->getName() % wsIndex % A1);
+  }
+
+  // Create a parameter file, with a root equation that will apply to all
+  // detectors.
+  const std::string parameterFileContents =
+      std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
+      "<parameter-file instrument = \"" + instrumentName +
+      "\" date = \"2012-01-31T00:00:00\">\n" + componentLinks +
+      "</parameter-file>\n";
+
+  // Create a temporary Instrument Parameter file.
+  ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
+
+  // Apply parameter file to workspace.
+  apply_instrument_parameter_file_to_workspace(ws, file);
+
+  return ws;
+}
+
+/**
+Helper function, applies fit functions from a fabricated, fake instrument
+parameter file ontop of an existing instrument definition.
+The fit function is different for every detector. HOWEVER, ONLY ONE OF THE TWO
+PARAMETERS FOR LINEARFIT (A1) IS PROVIDED.
+*/
+MatrixWorkspace_sptr
+create_workspace_with_incomplete_detector_level_only_fit_functions(
+    MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>()) {
+  MatrixWorkspace_sptr ws = original;
+  if (original == NULL) {
+    // Create a default workspace with no-fitting functions.
+    ws = create_workspace_with_no_fitting_functions();
+  }
+  const std::string instrumentName = ws->getInstrument()->getName();
+
+  std::string componentLinks;
+  for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
+    Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
+
+    // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
+    componentLinks += boost::str(boost::format("<component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n") %
+                                 det->getName() % wsIndex);
+  }
+
+  // Create a parameter file, with a root equation that will apply to all
+  // detectors.
+  const std::string parameterFileContents =
+      std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
+      "<parameter-file instrument = \"" + instrumentName +
+      "\" date = \"2012-01-31T00:00:00\">\n" + componentLinks +
+      "</parameter-file>\n";
+
+  // Create a temporary Instrument Parameter file.
+  ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
+
+  // Apply parameter file to workspace.
+  apply_instrument_parameter_file_to_workspace(ws, file);
+
+  return ws;
+}
+
+/**
+Helper method for running the algorithm and testing for invalid argument on
+execution.
+*/
+void do_test_throws_invalid_argument_on_execution(MatrixWorkspace_sptr inputWS,
+                                                  bool parallel = false) {
+  NormaliseByDetector alg(parallel);
+  alg.setRethrows(true);
+  alg.initialize();
+  alg.setPropertyValue("OutputWorkspace", "out");
+  alg.setProperty("InputWorkspace", inputWS);
+  TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
 }
 
 /**
@@ -54,229 +262,13 @@ do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS,
   TS_ASSERT(outWS != NULL);
   return outWS;
 }
-
+}
 /**
 
 Functionality Tests
 
 */
 class NormaliseByDetectorTest : public CxxTest::TestSuite {
-
-private:
-  /** Helper function, creates a histogram workspace with an instrument with 2
-     detectors, and 2 spectra.
-      Y-values are flat accross the x bins. Which makes it easy to calculate the
-     expected value for any fit function applied to the X-data.
-  */
-  MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
-    const std::string outWSName = "test_ws";
-    IAlgorithm *workspaceAlg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
-    workspaceAlg->initialize();
-    workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
-    workspaceAlg->setPropertyValue(
-        "DataY", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 Y values
-    workspaceAlg->setPropertyValue(
-        "DataE", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 E values
-    workspaceAlg->setPropertyValue("NSpec", "2");
-    workspaceAlg->setPropertyValue("UnitX", "Wavelength");
-    workspaceAlg->setPropertyValue("OutputWorkspace", outWSName);
-    workspaceAlg->execute();
-    MatrixWorkspace_sptr ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
-    ws->setInstrument(
-        ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
-    return ws;
-  }
-
-  /**
-   Helper function, applies fit functions from a fabricated, fake instrument
-   parameter file ontop of an existing instrument definition.
-   The fit function is set at the instrument level.
-  */
-  MatrixWorkspace_sptr create_workspace_with_fitting_functions(
-      const std::string result_unit = "Wavelength") {
-    // Create a default workspace with no-fitting functions.
-    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
-
-    // Create a parameter file, with a root equation that will apply to all
-    // detectors.
-    const std::string parameterFileContents =
-        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
-       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
-          <component-link name=\"%1%\">\n\
-           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
-               <formula eq=\"1\" result-unit=\"%2%\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
-               <formula eq=\"2\" result-unit=\"%2%\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           </component-link>\n\
-        </parameter-file>\n") %
-                   instrumentName % result_unit);
-
-    // Create a temporary Instrument Parameter file.
-    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
-
-    // Apply parameter file to workspace.
-    apply_instrument_parameter_file_to_workspace(ws, file);
-
-    return ws;
-  }
-
-  /**
- Helper function, applies fit functions from a fabricated, fake instrument
- parameter file ontop of an existing instrument definition.
- The fit function is set at the instrument level. HOWEVER, this instrument
- definition is corrupted in that at the instrument level, ONLY ONE OF THE TWO
- PARAMETERS FOR LINEARFIT (A0) IS PROVIDED.
-*/
-  MatrixWorkspace_sptr
-  create_workspace_with_incomplete_instrument_level_fitting_functions() {
-    // Create a default workspace with no-fitting functions.
-    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
-
-    // Create a parameter file, with a root equation that will apply to all
-    // detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
-    const std::string parameterFileContents =
-        boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
-       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
-          <component-link name=\"%1%\">\n\
-           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
-               <formula eq=\"3\" result-unit=\"Wavelength\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           </component-link>\n\
-        </parameter-file>\n") %
-                   instrumentName);
-
-    // Create a temporary Instrument Parameter file.
-    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
-
-    // Apply parameter file to workspace.
-    apply_instrument_parameter_file_to_workspace(ws, file);
-
-    return ws;
-  }
-
-  /**
-  Helper function, applies fit functions from a fabricated, fake instrument
-  parameter file ontop of an existing instrument definition.
-  The fit function is different for every detector.
- */
-  MatrixWorkspace_sptr
-  create_workspace_with_detector_level_only_fit_functions() {
-    // Create a default workspace with no-fitting functions.
-    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-    const std::string instrumentName = ws->getInstrument()->getName();
-
-    const double A1 = 1;
-    std::string componentLinks = "";
-
-    const auto &spectrumInfo = ws->spectrumInfo();
-    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
-      // A0, will vary with workspace index, from detector to detector, A1 is
-      // constant = 1.
-      componentLinks +=
-          boost::str(boost::format("<component-link name=\"%1%\">\n\
-           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
-               <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
-               <formula eq=\"%3%\" result-unit=\"Wavelength\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           </component-link>\n") %
-                     detector.getName() % wsIndex % A1);
-    }
-
-    // Create a parameter file, with a root equation that will apply to all
-    // detectors.
-    const std::string parameterFileContents =
-        std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
-        "<parameter-file instrument = \"" + instrumentName +
-        "\" date = \"2012-01-31T00:00:00\">\n" + componentLinks +
-        "</parameter-file>\n";
-
-    // Create a temporary Instrument Parameter file.
-    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
-
-    // Apply parameter file to workspace.
-    apply_instrument_parameter_file_to_workspace(ws, file);
-
-    return ws;
-  }
-
-  /**
-  Helper function, applies fit functions from a fabricated, fake instrument
-  parameter file ontop of an existing instrument definition.
-  The fit function is different for every detector. HOWEVER, ONLY ONE OF THE TWO
-  PARAMETERS FOR LINEARFIT (A1) IS PROVIDED.
- */
-  MatrixWorkspace_sptr
-  create_workspace_with_incomplete_detector_level_only_fit_functions(
-      MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>()) {
-    MatrixWorkspace_sptr ws = original;
-    if (original == NULL) {
-      // Create a default workspace with no-fitting functions.
-      ws = create_workspace_with_no_fitting_functions();
-    }
-    const std::string instrumentName = ws->getInstrument()->getName();
-
-    std::string componentLinks = "";
-    const auto &spectrumInfo = ws->spectrumInfo();
-
-    for (size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex) {
-      const auto &detector = spectrumInfo.detector(wsIndex);
-
-      // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
-      componentLinks +=
-          boost::str(boost::format("<component-link name=\"%1%\">\n\
-           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
-               <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
-               <fixed />\n\
-           </parameter>\n\
-           </component-link>\n") %
-                     detector.getName() % wsIndex);
-    }
-
-    // Create a parameter file, with a root equation that will apply to all
-    // detectors.
-    const std::string parameterFileContents =
-        std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
-        "<parameter-file instrument = \"" + instrumentName +
-        "\" date = \"2012-01-31T00:00:00\">\n" + componentLinks +
-        "</parameter-file>\n";
-
-    // Create a temporary Instrument Parameter file.
-    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
-
-    // Apply parameter file to workspace.
-    apply_instrument_parameter_file_to_workspace(ws, file);
-
-    return ws;
-  }
-
-  /**
-  Helper method for running the algorithm and testing for invalid argument on
-  execution.
-  */
-  void
-  do_test_throws_invalid_argument_on_execution(MatrixWorkspace_sptr inputWS,
-                                               bool parallel = false) {
-    NormaliseByDetector alg(parallel);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setProperty("InputWorkspace", inputWS);
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-  }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -567,64 +559,7 @@ public:
 
   void setUp() override {
     if (!ws) {
-      // Load some data
-      IAlgorithm *loadalg =
-          FrameworkManager::Instance().createAlgorithm("Load");
-      loadalg->setRethrows(true);
-      loadalg->initialize();
-      loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
-      loadalg->setPropertyValue("OutputWorkspace", "testws");
-      loadalg->execute();
-
-      // Convert units to wavelength
-      IAlgorithm *unitsalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertUnits");
-      unitsalg->initialize();
-      unitsalg->setPropertyValue("InputWorkspace", "testws");
-      unitsalg->setPropertyValue("OutputWorkspace", "testws");
-      unitsalg->setPropertyValue("Target", "Wavelength");
-      unitsalg->execute();
-
-      // Convert the specturm axis ot signed_theta
-      IAlgorithm *specaxisalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
-      specaxisalg->initialize();
-      specaxisalg->setPropertyValue("InputWorkspace", "testws");
-      specaxisalg->setPropertyValue("OutputWorkspace", "testws");
-      specaxisalg->setPropertyValue("Target", "signed_theta");
-      specaxisalg->execute();
-
-      WorkspaceGroup_sptr wsGroup =
-          API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-              "testws");
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
-
-      const std::string instrumentName = ws->getInstrument()->getName();
-
-      // Create a parameter file, with a root equation that will apply to all
-      // detectors.
-      const std::string parameterFileContents = boost::str(
-          boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
-        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
-        <component-link name=\"%1%\">\n\
-        <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
-        <formula eq=\"1\" result-unit=\"Wavelength\"/>\n\
-        <fixed />\n\
-        </parameter>\n\
-        <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
-        <formula eq=\"2\" result-unit=\"Wavelength\"/>\n\
-        <fixed />\n\
-        </parameter>\n\
-        </component-link>\n\
-        </parameter-file>\n") %
-          instrumentName);
-
-      // Create a temporary Instrument Parameter file.
-      ScopedFile file(parameterFileContents,
-                      instrumentName + "_Parameters.xml");
-
-      // Apply parameter file to workspace.
-      apply_instrument_parameter_file_to_workspace(ws, file);
+      ws = create_workspace_with_fitting_functions();
     }
   }
 
