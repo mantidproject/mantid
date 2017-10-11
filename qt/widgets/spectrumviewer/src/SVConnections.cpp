@@ -602,7 +602,7 @@ void SVConnections::showColorScale(std::vector<QRgb> &positiveColorTable,
  */
 void SVConnections::openOnlineHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("SpectrumViewer"));
+                                                 QString("Spectrum Viewer"));
 }
 
 /// Set the display which is currently visible
