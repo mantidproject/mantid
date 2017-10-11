@@ -524,6 +524,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     Geometry
     HistogramData
     Kernel
+    Types
     ${QT_LIBRARIES}
     ${QWT_LIBRARIES}
     ${Boost_LIBRARIES}

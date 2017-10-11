@@ -73,6 +73,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     Geometry
     HistogramData
     Kernel
+    Types
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${POCO_LIBRARIES}
