@@ -286,7 +286,7 @@ void MaxEnt::exec() {
 
   npoints = complexImage ? npoints * 2 : npoints;
   
-  _start_filter([](size_t it){return it < 500 && it % 1 == 0;});
+  _start_filter([](size_t it){return it < 50 && it % 1 == 0;});
 
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
@@ -687,9 +687,9 @@ MaxEnt::updateImage(const std::vector<double> &image,
     }
   }
 //  _(newImage);
-  //for (size_t i = 0; i < image.size(); i++) {
-  //  newImage[i] += image[i];
-  //}
+  for (size_t i = 0; i < image.size(); i++) {
+    newImage[i] += image[i];
+  }
   return newImage;
 }
 

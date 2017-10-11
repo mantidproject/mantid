@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/MaxEnt/MaxentCalculator.h"
 #include <cmath>
 
-#include "D:/Work/mantid_stuff/Testing/class/MyTest.h"
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -237,6 +235,8 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 
   calculateChisq();
   double chiSq = getChisq();
+  //double fac = chiSq;
+  double fac = double(npoints) * double(npoints);
 
   // Calculate the quadratic coefficients SB. eq 24
 
@@ -249,7 +249,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.s1[k][0] += m_directionsIm[k][i] * sgrad[i];
       m_coeffs.c1[k][0] += m_directionsIm[k][i] * cgrad[i];
     }
-    m_coeffs.c1[k][0] /= chiSq;
+    m_coeffs.c1[k][0] /= fac;
   }
 
   // Then s2
@@ -275,7 +275,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
           m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
                                m_errors[i] / m_errors[i];
       }
-      m_coeffs.c2[k][l] *= 2.0 / chiSq;
+      m_coeffs.c2[k][l] *= 2.0 / fac;
     }
   }
 
@@ -286,20 +286,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.c2[k][l] = m_coeffs.c2[l][k];
     }
   }
-
-  //_(sgrad);
-  //_(cgrad);
-  //_n(chigrad, calculateChiGrad());
-  //_(m_angle);
-  //_(metric);
-  //_n(im0, m_directionsIm[0]);
-  //_n(im1, m_directionsIm[1]);
-  //_n(dat0, directionsDat[0]);
-  //_n(dat1, directionsDat[1]);
-  //_matr(m_coeffs.c1);
-  //_matr(m_coeffs.c2);
-  //_matr(m_coeffs.s1);
-  //_matr(m_coeffs.s2);
 
 }
 
