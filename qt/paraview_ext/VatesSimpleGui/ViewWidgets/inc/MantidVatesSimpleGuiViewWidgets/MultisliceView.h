@@ -102,15 +102,13 @@ protected slots:
   //// changes the slice point in VATES.
   void changedSlicePoint(Mantid::Kernel::VMD selectedPoint);
 
-  void ShowContextMenu(const QPoint &pos);
-
   void setSlicePosition();
 
   void checkState(const QString &input);
 
 private:
   Q_DISABLE_COPY(MultiSliceView)
-  void setSlicePosition(int axisIndex, double sliceOffsetOnAxis);
+  void editSlicePosition(int axisIndex, double sliceOffsetOnAxis);
   /// Determine if the data can support the SliceViewer being shown.
   void checkSliceViewCompat();
   /// Create the current data representation.
