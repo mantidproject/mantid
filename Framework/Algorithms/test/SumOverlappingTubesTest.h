@@ -8,9 +8,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 using Mantid::Algorithms::SumOverlappingTubes;
 
@@ -18,6 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 
 class SumOverlappingTubesTest : public CxxTest::TestSuite {
 public:

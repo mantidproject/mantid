@@ -492,7 +492,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InterpolationOption.h
-        inc/MantidAlgorithms/InvertMask.h
+	inc/MantidAlgorithms/InvertMask.h
 	inc/MantidAlgorithms/LineProfile.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
@@ -530,6 +530,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseByDetector.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
+	inc/MantidAlgorithms/NRCalculateSlitResolution.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
 	inc/MantidAlgorithms/PaddingAndApodization.h
 	inc/MantidAlgorithms/PDCalibration.h
@@ -861,6 +862,7 @@ set ( TEST_FILES
 	NormaliseByCurrentTest.h
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
+	NRCalculateSlitResolutionTest.h
 	OneMinusExponentialCorTest.h
 	PaddingAndApodizationTest.h
 	PDCalibrationTest.h
