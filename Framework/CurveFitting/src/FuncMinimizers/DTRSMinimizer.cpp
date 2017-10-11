@@ -30,27 +30,28 @@ std::string DTRSMinimizer::name() const { return "Trust Region"; }
 
 namespace {
 
-const double huge = std::numeric_limits<double>::max();
-const double epsmch = std::numeric_limits<double>::epsilon();
-const double largest = huge;
-const double lower_default = -0.5 * largest;
-const double upper_default = largest;
-const double point4 = 0.4;
-const double two = 2.0;
-const double three = 3.0;
-const double four = 4.0;
-const double six = 6.0;
-const double onesixth = one / six;
-const double sixth = onesixth;
-const double onethird = one / three;
-const double twothirds = two / three;
-const double threequarters = 0.75;
-const double twentyfour = 24.0;
-const int max_degree = 3;
-const int history_max = 100;
-const double teneps = 10.0 * epsmch;
-const double roots_tol = teneps;
-const double infinity = huge;
+const double HUGE = std::numeric_limits<double>::max();
+const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
+const double LARGEST = HUGE;
+const double LOWER_DEFAULT = -0.5 * LARGEST;
+const double UPPER_DEFAULT = LARGEST;
+const double POINT4 = 0.4;
+const double ONE = 1.0;
+const double TWO = 2.0;
+const double THREE = 3.0;
+const double FOUR = 4.0;
+const double SIX = 6.0;
+const double ONESIXTH = ONE / SIX;
+const double SIXTH = ONESIXTH;
+const double ONE_THIRD = ONE / THREE;
+const double TWO_THIRDS = TWO / THREE;
+const double THREE_QUARTERS = 0.75;
+const double TWENTY_FOUR = 24.0;
+const int MAX_DEGREE = 3;
+const int HISTORY_MAX = 100;
+const double TEN_EPSILON_MCH = 10.0 * EPSILON_MCH;
+const double ROOTS_TOL = TEN_EPSILON_MCH;
+const double INFINITE_NUMBER = HUGE;
 
 enum class ErrorCode {
   ral_nlls_ok = 0,
@@ -139,20 +140,20 @@ inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 struct dtrs_control_type {
   //!  maximum degree of Taylor approximant allowed
-  int taylor_max_degree = 3;
+  int taylor_MAX_DEGREE = 3;
 
   //!  any entry of H that is smaller than h_min * MAXVAL( H ) we be treated as
   // zero
-  double h_min = epsmch;
+  double h_min = EPSILON_MCH;
 
   //!  lower and upper bounds on the multiplier, if known
-  double lower = lower_default;
-  double upper = upper_default;
+  double lower = LOWER_DEFAULT;
+  double upper = UPPER_DEFAULT;
 
   //!  stop when | ||x|| - radius | <=
   //!     max( stop_normal * radius, stop_absolute_normal )
-  double stop_normal = epsmch;
-  double stop_absolute_normal = epsmch;
+  double stop_normal = EPSILON_MCH;
+  double stop_absolute_normal = EPSILON_MCH;
 
   //!  is the solution is REQUIRED to lie on the boundary (i.e., is the
   // constraint
@@ -295,8 +296,8 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
 
   auto rhs = tol * a1 * a1;
   if (fabs(a0 * a2) > rhs) { // really is quadratic
-    root2 = a1 * a1 - four * a2 * a0;
-    if (fabs(root2) <= pow(epsmch * a1, 2)) { // numerical double root
+    root2 = a1 * a1 - FOUR * a2 * a0;
+    if (fabs(root2) <= pow(EPSILON_MCH * a1, 2)) { // numerical double root
       nroots = 2;
       root1 = -half * a1 / a2;
       root2 = root1;
@@ -346,13 +347,13 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
 
   if (nroots >= 1) {
     auto p = (a2 * root1 + a1) * root1 + a0;
-    auto pprime = two * a2 * root1 + a1;
+    auto pprime = TWO * a2 * root1 + a1;
     if (pprime != zero) {
       root1 = root1 - p / pprime;
     }
     if (nroots == 2) {
       p = (a2 * root2 + a1) * root2 + a0;
-      pprime = two * a2 * root2 + a1;
+      pprime = TWO * a2 * root2 + a1;
       if (pprime != zero) {
         root2 = root2 - p / pprime;
       }
@@ -381,7 +382,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
   //  Check to see if the cubic is actually a quadratic
   if (a3 == zero) {
     rootsQuadratic(a0, a1, a2, tol, nroots, root1, root2);
-    root3 = infinity;
+    root3 = INFINITE_NUMBER;
     return;
   }
 
@@ -399,16 +400,16 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
   double c1 = a1 / a3;
   double c2 = a2 / a3;
 
-  double s = c2 / three;
+  double s = c2 / THREE;
   double t = s * c2;
-  double b = 0.5 * (s * (twothirds * t - c1) + c0);
-  t = (t - c1) / three;
+  double b = 0.5 * (s * (TWO_THIRDS * t - c1) + c0);
+  t = (t - c1) / THREE;
   double c = t * t * t;
   double d = b * b - c;
 
   // 1 real + 2 equal real or 2 complex roots
   if (d >= zero) {
-    d = pow(sqrt(d) + fabs(b), onethird);
+    d = pow(sqrt(d) + fabs(b), ONE_THIRD);
     if (d != zero) {
       if (b > zero) {
         b = -d;
@@ -417,7 +418,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
       }
       c = t / b;
     }
-    d = sqrt(threequarters) * (b - c);
+    d = sqrt(THREE_QUARTERS) * (b - c);
     b = b + c;
     c = -0.5 * b - s;
     root1 = b - s;
@@ -430,17 +431,17 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
     }
   } else { // 3 real roots
     if (b == zero) {
-      d = twothirds * atan(one);
+      d = TWO_THIRDS * atan(ONE);
     } else {
-      d = atan(sqrt(-d) / fabs(b)) / three;
+      d = atan(sqrt(-d) / fabs(b)) / THREE;
     }
     if (b < zero) {
-      b = two * sqrt(t);
+      b = TWO * sqrt(t);
     } else {
-      b = -two * sqrt(t);
+      b = -TWO * sqrt(t);
     }
     c = cos(d) * b;
-    t = -sqrt(threequarters) * sin(d) * b - half * c;
+    t = -sqrt(THREE_QUARTERS) * sin(d) * b - half * c;
     d = -t - c - s;
     c = c - s;
     t = t - s;
@@ -481,7 +482,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 
   //  perfom a Newton iteration to ensure that the roots are accurate
   double p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
-  double pprime = (three * a3 * root1 + two * a2) * root1 + a1;
+  double pprime = (THREE * a3 * root1 + TWO * a2) * root1 + a1;
   if (pprime != zero) {
     root1 = root1 - p / pprime;
     // p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0; // never used
@@ -489,14 +490,14 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 
   if (nroots == 3) {
     p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0;
-    pprime = (three * a3 * root2 + two * a2) * root2 + a1;
+    pprime = (THREE * a3 * root2 + TWO * a2) * root2 + a1;
     if (pprime != zero) {
       root2 = root2 - p / pprime;
       // p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0; // never used
     }
 
     p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
-    pprime = (three * a3 * root3 + two * a2) * root3 + a1;
+    pprime = (THREE * a3 * root3 + TWO * a2) * root3 + a1;
     if (pprime != zero) {
       root3 = root3 - p / pprime;
       // p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0; // never used
@@ -519,17 +520,17 @@ void dtrsPiDerivs(int max_order, double beta,
                   DoubleFortranVector &pi_beta) {
   double hbeta = half * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
-  pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - one))) * x_norm2(1);
+  pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - ONE))) * x_norm2(1);
   if (max_order == 1)
     return;
-  pi_beta(2) = hbeta * (pow(x_norm2(0), (hbeta - two))) *
-               ((hbeta - one) * pow(x_norm2(1), 2) + x_norm2(0) * x_norm2(2));
+  pi_beta(2) = hbeta * (pow(x_norm2(0), (hbeta - TWO))) *
+               ((hbeta - ONE) * pow(x_norm2(1), 2) + x_norm2(0) * x_norm2(2));
   if (max_order == 2)
     return;
-  pi_beta(3) = hbeta * (pow(x_norm2(0), (hbeta - three))) *
+  pi_beta(3) = hbeta * (pow(x_norm2(0), (hbeta - THREE))) *
                (x_norm2(3) * pow(x_norm2(0), 2) +
-                (hbeta - one) * (three * x_norm2(0) * x_norm2(1) * x_norm2(2) +
-                                 (hbeta - two) * pow(x_norm2(1), 3)));
+                (hbeta - ONE) * (THREE * x_norm2(0) * x_norm2(1) * x_norm2(2) +
+                                 (hbeta - TWO) * pow(x_norm2(1), 3)));
 }
 
 /**  Set initial values for the TRS control parameters
@@ -539,8 +540,8 @@ void dtrsPiDerivs(int max_order, double beta,
  */
 void dtrsInitialize(dtrs_control_type &control, dtrs_inform_type &inform) {
   inform.status = ErrorCode::ral_nlls_ok;
-  control.stop_normal = pow(epsmch, 0.75);
-  control.stop_absolute_normal = pow(epsmch, 0.75);
+  control.stop_normal = pow(EPSILON_MCH, 0.75);
+  control.stop_absolute_normal = pow(EPSILON_MCH, 0.75);
 }
 
 /**  Solve the trust-region subproblem
@@ -580,7 +581,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     return;
   }
 
-  DoubleFortranVector x_norm2(0, max_degree), pi_beta(0, max_degree);
+  DoubleFortranVector x_norm2(0, MAX_DEGREE), pi_beta(0, MAX_DEGREE);
 
   //  compute the two-norm of c and the extreme eigenvalues of H
 
@@ -600,7 +601,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
           break;
         }
       }
-      x(i_hard) = one / radius;
+      x(i_hard) = ONE / radius;
       inform.x_norm = radius;
       inform.obj = f + lambda_min * radius * radius;
     }
@@ -634,7 +635,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     inform.hard_case = true;
     for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
       if (h(i) == lambda_min) {
-        if (fabs(c(i)) > epsmch * c_norm) {
+        if (fabs(c(i)) > EPSILON_MCH * c_norm) {
           inform.hard_case = false;
           c2 = c2 + pow(c(i), 2);
         } else {
@@ -688,7 +689,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
           if (h(i) != lambda_min)
             w_norm2 = w_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 3);
         }
-        x_norm2(1) = -two * w_norm2;
+        x_norm2(1) = -TWO * w_norm2;
 
         //  compute the newton correction
 
@@ -699,13 +700,13 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       //  there is a singularity at lambda. compute the point for which the
       //  sum of squares of the singular terms is equal to radius^2
     } else {
-      lambda = lambda + std::max(sqrt(c2) / radius, lambda * epsmch);
+      lambda = lambda + std::max(sqrt(c2) / radius, lambda * EPSILON_MCH);
       lambda_l = std::max(lambda_l, lambda);
     }
   }
 
   //  the iterates will all be in the L region. Prepare for the main loop
-  auto max_order = std::max(1, std::min(max_degree, control.taylor_max_degree));
+  auto max_order = std::max(1, std::min(MAX_DEGREE, control.taylor_MAX_DEGREE));
 
   //  start the main loop
   for (;;) {
@@ -740,7 +741,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     lambda_l = std::max(lambda_l, lambda);
 
     //  record, for the future, values of lambda which give small ||x||
-    if (inform.len_history < history_max) {
+    if (inform.len_history < HISTORY_MAX) {
       dtrs_history_type history_item;
       history_item.lambda = lambda;
       history_item.x_norm = inform.x_norm;
@@ -768,10 +769,10 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     }
 
     //  compute the first derivative of x_norm2 = x^T M x
-    x_norm2(1) = -two * w_norm2;
+    x_norm2(1) = -TWO * w_norm2;
 
     //  compute pi_beta = ||x||^beta and its first derivative when beta = - 1
-    double beta = -one;
+    double beta = -ONE;
     dtrsPiDerivs(1, beta, x_norm2, pi_beta);
 
     //  compute the Newton correction (for beta = - 1)
@@ -790,7 +791,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
         z_norm2 = z_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 4);
       }
-      x_norm2(2) = six * z_norm2;
+      x_norm2(2) = SIX * z_norm2;
 
       //  compute the third derivatives of x^T x
 
@@ -798,11 +799,11 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
         v_norm2 = v_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 5);
       }
-      x_norm2(3) = -twentyfour * v_norm2;
+      x_norm2(3) = -TWENTY_FOUR * v_norm2;
 
       //  compute pi_beta = ||x||^beta and its derivatives when beta = 2
 
-      beta = two;
+      beta = TWO;
       dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = 2)
@@ -810,7 +811,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       auto a_0 = pi_beta(0) - pow((radius), beta);
       auto a_1 = pi_beta(1);
       auto a_2 = half * pi_beta(2);
-      auto a_3 = sixth * pi_beta(3);
+      auto a_3 = SIXTH * pi_beta(3);
       auto a_max = biggest(fabs(a_0), fabs(a_1), fabs(a_2), fabs(a_3));
       if (a_max > zero) {
         a_0 = a_0 / a_max;
@@ -821,7 +822,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       int nroots = 0;
       double root1 = 0, root2 = 0, root3 = 0;
 
-      rootsCubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
+      rootsCubic(a_0, a_1, a_2, a_3, ROOTS_TOL, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -831,7 +832,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
       //  compute pi_beta = ||x||^beta and its derivatives when beta = - 0.4
 
-      beta = -point4;
+      beta = -POINT4;
       dtrsPiDerivs(max_order, beta, x_norm2, pi_beta);
 
       //  compute the "cubic Taylor approximaton" step (beta = - 0.4)
@@ -839,7 +840,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       a_0 = pi_beta(0) - pow((radius), beta);
       a_1 = pi_beta(1);
       a_2 = half * pi_beta(2);
-      a_3 = sixth * pi_beta(3);
+      a_3 = SIXTH * pi_beta(3);
       a_max = biggest(fabs(a_0), fabs(a_1), fabs(a_2), fabs(a_3));
       if (a_max > zero) {
         a_0 = a_0 / a_max;
@@ -847,7 +848,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
         a_2 = a_2 / a_max;
         a_3 = a_3 / a_max;
       }
-      rootsCubic(a_0, a_1, a_2, a_3, roots_tol, nroots, root1, root2, root3);
+      rootsCubic(a_0, a_1, a_2, a_3, ROOTS_TOL, nroots, root1, root2, root3);
       n_lambda = n_lambda + 1;
       if (nroots == 3) {
         lambda_new(n_lambda) = lambda + root3;
@@ -868,7 +869,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     //  check that the best Taylor improvement is significant
 
-    if (fabs(delta_lambda) < epsmch * std::max(one, fabs(lambda))) {
+    if (fabs(delta_lambda) < EPSILON_MCH * std::max(ONE, fabs(lambda))) {
       inform.status = ErrorCode::ral_nlls_ok;
       break;
     }
@@ -922,7 +923,7 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
       }
     }
   } else {
-    scale_h = one;
+    scale_h = ONE;
     h_scale.zero();
   }
 
@@ -939,7 +940,7 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
       }
     }
   } else {
-    scale_c = one;
+    scale_c = ONE;
     c_scale.zero();
   }
 
@@ -947,10 +948,10 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
   double f_scale = (scale_h / pow(scale_c, 2)) * f;
 
   auto control_scale = control;
-  if (control_scale.lower != lower_default) {
+  if (control_scale.lower != LOWER_DEFAULT) {
     control_scale.lower = control_scale.lower / scale_h;
   }
-  if (control_scale.upper != upper_default) {
+  if (control_scale.upper != UPPER_DEFAULT) {
     control_scale.upper = control_scale.upper / scale_h;
   }
 
@@ -1053,10 +1054,10 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-    if (fabs(w.v_trans(ii)) < epsmch) {
+    if (fabs(w.v_trans(ii)) < EPSILON_MCH) {
       w.v_trans(ii) = zero;
     }
-    if (fabs(w.ew(ii)) < epsmch) {
+    if (fabs(w.ew(ii)) < EPSILON_MCH) {
       w.ew(ii) = zero;
     }
   }
