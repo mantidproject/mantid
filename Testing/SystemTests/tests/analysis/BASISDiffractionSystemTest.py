@@ -16,6 +16,7 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
         """
         BASISDiffraction(SampleOrientation=True,
                          RunNumbers='74799-74804',
+                         MaskFile='BASIS_Mask_default_diff.xml',
                          VanadiumRuns='64642',
                          BackgroundRun='75527',
                          PsiAngleLog='SE50Rot',
