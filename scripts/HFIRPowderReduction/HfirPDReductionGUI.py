@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments,C901
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
