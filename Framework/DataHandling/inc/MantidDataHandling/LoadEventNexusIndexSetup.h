@@ -4,6 +4,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidParallel/Communicator.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -41,9 +42,10 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL LoadEventNexusIndexSetup {
 public:
-  LoadEventNexusIndexSetup(API::MatrixWorkspace_const_sptr instrumentWorkspace,
-                           const int32_t min, const int32_t max,
-                           const std::vector<int32_t> range);
+  LoadEventNexusIndexSetup(
+      API::MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
+      const int32_t max, const std::vector<int32_t> range,
+      const Parallel::Communicator &communicator = Parallel::Communicator());
 
   std::pair<int32_t, int32_t> eventIDLimits() const;
 
@@ -61,6 +63,7 @@ private:
   int32_t m_min;
   int32_t m_max;
   std::vector<int32_t> m_range;
+  const Parallel::Communicator m_communicator;
 };
 
 } // namespace DataHandling
