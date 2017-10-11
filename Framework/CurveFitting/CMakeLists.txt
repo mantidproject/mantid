@@ -350,6 +350,7 @@ set ( TEST_FILES
 	FuncMinimizers/FRConjugateGradientTest.h
 	FuncMinimizers/LevenbergMarquardtMDTest.h
 	FuncMinimizers/LevenbergMarquardtTest.h
+        FuncMinimizers/MoreSorensenTest.h
 	FuncMinimizers/PRConjugateGradientTest.h
 	FuncMinimizers/SimplexTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
