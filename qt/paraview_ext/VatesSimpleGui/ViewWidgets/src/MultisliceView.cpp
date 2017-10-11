@@ -64,8 +64,16 @@ static void GetOrientations(vtkSMSourceProxy *producer,
 MultiSliceView::MultiSliceView(QWidget *parent,
                                RebinnedSourcesManager *rebinnedSourcesManager,
                                bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager) {
+    : ViewBase(parent, rebinnedSourcesManager),
+      m_contextMenu(new QMenu(tr("Context menu"), this)),
+      m_edit(new QLineEdit(this)), m_action(new QWidgetAction(this)) {
   this->m_ui.setupUi(this);
+
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  m_edit->setPlaceholderText(QString("Slice Position"));
+  m_action->setDefaultWidget(m_edit);
+  m_contextMenu->addAction(m_action);
+
   if (createRenderProxy) {
     pqRenderView *tmp =
         this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
@@ -74,6 +82,11 @@ MultiSliceView::MultiSliceView(QWidget *parent,
     QObject::connect(this->m_mainView,
                      SIGNAL(sliceClicked(int, double, int, int)), this,
                      SLOT(checkSliceClicked(int, double, int, int)));
+
+    QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this,
+                     SLOT(checkState(const QString &)));
+    QObject::connect(this->m_edit, SIGNAL(editingFinished()), this,
+                     SLOT(setSlicePosition()));
   }
 }
 
@@ -82,6 +95,16 @@ MultiSliceView::~MultiSliceView() {}
 void MultiSliceView::destroyView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(this->m_mainView);
+}
+
+void MultiSliceView::ShowContextMenu(const QPoint &pos) {
+  QMenu contextMenu(tr("Context menu"), this);
+
+  QAction action1("Remove Data Point", this);
+  // connect(&action1, SIGNAL(triggered()), this, SLOT(removeDataPoint()));
+  contextMenu.addAction(&action1);
+
+  contextMenu.exec(mapToGlobal(pos));
 }
 
 pqRenderView *MultiSliceView::getView() {
@@ -151,10 +174,87 @@ void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
 void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier) {
   if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER &&
-      (button == vtkContextMouseEvent::LEFT_BUTTON ||
-       button == vtkContextMouseEvent::RIGHT_BUTTON)) {
+      button == vtkContextMouseEvent::RIGHT_BUTTON) {
     this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
   }
+
+  if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER &&
+      button == vtkContextMouseEvent::LEFT_BUTTON) {
+    this->setSlicePosition(axisIndex, sliceOffsetOnAxis);
+  }
+}
+
+void MultiSliceView::setSlicePosition(int axisIndex, double sliceOffsetOnAxis) {
+
+  m_axisIndex = axisIndex;
+  m_sliceOffsetOnAxis = sliceOffsetOnAxis;
+
+  double bounds[6];
+  vtkSMMultiSliceViewProxy::GetDataBounds(this->origSrc->getSourceProxy(), 0,
+                                          bounds);
+  if (axisIndex == 0) {
+    m_edit->setValidator(new QDoubleValidator(bounds[0], bounds[1], 5, this));
+  } else if (axisIndex == 1) {
+    m_edit->setValidator(new QDoubleValidator(bounds[2], bounds[3], 5, this));
+  } else if (axisIndex == 2) {
+    m_edit->setValidator(new QDoubleValidator(bounds[4], bounds[5], 5, this));
+  }
+  m_contextMenu->exec(QCursor::pos());
+}
+
+void MultiSliceView::checkState(const QString &input) {
+  auto validator = m_edit->validator();
+  QString tmp = input;
+  int tmp2 = 0;
+  auto state = validator->validate(tmp, tmp2);
+  std::string color;
+  if (state == QValidator::Acceptable) {
+    color = "#c4df9b"; // green
+  } else if (state == QValidator::Intermediate) {
+    color = "#fff79a"; // yellow
+  } else {
+    color = "#f6989d"; // red
+  }
+  m_edit->setStyleSheet(
+      QString::fromStdString("QLineEdit { background-color: " + color + " }"));
+}
+
+void MultiSliceView::setSlicePosition() {
+  double newPosition = m_edit->text().toDouble();
+
+  if (m_axisIndex == 0) {
+    std::vector<double> xSlices =
+        vtkSMPropertyHelper(m_mainView->getViewProxy(), "XSlicesValues")
+            .GetDoubleArray();
+    auto it = std::find(xSlices.begin(), xSlices.end(), m_sliceOffsetOnAxis);
+    if (it != xSlices.end()) {
+      *it = newPosition;
+    }
+    vtkSMPropertyHelper(m_mainView->getViewProxy(), "XSlicesValues")
+        .Set(xSlices.data(), static_cast<int>(xSlices.size()));
+  } else if (m_axisIndex == 1) {
+    std::vector<double> ySlices =
+        vtkSMPropertyHelper(m_mainView->getViewProxy(), "YSlicesValues")
+            .GetDoubleArray();
+    auto it = std::find(ySlices.begin(), ySlices.end(), m_sliceOffsetOnAxis);
+    if (it != ySlices.end()) {
+      *it = newPosition;
+    }
+    vtkSMPropertyHelper(m_mainView->getViewProxy(), "YSlicesValues")
+        .Set(ySlices.data(), static_cast<int>(ySlices.size()));
+  } else if (m_axisIndex == 2) {
+    std::vector<double> zSlices =
+        vtkSMPropertyHelper(m_mainView->getViewProxy(), "ZSlicesValues")
+            .GetDoubleArray();
+    auto it = std::find(zSlices.begin(), zSlices.end(), m_sliceOffsetOnAxis);
+    if (it != zSlices.end()) {
+      *it = newPosition;
+    }
+    vtkSMPropertyHelper(m_mainView->getViewProxy(), "ZSlicesValues")
+        .Set(zSlices.data(), static_cast<int>(zSlices.size()));
+  }
+  m_mainView->getViewProxy()->UpdateVTKObjects();
+  m_contextMenu->hide();
 }
 
 /**

@@ -8,6 +8,7 @@
 
 #include <QPointer>
 #include <QWidget>
+#include <QWidgetAction>
 
 class pqMultiSliceView;
 
@@ -101,9 +102,15 @@ protected slots:
   //// changes the slice point in VATES.
   void changedSlicePoint(Mantid::Kernel::VMD selectedPoint);
 
+  void ShowContextMenu(const QPoint &pos);
+
+  void setSlicePosition();
+
+  void checkState(const QString &input);
+
 private:
   Q_DISABLE_COPY(MultiSliceView)
-
+  void setSlicePosition(int axisIndex, double sliceOffsetOnAxis);
   /// Determine if the data can support the SliceViewer being shown.
   void checkSliceViewCompat();
   /// Create the current data representation.
@@ -111,6 +118,11 @@ private:
 
   QPointer<pqMultiSliceView> m_mainView; ///< The main view class
   Ui::MultiSliceViewClass m_ui;          ///< The view's UI form
+  QMenu *m_contextMenu;
+  QLineEdit *m_edit;
+  QWidgetAction *m_action;
+  int m_axisIndex;
+  double m_sliceOffsetOnAxis;
 };
 }
 }
