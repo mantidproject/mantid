@@ -13,7 +13,6 @@ from sans.state.state_base import create_deserialized_sans_state_from_property_m
 from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
 
 from sans.algorithm_detail.xml_shapes import quadrant_xml
-import SANSUtility
 
 class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
     def category(self):
@@ -68,10 +67,11 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
         self.declareProperty("CompatibilityMode", False, direction=Direction.Input)
 
-        self.declareProperty("Centre1", 0, direction=Direction.Input)
-        self.declareProperty("Centre2", 0, direction=Direction.Input)
+        self.declareProperty("Centre1", 0.0, direction=Direction.Input)
+        self.declareProperty("Centre2", 0.0, direction=Direction.Input)
 
-
+        self.declareProperty("RMax", 0.26, direction= Direction.Input)
+        self.declareProperty("RMin", 0.06, direction= Direction.Input)
 
         # ----------
         # OUTPUT
@@ -88,34 +88,27 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceBottom", 'Bottom', optional=PropertyMode.Optional, direction=Direction.Output),
                              doc='The bottom output workspace.')
 
-        self.declareProperty("UpDownResidual", '', direction=Direction.Output,
-                             doc="The residual of the top and bottom quadrants.")
-
-        self.declareProperty("LeftRightResidual", '', direction=Direction.Output,
-                             doc="The residual of the left and right quadrants")
-
     def PyExec(self):
         # --------
         # Clone the input workspaces
         # --------
         # Get the input
         state = self._get_state()
-
         # --------
         # Change cloned state
         # --------
-        # # Remove phi Masking
-        # if state.mask.phi_min:
-        #     state.mask.phi_min = 0.0
-        # if state.mask.phi_max:
-        #     state.mask.phi_max = 0.0
+        # Remove phi Masking
+        if state.mask.phi_min:
+            state.mask.phi_min = 0.0
+        if state.mask.phi_max:
+            state.mask.phi_max = 0.0
 
-        # # Set compatibility mode
-        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
-        #
-        # # Set test centre
-        # state.move.sample_centre_pos1 = self.getProperty("Centre1").value
-        # state.move.sample_centre_pos2 = self.getProperty("Centre2").value
+        # Set compatibility mode
+        #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+
+        # Set test centre
+        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = self.getProperty("Centre1").value
+        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = self.getProperty("Centre2").value
 
         state_serialized = state.property_manager
 
@@ -234,10 +227,10 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         quadrants = [MaskingQuadrant.Left, MaskingQuadrant.Right, MaskingQuadrant.Top, MaskingQuadrant.Bottom]
         quadrant_scatter_reduced = {}
         centre = [0, 0, 0]
-        rmin = 0.06
-        rmax = 0.28
+        r_min = self.getProperty("RMin").value
+        r_max = self.getProperty("RMax").value
         for quadrant in quadrants:
-            xml_string = quadrant_xml(centre, rmin, rmax, quadrant)
+            xml_string = quadrant_xml(centre, r_min, r_max, quadrant)
             quadrant_scatter_data = self._get_cloned_workspace(scatter_data)
             self._mask_quadrants(quadrant_scatter_data, xml_string)
             quadrant_scatter_data, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
@@ -254,10 +247,6 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspaceRight", quadrant_scatter_reduced[MaskingQuadrant.Right])
         self.setProperty("OutputWorkspaceTop", quadrant_scatter_reduced[MaskingQuadrant.Top])
         self.setProperty("OutputWorkspaceBottom", quadrant_scatter_reduced[MaskingQuadrant.Bottom])
-
-        # # ------------------------------------------------------------
-        # # Calculate the two residuals
-        # # ------------------------------------------------------------
 
     def _mask_quadrants(self, workspace, shape):
         mask_name = "MaskDetectorsInShape"
@@ -459,4 +448,4 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-#AlgorithmFactory.subscribe(SANSBeamCentreFinderCore)
+AlgorithmFactory.subscribe(SANSBeamCentreFinderCore)

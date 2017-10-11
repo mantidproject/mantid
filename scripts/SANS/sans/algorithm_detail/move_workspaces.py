@@ -10,7 +10,6 @@ from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorTyp
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
                                            quaternion_to_angle_and_axis, sanitise_instrument_name)
 
-
 # -------------------------------------------------
 # Free functions
 # -------------------------------------------------
@@ -482,7 +481,6 @@ class SANSMoveSANS2D(SANSMove):
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
-
         _component = component  # noqa
         _is_transmission_workspace = is_transmission_workspace  # noqa
 
@@ -532,19 +530,21 @@ class SANSMoveLOQ(SANSMove):
             x_shift = center_position - x
             y_shift = center_position - y
 
-            # Get the detector name
-            component_name = move_info.detectors[component].detector_name
+            detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+            for detector in detectors:
+                # Get the detector name
+                component_name = move_info.detectors[detector].detector_name
 
-            # Shift the detector by the the input amount
-            offset = {CanonicalCoordinates.X: x_shift,
-                      CanonicalCoordinates.Y: y_shift}
-            move_component(workspace, offset, component_name)
+                # Shift the detector by the the input amount
+                offset = {CanonicalCoordinates.X: x_shift,
+                          CanonicalCoordinates.Y: y_shift}
+                move_component(workspace, offset, component_name)
 
-            # Shift the detector according to the corrections of the detector under investigation
-            offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[component].x_translation_correction,
-                                       CanonicalCoordinates.Y: move_info.detectors[component].y_translation_correction,
-                                       CanonicalCoordinates.Z: move_info.detectors[component].z_translation_correction}
-            move_component(workspace, offset_from_corrections, component_name)
+                # Shift the detector according to the corrections of the detector under investigation
+                offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[detector].x_translation_correction,
+                                           CanonicalCoordinates.Y: move_info.detectors[detector].y_translation_correction,
+                                           CanonicalCoordinates.Z: move_info.detectors[detector].z_translation_correction}
+                move_component(workspace, offset_from_corrections, component_name)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
