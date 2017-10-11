@@ -614,6 +614,7 @@ class MainWindow(QtGui.QMainWindow):
                 mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
         return
 
+    # flake8: noqa
     def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data
         It does not support for tab 'Advanced Setup'
