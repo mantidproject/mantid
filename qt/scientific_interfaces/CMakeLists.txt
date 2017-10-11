@@ -68,12 +68,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     ../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
-    API
+    ${CORE_MANTIDLIBS}
     DataObjects
-    Geometry
-    HistogramData
-    Kernel
-    Types
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${POCO_LIBRARIES}

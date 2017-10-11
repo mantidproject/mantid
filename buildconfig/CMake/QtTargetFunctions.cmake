@@ -5,16 +5,18 @@
 # brief: create a library target for both Qt4 & Qt5
 # For all options see mtd_add_qt_target
 function (mtd_add_qt_library)
-  mtd_add_qt_target (LIBRARY QT_VERSION 4 ${ARGN})
-  #mtd_add_qt_target (LIBRARY QT_VERSION 5 ${ARGN})
+  if(ENABLE_MANTIDPLOT)
+    mtd_add_qt_target (LIBRARY QT_VERSION 4 ${ARGN})
+  endif()
 endfunction()
 
 # name: mtd_add_qt_executable
 # brief: create an executable target for a given Qt version
 # For all options see mtd_add_qt_target
 function (mtd_add_qt_executable)
-  mtd_add_qt_target (EXECUTABLE QT_VERSION 4 ${ARGN})
-  #mtd_add_qt_target (EXECUTABLE QT_VERSION 5 ${ARGN})
+  if(ENABLE_MANTIDPLOT)
+    mtd_add_qt_target (EXECUTABLE QT_VERSION 4 ${ARGN})
+  endif()
 endfunction()
 
 # Target agnostic function to add either an executable or library linked to Qt
@@ -148,7 +150,9 @@ function (mtd_add_qt_target)
 endfunction()
 
 function (mtd_add_qt_tests)
-  mtd_add_qt_test_executable (QT_VERSION 4 ${ARGN})
+  if(ENABLE_MANTIDPLOT)
+    mtd_add_qt_test_executable (QT_VERSION 4 ${ARGN})
+  endif()
 endfunction()
 
 # Create an executable target for running a set of unit tests

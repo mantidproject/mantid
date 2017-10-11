@@ -39,7 +39,7 @@ Usage
     ws = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=np.sqrt(dataY), NSpec=3, UnitX="DeltaE")
 
     # add Instrument
-    LoadInstrument(ws,False,InstrumentName="TOFTOF")
+    LoadInstrument(ws,True,InstrumentName="TOFTOF")
 
     #add sample Logs
     AddSampleLog(ws,"proposal_number","3")

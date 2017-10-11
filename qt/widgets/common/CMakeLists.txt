@@ -517,18 +517,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    Crystal
-    API
+    ${TARGET_LIBRARIES}
     DataObjects
-    Geometry
-    HistogramData
-    Kernel
-    Types
-    ${QT_LIBRARIES}
-    ${QWT_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${POCO_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
   MTD_QT_LINK_LIBS
