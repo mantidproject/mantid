@@ -220,9 +220,13 @@ def load_neutron_data_fitting_problem_file(fname):
     """
     with open(fname) as probf:
         entries = get_neutron_data_problem_entries(probf)
-
+        k=-1
+        prefix =""
+        k = fname.rfind("\\")
+        if k != -1:
+            prefix = fname[:k]+"\\data_files\\"
         prob = test_problem.FittingTestProblem()
-        get_fitting_neutron_data(entries['input_file'], prob)
+        get_fitting_neutron_data(prefix+entries['input_file'], prob)
         prob.name = entries['name']
         prob.equation = entries['function']
         prob.starting_values = None
@@ -263,7 +267,7 @@ def get_fitting_neutron_data(fname, prob):
     @param prob :: problem definition to populate with X-Y-E data.
     """
     import mantid.simpleapi as msapi
-
+    print("moooo ",fname)
     wks = msapi.Load(fname)
     prob.data_pattern_in = wks.readX(0)
     prob.data_pattern_out = wks.readY(0)

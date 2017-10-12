@@ -101,7 +101,7 @@ def run_all_with_or_without_errors(base_problem_files_dir, use_errors, minimizer
 
 
 def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_data_group_dirs=None,
-                         minimizers=None, use_errors=True):
+                         muon_data_group_dir=None, minimizers=None, use_errors=True):
     """
     Run a fit minimizer benchmark against groups of fitting problems.
 
@@ -116,6 +116,7 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
     @param nist_group_dir :: whether to try to load NIST problems
     @param cutest_group_dir :: whether to try to load CUTEst problems
     @param neutron_data_group_dirs :: base directory where fitting problems are located including NIST+CUTEst
+    @param muon_data_group_dir :: base directory where muon fitting problems are located
     @param minimizers :: list of minimizers to test
     @param use_errors :: whether to use observational errors as weights in the cost function
     """
@@ -134,6 +135,8 @@ def do_fitting_benchmark(nist_group_dir=None, cutest_group_dir=None, neutron_dat
 
     if neutron_data_group_dirs:
         problem_blocks.extend(get_data_groups(neutron_data_group_dirs))
+    if muon_data_group_dir:
+        problem_blocks.extend(get_data_groups(muon_data_group_dir))
 
     prob_results = [do_fitting_benchmark_group(block, minimizers, use_errors=use_errors) for
                     block in problem_blocks]
@@ -314,10 +317,15 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         start_fig.labels['y']="Arbitrary units"
         title=user_func[27:-1]
         title=splitByString(title,30)
-        start_fig.labels['title']=prob.name[:-4]+" "+str(count)+"\n"+title
+        run_ID = prob.name
+        k=-1
+        k=run_ID.rfind(".")
+        if k != -1:
+            run_ID=run_ID[:k]
+        start_fig.labels['title']=run_ID+" "+str(count)+"\n"+title
         start_fig.title_size=10
-        fig.make_scatter_plot("Fit for "+prob.name[:-4]+" "+str(count)+".pdf")
-        start_fig.make_scatter_plot("start for "+prob.name[:-4]+" "+str(count)+".pdf")
+        fig.make_scatter_plot("Fit for "+run_ID+" "+str(count)+".pdf")
+        start_fig.make_scatter_plot("start for "+run_ID+" "+str(count)+".pdf")
     return results_fit_problem
 
 
@@ -346,7 +354,6 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         # Note the ugly adhoc exception. We need to reconsider these WISH problems:
         if 'WISH17701' in prob.name:
             ignore_invalid = False
-        #print("boo ", function,cost_function,prob.start_x,prob.end_x)
 
         status = msapi.Fit(function, wks, Output='ws_fitting_test',
                                                                 Minimizer=minimizer,
