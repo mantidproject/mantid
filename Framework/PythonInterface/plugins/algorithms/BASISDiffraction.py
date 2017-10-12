@@ -156,7 +156,8 @@ class BASISDiffraction(DataProcessorAlgorithm):
                                 PropertyCriterion.IsNotDefault)
         self.declareProperty('PsiAngleLog', 'SE50Rot',
                              direction=Direction.Input,
-                             doc='log entry storing sample orientation')
+                             doc='log entry storing rotation of the sample'
+                                 'around the vertical axis')
         self.declareProperty('PsiOffset', 0.0,
                              direction=Direction.Input,
                              doc='Add this quantity to PsiAngleLog')
