@@ -317,11 +317,13 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         start_fig.labels['y']="Arbitrary units"
         title=user_func[27:-1]
         title=splitByString(title,30)
+        # remove the extension (e.g. .nxs) if there is one
         run_ID = prob.name
         k=-1
         k=run_ID.rfind(".")
         if k != -1:
             run_ID=run_ID[:k]
+
         start_fig.labels['title']=run_ID+" "+str(count)+"\n"+title
         start_fig.title_size=10
         fig.make_scatter_plot("Fit for "+run_ID+" "+str(count)+".pdf")
