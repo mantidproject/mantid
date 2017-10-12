@@ -187,7 +187,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
     MantidScientificInterfacesGeneral
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS;@loader_path/../../../plugins/qtplugins/mantid"
 )
 
 if ( MSVC_IDE )

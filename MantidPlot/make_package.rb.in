@@ -133,7 +133,7 @@ if( "@MAKE_VATES@" == "ON" )
   `mkdir Contents/Libraries`
   `cp #{ParaView_dir}/lib/*Python.so Contents/Libraries`
   vatesfiles = ["Contents/MacOS/MantidPlot",
-                "Contents/MacOS/libMantidQtWidgetsCommon.dylib",
+                "Contents/MacOS/libMantidQtWidgetsCommonQt4.dylib",
                 "Contents/MacOS/libMantidParaViewQtWidgets.dylib",
                 "Contents/MacOS/libMantidVatesAPI.dylib",
                 "plugins/libMantidVatesAlgorithms.dylib",
@@ -345,7 +345,7 @@ end
 # ---------------------------------------------
 # Fix imports for Mantid Scientific Interfaces
 # ---------------------------------------------
-`install_name_tool -add_rpath @loader_path/../../../plugins/qtplugins/mantid ./plugins/qtplugins/mantid/libMantidScientificInterfacesEnggDiffraction.dylib`
+`install_name_tool -add_rpath @loader_path/../../../plugins/qtplugins/mantid ./plugins/qtplugins/mantid/libMantidScientificInterfacesEnggDiffractionQt4.dylib`
 # ---------------------------------------------
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
