@@ -299,9 +299,9 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         fig.labels['title']=prob.name[:-4]+" "+str(count)
         fig.title_size=10
         status= msapi.Fit(user_func, wks, Output='ws_fitting_test',
-                                                                Minimizer='Levenberg-Marquardt',
-                                                                CostFunction='Least squares',IgnoreInvalidData=True,
-                                                                StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
+                          Minimizer='Levenberg-Marquardt',
+                          CostFunction='Least squares',IgnoreInvalidData=True,
+                          StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
         tmp=msapi.ConvertToPointData(status.OutputWorkspace)
         xData = tmp.readX(1)
         yData = tmp.readY(1)
@@ -346,9 +346,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
     @returns the fitted parameter values and error estimates for these
     """
     status = None
-    chi2 = None
     param_tbl = None
-    fit_wks = None
     try:
         # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
         # ignore them when using 'Unweighted least squares' as that would ignore all values!
@@ -358,10 +356,10 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
             ignore_invalid = False
 
         status = msapi.Fit(function, wks, Output='ws_fitting_test',
-                                                                Minimizer=minimizer,
-                                                                CostFunction=cost_function,
-                                                                IgnoreInvalidData=ignore_invalid,
-                                                                StartX=prob.start_x, EndX=prob.end_x)
+                           Minimizer=minimizer,
+                           CostFunction=cost_function,
+                           IgnoreInvalidData=ignore_invalid,
+                           StartX=prob.start_x, EndX=prob.end_x)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
