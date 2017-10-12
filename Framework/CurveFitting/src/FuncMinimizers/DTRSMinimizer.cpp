@@ -53,12 +53,6 @@ const double TEN_EPSILON_MCH = 10.0 * EPSILON_MCH;
 const double ROOTS_TOL = TEN_EPSILON_MCH;
 const double INFINITE_NUMBER = HUGE;
 
-enum class ErrorCode {
-  ral_nlls_ok = 0,
-  ral_nlls_error_restrictions = -3,
-  ral_nlls_error_ill_conditioned = -16,
-};
-
 /** Replacement for FORTRAN's SIGN intrinsic function
  */
 inline double sign(double x, double y) { return y >= 0.0 ? fabs(x) : -fabs(x); }
@@ -110,7 +104,6 @@ struct dtrs_inform_type {
   //!      0 the solution has been found
   //!     -3 n and/or Delta is not positive
   //!    -16 ill-conditioning has prevented furthr progress
-  ErrorCode status = ErrorCode::ral_nlls_ok;
 
   //!  the number of (||x||_M,lambda) pairs in the history
   int len_history = 0;
@@ -467,7 +460,6 @@ void dtrsPiDerivs(int max_order, double beta,
  *  @param inform  :: A structure containing information.
  */
 void dtrsInitialize(dtrs_control_type &control, dtrs_inform_type &inform) {
-  inform.status = ErrorCode::ral_nlls_ok;
   control.stop_normal = pow(EPSILON_MCH, 0.75);
   control.stop_absolute_normal = pow(EPSILON_MCH, 0.75);
 }
@@ -503,10 +495,12 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
   inform.hard_case = false;
   double delta_lambda = zero;
 
-  //  check for n < 0 or delta < 0
-  if (n < 0 || radius < 0) {
-    inform.status = ErrorCode::ral_nlls_error_restrictions;
-    return;
+  //  Check that arguments are OK
+  if (n < 0) {
+      throw std::runtime_error("Number of unknowns for trust-region subproblem is negative.");
+  }
+  if (radius < 0) {
+      throw std::runtime_error("Trust-region radius for trust-region subproblem is negative");
   }
 
   DoubleFortranVector x_norm2(0, MAX_DEGREE), pi_beta(0, MAX_DEGREE);
@@ -533,7 +527,6 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
       inform.x_norm = radius;
       inform.obj = f + lambda_min * radius * radius;
     }
-    inform.status = ErrorCode::ral_nlls_ok;
     return;
   }
 
@@ -604,7 +597,6 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
         }
         inform.x_norm = twoNorm(x);
         inform.obj = f + half * (dotProduct(c, x) - lambda * pow(radius, 2));
-        inform.status = ErrorCode::ral_nlls_ok;
         return;
 
         //  the hard case didn't occur after all
@@ -653,7 +645,6 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     if (lambda == zero && inform.x_norm <= radius) {
       inform.obj = f + half * dotProduct(c, x);
-      inform.status = ErrorCode::ral_nlls_ok;
       return;
     }
 
@@ -662,7 +653,6 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     if (fabs(inform.x_norm - radius) <=
         std::max(control.stop_normal * radius, control.stop_absolute_normal)) {
-      inform.status = ErrorCode::ral_nlls_ok;
       break;
     }
 
@@ -683,8 +673,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     //  precaution against rounding producing lambda outside L
 
     if (lambda > lambda_u) {
-      inform.status = ErrorCode::ral_nlls_error_ill_conditioned;
-      break;
+      throw std::runtime_error("Lambda for trust-region subproblem is ill conditioned");
     }
 
     //  compute first derivatives of x^T M x
@@ -798,7 +787,6 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     //  check that the best Taylor improvement is significant
 
     if (fabs(delta_lambda) < EPSILON_MCH * std::max(ONE, fabs(lambda))) {
-      inform.status = ErrorCode::ral_nlls_ok;
       break;
     }
 
@@ -992,12 +980,6 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   dtrsSolve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
             dtrs_inform);
-  if (dtrs_inform.status != ErrorCode::ral_nlls_ok) {
-    inform.external_return = int(dtrs_inform.status);
-    inform.external_name = "galahad_dtrs";
-    inform.status = NLLS_ERROR::FROM_EXTERNAL;
-    return;
-  }
 
   // and return the un-transformed vector
   multJ(w.ev, w.d_trans, d);
