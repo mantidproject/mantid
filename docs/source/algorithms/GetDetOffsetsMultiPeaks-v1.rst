@@ -239,7 +239,7 @@ Usage
   f.close()
 
   # Print out first 10 lines of the file
-  print(file[0][:55],'...')
+  print("{} ...".format(file[0][:55]))
   for line in file[1:10]:
     print(line)
 
