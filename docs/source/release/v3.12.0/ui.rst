@@ -18,7 +18,7 @@ Workbench
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
-- Pressing alt while clicking an arrow in the MultiSlice view opens a text box where on may precisely enter the slice position.
+- Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
 
 .. figure:: ../../images/VatesMultiSliceView.png
    :class: screenshot
