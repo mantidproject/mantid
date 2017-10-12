@@ -170,12 +170,9 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsSliceViewerTest
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
-    API
+    ${CORE_MANTIDLIBS}
     Crystal
     DataObjects
-    Geometry
-    HistogramData
-    Kernel
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
     ${POCO_LIBRARIES}
@@ -184,6 +181,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsSliceViewerTest
     ${QWT_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsSliceViewer
+  PARENT_DEPENDENCIES
+    GUITests
 )
 
 # Python unit tests
