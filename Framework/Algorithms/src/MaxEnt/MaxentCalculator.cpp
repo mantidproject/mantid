@@ -129,6 +129,14 @@ double MaxentCalculator::getChisq() {
   return m_chisq;
 }
 
+std::vector<double> MaxentCalculator::calculateData(const std::vector<double> &image) const {
+  return m_transform->imageToData(image);
+}
+
+std::vector<double> MaxentCalculator::calculateImage(const std::vector<double> &data) const {
+  return m_transform->dataToImage(data);
+}
+
 /**
 * Performs an iteration and calculates everything: search directions (SB. 21),
 * quadratic coefficients (SB. 22), angle between the gradient of chi-square and
@@ -179,7 +187,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   std::vector<double> metric =
       m_entropy->secondDerivative(m_image, m_background);
 
-  //std::fill(metric.begin(), metric.end(), 1.0);
+  std::fill(metric.begin(), metric.end(), 1.0);
 
   if (cgrad.size() != npoints || sgrad.size() != npoints ||
       metric.size() != npoints)
@@ -235,8 +243,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 
   calculateChisq();
   double chiSq = getChisq();
-  //double fac = chiSq;
-  double fac = double(npoints) * double(npoints);
+  double fac = chiSq / 4;
 
   // Calculate the quadratic coefficients SB. eq 24
 
@@ -249,7 +256,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.s1[k][0] += m_directionsIm[k][i] * sgrad[i];
       m_coeffs.c1[k][0] += m_directionsIm[k][i] * cgrad[i];
     }
-    m_coeffs.c1[k][0] /= fac;
+    m_coeffs.c1[k][0] /= fac * npoints;
   }
 
   // Then s2
@@ -308,6 +315,21 @@ void MaxentCalculator::calculateChisq() {
       m_chisq += term * term;
     }
   }
+}
+
+double MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
+  size_t npoints = m_data.size();
+
+  // Calculate
+  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
+  double chisq = 0;
+  for (size_t i = 0; i < npoints; i++) {
+    if (m_errors[i] != 0.0) {
+      double term = (m_data[i] - data[i]) / m_errors[i];
+      chisq += term * term;
+    }
+  }
+  return chisq;
 }
 
 } // namespace Algorithms
