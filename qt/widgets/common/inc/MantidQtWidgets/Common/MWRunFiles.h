@@ -6,10 +6,11 @@
 #include "ui_MWRunFiles.h"
 #include <QComboBox>
 #include <QMessageBox>
+#include <QRunnable>
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-#include <QThread>
+#include <QThreadPool>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -20,15 +21,24 @@ class IAlgorithm;
 
 namespace MantidQt {
 namespace API {
+
+namespace {
+// make a local thread pool
+static QThreadPool m_pool;
+} // namespace
+
 /**
  * A class to allow the asynchronous finding of files.
  */
-class FindFilesThread : public QThread {
+class FindFilesThread : public QObject, public QRunnable {
   Q_OBJECT
+
+signals:
+  void finished(std::string, std::vector<std::string>, std::string);
 
 public:
   /// Constructor.
-  FindFilesThread(QObject *parent = nullptr);
+  FindFilesThread();
   /// Set the various file-finding values / options.
   void set(QString text, bool isForRunFiles, bool isOptional,
            const QString &algorithmProperty = "");
@@ -38,9 +48,6 @@ public:
   /// Returns the vector of "unpacked" filenames.  Empty if no files were found,
   /// or if there was an error.
   std::vector<std::string> filenames() const { return m_filenames; }
-  /// Returns a string value that can be used to put in to another instance of
-  /// the algorithm to avoid searching again
-  QString valueForProperty() const { return m_valueForProperty; }
 
 protected:
   /// Override parent class run().
@@ -57,7 +64,6 @@ private:
   std::vector<std::string> m_filenames;
   /// Stores the string value to be used as input for an algorithm property
   QString m_valueForProperty;
-
   /// File name text typed in by the user.
   std::string m_text;
 
@@ -143,9 +149,6 @@ public:
 
   /// Default constructor
   MWRunFiles(QWidget *parent = nullptr);
-
-  /// Destructor
-  ~MWRunFiles() override;
 
   // property accessors/modifiers
   bool isForRunFiles() const;
@@ -282,7 +285,9 @@ private slots:
   /// currently checks only if the entry number is any integer > 0
   void checkEntry();
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult();
+  void inspectThreadResult(std::string error,
+                           std::vector<std::string> filenames,
+                           std::string valueForProperty);
 
 private:
   /// Is the widget for run files or standard files
@@ -325,10 +330,10 @@ private:
   QString m_lastDir;
   /// A file filter for the file browser
   QString m_fileFilter;
-  /// Thread to allow asynchronous finding of files.
-  FindFilesThread *m_thread;
-
+  /// Cache the default instrument name
   QString m_defaultInstrumentName;
+  /// Expanded user input
+  QString m_valueForProperty;
 };
 }
 }

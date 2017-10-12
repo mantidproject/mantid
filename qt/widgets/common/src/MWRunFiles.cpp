@@ -38,8 +38,8 @@ namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
  *
  * @param parent :: pointer to the parent QObject.
  */
-FindFilesThread::FindFilesThread(QObject *parent)
-    : QThread(parent), m_error(), m_filenames(), m_valueForProperty(), m_text(),
+FindFilesThread::FindFilesThread()
+    : QRunnable(), m_error(), m_filenames(), m_valueForProperty(), m_text(),
       m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional() {}
 
 /**
@@ -91,6 +91,7 @@ void FindFilesThread::run() {
     else
       m_error = "No files specified.";
 
+    emit finished(m_error, m_filenames, m_valueForProperty.toStdString());
     return;
   }
 
@@ -142,6 +143,8 @@ void FindFilesThread::run() {
               "Please contact the development team";
     m_filenames.clear();
   }
+
+  emit finished(m_error, m_filenames, m_valueForProperty.toStdString());
 }
 
 /**
@@ -196,7 +199,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
       m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
       m_liveButtonState(Hide), m_showValidator(true), m_foundFiles(),
       m_lastFoundFiles(), m_lastDir(), m_fileFilter() {
-  m_thread = new FindFilesThread(this);
 
   m_uiForm.setupUi(this);
 
@@ -212,9 +214,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
           SLOT(checkEntry()));
   connect(m_uiForm.entryNum, SIGNAL(editingFinished()), this,
           SLOT(checkEntry()));
-
-  connect(m_thread, SIGNAL(finished()), this, SLOT(inspectThreadResult()));
-  connect(m_thread, SIGNAL(finished()), this, SIGNAL(fileFindingFinished()));
 
   m_uiForm.fileEditor->clear();
 
@@ -256,13 +255,6 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   // this for accepts drops, but the underlying text input does not.
   this->setAcceptDrops(true);
   m_uiForm.fileEditor->setAcceptDrops(false);
-}
-
-MWRunFiles::~MWRunFiles() {
-  // Before destruction, make sure the file finding thread has stopped running.
-  // Wait if necessary. This can freeze up Mantid.
-  m_thread->exit(-1);
-  m_thread->wait(50);
 }
 
 /**
@@ -471,9 +463,7 @@ bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
  * Is the widget currently searching
  * @return True if a search is inprogress
  */
-bool MWRunFiles::isSearching() const {
-  return (m_thread ? m_thread->isRunning() : false);
-}
+bool MWRunFiles::isSearching() const { return m_pool.activeThreadCount() > 0; }
 
 /**
 * Returns the names of the files found
@@ -540,7 +530,7 @@ void MWRunFiles::setEntryNum(const int num) {
  * @returns A QVariant containing the text string for the algorithm property
  */
 QVariant MWRunFiles::getUserInput() const {
-  return QVariant(m_thread->valueForProperty());
+  return QVariant(m_valueForProperty);
 }
 
 /**
@@ -701,12 +691,6 @@ void MWRunFiles::findFiles() {
     // Reset modified flag.
     m_uiForm.fileEditor->setModified(false);
 
-    // If the thread is running, cancel it.
-    if (m_thread->isRunning()) {
-      m_thread->exit(-1);
-      m_thread->wait();
-    }
-
     emit findingFiles();
 
     // If we have an override instrument then add it in appropriate places to
@@ -739,12 +723,24 @@ void MWRunFiles::findFiles() {
       }
     }
 
-    m_thread->set(searchText, isForRunFiles(), this->isOptional(),
-                  m_algorithmProperty);
-    m_thread->start();
+    auto worker = new FindFilesThread();
+    connect(
+        worker,
+        SIGNAL(finished(std::string, std::vector<std::string>, std::string)),
+        this,
+        SLOT(inspectThreadResult(std::string, std::vector<std::string>,
+                                 std::string)));
+    connect(
+        worker,
+        SIGNAL(finished(std::string, std::vector<std::string>, std::string)),
+        this, SIGNAL(fileFindingFinished()));
+    worker->set(searchText, isForRunFiles(), this->isOptional(),
+                m_algorithmProperty);
+    m_pool.start(worker);
+
   } else {
     // Make sure errors are correctly set if we didn't run
-    inspectThreadResult();
+    //    inspectThreadResult();
   }
 }
 
@@ -767,17 +763,17 @@ IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm() {
  * Called when the file finding thread finishes.  Inspects the result
  * of the thread, and emits fileFound() if it has been successful.
  */
-void MWRunFiles::inspectThreadResult() {
+void MWRunFiles::inspectThreadResult(std::string error,
+                                     std::vector<std::string> filenames,
+                                     std::string valueForProperty) {
   // Get results from the file finding thread.
-  std::string error = m_thread->error();
-  std::vector<std::string> filenames = m_thread->filenames();
-
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
     emit fileInspectionFinished();
     return;
   }
 
+  m_valueForProperty = QString::fromStdString(valueForProperty);
   m_lastFoundFiles = m_foundFiles;
   m_foundFiles.clear();
 
