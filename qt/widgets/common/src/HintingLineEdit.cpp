@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
-#include <boost/algorithm/string.hpp>
 #include <QToolTip>
+#include <boost/algorithm/string.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,7 +17,7 @@ HintingLineEdit::HintingLineEdit(
   m_hintLabel->setWordWrap(true);
   m_hintLabel->setIndent(1);
   m_hintLabel->setAutoFillBackground(true);
-  m_hintLabel->setPalette(QToolTip::palette());
+  m_hintLabel->setPalette(createFixedPalette());
   m_hintLabel->setForegroundRole(QPalette::ToolTipText);
   m_hintLabel->setBackgroundRole(QPalette::ToolTipBase);
   m_hintLabel->ensurePolished();
@@ -25,6 +25,21 @@ HintingLineEdit::HintingLineEdit(
   connect(this, SIGNAL(textEdited(const QString &)), this,
           SLOT(updateHints(const QString &)));
   connect(this, SIGNAL(editingFinished()), this, SLOT(hideHints()));
+}
+
+QPalette HintingLineEdit::createFixedPalette() {
+  auto toolTipPalette = QToolTip::palette();
+
+  /* Tooltips use the inactive text colours since they are never 'in focus'.
+     This causes problems on some linux distributions (specifically Fedora 26
+     and Ubuntu 16.04) where the inactive text colours are particularly light
+     and lack contrast with the colour used for the background. */
+
+  auto const activeTextColour =
+      toolTipPalette.color(QPalette::ColorGroup::Active, QPalette::WindowText);
+  toolTipPalette.setColor(QPalette::ColorGroup::Inactive, QPalette::ToolTipText,
+                          activeTextColour);
+  return toolTipPalette;
 }
 
 HintingLineEdit::~HintingLineEdit() {}
