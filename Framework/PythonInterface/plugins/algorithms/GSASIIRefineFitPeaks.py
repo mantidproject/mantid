@@ -9,15 +9,15 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     (https://subversion.xray.aps.anl.gov/trac/pyGSAS)
     """
 
-    PROP_PATH_TO_GSASII = "GSASIIPath"
-    PROP_PATH_TO_SPECTRUM = "SpectrumPath"
-    PROP_PATH_TO_PHASE = "PhasePath"
-    PROP_PATH_TO_INST_PARAMS = "InstrumentParameterPath"
     PROP_GSAS_PROJ_PATH = "GSASProjectPath"
-    PROP_OUT_RWP = "Rwp"
+    PROP_PATH_TO_GSASII = "GSASIIPath"
+    PROP_PATH_TO_INST_PARAMS = "InstrumentParameterPath"
+    PROP_PATH_TO_PHASE = "PhasePath"
+    PROP_PATH_TO_SPECTRUM = "SpectrumPath"
     PROP_OUT_GOF = "GOF"
-    PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
     PROP_OUT_GROUP_RESULTS = "Results"
+    PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
+    PROP_OUT_RWP = "Rwp"
 
     DEFAULT_REFINEMENT_PARAMS = {"set":
                                  {"Background": {"no.coeffs": 3,
