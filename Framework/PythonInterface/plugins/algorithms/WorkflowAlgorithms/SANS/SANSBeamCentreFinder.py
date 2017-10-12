@@ -3,21 +3,17 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace, ITableWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
+from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, FindDirectionEnum)
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-import pydevd
-
-
-
+C
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def category(self):
         return 'SANS\\BeamCentreFinder'
@@ -33,35 +29,35 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.declareProperty(PropertyManagerProperty('SANSState'),
                              doc='A property manager which fulfills the SANSState contract.')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleScatter", '',
+        self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace", '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleScatterMonitor", '',
+        self.declareProperty(MatrixWorkspaceProperty("SampleScatterMonitorWorkspace", '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleTransmission", '',
+        self.declareProperty(MatrixWorkspaceProperty("SampleTransmissionWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample transmission data')
 
-        self.declareProperty(MatrixWorkspaceProperty("SampleDirect", '',
+        self.declareProperty(MatrixWorkspaceProperty("SampleDirectWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample direct data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanScatter", '',
+        self.declareProperty(MatrixWorkspaceProperty("CanScatterWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanScatterMonitor", '',
+        self.declareProperty(MatrixWorkspaceProperty("CanScatterMonitorWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample scatter data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanTransmission", '',
+        self.declareProperty(MatrixWorkspaceProperty("CanTransmissionWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample transmission data')
 
-        self.declareProperty(MatrixWorkspaceProperty("CanDirect", '',
+        self.declareProperty(MatrixWorkspaceProperty("CanDirectWorkspace", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='The sample transmission data')
 
@@ -83,6 +79,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         self.declareProperty('Position2Start', 0.0, direction=Direction.Input)
 
         self.declareProperty('Tolerance', 0.0001251, direction=Direction.Input)
+
+        self.declareProperty('Direction', FindDirectionEnum.to_string(FindDirectionEnum.All), direction=Direction.Input)
 
         # ----------
         # Output
@@ -107,15 +105,15 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         x_start = self.getProperty("Position1Start").value
         y_start = self.getProperty("Position2Start").value
 
-        sample_scatter = self._get_cloned_workspace("SampleScatter")
-        sample_scatter_monitor = self._get_cloned_workspace("SampleScatterMonitor")
-        sample_transmission = self._get_cloned_workspace("SampleTransmission")
-        sample_direct = self._get_cloned_workspace("SampleDirect")
+        sample_scatter = self._get_cloned_workspace("SampleScatterWorkspace")
+        sample_scatter_monitor = self._get_cloned_workspace("SampleScatterMonitorWorkspace")
+        sample_transmission = self._get_cloned_workspace("SampleTransmissionWorkspace")
+        sample_direct = self._get_cloned_workspace("SampleDirectWorkspace")
 
-        can_scatter = self._get_cloned_workspace("CanScatter")
-        can_scatter_monitor = self._get_cloned_workspace("CanScatterMonitor")
-        can_transmission = self._get_cloned_workspace("CanTransmission")
-        can_direct = self._get_cloned_workspace("CanDirect")
+        can_scatter = self._get_cloned_workspace("CanScatterWorkspace")
+        can_scatter_monitor = self._get_cloned_workspace("CanScatterMonitorWorkspace")
+        can_transmission = self._get_cloned_workspace("CanTransmissionWorkspace")
+        can_direct = self._get_cloned_workspace("CanDirectWorkspace")
 
         component = self.getProperty("Component").value
         tolerance = self.getProperty("Tolerance").value
@@ -123,10 +121,16 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         r_min = self.getProperty("RMin").value
         r_max = self.getProperty("RMax").value
-
         instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
         position_1_step = get_named_elements_from_ipf_file(instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
         position_2_step = get_named_elements_from_ipf_file(instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
+
+        find_direction = self.getProperty("Direction").value
+        if find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Left_Right):
+            position_2_step = 0.0
+        elif find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Up_Down):
+            position_1_step = 0.0
+
         centre1 = x_start
         centre2 = y_start
         for j in range(0, max_iterations + 1):
@@ -156,7 +160,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB > resTB_old:
                     position_2_step = - position_2_step / 2
 
-                logger.warning("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX=" + str(
+                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX=" + str(
                     residueLR) + "  ResY=" + str(residueTB))
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
@@ -171,7 +175,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         self.setProperty("Centre1", centre1)
         self.setProperty("Centre2", centre2)
-
 
     def _get_cloned_workspace(self, workspace_name):
         workspace = self.getProperty(workspace_name).value
@@ -255,6 +258,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
+
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSBeamCentreFinder)
