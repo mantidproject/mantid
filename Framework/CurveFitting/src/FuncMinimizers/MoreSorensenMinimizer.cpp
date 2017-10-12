@@ -35,21 +35,20 @@ namespace {
   * @param b :: A vector of the right-hand side.
   * @param LtL :: A work matrix.
   * @param x :: A vector that receives the solution.
-  * @param inform :: The information struct.
  */
-void solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
-              DoubleFortranMatrix &LtL, DoubleFortranVector &x,
-              nlls_inform &inform) {
+bool solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
+              DoubleFortranMatrix &LtL, DoubleFortranVector &x) {
   // Fortran code uses this:
   // dposv('L', n, 1, LtL, n, x, n, inform.external_return)
   // This is the GSL replacement:
   LtL = A;
   auto res = gsl_linalg_cholesky_decomp(LtL.gsl());
   if (res == GSL_EDOM) {
-    inform.status = NLLS_ERROR::MS_NOT_PD;
-    return;
+    // Matrix is not positive definite, return for retry.
+    return false;
   }
   gsl_linalg_cholesky_solve(LtL.gsl(), b.gsl(), x.gsl());
+  return true;
 }
 
 /** Calculate the leftmost eigenvalue of a matrix.
@@ -105,29 +104,26 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
  *  @param inform :: The inform struct.
  *  @param w :: The work struct.
  */
-void getPdShift(double &sigma, DoubleFortranVector &d,
+bool getPdShift(double &sigma, DoubleFortranVector &d,
                 const nlls_options &options, nlls_inform &inform,
                 more_sorensen_work &w) {
   int no_shifts = 0;
   bool successful_shift = false;
   while (!successful_shift) {
     shiftMatrix(w.A, sigma, w.AplusSigma);
-    solveSpd(w.AplusSigma, negative(w.v), w.LtL, d, inform);
-    if (inform.status != NLLS_ERROR::OK) {
-      // reset the error calls -- handled in the code....
-      inform.status = NLLS_ERROR::OK;
+    successful_shift = solveSpd(w.AplusSigma, negative(w.v), w.LtL, d);
+    if (!successful_shift) {
+      // We try again with a shifted sigma, but no too many times.
       inform.external_return = 0;
       inform.external_name = "";
       no_shifts = no_shifts + 1;
-      if (no_shifts == 10) { // too many shifts -- exit
-        inform.status = NLLS_ERROR::MS_TOO_MANY_SHIFTS;
-        return;
+      if (no_shifts == 10) { 
+          return false;
       }
       sigma = sigma + (pow(10.0, no_shifts)) * options.more_sorensen_shift;
-    } else {
-      successful_shift = true;
-    }
+    } 
   }
+  return true;
 }
 
 /**  A subroutine to find the optimal beta such that
@@ -140,10 +136,9 @@ void getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param b :: The second vector.
  *  @param Delta :: The Delta.
  *  @param beta :: The beta.
- *  @param inform :: The inform struct.
  */
-void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
-              double Delta, double &beta, nlls_inform &inform) {
+bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
+              double Delta, double &beta) {
 
   auto c = a.dot(b);
 
@@ -152,9 +147,7 @@ void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 
   double discrim = pow(c, 2) + (normb2) * (pow(Delta, 2) - norma2);
   if (discrim < zero) {
-    inform.status = NLLS_ERROR::FIND_BETA;
-    inform.external_name = "findBeta";
-    return;
+    return false;
   }
 
   if (c <= 0) {
@@ -162,6 +155,7 @@ void findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   } else {
     beta = (pow(Delta, 2) - norma2) / (c + sqrt(discrim));
   }
+  return true;
 }
 
 /** Solve the trust-region subproblem using
@@ -220,25 +214,20 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // d = -A\v
   DoubleFortranVector negv = w.v;
   negv *= -1.0;
-  solveSpd(w.A, negv, w.LtL, d, inform);
+  bool matrix_ok = solveSpd(w.A, negv, w.LtL, d);
   double sigma = 0.0;
-  if (inform.status == NLLS_ERROR::OK) {
+  if (matrix_ok) {
     // A is symmetric positive definite....
     sigma = zero;
   } else {
-    // reset the error calls -- handled in the code....
-    inform.status = NLLS_ERROR::OK;
+    // shift and try again
     inform.external_return = 0;
     inform.external_name = "";
     minEigSymm(w.A, sigma, w.y1);
-    if (inform.status != NLLS_ERROR::OK) {
-      scaleBack();
-      return;
-    }
     sigma = -(sigma - local_ms_shift);
     // find a shift that makes (A + sigma I) positive definite
-    getPdShift(sigma, d, options, inform, w);
-    if (inform.status != NLLS_ERROR::OK) {
+    bool ok = getPdShift(sigma, d, options, inform, w);
+    if (!ok) {
       scaleBack();
       return;
     }
@@ -246,7 +235,6 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   nd = norm2(d);
   if (!std::isfinite(nd)) {
-    inform.status = NLLS_ERROR::NAN_OR_INF;
     throw std::runtime_error("Step is NaN or infinite.");
   }
 
@@ -268,8 +256,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
       }
       if (w.y1.len() == n) {
         double alpha = 0.0;
-        findBeta(d, w.y1, Delta, alpha, inform);
-        if (inform.status == NLLS_ERROR::OK) {
+        if(findBeta(d, w.y1, Delta, alpha)) {
           DoubleFortranVector tmp = w.y1;
           tmp *= alpha;
           d += tmp;
@@ -294,14 +281,14 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
         // find a shift that makes (A + sigma I) positive definite
-        getPdShift(sigma, d, options, inform, w);
-        if (inform.status != NLLS_ERROR::OK) {
+        bool ok = getPdShift(sigma, d, options, inform, w);
+        if (!ok) {
           break;
         }
         no_restarts = no_restarts + 1;
       } else {
         // we're not going to make progress...jump out
-        inform.status = NLLS_ERROR::MS_NO_PROGRESS;
+        throw std::runtime_error("Not making progress.");
         break;
       }
     } else {
@@ -311,8 +298,8 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     shiftMatrix(w.A, sigma, w.AplusSigma);
     DoubleFortranVector negv = w.v;
     negv *= -1.0;
-    solveSpd(w.AplusSigma, negv, w.LtL, d, inform);
-    if (inform.status != NLLS_ERROR::OK) {
+    bool matrix_ok = solveSpd(w.AplusSigma, negv, w.LtL, d);
+    if (!matrix_ok) {
       break;
     }
 
@@ -321,7 +308,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   if (it == options.more_sorensen_maxits) {
     // maxits reached, not converged
-    inform.status = NLLS_ERROR::MS_MAXITS;
+    throw std::runtime_error("No convergence in maximum number of iterations.");
   }
   scaleBack();
 }

@@ -240,7 +240,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   while (!success) { // loop until successful
     no_reductions = no_reductions + 1;
     if (no_reductions > max_tr_decrease + 1) {
-      inform.status = NLLS_ERROR::MAX_TR_REDUCTIONS;
+      //inform.status = NLLS_ERROR::MAX_TR_REDUCTIONS;
       return true;
     }
     // Calculate the step d that the model thinks we should take next
@@ -291,7 +291,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     if (!success) {
       // finally, check d makes progress
       if (norm2(w.d) < std::numeric_limits<double>::epsilon() * norm2(w.Xnew)) {
-        inform.status = NLLS_ERROR::X_NO_PROGRESS;
+        //inform.status = NLLS_ERROR::X_NO_PROGRESS;
         m_errorString = "Failed to make progress.";
         return false;
       }
