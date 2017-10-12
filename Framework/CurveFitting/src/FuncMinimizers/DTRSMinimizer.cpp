@@ -100,10 +100,6 @@ struct dtrs_history_type {
 //!  - - - - - - - - - - - - - - - - - - - - - - -
 struct dtrs_inform_type {
   //
-  //!   reported return status:
-  //!      0 the solution has been found
-  //!     -3 n and/or Delta is not positive
-  //!    -16 ill-conditioning has prevented furthr progress
 
   //!  the number of (||x||_M,lambda) pairs in the history
   int len_history = 0;
@@ -947,9 +943,6 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // eigendecomposition to make A diagonal
   //
   allEigSymm(w.A, w.ew, w.ev);
-  if (inform.status != NLLS_ERROR::OK) {
-    return;
-  }
 
   // We can now change variables, setting y = Vp, getting
   // Vd = arg min_(Vx) v^T p + 0.5 * (Vp)^T D (Vp)

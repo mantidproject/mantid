@@ -249,9 +249,6 @@ public:
     s.initialize(costFun);
     TS_ASSERT(s.minimize());
 
-    // std::cerr << "a=" << fun->getParameter("a") << '\n';
-    // std::cerr << "b=" << fun->getParameter("b") << '\n';
-
     TS_ASSERT_DELTA(costFun->val(), 0.00, 0.0001);
     TS_ASSERT_DELTA(fun->getParameter("a"), 1.0, 0.01);
     TS_ASSERT_DELTA(fun->getParameter("b"), 2.0, 0.01);
