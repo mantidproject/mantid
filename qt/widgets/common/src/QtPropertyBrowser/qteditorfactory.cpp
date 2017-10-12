@@ -1387,7 +1387,7 @@ bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
         actionString = actionString.remove(pos, actionString.length() - pos);
       action->setText(actionString);
     }
-    QAction *actionBefore = 0;
+    QAction *actionBefore = nullptr;
     if (actions.count() > 0)
       actionBefore = actions[0];
     QAction *clearAction = new QAction(tr("Clear Char"), menu);
@@ -1850,7 +1850,7 @@ void QtCursorEditorFactory::connectPropertyManager(
 */
 QWidget *QtCursorEditorFactory::createEditorForManager(
     QtCursorPropertyManager *manager, QtProperty *property, QWidget *parent) {
-  QtProperty *enumProp = 0;
+  QtProperty *enumProp = nullptr;
   if (d_ptr->m_propertyToEnum.contains(property)) {
     enumProp = d_ptr->m_propertyToEnum[property];
   } else {

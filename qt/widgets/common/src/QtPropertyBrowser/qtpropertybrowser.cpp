@@ -371,7 +371,7 @@ void QtProperty::setModified(bool modified) {
     \sa insertSubProperty(), removeSubProperty()
 */
 void QtProperty::addSubProperty(QtProperty *property) {
-  QtProperty *after = 0;
+  QtProperty *after = nullptr;
   if (d_ptr->m_subItems.count() > 0)
     after = d_ptr->m_subItems.last();
   insertSubProperty(property, after);
@@ -417,7 +417,7 @@ void QtProperty::insertSubProperty(QtProperty *property,
   pendingList = subProperties();
   int pos = 0;
   int newPos = 0;
-  QtProperty *properAfterProperty = 0;
+  QtProperty *properAfterProperty = nullptr;
   while (pos < pendingList.count()) {
     QtProperty *i = pendingList.at(pos);
     if (i == property)
@@ -1066,7 +1066,8 @@ class QtBrowserItemPrivate {
 public:
   QtBrowserItemPrivate(QtAbstractPropertyBrowser *browser, QtProperty *property,
                        QtBrowserItem *parent)
-      : m_browser(browser), m_property(property), m_parent(parent), q_ptr(0) {}
+      : m_browser(browser), m_property(property), m_parent(parent),
+        q_ptr(nullptr) {}
 
   void addChild(QtBrowserItem *index, QtBrowserItem *after);
   void removeChild(QtBrowserItem *index);
@@ -1181,7 +1182,7 @@ Q_GLOBAL_STATIC(Map1, m_viewToManagerToFactory)
 Q_GLOBAL_STATIC(Map2, m_managerToFactoryToViews)
 
 QtAbstractPropertyBrowserPrivate::QtAbstractPropertyBrowserPrivate()
-    : m_currentItem(0) {}
+    : m_currentItem(nullptr) {}
 
 void QtAbstractPropertyBrowserPrivate::insertSubTree(
     QtProperty *property, QtProperty *parentProperty) {
@@ -1271,7 +1272,7 @@ void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(
     if (it == m_propertyToIndexes.constEnd())
       return;
 
-    QList<QtBrowserItem *> indexes = it.value();
+    const QList<QtBrowserItem *> &indexes = it.value();
     QListIterator<QtBrowserItem *> itIndex(indexes);
     while (itIndex.hasNext()) {
       QtBrowserItem *idx = itIndex.next();
@@ -1287,7 +1288,7 @@ void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(
     if (it == m_propertyToIndexes.constEnd())
       return;
 
-    QList<QtBrowserItem *> indexes = it.value();
+    const QList<QtBrowserItem *> &indexes = it.value();
     QListIterator<QtBrowserItem *> itIndex(indexes);
     while (itIndex.hasNext()) {
       QtBrowserItem *idx = itIndex.next();
@@ -1322,7 +1323,7 @@ QtBrowserItem *QtAbstractPropertyBrowserPrivate::createBrowserIndex(
 
   QList<QtProperty *> subItems = property->subProperties();
   QListIterator<QtProperty *> itChild(subItems);
-  QtBrowserItem *afterChild = 0;
+  QtBrowserItem *afterChild = nullptr;
   while (itChild.hasNext()) {
     QtProperty *child = itChild.next();
     afterChild = createBrowserIndex(child, newIndex, afterChild);
@@ -1338,7 +1339,7 @@ void QtAbstractPropertyBrowserPrivate::removeBrowserIndexes(
   if (it == m_propertyToIndexes.constEnd())
     return;
 
-  QList<QtBrowserItem *> indexes = it.value();
+  const QList<QtBrowserItem *> &indexes = it.value();
   QListIterator<QtBrowserItem *> itIndex(indexes);
   while (itIndex.hasNext()) {
     QtBrowserItem *idx = itIndex.next();
@@ -1427,7 +1428,7 @@ void QtAbstractPropertyBrowserPrivate::slotPropertyDataChanged(
   if (it == m_propertyToIndexes.constEnd())
     return;
 
-  QList<QtBrowserItem *> indexes = it.value();
+  const QList<QtBrowserItem *> &indexes = it.value();
   QListIterator<QtBrowserItem *> itIndex(indexes);
   while (itIndex.hasNext()) {
     QtBrowserItem *idx = itIndex.next();
@@ -1745,7 +1746,7 @@ void QtAbstractPropertyBrowser::clear() {
     \sa insertProperty(), QtProperty::addSubProperty(), properties()
 */
 QtBrowserItem *QtAbstractPropertyBrowser::addProperty(QtProperty *property) {
-  QtProperty *afterProperty = 0;
+  QtProperty *afterProperty = nullptr;
   if (d_ptr->m_subItems.count() > 0)
     afterProperty = d_ptr->m_subItems.last();
   return insertProperty(property, afterProperty);
@@ -1773,7 +1774,7 @@ QtBrowserItem *
 QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
                                           QtProperty *afterProperty) {
   if (!property)
-    return 0;
+    return nullptr;
 
   // if item is already inserted in this item then cannot add.
   QList<QtProperty *> pendingList = properties();
@@ -1788,10 +1789,10 @@ QtAbstractPropertyBrowser::insertProperty(QtProperty *property,
     }
     pos++;
   }
-  d_ptr->createBrowserIndexes(property, 0, afterProperty);
+  d_ptr->createBrowserIndexes(property, nullptr, afterProperty);
 
   // traverse inserted subtree and connect to manager's signals
-  d_ptr->insertSubTree(property, 0);
+  d_ptr->insertSubTree(property, nullptr);
 
   d_ptr->m_subItems.insert(newPos, property);
   return topLevelItem(property);
@@ -1852,7 +1853,7 @@ void QtAbstractPropertyBrowser::removeProperty(QtProperty *property) {
 */
 QWidget *QtAbstractPropertyBrowser::createEditor(QtProperty *property,
                                                  QWidget *parent) {
-  QtAbstractEditorFactoryBase *factory = 0;
+  QtAbstractEditorFactoryBase *factory = nullptr;
   QtAbstractPropertyManager *manager = property->propertyManager();
 
   if (m_viewToManagerToFactory()->contains(this) &&
@@ -1861,7 +1862,7 @@ QWidget *QtAbstractPropertyBrowser::createEditor(QtProperty *property,
   }
 
   if (!factory)
-    return 0;
+    return nullptr;
   return factory->createEditor(property, parent);
 }
 

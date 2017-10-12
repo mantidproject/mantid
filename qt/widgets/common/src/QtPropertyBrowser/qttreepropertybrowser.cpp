@@ -104,7 +104,8 @@ class QtPropertyEditorView;
 // ------------ QtPropertyEditorView
 
 QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel)
-    : QTreeWidget(parent), m_editorPrivate(0), m_darkTopLevel(darkTopLevel) {
+    : QTreeWidget(parent), m_editorPrivate(nullptr),
+      m_darkTopLevel(darkTopLevel) {
   connect(header(), SIGNAL(sectionDoubleClicked(int)), this,
           SLOT(resizeColumnToContents(int)));
 }
@@ -220,8 +221,8 @@ void QtPropertyEditorDelegate::slotEditorDestroyed(QObject *object) {
       m_editorToProperty.erase(it);
     }
     if (m_editedWidget == w) {
-      m_editedWidget = 0;
-      m_editedItem = 0;
+      m_editedWidget = nullptr;
+      m_editedItem = nullptr;
     }
   }
 }
@@ -258,7 +259,7 @@ QtPropertyEditorDelegate::createEditor(QWidget *parent,
     QtProperty *property = m_editorPrivate->indexToProperty(index);
     int optionIndex = index.column() - 2;
     if (optionIndex >= m_editorPrivate->options().size()) {
-      return NULL;
+      return nullptr;
     }
     QString optionName = m_editorPrivate->options()[optionIndex];
     if (property->hasOption(optionName)) {
@@ -270,7 +271,7 @@ QtPropertyEditorDelegate::createEditor(QWidget *parent,
       return editor;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 void QtPropertyEditorDelegate::updateEditorGeometry(
@@ -361,8 +362,8 @@ bool QtPropertyEditorDelegate::eventFilter(QObject *object, QEvent *event) {
 
 //  -------- QtTreePropertyBrowserPrivate implementation
 QtTreePropertyBrowserPrivate::QtTreePropertyBrowserPrivate()
-    : m_treeWidget(0), m_headerVisible(true),
-      m_resizeMode(QtTreePropertyBrowser::Stretch), m_delegate(0),
+    : m_treeWidget(nullptr), m_headerVisible(true),
+      m_resizeMode(QtTreePropertyBrowser::Stretch), m_delegate(nullptr),
       m_markPropertiesWithoutValue(false), m_browserChangedBlocked(false) {}
 
 // Draw an icon indicating opened/closing branches
@@ -445,7 +446,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
 QtBrowserItem *QtTreePropertyBrowserPrivate::currentItem() const {
   if (QTreeWidgetItem *treeItem = m_treeWidget->currentItem())
     return m_itemToIndex.value(treeItem);
-  return 0;
+  return nullptr;
 }
 
 void QtTreePropertyBrowserPrivate::setCurrentItem(QtBrowserItem *browserItem,
@@ -465,7 +466,7 @@ QtTreePropertyBrowserPrivate::indexToProperty(const QModelIndex &index) const {
   QtBrowserItem *idx = m_itemToIndex.value(item);
   if (idx)
     return idx->property();
-  return 0;
+  return nullptr;
 }
 
 QtBrowserItem *QtTreePropertyBrowserPrivate::indexToBrowserItem(
@@ -524,7 +525,7 @@ void QtTreePropertyBrowserPrivate::propertyInserted(QtBrowserItem *index,
   QTreeWidgetItem *afterItem = m_indexToItem.value(afterIndex);
   QTreeWidgetItem *parentItem = m_indexToItem.value(index->parent());
 
-  QTreeWidgetItem *newItem = 0;
+  QTreeWidgetItem *newItem = nullptr;
   if (parentItem) {
     newItem = new QTreeWidgetItem(parentItem, afterItem);
   } else {

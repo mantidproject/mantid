@@ -126,7 +126,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtVariantPropertyManager
     : public QtAbstractPropertyManager {
   Q_OBJECT
 public:
-  QtVariantPropertyManager(QObject *parent = 0);
+  QtVariantPropertyManager(QObject *parent = nullptr);
   ~QtVariantPropertyManager() override;
 
   virtual QtVariantProperty *addProperty(int propertyType,
@@ -228,7 +228,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtVariantEditorFactory
     : public QtAbstractEditorFactory<QtVariantPropertyManager> {
   Q_OBJECT
 public:
-  QtVariantEditorFactory(QObject *parent = 0);
+  QtVariantEditorFactory(QObject *parent = nullptr);
   ~QtVariantEditorFactory() override;
 
 protected:

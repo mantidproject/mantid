@@ -316,9 +316,9 @@ private:
 class QtPropertyEditorDelegate : public QItemDelegate {
   Q_OBJECT
 public:
-  QtPropertyEditorDelegate(QObject *parent = 0)
-      : QItemDelegate(parent), m_editorPrivate(0), m_editedItem(0),
-        m_editedWidget(0) {}
+  QtPropertyEditorDelegate(QObject *parent = nullptr)
+      : QItemDelegate(parent), m_editorPrivate(nullptr), m_editedItem(nullptr),
+        m_editedWidget(nullptr) {}
 
   void setEditorPrivate(QtTreePropertyBrowserPrivate *editorPrivate) {
     m_editorPrivate = editorPrivate;
