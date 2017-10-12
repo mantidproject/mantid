@@ -1,13 +1,13 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
-#include "ui_MWRunFiles.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include <QString>
-#include <QSettings>
+#include "ui_MWRunFiles.h"
 #include <QComboBox>
 #include <QMessageBox>
+#include <QSettings>
+#include <QString>
 #include <QStringList>
 #include <QThread>
 #include <boost/shared_ptr.hpp>
