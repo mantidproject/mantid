@@ -13,7 +13,7 @@ Description
 The syntax for the run numbers designation allows runs to be segregated
 into sets. The semicolon symbol ";" is used to separate the runs into sets.
 Runs within each set are jointly reduced. However, for job
-*Determine Sample Orientation*, all run numbers provided will be reduced
+*Determine Single Crystal Diffracton*, all run numbers provided will be reduced
 together.
 
 Examples:
@@ -40,39 +40,36 @@ scaling factor between zero and one.
 and isotropic scattering to determine instrument efficiency per detector. If
 no vanadium is provided, all detectors are assumed to have the same efficiency
 
-Determine Sample Orientation
-============================
+Determine Single Crystal Diffraction
+====================================
 
-This job should be used to find the Bragg peaks of a pre-oriented sample upon
-a discretized rotation of the sample around the cryostat axis. The
-corresponding goniometer's rotation angle determines the angle between
-:math:`\vec{k_i}` and **VectorU**. It should be logged under log name
+This job should be used to create a diffraction pattern from a set of runs
+implementing a rotational scan of the sample around the vertical axis. The
+corresponding goniometer's rotation should be logged under log name
 **PsiAngleLog**. Option **PsiOffset** allows user to enter a shift for this
 angle.
 
 **VectorU**: h, k, l indexes for the crystal plane providing the sought Bragg
 peak.
 
-**VectorV**: h, k, l indexes perpendicular to *VectorU* and contained
-in the plane spawned by *VectorU* and the direction of the incoming neutron
-beam.
+**VectorV**: h, k, l indexes perpendicular to *VectorU* and the vertical axis.
 
-**Uproj**: h, k, l indexes for the abscissa axis of the reciprocal slice to be
-viewed.
+**Uproj**: h, k, l indexes for the abscissa axis of the diffraction pattern to
+be viewed.
 
-**Vproj**: h, k, l indexes for the ordinate axis of the reciprocal slice to be
-viewed.
+**Vproj**: h, k, l indexes for the ordinate axis of the diffraction pattern to
+be viewed.
 
 **Wproj**: h, k, l indexes for the axis independent of the abcissa and ordinate
 axes. Typically, **Wproj** is perpendicular both to Uproj and Vproj.
 
-**Nbins**: the reciprocal slice to be viewed is partitioned into an
+**Nbins**: the diffraction pattern to be viewed is partitioned into an
 Nbins x Nbins grid, each grid rectangle assigned a particular scattered
 intensity.
 
 **OutputWorkspace**: a :ref:`MDHistoWorkspace <MDHistoWorkspace>` containing
 the intensities projected onto the reciprocal slice, integrated over the
-independent axis *Wproj*. The reciprocal slice can be visualized with
+independent axis *Wproj*. The diffraction pattern can be visualized with
 the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
 
 If a background run is provided, two additional workspaces
@@ -80,13 +77,13 @@ are generated. Workspace *_bkg* will contain the scattered intensity by the
 background, and workspace *_dat* will contain the scattered intensity by
 the sample with *no* background subtracted.
 
-*Timing*: 10 to 15 seconds per sample run. A typical scan made up of 50 runs will take
-about 10 minutes to complete.
+*Timing*: 10 to 15 seconds per sample run. A typical scan made up of 50 runs
+will take about 10 minutes to complete.
 
 Usage
 -----
 
-**Determine sample orientation:**
+**Determine single crystal diffraction pattern:**
 
 .. code-block:: python
 
@@ -107,7 +104,7 @@ Usage
                      Nbins=400,
                      OutputWorkspace='peaks')
 
-.. figure:: /images/BASISDiffraction_sample_orientation.png
+.. figure:: /images/BASISDiffraction_syngle_crystal_diffraction.png
 
 .. categories::
 

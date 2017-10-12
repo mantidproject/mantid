@@ -145,14 +145,15 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.setPropertyGroup('VanadiumRuns', vanadium_title)
 
         #
-        # Sample Orientation
+        # Single Crystal Diffraction
         #
-        sample_orientation_title = 'Determine Sample Orientation'
-        self.declareProperty('SampleOrientation',
+        crystal_diffraction_title = 'Single Crystal Diffraction'
+        self.declareProperty('SingleCrystalDiffraction',
                              False, direction=Direction.Input,
-                             doc='Determine sample orientation?')
-        sample_orientation_enabled = EnabledWhenProperty('SampleOrientation',
-                                                         PropertyCriterion.IsNotDefault)
+                             doc='Calculate diffraction pattern?')
+        crystal_diffraction_enabled =\
+            EnabledWhenProperty('SingleCrystalDiffraction',
+                                PropertyCriterion.IsNotDefault)
         self.declareProperty('PsiAngleLog', 'SE50Rot',
                              direction=Direction.Input,
                              doc='log entry storing sample orientation')
@@ -173,23 +174,28 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated "u" vector')
+                             doc='three item, comma-separated, HKL indexes'
+                                 'of the diffracting plane')
         #    Reciprocal vector orthogonal to VectorU and in-plane with
         #    incoming beam
         self.declareProperty(FloatArrayProperty('VectorV', [0, 1, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated "v" vector')
+                             doc='three item, comma-separated, HKL indexes'
+                                 'of the direction perpendicular to VectorV'
+                                 'and the vertical axis')
         #    Abscissa view
         self.declareProperty(FloatArrayProperty('Uproj', [1, 0, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated Abscissa view')
+                             doc='three item comma-separated Abscissa view'
+                                 'of the diffraction pattern')
         #    Ordinate view
         self.declareProperty(FloatArrayProperty('Vproj', [0, 1, 0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated Ordinate view')
+                             doc='three item comma-separated Ordinate view'
+                                 'of the diffraction pattern')
         #    Hidden axis
         self.declareProperty(FloatArrayProperty('Wproj', [0, 0, 1],
                                                 array_length_three,
@@ -199,12 +205,13 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.declareProperty('NBins', 400, direction=Direction.Input,
                              doc='number of bins in the HKL slice')
 
-        self.setPropertyGroup('SampleOrientation', sample_orientation_title)
+        self.setPropertyGroup('SingleCrystalDiffraction',
+                              crystal_diffraction_title)
         for a_property in ('PsiAngleLog', 'PsiOffset',
                            'LatticeSizes', 'LatticeAngles', 'VectorU',
                            'VectorV', 'Uproj', 'Vproj', 'Wproj', 'NBins'):
-            self.setPropertyGroup(a_property, sample_orientation_title)
-            self.setPropertySettings(a_property, sample_orientation_enabled)
+            self.setPropertyGroup(a_property, crystal_diffraction_title)
+            self.setPropertySettings(a_property, crystal_diffraction_enabled)
 
     def PyExec(self):
         # Facility and database configuration
@@ -241,13 +248,13 @@ class BASISDiffraction(DataProcessorAlgorithm):
                 run_numbers = list(itertools.chain.from_iterable(run_numbers))
                 self._vanadium_files = [self._save_t0(r) for r in run_numbers]
 
-            # Determination of Sample Orientation
-            if self.getProperty("SampleOrientation").value:
-                self._determine_sample_orientation()
+            # Determination of single crystal diffraction
+            if self.getProperty("SingleCrystalDiffraction").value:
+                self._determine_single_crystal_diffraction()
 
-    def _determine_sample_orientation(self):
+    def _determine_single_crystal_diffraction(self):
         """
-        All work related to the determination of sample orientation
+        All work related to the determination of the diffraction pattern
         """
 
         a, b, c = self.getProperty('LatticeSizes').value
