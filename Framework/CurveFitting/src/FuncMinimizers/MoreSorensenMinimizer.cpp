@@ -28,13 +28,13 @@ std::string MoreSorensenMinimizer::name() const { return "More-Sorensen"; }
 namespace {
 
 /** Solve a system of linear equations. The system's matrix must be
-  * positive-definite.
-  * @param A :: A matrix of a system of equations. Must be positive-definite
-  * otherwise
-  *     the solution will not be found and an error code returned.
-  * @param b :: A vector of the right-hand side.
-  * @param LtL :: A work matrix.
-  * @param x :: A vector that receives the solution.
+ *  positive-definite.
+ *  @param A :: A matrix of a system of equations. 
+ *     Must be positive-definite for success.
+ *  @param b :: A vector of the right-hand side.
+ *  @param LtL :: A work matrix.
+ *  @param x :: A vector that receives the solution.
+ *  @return true if successful
  */
 bool solveSpd(const DoubleFortranMatrix &A, const DoubleFortranVector &b,
               DoubleFortranMatrix &LtL, DoubleFortranVector &x) {
@@ -103,6 +103,7 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
  *  @param options :: The options.
  *  @param inform :: The inform struct.
  *  @param w :: The work struct.
+ *  @return true if successful
  */
 bool getPdShift(double &sigma, DoubleFortranVector &d,
                 const nlls_options &options, nlls_inform &inform,
@@ -136,6 +137,7 @@ bool getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param b :: The second vector.
  *  @param Delta :: The Delta.
  *  @param beta :: The beta.
+ *  @return true if successful
  */
 bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
               double Delta, double &beta) {
