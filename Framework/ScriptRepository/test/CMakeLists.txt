@@ -7,6 +7,7 @@ if ( CXXTEST_FOUND )
   cxxtest_add_test ( ScriptRepositoryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( ScriptRepositoryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             API
+	    Types
             Kernel
             ScriptRepository
             ${Boost_LIBRARIES}

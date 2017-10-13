@@ -175,6 +175,7 @@ public:
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:
+  size_t numberOfDetectorGroups() const;
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 

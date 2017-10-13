@@ -150,6 +150,88 @@ class FunctionWrapper(object):
         return output_array
       else:
         return output_array[0]
+        
+  def plot(self, **kwargs):
+      """ Plot the function
+      
+          :param workspace=ws: workspace upon whose x values 
+          the function is plotted.
+      """
+      from mantid import mtd
+      try:
+          from mantidplot import plot 
+      except:
+          raise RuntimeError("mantidplot must be importable to plot functions.")
+      from mantid.simpleapi import CreateWorkspace
+      import numpy as np
+      
+      isWorkspace = False
+      extractSpectrum = False
+      workspaceIndex = 0
+      haveXValues = False
+      haveStartX = False
+      haveEndX = False
+      nSteps = 20
+      plotName = self.name
+      
+      def inRange(x):
+         return x >= xMin and x <= xMax
+
+      for key in kwargs:
+        if key == "workspace":
+           isWorkspace = True
+           ws = kwargs[key]
+           if type(ws) == type('string'):
+              ws = mtd[ws]
+        if key == "workspaceIndex":
+           workspaceIndex = kwargs[key]
+           if workspaceIndex > 0:
+              extractSpectrum = True
+        if key == "xValues":
+           xvals = kwargs[key]
+           haveXValues = True
+        if key == "startX":
+           xMin = kwargs[key]
+           haveStartX = True
+        if key == "endX":
+           xMax = kwargs[key]
+           haveEndX = True
+        if key == "nSteps":
+           nSteps = kwargs[key]
+           if nSteps < 1:
+              raise RuntimeError("nSteps must be at least 1")
+        if key == "name":
+           plotName = kwargs[key]
+           
+      if haveStartX and haveEndX:
+          if xMin >= xMax:
+             raise RuntimeError("startX must be less than EndX")
+
+      if haveXValues:
+          spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+      elif isWorkspace:
+          xvals = ws.readX(workspaceIndex)
+          if haveStartX and haveEndX:
+              xvals = filter(inRange, xvals)
+          if extractSpectrum or (haveStartX and haveEndX):
+              spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+          else:
+              spectrumWs = ws           
+      elif haveStartX and haveEndX:
+          xvals = np.linspace(start=xMin, stop=xMax, num=nSteps)
+          spectrumWs = self._execute_algorithm('CreateWorkspace', DataX=xvals, DataY=xvals)
+      else:
+          if not haveStartX:
+             raise RuntimeError("startX must be defined if no workspace or xValues are defined.") 
+          if not haveEndX:
+             raise RuntimeError("endX must be defined if no workspace or xValues are defined.")
+          else:
+             raise RuntimeError("insufficient plotting arguments") # Should not occur.
+
+      outWs = self(spectrumWs)
+      vals = outWs.readY(1)
+      function = CreateWorkspace( DataX=xvals, DataY=vals, OutputWorkspace=plotName)
+      plot(plotName,0)
          
   def tie (self, *args, **kwargs):
     """ Add ties.

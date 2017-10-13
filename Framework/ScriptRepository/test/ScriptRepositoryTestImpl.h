@@ -22,7 +22,7 @@
 #include "MantidKernel/ConfigService.h"
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 using namespace std;
 using Mantid::API::ScriptRepositoryImpl;
 using Mantid::API::ScriptRepoException;

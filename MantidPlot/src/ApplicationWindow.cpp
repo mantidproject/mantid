@@ -6566,7 +6566,7 @@ void ApplicationWindow::exportASCII(const QString &tableName,
   if (!fname.isEmpty()) {
     QFileInfo fi(fname);
     QString baseName = fi.fileName();
-    if (baseName.contains(".") == 0)
+    if (!baseName.contains("."))
       fname.append(selectedFilter.remove("*"));
 
     asciiDirPath = fi.absolutePath();
@@ -8305,7 +8305,7 @@ void ApplicationWindow::drawArrow() {
 
   Graph *g = dynamic_cast<Graph *>(plot->activeGraph());
   if (g) {
-    g->drawLine(true, 1);
+    g->drawLine(true, true);
     emit modified();
   }
 }

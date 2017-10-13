@@ -6,7 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-using Mantid::API::SpectraAxis;
 using std::set;
 using std::size_t;
 
@@ -40,7 +39,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
 
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
     auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
@@ -59,7 +58,7 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
   detID_to_WI.clear();
-  for (size_t wi = 0; wi < m_noVectors; wi++) {
+  for (size_t wi = 0; wi < getNumberHistograms(); wi++) {
     auto &dets = getSpectrum(wi).getDetectorIDs();
     for (auto det : dets) {
       detID_to_WI[det] = wi;
@@ -83,15 +82,14 @@ void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength,
   Workspace2D::init(NVectors, XLength, YLength);
 }
 
-void SpecialWorkspace2D::init(const size_t &NVectors,
-                              const HistogramData::Histogram &histogram) {
+void SpecialWorkspace2D::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::Points)
     throw std::runtime_error(
         "SpecialWorkspace2D can only be initialized with XMode::Points");
   if (histogram.x().size() != 1)
     throw std::runtime_error(
         "SpecialWorkspace2D can only be initialized with length 1");
-  Workspace2D::init(NVectors, histogram);
+  Workspace2D::init(histogram);
 }
 
 /**
@@ -139,7 +137,8 @@ double SpecialWorkspace2D::getValue(const detid_t detectorID,
   if (it == detID_to_WI.end())
     return defaultValue;
   else {
-    if (it->second < m_noVectors) // don't let it generate an exception
+    if (it->second <
+        getNumberHistograms()) // don't let it generate an exception
     {
       return this->dataY(it->second)[0];
     } else {

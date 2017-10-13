@@ -28,6 +28,13 @@ namespace Geometry {
 
 namespace {
 Kernel::Logger g_log("Instrument");
+
+void raiseDuplicateDetectorError(const size_t detectorId) {
+  std::stringstream sstream;
+  sstream << "Instrument Definition corrupt. Detector with ID " << detectorId
+          << " already exists.";
+  throw std::runtime_error(sstream.str());
+}
 }
 
 /// Default constructor
@@ -709,12 +716,12 @@ void Instrument::markAsDetector(const IDetector *det) {
   // Create a (non-deleting) shared pointer to it
   IDetector_const_sptr det_sptr = IDetector_const_sptr(det, NoDeleting());
   auto it = lower_bound(m_detectorCache, det->getID());
-  // Silently ignore detector IDs that are already marked as detectors, even if
-  // the actual detector is different.
-  if ((it == m_detectorCache.end()) || (std::get<0>(*it) != det->getID())) {
-    bool isMonitor = false;
-    m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
+  // Duplicate detector ids are forbidden
+  if ((it != m_detectorCache.end()) && (std::get<0>(*it) == det->getID())) {
+    raiseDuplicateDetectorError(det->getID());
   }
+  bool isMonitor = false;
+  m_detectorCache.emplace(it, det->getID(), det_sptr, isMonitor);
 }
 
 /// As markAsDetector but without the required sorting. Must call
@@ -733,20 +740,21 @@ void Instrument::markAsDetectorIncomplete(const IDetector *det) {
 /// Sorts the detector cache. Called after all detectors have been marked via
 /// markAsDetectorIncomplete.
 void Instrument::markAsDetectorFinalize() {
-  // markAsDetector silently ignores detector IDs that are already marked as
-  // detectors, even if the actual detector is different. We mimic this behavior
-  // in this final sort by using stable_sort and removing duplicates. This will
-  // effectively favor the first detector with a certain ID that was added.
-  std::stable_sort(m_detectorCache.begin(), m_detectorCache.end(),
-                   [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-                      const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-                       -> bool { return std::get<0>(a) < std::get<0>(b); });
-  m_detectorCache.erase(
-      std::unique(m_detectorCache.begin(), m_detectorCache.end(),
-                  [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
-                     const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
-                      -> bool { return std::get<0>(a) == std::get<0>(b); }),
-      m_detectorCache.end());
+  // Detectors (even when different objects) are NOT allowed to have duplicate
+  // ids. This method establishes the presence of duplicates.
+  std::sort(m_detectorCache.begin(), m_detectorCache.end(),
+            [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+               const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+                -> bool { return std::get<0>(a) < std::get<0>(b); });
+
+  auto resultIt = std::adjacent_find(
+      m_detectorCache.begin(), m_detectorCache.end(),
+      [](const std::tuple<detid_t, IDetector_const_sptr, bool> &a,
+         const std::tuple<detid_t, IDetector_const_sptr, bool> &b)
+          -> bool { return std::get<0>(a) == std::get<0>(b); });
+  if (resultIt != m_detectorCache.end()) {
+    raiseDuplicateDetectorError(std::get<0>(*resultIt));
+  }
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -822,9 +830,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       return;
     }
 
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
-      return;
-    }
     // Loop over the children and define a box large enough for all of them
     ComponentID sourceID = getSource()->getComponentID();
     assemblyBox =
@@ -838,9 +843,6 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
         assemblyBox.grow(compBox);
       }
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
-
   } else {
 
     if (!m_cachedBoundingBox) {
@@ -991,7 +993,7 @@ const std::string &Instrument::getXmlText() const {
  */
 void Instrument::saveNexus(::NeXus::File *file,
                            const std::string &group) const {
-  file->makeGroup(group, "NXinstrument", 1);
+  file->makeGroup(group, "NXinstrument", true);
   file->putAttr("version", 1);
 
   file->writeData("name", getName());
@@ -1152,8 +1154,8 @@ void Instrument::setDefaultView(const std::string &type) {
 /// @param val :: date and time
 /// @throw InstrumentDefinitionError Thrown if date is earlier than 1900-01-31
 /// 23:59:01
-void Instrument::setValidFromDate(const Kernel::DateAndTime &val) {
-  Kernel::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
+void Instrument::setValidFromDate(const Types::Core::DateAndTime &val) {
+  Types::Core::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
   if (val < earliestAllowedDate) {
     throw Kernel::Exception::InstrumentDefinitionError(
         "The valid-from <instrument> tag date must be from 1900-01-31 23:59:01 "

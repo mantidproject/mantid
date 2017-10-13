@@ -36,24 +36,27 @@ Usage
 
    ws=LoadIsawPeaks("TOPAZ_3007.peaks")
    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-   print "Lattice before SelectCellOfType:"
+   print("Lattice before SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
    SelectCellOfType(PeaksWorkspace=ws, CellType='Monoclinic', Centering='C', Apply=True)
-   print "\nLattice after SelectCellOfType:"
+   print("\nLattice after SelectCellOfType:")
    lattice = ws.sample().getOrientedLattice()
-   print lattice.a(),lattice.b(),lattice.c(),lattice.alpha(),lattice.beta(),lattice.gamma()
+   print(" ".join("{:.9f}".format(x) for x in [lattice.a(), lattice.b(), lattice.c(),
+                   	                        lattice.alpha(), lattice.beta(), lattice.gamma()]))
 
 
 Output:
 
 .. testoutput:: ExSelectCellOfType
 
-   Lattice before SelectCellOfType:
-   8.60581864273 11.935925461 11.9418127661 107.429088323 98.7529124665 98.9511934747
+    Lattice before SelectCellOfType:
+    8.605818643 11.935925461 11.941812766 107.429088323 98.752912466 98.951193475
 
-   Lattice after SelectCellOfType:
-   14.1310511523 19.247332564 8.60581864273 89.8811706749 105.07133377 89.970386662
+    Lattice after SelectCellOfType:
+    14.131051152 19.247332564 8.605818643 89.881170675 105.071333770 89.970386662
+
 
 .. categories::
 

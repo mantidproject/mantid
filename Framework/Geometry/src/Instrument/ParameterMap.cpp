@@ -2,7 +2,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -60,9 +59,7 @@ ParameterMap::ParameterMap()
     : m_cacheLocMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::V3D>>()),
       m_cacheRotMap(Kernel::make_unique<
-          Kernel::Cache<const ComponentID, Kernel::Quat>>()),
-      m_boundingBoxMap(Kernel::make_unique<
-          Kernel::Cache<const ComponentID, BoundingBox>>()) {}
+          Kernel::Cache<const ComponentID, Kernel::Quat>>()) {}
 
 ParameterMap::ParameterMap(const ParameterMap &other)
     : m_parameterFileNames(other.m_parameterFileNames), m_map(other.m_map),
@@ -72,9 +69,6 @@ ParameterMap::ParameterMap(const ParameterMap &other)
       m_cacheRotMap(
           Kernel::make_unique<Kernel::Cache<const ComponentID, Kernel::Quat>>(
               *other.m_cacheRotMap)),
-      m_boundingBoxMap(
-          Kernel::make_unique<Kernel::Cache<const ComponentID, BoundingBox>>(
-              *other.m_boundingBoxMap)),
       m_instrument(other.m_instrument) {
   if (m_instrument)
     std::tie(m_componentInfo, m_detectorInfo) =
@@ -1036,7 +1030,6 @@ std::string ParameterMap::asString() const {
 void ParameterMap::clearPositionSensitiveCaches() {
   m_cacheLocMap->clear();
   m_cacheRotMap->clear();
-  m_boundingBoxMap->clear();
 }
 
 /// Sets a cached location on the location cache
@@ -1071,23 +1064,6 @@ void ParameterMap::setCachedRotation(const IComponent *comp,
 bool ParameterMap::getCachedRotation(const IComponent *comp,
                                      Quat &rotation) const {
   return m_cacheRotMap->getCache(comp->getComponentID(), rotation);
-}
-
-/// Sets a cached bounding box
-/// @param comp :: The Component to set the rotation of
-/// @param box :: A reference to the bounding box
-void ParameterMap::setCachedBoundingBox(const IComponent *comp,
-                                        const BoundingBox &box) const {
-  m_boundingBoxMap->setCache(comp->getComponentID(), box);
-}
-
-/// Attempts to retrieve a bounding box from the cache
-/// @param comp :: The Component to find the bounding box of
-/// @param box :: If the bounding box is found it's value will be set here
-/// @returns true if the bounding is in the map, otherwise false
-bool ParameterMap::getCachedBoundingBox(const IComponent *comp,
-                                        BoundingBox &box) const {
-  return m_boundingBoxMap->getCache(comp->getComponentID(), box);
 }
 
 /**
@@ -1125,7 +1101,7 @@ void ParameterMap::saveNexus(::NeXus::File *file,
   file->putAttr("version", 1);
   file->writeData("author", "");
   file->writeData("date",
-                  Kernel::DateAndTime::getCurrentTime().toISO8601String());
+                  Types::Core::DateAndTime::getCurrentTime().toISO8601String());
   file->writeData("description", "A string representation of the parameter "
                                  "map. The format is either: "
                                  "|detID:id-value;param-type;param-name;param-"

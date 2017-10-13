@@ -40,7 +40,6 @@ using Mantid::Kernel::Direction;
 using Mantid::Kernel::ListValidator;
 using Mantid::Kernel::make_unique;
 using Mantid::Kernel::MandatoryValidator;
-using Mantid::Kernel::Unit;
 
 namespace {
 /// An enum specifying a line profile orientation.

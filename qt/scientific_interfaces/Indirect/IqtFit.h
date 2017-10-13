@@ -89,8 +89,6 @@ private:
   QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
   QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
   QMap<QtProperty *, QtProperty *> m_fixedProps;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_iqtFInputWS;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotData;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;

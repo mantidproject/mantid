@@ -344,7 +344,7 @@ std::vector<std::string> MuonAnalysisFitDataPresenter::generateWorkspaceNames(
     }
   }
 
-  for (const auto runsVector : runNumberVectors) {
+  for (const auto &runsVector : runNumberVectors) {
     params.runs = runsVector;
     for (const auto &group : groups) {
       params.itemType = getItemType(group.toStdString());

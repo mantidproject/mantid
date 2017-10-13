@@ -30,10 +30,7 @@ namespace CurveFitting {
 
 using namespace Kernel;
 using API::Workspace;
-using API::Axis;
 using API::MatrixWorkspace;
-using API::Algorithm;
-using API::Jacobian;
 
 namespace {
 

@@ -47,21 +47,21 @@ Usage
    SumWS=MergeMD(InputWorkspaces='mdWs1,mdWs2',SplitInto='100,100')
 
     # check it looks like the one we wanted
-   print 'merged workspace of type: {0}\n'.format(SumWS.id()),
+   print('merged workspace of type: {0}'.format(SumWS.id()))
    # this is how you would check whether it is a general MDEventWorkspace
-   print 'it is a type of MDEventWorkspace: {0}\n'.format(isinstance(SumWS, IMDEventWorkspace)),
-   print '****************************************************************'   
-   print 'workspace 1 has {0} dimensions with {1} points and {2} events'.format(mdWs1.getNumDims(),mdWs1.getNPoints(),mdWs1.getNEvents());
+   print('it is a type of MDEventWorkspace: {0}'.format(isinstance(SumWS, IMDEventWorkspace)))
+   print('****************************************************************')
+   print('workspace 1 has {0} dimensions with {1} points and {2} events'.format(mdWs1.getNumDims(),mdWs1.getNPoints(),mdWs1.getNEvents()))
    d1=mdWs1.getDimension(0);d2=mdWs1.getDimension(1)
-   print 'with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum())
-   print 'workspace 2 has {0} dimensions with {1} points and {2} events'.format(mdWs2.getNumDims(),mdWs2.getNPoints(),mdWs2.getNEvents());   
+   print('with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum()))
+   print('workspace 2 has {0} dimensions with {1} points and {2} events'.format(mdWs2.getNumDims(),mdWs2.getNPoints(),mdWs2.getNEvents()))
    d1=mdWs2.getDimension(0);d2=mdWs2.getDimension(1)
-   print 'with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum())
-   print '****************************************************************'
-   print 'Merged WS has   {0} dimensions with {1} points and {2} events'.format(SumWS.getNumDims(),SumWS.getNPoints(),SumWS.getNEvents());
+   print('with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum()))
+   print('****************************************************************')
+   print('Merged WS has   {0} dimensions with {1} points and {2} events'.format(SumWS.getNumDims(),SumWS.getNPoints(),SumWS.getNEvents()))
    d1=SumWS.getDimension(0);d2=SumWS.getDimension(1)
-   print 'with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum())
-   print '****************************************************************'   
+   print('with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum()))
+   print('****************************************************************')
 
    
 **Output:**

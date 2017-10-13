@@ -41,15 +41,13 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
-using Poco::XML::Node;
-using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Types::Core::DateAndTime;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -703,7 +701,7 @@ void LoadSpice2D::runLoadInstrument(
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

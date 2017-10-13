@@ -14,6 +14,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 class FilterByLogValueTest : public CxxTest::TestSuite {
 public:

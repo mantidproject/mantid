@@ -32,11 +32,11 @@ Usage
 
 .. testcode:: ExShowPossibleCells
 
-   ws=LoadIsawPeaks("TOPAZ_3007.peaks")
+   ws = LoadIsawPeaks("TOPAZ_3007.peaks")
    FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
    ShowPossibleCells(PeaksWorkspace=ws)
    alg = ws.getHistory().lastAlgorithm()
-   print "Num Cells : ", alg.getPropertyValue("NumberOfCells")
+   print("Num Cells :  {}".format(alg.getPropertyValue("NumberOfCells")))
 
 
 Output:

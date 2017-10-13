@@ -19,8 +19,6 @@
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
-using boost::algorithm::is_any_of;
-using boost::algorithm::split;
 
 #ifdef _WIN32
 #pragma warning(push)
@@ -43,7 +41,7 @@ namespace PropertyNexus {
 template <typename NumT>
 std::unique_ptr<Property>
 makeProperty(::NeXus::File *file, const std::string &name,
-             const std::vector<Kernel::DateAndTime> &times) {
+             const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<NumT> values;
   file->getData(values);
   if (times.empty()) {
@@ -69,7 +67,7 @@ makeProperty(::NeXus::File *file, const std::string &name,
 */
 std::unique_ptr<Property>
 makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
-                           const std::vector<Kernel::DateAndTime> &times) {
+                           const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<uint8_t> savedValues;
   file->getData(savedValues);
   const size_t nvals = savedValues.size();
@@ -85,7 +83,7 @@ makeTimeSeriesBoolProperty(::NeXus::File *file, const std::string &name,
 /** Make a string/vector\<string\> property */
 std::unique_ptr<Property>
 makeStringProperty(::NeXus::File *file, const std::string &name,
-                   const std::vector<Kernel::DateAndTime> &times) {
+                   const std::vector<Types::Core::DateAndTime> &times) {
   std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
@@ -147,13 +145,13 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file,
     typeIsBool = true;
   }
 
-  std::vector<Kernel::DateAndTime> times;
+  std::vector<Types::Core::DateAndTime> times;
   if (!timeSec.empty()) {
     // Use a default start time
     if (startStr.empty())
       startStr = "2000-01-01T00:00:00";
     // Convert time in seconds to DateAndTime
-    DateAndTime start(startStr);
+    Types::Core::DateAndTime start(startStr);
     times.reserve(timeSec.size());
     for (double time : timeSec) {
       times.push_back(start + time);
