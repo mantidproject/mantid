@@ -115,10 +115,7 @@ bool MonIDPropChanger::monitorIdReader(
   }
   // are these monitors really there?
   // got the index of correspondent spectra.
-  // Skip this for performance if number of histograms is large.
-  std::vector<size_t> indexList;
-
-  indexList = inputWS->getIndicesFromDetectorIDs(mon);
+  std::vector<size_t> indexList = inputWS->getIndicesFromDetectorIDs(mon);
   if (indexList.empty()) {
     if (iExistingAllowedValues.empty()) {
       return false;
@@ -128,8 +125,7 @@ bool MonIDPropChanger::monitorIdReader(
     }
   }
   // index list can be less or equal to the mon list size (some monitors do
-  // not
-  // have spectra)
+  // not have spectra)
   size_t mon_count =
       (mon.size() < indexList.size()) ? mon.size() : indexList.size();
   mon.resize(mon_count);
@@ -150,6 +146,15 @@ bool MonIDPropChanger::monitorIdReader(
     }
   }
   return values_redefined;
+}
+
+bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
+                                       const size_t timeIndex) {
+  if (specDef.size() > 0)
+    for (const auto &spec : specDef)
+      if (spec.second != timeIndex)
+        return false;
+  return true;
 }
 
 // Register with the algorithm factory
@@ -456,8 +461,9 @@ MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(
           "Can not find spectra, corresponding to the requested monitor ID");
     }
     if (indexList.size() > 1 && !m_syncScanInput) {
-      throw std::runtime_error("More then one spectra corresponds to the "
-                               "requested monitor ID, which is unheard of");
+      throw std::runtime_error("More then one spectrum corresponds to the "
+                               "requested monitor ID. This is unexpected in a "
+                               "non-scanning workspace.");
     }
     m_workspaceIndexes = indexList;
   } else { // monitor spectrum is specified.
@@ -611,9 +617,7 @@ void NormaliseToMonitor::performHistogramDivision(
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
 
-    size_t timeIndex = 0;
-    if (m_syncScanInput)
-      timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
+    size_t timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
 
     const auto newYFactor =
         1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
@@ -624,7 +628,8 @@ void NormaliseToMonitor::performHistogramDivision(
 
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
       const auto &specDef = specInfo.spectrumDefinition(i);
-      if (specDef.size() > 0 && specDef[0].second != timeIndex)
+
+      if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
         continue;
 
       auto hist = outputWorkspace->histogram(i);
@@ -662,13 +667,8 @@ void NormaliseToMonitor::normaliseBinByBin(
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
-  std::shared_ptr<SpectrumInfo> inputSpecInfo;
-  std::shared_ptr<SpectrumInfo> monitorSpecInfo;
-  if (m_syncScanInput) {
-    inputSpecInfo =
-        std::make_shared<SpectrumInfo>(inputWorkspace->spectrumInfo());
-    monitorSpecInfo = std::make_shared<SpectrumInfo>(m_monitor->spectrumInfo());
-  }
+  const auto &inputSpecInfo = inputWorkspace->spectrumInfo();
+  const auto &monitorSpecInfo = m_monitor->spectrumInfo();
 
   for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
@@ -677,7 +677,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     auto monE = m_monitor->countStandardDeviations(workspaceIndex);
     size_t timeIndex = 0;
     if (m_syncScanInput)
-      timeIndex = monitorSpecInfo->spectrumDefinition(workspaceIndex)[0].second;
+      timeIndex = monitorSpecInfo.spectrumDefinition(workspaceIndex)[0].second;
     // Calculate the overall normalization just the once if bins are all
     // matching
     if (m_commonBins)
@@ -695,11 +695,9 @@ void NormaliseToMonitor::normaliseBinByBin(
       PARALLEL_START_INTERUPT_REGION
       prog.report();
 
-      if (m_syncScanInput) {
-        const auto &specDef = inputSpecInfo->spectrumDefinition(i);
-        if (specDef.size() > 0 && specDef[0].second != timeIndex)
-          continue;
-      }
+      const auto &specDef = inputSpecInfo.spectrumDefinition(i);
+      if (!spectrumDefinitionsMatchTimeIndex(specDef, timeIndex))
+        continue;
 
       const auto &X = inputWorkspace->binEdges(i);
       // If not rebinning, just point to our monitor spectra, otherwise create
@@ -733,7 +731,7 @@ void NormaliseToMonitor::normaliseBinByBin(
         auto &EOut = outputWorkspace->mutableE(i);
         const auto &inY = inputWorkspace->y(i);
         const auto &inE = inputWorkspace->e(i);
-        outputWorkspace->mutableX(i) = inputWorkspace->x(i);
+        outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
 
         // The code below comes more or less straight out of Divide.cpp
         for (size_t k = 0; k < specLength; ++k) {

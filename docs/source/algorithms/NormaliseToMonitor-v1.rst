@@ -55,8 +55,8 @@ technically dimensionless.
 Restrictions on the input workspace
 ###################################
 
-The data must be histogram, non-distribution data. The exception to this is for workspaces that contain point data with a single
-count per spectrum. In this case the normalisation is performed by dividing every spectrum by the monitor counts, taking into
+The data must be histogram, non-distribution data. The exception to the histogram requirement is for workspaces that contain point data with
+a single count per spectrum. In this case the normalisation is performed by dividing every spectrum by the monitor counts, taking into
 account the error on the monitor counts.
 
 Detector Scan Workspaces

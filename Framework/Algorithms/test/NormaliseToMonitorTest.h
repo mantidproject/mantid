@@ -528,10 +528,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", merged))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "outputWS"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("MonitorID", "9"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
-                            std::string(e.what()),
-                            "More then one spectra corresponds to the "
-                            "requested monitor ID, which is unheard of")
+    TS_ASSERT_THROWS_EQUALS(
+        alg.execute(), std::runtime_error & e, std::string(e.what()),
+        "More then one spectrum corresponds to the requested monitor ID. This "
+        "is unexpected in a non-scanning workspace.")
   }
 
   void test_with_single_count_point_data_workspace() {
