@@ -619,7 +619,7 @@ void NormaliseToMonitor::performHistogramDivision(
         1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
     const auto divisorError =
         m_monitor->histogram(monitorWorkspaceIndex).e()[0];
-    const double rhsFactor = pow(divisorError * newYFactor, 2);
+    const double yErrorFactor = pow(divisorError * newYFactor, 2);
     monitorWorkspaceIndex++;
 
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
@@ -633,7 +633,7 @@ void NormaliseToMonitor::performHistogramDivision(
 
       for (size_t j = 0; j < yValues.size(); ++j) {
         eValues[j] = newYFactor * sqrt(eValues[j] * eValues[j] +
-                                       yValues[j] * yValues[j] * rhsFactor);
+                                       yValues[j] * yValues[j] * yErrorFactor);
         yValues[j] *= newYFactor;
       }
 
