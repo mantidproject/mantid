@@ -7,6 +7,7 @@
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventDataSink.h"
+#include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Event/TofEvent.h"
 
 #include <cstdint>
@@ -82,9 +83,6 @@ public:
   void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
                                     size_t bankIndex) const;
 
-  std::pair<size_t, size_t> findStartAndEndPulseIndices(size_t rangeStart,
-                                                        size_t count);
-
   void populateEventList(const std::vector<EventListEntry> &events);
 
   const std::vector<std::vector<EventListEntry>> &rankData() const {
@@ -100,10 +98,7 @@ private:
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
-  std::vector<IndexType> m_eventIndex;
-  std::vector<TimeZeroType> m_eventTimeZero;
-  Types::Core::DateAndTime m_eventTimeZeroOffset;
-  std::size_t m_posInEventIndex{0};
+  PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
   std::vector<std::vector<EventListEntry>> m_allRankData;
   std::vector<EventListEntry> m_thisRankData;
   std::future<void> m_future;
@@ -142,10 +137,9 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
     std::vector<IndexType> event_index,
     std::vector<TimeZeroType> event_time_zero,
     const int64_t event_time_zero_offset) {
-  m_eventIndex = std::move(event_index);
-  m_eventTimeZero = std::move(event_time_zero);
-  m_eventTimeZeroOffset = Types::Core::DateAndTime(event_time_zero_offset);
-  m_posInEventIndex = 0;
+  m_pulseTimes = PulseTimeGenerator<IndexType, TimeZeroType>(
+      std::move(event_index), std::move(event_time_zero),
+      event_time_zero_offset);
 }
 
 /** Transform event IDs to global spectrum numbers using the bankOffsets stored
@@ -164,68 +158,6 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
                                  size_t bankIndex) const {
   for (size_t i = 0; i < count; ++i)
     event_id_start[i] -= m_bankOffsets[bankIndex];
-}
-
-/** Finds the start and end pulse indices within the event_index given an offset
- * into the event_id/event_time_offset array and a chunk size.
- *
- * Returns the indices which correspond to the first and last pulse covering the
- * data chunk.
- * @param rangeStart Offset into event_time_offset/event_id
- * @param count Size of data chunk.
- */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-std::pair<size_t, size_t>
-EventParser<IndexType, TimeZeroType,
-            TimeOffsetType>::findStartAndEndPulseIndices(size_t rangeStart,
-                                                         size_t count) {
-  size_t startPulse = m_posInEventIndex;
-  size_t endPulse = startPulse;
-  const auto rangeEnd = rangeStart + count;
-
-  for (size_t pulse = startPulse; pulse < m_eventIndex.size(); ++pulse) {
-    size_t icount = (pulse != m_eventIndex.size() - 1 ? m_eventIndex[pulse + 1]
-                                                      : rangeEnd) -
-                    static_cast<size_t>(m_eventIndex[pulse]);
-    fprintf(stderr, "%lu %lu\n", pulse, icount);
-    if (rangeStart >= static_cast<size_t>(m_eventIndex[pulse]) &&
-        rangeStart < static_cast<size_t>(m_eventIndex[pulse]) + icount)
-      startPulse = pulse;
-    if (rangeEnd > static_cast<size_t>(m_eventIndex[pulse]) &&
-        rangeEnd <= static_cast<size_t>(m_eventIndex[pulse]) + icount) {
-      endPulse = pulse + 1;
-      break;
-    }
-  }
-
-  m_posInEventIndex = endPulse - 1;
-
-  return {startPulse, endPulse};
-}
-
-template <class TimeZeroType>
-Types::Core::DateAndTime getPulseTime(const Types::Core::DateAndTime &offset,
-                                      const TimeZeroType &eventTimeZero) {
-  return offset + eventTimeZero;
-}
-
-template <>
-inline Types::Core::DateAndTime getPulseTime<uint64_t>(const Types::Core::DateAndTime &offset,
-                                      const uint64_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
-}
-
-template <>
-inline Types::Core::DateAndTime
-getPulseTime<int32_t>(const Types::Core::DateAndTime &offset,
-                      const int32_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
-}
-
-template <>
-inline Types::Core::DateAndTime getPulseTime<uint32_t>(const Types::Core::DateAndTime &offset,
-                                      const uint32_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
 }
 
 /** Extracts event information from the list of time offsets and global spectrum
@@ -248,35 +180,14 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
   rankData.resize(m_comm.size());
 
-  auto offset = range.eventOffset;
-  auto count = range.eventCount;
-  auto result = findStartAndEndPulseIndices(offset, count);
-
-  size_t actual{0};
-  for (size_t pulse = result.first; pulse < result.second; ++pulse) {
-    const auto start =
-        std::max(offset, static_cast<size_t>(m_eventIndex[pulse])) - offset;
-    const auto end =
-        std::min(offset + count,
-                 static_cast<size_t>(pulse != m_eventIndex.size() - 1
-                                         ? m_eventIndex[pulse + 1]
-                                         : count)) -
-        offset;
-    //fprintf(stderr, "pulse %lu start %lu end %lu\n", pulse, start, end);
-
-    const auto pulseTime =
-        getPulseTime(m_eventTimeZeroOffset, m_eventTimeZero[pulse]);
-    for (size_t i = static_cast<size_t>(start); i < static_cast<size_t>(end);
-         ++i) {
-      ++actual;
-      int rank = globalSpectrumIndex[i] % m_comm.size();
-      rankData[rank].emplace_back(EventListEntry{
-          globalSpectrumIndex[i],
-          TofEvent{static_cast<double>(eventTimeOffset[i]), pulseTime}});
-    }
+  m_pulseTimes.seek(range.eventOffset);
+  for (size_t event = 0; event < range.eventCount; ++event) {
+    int rank = globalSpectrumIndex[event] % m_comm.size();
+    rankData[rank].emplace_back(
+        EventListEntry{globalSpectrumIndex[event],
+                       TofEvent{static_cast<double>(eventTimeOffset[event]),
+                                m_pulseTimes.next()}});
   }
-  if(actual != count)
-    fprintf(stderr, "aaaa\n");
 }
 
 /** Uses MPI calls to redistribute chunks which must be processed on certain
@@ -362,10 +273,6 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
   fprintf(stderr, "parsing %lu events from bank %lu\n", range.eventCount, range.bankIndex);
-
-  if (m_eventTimeZero.empty() || m_eventIndex.empty())
-    throw std::runtime_error("Both event_time_zero and event_index must be set "
-                             "before running the parser.");
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own

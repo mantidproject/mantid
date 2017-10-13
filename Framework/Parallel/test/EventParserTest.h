@@ -12,7 +12,7 @@ using namespace Parallel::IO;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-namespace detail {
+namespace anonymous {
 template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
 class FakeParserDataGenerator {
 public:
@@ -139,7 +139,7 @@ private:
   std::vector<std::vector<TofEvent>> m_referenceEventLists;
   std::vector<std::vector<TofEvent>> test_event_lists;
 };
-} // namespace detail
+}
 
 class EventParserTest : public CxxTest::TestSuite {
 public:
@@ -175,39 +175,8 @@ public:
     TS_ASSERT_EQUALS(eventId[3], eventIdCopy[3] - bankOffsets[0]);
   }
 
-  void testFindFirstAndLastPulses() {
-    std::vector<std::vector<int>> rankGroups;
-    std::vector<int32_t> bankOffsets{1000};
-    std::vector<std::vector<TofEvent> *> eventLists(10);
-
-    EventParser<int64_t, int64_t, double> parser(rankGroups, bankOffsets,
-                                                 eventLists);
-
-    std::vector<int64_t> event_index{0, 20, 40, 60, 100, 150, 210};
-    std::vector<int64_t> event_time_zero{10, 20, 30, 40, 50, 60, 70};
-    parser.setPulseInformation(event_index, event_time_zero, 0);
-    auto res = parser.findStartAndEndPulseIndices(0, 50);
-    TS_ASSERT_EQUALS(res.first, 0);
-    TS_ASSERT_EQUALS(res.second, 3);
-
-    // reset "current position" for new set of indices
-    parser.setPulseInformation(event_index, event_time_zero, 0);
-    res = parser.findStartAndEndPulseIndices(30, 50);
-    TS_ASSERT_EQUALS(res.first, 1);
-    TS_ASSERT_EQUALS(res.second, 4);
-
-    // instead of resetting allow search to start from this position
-    res = parser.findStartAndEndPulseIndices(105, 100);
-    TS_ASSERT_EQUALS(res.first, 4);
-    TS_ASSERT_EQUALS(res.second, 6);
-
-    res = parser.findStartAndEndPulseIndices(209, 1000);
-    TS_ASSERT_EQUALS(res.first, 5);
-    TS_ASSERT_EQUALS(res.second, 7);
-  }
-
   void testExtractEventsFull() {
-    detail::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
@@ -230,7 +199,7 @@ public:
   }
 
   void testExtractEventsPartial() {
-    detail::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
@@ -281,7 +250,7 @@ public:
   }
 
   void testParsingFull_1Pulse_1Bank() {
-    detail::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
+    anonymous::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
@@ -295,7 +264,7 @@ public:
   }
 
   void testParsingFull_1Rank_1Bank() {
-    detail::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
@@ -310,7 +279,7 @@ public:
 
   void testParsingFull_1Rank_2Banks() {
     int numBanks = 2;
-    detail::FakeParserDataGenerator<int32_t, int64_t, double> gen(numBanks, 10,
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(numBanks, 10,
                                                                   7);
     auto parser = gen.generateTestParser();
 
@@ -327,7 +296,7 @@ public:
   }
 
   void testParsingFull_InParts_1Rank_1Bank() {
-    detail::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
     auto parser = gen.generateTestParser();
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
     auto event_id = gen.eventId(0);
@@ -353,7 +322,7 @@ public:
 
   void testParsingFull_InParts_1Rank_3Banks() {
     size_t numBanks = 3;
-    detail::FakeParserDataGenerator<int32_t, int64_t, double> gen(3, 20, 7);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(3, 20, 7);
     auto parser = gen.generateTestParser();
 
     for (size_t bank = 0; bank < numBanks; bank++) {
@@ -386,10 +355,11 @@ private:
       const std::vector<std::vector<EventListEntry>> &rankData,
       boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>> &
           parser,
-      detail::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
+      anonymous::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
           gen,
       const Chunker::LoadRange &range) {
     parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    /*
     auto res = parser->findStartAndEndPulseIndices(range.eventOffset,
                                                    range.eventCount);
 
@@ -409,6 +379,7 @@ private:
                                      static_cast<int64_t>(pulses[pulse]);
                             }));
     }
+    */
   }
 };
 
@@ -459,7 +430,7 @@ private:
   const size_t NUM_BANKS = 7;
   std::vector<std::vector<int32_t>> event_ids;
   std::vector<std::vector<double>> event_time_offsets;
-  detail::FakeParserDataGenerator<int32_t, int64_t, double> gen;
+  anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen;
   boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
 };
 #endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */
