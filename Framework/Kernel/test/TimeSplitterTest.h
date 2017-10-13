@@ -14,6 +14,7 @@
 #include "MantidKernel/DateAndTime.h"
 
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class TimeSplitterTest : public CxxTest::TestSuite {
 public:

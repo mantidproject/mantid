@@ -2,8 +2,9 @@
 // Includes
 //-------------------------------------------------------------
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
+#include "MantidGeometry/Instrument/InstrumentVisitor.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
 #include <deque>
@@ -130,7 +131,15 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
     node = nodeQueue.front();
     nodeQueue.pop_front();
     BoundingBox bbox;
-    node->getBoundingBox(bbox);
+    auto it = m_boxCache.find(node->getComponentID());
+    if (it != m_boxCache.end()) {
+      bbox = it->second;
+    } else {
+      node->getBoundingBox(bbox);
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_boxCache[node->getComponentID()] = bbox;
+    }
+
     // Quick test. If this suceeds moved on to test the children
     if (bbox.doesLineIntersect(testRay)) {
       if (ICompAssembly_const_sptr assembly =

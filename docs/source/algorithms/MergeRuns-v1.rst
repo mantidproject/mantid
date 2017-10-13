@@ -147,9 +147,9 @@ Usage
 
    merged = MergeRuns(InputWorkspaces="a, b")
 
-   print "a      = " + str(a.readY(0))
-   print "b      = " + str(b.readY(0))
-   print "merged = " + str(merged.readY(0))
+   print("a      = {}".format(a.readY(0)))
+   print("b      = {}".format(b.readY(0)))
+   print("merged = {}".format(merged.readY(0)))
 
 Output:
 
@@ -176,13 +176,13 @@ Output:
 
    merged = MergeRuns(InputWorkspaces="group_1, group_2")
 
-   print "group_1 = [" + str(group_1[0].readY(0)) + ","
-   print "           " + str(group_1[1].readY(0)) + "]"
+   print("group_1 = [{},".format(group_1[0].readY(0)))
+   print("           {}]".format(group_1[1].readY(0)))
+	      
+   print("group_2 = [{},".format(group_2[0].readY(0)))
+   print("           {}]".format(group_2[1].readY(0)))
 
-   print "group_2 = [" + str(group_2[0].readY(0)) + ","
-   print "           " + str(group_2[1].readY(0)) + "]"
-
-   print "merged   = " + str(merged.readY(0))
+   print("merged   = {}".format(merged.readY(0)))
 
 Output:
 

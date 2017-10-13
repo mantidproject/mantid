@@ -25,7 +25,7 @@ Usage
    filesRemoved = ClearCache(DownloadedInstrumentFileCache=True)
 
    # Print the result
-   print "%i files were removed" % filesRemoved
+   print("{} files were removed".format(filesRemoved))
 
    # This will repopulate the cache you have just cleared
    DownloadInstrument()

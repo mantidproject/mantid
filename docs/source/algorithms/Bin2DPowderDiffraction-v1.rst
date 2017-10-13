@@ -41,8 +41,8 @@ Restrictions on the input workspace
 
 Binning parameters
 ------------------
-Either *Axis1Binning* and *Axis2Binning* or *BinEdgesFile* must be specified, but not both. *Axis1Binning* contains binning parameters
-in d-Spacing. *Axis2Binning* contains binning parameters in d-SpacingPerpendicular. Binning parameters should be set the same way as
+Either *dSpaceBinning* and *dPerpendicularBinning* or *BinEdgesFile* must be specified, but not both. *dSpaceBinning* contains binning parameters
+in d-Spacing. *dPerpendicularBinning* contains binning parameters in d-SpacingPerpendicular. Binning parameters should be set the same way as
 for :ref:`algm-Rebin` algorithm.
 
 In the case if non-equidistant binning is required, bin edges can be specified in the *BinEdgesFile*.
@@ -100,10 +100,10 @@ Usage
    wsOutNorm = Bin2DPowderDiffraction(wsIn, dSpaceBinning="2,2,6", dPerpendicularBinning="1,2,5", NormalizeByBinArea=True)
 
    # Print the result
-   print "Y values without normalization:"
-   print wsOut.extractY()
-   print "Y values with normalization by bin area:"
-   print wsOutNorm.extractY()
+   print("Y values without normalization:")
+   print(wsOut.extractY())
+   print("Y values with normalization by bin area:")
+   print(wsOutNorm.extractY())
 
 Output:
 

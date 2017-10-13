@@ -15,7 +15,7 @@ class PeaksTableColumnsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit PeaksTableColumnsDialog(QWidget *parent = 0);
+  explicit PeaksTableColumnsDialog(QWidget *parent = nullptr);
   ~PeaksTableColumnsDialog() override;
 
   void setVisibleColumns(const std::set<QString> &cols);

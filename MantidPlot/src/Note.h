@@ -46,7 +46,7 @@ class Note : public MdiSubWindow {
 
 public:
   Note(const QString &label, QWidget *parent, const QString &name = QString(),
-       Qt::WFlags f = 0);
+       Qt::WFlags f = nullptr);
   ~Note() override{};
 
   static MantidQt::API::IProjectSerialisable *

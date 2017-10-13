@@ -93,7 +93,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling,
   if ((nelements == 0) || (nelements == 1 && (instrument->getSource() ||
                                               instrument->getSample())) ||
       (nelements == 2 && instrument->getSource() && instrument->getSample())) {
-    QMessageBox::warning(NULL, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "MantidPlot - Warning",
                          "This instrument appears to contain no detectors",
                          "OK");
   }
@@ -292,7 +292,7 @@ void InstrumentActor::applyMaskWorkspace() {
       // after-replace notification
       // and updates this instrument actor.
     } catch (...) {
-      QMessageBox::warning(NULL, "MantidPlot - Warning",
+      QMessageBox::warning(nullptr, "MantidPlot - Warning",
                            "An error accured when applying the mask.", "OK");
     }
   }
@@ -879,7 +879,7 @@ void InstrumentActor::initMaskHelper() const {
     m_maskWorkspace = extractCurrentMask();
   } catch (...) {
     // don't know what to do here yet ...
-    QMessageBox::warning(NULL, "MantidPlot - Warning",
+    QMessageBox::warning(nullptr, "MantidPlot - Warning",
                          "An error occurred when extracting the mask.", "OK");
   }
 }

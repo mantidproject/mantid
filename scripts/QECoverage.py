@@ -204,7 +204,7 @@ class QECoverageGUI(QtGui.QWidget):
 
     def onHelp(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("QECoverage")
+        showCustomInterfaceHelp("QE Coverage")
 
     def onDirectPlotOverChanged(self, state):
         self.indirect_plotover.setCheckState(state)

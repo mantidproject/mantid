@@ -13,9 +13,9 @@ namespace CustomDialogs {
 DECLARE_DIALOG(LoadAsciiDialog)
 
 LoadAsciiDialog::LoadAsciiDialog(QWidget *parent)
-    : MantidQt::API::AlgorithmDialog(parent), m_lineFilename(NULL),
-      m_lineOutputWorkspace(NULL), m_lineCommentIndicator(NULL),
-      m_lineCustomSeparator(NULL), m_separatorBox(NULL) {}
+    : MantidQt::API::AlgorithmDialog(parent), m_lineFilename(nullptr),
+      m_lineOutputWorkspace(nullptr), m_lineCommentIndicator(nullptr),
+      m_lineCustomSeparator(nullptr), m_separatorBox(nullptr) {}
 
 LoadAsciiDialog::~LoadAsciiDialog() {}
 

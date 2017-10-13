@@ -29,7 +29,7 @@ public:
   ~SaveTBLTest() override {}
 
   void testNoQuotes() {
-    ITableWorkspace_sptr ws = CreateWorkspace();
+    ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
@@ -74,7 +74,7 @@ public:
   }
 
   void testQuotes() {
-    ITableWorkspace_sptr ws = CreateWorkspace();
+    ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
 
     TableRow row = ws->appendRow();
     row << "13460"
@@ -143,8 +143,65 @@ public:
     cleanupafterwards();
   }
 
+  void testWithExtraColumns() {
+    auto ws = CreateWorkspace();
+    auto extraValues = ws->addColumn("str", "ExtraValues");
+    extraValues->setPlotType(0);
+
+    TableRow row = ws->appendRow();
+    row << "13460"
+        << "0.7"
+        << "13463+13464"
+        << "0.01"
+        << "0.06"
+        << "0.04"
+        << "2.0"
+        << "4"
+        << ""
+        << "Some Value";
+
+    row = ws->appendRow();
+    row << "13470"
+        << "2.3"
+        << "13463+13464"
+        << "0.035"
+        << "0.3"
+        << "0.04"
+        << "2.0"
+        << "5"
+        << ""
+        << "Some Other Value";
+
+    Mantid::API::IAlgorithm_sptr alg =
+        Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
+    alg->setRethrows(true);
+    alg->setPropertyValue("InputWorkspace", m_name);
+    alg->setPropertyValue("Filename", m_filename);
+    m_abspath = alg->getPropertyValue("Filename"); // Get absolute path
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+
+    if (!alg->isExecuted()) {
+      TS_FAIL("Could not run SaveTBL");
+    }
+
+    TS_ASSERT(Poco::File(m_abspath).exists());
+    std::ifstream file(m_abspath.c_str());
+    std::string line = "";
+    getline(file, line);
+    TS_ASSERT_EQUALS(line, "Run(s),ThetaIn,TransRun(s),Qmin,Qmax,dq/"
+                           "q,Scale,StitchGroup,Options,ExtraValues");
+    getline(file, line);
+    TS_ASSERT_EQUALS(line,
+                     "13460,0.7,13463+13464,0.01,0.06,0.04,2.0,4,,Some Value");
+    getline(file, line);
+    TS_ASSERT_EQUALS(
+        line, "13470,2.3,13463+13464,0.035,0.3,0.04,2.0,5,,Some Other Value");
+    file.close();
+    cleanupafterwards();
+  }
+
   void testGroupPass() {
-    ITableWorkspace_sptr ws = CreateWorkspace();
+    ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
     TableRow row = ws->appendRow();
     row << "13460"
         << "0.7"
@@ -221,7 +278,7 @@ public:
   }
 
   void testLoadWithLoadTBL() {
-    ITableWorkspace_sptr ws = CreateWorkspace();
+    ITableWorkspace_sptr ws = CreatePopulatedWorkspace();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("SaveTBL");
@@ -278,6 +335,11 @@ private:
     colStitch->setPlotType(0);
     colOptions->setPlotType(0);
 
+    return ws;
+  }
+
+  ITableWorkspace_sptr CreatePopulatedWorkspace() {
+    auto ws = CreateWorkspace();
     TableRow row = ws->appendRow();
     row << "13460"
         << "0.7"

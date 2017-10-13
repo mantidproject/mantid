@@ -76,18 +76,18 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
        for name in tab_names:
            if len(name)>8:
               name= name[0:8];
-           print "| {0:8} ".format(name),
-       print "|\n",
+           print("| {0:8} ".format(name))
+       print("|\n")
    
        for i in xrange(0,nRows):
            for name in tab_names:
                  col = pTWS.column(name);
                  data2pr=col[i]
                  if type(data2pr) is float:
-                      print "| {0:>8.2f} ".format(data2pr),
+                      print("| {0:>8.2f} ".format(data2pr))
                  else:
-                     print "| {0:>8} ".format(data2pr),   
-           print "|\n",
+                     print("| {0:>8} ".format(data2pr))
+           print("|\n")
        
     
    # load test workspace

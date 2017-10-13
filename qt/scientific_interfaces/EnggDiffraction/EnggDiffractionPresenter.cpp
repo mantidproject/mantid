@@ -354,8 +354,8 @@ void EnggDiffractionPresenter::ProcessCropCalib() {
     if (m_view->currentCalibSpecNos().empty() &&
         specNoNum == BankMode::SPECNOS) {
       throw std::invalid_argument(
-          "The Spectrum Nos cannot be empty, must be a"
-          "valid range or a Bank Name can be selected instead");
+          "The Spectrum Numbers field cannot be empty, must be a "
+          "valid range or a Bank Name can be selected instead.");
     }
   } catch (std::invalid_argument &ia) {
     m_view->userWarning("Error in the inputs required for cropped calibration",
@@ -729,7 +729,7 @@ std::vector<std::string> EnggDiffractionPresenter::isValidMultiRunNumber(
   if (paths.empty() || paths.front().empty())
     return multi_run_number;
 
-  for (auto path : paths) {
+  for (const auto &path : paths) {
     std::string run_number;
     try {
       if (Poco::File(path).exists()) {
@@ -869,7 +869,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   ceriaNo = "";
 
   Poco::Path fullPath(path);
-  const std::string filename = fullPath.getFileName();
+  const std::string &filename = fullPath.getFileName();
   if (filename.empty()) {
     return;
   }
@@ -1326,8 +1326,9 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusCropped(
   }
 
   if (specNos.empty()) {
-    throw std::invalid_argument("The list of spectrum Nos cannot be empty when "
-                                "focusing in 'cropped' mode.");
+    throw std::invalid_argument(
+        "The Spectrum Numbers field cannot be empty when "
+        "focusing in 'cropped' mode.");
   }
 
   inputChecksBanks(banks);

@@ -24,7 +24,7 @@ double my_complicated_function(int arg1, double arg2) {
 class FunctionTaskTest : public CxxTest::TestSuite {
 public:
   void test_NullFunction_throws() {
-    FunctionTask mytask(NULL);
+    FunctionTask mytask(nullptr);
     TS_ASSERT_THROWS(mytask.run(), std::runtime_error);
   }
 

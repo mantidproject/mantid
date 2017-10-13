@@ -26,9 +26,9 @@ void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces &) {}
  */
 void removeLayout(QWidget *widget) {
   QLayout *layout = widget->layout();
-  if (layout != 0) {
+  if (layout != nullptr) {
     QLayoutItem *item;
-    while ((item = layout->takeAt(0)) != 0) {
+    while ((item = layout->takeAt(0)) != nullptr) {
       layout->removeItem(item);
       delete item->widget();
     }
@@ -197,7 +197,7 @@ void PeaksViewer::loadFromProject(const std::string &lines) {
     return;
 
   // load presented workspaces
-  for (auto section : tsv.sections("peaksworkspace"))
+  for (const auto &section : tsv.sections("peaksworkspace"))
     loadPresentedWorkspace(section);
 
   // Apply zooming/peak selection
@@ -280,7 +280,7 @@ std::string PeaksViewer::saveToProject() const {
 
   // save all workspaces
   auto workspaces = m_presenter->presentedWorkspaces();
-  for (auto ws : workspaces)
+  for (const auto &ws : workspaces)
     tsv.writeSection("peaksworkspace", savePresentedWorkspace(ws));
 
   // save zoom a particular peak

@@ -342,6 +342,11 @@ h5py_patterns.each do |pattern|
   end
 end
 
+# ---------------------------------------------
+# Fix imports for Mantid Scientific Interfaces
+# ---------------------------------------------
+`install_name_tool -add_rpath @loader_path/../../../plugins/qtplugins/mantid ./plugins/qtplugins/mantid/libMantidScientificInterfacesEnggDiffraction.dylib`
+# ---------------------------------------------
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|

@@ -163,11 +163,11 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   if (m_postprocessor.name().isEmpty()) {
     m_postprocess = false;
-    m_manager = Mantid::Kernel::make_unique<OneLevelTreeManager>(
-        this, m_whitelist);
+    m_manager =
+        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
   } else {
-    m_manager = Mantid::Kernel::make_unique<TwoLevelTreeManager>(
-        this, m_whitelist);
+    m_manager =
+        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
   }
 }
 
@@ -179,12 +179,11 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const WhiteList &whitelist,
-    const ProcessingAlgorithm &processor,
+    const WhiteList &whitelist, const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor)
-    : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, PreprocessingAlgorithm>(),
-          processor, postprocessor) {}
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, postprocessor) {}
 
 /**
  * Delegating constructor (only whitelist specified)
@@ -194,8 +193,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     const WhiteList &whitelist)
     : GenericDataProcessorPresenter(
           whitelist, std::map<QString, PreprocessingAlgorithm>(),
-          ProcessingAlgorithm(),
-          PostprocessingAlgorithm()) {}
+          ProcessingAlgorithm(), PostprocessingAlgorithm()) {}
 
 /**
 * Delegating constructor (no post-processing needed)
@@ -218,11 +216,10 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const WhiteList &whitelist,
-    const ProcessingAlgorithm &processor)
-    : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, PreprocessingAlgorithm>(),
-          processor, PostprocessingAlgorithm()) {}
+    const WhiteList &whitelist, const ProcessingAlgorithm &processor)
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, PostprocessingAlgorithm()) {}
 
 /**
 * Destructor
@@ -300,7 +297,10 @@ Process selected data
 void GenericDataProcessorPresenter::process() {
   // Emit a signal hat the process is starting
   m_view->emitProcessClicked();
-
+  if (GenericDataProcessorPresenter::m_skipProcessing) {
+    m_skipProcessing = false;
+    return;
+  }
   m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
@@ -660,8 +660,7 @@ desired workspace
 @returns a shared pointer to the workspace
 */
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
-    const QString &runStr,
-    const PreprocessingAlgorithm &preprocessor,
+    const QString &runStr, const PreprocessingAlgorithm &preprocessor,
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
@@ -698,11 +697,11 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
 
-      for (auto& kvp : optionsMap) {
+      for (auto &kvp : optionsMap) {
         try {
           if (kvp.first != preprocessor.lhsProperty().toStdString() &&
               kvp.first != preprocessor.rhsProperty().toStdString())
-          setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
+            setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
           throw;
@@ -763,7 +762,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
     if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
-      auto const valueStr = data.at(col);
+      auto const &valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
@@ -984,7 +983,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                            runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data->at(i);
+      const auto &propertyValue = data->at(i);
       if (!propertyValue.isEmpty())
         alg->setPropertyValue(propertyName.toStdString(),
                               propertyValue.toStdString());
@@ -1675,8 +1674,7 @@ void GenericDataProcessorPresenter::accept(
 /** Returs the list of valid workspaces currently in the ADS
 * @return : The vector of workspaces (as commands)
 */
-std::vector<Command_uptr>
-GenericDataProcessorPresenter::getTableList() {
+std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
 
   std::vector<Command_uptr> workspaces;
   workspaces.reserve(m_workspaceList.size());
@@ -1811,6 +1809,12 @@ int GenericDataProcessorPresenter::getNumberOfRows() {
  **/
 void GenericDataProcessorPresenter::clearTable() { m_manager->deleteRow(); }
 
+/**
+  * Flag used to stop processing
+**/
+void GenericDataProcessorPresenter::skipProcessing() {
+  m_skipProcessing = true;
+}
 }
 }
 }

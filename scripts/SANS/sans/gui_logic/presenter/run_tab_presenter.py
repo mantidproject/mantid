@@ -233,25 +233,30 @@ class RunTabPresenter(object):
         2. Adds a dummy input workspace
         3. Adds row index information
         """
-        self.sans_logger.information("Starting processing of batch table.")
-        # 0. Validate rows
-        self._create_dummy_input_workspace()
-        self._validate_rows()
 
-        # 1. Set up the states and convert them into property managers
-        states = self.get_states()
-        if not states:
-            raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
-                               "has been loaded")
-        property_manager_service = PropertyManagerService()
-        property_manager_service.add_states_to_pmds(states)
+        try:
+            self.sans_logger.information("Starting processing of batch table.")
+            # 0. Validate rows
+            self._create_dummy_input_workspace()
+            self._validate_rows()
 
-        # 2. Add dummy input workspace to Options column
-        self._remove_dummy_workspaces_and_row_index()
-        self._set_dummy_workspace()
+            # 1. Set up the states and convert them into property managers
+            states = self.get_states()
+            if not states:
+                raise RuntimeError("There seems to have been an issue with setting the states. Make sure that a user file"
+                                   "has been loaded")
+            property_manager_service = PropertyManagerService()
+            property_manager_service.add_states_to_pmds(states)
 
-        # 3. Add dummy row index to Options column
-        self._set_indices()
+            # 2. Add dummy input workspace to Options column
+            self._remove_dummy_workspaces_and_row_index()
+            self._set_dummy_workspace()
+
+            # 3. Add dummy row index to Options column
+            self._set_indices()
+        except:
+            self._view.halt_process_flag()
+            raise
 
     def on_processing_finished(self):
         self._remove_dummy_workspaces_and_row_index()

@@ -38,6 +38,7 @@ namespace Kernel {
 class DLLExport StringContainsValidator : public TypedValidator<std::string> {
 public:
   StringContainsValidator();
+  StringContainsValidator(const std::vector<std::string> &);
 
   /// Clone the current state
   IValidator_sptr clone() const override;

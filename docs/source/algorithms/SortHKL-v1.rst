@@ -59,11 +59,11 @@ and rhombohedral centering:
 
     statistics = statistics_table.row(0)
 
-    print 'Data set statistics:'
-    print '        Peaks: {0}'.format(sorted.getNumberPeaks())
-    print '       Unique: {0}'.format(statistics['No. of Unique Reflections'])
-    print ' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2))
-    print '   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2))
+    print('Data set statistics:')
+    print('        Peaks: {0}'.format(sorted.getNumberPeaks()))
+    print('       Unique: {0}'.format(statistics['No. of Unique Reflections']))
+    print(' Completeness: {0}%'.format(round(statistics['Data Completeness'], 2)))
+    print('   Redundancy: {0}'.format(round(statistics['Multiplicity'], 2)))
 
 Output:
 

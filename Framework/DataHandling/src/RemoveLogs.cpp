@@ -29,7 +29,6 @@ DECLARE_ALGORITHM(RemoveLogs)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
