@@ -49,9 +49,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                           extensions=[".cif"]), doc="Location of the phase file")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_INST_PARAMS, defaultValue="", action=FileAction.Load,
                                           extensions=[".prm"]), doc="Location of the phase file")
+
         self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH, defaultValue="", action=FileAction.Save,
                                           extensions=".gpx"), doc="GSASII Project to work on")
-
         self.declareProperty(name=self.PROP_OUT_GOF, defaultValue=0.0, direction=Direction.Output,
                              doc="Goodness of fit value (Chi squared)")
         self.declareProperty(name=self.PROP_OUT_RWP, defaultValue=0.0, direction=Direction.Output,
@@ -60,6 +60,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                                      defaultValue=self.PROP_OUT_LATTICE_PARAMS),
                              doc="Table to output the lattice parameters (refined)")
 
+        self.setPropertyGroup(self.PROP_GSAS_PROJ_PATH, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_GOF, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_RWP, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, self.PROP_OUT_GROUP_RESULTS)
