@@ -25,13 +25,14 @@ class AddPeaksThread(QThread):
         :param exp_number:
         :param scan_number_list:
         """
-        QThread.__init__(self)
-
         # check
         assert main_window is not None, 'Main window cannot be None'
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
         assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
                                                    '' % str(type(scan_number_list))
+
+        # init thread
+        super(AddPeaksThread, self).__init__()
 
         # set values
         self._mainWindow = main_window
@@ -415,9 +416,9 @@ class MergePeaksThread(QThread):
             # merge if not merged
             merged_ws_name = None
             try:
-                status, ret_tup = self._mainWindow._myController.merge_pts_in_scan(exp_no=self._expNumber,
-                                                                                   scan_no=scan_number,
-                                                                                   pt_num_list=pt_number_list)
+                status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
+                                                                                scan_no=scan_number,
+                                                                                pt_num_list=pt_number_list)
                 if status:
                     merged_ws_name = str(ret_tup[0])
                     error_message = ''
@@ -426,12 +427,11 @@ class MergePeaksThread(QThread):
 
                 # save
                 if save_file:
-                    # TODO/ISSUE/NOW - Use a property to replace
-                    self._mainWindow._myController.save_merged_scan(exp_number=self._expNumber,
-                                                                    scan_number=scan_number,
-                                                                    pt_number_list=pt_number_list,
-                                                                    merged_ws_name=merged_ws_name,
-                                                                    output=self._outputMDFileList[index])
+                    self._mainWindow.controller.save_merged_scan(exp_number=self._expNumber,
+                                                                 scan_number=scan_number,
+                                                                 pt_number_list=pt_number_list,
+                                                                 merged_ws_name=merged_ws_name,
+                                                                 output=self._outputMDFileList[index])
                 # END-IF-ELSE
 
             except RuntimeError as run_err:
