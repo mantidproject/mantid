@@ -70,6 +70,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         spectrum = self._extract_spectrum_from_workspace()
         spectrum_path = self._save_temporary_fxye(spectrum=spectrum)
+        mantid.DeleteWorkspace(Workspace=spectrum)
 
         inst_param_path = self.getPropertyValue(self.PROP_PATH_TO_INST_PARAMS)
         histogram = gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path)
@@ -87,7 +88,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.setProperty(self.PROP_OUT_GOF, covariance_rvals["GOF"])
 
         lattice_params = gsas_proj.phases()[0].get_cell()
-        lattice_param_table = self._build_output_lattice_table(**lattice_params)
+        lattice_param_table = self._build_output_lattice_table(lattice_params)
         self.setProperty(self.PROP_OUT_LATTICE_PARAMS, lattice_param_table)
 
     def _initialise_GSAS(self):
@@ -99,7 +100,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         gsas_proj = self.getPropertyValue(self.PROP_GSAS_PROJ_PATH)
         return GSASII.G2Project(filename=gsas_proj)
 
-    def _build_output_lattice_table(self, **kwargs):
+    def _build_output_lattice_table(self, lattice_params):
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.execute()
         table = alg.getProperty('OutputWorkspace').value
@@ -107,18 +108,21 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         for param in self.LATTICE_TABLE_PARAMS:
             table.addColumn("double", param.split("_")[-1])
 
-        table.addRow([float(kwargs.get(param)) for param in self.LATTICE_TABLE_PARAMS])
+        table.addRow([float(lattice_params[param]) for param in self.LATTICE_TABLE_PARAMS])
         return table
 
     def _extract_spectrum_from_workspace(self):
         ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
         ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
         spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index, EndWorkspaceIndex=ws_index)
+        mantid.DeleteWorkspace(Workspace=ws)
         return spectrum
 
     def _save_temporary_fxye(self, spectrum):
         workspace_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
         temp_dir = tempfile.gettempdir()
+        # Output file MUST end with "-n.fxye" where n is a number
+        # If you see "Runtime error: Rvals" from GSASIIscriptable.py, it may be because this name is badly formatted
         file_path = os.path.join(temp_dir, "{}_focused_spectrum-{}.fxye".format(self.name(), workspace_index))
         mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
         return file_path
