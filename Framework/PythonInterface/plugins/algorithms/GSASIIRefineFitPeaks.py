@@ -1,5 +1,5 @@
-from mantid.kernel import Direction
-from mantid.api import AlgorithmFactory, FileProperty, FileAction, ITableWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import *
+from mantid.api import *
 
 
 class GSASIIRefineFitPeaks(PythonAlgorithm):
