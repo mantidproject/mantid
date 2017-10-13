@@ -254,7 +254,7 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
     }
     break;
   default:
-    inform.status = NLLS_ERROR::BAD_TR_STRATEGY;
+    throw std::runtime_error("Bad strategy.");
   }
 }
 

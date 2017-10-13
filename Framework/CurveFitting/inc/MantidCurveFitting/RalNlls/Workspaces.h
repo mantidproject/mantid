@@ -174,19 +174,6 @@ struct nlls_options {
 ///   inform derived type with component defaults
 struct nlls_inform {
 
-  ///  return status
-  ///  (see ERROR type for descriptions)
-  NLLS_ERROR status = NLLS_ERROR::OK;
-
-  /// error message
-  std::string error_message;
-
-  ///  the status of the last attempted allocation/deallocation
-  int alloc_status = 0;
-
-  ///  the name of the array for which an allocation/deallocation error ocurred
-  std::string bad_alloc;
-
   ///  the total number of iterations performed
   int iter;
 
@@ -227,12 +214,6 @@ struct nlls_inform {
 
   /// the norm of the gradient, scaled by the norm of the residual
   double scaled_g = HUGE;
-
-  /// error returns from external subroutines
-  int external_return = 0;
-
-  /// name of external program that threw and error
-  std::string external_name;
 
 }; //  END TYPE nlls_inform
 
