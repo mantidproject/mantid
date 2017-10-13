@@ -45,7 +45,7 @@ Creating and splitting groups
     # or 
     wsGroup = GroupWorkspaces("ws1,ws2,ws3")
 
-    print wsGroup.getNames()
+    print(wsGroup.getNames())
 
     # Remove the group
     # The child workspaces will be preserved
@@ -76,7 +76,7 @@ If you want to check if a variable points to something that is a Workspace Group
     wsGroup = GroupWorkspaces("ws1,ws2")
 
     if isinstance(wsGroup, WorkspaceGroup):
-        print wsGroup.name() + " is an " + wsGroup.id()
+        print(wsGroup.name() + " is an " + wsGroup.id())
 
 Output:
 
@@ -94,13 +94,13 @@ Looping over all of the members of a group
     ws2 = CreateSampleWorkspace()
     wsGroup = GroupWorkspaces("ws1,ws2")
 
-    print "Number of members:", wsGroup.getNumberOfEntries()
-    print "List of names:", wsGroup.getNames()
+    print("Number of members: " + str(wsGroup.getNumberOfEntries()))
+    print("List of names: " + str(wsGroup.getNames()))
 
     # Get the member workspaces in a loop
     for i in range(wsGroup.getNumberOfEntries()):
         wsLoop = wsGroup.getItem(i)
-        print "Member", i, wsLoop
+        print("Member {0} {1}".format(i, wsLoop.getName()))
 
 
 Output:

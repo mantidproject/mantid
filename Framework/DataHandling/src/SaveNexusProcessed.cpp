@@ -547,7 +547,7 @@ void SaveNexusProcessed::saveSpectraMapNexus(
   }
 
   // Start the detector group
-  file->makeGroup("detector", "NXdetector", 1);
+  file->makeGroup("detector", "NXdetector", true);
   file->putAttr("version", 1);
 
   int numberSpec = int(spec.size());

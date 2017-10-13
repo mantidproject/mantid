@@ -378,7 +378,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
   for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
     PropertyWidget *widget = pitr.value();
     Mantid::Kernel::Property *prop = widget->getProperty();
-    QString propName = pitr.key();
+    const QString &propName = pitr.key();
     IPropertySettings *settings = prop->getSettings();
 
     // Set the enabled and visible flags based on what the validators say.
@@ -441,7 +441,7 @@ void AlgorithmPropertiesWidget::saveInput() {
     for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end();
          ++pitr) {
       PropertyWidget *widget = pitr.value();
-      QString propName = pitr.key();
+      const QString &propName = pitr.key();
       QString value = widget->getValue();
       //        Mantid::Kernel::Property *prop = widget->getProperty();
       //        if (!prop || prop->remember())

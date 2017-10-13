@@ -57,14 +57,14 @@ public:
 
       auto x = data->x(i);
       TS_ASSERT_EQUALS(x.size(), 2);
-      TS_ASSERT_EQUALS(x[0], 1);
-      TS_ASSERT_EQUALS(x[1], 2);
+      TS_ASSERT_DELTA(x[0], 4.9639999139, 1e-8);
+      TS_ASSERT_DELTA(x[1], 5.1039999245, 1e-8);
 
       auto y = data->y(i);
-      TS_ASSERT_EQUALS(y[0], 0.0);
+      TS_ASSERT_DIFFERS(y[0], 0.0);
 
       auto e = data->e(i);
-      TS_ASSERT_EQUALS(e[0], 0.0);
+      TS_ASSERT_DIFFERS(e[0], 0.0);
     }
   }
 };

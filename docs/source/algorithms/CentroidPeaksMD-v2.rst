@@ -45,16 +45,16 @@ FindPeaksMD algorithm.
    
           for name in tab_names:
               if name in common :
-                   print "| {0:>10} ".format(name),
+                   print("| {0:>10}  ".format(name))
               else:
                   if name in long:
-                       print "|FindPeaksMD found (old):{0:>7} |IntegrEllipsoids (new): {0:>7} ".format(name),
+                       print("|FindPeaksMD found (old):{0:>7} |IntegrEllipsoids (new): {0:>7}  ".format(name))
                   else:
                       ntp = name;
                       if len(ntp )>6:
                           ntp = ntp[0:6]
-                      print "| old {0:>6} | new {0:>6} ".format(ntp),
-          print "|\n",
+                      print("| old {0:>6} | new {0:>6}  ".format(ntp))
+          print("|\n" )
       
           for i in xrange(0,nRows):
               for name in tab_names:
@@ -63,14 +63,14 @@ FindPeaksMD algorithm.
                     col2 = pTWS2.column(name);
                     data2_toPr=col2[i]
                     if name in common :
-                         print "| {0:>10} ".format(data1_toPr),
+                         print("| {0:>10}  ".format(data1_toPr))
                     else:
                          if name in long:
-                            print "| {0:>30} | {1:>30} ".format(data1_toPr,data2_toPr),
+                            print("| {0:>30} | {1:>30}  ".format(data1_toPr,data2_toPr))
                          else:
-                         print "| {0:>10.2f} | {1:>10.2f} ".format(data1_toPr,data2_toPr),
+                            print("| {0:>10.2f} | {1:>10.2f}  ".format(data1_toPr,data2_toPr))
    
-              print "|\n",
+              print("|\n ")
     
 
    # load test workspace

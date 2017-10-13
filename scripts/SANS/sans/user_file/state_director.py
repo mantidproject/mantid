@@ -1056,11 +1056,16 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if not spec.is_trans]
-            mon_spec = mon_spec[-1]
+
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._normalize_to_monitor_builder.set_rebin_type(rebin_type)
-                self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
+
+                #  We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._normalize_to_monitor_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The prompt peak correction values
         set_prompt_peak_correction(self._normalize_to_monitor_builder, user_file_items)
@@ -1104,11 +1109,15 @@ class StateDirectorISIS(object):
         if MonId.spectrum in user_file_items:
             mon_spectrum = user_file_items[MonId.spectrum]
             mon_spec = [spec for spec in mon_spectrum if spec.is_trans]
-            mon_spec = mon_spec[-1]
             if mon_spec:
+                mon_spec = mon_spec[-1]
                 rebin_type = RebinType.InterpolatingRebin if mon_spec.interpolate else RebinType.Rebin
                 self._calculate_transmission_builder.set_rebin_type(rebin_type)
-                self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
+
+                # We have to check if the spectrum is None, this can be the case when the user wants to use the
+                # default incident monitor spectrum
+                if mon_spec.spectrum:
+                    self._calculate_transmission_builder.set_incident_monitor(mon_spec.spectrum)
 
         # The general background settings
         set_background_tof_general(self._calculate_transmission_builder, user_file_items)

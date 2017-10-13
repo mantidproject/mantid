@@ -363,11 +363,6 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
       return;
     }
 
-    // Check cache for assembly, inside the ParameterMap
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
-      return;
-    }
-
     // Loop over the children and define a box large enough for all of them
     assemblyBox = BoundingBox(); // this makes assembly box always axis alighned
     int nchildren = nelements();
@@ -377,8 +372,6 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
       comp->getBoundingBox(compBox);
       assemblyBox.grow(compBox);
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
   }
 
   else {

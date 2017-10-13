@@ -3,12 +3,12 @@
 //----------------------
 #include "IndirectDataAnalysis.h"
 
+#include "ConvFit.h"
 #include "Elwin.h"
-#include "MSDFit.h"
 #include "Iqt.h"
 #include "IqtFit.h"
 #include "JumpFit.h"
-#include "ConvFit.h"
+#include "MSDFit.h"
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
@@ -140,7 +140,7 @@ void IndirectDataAnalysis::openDirectoryDialog() {
  */
 void IndirectDataAnalysis::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect_DataAnalysis"));
+      nullptr, QString("Indirect Data Analysis"));
 }
 
 /**

@@ -60,6 +60,8 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   instr->add(det);
   instr->markAsDetector(det);
   input->setInstrument(instr);
+  input->getSpectrum(0).setDetectorID(0);
+  input->getSpectrum(1).setDetectorID(1);
 
   AnalysisDataService::Instance().addOrReplace("normMon", input);
 
@@ -71,6 +73,7 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   // Now need to set up a minimal instrument and spectra-detector map
   input->getSpectrum(0).setSpectrumNo(0);
   monWS->setInstrument(input->getInstrument());
+  monWS->getSpectrum(0).setDetectorID(0);
 
   AnalysisDataService::Instance().addOrReplace("monWS", monWS);
 }

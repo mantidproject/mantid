@@ -94,7 +94,7 @@ void translateAdd(const std::string &instructions,
 
   std::vector<size_t> outSpectra;
   outSpectra.reserve(spectra.count());
-  for (auto spectrum : spectra) {
+  for (const auto &spectrum : spectra) {
     // add this spectrum to the group we're about to add
     outSpectra.push_back(boost::lexical_cast<size_t>(spectrum));
   }

@@ -14,7 +14,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.api._api import WorkspaceGroup
-from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load
+from mantid.simpleapi import CloneWorkspace, GroupWorkspaces, SaveAscii, Load, Scale
 from mantid.kernel import logger, StringListValidator, Direction, StringArrayProperty, Atom
 import AbinsModules
 
@@ -26,6 +26,7 @@ class Abins(PythonAlgorithm):
     _phonon_file = None
     _experimental_file = None
     _temperature = None
+    _bin_width = None
     _scale = None
     _sample_form = None
     _instrument_name = None
@@ -67,10 +68,12 @@ class Abins(PythonAlgorithm):
                              extensions=["raw", "dat"]),
                              doc="File with the experimental inelastic spectrum to compare.")
 
-        self.declareProperty(name="Temperature",
+        self.declareProperty(name="TemperatureInKelvin",
                              direction=Direction.Input,
                              defaultValue=10.0,
                              doc="Temperature in K for which dynamical structure factor S should be calculated.")
+
+        self.declareProperty(name="BinWidthInWavenumber",  defaultValue=1.0, doc="Width of bins used during rebining.")
 
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
@@ -122,13 +125,17 @@ class Abins(PythonAlgorithm):
 
         issues = dict()
 
-        temperature = self.getProperty("Temperature").value
+        temperature = self.getProperty("TemperatureInKelvin").value
         if temperature < 0:
-            issues["Temperature"] = "Temperature must be positive."
+            issues["TemperatureInKelvin"] = "Temperature must be positive."
 
         scale = self.getProperty("Scale").value
         if scale < 0:
             issues["Scale"] = "Scale must be positive."
+
+        bin_width =  self.getProperty("BinWidthInWavenumber").value
+        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
+            issues["BinWidthInWavenumber"] = ["Invalid bin width. Valid range is [1.0, 10.0] cm^-1"]
 
         dft_program = self.getProperty("DFTprogram").value
         phonon_filename = self.getProperty("PhononFile").value
@@ -177,7 +184,8 @@ class Abins(PythonAlgorithm):
         s_calculator = AbinsModules.CalculateS.init(filename=self._phonon_file, temperature=self._temperature,
                                                     sample_form=self._sample_form, abins_data=dft_data,
                                                     instrument=self._instrument,
-                                                    quantum_order_num=self._num_quantum_order_events)
+                                                    quantum_order_num=self._num_quantum_order_events,
+                                                    bin_width=self._bin_width)
         s_data = s_calculator.get_formatted_data()
         prog_reporter.report("Dynamical structure factors have been determined.")
 
@@ -227,7 +235,8 @@ class Abins(PythonAlgorithm):
         num_workspaces = mtd[self._out_ws_name].getNumberOfEntries()
         for wrk_num in range(num_workspaces):
             wrk = mtd[self._out_ws_name].getItem(wrk_num)
-            SaveAscii(InputWorkspace=wrk, Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
+            SaveAscii(InputWorkspace=Scale(wrk, 1.0/self._bin_width, "Multiply"),
+                      Filename=wrk.name() + ".dat", Separator="Space", WriteSpectrumID=False)
         prog_reporter.report("All workspaces have been saved to ASCII files.")
 
         # 9) set  OutputWorkspace
@@ -346,6 +355,8 @@ class Abins(PythonAlgorithm):
         dim = 1
         length = s_points.size
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
+        for i in range(dim):
+            wrk.getSpectrum(i).setDetectorID(i + 1)
         wrk.setX(0, self._bins)
         wrk.setY(0, s_points)
         AnalysisDataService.addOrReplace(workspace, wrk)
@@ -544,11 +555,6 @@ class Abins(PythonAlgorithm):
         if not (isinstance(pkt_per_peak, six.integer_types) and 1 <= pkt_per_peak <= 1000):
             raise RuntimeError("Invalid value of pkt_per_peak" + message_end)
 
-        # bin width is expressed in cm^-1
-        bin_width = AbinsModules.AbinsParameters.bin_width
-        if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
-            raise RuntimeError("Invalid value of bin_width" + message_end)
-
         min_wavenumber = AbinsModules.AbinsParameters.min_wavenumber
         if not (isinstance(min_wavenumber, float) and min_wavenumber >= 0.0):
             raise RuntimeError("Invalid value of min_wavenumber" + message_end)
@@ -723,7 +729,8 @@ class Abins(PythonAlgorithm):
         self._dft_program = self.getProperty("DFTprogram").value
         self._phonon_file = self.getProperty("PhononFile").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
-        self._temperature = self.getProperty("Temperature").value
+        self._temperature = self.getProperty("TemperatureInKelvin").value
+        self._bin_width = self.getProperty("BinWidthInWavenumber").value
         self._scale = self.getProperty("Scale").value
         self._sample_form = self.getProperty("SampleForm").value
 
@@ -749,7 +756,7 @@ class Abins(PythonAlgorithm):
         # AbinsModules.AbinsParameters.min_wavenumber
         # AbinsModules.AbinsParameters.max_wavenumber
         # with bin width AbinsModules.AbinsParameters.bin_width
-        step = AbinsModules.AbinsParameters.bin_width
+        step = self._bin_width
         start = AbinsModules.AbinsParameters.min_wavenumber + step / 2.0
         stop = AbinsModules.AbinsParameters.max_wavenumber + step / 2.0
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
