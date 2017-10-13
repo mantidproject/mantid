@@ -13,7 +13,7 @@ from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-C
+
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def category(self):
         return 'SANS\\BeamCentreFinder'
@@ -121,10 +121,13 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         r_min = self.getProperty("RMin").value
         r_max = self.getProperty("RMax").value
+
         instrument_file = get_instrument_paths_for_sans_file(state.data.sample_scatter)
         position_1_step = get_named_elements_from_ipf_file(instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
-        position_2_step = get_named_elements_from_ipf_file(instrument_file[1], "centre-finder-step-size", float)['centre-finder-step-size']
-
+        try:
+            position_2_step = get_named_elements_from_ipf_file(instrument_file[1], "centre-finder-step-size2", float)['centre-finder-step-size2']
+        except:
+            position_2_step = position_1_step
         find_direction = self.getProperty("Direction").value
         if find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Left_Right):
             position_2_step = 0.0
@@ -258,8 +261,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
-
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSBeamCentreFinder)

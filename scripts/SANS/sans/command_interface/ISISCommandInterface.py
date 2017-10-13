@@ -1009,12 +1009,12 @@ def PhiRanges(phis, plot=True):
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
 
-def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4, find_direction=FindDirectionEnum.All):
-    _, _, _, _, _, _, _ = rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction  # noqa
-    #raise NotImplementedError("The FindBeamCentre command is not implemented in SANS v2.")
+def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4, find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
     centre_finder = SANSCentreFinder()
-    centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction)
+    centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
+    SetCentre(centre['pos1'], centre['pos2'], bank='rear')
+    SetCentre(centre['pos1'], centre['pos2'], bank='front')
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General commands
