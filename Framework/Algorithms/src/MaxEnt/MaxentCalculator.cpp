@@ -129,11 +129,13 @@ double MaxentCalculator::getChisq() {
   return m_chisq;
 }
 
-std::vector<double> MaxentCalculator::calculateData(const std::vector<double> &image) const {
+std::vector<double>
+MaxentCalculator::calculateData(const std::vector<double> &image) const {
   return m_transform->imageToData(image);
 }
 
-std::vector<double> MaxentCalculator::calculateImage(const std::vector<double> &data) const {
+std::vector<double>
+MaxentCalculator::calculateImage(const std::vector<double> &data) const {
   return m_transform->dataToImage(data);
 }
 
@@ -293,7 +295,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.c2[k][l] = m_coeffs.c2[l][k];
     }
   }
-
 }
 
 /**
@@ -317,7 +318,8 @@ void MaxentCalculator::calculateChisq() {
   }
 }
 
-double MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
+double
+MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
   size_t npoints = m_data.size();
 
   // Calculate

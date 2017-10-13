@@ -50,9 +50,9 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
 
 double calcEntropy(const std::vector<double> &image, double a) {
   double entropy = 0.0;
-  for(auto f: image) {
+  for (auto f : image) {
     auto fa = f / a;
-    auto root = sqrt(fa*fa + 1.0);
+    auto root = sqrt(fa * fa + 1.0);
     entropy += a * root - f * log(fa + root);
   }
   return entropy;
@@ -329,13 +329,14 @@ void MaxEnt::exec() {
       // Record the evolution of Chi-square and angle(S,C)
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
-      //evolTest[it] = currAngle;
+      // evolTest[it] = currAngle;
       evolTest[it] = calcEntropy(image, background);
 
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
           (currAngle < angle)) {
-        g_log.information() << "Stopped after " << it << " iterations " << currChisq << ' ' << chiTarget << std::endl;
+        g_log.information() << "Stopped after " << it << " iterations "
+                            << currChisq << ' ' << chiTarget << std::endl;
         break;
       }
 
@@ -455,7 +456,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   std::vector<double> delta(dim, 0); // delta at current alpha
 
-  while ((fabs(eps/chiTarget) > chiEps) && (iter < alphaIter)) {
+  while ((fabs(eps / chiTarget) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
     double chiMid = calculateChi(coeffs, aMid, delta);
@@ -635,7 +636,6 @@ std::vector<double> MaxEnt::applyDistancePenalty(
   }
   return newDelta;
 }
-
 
 /**
 * Updates the image according to an increment delta
