@@ -83,7 +83,7 @@ Chunker::Chunker(const int numWorkers, const int worker,
   const auto sizeToChunkCount =
       [&](size_t &value) { value = (value + m_chunkSize - 1) / m_chunkSize; };
   std::for_each(m_chunkCounts.begin(), m_chunkCounts.end(), sizeToChunkCount);
-  m_partitioning = makeBalancedPartitioning(numRanks, m_chunkCounts);
+  m_partitioning = makeBalancedPartitioning(numWorkers, m_chunkCounts);
 }
 
 size_t Chunker::chunkSize() const { return m_chunkSize; }
@@ -119,12 +119,12 @@ std::vector<std::vector<int>> Chunker::makeWorkerGroups() const {
 std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
   // Find our partition.
   size_t partitionIndex = 0;
-  int firstRankSharingOurPartition = 0;
+  int firstWorkerSharingOurPartition = 0;
   for (; partitionIndex < m_partitioning.size(); ++partitionIndex) {
     const int workersInPartition = m_partitioning[partitionIndex].first;
-    if (firstRankSharingOurPartition + workersInPartition > m_worker)
+    if (firstWorkerSharingOurPartition + workersInPartition > m_worker)
       break;
-    firstRankSharingOurPartition += workersInPartition;
+    firstWorkerSharingOurPartition += workersInPartition;
   }
   const auto workersSharingOurPartition = m_partitioning[partitionIndex].first;
   const auto &ourBanks = m_partitioning[partitionIndex].second;
@@ -138,7 +138,7 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
     size_t current = 0;
     while (current < m_bankSizes[bank]) {
       if (chunk % workersSharingOurPartition ==
-          (m_worker - firstRankSharingOurPartition)) {
+          (m_worker - firstWorkerSharingOurPartition)) {
         size_t count =
             std::min(current + m_chunkSize, m_bankSizes[bank]) - current;
         ranges.push_back(LoadRange{bank, current, count});
