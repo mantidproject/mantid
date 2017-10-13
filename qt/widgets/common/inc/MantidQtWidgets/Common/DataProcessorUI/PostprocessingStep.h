@@ -16,8 +16,8 @@ namespace DataProcessor {
 struct EXPORT_OPT_MANTIDQT_COMMON PostprocessingStep {
 public:
   PostprocessingStep(const QString &options);
-  PostprocessingStep(const QString &options, PostprocessingAlgorithm algorithm,
-                     std::map<QString, QString> map);
+  PostprocessingStep(const QString &options, PostprocessingAlgorithm &algorithm,
+                     std::map<QString, QString> &map);
 
   void postProcessGroup(const QString &processorPrefix,
                         const WhiteList &whitelist, const GroupData &groupData);

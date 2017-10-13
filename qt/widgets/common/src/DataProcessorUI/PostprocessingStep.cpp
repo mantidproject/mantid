@@ -6,7 +6,7 @@ namespace DataProcessor {
 PostprocessingStep::PostprocessingStep(const QString &options)
     : m_options(options) {}
 PostprocessingStep::PostprocessingStep(const QString &options,
-                                       PostprocessingAlgorithm algorithm,
+                                       PostprocessingAlgorithm& algorithm,
                                        std::map<QString, QString> map)
     : m_options(options), m_algorithm(algorithm), m_map(map) {}
 

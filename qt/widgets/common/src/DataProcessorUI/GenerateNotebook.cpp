@@ -303,10 +303,10 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
     outputName.append(suffix);
   }
 
-  auto postprocessingAlgorithm = postprocessingStep.m_algorithm;
+  auto &postprocessingAlgorithm = postprocessingStep.m_algorithm;
 
-  QString outputWSName =
-      postprocessingStep.m_algorithm.prefix() + outputName.join("_");
+  auto outputWSName =
+      postprocessingAlgorithm.prefix() + outputName.join("_");
   stitchString += outputWSName;
   stitchString += completeOutputProperties(
       postprocessingAlgorithm.name(),
