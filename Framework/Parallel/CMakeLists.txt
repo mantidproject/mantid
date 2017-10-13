@@ -16,9 +16,10 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventDataSink.h
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/EventLoaderHelpers.h
+	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
-	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/IO/PulseTimeGenerator.h
 	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
@@ -34,6 +35,7 @@ set ( TEST_FILES
 	ExecutionModeTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
+	PulseTimeGeneratorTest.h
 	RequestTest.h
 	StorageModeTest.h
 	ThreadingBackendTest.h
