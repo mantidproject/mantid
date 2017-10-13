@@ -38,35 +38,6 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace detail {
-template <class TimeZeroType>
-Types::Core::DateAndTime getPulseTime(const Types::Core::DateAndTime &offset,
-                                      const TimeZeroType &eventTimeZero) {
-  return offset + eventTimeZero;
-}
-
-template <>
-inline Types::Core::DateAndTime
-getPulseTime<uint64_t>(const Types::Core::DateAndTime &offset,
-                       const uint64_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
-}
-
-template <>
-inline Types::Core::DateAndTime
-getPulseTime<int32_t>(const Types::Core::DateAndTime &offset,
-                      const int32_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
-}
-
-template <>
-inline Types::Core::DateAndTime
-getPulseTime<uint32_t>(const Types::Core::DateAndTime &offset,
-                       const uint32_t &eventTimeZero) {
-  return offset + static_cast<int64_t>(eventTimeZero);
-}
-}
-
 template <class IndexType, class TimeZeroType> class PulseTimeGenerator {
 public:
   PulseTimeGenerator() = default;
@@ -88,20 +59,31 @@ public:
     for (; m_pulse < m_index.size() - 1; ++m_pulse)
       if (m_event < m_index[m_pulse + 1])
         break;
-    m_pulseTime = detail::getPulseTime(m_timeZeroOffset, m_timeZero[m_pulse]);
+    m_pulseTime = getPulseTime(m_timeZeroOffset, m_timeZero[m_pulse]);
   }
 
-  /// Return pulse time for next event, and advance.
+  /// Return pulse time for next event, and advance. Must call seek() first, at
+  /// least once.
   Types::Core::DateAndTime next() {
     while (m_pulse < m_index.size() - 1 && m_event == m_index[m_pulse + 1]) {
       ++m_pulse;
-      m_pulseTime = detail::getPulseTime(m_timeZeroOffset, m_timeZero[m_pulse]);
+      m_pulseTime = getPulseTime(m_timeZeroOffset, m_timeZero[m_pulse]);
     }
     ++m_event;
     return m_pulseTime;
   }
 
 private:
+  int64_t cast(const uint64_t time) const { return static_cast<int64_t>(time); }
+  int64_t cast(const int64_t time) const { return static_cast<int64_t>(time); }
+  int64_t cast(const uint32_t time) const { return static_cast<int64_t>(time); }
+  int64_t cast(const int32_t time) const { return static_cast<int64_t>(time); }
+  double cast(const double time) const { return static_cast<double>(time); }
+  Types::Core::DateAndTime getPulseTime(const Types::Core::DateAndTime &offset,
+                                        const TimeZeroType &eventTimeZero) {
+    return offset + cast(eventTimeZero);
+  }
+
   IndexType m_event{0};
   size_t m_pulse{0};
   Types::Core::DateAndTime m_pulseTime;
