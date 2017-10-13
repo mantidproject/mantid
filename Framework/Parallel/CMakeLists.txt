@@ -1,6 +1,8 @@
 set ( SRC_FILES
 	src/Communicator.cpp
 	src/ExecutionMode.cpp
+	src/IO/Chunker.cpp
+	src/IO/EventLoader.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
@@ -11,6 +13,11 @@ set ( INC_FILES
 	inc/MantidParallel/Collectives.h
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
+	inc/MantidParallel/IO/Chunker.h
+	inc/MantidParallel/IO/EventLoader.h
+	inc/MantidParallel/IO/EventLoaderHelpers.h
+	inc/MantidParallel/IO/NXEventDataLoader.h
+	inc/MantidParallel/IO/NXEventDataSource.h
 	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
@@ -19,8 +26,10 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	ChunkerTest.h
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventLoaderTest.h
 	EventParserTest.h
 	ExecutionModeTest.h
 	NonblockingTest.h
@@ -49,8 +58,9 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Parallel PROPERTY FOLDER "MantidFramework" )
 
+target_include_directories ( Parallel SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} )
 target_link_libraries ( Parallel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${GSL_LIBRARIES} ${MANTIDLIBS} )
+                        ${GSL_LIBRARIES} ${MANTIDLIBS} ${HDF5_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
