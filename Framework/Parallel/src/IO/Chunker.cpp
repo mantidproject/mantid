@@ -8,7 +8,7 @@ namespace Parallel {
 namespace IO {
 
 namespace {
-/// Helper to build partition (subgroup of ranks with subgroup of banks).
+/// Helper to build partition (subgroup of workers with subgroup of banks).
 std::pair<int, std::vector<size_t>>
 buildPartition(const int totalWorkers, const size_t totalSize,
                std::vector<std::tuple<size_t, size_t, bool>> &sortedSizes) {
@@ -68,9 +68,9 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
 }
 
 /// Create a chunker based on bank sizes and chunk size.
-Chunker::Chunker(const int numRanks, const int rank,
+Chunker::Chunker(const int numWorkers, const int worker,
                  const std::vector<size_t> &bankSizes, const size_t chunkSize)
-    : m_rank(rank), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
+    : m_worker(worker), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
   // Create partitions based on chunk counts.
   m_chunkCounts = m_bankSizes;
   const auto sizeToChunkCount =
@@ -81,56 +81,57 @@ Chunker::Chunker(const int numRanks, const int rank,
 
 size_t Chunker::chunkSize() const { return m_chunkSize; }
 
-std::vector<std::vector<int>> Chunker::makeRankGroups() const {
-  int rank{0};
-  std::vector<std::vector<int>> rankGroups;
+std::vector<std::vector<int>> Chunker::makeWorkerGroups() const {
+  int worker{0};
+  std::vector<std::vector<int>> workerGroups;
   for (const auto &partition : m_partitioning) {
-    rankGroups.emplace_back();
+    workerGroups.emplace_back();
     for (int i = 0; i < partition.first; ++i)
-      rankGroups.back().push_back(rank++);
+      workerGroups.back().push_back(worker++);
   }
-  return rankGroups;
+  return workerGroups;
 }
 
 /** Returns a vector of LoadRanges based on parameters passed to the
  * constructor.
  *
- * The ranges are optimized such that the number of ranks per bank is minimized
- * while at the same time achieving good load balance by making the number of
- * chunks to be loaded by each rank as equal as possible. The current algorithm
- * does not find the optimial solution for all edge cases but should usually
- * yield a 'good-enough' approximation. There are two reasons for minimizing the
- * number of ranks per bank:
+ * The ranges are optimized such that the number of workers per bank is
+ * minimized while at the same time achieving good load balance by making the
+ * number of chunks to be loaded by each worker as equal as possible. The
+ * current algorithm does not find the optimial solution for all edge cases but
+ * should usually yield a 'good-enough' approximation. There are two reasons for
+ * minimizing the number of workers per bank:
  * 1. Avoid overhead from loading event_index and event_time_zero for a bank on
- *    more ranks than necessary.
- * 2. Reduce the number of banks a rank is loading from to allow more flexible
+ *    more workers than necessary.
+ * 2. Reduce the number of banks a worker is loading from to allow more flexible
  *    ordering when redistributing data with MPI in the loader.
- * If more than one rank is used to load a subset of banks, chunks are assigned
- * in a round-robin fashion to ranks. This is not reset when reaching the end of
- * a bank, i.e., the rank loading the first chunk of the banks in a subset is
- * *not* guarenteed to be the same for all banks. */
+ * If more than one worker is used to load a subset of banks, chunks are
+ * assigned in a round-robin fashion to workers. This is not reset when reaching
+ * the end of a bank, i.e., the worker loading the first chunk of the banks in a
+ * subset is *not* guarenteed to be the same for all banks. */
 std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
   // Find our partition.
   size_t partitionIndex = 0;
   int firstRankSharingOurPartition = 0;
   for (; partitionIndex < m_partitioning.size(); ++partitionIndex) {
-    const int ranksInPartition = m_partitioning[partitionIndex].first;
-    if (firstRankSharingOurPartition + ranksInPartition > m_rank)
+    const int workersInPartition = m_partitioning[partitionIndex].first;
+    if (firstRankSharingOurPartition + workersInPartition > m_worker)
       break;
-    firstRankSharingOurPartition += ranksInPartition;
+    firstRankSharingOurPartition += workersInPartition;
   }
-  const auto ranksSharingOurPartition = m_partitioning[partitionIndex].first;
+  const auto workersSharingOurPartition = m_partitioning[partitionIndex].first;
   const auto &ourBanks = m_partitioning[partitionIndex].second;
 
-  // Assign all chunks from all banks in this partition to ranks in round-robin
+  // Assign all chunks from all banks in this partition to workers in
+  // round-robin
   // manner.
   int64_t chunk = 0;
   std::vector<LoadRange> ranges;
   for (const auto bank : ourBanks) {
     size_t current = 0;
     while (current < m_bankSizes[bank]) {
-      if (chunk % ranksSharingOurPartition ==
-          (m_rank - firstRankSharingOurPartition)) {
+      if (chunk % workersSharingOurPartition ==
+          (m_worker - firstRankSharingOurPartition)) {
         size_t count =
             std::min(current + m_chunkSize, m_bankSizes[bank]) - current;
         ranges.push_back(LoadRange{bank, current, count});
@@ -140,15 +141,15 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
     }
   }
 
-  // Compute maximum chunk count (on any rank).
+  // Compute maximum chunk count (on any worker).
   int64_t maxChunkCount = 0;
   for (const auto &partition : m_partitioning) {
     size_t chunksInPartition = 0;
     for (const auto bank : partition.second)
       chunksInPartition += m_chunkCounts[bank];
-    int ranksInPartition = partition.first;
+    int workersInPartition = partition.first;
     int64_t maxChunkCountInPartition =
-        (chunksInPartition + ranksInPartition - 1) / ranksInPartition;
+        (chunksInPartition + workersInPartition - 1) / workersInPartition;
     maxChunkCount = std::max(maxChunkCount, maxChunkCountInPartition);
   }
   ranges.resize(maxChunkCount);
