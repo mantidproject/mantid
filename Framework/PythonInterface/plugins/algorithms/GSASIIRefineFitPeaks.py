@@ -116,8 +116,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return spectrum
 
     def _save_temporary_fxye(self, spectrum):
+        workspace_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
         temp_dir = tempfile.gettempdir()
-        file_path = os.path.join(temp_dir, self.name() + "_focused_spectrum.fxye")
+        file_path = os.path.join(temp_dir, "{}_focused_spectrum-{}.fxye".format(self.name(), workspace_index))
         mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
         return file_path
 
