@@ -16,7 +16,7 @@ def tof_distribution(file_path, callback=None,
     ws_raw = "__%s" % basename
     ws = "__TOF_distribution"
 
-    #     if not mtd.workspaceExists(ws_raw):
+    # if not mtd.workspaceExists(ws_raw):
     LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw)
 
     Rebin(InputWorkspace=ws_raw, OutputWorkspace=ws, Params="0,200,200000")

@@ -216,7 +216,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
 
-        #        self.axes = self.fig.add_subplot(111)
+        # self.axes = self.fig.add_subplot(111)
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
 
         plot_vbox = QtGui.QVBoxLayout()
@@ -271,7 +271,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.backSwitch.setChecked(not bPeak)
 
         if bPeak:
-            #            class_name = self.from_peak_input.__class__.__name__
+            # class_name = self.from_peak_input.__class__.__name__
             self.peakFrom.setStyleSheet(CSS_ACTIVATED)
             self.peakTo.setStyleSheet(CSS_ACTIVATED)
             self.backFrom.setStyleSheet(CSS_DESACTIVATED)
@@ -480,13 +480,13 @@ class _DraggableRectangle:
         self.parent = parent
 
     def connect(self):
-        'connect to all the events we need'
+        """connect to all the events we need"""
         self.cidpress = self.rect.figure.canvas.mpl_connect('button_press_event', self.on_press)
         self.cidrelease = self.rect.figure.canvas.mpl_connect('button_release_event', self.on_release)
         self.cidmotion = self.rect.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
 
     def on_press(self, event):
-        'on button press we will see if the mouse is over us and store some data'
+        """on button press we will see if the mouse is over us and store some data"""
         if event.inaxes != self.rect.axes:
             return
 
@@ -564,7 +564,7 @@ class _DraggableRectangle:
         self.rect.figure.canvas.draw()
 
     def disconnect(self):
-        'disconnect all the stored connection ids'
+        """disconnect all the stored connection ids"""
         self.rect.figure.canvas.mpl_disconnect(self.cidpress)
         self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
         self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
