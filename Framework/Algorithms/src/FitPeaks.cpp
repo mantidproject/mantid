@@ -11,6 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -579,6 +580,9 @@ void FitPeaks::estimateBackground(size_t wi,
                                   API::IAlgorithm_sptr fitter) {
   // TODO/ISSUE/NOW - Implement!.. Need to document the algorithm to estimate
   // background
+  Mantid::Algorithms::FindPeakBackground bkgd_finder;
+  bkgd_finder.setBackgroundOrder(2);
+  bkgd_finder.execute();
 
   // call algorithm FindPeakBackground
   // blabla()
@@ -617,13 +621,13 @@ int FitPeaks::estimatePeakParameters(
   //      peak_center, max_value);
 
   // copied from FindMaxValue
-  double left_window_boundary = window.first;
-  double right_window_boundary = window.second;
+  double left_window_boundary = peak_window.first;
+  double right_window_boundary = peak_window.second;
 
   auto vecY = m_inputWS->y(wi);
 
   double real_y_max = 0;
-  max_value = 0;
+  double max_value = 0;
 
   // get the range of start and stop to construct a function domain
   auto vec_x = m_inputWS->x(wi);
@@ -1267,7 +1271,7 @@ void FitPeaks::reduceBackground(const std::vector<double> &vec_x,
   return;
 }
 
-size_t FitPeaks::getXIndex() {
+size_t FitPeaks::getXIndex(size_t wi, double x) {
   // TODO - Implement NOW
   return 0;
 }
