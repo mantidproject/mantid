@@ -68,12 +68,12 @@ function (mtd_add_qt_target)
   set (CMAKE_CURRENT_BINARY_DIR ${_ui_dir})
   if (PARSED_QT_VERSION EQUAL 4)
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
-    qt4_wrap_cpp (MOC_GENERATED ${PARSED_MOC})
+    _internal_qt_wrap_cpp ( 4 MOC_GENERATED ${PARSED_MOC})
     qt4_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
   elseif (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
-    qt5_wrap_cpp (MOC_GENERATED ${PARSED_MOC})
+    _internal_qt_wrap_cpp (5 MOC_GENERATED ${PARSED_MOC})
     qt5_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
   else ()
@@ -154,6 +154,28 @@ function (mtd_add_qt_tests)
     mtd_add_qt_test_executable (QT_VERSION 4 ${ARGN})
   endif()
 endfunction()
+
+# Wrap generation of moc files
+# We call the qt{4|5}_wrap_cpp individually for each file and force the include
+# path to be absolute to avoid relative paths whose length exceed the maximum
+# allowed limit on Windows (260 chars). It is assumed that the input paths
+# can be made absolute by prefixing them with ${CMAKE_CURRENT_LIST_DIR}
+# It assumes that the unnamed arguments are the input files to run through moc
+function(_internal_qt_wrap_cpp qtversion outfiles)
+  foreach (_infile ${ARGN})
+    if(qtversion EQUAL 4)
+      qt4_wrap_cpp (outfiles ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+    elseif (qtversion EQUAL 5)
+      qt5_wrap_cpp (outfiles ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+    else()
+      message (FATAL_ERROR "Unknown Qt version='${qtversion}'.")
+    endif()
+  endforeach()
+  # Pass the output variable out
+  set (${outfiles} ${${outfiles}} PARENT_SCOPE)
+endfunction()
+
+
 
 # Create an executable target for running a set of unit tests
 # linked to Qt
