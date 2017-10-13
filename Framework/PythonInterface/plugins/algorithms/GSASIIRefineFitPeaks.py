@@ -1,6 +1,7 @@
 from mantid.kernel import *
 from mantid.api import *
-
+import os, tempfile
+import mantid.simpleapi as mantid
 
 class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
@@ -10,14 +11,15 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
 
     PROP_GSAS_PROJ_PATH = "GSASProjectPath"
+    PROP_INPUT_WORKSPACE = "InputWorkspace"
     PROP_PATH_TO_GSASII = "GSASIIPath"
     PROP_PATH_TO_INST_PARAMS = "InstrumentParameterPath"
     PROP_PATH_TO_PHASE = "PhasePath"
-    PROP_PATH_TO_SPECTRUM = "SpectrumPath"
     PROP_OUT_GOF = "GOF"
     PROP_OUT_GROUP_RESULTS = "Results"
     PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
     PROP_OUT_RWP = "Rwp"
+    PROP_WORKSPACE_INDEX = "WorkspaceIndex"
 
     DEFAULT_REFINEMENT_PARAMS = {"set":
                                  {"Background": {"no.coeffs": 3,
@@ -38,8 +40,11 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
-        self.declareProperty(FileProperty(name=self.PROP_PATH_TO_SPECTRUM, defaultValue="", action=FileAction.Load,
-                                          extensions=[".fxye"]), doc="Location of the spectrum to do a refinement on")
+        self.declareProperty(WorkspaceProperty(name=self.PROP_INPUT_WORKSPACE, defaultValue="",
+                                               direction=Direction.Input), doc="Workspace with spectra to fit peaks")
+        self.declareProperty(name=self.PROP_WORKSPACE_INDEX, defaultValue=0, direction=Direction.Input,
+                             doc="Index of the spectrum in InputWorkspace to fit. By default, the first spectrum "
+                                 "(ie the only one for a focused workspace) is used")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_PHASE, defaultValue="", action=FileAction.Load,
                                           extensions=[".cif"]), doc="Location of the phase file")
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_INST_PARAMS, defaultValue="", action=FileAction.Load,
@@ -62,9 +67,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     def PyExec(self):
         gsas_proj = self._initialise_GSAS()
 
-        spectrum_path = self.getPropertyValue(self.PROP_PATH_TO_SPECTRUM)
+        spectrum = self._extract_spectrum_from_workspace()
+        spectrum_path = self._save_temporary_fxye(spectrum=spectrum)
+
         inst_param_path = self.getPropertyValue(self.PROP_PATH_TO_INST_PARAMS)
         histogram = gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path)
+
+        self._remove_temporary_fxye(spectrum_path=spectrum_path)
 
         phase_path = self.getPropertyValue(self.PROP_PATH_TO_PHASE)
         phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[histogram])
@@ -99,6 +108,24 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         table.addRow([float(kwargs.get(param)) for param in self.LATTICE_TABLE_PARAMS])
         return table
+
+    def _extract_spectrum_from_workspace(self):
+        ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
+        ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
+        spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index, EndWorkspaceIndex=ws_index)
+        return spectrum
+
+    def _save_temporary_fxye(self, spectrum):
+        temp_dir = tempfile.gettempdir()
+        file_path = os.path.join(temp_dir, self.name() + "_focused_spectrum.fxye")
+        mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
+        return file_path
+
+    def _remove_temporary_fxye(self, spectrum_path):
+        try:
+            os.remove(spectrum_path)
+        except Exception as e:
+            raise Warning("Couldn't remove temporary spectrum file at location \"{}\":\n{}".format(spectrum_path, e))
 
 
 AlgorithmFactory.subscribe(GSASIIRefineFitPeaks)
