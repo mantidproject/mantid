@@ -1,7 +1,12 @@
+from __future__ import (absolute_import, division, print_function)
+import os
+import tempfile
+import sys
+
 from mantid.kernel import *
 from mantid.api import *
-import os, tempfile
 import mantid.simpleapi as mantid
+
 
 class GSASIIRefineFitPeaks(PythonAlgorithm):
     """
@@ -93,7 +98,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
     def _initialise_GSAS(self):
         gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
-        import sys
         sys.path.append(gsas_path)
         import GSASIIscriptable as GSASII
 
