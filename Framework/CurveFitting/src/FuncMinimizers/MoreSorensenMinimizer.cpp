@@ -18,8 +18,6 @@ DECLARE_FUNCMINIMIZER(MoreSorensenMinimizer,More-Sorensen)
 ///@endcond
 // clang-format on
 
-//using namespace NLLS;
-
 MoreSorensenMinimizer::MoreSorensenMinimizer() : TrustRegionMinimizer() {}
 
 /// Name of the minimizer.
@@ -148,7 +146,7 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
   auto normb2 = pow(NLLS::norm2(b), 2);
 
   double discrim = pow(c, 2) + (normb2) * (pow(Delta, 2) - norma2);
-  if (discrim < NLLS::zero) {
+  if (discrim < NLLS::ZERO) {
     return false;
   }
 
@@ -220,7 +218,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   double sigma = 0.0;
   if (matrix_ok) {
     // A is symmetric positive definite....
-    sigma = NLLS::zero;
+    sigma = NLLS::ZERO;
   } else {
     // shift and try again
     inform.external_return = 0;
@@ -241,7 +239,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   }
 
   // now, we're not in the trust region initally, so iterate....
-  auto sigma_shift = NLLS::zero;
+  auto sigma_shift = NLLS::ZERO;
   int no_restarts = 0;
   // set 'small' in the context of the algorithm
   double epsilon =

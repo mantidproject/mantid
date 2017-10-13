@@ -12,17 +12,17 @@ namespace NLLS {
 
 namespace {
 
-const double tenm3 = 1.0e-3;
-const double tenm5 = 1.0e-5;
-const double tenm8 = 1.0e-8;
-const double hundred = 100.0;
-const double ten = 10.0;
-const double point9 = 0.9;
-const double zero = 0.0;
-const double one = 1.0;
-const double two = 2.0;
-const double half = 0.5;
-const double sixteenth = 0.0625;
+const double TEN_M3 = 1.0e-3;
+const double TEN_M5 = 1.0e-5;
+const double TEN_M8 = 1.0e-8;
+const double HUNDRED = 100.0;
+const double TEN = 10.0;
+const double POINT9 = 0.9;
+const double ZERO = 0.0;
+const double ONE = 1.0;
+const double TWO = 2.0;
+const double HALF = 0.5;
+const double SIXTEENTH = 0.0625;
 }
 
 enum class NLLS_ERROR {
@@ -78,8 +78,8 @@ struct nlls_options {
   ///       MAX( .stop_g_absolute, .stop_g_relative * norm of the initial
   ///       gradient
   ///     or if the step is less than .stop_s
-  double stop_g_absolute = tenm5;
-  double stop_g_relative = tenm8;
+  double stop_g_absolute = TEN_M5;
+  double stop_g_relative = TEN_M8;
 
   ///   should we scale the initial trust region radius?
   int relative_tr_radius = 0;
@@ -92,7 +92,7 @@ struct nlls_options {
 
   ///   if relative_tr_radius /= 1, then set the
   ///   initial value for the trust-region radius (-ve => ||g_0||)
-  double initial_radius = hundred;
+  double initial_radius = HUNDRED;
 
   ///   maximum permitted trust-region radius
   double maximum_radius = 1.0e8; // ten ** 8
@@ -105,8 +105,8 @@ struct nlls_options {
   ///    but smaller than .eta_too_successful
   double eta_successful = 1.0e-8;         // ten ** ( - 8 )
   double eta_success_but_reduce = 1.0e-8; // ten ** ( - 8 )
-  double eta_very_successful = point9;
-  double eta_too_successful = two;
+  double eta_very_successful = POINT9;
+  double eta_too_successful = TWO;
 
   ///   on very successful iterations, the trust-region radius will be increased
   ///   by
@@ -114,9 +114,9 @@ struct nlls_options {
   ///    the
   ///    radius will be decreased by a factor .radius_reduce but no more than
   ///    .radius_reduce_max
-  double radius_increase = two;
-  double radius_reduce = half;
-  double radius_reduce_max = sixteenth;
+  double radius_increase = TWO;
+  double radius_reduce = HALF;
+  double radius_reduce_max = SIXTEENTH;
 
   /// Trust region update strategy
   ///    1 - usual step function

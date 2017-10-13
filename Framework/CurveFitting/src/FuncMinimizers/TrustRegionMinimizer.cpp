@@ -12,8 +12,6 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-//using namespace NLLS;
-
 TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
   declareProperty("InitialRadius", 100.0,
                   "Initial radius of the trust region.");
@@ -232,7 +230,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  double rho = -NLLS::one; // intialize rho as a negative value
+  double rho = -NLLS::ONE; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
   double normFnew = 0.0;

@@ -19,7 +19,7 @@ namespace CurveFitting {
 namespace NLLS {
 
 /// Too small values don't work well with numerical derivatives.
-const double epsmch = std::numeric_limits<double>::epsilon();
+const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
 
 ///  Takes an m x n matrix J and forms the
 ///  n x n matrix A given by
@@ -149,10 +149,10 @@ double calculateRho(double normf, double normfnew, double md,
   auto actual_reduction = (0.5 * pow(normf, 2)) - (0.5 * pow(normfnew, 2));
   auto predicted_reduction = ((0.5 * pow(normf, 2)) - md);
   double rho = 0.0;
-  if (fabs(actual_reduction) < 10 * epsmch) {
-    rho = one;
-  } else if (fabs(predicted_reduction) < 10 * epsmch) {
-    rho = one;
+  if (fabs(actual_reduction) < 10 * EPSILON_MCH) {
+    rho = ONE;
+  } else if (fabs(predicted_reduction) < 10 * EPSILON_MCH) {
+    rho = ONE;
   } else {
     rho = actual_reduction / predicted_reduction;
   }
@@ -165,7 +165,7 @@ double calculateRho(double normf, double normfnew, double md,
 void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
 
   auto yts = dotProduct(w.d, w.y);
-  if (fabs(yts) < sqrt(10 * epsmch)) {
+  if (fabs(yts) < sqrt(10 * EPSILON_MCH)) {
     //! safeguard: skip this update
     return;
   }
@@ -178,7 +178,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
   // now, let's scale hd (Nocedal and Wright, Section 10.2)
   auto dSks = fabs(dotProduct(w.d, w.Sks));
   auto alpha = fabs(dotProduct(w.d, w.y_sharp)) / dSks;
-  alpha = std::min(one, alpha);
+  alpha = std::min(ONE, alpha);
   hf *= alpha;
 
   // update S_k (again, as in N&W, Section 10.2)
@@ -212,7 +212,7 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
     if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
+      rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho < options.eta_success_but_reduce) {
       // unsuccessful....reduce Delta
       w.Delta =
@@ -238,7 +238,7 @@ void updateTrustRegionRadius(double &rho, const nlls_options &options,
     if (!std::isfinite(rho)) {
       w.Delta =
           std::max(options.radius_reduce, options.radius_reduce_max) * w.Delta;
-      rho = -one; // set to be negative, so that the logic works....
+      rho = -ONE; // set to be negative, so that the logic works....
     } else if (rho >= options.eta_too_successful) {
       // too successful....accept step, but don't change w.Delta
     } else if (rho > options.eta_successful) {
@@ -301,7 +301,7 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
   case 1:
   case 2:
     for (int ii = 1; ii <= n; ++ii) { // do ii = 1,n
-      double temp = zero;
+      double temp = ZERO;
       if (options.scale == 1) {
         //! use the scaling present in gsl:
         //! scale by W, W_ii = ||J(i,:)||_2^2
@@ -319,13 +319,13 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
         if (options.scale_trim_min) {
           temp = options.scale_min;
         } else {
-          temp = one;
+          temp = ONE;
         }
       } else if (temp > options.scale_max) {
         if (options.scale_trim_max) {
           temp = options.scale_max;
         } else {
-          temp = one;
+          temp = ONE;
         }
       }
       temp = sqrt(temp);
