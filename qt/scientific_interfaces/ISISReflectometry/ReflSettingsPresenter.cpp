@@ -281,35 +281,51 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
-  auto runs = m_view->getTransmissionRuns();
-  if (runs.empty())
+  auto transmissionRunsString = m_view->getTransmissionRuns();
+  if (transmissionRunsString.empty())
     return "";
 
-  std::vector<std::string> transRuns;
-  boost::split(transRuns, runs, boost::is_any_of(","));
-  
-  if (loadRuns) {
-    for (const auto &run : transRuns) {
-      if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
-        // Load transmission runs and put them in the ADS
-        IAlgorithm_sptr alg =
-            AlgorithmManager::Instance().create("LoadISISNexus");
-        alg->setProperty("Filename", run);
-        alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-        alg->execute();
-      }
-    }
-  }
+  std::vector<std::string> transmissionRuns;
+  boost::split(transmissionRuns, transmissionRunsString,
+               boost::is_any_of(","));
 
-  switch(transRuns.size()) {
+  if (loadRuns)
+    loadTransmissionRuns(transmissionRuns);
+
+  switch (transmissionRuns.size()) {
   case 1:
-    return "FirstTransmissionRun=" + transRuns[0];
+    return firstTransmissionRunLabelled(transmissionRuns);
   case 2:
-    return "FirstTransmissionRun=" + transRuns[0] + ",SecondTransmissionRun=" + transRuns[1];
+    return firstTransmissionRunLabelled(transmissionRuns) + "," +
+           secondTransmissionRunLabelled(transmissionRuns);
   default:
     throw std::invalid_argument("Only one transmission run or two "
                                 "transmission runs separated by ',' "
                                 "are allowed.");
+  }
+}
+
+std::string ReflSettingsPresenter::firstTransmissionRunLabelled(
+    std::vector<std::string> const &runNumbers) const {
+  return "FirstTransmissionRun=" + runNumbers[0];
+}
+
+std::string ReflSettingsPresenter::secondTransmissionRunLabelled(
+    std::vector<std::string> const &runNumbers) const {
+  return "SecondTransmissionRun=" + runNumbers[1];
+}
+
+void ReflSettingsPresenter::loadTransmissionRuns(
+    std::vector<std::string> const &transmissionRuns) const {
+  for (const auto &run : transmissionRuns) {
+    if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
+      // Load transmission runs and put them in the ADS
+      IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("LoadISISNexus");
+      alg->setProperty("Filename", run);
+      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+      alg->execute();
+    }
   }
 }
 
