@@ -39,7 +39,7 @@ class FFTWrapper(object):
     #runs the relevant parts of the FFT and the preprocessing
     def execute(self):
         if self.phaseTable is not None:
-            if self.phaseTable["newTable"] is True:
+            if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
             self.model.PhaseQuad()
 

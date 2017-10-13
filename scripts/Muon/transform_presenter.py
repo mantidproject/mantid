@@ -14,7 +14,7 @@ class TransformPresenter(object):
     def __init__(self,view,model):
         self.view=view
         self.load=load_utils.LoadUtils()
-        if self.load.MuonAnalysisExists() is False:
+        if not self.load.MuonAnalysisExists():
             return
 
         # create presenters for the views
