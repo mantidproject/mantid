@@ -104,7 +104,7 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
  *  @return true if successful
  */
 bool getPdShift(double &sigma, DoubleFortranVector &d,
-                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                const NLLS::nlls_options &options,
                 NLLS::more_sorensen_work &w) {
   int no_shifts = 0;
   bool successful_shift = false;
@@ -113,8 +113,6 @@ bool getPdShift(double &sigma, DoubleFortranVector &d,
     successful_shift = solveSpd(w.AplusSigma, negative(w.v), w.LtL, d);
     if (!successful_shift) {
       // We try again with a shifted sigma, but no too many times.
-      inform.external_return = 0;
-      inform.external_name = "";
       no_shifts = no_shifts + 1;
       if (no_shifts == 10) { 
           return false;
@@ -179,7 +177,7 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                   const DoubleFortranMatrix &hf, double Delta,
                   DoubleFortranVector &d, double &nd,
-                  const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                  const NLLS::nlls_options &options, 
                   NLLS::more_sorensen_work &w) {
 
   // The code finds
@@ -198,7 +196,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
+    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options);
   }
 
   auto n = J.len2();
@@ -221,12 +219,10 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     sigma = NLLS::ZERO;
   } else {
     // shift and try again
-    inform.external_return = 0;
-    inform.external_name = "";
     minEigSymm(w.A, sigma, w.y1);
     sigma = -(sigma - local_ms_shift);
     // find a shift that makes (A + sigma I) positive definite
-    bool ok = getPdShift(sigma, d, options, inform, w);
+    bool ok = getPdShift(sigma, d, options, w);
     if (!ok) {
       scaleBack();
       return;
@@ -281,7 +277,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
         // find a shift that makes (A + sigma I) positive definite
-        bool ok = getPdShift(sigma, d, options, inform, w);
+        bool ok = getPdShift(sigma, d, options, w);
         if (!ok) {
           break;
         }
@@ -321,8 +317,8 @@ void MoreSorensenMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
-    NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-  moreSorensen(J, f, hf, Delta, d, normd, options, inform, w.more_sorensen_ws);
+    NLLS::calculate_step_work &w) {
+  moreSorensen(J, f, hf, Delta, d, normd, options, w.more_sorensen_ws);
 }
 
 } // namespace FuncMinimisers

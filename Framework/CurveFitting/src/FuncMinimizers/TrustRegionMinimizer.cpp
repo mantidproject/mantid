@@ -242,7 +242,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
       return true;
     }
     // Calculate the step d that the model thinks we should take next
-    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options, inform,
+    calculateStep(w.J, w.f, w.hf, w.g, w.Delta, w.d, w.normd, options,
                   w.calculate_step_ws);
 
     // Accept the step?

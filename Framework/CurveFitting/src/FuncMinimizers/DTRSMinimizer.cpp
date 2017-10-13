@@ -906,7 +906,7 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                const DoubleFortranMatrix &hf, double Delta,
                DoubleFortranVector &d, double &normd,
-               const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+               const NLLS::nlls_options &options, 
                NLLS::solve_dtrs_work &w) {
 
   dtrs_control_type dtrs_options;
@@ -935,7 +935,7 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options, inform);
+    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options);
   }
 
   // Now that we have the unprocessed matrices, we need to get an
@@ -994,8 +994,8 @@ void DTRSMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
     DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
-    NLLS::nlls_inform &inform, NLLS::calculate_step_work &w) {
-  solveDtrs(J, f, hf, Delta, d, normd, options, inform, w.solve_dtrs_ws);
+    NLLS::calculate_step_work &w) {
+  solveDtrs(J, f, hf, Delta, d, normd, options, w.solve_dtrs_ws);
 }
 
 } // namespace FuncMinimisers

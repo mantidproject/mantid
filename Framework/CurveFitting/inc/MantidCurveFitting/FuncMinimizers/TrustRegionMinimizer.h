@@ -62,7 +62,7 @@ private:
   calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                 const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
                 double Delta, DoubleFortranVector &d, double &normd,
-                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                const NLLS::nlls_options &options, 
                 NLLS::calculate_step_work &w) = 0;
 
   /// Stored cost function

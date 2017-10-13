@@ -290,7 +290,7 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
 /// @param inform :: The information.
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
                   DoubleFortranVector &v, apply_scaling_work &w,
-                  const nlls_options &options, nlls_inform &inform) {
+                  const nlls_options &options) {
   auto m = J.len1();
   auto n = J.len2();
   if (w.diag.len() != n) {
@@ -337,7 +337,7 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
     }
     break;
   default:
-    inform.status = NLLS_ERROR::BAD_SCALING;
+    throw std::runtime_error("Scaling error.");
     return;
   }
 

@@ -43,7 +43,6 @@ private:
                      const DoubleFortranVector &g, double Delta,
                      DoubleFortranVector &d, double &normd,
                      const NLLS::nlls_options &options,
-                     NLLS::nlls_inform &inform,
                      NLLS::calculate_step_work &w) override;
 };
 
