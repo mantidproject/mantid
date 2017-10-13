@@ -15,9 +15,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_linalg.h>
 #include <numeric>
-#include <iostream>
-
-//#include "D:/Work/mantid_stuff/Testing/class/MyTestDef.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -286,8 +283,6 @@ void MaxEnt::exec() {
   outEvolTest = WorkspaceFactory::Instance().create(inWS, nspec, niter, niter);
 
   npoints = complexImage ? npoints * 2 : npoints;
-  
-  //_start_filter([](size_t it){return it < 50 && it % 1 == 0;});
 
   outEvolChi->setPoints(0, Points(niter, LinearGenerator(0.0, 1.0)));
   for (size_t s = 0; s < nspec; s++) {
@@ -315,10 +310,6 @@ void MaxEnt::exec() {
     // Run maxent algorithm
     for (size_t it = 0; it < niter; it++) {
 
-      //_item;
-      //_(data);
-      //_(image);
-
       // Iterates one step towards the solution. This means calculating
       // quadratic coefficients, search directions, angle and chi-sq
       maxentCalculator.iterate(data, errors, image, background);
@@ -326,10 +317,10 @@ void MaxEnt::exec() {
       // Calculate delta to construct new image (SB eq. 25)
       double currChisq = maxentCalculator.getChisq();
       auto coeffs = maxentCalculator.getQuadraticCoefficients();
-      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter, image, background, distEps);
+      auto delta = move(coeffs, chiTarget / currChisq, chiEps, alphaIter);
 
       // Apply distance penalty (SB eq. 33)
-      //delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
+      delta = applyDistancePenalty(delta, coeffs, image, background, distEps);
 
       // Update image
       auto dirs = maxentCalculator.getSearchDirections();
@@ -344,7 +335,7 @@ void MaxEnt::exec() {
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
           (currAngle < angle)) {
-        std::cerr << "Stopped after " << it << " iterations " << currChisq << ' ' << chiTarget << std::endl;
+        g_log.information() << "Stopped after " << it << " iterations " << currChisq << ' ' << chiTarget << std::endl;
         break;
       }
 
@@ -428,8 +419,7 @@ std::vector<double> MaxEnt::toComplex(API::MatrixWorkspace_const_sptr &inWS,
 */
 std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
                                  double chiTarget, double chiEps,
-                                 size_t alphaIter, const std::vector<double> &image,
-                                           double background, double distEps) {
+                                 size_t alphaIter) {
 
   double aMin = 0.; // Minimum alpha
   double aMax = 1.; // Maximum alpha
@@ -464,45 +454,29 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   // Bisection method
 
   std::vector<double> delta(dim, 0); // delta at current alpha
-  double chiMid = 0.0;
-  bool targetTooFar = false;
 
   while ((fabs(eps/chiTarget) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
-    chiMid = calculateChi(coeffs, aMid, delta);
+    double chiMid = calculateChi(coeffs, aMid, delta);
 
     eps = chiMid - chiTarget;
 
-    auto dist = 0.0 * getDistancePenalty(delta, coeffs, image, background, distEps);
-    if (dist > 10.0) {
+    if (dchiMin * eps > 0) {
       aMin = aMid;
       dchiMin = eps;
-      targetTooFar = true;
-    } else {
+    }
 
-      if (targetTooFar) {
-        break;
-      }
-
-      if (dchiMin * eps > 0) {
-        aMin = aMid;
-        dchiMin = eps;
-      }
-
-      if (dchiMax * eps > 0) {
-        aMax = aMid;
-        dchiMax = eps;
-      }
+    if (dchiMax * eps > 0) {
+      aMax = aMid;
+      dchiMax = eps;
     }
 
     iter++;
   }
 
-  //std::cerr << iter << ' ' << chiTarget << ' ' << chiMid << ' ' << eps << std::endl;
-
   // Check if move was successful
-  if (/*(fabs(eps) > chiEps) ||*/ (iter > alphaIter)) {
+  if ((fabs(eps) > chiEps) || (iter > alphaIter)) {
 
     throw std::runtime_error("Error encountered when calculating solution "
                              "image. No convergence in alpha chop.\n");
@@ -662,28 +636,6 @@ std::vector<double> MaxEnt::applyDistancePenalty(
   return newDelta;
 }
 
-double MaxEnt::getDistancePenalty(const std::vector<double> &delta,
-                                           const QuadraticCoefficients &coeffs,
-                                           const std::vector<double> &image,
-                                           double background, double distEps) {
-  double sum = 0.;
-  for (double point : image)
-    sum += fabs(point);
-
-  size_t dim = coeffs.s2.size().first;
-
-  double dist = 0.;
-
-  for (size_t k = 0; k < dim; k++) {
-    double sum = 0.0;
-    for (size_t l = 0; l < dim; l++)
-      sum -= coeffs.s2[k][l] * delta[l];
-    dist += delta[k] * sum;
-  }
-
-  return dist / (distEps * sum / background);
-}
-
 
 /**
 * Updates the image according to an increment delta
@@ -704,17 +656,11 @@ MaxEnt::updateImage(const std::vector<double> &image,
     throw std::runtime_error("Cannot calculate new image");
   }
 
-  newImage.assign(image.size(), 0.0);
-
   // Calculate the new image
   for (size_t i = 0; i < image.size(); i++) {
     for (size_t k = 0; k < delta.size(); k++) {
       newImage[i] = newImage[i] + delta[k] * dirs[k][i];
     }
-  }
-//  _(newImage);
-  for (size_t i = 0; i < image.size(); i++) {
-    newImage[i] += image[i];
   }
   return newImage;
 }
