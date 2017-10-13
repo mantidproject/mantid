@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from mantid.kernel import CompositeValidator, FloatBoundedValidator
+from mantid.kernel import CompositeValidator, CompositeRelation, FloatBoundedValidator
 from mantid.api import PythonAlgorithm
 
 class CompositeValidatorTest(unittest.TestCase):
@@ -22,6 +22,27 @@ class CompositeValidatorTest(unittest.TestCase):
         """
         validation = CompositeValidator([FloatBoundedValidator(lower=5), FloatBoundedValidator(upper=10)])
         self._do_validation_test(validation)
+
+    def test_composite_validator_with_or_relation(self):
+        validation = CompositeValidator([FloatBoundedValidator(lower=5, upper=10), 
+                                         FloatBoundedValidator(lower=15, upper=20)], 
+                                        relation=CompositeRelation.OR)
+
+        test_alg = self._create_test_algorithm(validation)
+
+        prop = test_alg.getProperty("Input")
+        self.assertNotEquals(prop.isValid, "")
+
+        test_alg.setProperty("Input", 6.8)
+        self.assertEquals(prop.isValid, "")
+
+        test_alg.setProperty("Input", 17.3)
+        self.assertEquals(prop.isValid, "")
+
+        self.assertRaises(ValueError, test_alg.setProperty, "Input", 3.0)
+        self.assertRaises(ValueError, test_alg.setProperty, "Input", 13.0)
+        self.assertRaises(ValueError, test_alg.setProperty, "Input", 23.0)
+
 
     def _do_validation_test(self, validation):
         """Run the validator tests"""

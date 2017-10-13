@@ -484,7 +484,7 @@ PeakPickerTool::clickedOnCentreMarker(double x, double dx) const {
       return peak;
     }
   }
-  return 0;
+  return nullptr;
 }
 
 // Lower fit boundary
@@ -635,7 +635,7 @@ void PeakPickerTool::parameterChanged(const Mantid::API::IFunction *f) {
 
 void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler *h) const {
   if (h->hasPlot()) {
-    FunctionCurve *fc = 0;
+    FunctionCurve *fc = nullptr;
     int indexForFC = -1;
     for (int i = 0; i < d_graph->curves(); i++) {
       fc = dynamic_cast<FunctionCurve *>(d_graph->curve(i));
@@ -913,7 +913,7 @@ void PeakPickerTool::removeGuess() {
 
 void PeakPickerTool::removePlot(MantidQt::MantidWidgets::PropertyHandler *h) {
   // check to see if function is already plotted?
-  FunctionCurve *fc = 0;
+  FunctionCurve *fc = nullptr;
   int indexForFC = -1;
   for (int i = 0; i < d_graph->curves(); i++) {
     fc = dynamic_cast<FunctionCurve *>(d_graph->curve(i));
@@ -1033,7 +1033,7 @@ bool PeakPickerTool::initializeFromCurve(PlotCurve *curve) {
  */
 void PeakPickerTool::addExistingFitsAndGuess(const QStringList &curvesList) {
   bool hasGuess = false;
-  for (const auto curveName : curvesList) {
+  for (const auto &curveName : curvesList) {
     if (curveName.contains(QRegExp("Workspace-[Calc|Diff]"))) { // fit
       m_curveNames.append(curveName);
     } else if (curveName == "CompositeFunction") { // guess

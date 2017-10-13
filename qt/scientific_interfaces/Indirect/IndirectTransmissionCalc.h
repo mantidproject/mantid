@@ -15,7 +15,7 @@ class DLLExport IndirectTransmissionCalc : public IndirectToolsTab {
   Q_OBJECT
 
 public:
-  IndirectTransmissionCalc(QWidget *parent = 0);
+  IndirectTransmissionCalc(QWidget *parent = nullptr);
 
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;

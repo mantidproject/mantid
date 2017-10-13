@@ -33,9 +33,9 @@ def get_cell_mock(row, column, convert_to=None):
         # all of hte sample data
         if column == 0:
             return "SANS2D00022024"
-        elif column == 1:
-            return "SANS2D00022048"
         elif column == 2:
+            return "SANS2D00022048"
+        elif column == 4:
             return "SANS2D00022048"
         else:
             return ""
@@ -79,6 +79,7 @@ def create_mock_view(user_file_path, batch_file_path=None):
     masking_table = create_mock_masking_table()
     view.masking_table = masking_table
 
+    view.halt_process_flag = mock.MagicMock()
     # ---------------------
     # Mocking properties
     # ---------------------

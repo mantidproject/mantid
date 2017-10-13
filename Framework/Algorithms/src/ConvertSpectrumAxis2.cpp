@@ -39,13 +39,14 @@ void ConvertSpectrumAxis2::init() {
   declareProperty(make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                    Direction::Output),
                   "The name to use for the output workspace.");
-  std::vector<std::string> targetOptions(6);
+  std::vector<std::string> targetOptions(7);
   targetOptions[0] = "Theta";
   targetOptions[1] = "SignedTheta";
   targetOptions[2] = "ElasticQ";
   targetOptions[3] = "ElasticQSquared";
   targetOptions[4] = "theta";
   targetOptions[5] = "signed_theta";
+  targetOptions[6] = "ElasticDSpacing";
 
   declareProperty(
       "Target", "", boost::make_shared<StringListValidator>(targetOptions),
@@ -97,7 +98,8 @@ void ConvertSpectrumAxis2::exec() {
   if (unitTarget == "theta" || unitTarget == "Theta" ||
       unitTarget == "signed_theta" || unitTarget == "SignedTheta") {
     createThetaMap(progress, unitTarget, inputWS);
-  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared") {
+  } else if (unitTarget == "ElasticQ" || unitTarget == "ElasticQSquared" ||
+             unitTarget == "ElasticDSpacing") {
     createElasticQMap(progress, unitTarget, inputWS);
   }
 
@@ -182,7 +184,7 @@ void ConvertSpectrumAxis2::createElasticQMap(
       efixed = getEfixed(detectorIndex, detectorInfo, *inputWS,
                          emode); // get efixed
     } else {
-      theta = 0.0;
+      theta = DBL_MIN;
       efixed = DBL_MIN;
     }
 
@@ -198,9 +200,12 @@ void ConvertSpectrumAxis2::createElasticQMap(
           elasticQInAngstroms * elasticQInAngstroms;
 
       emplaceIndexMap(elasticQSquaredInAngstroms, i);
+    } else if (targetUnit == "ElasticDSpacing") {
+      double elasticDSpacing = 2 * M_PI / elasticQInAngstroms;
+      emplaceIndexMap(elasticDSpacing, i);
     }
 
-    progress.report("Converting to Elastic Q...");
+    progress.report("Converting to " + targetUnit);
   }
 }
 
@@ -242,6 +247,8 @@ MatrixWorkspace_sptr ConvertSpectrumAxis2::createOutputWorkspace(
     newAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
   } else if (targetUnit == "ElasticQSquared") {
     newAxis->unit() = UnitFactory::Instance().create("QSquared");
+  } else if (targetUnit == "ElasticDSpacing") {
+    newAxis->unit() = UnitFactory::Instance().create("dSpacing");
   }
 
   // Note that this is needed only for ordered case

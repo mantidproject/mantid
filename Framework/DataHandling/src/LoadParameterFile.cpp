@@ -19,10 +19,6 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 using Poco::XML::AutoPtr;
 using Mantid::Geometry::InstrumentDefinitionParser;
 

@@ -14,9 +14,6 @@ namespace Algorithms {
 
 namespace {
 
-// Maximum number of attempts to generate a scatter point
-constexpr size_t MAX_SCATTER_ATTEMPTS = 500;
-
 /**
  * Compute the attenuation factor for the given coefficients
  * @param rho Number density of the sample in \f$\\A^{-3}\f$
@@ -37,11 +34,14 @@ double attenuation(double rho, double sigma, double length) {
  * @param sample A reference to a sample object that defines a valid shape
  * & material
  * @param activeRegion Restrict scattering point sampling to this region
+ * @param maxScatterAttempts The maximum number of tries to generate a random
+ * point within the object. [Default=5000]
  */
 MCInteractionVolume::MCInteractionVolume(
-    const API::Sample &sample, const Geometry::BoundingBox &activeRegion)
-    : m_sample(sample.getShape()), m_env(nullptr),
-      m_activeRegion(activeRegion) {
+    const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
+    const size_t maxScatterAttempts)
+    : m_sample(sample.getShape()), m_env(nullptr), m_activeRegion(activeRegion),
+      m_maxScatterAttempts(maxScatterAttempts) {
   if (!m_sample.hasValidShape()) {
     throw std::invalid_argument(
         "MCInteractionVolume() - Sample shape does not have a valid shape.");
@@ -90,10 +90,10 @@ double MCInteractionVolume::calculateAbsorption(
   V3D scatterPos;
   if (m_env && (rng.nextValue() > 0.5)) {
     scatterPos =
-        m_env->generatePoint(rng, m_activeRegion, MAX_SCATTER_ATTEMPTS);
+        m_env->generatePoint(rng, m_activeRegion, m_maxScatterAttempts);
   } else {
     scatterPos = m_sample.generatePointInObject(rng, m_activeRegion,
-                                                MAX_SCATTER_ATTEMPTS);
+                                                m_maxScatterAttempts);
   }
   auto toStart = startPos - scatterPos;
   toStart.normalize();

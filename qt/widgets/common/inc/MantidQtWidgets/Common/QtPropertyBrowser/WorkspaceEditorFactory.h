@@ -11,7 +11,7 @@ class WorkspaceEditorFactory
     : public QtAbstractEditorFactory<QtStringPropertyManager> {
   Q_OBJECT
 public:
-  WorkspaceEditorFactory(QObject *parent = 0)
+  WorkspaceEditorFactory(QObject *parent = nullptr)
       : QtAbstractEditorFactory<QtStringPropertyManager>(parent) {}
 
 protected:

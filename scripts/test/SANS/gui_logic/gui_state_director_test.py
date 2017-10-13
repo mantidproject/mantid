@@ -17,7 +17,7 @@ from sans.test_helper.user_file_test_helper import create_user_file, sample_user
 class GuiStateDirectorTest(unittest.TestCase):
     @staticmethod
     def _get_table_model(option_string=""):
-        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "",
+        table_index_model = TableIndexModel(0, "SANS2D00022024", "", "", "", "", "", "", "", "",
                                             "", "", "", "", option_string)
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
@@ -48,8 +48,8 @@ class GuiStateDirectorTest(unittest.TestCase):
         self.assertTrue(state.wavelength.wavelength_high == 12.5)
 
     def test_that_will_raise_when_models_are_incomplete(self):
-        table_index_model = TableIndexModel(0, "", "", "",
-                                            "", "", "")
+        table_index_model = TableIndexModel(0, "", "", "", "", "", "",
+                                               "", "", "", "", "", "")
         table_model = TableModel()
         table_model.add_table_entry(0, table_index_model)
         state_model = self._get_state_gui_model()

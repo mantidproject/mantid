@@ -1,7 +1,7 @@
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
+#include <cmath>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 
 #include "nrutil.h"
 

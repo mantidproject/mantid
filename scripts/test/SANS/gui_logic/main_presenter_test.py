@@ -21,22 +21,30 @@ class MainPresenterTest(unittest.TestCase):
         presenter = MainPresenter(SANSFacility.ISIS)
         self.assertTrue(presenter.get_number_of_white_list_items() == 0)
         white_list = presenter.get_white_list()
-        self.assertTrue(presenter.get_number_of_white_list_items() == 10)
+        self.assertTrue(presenter.get_number_of_white_list_items() == 16)
         self.assertTrue(white_list[0].algorithm_property == "SampleScatter")
-        self.assertTrue(white_list[1].algorithm_property == "SampleTransmission")
-        self.assertTrue(white_list[2].algorithm_property == "SampleDirect")
-        self.assertTrue(white_list[3].algorithm_property == "CanScatter")
-        self.assertTrue(white_list[4].algorithm_property == "CanTransmission")
-        self.assertTrue(white_list[5].algorithm_property == "CanDirect")
-        self.assertTrue(white_list[6].algorithm_property == "UseOptimizations")
-        self.assertTrue(white_list[7].algorithm_property == "OutputName")
-        self.assertTrue(white_list[8].algorithm_property == "RowIndex")
-        self.assertTrue(white_list[9].algorithm_property == "OutputMode")
+        self.assertTrue(white_list[1].algorithm_property == "SampleScatterPeriod")
+        self.assertTrue(white_list[2].algorithm_property == "SampleTransmission")
+        self.assertTrue(white_list[3].algorithm_property == "SampleTransmissionPeriod")
+        self.assertTrue(white_list[4].algorithm_property == "SampleDirect")
+        self.assertTrue(white_list[5].algorithm_property == "SampleDirectPeriod")
+        self.assertTrue(white_list[6].algorithm_property == "CanScatter")
+        self.assertTrue(white_list[7].algorithm_property == "CanScatterPeriod")
+        self.assertTrue(white_list[8].algorithm_property == "CanTransmission")
+        self.assertTrue(white_list[9].algorithm_property == "CanTransmissionPeriod")
+        self.assertTrue(white_list[10].algorithm_property == "CanDirect")
+        self.assertTrue(white_list[11].algorithm_property == "CanDirectPeriod")
+        self.assertTrue(white_list[12].algorithm_property == "UseOptimizations")
+        self.assertTrue(white_list[13].algorithm_property == "OutputName")
+        self.assertTrue(white_list[14].algorithm_property == "RowIndex")
+        self.assertTrue(white_list[15].algorithm_property == "OutputMode")
 
     def test_that_black_list_is_correct(self):
         presenter = MainPresenter(SANSFacility.ISIS)
-        expected = "InputWorkspace,OutputWorkspace,SampleScatter,SampleTransmission,SampleDirect,CanScatter," \
-                   "CanTransmission,CanDirect,UseOptimizations,OutputName,RowIndex,OutputMode,"
+        expected = "InputWorkspace,OutputWorkspace,SampleScatter,SampleScatterPeriod,SampleTransmission," \
+                   "SampleTransmissionPeriod,SampleDirect,SampleDirectPeriod,CanScatter,CanScatterPeriod," \
+                   "CanTransmission,CanTransmissionPeriod,CanDirect,CanDirectPeriod," \
+                   "UseOptimizations,OutputName,RowIndex,OutputMode,"
         self.assertTrue(expected == presenter.get_black_list())
 
     def test_that_gets_pre_processing_options_are_valid_and_other_options_are_empty(self):

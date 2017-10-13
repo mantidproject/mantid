@@ -44,13 +44,13 @@ Usage
    # Run Algorithm 
    indexed =IndexPeaks(PeaksWorkspace='peaks_qLab',Tolerance=0.12,RoundHKLs=1)
 
-   print "Number of Indexed Peaks: ", indexed[0]
+   print("Number of Indexed Peaks: {:d}".format(indexed[0]))
 
 Output:
 
 .. testoutput:: ExIndexPeaksSimple
 
-   Number of Indexed Peaks:  147
+   Number of Indexed Peaks: 147
 
 .. categories::
 

@@ -64,8 +64,6 @@ public slots:
   void handleModelCleared();
   /// Pass show/hide parameter errors to function browser
   void handleErrorsEnabled(bool enabled);
-  /// When a saved setup is loaded, update the function browser
-  void handleFunctionLoaded(const QString &funcString);
   /// When number of datasets to fit changes, update function browser
   void updateNumberOfDatasets(int nDatasets);
   /// When "edit local parameter" button is clicked, launch dialog

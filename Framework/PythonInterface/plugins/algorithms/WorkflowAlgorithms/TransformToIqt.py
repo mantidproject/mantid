@@ -1,4 +1,4 @@
-#pylint: disable=no-init,too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
@@ -8,7 +8,6 @@ import math
 
 
 class TransformToIqt(PythonAlgorithm):
-
     _sample = None
     _resolution = None
     _e_min = None
@@ -192,7 +191,7 @@ class TransformToIqt(PythonAlgorithm):
         log_alg = self.createChildAlgorithm(name='AddSampleLogMultiple', startProgress=0.8,
                                             endProgress=1.0, enableLogging=True)
         log_alg.setProperty('Workspace', self._output_workspace)
-        log_alg.setProperty('LogNames',[item[0] for item in sample_logs])
+        log_alg.setProperty('LogNames', [item[0] for item in sample_logs])
         log_alg.setProperty('LogValues', [item[1] for item in sample_logs])
         log_alg.execute()
 
@@ -283,6 +282,13 @@ class TransformToIqt(PythonAlgorithm):
         CropWorkspace(InputWorkspace=self._output_workspace,
                       OutputWorkspace=self._output_workspace,
                       XMax=bin_v)
+
+        # Replace NaN values in last bin, with zeroes
+        ReplaceSpecialValues(InputWorkspace=self._output_workspace,
+                             OutputWorkspace=self._output_workspace,
+                             InfinityValue=0.0,
+                             BigNumberThreshold=1.0001,
+                             NaNValue=0.0)
 
         # Set Y axis unit and label
         mtd[self._output_workspace].setYUnit('')

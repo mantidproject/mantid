@@ -10,10 +10,6 @@
 
 #include <vector>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -22,7 +18,9 @@ DECLARE_ALGORITHM(EQSANSTofStructure)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using namespace Geometry;
+using Types::Event::TofEvent;
 
 EQSANSTofStructure::EQSANSTofStructure()
     : API::Algorithm(), frame_tof0(0.), flight_path_correction(false),

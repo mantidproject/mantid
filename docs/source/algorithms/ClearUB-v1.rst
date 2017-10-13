@@ -27,15 +27,15 @@ Usage
    #check that we do have a UB matrix
    from numpy import *
    mat=array(ws.sample().getOrientedLattice().getUB())
-   print "UB matrix size", mat.size 
+   print("UB matrix size {}".format(mat.size ))
 
    ClearUB(ws)
 
    #check that it removed UB matrix & orientated lattice
    if( ws.sample().hasOrientedLattice() ):
-	print "ClearUB has not removed the orientated lattice."
+	print("ClearUB has not removed the orientated lattice.")
    else:
-	print "ClearUB has removed the oriented lattice."
+	print("ClearUB has removed the oriented lattice.")
 
 Output:
 

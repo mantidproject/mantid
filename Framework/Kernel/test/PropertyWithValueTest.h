@@ -38,26 +38,31 @@ public:
   void testConstructor() {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT(!iProp->name().compare("intProp"));
+    TS_ASSERT(!iProp->type().compare("number"));
     TS_ASSERT(!iProp->documentation().compare(""));
     TS_ASSERT(typeid(int) == *iProp->type_info());
     TS_ASSERT(iProp->isDefault());
 
     TS_ASSERT(!dProp->name().compare("doubleProp"));
+    TS_ASSERT(!dProp->type().compare("number"));
     TS_ASSERT(!dProp->documentation().compare(""));
     TS_ASSERT(typeid(double) == *dProp->type_info());
     TS_ASSERT(dProp->isDefault());
 
     TS_ASSERT(!sProp->name().compare("stringProp"));
+    TS_ASSERT(!sProp->type().compare("string"));
     TS_ASSERT(!sProp->documentation().compare(""));
     TS_ASSERT(typeid(std::string) == *sProp->type_info());
     TS_ASSERT(sProp->isDefault());
 
     TS_ASSERT(!lProp->name().compare("int64Prop"));
+    TS_ASSERT(!lProp->type().compare("number"));
     TS_ASSERT(!lProp->documentation().compare(""));
     TS_ASSERT(typeid(int64_t) == *lProp->type_info());
     TS_ASSERT(lProp->isDefault());
 
     TS_ASSERT(!bProp->name().compare("boolProp"));
+    TS_ASSERT(!bProp->type().compare("optional boolean"));
     TS_ASSERT(!bProp->documentation().compare(""));
     TS_ASSERT(typeid(OptionalBool) == *bProp->type_info());
     TS_ASSERT(bProp->isDefault());
@@ -389,7 +394,7 @@ public:
 
   void testCasting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int> i("Prop1", 5);
     Property *p = dynamic_cast<Property *>(&i);
     TS_ASSERT(!p->name().compare("Prop1"));
@@ -399,7 +404,7 @@ public:
     TS_ASSERT_EQUALS(i, 10);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<double> d("Prop2", 5.5);
     Property *pp = dynamic_cast<Property *>(&d);
     TS_ASSERT(!pp->name().compare("Prop2"));
@@ -414,7 +419,7 @@ public:
     TS_ASSERT_EQUALS(d, 7.777);
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property *>(&s);
     TS_ASSERT(!ppp->name().compare("Prop3"));
@@ -424,7 +429,7 @@ public:
     TS_ASSERT_EQUALS(s.operator()(), "newValue");
 
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(lProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     PropertyWithValue<int64_t> l("Prop4", 789789789789LL);
     Property *pppp = dynamic_cast<Property *>(&l);
     TS_ASSERT(!pppp->name().compare("Prop4"));
@@ -643,7 +648,7 @@ public:
 
   void test_string_property_alias() {
     // system("pause");
-    std::vector<std::string> allowedValues{"Hello", "World"};
+    std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
         boost::make_shared<ListValidator<std::string>>(allowedValues, alias);

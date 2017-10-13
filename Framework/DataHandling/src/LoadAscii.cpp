@@ -319,13 +319,14 @@ void LoadAscii::init() {
                                {"Colon", ":"},
                                {"SemiColon", ";"}};
   // For the ListValidator
-  std::vector<std::string> sepOptions;
+  std::array<std::string, 5> sepOptions;
   for (size_t i = 0; i < 5; ++i) {
-    std::string option = spacers[i][0];
+    const auto &option = spacers[i][0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacers[i][1]));
-    sepOptions.push_back(option);
+    sepOptions[i] = option;
   }
+
   declareProperty(
       "Separator", "Automatic",
       boost::make_shared<StringListValidator>(sepOptions),

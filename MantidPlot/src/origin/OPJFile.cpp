@@ -35,13 +35,13 @@
 #pragma warning disable 181
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <math.h>
-#include <cstring>
-#include <algorithm> //required for std::swap
 #include "OPJFile.h"
+#include <algorithm> //required for std::swap
+#include <climits>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 using std::vector;
 using std::string;
@@ -246,7 +246,7 @@ filepre +
 /* parse file "filename" completely and save values */
 int OPJFile::Parse() {
   FILE *f;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
@@ -285,12 +285,12 @@ int OPJFile::Parse() {
 int OPJFile::ParseFormatOld() {
   int i;
   FILE *f, *debug;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
 
-  if ((debug = fopen("opjfile.log", "w")) == NULL) {
+  if ((debug = fopen("opjfile.log", "w")) == nullptr) {
     printf("Could not open log file!\n");
     fclose(f); // f is still open, so close it before returning
     return -1;
@@ -402,9 +402,10 @@ int OPJFile::ParseFormatOld() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(NULL, "_");           // column name
-    while (char *tmpstr = strtok(NULL, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
@@ -437,7 +438,7 @@ int OPJFile::ParseFormatOld() {
             current_col, cname, (unsigned int)ftell(f));
     fflush(debug);
 
-    if (cname == 0) {
+    if (cname == nullptr) {
       fprintf(debug, "NO COLUMN NAME FOUND! Must be a matrix or function.\n");
       ////////////////////////////// READ MATRIX or FUNCTION
       ///////////////////////////////////////
@@ -757,12 +758,12 @@ int OPJFile::ParseFormatOld() {
 int OPJFile::ParseFormatNew() {
   int i;
   FILE *f, *debug;
-  if ((f = fopen(filename, "rb")) == NULL) {
+  if ((f = fopen(filename, "rb")) == nullptr) {
     printf("Could not open %s!\n", filename);
     return -1;
   }
 
-  if ((debug = fopen("opjfile.log", "w")) == NULL) {
+  if ((debug = fopen("opjfile.log", "w")) == nullptr) {
     printf("Could not open log file!\n");
     fclose(f);
     return -1;
@@ -909,15 +910,16 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FREAD(debug, &name, 25, 1, f);
     // char* sname = new char[26];
     char sname[26];
-    sprintf(sname, "%s", strtok(name, "_"));   // spreadsheet name
-    char *cname = strtok(NULL, "_");           // column name
-    while (char *tmpstr = strtok(NULL, "_")) { // get multiple-"_" title correct
+    sprintf(sname, "%s", strtok(name, "_")); // spreadsheet name
+    char *cname = strtok(nullptr, "_");      // column name
+    while (char *tmpstr =
+               strtok(nullptr, "_")) { // get multiple-"_" title correct
       strcat(sname, "_");
       strcat(sname, cname);
       strcpy(cname, tmpstr);
     }
     int spread = 0;
-    if (cname == 0) {
+    if (cname == nullptr) {
       fprintf(debug, "NO COLUMN NAME FOUND! Must be a matrix or function.\n");
       ////////////////////////////// READ MATRIX or FUNCTION
       ///////////////////////////////////////
@@ -1217,7 +1219,7 @@ int OPJFile::ParseFormatNew() {
     fprintf(debug, "\n");
     fflush(debug);
 
-    if (nbytes > 0 || cname == 0)
+    if (nbytes > 0 || cname == nullptr)
       CHECKED_FSEEK(debug, f, 1, SEEK_CUR);
 
     int tailsize;
@@ -1258,7 +1260,7 @@ int OPJFile::ParseFormatNew() {
   //////////////////////// OBJECT INFOS //////////////////////////////////////
   POS += 0xB;
   CHECKED_FSEEK(debug, f, POS, SEEK_SET);
-  while (1) {
+  while (true) {
 
     fprintf(debug, "     reading Header\n");
     fflush(debug);
@@ -1309,7 +1311,7 @@ int OPJFile::ParseFormatNew() {
     CHECKED_FREAD(debug, &c, 1, 1, f);
   }
   CHECKED_FSEEK(debug, f, 1 + 5, SEEK_CUR);
-  while (1) {
+  while (true) {
     // fseek(f,5+0x40+1,SEEK_CUR);
     int size;
     CHECKED_FREAD(debug, &size, 4, 1, f);
@@ -1442,7 +1444,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
     // possible sections: column formulas, __WIPR, __WIOTN, __LayerInfoStorage
     // etc
     // section name(column name in formula case) starts with 0x46 position
-    while (1) {
+    while (true) {
       int sec_size;
       // section_header_size=0x6F(4 bytes) + '\n'
       LAYER += 0x5;
@@ -1521,7 +1523,7 @@ void OPJFile::readSpreadInfo(FILE *f, int file_size, FILE *debug) {
   fprintf(debug, "     Spreadsheet has %zu columns\n",
           SPREADSHEET[spread].column.size());
 
-  while (1) {
+  while (true) {
     LAYER += 0x5;
     CHECKED_FSEEK(debug, f, LAYER + 0x12, SEEK_SET);
     CHECKED_FREAD(debug, &name, 12, 1, f);
@@ -1681,7 +1683,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
   LAYER += headersize + 0x1;
   int sec_size;
   int isheet = 0;
-  while (1) // multisheet loop
+  while (true) // multisheet loop
   {
     // LAYER section
     LAYER += 0x5 /* length of block = 0x12D + '\n'*/ + 0x12D + 0x1;
@@ -1692,7 +1694,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
     // possible sections: column formulas, __WIPR, __WIOTN, __LayerInfoStorage
     // etc
     // section name(column name in formula case) starts with 0x46 position
-    while (1) {
+    while (true) {
       // section_header_size=0x6F(4 bytes) + '\n'
       LAYER += 0x5;
 
@@ -1767,7 +1769,7 @@ void OPJFile::readExcelInfo(FILE *f, int file_size, FILE *debug) {
     fprintf(debug, "     Excel sheet %d has %zu columns\n", isheet,
             EXCEL[iexcel].sheet[isheet].column.size());
 
-    while (1) {
+    while (true) {
       LAYER += 0x5;
       CHECKED_FSEEK(debug, f, LAYER + 0x12, SEEK_SET);
       CHECKED_FREAD(debug, &name, 12, 1, f);
@@ -1988,7 +1990,7 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
   // section_body_2 + '\n'
   // possible sections: column formulas, __WIPR, __WIOTN, __LayerInfoStorage
   // section name(column name in formula case) starts with 0x46 position
-  while (1) {
+  while (true) {
     // section_header_size=0x6F(4 bytes) + '\n'
     LAYER += 0x5;
 
@@ -2051,7 +2053,7 @@ void OPJFile::readMatrixInfo(FILE *f, int file_size, FILE *debug) {
   }
   LAYER += 0x5;
 
-  while (1) {
+  while (true) {
     LAYER += 0x5;
 
     short width = 0;
@@ -2138,7 +2140,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
   int LAYER = POS;
   LAYER += headersize + 0x1;
   int sec_size;
-  while (1) // multilayer loop
+  while (true) // multilayer loop
   {
     GRAPH.back().layer.push_back(graphLayer());
     // LAYER section
@@ -2204,7 +2206,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
     // possible sections: axes, legend, __BC02, _202, _231, _232,
     // __LayerInfoStorage etc
     // section name starts with 0x46 position
-    while (1) {
+    while (true) {
       // section_header_size=0x6F(4 bytes) + '\n'
       LAYER += 0x5;
 
@@ -2503,7 +2505,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
       SwapBytes(sec_size);
     if (sec_size == 0x1E7) // check layer is not empty
     {
-      while (1) {
+      while (true) {
         LAYER += 0x5;
 
         graphCurve curve;
@@ -2782,7 +2784,7 @@ void OPJFile::readGraphInfo(FILE *f, int file_size, FILE *debug) {
 
     LAYER += 0x5;
     // read axis breaks
-    while (1) {
+    while (true) {
       CHECKED_FSEEK(debug, f, LAYER, SEEK_SET);
       CHECKED_FREAD(debug, &sec_size, 4, 1, f);
       if (IsBigEndian())
@@ -2900,7 +2902,7 @@ void OPJFile::skipObjectInfo(FILE *f, FILE *fdebug) {
   int LAYER = POS;
   LAYER += headersize + 0x1;
   int sec_size;
-  while (1) // multilayer loop
+  while (true) // multilayer loop
   {
     // LAYER section
     LAYER += 0x5 /* length of block = 0x12D + '\n'*/ + 0x12D + 0x1;
@@ -2910,7 +2912,7 @@ void OPJFile::skipObjectInfo(FILE *f, FILE *fdebug) {
     // section_body_2 + '\n'
     // possible sections: column formulas, __WIPR, __WIOTN, __LayerInfoStorage
     // section name(column name in formula case) starts with 0x46 position
-    while (1) {
+    while (true) {
       // section_header_size=0x6F(4 bytes) + '\n'
       LAYER += 0x5;
 
@@ -2960,7 +2962,7 @@ void OPJFile::skipObjectInfo(FILE *f, FILE *fdebug) {
     }
     LAYER += 0x5;
 
-    while (1) {
+    while (true) {
       LAYER += 0x5;
 
       LAYER += 0x1E7 + 0x1;

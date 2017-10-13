@@ -15,10 +15,10 @@ struct MantidMatrixTabExtension {
                            MantidMatrixModel::Type type)
       : label(label), tableView(tableView), model(model), type(type) {}
   MantidMatrixTabExtension()
-      : label(""), tableView(NULL), model(NULL),
+      : label(""), tableView(), model(nullptr),
         type(MantidMatrixModel::Type::DX) {}
   QString label;
-  QTableView *tableView;
+  std::unique_ptr<QTableView> tableView;
   QPointer<MantidMatrixModel> model;
   MantidMatrixModel::Type type;
 };

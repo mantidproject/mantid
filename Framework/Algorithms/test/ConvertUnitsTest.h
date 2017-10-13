@@ -754,9 +754,9 @@ public:
       }
     } else if (sortType == PULSETIME_SORT) {
       // Check directly that it is indeed increasing
-      Mantid::Kernel::DateAndTime last_x;
+      Mantid::Types::Core::DateAndTime last_x;
       for (size_t i = 0; i < el.getNumberEvents(); i++) {
-        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        Mantid::Types::Core::DateAndTime x = el.getEvent(i).pulseTime();
         TS_ASSERT(x >= last_x);
         last_x = x;
       }

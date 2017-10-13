@@ -12,13 +12,13 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
@@ -102,23 +102,24 @@ void removeWorkspace(QString const &workspaceName) {
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 * Constructor
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
-* @param postprocessor : A DataProcessorPostprocessingAlgorithm
+* @param processor : A ProcessingAlgorithm
+* @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 * @param postprocessMap : A map containing instructions for post-processing.
 * This map links column name to properties of the post-processing algorithm
 * @param loader : The algorithm responsible for loading data
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor,
+    const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const ProcessingAlgorithm &processor,
+    const PostprocessingAlgorithm &postprocessor,
     const std::map<QString, QString> &postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(loader), m_whitelist(whitelist),
@@ -162,66 +163,63 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 
   if (m_postprocessor.name().isEmpty()) {
     m_postprocess = false;
-    m_manager = Mantid::Kernel::make_unique<DataProcessorOneLevelTreeManager>(
-        this, m_whitelist);
+    m_manager =
+        Mantid::Kernel::make_unique<OneLevelTreeManager>(this, m_whitelist);
   } else {
-    m_manager = Mantid::Kernel::make_unique<DataProcessorTwoLevelTreeManager>(
-        this, m_whitelist);
+    m_manager =
+        Mantid::Kernel::make_unique<TwoLevelTreeManager>(this, m_whitelist);
   }
 }
 
 /**
 * Delegating constructor (no pre-processing needed)
 * @param whitelist : The set of properties we want to show as columns
-* @param processor : A DataProcessorProcessingAlgorithm
-* @param postprocessor : A DataProcessorPostprocessingAlgorithm
+* @param processor : A ProcessingAlgorithm
+* @param postprocessor : A PostprocessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor,
-    const DataProcessorPostprocessingAlgorithm &postprocessor)
-    : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
-          processor, postprocessor) {}
+    const WhiteList &whitelist, const ProcessingAlgorithm &processor,
+    const PostprocessingAlgorithm &postprocessor)
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, postprocessor) {}
 
 /**
  * Delegating constructor (only whitelist specified)
  * @param whitelist : The set of properties we want to show as columns
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist)
+    const WhiteList &whitelist)
     : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
-          DataProcessorProcessingAlgorithm(),
-          DataProcessorPostprocessingAlgorithm()) {}
+          whitelist, std::map<QString, PreprocessingAlgorithm>(),
+          ProcessingAlgorithm(), PostprocessingAlgorithm()) {}
 
 /**
 * Delegating constructor (no post-processing needed)
 * @param whitelist : The set of properties we want to show as columns
 * @param preprocessMap : A map containing instructions for pre-processing
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
-    const std::map<QString, DataProcessorPreprocessingAlgorithm> &preprocessMap,
-    const DataProcessorProcessingAlgorithm &processor)
+    const WhiteList &whitelist,
+    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+    const ProcessingAlgorithm &processor)
     : GenericDataProcessorPresenter(whitelist, preprocessMap, processor,
-                                    DataProcessorPostprocessingAlgorithm()) {}
+                                    PostprocessingAlgorithm()) {}
 
 /**
 * Delegating constructor (no pre-processing needed, no post-processing needed)
 * @param whitelist : The set of properties we want to show as columns
-* @param processor : A DataProcessorProcessingAlgorithm
+* @param processor : A ProcessingAlgorithm
 * workspaces
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    const DataProcessorWhiteList &whitelist,
-    const DataProcessorProcessingAlgorithm &processor)
-    : GenericDataProcessorPresenter(
-          whitelist, std::map<QString, DataProcessorPreprocessingAlgorithm>(),
-          processor, DataProcessorPostprocessingAlgorithm()) {}
+    const WhiteList &whitelist, const ProcessingAlgorithm &processor)
+    : GenericDataProcessorPresenter(whitelist,
+                                    std::map<QString, PreprocessingAlgorithm>(),
+                                    processor, PostprocessingAlgorithm()) {}
 
 /**
 * Destructor
@@ -299,7 +297,10 @@ Process selected data
 void GenericDataProcessorPresenter::process() {
   // Emit a signal hat the process is starting
   m_view->emitProcessClicked();
-
+  if (GenericDataProcessorPresenter::m_skipProcessing) {
+    m_skipProcessing = false;
+    return;
+  }
   m_selectedData = m_manager->selectedData(m_promptUser);
 
   // Don't continue if there are no items selected
@@ -553,7 +554,7 @@ void GenericDataProcessorPresenter::saveNotebook(const TreeData &data) {
     const auto preprocessingOptionsMap =
         convertStringToMap(m_preprocessingOptions);
 
-    auto notebook = Mantid::Kernel::make_unique<DataProcessorGenerateNotebook>(
+    auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_view->getProcessInstrument(), m_whitelist, m_preprocessMap,
         m_processor, m_postprocessor, preprocessingOptionsMap,
         m_processingOptions, m_postprocessingOptions);
@@ -659,8 +660,7 @@ desired workspace
 @returns a shared pointer to the workspace
 */
 Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
-    const QString &runStr,
-    const DataProcessorPreprocessingAlgorithm &preprocessor,
+    const QString &runStr, const PreprocessingAlgorithm &preprocessor,
     const std::map<std::string, std::string> &optionsMap) {
   auto const instrument = m_view->getProcessInstrument();
 
@@ -697,11 +697,11 @@ Workspace_sptr GenericDataProcessorPresenter::prepareRunWorkspace(
     // Iterate through all the remaining runs, adding them to the first run
     for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt) {
 
-      for (auto& kvp : optionsMap) {
+      for (auto &kvp : optionsMap) {
         try {
           if (kvp.first != preprocessor.lhsProperty().toStdString() &&
               kvp.first != preprocessor.rhsProperty().toStdString())
-          setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
+            setAlgorithmProperty(alg.get(), kvp.first, kvp.second);
         } catch (Mantid::Kernel::Exception::NotFoundError &) {
           // We can't apply this option to this pre-processing alg
           throw;
@@ -762,7 +762,7 @@ GenericDataProcessorPresenter::getReducedWorkspaceName(const QStringList &data,
     if (m_whitelist.showValue(col)) {
 
       // Get what's in the column
-      auto const valueStr = data.at(col);
+      auto const &valueStr = data.at(col);
 
       // If it's not empty, use it
       if (!valueStr.isEmpty()) {
@@ -983,7 +983,7 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                            runWS->getName());
     } else {
       // No pre-processing needed
-      auto propertyValue = data->at(i);
+      const auto &propertyValue = data->at(i);
       if (!propertyValue.isEmpty())
         alg->setPropertyValue(propertyName.toStdString(),
                               propertyValue.toStdString());
@@ -1594,7 +1594,7 @@ void GenericDataProcessorPresenter::initOptions() {
 void GenericDataProcessorPresenter::addCommands() {
 
   auto commands = m_manager->publishCommands();
-  std::vector<std::unique_ptr<DataProcessorCommand>> commandsToShow;
+  std::vector<std::unique_ptr<Command>> commandsToShow;
   for (auto comm = 10u; comm < commands.size(); comm++)
     commandsToShow.push_back(std::move(commands.at(comm)));
   m_view->addActions(std::move(commandsToShow));
@@ -1646,7 +1646,7 @@ void GenericDataProcessorPresenter::setPromptUser(bool allowPrompt) {
 * Publishes a list of available commands
 * @return : The list of available commands
 */
-std::vector<std::unique_ptr<DataProcessorCommand>>
+std::vector<std::unique_ptr<Command>>
 GenericDataProcessorPresenter::publishCommands() {
 
   auto commands = m_manager->publishCommands();
@@ -1674,15 +1674,14 @@ void GenericDataProcessorPresenter::accept(
 /** Returs the list of valid workspaces currently in the ADS
 * @return : The vector of workspaces (as commands)
 */
-std::vector<DataProcessorCommand_uptr>
-GenericDataProcessorPresenter::getTableList() {
+std::vector<Command_uptr> GenericDataProcessorPresenter::getTableList() {
 
-  std::vector<DataProcessorCommand_uptr> workspaces;
+  std::vector<Command_uptr> workspaces;
   workspaces.reserve(m_workspaceList.size());
   // Create a command for each of the workspaces in the ADS
   for (const auto &name : m_workspaceList) {
     workspaces.push_back(
-        Mantid::Kernel::make_unique<DataProcessorWorkspaceCommand>(this, name));
+        Mantid::Kernel::make_unique<WorkspaceCommand>(this, name));
   }
   return workspaces;
 }
@@ -1810,5 +1809,12 @@ int GenericDataProcessorPresenter::getNumberOfRows() {
  **/
 void GenericDataProcessorPresenter::clearTable() { m_manager->deleteRow(); }
 
+/**
+  * Flag used to stop processing
+**/
+void GenericDataProcessorPresenter::skipProcessing() {
+  m_skipProcessing = true;
+}
+}
 }
 }

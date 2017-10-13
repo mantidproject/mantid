@@ -43,7 +43,7 @@ public:
     bank->setRot(q);
     instrument->add(bank);
 
-    det1 = new Detector("det1", 1, 0);
+    det1 = new Detector("det1", 1, nullptr);
     det1->setPos(1.0, 0.0, 0.0);
     bank->add(det1);
     instrument->markAsDetector(det1);

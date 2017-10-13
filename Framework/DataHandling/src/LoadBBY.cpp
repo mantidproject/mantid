@@ -333,11 +333,11 @@ void LoadBBY::exec() {
       "bm_counts", static_cast<double>(frame_count) * period /
                        1.0e6); // static_cast<double>(instrumentInfo.bm_counts)
 
-  Kernel::time_duration duration = boost::posix_time::microseconds(
+  Types::Core::time_duration duration = boost::posix_time::microseconds(
       static_cast<boost::int64_t>(static_cast<double>(frame_count) * period));
 
-  Kernel::DateAndTime start_time("2000-01-01T00:00:00");
-  Kernel::DateAndTime end_time(start_time + duration);
+  Types::Core::DateAndTime start_time("2000-01-01T00:00:00");
+  Types::Core::DateAndTime end_time(start_time + duration);
 
   logManager.addProperty("start_time", start_time.toISO8601String());
   logManager.addProperty("end_time", end_time.toISO8601String());

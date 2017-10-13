@@ -190,6 +190,9 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run = 6398 # (raw file)
         propman.det_cal_file = 6399
         propman.load_monitors_with_workspace = False
+        propman.mon1_norm_spec =  69633
+        propman.ei_mon1_spec = [ 69634,69635,69636,69637]
+        propman.ei_mon2_spec = [ 69638,69639,69640,69641]
 
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(mon_ws is not None)
@@ -199,7 +202,6 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         self.assertEqual(ws.getNumberHistograms(),69632)
         self.assertEqual(mon_ws.getNumberHistograms(),9)
 
-        # test load together
         propman.sample_run = None # (clean things up)
         propman.load_monitors_with_workspace = True
         propman.sample_run  = 6398
@@ -309,5 +311,5 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
 
 
 if __name__=="__main__":
-    tester = ISISLoadFilesLET()
+    tester = ISISLoadFilesMER()
     tester.runTest()

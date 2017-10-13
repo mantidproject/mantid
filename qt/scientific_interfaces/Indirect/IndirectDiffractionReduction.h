@@ -22,7 +22,7 @@ public:
 
 public:
   /// Default Constructor
-  explicit IndirectDiffractionReduction(QWidget *parent = 0);
+  explicit IndirectDiffractionReduction(QWidget *parent = nullptr);
   ~IndirectDiffractionReduction() override;
 
 public slots:
@@ -37,8 +37,9 @@ public slots:
   void runFilesChanged();
   void runFilesFinding();
   void runFilesFound();
-  void individualGroupingToggled(int state);
+  void manualGroupingToggled(int state);
   void algorithmComplete(bool error);
+  void deleteGroupingWorkspace();
 
 private:
   void initLayout() override;
@@ -46,6 +47,21 @@ private:
 
   void loadSettings();
   void saveSettings();
+
+  Mantid::API::IAlgorithm_sptr saveGSSAlgorithm(const std::string &filename);
+  Mantid::API::IAlgorithm_sptr
+  saveASCIIAlgorithm(const std::string &filename,
+                     const std::string &inputWsName);
+  Mantid::API::IAlgorithm_sptr
+  saveNexusProcessedAlgorithm(const std::string &filename,
+                              const std::string &inputWsName);
+  Mantid::API::IAlgorithm_sptr
+  saveAlgorithm(const std::string &saveAlgName, const std::string &filename,
+                const std::string &inputWsName = "", const int &version = -1);
+  Mantid::API::IAlgorithm_sptr
+  convertUnitsAlgorithm(const std::string &inputWsName,
+                        const std::string &outputWsName,
+                        const std::string &target);
 
   bool validateRebin();
   bool validateVanCal();
@@ -57,6 +73,7 @@ private:
 
   void runGenericReduction(QString instName, QString mode);
   void runOSIRISdiffonlyReduction();
+  void createGroupingWorkspace(const std::string &outputWsName);
 
 private:
   Ui::IndirectDiffractionReduction
@@ -65,8 +82,9 @@ private:
   QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
+  std::string m_groupingWsName;
 };
-}
-}
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_

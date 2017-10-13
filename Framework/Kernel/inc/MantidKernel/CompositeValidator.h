@@ -39,10 +39,14 @@ namespace Kernel {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+enum class CompositeRelation { AND = 0, OR = 1 };
+
 class DLLExport CompositeValidator : public IValidator {
 public:
   /// Default constructor
-  CompositeValidator();
+  CompositeValidator(
+      const CompositeRelation &relation = CompositeRelation::AND);
   /// Destructor
   ~CompositeValidator() override;
 
@@ -65,12 +69,22 @@ public:
   }
 
 private:
-  /// Private Copy constructor: NO DIRECT COPY ALLOWED
-  CompositeValidator(const CompositeValidator &);
   /// Verify the value with the child validators
   std::string check(const boost::any &value) const override;
+  /// Verify the value with the child validators with logical "and" relationship
+  std::string checkAll(const boost::any &value) const;
+  /// Verify the value with the child validators with logical "or" relationship
+  std::string checkAny(const boost::any &value) const;
+  /// build an error message for OR relations
+  std::string buildErrorMessage(const bool valid,
+                                const std::string &errors) const;
+  /// Private Copy constructor: NO DIRECT COPY ALLOWED
+  CompositeValidator(const CompositeValidator &);
+
   /// A container for the child validators
   std::list<IValidator_sptr> m_children;
+  /// Store what relationship child validators have
+  const CompositeRelation m_relation;
 };
 
 } // namespace Kernel

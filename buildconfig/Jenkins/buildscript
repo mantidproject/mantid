@@ -74,7 +74,6 @@ if [[ ${PRBUILD} == true ]]; then
   fi
 fi
 
-
 ###############################################################################
 # Setup the build directory
 # For a clean build the entire thing is removed to guarantee it is clean. All
@@ -99,6 +98,7 @@ if [ -d $BUILD_DIR ]; then
   if [[ -n ${CLEAN_EXTERNAL_PROJECTS} && "${CLEAN_EXTERNAL_PROJECTS}" == true ]]; then
       rm -rf $BUILD_DIR/eigen-*
       rm -rf $BUILD_DIR/googletest-*
+      rm -fr $BUILD_DIR/python-xmlrunner-*
   fi
 else
   mkdir $BUILD_DIR
@@ -121,6 +121,10 @@ if [[ $USE_CLANG ]]; then
   clang --version
   export CC=clang
   export CXX=clang++
+  # check if this is also a clang-tidy build
+  if [[ ${JOB_NAME} == *clang_tidy* ]]; then
+      CLANGTIDYVAR="-DENABLE_CLANG_TIDY=ON"
+  fi
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
   #only needed with incremental builds. Clean builds delete this directory in a later step.
   if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
@@ -233,7 +237,7 @@ rm -f *.dmg *.rpm *.deb *.tar.gz
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} .."
+$SCL_ON_RHEL6 "cmake ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DENABLE_FILE_LOGGING=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} .."
 
 ###############################################################################
 # Coverity build should exit early
@@ -258,6 +262,14 @@ fi
 ###############################################################################
 $SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
 $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
+
+###############################################################################
+# static analysis builds stop here
+###############################################################################
+if [[ $USE_CLANG ]] && [[ ${JOB_NAME} == *clang_tidy* ]]; then
+  exit 0
+fi
+
 
 ###############################################################################
 # Run the unit tests

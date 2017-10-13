@@ -254,6 +254,12 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.normalization_incident_monitor = 3
         self.assertTrue(state_gui_model.normalization_incident_monitor == 3)
 
+    def test_that_can_set_only_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.normalization_interpolate = True
+        self.assertTrue(state_gui_model.normalization_incident_monitor is None)
+        self.assertTrue(state_gui_model.normalization_interpolate)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Transmission
     # ------------------------------------------------------------------------------------------------------------------
@@ -271,6 +277,12 @@ class StateGuiModelTest(unittest.TestCase):
         # # Reassign
         state_gui_model.transmission_incident_monitor = 3
         self.assertTrue(state_gui_model.transmission_incident_monitor == 3)
+
+    def test_that_can_set_only_interpolation(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.transmission_interpolate = True
+        self.assertTrue(state_gui_model.transmission_incident_monitor is None)
+        self.assertTrue(state_gui_model.transmission_interpolate)
 
     def test_that_can_set_normalization_and_transmission_monitor_and_rebin_type_settings(self):
         pass
@@ -299,14 +311,14 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.transmission_monitor = 4
         self.assertTrue(state_gui_model.transmission_monitor == 4)
 
-    def test_that_transmission_m4_shift_default_is_empty(self):
+    def test_that_transmission_mn_shift_default_is_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        self.assertTrue(state_gui_model.transmission_m4_shift == "")
+        self.assertTrue(state_gui_model.transmission_mn_shift == "")
 
-    def test_that_transmission_m4_shift_can_be_set(self):
+    def test_that_transmission_mn_shift_can_be_set(self):
         state_gui_model = StateGuiModel({"test": [1]})
-        state_gui_model.transmission_m4_shift = 234
-        self.assertTrue(state_gui_model.transmission_m4_shift == 234)
+        state_gui_model.transmission_mn_shift = 234
+        self.assertTrue(state_gui_model.transmission_mn_shift == 234)
 
     def test_that_default_for_adjustment_files_are_empty(self):
         state_gui_model = StateGuiModel({"test": [1]})
@@ -486,6 +498,17 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(state_gui_model.radius_limit_min == 12.)
         self.assertTrue(state_gui_model.radius_limit_max == 13.)
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # Mask files
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_mask_file_defaults_are_empty(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        self.assertTrue(state_gui_model.mask_files == [])
+
+    def test_that_mask_file_can_be_set(self):
+        state_gui_model = StateGuiModel({"test": [1]})
+        state_gui_model.mask_files = ["file.txt", "file2.txt"]
+        self.assertTrue(state_gui_model.mask_files == ["file.txt", "file2.txt"])
 
 if __name__ == '__main__':
     unittest.main()

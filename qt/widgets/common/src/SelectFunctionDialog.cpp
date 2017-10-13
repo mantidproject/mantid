@@ -106,7 +106,7 @@ QString SelectFunctionDialog::getFunction() const {
     return "";
   }
 
-  if (items[0]->parent() == NULL) {
+  if (items[0]->parent() == nullptr) {
     return "";
   }
 

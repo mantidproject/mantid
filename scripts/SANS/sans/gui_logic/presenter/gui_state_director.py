@@ -25,11 +25,17 @@ class GuiStateDirector(object):
         data_builder = get_data_builder(self._facility)
 
         self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
+        self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
         self._set_data_entry(data_builder.set_sample_transmission, table_index_model.sample_transmission)
+        self._set_data_period_entry(data_builder.set_sample_transmission_period, table_index_model.sample_transmission_period)  # noqa
         self._set_data_entry(data_builder.set_sample_direct, table_index_model.sample_direct)
+        self._set_data_period_entry(data_builder.set_sample_direct_period, table_index_model.sample_direct_period)
         self._set_data_entry(data_builder.set_can_scatter, table_index_model.can_scatter)
+        self._set_data_period_entry(data_builder.set_can_scatter_period, table_index_model.can_scatter_period)
         self._set_data_entry(data_builder.set_can_transmission, table_index_model.can_transmission)
+        self._set_data_period_entry(data_builder.set_can_transmission_period, table_index_model.can_transmission_period)
         self._set_data_entry(data_builder.set_can_direct, table_index_model.can_direct)
+        self._set_data_period_entry(data_builder.set_can_direct_period, table_index_model.can_direct_period)
 
         data = data_builder.build()
 
@@ -54,6 +60,17 @@ class GuiStateDirector(object):
     def _set_data_entry(func, entry):
         if entry:
             func(entry)
+
+    @staticmethod
+    def _set_data_period_entry(func, entry):
+        if entry:
+            # Ensure that it is convertible to an integer and that it is larger than 0
+            try:
+                entry_as_integer = int(entry)
+                if entry_as_integer > 0:
+                    func(entry_as_integer)
+            except ValueError:  # noqa
+                pass
 
     @staticmethod
     def _apply_column_options_to_state(options_column_model, state_gui_model):

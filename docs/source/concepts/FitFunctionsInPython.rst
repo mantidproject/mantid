@@ -166,5 +166,66 @@ and also remove such constraints.
     ...
     comp.unconstrainAll("Sigma")
     
+Evaluation
+----------
+One can evaluate functions:
+
+.. code:: python
+
+    p = Polynomial(n=2, A0=0, A1=0.5, A2=0.5)
+
+    print p(1)  # expect 1.0
+    print p(2)  # expect 3.0 
+    print p(3)  # expect 6.0
+    print p([0,1,2,3])  # expect [ 0. 1. 3. 6.]
+
+    ws = CreateWorkspace(DataX=[0,1,2,3,4,5,6,7], DataY=[5,5,5,5,5,5,5])
+
+    print p(ws).readY(1) # expect [  0.375   1.875   4.375   7.875  12.375  17.875  24.375]
+    
+One can use numpy arrays:
+
+.. code:: python
+
+    import numpy as np
+
+    a = np.array([[0, 1,], [2, 3]])
+    p = Polynomial(n=4, A0=1, A1=1, A2=1, A3=1, A4=1)
+    print p(a)
+    # expect [[   1.    5.]
+    #         [  31.  121.]]
+
+Also one can put parameters into the function when evaluating.
+
+.. code:: python
+
+   p = Polynomial(n=2)
+   print p([0,1,2,3], 0.0, 0.5, 0.5) #expect [ 0. 1. 3. 6.]
+
+This enables one to fit the functions with ``scipy.optimize.curve_fit``.  
+
+Plotting
+--------
+Functions may be plotted by calling the ``plot`` method of the function.
+``mantidplot`` must be available to import for ``plot`` to work.
+
+This method can be called in any of the following manners:
+
+.. code:: python
+
+   f.plot(xValues=[0,2,2.5,3,5]) # for these x-values
+   f.plot(workspace=ws) # for the x-values of workspace ws
+   f.plot(workspace=ws, workspaceIndex=i)   # for x-values of workspace index i of ws
+   f.plot(startX=xmin, endX=xmax)  # for 20 x-values between xmin and xmax
+   f.plot(startX=xmin, endX=xmax, nSteps=10) # for 10 x-values between xmin and xmax
+   f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax
+   f.plot(workspace=ws, name='Fred') # for plot & its workspace to be called 'Fred'  
+
+If you use ``xValues``, then the list of x values must be in numerical order. 
+This is not checked and if they are not in order the plot may fail to display properly.
+
+If you want to display multiple plots of the same function, then use
+``name`` to give each plot a unique name. The default value of ``name`` 
+is the name of the function. 
 
 .. categories:: Concepts

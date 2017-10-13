@@ -110,6 +110,10 @@ private:
   void initScanIntervals();
   void initIndices();
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
+  std::vector<bool> buildMergeSyncScanIndices(const DetectorInfo &other) const;
+  void checkSizes(const DetectorInfo &other) const;
+  void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
+                               const size_t index2) const;
   bool m_isSyncScan{true};
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};

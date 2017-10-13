@@ -1,6 +1,14 @@
 """ The settings diagnostic tab which visualizes the SANS state object. """
+from __future__ import (absolute_import, division, print_function)
+
+
+import os
+import json
+
+from mantid.kernel import Logger
 
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
+from sans.gui_logic.gui_common import JSON_SUFFIX
 
 
 class SettingsDiagnosticPresenter(object):
@@ -21,10 +29,15 @@ class SettingsDiagnosticPresenter(object):
         def on_expand(self):
             self._presenter.on_expand()
 
+        def on_save_state_to_file(self):
+            self._presenter.on_save_state()
+
     def __init__(self, parent_presenter):
         super(SettingsDiagnosticPresenter, self).__init__()
         self._view = None
         self._parent_presenter = parent_presenter
+        # Logger
+        self.gui_logger = Logger("SANS GUI LOGGER")
 
     def on_collapse(self):
         self._view.collapse()
@@ -83,3 +96,26 @@ class SettingsDiagnosticPresenter(object):
         if state is not None:
             state = state.property_manager
         self._view.set_tree(state)
+
+    def on_save_state(self):
+        # Get the save location
+        save_location = self._view.get_save_location()
+        # Check if it exists
+        path_dir = os.path.dirname(save_location)
+        if not path_dir:
+            self.gui_logger.warning("The provided save location for the SANS state does not seem to exist. "
+                                    "Please provide a validate path")
+            return
+
+        file_name, _ = os.path.splitext(save_location)
+        full_file_path = file_name + JSON_SUFFIX
+
+        row_index = self._view.get_current_row()
+        state = self.get_state(row_index)
+        serialized_state = state.property_manager
+        with open(full_file_path, 'w') as f:
+            json.dump(serialized_state, f, sort_keys=True, indent=4)
+        self.gui_logger.information("The state for row {} has been saved to: {} ".format(row_index, full_file_path))
+
+        # Update the file name in the UI
+        self._view.set_save_location(full_file_path)
