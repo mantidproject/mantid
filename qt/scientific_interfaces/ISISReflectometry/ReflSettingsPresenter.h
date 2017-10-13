@@ -60,8 +60,11 @@ public:
   // Loads the runs with the names/run numbers specified by the vector.
   void
   loadTransmissionRuns(std::vector<std::string> const &transmissionRuns) const;
-  std::string firstTransmissionRunLabelled(std::vector<std::string> const& runNumber) const;
-  std::string secondTransmissionRunLabelled(std::vector<std::string> const& runNumber) const;
+  std::string
+  firstTransmissionRunLabelled(std::vector<std::string> const &runNumber) const;
+  std::string secondTransmissionRunLabelled(
+      std::vector<std::string> const &runNumber) const;
+
 private:
   void createStitchHints();
   void getExpDefaults();

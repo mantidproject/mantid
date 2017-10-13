@@ -286,8 +286,7 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
     return "";
 
   std::vector<std::string> transmissionRuns;
-  boost::split(transmissionRuns, transmissionRunsString,
-               boost::is_any_of(","));
+  boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
 
   if (loadRuns)
     loadTransmissionRuns(transmissionRuns);
