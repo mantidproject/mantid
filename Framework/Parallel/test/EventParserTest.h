@@ -195,7 +195,7 @@ public:
                          [](const EventListEntry &e, const int64_t tof) {
                            return static_cast<double>(tof) == e.tofEvent.tof();
                          }));
-    doTestRankData(rankData, parser, gen, range);
+    doTestRankData(rankData, gen, range);
   }
 
   void testExtractEventsPartial() {
@@ -218,7 +218,7 @@ public:
                          [](const EventListEntry &e, const int64_t tof) {
                            return static_cast<double>(tof) == e.tofEvent.tof();
                          }));
-    doTestRankData(rankData, parser, gen, range);
+    doTestRankData(rankData, gen, range);
   }
 
   void testParsingFailsNoEventIndexVector() {
@@ -353,33 +353,16 @@ private:
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
   void doTestRankData(
       const std::vector<std::vector<EventListEntry>> &rankData,
-      boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>> &
-          parser,
       anonymous::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
           gen,
       const Chunker::LoadRange &range) {
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
-    /*
-    auto res = parser->findStartAndEndPulseIndices(range.eventOffset,
-                                                   range.eventCount);
-
-    for (size_t pulse = res.first; pulse < res.second; ++pulse) {
-      auto start = std::max(pulse == 0 ? 0 : static_cast<size_t>(
-                                                 gen.eventIndex(0)[pulse]),
-                            range.eventOffset) -
-                   range.eventOffset;
-      auto end = std::min(static_cast<size_t>(gen.eventIndex(0)[pulse] - 1),
-                          range.eventOffset + range.eventCount) -
-                 range.eventOffset;
-      auto &pulses = gen.eventTimeZero();
-      TS_ASSERT(std::all_of(rankData[0].cbegin() + start,
-                            rankData[0].cbegin() + end,
-                            [pulses, pulse](const EventListEntry &e) {
-                              return e.tofEvent.pulseTime() ==
-                                     static_cast<int64_t>(pulses[pulse]);
-                            }));
+    PulseTimeGenerator<int32_t, int64_t> pulseTimes(gen.eventIndex(0),
+                                                    gen.eventTimeZero(), 0);
+    pulseTimes.seek(range.eventOffset);
+    TS_ASSERT_EQUALS(rankData.size(), range.eventCount);
+    for (const auto &item : rankData[0]) {
+      TS_ASSERT_EQUALS(item.tofEvent.pulseTime(), pulseTimes.next());
     }
-    */
   }
 };
 
