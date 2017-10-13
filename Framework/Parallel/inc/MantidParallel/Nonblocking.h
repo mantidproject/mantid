@@ -41,13 +41,20 @@ namespace Parallel {
 template <typename ForwardIterator>
 void wait_all(ForwardIterator begin, ForwardIterator end) {
 #ifdef MPI_EXPERIMENTAL
-  boost::mpi::wait_all(begin, end);
-#else
+  class RequestIteratorWrapper : public ForwardIterator {
+  public:
+    RequestIteratorWrapper(const ForwardIterator &it) : ForwardIterator(it) {}
+    boost::mpi::request &operator*() { return ForwardIterator::operator*(); }
+    boost::mpi::request *operator->() { return &operator*(); }
+  };
+  if (!begin->hasBackend())
+    return boost::mpi::wait_all(RequestIteratorWrapper(begin),
+                                RequestIteratorWrapper(end));
+#endif
   while (begin != end) {
     (*begin).wait();
     ++begin;
   }
-#endif
 }
 
 } // namespace Parallel
