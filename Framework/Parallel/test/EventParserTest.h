@@ -27,7 +27,9 @@ public:
     return m_event_indices[bank];
   }
 
-  const std::vector<TimeZeroType> &eventTimeZero() { return m_event_time_zero; }
+  const std::vector<TimeZeroType> &eventTimeZero() const {
+    return m_event_time_zero;
+  }
 
   const std::vector<TimeOffsetType> &eventTimeOffset(size_t bank) const {
     return m_event_time_offsets[bank];
@@ -76,34 +78,32 @@ private:
     m_referenceEventLists.clear();
     m_referenceEventLists.resize(numPixels);
 
-    for (size_t pulse = 0; pulse < numPulses; ++pulse) {
-      m_event_time_zero[pulse] = static_cast<TimeZeroType>(pulse * 100000);
-      size_t pulseEventSize = 0;
-      int bank = 0;
-      for (size_t pixel = 0; pixel < numPixels; ++pixel) {
-        auto eventSize = getRandEventSize(1, maxEventsPerPixel / numPulses);
-        if ((pixel % pixelsPerBank) == 0) {
-          m_event_indices[bank][pulse] = static_cast<int32_t>(pulseEventSize);
-          pulseEventSize = 0;
-          bank++;
+    for (size_t bank = 0; bank < numBanks; ++bank) {
+      size_t bankEventSize = 0;
+      for (size_t pulse = 0; pulse < numPulses; ++pulse) {
+        m_event_indices[bank][pulse] = static_cast<int32_t>(bankEventSize);
+        m_event_time_zero[pulse] = static_cast<TimeZeroType>(pulse * 100000);
+        for (size_t pixel = 0; pixel < pixelsPerBank; ++pixel) {
+          size_t absolutePixel = pixel + bank * pixelsPerBank;
+          auto eventSize = getRandEventSize(1, maxEventsPerPixel / numPulses);
+          bankEventSize += eventSize;
+          auto &list = m_referenceEventLists[absolutePixel];
+          auto prev_end = list.size();
+          std::generate_n(std::back_inserter(list), eventSize, [this, pulse]() {
+            return TofEvent(getRandomTimeOffset(100000),
+                            m_event_time_zero[pulse]);
+          });
+          std::fill_n(
+              std::back_inserter(m_event_ids[bank]), eventSize,
+              static_cast<IndexType>(m_bank_offsets[bank] + absolutePixel));
+          std::transform(list.cbegin() + prev_end, list.cend(),
+                         std::back_inserter(m_event_time_offsets[bank]),
+                         [this](const TofEvent &event) {
+                           return static_cast<TimeOffsetType>(event.tof());
+                         });
         }
-        pulseEventSize += eventSize;
-        auto &list = m_referenceEventLists[pixel];
-        auto prev_end = list.size();
-        std::generate_n(std::back_inserter(list), eventSize, [this, pulse]() {
-          return TofEvent(getRandomTimeOffset(100000),
-                          m_event_time_zero[pulse]);
-        });
-        std::fill_n(std::back_inserter(m_event_ids[bank]), eventSize,
-                    static_cast<IndexType>(m_bank_offsets[bank] + pixel));
-        std::transform(list.cbegin() + prev_end, list.cend(),
-                       std::back_inserter(m_event_time_offsets[bank]),
-                       [this](const TofEvent &event) {
-                         return static_cast<TimeOffsetType>(event.tof());
-                       });
       }
     }
-    calculateEventIndicesPartialSums(numBanks);
   }
 
   void initOffsetsAndIndices(const size_t numBanks, const size_t numPulses) {
@@ -112,14 +112,6 @@ private:
     for (size_t bank = 0; bank < numBanks; ++bank) {
       m_bank_offsets[bank] = static_cast<int32_t>(bank * 1000) + 1000;
       m_event_indices[bank].resize(numPulses);
-    }
-  }
-
-  void calculateEventIndicesPartialSums(size_t numBanks) {
-    for (size_t bank = 0; bank < numBanks; bank++) {
-      auto &indices = m_event_indices[bank];
-      std::partial_sum(indices.cbegin(), indices.cend(), indices.begin(),
-                       std::plus<int32_t>());
     }
   }
 
@@ -221,34 +213,6 @@ public:
     doTestRankData(rankData, gen, range);
   }
 
-  void testParsingFailsNoEventIndexVector() {
-    std::vector<std::vector<int>> rankGroups;
-    std::vector<int32_t> bankOffsets(2);
-    std::vector<std::vector<TofEvent> *> eventLists(4);
-
-    EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
-                                                  eventLists);
-
-    TS_ASSERT_THROWS(
-        parser.startAsync(nullptr, nullptr, Chunker::LoadRange{0, 0, 0}),
-        std::runtime_error);
-  }
-
-  void testParsingFailNoEventTimeZeroVector() {
-    std::vector<std::vector<int>> rankGroups;
-    std::vector<int32_t> bankOffsets(2);
-    std::vector<std::vector<TofEvent> *> eventLists(4);
-
-    EventParser<int32_t, int64_t, int32_t> parser(rankGroups, bankOffsets,
-                                                  eventLists);
-
-    parser.setPulseInformation({10, 4, 4}, {}, 0);
-
-    TS_ASSERT_THROWS(
-        parser.startAsync(nullptr, nullptr, Chunker::LoadRange{0, 0, 0}),
-        std::runtime_error);
-  }
-
   void testParsingFull_1Pulse_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
@@ -279,8 +243,8 @@ public:
 
   void testParsingFull_1Rank_2Banks() {
     int numBanks = 2;
-    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(numBanks, 10,
-                                                                  7);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(numBanks,
+                                                                     10, 7);
     auto parser = gen.generateTestParser();
 
     for (int i = 0; i < numBanks; i++) {
@@ -351,15 +315,15 @@ public:
 
 private:
   template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
-  void doTestRankData(
-      const std::vector<std::vector<EventListEntry>> &rankData,
-      anonymous::FakeParserDataGenerator<IndexType, TimeZeroType, TimeOffsetType> &
-          gen,
-      const Chunker::LoadRange &range) {
+  void
+  doTestRankData(const std::vector<std::vector<EventListEntry>> &rankData,
+                 anonymous::FakeParserDataGenerator<IndexType, TimeZeroType,
+                                                    TimeOffsetType> &gen,
+                 const Chunker::LoadRange &range) {
     PulseTimeGenerator<int32_t, int64_t> pulseTimes(gen.eventIndex(0),
                                                     gen.eventTimeZero(), 0);
     pulseTimes.seek(range.eventOffset);
-    TS_ASSERT_EQUALS(rankData.size(), range.eventCount);
+    TS_ASSERT_EQUALS(rankData[0].size(), range.eventCount);
     for (const auto &item : rankData[0]) {
       TS_ASSERT_EQUALS(item.tofEvent.pulseTime(), pulseTimes.next());
     }
