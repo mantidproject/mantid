@@ -18,7 +18,7 @@ DECLARE_FUNCMINIMIZER(MoreSorensenMinimizer,More-Sorensen)
 ///@endcond
 // clang-format on
 
-using namespace NLLS;
+//using namespace NLLS;
 
 MoreSorensenMinimizer::MoreSorensenMinimizer() : TrustRegionMinimizer() {}
 
@@ -106,8 +106,8 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
  *  @return true if successful
  */
 bool getPdShift(double &sigma, DoubleFortranVector &d,
-                const nlls_options &options, nlls_inform &inform,
-                more_sorensen_work &w) {
+                const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                NLLS::more_sorensen_work &w) {
   int no_shifts = 0;
   bool successful_shift = false;
   while (!successful_shift) {
@@ -144,11 +144,11 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 
   auto c = a.dot(b);
 
-  auto norma2 = pow(norm2(a), 2);
-  auto normb2 = pow(norm2(b), 2);
+  auto norma2 = pow(NLLS::norm2(a), 2);
+  auto normb2 = pow(NLLS::norm2(b), 2);
 
   double discrim = pow(c, 2) + (normb2) * (pow(Delta, 2) - norma2);
-  if (discrim < zero) {
+  if (discrim < NLLS::zero) {
     return false;
   }
 
@@ -181,8 +181,8 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                   const DoubleFortranMatrix &hf, double Delta,
                   DoubleFortranVector &d, double &nd,
-                  const nlls_options &options, nlls_inform &inform,
-                  more_sorensen_work &w) {
+                  const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+                  NLLS::more_sorensen_work &w) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p
@@ -191,12 +191,12 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // set A and v for the model being considered here...
 
   // Set A = J^T J
-  matmultInner(J, w.A);
+  NLLS::matmultInner(J, w.A);
   // add any second order information...
   // so A = J^T J + HF
   w.A += hf;
   // now form v = J^T f
-  multJt(J, f, w.v);
+  NLLS::multJt(J, f, w.v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
@@ -220,7 +220,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   double sigma = 0.0;
   if (matrix_ok) {
     // A is symmetric positive definite....
-    sigma = zero;
+    sigma = NLLS::zero;
   } else {
     // shift and try again
     inform.external_return = 0;
@@ -235,13 +235,13 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     }
   }
 
-  nd = norm2(d);
+  nd = NLLS::norm2(d);
   if (!std::isfinite(nd)) {
     throw std::runtime_error("Step is NaN or infinite.");
   }
 
   // now, we're not in the trust region initally, so iterate....
-  auto sigma_shift = zero;
+  auto sigma_shift = NLLS::zero;
   int no_restarts = 0;
   // set 'small' in the context of the algorithm
   double epsilon =
@@ -278,7 +278,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     }
     w.LtL.solve(d, w.q);
 
-    auto nq = norm2(w.q);
+    auto nq = NLLS::norm2(w.q);
     sigma_shift = (pow((nd / nq), 2)) * ((nd - Delta) / Delta);
     if (fabs(sigma_shift) < options.more_sorensen_tiny * fabs(sigma)) {
       if (no_restarts < 1) {
@@ -305,7 +305,7 @@ void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
       break;
     }
 
-    nd = norm2(d);
+    nd = NLLS::norm2(d);
   }
 
   if (it == options.more_sorensen_maxits) {

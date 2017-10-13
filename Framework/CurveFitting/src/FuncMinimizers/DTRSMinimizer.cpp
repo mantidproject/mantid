@@ -20,8 +20,6 @@ DECLARE_FUNCMINIMIZER(DTRSMinimizer, Trust Region)
 ///@endcond
 // clang-format on
 
-using namespace NLLS;
-
 DTRSMinimizer::DTRSMinimizer() : TrustRegionMinimizer() {}
 
 /** Name of the minimizer.
@@ -216,14 +214,14 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
     root2 = a1 * a1 - FOUR * a2 * a0;
     if (fabs(root2) <= pow(EPSILON_MCH * a1, 2)) { // numerical double root
       nroots = 2;
-      root1 = -half * a1 / a2;
+      root1 = -NLLS::half * a1 / a2;
       root2 = root1;
-    } else if (root2 < zero) { // complex not real roots
+    } else if (root2 < NLLS::zero) { // complex not real roots
       nroots = 0;
-      root1 = zero;
-      root2 = zero;
+      root1 = NLLS::zero;
+      root2 = NLLS::zero;
     } else { // distint real roots
-      auto d = -half * (a1 + sign(sqrt(root2), a1));
+      auto d = -NLLS::half * (a1 + sign(sqrt(root2), a1));
       nroots = 2;
       root1 = d / a2;
       root2 = a0 / d;
@@ -233,30 +231,30 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
         root2 = d;
       }
     }
-  } else if (a2 == zero) {
-    if (a1 == zero) {
-      if (a0 == zero) { // the function is zero
+  } else if (a2 == NLLS::zero) {
+    if (a1 == NLLS::zero) {
+      if (a0 == NLLS::zero) { // the function is zero
         nroots = 1;
-        root1 = zero;
-        root2 = zero;
+        root1 = NLLS::zero;
+        root2 = NLLS::zero;
       } else { // the function is constant
         nroots = 0;
-        root1 = zero;
-        root2 = zero;
+        root1 = NLLS::zero;
+        root2 = NLLS::zero;
       }
     } else { // the function is linear
       nroots = 1;
       root1 = -a0 / a1;
-      root2 = zero;
+      root2 = NLLS::zero;
     }
   } else { // very ill-conditioned quadratic
     nroots = 2;
-    if (-a1 / a2 > zero) {
-      root1 = zero;
+    if (-a1 / a2 > NLLS::zero) {
+      root1 = NLLS::zero;
       root2 = -a1 / a2;
     } else {
       root1 = -a1 / a2;
-      root2 = zero;
+      root2 = NLLS::zero;
     }
   }
 
@@ -265,13 +263,13 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
   if (nroots >= 1) {
     auto p = (a2 * root1 + a1) * root1 + a0;
     auto pprime = TWO * a2 * root1 + a1;
-    if (pprime != zero) {
+    if (pprime != NLLS::zero) {
       root1 = root1 - p / pprime;
     }
     if (nroots == 2) {
       p = (a2 * root2 + a1) * root2 + a0;
       pprime = TWO * a2 * root2 + a1;
-      if (pprime != zero) {
+      if (pprime != NLLS::zero) {
         root2 = root2 - p / pprime;
       }
     }
@@ -297,15 +295,15 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
                 int &nroots, double &root1, double &root2, double &root3) {
 
   //  Check to see if the cubic is actually a quadratic
-  if (a3 == zero) {
+  if (a3 == NLLS::zero) {
     rootsQuadratic(a0, a1, a2, tol, nroots, root1, root2);
     root3 = INFINITE_NUMBER;
     return;
   }
 
   //  Deflate the polnomial if the trailing coefficient is zero
-  if (a0 == zero) {
-    root1 = zero;
+  if (a0 == NLLS::zero) {
+    root1 = NLLS::zero;
     rootsQuadratic(a1, a2, a3, tol, nroots, root2, root3);
     nroots = nroots + 1;
     return;
@@ -325,10 +323,10 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
   double d = b * b - c;
 
   // 1 real + 2 equal real or 2 complex roots
-  if (d >= zero) {
+  if (d >= NLLS::zero) {
     d = pow(sqrt(d) + fabs(b), ONE_THIRD);
-    if (d != zero) {
-      if (b > zero) {
+    if (d != NLLS::zero) {
+      if (b > NLLS::zero) {
         b = -d;
       } else {
         b = d;
@@ -339,7 +337,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
     b = b + c;
     c = -0.5 * b - s;
     root1 = b - s;
-    if (d == zero) {
+    if (d == NLLS::zero) {
       nroots = 3;
       root2 = c;
       root3 = c;
@@ -347,18 +345,18 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
       nroots = 1;
     }
   } else { // 3 real roots
-    if (b == zero) {
+    if (b == NLLS::zero) {
       d = TWO_THIRDS * atan(ONE);
     } else {
       d = atan(sqrt(-d) / fabs(b)) / THREE;
     }
-    if (b < zero) {
+    if (b < NLLS::zero) {
       b = TWO * sqrt(t);
     } else {
       b = -TWO * sqrt(t);
     }
     c = cos(d) * b;
-    t = -sqrt(THREE_QUARTERS) * sin(d) * b - half * c;
+    t = -sqrt(THREE_QUARTERS) * sin(d) * b - NLLS::half * c;
     d = -t - c - s;
     c = c - s;
     t = t - s;
@@ -400,7 +398,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
   //  perfom a Newton iteration to ensure that the roots are accurate
   double p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0;
   double pprime = (THREE * a3 * root1 + TWO * a2) * root1 + a1;
-  if (pprime != zero) {
+  if (pprime != NLLS::zero) {
     root1 = root1 - p / pprime;
     // p = ((a3 * root1 + a2) * root1 + a1) * root1 + a0; // never used
   }
@@ -408,14 +406,14 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
   if (nroots == 3) {
     p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0;
     pprime = (THREE * a3 * root2 + TWO * a2) * root2 + a1;
-    if (pprime != zero) {
+    if (pprime != NLLS::zero) {
       root2 = root2 - p / pprime;
       // p = ((a3 * root2 + a2) * root2 + a1) * root2 + a0; // never used
     }
 
     p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0;
     pprime = (THREE * a3 * root3 + TWO * a2) * root3 + a1;
-    if (pprime != zero) {
+    if (pprime != NLLS::zero) {
       root3 = root3 - p / pprime;
       // p = ((a3 * root3 + a2) * root3 + a1) * root3 + a0; // never used
     }
@@ -435,7 +433,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 void dtrsPiDerivs(int max_order, double beta,
                   const DoubleFortranVector &x_norm2,
                   DoubleFortranVector &pi_beta) {
-  double hbeta = half * beta;
+  double hbeta = NLLS::half * beta;
   pi_beta(0) = pow(x_norm2(0), hbeta);
   pi_beta(1) = hbeta * (pow(x_norm2(0), (hbeta - ONE))) * x_norm2(1);
   if (max_order == 1)
@@ -453,9 +451,8 @@ void dtrsPiDerivs(int max_order, double beta,
 /**  Set initial values for the TRS control parameters
  * 
  *  @param control :: A structure containing control information.
- *  @param inform  :: A structure containing information.
  */
-void dtrsInitialize(dtrs_control_type &control, dtrs_inform_type &inform) {
+void dtrsInitialize(dtrs_control_type &control) {
   control.stop_normal = pow(EPSILON_MCH, 0.75);
   control.stop_absolute_normal = pow(EPSILON_MCH, 0.75);
 }
@@ -486,10 +483,10 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     x.allocate(n);
   }
   x.zero();
-  inform.x_norm = zero;
+  inform.x_norm = NLLS::zero;
   inform.obj = f;
   inform.hard_case = false;
-  double delta_lambda = zero;
+  double delta_lambda = NLLS::zero;
 
   //  Check that arguments are OK
   if (n < 0) {
@@ -510,7 +507,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
   double lambda = 0.0;
   //!  check for the trivial case
-  if (c_norm == zero && lambda_min >= zero) {
+  if (c_norm == NLLS::zero && lambda_min >= NLLS::zero) {
     if (control.equality_problem) {
       int i_hard = 1;                // TODO: is init value of 1 correct?
       for (int i = 1; i <= n; ++i) { // do i = 1, n
@@ -538,17 +535,17 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
         biggest(control.lower, -lambda_min, c_norm_over_radius - lambda_max);
     lambda_u = std::min(control.upper, c_norm_over_radius - lambda_min);
   } else {
-    lambda_l = biggest(control.lower, zero, -lambda_min,
+    lambda_l = biggest(control.lower, NLLS::zero, -lambda_min,
                        c_norm_over_radius - lambda_max);
     lambda_u = std::min(control.upper,
-                        std::max(zero, c_norm_over_radius - lambda_min));
+                        std::max(NLLS::zero, c_norm_over_radius - lambda_min));
   }
   lambda = lambda_l;
 
   //  check for the "hard case"
   if (lambda == -lambda_min) {
     int i_hard = 1; // TODO: is init value of 1 correct?
-    double c2 = zero;
+    double c2 = NLLS::zero;
     inform.hard_case = true;
     for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
       if (h(i) == lambda_min) {
@@ -567,7 +564,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
         if (h(i) != lambda_min) {
           x(i) = -c(i) / (h(i) + lambda);
         } else {
-          x(i) = zero;
+          x(i) = NLLS::zero;
         }
       }
       inform.x_norm = twoNorm(x);
@@ -592,7 +589,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
           x(i_hard) = x(i_hard) + alpha;
         }
         inform.x_norm = twoNorm(x);
-        inform.obj = f + half * (dotProduct(c, x) - lambda * pow(radius, 2));
+        inform.obj = f + NLLS::half * (dotProduct(c, x) - lambda * pow(radius, 2));
         return;
 
         //  the hard case didn't occur after all
@@ -600,7 +597,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
         inform.hard_case = false;
 
         //  compute the first derivative of ||x|(lambda)||^2 - radius^2
-        auto w_norm2 = zero;
+        auto w_norm2 = NLLS::zero;
         for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
           if (h(i) != lambda_min)
             w_norm2 = w_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 3);
@@ -639,8 +636,8 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     //  if the newton step lies within the trust region, exit
 
-    if (lambda == zero && inform.x_norm <= radius) {
-      inform.obj = f + half * dotProduct(c, x);
+    if (lambda == NLLS::zero && inform.x_norm <= radius) {
+      inform.obj = f + NLLS::half * dotProduct(c, x);
       return;
     }
 
@@ -676,7 +673,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
     //  form ||w||^2 = x^T H^-1(lambda) x
 
-    double w_norm2 = zero;
+    double w_norm2 = NLLS::zero;
     for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
       w_norm2 = w_norm2 + pow(c(i), 2) / pow(h(i) + lambda, 3);
     }
@@ -700,7 +697,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
       //  compute the second derivative of x^T x
 
-      double z_norm2 = zero;
+      double z_norm2 = NLLS::zero;
       for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
         z_norm2 = z_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 4);
       }
@@ -708,7 +705,7 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
       //  compute the third derivatives of x^T x
 
-      double v_norm2 = zero;
+      double v_norm2 = NLLS::zero;
       for (int i = 1; i <= n; ++i) { // for_do(i, 1, n)
         v_norm2 = v_norm2 + pow(c(i), 2) / pow((h(i) + lambda), 5);
       }
@@ -723,10 +720,10 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
       auto a_0 = pi_beta(0) - pow((radius), beta);
       auto a_1 = pi_beta(1);
-      auto a_2 = half * pi_beta(2);
+      auto a_2 = NLLS::half * pi_beta(2);
       auto a_3 = SIXTH * pi_beta(3);
       auto a_max = biggest(fabs(a_0), fabs(a_1), fabs(a_2), fabs(a_3));
-      if (a_max > zero) {
+      if (a_max > NLLS::zero) {
         a_0 = a_0 / a_max;
         a_1 = a_1 / a_max;
         a_2 = a_2 / a_max;
@@ -752,10 +749,10 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
       a_0 = pi_beta(0) - pow((radius), beta);
       a_1 = pi_beta(1);
-      a_2 = half * pi_beta(2);
+      a_2 = NLLS::half * pi_beta(2);
       a_3 = SIXTH * pi_beta(3);
       a_max = biggest(fabs(a_0), fabs(a_1), fabs(a_2), fabs(a_3));
-      if (a_max > zero) {
+      if (a_max > NLLS::zero) {
         a_0 = a_0 / a_max;
         a_1 = a_1 / a_max;
         a_2 = a_2 / a_max;
@@ -826,12 +823,12 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 
   DoubleFortranVector h_scale(n);
   auto scale_h = maxAbsVal(h); // MAXVAL( ABS( H ) )
-  if (scale_h > zero) {
+  if (scale_h > NLLS::zero) {
     for (int i = 1; i <= n; ++i) { // do i = 1, n
       if (fabs(h(i)) >= control.h_min * scale_h) {
         h_scale(i) = h(i) / scale_h;
       } else {
-        h_scale(i) = zero;
+        h_scale(i) = NLLS::zero;
       }
     }
   } else {
@@ -843,12 +840,12 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 
   DoubleFortranVector c_scale(n);
   auto scale_c = maxAbsVal(c); // maxval( abs( c ) )
-  if (scale_c > zero) {
+  if (scale_c > NLLS::zero) {
     for (int i = 1; i <= n; ++i) { // do i = 1, n
       if (fabs(c(i)) >= control.h_min * scale_c) {
         c_scale(i) = c(i) / scale_c;
       } else {
-        c_scale(i) = zero;
+        c_scale(i) = NLLS::zero;
       }
     }
   } else {
@@ -907,8 +904,8 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
                const DoubleFortranMatrix &hf, double Delta,
                DoubleFortranVector &d, double &normd,
-               const nlls_options &options, nlls_inform &inform,
-               solve_dtrs_work &w) {
+               const NLLS::nlls_options &options, NLLS::nlls_inform &inform,
+               NLLS::solve_dtrs_work &w) {
 
   dtrs_control_type dtrs_options;
   dtrs_inform_type dtrs_inform;
@@ -926,13 +923,13 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //
   //  first, find the matrix H and vector v
   //  Set A = J^T J
-  matmultInner(J, w.A);
+  NLLS::matmultInner(J, w.A);
   // add any second order information...
   // so A = J^T J + HF
   w.A += hf;
 
   // now form v = J^T f
-  multJt(J, f, w.v);
+  NLLS::multJt(J, f, w.v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
@@ -942,7 +939,7 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   // Now that we have the unprocessed matrices, we need to get an
   // eigendecomposition to make A diagonal
   //
-  allEigSymm(w.A, w.ew, w.ev);
+  NLLS::allEigSymm(w.A, w.ew, w.ev);
 
   // We can now change variables, setting y = Vp, getting
   // Vd = arg min_(Vx) v^T p + 0.5 * (Vp)^T D (Vp)
@@ -952,10 +949,10 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //       s.t.  ||x|| \leq Delta
   // <=>
   // we need to get the transformed vector v
-  multJt(w.ev, w.v, w.v_trans);
+  NLLS::multJt(w.ev, w.v, w.v_trans);
 
   // we've now got the vectors we need, pass to dtrsSolve
-  dtrsInitialize(dtrs_options, dtrs_inform);
+  dtrsInitialize(dtrs_options);
 
   auto n = J.len2();
   if (w.v_trans.len() != n) {
@@ -964,20 +961,20 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
 
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
     if (fabs(w.v_trans(ii)) < EPSILON_MCH) {
-      w.v_trans(ii) = zero;
+      w.v_trans(ii) = NLLS::zero;
     }
     if (fabs(w.ew(ii)) < EPSILON_MCH) {
-      w.ew(ii) = zero;
+      w.ew(ii) = NLLS::zero;
     }
   }
 
-  dtrsSolve(n, Delta, zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
+  dtrsSolve(n, Delta, NLLS::zero, w.v_trans, w.ew, w.d_trans, dtrs_options,
             dtrs_inform);
 
   // and return the un-transformed vector
-  multJ(w.ev, w.d_trans, d);
+  NLLS::multJ(w.ev, w.d_trans, d);
 
-  normd = norm2(d); // ! ||d||_D
+  normd = NLLS::norm2(d); // ! ||d||_D
 
   if (options.scale != 0) {
     for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1, n)

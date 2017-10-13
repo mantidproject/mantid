@@ -12,7 +12,7 @@ namespace Mantid {
 namespace CurveFitting {
 namespace FuncMinimisers {
 
-using namespace NLLS;
+//using namespace NLLS;
 
 TrustRegionMinimizer::TrustRegionMinimizer() : m_function() {
   declareProperty("InitialRadius", 100.0,
@@ -165,16 +165,16 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (options.calculate_svd_J) {
       // calculate the svd of J (if needed)
-      getSvdJ(w.J, w.smallest_sv(1), w.largest_sv(1));
+      NLLS::getSvdJ(w.J, w.smallest_sv(1), w.largest_sv(1));
     }
 
-    w.normF = norm2(w.f);
+    w.normF = NLLS::norm2(w.f);
     w.normF0 = w.normF;
 
     // g = -J^Tf
-    multJt(w.J, w.f, w.g);
+    NLLS::multJt(w.J, w.f, w.g);
     w.g *= -1.0;
-    w.normJF = norm2(w.g);
+    w.normJF = NLLS::norm2(w.g);
     w.normJF0 = w.normJF;
     w.normJFold = w.normJF;
 
@@ -232,7 +232,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
   w.iter = w.iter + 1;
   inform.iter = w.iter;
 
-  double rho = -one; // intialize rho as a negative value
+  double rho = -NLLS::one; // intialize rho as a negative value
   bool success = false;
   int no_reductions = 0;
   double normFnew = 0.0;
@@ -252,7 +252,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     w.Xnew += w.d;
     evalF(w.Xnew, w.fnew);
     inform.f_eval = inform.f_eval + 1;
-    normFnew = norm2(w.fnew);
+    normFnew = NLLS::norm2(w.fnew);
 
     // Get the value of the model
     //      md :=   m_k(d)
@@ -290,7 +290,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (!success) {
       // finally, check d makes progress
-      if (norm2(w.d) < std::numeric_limits<double>::epsilon() * norm2(w.Xnew)) {
+      if (NLLS::norm2(w.d) < std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
         //inform.status = NLLS_ERROR::X_NO_PROGRESS;
         m_errorString = "Failed to make progress.";
         return false;
@@ -308,7 +308,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     // g_old = -J_k^T r_k
     w.g_old = w.g;
     // g_mixed = -J_k^T r_{k+1}
-    multJt(w.J, w.fnew, w.g_mixed);
+    NLLS::multJt(w.J, w.fnew, w.g_mixed);
     w.g_mixed *= -1.0;
   }
 
@@ -317,16 +317,16 @@ bool TrustRegionMinimizer::iterate(size_t) {
   inform.g_eval = inform.g_eval + 1;
 
   if (options.calculate_svd_J) {
-    getSvdJ(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
+    NLLS::getSvdJ(w.J, w.smallest_sv(w.iter + 1), w.largest_sv(w.iter + 1));
   }
 
   // g = -J^Tf
-  multJt(w.J, w.f, w.g);
+  NLLS::multJt(w.J, w.f, w.g);
   w.g *= -1.0;
 
   w.normJFold = w.normJF;
   w.normF = normFnew;
-  w.normJF = norm2(w.g);
+  w.normJF = NLLS::norm2(w.g);
 
   // setup the vectors needed if second derivatives are not available
   if (!options.exact_second_derivatives) {
