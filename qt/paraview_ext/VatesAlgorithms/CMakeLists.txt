@@ -92,6 +92,7 @@ target_link_libraries( VatesAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LIN
   DataHandling
   Kernel
   DataObjects
+  Indexing
   vtkCommonCore
   vtkCommonDataModel
   vtkIOLegacy

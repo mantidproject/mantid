@@ -44,7 +44,7 @@ Usage
     
     SaveFocusedXYE(ws, path)
     path = os.path.join(os.path.expanduser("~"), "myworkspace-0.ascii")
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 Output:
 
@@ -78,7 +78,7 @@ Output:
     path = os.path.join(os.path.expanduser("~"), file_name)
 
     SaveFocusedXYE(ws, path, SplitFiles=False, IncludeHeader=True, Format='MAUD')
-    print os.path.isfile(path)
+    print(os.path.isfile(path))
 
 
 Output:

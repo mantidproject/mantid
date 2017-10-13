@@ -143,7 +143,7 @@ MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
       else if (caseSensitive && name == s)
         return w;
       else {
-        QString text = s;
+        const QString &text = s;
         if (name == text.toLower())
           return w;
       }
@@ -156,7 +156,7 @@ MdiSubWindow *Folder::findWindow(const QString &s, bool windowNames,
       else if (caseSensitive && label == s)
         return w;
       else {
-        QString text = s;
+        const QString &text = s;
         if (label == text.toLower())
           return w;
       }

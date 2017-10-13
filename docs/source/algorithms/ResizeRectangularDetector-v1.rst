@@ -50,8 +50,8 @@ Usage
 	bank1=i.getComponentByName('bank1')
 	bank2=i.getComponentByName('bank2')
 
-	print ("bank 1 was scaled and is now %.2f by %.2f" % (bank1.xsize(), bank1.ysize()))
-	print ("bank 2 was not scaled and remains %.2f by %.2f" % (bank2.xsize(), bank2.ysize()))
+	print ("bank 1 was scaled and is now {:.2f} by {:.2f}".format(bank1.xsize(), bank1.ysize()))
+	print ("bank 2 was not scaled and remains {:.2f} by {:.2f}".format(bank2.xsize(), bank2.ysize()))
 
 Output:
 

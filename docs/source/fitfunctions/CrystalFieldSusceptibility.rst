@@ -79,7 +79,7 @@ The `x`-axis is given in Kelvin, and the susceptibility (`y`-axis) is in cgs uni
     for i in range(parws.rowCount()):
         row = parws.row(i)
         if row['Value'] != 0:
-            print "%7s = % 7.5g" % (row['Name'], row['Value'])
+            print("%7s = % 7.5g" % (row['Name'], row['Value']))
 
 .. testcleanup:: ExampleCrystalFieldSusceptibility
 

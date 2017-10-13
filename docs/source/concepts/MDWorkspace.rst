@@ -126,7 +126,7 @@ If you want to check if a variable points to something that is an MDWorkspace Wo
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
 
     if isinstance(mdws, IMDEventWorkspace):
-        print mdws.name() + " is a " + mdws.id()
+        print(mdws.name() + " is a " + mdws.id())
 
 Output:
 
@@ -147,16 +147,16 @@ For a full list of the available properties and operation look at the :py:obj:`I
                          Names='Q_lab_x,Q_lab_y', Units='A,B')
    FakeMDEventData(ws, UniformParams="1000000")
 
-   print "Number of events =", ws.getNEvents()
-   print "Number of dimensions =", ws.getNumDims()
-   print "Normalization =", ws.displayNormalization()
+   print("Number of events = {}".format(ws.getNEvents()))
+   print("Number of dimensions = {}".format(ws.getNumDims()))
+   print("Normalization = {}".format(ws.displayNormalization()))
    for i in range(ws.getNumDims()):
        dimension = ws.getDimension(i)
-       print "\tDimension {0} Name: {1}".format(i,
-          dimension.name)
+       print("\tDimension {0} Name: {1}".format(i,
+          dimension.name))
 
    bc =ws.getBoxController()
-   print "Is the workspace using a file back end?", bc.isFileBacked()
+   print("Is the workspace using a file back end? {}".format(bc.isFileBacked()))
    backEndFilename = bc.getFilename()
 
 .. testoutput:: MDWorkspaceProperties
@@ -181,23 +181,23 @@ As a generic multi dimensional container being able to access information about 
                         Names='Q_lab_x,Q_lab_y,Q_lab_z', Units='1\A,1\A,1\A')
    FakeMDEventData(ws, UniformParams="1000000")
 
-   print "Number of dimensions =", ws.getNumDims()
+   print("Number of dimensions = {}".format(ws.getNumDims()))
    for i in range(ws.getNumDims()):
       dimension = ws.getDimension(i)
-      print "\tDimension {0} Name: {1} id: {2} Range: {3}-{4} {5}".format(i,
+      print("\tDimension {0} Name: {1} id: {2} Range: {3}-{4} {5}".format(i,
           dimension.getDimensionId(),
           dimension.name,
           dimension.getMinimum(),
           dimension.getMaximum(),
-          dimension.getUnits())
+          dimension.getUnits()))
 
-   print "The dimension assigned to X =", ws.getXDimension().name
-   print "The dimension assigned to Y =", ws.getYDimension().name
+   print("The dimension assigned to X = {}".format(ws.getXDimension().name))
+   print("The dimension assigned to Y = {}".format(ws.getYDimension().name))
    try:
-      print "The dimension assigned to Z =", ws.getZDimension().name
+      print("The dimension assigned to Z = {}".format(ws.getZDimension().name))
    except RuntimeError:
        # if the dimension does not exist you will get a RuntimeError
-      print "Workspace does not have a Z dimension"
+      print("Workspace does not have a Z dimension")
 
    # you can also get a dimension by it's id
    dim = ws.getDimensionIndexById("Q_lab_x")

@@ -731,7 +731,7 @@ std::pair<std::string, std::string> findLogRange(
     const std::vector<Workspace_sptr> &workspaces, const std::string &logName,
     bool (*isLessThan)(const std::string &first, const std::string &second)) {
   std::string smallest, largest;
-  for (auto ws : workspaces) {
+  for (const auto &ws : workspaces) {
     auto range = findLogRange(ws, logName, isLessThan);
     if (smallest.empty() || isLessThan(range.first, smallest)) {
       smallest = range.first;
