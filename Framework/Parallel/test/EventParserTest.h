@@ -177,16 +177,16 @@ public:
 
     parser->eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, range.bankIndex);
-    std::vector<std::vector<EventListEntry>> rankData;
+    std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
+        rankData;
     // event_id now contains spectrum indices
     parser->extractEventsForRanks(rankData, event_id.data(),
                                   event_time_offset.data() + range.eventOffset,
                                   range);
-    TS_ASSERT(std::equal(rankData[0].cbegin(), rankData[0].cend(),
-                         event_time_offset.cbegin(),
-                         [](const EventListEntry &e, const int64_t tof) {
-                           return static_cast<double>(tof) == e.tofEvent.tof();
-                         }));
+    TS_ASSERT(std::equal(
+        rankData[0].cbegin(), rankData[0].cend(), event_time_offset.cbegin(),
+        [](const EventParser<int32_t, int64_t, int64_t>::Event &e,
+           const int64_t tof) { return static_cast<double>(tof) == e.tof; }));
     doTestRankData(rankData, gen, range);
   }
 
@@ -200,16 +200,17 @@ public:
 
     parser->eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, range.bankIndex);
-    std::vector<std::vector<EventListEntry>> rankData;
+    std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
+        rankData;
     // event_id now contains spectrum indices
     parser->extractEventsForRanks(rankData, event_id.data(),
                                   event_time_offset.data() + range.eventOffset,
                                   range);
-    TS_ASSERT(std::equal(rankData[0].cbegin(), rankData[0].cend(),
-                         event_time_offset.cbegin() + range.eventOffset,
-                         [](const EventListEntry &e, const int64_t tof) {
-                           return static_cast<double>(tof) == e.tofEvent.tof();
-                         }));
+    TS_ASSERT(std::equal(
+        rankData[0].cbegin(), rankData[0].cend(),
+        event_time_offset.cbegin() + range.eventOffset,
+        [](const EventParser<int32_t, int64_t, int64_t>::Event &e,
+           const int64_t tof) { return static_cast<double>(tof) == e.tof; }));
     doTestRankData(rankData, gen, range);
   }
 
@@ -314,18 +315,19 @@ public:
   }
 
 private:
-  template <typename IndexType, typename TimeZeroType, typename TimeOffsetType>
+  template <typename T, typename IndexType, typename TimeZeroType,
+            typename TimeOffsetType>
   void
-  doTestRankData(const std::vector<std::vector<EventListEntry>> &rankData,
+  doTestRankData(const T &rankData,
                  anonymous::FakeParserDataGenerator<IndexType, TimeZeroType,
                                                     TimeOffsetType> &gen,
                  const Chunker::LoadRange &range) {
-    PulseTimeGenerator<int32_t, int64_t> pulseTimes(gen.eventIndex(0),
-                                                    gen.eventTimeZero(), 0);
+    PulseTimeGenerator<IndexType, TimeZeroType> pulseTimes(
+        gen.eventIndex(0), gen.eventTimeZero(), 0);
     pulseTimes.seek(range.eventOffset);
     TS_ASSERT_EQUALS(rankData[0].size(), range.eventCount);
     for (const auto &item : rankData[0]) {
-      TS_ASSERT_EQUALS(item.tofEvent.pulseTime(), pulseTimes.next());
+      TS_ASSERT_EQUALS(item.pulseTime, pulseTimes.next());
     }
   }
 };
@@ -362,7 +364,8 @@ public:
   }
 
   void testExtractEventsPerformance() {
-    std::vector<std::vector<EventListEntry>> rankData;
+    std::vector<std::vector<EventParser<int32_t, int64_t, double>::Event>>
+        rankData;
     for (size_t bank = 0; bank < NUM_BANKS; bank++)
       parser->extractEventsForRanks(rankData, event_ids[bank].data(),
                                     event_time_offsets[bank].data(),

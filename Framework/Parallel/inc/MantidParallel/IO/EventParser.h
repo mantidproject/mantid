@@ -22,11 +22,6 @@ namespace Mantid {
 namespace Parallel {
 namespace IO {
 
-struct MANTID_PARALLEL_DLL EventListEntry {
-  int32_t globalIndex; // global spectrum index
-  Types::Event::TofEvent tofEvent;
-};
-
 /** Distributed (MPI) parsing of Nexus events from a data stream. Data is
 distributed accross MPI ranks for writing to event lists on the correct target
 rank.
@@ -59,6 +54,12 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 class EventParser
     : public EventDataSink<IndexType, TimeZeroType, TimeOffsetType> {
 public:
+  struct Event {
+    int32_t index; // local spectrum index
+    TimeOffsetType tof;
+    Types::Core::DateAndTime pulseTime;
+  };
+
   EventParser(std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
@@ -71,11 +72,10 @@ public:
                   const TimeOffsetType *event_time_offset_start,
                   const Chunker::LoadRange &range) override;
 
-  void redistributeDataMPI(
-      std::vector<EventListEntry> &result,
-      const std::vector<std::vector<EventListEntry>> &data) const;
+  void redistributeDataMPI(std::vector<Event> &result,
+                           const std::vector<std::vector<Event>> &data) const;
 
-  void extractEventsForRanks(std::vector<std::vector<EventListEntry>> &rankData,
+  void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
                              const int32_t *globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
                              const Chunker::LoadRange &range);
@@ -83,9 +83,9 @@ public:
   void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
                                     size_t bankIndex) const;
 
-  void populateEventList(const std::vector<EventListEntry> &events);
+  void populateEventList(const std::vector<Event> &events);
 
-  const std::vector<std::vector<EventListEntry>> &rankData() const {
+  const std::vector<std::vector<Event>> &rankData() const {
     return m_allRankData;
   }
 
@@ -99,8 +99,8 @@ private:
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
   PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
-  std::vector<std::vector<EventListEntry>> m_allRankData;
-  std::vector<EventListEntry> m_thisRankData;
+  std::vector<std::vector<Event>> m_allRankData;
+  std::vector<Event> m_thisRankData;
   std::future<void> m_future;
   Communicator m_comm;
 };
@@ -171,7 +171,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    extractEventsForRanks(std::vector<std::vector<EventListEntry>> &rankData,
+    extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
                           const int32_t *globalSpectrumIndex,
                           const TimeOffsetType *eventTimeOffset,
                           const Chunker::LoadRange &range) {
@@ -182,11 +182,11 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
   m_pulseTimes.seek(range.eventOffset);
   for (size_t event = 0; event < range.eventCount; ++event) {
+    // Currently this supports only a hard-coded round-robin partitioning.
     int rank = globalSpectrumIndex[event] % m_comm.size();
+    auto index = globalSpectrumIndex[event] / m_comm.size();
     rankData[rank].emplace_back(
-        EventListEntry{globalSpectrumIndex[event],
-                       TofEvent{static_cast<double>(eventTimeOffset[event]),
-                                m_pulseTimes.next()}});
+        Event{index, eventTimeOffset[event], m_pulseTimes.next()});
   }
 }
 
@@ -198,8 +198,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
-    std::vector<EventListEntry> &result,
-    const std::vector<std::vector<EventListEntry>> &data) const {
+    std::vector<Event> &result,
+    const std::vector<std::vector<Event>> &data) const {
   if (m_comm.size() == 1) {
     result = data.front();
     return;
@@ -207,7 +207,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
 
   std::vector<int> sizes(data.size());
   std::transform(data.cbegin(), data.cend(), sizes.begin(),
-                 [](const std::vector<EventListEntry> &vec) {
+                 [](const std::vector<Event> &vec) {
                    return static_cast<int>(vec.size());
                  });
   std::vector<int> recv_sizes(data.size());
@@ -220,7 +220,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
   for (int rank = 0; rank < m_comm.size(); ++rank) {
     int tag = 0;
     auto buffer = reinterpret_cast<char *>(result.data() + offset);
-    int size = recv_sizes[rank] * static_cast<int>(sizeof(EventListEntry));
+    int size = recv_sizes[rank] * static_cast<int>(sizeof(Event));
     recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
     offset += recv_sizes[rank];
   }
@@ -231,7 +231,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
     int tag = 0;
     send_requests.emplace_back(
         m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
-                     static_cast<int>(vec.size() * sizeof(EventListEntry))));
+                     static_cast<int>(vec.size() * sizeof(Event))));
   }
 
   Parallel::wait_all(send_requests.begin(), send_requests.end());
@@ -243,17 +243,16 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
-    const std::vector<EventListEntry> &events) {
+    const std::vector<Event> &events) {
   for (const auto &event : events) {
-    // Currently this supports only a hard-code round-robin partitioning.
-    auto index = event.globalIndex / m_comm.size();
-    m_eventLists[index]->emplace_back(event.tofEvent);
+    m_eventLists[event.index]->emplace_back(event.tof, event.pulseTime);
     // In general `index` is random so this loop suffers from frequent cache
     // misses (probably because the hardware prefetchers cannot keep up with the
     // number of different memory locations that are getting accessed). We
     // manually prefetch into L2 cache to reduce the amount of misses.
-    _mm_prefetch(reinterpret_cast<char *>(&m_eventLists[index]->back() + 1),
-                 _MM_HINT_T1);
+    _mm_prefetch(
+        reinterpret_cast<char *>(&m_eventLists[event.index]->back() + 1),
+        _MM_HINT_T1);
   }
 }
 
@@ -272,7 +271,8 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
-  fprintf(stderr, "parsing %lu events from bank %lu\n", range.eventCount, range.bankIndex);
+  fprintf(stderr, "parsing %lu events from bank %lu\n", range.eventCount,
+          range.bankIndex);
 
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
