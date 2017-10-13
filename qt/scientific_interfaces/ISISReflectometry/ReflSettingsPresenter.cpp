@@ -1,11 +1,11 @@
 #include "ReflSettingsPresenter.h"
+#include "IReflSettingsTabPresenter.h"
+#include "IReflSettingsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "IReflSettingsTabPresenter.h"
-#include "IReflSettingsView.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 
 namespace MantidQt {
@@ -281,38 +281,36 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
-
   auto runs = m_view->getTransmissionRuns();
   if (runs.empty())
     return "";
 
   std::vector<std::string> transRuns;
   boost::split(transRuns, runs, boost::is_any_of(","));
-
-  if (transRuns.size() > 2)
-    throw std::invalid_argument("Only one transmission run or two "
-                                "transmission runs separated by ',' "
-                                "are allowed.");
-
+  
   if (loadRuns) {
     for (const auto &run : transRuns) {
-      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
-        continue;
-      // Load transmission runs and put them in the ADS
-      IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("LoadISISNexus");
-      alg->setProperty("Filename", run);
-      alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
-      alg->execute();
+      if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
+        // Load transmission runs and put them in the ADS
+        IAlgorithm_sptr alg =
+            AlgorithmManager::Instance().create("LoadISISNexus");
+        alg->setProperty("Filename", run);
+        alg->setPropertyValue("OutputWorkspace", "TRANS_" + run);
+        alg->execute();
+      }
     }
   }
 
-  // Attach labels to the runs and return them as a single string
-  std::string labelledRuns = "FirstTransmissionRun=" + transRuns[0];
-  if (runs.size() > 1)
-    labelledRuns += ",SecondTransmissionRun=" + transRuns[1];
-
-  return labelledRuns;
+  switch(transRuns.size()) {
+  case 1:
+    return "FirstTransmissionRun=" + transRuns[0];
+  case 2:
+    return "FirstTransmissionRun=" + transRuns[0] + ",SecondTransmissionRun=" + transRuns[1];
+  default:
+    throw std::invalid_argument("Only one transmission run or two "
+                                "transmission runs separated by ',' "
+                                "are allowed.");
+  }
 }
 
 /** Returns global options for 'Stitch1DMany'
