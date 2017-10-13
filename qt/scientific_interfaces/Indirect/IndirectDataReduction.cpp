@@ -76,7 +76,7 @@ IndirectDataReduction::~IndirectDataReduction() {
  */
 void IndirectDataReduction::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect Data Reduction"));
+      nullptr, QString("Indirect Data Reduction"));
 }
 
 /**

@@ -1094,7 +1094,7 @@ public:
   }
 
   void test_maskNULL() {
-    doTestMasking(NULL, 0); // 1000 out of 1000 bins masked
+    doTestMasking(nullptr, 0); // 1000 out of 1000 bins masked
   }
 
   void test_mask_everything() {

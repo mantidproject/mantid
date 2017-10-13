@@ -159,25 +159,6 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         AbinsParameters.powder_data_group = "NiceName"
         self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
 
-    # Test for rebinning parameters
-    def test_wrong_bin_width(self):
-
-        # width cannot be 0
-        AbinsParameters.bin_width = 0.0
-        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
-        # width must be float
-        AbinsParameters.bin_width = 5
-        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
-        # width must be positive
-        AbinsParameters.bin_width = -1.0
-        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
-        # width should be smaller than 10 cm^-1
-        AbinsParameters.bin_width = 20.0
-        self.assertRaises(RuntimeError, Abins, PhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name)
-
     def test_wrong_min_wavenumber(self):
 
         # minimum wavenumber cannot be negative

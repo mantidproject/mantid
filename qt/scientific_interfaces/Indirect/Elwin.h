@@ -12,7 +12,7 @@ class DLLExport Elwin : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Elwin(QWidget *parent = 0);
+  Elwin(QWidget *parent = nullptr);
 
 private:
   void setup() override;

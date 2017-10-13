@@ -123,7 +123,7 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   // Set default UI state
-  sliceTwoRanges(0, false);
+  sliceTwoRanges(nullptr, false);
   m_uiForm.ckUseCalibration->setChecked(false);
   sliceCalib(false);
 }

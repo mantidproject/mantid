@@ -11,7 +11,7 @@ GCC_DIAG_OFF(literal-suffix)
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include <iomanip>
-#include <time.h>
+#include <ctime>
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid {

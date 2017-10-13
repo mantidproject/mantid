@@ -11,7 +11,7 @@ class DLLExport Iqt : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Iqt(QWidget *parent = 0);
+  Iqt(QWidget *parent = nullptr);
 
 private:
   void setup() override;

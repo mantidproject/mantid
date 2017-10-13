@@ -23,14 +23,12 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 using API::ExperimentInfo;
-using Geometry::MDHistoDimension;
 using Geometry::MDHistoDimensionBuilder;
 using Geometry::Goniometer;
 using Geometry::OrientedLattice;
 using Kernel::BinaryStreamReader;
 using Kernel::Logger;
 using Kernel::DblMatrix;
-using Kernel::Matrix;
 using Kernel::V3D;
 
 namespace {

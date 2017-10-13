@@ -67,7 +67,7 @@ Usage
    # Load dataset
    ws = LoadDNSLegacy(datafile, Normalization='monitor')
 
-   print "This workspace has", ws.getNumDims(), "dimensions and has", ws.getNumberHistograms(), "histograms."
+   print("This workspace has {} dimensions and has {} histograms.".format(ws.getNumDims(), ws.getNumberHistograms()))
 
 Output:
 

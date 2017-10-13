@@ -22,7 +22,7 @@ public:
 
 public:
   /// Default Constructor
-  explicit IndirectDiffractionReduction(QWidget *parent = 0);
+  explicit IndirectDiffractionReduction(QWidget *parent = nullptr);
   ~IndirectDiffractionReduction() override;
 
 public slots:

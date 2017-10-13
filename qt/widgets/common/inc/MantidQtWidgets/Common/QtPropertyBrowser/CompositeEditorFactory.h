@@ -19,7 +19,7 @@ class CompositeEditorFactory : public QtAbstractEditorFactory<ManagerType> {
 public:
   CompositeEditorFactory(QObject *parent, FactoryBaseType *defaultFactory)
       : QtAbstractEditorFactory<ManagerType>(parent),
-        m_defaultFactory(defaultFactory), m_secondaryFactory(NULL) {}
+        m_defaultFactory(defaultFactory), m_secondaryFactory(nullptr) {}
 
   void setSecondaryFactory(const QString &optionName,
                            FactoryBaseType *factory) {

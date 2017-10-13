@@ -37,6 +37,8 @@ SliceViewer Improvements
 ########################
 
 - SliceViewer input of number of bins, thickness, and slice point now waits until the editing is finished to rebin or changing slice point instead of changing with each digit entered.
+- Fixed the ability to drag & drop files into Mantid OSX >=10.10
+- The welcome dialog has been redesigned to use less of the screen to fit better onto laptops with small high resolution screens that use screen scaling.
 
 VSI Improvements
 ################
@@ -70,7 +72,6 @@ Bugs Resolved
 - Fixed a bug where setting a table column's plot type would not be saved to the workspace correctly.
 - We have improved the documentation for the `RewriteSpectraMap` property of the `LoadInstrument`
   algorithm
-- Fixed a bug where replacing a workspace with X errors with a workspace without would cause a crash if the workspace's data view was open.
 - Fixed a bug where replacing a workspace with X errors with a workspace without the errors while Data View was open would result in a crash.
 
 Full list of

@@ -38,7 +38,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 //----------------------
 /// Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent)
-    : UserSubWindow(parent), m_valDbl(NULL),
+    : UserSubWindow(parent), m_valDbl(nullptr),
       m_settingsGroup("CustomInterfaces/DEMON"),
       m_batchAlgoRunner(new BatchAlgorithmRunner(parent)) {}
 
@@ -229,8 +229,7 @@ void IndirectDiffractionReduction::plotResults() {
  * Handles saving the reductions from the generic algorithm.
  */
 void IndirectDiffractionReduction::saveReductions() {
-
-  for (const auto wsName : m_plotWorkspaces) {
+  for (const auto &wsName : m_plotWorkspaces) {
     const auto workspaceExists =
         AnalysisDataService::Instance().doesExist(wsName);
     if (workspaceExists) {
@@ -729,7 +728,7 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
  */
 void IndirectDiffractionReduction::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect Diffraction"));
+      nullptr, QString("Indirect Diffraction"));
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

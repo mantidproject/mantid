@@ -23,7 +23,7 @@ class DLLExport IqtFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  IqtFit(QWidget *parent = 0);
+  IqtFit(QWidget *parent = nullptr);
 
 private:
   void setup() override;

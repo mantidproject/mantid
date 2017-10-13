@@ -6,6 +6,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {

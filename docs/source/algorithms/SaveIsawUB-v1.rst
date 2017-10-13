@@ -26,24 +26,24 @@ Usage
 .. testcode:: SaveIsawUB
 
     #A workspace with some UB matrix    
-    w=CreateSingleValuedWorkspace()
-    SetUB(w,2,4,5,90,90,90,"0,0,1","1,0,0")
+    w = CreateSingleValuedWorkspace()
+    SetUB(w, 2, 4, 5, 90, 90, 90, "0,0,1", "1,0,0")
     #run the algorithm
     import mantid   
-    filename=mantid.config.getString("defaultsave.directory")+"saveIsawUBTest.mat"  
-    SaveIsawUB(w,filename)
+    filename = mantid.config.getString("defaultsave.directory") + "saveIsawUBTest.mat"  
+    SaveIsawUB(w, filename)
     
     #check if the correct results are written in the file
-    f=open(filename,"r")
-    x,y,z=map(float,f.readline().split())
+    f = open(filename, "r")
+    x, y, z = map(float, f.readline().split())
     if (x==0) and (y==0.5) and (z==0):
-        print "The first line is 0 0.5 0"
-    x,y,z=map(float,f.readline().split())
+        print("The first line is 0 0.5 0")
+    x, y, z = map(float, f.readline().split())
     if (x==0) and (y==0) and (z==0.25):
-        print "The second line is 0 0 0.25"
-    x,y,z=map(float,f.readline().split())
+        print("The second line is 0 0 0.25")
+    x, y, z = map(float, f.readline().split())
     if (x==0.2) and (y==0) and (z==0):
-        print "The third line is 0.2 0 0"
+        print("The third line is 0.2 0 0")
     f.close()
   
 

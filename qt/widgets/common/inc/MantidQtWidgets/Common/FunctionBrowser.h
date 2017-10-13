@@ -75,7 +75,7 @@ public:
   };
 
   /// Constructor
-  FunctionBrowser(QWidget *parent = NULL, bool multi = false);
+  FunctionBrowser(QWidget *parent = nullptr, bool multi = false);
   /// Destructor
   virtual ~FunctionBrowser() override;
   /// Clear the contents
@@ -87,7 +87,7 @@ public:
   /// Return FunctionFactory function string
   QString getFunctionString() override;
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = NULL,
+  Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
                                           bool attributesOnly = false);
   /// Check if a function is set
   bool hasFunction() const;
@@ -204,7 +204,7 @@ protected:
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties
-  void updateFunctionIndices(QtProperty *prop = NULL, QString index = "");
+  void updateFunctionIndices(QtProperty *prop = nullptr, QString index = "");
   /// Get property of the overall function
   AProperty getFunctionProperty() const;
   /// Check if property is a function group

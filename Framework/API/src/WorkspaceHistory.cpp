@@ -359,12 +359,12 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   Poco::DateTime start_timedate;
   // This is needed by the Poco parsing function
   int tzdiff(-1);
-  Mantid::Kernel::DateAndTime utc_start;
+  Mantid::Types::Core::DateAndTime utc_start;
   if (!Poco::DateTimeParser::tryParse("%Y-%b-%d %H:%M:%S", date + " " + time,
                                       start_timedate, tzdiff)) {
     g_log.warning() << "Error parsing start time in algorithm history entry."
                     << "\n";
-    utc_start = Kernel::DateAndTime::defaultTime();
+    utc_start = Types::Core::DateAndTime::defaultTime();
   }
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);

@@ -239,13 +239,14 @@ int main(int argc, char **argv) {
     return app.exec();
   } catch (std::exception &e) {
     QMessageBox::critical(
-        0, "Mantid - Error",
+        nullptr, "Mantid - Error",
         QString("An unhandled exception has been caught. MantidPlot will have "
                 "to close. Details:\n\n") +
             e.what());
   } catch (...) {
-    QMessageBox::critical(0, "Mantid - Error", "An unhandled exception has "
-                                               "been caught. MantidPlot will "
-                                               "have to close.");
+    QMessageBox::critical(nullptr, "Mantid - Error",
+                          "An unhandled exception has "
+                          "been caught. MantidPlot will "
+                          "have to close.");
   }
 }

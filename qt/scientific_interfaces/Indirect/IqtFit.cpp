@@ -25,9 +25,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_iqtFTree(NULL),
-      m_iqtFRangeManager(NULL), m_fixedProps(), m_ties(), m_runMin(-1),
-      m_runMax(-1) {
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
+      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
+      m_ties(), m_runMin(-1), m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -1007,7 +1007,7 @@ void IqtFit::updateFitFunctions() {
 }
 
 void IqtFit::fitContextMenu(const QPoint &) {
-  QtBrowserItem *item(NULL);
+  QtBrowserItem *item(nullptr);
 
   item = m_iqtFTree->currentItem();
 

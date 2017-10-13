@@ -239,7 +239,7 @@ bool MuonSequentialFitDialog::isInputValid() {
  */
 void MuonSequentialFitDialog::updateControlButtonType(DialogState newState) {
   // Disconnect everything connected to pressed() signal of the button
-  disconnect(m_ui.controlButton, SIGNAL(pressed()), 0, 0);
+  disconnect(m_ui.controlButton, SIGNAL(pressed()), nullptr, nullptr);
 
   // Connect to appropriate slot
   auto buttonSlot = (newState == Running) ? SLOT(stopFit()) : SLOT(startFit());

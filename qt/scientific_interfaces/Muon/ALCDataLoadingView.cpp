@@ -15,7 +15,7 @@ const std::string ALCDataLoadingView::g_autoString = "Auto";
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
     : m_widget(widget), m_dataCurve(new QwtPlotCurve()),
-      m_dataErrorCurve(NULL) {}
+      m_dataErrorCurve(nullptr) {}
 
 ALCDataLoadingView::~ALCDataLoadingView() {
   m_dataCurve->detach();
@@ -229,7 +229,7 @@ void ALCDataLoadingView::setAvailableItems(
   }
 
   // Add new items
-  for (const auto item : items) {
+  for (const auto &item : items) {
     if (item != previousValue) { // has already been added
       comboBox->addItem(QString::fromStdString(item));
     }
@@ -252,7 +252,7 @@ void ALCDataLoadingView::setTimeRange(double tMin, double tMax) {
 }
 
 void ALCDataLoadingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
 }
 
 void ALCDataLoadingView::disableAll() {

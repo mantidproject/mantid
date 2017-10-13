@@ -66,8 +66,6 @@ using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
 using MantidQt::API::AlgorithmRunner;
 
 namespace MantidQt {
@@ -89,7 +87,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL), m_lastRatioState(Guess),
+      m_peaksSliderWidget(nullptr), m_lastRatioState(Guess),
       m_holdDisplayUpdates(false) {
 
   ui.setupUi(this);
@@ -2676,7 +2674,7 @@ void SliceViewer::updatePeakOverlaySliderWidget() {
 * to update the collection of peaks presetners.
 */
 void SliceViewer::updatePeaksOverlay() {
-  if (m_peaksSliderWidget != NULL) {
+  if (m_peaksSliderWidget != nullptr) {
     auto xInterval = getXLimits();
     auto yInterval = getYLimits();
     PeakBoundingBox viewableRegion(
@@ -2896,7 +2894,7 @@ void SliceViewer::loadFromProject(const std::string &lines) {
     API::TSVSerialiser peaks(peaksViewerLines);
 
     QStringList names;
-    for (auto section : peaks.sections("peaksworkspace")) {
+    for (const auto &section : peaks.sections("peaksworkspace")) {
       API::TSVSerialiser sec(section);
       QString name;
 

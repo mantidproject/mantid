@@ -73,4 +73,4 @@ def setTableHeaders(table):
                 +"}"
             table.setStyleSheet(styleSheet)
             return styleSheet
-        return 
+        return

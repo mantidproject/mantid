@@ -48,7 +48,7 @@ class DLLExport IndirectDataAnalysisTab : public IndirectTab {
 
 public:
   /// Constructor
-  IndirectDataAnalysisTab(QWidget *parent = 0);
+  IndirectDataAnalysisTab(QWidget *parent = nullptr);
 
   /// Loads the tab's settings.
   void loadTabSettings(const QSettings &settings);

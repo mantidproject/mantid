@@ -92,7 +92,7 @@ DataObjects::Workspace2D_sptr createTestingWS(bool noLogs = false) {
       Kernel::make_unique<Kernel::TimeSeriesProperty<double>>("is_running");
 
   for (int i = 0; i < 10; i++) {
-    auto time = Kernel::DateAndTime(10 * i, 0);
+    auto time = Types::Core::DateAndTime(10 * i, 0);
     chopDelayLog->addValue(time, delay);
     chopSpeedLog->addValue(time, chopSpeed);
     isRunning->addValue(time, 1.);
@@ -118,7 +118,7 @@ public:
     GetAllEi::findGuessOpeningTimes(TOF_range, ChopDelay, Period,
                                     guess_opening_times);
   }
-  bool filterLogProvided() const { return (m_pFilterLog != NULL); }
+  bool filterLogProvided() const { return (m_pFilterLog != nullptr); }
   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
                          const std::string &propertyName) {
     std::vector<Kernel::SplittingInterval> splitter;
@@ -238,13 +238,13 @@ public:
     auto chopSpeed = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
         "Chopper_Speed");
     for (int i = 0; i < 10; i++) {
-      chopSpeed->addValue(Kernel::DateAndTime(10000 + 10 * i, 0), 1.);
+      chopSpeed->addValue(Types::Core::DateAndTime(10000 + 10 * i, 0), 1.);
     }
     for (int i = 0; i < 10; i++) {
-      chopSpeed->addValue(Kernel::DateAndTime(100 + 10 * i, 0), 10.);
+      chopSpeed->addValue(Types::Core::DateAndTime(100 + 10 * i, 0), 10.);
     }
     for (int i = 0; i < 10; i++) {
-      chopSpeed->addValue(Kernel::DateAndTime(10 * i, 0), 100.);
+      chopSpeed->addValue(Types::Core::DateAndTime(10 * i, 0), 100.);
     }
     ws->mutableRun().addLogData(chopSpeed.release());
 
@@ -253,13 +253,13 @@ public:
         "Attempt to get log without start/stop time set should fail",
         m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog"), std::runtime_error);
 
-    ws->mutableRun().setStartAndEndTime(Kernel::DateAndTime(90, 0),
-                                        Kernel::DateAndTime(10000, 0));
+    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(90, 0),
+                                        Types::Core::DateAndTime(10000, 0));
     double val = m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog");
     TS_ASSERT_DELTA(val, (10 * 10 + 100.) / 11., 1.e-6);
 
-    ws->mutableRun().setStartAndEndTime(Kernel::DateAndTime(100, 0),
-                                        Kernel::DateAndTime(10000, 0));
+    ws->mutableRun().setStartAndEndTime(Types::Core::DateAndTime(100, 0),
+                                        Types::Core::DateAndTime(10000, 0));
     val = m_getAllEi.getAvrgLogValue(ws, "ChopperSpeedLog");
     TS_ASSERT_DELTA(val, 10., 1.e-6);
 
@@ -270,7 +270,7 @@ public:
         "proton_charge");
 
     for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(200 + 10 * i, 0);
+      auto time = Types::Core::DateAndTime(200 + 10 * i, 0);
       chopDelay->addValue(time, 10.);
       if (i < 2) {
         goodFram->addValue(time, 1);
@@ -279,12 +279,12 @@ public:
       }
     }
     for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(100 + 10 * i, 0);
+      auto time = Types::Core::DateAndTime(100 + 10 * i, 0);
       chopDelay->addValue(time, 0.1);
       goodFram->addValue(time, 1);
     }
     for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(10 * i, 0);
+      auto time = Types::Core::DateAndTime(10 * i, 0);
       chopDelay->addValue(time, 1.);
       goodFram->addValue(time, 0);
     }
@@ -304,7 +304,7 @@ public:
     goodFram = Kernel::make_unique<Kernel::TimeSeriesProperty<double>>(
         "proton_charge");
     for (int i = 0; i < 10; i++) {
-      auto time = Kernel::DateAndTime(100 + 10 * i, 0);
+      auto time = Types::Core::DateAndTime(100 + 10 * i, 0);
       goodFram->addValue(time, 1);
     }
 
@@ -340,7 +340,7 @@ public:
 
     double gf(0);
     for (int i = 0; i < 50; i++) {
-      auto time = Kernel::DateAndTime(10 * i, 0);
+      auto time = Types::Core::DateAndTime(10 * i, 0);
       if (i > 10 && i < 20) {
         chopDelay->addValue(time, 100.);
         chopSpeed->addValue(time, 0.);

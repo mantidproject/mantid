@@ -141,7 +141,7 @@ void IndirectCorrections::openDirectoryDialog() {
  */
 void IndirectCorrections::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect Corrections"));
+      nullptr, QString("Indirect Corrections"));
 }
 
 /**

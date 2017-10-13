@@ -23,7 +23,7 @@ class EXPORT_OPT_MANTIDQT_COMMON LineEditWithClear : public QLineEdit {
   Q_OBJECT
 
 public:
-  LineEditWithClear(QWidget *parent = 0);
+  LineEditWithClear(QWidget *parent = nullptr);
 
 protected:
   void resizeEvent(QResizeEvent *) override;

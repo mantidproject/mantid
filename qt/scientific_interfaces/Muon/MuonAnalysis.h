@@ -82,7 +82,7 @@ public:
   static QString categoryInfo() { return "Muon"; }
 
   /// Default Constructor
-  explicit MuonAnalysis(QWidget *parent = 0);
+  explicit MuonAnalysis(QWidget *parent = nullptr);
 
   /// Destructor
   ~MuonAnalysis();

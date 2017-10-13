@@ -196,7 +196,7 @@ void JumpFit::fitAlgDone(bool error) {
     m_uiForm.ckPlotGuess->setChecked(false);
   }
   for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
-    QString propName(it.key());
+    const QString &propName(it.key());
     if (propName.startsWith("parameter_")) {
       size_t row(0), col(0);
       paramTable->find(propName.split("_")[1].toStdString(), row, col);

@@ -18,7 +18,7 @@ namespace API {
 SignalRange::SignalRange(const Mantid::API::IMDWorkspace &workspace,
                          const Mantid::API::MDNormalization normalization)
     : m_interval(), m_normalization(normalization) {
-  findFullRange(workspace, NULL);
+  findFullRange(workspace, nullptr);
 }
 
 /**

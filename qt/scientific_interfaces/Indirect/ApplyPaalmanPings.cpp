@@ -183,7 +183,7 @@ void ApplyPaalmanPings::run() {
       const char *text = "Binning on sample and container does not match."
                          "Would you like to enable rebinning of the container?";
 
-      int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+      int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
                                          QMessageBox::Yes, QMessageBox::No,
                                          QMessageBox::NoButton);
 

@@ -76,7 +76,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewer : public QWidget,
   Q_OBJECT
 
 public:
-  SliceViewer(QWidget *parent = 0);
+  SliceViewer(QWidget *parent = nullptr);
   ~SliceViewer() override;
 
   void setWorkspace(const QString &wsName);

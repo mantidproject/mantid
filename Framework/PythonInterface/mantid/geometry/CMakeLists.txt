@@ -83,6 +83,7 @@ target_link_libraries ( PythonGeometryModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_L
             PythonKernelModule
             Geometry
             Beamline
+            Types
             Kernel
             ${PYTHON_LIBRARIES}
             ${POCO_LIBRARIES}

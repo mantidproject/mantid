@@ -49,12 +49,12 @@ Usage
 .. testcode:: ExFindUBUsingLatticeParameters
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After LoadIsawPeaks does the workspace have an orientedLattice: {}".format(ws.sample().hasOrientedLattice()))
 
     FindUBUsingLatticeParameters(ws,a=14.131,b=19.247,c=8.606,alpha=90.0,beta=105.071,gamma=90.0,NumInitial=15)
-    print "After FindUBUsingLatticeParameters does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After FindUBUsingLatticeParameters does the workspace have an orientedLattice: {}".format(ws.sample().hasOrientedLattice()))
 
-    print ws.sample().getOrientedLattice().getUB()
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:

@@ -56,7 +56,7 @@ class QEvent;
 class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface {
   Q_OBJECT
 public:
-  RangeSelectorTool(Graph *graph, const QObject *status_target = NULL,
+  RangeSelectorTool(Graph *graph, const QObject *status_target = nullptr,
                     const char *status_slot = "");
   ~RangeSelectorTool() override;
   double minXValue() const {

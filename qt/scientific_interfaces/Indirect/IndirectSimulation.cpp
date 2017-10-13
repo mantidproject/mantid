@@ -122,7 +122,7 @@ void IndirectSimulation::runClicked() {
  */
 void IndirectSimulation::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      NULL, QString("Indirect Simulation"));
+      nullptr, QString("Indirect Simulation"));
 }
 
 /**

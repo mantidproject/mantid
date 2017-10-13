@@ -19,16 +19,16 @@ Usage
 .. testcode:: ShiftLogTime
     
     #Load a workspace
-    w=Load('CNCS_7860')
+    w = Load('CNCS_7860')
     #get the log times for a particular variable
-    original=w.getRun()['Speed5'].times
+    original = w.getRun()['Speed5'].times
     #Change the log times
-    w=ShiftLogTime(w,LogName='Speed5',IndexShift='2')
+    w = ShiftLogTime(w, LogName='Speed5', IndexShift='2')
     #get the log times for a particular variable, after change
-    modified=w.getRun()['Speed5'].times
+    modified = w.getRun()['Speed5'].times
     #print times
-    print "OriginalTimes: ", original
-    print "ModifiedTimes: ", modified
+    print("OriginalTimes:  {}".format(original))
+    print("ModifiedTimes:  {}".format(modified))
 
 
 .. testcleanup:: ShiftLogTime

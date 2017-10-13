@@ -29,8 +29,9 @@ namespace CustomInterfaces {
 namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_stringManager(NULL), m_cfTree(NULL),
-      m_fixedProps(), m_confitResFileType(), m_runMin(-1), m_runMax(-1) {
+    : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
+      m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(), m_runMin(-1),
+      m_runMax(-1) {
   m_uiForm.setupUi(parent);
 }
 
@@ -1626,7 +1627,7 @@ void ConvFit::hideFABADA() {
 }
 
 void ConvFit::fitContextMenu(const QPoint &) {
-  QtBrowserItem *item(NULL);
+  QtBrowserItem *item(nullptr);
 
   item = m_cfTree->currentItem();
 

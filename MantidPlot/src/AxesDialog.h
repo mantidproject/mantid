@@ -72,7 +72,7 @@ class AxesDialog : public QDialog {
   Q_OBJECT
 
 public:
-  AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = 0);
+  AxesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = nullptr);
   ~AxesDialog() override;
 
 public slots:

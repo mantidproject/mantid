@@ -7,7 +7,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 class HistoryViewTest : public CxxTest::TestSuite {
 

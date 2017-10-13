@@ -17,7 +17,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 Iqt::Iqt(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_iqtTree(NULL), m_iqtResFileType() {
+    : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
 }
 

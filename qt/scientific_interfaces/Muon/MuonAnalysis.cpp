@@ -89,12 +89,12 @@ const std::string MuonAnalysis::PEAK_RADIUS_CONFIG("curvefitting.peakRadius");
 MuonAnalysis::MuonAnalysis(QWidget *parent)
     : UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"),
       m_grouped_name(m_workspace_name + "Grouped"), m_currentDataName(),
-      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0), m_currentTab(NULL),
-      m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"),
-      m_updating(false), m_updatingGrouping(false), m_loaded(false),
-      m_deadTimesChanged(false), m_textToDisplay(""), m_optionTab(NULL),
-      m_fitDataTab(NULL),
-      m_resultTableTab(NULL), // Will be created in initLayout()
+      m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
+      m_currentTab(nullptr), m_groupNames(),
+      m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false),
+      m_updatingGrouping(false), m_loaded(false), m_deadTimesChanged(false),
+      m_textToDisplay(""), m_optionTab(nullptr), m_fitDataTab(nullptr),
+      m_resultTableTab(nullptr), // Will be created in initLayout()
       m_dataTimeZero(0.0), m_dataFirstGoodData(0.0),
       m_currentLabel("NoLabelSet"), m_numPeriods(0),
       m_groupingHelper(this->m_uiForm), m_functionBrowser(nullptr),
@@ -842,14 +842,14 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
       std::stringstream detNumRead;
       if (numDet > 0) {
         detNumRead << numDet;
-        if (itemNdet == NULL)
+        if (itemNdet == nullptr)
           m_uiForm.groupTable->setItem(
               row, 2, new QTableWidgetItem(detNumRead.str().c_str()));
         else {
           itemNdet->setText(detNumRead.str().c_str());
         }
       } else {
-        if (itemNdet == NULL)
+        if (itemNdet == nullptr)
           m_uiForm.groupTable->setItem(
               row, 2, new QTableWidgetItem("Invalid IDs string"));
         else
@@ -862,7 +862,7 @@ void MuonAnalysis::groupTableChanged(int row, int column) {
   if (column == 0) {
     QTableWidgetItem *itemName = m_uiForm.groupTable->item(row, 0);
 
-    if (itemName == NULL) // Just in case it wasn't assigned
+    if (itemName == nullptr) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.groupTable->setItem(row, 0, itemName);
@@ -945,7 +945,7 @@ void MuonAnalysis::pairTableChanged(int row, int column) {
   if (column == 0) {
     QTableWidgetItem *itemName = m_uiForm.pairTable->item(row, 0);
 
-    if (itemName == NULL) // Just in case it wasn't assigned
+    if (itemName == nullptr) // Just in case it wasn't assigned
     {
       itemName = new QTableWidgetItem("");
       m_uiForm.pairTable->setItem(row, 0, itemName);

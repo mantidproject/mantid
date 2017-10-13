@@ -53,7 +53,7 @@ Usage
 
 
     for name in benzene_wrk.getNames():
-        print name
+        print(name)
 
 Output:
 
@@ -71,7 +71,7 @@ Output:
     wrk=Abins(DFTProgram="CRYSTAL", PhononFile="b3lyp.out", QuantumOrderEventsNumber="1")
 
     for name in wrk.getNames():
-        print name
+        print(name)
 
 Output:
 
@@ -93,11 +93,12 @@ Output:
 .. testcode:: AbinsexplicitParameters
 
     wrk_verbose=Abins(DFTprogram="CASTEP", PhononFile="benzene.phonon", ExperimentalFile="benzene_experimental.dat",
-                    Temperature=10, SampleForm="Powder", Instrument="TOSCA", Atoms="H", SumContributions=True,
-                    QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
+                      TemperatureInKelvin=10, BinWidthInWavenumber=1.0, SampleForm="Powder", Instrument="TOSCA",
+                      Atoms="H", SumContributions=True,
+                      QuantumOrderEventsNumber="1", ScaleByCrossSection="Incoherent")
 
     for name in wrk_verbose.getNames():
-        print name
+        print(name)
 
 Output:
 

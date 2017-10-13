@@ -50,7 +50,7 @@ public:
   // This interface's categories.
   static QString categoryInfo() { return "Indirect"; }
   /// Default Constructor
-  explicit IndirectCorrections(QWidget *parent = 0);
+  explicit IndirectCorrections(QWidget *parent = nullptr);
 
 private:
   /// Initialize the layout
