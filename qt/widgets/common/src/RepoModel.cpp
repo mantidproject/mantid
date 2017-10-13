@@ -214,7 +214,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
     return QVariant();
   RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
   try {
-    QString path = item->path();
+    const QString &path = item->path();
     Mantid::API::ScriptInfo inf;
     Mantid::API::SCRIPTSTATUS status;
     // return the data for the display role

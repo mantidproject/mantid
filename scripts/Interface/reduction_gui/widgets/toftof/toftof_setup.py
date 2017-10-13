@@ -188,6 +188,14 @@ class TOFTOFSetupWidget(BaseWidget):
     TIP_rbtCorrectTOFVan = ''
     TIP_rbtCorrectTOFSample = ''
 
+    def dir_browse_dialog(self, default_dir=''):
+        """
+            Pop up a directory dialog box.
+        """
+        dirname = str(QFileDialog.getExistingDirectory(self, "Select Directory", default_dir, QFileDialog.DontUseNativeDialog))
+
+        return dirname
+
     def __init__(self, settings):
         BaseWidget.__init__(self, settings = settings)
 
@@ -396,12 +404,12 @@ class TOFTOFSetupWidget(BaseWidget):
         self.runDataModel.selectCell.connect(self._onSelectedCell)
 
     def _onDataDir(self):
-        dirname = self.dir_browse_dialog()
+        dirname = self.dir_browse_dialog(self.dataDir.text())
         if dirname:
             self.dataDir.setText(dirname)
 
     def _onSaveDir(self):
-        dirname = self.dir_browse_dialog()
+        dirname = self.dir_browse_dialog(self.saveDir.text())
         if dirname:
             self.saveDir.setText(dirname)
 

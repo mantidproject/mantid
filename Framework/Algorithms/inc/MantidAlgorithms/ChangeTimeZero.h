@@ -42,7 +42,7 @@ private:
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift,
                        double startProgress, double stopProgress);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Kernel::DateAndTime
+  Mantid::Types::Core::DateAndTime
   getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(std::string val) const;

@@ -33,6 +33,8 @@ using namespace Mantid::Kernel::Exception;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::HistogramX;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 using std::runtime_error;
 using std::size_t;
@@ -130,7 +132,7 @@ public:
     std::map<DateAndTime, double> logMap = log->valueAsMap();
     std::map<DateAndTime, double>::iterator it, it2;
     it = logMap.begin();
-    Kernel::DateAndTime start = it->first;
+    Types::Core::DateAndTime start = it->first;
 
     std::vector<TofEvent> events1 = ew->getSpectrum(1000).getEvents();
     for (size_t i = 0; i < events1.size(); i++) {

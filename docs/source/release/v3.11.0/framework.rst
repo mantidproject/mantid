@@ -35,7 +35,7 @@ Improved
 - :ref:`FilterEvents <algm-FilterEvents-v1>` has refactored on splitting sample logs.
 - :ref:`FilterEvents <algm-FilterEvents-v1>` now copies units for the logs in the filtered workspaces
 - :ref:`GroupDetectors <algm-GroupDetectors-v2>` now supports workspaces with detector scans.
-- :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` allows now to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
+- :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` now allows users to normalize by the number of events. This can improve results for data that was originally based on histogram data which has been converted to event-mode.
 - :ref:`FindSXPeaks <algm-FindSXPeaks-v1>` now finds all peaks in each spectrum. It also allows for setting more fine-grained resolutions and takes into account any goniometer set on the workspace.
 - :ref:`SimpleShapeMonteCarloAbsorption <algm-SimpleShapeMonteCarloAbsorption>` has been added to simplify sample environment inputs for MonteCarloAbsorption
 - :ref:`IntegreatePeaksMD <algm-IntegratePeaksMD-v2>` makes the culling of the top one percent of the background events optional.
@@ -46,9 +46,9 @@ Improved
 - :ref:`LoadBBY <algm-LoadBBY-v1>` is now better at handling sample information.
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption-v1>` has had several improvements:
 
-  * it now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays
-  * the NumberOfWavelengthPoints input property is now validated more rigorously
-  * a new MaxScatterPtAttempts input has been added to control how many tries are made to generate a random point in the object. Useful for cases such as thin annuli that require a higher number of tries. The previous version was hard coded internally.
+  * It now supports approximating the input instrument with a sparse grid of detectors enabling quick simulation of huge pixel arrays.
+  * The NumberOfWavelengthPoints input property is now validated more rigorously.
+  * A new MaxScatterPtAttempts input has been added to control how many tries are made to generate a random point in the object. Useful for cases such as thin annuli that require a higher number of tries. The previous version was hard coded internally.
 - :ref:`SaveGSS <algm-SaveGSS-v1>` now supports saving in the legacy GSAS ALT format. This is useful for older tools however the default format FXYE should be used whenever possible.
 - :ref:`SaveMDWorkspaceToVTK <algm-SaveMDWorkspaceToVTK-v1>` and :ref:`LoadVTK <algm-LoadVTK-v1>` algorithms are now accessible from python.
 - :ref:`MergeRuns <algm-MergeRuns-v1>` will now merge workspaces with detector scans.
@@ -59,11 +59,13 @@ Improved
 - :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>`: Added an option to disable the sorting of the resulting axis making it useful especially for scanning workspaces. Also reduced the complexity of the operation for the default (ordered axis) case from *Nˆ2* to *N*.
 - :ref:`MSDFit <algm-MSDFit>` now supports model selection. Currently has the option of 3 models: MsdGauss, MsdPeters and MsdYi.
 - :ref:`algm-LineProfile`: Fixed a bug which could cause crashes when the line extended over the right or bottom edge of a workspace.
+- :ref:`algm-Mean`: Added error messages if the data is not appropriate.
 - :ref:`algm-LoadLiveData`: Fixed a bug affecting Live Data Processing in "Replace" mode. The bug meant that changes to Instrument position/rotation were overwitten by defaults on every load. Now fixed so that Instrument state is persistent across loads.
+- :ref:`CalMuonDetectorPhasees <algm-CalMuonDetectorPhases-v1>` now fits a cos instead of a sin function.
 
 Performance
 -----------
-- Performance of UB indexing routines addressed. `:ref:`FindUBUsingLatticeParameters` running 2x faster than before.
+- Performance of UB indexing routines addressed. :ref:`FindUBUsingLatticeParameters <algm-FindUBUsingLatticeParameters-v1>` running 2x faster than before.
 - Several changes to the core of how instrument geometry is stored and accessed. These changes have resulted in a few noteworthy performance improvements.
 
   * Partial loading of event nexus files has improved by 22%.
@@ -94,6 +96,7 @@ Improved
 - :ref:`CubicSpline <func-CubicSpline>` is fixed to sort the y-values and x-values correctly.
 - Fix displayed type name for optional boolean properties.
 - Fix parameters that are tied to functions can now be untied correctly.
+- Table workspaces do not have the values changed by viewing them (no rounding).
 
 Python
 ------
@@ -109,6 +112,7 @@ Bugfixes
 ########
 
 - :ref:`MatchPeaks <algm-MatchPeaks-v1>` is fixed to not to leave temporary hidden workspaces behind.
+- Fix a bug where Mantid could crash when trying to update live data if the network connection is lost.
 
 Python Fit Functions
 ####################

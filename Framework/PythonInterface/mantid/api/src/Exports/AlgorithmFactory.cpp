@@ -19,7 +19,6 @@
 
 using namespace Mantid::API;
 using namespace boost::python;
-using Mantid::Kernel::AbstractInstantiator;
 using Mantid::PythonInterface::PythonObjectInstantiator;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)

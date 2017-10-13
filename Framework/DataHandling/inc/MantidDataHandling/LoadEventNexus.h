@@ -150,9 +150,9 @@ public:
   int32_t m_specMax;
 
   /// Filter by start time
-  Kernel::DateAndTime filter_time_start;
+  Mantid::Types::Core::DateAndTime filter_time_start;
   /// Filter by stop time
-  Kernel::DateAndTime filter_time_stop;
+  Mantid::Types::Core::DateAndTime filter_time_stop;
   /// chunk number
   int chunk;
   /// number of chunks
@@ -183,7 +183,7 @@ public:
   double compressTolerance;
 
   /// Pointer to the vector of events
-  typedef std::vector<Mantid::DataObjects::TofEvent> *EventVector_pt;
+  typedef std::vector<Mantid::Types::Event::TofEvent> *EventVector_pt;
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.

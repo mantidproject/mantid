@@ -1,6 +1,6 @@
 # Include useful utils
 include ( MantidUtils )
-
+include ( GenerateMantidExportHeader )
 # Make the default build type Release
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )

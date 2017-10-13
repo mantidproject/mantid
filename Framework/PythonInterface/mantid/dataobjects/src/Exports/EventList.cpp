@@ -10,8 +10,8 @@ GET_POINTER_SPECIALIZATION(EventList)
 
 namespace {
 void addEventToEventList(EventList &self, double tof,
-                         Mantid::Kernel::DateAndTime pulsetime) {
-  self.addEventQuickly(Mantid::DataObjects::TofEvent(tof, pulsetime));
+                         Mantid::Types::Core::DateAndTime pulsetime) {
+  self.addEventQuickly(Mantid::Types::Event::TofEvent(tof, pulsetime));
 }
 }
 

@@ -71,7 +71,7 @@ void BackgroundRemover::initLayout() {
  */
 void BackgroundRemover::showHelp() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("DPDFBackgroundRemover"));
+      nullptr, QString("Dynamic PDF Background Remover"));
 }
 
 /**

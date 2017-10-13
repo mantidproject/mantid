@@ -203,9 +203,10 @@ private:
     timeinfo->tm_min = 54;
     timeinfo->tm_sec = 49;
     // Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t execTime_t = Mantid::Kernel::DateAndTime::utc_mktime(timeinfo);
+    std::time_t execTime_t =
+        Mantid::Types::Core::DateAndTime::utc_mktime(timeinfo);
     // Create a UTC datetime from it
-    Mantid::Kernel::DateAndTime execTime;
+    Mantid::Types::Core::DateAndTime execTime;
     execTime.set_from_time_t(execTime_t);
 
     // Not really much to test

@@ -122,7 +122,7 @@ int MantidWSIndexWidget::getPlotIndex() const {
   if (!userInput.empty()) {
     const auto indexList = userInput.values();
     if (!indexList.empty()) {
-      const auto spectrumIndexes = indexList.at(0);
+      const auto &spectrumIndexes = indexList.at(0);
       if (!spectrumIndexes.empty()) {
         spectrumIndex = *spectrumIndexes.begin();
       }
@@ -634,7 +634,7 @@ void MantidWSIndexWidget::populateLogComboBox() {
         // If this is a single-value numeric log, add it to the list of counts
         if (dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(log) ||
             dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(log)) {
-          const std::string name = log->name();
+          const std::string &name = log->name();
           if (logCounts.find(name) != logCounts.end()) {
             logCounts[name]++;
           } else {
@@ -1182,7 +1182,7 @@ void IntervalList::addIntervals(QString intervals) {
 }
 
 void IntervalList::addIntervalList(const IntervalList &intervals) {
-  const QList<Interval> list = intervals.getList();
+  const QList<Interval> &list = intervals.getList();
 
   QList<Interval>::const_iterator it = list.constBegin();
 

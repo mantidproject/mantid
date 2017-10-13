@@ -61,7 +61,7 @@ public:
 
     // convert workspace index into detector id
     const auto &spectrum = wksp->getSpectrum(wkspIndex);
-    const auto detIds = spectrum.getDetectorIDs();
+    const auto &detIds = spectrum.getDetectorIDs();
     if (detIds.size() != 1) {
       throw std::runtime_error("Summed pixels is not currently supported");
     }

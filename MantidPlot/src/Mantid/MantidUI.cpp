@@ -1,5 +1,6 @@
 // Python header must go first
 #include "MantidQtWidgets/Common/PythonThreading.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
@@ -104,7 +105,8 @@ using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
 using MantidQt::MantidWidgets::MantidTreeWidget;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Core::time_duration;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
 namespace MantidException = Mantid::Kernel::Exception;
@@ -733,7 +735,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
                      const bool showErrors, MultiLayer *plotWindow,
                      bool clearWindow) {
   ScopedOverrideCursor waitCursor;
-  auto firstName = wsNames.at(0);
+  const auto &firstName = wsNames.at(0);
 
   bool isGraphNew = false;
   MultiLayer *ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow,
@@ -743,7 +745,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   try {
     for (int i = 0; i < wsNames.size(); ++i) {
       // Create the curve with defaults
-      auto wsName = wsNames.at(i);
+      const auto &wsName = wsNames.at(i);
       MantidMDCurve *curve = new MantidMDCurve(wsName, g, showErrors);
       MantidQwtIMDWorkspaceData *data = curve->mantidData();
 
@@ -1562,8 +1564,8 @@ bool MantidUI::drop(QDropEvent *e) {
     foreach (const auto &wsName, wsNames) { importWorkspace(wsName, false); }
     return true;
   } else if (e->mimeData()->hasUrls()) {
-    QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
-    if (pyFiles.size() > 0) {
+    const auto pyFiles = DropEventHelper::extractPythonFiles(e);
+    if (!pyFiles.empty()) {
       try {
         MantidQt::API::ProjectSerialiser serialiser(m_appWindow);
         serialiser.openScriptWindow(pyFiles);
@@ -1595,22 +1597,6 @@ bool MantidUI::drop(QDropEvent *e) {
   }
 
   return false;
-}
-
-/// extracts the files from a mimedata object that have a .py extension
-QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().toUpper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
 }
 
 /**
@@ -2508,7 +2494,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // the extent of the data, then set this to the index of the row to add the
   // value
   int addFinalFilterValueIndex = 0;
-  Mantid::Kernel::DateAndTime lastFilterTime;
+  Mantid::Types::Core::DateAndTime lastFilterTime;
 
   // Convert input int into enum value
   const Mantid::API::LogFilterGenerator::FilterType filterType = [&filter]() {
@@ -2558,7 +2544,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   formatLogName(label, wsName);
 
   // Get the starting time of the log.
-  Mantid::Kernel::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime startTime;
   // Toggle to switch between using the real date or the change in seconds.
   bool useAbsoluteDate = false;
 
@@ -2652,7 +2638,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     } // end (valid filter exists)
   }
 
-  Mantid::Kernel::DateAndTime lastTime;
+  Mantid::Types::Core::DateAndTime lastTime;
   double lastValue = 0;
 
   // Iterate through the time-value map.
@@ -2726,7 +2712,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   // Set x-axis label format
   if (useAbsoluteDate) {
-    Mantid::Kernel::DateAndTime label_as_ptime =
+    Mantid::Types::Core::DateAndTime label_as_ptime =
         flt->data()->nthInterval(0).begin();
     QDateTime dt = QDateTime::fromTime_t(uint(label_as_ptime.to_localtime_t()));
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
@@ -2781,17 +2767,16 @@ void MantidUI::configModified() {
       appWindow()->isDeleteWorkspacePromptEnabled());
 }
 
-std::string MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,
-                                     bool useAbsoluteDate,
-                                     Mantid::Kernel::DateAndTime start) {
+std::string MantidUI::extractLogTime(DateAndTime value, bool useAbsoluteDate,
+                                     DateAndTime start) {
   std::string time_string;
   if (useAbsoluteDate) {
     // Convert time into string
     time_string = value.toSimpleString();
   } else {
     // How many seconds elapsed?
-    Mantid::Kernel::time_duration elapsed = value - start;
-    double seconds = Mantid::Kernel::DateAndTime::secondsFromDuration(elapsed);
+    time_duration elapsed = value - start;
+    double seconds = DateAndTime::secondsFromDuration(elapsed);
 
     // Output with 6 decimal points
     std::ostringstream oss;

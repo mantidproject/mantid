@@ -36,6 +36,7 @@ namespace DataHandling {
 
 using namespace Kernel;
 using namespace API;
+using Types::Core::DateAndTime;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
@@ -839,7 +840,7 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
  * @param isisRaw: pointer to the raw file
  * @return the endtime
  */
-Kernel::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
   std::string isisDate = std::string(isisRaw->rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
@@ -854,7 +855,7 @@ Kernel::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
  * @param isisRaw: pointer to the raw file
  * @return the start time
  */
-Kernel::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
   auto isisDate = std::string(isisRaw->hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';

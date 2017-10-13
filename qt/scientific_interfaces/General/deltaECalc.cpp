@@ -88,8 +88,8 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles,
       (motorName.isEmpty()) ? "None" : QString("r'" + motorName + "'");
 
   QString None = "None";
-  auto rebin = None;
-  auto map_file = None;
+  const auto &rebin = None;
+  const auto &map_file = None;
   pyCode += "mono_sample.prop_man.motor_name = " + pyMotorName + "\n";
   pyCode += "mono_sample.prop_man.motor_offset = " + pySeOffset + "\n";
 
