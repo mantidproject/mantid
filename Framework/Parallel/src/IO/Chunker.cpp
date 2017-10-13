@@ -8,7 +8,9 @@ namespace Parallel {
 namespace IO {
 
 namespace {
-/// Helper to build partition (subgroup of workers with subgroup of banks).
+/** Helper to build partition (subgroup of workers with subgroup of banks).
+ *
+ * Elements of `sortedSizes` are <size, original index, done flag> */
 std::pair<int, std::vector<size_t>>
 buildPartition(const int totalWorkers, const size_t totalSize,
                std::vector<std::tuple<size_t, size_t, bool>> &sortedSizes) {
@@ -67,7 +69,12 @@ size_t taskSize(const std::pair<int, std::vector<size_t>> &partition,
 }
 }
 
-/// Create a chunker based on bank sizes and chunk size.
+/** Create a chunker based on bank sizes and chunk size.
+ *
+ * The `bankSizes` define the items of work to be split up amongst the workers.
+ * This is done using the given `chunkSize`, i.e., each bank size is cut into
+ * pieces of size `chunkSize` and all pieces are assigned to the requested
+ * number of workers. */
 Chunker::Chunker(const int numWorkers, const int worker,
                  const std::vector<size_t> &bankSizes, const size_t chunkSize)
     : m_worker(worker), m_chunkSize(chunkSize), m_bankSizes(bankSizes) {
