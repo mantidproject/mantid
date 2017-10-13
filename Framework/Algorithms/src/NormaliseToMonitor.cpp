@@ -623,11 +623,9 @@ void NormaliseToMonitor::performHistogramDivision(
     monitorWorkspaceIndex++;
 
     for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i) {
-      if (m_syncScanInput) {
-        const auto &specDef = specInfo.spectrumDefinition(i);
-        if (specDef.size() > 0 && specDef[0].second != timeIndex)
-          continue;
-      }
+      const auto &specDef = specInfo.spectrumDefinition(i);
+      if (specDef.size() > 0 && specDef[0].second != timeIndex)
+        continue;
 
       auto hist = outputWorkspace->histogram(i);
       auto &yValues = hist.mutableY();
@@ -664,17 +662,22 @@ void NormaliseToMonitor::normaliseBinByBin(
   auto outputEvent =
       boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
+  std::shared_ptr<SpectrumInfo> inputSpecInfo;
+  std::shared_ptr<SpectrumInfo> monitorSpecInfo;
+  if (m_syncScanInput) {
+    inputSpecInfo =
+        std::make_shared<SpectrumInfo>(inputWorkspace->spectrumInfo());
+    monitorSpecInfo = std::make_shared<SpectrumInfo>(m_monitor->spectrumInfo());
+  }
+
   for (auto &workspaceIndex : m_workspaceIndexes) {
     // Get hold of the monitor spectrum
     const auto &monX = m_monitor->binEdges(workspaceIndex);
     auto monY = m_monitor->counts(workspaceIndex);
     auto monE = m_monitor->countStandardDeviations(workspaceIndex);
-    // TODO: is this definitely the same as spectrum index?
     size_t timeIndex = 0;
     if (m_syncScanInput)
-      timeIndex = m_monitor->spectrumInfo()
-                      .spectrumDefinition(workspaceIndex)[0]
-                      .second;
+      timeIndex = monitorSpecInfo->spectrumDefinition(workspaceIndex)[0].second;
     // Calculate the overall normalization just the once if bins are all
     // matching
     if (m_commonBins)
@@ -693,8 +696,7 @@ void NormaliseToMonitor::normaliseBinByBin(
       prog.report();
 
       if (m_syncScanInput) {
-        const auto &specDef =
-            inputWorkspace->spectrumInfo().spectrumDefinition(i);
+        const auto &specDef = inputSpecInfo->spectrumDefinition(i);
         if (specDef.size() > 0 && specDef[0].second != timeIndex)
           continue;
       }
