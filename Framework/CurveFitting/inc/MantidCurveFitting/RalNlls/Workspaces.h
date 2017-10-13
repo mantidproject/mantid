@@ -25,29 +25,6 @@ const double HALF = 0.5;
 const double SIXTEENTH = 0.0625;
 }
 
-enum class NLLS_ERROR {
-  OK = 0,
-  MAXITS = -1,
-  EVALUATION = -2,
-  UNSUPPORTED_MODEL = -3,
-  FROM_EXTERNAL = -4,
-  UNSUPPORTED_METHOD = -5,
-  ALLOCATION = -6,
-  MAX_TR_REDUCTIONS = -7,
-  X_NO_PROGRESS = -8,
-  N_GT_M = -9,
-  BAD_TR_STRATEGY = -10,
-  FIND_BETA = -11,
-  BAD_SCALING = -12,
-  NAN_OR_INF = -13,
-  //     ! More-Sorensen errors
-  MS_MAXITS = -301,
-  MS_TOO_MANY_SHIFTS = -302,
-  MS_NO_PROGRESS = -303,
-  MS_NOT_PD = -304 // Matrix is not positive-definite
-  //     ! DTRS errors
-};
-
 struct nlls_options {
 
   // M A I N   R O U T I N E   C O N T R O L S !!!
@@ -260,7 +237,7 @@ struct all_eig_symm_work {
   DoubleFortranVector work;
 };
 
-/// workspace for subrouine applyScaling
+/// workspace for subroutine applyScaling
 struct apply_scaling_work {
   DoubleFortranVector diag;
   DoubleFortranMatrix ev;
