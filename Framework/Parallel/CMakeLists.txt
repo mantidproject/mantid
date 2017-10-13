@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
+        src/IO/EventParser.cpp
 )
 
 set ( INC_FILES
@@ -17,6 +18,8 @@ set ( INC_FILES
 	inc/MantidParallel/IO/EventLoaderHelpers.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
+	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
 	inc/MantidParallel/ThreadingBackend.h
@@ -27,7 +30,9 @@ set ( TEST_FILES
 	CollectivesTest.h
 	CommunicatorTest.h
 	EventLoaderTest.h
+	EventParserTest.h
 	ExecutionModeTest.h
+	NonblockingTest.h
 	ParallelRunnerTest.h
 	RequestTest.h
 	StorageModeTest.h

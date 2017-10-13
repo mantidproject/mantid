@@ -1088,7 +1088,7 @@ void LoadEventNexus::createSpectraMapping(
     const std::vector<std::string> &bankNames) {
   LoadEventNexusIndexSetup indexSetup(
       m_ws->getSingleHeldWorkspace(), getProperty("SpectrumMin"),
-      getProperty("SpectrumMax"), getProperty("SpectrumList"));
+      getProperty("SpectrumMax"), getProperty("SpectrumList"), communicator());
   if (!monitorsOnly && !bankNames.empty()) {
     if (!isDefault("SpectrumMin") || !isDefault("SpectrumMax") ||
         !isDefault("SpectrumList"))
@@ -1644,6 +1644,12 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+}
+
+Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  static_cast<void>(storageModes);
+  return Parallel::ExecutionMode::Distributed;
 }
 
 } // namespace DataHandling
