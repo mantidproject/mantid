@@ -123,20 +123,20 @@ void LoadDialog::accept() {
   // wasn't attempted for the new contents. Force one here.
   // The widget does nothing if the contents have not changed so it will be
   // quick for this case
-  protectedFromLoadRequests([this]() -> void {
-    m_form.fileWidget->findFiles();
-    while (m_form.fileWidget->isSearching() || m_populating)
-      QApplication::instance()->processEvents();
+  disableLoadRequests();
+  m_form.fileWidget->findFiles();
+  while (m_form.fileWidget->isSearching() || m_populating)
+    QApplication::instance()->processEvents();
 
-    // Check that the file still exists just incase it somehow got removed
-    std::string errMess =
-        getAlgorithm()->getPointerToProperty("Filename")->isValid();
-    if (!errMess.empty()) {
-      m_currentFiles = "";
-      createDynamicWidgets();
-    } else
-      AlgorithmDialog::accept();
-  });
+  // Check that the file still exists just incase it somehow got removed
+  std::string errMess =
+      getAlgorithm()->getPointerToProperty("Filename")->isValid();
+  if (!errMess.empty()) {
+    m_currentFiles = "";
+    createDynamicWidgets();
+  } else
+    AlgorithmDialog::accept();
+  enableLoadRequests();
 }
 
 //--------------------------------------------------------------------------
