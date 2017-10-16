@@ -173,6 +173,23 @@ public:
     TS_ASSERT_EQUALS(ranges[1], (Chunker::LoadRange{bank, 0, 1}));
   }
 
+  void test_makeLoadRange_many_random_banks() {
+    for (int workers = 1; workers < 100; ++workers) {
+      for (int worker = 0; worker < workers; ++worker) {
+        const std::vector<size_t> bankSizes{
+            2091281, 520340,  841355,  912704,  1435110, 567885,
+            1850044, 1333453, 1507522, 1396560, 1699092, 1484645,
+            515805,  474417,  633111,  600780,  638784,  572031,
+            741562,  593741,  546107,  552800,  556607};
+        const size_t chunkSize = 1024 * 1024;
+        TS_ASSERT_THROWS_NOTHING(
+            Chunker chunker(workers, worker, bankSizes, chunkSize));
+        Chunker chunker(workers, worker, bankSizes, chunkSize);
+        TS_ASSERT_THROWS_NOTHING(chunker.makeLoadRanges());
+      }
+    }
+  }
+
   void test_makeBalancedPartitioning_1_worker() {
     const size_t workers = 1;
     const std::vector<size_t> sizes{7, 1, 3};

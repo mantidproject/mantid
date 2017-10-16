@@ -222,6 +222,12 @@ Chunker::makeBalancedPartitioning(const int workers,
       std::get<0>(item)++;
   }
 
+  // In some cases there are also unused workers, assign them such that client
+  // code has consistent partitioning.
+  int tooFew = workers - numberOfWorkers(partitioning);
+  if (tooFew != 0)
+    partitioning.push_back({tooFew, {}});
+
   return partitioning;
 }
 
