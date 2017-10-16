@@ -102,7 +102,7 @@ public:
       const PostprocessingStep &postprocessingStep,
       const std::map<QString, QString> preprocessingInstructionsMap,
       const QString processingInstructions);
-  virtual ~GenerateNotebook(){};
+  virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
 

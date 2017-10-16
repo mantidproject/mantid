@@ -39,7 +39,7 @@ Constructor
 corresponding pre-processing algorithms
 @param processor : the reduction algorithm
 @param postprocessingStep : the post-processing algorithm and options for the
-pre-processing algorithms specified via hinting line edits in the view
+post-processing algorithms specified via hinting line edits in the view
 @param preprocessingOptionsMap : options passed to the preprocessing algorithm.
 @param processingOptions : options to the reduction algorithm specified via
 the corresponding hinting line edit in the view
