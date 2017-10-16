@@ -113,9 +113,8 @@ void load(const H5::Group &group, const std::vector<std::string> &bankNames,
                         readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType> loader(group,
                                                                     bankNames);
-  // TODO use comm in consumer
   EventParser<IndexType, TimeZeroType, TimeOffsetType> consumer(
-      chunker.makeRankGroups(), bankOffsets, eventLists);
+      comm, chunker.makeRankGroups(), bankOffsets, eventLists);
   load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader, consumer);
 }
 

@@ -36,6 +36,7 @@ template <> void load<int32_t, double>() { throw std::runtime_error("double"); }
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
 using namespace Mantid;
+using namespace Parallel;
 using namespace Parallel::IO;
 
 namespace {
@@ -115,8 +116,9 @@ void do_test_load(const size_t chunkSize) {
   for (auto &eventList : eventLists)
     eventListPtrs.emplace_back(&eventList);
 
-  EventParser<int64_t, int64_t, int32_t> dataSink(chunker.makeRankGroups(),
-                                                  bankOffsets, eventListPtrs);
+  Communicator comm;
+  EventParser<int64_t, int64_t, int32_t> dataSink(
+      comm, chunker.makeRankGroups(), bankOffsets, eventListPtrs);
   TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
       chunker, dataSource, dataSink)));
 

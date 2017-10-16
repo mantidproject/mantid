@@ -55,9 +55,10 @@ public:
     std::vector<std::vector<TofEvent> *> eventLists;
     for (auto &eventList : test_event_lists)
       eventLists.emplace_back(&eventList);
+    Parallel::Communicator comm;
     return boost::make_shared<
         EventParser<IndexType, TimeZeroType, TimeOffsetType>>(
-        std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
+        comm, std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
   }
 
   void checkEventLists() const {
@@ -145,8 +146,9 @@ public:
     std::vector<int32_t> bankOffsets{1, 2, 3, 4};
     std::vector<std::vector<TofEvent> *> eventLists(4);
 
+    Parallel::Communicator comm;
     TS_ASSERT_THROWS_NOTHING((EventParser<int64_t, int64_t, double>(
-        rankGroups, bankOffsets, eventLists)));
+        comm, rankGroups, bankOffsets, eventLists)));
   }
 
   void testConvertEventIDToGlobalSpectrumIndex() {
@@ -154,7 +156,8 @@ public:
     std::vector<int32_t> bankOffsets{1000};
     std::vector<std::vector<TofEvent> *> eventLists(10);
 
-    EventParser<int64_t, int64_t, double> parser(rankGroups, bankOffsets,
+    Parallel::Communicator comm;
+    EventParser<int64_t, int64_t, double> parser(comm, rankGroups, bankOffsets,
                                                  eventLists);
 
     std::vector<int32_t> eventId{1001, 1002, 1004, 1004};

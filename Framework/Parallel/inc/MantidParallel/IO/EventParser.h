@@ -60,7 +60,8 @@ public:
     Types::Core::DateAndTime pulseTime;
   };
 
-  EventParser(std::vector<std::vector<int>> rankGroups,
+  EventParser(const Communicator &comm,
+              std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
@@ -95,6 +96,7 @@ private:
   void doParsing(int32_t *event_id_start,
                  const TimeOffsetType *event_time_offset_start,
                  const Chunker::LoadRange &range);
+  Communicator m_comm;
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
@@ -102,7 +104,6 @@ private:
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
   std::future<void> m_future;
-  Communicator m_comm;
 };
 
 /** Constructor for EventParser.
@@ -120,9 +121,10 @@ private:
  */
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
 EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
-    std::vector<std::vector<int>> rankGroups, std::vector<int32_t> bankOffsets,
+    const Communicator &comm, std::vector<std::vector<int>> rankGroups,
+    std::vector<int32_t> bankOffsets,
     std::vector<std::vector<TofEvent> *> eventLists)
-    : m_rankGroups(std::move(rankGroups)),
+    : m_comm(comm), m_rankGroups(std::move(rankGroups)),
       m_bankOffsets(std::move(bankOffsets)),
       m_eventLists(std::move(eventLists)) {}
 
