@@ -40,7 +40,7 @@ def create_test_workspace(model, num_bins):
     workspace = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=num_bins, YLength=num_bins)
 
     for i in range(1, num_bins):
-        noise = random.random(0.8, 1.2)
+        noise = random.uniform(0.8, 1.2)
         x_value = i * 1.2
         workspace.dataX(0)[i] = x_value
         workspace.dataY(0)[i] = noise * model(x_value)[0]
