@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
 
 #include <QSettings>
@@ -121,12 +122,55 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
+}
+
+/**
+ * Plots the workspace at the specified index in the workspace group
+ * with the specified name. Plots the sample and fit spectrum in the
+ * specified top preview plot. Plots the diff spectra in the specified
+ * bottom preview plot.
+ *
+ * @param workspaceName     The name of the workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param topPreviewPlot    The top preview plot.
+ * @param bottomPreviewPlot The bottom preview plot.
+ */
+void IndirectDataAnalysisTab::plotOutputGroup(
+    const std::string workspaceName, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  auto workspace =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
+  plotOutputGroup(workspace, index, topPreviewPlot, bottomPreviewPlot);
+}
+
+/**
+* Plots the workspace at the specified index in the specified workspace
+* group. Plots the sample and fit spectrum in the specified top preview
+* plot. Plots the diff spectra in the specified bottom preview plot.
+*
+* @param workspace         The workspace group.
+* @param index             The index of the workspace (in the group)
+*                          to plot.
+* @param topPreviewPlot    The top preview plot.
+* @param bottomPreviewPlot The bottom preview plot.
+*/
+void IndirectDataAnalysisTab::plotOutputGroup(
+    WorkspaceGroup_sptr workspaceGroup, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      workspaceGroup->getItem(index));
+  IndirectTab::plotWorkspace(workspace, topPreviewPlot,
+                             {{0, "Sample"}, {1, "Fit"}});
+  IndirectTab::plotWorkspace(workspace, bottomPreviewPlot, {{2, "Diff"}},
+                             {Qt::blue});
 }
 
 } // namespace IDA

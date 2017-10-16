@@ -5,6 +5,7 @@
 #include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <boost/weak_ptr.hpp>
 
@@ -95,6 +96,15 @@ private:
   void run() override = 0;
   /// Overidden by child class.
   bool validate() override = 0;
+
+  void plotOutputGroup(const std::string workspaceName, size_t index,
+                       MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+                       MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+
+  void plotOutputGroup(Mantid::API::WorkspaceGroup_sptr workspaceGroup,
+                       size_t index,
+                       MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+                       MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
