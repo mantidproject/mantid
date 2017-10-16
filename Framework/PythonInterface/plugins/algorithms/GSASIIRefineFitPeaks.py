@@ -18,16 +18,16 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_GROUP_PAWLEY_PARAMS = "Pawley Parameters"
     PROP_GSAS_PROJ_PATH = "SaveGSASIIProjectFile"
     PROP_INPUT_WORKSPACE = "InputWorkspace"
+    PROP_OUT_GOF = "GOF"
+    PROP_OUT_GROUP_RESULTS = "Results"
+    PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
+    PROP_OUT_RWP = "Rwp"
     PROP_PATH_TO_GSASII = "PathToGSASII"
     PROP_PATH_TO_INST_PARAMS = "InstrumentFile"
     PROP_PATH_TO_PHASE = "PhaseInfoFile"
     PROP_PAWLEY_DMIN = "PawleyDMin"
     PROP_PAWLEY_NEGATIVE_WEIGHT = "PawleyNegativeWeight"
     PROP_REFINEMENT_METHOD = "RefinementMethod"
-    PROP_OUT_GOF = "GOF"
-    PROP_OUT_GROUP_RESULTS = "Results"
-    PROP_OUT_LATTICE_PARAMS = "LatticeParameters"
-    PROP_OUT_RWP = "Rwp"
     PROP_WORKSPACE_INDEX = "WorkspaceIndex"
 
     DEFAULT_REFINEMENT_PARAMS = {"set":
@@ -64,20 +64,20 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.declareProperty(FileProperty(name=self.PROP_PATH_TO_GSASII, defaultValue="", action=FileAction.Directory),
                              doc="Path to the directory containing GSASII executable on the user's machine")
 
+        self.declareProperty(name=self.PROP_OUT_GOF, defaultValue=0.0, direction=Direction.Output,
+                             doc="Goodness of fit value (Chi squared)")
+        self.declareProperty(name=self.PROP_OUT_RWP, defaultValue=0.0, direction=Direction.Output,
+                             doc="Weight profile R-factor (Rwp) discrepancy index for the goodness of fit")
         self.declareProperty(ITableWorkspaceProperty(name=self.PROP_OUT_LATTICE_PARAMS, direction=Direction.Output,
                                                      defaultValue=self.PROP_OUT_LATTICE_PARAMS),
                              doc="Table to output the lattice parameters (refined)")
         self.declareProperty(FileProperty(name=self.PROP_GSAS_PROJ_PATH, defaultValue="", action=FileAction.Save,
                                           extensions=".gpx"), doc="GSASII Project to work on")
-        self.declareProperty(name=self.PROP_OUT_GOF, defaultValue=0.0, direction=Direction.Output,
-                             doc="Goodness of fit value (Chi squared)")
-        self.declareProperty(name=self.PROP_OUT_RWP, defaultValue=0.0, direction=Direction.Output,
-                             doc="Weight profile R-factor (Rwp) discrepancy index for the goodness of fit")
 
-        self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, self.PROP_OUT_GROUP_RESULTS)
-        self.setPropertyGroup(self.PROP_GSAS_PROJ_PATH, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_GOF, self.PROP_OUT_GROUP_RESULTS)
         self.setPropertyGroup(self.PROP_OUT_RWP, self.PROP_OUT_GROUP_RESULTS)
+        self.setPropertyGroup(self.PROP_OUT_LATTICE_PARAMS, self.PROP_OUT_GROUP_RESULTS)
+        self.setPropertyGroup(self.PROP_GSAS_PROJ_PATH, self.PROP_OUT_GROUP_RESULTS)
 
         self.declareProperty(name=self.PROP_PAWLEY_DMIN, defaultValue=1.0, direction=Direction.Input,
                              doc="For Pawley refiment: as defined in GSAS-II, the minimum d-spacing to be used in a "
@@ -95,11 +95,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
         if refinement_method == self.REFINEMENT_METHODS[0]:  # Rawley refinement
-            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=True,
-                                                                            histogram=gsas_proj.histograms()[0])
+            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=True)
         elif refinement_method == self.REFINEMENT_METHODS[1]:  # Rietveld refinement
-            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=False,
-                                                                            histogram=gsas_proj.histograms()[0])
+            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=False)
         else:  # Peak fitting
             raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
 
@@ -157,9 +155,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         except Exception as e:
             raise Warning("Couldn't remove temporary spectrum file at location \"{}\":\n{}".format(spectrum_path, e))
 
-    def _run_rietveld_pawley_refinement(self, gsas_proj, histogram, do_pawley):
+    def _run_rietveld_pawley_refinement(self, gsas_proj, do_pawley):
         phase_path = self.getPropertyValue(self.PROP_PATH_TO_PHASE)
-        phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[histogram])
+        phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
 
         if do_pawley:
             self._set_pawley_phase_parameters(phase)
