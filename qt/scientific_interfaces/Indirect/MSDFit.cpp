@@ -211,47 +211,13 @@ void MSDFit::updatePlot(int spectrumNo) {
 
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       m_runMin <= specNo && specNo <= m_runMax) {
-    plotResult(groupName, specNo);
+    IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
+                                        m_uiForm.ppPlot, m_uiForm.ppPlot);
   } else {
-    auto inputWs = inputWorkspace();
-
-    if (inputWs) {
-      setPreviewPlotWorkspace(inputWs);
-      m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
-    } else {
-      g_log.error("No workspace loaded, cannot create preview plot.");
-      return;
-    }
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   }
 
-  updatePlotRange();
-}
-
-void MSDFit::updatePlotRange() {
-
-  try {
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    m_uiForm.ppPlot->getRangeSelector("MSDRange")
-        ->setRange(range.first, range.second);
-    IndirectTab::resizePlotRange(m_uiForm.ppPlot, qMakePair(0.0, 1.0));
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-}
-
-void MSDFit::plotResult(const std::string &groupWsName, size_t specNo) {
-  WorkspaceGroup_sptr outputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupWsName);
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo - m_runMin));
-
-  if (ws) {
-    setPreviewPlotWorkspace(ws);
-    m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
-    m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-    m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-  }
+  IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlot);
 }
 
 /**
