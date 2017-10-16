@@ -182,6 +182,11 @@ void FitPeaks::init() {
   setPropertyGroup("CostFunction", optimizergrp);
 
   // other helping information
+  declareProperty("HighBackground", true,
+                  "Flag whether the data has high background comparing to "
+                  "peaks' intensities. "
+                  "For example, vanadium peaks usually have high background.");
+
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "EventNumberWorkspace", "", Direction::Input, PropertyMode::Optional),
@@ -192,6 +197,7 @@ void FitPeaks::init() {
       "the corresponding spectrum.");
 
   std::string helpgrp("Additional Information");
+
   setPropertyGroup("EventNumberWorkspace", helpgrp);
 
   //  declareProperty(Kernel::make_unique<ArrayProperty<double>>("PeakRanges"),
@@ -252,6 +258,8 @@ void FitPeaks::processInputs() {
   m_stopWorkspaceIndex = static_cast<size_t>(stop_wi);
   if (m_stopWorkspaceIndex == 0)
     m_stopWorkspaceIndex = m_inputWS->getNumberHistograms();
+
+  m_highBackground = getProperty("HighBackground");
 
   // Set up peak and background functions
   processInputFunctions();
@@ -469,7 +477,7 @@ void FitPeaks::fitPeaks() {
 
       PARALLEL_START_INTERUPT_REGION
 
-      // init outputs
+      // initialize outputs
       std::vector<double> peak_positions(m_numPeaksToFit, -1);
       std::vector<std::vector<double>> peak_parameters(m_numPeaksToFit);
       std::vector<std::vector<double>> fitted_peaks;
@@ -500,9 +508,14 @@ void FitPeaks::fitPeaks() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Fit peaks in a same spectrum
- * NEW!
+/** Fit peaks across one single spectrum
  * @brief FitPeaks::fitSpectrumPeaks
+ * @param wi
+ * @param peak_pos : fitted peak positions
+ * @param peak_params : fitted peak parameters
+ * @param peak_chi2_vec : fitted chi squiares
+ * @param fitted_functions : ???
+ * @param fitted_peak_windows : ???
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, std::vector<double> &peak_pos,
@@ -557,10 +570,60 @@ void FitPeaks::fitSpectrumPeaks(
     // Estimate peak profile parameter
     estimatePeakParameters(wi, peak_window_i, peakfunction, bkgdfunction);
 
-    // Estimate peak parameters
+    // Fit peak
     double tol = 0.001;
-    fitIndividualPeak(wi, peak_fitter, compfunc, peakfunction, bkgdfunction,
-                      peak_window_i, center_i, tol);
+    double cost =
+        fitIndividualPeak(wi, peak_fitter, compfunc, peakfunction, bkgdfunction,
+                          peak_window_i, center_i, tol, m_highBackground);
+
+    // process fitting result
+    processSinglePeakFitResult(wi, ipeak, peakfunction, bkgdfunction, cost,
+                               peak_pos, peak_params, peak_chi2_vec,
+                               fitted_peaks);
+  }
+
+  return;
+}
+
+void FitPeaks::processSinglePeakFitResult(
+    size_t wi, size_t peakindex, API::IFunction_sptr peakbkgdfunction,
+    API::IPeakFunction_sptr peakfunction,
+    API::IBackgroundFunction_sptr bkgdfunction, double chi2,
+    std::vector<double> &fitted_peak_positions,
+    std::vector<std::vector<double>> &peak_params_vector,
+    std::vector<double> &peak_chi2_vec, bool calculated_fitted,
+    HistogramData::Histogram &fitted_data,
+    const std::pair<double, double> &peakwindow) {
+  // check input
+  if (peakindex >= fitted_peak_positions.size() ||
+      peakindex >= peak_params_vector.size() ||
+      peakindex >= peak_chi2_vec.size()) {
+    throw std::runtime_error("peak index size is out of boundary for fitted "
+                             "peaks positions, peak parameters or chi2s");
+  }
+
+  // peak position
+  fitted_peak_positions[peakindex] = peakfunction->centre();
+
+  // new method
+  // TODO/NOW/How to get the peak parameters out?
+  std::vector<double> peak_params;
+  for (size_t iparam = 0; iparam < m_numberPeakParams; ++iparam)
+    peak_params.push_back(peakfunction->getParameter(iparam));
+  peak_params_vector[ipeak] = peak_params;
+
+  // chi2
+  peak_chi2_vec[ipeak] = chi2;
+
+  // return if it is not required to calculated fitted peaks
+  if (!calculated_fitted)
+    return;
+
+  // calculate fitted peak with background
+  size_t start_x_index = getXIndex(wi, peakwindow.first);
+  size_t end_x_index = getXIndex(wi, peakwindow.second);
+  for (size_t i = start_x_index; i < end_x_index; ++i) {
+    peakbkgdfunction->function(fitted_data.mutableX(), fitted_data.mutableY());
   }
 
   return;
@@ -579,12 +642,29 @@ void FitPeaks::estimateBackground(size_t wi,
                                   API::IBackgroundFunction_sptr function,
                                   API::IAlgorithm_sptr fitter) {
   // TODO/ISSUE/NOW - Implement!.. Need to document the algorithm to estimate
-  // background
+  // call algorithm FindPeakBackground
+  std::vector<size_t> peak_min_max_indexes;
+  std::vector<double> &vector_bkgd(3);
+
   Mantid::Algorithms::FindPeakBackground bkgd_finder;
   bkgd_finder.setBackgroundOrder(2);
-  bkgd_finder.execute();
+  bkgd_finder.setSigma(sigma);
+  bkgd_finder.setFitWindow(peak_window);
+  bkgd_finder.findBackground(m_inputWS->histogram(wi), l0, n,
+                             peak_min_max_indexes, bkgd_vectors);
 
-  // call algorithm FindPeakBackground
+  bool result = bkgd_finder.getResults();
+
+  // use the simple way to find linear background
+  if (!result) {
+    this->estimateLinearBackground()
+  }
+  /*
+    const HistogramData::Histogram &histogram, const size_t &l0,
+    const size_t &n, std::vector<size_t> &peak_min_max_indexes,
+    std::vector<double> &bkgd3) {
+        */
+
   // blabla()
 
   // step 2 ... (refer to documentation)
@@ -744,7 +824,16 @@ int FitPeaks::estimatePeakParameters(
 
 //----------------------------------------------------------------------------------------------
 /** Fit a specific peak with estimated peak and background parameters
- * @brief FitPeaks::FitIndividualPeak
+ * @brief FitPeaks::fitIndividualPeak
+ * @param wi
+ * @param fitter
+ * @param peakbkgdfunc
+ * @param peakfunction
+ * @param bkgdfunc
+ * @param fitwindow
+ * @param exppeakcenter
+ * @param postol
+ * @param high : high background
  * @return cost of fitting peak
  */
 double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
@@ -753,7 +842,11 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                                    API::IBackgroundFunction_sptr bkgdfunc,
                                    const std::pair<double, double> &fitwindow,
                                    const double &exppeakcenter,
-                                   const double &postol) {
+                                   const double &postol, const bool high) {
+
+  if (high) {
+    // high background : create a new workspace with high background
+  }
 
   //
   bool high(false);
@@ -1164,15 +1257,15 @@ void FitPeaks::writeFitResult(
 
     // about the peak: if fitting is bad, then the fitted peak window is
     // empty
-    if (fitted_peaks_windows[ipeak].size() == 2) {
-      auto vec_x = m_fittedPeakWS->histogram(wi).x();
-      double window_left = fitted_peaks_windows[ipeak][0];
-      double window_right = fitted_peaks_windows[ipeak][1];
-      size_t window_left_index = findXIndex(vec_x, window_left);
-      size_t window_right_index = findXIndex(vec_x, window_right);
-      for (size_t ix = window_left_index; ix < window_right_index; ++ix)
-        m_fittedPeakWS->dataY(wi)[ix] =
-            fitted_peaks[ipeak][ix - window_left_index];
+    //    if (fitted_peaks_windows[ipeak].size() == 2) {
+    //      auto vec_x = m_fittedPeakWS->histogram(wi).x();
+    //      double window_left = fitted_peaks_windows[ipeak][0];
+    //      double window_right = fitted_peaks_windows[ipeak][1];
+    //      size_t window_left_index = findXIndex(vec_x, window_left);
+    //      size_t window_right_index = findXIndex(vec_x, window_right);
+    //      for (size_t ix = window_left_index; ix < window_right_index; ++ix)
+    //        m_fittedPeakWS->dataY(wi)[ix] =
+    //            fitted_peaks[ipeak][ix - window_left_index];
     }
   }
 
