@@ -31,7 +31,8 @@ namespace IDA {
 ConvFit::ConvFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
       m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(), m_runMin(-1),
-      m_runMax(-1) {
+      m_runMax(-1), m_fitFunctions(), m_parameterValues(),
+      m_propertyToParameter() {
   m_uiForm.setupUi(parent);
 }
 
@@ -981,8 +982,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
