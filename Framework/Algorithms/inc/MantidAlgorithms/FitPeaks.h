@@ -60,15 +60,16 @@ private:
   void fitSpectrumPeaks(size_t wi, std::vector<double> &peak_pos,
                         std::vector<std::vector<double>> &peak_params,
                         std::vector<double> &peak_chi2_vec,
-                        std::vector<std::vector<double>> &fitted_functions,
-                        std::vector<std::vector<double>> &fitted_peak_windows);
+                        std::vector<std::vector<double>> &&fitted_functions,
+                        std::vector<std::vector<double>> &&fitted_peak_windows);
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                            API::IFunction_sptr peakbkgdfunc,
                            API::IPeakFunction_sptr peakfunction,
                            API::IBackgroundFunction_sptr bkgdfunc,
                            const std::pair<double, double> &fitwindow,
-                           const double &exppeakcenter, const double &postol);
+                           const double &exppeakcenter, const double &postol,
+                           const bool high);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
@@ -118,7 +119,7 @@ private:
                       std::vector<std::vector<double>> &fitted_peaks,
                       std::vector<std::vector<double>> &fitted_peaks_windows);
 
-  // ------------------------ May not be used --------------
+  /// estimate linear background
   void estimateLinearBackground(size_t wi, double left_window_boundary,
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
@@ -172,6 +173,9 @@ private:
 
   size_t m_startWorkspaceIndex;
   size_t m_stopWorkspaceIndex;
+
+  /// flag for high background
+  bool m_highBackground;
 };
 
 } // namespace Algorithms

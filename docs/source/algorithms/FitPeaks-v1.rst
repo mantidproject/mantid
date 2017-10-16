@@ -182,6 +182,42 @@ Step 4
 Remove the background and fit peak!
 
 
+Outputs
+-------
+
+Algorithm *FitPeaks* is designed for various purposes including but not limited to vanadium peak striping and fitting diamond peaks to calibrate detectors' positions.
+On the other hand, due to the complexity in peak fitting, users prefer to check the fitting results. 
+Therefore, *FitPeaks* supports various fexible and informative outputs.
+
+OutputWorkspace
+===============
+
+It is a TableWorkspace containing peak parameters.
+According to user's specication, it will contain one parameter, i.e., peak position, or all parameters.
+
+The order of the peaks will be exactly the sequence of peaks as the order of the given positions of peaks.
+
+
+FittingCostWorkspace
+====================
+
+It is a MatrixWorkspace recording the cost of each peak that is fitted.
+It is in the exactly same order as the given positions of peaks to fit.
+Its X values store the fitted peak positions and Y values are for :math:`\chi^2`.
+
+If a peak's fitting is bad, then the peak position will be its proposed peak position,
+while its :math:`\chi^2` shall be some special value.
+
+
+FittedPeaksWorkspace
+====================
+
+It is an optional output MatrixWorkspace.
+
+For each spectrum, in each fit window, the Y values will be replaced by the calcualted peak and background value.
+If fitting is bad, then only background is calculated.
+
+
 
 Usage
 -----
