@@ -289,7 +289,7 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
   if (analyser.size() > 0) {
     auto comp = inst->getComponentByName(analyser[0]);
 
-    if(comp) {
+    if (comp) {
       auto params = comp->getNumberParameter("resolution", true);
 
       // set the default instrument resolution
@@ -305,7 +305,8 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
         m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
       }
     } else {
-      showMessageBox("Warning: The instrument definition file for the input workspace is invalid.");
+      showMessageBox("Warning: The instrument definition file for the input "
+                     "workspace contains an invalid value.");
     }
   }
 }
