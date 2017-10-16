@@ -189,8 +189,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   std::vector<double> metric =
       m_entropy->secondDerivative(m_image, m_background);
 
-  std::fill(metric.begin(), metric.end(), 1.0);
-
   if (cgrad.size() != npoints || sgrad.size() != npoints ||
       metric.size() != npoints)
     throw std::runtime_error(
@@ -270,7 +268,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
         m_coeffs.s2[k][l] -=
             m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
       }
-      m_coeffs.s2[k][l] *= 1.0 / m_background;
     }
   }
   // Then c2
