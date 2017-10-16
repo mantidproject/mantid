@@ -19,8 +19,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 MSDFit::MSDFit(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_msdTree(nullptr), m_parameterValues,
-      m_propertyToParameter() {
+    : IndirectDataAnalysisTab(parent), m_msdTree(nullptr), m_parameterValues(),
+      m_parameterToProperty() {
   m_uiForm.setupUi(parent);
 }
 
