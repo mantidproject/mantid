@@ -89,13 +89,8 @@ protected slots:
   /// Plots the current preview data
   void plotCurrentPreview();
 
-private:
-  /// Overidden by child class.
-  void setup() override = 0;
-  /// Overidden by child class.
-  void run() override = 0;
-  /// Overidden by child class.
-  bool validate() override = 0;
+protected:
+  void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void updatePlot(const std::string workspaceName, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
@@ -104,6 +99,17 @@ private:
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+
+  void updatePlotRange(QString rangeName,
+                       MantidQt::MantidWidgets::PreviewPlot *previewPlot);
+
+private:
+  /// Overidden by child class.
+  void setup() override = 0;
+  /// Overidden by child class.
+  void run() override = 0;
+  /// Overidden by child class.
+  bool validate() override = 0;
 
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;

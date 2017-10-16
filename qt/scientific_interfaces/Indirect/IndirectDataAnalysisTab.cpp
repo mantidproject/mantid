@@ -130,6 +130,19 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 }
 
 /**
+ * Plots the selected spectrum of the input workspace in this indirect data
+ * analysis tab.
+ */
+void IndirectDataAnalysisTab::plotInput(
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+  previewPlot->clear();
+  auto inputWS = inputWorkspace();
+
+  if (inputWS)
+    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
+}
+
+/**
  * Plots the workspace at the specified index in the workspace group
  * with the specified name. Plots the sample and fit spectrum in the
  * specified top preview plot. Plots the diff spectra in the specified
@@ -165,6 +178,8 @@ void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  topPreviewPlot->clear();
+  bottomPreviewPlot->clear();
   // Check whether the specified index is within the bounds of the
   // fitted spectrum.
   if (outputWS && index > 0 && index <= outputWS->size()) {
@@ -175,7 +190,22 @@ void IndirectDataAnalysisTab::updatePlot(
     topPreviewPlot->addSpectrum("Fit", workspace, 1, Qt::red);
     bottomPreviewPlot->addSpectrum("Diff", workspace, 2, Qt::blue);
   } else {
-    topPreviewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
+    plotInput(topPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlotRange(
+    QString rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+  try {
+    const QPair<double, double> curveRange =
+        previewPlot->getCurveRange("Sample");
+    const std::pair<double, double> range(curveRange.first, curveRange.second);
+    previewPlot->getRangeSelector(rangeName)
+        ->setRange(range.first, range.second);
+    m_dblManager->setValue(m_properties["StartX"], range.first);
+    m_dblManager->setValue(m_properties["EndX"], range.second);
+  } catch (std::invalid_argument &exc) {
+    showMessageBox(exc.what());
   }
 }
 
