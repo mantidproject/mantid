@@ -101,14 +101,14 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             gsas_proj = self._initialise_GSAS()
 
             refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
-            if refinement_method == self.REFINEMENT_METHODS[0]:  # Rawley refinement
-                rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=True)
-            elif refinement_method == self.REFINEMENT_METHODS[1]:  # Rietveld refinement
-                rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=False)
-            else:  # Peak fitting
+
+            if refinement_method == self.REFINEMENT_METHODS[2]:  # Peak fitting
                 raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
 
-        self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params)
+            rwp, gof, lattice_params = \
+                self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
+                                                     do_pawley=refinement_method == self.REFINEMENT_METHODS[0])
+            self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params)
 
     def _build_output_lattice_table(self, lattice_params):
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
@@ -170,7 +170,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         Run a Rietveld or Pawley refinement
         :param gsas_proj: The project to work on
         :param do_pawley: True if doing a Pawley refinement (the default), False if doing a Rietveld refinement
-        :return: (R weight profile, goodness-of-fit coefficient, table containing refined lattice parameters)
+        :return: (R weighted profile, goodness-of-fit coefficient, table containing refined lattice parameters)
         """
         phase_path = self.getPropertyValue(self.PROP_PATH_TO_PHASE)
         phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
@@ -224,6 +224,9 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
     @contextmanager
     def _suppress_stdout(self):
+        """
+        Suppress output from print statements. This is mainly useful for debugging, as GSAS does a lot of printing.
+        """
         if self.getPropertyValue(self.PROP_SUPPRESS_GSAS_OUTPUT) == "1":
             self.log().information("Suppressing stdout")
             with open(os.devnull, "w") as devnull:
