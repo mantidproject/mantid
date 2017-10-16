@@ -108,7 +108,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     ${QT_LIBRARIES}
-    ${QWT_LIBRARIES}
+    ${QWT5_LIBRARIES}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}

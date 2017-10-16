@@ -97,10 +97,10 @@ endif()
 if (ENABLE_MANTIDPLOT)
   find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
 
-  find_package ( Qwt REQUIRED )
-  if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
-      QWT_VERSION VERSION_GREATER 6.0 )
-    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
+  find_package ( Qwt5 REQUIRED )
+  if( QWT5_VERSION VERSION_LESS 5.0 OR QWT5_VERSION VERSION_EQUAL 6.0 OR
+      QWT5_VERSION VERSION_GREATER 6.0 )
+    message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}" )
   endif()
 
   find_package ( PyQt4 REQUIRED )

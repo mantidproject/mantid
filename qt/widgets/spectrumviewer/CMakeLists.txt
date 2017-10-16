@@ -69,7 +69,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
                         ${POCO_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES}
+                        ${QWT5_LIBRARIES}
                     MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon
 )

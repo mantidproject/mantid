@@ -7,7 +7,7 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewMDHWSourceSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewMDHWSourceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${CORE_MANTIDLIBS}
@@ -16,7 +16,7 @@ VatesAPI
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 ${vtkjsoncpp_LIBRARIES}
-${QWT_LIBRARIES}
+${QWT5_LIBRARIES}
 Qt4::QtCore
 )
 

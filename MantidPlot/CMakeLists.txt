@@ -676,7 +676,7 @@ endif()
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 find_package ( QwtPlot3d REQUIRED )
 include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
@@ -801,7 +801,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${GSL_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
+            ${QWT5_LIBRARIES}
             ${QWTPLOT3D_LIBRARIES}
             Qt4::Qscintilla
             ${PYTHON_LIBRARIES}

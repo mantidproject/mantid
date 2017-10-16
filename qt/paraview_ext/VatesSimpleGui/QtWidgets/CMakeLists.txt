@@ -39,12 +39,12 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
                     UI ${UI_FILES}
                     RES ${RES_FILES}
                     DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
-                    INCLUDE_DIRS ${QWT_INCLUDE_DIR}
+                    INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
                     LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${POCO_LIBRARIES}
                         ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES}
+                        ${QWT5_LIBRARIES}
                         ${MANTID_SUBPROJECT_LIBS}
                     MTD_QT_LINK_LIBS
                         MantidQtWidgetsCommon

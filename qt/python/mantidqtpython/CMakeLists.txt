@@ -162,7 +162,7 @@ target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIM
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
             ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
+            ${QWT5_LIBRARIES}
             ${PYTHON_LIBRARIES}
             )
 

@@ -108,7 +108,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_SOURCE_DIR}/MantidPlot/src
 )
-include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT5_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
 
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
                     SRC ${SOURCE_FILES}
@@ -117,7 +117,7 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
                     UI ${UI_FILES}
                     RES ${RES_FILES}
                     DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
-                    INCLUDE_DIRS ${QWT_INCLUDE_DIR}
+                    INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
                     LINK_LIBS
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         pqApplicationComponents

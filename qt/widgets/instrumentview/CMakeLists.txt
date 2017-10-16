@@ -139,7 +139,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${CORE_MANTIDLIBS}
                       ${QT_LIBRARIES}
-                      ${QWT_LIBRARIES}
+                      ${QWT5_LIBRARIES}
                       ${POCO_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${PYTHON_LIBRARIES}
