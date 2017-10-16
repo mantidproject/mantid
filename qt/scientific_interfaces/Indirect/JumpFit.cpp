@@ -164,26 +164,7 @@ void JumpFit::fitAlgDone(bool error) {
 
   // Get output workspace name
   std::string outWsName = outName + "_Workspace";
-
-  // Get the output workspace group
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
-  TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
-
-  // Find the fit and diff curves (data should already be plotted)
-  for (unsigned int histIndex = 0;
-       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
-    QString specName = QString::fromStdString(axis->label(histIndex));
-
-    // Fit curve is red
-    if (specName == "Calc")
-      m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
-
-    // Difference curve is green
-    if (specName == "Diff")
-      m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
-                                   Qt::blue);
-  }
+  IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlot, m_uiForm.ppPlot);
 
   // Update parameters in UI
   std::string paramTableName = outName + "_Parameters";
@@ -246,8 +227,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
     setSelectedSpectrum(m_spectraList[currentWidth]);
-    m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", sample, selectedSpectrum());
+    plotInput(m_uiForm.ppPlot);
 
     QPair<double, double> res;
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
