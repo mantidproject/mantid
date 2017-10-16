@@ -220,7 +220,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
     def _interpolate_zero_cells(self, ws, theta_axis):
         """
-            Interpolates the counts of zero counting cells linearly from the 2 neighbour cells
+            Interpolates the counts of zero counting cells linearly from the
+            nearest non-zero neighbour cells
             @param ws: the input workspace
             @param theta_axis: the unordered signed 2theta axis
         """
