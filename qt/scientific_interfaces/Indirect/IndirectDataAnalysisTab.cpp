@@ -164,6 +164,7 @@ void IndirectDataAnalysisTab::updatePlot(
         outputWSName);
     updatePlot(workspace, index, topPreviewPlot, bottomPreviewPlot);
   } else {
+    bottomPreviewPlot->clear();
     plotInput(topPreviewPlot);
   }
 }
@@ -190,6 +191,7 @@ void IndirectDataAnalysisTab::updatePlot(
         boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, topPreviewPlot, bottomPreviewPlot);
   } else {
+    bottomPreviewPlot->clear();
     plotInput(topPreviewPlot);
   }
 }
