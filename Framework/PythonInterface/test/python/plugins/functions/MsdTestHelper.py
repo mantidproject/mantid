@@ -3,6 +3,7 @@ from mantid.api import FunctionFactory, WorkspaceFactory
 
 import numpy as np
 
+
 def is_registered(function_name):
     """
     Check whether the function with the specified name has been registered.
@@ -18,17 +19,21 @@ def is_registered(function_name):
         return False, 'Could not create {} function: {}'.format(function, str(exc))
     return True, ""
 
+
 def create_function_string(function_name, **function_params):
     return str(FunctionWrapper(function_name, **function_params))
+
 
 def check_output(function_name, input, expected_output, tolerance, **function_params):
     func = FunctionWrapper(function_name, **function_params)
     output = func(input)
     return np.allclose(output, expected_output, atol=0.0001), output
 
+
 def create_model(function_name, **function_params):
     func = FunctionWrapper(function_name, **function_params)
-    return lambda x : func(x)
+    return lambda x: func(x)
+
 
 def create_test_workspace(model, num_bins):
     import random
