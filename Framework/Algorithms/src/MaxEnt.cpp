@@ -131,8 +131,9 @@ void MaxEnt::init() {
                       "A", 0.001, mustBeNonNegative, Direction::Input),
                   "A maximum entropy constant");
 
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTarget", 1.0e-12, mustBeNonNegative, Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>("ChiTarget", 1.0e-12,
+                                                         mustBeNonNegative,
+                                                         Direction::Input),
                   "Target value of Chi-square");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
