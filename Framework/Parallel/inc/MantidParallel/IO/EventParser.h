@@ -181,10 +181,11 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   rankData.resize(m_comm.size());
 
   m_pulseTimes.seek(range.eventOffset);
+  int ranks = m_comm.size();
   for (size_t event = 0; event < range.eventCount; ++event) {
     // Currently this supports only a hard-coded round-robin partitioning.
-    int rank = globalSpectrumIndex[event] % m_comm.size();
-    auto index = globalSpectrumIndex[event] / m_comm.size();
+    int rank = globalSpectrumIndex[event] % ranks;
+    auto index = globalSpectrumIndex[event] / ranks;
     rankData[rank].emplace_back(
         Event{index, eventTimeOffset[event], m_pulseTimes.next()});
   }
