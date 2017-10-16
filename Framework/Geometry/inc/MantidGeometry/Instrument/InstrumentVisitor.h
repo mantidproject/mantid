@@ -26,6 +26,8 @@ class IObjComponent;
 class Instrument;
 class Object;
 class ParameterMap;
+class RectangularDetector;
+
 /** InstrumentVisitor : Visitor for components with access to Info wrapping
   features.
 
@@ -134,6 +136,9 @@ private:
   /// Scale factors
   boost::shared_ptr<std::vector<Eigen::Vector3d>> m_scaleFactors;
 
+  /// Structured bank flag
+  boost::shared_ptr<std::vector<bool>> m_isStructuredBank;
+
   void markAsSourceOrSample(Mantid::Geometry::IComponent *componentId,
                             const size_t componentIndex);
 
@@ -153,6 +158,9 @@ public:
 
   virtual size_t registerGenericObjComponent(
       const Mantid::Geometry::IObjComponent &objComponent) override;
+
+  virtual size_t
+  registerStructuredBank(const Mantid::Geometry::ICompAssembly &bank) override;
 
   virtual size_t
   registerDetector(const Mantid::Geometry::IDetector &detector) override;

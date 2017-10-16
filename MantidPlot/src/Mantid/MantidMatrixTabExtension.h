@@ -15,7 +15,7 @@ struct MantidMatrixTabExtension {
                            MantidMatrixModel::Type type)
       : label(label), tableView(tableView), model(model), type(type) {}
   MantidMatrixTabExtension()
-      : label(""), tableView(NULL), model(NULL),
+      : label(""), tableView(nullptr), model(nullptr),
         type(MantidMatrixModel::Type::DX) {}
   QString label;
   QTableView *tableView;

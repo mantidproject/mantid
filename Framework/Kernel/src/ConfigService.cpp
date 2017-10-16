@@ -46,13 +46,13 @@
 #include <boost/regex.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <exception>
 #include <fstream>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
 #include <utility>
-#include <ctype.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>

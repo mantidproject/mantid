@@ -39,7 +39,7 @@ class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem {
 public:
   AlgHistoryItem(const QStringList &names,
                  Mantid::API::AlgorithmHistory_const_sptr algHistory,
-                 AlgHistoryItem *parent = 0)
+                 AlgHistoryItem *parent = nullptr)
       : QTreeWidgetItem(parent, names, UserType),
         Mantid::API::HistoryItem(algHistory) {}
 };

@@ -1,4 +1,6 @@
 #include "MantidGeometry/Instrument/StructuredDetector.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -518,6 +520,10 @@ int StructuredDetector::getPointInObject(V3D &) const {
 * @param assemblyBox :: A BoundingBox object that will be overwritten
 */
 void StructuredDetector::getBoundingBox(BoundingBox &assemblyBox) const {
+  if (hasComponentInfo()) {
+    assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
+    return;
+  }
   if (!m_cachedBoundingBox) {
     m_cachedBoundingBox = new BoundingBox();
     // Get all the corners
@@ -641,6 +647,11 @@ std::ostream &operator<<(std::ostream &os, const StructuredDetector &ass) {
   os << "Number of children :" << ass.nelements() << '\n';
   ass.printChildren(os);
   return os;
+}
+
+size_t StructuredDetector::registerContents(
+    class ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerStructuredBank(*this);
 }
 
 } // namespace Geometry

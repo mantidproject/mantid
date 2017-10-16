@@ -696,7 +696,7 @@ private:
     const auto *prop_with_value =
         dynamic_cast<PropertyWithValue<int> *>(prop.get());
 
-    TS_ASSERT(prop_with_value != NULL);
+    TS_ASSERT(prop_with_value != nullptr);
     int value = boost::lexical_cast<int>(prop_with_value->value());
     TS_ASSERT_EQUALS(expected_period, value);
   }

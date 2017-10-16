@@ -334,8 +334,36 @@ public:
     InstrumentVisitor visitor(instrument);
     visitor.walkInstrument();
 
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto compInfo = std::move(std::get<0>(wrappers));
+    auto detInfo = std::move(std::get<1>(wrappers));
+
     TSM_ASSERT_EQUALS("Wrong number of detectors registered",
                       visitor.detectorIds()->size(), nPixelsWide * nPixelsWide);
+
+    const size_t bankIndex = compInfo->indexOf(
+        instrument->getComponentByName("bank1")->getComponentID());
+    TS_ASSERT(compInfo->isStructuredBank(bankIndex)); // Bank is rectangular
+    TS_ASSERT(!compInfo->isStructuredBank(
+        compInfo->source())); // Source is not a rectangular bank
+    TS_ASSERT(!compInfo->isStructuredBank(
+        0)); //  A detector is never a bank, let alone a detector
+  }
+
+  void test_visitation_of_non_rectangular_detectors() {
+
+    auto instrument =
+        ComponentCreationHelper::createTestInstrumentCylindrical(1 /*n banks*/);
+    auto wrappers =
+        InstrumentVisitor::makeWrappers(*instrument, nullptr /*parameter map*/);
+    auto compInfo = std::move(std::get<0>(wrappers));
+    auto detInfo = std::move(std::get<1>(wrappers));
+
+    // Nothing should be marked as a rectangular bank
+    for (size_t index = 0; index < compInfo->size(); ++index) {
+      TS_ASSERT(!compInfo->isStructuredBank(index));
+    }
   }
 
   void test_parent_indices() {

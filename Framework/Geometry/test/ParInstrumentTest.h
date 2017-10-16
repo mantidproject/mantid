@@ -69,8 +69,8 @@ public:
     TS_ASSERT_EQUALS(pinstrument.getDetector(1)->getID(), det->getID());
     TS_ASSERT_THROWS(pinstrument.getDetector(2), Exception::NotFoundError);
 
-    TS_ASSERT(NULL == pinstrument.getBaseDetector(0));
-    Detector *d = new Detector("det", 2, 0);
+    TS_ASSERT(nullptr == pinstrument.getBaseDetector(0));
+    Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument->markAsDetector(d));
     TS_ASSERT_EQUALS(pinstrument.getDetector(2)->getID(), d->getID());
 

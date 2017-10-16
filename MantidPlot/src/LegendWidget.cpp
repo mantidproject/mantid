@@ -68,7 +68,7 @@ LegendWidget::LegendWidget(Plot *plot)
   pos = QPoint(pos.x() + 10, pos.y() + 10);
   move(pos);
 
-  d_selector = NULL;
+  d_selector = nullptr;
 
   connect(this, SIGNAL(showDialog()), plot->parent(), SIGNAL(viewTextDialog()));
   connect(this, SIGNAL(showMenu()), plot->parent(),
@@ -595,7 +595,7 @@ QString LegendWidget::parse(const QString &str) {
 
 PlotCurve *LegendWidget::getCurve(const QString &s, int &point) {
   point = -1;
-  PlotCurve *curve = 0;
+  PlotCurve *curve = nullptr;
   if (Graph *g = dynamic_cast<Graph *>(d_plot->parent())) {
     QStringList l = s.split(",");
     if (l.count() == 2)
@@ -621,7 +621,7 @@ PlotCurve *LegendWidget::getCurve(const QString &s, int &point) {
 void LegendWidget::mousePressEvent(QMouseEvent * /*e*/) {
   if (d_selector) {
     delete d_selector;
-    d_selector = NULL;
+    d_selector = nullptr;
   }
 
   Graph *g = (dynamic_cast<Graph *>(d_plot->parent()));
@@ -663,11 +663,11 @@ void LegendWidget::setSelected(bool on) {
     }
   } else if (d_selector) {
     d_selector->close();
-    d_selector = NULL;
+    d_selector = nullptr;
     Graph *g = (dynamic_cast<Graph *>(d_plot->parent()));
     if (!g)
       return;
-    g->setSelectedText(NULL);
+    g->setSelectedText(nullptr);
   }
 }
 

@@ -43,6 +43,7 @@ set ( TEST_PY_FILES
       test/AbinsLoadGAUSSIANTest.py
       test/AbinsPowderDataTest.py
       test/ConvertToWavelengthTest.py
+      test/CrystalFieldMultiSiteTest.py
       test/CrystalFieldTest.py
       test/DirectEnergyConversionTest.py
       test/DirectPropertyManagerTest.py

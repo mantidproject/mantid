@@ -170,7 +170,7 @@ public:
         output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputSpace));
 
-    Property *prop = 0;
+    Property *prop = nullptr;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
     std::vector<DateAndTime> times;

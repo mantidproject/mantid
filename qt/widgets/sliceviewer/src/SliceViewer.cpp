@@ -89,7 +89,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL), m_lastRatioState(Guess) {
+      m_peaksSliderWidget(nullptr), m_lastRatioState(Guess) {
 
   ui.setupUi(this);
   std::string enableNonOrthogonal;
@@ -2663,7 +2663,7 @@ void SliceViewer::updatePeakOverlaySliderWidget() {
 * to update the collection of peaks presetners.
 */
 void SliceViewer::updatePeaksOverlay() {
-  if (m_peaksSliderWidget != NULL) {
+  if (m_peaksSliderWidget != nullptr) {
     auto xInterval = getXLimits();
     auto yInterval = getYLimits();
     PeakBoundingBox viewableRegion(

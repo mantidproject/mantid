@@ -5,10 +5,10 @@
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
-#include <time.h>
+#include <cstdint>
 #include <iosfwd>
-#include <stdint.h>
 #include <string>
+#include <ctime>
 #include <vector>
 
 namespace Mantid {
@@ -41,7 +41,7 @@ public:
   DateAndTime(const double seconds, const double nanoseconds);
   DateAndTime(const int32_t seconds, const int32_t nanoseconds);
   DateAndTime(const int64_t seconds, const int64_t nanoseconds);
-  DateAndTime(const std::string &ISO8601_string, bool displayLogs = true);
+  DateAndTime(const std::string &ISO8601_string);
   DateAndTime(const boost::posix_time::ptime _ptime);
 
   void set_from_ptime(boost::posix_time::ptime _ptime);
@@ -53,7 +53,7 @@ public:
   std::time_t to_localtime_t() const;
   std::tm to_tm() const;
 
-  void setFromISO8601(const std::string &str, bool displayLogs = true);
+  void setFromISO8601(const std::string &str);
   std::string toSimpleString() const;
   std::string
   toFormattedString(const std::string format = "%Y-%b-%d %H:%M:%S") const;
@@ -114,29 +114,23 @@ public:
   static void createVector(const DateAndTime start,
                            const std::vector<double> &seconds,
                            std::vector<DateAndTime> &out);
-  static bool stringIsISO8601(const std::string &str);
+
+  /// The difference in seconds between standard unix and gps epochs.
+  static const uint32_t EPOCH_DIFF;
+
+  /// The epoch for GPS times.
+  static const boost::posix_time::ptime GPS_EPOCH;
+
+  /// Const of one second time duration
+  static const time_duration ONE_SECOND;
+
+  static time_t utc_mktime(struct tm *utctime);
 
 private:
   /// A signed 64-bit int of the # of nanoseconds since Jan 1, 1990.
   int64_t _nanoseconds;
 };
 #pragma pack(pop)
-
-namespace DateAndTimeHelpers {
-
-/// The difference in seconds between standard unix and gps epochs.
-static const uint32_t EPOCH_DIFF = 631152000;
-
-/// The epoch for GPS times.
-static const boost::posix_time::ptime GPS_EPOCH(boost::gregorian::date(1990, 1,
-                                                                       1));
-
-/// Const of one second time duration
-static const time_duration oneSecond =
-    boost::posix_time::time_duration(0, 0, 1, 0);
-
-MANTID_KERNEL_DLL time_t utc_mktime(struct tm *utctime);
-}
 
 /** Represents a time interval.
 

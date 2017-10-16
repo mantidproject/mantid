@@ -47,7 +47,7 @@ ScanningWorkspaceBuilder::ScanningWorkspaceBuilder(
  * @param histogram A histogram with bin edges defined
  */
 void ScanningWorkspaceBuilder::setHistogram(
-    const HistogramData::Histogram histogram) {
+    HistogramData::Histogram histogram) {
   if (histogram.size() != m_nBins)
     throw std::logic_error(
         "Histogram supplied does not have the correct size.");
@@ -61,7 +61,7 @@ void ScanningWorkspaceBuilder::setHistogram(
  * @param timeRanges A vector of DateAndTime pairs, corresponding to the start
  *and end times
  */
-void ScanningWorkspaceBuilder::setTimeRanges(const std::vector<
+void ScanningWorkspaceBuilder::setTimeRanges(std::vector<
     std::pair<Kernel::DateAndTime, Kernel::DateAndTime>> timeRanges) {
   verifyTimeIndexSize(timeRanges.size(), "start time, end time pairs");
   m_timeRanges = std::move(timeRanges);
@@ -101,7 +101,7 @@ void ScanningWorkspaceBuilder::setTimeRanges(
  * @param positions A vector of vectors containing positions
  */
 void ScanningWorkspaceBuilder::setPositions(
-    const std::vector<std::vector<Kernel::V3D>> positions) {
+    std::vector<std::vector<Kernel::V3D>> positions) {
 
   if (!m_positions.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set positions, as positions or instrument "
@@ -123,7 +123,7 @@ void ScanningWorkspaceBuilder::setPositions(
  * @param rotations A vector of vectors containing rotations
  */
 void ScanningWorkspaceBuilder::setRotations(
-    const std::vector<std::vector<Kernel::Quat>> rotations) {
+    std::vector<std::vector<Kernel::Quat>> rotations) {
 
   if (!m_rotations.empty() || !m_instrumentAngles.empty())
     throw std::logic_error("Can not set rotations, as rotations or instrument "
@@ -154,8 +154,8 @@ void ScanningWorkspaceBuilder::setRotations(
  *rotate the instrument in the horizontal plane
  */
 void ScanningWorkspaceBuilder::setRelativeRotationsForScans(
-    const std::vector<double> relativeRotations,
-    const Kernel::V3D &rotationPosition, const Kernel::V3D &rotationAxis) {
+    std::vector<double> relativeRotations, const Kernel::V3D &rotationPosition,
+    const Kernel::V3D &rotationAxis) {
 
   if (!m_positions.empty() || !m_rotations.empty())
     throw std::logic_error("Can not set instrument angles, as positions and/or "

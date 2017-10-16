@@ -9,6 +9,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
@@ -20,13 +21,14 @@
 #include <map>
 #include <vector>
 
-using Mantid::DataObjects::EventWorkspace;
-using Mantid::DataObjects::EventWorkspace_sptr;
+using namespace Mantid::Kernel::DateAndTimeHelpers;
 using Mantid::API::WorkspaceGroup;
 using Mantid::API::WorkspaceGroup_sptr;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Histogram;
 
 namespace Mantid {
@@ -798,7 +800,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(NeXus::File &file, size_t i) {
   {
     std::string startTime;
     file.getAttr("offset", startTime);
-    pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
+    pulsetime_offset = createFromSanitizedISO8601(startTime);
   }
   file.closeData();
 
@@ -854,5 +856,5 @@ void LoadNexusMonitors2::readHistoMonitorEntry(NeXus::File &file, size_t i,
   }
 }
 
-} // end DataHandling
-} // end Mantid
+} // namespace DataHandling
+} // namespace Mantid

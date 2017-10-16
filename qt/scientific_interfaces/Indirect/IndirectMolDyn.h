@@ -10,7 +10,7 @@ class DLLExport IndirectMolDyn : public IndirectSimulationTab {
   Q_OBJECT
 
 public:
-  IndirectMolDyn(QWidget *parent = 0);
+  IndirectMolDyn(QWidget *parent = nullptr);
 
   // Inherited methods from IndirectTab
   void setup() override;

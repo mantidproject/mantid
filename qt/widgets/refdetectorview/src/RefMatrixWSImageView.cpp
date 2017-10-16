@@ -18,7 +18,7 @@ using namespace Mantid::API;
  * Construct an ImageView for the specified matrix workspace
  */
 RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
-    : m_imageView(NULL) {
+    : m_imageView(nullptr) {
   return;
   //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
   //  image_view = new RefImageView( source );  // this is the QMainWindow

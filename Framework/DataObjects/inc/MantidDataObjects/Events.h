@@ -1,9 +1,6 @@
 #ifndef MANTID_DATAOBJECTS_EVENTS_H_
 #define MANTID_DATAOBJECTS_EVENTS_H_
 
-#ifdef _WIN32 /* _WIN32 */
-#include <time.h>
-#endif
 #include <cstddef>
 #include <iosfwd>
 #include <vector>

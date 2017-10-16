@@ -53,7 +53,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QDataProcessorWidget
   Q_OBJECT
 public:
   QDataProcessorWidget(std::unique_ptr<DataProcessorPresenter> presenter,
-                       QWidget *parent = 0);
+                       QWidget *parent = nullptr);
   QDataProcessorWidget(const WhiteList &, QWidget *parent);
   QDataProcessorWidget(const WhiteList &, const ProcessingAlgorithm &,
                        QWidget *parent);

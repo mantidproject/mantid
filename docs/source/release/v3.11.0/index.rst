@@ -49,8 +49,8 @@ Changes
 .. toctree::
    :titlesonly:
 
-   Framework <framework>
    User Interface & Usability <ui>
+   Framework <framework>
    Direct Inelastic <direct_inelastic>
    Indirect Inelastic <indirect_inelastic>
    SANS <sans>

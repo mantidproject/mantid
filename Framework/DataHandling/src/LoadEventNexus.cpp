@@ -1,7 +1,6 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/ProcessBankData.h"
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -13,6 +12,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -41,6 +41,7 @@ namespace DataHandling {
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
+using namespace Kernel::DateAndTimeHelpers;
 using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
@@ -1295,7 +1296,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       std::string tmp;
       m_file->readData("start_time", tmp);
       m_file->closeGroup();
-      run_start = DateAndTime(tmp);
+      run_start = createFromSanitizedISO8601(tmp);
       m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                      true);
     }
