@@ -75,7 +75,17 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
                     line = f_handle.readline()
                     line_data = line.strip().split()
                     indx = int(line_data[0]) - 1  # -1 to convert to zero based indexing
-                    symbol = line_data[4]
+
+                    # only name of element in the name
+                    if ":" not in line_data[4]:
+                        symbol = line_data[4]
+                    # D,T etc
+                    else:
+                        # possible scenarios:
+                        # H:D1
+                        # H:D2
+                        symbol = "H"
+
                     ion = {"symbol": symbol,
                            "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
                                              float(line_data[2]) * file_data['unit_cell'][1] +

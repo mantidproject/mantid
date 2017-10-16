@@ -265,38 +265,93 @@ class Abins(PythonAlgorithm):
 
         result = []
 
+        # check if isotopes are in the system
+        eps = AbinsModules.AbinsConstants.MASS_EPS
+        isotopes_found = any([self._extracted_ab_initio_data["atom_%s" % atom]["mass"] -
+                              Atom(symbol=self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]).mass > eps
+                             for atom in range(num_atoms)])
+
+        # if isotopes found then find corresponding masses
+        if isotopes_found:
+
+            masses = {}
+            for i in range(num_atoms):
+                symbol = self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]
+                mass = self._extracted_ab_initio_data["atom_%s" % atom]["mass"]
+                if symbol not in masses:
+                    masses[symbol] = set()
+                masses[symbol].add(mass)
+
+            # convert set to list to fix order
+            for s in masses:
+                masses[s] = list(set(masses[s]))
+
         for atom_symbol in atoms_symbols:
 
-            # create partial workspaces for the given type of atom
             atom_workspaces = []
             s_atom_data.fill(0.0)
 
-            for atom in range(num_atoms):
-                if self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol:
+            main_isotope = Atom(symbol=atom_symbol)
+            main_protons_num = main_isotope.z_number
 
-                    temp_s_atom_data.fill(0.0)
+            if isotopes_found:
 
-                    for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
-                                       self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX):
+                for m in masses[atom_symbol]:
 
-                        order_indx = order - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
-                        temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
-                        temp_s_atom_data[order_indx] = temp_s_order
+                    isotope_nucleons_num = round(m)
+                    isotope_symbol = atom_symbol + str(isotope_nucleons_num)
+                    self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
+                                      atom_symbol=isotope_symbol, temp_s_atom_data=temp_s_atom_data,
+                                      s_atom_data=s_atom_data, atom_workspaces=atom_workspaces,
+                                      protons_number=main_protons_num, nucleons_number=isotope_nucleons_num)
 
-                    s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
+            else:
 
-            total_s_atom_data = np.sum(s_atom_data, axis=0)
-
-            atom_workspaces.append(
-                self._create_workspace(atom_name=atom_symbol, s_points=np.copy(total_s_atom_data),
-                                       optional_name="_total"))
-
-            atom_workspaces.append(
-                self._create_workspace(atom_name=atom_symbol, s_points=np.copy(s_atom_data)))
+                main_nucleons_num = round(main_mass)
+                main_mass = main_isotope.mass
+                self._atom_type_s(num_atoms=num_atoms, mass=main_mass, s_data_extracted=s_data_extracted,
+                                  atom_symbol=atom_symbol, temp_s_atom_data=temp_s_atom_data, s_atom_data=s_atom_data,
+                                  atom_workspaces=atom_workspaces, protons_number=main_protons_num,
+                                  nucleons_number=main_nucleons_num)
 
             result.extend(atom_workspaces)
 
         return result
+
+    def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, atom_symbol=None, temp_s_atom_data=None,
+                     s_atom_data=None, atom_workspaces=None, protons_number=None, nucleons_number=None):
+        """
+        Helper function for calculating S for the given type of atom
+        :param num_atoms: number of atoms in the system
+        :param s_data_extracted: data with all S
+        :param atom_symbol: label for the type of atom
+        :param temp_s_atom_data: helper array to store S
+        :param s_atom_data: stores all S for the given type of atom
+        :param atom_workspaces: list with all workspaces created up to now
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
+        """
+        for atom in range(num_atoms):
+            if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol and
+               self._extracted_ab_initio_data["atom_%s" % atom]["mass"] == mass):
+
+                temp_s_atom_data.fill(0.0)
+
+                for order in range(AbinsModules.AbinsConstants.FUNDAMENTALS,
+                                   self._num_quantum_order_events + AbinsModules.AbinsConstants.S_LAST_INDEX):
+                    order_indx = order - AbinsModules.AbinsConstants.PYTHON_INDEX_SHIFT
+                    temp_s_order = s_data_extracted["atom_%s" % atom]["s"]["order_%s" % order]
+                    temp_s_atom_data[order_indx] = temp_s_order
+
+                s_atom_data += temp_s_atom_data  # sum S over the atoms of the same type
+
+        total_s_atom_data = np.sum(s_atom_data, axis=0)
+
+        atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, s_points=np.copy(total_s_atom_data),
+                                                      optional_name="_total", protons_number=protons_number,
+                                                      nucleons_number=nucleons_number))
+        atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, s_points=np.copy(s_atom_data),
+                                                      protons_number=protons_number, nucleons_number=nucleons_number))
 
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
@@ -311,22 +366,27 @@ class Abins(PythonAlgorithm):
 
         return self._create_workspaces(atoms_symbols=atoms_symbols, s_data=s_data)
 
-    def _fill_s_workspace(self, s_points=None, workspace=None, atom_name=None):
+    def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
         Puts S into workspace(s).
+
         :param s_points: dynamical factor for the given atom
         :param workspace:  workspace to be filled with S
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
         """
         if self._instrument.get_name() in AbinsModules.AbinsConstants.ONE_DIMENSIONAL_INSTRUMENTS:
             # only FUNDAMENTALS
             if s_points.shape[0] == AbinsModules.AbinsConstants.FUNDAMENTALS:
 
-                self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, atom_name=atom_name)
+                self._fill_s_1d_workspace(s_points=s_points[0], workspace=workspace, protons_number=protons_number,
+                                          nucleons_number=nucleons_number)
 
             # total workspaces
             elif len(s_points.shape) == AbinsModules.AbinsConstants.ONE_DIMENSIONAL_SPECTRUM:
 
-                self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, atom_name=atom_name)
+                self._fill_s_1d_workspace(s_points=s_points, workspace=workspace, protons_number=protons_number,
+                                          nucleons_number=nucleons_number)
 
             # quantum order events (fundamentals  or  overtones + combinations for the given order)
             else:
@@ -339,20 +399,23 @@ class Abins(PythonAlgorithm):
                     wrk_name = workspace + "_" + seed
                     partial_wrk_names.append(wrk_name)
 
-                    self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, atom_name=atom_name)
+                    self._fill_s_1d_workspace(s_points=s_points[n], workspace=wrk_name, protons_number=protons_number,
+                                              nucleons_number=nucleons_number)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
-    def _fill_s_1d_workspace(self, s_points=None, workspace=None, atom_name=None):
+    def _fill_s_1d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
         Puts 1D S into workspace.
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
         :param s_points: dynamical factor for the given atom
         :param workspace: workspace to be filled with S
-        :param atom_name: name of atom (for example H for hydrogen)
         """
-        if atom_name is not None:
+        if protons_number is not None and nucleons_number is not None:
 
-            s_points = s_points * self._scale * self._get_cross_section(atom_name=atom_name)
+            s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
+                                                                        nucleons_number=nucleons_number)
 
         dim = 1
         length = s_points.size
@@ -364,13 +427,14 @@ class Abins(PythonAlgorithm):
         # Set correct units on workspace
         self._set_workspace_units(wrk=workspace)
 
-    def _get_cross_section(self, atom_name=None):
+    def _get_cross_section(self, protons_number=None, nucleons_number=None):
         """
         Calculates cross section for the given element.
-        :param atom_name: symbol of element
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
         :returns: cross section for that element
         """
-        atom = Atom(symbol=atom_name)
+        atom = Atom(a_number=nucleons_number, z_number=protons_number)
         cross_section = None
         if self._scale_by_cross_section == 'Incoherent':
             cross_section = atom.neutron()["inc_scatt_xs"]
@@ -417,20 +481,25 @@ class Abins(PythonAlgorithm):
 
         return total_workspace
 
-    def _create_workspace(self, atom_name=None, s_points=None, optional_name=""):
+    def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None,
+                          nucleons_number=None):
 
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
+
         :param atom_name: symbol of atom for which workspace should be created
         :param s_points: S(Q, omega)
         :param optional_name: optional part of workspace name
         :returns: workspace for the given frequency and S data
+        :param protons_number: number of protons in the given type fo atom
+        :param nucleons_number: number of nucleons in the given type of atom
         """
 
         ws_name = self._out_ws_name + "_" + atom_name + optional_name
-        self._fill_s_workspace(s_points=s_points, workspace=ws_name, atom_name=atom_name)
+        self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number,
+                               nucleons_number=nucleons_number)
 
         return ws_name
 
