@@ -35,4 +35,11 @@ else ()
   set( QWT5_LIBRARIES ${QWT5_LIBRARY} )
 endif ()
 
+# Create an import target
+add_library ( Qwt5 UNKNOWN IMPORTED )
+set_target_properties ( Qwt5 PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES ${QWT5_INCLUDE_DIR}
+  IMPORTED_LOCATION ${QWT5_LIBRARIES}
+)
+
 mark_as_advanced ( QWT5_INCLUDE_DIR QWT5_LIBRARY QWT5_LIBRARY_DEBUG )
