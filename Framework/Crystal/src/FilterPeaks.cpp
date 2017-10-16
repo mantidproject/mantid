@@ -7,7 +7,9 @@
 namespace {
 
 double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
-double wavelength(const Mantid::Geometry::IPeak &p) { return p.getWavelength(); }
+double wavelength(const Mantid::Geometry::IPeak &p) {
+  return p.getWavelength();
+}
 double dspacing(const Mantid::Geometry::IPeak &p) { return p.getDSpacing(); }
 double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
 
@@ -26,7 +28,6 @@ double QMOD(const Mantid::Geometry::IPeak &p) {
 double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
-
 }
 
 namespace Mantid {
@@ -57,8 +58,9 @@ void FilterPeaks::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The filtered workspace");
 
-  std::vector<std::string> filters{"h+k+l", "h^2+k^2+l^2", "Intensity",
-                                   "Signal/Noise", "QMod", "Wavelength", "DSpacing", "TOF"};
+  std::vector<std::string> filters{"h+k+l",        "h^2+k^2+l^2", "Intensity",
+                                   "Signal/Noise", "QMod",        "Wavelength",
+                                   "DSpacing",     "TOF"};
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
