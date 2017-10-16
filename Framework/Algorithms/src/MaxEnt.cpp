@@ -128,11 +128,11 @@ void MaxEnt::init() {
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "A", 0.4, mustBeNonNegative, Direction::Input),
+                      "A", 0.001, mustBeNonNegative, Direction::Input),
                   "A maximum entropy constant");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
+                      "ChiTarget", 1.0e-12, mustBeNonNegative, Direction::Input),
                   "Target value of Chi-square");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -216,7 +216,7 @@ void MaxEnt::exec() {
   // Background (default level, sky background, etc)
   const double background = getProperty("A");
   // Chi target
-  const double chiTarget = getProperty("ChiTarget");
+  double chiTarget = getProperty("ChiTarget");
   // Required precision for Chi arget
   const double chiEps = getProperty("ChiEps");
   // Maximum degree of non-parallelism between S and C
@@ -237,6 +237,13 @@ void MaxEnt::exec() {
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
+
+  // Default target chi squared = the number of data points:
+  // it is what is expected from a good fit with a smooth function
+  // (given that the error values are correct)
+  if (chiTarget <= 1.0e-12) {
+    chiTarget = static_cast<double>(npoints);
+  }
 
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;
@@ -477,8 +484,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   }
 
   // Check if move was successful
-  if ((fabs(eps) > chiEps) || (iter > alphaIter)) {
-
+  if ((fabs(eps / chiTarget) > chiEps) || (iter > alphaIter)) {
     throw std::runtime_error("Error encountered when calculating solution "
                              "image. No convergence in alpha chop.\n");
   }
