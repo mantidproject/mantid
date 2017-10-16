@@ -94,7 +94,18 @@ private:
   /// Create the widgets for a given property
   int createWidgetsForProperty(const Mantid::Kernel::Property *prop,
                                QVBoxLayout *propertyLayout, QWidget *parent);
+  /// Ignore requests to load until they are re-enabled.
+  void disableLoadRequests();
+  /// Accept requests to load until they are disabled.
+  void enableLoadRequests();
 
+  /// Perform an action ignoring any load requests which occur during it's execution.
+  template<typename Action>
+  auto protectedFromLoadRequests(Action action) {
+    disableLoadRequests();
+    action();
+    enableLoadRequests();
+  }
 private:
   /// Form
   Ui::LoadDialog m_form;

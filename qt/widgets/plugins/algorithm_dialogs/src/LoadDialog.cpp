@@ -2,21 +2,21 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/LoadDialog.h"
-#include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/MWRunFiles.h"
 // Qt
 #include <QCheckBox>
 #include <QComboBox>
-#include <QUrl>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QUrl>
 
 // Mantid
-#include "MantidKernel/Property.h"
-#include "MantidKernel/MaskedProperty.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidKernel/MaskedProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 namespace MantidQt {
@@ -111,29 +111,32 @@ void LoadDialog::enableNameSuggestion(const bool on) {
   }
 }
 
+void LoadDialog::enableLoadRequests() { m_okButton->blockSignals(false); }
+
+void LoadDialog::disableLoadRequests() { m_okButton->blockSignals(true); }
+
 /**
  * Called when the run button is clicked
  */
 void LoadDialog::accept() {
   // The file widget may have been edited but not lost focus so that the search
-  // wasn't
-  // attempted for the new contents. Force one here.
+  // wasn't attempted for the new contents. Force one here.
   // The widget does nothing if the contents have not changed so it will be
   // quick for this case
-  m_form.fileWidget->findFiles();
-  while (m_form.fileWidget->isSearching() || m_populating) {
-    QApplication::instance()->processEvents();
-  }
+  protectedFromLoadRequests([this]() -> void {
+    m_form.fileWidget->findFiles();
+    while (m_form.fileWidget->isSearching() || m_populating)
+      QApplication::instance()->processEvents();
 
-  // Check that the file still exists just incase it somehow got removed
-  std::string errMess =
-      getAlgorithm()->getPointerToProperty("Filename")->isValid();
-  if (!errMess.empty()) {
-    m_currentFiles = "";
-    createDynamicWidgets();
-    return;
-  }
-  AlgorithmDialog::accept();
+    // Check that the file still exists just incase it somehow got removed
+    std::string errMess =
+        getAlgorithm()->getPointerToProperty("Filename")->isValid();
+    if (!errMess.empty()) {
+      m_currentFiles = "";
+      createDynamicWidgets();
+    } else
+      AlgorithmDialog::accept();
+  });
 }
 
 //--------------------------------------------------------------------------
