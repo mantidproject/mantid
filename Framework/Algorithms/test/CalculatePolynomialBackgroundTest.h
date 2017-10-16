@@ -111,7 +111,9 @@ public:
     const HistogramData::Counts counts{0, 4, 0, 0};
     const HistogramData::CountStandardDeviations stdDevs{0, 0.001, 0, 0};
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
-    API::MatrixWorkspace_sptr ws(DataObjects::create<DataObjects::Workspace2D>(nHist, HistogramData::Histogram(edges, counts, stdDevs)).release());
+    API::MatrixWorkspace_sptr ws(
+        DataObjects::create<DataObjects::Workspace2D>(
+            nHist, HistogramData::Histogram(edges, counts, stdDevs)).release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
@@ -140,18 +142,22 @@ public:
     const size_t nHist{2};
     const HistogramData::Counts counts{0, 4, 0, 0};
     const HistogramData::BinEdges edges{0, 1, 2, 3, 4};
-    API::MatrixWorkspace_sptr ws(DataObjects::create<DataObjects::Workspace2D>(nHist, HistogramData::Histogram(edges, counts)).release());
+    API::MatrixWorkspace_sptr ws(
+        DataObjects::create<DataObjects::Workspace2D>(
+            nHist, HistogramData::Histogram(edges, counts)).release());
     auto alg = makeAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("OutputWorkspace", "outputWS"))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("Degree", 0))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg->setProperty("CostFunction", "Unweighted least squares"))
     TS_ASSERT_THROWS_NOTHING(alg->execute())
     TS_ASSERT(alg->isExecuted())
     API::MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT(outWS)
     // Unweighted fitting of zeroth order polynomial is equivalent to the mean.
-    const double result = std::accumulate(counts.cbegin(), counts.cend(), 0.0) / static_cast<double>(counts.size());
+    const double result = std::accumulate(counts.cbegin(), counts.cend(), 0.0) /
+                          static_cast<double>(counts.size());
     for (size_t histI = 0; histI < nHist; ++histI) {
       const auto &xs = ws->x(histI);
       const auto &bkgYs = outWS->y(histI);

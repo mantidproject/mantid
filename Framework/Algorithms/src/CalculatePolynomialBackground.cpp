@@ -163,12 +163,10 @@ std::vector<double> invertRanges(const std::vector<double> &ranges) {
  *  @param ranges a vector defining the fitting intervals
  *  @return a vector of final fitted parameters
  */
-std::vector<double> executeFit(Mantid::API::Algorithm &fit,
-                               const std::string &function,
-                               Mantid::API::MatrixWorkspace_sptr &ws,
-                               const size_t wsIndex,
-                               const std::vector<double> &ranges,
-                               const std::string &costFunction) {
+std::vector<double>
+executeFit(Mantid::API::Algorithm &fit, const std::string &function,
+           Mantid::API::MatrixWorkspace_sptr &ws, const size_t wsIndex,
+           const std::vector<double> &ranges, const std::string &costFunction) {
   const auto fitRanges = histogramRanges(ranges, *ws, wsIndex);
   const auto excludedRanges = invertRanges(fitRanges);
   fit.setProperty("Function", function);
@@ -279,8 +277,12 @@ void CalculatePolynomialBackground::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
-  std::array<std::string, 2> costFuncOpts{CostFunc::WEIGHTED_LEAST_SQUARES, CostFunc::UNWEIGHTED_LEAST_SQUARES};
-  declareProperty(Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(), boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts), "The cost function to be passed to the Fit algorithm.");
+  std::array<std::string, 2> costFuncOpts{CostFunc::WEIGHTED_LEAST_SQUARES,
+                                          CostFunc::UNWEIGHTED_LEAST_SQUARES};
+  declareProperty(
+      Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(),
+      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
+      "The cost function to be passed to the Fit algorithm.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -304,7 +306,8 @@ void CalculatePolynomialBackground::exec() {
     PARALLEL_START_INTERUPT_REGION
     const bool logging{false};
     auto fit = createChildAlgorithm("Fit", 0, 0, logging);
-    const auto parameters = executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction);
+    const auto parameters =
+        executeFit(*fit, fitFunction, inWS, i, inputRanges, costFunction);
     const auto bkgFunction = makeFunctionString(parameters);
     evaluateInPlace(bkgFunction, *outWS, i);
     progress.report();
