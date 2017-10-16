@@ -175,11 +175,11 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -978,8 +978,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1203,27 +1203,11 @@ void ConvFit::bgTypeSelection(int index) {
  */
 void ConvFit::updatePlot() {
   using Mantid::Kernel::Exception::NotFoundError;
-
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    g_log.error("No workspace loaded, cannot create preview plot.");
-    return;
-  }
-
-  bool plotGuess = m_uiForm.ckPlotGuess->isChecked();
-  m_uiForm.ckPlotGuess->setChecked(plotGuess);
-
-  int specNo = m_uiForm.spPlotSpectrum->text().toInt();
-
-  m_uiForm.ppPlot->clear();
-  setPreviewPlotWorkspace(inputWs);
-  m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
+  int specNo = selectedSpectrum();
 
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
   if (resolution > 0) {
-    m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
     m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
   }
 
@@ -1233,53 +1217,20 @@ void ConvFit::updatePlot() {
       m_singleFitOutputName.toStdString() + "_Workspaces";
 
   if (AnalysisDataService::Instance().doesExist(baseGroupName)) {
-    plotOutput(baseGroupName, specNo);
+    IndirectDataAnalysisTab::updatePlot(
+        baseGroupName, boost::numeric_cast<size_t>(specNo - m_runMin),
+        m_uiForm.ppPlot, m_uiForm.ppPlot);
   } else if (AnalysisDataService::Instance().doesExist(singleGroupName)) {
-    plotOutput(singleGroupName, specNo);
+    IndirectDataAnalysisTab::updatePlot(
+        singleGroupName, boost::numeric_cast<size_t>(specNo - m_runMin),
+        m_uiForm.ppPlot, m_uiForm.ppPlot);
+  } else {
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   }
 }
 
 void ConvFit::updatePlotRange() {
-
-  try {
-    const QPair<double, double> curveRange =
-        m_uiForm.ppPlot->getCurveRange("Sample");
-    const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
-        ->setRange(range.first, range.second);
-    m_dblManager->setValue(m_properties["StartX"], range.first);
-    m_dblManager->setValue(m_properties["EndX"], range.second);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-}
-
-/*
- * Plots the specified spectrum of the output group workspace witht the
- *specified name;
- * created from Convolution Fitting.
- *
- * @param outputWsName  The name of the output workspace whose data to plot.
- * @param specNo        The spectrum number to plot from the output workspace.
- */
-void ConvFit::plotOutput(std::string const &outputWsName, int specNo) {
-  WorkspaceGroup_sptr outputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName);
-  if (specNo - m_runMin >= static_cast<int>(outputGroup->size()))
-    return;
-  if ((specNo - m_runMin) >= 0) {
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        outputGroup->getItem(specNo - m_runMin));
-    if (ws) {
-      setPreviewPlotWorkspace(ws);
-      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-      m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-      if (m_uiForm.ckPlotGuess->isChecked()) {
-        m_uiForm.ppPlot->removeSpectrum("Guess");
-        m_uiForm.ckPlotGuess->setChecked(false);
-      }
-    }
-  }
+  IndirectDataAnalysisTab::updatePlotRange("ConvFitRange", m_uiForm.ppPlot);
 }
 
 void ConvFit::updateProperties(int specNo) {

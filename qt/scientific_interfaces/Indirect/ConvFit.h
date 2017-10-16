@@ -70,7 +70,6 @@ private:
   QVector<QString> indexToFitFunctions(const int &fitTypeIndex);
   void updateProperties(int specNo, const QString &fitFunction);
   void updatePlotOptions();
-  void plotOutput(std::string const &outputWs, int specNo);
   void addDefaultParametersToTree(const QVector<QString> &currentFitFunction);
   void addSampleLogsToWorkspace(const std::string &workspaceName,
                                 const std::string &logName,
