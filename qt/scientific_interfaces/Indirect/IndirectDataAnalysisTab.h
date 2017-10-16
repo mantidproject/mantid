@@ -74,9 +74,6 @@ protected:
   /// Retrieve the selected spectrum
   int selectedSpectrum();
 
-  /// Sets the selected spectrum
-  void setSelectedSpectrum(int spectrum);
-
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
@@ -88,6 +85,9 @@ protected slots:
 
   /// Plots the current preview data
   void plotCurrentPreview();
+
+  /// Sets the selected spectrum
+  void setSelectedSpectrum(int spectrum);
 
 protected:
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
