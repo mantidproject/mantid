@@ -15,8 +15,19 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
   const auto &compInfo = ws.componentInfo();
   const auto &detInfo = ws.detectorInfo();
   const auto &detIDs = detInfo.detectorIDs();
+
+  // Monitors are not loaded by LoadEventNexus, so we have to exclude them when
+  // computing an offset based on detector IDs. Currently this is computed in a
+  // naive way and works only if all monitors have IDs smaller than any
+  // detector.
   const auto monitors = instrument->getMonitors();
   int32_t monitorOffset = static_cast<int32_t>(monitors.size());
+  for (size_t i = 0; i < monitorOffset; ++i)
+    if (monitors[i] != detIDs[i])
+      throw std::runtime_error(
+          "Monitors are not corresponding to the first detector IDs in the "
+          "instrument. This is currently not supported by ParallelEventLoader");
+
   std::vector<int32_t> bankOffsets;
   for (const auto &bankName : bankNames) {
     // Removing "_events" from bankName
@@ -56,25 +67,7 @@ void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
   Parallel::IO::EventLoader::load(filename, groupName, bankNames,
                                   bankOffsets(ws, bankNames),
                                   std::move(eventLists));
-  //for (size_t i = 0; i < size; ++i)
-  //  fprintf(stderr, "total %lu\n", ws.getSpectrum(i).getNumberEvents());
-  fprintf(stderr, "loading done\n");
 }
-
-/*
-for chunk in myfile:
-    if currently_processed_buffer_start == buffer_index:
-        consumer.wait()
-    # ring buffer, loader is taking small steps
-    loader.load(chunk, buffer_index)
-    buffer_index = (buffer_index + 1)%buffer_count
-    if buffer_index * chunk.size <= consumer.optimal_buffer_size:
-        # consumer taking large steps (better for MPI), chasing the loader in the ring buffer
-        consumer.start_processing(buffer_index_start, buffer_index)
-        currently_processed_buffer_start = buffer_index_start
-        buffer_index_start = buffer_index
-    consumer.finalize()
-    */
 
 } // namespace DataHandling
 } // namespace Mantid
