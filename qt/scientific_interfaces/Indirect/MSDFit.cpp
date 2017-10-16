@@ -57,7 +57,7 @@ void MSDFit::setup() {
   connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -71,7 +71,7 @@ void MSDFit::setup() {
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 void MSDFit::run() {
