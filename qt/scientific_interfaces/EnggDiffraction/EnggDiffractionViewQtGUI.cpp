@@ -136,12 +136,12 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
     m_uiTabCalib.MWRunFiles_new_vanadium_num->setFileTextWithoutSearch(
         QString::fromStdString(vanadiumRun));
   }
-  if (m_uiTabCalib.MWRunFiles_new_ceria_num->getUserInput()
-          .toString()
-          .isEmpty()) {
-    m_uiTabCalib.MWRunFiles_new_ceria_num->setFileTextWithoutSearch(
-        QString::fromStdString(ceriaRun));
-  }
+//  if (m_uiTabCalib.MWRunFiles_new_ceria_num->getUserInput()
+//          .toString()
+//          .isEmpty()) {
+//    m_uiTabCalib.MWRunFiles_new_ceria_num->setFileTextWithoutSearch(
+//        QString::fromStdString(ceriaRun));
+//  }
 
   // push button signals/slots
   connect(m_uiTabCalib.pushButton_load_calib, SIGNAL(released()), this,
@@ -274,6 +274,7 @@ void EnggDiffractionViewQtGUI::doSetupSplashMsg() {
 void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(g_settingsGroup));
+  auto fname = qs.fileName();
 
   m_ui.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
@@ -361,6 +362,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
+
 
   // settings
   QString lastPath =
