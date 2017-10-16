@@ -158,9 +158,14 @@ void IndirectDataAnalysisTab::updatePlot(
     const std::string &outputWSName, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-  auto workspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWSName);
-  updatePlot(workspace, index, topPreviewPlot, bottomPreviewPlot);
+
+  if (AnalysisDataService::Instance().doesExist(outputWSName)) {
+    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+        outputWSName);
+    updatePlot(workspace, index, topPreviewPlot, bottomPreviewPlot);
+  } else {
+    plotInput(topPreviewPlot);
+  }
 }
 
 /**

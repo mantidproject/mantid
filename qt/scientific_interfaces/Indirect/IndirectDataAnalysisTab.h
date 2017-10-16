@@ -104,7 +104,7 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
-  void updatePlot(MatrixWorkspace_sptr outputWS,
+  void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
