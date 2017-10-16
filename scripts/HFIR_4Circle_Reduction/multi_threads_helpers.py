@@ -359,7 +359,7 @@ class MergePeaksThread(QThread):
         assert main_window is not None, 'Main window cannot be None'
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
         assert isinstance(scan_number_list, list), 'Scan (info) tuple list {0} must be a list but not {1}.' \
-                                                  ''.format(scan_number_list, type(scan_number_list))
+                                                   ''.format(scan_number_list, type(scan_number_list))
         assert isinstance(md_file_list, list) or md_file_list is None, 'Output MDWorkspace file name list {0} ' \
                                                                        'must be either a list or None but not {1}.' \
                                                                        ''.format(md_file_list, type(md_file_list))

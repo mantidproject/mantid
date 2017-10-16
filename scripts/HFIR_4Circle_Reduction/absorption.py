@@ -7,7 +7,8 @@ import numpy
 import numpy.linalg
 from six.moves import range
 
-# Do absorption correction
+# This module does absorption correction
+
 
 class Lattice(object):
     """A simple structure-styled class to hold lattice or lattice*

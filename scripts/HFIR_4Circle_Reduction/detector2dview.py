@@ -5,7 +5,6 @@ import numpy as np
 import os
 
 
-
 class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
     """
     Customized 2D detector view
@@ -359,4 +358,3 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
             self._myParentWindow.do_apply_roi()
 
         return
-

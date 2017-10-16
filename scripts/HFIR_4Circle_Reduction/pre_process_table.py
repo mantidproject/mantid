@@ -1,4 +1,3 @@
-from PyQt4 import QtGui, QtCore
 import NTableWidget
 
 
@@ -94,6 +93,3 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         self.update_cell_value(row_number, self._iColStatus, status)
 
         return
-
-
-

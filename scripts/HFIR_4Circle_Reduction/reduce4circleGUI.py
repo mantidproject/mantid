@@ -3512,14 +3512,11 @@ class MainWindow(QtGui.QMainWindow):
             det_size_str = str(self.ui.comboBox_detectorSize.currentText())
             det_size = int(det_size_str.split()[0])
             det_center = str(self.ui.lineEdit_infoDetCenter.text())
-            # TODO/ISSUE/NOWNOW - Set up the other calibration parameters
-
+            # set up the other calibration parameters
             self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
                                                               det_center=det_center,
                                                               det_sample_distance=None, wave_length=None)
         # END-IF
-
-
 
         return
 
