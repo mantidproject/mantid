@@ -267,6 +267,18 @@ protected:
   /// Overidden by child class.
   virtual bool validate() = 0;
 
+  void plotWorkspace(const std::string &workspaceName,
+                     MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                     const std::map<size_t, QString> &plotTitles,
+                     const std::vector<Qt::GlobalColor> &plotColours = {
+                         Qt::black, Qt::red, Qt::blue});
+
+  void plotWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+                     MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                     const std::map<size_t, QString> &plotTitles,
+                     const std::vector<Qt::GlobalColor> &plotColours = {
+                         Qt::black, Qt::red, Qt::blue});
+
   Mantid::Types::Core::DateAndTime m_tabStartTime;
   Mantid::Types::Core::DateAndTime m_tabEndTime;
   std::string m_pythonExportWsName;

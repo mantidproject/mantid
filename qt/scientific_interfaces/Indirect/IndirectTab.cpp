@@ -827,6 +827,57 @@ IndirectTab::extractColumnFromTable(Mantid::API::ITableWorkspace_sptr tableWs,
   return columnValues;
 }
 
+/**
+ * Plots the workspace with the specified name in the specified preview
+ * plot.
+ *
+ * @param workspaceName The name of the workspace to plot.
+ * @param previewPlot   The preview plot to add the plots to.
+ * @param plotTitles    A map from an index of the histogram (in the workspace)
+ *                      to plot, to the title of that plot.
+ * @param plotColours   The colours to use for the plotting - colours will be
+ *                      applied in a round-robin fashion.
+ */
+void IndirectTab::plotWorkspace(
+    const std::string &workspaceName,
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+    const std::map<size_t, QString> &plotTitles,
+    const std::vector<Qt::GlobalColor> &plotColours) {
+  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      workspaceName);
+
+  if (workspace)
+    plotWorkspace(workspace, previewPlot, plotTitles, plotColours);
+}
+
+/**
+ * Plots the specified workspace in the specified preview plot.
+ *
+ * @param workspace     The workspace to plot.
+ * @param previewPlot   The preview plot to add the plots to.
+ * @param plotTitles    A map from an index of the histogram (in the workspace)
+ *                      to plot, to the title of that plot.
+ * @param plotColours   The colours to use for the plotting - colours will be
+ *                      applied in a round-robin fashion.
+ */
+void IndirectTab::plotWorkspace(
+    MatrixWorkspace_sptr workspace,
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+    const std::map<size_t, QString> &plotTitles,
+    const std::vector<Qt::GlobalColor> &plotColours) {
+  setPreviewPlotWorkspace(workspace);
+  int colour = 0;
+
+  for (auto const &it : plotTitles) {
+    size_t wsIndex = it.first;
+    if (wsIndex < workspace->getNumberHistograms()) {
+      previewPlot->addSpectrum(it.second, workspace, wsIndex,
+                               plotColours[colour]);
+    }
+    colour = (colour == plotColours.size() - 1) ? 0 : colour + 1;
+  }
+}
+
 /*
  * Converts a standard vector of standard strings to a QVector of QStrings.
  *
