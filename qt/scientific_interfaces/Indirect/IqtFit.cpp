@@ -130,11 +130,11 @@ void IqtFit::setup() {
           SLOT(updatePlot()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -609,64 +609,21 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    g_log.error("No workspace loaded, cannot create preview plot.");
-    return;
-  }
-
-  m_uiForm.ppPlot->clear();
-
-  size_t specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
+  size_t specNo = selectedSpectrum();
 
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       specNo <= m_runMax && specNo >= m_runMin) {
-    plotResult(groupName, specNo);
-  } else if (inputWs) {
-    setPreviewPlotWorkspace(inputWs);
-    m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
+    IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
+                                        m_uiForm.ppPlot, m_uiForm.ppPlot);
+  } else {
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   }
 
-  try {
-    const QPair<double, double> curveRange =
-        m_uiForm.ppPlot->getCurveRange("Sample");
-    const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("IqtFitRange")
-        ->setRange(range.first, range.second);
-    m_iqtFRangeManager->setRange(m_properties["StartX"], range.first,
-                                 range.second);
-    m_iqtFRangeManager->setRange(m_properties["EndX"], range.first,
-                                 range.second);
-
-    resizePlotRange(m_uiForm.ppPlot);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-
+  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlot);
+  resizePlotRange(m_uiForm.ppPlot);
   updateGuessPlot();
-}
-
-void IqtFit::plotResult(const std::string &groupName, const size_t &specNo) {
-  WorkspaceGroup_sptr outputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      outputGroup->getItem(specNo - m_runMin));
-
-  if (ws) {
-    if (m_uiForm.ckPlotGuess->isChecked()) {
-      m_uiForm.ckPlotGuess->setChecked(false);
-    }
-
-    setPreviewPlotWorkspace(ws);
-
-    m_uiForm.ppPlot->addSpectrum("Sample", ws, 0, Qt::black);
-    m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-    m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-  }
 }
 
 void IqtFit::resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview) {
