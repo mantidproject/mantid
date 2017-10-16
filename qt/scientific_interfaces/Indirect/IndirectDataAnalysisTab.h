@@ -92,7 +92,7 @@ protected slots:
 protected:
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
-  void updatePlot(const std::string workspaceName, size_t index,
+  void updatePlot(const std::string &workspaceName, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
@@ -100,8 +100,18 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
-  void updatePlotRange(QString rangeName,
-                       MantidQt::MantidWidgets::PreviewPlot *previewPlot);
+  void updatePlot(const std::string &workspaceName,
+                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+
+  void updatePlot(MatrixWorkspace_sptr outputWS,
+                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+
+  void updatePlotRange(const QString &rangeName,
+                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                       const QString &startRangePropName = "StartX",
+                       const QString &endRangePropName = "EndX");
 
 private:
   /// Overidden by child class.
