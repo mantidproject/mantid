@@ -175,7 +175,7 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -482,7 +482,7 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   updatePlot();
   updatePlotRange();
 
-  std::string paramWsName = outputPrefix + "_Parameters_new";
+  std::string paramWsName = outputPrefix + "_Parameters";
 
   if (AnalysisDataService::Instance().doesExist(paramWsName)) {
     QString prefixPrefix = "f1.f1.";
