@@ -71,12 +71,6 @@ endif ()
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
-###########################################################################
-# Check for Qt (DarwinSetup below needs a variable from this)
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
-endif ()
 
 ###########################################################################
 # Find OpenGL
@@ -98,20 +92,17 @@ if (COVERALLS)
 endif()
 
 ###########################################################################
-# Find qwt. Needs to be version 5
+# Qt/Qwt/PyQt/sip
 ###########################################################################
 if (ENABLE_MANTIDPLOT)
+  find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
+
   find_package ( Qwt REQUIRED )
   if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
       QWT_VERSION VERSION_GREATER 6.0 )
     message ( FATAL_ERROR "Qwt version 5 is required, found: ${QWT_VERSION}" )
   endif()
-endif()
 
-###########################################################################
-# Find PyQt & sip
-###########################################################################
-if (ENABLE_MANTIDPLOT)
   find_package ( PyQt4 REQUIRED )
   find_package ( SIP REQUIRED )
   separate_arguments ( PYQT4_SIP_FLAGS )

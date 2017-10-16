@@ -681,8 +681,7 @@ include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 find_package ( QwtPlot3d REQUIRED )
 include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
-find_package ( QScintilla REQUIRED )
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+find_package ( QScintillaQt4 REQUIRED )
 
 ###########################################################################
 # Now create the target and add its dependencies and flags
@@ -804,7 +803,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${QT_LIBRARIES}
             ${QWT_LIBRARIES}
             ${QWTPLOT3D_LIBRARIES}
-            ${QSCINTILLA_LIBRARIES}
+            Qt4::Qscintilla
             ${PYTHON_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${OPENGL_LIBRARIES}
