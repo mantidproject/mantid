@@ -532,10 +532,9 @@ void TwoLevelTreeManager::transfer(
       ws->removeRow(0);
   }
 
-  // Loop over the rows (vector elements)
   for (const auto &row : runs) {
-
     TableRow newRow = ws->appendRow();
+
     try {
       newRow << (row.at("Group")).toStdString();
     } catch (std::out_of_range &) {
@@ -545,7 +544,7 @@ void TwoLevelTreeManager::transfer(
     }
 
     try {
-      for (auto columnName : whitelist.names())
+      for (auto const& columnName : whitelist.names())
         newRow << (row.at(columnName)).toStdString();
     } catch (std::out_of_range &) {
       // OK, this column will not be populated
