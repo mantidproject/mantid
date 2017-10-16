@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
-    VisibleWhenProperty, PropertyCriterion
+    VisibleWhenProperty, PropertyCriterion, IntArrayBoundedValidator, IntArrayProperty
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
@@ -19,7 +19,9 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _unit = None
     _out_name = None
     _progress = None
-    _format = None
+    _crop_negative = None
+    _zero_counting_option = None
+    _zero_cells = []
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -74,16 +76,17 @@ class PowderDiffILLReduction(PythonAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the scanning observable axis.')
 
+        self.declareProperty(name='CropNegative2Theta', defaultValue=True,
+                             doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
+
+        self.declareProperty(name='ZeroCountingCells', defaultValue='Crop',
+                             validator=StringListValidator(['Crop','Interpolate','Leave']),
+                             doc='Crop out the zero counting cells or interpolate the counts from the neighbours.')
+
         self.declareProperty(name='Unit',
                              defaultValue='ScatteringAngle',
                              validator=StringListValidator(['ScatteringAngle', 'MomentumTransfer', 'dSpacing']),
                              doc='The unit of the reduced diffractogram.')
-
-        self.declareProperty(name='PrepareToSaveAs', defaultValue='NexusProcessed',
-                             validator=StringListValidator(['NexusProcessed', 'FullProf', 'GSAS']),
-                             doc='Performs some more steps depending on the format intended to save later in. '
-                                 'Does nothing by default (nexus processed). '
-                                 'This algorithm does not save itself, but prepares for the corresponding format.')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
                                                      direction=Direction.Output),
@@ -98,7 +101,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._normalise_option = self.getPropertyValue('NormaliseTo')
         self._calibration_file = self.getPropertyValue('CalibrationFile')
         self._unit = self.getPropertyValue('Unit')
-        self._format = self.getPropertyValue('PrepareToSaveAs')
+        self._crop_negative = self.getProperty('CropNegative2Theta').value
+        self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
         if self._normalise_option == 'ROI':
             self._region_of_interest = self.getProperty('ROI').value
 
@@ -164,9 +168,22 @@ class PowderDiffILLReduction(PythonAlgorithm):
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
 
-        if self._format == 'FullProf':
-            self._crop_negative_2theta(joined_ws)
-            self._crop_dead_pixels(joined_ws)
+        theta_ws = self._hide('theta')
+        ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=theta_ws, Target='SignedTheta', OrderAxis=False)
+        theta_axis = mtd[theta_ws].getAxis(1).extractValues()
+        DeleteWorkspace(theta_ws)
+        first_positive_theta = np.where(theta_axis > 0)[0][0]
+
+        if self._crop_negative:
+            self.log().information('First positive 2theta at workspace index: ' + str(first_positive_theta))
+            CropWorkspace(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, StartWorkspaceIndex=first_positive_theta)
+
+        self._find_zero_counting_cells(joined_ws)
+
+        if self._zero_counting_option == 'Crop':
+            self._crop_zero_cells(joined_ws)
+        elif self._zero_counting_option == 'Interpolate':
+            self._interpolate_zero_cells(joined_ws, theta_axis)
 
         target = 'SignedTheta'
         if self._unit == 'MomentumTransfer':
@@ -179,38 +196,69 @@ class PowderDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
 
-    def _crop_negative_2theta(self, ws):
+    def _find_zero_counting_cells(self, ws):
         """
-            Crops out the part of the workspace corresponding to negative signed 2theta
+            Finds the cells counting zeros
             @param ws: the input workspace
         """
-        theta_ws = self._hide('2theta')
-        ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta', OrderAxis=False)
-        positive_index = np.where(mtd[theta_ws].getAxis(1).extractValues() > 0)[0][0]
-        self.log().information('First positive 2theta at workspace index: ' + str(positive_index))
-        CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, StartWorkspaceIndex=positive_index)
-        DeleteWorkspace(theta_ws)
+        self._zero_cells = []
+        size = mtd[ws].blocksize()
+        for spectrum in range(mtd[ws].getNumberHistograms()):
+            counts = mtd[ws].readY(spectrum)
+            if np.count_nonzero(counts) < size/10:
+                self._zero_cells.append(spectrum)
+        self._zero_cells.sort()
+        self.log().information('Found zero counting cells at indices: ' + str(self._zero_cells))
 
-    def _crop_dead_pixels(self, ws):
+    def _crop_zero_cells(self, ws):
         """
             Crops out the spectra corresponding to zero counting pixels
             @param ws: the input workspace
         """
-        dead_pixels = []
-        for spectrum in range(mtd[ws].getNumberHistograms()):
-            counts = mtd[ws].readY(spectrum)
-            if not np.any(counts):
-                dead_pixels.append(spectrum)
-        self.log().information('Found zero counting cells at indices: ' + str(dead_pixels))
-        MaskDetectors(Workspace=ws, WorkspaceIndexList=dead_pixels)
+        MaskDetectors(Workspace=ws, WorkspaceIndexList=self._zero_cells)
         ExtractUnmaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
+
+    def _interpolate_zero_cells(self, ws, theta_axis):
+        """
+            Interpolates the counts of zero counting cells linearly from the 2 neighbour cells
+            @param ws: the input workspace
+            @param theta_axis: the unordered signed 2theta axis
+        """
+        for cell in self._zero_cells:
+            prev_cell = cell - 1
+            next_cell = cell + 1
+
+            while prev_cell in self._zero_cells:
+                prev_cell-=1
+            while next_cell in self._zero_cells:
+                next_cell+=1
+
+            if prev_cell == -1:
+                self.log().warning('Unable to interpolate for cell #'+str(cell)+
+                ' No non-zero neighbour cell was found on the left side.')
+            if next_cell == mtd[ws].getNumberHistograms():
+                self.log().warning('Unable to interpolate for cell #'+str(cell)+
+                ' No non-zero neighbour cell was found on the right side.')
+
+            if prev_cell >= 0 and next_cell < mtd[ws].getNumberHistograms():
+                theta_prev = theta_axis[prev_cell]
+                theta = theta_axis[cell]
+                theta_next = theta_axis[next_cell]
+                counts_prev = mtd[ws].readY(prev_cell)
+                errors_prev = mtd[ws].readE(prev_cell)
+                counts_next = mtd[ws].readY(next_cell)
+                errors_next = mtd[ws].readE(next_cell)
+                coefficient = (theta - theta_prev) / (theta_next - theta_prev)
+                counts = counts_prev + coefficient * (counts_next - counts_prev)
+                errors = errors_prev + coefficient * (errors_next - errors_prev)
+                mtd[ws].setY(cell,counts)
+                mtd[ws].setE(cell,errors)
 
     def _normalise_to_roi(self, ws):
         """
             Normalises counts to the sum of counts in the region-of-interest
             @param ws : input workspace with raw spectrum axis
         """
-        theta_ws = self._hide('theta')
         roi_ws = self._hide('roi')
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta')
         roi_pattern = self._parse_roi(theta_ws)
