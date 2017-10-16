@@ -404,22 +404,12 @@ void Elwin::plotInput() {
     return;
   }
 
-  int specNo = m_uiForm.spPreviewSpec->value();
-
-  try {
-    m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", ws, specNo);
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-    auto rangeSelector =
-        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
-    setPlotPropertyRange(rangeSelector, m_properties["IntegrationStart"],
-                         m_properties["IntegrationEnd"], range);
-
-    setDefaultResolution(ws, range);
-    setDefaultSampleLog(ws);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+  IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
+                                           m_uiForm.ppPlot, "IntegrationStart",
+                                           "IntegrationEnd");
+  setDefaultResolution(ws, m_uiForm.ppPlot->getCurveRange("Sample"));
+  setDefaultSampleLog(ws);
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
