@@ -66,6 +66,7 @@ set ( TEST_PY_FILES
   SANSWideAngleCorrectionTest.py
   SaveNexusPDTest.py
   SavePlot1DAsJsonTest.py
+  SaveReflectionsTest.py
   SaveVulcanGSSTest.py
   ExtractMonitorsTest.py
   SetDetScaleTest.py
