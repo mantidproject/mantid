@@ -6,7 +6,9 @@
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventDataSink.h"
 #include "MantidParallel/IO/EventLoader.h"
+#include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
+#include "MantidTypes/Event/TofEvent.h"
 
 #include <H5Cpp.h>
 
@@ -33,38 +35,50 @@ template <> void load<int32_t, double>() { throw std::runtime_error("double"); }
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
-using namespace Mantid::Parallel::IO;
+using namespace Mantid;
+using namespace Parallel::IO;
 
-namespace detail {
+namespace {
+
 class FakeDataSource : public NXEventDataSource<int64_t, int64_t, int32_t> {
 public:
   void setBankIndex(const size_t bank) override {
     m_bank = bank;
-    m_index = std::vector<int64_t>{0, 2, 4, 8};
+    m_index = std::vector<int64_t>{0, 100, 100,
+                                   300 * static_cast<int64_t>(m_bank + 1),
+                                   500 * static_cast<int64_t>(m_bank + 1),
+                                   700 * static_cast<int64_t>(m_bank + 1)};
     m_time_zero.clear();
     for (size_t i = 0; i < m_index.size(); ++i)
-      m_time_zero.push_back(static_cast<int64_t>(1000 * i + bank));
+      m_time_zero.push_back(static_cast<int64_t>(100000 * i + bank));
   }
 
   const std::vector<int64_t> &eventIndex() const override { return m_index; }
   const std::vector<int64_t> &eventTimeZero() const override {
     return m_time_zero;
   }
-  int64_t eventTimeZeroOffset() const override { return 123456789; }
+
+  int64_t eventTimeZeroOffset() const override {
+    // Drift depening on bank to ensure correct offset is used for every bank.
+    return 123456789 + 1000000 * m_bank;
+  }
+
   void readEventID(int32_t *event_id, size_t start,
                    size_t count) const override {
+    // Factor 13 such that there is a gap in the detector IDs between banks.
     for (size_t i = 0; i < count; ++i)
-      event_id[i] = static_cast<int32_t>(m_bank * m_bankSize +
-                                         (start + count) % m_bankSize);
+      event_id[i] = static_cast<int32_t>(m_bank * 13 * m_pixelsPerBank +
+                                         (start + i) % m_pixelsPerBank);
   }
+
   void readEventTimeOffset(int32_t *event_time_offset, size_t start,
                            size_t count) const override {
     for (size_t i = 0; i < count; ++i)
-      event_time_offset[i] = static_cast<int32_t>(start + count);
+      event_time_offset[i] = static_cast<int32_t>(17 * m_bank + start + i);
   }
 
 private:
-  const size_t m_bankSize{10};
+  const size_t m_pixelsPerBank{77};
   size_t m_bank;
   std::vector<int64_t> m_index;
   std::vector<int64_t> m_time_zero;
@@ -88,6 +102,59 @@ public:
   }
   void wait() const override {}
 };
+
+void do_test_load(const size_t chunkSize) {
+  const std::vector<size_t> bankSizes{111, 1111, 11111};
+  Chunker chunker(1, 0, bankSizes, chunkSize);
+  // FakeDataSource encodes information on bank and position in file into TOF
+  // and pulse times, such that we can verify correct mapping.
+  FakeDataSource dataSource;
+  const std::vector<int32_t> bankOffsets{0, 12 * 77, 24 * 77};
+  std::vector<std::vector<Types::Event::TofEvent>> eventLists(3 * 77);
+  std::vector<std::vector<Types::Event::TofEvent> *> eventListPtrs;
+  for (auto &eventList : eventLists)
+    eventListPtrs.emplace_back(&eventList);
+
+  EventParser<int64_t, int64_t, int32_t> dataSink(chunker.makeRankGroups(),
+                                                  bankOffsets, eventListPtrs);
+  TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
+      chunker, dataSource, dataSink)));
+
+  for (size_t i = 0; i < eventLists.size(); ++i) {
+    size_t bank = i / 77;
+    size_t pixelInBank = i % 77;
+    TS_ASSERT_EQUALS(eventLists[i].size(),
+                     (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
+    int64_t previousPulseTime{0};
+    for (size_t event = 0; event < eventLists[i].size(); ++event) {
+      // Every 77th event in the input is in this list so our TOF should jump
+      // over 77 TOFs in the input.
+      TS_ASSERT_EQUALS(eventLists[i][event].tof(),
+                       17 * bank + 77 * event + pixelInBank);
+      size_t index = event * 77 + pixelInBank;
+      size_t pulse = 0;
+      if (index >= 100)
+        pulse = 2;
+      if (index >= 300 * static_cast<size_t>(bank + 1))
+        pulse = 3;
+      if (index >= 500 * static_cast<size_t>(bank + 1))
+        pulse = 4;
+      if (index >= 700 * static_cast<size_t>(bank + 1))
+        pulse = 5;
+      // Testing different aspects that affect pulse time:
+      // - `123456789 + 1000000 * bank` confirms that the event_time_zero
+      //   offset attribute is taken into account, and for correct bank.
+      // - `100000 * pulse + bank` confirms that currect event_index is used
+      //   and event_time_offset is used correctly, and for correct bank.
+      const auto pulseTime =
+          eventLists[i][event].pulseTime().totalNanoseconds();
+      TS_ASSERT_EQUALS(pulseTime,
+                       123456789 + 1000000 * bank + 100000 * pulse + bank);
+      TS_ASSERT(pulseTime >= previousPulseTime);
+      previousPulseTime = pulseTime;
+    }
+  }
+}
 }
 
 class EventLoaderTest : public CxxTest::TestSuite {
@@ -139,14 +206,8 @@ public:
   }
 
   void test_load() {
-    const std::vector<size_t> bankSizes{10, 100, 1000};
-    const size_t chunkSize{37};
-    Chunker chunker(1, 0, bankSizes, chunkSize);
-    ::detail::FakeDataSource dataSource;
-    ::detail::FakeDataSink dataSink;
-    TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
-        chunker, dataSource, dataSink)));
-    // TODO cannot test anything useful before we have the parser.
+    for (const size_t chunkSize : {37, 123, 1111})
+      do_test_load(chunkSize);
   }
 };
 
