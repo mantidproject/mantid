@@ -99,7 +99,7 @@ class FullprofFormat(object):
         """
         for i, peak in enumerate(workspace):
             data = (peak['h'],peak['k'],peak['l'],peak['Intens'],peak['SigInt'],i+1,peak['Wavelength'])
-            line = "%4i%4i%4i%12.2f%12.2f%5i%10.4f\n" % data
+            line = "{:>4.0f}{:>4.0f}{:>4.0f}{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             f_handle.write(line)
 
 # ------------------------------------------------------------------------------------------------------
