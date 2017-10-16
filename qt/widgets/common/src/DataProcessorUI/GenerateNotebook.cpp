@@ -305,8 +305,7 @@ postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
 
   auto &postprocessingAlgorithm = postprocessingStep.m_algorithm;
 
-  auto outputWSName =
-      postprocessingAlgorithm.prefix() + outputName.join("_");
+  auto outputWSName = postprocessingAlgorithm.prefix() + outputName.join("_");
   stitchString += outputWSName;
   stitchString += completeOutputProperties(
       postprocessingAlgorithm.name(),
