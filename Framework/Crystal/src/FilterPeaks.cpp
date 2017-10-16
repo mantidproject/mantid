@@ -5,6 +5,12 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
+
+double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
+double wavelength(const Mantid::Geometry::IPeak &p) { return p.getWavelength(); }
+double dspacing(const Mantid::Geometry::IPeak &p) { return p.getDSpacing(); }
+double tof(const Mantid::Geometry::IPeak &p) { return p.getTOF(); }
+
 double HKLSum(const Mantid::Geometry::IPeak &p) {
   return p.getH() + p.getK() + p.getL();
 }
@@ -17,11 +23,10 @@ double QMOD(const Mantid::Geometry::IPeak &p) {
   return p.getQSampleFrame().norm();
 }
 
-double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
-
 double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
+
 }
 
 namespace Mantid {
@@ -53,7 +58,7 @@ void FilterPeaks::init() {
                   "The filtered workspace");
 
   std::vector<std::string> filters{"h+k+l", "h^2+k^2+l^2", "Intensity",
-                                   "Signal/Noise", "QMod"};
+                                   "Signal/Noise", "QMod", "Wavelength", "DSpacing", "TOF"};
   declareProperty("FilterVariable", "",
                   boost::make_shared<StringListValidator>(filters),
                   "The variable on which to filter the peaks");
@@ -84,6 +89,12 @@ void FilterPeaks::exec() {
     filterFunction = &HKL2;
   else if (FilterVariable == "Intensity")
     filterFunction = &intensity;
+  else if (FilterVariable == "Wavelength")
+    filterFunction = &wavelength;
+  else if (FilterVariable == "DSpacing")
+    filterFunction = &dspacing;
+  else if (FilterVariable == "TOF")
+    filterFunction = &tof;
   else if (FilterVariable == "Signal/Noise")
     filterFunction = &SN;
   else if (FilterVariable == "QMod")
