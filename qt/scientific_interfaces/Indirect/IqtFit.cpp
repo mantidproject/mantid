@@ -616,13 +616,8 @@ void IqtFit::updatePlot() {
 
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
-  if (AnalysisDataService::Instance().doesExist(groupName) &&
-      specNo <= m_runMax && specNo >= m_runMin) {
-    IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
-                                        m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
-  } else {
-    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
-  }
+  IndirectDataAnalysisTab::updatePlot(
+      groupName, specNo - m_runMin, m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
 
   IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
   resizePlotRange(m_uiForm.ppPlotTop);

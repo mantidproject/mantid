@@ -209,15 +209,8 @@ void MSDFit::updatePlot(int spectrumNo) {
   size_t specNo = boost::numeric_cast<size_t>(spectrumNo);
   const auto groupName = m_pythonExportWsName + "_Workspaces";
 
-  if (AnalysisDataService::Instance().doesExist(groupName) &&
-      m_runMin <= specNo && specNo <= m_runMax) {
-    IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
-                                        m_uiForm.ppPlotTop,
-                                        m_uiForm.ppPlotBottom);
-  } else {
-    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
-  }
-
+  IndirectDataAnalysisTab::updatePlot(
+      groupName, specNo - m_runMin, m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
 }
 
