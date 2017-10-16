@@ -122,13 +122,25 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return table
 
     def _extract_spectrum_from_workspace(self):
+        """
+        Extract a single spectrum from the input workspace. If the input workspace only has one spectrum then just
+        return the input workspace
+        :return: Single-spectrum workspace
+        """
         ws = self.getPropertyValue(self.PROP_INPUT_WORKSPACE)
-        ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
-        spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index, EndWorkspaceIndex=ws_index)
-        mantid.DeleteWorkspace(Workspace=ws)
-        return spectrum
+        if mtd[ws].getNumberHistograms > 1:
+            ws_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
+            spectrum = mantid.ExtractSpectra(InputWorkspace=ws, StartWorkspaceIndex=ws_index, EndWorkspaceIndex=ws_index)
+            mantid.DeleteWorkspace(Workspace=ws)
+            return spectrum
+        else:
+            return ws
 
     def _initialise_GSAS(self):
+        """
+        Initialise a GSAS project object with a spectrum and an instrument parameter file
+        :return: GSAS project object
+        """
         gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
         sys.path.append(gsas_path)
         import GSASIIscriptable as GSASII
@@ -154,6 +166,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             raise Warning("Couldn't remove temporary spectrum file at location \"{}\":\n{}".format(spectrum_path, e))
 
     def _run_rietveld_pawley_refinement(self, gsas_proj, do_pawley):
+        """
+        Run a Rietveld or Pawley refinement
+        :param gsas_proj: The project to work on
+        :param do_pawley: True if doing a Pawley refinement (the default), False if doing a Rietveld refinement
+        :return: (R weight profile, goodness-of-fit coefficient, table containing refined lattice parameters)
+        """
         phase_path = self.getPropertyValue(self.PROP_PATH_TO_PHASE)
         phase = gsas_proj.add_phase(phasefile=phase_path, histograms=[gsas_proj.histograms()[0]])
 
@@ -170,6 +188,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return residuals["Rwp"], residuals["GOF"], lattice_param_table
 
     def _save_temporary_fxye(self, spectrum):
+        """
+        Create a temporary fxye file for GSAS to read the spectrum from. This is required as we cannot pass a workspace
+        straight to GSASIIscriptable, but rather it must be read from a file
+        :param spectrum: The spectrum to save
+        :return: Fully qualified path to the new file
+        """
         workspace_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
         temp_dir = tempfile.gettempdir()
         # Output file MUST end with "-n.fxye" where n is a number
