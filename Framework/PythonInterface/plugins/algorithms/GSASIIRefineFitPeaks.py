@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function)
+from contextlib import contextmanager
 import os
-import tempfile
 import sys
+import tempfile
 
 from mantid.kernel import *
 from mantid.api import *
@@ -28,6 +29,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
     PROP_PAWLEY_DMIN = "PawleyDMin"
     PROP_PAWLEY_NEGATIVE_WEIGHT = "PawleyNegativeWeight"
     PROP_REFINEMENT_METHOD = "RefinementMethod"
+    PROP_SUPPRESS_GSAS_OUTPUT = "MuteGSASII"
     PROP_WORKSPACE_INDEX = "WorkspaceIndex"
 
     DEFAULT_REFINEMENT_PARAMS = {"set":
@@ -90,16 +92,21 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         self.setPropertyGroup(self.PROP_PAWLEY_DMIN, self.PROP_GROUP_PAWLEY_PARAMS)
         self.setPropertyGroup(self.PROP_PAWLEY_NEGATIVE_WEIGHT, self.PROP_GROUP_PAWLEY_PARAMS)
 
-    def PyExec(self):
-        gsas_proj = self._initialise_GSAS()
+        self.declareProperty(name=self.PROP_SUPPRESS_GSAS_OUTPUT, defaultValue=False, direction=Direction.Input,
+                             doc="Set to True to prevent GSAS run info from being "
+                                 "printed (not recommended, but can be useful for debugging)")
 
-        refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
-        if refinement_method == self.REFINEMENT_METHODS[0]:  # Rawley refinement
-            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=True)
-        elif refinement_method == self.REFINEMENT_METHODS[1]:  # Rietveld refinement
-            rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=False)
-        else:  # Peak fitting
-            raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
+    def PyExec(self):
+        with self._suppress_stdout():
+            gsas_proj = self._initialise_GSAS()
+
+            refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
+            if refinement_method == self.REFINEMENT_METHODS[0]:  # Rawley refinement
+                rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=True)
+            elif refinement_method == self.REFINEMENT_METHODS[1]:  # Rietveld refinement
+                rwp, gof, lattice_params = self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj, do_pawley=False)
+            else:  # Peak fitting
+                raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
 
         self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params)
 
@@ -190,6 +197,20 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         pawley_neg_wt = self.getPropertyValue(self.PROP_PAWLEY_NEGATIVE_WEIGHT)
         phase_params["Pawley neg wt"] = pawley_neg_wt
+
+    @contextmanager
+    def _suppress_stdout(self):
+        if self.getPropertyValue(self.PROP_SUPPRESS_GSAS_OUTPUT) == "1":
+            self.log().information("Suppressing stdout")
+            with open(os.devnull, "w") as devnull:
+                old_stdout = sys.stdout
+                sys.stdout = devnull
+                try:
+                    yield
+                finally:
+                    sys.stdout = old_stdout
+        else:
+            yield
 
 
 AlgorithmFactory.subscribe(GSASIIRefineFitPeaks)
