@@ -2,22 +2,21 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
-from mantid.simpleapi import FunctionWrapper
-from mantid.api import FunctionFactory
+from MsdTestHelper import is_registered, check_output
 
 class MsdPetersTest(unittest.TestCase):
 
     def test_function_has_been_registered(self):
-        try:
-            FunctionFactory.createFunction("MsdPeters")
-        except RuntimeError as exc:
-            self.fail("Could not create MsdPeters function: %s" % str(exc))
+        status, msg = is_registered("MsdPeters")
+        if not status:
+            self.fail(msg)
 
     def test_function_output(self):
-        msd_peters = FunctionWrapper("MsdPeters", Height=1.0, MSD=0.05, Beta=1.0)
         input = np.array([[0, 1], [2, 3]])
-        output = msd_peters(input)
-        self.assertAlmostEqual(output[0][0], 1.000)
-        self.assertAlmostEqual(output[0][1], 0.992)
-        self.assertAlmostEqual(output[1][0], 0.968)
-        self.assertAlmostEqual(output[1][1], 0.930)
+        expected = np.array([1.000, 0.992], [0.968, 0.930])
+        tolerance = 0.0005
+        status, output = check_output("MsdPeters", input, expected, tolerance, Height=1.0, MSD=0.05, Beta=1.0)
+
+        if not status:
+            self.fail("Computed output " + str(output) + " from input " + str(input) + " is not"
+                      " equal to the expected output: " + str(expected))
