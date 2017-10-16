@@ -56,12 +56,12 @@ void export_Material() {
       .add_property("temperature", make_function(&Material::temperature),
                     "Temperature")
       .add_property("pressure", make_function(&Material::pressure), "Pressure")
-      .def(
-          "cohScatterXSection",
-          (double (Material::*)(double) const)(&Material::cohScatterXSection),
-          (arg("self"),
-           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-          "Coherent Scattering Cross-Section for the given wavelength in barns")
+      .def("cohScatterXSection",
+           (double (Material::*)(double) const)(&Material::cohScatterXSection),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Coherent Scattering Cross-Section for the given wavelength in "
+           "barns")
       .def("incohScatterXSection", (double (Material::*)(double)
                                         const)(&Material::incohScatterXSection),
            (arg("self"),
@@ -113,12 +113,12 @@ void export_Material() {
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
            "Coherent Scattering Length <b^2> for the given wavelength in fm^2")
-      .def(
-          "incohScatterLengthSqrd", (double (Material::*)(double) const)(
-                                        &Material::incohScatterLengthSqrd),
-          (arg("self"),
-           arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-          "Incoherent Scattering Length <b^2> for the given wavelength in fm^2")
+      .def("incohScatterLengthSqrd", (double (Material::*)(double) const)(
+                                         &Material::incohScatterLengthSqrd),
+           (arg("self"),
+            arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
+           "Incoherent Scattering Length <b^2> for the given wavelength in "
+           "fm^2")
       .def("totalScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::totalScatterLengthSqrd),
            (arg("self"),
