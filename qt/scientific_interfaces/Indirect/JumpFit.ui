@@ -120,23 +120,30 @@
       <layout class="QVBoxLayout" name="treeSpace"/>
      </item>
      <item>
-      <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
-       <property name="canvasColour" stdset="0">
-        <color>
-         <red>255</red>
-         <green>255</green>
-         <blue>255</blue>
-        </color>
-       </property>
-       <property name="showLegend" stdset="0">
-        <bool>true</bool>
-       </property>
-       <property name="curveErrorBars" stdset="0">
-        <stringlist>
-         <string>Sample</string>
-        </stringlist>
-       </property>
-      </widget>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="curveErrorBars" stdset="0">
+          <stringlist>
+           <string>Sample</string>
+          </stringlist>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true"/>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
