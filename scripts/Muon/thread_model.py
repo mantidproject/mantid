@@ -21,6 +21,9 @@ class ThreadModel(QThread):
         self.model.output()
         return
 
+    def cancel(self):
+        self.model.cancel()
+   
     # if there is one set of inputs (1 alg)
     def setInputs(self,inputs,runName):
         self.model.setInputs(inputs,runName)

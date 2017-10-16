@@ -12,10 +12,11 @@ class MaxEntView(QtGui.QWidget):
     """
     # signals
     maxEntButtonSignal = QtCore.pyqtSignal()
+    cancelSignal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(MaxEntView, self).__init__(parent)
-        self.grid = QtGui.QGridLayout(self)
+        self.grid = QtGui.QVBoxLayout(self)
 
         #make table
         self.table = QtGui.QTableWidget(self)
@@ -102,18 +103,25 @@ class MaxEntView(QtGui.QWidget):
         self.tableA.setMinimumSize(40,207)
         self.horizontalSpacer1 = QtGui.QSpacerItem(20, 30, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self.horizontalSpacer2 = QtGui.QSpacerItem(20, 70, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        #make button
+        #make buttons
         self.button = QtGui.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
-#       #connects
+        self.cancel = QtGui.QPushButton('Cancel', self)
+        self.cancel.setStyleSheet("background-color:lightgrey")
+        #connects
         self.button.clicked.connect(self.MaxEntButtonClick)
+        self.cancel.clicked.connect(self.cancelClick)
+        # button layout
+        self.buttonLayout=QtGui.QHBoxLayout()
+        self.buttonLayout.addWidget(self.button)
+        self.buttonLayout.addWidget(self.cancel)
         # add to layout
         self.grid.addWidget(self.table)
         self.grid.addItem(self.horizontalSpacer1)
         self.grid.addWidget(self.advancedLabel)
         self.grid.addWidget(self.tableA)
         self.grid.addItem(self.horizontalSpacer2)
-        self.grid.addWidget(self.button)
+        self.grid.addLayout(self.buttonLayout)
 
     # add data to view
     def addItems(self,options):
@@ -123,6 +131,9 @@ class MaxEntView(QtGui.QWidget):
     # send signal
     def MaxEntButtonClick(self):
         self.maxEntButtonSignal.emit()
+
+    def cancelClick(self):
+        self.cancelSignal.emit()
 
     # get some inputs for model
     def initMaxEntInput(self):
