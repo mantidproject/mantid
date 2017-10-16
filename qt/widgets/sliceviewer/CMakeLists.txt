@@ -131,8 +131,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   OSX_INSTALL_RPATH
@@ -177,8 +177,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsSliceViewerTest
     ${GTEST_LIBRARIES}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsSliceViewer
   PARENT_DEPENDENCIES

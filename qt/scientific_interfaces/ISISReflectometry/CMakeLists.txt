@@ -107,13 +107,13 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
+    MantidQtWidgetsCommon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )

@@ -463,7 +463,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt4::QtWebKit
     Qt4::QtNetwork
     Qt4::Qscintilla
-    ${QWT5_LIBRARIES}
+    Qwt5
   OSX_INSTALL_RPATH
     "@loader_path/../MacOS;@loader_path/../Libraries"
 )

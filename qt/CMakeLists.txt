@@ -4,7 +4,6 @@
 find_package ( QScintillaQt4 REQUIRED )
 
 include ( UseQt4 )
-include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 # Utilities for defining targets
 include (QtTargetFunctions)

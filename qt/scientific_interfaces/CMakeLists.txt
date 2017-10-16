@@ -74,8 +74,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
     ${GTEST_LIBRARIES}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesGeneral
     MantidScientificInterfacesMuon

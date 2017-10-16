@@ -21,21 +21,21 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../../sliceviewer )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    DEFS QSCINTILLA_DLL
-                    QT_PLUGIN MantidWidgetPlugins
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${CORE_MANTIDLIBS}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${QSCINTILLA_LIBRARIES}
-                        ${QT_LIBRARIES}
-                        ${QWT5_LIBRARIES}
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
-                        MantidQtWidgetsSliceViewer
-                    EXCLUDE_FROM_ALL
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  DEFS QSCINTILLA_DLL
+  QT_PLUGIN MantidWidgetPlugins
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::Qscintilla
+    Qwt5
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+      MantidQtWidgetsSliceViewer
+  EXCLUDE_FROM_ALL
 )

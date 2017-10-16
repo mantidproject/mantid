@@ -201,6 +201,7 @@ ${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
+Qwt5
 )
 
 if ( MSVC )
@@ -251,6 +252,7 @@ target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${Boost_LIBRARIES}
   ${GMOCK_LIBRARIES}
   ${GTEST_LIBRARIES}
+  Qwt5
   )
 add_dependencies( AllTests VatesAPITest )
 # Add to the 'UnitTests' group in VS

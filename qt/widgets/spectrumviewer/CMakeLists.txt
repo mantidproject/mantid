@@ -58,20 +58,20 @@ include_directories ( inc )
 # Main Library Target
 ###########################################################################
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    DEFS IN_MANTIDQT_SPECTRUMVIEWER
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${CORE_MANTIDLIBS}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${QT_LIBRARIES}
-                        ${QWT5_LIBRARIES}
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_SPECTRUMVIEWER
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

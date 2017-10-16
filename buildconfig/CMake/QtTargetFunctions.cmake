@@ -186,6 +186,10 @@ endfunction()
 # keyword: TEST_HELPER_SRCS A list of test helper files to compile in with the target
 # keyword: LINK_LIBS A list of additional libraries to link to the
 #          target that are not dependent on Qt
+# keyword: QT4_LINK_LIBS A list of additional Qt libraries to link to.
+#          QtGui islinked to by default
+# keyword: QT5_LINK_LIBS A list of additional Qt libraries to link to.
+#          QtWidgets islinked to by default
 # keyword: MTD_QT_LINK_LIBS A list of additional libraries to link to the
 #          target. It is assumed each was produced with this function and
 #          will have the Qt{QT_VERSION} suffix appended.
@@ -195,7 +199,7 @@ function (mtd_add_qt_test_executable)
   set (options)
   set (oneValueArgs TARGET_NAME QT_VERSION)
   set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
-       MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
+       QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
 
@@ -218,9 +222,9 @@ function (mtd_add_qt_test_executable)
 
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
   if (PARSED_QT_VERSION EQUAL 4)
-    set (_link_libs Qt4::QtGui ${_link_libs})
+    set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
   elseif (PARSED_QT_VERSION EQUAL 5)
-    set (_link_libs Qt5::Widgets ${_link_libs})
+    set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
   else ()
     message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
   endif()

@@ -51,10 +51,11 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISSANS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
+  QT4_LINK_LIBS
+      Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidScientificInterfacesMuon

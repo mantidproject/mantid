@@ -56,9 +56,9 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
     ${OPENGL_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid

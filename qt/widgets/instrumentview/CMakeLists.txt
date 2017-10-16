@@ -130,21 +130,21 @@ include_directories ( inc )
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
-                    SRC ${SRC_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INC_FILES}
-                    UI ${UI_FILES}
-                    DEFS IN_MANTIDQT_INSTRUMENTVIEW
-                    LINK_LIBS 
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
-                      ${CORE_MANTIDLIBS}
-                      ${QT_LIBRARIES}
-                      ${QWT5_LIBRARIES}
-                      ${POCO_LIBRARIES}
-                      ${Boost_LIBRARIES}
-                      ${PYTHON_LIBRARIES}
-                      ${OPENGL_LIBRARIES}
-                    MTD_QT_LINK_LIBS MantidQtWidgetsCommon
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  DEFS IN_MANTIDQT_INSTRUMENTVIEW
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${PYTHON_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
+  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
