@@ -40,13 +40,13 @@ void IqtFit::setup() {
   m_iqtFTree = new QtTreePropertyBrowser(m_parentWidget);
   m_uiForm.properties->addWidget(m_iqtFTree);
 
-  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("IqtFitRange");
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(xMinSelected(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(xMaxSelected(double)));
 
-  auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector(
+  auto backgroundRangeSelector = m_uiForm.ppPlotTop->addRangeSelector(
       "IqtFitBackground", MantidWidgets::RangeSelector::YSINGLE);
   backgroundRangeSelector->setRange(0.0, 1.0);
   backgroundRangeSelector->setColour(Qt::darkGreen);
@@ -595,8 +595,8 @@ void IqtFit::typeSelection(int index) {
   }
 
   updateGuessPlot();
-  m_uiForm.ppPlot->removeSpectrum("Fit");
-  m_uiForm.ppPlot->removeSpectrum("Diff");
+  m_uiForm.ppPlotTop->removeSpectrum("Fit");
+  m_uiForm.ppPlotTop->removeSpectrum("Diff");
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(updateCurrentPlotOption(QString)));
 }
@@ -616,13 +616,13 @@ void IqtFit::updatePlot() {
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       specNo <= m_runMax && specNo >= m_runMin) {
     IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
-                                        m_uiForm.ppPlot, m_uiForm.ppPlot);
+                                        m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
   } else {
-    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
   }
 
-  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlot);
-  resizePlotRange(m_uiForm.ppPlot);
+  IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
+  resizePlotRange(m_uiForm.ppPlotTop);
   updateGuessPlot();
 }
 
@@ -722,9 +722,9 @@ void IqtFit::backgroundSelected(double val) {
 }
 
 void IqtFit::propertyChanged(QtProperty *prop, double val) {
-  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("IqtFitRange");
   auto backgroundRangeSelector =
-      m_uiForm.ppPlot->getRangeSelector("IqtFitBackground");
+      m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
   auto specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
   bool autoUpdate = specNo > m_runMax || specNo < m_runMin ||
                     m_parameterValues[prop->propertyName()].isEmpty();
@@ -869,12 +869,12 @@ void IqtFit::singleFitComplete(bool error) {
 
 void IqtFit::updateGuessPlot() {
   // Do nothing if there is no sample data curve
-  if (!m_uiForm.ppPlot->hasCurve("Sample"))
+  if (!m_uiForm.ppPlotTop->hasCurve("Sample"))
     return;
 
   // Don't plot guess if plot guess is unchecked
   if (!m_uiForm.ckPlotGuess->isChecked()) {
-    m_uiForm.ppPlot->removeSpectrum("Guess");
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
   } else {
     plotGuess(NULL);
   }
@@ -917,7 +917,7 @@ void IqtFit::plotGuess(QtProperty *) {
   createWsAlg->execute();
   MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
 
-  m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+  m_uiForm.ppPlotTop->addSpectrum("Guess", guessWs, 0, Qt::green);
 }
 
 /*
