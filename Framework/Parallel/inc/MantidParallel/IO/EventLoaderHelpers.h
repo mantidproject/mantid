@@ -70,6 +70,7 @@ void load(
   int64_t previousBank = -1;
   for (const auto &range : ranges) {
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
+      previousBank = range.bankIndex;
       dataSource.setBankIndex(range.bankIndex);
       dataSink.setPulseInformation(dataSource.eventIndex(),
                                    dataSource.eventTimeZero(),
