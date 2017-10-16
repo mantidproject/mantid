@@ -39,7 +39,7 @@ void MSDFit::setup() {
   m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
   m_properties["Yi"] = createModel("Yi", {"Intensity", "MSD", "Sigma"});
 
-  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("MSDRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
 
   modelSelection(m_uiForm.cbModelInput->currentIndex());
 
@@ -204,7 +204,7 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePlot(int spectrumNo) {
-  m_uiForm.ppPlot->clear();
+  m_uiForm.ppPlotTop->clear();
 
   size_t specNo = boost::numeric_cast<size_t>(spectrumNo);
   const auto groupName = m_pythonExportWsName + "_Workspaces";
@@ -212,12 +212,13 @@ void MSDFit::updatePlot(int spectrumNo) {
   if (AnalysisDataService::Instance().doesExist(groupName) &&
       m_runMin <= specNo && specNo <= m_runMax) {
     IndirectDataAnalysisTab::updatePlot(groupName, specNo - m_runMin,
-                                        m_uiForm.ppPlot, m_uiForm.ppPlot);
+                                        m_uiForm.ppPlotTop,
+                                        m_uiForm.ppPlotBottom);
   } else {
-    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
   }
 
-  IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlot);
+  IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
 }
 
 /**
@@ -281,7 +282,7 @@ void MSDFit::maxChanged(double val) {
 }
 
 void MSDFit::updateRS(QtProperty *prop, double val) {
-  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("MSDRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("MSDRange");
 
   if (prop == m_properties["StartX"])
     fitRangeSelector->setMinimum(val);
