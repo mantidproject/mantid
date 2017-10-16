@@ -2,12 +2,14 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
-from MsdTestHelper import is_registered, check_output
+
+from MsdTestHelper import is_registered, check_output, create_model, create_test_workspace, create_function_string
+from mantid.simpleapi import Fit
 
 class MsdYiTest(unittest.TestCase):
 
     def test_function_has_been_registered(self):
-        status, msg = is_registered("MsdGauss")
+        status, msg = is_registered("MsdYi")
         if not status:
             self.fail(msg)
 
@@ -20,3 +22,11 @@ class MsdYiTest(unittest.TestCase):
         if not status:
             self.fail("Computed output " + str(output) + " from input " + str(input) + " is not"
                       " equal to the expected output: " + str(expected))
+
+    def test_use_in_fit(self):
+        workspace = create_test_workspace(create_model("MsdYi", Height=1.0, MSD=0.05, Sigma=1.0), 1000)
+        function_string = create_function_string("MsdYi", Height=1.0, MSD=0.05, Sigma=1.0)
+        Fit(Function=function_string, InputWorkspace=workspace, StartX=1.2, EndX=1200)
+
+if __name__ == '__main__':
+    unittest.main()
