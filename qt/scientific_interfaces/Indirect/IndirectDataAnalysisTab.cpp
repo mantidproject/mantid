@@ -135,42 +135,48 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
  * specified top preview plot. Plots the diff spectra in the specified
  * bottom preview plot.
  *
- * @param workspaceName     The name of the workspace group.
+ * @param outputWSName      The name of the output workspace group.
  * @param index             The index of the workspace (in the group)
  *                          to plot.
  * @param topPreviewPlot    The top preview plot.
  * @param bottomPreviewPlot The bottom preview plot.
  */
-void IndirectDataAnalysisTab::plotOutputGroup(
-    const std::string workspaceName, size_t index,
+void IndirectDataAnalysisTab::updatePlot(
+    const std::string outputWSName, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
   auto workspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-  plotOutputGroup(workspace, index, topPreviewPlot, bottomPreviewPlot);
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWSName);
+  updatePlot(workspace, index, topPreviewPlot, bottomPreviewPlot);
 }
 
 /**
-* Plots the workspace at the specified index in the specified workspace
-* group. Plots the sample and fit spectrum in the specified top preview
-* plot. Plots the diff spectra in the specified bottom preview plot.
-*
-* @param workspace         The workspace group.
-* @param index             The index of the workspace (in the group)
-*                          to plot.
-* @param topPreviewPlot    The top preview plot.
-* @param bottomPreviewPlot The bottom preview plot.
-*/
-void IndirectDataAnalysisTab::plotOutputGroup(
-    WorkspaceGroup_sptr workspaceGroup, size_t index,
+ * Plots the workspace at the specified index in the specified workspace
+ * group. Plots the sample and fit spectrum in the specified top preview
+ * plot. Plots the diff spectra in the specified bottom preview plot.
+ *
+ * @param outputWS          The output workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param topPreviewPlot    The top preview plot.
+ * @param bottomPreviewPlot The bottom preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    WorkspaceGroup_sptr outputWS, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-  auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      workspaceGroup->getItem(index));
-  IndirectTab::plotWorkspace(workspace, topPreviewPlot,
-                             {{0, "Sample"}, {1, "Fit"}});
-  IndirectTab::plotWorkspace(workspace, bottomPreviewPlot, {{2, "Diff"}},
-                             {Qt::blue});
+  // Check whether the specified index is within the bounds of the
+  // fitted spectrum.
+  if (outputWS && index > 0 && index <= outputWS->size()) {
+    auto workspace =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+    setPreviewPlotWorkspace(workspace);
+    topPreviewPlot->addSpectrum("Sample", workspace, 0, Qt::black);
+    topPreviewPlot->addSpectrum("Fit", workspace, 1, Qt::red);
+    bottomPreviewPlot->addSpectrum("Diff", workspace, 2, Qt::blue);
+  } else {
+    topPreviewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
+  }
 }
 
 } // namespace IDA
