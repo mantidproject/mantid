@@ -17,6 +17,7 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+- :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
 
 Imaging
 -------
