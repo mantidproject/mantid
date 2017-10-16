@@ -153,7 +153,18 @@
         </widget>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true"/>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+         <property name="showLegend" stdset="0">
+          <bool>true</bool>
+         </property>
+         <property name="canvasColour" stdset="0">
+          <color>
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </property>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="gpPlotOptions">
