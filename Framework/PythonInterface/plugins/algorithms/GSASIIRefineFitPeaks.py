@@ -97,13 +97,12 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                                  "printed (not recommended, but can be useful for debugging)")
 
     def PyExec(self):
+        refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
+        if refinement_method == self.REFINEMENT_METHODS[2]:  # Peak fitting
+            raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
+
         with self._suppress_stdout():
             gsas_proj = self._initialise_GSAS()
-
-            refinement_method = self.getPropertyValue(self.PROP_REFINEMENT_METHOD)
-
-            if refinement_method == self.REFINEMENT_METHODS[2]:  # Peak fitting
-                raise NotImplementedError("GSAS-II Peak fitting not yet implemented in Mantid")
 
             rwp, gof, lattice_params = \
                 self._run_rietveld_pawley_refinement(gsas_proj=gsas_proj,
