@@ -99,13 +99,14 @@ private:
   /// Accept requests to load until they are disabled.
   void enableLoadRequests();
 
-  /// Perform an action ignoring any load requests which occur during it's execution.
-  template<typename Action>
-  auto protectedFromLoadRequests(Action action) {
+  /// Perform an action ignoring any load requests which occur during it's
+  /// execution.
+  template <typename Action> auto protectedFromLoadRequests(Action action) {
     disableLoadRequests();
     action();
     enableLoadRequests();
   }
+
 private:
   /// Form
   Ui::LoadDialog m_form;
