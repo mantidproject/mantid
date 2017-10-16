@@ -64,32 +64,41 @@ void load(
     EventDataSink<IndexType, TimeZeroType, TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
-  std::vector<int32_t> event_id(chunkSize);
-  std::vector<TimeOffsetType> event_time_offset(chunkSize);
+  std::vector<int32_t> event_id(2 * chunkSize);
+  std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 
   int64_t previousBank = -1;
+  size_t bufferOffset{0};
   for (const auto &range : ranges) {
+    std::vector<IndexType> eventIndex;
+    std::vector<TimeZeroType> eventTimeZero;
+    int64_t eventTimeZeroOffset{0};
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      previousBank = range.bankIndex;
       dataSource.setBankIndex(range.bankIndex);
-      dataSink.setPulseInformation(dataSource.eventIndex(),
-                                   dataSource.eventTimeZero(),
-                                   dataSource.eventTimeZeroOffset());
+      eventIndex = dataSource.eventIndex();
+      eventTimeZero = dataSource.eventTimeZero();
+      eventTimeZeroOffset = dataSource.eventTimeZeroOffset();
     }
-    // TODO use double buffer or something
-    // TODO use and manage bufferOffset
-    size_t bufferOffset{0};
-    dataSource.readEventID(event_id.data(), range.eventOffset,
+    dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset,
                            range.eventCount);
-    dataSource.readEventTimeOffset(event_time_offset.data(), range.eventOffset,
-                                   range.eventCount);
+    dataSource.readEventTimeOffset(event_time_offset.data() + bufferOffset,
+                                   range.eventOffset, range.eventCount);
+    if (previousBank != -1)
+      dataSink.wait();
+    if (static_cast<int64_t>(range.bankIndex) != previousBank) {
+      dataSink.setPulseInformation(std::move(eventIndex),
+                                   std::move(eventTimeZero),
+                                   eventTimeZeroOffset);
+      previousBank = range.bankIndex;
+    }
     // parser can assume that event_index and event_time_zero stay the same and
     // chunks are ordered, i.e., current position in event_index can be reused,
     // no need to iterate in event_index from the start for every chunk.
     dataSink.startAsync(event_id.data() + bufferOffset,
                         event_time_offset.data() + bufferOffset, range);
-    dataSink.wait();
+    bufferOffset = (bufferOffset + chunkSize) % (2 * chunkSize);
   }
+  dataSink.wait();
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
