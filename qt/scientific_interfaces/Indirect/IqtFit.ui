@@ -139,7 +139,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
          <property name="showLegend" stdset="0">
           <bool>true</bool>
          </property>
@@ -151,6 +151,9 @@
           </color>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true"/>
        </item>
        <item>
         <layout class="QHBoxLayout" name="gpPlotOptions">
