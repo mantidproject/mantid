@@ -15,8 +15,8 @@ class MsdGaussTest(unittest.TestCase):
 
     def test_function_output(self):
         input = np.array([[0, 1], [2, 3]])
-        expected = np.array([[1.000, 0.951], [0.819, 0.638]])
-        tolerance = 0.0005
+        expected = np.array([[1., 0.95122942], [0.81873075, 0.63762815]])
+        tolerance = 0.000001
         status, output = check_output("MsdGauss", input, expected, tolerance, Height=1.0, MSD=0.05)
 
         if not status:
