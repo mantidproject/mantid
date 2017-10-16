@@ -98,6 +98,7 @@ private:
   void disableLoadRequests();
   /// Accept requests to load until they are disabled.
   void enableLoadRequests();
+
 private:
   /// Form
   Ui::LoadDialog m_form;
