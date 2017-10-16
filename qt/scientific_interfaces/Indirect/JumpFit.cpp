@@ -164,7 +164,8 @@ void JumpFit::fitAlgDone(bool error) {
 
   // Get output workspace name
   std::string outWsName = outName + "_Workspace";
-  IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
+  IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop,
+                                      m_uiForm.ppPlotBottom);
 
   // Update parameters in UI
   std::string paramTableName = outName + "_Parameters";
@@ -309,7 +310,7 @@ void JumpFit::handleWidthChange(const QString &text) {
     if (validate()) {
       m_uiForm.ppPlotTop->clear();
       m_uiForm.ppPlotTop->addSpectrum("Sample", sampleName,
-                                   m_spectraList[text.toStdString()]);
+                                      m_spectraList[text.toStdString()]);
     }
   }
 }
@@ -415,7 +416,7 @@ void JumpFit::clearPlot() {
 
       m_uiForm.ppPlotTop->clear();
       m_uiForm.ppPlotTop->addSpectrum("Sample", sample,
-                                   m_spectraList[currentWidth]);
+                                      m_spectraList[currentWidth]);
     }
   }
 }
@@ -467,7 +468,7 @@ void JumpFit::plotGuess(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(plotGuess(bool)));
   m_uiForm.ppPlotTop->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
-                               Qt::green);
+                                  Qt::green);
   deletePlotGuessWorkspaces(false);
 }
 
