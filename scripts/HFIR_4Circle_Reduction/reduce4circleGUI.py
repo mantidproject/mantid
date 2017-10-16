@@ -3509,13 +3509,29 @@ class MainWindow(QtGui.QMainWindow):
         # setup the parameters
         if reset_pre_process_window:
             exp_number = int(str(self.ui.lineEdit_exp.text()))
+            # detector size/pixel numbers
             det_size_str = str(self.ui.comboBox_detectorSize.currentText())
             det_size = int(det_size_str.split()[0])
+            # detector center
             det_center = str(self.ui.lineEdit_infoDetCenter.text())
+            # sample detector distance
+            det_sample_dist = str(self.ui.lineEdit_infoDetSampleDistance.text())
+            try:
+                det_sample_dist = float(det_sample_dist)
+            except ValueError:
+                det_sample_dist = None
+            # wave length
+            wave_length = str(self.ui.lineEdit_infoWavelength.text())
+            try:
+                wave_length = float(wave_length)
+            except ValueError:
+                wave_length = None
+
             # set up the other calibration parameters
             self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
                                                               det_center=det_center,
-                                                              det_sample_distance=None, wave_length=None)
+                                                              det_sample_distance=det_sample_dist,
+                                                              wave_length=wave_length)
         # END-IF
 
         return

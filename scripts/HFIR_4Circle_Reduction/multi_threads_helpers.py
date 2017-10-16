@@ -346,6 +346,7 @@ class MergePeaksThread(QThread):
     """
     # signal to report state: (1) scan, (2) message
     mergeMsgSignal = QtCore.pyqtSignal(int, str)
+    saveMsgSignal = QtCore.pyqtSignal(int, str)
 
     def __init__(self, main_window, exp_number, scan_number_list, md_file_list):
         """Initialization
@@ -381,7 +382,7 @@ class MergePeaksThread(QThread):
 
         # link signals
         self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
-        self.mergeMsgSignal.connect(self._mainWindow.update_merge_message)
+        self.saveMsgSignal.connect(self._mainWindow.update_file_name)
 
         return
 
@@ -411,10 +412,11 @@ class MergePeaksThread(QThread):
 
             # emit signal for run start (mode 0)
             # self.peakMergeSignal.emit(scan_number, 'In merging')
-            self.mergeMsgSignal.emit(-1, scan_number, 0, 'In merging')
+            self.mergeMsgSignal.emit(scan_number, 'Being merged')
 
             # merge if not merged
             merged_ws_name = None
+            out_file_name = 'No File To Save'
             try:
                 status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                 scan_no=scan_number,
@@ -427,11 +429,12 @@ class MergePeaksThread(QThread):
 
                 # save
                 if save_file:
+                    out_file_name = self._outputMDFileList[index]
                     self._mainWindow.controller.save_merged_scan(exp_number=self._expNumber,
                                                                  scan_number=scan_number,
                                                                  pt_number_list=pt_number_list,
                                                                  merged_ws_name=merged_ws_name,
-                                                                 output=self._outputMDFileList[index])
+                                                                 output=out_file_name)
                 # END-IF-ELSE
 
             except RuntimeError as run_err:
@@ -444,6 +447,7 @@ class MergePeaksThread(QThread):
                 # successfully merge peak
                 assert merged_ws_name is not None, 'Impossible situation'
                 self.mergeMsgSignal.emit(scan_number, merged_ws_name)
+                self.saveMsgSignal.emit(scan_number, out_file_name)
             else:
                 # merging error
                 self.mergeMsgSignal.emit(scan_number, error_message)

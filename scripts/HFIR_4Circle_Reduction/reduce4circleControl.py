@@ -112,6 +112,8 @@ class CWSCDReductionControl(object):
 
         # detector geometry: initialized to unphysical value
         self._detectorSize = [-1, -1]
+        self._defaultPixelNumberX = None
+        self._defaultPixelNumberY = None
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
@@ -926,9 +928,6 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
-        # print('[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
-        #       ''.format(exp_number, scan_number, self._myPeakInfoDict.keys()))
-
         # construct key
         if pt_number is None:
             p_key = (exp_number, scan_number)
@@ -938,8 +937,6 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
-            # print('[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
-            #                                                                             hex(id(ret_value))))
         else:
             ret_value = None
 
@@ -1225,7 +1222,6 @@ class CWSCDReductionControl(object):
         assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
             'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
         assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
-        # print('[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple)))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
         # get input MDEventWorkspace name for merged scan
@@ -1674,8 +1670,8 @@ class CWSCDReductionControl(object):
                 # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
                 # calculate the sample-detector distance shift if it is defined
                 if exp_no in self._detSampleDistanceDict:
-                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
-                                                              self._defaultDetectorSampleDistance
+                    alg_args['DetectorSampleDistanceShift'] \
+                        = self._detSampleDistanceDict[exp_no] - self._defaultDetectorSampleDistance
                 # calculate the shift of detector center
                 if exp_no in self._detCenterDict:
                     user_center_row, user_center_col = self._detCenterDict[exp_no]
@@ -1863,8 +1859,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_detector_sample_distance(self, default_det_sample_distance):
-        """
-        set default detector-sample distance
+        """set default detector-sample distance
         :param default_det_sample_distance:
         :return:
         """
@@ -1876,8 +1871,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
-        """
-        set default pixel size
+        """set default pixel size, i.e., physical dimension of a pixel
         :param pixel_x_size:
         :param pixel_y_size:
         :return:
@@ -1887,6 +1881,21 @@ class CWSCDReductionControl(object):
 
         self._defaultPixelSizeX = pixel_x_size
         self._defaultPixelSizeY = pixel_y_size
+
+        return
+
+    def set_default_pixel_number(self, num_pixel_x, num_pixel_y):
+        """
+        set the default number of pixels on the detector
+        :param num_pixel_x:
+        :param num_pixel_y:
+        :return:
+        """
+        assert isinstance(num_pixel_x, int) and num_pixel_x > 0, 'Wrong input'
+        assert isinstance(num_pixel_y, int) and num_pixel_y > 0, 'Wrong input'
+
+        self._defaultPixelNumberX = num_pixel_x
+        self._defaultPixelNumberY = num_pixel_y
 
         return
 

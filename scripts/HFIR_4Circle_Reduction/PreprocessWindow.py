@@ -34,6 +34,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         # initialize table
         self.ui.tableView_scanProcessState.setup()
+        # try to make column nicer
+        self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         # define event handling
         self.connect(self.ui.pushButton_browseOutputDir, QtCore.SIGNAL('clicked()'),
@@ -53,6 +55,16 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         self._rowScanDict = dict()
 
         return
+
+    @property
+    def controller(self):
+        """
+        get access to controller
+        :return:
+        """
+        assert self._myController is not None, 'Controller cannot be None'
+
+        return self._myController
 
     def do_browse_output_dir(self):
         """
@@ -102,7 +114,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         :return:
         """
-        print '[INFO] Closing {0}'.format(self.objectName())
+        print ('[INFO] Closing {0}'.format(self.objectName()))
 
         if self._myMergePeaksThread is not None:
             self._myMergePeaksThread.terminate()
@@ -126,7 +138,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             raise RuntimeError('Reduction controller has not been set up yet.  It is required for pre-processing.')
 
         # get all the information
-        exp_number = int(self.ui.lineEdit_expNumber.text())
+        exp_number = self.get_exp_number()
         scan_list = self.get_scan_numbers()
 
         # set up calibration information
@@ -229,8 +241,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         # set up the experiment number if it is different
         if exp_number != self._myController.get_experiment():
             self._myController.set_exp_number(exp_number)
-            self._myController.set_default_detector_sample_distance()
-            self._myController.set_default_pixel_size()
+            self._myController.set_default_detector_sample_distance(0.3750)
+            self._myController.set_default_pixel_number(256, 256)
 
         # set up the calibration
         # wave length
@@ -260,13 +272,14 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         # detector sample distance
         status, ret_obj = gui_util.parse_float_editors([self.ui.lineEdit_infoDetSampleDistance], allow_blank=True)
+
         if not status:
             error_message = ret_obj
             gui_util.show_message(self, '[ERROR] {0}'.format(error_message))
             return
         user_det_sample_distance = ret_obj[0]
         if user_det_sample_distance is not None:
-            self._myController.set_default_detector_sample_distance(user_det_sample_distance)
+            self._myController.set_detector_sample_distance(exp_number, user_det_sample_distance)
 
         # detector size
         curr_det_size_index = self.ui.comboBox_detSize.currentIndex()
@@ -343,29 +356,27 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
 
         return
 
+    def update_file_name(self, scan_number, file_name):
+        """Update merged file name
+        :param scan_number:
+        :param file_name:
+        :return:
+        """
+        row_number = self._rowScanDict[scan_number]
+        self.ui.tableView_scanProcessState.set_file_name(row_number, file_name)
+        self.ui.tableView_scanProcessState.resizeColumnsToContents()
+
+        return
+
     def update_merge_value(self, scan_number, message):
         """update merged signal
-
         :param scan_number:
         :param message:
         :return:
         """
         row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_status(row_number, message)
-
-        return
-
-    def update_merge_message(self, exp_number, scan_number, mode, message):
-        """
-        update merged data message
-        :param exp_number:
-        :param scan_number:
-        :param mode:
-        :param message:
-        :return:
-        """
-        # blabla
-        # TODO/ISSUE/NOW - Make it work!
+        self.ui.tableView_scanProcessState.resizeColumnsToContents()
 
         return
 

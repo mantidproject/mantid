@@ -81,6 +81,16 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
 
         return part_dict
 
+    def set_file_name(self, row_number, file_name):
+        """set the file name for a certain row
+        :param row_number:
+        :param file_name:
+        :return:
+        """
+        self.update_cell_value(row_number, self._iColFile, file_name)
+
+        return
+
     def set_status(self, row_number, status):
         """
 
