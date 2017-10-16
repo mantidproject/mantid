@@ -108,6 +108,7 @@ class MaxEntView(QtGui.QWidget):
         self.button.setStyleSheet("background-color:lightgrey")
         self.cancel = QtGui.QPushButton('Cancel', self)
         self.cancel.setStyleSheet("background-color:lightgrey")
+        self.cancel.setEnabled(False)
         #connects
         self.button.clicked.connect(self.MaxEntButtonClick)
         self.cancel.clicked.connect(self.cancelClick)
@@ -173,8 +174,10 @@ class MaxEntView(QtGui.QWidget):
         return self.raw_box.checkState() == QtCore.Qt.Checked
 
     # turn button on and off
-    def activateButton(self):
+    def activateCalculateButton(self):
         self.button.setEnabled(True)
+        self.cancel.setEnabled(False)
 
-    def deactivateButton(self):
+    def deactivateCalculateButton(self):
         self.button.setEnabled(False)
+        self.cancel.setEnabled(True)

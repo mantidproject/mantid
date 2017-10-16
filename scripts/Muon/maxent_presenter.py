@@ -41,7 +41,6 @@ class MaxEntPresenter(object):
         import time
         if self.thread is not None:
             self.thread.cancel()
-            time.sleep(60)
  
     def handleFinished(self):
         self.activate()
@@ -49,10 +48,10 @@ class MaxEntPresenter(object):
         self.thread=None
 
     def activate(self):
-        self.view.activateButton()
+        self.view.activateCalculateButton()
 
     def deactivate(self):
-        self.view.deactivateButton()
+        self.view.deactivateCalculateButton()
 
     def getMaxEntInput(self):
         inputs=self.view.initMaxEntInput()
