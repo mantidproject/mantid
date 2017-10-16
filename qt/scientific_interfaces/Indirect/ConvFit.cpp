@@ -634,6 +634,9 @@ void ConvFit::newDataLoaded(const QString wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
+  m_properties.clear();
+  m_propertyToParameter.clear();
+  m_fitFunctions.clear();
 
   const int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 

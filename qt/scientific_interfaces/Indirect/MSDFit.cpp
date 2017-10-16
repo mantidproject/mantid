@@ -235,6 +235,8 @@ void MSDFit::newDataLoaded(const QString wsName) {
   int maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
   setInputWorkspace(workspace);
   setPreviewPlotWorkspace(workspace);
+  m_parameterValues.clear();
+  m_parameterToProperty.clear();
   m_pythonExportWsName = "";
 
   m_uiForm.spPlotSpectrum->setMaximum(maxWsIndex);

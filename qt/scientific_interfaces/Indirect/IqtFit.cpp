@@ -387,6 +387,9 @@ void IqtFit::newDataLoaded(const QString wsName) {
       wsName.toStdString());
   setInputWorkspace(inputWs);
   setPreviewPlotWorkspace(inputWs);
+  m_properties.clear();
+  m_parameterToProperty.clear();
+  m_fitFunctions.clear();
 
   int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 
