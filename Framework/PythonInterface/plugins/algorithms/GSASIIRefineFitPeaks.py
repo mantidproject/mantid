@@ -103,25 +103,6 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
 
         self._set_output_properties(rwp=rwp, gof=gof, lattice_params=lattice_params)
 
-    def _initialise_GSAS(self):
-        gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
-        sys.path.append(gsas_path)
-        import GSASIIscriptable as GSASII
-
-        gsas_proj_path = self.getPropertyValue(self.PROP_GSAS_PROJ_PATH)
-        gsas_proj = GSASII.G2Project(filename=gsas_proj_path)
-
-        spectrum = self._extract_spectrum_from_workspace()
-        spectrum_path = self._save_temporary_fxye(spectrum=spectrum)
-        mantid.DeleteWorkspace(Workspace=spectrum)
-
-        inst_param_path = self.getPropertyValue(self.PROP_PATH_TO_INST_PARAMS)
-        gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path)
-
-        self._remove_temporary_fxye(spectrum_path=spectrum_path)
-
-        return gsas_proj
-
     def _build_output_lattice_table(self, lattice_params):
         alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
         alg.execute()
@@ -140,14 +121,24 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         mantid.DeleteWorkspace(Workspace=ws)
         return spectrum
 
-    def _save_temporary_fxye(self, spectrum):
-        workspace_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
-        temp_dir = tempfile.gettempdir()
-        # Output file MUST end with "-n.fxye" where n is a number
-        # If you see "Runtime error: Rvals" from GSASIIscriptable.py, it may be because this name is badly formatted
-        file_path = os.path.join(temp_dir, "{}_focused_spectrum-{}.fxye".format(self.name(), workspace_index))
-        mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
-        return file_path
+    def _initialise_GSAS(self):
+        gsas_path = self.getPropertyValue(self.PROP_PATH_TO_GSASII)
+        sys.path.append(gsas_path)
+        import GSASIIscriptable as GSASII
+
+        gsas_proj_path = self.getPropertyValue(self.PROP_GSAS_PROJ_PATH)
+        gsas_proj = GSASII.G2Project(filename=gsas_proj_path)
+
+        spectrum = self._extract_spectrum_from_workspace()
+        spectrum_path = self._save_temporary_fxye(spectrum=spectrum)
+        mantid.DeleteWorkspace(Workspace=spectrum)
+
+        inst_param_path = self.getPropertyValue(self.PROP_PATH_TO_INST_PARAMS)
+        gsas_proj.add_powder_histogram(datafile=spectrum_path, iparams=inst_param_path)
+
+        self._remove_temporary_fxye(spectrum_path=spectrum_path)
+
+        return gsas_proj
 
     def _remove_temporary_fxye(self, spectrum_path):
         try:
@@ -170,6 +161,15 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         lattice_param_table = self._build_output_lattice_table(lattice_params)
 
         return residuals["Rwp"], residuals["GOF"], lattice_param_table
+
+    def _save_temporary_fxye(self, spectrum):
+        workspace_index = self.getPropertyValue(self.PROP_WORKSPACE_INDEX)
+        temp_dir = tempfile.gettempdir()
+        # Output file MUST end with "-n.fxye" where n is a number
+        # If you see "Runtime error: Rvals" from GSASIIscriptable.py, it may be because this name is badly formatted
+        file_path = os.path.join(temp_dir, "{}_focused_spectrum-{}.fxye".format(self.name(), workspace_index))
+        mantid.SaveFocusedXYE(Filename=file_path, InputWorkspace=spectrum, SplitFiles=False)
+        return file_path
 
     def _set_output_properties(self, rwp, gof, lattice_params):
         self.setProperty(self.PROP_OUT_RWP, rwp)
