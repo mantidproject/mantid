@@ -100,7 +100,6 @@ private:
   QtTreePropertyBrowser *m_cfTree;
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   bool m_confitResFileType;
-  QString m_singleFitOutputName;
   QString m_baseName;
   int m_runMin;
   int m_runMax;
