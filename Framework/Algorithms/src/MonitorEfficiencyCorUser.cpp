@@ -1,3 +1,4 @@
+
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -32,16 +33,11 @@ void MonitorEfficiencyCorUser::init() {
                   "The name of the workspace in which to store the result.");
 }
 
+
 void MonitorEfficiencyCorUser::exec() {
   m_inputWS = this->getProperty("InputWorkspace");
 
   m_outputWS = this->getProperty("OutputWorkspace");
-
-  if (m_inputWS->getInstrument()->getName() != "TOFTOF") {
-    std::string message("The input workspace does not come from TOFTOF");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
 
   // If input and output workspaces are not the same, create a new workspace for
   // the output
@@ -51,7 +47,18 @@ void MonitorEfficiencyCorUser::exec() {
   double val;
   Strings::convert(m_inputWS->run().getProperty("Ei")->value(), val);
   m_Ei = val;
-  Strings::convert(m_inputWS->run().getProperty("monitor_counts")->value(),
+
+  std::string mon_counts_log;
+
+  // get name of the monitor counts sample log from the instrument parameter file
+  try {
+      mon_counts_log = getValFromInstrumentDef("monitor_counts_log");
+  } catch (Kernel::Exception::InstrumentDefinitionError) {
+      // the default value is monitor_counts
+      mon_counts_log = "monitor_counts";
+  }
+
+  Strings::convert(m_inputWS->run().getProperty(mon_counts_log)->value(),
                    m_monitorCounts);
 
   // get Efficiency formula from the IDF - Parameters file
