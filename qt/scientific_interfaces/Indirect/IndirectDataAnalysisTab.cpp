@@ -209,19 +209,18 @@ void IndirectDataAnalysisTab::updatePlot(
 
   if (AnalysisDataService::Instance().doesExist(workspaceName)) {
     auto groupWorkspace =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            workspaceName);
     // Check whether the specified workspace is a workspace group.
     if (groupWorkspace) {
       updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
-    }
-    else {
+    } else {
       auto matWorkspace =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          workspaceName);
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              workspaceName);
       updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
     }
-  }
-  else {
+  } else {
     bottomPreviewPlot->clear();
     plotInput(topPreviewPlot);
   }
