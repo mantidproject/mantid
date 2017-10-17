@@ -205,16 +205,24 @@ void IndirectDataAnalysisTab::updatePlot(
     const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-  auto groupWorkspace =
+
+  if (AnalysisDataService::Instance().doesExist(workspaceName)) {
+    auto groupWorkspace =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
-  // Check whether the specified workspace is a workspace group.
-  if (groupWorkspace) {
-    updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
-  } else {
-    auto matWorkspace =
+    // Check whether the specified workspace is a workspace group.
+    if (groupWorkspace) {
+      updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
+    }
+    else {
+      auto matWorkspace =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            workspaceName);
-    updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
+          workspaceName);
+      updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
+    }
+  }
+  else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
   }
 }
 
