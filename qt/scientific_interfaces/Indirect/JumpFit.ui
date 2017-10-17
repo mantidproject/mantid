@@ -143,7 +143,7 @@
        <item>
         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
          <property name="showLegend" stdset="0">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="canvasColour" stdset="0">
           <color>
