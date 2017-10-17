@@ -52,18 +52,12 @@ FindFilesThread::FindFilesThread()
  * @param algorithmProperty :: the algorithm and property to use as an
  *alternative to FileFinder.  Optional.
  */
-void FindFilesThread::set(QString text, bool isForRunFiles, bool isOptional,
-                          const QString &algorithmProperty) {
-  m_text = text.trimmed().toStdString();
-  m_isForRunFiles = isForRunFiles;
-  m_isOptional = isOptional;
-
-  QStringList elements = algorithmProperty.split("|");
-
-  if (elements.size() == 2) {
-    m_algorithm = elements[0];
-    m_property = elements[1];
-  }
+void FindFilesThread::set(const FindFilesSearchParameters &parameters) {
+  m_text = parameters.searchText.trimmed().toStdString();
+  m_isForRunFiles = parameters.isForRunFiles;
+  m_isOptional = parameters.isOptional;
+  m_algorithm = parameters.algorithmName;
+  m_property = parameters.algorithmProperty;
 }
 
 /**
@@ -91,7 +85,8 @@ void FindFilesThread::run() {
     else
       m_error = "No files specified.";
 
-    emit finished(m_error, m_filenames, m_valueForProperty.toStdString());
+    const auto result = createFindFilesSearchResult();
+    emit finished(result);
     return;
   }
 
@@ -144,7 +139,8 @@ void FindFilesThread::run() {
     m_filenames.clear();
   }
 
-  emit finished(m_error, m_filenames, m_valueForProperty.toStdString());
+  const auto result = createFindFilesSearchResult();
+  emit finished(result);
 }
 
 /**
@@ -188,6 +184,63 @@ void FindFilesThread::getFilesFromAlgorithm() {
   }
 }
 
+FindFilesSearchResults FindFilesThread::createFindFilesSearchResult() {
+  FindFilesSearchResults results;
+  results.error = m_error;
+  results.filenames = m_filenames;
+  results.valueForProperty = m_valueForProperty.toStdString();
+  return results;
+}
+
+////////////////////////////////////////////////////////////////////
+// FindFilesThreadPoolManager
+////////////////////////////////////////////////////////////////////
+
+QThreadPool FindFilesThreadPoolManager::m_pool;
+
+FindFilesThreadPoolManager::FindFilesThreadPoolManager()
+    : m_currentWorker(nullptr) {}
+
+void FindFilesThreadPoolManager::createWorker(
+    const MWRunFiles *parent, const FindFilesSearchParameters &parameters) {
+  // if parent is null then don't do anything as there will be no
+  // object listening for the search result
+  if (!parent)
+    return;
+
+  m_currentWorker = new FindFilesThread();
+
+  // Hook up slots for when the thread finishes
+  parent->connect(m_currentWorker,
+                  SIGNAL(finished(const FindFilesSearchResults &)), parent,
+                  SLOT(inspectThreadResult(const FindFilesSearchResults &)));
+  parent->connect(m_currentWorker,
+                  SIGNAL(finished(const FindFilesSearchResults &)), parent,
+                  SIGNAL(fileFindingFinished()));
+
+  // Set the search parameters
+  m_currentWorker->set(parameters);
+
+  // pass ownership to the thread pool
+  // we do not need to worry about deleting m_currentWorker
+  m_pool.start(m_currentWorker);
+}
+
+void FindFilesThreadPoolManager::cancelWorker(const MWRunFiles *parent) {
+  if (!isSearchRunning())
+    return;
+
+  // Just disconnect any signals from the worker. We leave the worker to
+  // continue running in the background because 1) terminating it directly
+  // is dangerous (we have no idea what it's currently doing from here) and 2)
+  // waiting for it to finish locks up the GUI event loop.
+  m_currentWorker->disconnect(parent);
+}
+
+bool FindFilesThreadPoolManager::isSearchRunning() const {
+  return m_currentWorker != nullptr;
+}
+
 ////////////////////////////////////////////////////////////////////
 // MWRunFiles
 ////////////////////////////////////////////////////////////////////
@@ -198,7 +251,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
       m_buttonOpt(Text), m_fileProblem(""), m_entryNumProblem(""),
       m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
       m_liveButtonState(Hide), m_showValidator(true), m_foundFiles(),
-      m_lastFoundFiles(), m_lastDir(), m_fileFilter() {
+      m_lastFoundFiles(), m_lastDir(), m_fileFilter(), m_pool() {
 
   m_uiForm.setupUi(this);
 
@@ -463,7 +516,9 @@ bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
  * Is the widget currently searching
  * @return True if a search is inprogress
  */
-bool MWRunFiles::isSearching() const { return m_pool.activeThreadCount() > 0; }
+bool MWRunFiles::isSearching() const {
+  return m_pool.isSearchRunning();
+}
 
 /**
 * Returns the names of the files found
@@ -691,6 +746,10 @@ void MWRunFiles::findFiles() {
     // Reset modified flag.
     m_uiForm.fileEditor->setModified(false);
 
+    if (m_pool.isSearchRunning()) {
+      m_pool.cancelWorker(this);
+    }
+
     emit findingFiles();
 
     // If we have an override instrument then add it in appropriate places to
@@ -724,25 +783,13 @@ void MWRunFiles::findFiles() {
     }
 
     if (!searchText.isEmpty()) {
-      auto worker = new FindFilesThread();
-      connect(
-          worker,
-          SIGNAL(finished(std::string, std::vector<std::string>, std::string)),
-          this,
-          SLOT(inspectThreadResult(std::string, std::vector<std::string>,
-                                   std::string)));
-      connect(
-          worker,
-          SIGNAL(finished(std::string, std::vector<std::string>, std::string)),
-          this, SIGNAL(fileFindingFinished()));
-      worker->set(searchText, isForRunFiles(), this->isOptional(),
-                  m_algorithmProperty);
-      m_pool.start(worker);
+      const auto parameters = createFindFilesSearchParameters(searchText);
+      m_pool.createWorker(this, parameters);
     }
 
   } else {
     // Make sure errors are correctly set if we didn't run
-    inspectThreadResult("", std::vector<std::string>(), "");
+    inspectThreadResult();
   }
 }
 
@@ -765,9 +812,12 @@ IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm() {
  * Called when the file finding thread finishes.  Inspects the result
  * of the thread, and emits fileFound() if it has been successful.
  */
-void MWRunFiles::inspectThreadResult(std::string error,
-                                     std::vector<std::string> filenames,
-                                     std::string valueForProperty) {
+void MWRunFiles::inspectThreadResult(const FindFilesSearchResults& results) {
+  // Unpack the search results
+  const auto error = results.error;
+  const auto filenames = results.filenames;
+  const auto valueForProperty = results.valueForProperty;
+
   // Get results from the file finding thread.
   if (!error.empty()) {
     setFileProblem(QString::fromStdString(error));
@@ -1116,4 +1166,21 @@ void MWRunFiles::setReadOnly(bool readOnly) {
  */
 void MWRunFiles::setValidatorDisplay(bool display) {
   m_showValidator = display;
+}
+
+FindFilesSearchParameters
+MWRunFiles::createFindFilesSearchParameters(const QString &text) const {
+  FindFilesSearchParameters parameters;
+  parameters.searchText = text;
+  parameters.isOptional = isOptional();
+  parameters.isForRunFiles = isForRunFiles();
+
+  // parse the algorithm - property name string
+  QStringList elements = m_algorithmProperty.split("|");
+  if (elements.size() == 2) {
+    parameters.algorithmName = elements[0];
+    parameters.algorithmProperty = elements[1];
+  }
+
+  return parameters;
 }

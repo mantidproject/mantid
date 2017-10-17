@@ -22,10 +22,21 @@ class IAlgorithm;
 namespace MantidQt {
 namespace API {
 
-namespace {
-// make a local thread pool
-static QThreadPool m_pool;
-} // namespace
+class MWRunFiles;
+
+struct FindFilesSearchParameters {
+  QString searchText;
+  bool isForRunFiles;
+  bool isOptional;
+  QString algorithmName;
+  QString algorithmProperty;
+};
+
+struct FindFilesSearchResults {
+  std::string error;
+  std::vector<std::string> filenames;
+  std::string valueForProperty;
+};
 
 /**
  * A class to allow the asynchronous finding of files.
@@ -34,20 +45,13 @@ class FindFilesThread : public QObject, public QRunnable {
   Q_OBJECT
 
 signals:
-  void finished(std::string, std::vector<std::string>, std::string);
+  void finished(const FindFilesSearchResults &);
 
 public:
   /// Constructor.
   FindFilesThread();
   /// Set the various file-finding values / options.
-  void set(QString text, bool isForRunFiles, bool isOptional,
-           const QString &algorithmProperty = "");
-
-  /// Returns the error string.  Empty if no error was caught.
-  std::string error() const { return m_error; }
-  /// Returns the vector of "unpacked" filenames.  Empty if no files were found,
-  /// or if there was an error.
-  std::vector<std::string> filenames() const { return m_filenames; }
+  void set(const FindFilesSearchParameters &parameters);
 
 protected:
   /// Override parent class run().
@@ -57,6 +61,8 @@ private:
   /// Use the specified algorithm and property to find files instead of using
   /// the FileFinder.
   void getFilesFromAlgorithm();
+  /// Helper method to create a search result object
+  FindFilesSearchResults createFindFilesSearchResult();
 
   /// Storage for any error thrown while trying to find files.
   std::string m_error;
@@ -71,6 +77,24 @@ private:
   QString m_property;
   bool m_isForRunFiles;
   bool m_isOptional;
+};
+
+/**
+ * A small helper class to hold the thread pool
+ */
+class FindFilesThreadPoolManager {
+
+public:
+  FindFilesThreadPoolManager();
+  void createWorker(const MWRunFiles *parent,
+                    const FindFilesSearchParameters &parameters);
+  void cancelWorker(const MWRunFiles *parent);
+  bool isSearchRunning() const;
+
+private:
+  // make a local thread pool
+  FindFilesThread *m_currentWorker;
+  static QThreadPool m_pool;
 };
 
 /**
@@ -278,6 +302,9 @@ private:
   void refreshValidator();
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
+  /// Helper method to create a FindFilesSearchParameters object
+  FindFilesSearchParameters
+  createFindFilesSearchParameters(const QString &text) const;
 
 private slots:
   /// Browse clicked slot
@@ -285,9 +312,7 @@ private slots:
   /// currently checks only if the entry number is any integer > 0
   void checkEntry();
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(std::string error,
-                           std::vector<std::string> filenames,
-                           std::string valueForProperty);
+  void inspectThreadResult(const FindFilesSearchResults& results = FindFilesSearchResults());
 
 private:
   /// Is the widget for run files or standard files
@@ -318,7 +343,6 @@ private:
   boost::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
   /// Whether validation red star is being shown
   bool m_showValidator;
-
   /// The Ui form
   Ui::MWRunFiles m_uiForm;
   /// An array of valid file names derived from the entries in the leNumber
@@ -334,6 +358,8 @@ private:
   QString m_defaultInstrumentName;
   /// Expanded user input
   QString m_valueForProperty;
+  /// Handle to a find files thread pool manager
+  FindFilesThreadPoolManager m_pool;
 };
 }
 }
