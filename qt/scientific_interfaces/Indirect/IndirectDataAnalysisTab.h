@@ -82,10 +82,6 @@ protected:
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
-  void updatePlot(const std::string &workspaceName, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
-
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);

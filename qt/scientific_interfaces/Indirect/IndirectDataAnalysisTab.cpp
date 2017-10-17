@@ -175,33 +175,6 @@ void IndirectDataAnalysisTab::plotInput(
 }
 
 /**
- * Plots the workspace at the specified index in the workspace group
- * with the specified name. Plots the sample and fit spectrum in the
- * specified top preview plot. Plots the diff spectra in the specified
- * bottom preview plot.
- *
- * @param outputWSName      The name of the output workspace group.
- * @param index             The index of the workspace (in the group)
- *                          to plot.
- * @param topPreviewPlot    The top preview plot.
- * @param bottomPreviewPlot The bottom preview plot.
- */
-void IndirectDataAnalysisTab::updatePlot(
-    const std::string &outputWSName, size_t index,
-    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-
-  if (AnalysisDataService::Instance().doesExist(outputWSName)) {
-    auto workspace = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-        outputWSName);
-    updatePlot(workspace, index, topPreviewPlot, bottomPreviewPlot);
-  } else {
-    bottomPreviewPlot->clear();
-    plotInput(topPreviewPlot);
-  }
-}
-
-/**
  * Plots the workspace at the specified index in the specified workspace
  * group. Plots the sample and fit spectrum in the specified top preview
  * plot. Plots the diff spectra in the specified bottom preview plot.
