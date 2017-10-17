@@ -5,7 +5,6 @@
 #include "MantidTestHelpers/ParallelRunner.h"
 
 #include "MantidParallel/IO/Chunker.h"
-#include "MantidParallel/IO/EventDataSink.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
@@ -84,25 +83,6 @@ private:
   size_t m_bank;
   std::vector<int64_t> m_index;
   std::vector<int64_t> m_time_zero;
-};
-
-class FakeDataSink : public EventDataSink<int64_t, int64_t, int32_t> {
-public:
-  void setPulseInformation(std::vector<int64_t> event_index,
-                           std::vector<int64_t> event_time_zero,
-                           const int64_t event_time_zero_offset) override {
-    static_cast<void>(event_index);
-    static_cast<void>(event_time_zero);
-    static_cast<void>(event_time_zero_offset);
-  }
-  void startAsync(int32_t *event_id_start,
-                  const int32_t *event_time_offset_start,
-                  const Chunker::LoadRange &range) override {
-    static_cast<void>(event_id_start);
-    static_cast<void>(event_time_offset_start);
-    static_cast<void>(range);
-  }
-  void wait() const override {}
 };
 
 void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {

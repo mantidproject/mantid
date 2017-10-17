@@ -13,7 +13,6 @@ set ( INC_FILES
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
 	inc/MantidParallel/IO/Chunker.h
-	inc/MantidParallel/IO/EventDataSink.h
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/EventLoaderHelpers.h
 	inc/MantidParallel/IO/EventParser.h

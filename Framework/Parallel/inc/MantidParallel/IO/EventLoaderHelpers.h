@@ -61,7 +61,7 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(
     const Chunker &chunker,
     NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource,
-    EventDataSink<IndexType, TimeZeroType, TimeOffsetType> &dataSink) {
+    EventParser<IndexType, TimeZeroType, TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
   std::vector<int32_t> event_id(2 * chunkSize);

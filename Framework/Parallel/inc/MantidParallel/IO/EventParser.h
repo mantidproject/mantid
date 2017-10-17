@@ -6,7 +6,6 @@
 #include "MantidParallel/Nonblocking.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
-#include "MantidParallel/IO/EventDataSink.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Event/TofEvent.h"
 
@@ -50,16 +49,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-class EventParser
-    : public EventDataSink<IndexType, TimeZeroType, TimeOffsetType> {
-public:
-  struct Event {
-    int32_t index; // local spectrum index
-    TimeOffsetType tof;
-    Types::Core::DateAndTime pulseTime;
-  };
+namespace detail {
+template <class TimeOffsetType> struct Event {
+  int32_t index; // local spectrum index
+  TimeOffsetType tof;
+  Types::Core::DateAndTime pulseTime;
+};
+}
 
+template <class IndexType, class TimeZeroType, class TimeOffsetType>
+class EventParser {
+public:
+  using Event = detail::Event<TimeOffsetType>;
   EventParser(const Communicator &comm,
               std::vector<std::vector<int>> rankGroups,
               std::vector<int32_t> bankOffsets,
@@ -67,14 +68,11 @@ public:
 
   void setPulseInformation(std::vector<IndexType> event_index,
                            std::vector<TimeZeroType> event_time_zero,
-                           const int64_t event_time_zero_offset) override;
+                           const int64_t event_time_zero_offset);
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
-                  const Chunker::LoadRange &range) override;
-
-  void redistributeDataMPI(std::vector<Event> &result,
-                           const std::vector<std::vector<Event>> &data) const;
+                  const Chunker::LoadRange &range);
 
   void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
                              const int32_t *globalSpectrumIndex,
@@ -90,7 +88,7 @@ public:
     return m_allRankData;
   }
 
-  void wait() const override;
+  void wait() const;
 
 private:
   void doParsing(int32_t *event_id_start,
@@ -195,15 +193,17 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
 
 /** Uses MPI calls to redistribute chunks which must be processed on certain
  * ranks.
+ * @param comm MPI communicator.
  * @param result output data which must be processed on current rank. (May
  * be updated by other ranks)
  * @param data Data on this rank which belongs to several other ranks.
  */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
-    std::vector<Event> &result,
-    const std::vector<std::vector<Event>> &data) const {
-  if (m_comm.size() == 1) {
+template <class TimeOffsetType>
+void redistributeDataMPI(
+    Communicator &comm, std::vector<detail::Event<TimeOffsetType>> &result,
+    const std::vector<std::vector<detail::Event<TimeOffsetType>>> &data) {
+  using Event = detail::Event<TimeOffsetType>;
+  if (comm.size() == 1) {
     result = data.front();
     return;
   }
@@ -214,31 +214,31 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
                    return static_cast<int>(vec.size());
                  });
   std::vector<int> recv_sizes(data.size());
-  Parallel::all_to_all(m_comm, sizes, recv_sizes);
+  Parallel::all_to_all(comm, sizes, recv_sizes);
 
   auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(), 0);
   result.resize(total_size);
   size_t offset = 0;
   std::vector<Parallel::Request> recv_requests;
-  for (int rank = 0; rank < m_comm.size(); ++rank) {
+  for (int rank = 0; rank < comm.size(); ++rank) {
     if (recv_sizes[rank] == 0)
       continue;
     int tag = 0;
     auto buffer = reinterpret_cast<char *>(result.data() + offset);
     int size = recv_sizes[rank] * static_cast<int>(sizeof(Event));
-    recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
+    recv_requests.emplace_back(comm.irecv(rank, tag, buffer, size));
     offset += recv_sizes[rank];
   }
 
   std::vector<Parallel::Request> send_requests;
-  for (int rank = 0; rank < m_comm.size(); ++rank) {
+  for (int rank = 0; rank < comm.size(); ++rank) {
     const auto &vec = data[rank];
     if (vec.size() == 0)
       continue;
     int tag = 0;
     send_requests.emplace_back(
-        m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
-                     static_cast<int>(vec.size() * sizeof(Event))));
+        comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
+                   static_cast<int>(vec.size() * sizeof(Event))));
   }
 
   Parallel::wait_all(send_requests.begin(), send_requests.end());
@@ -299,7 +299,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
   extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
                         range);
 
-  redistributeDataMPI(m_thisRankData, m_allRankData);
+  redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
   // TODO: accept something which translates from global to local spectrum index
   populateEventList(m_thisRankData);
 }
