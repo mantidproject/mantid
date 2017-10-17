@@ -253,7 +253,8 @@ void AlgorithmProxy::createConcreteAlg(bool initOnly) {
 * Clean up when the real algorithm stops
 */
 void AlgorithmProxy::stopped() {
-  dropWorkspaceReferences();
+  if (m_setAlwaysStoreInADS)
+    dropWorkspaceReferences();
   m_isExecuted = m_alg->isExecuted();
   m_alg.reset();
 }
@@ -265,15 +266,7 @@ void AlgorithmProxy::dropWorkspaceReferences() {
   const std::vector<Property *> &props = getProperties();
   for (auto prop : props) {
     if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
-      if (m_setAlwaysStoreInADS) {
-        wsProp->clear();
-      } else {
-        // if we are not storing in ADS, do not clear the output properties!
-        auto *workspaceProp = dynamic_cast<Property *>(prop);
-        if (workspaceProp->direction() == Direction::Input) {
-          wsProp->clear();
-        }
-      }
+      wsProp->clear();
     }
   }
 }
