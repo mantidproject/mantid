@@ -33,7 +33,6 @@ void MonitorEfficiencyCorUser::init() {
                   "The name of the workspace in which to store the result.");
 }
 
-
 void MonitorEfficiencyCorUser::exec() {
   m_inputWS = this->getProperty("InputWorkspace");
 
@@ -50,12 +49,13 @@ void MonitorEfficiencyCorUser::exec() {
 
   std::string mon_counts_log;
 
-  // get name of the monitor counts sample log from the instrument parameter file
+  // get name of the monitor counts sample log from the instrument parameter
+  // file
   try {
-      mon_counts_log = getValFromInstrumentDef("monitor_counts_log");
+    mon_counts_log = getValFromInstrumentDef("monitor_counts_log");
   } catch (Kernel::Exception::InstrumentDefinitionError) {
-      // the default value is monitor_counts
-      mon_counts_log = "monitor_counts";
+    // the default value is monitor_counts
+    mon_counts_log = "monitor_counts";
   }
 
   Strings::convert(m_inputWS->run().getProperty(mon_counts_log)->value(),
