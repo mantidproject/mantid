@@ -450,6 +450,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                                                         OutputWorkspace=transposedBkgWSName,
                                                         Degree=polynomialDegree,
                                                         XRanges=ranges,
+                                                        CostFunction='Unweighted least squares',
                                                         EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(transposedWS)
         bkgWSName = self._names.withSuffix('flat_background')
