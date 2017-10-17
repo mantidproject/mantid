@@ -22,7 +22,7 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
   // detector.
   const auto monitors = instrument->getMonitors();
   int32_t monitorOffset = static_cast<int32_t>(monitors.size());
-  for (size_t i = 0; i < monitorOffset; ++i)
+  for (size_t i = 0; i < monitors.size(); ++i)
     if (monitors[i] != detIDs[i])
       throw std::runtime_error(
           "Monitors are not corresponding to the first detector IDs in the "
@@ -39,9 +39,6 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
       const size_t detIndex = detectors.front();
       bankOffsets.push_back(detIDs[detIndex] - static_cast<int32_t>(detIndex) +
                             monitorOffset);
-      printf("%s %d %d %lu offset %d\n", bankName.c_str(),
-             detIDs[detectors.front()], detIDs[detectors.back()],
-             detectors.size(), bankOffsets.back());
       if ((detIDs[detectors.back()] - detIDs[detectors.front()]) !=
           static_cast<int32_t>(detectors.size()) - 1)
         throw std::runtime_error("Detector ID range in bank is not contiguous. "
@@ -63,7 +60,6 @@ void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
   for (size_t i = 0; i < size; ++i)
     DataObjects::getEventsFrom(ws.getSpectrum(i), eventLists[i]);
 
-  fprintf(stderr, "loading into %lu event lists\n", size);
   Parallel::IO::EventLoader::load(filename, groupName, bankNames,
                                   bankOffsets(ws, bankNames),
                                   std::move(eventLists));
