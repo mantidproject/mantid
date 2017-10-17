@@ -1000,14 +1000,20 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   m_modelY = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::Y);
   connectTableView(m_table_viewY, m_modelY);
+  setNumberFormat(0, MantidPreferences::MantidMatrixNumberFormatY(),
+                  MantidPreferences::MantidMatrixNumberPrecisionY());
 
   m_modelX = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::X);
   connectTableView(m_table_viewX, m_modelX);
+  setNumberFormat(1, MantidPreferences::MantidMatrixNumberFormatX(),
+                  MantidPreferences::MantidMatrixNumberPrecisionX());
 
   m_modelE = new MantidMatrixModel(this, ws.get(), m_rows, m_cols, m_startRow,
                                    MantidMatrixModel::E);
   connectTableView(m_table_viewE, m_modelE);
+  setNumberFormat(2, MantidPreferences::MantidMatrixNumberFormatE(),
+                  MantidPreferences::MantidMatrixNumberPrecisionE());
 
   // Update the extensions
   updateExtensions(ws);
@@ -1326,17 +1332,23 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
 void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
   auto it = m_extensions.begin();
   while (it != m_extensions.cend()) {
-    switch (it->first) {
+    auto type = it->first;
+    switch (type) {
     case MantidMatrixModel::DX:
       if (ws->hasDx(0)) {
         auto &extension = it->second;
         extension.model = new MantidMatrixModel(this, ws.get(), m_rows, m_cols,
-                                                m_startRow, it->first);
+                                                m_startRow, type);
         connectTableView(extension.tableView.get(), extension.model);
+        auto format = m_extensionRequest.getFormat(
+            type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
+        auto precision = m_extensionRequest.getPrecision(
+            type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
+        setNumberFormat(modelTypeToInt(type), format, precision);
         ++it;
       } else {
         closeDependants();
-        m_tabs->removeTab(modelTypeToInt(it->first));
+        m_tabs->removeTab(modelTypeToInt(type));
         it = m_extensions.erase(it);
       }
       break;
