@@ -34,10 +34,10 @@ Required pre-knowledge
 
 The following information are required.
 
- * Assumed position of each peak;
- * Peak profile;
- * Background type (flat or linear);
- * Starting values of peak parameters;
+* Assumed position of each peak;
+* Peak profile;
+* Background type (flat or linear);
+* Starting values of peak parameters;
 
 
 
@@ -80,8 +80,7 @@ Peak positions
 One of only one of the following will be taken.
 
  * A MatrixWorkspace
-   * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.
-     Or the number of spectra is the same as the number of spectra of the input workspace.
+   * Number of spectra shall be the same as the number of spectra of the workspace containing peaks to fit for.  Or the number of spectra is the same as the number of spectra of the input workspace.
    * X value is the index of the peak.
    * Y value is the position of the peaks to fit.
 
@@ -105,8 +104,11 @@ but found by highest value within peak window. (Is this correct???)
 Calculation of starting value of peak profile and background parameters
 -----------------------------------------------------------------------
 
+FitPeaks supports estimating peak parameter names as starting values.
+
+
 Workflow
-========
+########
 
 1. Call `algm-FindPeakBackground` to estimate the background of peak with a numerical approach.
 
@@ -117,7 +119,7 @@ Workflow
 4. Estimate the peak range, which is used to constrain the peak position in fitting, by using the left *FWHM* and right *FWHM* from step 3.
 
 Estimate background
-===================
+###################
 
 *Estimate-peak-background* takes *peak fit window* for pre-knowledge, and calculate *a* and *b* in the linear background function.
 
@@ -127,7 +129,7 @@ The algorithm is
    in :math:`y = a\cdot x + b`
 
 Estimate peak parameters
-========================
+########################
 
 *Estimate-peak-parameters* requires background parameters being estimated.
 
@@ -156,7 +158,7 @@ It will output the left and right boundary of the peak such that the background 
 
 
 Fit peak with high background
------------------------------
+#############################
 
 Step 1
 ======
@@ -190,7 +192,7 @@ On the other hand, due to the complexity in peak fitting, users prefer to check 
 Therefore, *FitPeaks* supports various fexible and informative outputs.
 
 OutputWorkspace
-===============
+###############
 
 It is a TableWorkspace containing peak parameters.
 According to user's specication, it will contain one parameter, i.e., peak position, or all parameters.
@@ -199,7 +201,7 @@ The order of the peaks will be exactly the sequence of peaks as the order of the
 
 
 FittingCostWorkspace
-====================
+####################
 
 It is a MatrixWorkspace recording the cost of each peak that is fitted.
 It is in the exactly same order as the given positions of peaks to fit.
@@ -210,7 +212,7 @@ while its :math:`\chi^2` shall be some special value.
 
 
 FittedPeaksWorkspace
-====================
+####################
 
 It is an optional output MatrixWorkspace.
 
