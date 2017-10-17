@@ -1,6 +1,5 @@
 #include "MantidQtWidgets/Common/MWRunFiles.h"
 #include "MantidQtWidgets/Common/DropEventHelper.h"
-#include <valgrind/callgrind.h>
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -674,7 +673,6 @@ void MWRunFiles::clear() {
 * Finds the files specified by the user in a background thread.
 */
 void MWRunFiles::findFiles() {
-  CALLGRIND_START_INSTRUMENTATION;
   // Set the values for the thread, and start it running.
   QString searchText = m_uiForm.fileEditor->text();
 
@@ -746,8 +744,6 @@ void MWRunFiles::findFiles() {
     // Make sure errors are correctly set if we didn't run
     //    inspectThreadResult();
   }
-  CALLGRIND_STOP_INSTRUMENTATION;
-  CALLGRIND_DUMP_STATS;
 }
 
 /** Calls cancel on a running instance of MonitorLiveData.
