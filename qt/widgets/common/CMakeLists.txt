@@ -203,7 +203,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FindDialog.h
-  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
@@ -255,6 +254,8 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringDialogEditor.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -393,7 +394,8 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
-
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
 )
 
 set ( UI_FILES
@@ -433,6 +435,7 @@ set ( TEST_PY_FILES
 set( TEST_FILES
    BatchAlgorithmRunnerTest.h
    FileDialogHandlerTest.h
+   FindFilesThreadPoolManagerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    NonOrthogonalTest.h

@@ -572,7 +572,7 @@ void MWRunFiles::findFiles() {
 
     if (!searchText.isEmpty()) {
       const auto parameters = createFindFilesSearchParameters(searchText);
-      m_pool.createWorker(this, parameters);
+      //      m_pool.createWorker(this, parameters);
     }
 
   } else {

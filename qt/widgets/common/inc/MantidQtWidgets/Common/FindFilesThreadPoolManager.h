@@ -96,6 +96,7 @@ public:
                     const FindFilesSearchParameters& parameters);
   void cancelWorker(const QObject *parent);
   bool isSearchRunning() const;
+  void waitForDone() const;
 
 private:
   // make a local thread pool

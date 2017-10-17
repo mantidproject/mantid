@@ -125,7 +125,7 @@ void FindFilesThread::run() {
     m_filenames.clear();
   }
 
-  const auto result = createFindFilesSearchResult();
+  auto result = createFindFilesSearchResult();
   emit finished(result);
 }
 
@@ -196,13 +196,18 @@ void FindFilesThreadPoolManager::createWorker(
 
   m_currentWorker = new FindFilesThread();
 
-  // Hook up slots for when the thread finishes
+  // Hook up slots for when the thread finishes. By default Qt uses queued
+  // connections when connecting signals/slots between threads. Instead here
+  // we explicitly choose to use a direct connection so the found result is
+  // immediately returned to the GUI thread.
   parent->connect(m_currentWorker,
                   SIGNAL(finished(const FindFilesSearchResults &)), parent,
-                  SLOT(inspectThreadResult(const FindFilesSearchResults &)));
+                  SLOT(inspectThreadResult(const FindFilesSearchResults &)),
+                  Qt::DirectConnection);
   parent->connect(m_currentWorker,
                   SIGNAL(finished(const FindFilesSearchResults &)), parent,
-                  SIGNAL(fileFindingFinished()));
+                  SIGNAL(fileFindingFinished()),
+                  Qt::DirectConnection);
 
   // Set the search parameters
   m_currentWorker->set(parameters);
@@ -219,10 +224,13 @@ void FindFilesThreadPoolManager::cancelWorker(const QObject *parent) {
   // Just disconnect any signals from the worker. We leave the worker to
   // continue running in the background because 1) terminating it directly
   // is dangerous (we have no idea what it's currently doing from here) and 2)
-  // waiting for it to finish locks up the GUI event loop.
+  // waiting for it to finish before starting a new thread locks up the GUI
+  // event loop.
   m_currentWorker->disconnect(parent);
 }
 
 bool FindFilesThreadPoolManager::isSearchRunning() const {
   return m_currentWorker != nullptr;
 }
+
+void FindFilesThreadPoolManager::waitForDone() const { m_pool.waitForDone(); }
