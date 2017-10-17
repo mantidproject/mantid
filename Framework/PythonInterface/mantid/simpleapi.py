@@ -898,8 +898,8 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                     retvals[name] = value
                 else:
                     if not prop.isOptional() and (prop.direction == _kernel.Direction.Input or prop.direction == _kernel.Direction.InOut):
-                        raise RuntimeError("Internal error. Output workspace property '%s' on "
-                                           "algorithm '%s' has not been stored correctly. "
+                        raise RuntimeError("Internal error. Input/InOut workspace property '%s' on "
+                                           "algorithm '%s' has not been set correctly. "
                                            "Please contact development team." % (name,  algm_obj.name()))
         elif _is_function_property(prop):
             retvals[name] = FunctionWrapper(prop.value)
