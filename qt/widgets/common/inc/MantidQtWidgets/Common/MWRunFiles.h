@@ -1,16 +1,15 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
+#include "ui_MWRunFiles.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
-#include "ui_MWRunFiles.h"
+#include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
+#include <QString>
+#include <QSettings>
 #include <QComboBox>
 #include <QMessageBox>
-#include <QRunnable>
-#include <QSettings>
-#include <QString>
 #include <QStringList>
-#include <QThreadPool>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -21,81 +20,6 @@ class IAlgorithm;
 
 namespace MantidQt {
 namespace API {
-
-class MWRunFiles;
-
-struct FindFilesSearchParameters {
-  QString searchText;
-  bool isForRunFiles;
-  bool isOptional;
-  QString algorithmName;
-  QString algorithmProperty;
-};
-
-struct FindFilesSearchResults {
-  std::string error;
-  std::vector<std::string> filenames;
-  std::string valueForProperty;
-};
-
-/**
- * A class to allow the asynchronous finding of files.
- */
-class FindFilesThread : public QObject, public QRunnable {
-  Q_OBJECT
-
-signals:
-  void finished(const FindFilesSearchResults &);
-
-public:
-  /// Constructor.
-  FindFilesThread();
-  /// Set the various file-finding values / options.
-  void set(const FindFilesSearchParameters &parameters);
-
-protected:
-  /// Override parent class run().
-  void run() override;
-
-private:
-  /// Use the specified algorithm and property to find files instead of using
-  /// the FileFinder.
-  void getFilesFromAlgorithm();
-  /// Helper method to create a search result object
-  FindFilesSearchResults createFindFilesSearchResult();
-
-  /// Storage for any error thrown while trying to find files.
-  std::string m_error;
-  /// Filenames found during execution of the thread.
-  std::vector<std::string> m_filenames;
-  /// Stores the string value to be used as input for an algorithm property
-  QString m_valueForProperty;
-  /// File name text typed in by the user.
-  std::string m_text;
-
-  QString m_algorithm;
-  QString m_property;
-  bool m_isForRunFiles;
-  bool m_isOptional;
-};
-
-/**
- * A small helper class to hold the thread pool
- */
-class FindFilesThreadPoolManager {
-
-public:
-  FindFilesThreadPoolManager();
-  void createWorker(const MWRunFiles *parent,
-                    const FindFilesSearchParameters &parameters);
-  void cancelWorker(const MWRunFiles *parent);
-  bool isSearchRunning() const;
-
-private:
-  // make a local thread pool
-  FindFilesThread *m_currentWorker;
-  static QThreadPool m_pool;
-};
 
 /**
 This class defines a widget for file searching. It allows either single or

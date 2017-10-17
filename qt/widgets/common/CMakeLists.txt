@@ -88,6 +88,7 @@
 	src/DoubleSpinBox.cpp
 	src/ErrorCurve.cpp
 	src/FindDialog.cpp
+        src/FindFilesThreadPoolManager.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
@@ -202,6 +203,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FindDialog.h
+  inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
