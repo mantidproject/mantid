@@ -2,21 +2,63 @@
 # the required version of Qt
 #
 # name: mtd_add_qt_library
-# brief: create a library target for both Qt4 & Qt5
+# brief: create a library target for linked against Qt
+# The global ENABLE_MANTIDPLOT option controls if a Qt4 target
+# is created.
+# To limit the Qt version for a specfic library use
+# QT_VERSION, e.g.
+#
+# mtd_add_qt_library ( QT_VERSION 5
+#   ...
+#   ...
+# )
+#
 # For all options see mtd_add_qt_target
 function (mtd_add_qt_library)
-  if(ENABLE_MANTIDPLOT)
-    mtd_add_qt_target (LIBRARY QT_VERSION 4 ${ARGN})
-  endif()
+  _qt_versions(_qt_vers ${ARGN})
+  # Create targets
+  foreach(_ver ${_qt_vers})
+    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+  endforeach()
 endfunction()
 
 # name: mtd_add_qt_executable
-# brief: create an executable target for a given Qt version
+# brief: create a library target for linked against Qt
+# The global ENABLE_MANTIDPLOT option controls if a Qt4 target
+# is created.
+# To limit the Qt version for a specfic library use
+# QT_VERSION, e.g.
+#
+# mtd_add_qt_executable ( QT_VERSION 5
+#   ...
+#   ...
+# )
 # For all options see mtd_add_qt_target
 function (mtd_add_qt_executable)
-  if(ENABLE_MANTIDPLOT)
-    mtd_add_qt_target (EXECUTABLE QT_VERSION 4 ${ARGN})
+  _qt_versions(_qt_vers ${ARGN})
+  # Create targets
+  foreach(_ver ${_qt_vers})
+    mtd_add_qt_target (LIBRARY QT_VERSION ${_ver} ${ARGN})
+  endforeach()
+endfunction()
+
+# Given a list of arguments decide which Qt versions
+# should be built. If ENABLE_MANTIPLOT is true the Qt4 is built.
+# QT_VERSION can be specified to override this.
+function (_qt_versions output_list)
+  # process argument list
+  list (FIND ARGN "QT_VERSION" _ver_idx)
+  if (_ver_idx EQUAL -1)
+    set (_qt_vers 4)
+  else()
+    math (EXPR _ver_value_idx "${_ver_idx}+1")
+    list (GET ARGN ${_ver_value_idx} _ver_value)
+    list (APPEND _qt_vers ${_ver_value})
   endif()
+  if(NOT ENABLE_MANTIDPLOT)
+    list (REMOVE_ITEM _qt_vers 4)
+  endif()
+  set (${output_list} ${_qt_vers} PARENT_SCOPE)
 endfunction()
 
 # Target agnostic function to add either an executable or library linked to Qt
@@ -27,6 +69,8 @@ endfunction()
 # keyword: TARGET_NAME The name of the target. The target will have -Qt{QT_VERSION} appended to it.
 # keyword: QT_VERSION The major version of Qt to build against
 # keyword: SRC .cpp files to include in the target build
+# keyword: QT4_SRC .cpp files to include in a Qt4 build
+# keyword: QT5_SRC .cpp files to include in a Qt5 build
 # keyword: MOC Header files that are to be parsed by moc
 # keyword: UI Qt designer ui files that are to be parsed by the UI compiler
 # keyword: NOMOC Additional headers that are not to be passed to moc
@@ -50,8 +94,8 @@ function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
     TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
-  set (multiValueArgs
-    SRC UI MOC NOMOC RES DEFS INCLUDE_DIRS UI_INCLUDE_DIRS LINK_LIBS
+  set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
+    NOMOC RES DEFS INCLUDE_DIRS UI_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -69,11 +113,13 @@ function (mtd_add_qt_target)
   if (PARSED_QT_VERSION EQUAL 4)
     qt4_wrap_ui (UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp ( 4 MOC_GENERATED ${PARSED_MOC})
+    set (ALL_SRC ${PARSED_SRC} ${PARSED_QT4_SRC} ${MOC_GENERATED})
     qt4_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
   elseif (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
     _internal_qt_wrap_cpp (5 MOC_GENERATED ${PARSED_MOC})
+    set (ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
     qt5_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
   else ()
@@ -96,7 +142,6 @@ function (mtd_add_qt_target)
     set(_target_exclude_from_all)
   endif()
 
-  set(ALL_SRC ${PARSED_SRC} ${MOC_GENERATED})
   # Use a precompiled header where they are supported
   if (${PARSED_PRECOMPILED})
     enable_precompiled_headers( ${PARSED_PRECOMPILED}  ALL_SRC )
