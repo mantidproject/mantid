@@ -4,7 +4,7 @@ import json
 import numpy as np
 
 
-class GeneralLoadDFTTester(object):
+class GeneralLoadAbInitioTester(object):
 
     _loaders_extensions = {"LoadCASTEP": "phonon", "LoadCRYSTAL": "out", "LoadDMOL3": "outmol", "LoadGAUSSIAN": "log"}
 
@@ -60,7 +60,7 @@ class GeneralLoadDFTTester(object):
         # check attributes
         self.assertEqual(correct_data["attributes"]["advanced_parameters"], data["attributes"]["advanced_parameters"])
         self.assertEqual(correct_data["attributes"]["hash"], data["attributes"]["hash"])
-        self.assertEqual(correct_data["attributes"]["DFT_program"], data["attributes"]["DFT_program"])
+        self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
 
         try:
             self.assertEqual(AbinsModules.AbinsTestHelpers.find_file(filename + "." + extension),
@@ -72,16 +72,16 @@ class GeneralLoadDFTTester(object):
         # check datasets
         self.assertEqual(True, np.allclose(correct_data["datasets"]["unit_cell"], data["datasets"]["unit_cell"]))
 
-    def _check_loader_data(self, correct_data=None, input_dft_filename=None, extension=None, loader=None):
+    def _check_loader_data(self, correct_data=None, input_ab_initio_filename=None, extension=None, loader=None):
 
         try:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension)
-            dft_loader = loader(input_dft_filename=read_filename)
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension)
+            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
         except ValueError:
-            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_dft_filename + "." + extension.upper())
-            dft_loader = loader(input_dft_filename=read_filename)
+            read_filename = AbinsModules.AbinsTestHelpers.find_file(input_ab_initio_filename + "." + extension.upper())
+            ab_initio_loader = loader(input_ab_initio_filename=read_filename)
 
-        loaded_data = dft_loader.load_formatted_data().extract()
+        loaded_data = ab_initio_loader.load_formatted_data().extract()
 
         # k points
         correct_items = correct_data["datasets"]["k_points_data"]
@@ -111,7 +111,7 @@ class GeneralLoadDFTTester(object):
         extension = self._loaders_extensions[str(loader)]
 
         # get calculated data
-        data = self._read_dft(loader=loader, filename=name, extension=extension)
+        data = self._read_ab_initio(loader=loader, filename=name, extension=extension)
 
         # get correct data
         correct_data = self._prepare_data(filename=name)
@@ -120,24 +120,24 @@ class GeneralLoadDFTTester(object):
         self._check_reader_data(correct_data=correct_data, data=data, filename=name, extension=extension)
 
         # check loaded data
-        self._check_loader_data(correct_data=correct_data, input_dft_filename=name, extension=extension, loader=loader)
+        self._check_loader_data(correct_data=correct_data, input_ab_initio_filename=name, extension=extension, loader=loader)
 
-    def _read_dft(self, loader=None, filename=None, extension=None):
+    def _read_ab_initio(self, loader=None, filename=None, extension=None):
         """
         Reads data from .{extension} file.
-        :param loader: DFT loader
-        :param filename: name of file with phonon data (name + extension)
-        :returns: phonon data
+        :param loader: ab initio loader
+        :param filename: name of file with vibrational or phonon data (name + extension)
+        :returns: vibrational or phonon data
         """
         # 1) Read data
         try:
             read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension)
-            ab_initio_reader = loader(input_dft_filename=read_filename)
+            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
         except ValueError:
             read_filename = AbinsModules.AbinsTestHelpers.find_file(filename=filename + "." + extension.upper())
-            ab_initio_reader = loader(input_dft_filename=read_filename)
+            ab_initio_reader = loader(input_ab_initio_filename=read_filename)
 
-        data = self._get_reader_data(dft_reader=ab_initio_reader)
+        data = self._get_reader_data(ab_initio_reader=ab_initio_reader)
 
         # test validData method
         self.assertEqual(True, ab_initio_reader._clerk._valid_hash())
@@ -145,14 +145,14 @@ class GeneralLoadDFTTester(object):
         return data
 
     # noinspection PyMethodMayBeStatic
-    def _get_reader_data(self, dft_reader=None):
+    def _get_reader_data(self, ab_initio_reader=None):
         """
-        :param dft_reader: object of type  GeneralDFTProgram
+        :param ab_initio_reader: object of type  GeneralAbInitioProgram
         :returns: read data
         """
-        abins_type_data = dft_reader.read_phonon_file()
+        abins_type_data = ab_initio_reader.read_vibrational_or_phonon_data()
         data = {"datasets": abins_type_data.extract(),
-                "attributes": dft_reader._clerk._attributes
+                "attributes": ab_initio_reader._clerk._attributes
                 }
-        data["datasets"].update({"unit_cell": dft_reader._clerk._data["unit_cell"]})
+        data["datasets"].update({"unit_cell": ab_initio_reader._clerk._data["unit_cell"]})
         return data
