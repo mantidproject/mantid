@@ -71,25 +71,15 @@ protected:
   void setPreviewPlotWorkspace(
       Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
-  /// Retrieve the selected spectrum
-  int selectedSpectrum();
+  /// Retrieve the selected spectra
+  int selectedSpectra();
 
-  /// DoubleEditorFactory
-  DoubleEditorFactory *m_dblEdFac;
-  /// QtCheckBoxFactory
-  QtCheckBoxFactory *m_blnEdFac;
+  /// Retrieve the selected minimum spectra
+  int minimumSpectra();
 
-protected slots:
-  /// Slot that can be called when a user eidts an input.
-  void inputChanged();
+  /// Retrieve the selected maximum spectra
+  int maximumSpectra();
 
-  /// Plots the current preview data
-  void plotCurrentPreview();
-
-  /// Sets the selected spectrum
-  void setSelectedSpectrum(int spectrum);
-
-protected:
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void updatePlot(const std::string &workspaceName, size_t index,
@@ -97,6 +87,10 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
+                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+
+  void updatePlot(WorkspaceGroup_sptr outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
@@ -113,6 +107,27 @@ protected:
                        const QString &startRangePropName = "StartX",
                        const QString &endRangePropName = "EndX");
 
+  /// DoubleEditorFactory
+  DoubleEditorFactory *m_dblEdFac;
+  /// QtCheckBoxFactory
+  QtCheckBoxFactory *m_blnEdFac;
+
+protected slots:
+  /// Slot that can be called when a user eidts an input.
+  void inputChanged();
+
+  /// Plots the current preview data
+  void plotCurrentPreview();
+
+  /// Sets the selected spectra
+  void setSelectedSpectra(int spectra);
+
+  /// Sets the maximum spectra
+  void setMaximumSpectra(int spectra);
+
+  /// Sets the minimum spectra
+  void setMinimumSpectra(int spectra);
+
 private:
   /// Overidden by child class.
   void setup() override = 0;
@@ -128,7 +143,9 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectrum;
+  int m_selectedSpectra;
+  int m_minSpectra;
+  int m_maxSpectra;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

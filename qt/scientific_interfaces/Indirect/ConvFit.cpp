@@ -30,17 +30,16 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(), m_runMin(-1),
-      m_runMax(-1), m_fitFunctions(), m_parameterValues(),
-      m_propertyToParameter() {
+      m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(),
+      m_fitFunctions(), m_parameterValues(), m_propertyToParameter() {
   m_uiForm.setupUi(parent);
 }
 
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
-  m_runMin = 0;
-  m_runMax = 0;
+  setMinimumSpectra(0);
+  setMaximumSpectra(0);
 
   // Initialise fitTypeStrings
   m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
@@ -176,7 +175,7 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectrum(int)));
+          SLOT(setSelectedSpectra(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -295,8 +294,8 @@ void ConvFit::initFABADAOptions() {
  */
 void ConvFit::run() {
   // Get input from interface
-  m_runMin = m_uiForm.spSpectraMin->value();
-  m_runMax = m_uiForm.spSpectraMax->value();
+  setMinimumSpectra(m_uiForm.spSpectraMin->value());
+  setMaximumSpectra(m_uiForm.spSpectraMax->value());
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
@@ -492,8 +491,8 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
     m_propertyToParameter = createPropertyToParameterMap(
         m_fitFunctions, prefixPrefix, prefixSuffix);
     m_parameterValues = IndirectTab::extractParametersFromTable(
-        paramWsName, m_propertyToParameter.values().toSet(), m_runMin,
-        m_runMax);
+        paramWsName, m_propertyToParameter.values().toSet(), minimumSpectra(),
+        maximumSpectra());
 
     updateProperties(m_uiForm.spPlotSpectrum->value());
   }
@@ -984,8 +983,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1209,7 +1208,7 @@ void ConvFit::bgTypeSelection(int index) {
  */
 void ConvFit::updatePlot() {
   using Mantid::Kernel::Exception::NotFoundError;
-  int specNo = selectedSpectrum();
+  int specNo = selectedSpectra();
 
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
@@ -1219,9 +1218,8 @@ void ConvFit::updatePlot() {
 
   // If there is a result workspace plot then plot it
   const auto baseGroupName = m_baseName.toStdString() + "_Workspaces";
-  IndirectDataAnalysisTab::updatePlot(
-      baseGroupName, boost::numeric_cast<size_t>(specNo - m_runMin),
-      m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
+  IndirectDataAnalysisTab::updatePlot(baseGroupName, m_uiForm.ppPlotTop,
+                                      m_uiForm.ppPlotBottom);
 }
 
 void ConvFit::updatePlotRange() {
@@ -1239,7 +1237,7 @@ void ConvFit::updateProperties(int specNo) {
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
   bool isTwoLorentzian = fitFunction == "Lorentzian 2";
-  bool specOutOfBounds = specNo < m_runMin || m_runMax < specNo;
+  bool specOutOfBounds = specNo < minimumSpectra() || maximumSpectra() < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
     auto propertyName = fitFunction + "." + param;
@@ -1361,8 +1359,8 @@ void ConvFit::singleFit() {
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
   int specNo = m_uiForm.spPlotSpectrum->value();
-  m_runMin = specNo;
-  m_runMax = specNo;
+  setMinimumSpectra(specNo);
+  setMaximumSpectra(specNo);
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());

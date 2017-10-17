@@ -44,8 +44,6 @@ private:
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;
-  size_t m_runMin;
-  size_t m_runMax;
 
   QHash<QString, QHash<size_t, double>> m_parameterValues;
   QHash<QString, QString> m_parameterToProperty;

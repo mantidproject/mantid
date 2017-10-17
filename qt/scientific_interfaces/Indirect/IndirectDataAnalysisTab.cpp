@@ -23,7 +23,7 @@ namespace IDA {
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectrum(0) {
+      m_selectedSpectra(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -93,15 +93,47 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
+int IndirectDataAnalysisTab::selectedSpectra() { return m_selectedSpectra; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
-  m_selectedSpectrum = spectrum;
+void IndirectDataAnalysisTab::setSelectedSpectra(int spectrum) {
+  m_selectedSpectra = spectrum;
+}
+
+/**
+ * Retrieves the selected minimum spectra.
+ *
+ * @return  The selected minimum spectra.
+ */
+int IndirectDataAnalysisTab::minimumSpectra() { return m_minSpectra; }
+
+/**
+ * Sets the selected spectra.
+ *
+ * @param spectrum  The spectra to set.
+ */
+void IndirectDataAnalysisTab::setMinimumSpectra(int spectra) {
+  m_minSpectra = spectra;
+}
+
+/**
+ * Retrieves the selected maximum spectra.
+ *
+ * @return  The selected maximum spectra.
+ */
+int IndirectDataAnalysisTab::maximumSpectra() { return m_maxSpectra; }
+
+/**
+ * Sets the selected maximum spectra.
+ *
+ * @param spectrum  The spectra to set.
+ */
+void IndirectDataAnalysisTab::setMaximumSpectra(int spectra) {
+  m_maxSpectra = spectra;
 }
 
 /**
@@ -117,16 +149,15 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_selectedSpectrum);
+                                m_selectedSpectra);
     } else {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectra)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              m_selectedSpectrum);
+                              m_selectedSpectra);
   }
 }
 
@@ -140,7 +171,7 @@ void IndirectDataAnalysisTab::plotInput(
   auto inputWS = inputWorkspace();
 
   if (inputWS)
-    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
+    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectra());
 }
 
 /**
@@ -201,9 +232,30 @@ void IndirectDataAnalysisTab::updatePlot(
     const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-  auto workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
-  updatePlot(workspace, topPreviewPlot, bottomPreviewPlot);
+  auto groupWorkspace =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(workspaceName);
+  // Check whether the specified workspace is a workspace group.
+  if (groupWorkspace) {
+    updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
+  } else {
+    auto matWorkspace =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            workspaceName);
+    updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlot(
+  WorkspaceGroup_sptr outputWS,
+  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  if (outputWS && selectedSpectra() >= minimumSpectra())
+    updatePlot(outputWS, selectedSpectra() - minimumSpectra(), topPreviewPlot,
+      bottomPreviewPlot);
+  else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
+  }
 }
 
 void IndirectDataAnalysisTab::updatePlot(

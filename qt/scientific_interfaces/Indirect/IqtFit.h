@@ -93,8 +93,6 @@ private:
   QString m_singleFitOutputName;
   std::string m_plotOption;
   std::string m_baseName;
-  size_t m_runMin;
-  size_t m_runMax;
 
   QVector<QString> m_fitFunctions;
   QHash<QString, QHash<size_t, double>> m_parameterValues;

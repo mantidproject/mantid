@@ -27,14 +27,13 @@ namespace IDA {
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
       m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
-      m_ties(), m_runMin(-1), m_runMax(-1), m_fitFunctions(),
-      m_parameterValues(), m_parameterToProperty() {
+      m_ties(), m_fitFunctions(), m_parameterValues(), m_parameterToProperty() {
   m_uiForm.setupUi(parent);
 }
 
 void IqtFit::setup() {
-  m_runMin = 0;
-  m_runMax = 0;
+  setMinimumSpectra(0);
+  setMaximumSpectra(0);
 
   m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
@@ -131,7 +130,7 @@ void IqtFit::setup() {
           SLOT(updatePlot()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectrum(int)));
+          SLOT(setSelectedSpectra(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -168,11 +167,12 @@ void IqtFit::run() {
     showMessageBox(msg);
   }
 
-  m_runMin = boost::numeric_cast<size_t>(m_uiForm.spSpectraMin->value());
-  m_runMax = boost::numeric_cast<size_t>(m_uiForm.spSpectraMax->value());
+  setMinimumSpectra(m_uiForm.spSpectraMin->value());
+  setMaximumSpectra(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
-  IAlgorithm_sptr iqtFitAlg = iqtFitAlgorithm(inputWs, m_runMin, m_runMax);
+  IAlgorithm_sptr iqtFitAlg =
+      iqtFitAlgorithm(inputWs, minimumSpectra(), maximumSpectra());
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -315,7 +315,7 @@ void IqtFit::algorithmComplete(bool error) {
   m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
   m_parameterValues = IndirectTab::extractParametersFromTable(
       m_baseName + "_Parameters", m_parameterToProperty.keys().toSet(),
-      m_runMin, m_runMax);
+      minimumSpectra(), maximumSpectra());
   updateProperties(m_uiForm.spPlotSpectrum->value());
 
   updatePlot();
@@ -614,12 +614,19 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  size_t specNo = selectedSpectrum();
+  size_t specNo = selectedSpectra();
 
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
-  IndirectDataAnalysisTab::updatePlot(
-      groupName, specNo - m_runMin, m_uiForm.ppPlotTop, m_uiForm.ppPlotBottom);
+
+  if (specNo >= minimumSpectra())
+    IndirectDataAnalysisTab::updatePlot(groupName, specNo - minimumSpectra(),
+                                        m_uiForm.ppPlotTop,
+                                        m_uiForm.ppPlotBottom);
+  else {
+    m_uiForm.ppPlotBottom->clear();
+    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
+  }
 
   IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
   resizePlotRange(m_uiForm.ppPlotTop);
@@ -726,7 +733,7 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
   auto specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
-  bool autoUpdate = specNo > m_runMax || specNo < m_runMin ||
+  bool autoUpdate = specNo > maximumSpectra() || specNo < minimumSpectra() ||
                     m_parameterValues[prop->propertyName()].isEmpty();
 
   if (prop == m_properties["StartX"]) {

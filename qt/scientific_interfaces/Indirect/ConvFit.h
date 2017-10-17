@@ -101,8 +101,6 @@ private:
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   bool m_confitResFileType;
   QString m_baseName;
-  int m_runMin;
-  int m_runMax;
 
   // ShortHand Naming for fit functions
   QStringList m_fitStrings;

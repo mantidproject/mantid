@@ -97,7 +97,7 @@ void Elwin::setup() {
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this,
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectrum(int)));
+          SLOT(setSelectedSpectra(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(plotInput()));
   // Handle plot and save
