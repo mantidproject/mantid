@@ -47,7 +47,7 @@ void wait_all(ForwardIterator begin, ForwardIterator end) {
     boost::mpi::request &operator*() { return ForwardIterator::operator*(); }
     boost::mpi::request *operator->() { return &operator*(); }
   };
-  if (!begin->hasBackend())
+  if (begin == end || !begin->hasBackend())
     return boost::mpi::wait_all(RequestIteratorWrapper(begin),
                                 RequestIteratorWrapper(end));
 #endif
