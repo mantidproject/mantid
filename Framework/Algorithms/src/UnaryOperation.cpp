@@ -62,6 +62,7 @@ void UnaryOperation::exec() {
         F.access() = intemp->dataF(i);
         outtemp->setF(i, F);
       }
+      outtemp->setFinalized(intemp->isFinalized());
     }
     setProperty(outputPropName(), out_work);
   }

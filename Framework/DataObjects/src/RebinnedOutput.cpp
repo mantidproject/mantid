@@ -40,6 +40,7 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   for (std::size_t i = 0; i < nHist; ++i) {
     this->fracArea[i].resize(YLength);
   }
+  m_finalized = false;
 }
 
 void RebinnedOutput::init(const std::size_t &NVectors,
@@ -50,6 +51,7 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   for (std::size_t i = 0; i < nHist; ++i) {
     this->fracArea[i].resize(histogram.size());
   }
+  m_finalized = false;
 }
 
 /**
@@ -98,6 +100,9 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
 void RebinnedOutput::finalize(bool hasSqrdErrs) {
+  if (m_finalized) {
+    return;
+  }
   g_log.debug() << "Starting finalize procedure.\n";
   std::size_t nHist = this->getNumberHistograms();
   g_log.debug() << "Number of histograms: " << nHist << '\n';
@@ -133,7 +138,34 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
     g_log.debug() << '\n';
   }
   // Sets flag so subsequent algorithms know to correctly treat data
-  m_finalized = 1;
+  m_finalized = true;
+}
+
+/**
+ * This function "unfinalizes" the workspace by taking the data/error arrays 
+ * and multiplying them by the corresponding fractional area array. 
+ * @param hasSqrdErrs :: does the workspace have squared errors?
+ */
+void RebinnedOutput::unfinalize(bool hasSqrdErrs) {
+  if (!m_finalized) {
+    return;
+  }
+  std::size_t nHist = this->getNumberHistograms();
+  for (std::size_t i = 0; i < nHist; ++i) {
+    MantidVec &data = this->dataY(i);
+    MantidVec &err = this->dataE(i);
+    MantidVec &frac = this->dataF(i);
+    std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
+                   std::multiplies<double>());
+    std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                   std::multiplies<double>());
+    if (hasSqrdErrs) {
+      std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
+                     std::multiplies<double>());
+    }
+  }
+  // Sets flag so subsequent algorithms know to correctly treat data
+  m_finalized = false;
 }
 
 } // namespace Mantid

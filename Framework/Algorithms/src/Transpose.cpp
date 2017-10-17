@@ -37,6 +37,9 @@ void Transpose::exec() {
           inputWorkspace);
   DataObjects::RebinnedOutput_sptr outRebinWorkspace =
       boost::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
+  if (outRebinWorkspace) {
+    outRebinWorkspace->setFinalized(inRebinWorkspace->isFinalized());
+  }
 
   size_t newNhist = outputWorkspace->getNumberHistograms();
   size_t newXsize = outputWorkspace->x(0).size();

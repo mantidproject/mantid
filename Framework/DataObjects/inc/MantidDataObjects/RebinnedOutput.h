@@ -62,9 +62,11 @@ public:
 
   /// Create final representation
   void finalize(bool hasSqrdErrs = true);
+  void unfinalize(bool hasSqrdErrs = false);
 
-  /// Returns if finalize has been called
-  bool isFinalized() const { return m_finalized != 0; }
+  /// Returns if finalize has been called, or sets this flag
+  bool isFinalized() const { return m_finalized; }
+  void setFinalized(bool isFinal) { m_finalized = isFinal; }
 
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;
@@ -86,7 +88,7 @@ protected:
   std::vector<MantidVec> fracArea;
 
   /// Flag to indicate if finalize has been called, and if errors/variance used
-  int m_finalized = 0;
+  bool m_finalized;
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }

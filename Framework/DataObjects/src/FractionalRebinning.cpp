@@ -206,8 +206,6 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
 
   // If the input is a RebinnedOutput workspace with frac. area we need
   // to account for the weight of the input bin in the output bin weights
-  // but _not_ in the signal / error calculations (so that the "finalize"
-  // procedure divides by the correct weight).
   double inputWeight = 1.;
   auto inputRB = boost::dynamic_pointer_cast<const RebinnedOutput>(inputWS);
   if (inputRB) {
