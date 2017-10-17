@@ -278,9 +278,6 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
-  fprintf(stderr, "parsing %lu events from bank %lu\n", range.eventCount,
-          range.bankIndex);
-
   // Wrapped in lambda because std::async is unable to specialize doParsing on
   // its own
   m_future =

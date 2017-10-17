@@ -2,6 +2,7 @@
 #define MANTID_PARALLEL_EVENTLOADERTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/ParallelRunner.h"
 
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventDataSink.h"
@@ -104,34 +105,36 @@ public:
   void wait() const override {}
 };
 
-void do_test_load(const size_t chunkSize) {
+void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
   const std::vector<size_t> bankSizes{111, 1111, 11111};
-  Chunker chunker(1, 0, bankSizes, chunkSize);
+  Chunker chunker(comm.size(), comm.rank(), bankSizes, chunkSize);
   // FakeDataSource encodes information on bank and position in file into TOF
   // and pulse times, such that we can verify correct mapping.
   FakeDataSource dataSource;
   const std::vector<int32_t> bankOffsets{0, 12 * 77, 24 * 77};
-  std::vector<std::vector<Types::Event::TofEvent>> eventLists(3 * 77);
+  std::vector<std::vector<Types::Event::TofEvent>> eventLists(
+      (3 * 77 + comm.size() - 1 - comm.rank()) / comm.size());
   std::vector<std::vector<Types::Event::TofEvent> *> eventListPtrs;
   for (auto &eventList : eventLists)
     eventListPtrs.emplace_back(&eventList);
 
-  Communicator comm;
   EventParser<int64_t, int64_t, int32_t> dataSink(
       comm, chunker.makeRankGroups(), bankOffsets, eventListPtrs);
   TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
       chunker, dataSource, dataSink)));
 
-  for (size_t i = 0; i < eventLists.size(); ++i) {
-    size_t bank = i / 77;
-    size_t pixelInBank = i % 77;
-    TS_ASSERT_EQUALS(eventLists[i].size(),
+  for (size_t localSpectrumIndex = 0; localSpectrumIndex < eventLists.size();
+       ++localSpectrumIndex) {
+    size_t globalSpectrumIndex = comm.size() * localSpectrumIndex + comm.rank();
+    size_t bank = globalSpectrumIndex / 77;
+    size_t pixelInBank = globalSpectrumIndex % 77;
+    TS_ASSERT_EQUALS(eventLists[localSpectrumIndex].size(),
                      (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
     int64_t previousPulseTime{0};
-    for (size_t event = 0; event < eventLists[i].size(); ++event) {
+    for (size_t event = 0; event < eventLists[localSpectrumIndex].size(); ++event) {
       // Every 77th event in the input is in this list so our TOF should jump
       // over 77 TOFs in the input.
-      TS_ASSERT_EQUALS(eventLists[i][event].tof(),
+      TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),
                        17 * bank + 77 * event + pixelInBank);
       size_t index = event * 77 + pixelInBank;
       size_t pulse = 0;
@@ -149,7 +152,7 @@ void do_test_load(const size_t chunkSize) {
       // - `100000 * pulse + bank` confirms that currect event_index is used
       //   and event_time_offset is used correctly, and for correct bank.
       const auto pulseTime =
-          eventLists[i][event].pulseTime().totalNanoseconds();
+          eventLists[localSpectrumIndex][event].pulseTime().totalNanoseconds();
       TS_ASSERT_EQUALS(pulseTime,
                        123456789 + 1000000 * bank + 100000 * pulse + bank);
       TS_ASSERT(pulseTime >= previousPulseTime);
@@ -208,8 +211,12 @@ public:
   }
 
   void test_load() {
-    for (const size_t chunkSize : {37, 123, 1111})
-      do_test_load(chunkSize);
+    for (const size_t chunkSize : {37, 123, 1111}) {
+      for (const auto threads : {1, 2, 3, 5, 7, 13}) {
+        ParallelTestHelpers::ParallelRunner runner(threads);
+        runner.run(do_test_load, chunkSize);
+      }
+    }
   }
 };
 
