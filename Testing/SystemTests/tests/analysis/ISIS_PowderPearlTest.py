@@ -162,7 +162,7 @@ def setup_inst_object(mode):
     user_name = "Test"
 
     inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=mode)
+                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=mode, focus_mode="all")
     return inst_obj
 
 
