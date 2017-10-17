@@ -99,7 +99,7 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
     eventListPtrs.emplace_back(&eventList);
 
   EventParser<int64_t, int64_t, int32_t> dataSink(
-      comm, chunker.makeRankGroups(), bankOffsets, eventListPtrs);
+      comm, chunker.makeWorkerGroups(), bankOffsets, eventListPtrs);
   TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
       chunker, dataSource, dataSink)));
 
