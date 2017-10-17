@@ -96,14 +96,16 @@ void ObjCompAssemblyActor::generateTexture(unsigned char *data,
     glDeleteTextures(1, &id);
     OpenGLError::check("TexObject::generateTexture()[delete texture] ");
   }
-  bool vertical = true; // depends on the tex coordinates of the shape object
 
-  int width = m_n;
-  int height = 1;
-  if (vertical) {
-    width = 1;
-    height = m_n;
+  int width = 1;
+  int height = m_n;
+  /*
+  bool vertical = true; // depends on the tex coordinates of the shape object
+  if (!vertical) {
+    width = m_n;
+    height = 1;
   }
+  */
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glGenTextures(1, &id); // Create The Texture
