@@ -154,8 +154,9 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs && inputWs->getNumberHistograms() <
-                            boost::numeric_cast<size_t>(m_selectedSpectra)) {
+  } else if (inputWs &&
+             inputWs->getNumberHistograms() <
+                 boost::numeric_cast<size_t>(m_selectedSpectra)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectra);
   }
@@ -227,12 +228,12 @@ void IndirectDataAnalysisTab::updatePlot(
 }
 
 void IndirectDataAnalysisTab::updatePlot(
-  WorkspaceGroup_sptr outputWS,
-  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+    WorkspaceGroup_sptr outputWS,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
   if (outputWS && selectedSpectra() >= minimumSpectra())
     updatePlot(outputWS, selectedSpectra() - minimumSpectra(), topPreviewPlot,
-      bottomPreviewPlot);
+               bottomPreviewPlot);
   else {
     bottomPreviewPlot->clear();
     plotInput(topPreviewPlot);
