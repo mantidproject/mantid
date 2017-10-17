@@ -47,6 +47,8 @@ __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD", "IntegrateP
 __LOGGING_KEYWORD__ = "EnableLogging"
 # The "magic" keyword to run as a child algorithm explicitly without storing on ADS
 __STORE_KEYWORD__ = "StoreInADS"
+# This is the default value for __STORE_KEYWORD__
+__STORE_ADS_DEFAULT__ = True
 
 
 def specialization_exists(name):
@@ -317,7 +319,7 @@ def fitting_algorithm(inout=False):
     """
     def inner_fitting_algorithm(f):
         """
-        :param f: algorithm calling Fit 
+        :param f: algorithm calling Fit
         """
         def wrapper(*args, **kwargs):
             function, input_workspace = _get_mandatory_args(function_name,
@@ -780,7 +782,7 @@ def _is_workspace_property(prop):
 def _is_function_property(prop):
     """
     Returns True if the property is a fit function
-    
+
     :param prop: A property object
     :type Property
     :return:  True if the property is considered a fit function
@@ -885,10 +887,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
         if ignore_property(name, ignore_regex):
             continue
         prop = algm_obj.getProperty(name)
-        # Parent algorithms store their workspaces in the ADS
-        # Child algorithms should store their workspaces in the property
-        # but they don't at the moment while the issues with history recording Python Child Algs
-        # is resolved: ticket #5157
+
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
             try:
@@ -898,7 +897,7 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
                 if value is not None:
                     retvals[name] = value
                 else:
-                    if not prop.isOptional():
+                    if not prop.isOptional() and (prop.direction == _kernel.Direction.Input or prop.direction == _kernel.Direction.InOut):
                         raise RuntimeError("Internal error. Output workspace property '%s' on "
                                            "algorithm '%s' has not been stored correctly. "
                                            "Please contact development team." % (name,  algm_obj.name()))
@@ -962,7 +961,7 @@ def _set_store_ads(algm_obj, kwargs):
         algm_obj.setAlwaysStoreInADS(kwargs[__STORE_KEYWORD__])
         del kwargs[__STORE_KEYWORD__]
     else:
-        algm_obj.setAlwaysStoreInADS(True)
+        algm_obj.setAlwaysStoreInADS(__STORE_ADS_DEFAULT__)
 
 
 def set_properties(alg_object, *args, **kwargs):

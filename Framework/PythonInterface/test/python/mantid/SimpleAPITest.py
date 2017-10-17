@@ -434,5 +434,25 @@ class SimpleAPITest(unittest.TestCase):
         self.assertTrue('out' in mtd)
         mtd.remove('out')
 
+    def test_vanilla_python_default_in_ADS(self):
+        from mantid.simpleapi import CreateSampleWorkspace
+        out = CreateSampleWorkspace()
+        self.assertTrue(out)
+        self.assertTrue('out' in mtd)
+        mtd.remove('out')
+
+    def test_vanilla_python_explicit_in_ADS(self):
+        from mantid.simpleapi import CreateSampleWorkspace
+        out = CreateSampleWorkspace(StoreInADS=True)
+        self.assertTrue(out)
+        self.assertTrue('out' in mtd)
+        mtd.remove('out')
+
+    def test_vanilla_python_not_in_ADS(self):
+        from mantid.simpleapi import CreateSampleWorkspace
+        out = CreateSampleWorkspace(StoreInADS=False)
+        self.assertTrue(out)
+        self.assertTrue('out' not in mtd)
+
 if __name__ == '__main__':
     unittest.main()

@@ -22,7 +22,8 @@ AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
       m_categorySeparator(alg->categorySeparator()), m_alias(alg->alias()),
       m_summary(alg->summary()), m_version(alg->version()), m_alg(alg),
       m_isExecuted(), m_isLoggingEnabled(true), m_loggingOffset(0),
-      m_isAlgStartupLoggingEnabled(true), m_rethrow(false), m_isChild(false) {
+      m_isAlgStartupLoggingEnabled(true), m_rethrow(false), m_isChild(false),
+      m_setAlwaysStoreInADS(true) {
   if (!alg) {
     throw std::logic_error("Unable to create a proxy algorithm.");
   }
@@ -252,8 +253,7 @@ void AlgorithmProxy::createConcreteAlg(bool initOnly) {
 * Clean up when the real algorithm stops
 */
 void AlgorithmProxy::stopped() {
-  if (!isChild())
-    dropWorkspaceReferences();
+  dropWorkspaceReferences();
   m_isExecuted = m_alg->isExecuted();
   m_alg.reset();
 }
@@ -265,7 +265,15 @@ void AlgorithmProxy::dropWorkspaceReferences() {
   const std::vector<Property *> &props = getProperties();
   for (auto prop : props) {
     if (auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop)) {
-      wsProp->clear();
+      if (m_setAlwaysStoreInADS) {
+        wsProp->clear();
+      } else {
+        // if we are not storing in ADS, do not clear the output properties!
+        auto *workspaceProp = dynamic_cast<Property *>(prop);
+        if (workspaceProp->direction() == Direction::Input) {
+          wsProp->clear();
+        }
+      }
     }
   }
 }
