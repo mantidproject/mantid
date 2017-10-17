@@ -39,12 +39,12 @@ void SaveDiffFittingAscii::init() {
                   "The filename to use for the saved data");
 
   declareProperty(
-      "RunNumber", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "RunNumber", "",
       "Run number list of the focused files, which is used to generate the "
       "parameters table workspace");
 
   declareProperty(
-      "Bank", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Bank", "",
       "Bank number list of the focused files, which is used to generate "
       "the parameters table workspace");
 
@@ -151,7 +151,9 @@ void SaveDiffFittingAscii::processAll(
 
     std::string runNum = splitRunNum[m_counter];
     std::string bank = splitBank[m_counter];
-    writeInfo(runNum, bank, file);
+
+    if (!runNum.empty() || !bank.empty())
+        writeInfo(runNum, bank, file);
 
     // write header
     std::vector<std::string> columnHeadings = input_ws[i]->getColumnNames();
@@ -274,30 +276,30 @@ std::map<std::string, std::string> SaveDiffFittingAscii::validateInputs() {
   std::string bankNumber = getPropertyValue("Bank");
   std::vector<std::string> splitBank = splitList(bankNumber);
 
-  if (runNumber.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
-  }
-  if (splitBank.empty()) {
-    errors["Bank"] = "Please provide a valid bank list";
+  if (bankNumber.empty()) {
+      if (!runNumber.empty())
+          errors["Bank"] = "Please provide a valid bank list";
+  } else if (runNumber.empty()) {
+      errors["RunNumber"] = "Please provide a valid run number list";
   } else if (!is_grp) {
-    if (splitRunNum.size() > 1) {
-      errors["RunNumber"] = "One run number should be provided when a Table"
-                            "workspace is selected";
+      if (splitRunNum.size() > 1) {
+        errors["RunNumber"] = "One run number should be provided when a Table"
+                              "workspace is selected";
+      }
+      if (splitBank.size() > 1) {
+        errors["Bank"] = "One bank should be provided when a Table"
+                         "Workspace is selected";
+      }
+    } else {
+      if (splitRunNum.size() != inGrp->size()) {
+        errors["RunNumber"] = "Run number list size should match the number of "
+                              "TableWorkspaces in the GroupWorkspace selected";
+      }
+      if (splitBank.size() != inGrp->size()) {
+        errors["Bank"] = "Bank list size should match the number of "
+                         "TableWorkspaces in the GroupWorkspace selected";
+      }
     }
-    if (splitBank.size() > 1) {
-      errors["Bank"] = "One bank should be provided when a Table"
-                       "Workspace is selected";
-    }
-  } else {
-    if (splitRunNum.size() != inGrp->size()) {
-      errors["RunNumber"] = "Run number list size should match the number of "
-                            "TableWorkspaces in the GroupWorkspace selected";
-    }
-    if (splitBank.size() != inGrp->size()) {
-      errors["Bank"] = "Bank list size should match the number of "
-                       "TableWorkspaces in the GroupWorkspace selected";
-    }
-  }
 
   return errors;
 }
