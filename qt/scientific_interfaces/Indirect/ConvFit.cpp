@@ -635,7 +635,7 @@ void ConvFit::newDataLoaded(const QString wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
-  m_properties.clear();
+  m_parameterValues.clear();
   m_propertyToParameter.clear();
   m_fitFunctions.clear();
 
