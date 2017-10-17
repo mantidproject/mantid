@@ -109,7 +109,7 @@ class JanaFormat(object):
     """Writes a PeaksWorkspace to an ASCII file in the format required
     by the Jana2006 crystallographic refinement program.
 
-    This is an 11 column file format consisting of H, K, L, intensity, sigma, 
+    This is an 11 column file format consisting of H, K, L, intensity, sigma,
     crystal domain, wavelength, 2*theta, transmission, absorption weighted path length (Tbar),
     and thermal diffuse scattering correction (TDS).
 
