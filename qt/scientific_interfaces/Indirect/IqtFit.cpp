@@ -618,15 +618,8 @@ void IqtFit::updatePlot() {
 
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
-
-  if (specNo >= minimumSpectra())
-    IndirectDataAnalysisTab::updatePlot(groupName, specNo - minimumSpectra(),
-                                        m_uiForm.ppPlotTop,
-                                        m_uiForm.ppPlotBottom);
-  else {
-    m_uiForm.ppPlotBottom->clear();
-    IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlotTop);
-  }
+  IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
+                                      m_uiForm.ppPlotBottom);
 
   IndirectDataAnalysisTab::updatePlotRange("IqtFitRange", m_uiForm.ppPlotTop);
   resizePlotRange(m_uiForm.ppPlotTop);
