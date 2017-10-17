@@ -205,7 +205,6 @@ void MSDFit::algorithmComplete(bool error) {
 }
 
 void MSDFit::updatePlot(int spectrumNo) {
-  size_t specNo = boost::numeric_cast<size_t>(spectrumNo);
   const auto groupName = m_pythonExportWsName + "_Workspaces";
 
   IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,

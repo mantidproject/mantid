@@ -1207,9 +1207,6 @@ void ConvFit::bgTypeSelection(int index) {
  * Updates the plot in the GUI window
  */
 void ConvFit::updatePlot() {
-  using Mantid::Kernel::Exception::NotFoundError;
-  int specNo = selectedSpectra();
-
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
   if (resolution > 0) {

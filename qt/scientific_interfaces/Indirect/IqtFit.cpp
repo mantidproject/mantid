@@ -614,8 +614,6 @@ void IqtFit::updateCurrentPlotOption(QString newOption) {
 }
 
 void IqtFit::updatePlot() {
-  size_t specNo = selectedSpectra();
-
   // If there is a result workspace plot then plot it
   const auto groupName = m_baseName + "_Workspaces";
   IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
