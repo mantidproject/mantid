@@ -104,8 +104,8 @@ void GPUAlgorithm::buildKernelFromCode(const std::string &code,
   if (!platforms.empty()) {
     for (i = platforms.begin(); i != platforms.end(); ++i) {
       g_log.debug() << "Platform: "
-                  << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str()
-                  << std::endl;
+                    << (*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str()
+                    << std::endl;
       if (!strcmp((*i).getInfo<CL_PLATFORM_VENDOR>(&err).c_str(),
                   "Advanced Micro Devices, Inc."))
         break;

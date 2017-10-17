@@ -63,7 +63,7 @@ double getMedian(const API::Run &run, const std::string &name) {
 }
 
 void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
-    wksp->getXMinMax(tmin, tmax);
+  wksp->getXMinMax(tmin, tmax);
 }
 } // anonymous namespace end
 
