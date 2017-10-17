@@ -95,13 +95,12 @@ completeOutputProperties(const QString &algName, size_t currentProperties);
 class DLLExport GenerateNotebook {
 
 public:
-  GenerateNotebook(
-      QString name, QString instrument, WhiteList whitelist,
-      std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor,
-      PostprocessingStep postprocessingStep,
-      std::map<QString, QString> preprocessingInstructionsMap,
-      QString processingInstructions);
+  GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
+                   std::map<QString, PreprocessingAlgorithm> preprocessMap,
+                   ProcessingAlgorithm processor,
+                   PostprocessingStep postprocessingStep,
+                   std::map<QString, QString> preprocessingInstructionsMap,
+                   QString processingInstructions);
   virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);

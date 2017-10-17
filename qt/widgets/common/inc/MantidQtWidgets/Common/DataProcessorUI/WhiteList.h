@@ -16,8 +16,8 @@ namespace DataProcessor {
 
 /** @class WhiteList
 
-A whitelist is a ordered collection of algorithm properties, 
-the values of which can be set from the DataProcessorWidget's 
+A whitelist is a ordered collection of algorithm properties,
+the values of which can be set from the DataProcessorWidget's
 processing table.
 
 Each entry in the whitelist also contains meta-data such as a description

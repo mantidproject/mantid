@@ -9,7 +9,8 @@ namespace MantidWidgets {
 namespace DataProcessor {
 /** @class ConstColumnIterator
 
-The const column iterator is a ForwardIterator for iterating over several columns
+The const column iterator is a ForwardIterator for iterating over several
+columns
 who's attributes may be stored separately.
 
 It is currently used to allow easy iteration over a WhiteList.

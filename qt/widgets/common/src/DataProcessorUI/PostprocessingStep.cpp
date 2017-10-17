@@ -8,7 +8,8 @@ PostprocessingStep::PostprocessingStep(QString options)
 PostprocessingStep::PostprocessingStep(QString options,
                                        PostprocessingAlgorithm algorithm,
                                        std::map<QString, QString> map)
-    : m_options(std::move(options)), m_algorithm(std::move(algorithm)), m_map(std::move(map)) {}
+    : m_options(std::move(options)), m_algorithm(std::move(algorithm)),
+      m_map(std::move(map)) {}
 
 bool PostprocessingStep::workspaceExists(QString const &workspaceName) {
   return Mantid::API::AnalysisDataService::Instance().doesExist(
@@ -21,7 +22,7 @@ void PostprocessingStep::removeWorkspace(QString const &workspaceName) {
 }
 
 void PostprocessingStep::removeIfExists(QString const &workspaceName) {
-  if (workspaceExists(workspaceName)) 
+  if (workspaceExists(workspaceName))
     removeWorkspace(workspaceName);
 }
 
@@ -129,7 +130,7 @@ void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
                    outputWSName.toStdString());
 
   auto optionsMap = parseKeyValueString(m_options.toStdString());
-  for (auto const& kvp : optionsMap) {
+  for (auto const &kvp : optionsMap) {
     try {
       alg->setProperty(kvp.first, kvp.second);
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
@@ -140,8 +141,8 @@ void PostprocessingStep::postProcessGroup(const QString &processorPrefix,
 
   // Options specified via post-process map
   for (auto const &prop : m_map) {
-    auto const& propName = prop.second;
-    auto const& propValueStr =
+    auto const &propName = prop.second;
+    auto const &propValueStr =
         groupData.begin()->second[whitelist.indexFromName(prop.first)];
     if (!propValueStr.isEmpty()) {
       // Warning: we take minus the value of the properties because in

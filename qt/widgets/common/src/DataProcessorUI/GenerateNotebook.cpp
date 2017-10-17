@@ -119,9 +119,8 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Draw plots **/
 
-    notebook->codeCell(
-        plotsString(output_ws, boost::get<1>(postProcessString), m_processor)
-            .toStdString());
+    notebook->codeCell(plotsString(output_ws, boost::get<1>(postProcessString),
+                                   m_processor).toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());

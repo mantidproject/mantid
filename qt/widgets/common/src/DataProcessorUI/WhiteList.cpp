@@ -83,7 +83,8 @@ auto WhiteList::cbegin() const -> const_iterator {
                         m_prefixes.cbegin());
 }
 
-/// Returns a ForwardIterator pointing to one past the last entry in the whitelist.
+/// Returns a ForwardIterator pointing to one past the last entry in the
+/// whitelist.
 auto WhiteList::cend() const -> const_iterator {
   return const_iterator(m_names.cend(), m_descriptions.cend(),
                         m_algorithmProperties.cend(), m_isShown.cend(),

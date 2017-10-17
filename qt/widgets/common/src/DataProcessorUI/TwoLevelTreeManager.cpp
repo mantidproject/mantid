@@ -544,7 +544,7 @@ void TwoLevelTreeManager::transfer(
     }
 
     try {
-      for (auto const& columnName : whitelist.names())
+      for (auto const &columnName : whitelist.names())
         newRow << (row.at(columnName)).toStdString();
     } catch (std::out_of_range &) {
       // OK, this column will not be populated

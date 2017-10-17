@@ -39,9 +39,8 @@ class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm
     : public ProcessingAlgorithmBase {
 public:
   // Constructor
-  PreprocessingAlgorithm(
-      QString name, QString prefix = "",
-      std::set<QString> blacklist = std::set<QString>());
+  PreprocessingAlgorithm(QString name, QString prefix = "",
+                         std::set<QString> blacklist = std::set<QString>());
   // Delegating constructor
   PreprocessingAlgorithm(QString name, QString prefix,
                          const QString &blacklist);

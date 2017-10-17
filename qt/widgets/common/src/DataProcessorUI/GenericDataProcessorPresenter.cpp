@@ -219,9 +219,9 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist, ProcessingAlgorithm processor)
-    : GenericDataProcessorPresenter(std::move(whitelist),
-                                    std::map<QString, PreprocessingAlgorithm>(),
-                                    std::move(processor), PostprocessingAlgorithm()) {}
+    : GenericDataProcessorPresenter(
+          std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
+          std::move(processor), PostprocessingAlgorithm()) {}
 
 /**
 * Destructor
@@ -231,9 +231,9 @@ GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 namespace {
 std::set<std::string> toStdStringSet(std::set<QString> in) {
   auto out = std::set<std::string>();
-  std::transform(
-      in.cbegin(), in.cend(), std::inserter(out, out.begin()),
-      [](QString const &inStr) -> std::string { return inStr.toStdString(); });
+  std::transform(in.cbegin(), in.cend(), std::inserter(out, out.begin()),
+                 [](QString const &inStr)
+                     -> std::string { return inStr.toStdString(); });
   return out;
 }
 }
@@ -900,8 +900,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
   auto runNumbersIt = data->constBegin();
   for (; columnIt != m_whitelist.cend() - 2; ++columnIt, ++runNumbersIt) {
     auto column = *columnIt;
-    auto& propertyName = column.algorithmProperty();
-    auto& columnName = column.name();
+    auto &propertyName = column.algorithmProperty();
+    auto &columnName = column.name();
 
     // The value for which preprocessing can be conducted on
     QString preProcessValue;
@@ -955,9 +955,9 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
 
   auto isUnrestrictedProperty =
       [&restrictedProps](QString const &propertyName) -> bool {
-    return std::find(restrictedProps.begin(), restrictedProps.end(),
-                     propertyName) != restrictedProps.end();
-  };
+        return std::find(restrictedProps.begin(), restrictedProps.end(),
+                         propertyName) != restrictedProps.end();
+      };
 
   // Parse and set any user-specified options
   ::MantidQt::MantidWidgets::DataProcessor::setPropertiesFromKeyValueString(
@@ -1007,9 +1007,8 @@ void GenericDataProcessorPresenter::reduceRow(RowData *data) {
                             ? propValue.right(propValue.indexOf("e"))
                             : "";
           propValue =
-              propValue.mid(0,
-                            propValue.indexOf(".") +
-                                m_options["RoundPrecision"].toInt() + 1) +
+              propValue.mid(0, propValue.indexOf(".") +
+                                   m_options["RoundPrecision"].toInt() + 1) +
               exp;
         }
 
@@ -1516,7 +1515,7 @@ GenericDataProcessorPresenter::options() const {
 */
 void GenericDataProcessorPresenter::setOptions(
     const std::map<QString, QVariant> &options) {
-  for (auto const& option : options)
+  for (auto const &option : options)
     m_options[option.first] = option.second;
 
   // Save any changes to disk
