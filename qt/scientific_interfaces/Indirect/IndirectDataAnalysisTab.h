@@ -86,7 +86,7 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
-  void updatePlot(WorkspaceGroup_sptr outputWS,
+  void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
 
