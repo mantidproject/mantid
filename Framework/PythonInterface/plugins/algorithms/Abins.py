@@ -37,6 +37,7 @@ class Abins(PythonAlgorithm):
     _out_ws_name = None
     _num_quantum_order_events = None
     _extracted_ab_initio_data = None
+    _isotopes_found = None
 
     def category(self):
         return "Simulation"
@@ -267,17 +268,17 @@ class Abins(PythonAlgorithm):
 
         # check if isotopes are in the system
         eps = AbinsModules.AbinsConstants.MASS_EPS
-        isotopes_found = any([self._extracted_ab_initio_data["atom_%s" % atom]["mass"] -
+        self._isotopes_found = any([self._extracted_ab_initio_data["atom_%s" % atom]["mass"] -
                               Atom(symbol=self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]).mass > eps
                              for atom in range(num_atoms)])
 
         # if isotopes found then find corresponding masses
-        if isotopes_found:
+        if self._isotopes_found:
 
             masses = {}
             for i in range(num_atoms):
-                symbol = self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]
-                mass = self._extracted_ab_initio_data["atom_%s" % atom]["mass"]
+                symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
+                mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
                 if symbol not in masses:
                     masses[symbol] = set()
                 masses[symbol].add(mass)
@@ -288,52 +289,44 @@ class Abins(PythonAlgorithm):
 
         for atom_symbol in atoms_symbols:
 
-            atom_workspaces = []
-            s_atom_data.fill(0.0)
-
             main_isotope = Atom(symbol=atom_symbol)
-            main_protons_num = main_isotope.z_number
 
-            if isotopes_found:
+            if self._isotopes_found:
 
                 for m in masses[atom_symbol]:
 
-                    isotope_nucleons_num = round(m)
-                    isotope_symbol = atom_symbol + str(isotope_nucleons_num)
-                    self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
-                                      atom_symbol=isotope_symbol, temp_s_atom_data=temp_s_atom_data,
-                                      s_atom_data=s_atom_data, atom_workspaces=atom_workspaces,
-                                      protons_number=main_protons_num, nucleons_number=isotope_nucleons_num)
+                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
+                                                    atom_symbol=atom_symbol, temp_s_atom_data=temp_s_atom_data,
+                                                    s_atom_data=s_atom_data, main_isotope=main_isotope))
 
             else:
 
-                main_nucleons_num = round(main_mass)
                 main_mass = main_isotope.mass
-                self._atom_type_s(num_atoms=num_atoms, mass=main_mass, s_data_extracted=s_data_extracted,
-                                  atom_symbol=atom_symbol, temp_s_atom_data=temp_s_atom_data, s_atom_data=s_atom_data,
-                                  atom_workspaces=atom_workspaces, protons_number=main_protons_num,
-                                  nucleons_number=main_nucleons_num)
-
-            result.extend(atom_workspaces)
+                result.extend(self._atom_type_s(num_atoms=num_atoms, mass=main_mass, s_data_extracted=s_data_extracted,
+                                                atom_symbol=atom_symbol, temp_s_atom_data=temp_s_atom_data,
+                                                s_atom_data=s_atom_data, main_isotope=main_isotope))
 
         return result
 
     def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, atom_symbol=None, temp_s_atom_data=None,
-                     s_atom_data=None, atom_workspaces=None, protons_number=None, nucleons_number=None):
+                     s_atom_data=None, main_isotope=None):
         """
         Helper function for calculating S for the given type of atom
+
         :param num_atoms: number of atoms in the system
         :param s_data_extracted: data with all S
         :param atom_symbol: label for the type of atom
         :param temp_s_atom_data: helper array to store S
         :param s_atom_data: stores all S for the given type of atom
-        :param atom_workspaces: list with all workspaces created up to now
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
+        :param main_isotope: object of type mantid.kernel.Atom
         """
+        atom_workspaces = []
+        s_atom_data.fill(0.0)
+
         for atom in range(num_atoms):
+
             if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol and
-               self._extracted_ab_initio_data["atom_%s" % atom]["mass"] == mass):
+               self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass < AbinsModules.AbinsConstants.MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
@@ -347,11 +340,20 @@ class Abins(PythonAlgorithm):
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
-        atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, s_points=np.copy(total_s_atom_data),
-                                                      optional_name="_total", protons_number=protons_number,
+        nucleons_number = int(round(mass))
+        if self._isotopes_found:
+            symbol = atom_symbol + str(nucleons_number)
+        else:
+            symbol = atom_symbol
+
+        main_protons_num = main_isotope.z_number
+        atom_workspaces.append(self._create_workspace(atom_name=symbol, s_points=np.copy(total_s_atom_data),
+                                                      optional_name="_total", protons_number=main_protons_num,
                                                       nucleons_number=nucleons_number))
-        atom_workspaces.append(self._create_workspace(atom_name=atom_symbol, s_points=np.copy(s_atom_data),
-                                                      protons_number=protons_number, nucleons_number=nucleons_number))
+        atom_workspaces.append(self._create_workspace(atom_name=symbol, s_points=np.copy(s_atom_data),
+                                                      protons_number=main_protons_num, nucleons_number=nucleons_number))
+
+        return atom_workspaces
 
     def _create_partial_s_per_type_workspaces(self, atoms_symbols=None, s_data=None):
         """
