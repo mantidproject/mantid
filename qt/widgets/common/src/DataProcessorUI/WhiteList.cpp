@@ -68,18 +68,22 @@ bool WhiteList::isShown(int index) const { return m_isShown.at(index); }
 */
 QString WhiteList::prefix(int index) const { return m_prefixes.at(index); }
 
+/** Returns the list of entry names.
+ *  @returns The list of entry names ordered by column index. */
 std::vector<QString> const &WhiteList::names() const { return m_names; }
 
 auto WhiteList::end() const -> const_iterator { return cend(); }
 
 auto WhiteList::begin() const -> const_iterator { return cbegin(); }
 
+/// Returns a ForwardIterator pointing to the first entry in the whitelist.
 auto WhiteList::cbegin() const -> const_iterator {
   return const_iterator(m_names.cbegin(), m_descriptions.cbegin(),
                         m_algorithmProperties.cbegin(), m_isShown.cbegin(),
                         m_prefixes.cbegin());
 }
 
+/// Returns a ForwardIterator pointing to one past the last entry in the whitelist.
 auto WhiteList::cend() const -> const_iterator {
   return const_iterator(m_names.cend(), m_descriptions.cend(),
                         m_algorithmProperties.cend(), m_isShown.cend(),

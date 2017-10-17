@@ -96,19 +96,19 @@ class DLLExport GenerateNotebook {
 
 public:
   GenerateNotebook(
-      QString name, const QString instrument, const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingStep &postprocessingStep,
-      const std::map<QString, QString> preprocessingInstructionsMap,
-      const QString processingInstructions);
+      QString name, QString instrument, WhiteList whitelist,
+      std::map<QString, PreprocessingAlgorithm> preprocessMap,
+      ProcessingAlgorithm processor,
+      PostprocessingStep postprocessingStep,
+      std::map<QString, QString> preprocessingInstructionsMap,
+      QString processingInstructions);
   virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
 
 private:
   // The table ws name
-  QString m_wsName;
+  const QString m_wsName;
   // The instrument
   const QString m_instrument;
   // The whitelist defining the number of columns, their names and how they

@@ -46,17 +46,18 @@ the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 GenerateNotebook::GenerateNotebook(
-    QString name, const QString instrument, const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const ProcessingAlgorithm &processor,
-    const PostprocessingStep &postprocessingStep,
-    const std::map<QString, QString> preprocessingOptionsMap,
-    const QString processingOptions)
-    : m_wsName(name), m_instrument(instrument), m_whitelist(whitelist),
-      m_preprocessMap(preprocessMap), m_processor(processor),
-      m_postprocessingStep(postprocessingStep),
-      m_preprocessingOptionsMap(preprocessingOptionsMap),
-      m_processingOptions(processingOptions) {
+    QString name, QString instrument, WhiteList whitelist,
+    std::map<QString, PreprocessingAlgorithm> preprocessMap,
+    ProcessingAlgorithm processor, PostprocessingStep postprocessingStep,
+    std::map<QString, QString> preprocessingOptionsMap,
+    QString processingOptions)
+    : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
+      m_whitelist(std::move(whitelist)),
+      m_preprocessMap(std::move(preprocessMap)),
+      m_processor(std::move(processor)),
+      m_postprocessingStep(std::move(postprocessingStep)),
+      m_preprocessingOptionsMap(std::move(preprocessingOptionsMap)),
+      m_processingOptions(std::move(processingOptions)) {
 
   if (m_whitelist.size() < 2)
     throw std::invalid_argument(
@@ -73,7 +74,6 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
   auto notebook = Mantid::Kernel::make_unique<Mantid::API::NotebookWriter>();
 
   notebook->markdownCell(titleString(m_wsName).toStdString());
-
   notebook->markdownCell(tableString(data, m_whitelist).toStdString());
 
   for (const auto &item : data) {
@@ -82,7 +82,6 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
     const auto rowMap = item.second;
 
     /** Announce the stitch group in the notebook **/
-
     QString groupTitle = "Group " + QString::number(groupId);
     notebook->markdownCell(groupTitle.toStdString());
 
@@ -120,8 +119,9 @@ QString GenerateNotebook::generateNotebook(const TreeData &data) {
 
     /** Draw plots **/
 
-    notebook->codeCell(plotsString(output_ws, boost::get<1>(postProcessString),
-                                   m_processor).toStdString());
+    notebook->codeCell(
+        plotsString(output_ws, boost::get<1>(postProcessString), m_processor)
+            .toStdString());
   }
 
   return QString::fromStdString(notebook->writeNotebook());

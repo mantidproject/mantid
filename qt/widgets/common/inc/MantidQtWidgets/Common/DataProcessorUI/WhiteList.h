@@ -16,7 +16,12 @@ namespace DataProcessor {
 
 /** @class WhiteList
 
-WhiteList is an class defining a whitelist
+A whitelist is a ordered collection of algorithm properties, 
+the values of which can be set from the DataProcessorWidget's 
+processing table.
+
+Each entry in the whitelist also contains meta-data such as a description
+and visability status which are used when displaying the processing table.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
