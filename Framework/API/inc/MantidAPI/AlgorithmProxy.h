@@ -115,9 +115,7 @@ public:
   void setAlwaysStoreInADS(const bool val) override {
     m_setAlwaysStoreInADS = val;
   }
-  bool getAlwaysStoreInADS() const {
-      return m_setAlwaysStoreInADS;
-  }
+  bool getAlwaysStoreInADS() const { return m_setAlwaysStoreInADS; }
 
   /// Proxies only manage parent algorithms
   void enableHistoryRecordingForChild(const bool) override{};

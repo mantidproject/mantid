@@ -141,8 +141,8 @@ bool Algorithm::isChild() const { return m_isChildAlgorithm; }
  * is a full managed algorithm.
  */
 void Algorithm::setChild(const bool isChild) {
-    m_isChildAlgorithm = isChild;
-    this->setAlwaysStoreInADS(!isChild);
+  m_isChildAlgorithm = isChild;
+  this->setAlwaysStoreInADS(!isChild);
 }
 
 /**
@@ -739,7 +739,7 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
   Algorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged(name, version);
   // set as a child
-  alg->setChild(true);  
+  alg->setChild(true);
   alg->setLogging(enableLogging);
 
   // Initialise the Child Algorithm
