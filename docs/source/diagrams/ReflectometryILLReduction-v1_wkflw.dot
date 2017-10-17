@@ -1,0 +1,32 @@
+digraph ReflectometryILLPreprocess {
+  // label = "ReflectometryILLReduction workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    DirectBeamWorkspace [label="Direct beam\nworkspace"]
+    ReflectedBeamWorkspace [label="Reflected beam\nworkspace"]
+    OutputWorkspace [label="Output"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Divide [label="Divide"]
+    ConvertToQ [label="Convert to\nmomentum transfer"]
+  }
+
+  subgraph values {
+    $value_style
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  ReflectedBeamWorkspace -> Divide [label="As LHS"]
+  DirectBeamWorkspace -> Divide [label="As RHS"]
+
+  Divide -> ConvertToQ
+
+  ConvertToQ -> OutputWorkspace
+}

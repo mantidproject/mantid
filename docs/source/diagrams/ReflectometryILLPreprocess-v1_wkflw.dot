@@ -1,0 +1,36 @@
+digraph ReflectometryILLPreprocess {
+  // label = "ReflectometryILLPreprocess workflow diagram"
+  $global_style
+
+  subgraph params {
+    $param_style
+    OutputWorkspace [label="Output"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load [label="Load and merge\ninput files"]
+    NormaliseToSlits [label="Normalise to slits"]
+    NormaliseToFlux [label="Normalise to time/monitor\n(optional)"]
+    InstrumentBkg [label="Subtract instrument\nbackground"]
+    FlatBkg [label="Subtract flat\nbackground"]
+    GroupForeground [label="Sum foreground"]
+    ConvertToWavelength [label="Convert to wavelength"]
+  }
+
+  subgraph values {
+    $value_style
+  }
+
+  subgraph decisions {
+    $decision_style
+  }
+
+  Load -> NormaliseToSlits
+  NormaliseToSlits -> NormaliseToFlux
+  NormaliseToFlux -> InstrumentBkg
+  InstrumentBkg -> FlatBkg
+  FlatBkg -> GroupForeground
+  GroupForeground -> ConvertToWavelength
+  ConvertToWavelength -> OutputWorkspace
+}
