@@ -189,8 +189,8 @@ void SaveDiffFittingAscii::writeInfo(const std::string &runNumber,
 void SaveDiffFittingAscii::writeHeader(
     const std::vector<std::string> &columnHeadings, std::ofstream &file) {
   for (const auto &heading : columnHeadings) {
-    // Chi being the last header in the table workspace
-    if (heading == "Chi") {
+    // if last header in the table workspace, put eol
+    if (&heading == &columnHeadings.back()) {
       writeVal(heading, file, true);
     } else {
       writeVal(heading, file, false);
