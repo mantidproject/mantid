@@ -187,7 +187,7 @@ void IndirectDataAnalysisTab::updatePlot(
     MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
   // Check whether the specified index is within the bounds of the
   // fitted spectrum.
-  if (outputWS && index >= 0 && index < outputWS->size()) {
+  if (outputWS && index < outputWS->size()) {
     auto workspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, topPreviewPlot, bottomPreviewPlot);
