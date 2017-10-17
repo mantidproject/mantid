@@ -111,7 +111,8 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
     TS_ASSERT_EQUALS(eventLists[localSpectrumIndex].size(),
                      (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
     int64_t previousPulseTime{0};
-    for (size_t event = 0; event < eventLists[localSpectrumIndex].size(); ++event) {
+    for (size_t event = 0; event < eventLists[localSpectrumIndex].size();
+         ++event) {
       // Every 77th event in the input is in this list so our TOF should jump
       // over 77 TOFs in the input.
       TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),

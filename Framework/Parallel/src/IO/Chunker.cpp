@@ -201,7 +201,8 @@ Chunker::makeBalancedPartitioning(const int workers,
   size_t padding = 0;
   const auto originalSortedSizes(sortedSizes);
   while (numProcessed != sizes.size()) {
-    partitioning.emplace_back(buildPartition(workers, totalSize, sortedSizes, padding));
+    partitioning.emplace_back(
+        buildPartition(workers, totalSize, sortedSizes, padding));
     numProcessed += partitioning.back().second.size();
     if (static_cast<int>(partitioning.size()) > workers) {
       partitioning.clear();

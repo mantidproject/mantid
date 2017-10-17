@@ -86,9 +86,8 @@ void load(
     if (previousBank != -1)
       dataSink.wait();
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      dataSink.setPulseInformation(std::move(eventIndex),
-                                   std::move(eventTimeZero),
-                                   eventTimeZeroOffset);
+      dataSink.setPulseInformation(
+          std::move(eventIndex), std::move(eventTimeZero), eventTimeZeroOffset);
       previousBank = range.bankIndex;
     }
     // parser can assume that event_index and event_time_zero stay the same and
