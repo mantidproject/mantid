@@ -14,11 +14,11 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, a
 
     if focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths=output_file_paths,
-                                                calibrated_spectra=processed_spectra,
+                                                processed_spectra=processed_spectra,
                                                 attenuation_filepath=attenuation_filepath)
     elif focus_mode == "groups":
         processed_nexus_files = _focus_mode_groups(output_file_paths=output_file_paths,
-                                                   calibrateded_spectra=processed_spectra)
+                                                   calibrated_spectra=processed_spectra)
     elif focus_mode == "trans":
         processed_nexus_files = _focus_mode_trans(output_file_paths=output_file_paths,
                                                   calibrated_spectra=processed_spectra,
