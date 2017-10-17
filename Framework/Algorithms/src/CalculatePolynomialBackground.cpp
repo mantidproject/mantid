@@ -277,8 +277,8 @@ void CalculatePolynomialBackground::init() {
   declareProperty(Kernel::make_unique<Kernel::ArrayProperty<double>>(
                       Prop::XRANGES, std::vector<double>(), orderedPairs),
                   "A list of fitting ranges given as pairs of X values.");
-  std::array<std::string, 2> costFuncOpts{CostFunc::WEIGHTED_LEAST_SQUARES,
-                                          CostFunc::UNWEIGHTED_LEAST_SQUARES};
+  std::array<std::string, 2> costFuncOpts{{CostFunc::WEIGHTED_LEAST_SQUARES,
+                                           CostFunc::UNWEIGHTED_LEAST_SQUARES}};
   declareProperty(
       Prop::COST_FUNCTION, CostFunc::WEIGHTED_LEAST_SQUARES.c_str(),
       boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOpts),
