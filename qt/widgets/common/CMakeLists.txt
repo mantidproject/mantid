@@ -521,6 +521,8 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     DataObjects
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   PARENT_DEPENDENCIES
