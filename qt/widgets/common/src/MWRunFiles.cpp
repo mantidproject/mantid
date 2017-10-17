@@ -742,7 +742,7 @@ void MWRunFiles::findFiles() {
 
   } else {
     // Make sure errors are correctly set if we didn't run
-    //    inspectThreadResult();
+    inspectThreadResult("", std::vector<std::string>(), "");
   }
 }
 
