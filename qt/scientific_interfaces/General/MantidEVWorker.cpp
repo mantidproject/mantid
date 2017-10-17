@@ -280,7 +280,6 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
     const auto &ADS = AnalysisDataService::Instance();
 
     if (alg->execute()) {
-      double monitor_count = 0.0;
       Mantid::API::MatrixWorkspace_sptr mon_ws =
           ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_monitors");
       IAlgorithm_sptr int_alg =
@@ -293,7 +292,7 @@ bool MantidEVWorker::findPeaks(const std::string &ev_ws_name,
       int_alg->execute();
       Mantid::API::MatrixWorkspace_sptr int_ws =
           ADS.retrieveWS<MatrixWorkspace>(ev_ws_name + "_integrated_monitor");
-      monitor_count = int_ws->y(0)[0];
+      double monitor_count = int_ws->y(0)[0];
       std::cout << "Beam monitor counts used for scaling = " << monitor_count
                 << "\n";
 
