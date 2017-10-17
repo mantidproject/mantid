@@ -542,7 +542,8 @@ void LoadRaw3::validateWorkspaceSizes(bool bexcludeMonitors,
  */
 bool LoadRaw3::isMonitor(const std::vector<specnum_t> &monitorIndexes,
                          specnum_t spectrumNum) {
-  return (find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum) != monitorIndexes.end());
+  return (find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum) !=
+          monitorIndexes.end());
 }
 
 } // namespace DataHandling
