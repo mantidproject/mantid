@@ -207,7 +207,7 @@ Chunker::makeBalancedPartitioning(const int workers,
       partitioning.clear();
       numProcessed = 0;
       padding += static_cast<size_t>(
-          std::max(1.0, static_cast<double>(totalSize) * 0.1));
+          std::max(1.0, static_cast<double>(totalSize) * 0.01));
       sortedSizes = originalSortedSizes;
     }
   }
