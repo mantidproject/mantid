@@ -268,9 +268,10 @@ class Abins(PythonAlgorithm):
 
         # check if isotopes are in the system
         eps = AbinsModules.AbinsConstants.MASS_EPS
-        self._isotopes_found = any([self._extracted_ab_initio_data["atom_%s" % atom]["mass"] -
-                              Atom(symbol=self._extracted_ab_initio_data["atom_%s" % atom]["symbol"]).mass > eps
-                             for atom in range(num_atoms)])
+        data = self._extracted_ab_initio_data
+        self._isotopes_found = any([abs(data["atom_%s" % atom]["mass"] -
+                                   Atom(symbol=data["atom_%s" % atom]["symbol"]).mass) > eps
+                                   for atom in range(num_atoms)])
 
         # if isotopes found then find corresponding masses
         if self._isotopes_found:
@@ -326,7 +327,8 @@ class Abins(PythonAlgorithm):
         for atom in range(num_atoms):
 
             if (self._extracted_ab_initio_data["atom_%s" % atom]["symbol"] == atom_symbol and
-               self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass < AbinsModules.AbinsConstants.MASS_EPS):
+               abs(self._extracted_ab_initio_data["atom_%s" % atom]["mass"] - mass) <
+                        AbinsModules.AbinsConstants.MASS_EPS):
 
                 temp_s_atom_data.fill(0.0)
 
