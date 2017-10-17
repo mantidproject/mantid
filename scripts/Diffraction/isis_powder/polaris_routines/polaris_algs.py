@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import absorb_corrections, common
+from isis_powder.routines import absorb_corrections, common, common_enums
 from isis_powder.routines.run_details import create_run_details_object, \
                                              CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
 from isis_powder.polaris_routines import polaris_advanced_config
@@ -55,6 +55,11 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
                                       num_splines=spline_number)
     common.remove_intermediate_workspace(masked_workspace_list)
     return output
+
+
+def save_unsplined_vanadium(vanadium_ws, output_path):
+    # TODO: convert vanadium_ws to TOF
+    mantid.SaveNexus(InputWorkspace=vanadium_ws, Filename=output_path, Append=False)
 
 
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
