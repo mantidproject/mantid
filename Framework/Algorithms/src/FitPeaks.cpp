@@ -67,7 +67,7 @@ size_t findXIndex(const HistogramX &vecx, double x) {
 /** constructor
  * @brief FitPeaks::FitPeaks
  */
-FitPeaks::FitPeaks() : m_minPeakMaxValue(20.) {}
+FitPeaks::FitPeaks() : m_minPeakMaxValue(20.), m_bkgdSimga(1.) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -157,7 +157,7 @@ void FitPeaks::init() {
   setPropertyGroup("PeakParameterValueTable", startvaluegrp);
   setPropertyGroup("FitWindowBoundaryList", startvaluegrp);
   setPropertyGroup("FitPeakWindowWorkspace", startvaluegrp);
-  setPropertyGroup("", startvaluegrp);
+  //  setPropertyGroup("", startvaluegrp);
 
   // optimization setup
   std::vector<std::string> minimizerOptions =
@@ -465,6 +465,9 @@ void FitPeaks::processInputPeakCenters() {
   return;
 }
 
+//---
+void FitPeaks::convert_parameter_name_to_index() {}
+
 //----------------------------------------------------------------------------------------------
 /** main method to fit peaks among all
  * @brief FitPeaks::fitPeaks
@@ -498,7 +501,7 @@ void FitPeaks::fitPeaks() {
 
       PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
         writeFitResult(wi, peak_positions, peak_parameters, fitted_peaks,
-                       fitted_peaks_windows);
+                       peak_chi2_vec);
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -518,7 +521,7 @@ void FitPeaks::fitPeaks() {
  * @param fitted_peak_windows : ???
  */
 void FitPeaks::fitSpectrumPeaks(
-    size_t wi, std::vector<double> &peak_pos,
+    size_t wi, std::vector<double> &peak_pos_vec,
     std::vector<std::vector<double>> &peak_params,
     std::vector<double> &peak_chi2_vec,
     std::vector<std::vector<double>> &fitted_functions,
@@ -565,7 +568,7 @@ void FitPeaks::fitSpectrumPeaks(
     // get xmin and xmax from ..
     std::pair<double, double> peak_window_i = getPeakFitWindow(wi, ipeak);
     // Estimate background
-    estimateBackground(wi, peak_window_i, bkgdfunction, bkgd_fitter);
+    estimateBackground(wi, peak_window_i, bkgdfunction);
 
     // Estimate peak profile parameter
     estimatePeakParameters(wi, peak_window_i, peakfunction, bkgdfunction);
@@ -577,23 +580,23 @@ void FitPeaks::fitSpectrumPeaks(
                           peak_window_i, center_i, tol, m_highBackground);
 
     // process fitting result
-    processSinglePeakFitResult(wi, ipeak, peakfunction, bkgdfunction, cost,
-                               peak_pos, peak_params, peak_chi2_vec,
-                               fitted_peaks);
+    // TODO/NOW - Study FindPeaks and FitPeak to figure out how to get result
+    // from fitting
+    processSinglePeakFitResult(wi, ipeak, compfunc, peakfunction, bkgdfunction,
+                               cost, peak_pos_vec, peak_params, peak_chi2_vec);
   }
 
   return;
 }
 
+//------
 void FitPeaks::processSinglePeakFitResult(
     size_t wi, size_t peakindex, API::IFunction_sptr peakbkgdfunction,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction, double chi2,
     std::vector<double> &fitted_peak_positions,
     std::vector<std::vector<double>> &peak_params_vector,
-    std::vector<double> &peak_chi2_vec, bool calculated_fitted,
-    HistogramData::Histogram &fitted_data,
-    const std::pair<double, double> &peakwindow) {
+    std::vector<double> &peak_chi2_vec) {
   // check input
   if (peakindex >= fitted_peak_positions.size() ||
       peakindex >= peak_params_vector.size() ||
@@ -608,23 +611,29 @@ void FitPeaks::processSinglePeakFitResult(
   // new method
   // TODO/NOW/How to get the peak parameters out?
   std::vector<double> peak_params;
-  for (size_t iparam = 0; iparam < m_numberPeakParams; ++iparam)
+  for (size_t iparam = 0; iparam < peakfunction->nParams(); ++iparam)
     peak_params.push_back(peakfunction->getParameter(iparam));
-  peak_params_vector[ipeak] = peak_params;
+  peak_params_vector[peakindex] = peak_params;
 
   // chi2
-  peak_chi2_vec[ipeak] = chi2;
+  peak_chi2_vec[peakindex] = chi2;
 
-  // return if it is not required to calculated fitted peaks
-  if (!calculated_fitted)
-    return;
+  return;
+}
 
-  // calculate fitted peak with background
-  size_t start_x_index = getXIndex(wi, peakwindow.first);
-  size_t end_x_index = getXIndex(wi, peakwindow.second);
-  for (size_t i = start_x_index; i < end_x_index; ++i) {
-    peakbkgdfunction->function(fitted_data.mutableX(), fitted_data.mutableY());
-  }
+//-----
+// TODO/NOW - Implement such that it can be parallelized
+void FitPeaks::calculateFittedPeaks(API::IFunction_sptr peakbkgdfunction) {
+  //    HistogramData::Histogram &fitted_data,
+  //    const std::pair<double, double> &peakwindow;
+
+  //    // calculate fitted peak with background
+  //    size_t start_x_index = getXIndex(wi, peakwindow.first);
+  //    size_t end_x_index = getXIndex(wi, peakwindow.second);
+  //    for (size_t i = start_x_index; i < end_x_index; ++i) {
+  //      peakbkgdfunction->function(fitted_data.mutableX(),
+  //      fitted_data.mutableY());
+  //    }
 
   return;
 }
@@ -639,37 +648,45 @@ void FitPeaks::processSinglePeakFitResult(
  */
 void FitPeaks::estimateBackground(size_t wi,
                                   const std::pair<double, double> &peak_window,
-                                  API::IBackgroundFunction_sptr function,
-                                  API::IAlgorithm_sptr fitter) {
-  // TODO/ISSUE/NOW - Implement!.. Need to document the algorithm to estimate
+                                  API::IBackgroundFunction_sptr bkgd_function) {
   // call algorithm FindPeakBackground
   std::vector<size_t> peak_min_max_indexes;
-  std::vector<double> &vector_bkgd(3);
+  std::vector<double> vector_bkgd(3);
+  std::vector<double> peak_window_v(2);
+  peak_window_v[0] = peak_window.first;
+  peak_window_v[1] = peak_window.second;
 
   Mantid::Algorithms::FindPeakBackground bkgd_finder;
+  // set values
+  bkgd_finder.setFitWindow(peak_window_v);
   bkgd_finder.setBackgroundOrder(2);
-  bkgd_finder.setSigma(sigma);
-  bkgd_finder.setFitWindow(peak_window);
-  bkgd_finder.findBackground(m_inputWS->histogram(wi), l0, n,
-                             peak_min_max_indexes, bkgd_vectors);
-
-  bool result = bkgd_finder.getResults();
+  bkgd_finder.setSigma(m_bkgdSimga);
+  // find fit window indexes
+  size_t l0, n;
+  auto histogram = m_inputWS->histogram(wi);
+  bkgd_finder.findWindowIndex(histogram, l0, n);
+  // find background
+  int find_bkgd = bkgd_finder.findBackground(histogram, l0, n,
+                                             peak_min_max_indexes, vector_bkgd);
 
   // use the simple way to find linear background
-  if (!result) {
-    this->estimateLinearBackground()
+  if (find_bkgd <= 0) {
+    double bkgd_a1, bkgd_a0;
+    this->estimateLinearBackground(wi, peak_window.first, peak_window.second,
+                                   bkgd_a1, bkgd_a0);
+    vector_bkgd[0] = bkgd_a0;
+    vector_bkgd[1] = bkgd_a1;
+    vector_bkgd[2] = 0;
   }
-  /*
-    const HistogramData::Histogram &histogram, const size_t &l0,
-    const size_t &n, std::vector<size_t> &peak_min_max_indexes,
-    std::vector<double> &bkgd3) {
-        */
 
-  // blabla()
-
-  // step 2 ... (refer to documentation)
-
-  // step 3 ... blabla
+  // set result
+  // FIXME - this is not flexible for background other than
+  // flat/linear/quadratic
+  bkgd_function->setParameter(0, vector_bkgd[0]);
+  if (bkgd_function->nParams() > 1)
+    bkgd_function->setParameter(1, vector_bkgd[1]);
+  if (bkgd_function->nParams() > 2)
+    bkgd_function->setParameter(2, vector_bkgd[2]);
 
   return;
 }
@@ -723,12 +740,14 @@ int FitPeaks::estimatePeakParameters(
   bkgdfunction->function(domain, values);
 
   size_t start_index = static_cast<size_t>(istart - vec_x.begin());
+  size_t peak_center_index;
+  double peak_center(0);
   for (size_t i = 0; i < values.size(); ++i) {
     double y = vecY[i + start_index] - values.getCalculated(i);
     if (y > max_value) {
       max_value = y;
       peak_center = vec_x[i + start_index];
-      center_index = i + start_index;
+      peak_center_index = i + start_index;
     }
     if (vecY[i] > real_y_max)
       real_y_max = y;
@@ -742,7 +761,7 @@ int FitPeaks::estimatePeakParameters(
   const size_t MAGIC3(3);
 
   int result(0);
-  if (real_max < 1.0) {
+  if (real_y_max < 1.0) {
     // none-event, but no signal within region
     result = NOSIGNAL;
   } else if (max_value < m_minPeakMaxValue) {
@@ -848,42 +867,44 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
     // high background : create a new workspace with high background
   }
 
-  //
-  bool high(false);
+  double cost(DBL_MAX);
 
   if (high) {
 
     // if it does not work, then fit!  refer to FitPeak()
     // fit to background
-    fitFunctionMD(fitter, m_inputWS, wi, function);
-  }
-
-  // fit peak and background
-  double cost = fitFunctionSD(fitter, peakbkgdfunc, m_inputWS, wi,
-                              fitwindow.first, fitwindow.second);
-
-  // check cost (chi2 or etc), peak center and peak height
-  double peak_pos(0);
-  bool good_fit = false;
-
-  if ((cost < 0) || (cost > DBL_MAX - 1.))
-    peak_pos = -4; // unphysical cost function value
-  else if (peakfunction->height() < m_minHeight)
-    peak_pos = -3; // peak height is under minimum request
-  else if (fabs(peakfunction->centre() - exppeakcenter) > postol)
-    peak_pos = -2; // peak center is not within tolerance
-  else {
-    // all criteria are passed
-    good_fit = true;
-  }
-
-  // set cost function to DBL_MAX if fitting is bad
-  if (good_fit) {
-    // convert fitting result to analysis data structure
-    std::cout << "pass";
+    // fitFunctionMD(fitter, m_inputWS, wi, function);
+    // TODO/NOW - Develop algorithm for high background!
+    ;
   } else {
-    // set the cost function value to DBL_MAX
-    cost = DBL_MAX;
+
+    // fit peak and background
+    cost = fitFunctionSD(fitter, peakbkgdfunc, m_inputWS, wi, fitwindow.first,
+                         fitwindow.second);
+
+    // check cost (chi2 or etc), peak center and peak height
+    double peak_pos(0);
+    bool good_fit = false;
+
+    if ((cost < 0) || (cost > DBL_MAX - 1.))
+      peak_pos = -4; // unphysical cost function value
+    else if (peakfunction->height() < m_minHeight)
+      peak_pos = -3; // peak height is under minimum request
+    else if (fabs(peakfunction->centre() - exppeakcenter) > postol)
+      peak_pos = -2; // peak center is not within tolerance
+    else {
+      // all criteria are passed
+      good_fit = true;
+    }
+
+    // set cost function to DBL_MAX if fitting is bad
+    if (good_fit) {
+      // convert fitting result to analysis data structure
+      std::cout << "pass";
+    } else {
+      // set the cost function value to DBL_MAX
+      cost = DBL_MAX;
+    }
   }
 
   return cost;
@@ -903,8 +924,8 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
  * return DBL_MAX
  */
 double FitPeaks::fitFunctionSD(IAlgorithm_sptr fit, IFunction_sptr fitfunc,
-                               MatrixWorkspace_sptr dataws, size_t wsindex,
-                               double xmin, double xmax) {
+                               API::MatrixWorkspace_const_sptr dataws,
+                               size_t wsindex, double xmin, double xmax) {
 
   // Set the properties
   fit->setProperty("Function", fitfunc);
@@ -977,14 +998,16 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   //      boost::make_shared<MultiDomainFunction>();
 
   // Set function first
-  funcmd->addFunction(fitfunc);
+  //  funcmd->addFunction(fitfunc);
 
   // set domain for function with index 0 covering both sides
-  funcmd->clearDomainIndices();
+  //  funcmd->clearDomainIndices();
+  mdfunction->clearDomainIndices();
+
   std::vector<size_t> ii(2);
   ii[0] = 0;
   ii[1] = 1;
-  funcmd->setDomainIndices(0, ii);
+  mdfunction->setDomainIndices(0, ii);
 
   // Set the properties
   fit->setProperty("Function",
@@ -1001,17 +1024,16 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   //  fit->setProperty("Minimizer", m_minimizer);
   //  fit->setProperty("CostFunction", "Least squares");
 
-  m_sstream << "FitMultiDomain: Funcion " << funcmd->name() << ": "
+  m_sstream << "FitMultiDomain: Funcion " << mdfunction->name() << ": "
             << "Range: (" << vec_xmin[0] << ", " << vec_xmax[0] << ") and ("
-            << vec_xmin[1] << ", " << vec_xmax[1] << "); " << funcmd->asString()
-            << "\n";
+            << vec_xmin[1] << ", " << vec_xmax[1] << "); "
+            << mdfunction->asString() << "\n";
 
   // Execute
   fit->execute();
   if (!fit->isExecuted()) {
     throw runtime_error("Fit is not executed on multi-domain function/data. ");
   }
-  ++m_numFitCalls;
 
   // Retrieve result
   std::string fitStatus = fit->getProperty("OutputStatus");
@@ -1021,7 +1043,7 @@ FitPeaks::fitFunctionMD(boost::shared_ptr<API::MultiDomainFunction> mdfunction,
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
     m_sstream << "FitMultidomain: Successfully-Fitted Function "
-              << fitfunc->asString() << ", Chi^2 = " << chi2 << "\n";
+              << mdfunction->asString() << ", Chi^2 = " << chi2 << "\n";
   }
 
   return chi2;
@@ -1137,67 +1159,68 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak)
   return std::make_pair(left, right);
 }
 
-//----------------------------------------------------------------------------------------------
-/**
- * @brief FitPeaks::processFitResult
- * @param param_table
- * @param param_values: sequence is I,A,B,X0,S,A0,A1
- * @param param_erros
- * @return
- */
-double FitPeaks::processFitResult(DataObjects::TableWorkspace_sptr param_table,
-                                  std::vector<double> &param_values,
-                                  std::vector<double> &param_errors) {
-  if (param_table->rowCount() != 10)
-    throw std::runtime_error(
-        "Expected 10 rows in the returned table workspace.");
+////----------------------------------------------------------------------------------------------
+///**
+// * @brief FitPeaks::processFitResult
+// * @param param_table
+// * @param param_values: sequence is I,A,B,X0,S,A0,A1
+// * @param param_erros
+// * @return
+// */
+// double FitPeaks::processFitResult(DataObjects::TableWorkspace_sptr
+// param_table,
+//                                  std::vector<double> &param_values,
+//                                  std::vector<double> &param_errors) {
+//  if (param_table->rowCount() != 10)
+//    throw std::runtime_error(
+//        "Expected 10 rows in the returned table workspace.");
 
-  // clear
-  param_values.clear();
-  param_values.resize(7, 0.0);
-  param_errors.clear();
-  param_values.resize(7, 0.0);
+//  // clear
+//  param_values.clear();
+//  param_values.resize(7, 0.0);
+//  param_errors.clear();
+//  param_values.resize(7, 0.0);
 
-  //    g_log.notice() << "Number of rows " << param_table->rowCount() << ",
-  //    columns "
-  //                   << param_table->columnCount() << "\n";
+//  //    g_log.notice() << "Number of rows " << param_table->rowCount() << ",
+//  //    columns "
+//  //                   << param_table->columnCount() << "\n";
 
-  // chi2
-  double chi2 = param_table->cell<double>(0, 1);
+//  // chi2
+//  double chi2 = param_table->cell<double>(0, 1);
 
-  size_t iparam = 0;
-  for (size_t irow = 2; irow < param_table->rowCount(); ++irow) {
-    if (irow == 7)
-      continue;
+//  size_t iparam = 0;
+//  for (size_t irow = 2; irow < param_table->rowCount(); ++irow) {
+//    if (irow == 7)
+//      continue;
 
-    // const std::string &parname = param_table->cell<std::string>(irow, 0);
-    double param_value = param_table->cell<double>(irow, 1);
-    double param_error = param_table->cell<double>(irow, 2);
-    //    g_log.notice() << "Row " << irow << ": " << parname << " = " <<
-    //    param_value
-    //                   << " +/- " << param_error << "\n";
+//    // const std::string &parname = param_table->cell<std::string>(irow, 0);
+//    double param_value = param_table->cell<double>(irow, 1);
+//    double param_error = param_table->cell<double>(irow, 2);
+//    //    g_log.notice() << "Row " << irow << ": " << parname << " = " <<
+//    //    param_value
+//    //                   << " +/- " << param_error << "\n";
 
-    param_values[iparam] = param_value;
-    param_errors[iparam] = param_error;
-    ++iparam;
-  }
+//    param_values[iparam] = param_value;
+//    param_errors[iparam] = param_error;
+//    ++iparam;
+//  }
 
-  //    const std::string &cell00 = param_table->cell<std::string>(0, 0);
-  //    double chi2 = param_table->cell<double>(0, 1);
-  //    g_log.notice() << "Row 0: " << cell00 << ": " << chi2 << "\n";
-  //    const std::string &cell01 = param_table->cell<std::string>(1, 0);
-  //    double param0value = param_table->cell<double>(1, 1);
-  //    double param0error = param_table->cell<double>(1, 2);
-  //    g_log.notice() << cell01 << ": " << param0value << " +/- " <<
-  //    param0error << "\n";
-  //    const std::string &cell02 = param_table->cell<std::string>(2, 0);
-  //    double param1value = param_table->cell<double>(2, 1);
-  //    double param1error = param_table->cell<double>(2, 2);
-  //    g_log.notice() << cell02 << ": " << param1value << " +/- " <<
-  //    param1error << "\n";
+//  //    const std::string &cell00 = param_table->cell<std::string>(0, 0);
+//  //    double chi2 = param_table->cell<double>(0, 1);
+//  //    g_log.notice() << "Row 0: " << cell00 << ": " << chi2 << "\n";
+//  //    const std::string &cell01 = param_table->cell<std::string>(1, 0);
+//  //    double param0value = param_table->cell<double>(1, 1);
+//  //    double param0error = param_table->cell<double>(1, 2);
+//  //    g_log.notice() << cell01 << ": " << param0value << " +/- " <<
+//  //    param0error << "\n";
+//  //    const std::string &cell02 = param_table->cell<std::string>(2, 0);
+//  //    double param1value = param_table->cell<double>(2, 1);
+//  //    double param1error = param_table->cell<double>(2, 2);
+//  //    g_log.notice() << cell02 << ": " << param1value << " +/- " <<
+//  //    param1error << "\n";
 
-  return chi2;
-}
+//  return chi2;
+//}
 
 void FitPeaks::setOutputProperties() {
   setProperty("OutputWorkspace", m_peakPosWS);
@@ -1214,11 +1237,11 @@ void FitPeaks::setOutputProperties() {
  * @param fitted_peaks
  * @param fitted_peaks_windows
  */
-void FitPeaks::writeFitResult(
-    size_t wi, const std::vector<double> &peak_positions,
-    std::vector<std::vector<double>> &peak_parameters,
-    std::vector<std::vector<double>> &fitted_peaks,
-    std::vector<std::vector<double>> &fitted_peaks_windows) {
+void FitPeaks::writeFitResult(size_t wi,
+                              const std::vector<double> &peak_positions,
+                              std::vector<std::vector<double>> &peak_parameters,
+                              std::vector<std::vector<double>> &fitted_peaks,
+                              std::vector<double> &peak_chi2_vec) {
 
   // TODO - Refine this part!
 
@@ -1266,7 +1289,7 @@ void FitPeaks::writeFitResult(
     //      for (size_t ix = window_left_index; ix < window_right_index; ++ix)
     //        m_fittedPeakWS->dataY(wi)[ix] =
     //            fitted_peaks[ipeak][ix - window_left_index];
-    }
+    // }
   }
 
   return;
@@ -1370,125 +1393,129 @@ size_t FitPeaks::getXIndex(size_t wi, double x) {
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- * @brief FitPeaks::fitSinglePeak
- * @param fitfunc
- * @param dataws
- * @param wsindex
- * @param xmin
- * @param xmax
- * @return
- */
-/*
- *FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
-   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
-   * PeakFunctionType='BackToBackExponential', PeakParameterNames='I,A,B,X0,S',
-   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
-   * FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
-   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
-   * FittedBackgroundParameterValues='3694.92,-3237.13', FitWindow='1.05,1.14',
- *PeakRange='1.06,1.09',
-   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
- *PeakPositionTolerance=0.02)
- *
- */
-double FitPeaks::fitSinglePeakX(size_t wsindex, size_t peakindex,
-                                const std::vector<double> &init_peak_values,
-                                const std::vector<double> &init_bkgd_values,
-                                const std::vector<double> &fit_window,
-                                const std::vector<double> &peak_range,
-                                std::vector<double> &fitted_params_values,
-                                std::vector<double> &fitted_params_errors,
-                                std::vector<double> &fitted_window,
-                                std::vector<double> &fitted_data) {
-  // Set up sub algorithm fit
-  IAlgorithm_sptr fit_peak;
-  try {
-    fit_peak = createChildAlgorithm("FitPeak", -1, -1, false);
-    fit_peak->initialize();
-  } catch (Exception::NotFoundError &) {
-    std::stringstream errss;
-    errss << "The FitPeak algorithm requires the CurveFitting library";
-    g_log.error(errss.str());
-    throw std::runtime_error(errss.str());
-  }
+///**
+// * @brief FitPeaks::fitSinglePeak
+// * @param fitfunc
+// * @param dataws
+// * @param wsindex
+// * @param xmin
+// * @param xmax
+// * @return
+// */
+///*
+// *FitPeak(InputWorkspace='diamond_high_res_d', OutputWorkspace='peak0_19999',
+//   * ParameterTableWorkspace='peak0_19999_Param', WorkspaceIndex=19999,
+//   * PeakFunctionType='BackToBackExponential',
+//   PeakParameterNames='I,A,B,X0,S',
+//   * PeakParameterValues='2.5e+06,5400,1700,1.07,0.000355',
+//   *
+//   FittedPeakParameterValues='129.407,-1.82258e+06,-230935,1.06065,-0.0154214',
+//   * BackgroundParameterNames='A0,A1', BackgroundParameterValues='0,0',
+//   * FittedBackgroundParameterValues='3694.92,-3237.13',
+//   FitWindow='1.05,1.14',
+// *PeakRange='1.06,1.09',
+//   * MinGuessedPeakWidth=10, MaxGuessedPeakWidth=20, GuessedPeakWidthStep=1,
+// *PeakPositionTolerance=0.02)
+// *
+// */
+// double FitPeaks::fitSinglePeakX(size_t wsindex, size_t peakindex,
+//                                const std::vector<double> &init_peak_values,
+//                                const std::vector<double> &init_bkgd_values,
+//                                const std::vector<double> &fit_window,
+//                                const std::vector<double> &peak_range,
+//                                std::vector<double> &fitted_params_values,
+//                                std::vector<double> &fitted_params_errors,
+//                                std::vector<double> &fitted_window,
+//                                std::vector<double> &fitted_data) {
+//  // Set up sub algorithm fit
+//  IAlgorithm_sptr fit_peak;
+//  try {
+//    fit_peak = createChildAlgorithm("FitPeak", -1, -1, false);
+//    fit_peak->initialize();
+//  } catch (Exception::NotFoundError &) {
+//    std::stringstream errss;
+//    errss << "The FitPeak algorithm requires the CurveFitting library";
+//    g_log.error(errss.str());
+//    throw std::runtime_error(errss.str());
+//  }
 
-  std::stringstream namess;
-  namess << m_inputWS->getName() << "_" << wsindex << "_" << peakindex;
-  std::string outwsname = namess.str();
-  namess << "_param";
-  std::string paramwsname = namess.str();
+//  std::stringstream namess;
+//  namess << m_inputWS->getName() << "_" << wsindex << "_" << peakindex;
+//  std::string outwsname = namess.str();
+//  namess << "_param";
+//  std::string paramwsname = namess.str();
 
-  fit_peak->setPropertyValue("InputWorkspace", m_inputWS->getName());
-  fit_peak->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
-  fit_peak->setPropertyValue("OutputWorkspace", outwsname);
-  fit_peak->setPropertyValue("ParameterTableWorkspace", paramwsname);
-  // fit_peak->setProperty("PeakFunctionType", "BackToBackExponential");
-  fit_peak->setProperty("PeakFunctionType", mPeakProfile);
-  // TODO/FIXME - from here! fit_peak->setProperty("PeakParameterNames", );
-  // fit_peak->setProperty("PeakParameterNames", "I,A,B,X0,S");
-  fit_peak->setProperty("PeakParameterValues", init_peak_values);
-  fit_peak->setProperty("BackgroundParameterNames", "A0, A1");
-  fit_peak->setProperty("BackgroundParameterValues", init_bkgd_values);
-  fit_peak->setProperty("FitWindow", fit_window);
-  fit_peak->setProperty("PeakRange", peak_range);
-  fit_peak->setProperty("MinGuessedPeakWidth", 10);
-  fit_peak->setProperty("MaxGuessedPeakWidth", 20);
-  fit_peak->setProperty("GuessedPeakWidthStep", 1);
-  fit_peak->setProperty("PeakPositionTolerance", 0.02);
+//  fit_peak->setPropertyValue("InputWorkspace", m_inputWS->getName());
+//  fit_peak->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+//  fit_peak->setPropertyValue("OutputWorkspace", outwsname);
+//  fit_peak->setPropertyValue("ParameterTableWorkspace", paramwsname);
+//  // fit_peak->setProperty("PeakFunctionType", "BackToBackExponential");
+//  fit_peak->setProperty("PeakFunctionType", mPeakProfile);
+//  // TODO/FIXME - from here! fit_peak->setProperty("PeakParameterNames", );
+//  // fit_peak->setProperty("PeakParameterNames", "I,A,B,X0,S");
+//  fit_peak->setProperty("PeakParameterValues", init_peak_values);
+//  fit_peak->setProperty("BackgroundParameterNames", "A0, A1");
+//  fit_peak->setProperty("BackgroundParameterValues", init_bkgd_values);
+//  fit_peak->setProperty("FitWindow", fit_window);
+//  fit_peak->setProperty("PeakRange", peak_range);
+//  fit_peak->setProperty("MinGuessedPeakWidth", 10);
+//  fit_peak->setProperty("MaxGuessedPeakWidth", 20);
+//  fit_peak->setProperty("GuessedPeakWidthStep", 1);
+//  fit_peak->setProperty("PeakPositionTolerance", 0.02);
 
-  fit_peak->executeAsChildAlg();
+//  fit_peak->executeAsChildAlg();
 
-  double chi2 = -1;
-  if (!fit_peak->isExecuted()) {
-    std::stringstream errss;
-    errss << "Unable to fit peak of workspace index " << wsindex << "'s "
-          << peakindex << "-th peak";
-    g_log.error(errss.str());
-    return chi2;
-  }
+//  double chi2 = -1;
+//  if (!fit_peak->isExecuted()) {
+//    std::stringstream errss;
+//    errss << "Unable to fit peak of workspace index " << wsindex << "'s "
+//          << peakindex << "-th peak";
+//    g_log.error(errss.str());
+//    return chi2;
+//  }
 
-  // get the information back
-  fitted_params_values.resize(7, 0.);
-  fitted_params_errors.resize(7, 0.);
+//  // get the information back
+//  fitted_params_values.resize(7, 0.);
+//  fitted_params_errors.resize(7, 0.);
 
-  DataObjects::TableWorkspace_sptr param_table =
-      fit_peak->getProperty("ParameterTableWorkspace");
-  if (!param_table) {
-    g_log.information() << "Unable to get fitted parameters\n";
-    return chi2;
-  } else {
-    g_log.information() << "Good to have fitted data\n";
+//  DataObjects::TableWorkspace_sptr param_table =
+//      fit_peak->getProperty("ParameterTableWorkspace");
+//  if (!param_table) {
+//    g_log.information() << "Unable to get fitted parameters\n";
+//    return chi2;
+//  } else {
+//    g_log.information() << "Good to have fitted data\n";
 
-    chi2 = processFitResult(param_table, fitted_params_values,
-                            fitted_params_errors);
-    //    g_log.notice() << "Number of fitted parameters = " <<
-    //    fitted_params_values.size() << "\n";
-    //    for (size_t i = 0; i < fitted_params_values.size(); ++i)
-    //        g_log.notice() << "Fitted parameter " << i << " = " <<
-    //        fitted_params_values[i] << "\n";
+//    chi2 = processFitResult(param_table, fitted_params_values,
+//                            fitted_params_errors);
+//    //    g_log.notice() << "Number of fitted parameters = " <<
+//    //    fitted_params_values.size() << "\n";
+//    //    for (size_t i = 0; i < fitted_params_values.size(); ++i)
+//    //        g_log.notice() << "Fitted parameter " << i << " = " <<
+//    //        fitted_params_values[i] << "\n";
 
-    MatrixWorkspace_const_sptr out_ws_i =
-        fit_peak->getProperty("OutputWorkspace");
-    auto vecx = out_ws_i->histogram(1).x();
-    //    g_log.notice() << "[DB] Output workspace from " << vecx.front() << ",
-    //    "
-    //                   << vecx.back() << ", number of points = " <<
-    //                   vecx.size()
-    //                   << "\n";
+//    MatrixWorkspace_const_sptr out_ws_i =
+//        fit_peak->getProperty("OutputWorkspace");
+//    auto vecx = out_ws_i->histogram(1).x();
+//    //    g_log.notice() << "[DB] Output workspace from " << vecx.front() <<
+//    ",
+//    //    "
+//    //                   << vecx.back() << ", number of points = " <<
+//    //                   vecx.size()
+//    //                   << "\n";
 
-    fitted_window.resize(2);
-    fitted_window[0] = vecx.front();
-    fitted_window[1] = vecx.back();
+//    fitted_window.resize(2);
+//    fitted_window[0] = vecx.front();
+//    fitted_window[1] = vecx.back();
 
-    auto vecy = out_ws_i->histogram(1).y();
-    fitted_data.resize(vecy.size());
-    for (size_t i = 0; i < vecy.size(); ++i)
-      fitted_data[i] = vecy[i];
-  }
+//    auto vecy = out_ws_i->histogram(1).y();
+//    fitted_data.resize(vecy.size());
+//    for (size_t i = 0; i < vecy.size(); ++i)
+//      fitted_data[i] = vecy[i];
+//  }
 
-  return chi2;
-}
+//  return chi2;
+//}
 
 void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
                                         double right_window_boundary,
@@ -1524,21 +1551,21 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
 }
 
 /// convert peak window from value to index
-std::vector<size_t> getRange(size_t wi,
-                             const std::vector<double> &peak_window) {
-  if (peak_window.size() != 2)
-    throw std::runtime_error("Invalid peak window size");
+// std::vector<size_t> getRange(size_t wi,
+//                             const std::vector<double> &peak_window) {
+//  if (peak_window.size() != 2)
+//    throw std::runtime_error("Invalid peak window size");
 
-  auto vecX = m_inputWS->histogram(wi).x();
-  size_t istart = findXIndex(vecX, peak_window[0]);
-  size_t istop = findXIndex(vecX, peak_window[1]);
+//  auto vecX = m_inputWS->histogram(wi).x();
+//  size_t istart = findXIndex(vecX, peak_window[0]);
+//  size_t istop = findXIndex(vecX, peak_window[1]);
 
-  std::vector<size_t> range_index_window(2);
-  range_index_window[0] = istart;
-  range_index_window[1] = istop;
+//  std::vector<size_t> range_index_window(2);
+//  range_index_window[0] = istart;
+//  range_index_window[1] = istop;
 
-  return range_index_window;
-}
+//  return range_index_window;
+//}
 
 DECLARE_ALGORITHM(FitPeaks)
 
