@@ -221,6 +221,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
   size_t offset = 0;
   std::vector<Parallel::Request> recv_requests;
   for (int rank = 0; rank < m_comm.size(); ++rank) {
+    if (recv_sizes[rank] == 0)
+      continue;
     int tag = 0;
     auto buffer = reinterpret_cast<char *>(result.data() + offset);
     int size = recv_sizes[rank] * static_cast<int>(sizeof(Event));
@@ -231,6 +233,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::redistributeDataMPI(
   std::vector<Parallel::Request> send_requests;
   for (int rank = 0; rank < m_comm.size(); ++rank) {
     const auto &vec = data[rank];
+    if (vec.size() == 0)
+      continue;
     int tag = 0;
     send_requests.emplace_back(
         m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
