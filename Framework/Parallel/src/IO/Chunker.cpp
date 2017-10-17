@@ -10,10 +10,14 @@ namespace IO {
 namespace {
 /** Helper to build partition (subgroup of workers with subgroup of banks).
  *
- * Elements of `sortedSizes` are <size, original index, done flag> */
+ * Elements of `sortedSizes` are <size, original index, done flag>. The
+ * `padding` argument is used to artificially increase the amount of work
+ * assigned to each group. This is used to deal with cases where
+ *`buildPartition` generates more groups than available workers. */
 std::pair<int, std::vector<size_t>>
 buildPartition(const int totalWorkers, const size_t totalSize,
-               std::vector<std::tuple<size_t, size_t, bool>> &sortedSizes) {
+               std::vector<std::tuple<size_t, size_t, bool>> &sortedSizes,
+               const size_t padding) {
   const size_t perWorkerSize = (totalSize + totalWorkers - 1) / totalWorkers;
 
   // 1. Find largest unprocessed item
@@ -33,7 +37,7 @@ buildPartition(const int totalWorkers, const size_t totalSize,
                 (static_cast<size_t>(totalWorkers) * size + totalSize - 1) /
                 totalSize)
           : totalWorkers;
-  size_t remainder = workers * perWorkerSize - size;
+  size_t remainder = workers * perWorkerSize - size + padding;
 
   // 3. Fill remainder with next largest fitting size(s)
   for (auto &item : sortedSizes) {
@@ -132,8 +136,7 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
   const auto &ourBanks = m_partitioning[partitionIndex].second;
 
   // Assign all chunks from all banks in this partition to workers in
-  // round-robin
-  // manner.
+  // round-robin manner.
   int64_t chunk = 0;
   std::vector<LoadRange> ranges;
   for (const auto bank : ourBanks) {
@@ -195,9 +198,18 @@ Chunker::makeBalancedPartitioning(const int workers,
 
   std::vector<std::pair<int, std::vector<size_t>>> partitioning;
   size_t numProcessed = 0;
+  size_t padding = 0;
+  const auto originalSortedSizes(sortedSizes);
   while (numProcessed != sizes.size()) {
-    partitioning.emplace_back(buildPartition(workers, totalSize, sortedSizes));
+    partitioning.emplace_back(buildPartition(workers, totalSize, sortedSizes, padding));
     numProcessed += partitioning.back().second.size();
+    if (static_cast<int>(partitioning.size()) > workers) {
+      partitioning.clear();
+      numProcessed = 0;
+      padding += static_cast<size_t>(
+          std::max(1.0, static_cast<double>(totalSize) * 0.1));
+      sortedSizes = originalSortedSizes;
+    }
   }
 
   // buildPartition always rounds up when computing needed workers, so we have

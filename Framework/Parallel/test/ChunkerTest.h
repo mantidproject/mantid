@@ -68,7 +68,7 @@ public:
     const std::vector<size_t> bankSizes{9, 0, 1, 1};
     const size_t chunkSize = 2;
     const Chunker chunker(ranks, rank, bankSizes, chunkSize);
-    const auto &groups = chunker.makeRankGroups();
+    const auto &groups = chunker.makeWorkerGroups();
     TS_ASSERT_EQUALS(groups.size(), 2);
     TS_ASSERT_EQUALS(groups[0].size(), 3);
     TS_ASSERT_EQUALS(groups[1].size(), 1);
@@ -176,16 +176,25 @@ public:
   void test_makeLoadRange_many_random_banks() {
     for (int workers = 1; workers < 100; ++workers) {
       for (int worker = 0; worker < workers; ++worker) {
-        const std::vector<size_t> bankSizes{
-            2091281, 520340,  841355,  912704,  1435110, 567885,
-            1850044, 1333453, 1507522, 1396560, 1699092, 1484645,
-            515805,  474417,  633111,  600780,  638784,  572031,
-            741562,  593741,  546107,  552800,  556607};
-        const size_t chunkSize = 1024 * 1024;
-        TS_ASSERT_THROWS_NOTHING(
-            Chunker chunker(workers, worker, bankSizes, chunkSize));
-        Chunker chunker(workers, worker, bankSizes, chunkSize);
-        TS_ASSERT_THROWS_NOTHING(chunker.makeLoadRanges());
+        // The following bank sizes come from actual files which have cause
+        // trouble so this also servers as a regression test.
+        for (const auto &bankSizes :
+             {std::vector<size_t>{2091281, 520340, 841355, 912704, 1435110,
+                                  567885, 1850044, 1333453, 1507522, 1396560,
+                                  1699092, 1484645, 515805, 474417, 633111,
+                                  600780, 638784, 572031, 741562, 593741,
+                                  546107, 552800, 556607},
+              std::vector<size_t>{
+                  5158050, 5566070, 5528000, 5461070, 5937410, 7415620, 5720310,
+                  6387840, 6007800, 6331110, 4744170, 20912810, 14846450,
+                  16990920, 13965600, 15075220, 13334530, 18500440, 5678850,
+                  14351100, 9127040, 8413550, 5203400}}) {
+          const size_t chunkSize = 1024 * 1024;
+          TS_ASSERT_THROWS_NOTHING(
+              Chunker chunker(workers, worker, bankSizes, chunkSize));
+          Chunker chunker(workers, worker, bankSizes, chunkSize);
+          TS_ASSERT_THROWS_NOTHING(chunker.makeLoadRanges());
+        }
       }
     }
   }
