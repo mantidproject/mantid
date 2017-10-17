@@ -1695,13 +1695,12 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
     m_cfTree->addProperty(m_properties["FitFunction2"]);
+    addDefaultParametersToTree("Lorentzian 2");
   } else {
     m_properties["FitFunction1"] = m_grpManager->addProperty(lastFunction);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
+    addDefaultParametersToTree(fitFunctions);
   }
-
-  // If there are parameters in the list, add them
-  addDefaultParametersToTree(fitFunctions);
 }
 
 /**
