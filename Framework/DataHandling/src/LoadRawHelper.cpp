@@ -1309,7 +1309,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
  *  @return true if Exclude Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) {
-  return (not monitorOption.compare("Exclude"));
+  return (monitorOption == "Exclude");
 }
 
 /**This method checks the value of LoadMonitors property and returns true or
@@ -1317,7 +1317,7 @@ bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) {
  * @return true if Include Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) {
-  return (not monitorOption.compare("Include"));
+  return (monitorOption == "Include");
 }
 
 /** This method checks the value of LoadMonitors property and returns true or
@@ -1325,7 +1325,7 @@ bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) {
  *  @return true if Separate Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) {
-  return (not monitorOption.compare("Separate"));
+  return (monitorOption == "Separate");
 }
 /**The method to interpret LoadMonitors property options and convert then into
  * boolean values
