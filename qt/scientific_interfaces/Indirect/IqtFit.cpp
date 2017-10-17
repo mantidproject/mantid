@@ -388,7 +388,8 @@ void IqtFit::newDataLoaded(const QString wsName) {
       wsName.toStdString());
   setInputWorkspace(inputWs);
   setPreviewPlotWorkspace(inputWs);
-  m_properties.clear();
+  m_baseName.clear();
+  m_parameterValues.clear();
   m_parameterToProperty.clear();
   m_fitFunctions.clear();
 
