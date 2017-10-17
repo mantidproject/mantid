@@ -67,8 +67,9 @@ public:
   template <typename... T>
   Request isend(int source, int dest, int tag, T &&... args);
 
-  template <typename... T>
-  Request irecv(int dest, int source, int tag, T &&... args);
+  template <typename T> Request irecv(int dest, int source, int tag, T &&data);
+  template <typename T>
+  Request irecv(int dest, int source, int tag, T *data, const size_t count);
 
 private:
   int m_size{1};
@@ -155,10 +156,18 @@ Request ThreadingBackend::isend(int source, int dest, int tag, T &&... args) {
   return Request{};
 }
 
-template <typename... T>
-Request ThreadingBackend::irecv(int dest, int source, int tag, T &&... args) {
-  return Request(std::bind(&ThreadingBackend::recv<T...>, this, dest, source,
-                           tag, std::ref(std::forward<T>(args))...));
+template <typename T>
+Request ThreadingBackend::irecv(int dest, int source, int tag, T &&data) {
+  return Request(std::bind(&ThreadingBackend::recv<T>, this, dest, source, tag,
+                           std::ref(std::forward<T>(data))));
+}
+template <typename T>
+Request ThreadingBackend::irecv(int dest, int source, int tag, T *data,
+                                const size_t count) {
+  // Pass (pointer) by value since reference to it may go out of scope.
+  return Request([this, dest, source, tag, data, count]() mutable {
+    recv(dest, source, tag, data, count);
+  });
 }
 
 } // namespace detail
