@@ -23,15 +23,14 @@ void qSleep(int ms) {
 namespace MantidQt {
 namespace API {
 
-class FakeFindFilesThread : public FindFilesThread {
+class FakeFindFilesThread : public FindFilesWorker {
   Q_OBJECT
 public:
-  FakeFindFilesThread(
-      const FindFilesSearchParameters &parameters,
-      const FindFilesSearchResults &results = FindFilesSearchResults(),
-      int milliseconds = 100)
-      : FindFilesThread(parameters), m_results(results),
-        m_milliseconds(milliseconds) {}
+  FakeFindFilesThread(const FindFilesSearchParameters& parameters,
+                      const FindFilesSearchResults& results = FindFilesSearchResults(),
+                      int milliseconds = 100)
+    : FindFilesWorker(parameters), m_results(results), m_milliseconds(milliseconds) {
+  }
 
 protected:
   void run() override {

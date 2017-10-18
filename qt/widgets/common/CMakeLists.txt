@@ -89,6 +89,7 @@
 	src/ErrorCurve.cpp
 	src/FindDialog.cpp
         src/FindFilesThreadPoolManager.cpp
+        src/FindFilesWorker.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
 	src/FitPropertyBrowser.cpp
@@ -256,6 +257,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -396,6 +398,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
   inc/MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h
+  inc/MantidQtWidgets/Common/FindFilesWorker.h
 )
 
 set ( UI_FILES
@@ -436,6 +439,7 @@ set( TEST_FILES
    BatchAlgorithmRunnerTest.h
    FileDialogHandlerTest.h
    FindFilesThreadPoolManagerTest.h
+   FindFilesWorkerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
    NonOrthogonalTest.h
