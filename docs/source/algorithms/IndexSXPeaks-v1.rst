@@ -16,11 +16,11 @@ potential HKL matches and the peaks as well as angles between Q vectors.
 Usage Notes
 -----------
 
-This algorithm does not generate a UB Matrix, it will only index peaks.
+This algorithm does not generate a :ref:`UB matrix <Lattice>`, it will only index peaks.
 Run :ref:`CalculateUMatrix <algm-CalculateUMatrix>` algorithm after executing
-this algorithm in order to attach a UB Matrix onto the sample. The
-:ref:`CopySample <algm-CopySample>` algorithm will allow this UB Matrix to be
-transfered between workspaces.
+this algorithm in order to attach a :ref:`UB matrix <Lattice>` onto the sample. The
+:ref:`CopySample <algm-CopySample>` algorithm will allow this :ref:`UB matrix <Lattice>`
+to be transfered between workspaces.
 
 Usage
 -----
