@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from isis_powder.routines import absorb_corrections, common, common_enums
+from isis_powder.routines import absorb_corrections, common
+from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, \
                                              CustomFuncForRunDetails, RunDetailsWrappedCommonFuncs
 from isis_powder.polaris_routines import polaris_advanced_config
@@ -58,8 +59,21 @@ def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
-    # TODO: convert vanadium_ws to TOF
-    mantid.SaveNexus(InputWorkspace=vanadium_ws, Filename=output_path, Append=False)
+    converted_workspaces = []
+
+    for ws_index in range(vanadium_ws.getNumberOfEntries()):
+        ws = vanadium_ws.getItem(ws_index)
+        previous_units = ws.getAxis(0).getUnit().unitID()
+
+        if previous_units != WORKSPACE_UNITS.tof:
+            ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+
+        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+        converted_workspaces.append(ws)
+
+    converted_group = mantid.GroupWorkspaces(",".join(ws.getName() for ws in converted_workspaces))
+    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+    mantid.DeleteWorkspace(converted_group)
 
 
 def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):

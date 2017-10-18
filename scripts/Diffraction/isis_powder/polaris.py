@@ -35,7 +35,7 @@ class Polaris(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
-        
+
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d,
                                              output_path=run_details.unsplined_vanadium_file_path)
