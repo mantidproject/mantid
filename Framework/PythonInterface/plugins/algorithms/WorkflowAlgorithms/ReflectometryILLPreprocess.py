@@ -93,7 +93,8 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._subalgLogging = self.getProperty(Prop.SUBALG_LOGGING).value == SubalgLogging.ON
         cleanupMode = self.getProperty(Prop.CLEANUP).value
         self._cleanup = common.WSCleanup(cleanupMode, self._subalgLogging)
-        self._names = common.WSNameSource('ReflectometryILLPreprocess', cleanupMode)
+        wsPrefix = self.getPropertyValue(Prop.OUTPUT_WS)
+        self._names = common.WSNameSource(wsPrefix, cleanupMode)
 
         ws, beamPosWS = self._inputWS()
 
@@ -446,6 +447,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ranges = self._flatBkgRanges(ws, peakPosWS)
         polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
         transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
+        self.log().warning('Flat bakground ranges {}'.format(ranges))
         transposedBkgWS = CalculatePolynomialBackground(InputWorkspace=transposedWS,
                                                         OutputWorkspace=transposedBkgWSName,
                                                         Degree=polynomialDegree,
