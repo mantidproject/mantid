@@ -20,13 +20,20 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
   // computing an offset based on detector IDs. Currently this is computed in a
   // naive way and works only if all monitors have IDs smaller than any
   // detector.
-  const auto monitors = instrument->getMonitors();
-  int32_t monitorOffset = static_cast<int32_t>(monitors.size());
-  for (size_t i = 0; i < monitors.size(); ++i)
-    if (monitors[i] != detIDs[i])
-      throw std::runtime_error(
-          "Monitors are not corresponding to the first detector IDs in the "
-          "instrument. This is currently not supported by ParallelEventLoader");
+  int32_t monitorOffset{0};
+  bool sawDetector{false};
+  for (size_t i = 0; i < detInfo.size(); ++i) {
+    if (detInfo.isMonitor(i)) {
+      if (sawDetector)
+        throw std::runtime_error("Monitors are not corresponding to the first "
+                                 "detector IDs in the instrument. This is "
+                                 "currently not supported by "
+                                 "ParallelEventLoader");
+      ++monitorOffset;
+    } else {
+      sawDetector = true;
+    }
+  }
 
   std::vector<int32_t> bankOffsets;
   for (const auto &bankName : bankNames) {
