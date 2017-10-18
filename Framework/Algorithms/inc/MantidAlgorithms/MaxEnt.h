@@ -74,6 +74,7 @@ private:
                                            const QuadraticCoefficients &coeffs,
                                            const std::vector<double> &image,
                                            double background, double distEps);
+
   /// Updates the image
   std::vector<double> updateImage(const std::vector<double> &image,
                                   const std::vector<double> &delta,

@@ -45,7 +45,7 @@ class MaxEntView(QtGui.QWidget):
         self.resolution_box= table_utils.addSpinBoxToTable(self.table,1,3)
 
         table_utils.setRowName(self.table,4,"Maximum entropy constant (A)")
-        self.AConst= table_utils.addDoubleToTable(self.table,0.4,4)
+        self.AConst= table_utils.addDoubleToTable(self.table,0.001,4)
 
         table_utils.setRowName(self.table, 5,"Auto shift")
         self.shift_box= table_utils.addCheckBoxToTable(self.table,False,5)
@@ -78,7 +78,7 @@ class MaxEntView(QtGui.QWidget):
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA,0,"Chi target")
-        self.chiTarget= table_utils.addDoubleToTable(self.tableA,100,0)
+        self.chiTarget= table_utils.addDoubleToTable(self.tableA,1.0e-12,0)
 
         table_utils.setRowName(self.tableA,1,"Chi (precision)")
         self.chiEps= table_utils.addDoubleToTable(self.tableA,0.001,1)
