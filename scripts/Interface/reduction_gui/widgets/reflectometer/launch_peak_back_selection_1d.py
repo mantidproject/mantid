@@ -27,8 +27,8 @@ CSS_LOWRES = """QLineEdit{
 class DesignerMainWindow(QtGui.QMainWindow):
     """ Customization for Qt Designer created window """
 
-    peak_back_xlim = [100,160]
-    low_res_xlim = [100,200]
+    peak_back_xlim = [100, 160]
+    low_res_xlim = [100, 200]
     bClick = False
     _peakFromValue = 4.
     _peakToValue = 6.
@@ -39,10 +39,10 @@ class DesignerMainWindow(QtGui.QMainWindow):
     drs = []
     parent = None
     dataType = 'data'  # 'data' or 'norm'
-    x1=None
-    x2=None
-    y1=None
-    y2=None
+    x1 = None
+    x2 = None
+    y1 = None
+    y2 = None
     topHorizontalLayout = None
     topHorizontalLayoutPeak = None
     peakTo = None
@@ -129,66 +129,66 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
     def create_main_frame(self):
 
-        self.resize(932,661)
+        self.resize(932, 661)
         self.setUnifiedTitleAndToolBarOnMac(False)
 
-        #selection mode and axis type
+        # selection mode and axis type
         self.topHorizontalLayout = QtGui.QHBoxLayout()
-        #peak and background input text fields
+        # peak and background input text fields
         self.topHorizontalLayoutPeak = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Peak")
         self.peakFrom = QtGui.QLineEdit("{0:.2f}".format(self._peakFromValue))
-        self.peakFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.peakFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.peakFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.peakFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.peakFrom.setObjectName("peakFrom")
         self.peakTo = QtGui.QLineEdit("{0:.2f}".format(self._peakToValue))
-        self.peakTo.setMinimumSize(QtCore.QSize(60,0))
-        self.peakTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.peakTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.peakTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.peakTo.setObjectName("peakTo")
         self.topHorizontalLayoutPeak.addWidget(self.label)
         self.topHorizontalLayoutPeak.addWidget(self.peakFrom)
         self.topHorizontalLayoutPeak.addWidget(self.peakTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #back
+        # back
         self.topHorizontalLayoutBack = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Background")
         self.backFrom = QtGui.QLineEdit("{0:.2f}".format(self._backFromValue))
-        self.backFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.backFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.backFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.backFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.backFrom.setObjectName("backFrom")
         self.backTo = QtGui.QLineEdit("{0:.2f}".format(self._backToValue))
-        self.backTo.setMinimumSize(QtCore.QSize(60,0))
-        self.backTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.backTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.backTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.backTo.setObjectName("backTo")
         self.topHorizontalLayoutBack.addWidget(self.label)
         self.topHorizontalLayoutBack.addWidget(self.backFrom)
         self.topHorizontalLayoutBack.addWidget(self.backTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #low resolution
+        # low resolution
         self.topHorizontalLayoutLowres = QtGui.QHBoxLayout()
         self.label = QtGui.QLabel("Low resolution axis")
         self.lowresFrom = QtGui.QLineEdit("{0:.2f}".format(self._lowresFromValue))
-        self.lowresFrom.setMinimumSize(QtCore.QSize(60,0))
-        self.lowresFrom.setMaximumSize(QtCore.QSize(60,16777215))
+        self.lowresFrom.setMinimumSize(QtCore.QSize(60, 0))
+        self.lowresFrom.setMaximumSize(QtCore.QSize(60, 16777215))
         self.lowresFrom.setObjectName("lowresFrom")
         self.lowresTo = QtGui.QLineEdit("{0:.2f}".format(self._lowresToValue))
-        self.lowresTo.setMinimumSize(QtCore.QSize(60,0))
-        self.lowresTo.setMaximumSize(QtCore.QSize(60,16777215))
+        self.lowresTo.setMinimumSize(QtCore.QSize(60, 0))
+        self.lowresTo.setMaximumSize(QtCore.QSize(60, 16777215))
         self.lowresTo.setObjectName("lowresTo")
         self.topHorizontalLayoutLowres.addWidget(self.label)
         self.topHorizontalLayoutLowres.addWidget(self.lowresFrom)
         self.topHorizontalLayoutLowres.addWidget(self.lowresTo)
 
-        #spacer
-        spacerItem = QtGui.QSpacerItem(40,20,QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        # spacer
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
 
-        #linear and log
+        # linear and log
         self.topHorizontalLayoutRight = QtGui.QHBoxLayout()
         self.linear = QtGui.QRadioButton("Linear")
         self.linear.setChecked(True)
@@ -207,7 +207,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.topHorizontalLayout.addItem(spacerItem)
         self.topHorizontalLayout.addLayout(self.topHorizontalLayoutRight)
 
-        #Plot and toolbar
+        # Plot and toolbar
         self.main_frame = QtGui.QWidget(self)
 
         self.dpi = 100
@@ -216,14 +216,14 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
 
-#        self.axes = self.fig.add_subplot(111)
+        # self.axes = self.fig.add_subplot(111)
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
 
         plot_vbox = QtGui.QVBoxLayout()
         plot_vbox.addWidget(self.canvas)
         plot_vbox.addWidget(self.mpl_toolbar)
 
-        #peak and background input
+        # peak and background input
         self.bottomHorizontalLayout = QtGui.QHBoxLayout()
 
         vbox = QtGui.QVBoxLayout()
@@ -271,7 +271,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.backSwitch.setChecked(not bPeak)
 
         if bPeak:
-#            class_name = self.from_peak_input.__class__.__name__
+            # class_name = self.from_peak_input.__class__.__name__
             self.peakFrom.setStyleSheet(CSS_ACTIVATED)
             self.peakTo.setStyleSheet(CSS_ACTIVATED)
             self.backFrom.setStyleSheet(CSS_DESACTIVATED)
@@ -321,7 +321,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def parse_file(self, filename):
         """ parse a text file to extract letters frequencies """
         # lower-case letter ordinal numbers
-        for i in range(97,122+1):
+        for i in range(97, 122 + 1):
             letters[chr(i)] = 0
 
         # parse the input file
@@ -329,7 +329,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
             for line in f:
                 for char in line:
                     # counts only letters
-                    if ord(char.lower()) in range(97, 122+1):
+                    if ord(char.lower()) in range(97, 122 + 1):
                         letters[char.lower()] += 1
 
         # compute the ordered list of keys and relative values
@@ -357,108 +357,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
                 rect._refresh()
             return
 
-        class DraggableRectangle:
-
-            def __init__(self, rect, type, super, parent):
-                self.rect = rect
-                self.xpress = None
-                self.type = type  # peak_from, peak_to, back_from, back_to...
-                self.super = super
-                self.parent = parent
-
-            def connect(self):
-                'connect to all the events we need'
-                self.cidpress = self.rect.figure.canvas.mpl_connect(
-                    'button_press_event', self.on_press)
-                self.cidrelease = self.rect.figure.canvas.mpl_connect(
-                    'button_release_event', self.on_release)
-                self.cidmotion = self.rect.figure.canvas.mpl_connect(
-                    'motion_notify_event', self.on_motion)
-
-            def on_press(self, event):
-                'on button press we will see if the mouse is over us and store some data'
-                if event.inaxes != self.rect.axes:
-                    return
-
-                contains, _attrd = self.rect.contains(event)
-                if not contains:
-                    return
-                self.xpress = event.xdata
-
-            def on_motion(self, event):
-                """on motion we will move the rect if the mouse is over us"""
-                if self.xpress is None:
-                    return
-                if event.inaxes != self.rect.axes:
-                    return
-                x0 = event.xdata
-                _x0_format = '{0:.2f}'.format(x0)
-                _x0_parent_format = str(int(round(x0)))
-                _summary = self.parent._summary
-                if self.super.dataType == 'data':
-                    parent_data_peak_from = _summary.data_peak_from_pixel
-                    parent_data_peak_to = _summary.data_peak_to_pixel
-                    parent_back_peak_from = _summary.data_background_from_pixel1
-                    parent_back_peak_to = _summary.data_background_to_pixel1
-                    parent_x_min = _summary.x_min_edit
-                    parent_x_max = _summary.x_max_edit
-                else:
-                    parent_data_peak_from = _summary.norm_peak_from_pixel
-                    parent_data_peak_to = _summary.norm_peak_to_pixel
-                    parent_back_peak_from = _summary.norm_background_from_pixel1
-                    parent_back_peak_to = _summary.norm_background_to_pixel1
-                    parent_x_min = _summary.norm_x_min_edit
-                    parent_x_max = _summary.norm_x_max_edit
-
-                if self.type == 'peak_from':
-                    self.super.peakFrom.setText(_x0_format)
-                    parent_data_peak_from.setText(_x0_parent_format)
-                if self.type == 'peak_to':
-                    self.super.peakTo.setText(_x0_format)
-                    parent_data_peak_to.setText(_x0_parent_format)
-                if self.type == 'back_from':
-                    self.super.backFrom.setText(_x0_format)
-                    parent_back_peak_from.setText(_x0_parent_format)
-                if self.type == 'back_to':
-                    self.super.backTo.setText(_x0_format)
-                    parent_back_peak_to.setText(_x0_parent_format)
-                if self.type == 'lowres_from':
-                    self.super.lowresFrom.setText(_x0_format)
-                    parent_x_min.setText(_x0_parent_format)
-                if self.type == 'lowres_to':
-                    self.super.lowresTo.setText(_x0_format)
-                    parent_x_max.setText(_x0_parent_format)
-
-                self.rect.set_xdata(x0)
-                self.rect.figure.canvas.draw()
-
-            def _refresh(self):
-                if self.type == 'peak_from':
-                    x0 = self.super.peakFrom.text()
-                if self.type == 'peak_to':
-                    x0 = self.super.peakTo.text()
-                if self.type == 'back_from':
-                    x0 = self.super.backFrom.text()
-                if self.type == 'back_to':
-                    x0 = self.super.backTo.text()
-                if self.type == 'lowres_from':
-                    x0 = self.super.lowresFrom.text()
-                if self.type == 'lowres_to':
-                    x0 = self.super.lowresTo.text()
-                self.rect.set_xdata(x0)
-                self.rect.figure.canvas.draw()
-
-            def on_release(self, event):
-                """on release we reset the press data"""
-                self.xpress = None
-                self.rect.figure.canvas.draw()
-
-            def disconnect(self):
-                'disconnect all the stored connection ids'
-                self.rect.figure.canvas.mpl_disconnect(self.cidpress)
-                self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
-                self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
-
         parent = self.parent
 
         # top plot will be for peak and background selection
@@ -474,10 +372,10 @@ class DesignerMainWindow(QtGui.QMainWindow):
         else:
             _line, = axes.semilogy(x, y, color='black')
 
-        ymax=max(y)
+        ymax = max(y)
 
         if bLinear:
-            ymin=0
+            ymin = 0
         else:
             ymin = 1
 
@@ -487,22 +385,22 @@ class DesignerMainWindow(QtGui.QMainWindow):
         peakx2 = self._peakToValue
         self.peakTo.setText(str(peakx2))
         if bLinear:
-            rectpeakx1 = axes.plot([peakx1,peakx1],[ymin,ymax], '--', color='blue')
+            rectpeakx1 = axes.plot([peakx1, peakx1], [ymin, ymax], '--', color='blue')
         else:
-            rectpeakx1 = axes.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='blue')
+            rectpeakx1 = axes.semilogy([peakx1, peakx1], [ymin, ymax], '--', color='blue')
 
         for rect in rectpeakx1:
-            dr = DraggableRectangle(rect, 'peak_from', self, parent)
+            dr = _DraggableRectangle(rect, 'peak_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
         if bLinear:
-            rectpeakx2 = axes.plot([peakx2,peakx2],[ymin,ymax], '--', color='blue')
+            rectpeakx2 = axes.plot([peakx2, peakx2], [ymin, ymax], '--', color='blue')
         else:
-            rectpeakx2 = axes.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='blue')
+            rectpeakx2 = axes.semilogy([peakx2, peakx2], [ymin, ymax], '--', color='blue')
 
         for rect in rectpeakx2:
-            dr = DraggableRectangle(rect, 'peak_to', self, parent)
+            dr = _DraggableRectangle(rect, 'peak_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
@@ -512,67 +410,161 @@ class DesignerMainWindow(QtGui.QMainWindow):
         backx2 = self._backToValue
         self.backTo.setText(str(backx2))
         if bLinear:
-            rectbackx1 = axes.plot([backx1,backx1],[ymin,ymax], '--', color='red')
+            rectbackx1 = axes.plot([backx1, backx1], [ymin, ymax], '--', color='red')
         else:
-            rectbackx1 = axes.semilogy([backx1,backx1],[ymin,ymax], '--', color='red')
+            rectbackx1 = axes.semilogy([backx1, backx1], [ymin, ymax], '--', color='red')
 
         for rect in rectbackx1:
-            dr = DraggableRectangle(rect, 'back_from', self, parent)
+            dr = _DraggableRectangle(rect, 'back_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
         if bLinear:
-            rectbackx2 = axes.plot([backx2,backx2],[ymin,ymax], '--', color='red')
+            rectbackx2 = axes.plot([backx2, backx2], [ymin, ymax], '--', color='red')
         else:
-            rectbackx2 = axes.semilogy([backx2,backx2],[ymin,ymax], '--', color='red')
+            rectbackx2 = axes.semilogy([backx2, backx2], [ymin, ymax], '--', color='red')
 
         for rect in rectbackx2:
-            dr = DraggableRectangle(rect, 'back_to', self, parent)
+            dr = _DraggableRectangle(rect, 'back_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
-        #bottom plot will be for low resolution selection
+        # bottom plot will be for low resolution selection
         axes2 = self.fig.add_subplot(212)
 
         x = self.x2
         y = self.y2
 
         if bLinear:
-            _line2, = axes2.plot(x,y,color='black')
+            _line2, = axes2.plot(x, y, color='black')
         else:
-            _line2, = axes2.semilogy(x,y,color='black')
+            _line2, = axes2.semilogy(x, y, color='black')
 
-        ymax=max(y)
-        if bLinear:
-            ymin=0
-        else:
-            ymin = 1
+        ymax = max(y)
 
-        #low resolution range
+        # low resolution range
         peakx1 = self._lowresFromValue
         self.lowresFrom.setText(str(peakx1))
         peakx2 = self._lowresToValue
         self.lowresTo.setText(str(peakx2))
         if bLinear:
-            rectpeakx1 = axes2.plot([peakx1,peakx1],[ymin,ymax], '--', color='green')
-            rectpeakx2 = axes2.plot([peakx2,peakx2],[ymin,ymax], '--', color='green')
+            rectpeakx1 = axes2.plot([peakx1, peakx1], [ymin, ymax], '--', color='green')
+            rectpeakx2 = axes2.plot([peakx2, peakx2], [ymin, ymax], '--', color='green')
         else:
-            rectpeakx1 = axes2.semilogy([peakx1,peakx1],[ymin,ymax], '--', color='green')
-            rectpeakx2 = axes2.semilogy([peakx2,peakx2],[ymin,ymax], '--', color='green')
+            rectpeakx1 = axes2.semilogy([peakx1, peakx1], [ymin, ymax], '--', color='green')
+            rectpeakx2 = axes2.semilogy([peakx2, peakx2], [ymin, ymax], '--', color='green')
 
-#        self.drs2 = []
         for rect in rectpeakx1:
-            dr = DraggableRectangle(rect, 'lowres_from', self, parent)
+            dr = _DraggableRectangle(rect, 'lowres_from', self, parent)
             dr.connect()
             self.drs.append(dr)
 
         for rect in rectpeakx2:
-            dr = DraggableRectangle(rect, 'lowres_to', self, parent)
+            dr = _DraggableRectangle(rect, 'lowres_to', self, parent)
             dr.connect()
             self.drs.append(dr)
 
         self.canvas.draw()
 
-        #set the x-axes range visible
+        # set the x-axes range visible
         axes.set_xlim(self.peak_back_xlim)
         axes2.set_xlim(self.low_res_xlim)
+
+
+class _DraggableRectangle:
+    def __init__(self, rect, type, super, parent):
+        self.rect = rect
+        self.xpress = None
+        self.type = type  # peak_from, peak_to, back_from, back_to...
+        self.super = super
+        self.parent = parent
+
+    def connect(self):
+        """connect to all the events we need"""
+        self.cidpress = self.rect.figure.canvas.mpl_connect('button_press_event', self.on_press)
+        self.cidrelease = self.rect.figure.canvas.mpl_connect('button_release_event', self.on_release)
+        self.cidmotion = self.rect.figure.canvas.mpl_connect('motion_notify_event', self.on_motion)
+
+    def on_press(self, event):
+        """on button press we will see if the mouse is over us and store some data"""
+        if event.inaxes != self.rect.axes:
+            return
+
+        contains, _attrd = self.rect.contains(event)
+        if not contains:
+            return
+        self.xpress = event.xdata
+
+    def on_motion(self, event):
+        """on motion we will move the rect if the mouse is over us"""
+        if self.xpress is None:
+            return
+        if event.inaxes != self.rect.axes:
+            return
+        x0 = event.xdata
+        _x0_format = '{0:.2f}'.format(x0)
+        _x0_parent_format = str(int(round(x0)))
+        _summary = self.parent._summary
+        if self.super.dataType == 'data':
+            parent_data_peak_from = _summary.data_peak_from_pixel
+            parent_data_peak_to = _summary.data_peak_to_pixel
+            parent_back_peak_from = _summary.data_background_from_pixel1
+            parent_back_peak_to = _summary.data_background_to_pixel1
+            parent_x_min = _summary.x_min_edit
+            parent_x_max = _summary.x_max_edit
+        else:
+            parent_data_peak_from = _summary.norm_peak_from_pixel
+            parent_data_peak_to = _summary.norm_peak_to_pixel
+            parent_back_peak_from = _summary.norm_background_from_pixel1
+            parent_back_peak_to = _summary.norm_background_to_pixel1
+            parent_x_min = _summary.norm_x_min_edit
+            parent_x_max = _summary.norm_x_max_edit
+
+        if self.type == 'peak_from':
+            self.super.peakFrom.setText(_x0_format)
+            parent_data_peak_from.setText(_x0_parent_format)
+        elif self.type == 'peak_to':
+            self.super.peakTo.setText(_x0_format)
+            parent_data_peak_to.setText(_x0_parent_format)
+        elif self.type == 'back_from':
+            self.super.backFrom.setText(_x0_format)
+            parent_back_peak_from.setText(_x0_parent_format)
+        elif self.type == 'back_to':
+            self.super.backTo.setText(_x0_format)
+            parent_back_peak_to.setText(_x0_parent_format)
+        elif self.type == 'lowres_from':
+            self.super.lowresFrom.setText(_x0_format)
+            parent_x_min.setText(_x0_parent_format)
+        elif self.type == 'lowres_to':
+            self.super.lowresTo.setText(_x0_format)
+            parent_x_max.setText(_x0_parent_format)
+
+        self.rect.set_xdata(x0)
+        self.rect.figure.canvas.draw()
+
+    def _refresh(self):
+        if self.type == 'peak_from':
+            x0 = self.super.peakFrom.text()
+        elif self.type == 'peak_to':
+            x0 = self.super.peakTo.text()
+        elif self.type == 'back_from':
+            x0 = self.super.backFrom.text()
+        elif self.type == 'back_to':
+            x0 = self.super.backTo.text()
+        elif self.type == 'lowres_from':
+            x0 = self.super.lowresFrom.text()
+        elif self.type == 'lowres_to':
+            x0 = self.super.lowresTo.text()
+        self.rect.set_xdata(x0)
+        self.rect.figure.canvas.draw()
+
+    def on_release(self, event):
+        """on release we reset the press data"""
+        self.xpress = None
+        self.rect.figure.canvas.draw()
+
+    def disconnect(self):
+        """disconnect all the stored connection ids"""
+        self.rect.figure.canvas.mpl_disconnect(self.cidpress)
+        self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
+        self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
