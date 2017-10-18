@@ -47,11 +47,9 @@ class NXEventDataLoader
 public:
   NXEventDataLoader(const H5::Group &group, std::vector<std::string> bankNames);
 
-  void setBankIndex(const size_t bank) override;
+  PulseTimeGenerator<IndexType, TimeZeroType>
+  setBankIndex(const size_t bank) override;
 
-  const std::vector<IndexType> &eventIndex() const override;
-  const std::vector<TimeZeroType> &eventTimeZero() const override;
-  int64_t eventTimeZeroOffset() const override;
   void readEventID(int32_t *event_id, size_t start,
                    size_t count) const override;
   void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start,
@@ -63,9 +61,6 @@ private:
   const std::vector<std::string> m_bankNames;
   const std::string m_id_path;
   const std::string m_time_offset_path;
-  std::vector<IndexType> m_index;
-  std::vector<TimeZeroType> m_time_zero;
-  int64_t m_time_zero_offset{0};
 };
 
 namespace detail {
@@ -114,41 +109,23 @@ NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::NXEventDataLoader(
     const H5::Group &group, std::vector<std::string> bankNames)
     : m_root(group), m_bankNames(std::move(bankNames)) {}
 
+/// Set the bank index and return a PulseTimeGenerator for that bank.
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::setBankIndex(
+PulseTimeGenerator<IndexType, TimeZeroType>
+NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::setBankIndex(
     const size_t bank) {
   m_group = m_root.openGroup(m_bankNames[bank]);
-  m_index = detail::read<IndexType>(m_group, "event_index");
-  m_time_zero = detail::read<TimeZeroType>(m_group, "event_time_zero");
   const auto dataSet = m_group.openDataSet("event_time_zero");
+  int64_t time_zero_offset{0};
   if (dataSet.attrExists("offset")) {
     const auto &attr = dataSet.openAttribute("offset");
     std::string offset;
     attr.read(attr.getDataType(), offset);
-    m_time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
+    time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
   }
-}
-
-/// Returns a reference to the vector read from event_index.
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-const std::vector<IndexType> &
-NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::eventIndex() const {
-  return m_index;
-}
-
-/// Returns a reference to the vector read from event_time_zero.
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-const std::vector<TimeZeroType> &
-NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType>::eventTimeZero()
-    const {
-  return m_time_zero;
-}
-
-/// Returns the offset attribute read from event_time_zero, in nano seconds.
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-int64_t NXEventDataLoader<IndexType, TimeZeroType,
-                          TimeOffsetType>::eventTimeZeroOffset() const {
-  return m_time_zero_offset;
+  return {detail::read<IndexType>(m_group, "event_index"),
+          detail::read<TimeZeroType>(m_group, "event_time_zero"),
+          time_zero_offset};
 }
 
 /// Read subset given by start and count from event_id and write it into buffer.

@@ -167,7 +167,7 @@ public:
   void testExtractEventsFull() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = gen.generateBasicRange(0);
@@ -190,7 +190,7 @@ public:
   void testExtractEventsPartial() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = Chunker::LoadRange{0, 5, 100};
@@ -214,7 +214,7 @@ public:
   void testParsingFull_1Pulse_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -228,7 +228,7 @@ public:
   void testParsingFull_1Rank_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -246,7 +246,8 @@ public:
     auto parser = gen.generateTestParser();
 
     for (int i = 0; i < numBanks; i++) {
-      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero(), 0);
+      parser->setPulseTimeGenerator(
+          {gen.eventIndex(i), gen.eventTimeZero(), 0});
       auto event_id = gen.eventId(i);
       auto event_time_offset = gen.eventTimeOffset(i);
 
@@ -260,7 +261,7 @@ public:
   void testParsingFull_InParts_1Rank_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
     auto parser = gen.generateTestParser();
-    parser->setPulseInformation(gen.eventIndex(0), gen.eventTimeZero(), 0);
+    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -288,7 +289,8 @@ public:
     auto parser = gen.generateTestParser();
 
     for (size_t bank = 0; bank < numBanks; bank++) {
-      parser->setPulseInformation(gen.eventIndex(bank), gen.eventTimeZero(), 0);
+      parser->setPulseTimeGenerator(
+          {gen.eventIndex(bank), gen.eventTimeZero(), 0});
       auto event_id = gen.eventId(bank);
       auto event_time_offset = gen.eventTimeOffset(bank);
 
@@ -355,7 +357,8 @@ public:
 
   void testCompletePerformance() {
     for (size_t i = 0; i < NUM_BANKS; ++i) {
-      parser->setPulseInformation(gen.eventIndex(i), gen.eventTimeZero(), 0);
+      parser->setPulseTimeGenerator(
+          {gen.eventIndex(i), gen.eventTimeZero(), 0});
       parser->startAsync(event_ids[i].data(), event_time_offsets[i].data(),
                          gen.generateBasicRange(i));
       parser->wait();

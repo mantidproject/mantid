@@ -7,6 +7,7 @@
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
+#include "MantidParallel/IO/PulseTimeGenerator.h"
 
 namespace Mantid {
 namespace Parallel {
@@ -70,14 +71,9 @@ void load(
   int64_t previousBank = -1;
   size_t bufferOffset{0};
   for (const auto &range : ranges) {
-    std::vector<IndexType> eventIndex;
-    std::vector<TimeZeroType> eventTimeZero;
-    int64_t eventTimeZeroOffset{0};
+    PulseTimeGenerator<IndexType, TimeZeroType> pulseTimeGenerator;
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      dataSource.setBankIndex(range.bankIndex);
-      eventIndex = dataSource.eventIndex();
-      eventTimeZero = dataSource.eventTimeZero();
-      eventTimeZeroOffset = dataSource.eventTimeZeroOffset();
+      pulseTimeGenerator = dataSource.setBankIndex(range.bankIndex);
     }
     dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset,
                            range.eventCount);
@@ -86,13 +82,9 @@ void load(
     if (previousBank != -1)
       dataSink.wait();
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      dataSink.setPulseInformation(
-          std::move(eventIndex), std::move(eventTimeZero), eventTimeZeroOffset);
+      dataSink.setPulseTimeGenerator(std::move(pulseTimeGenerator));
       previousBank = range.bankIndex;
     }
-    // parser can assume that event_index and event_time_zero stay the same and
-    // chunks are ordered, i.e., current position in event_index can be reused,
-    // no need to iterate in event_index from the start for every chunk.
     dataSink.startAsync(event_id.data() + bufferOffset,
                         event_time_offset.data() + bufferOffset, range);
     bufferOffset = (bufferOffset + chunkSize) % (2 * chunkSize);

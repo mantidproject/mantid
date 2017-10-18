@@ -43,25 +43,21 @@ namespace {
 
 class FakeDataSource : public NXEventDataSource<int64_t, int64_t, int32_t> {
 public:
-  void setBankIndex(const size_t bank) override {
+  PulseTimeGenerator<int64_t, int64_t>
+  setBankIndex(const size_t bank) override {
     m_bank = bank;
-    m_index = std::vector<int64_t>{0, 100, 100,
-                                   300 * static_cast<int64_t>(m_bank + 1),
-                                   500 * static_cast<int64_t>(m_bank + 1),
-                                   700 * static_cast<int64_t>(m_bank + 1)};
-    m_time_zero.clear();
-    for (size_t i = 0; i < m_index.size(); ++i)
-      m_time_zero.push_back(static_cast<int64_t>(100000 * i + bank));
-  }
+    auto index = std::vector<int64_t>{0, 100, 100,
+                                      300 * static_cast<int64_t>(m_bank + 1),
+                                      500 * static_cast<int64_t>(m_bank + 1),
+                                      700 * static_cast<int64_t>(m_bank + 1)};
+    std::vector<int64_t> time_zero;
+    for (size_t i = 0; i < index.size(); ++i)
+      time_zero.push_back(static_cast<int64_t>(100000 * i + bank));
 
-  const std::vector<int64_t> &eventIndex() const override { return m_index; }
-  const std::vector<int64_t> &eventTimeZero() const override {
-    return m_time_zero;
-  }
-
-  int64_t eventTimeZeroOffset() const override {
     // Drift depening on bank to ensure correct offset is used for every bank.
-    return 123456789 + 1000000 * m_bank;
+    int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
+
+    return {index, time_zero, time_zero_offset};
   }
 
   void readEventID(int32_t *event_id, size_t start,
@@ -81,8 +77,6 @@ public:
 private:
   const size_t m_pixelsPerBank{77};
   size_t m_bank;
-  std::vector<int64_t> m_index;
-  std::vector<int64_t> m_time_zero;
 };
 
 void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {

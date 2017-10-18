@@ -80,9 +80,7 @@ public:
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
-  void setPulseInformation(std::vector<IndexType> event_index,
-                           std::vector<TimeZeroType> event_time_zero,
-                           const int64_t event_time_zero_offset);
+  void setPulseTimeGenerator(PulseTimeGenerator<IndexType, TimeZeroType> &&gen);
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
@@ -131,20 +129,11 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
       m_bankOffsets(std::move(bankOffsets)),
       m_eventLists(std::move(eventLists)) {}
 
-/** Sets the event_index and event_time_zero read from I/O which is used for
- * parsing events from file/event stream.
- *
- * @param event_index The event_index entry from the NXevent_data group.
- * @param event_time_zero The event_time_zero entry from the NXevent_data group.
- */
+/// Set the PulseTimeGenerator to use for parsing subsequent events.
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
-    std::vector<IndexType> event_index,
-    std::vector<TimeZeroType> event_time_zero,
-    const int64_t event_time_zero_offset) {
-  m_pulseTimes = PulseTimeGenerator<IndexType, TimeZeroType>(
-      std::move(event_index), std::move(event_time_zero),
-      event_time_zero_offset);
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
+    setPulseTimeGenerator(PulseTimeGenerator<IndexType, TimeZeroType> &&gen) {
+  m_pulseTimes = std::move(gen);
 }
 
 /** Extracts event information from the list of time offsets and global spectrum
