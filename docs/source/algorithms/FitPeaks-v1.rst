@@ -39,10 +39,25 @@ The following information are required.
 * Background type (flat or linear);
 * Starting values of peak parameters;
 
+For better results
+==================
+
+* Peak fit window: this is an option
+
+  a. specified by user
+  b. figured out by FindPeakBackground, first moments and second moments
+
+* Peak position tolerance: there could be three cases for how the peak position tolerance is specified.
+
+  a. specified by user
+  b. defined by peak windows
+  c. half distance to the neighboring peak (if not (a) and not (b))
+  d. whole range of X-axis (if there is one and only one peak in a spectrum)
+
 
 
 Descrption of algorithm
-=======================
+#######################
 
 For each spectrum, it is assumed that there are N peaks to fit.
 The fitting starts from either the peak at the smallest X value or the largest X values depending on the 

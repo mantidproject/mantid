@@ -4,6 +4,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -57,11 +59,11 @@ private:
 
   /// suites of method to fit peaks
   void fitPeaks();
-  void fitSpectrumPeaks(size_t wi, std::vector<double> &peak_pos_vec,
-                        std::vector<std::vector<double>> &peak_params,
-                        std::vector<double> &peak_chi2_vec,
-                        std::vector<std::vector<double>> &fitted_functions,
-                        std::vector<std::vector<double>> &fitted_peak_windows);
+  void
+  fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_peak_centers,
+                   std::vector<double> &fitted_peak_centers,
+                   std::vector<std::vector<double>> &fitted_function_parameters,
+                   std::vector<double> &peak_chi2_vec);
   // Peak fitting suite
   double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                            API::IFunction_sptr peakbkgdfunc,
@@ -107,14 +109,17 @@ private:
       std::vector<double> &peak_chi2_vec);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks(API::IFunction_sptr peakbkgdfunction);
+  void calculateFittedPeaks();
 
   //  std::vector<size_t> getRange(size_t wi,
   //                               const std::vector<double> &peak_window);
 
   size_t getXIndex(size_t wi, double x);
 
+  /// main method to create output workspaces
   void generateOutputWorkspaces();
+  /// create table workspace for fitted parameter value
+  void genearateFittedParameterTable(const std::string &param_table_name);
 
   //  double processFitResult(DataObjects::TableWorkspace_sptr param_table,
   //                          std::vector<double> &param_values,
@@ -124,9 +129,9 @@ private:
 
 
   /// Write result of peak fit per spectrum to output analysis workspaces
-  void writeFitResult(size_t wi, const std::vector<double> &peak_positions,
+  void writeFitResult(size_t wi, const std::vector<double> &expected_positions,
+                      std::vector<double> &fitted_positions,
                       std::vector<std::vector<double>> &peak_parameters,
-                      std::vector<std::vector<double>> &fitted_peaks,
                       std::vector<double> &peak_chi2_vec);
 
   /// estimate linear background
@@ -134,10 +139,31 @@ private:
                                 double right_window_boundary, double &bkgd_a1,
                                 double &bkgd_a0);
 
-  API::MatrixWorkspace_const_sptr m_inputWS;
-  DataObjects::EventWorkspace_const_sptr m_eventWS;
+  /// set peak positions tolerance
+  void setPeakPosTolerance();
+
+  //------- Workspaces
+  //-------------------------------------------------------------
+  /// mandatory input and output workspaces
+  API::MatrixWorkspace_const_sptr m_inputMatrixWS;
+  DataObjects::EventWorkspace_const_sptr m_inputEventWS; // cast from m_inputWS
+  API::MatrixWorkspace_sptr m_outputWS; // output workspace for peak positions
+
+  /// optional output analysis workspaces
+  /// table workspace for fitted parameters
+  API::ITableWorkspace_sptr m_fittedParamTable;
+
+  /// FIXME - will be replaed by m_fittedParaTable output workspace for all peak
+  /// parameters
+  // API::MatrixWorkspace_sptr m_peakParamsWS;
+  /// matrix workspace contained calcalated peaks+background from fitted result
+  API::MatrixWorkspace_sptr m_fittedPeakWS;
+
+  /// matrix workspace contains number of events of each spectrum
   API::MatrixWorkspace_const_sptr m_eventNumberWS;
 
+  //-------- Functions
+  //-------------------------------------------------------------
   /// Peak profile name
   API::IPeakFunction_sptr m_peakFunction;
   /// Background function
@@ -148,14 +174,21 @@ private:
   /// Cost function
   std::string m_costFunction;
 
+  //-------- Peak centers (expected)
+  //-------------------------------------------------
   /// Designed peak positions and tolerance
   std::vector<double> m_peakCenters;
   API::MatrixWorkspace_const_sptr m_peakCenterWorkspace;
-  bool m_uniformPeakPositions;
-  bool m_partialSpectra; // flag whether the peak center workspace has only
-                         // spectra to fit
-  std::vector<double> m_peakPosTolerances;
   size_t m_numPeaksToFit;
+  bool m_uniformPeakPositions;
+
+  /// start index
+  size_t m_startWorkspaceIndex;
+  /// stop index
+  size_t m_stopWorkspaceIndex;
+  /// flag whether the peak center workspace has only a subset of spectra to fit
+  bool m_partialSpectra;
+  std::vector<double> m_peakPosTolerances;
 
   /// peak windows
   std::vector<std::vector<double>> m_peakWindowVector;
@@ -176,13 +209,7 @@ private:
   double m_minHeight; // TODO - Implement in init() and processInput()
   double m_minPeakMaxValue;
 
-  API::MatrixWorkspace_sptr m_peakPosWS; // output workspace
-  API::MatrixWorkspace_sptr
-      m_peakParamsWS; // output workspace for all peak parameters
-  API::MatrixWorkspace_sptr m_fittedPeakWS;
-
-  size_t m_startWorkspaceIndex;
-  size_t m_stopWorkspaceIndex;
+  bool m_checkPeakPositionByTolerance;
 
   /// flag for high background
   bool m_highBackground;
