@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
+import six
 import numpy as np
 from mantid.kernel import Atom
 
@@ -33,9 +34,10 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
             # create dummy lattice vectors
             self._generates_lattice_vectors(data=data)
 
+            masses = self._read_masses_from_file(file_obj=gaussian_file)
             # move file pointer to the last optimized atomic positions
             self._parser.find_last(file_obj=gaussian_file, msg="Input orientation:")
-            self._read_atomic_coordinates(file_obj=gaussian_file, data=data)
+            self._read_atomic_coordinates(file_obj=gaussian_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements for a molecule
             self._parser.find_first(file_obj=gaussian_file,
@@ -48,11 +50,13 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
             # return AbinsData object
             return self._rearrange_data(data=data)
 
-    def _read_atomic_coordinates(self, file_obj=None, data=None):
+    def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
         """
         Reads atomic coordinates from .log GAUSSIAN file.
+
         :param file_obj: file object from which we read
         :param data: Python dictionary to which atoms data should be added
+        :param masses_from_file:  masses read from an ab initio output file
         """
         atoms = {}
         atom_indx = 0
@@ -78,6 +82,8 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
                                                   "coord": coord}
 
             atom_indx += 1
+        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file)
+
         self._num_atoms = len(atoms)
         data["atoms"] = atoms
 
@@ -177,3 +183,24 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
             l = file_obj.readline().split()
             num_atom += 1
         self._num_read_freq += freq_per_line
+
+    def _read_masses_from_file(self, file_obj=None):
+        masses = []
+        pos = file_obj.tell()
+        self._parser.find_first(file_obj=file_obj, msg="Thermochemistry")
+
+        end_msg = "Molecular mass:"
+        key = "Atom"
+        if six.PY3:
+            end_msg = bytes(end_msg, "utf8")
+            key = bytes(key, "utf8")
+
+        while not self._parser.file_end(file_obj=file_obj):
+
+            line = file_obj.readline()
+            if end_msg in line:
+                break
+            if key in line:
+                masses.append(float(line.split()[-1]))
+        file_obj.seek(pos)
+        return masses

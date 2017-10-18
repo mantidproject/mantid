@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
+import six
 import numpy as np
 from math import sqrt
 from mantid.kernel import Atom
@@ -38,7 +39,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
             self._read_lattice_vectors(obj_file=dmol3_file, data=data)
 
             # read info about atoms and construct atom data
-            self._read_atomic_coordinates(file_obj=dmol3_file, data=data)
+            masses = self._read_masses_from_file(obj_file=dmol3_file)
+            self._read_atomic_coordinates(file_obj=dmol3_file, data=data, masses_from_file=masses)
 
             # read frequencies, corresponding atomic displacements and construct k-points data
             self._parser.find_first(file_obj=dmol3_file, msg="Frequencies (cm-1) and normal modes ")
@@ -75,11 +77,13 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         au2ang = AbinsModules.AbinsConstants.ATOMIC_LENGTH_2_ANGSTROM
         return float(string) * au2ang
 
-    def _read_atomic_coordinates(self, file_obj=None, data=None):
+    def _read_atomic_coordinates(self, file_obj=None, data=None, masses_from_file=None):
         """
         Reads atomic coordinates from .outmol DMOL3 file.
+
         :param file_obj: file object from which we read
         :param data: Python dictionary to which atoms data should be added
+        :param masses_from_file: masses read from an ab initio output file
         """
         atoms = {}
         atom_indx = 0
@@ -101,6 +105,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
                                                   "coord": np.asarray(entries[1:]).astype(dtype=float_type) * au2ang}
 
             atom_indx += 1
+
+        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file)
 
         data["atoms"] = atoms
 
@@ -235,3 +241,23 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
             container.append(complex(0.0, float(floated_item)) * sqrt(mass))
         else:
             raise ValueError("Real or imaginary part of complex number was expected.")
+
+    def _read_masses_from_file(self, obj_file):
+        masses = []
+        pos = obj_file.tell()
+        self._parser.find_first(file_obj=obj_file, msg="Zero point vibrational energy:      ")
+
+        end_msg = "Molecular Mass:"
+        key = "Atom"
+        if six.PY3:
+            end_msg = bytes(end_msg, "utf8")
+            key = bytes(key, "utf8")
+
+        while not self._parser.file_end(file_obj=obj_file):
+            line = obj_file.readline()
+            if end_msg in line:
+                break
+            if key in line:
+                masses.append(float(line.split()[-1]))
+        obj_file.seek(pos)
+        return masses

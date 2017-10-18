@@ -1,5 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import io
+import six
 import numpy as np
 import AbinsModules
 from mantid.kernel import Atom, logger
@@ -378,7 +379,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         :param coord_lines: list with information about atoms
         """
         data.update({"atoms": dict()})
-        eps = AbinsModules.AbinsConstants.MASS_EPS
+
         for i, line in enumerate(coord_lines):
             l = line.split()
             symbol = str(l[2].decode("utf-8").capitalize())
@@ -388,20 +389,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
                 "symbol": symbol, "mass": atom.mass, "sort": i,
                 "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
 
-        # check if isotopic substitution in the system and update mass if necessary:
-        num_atoms = len(data["atoms"])
-        isotopes_found = any([abs(round(data["atoms"]["atom_%s" % i]["mass"]) - round(atoms_masses[i])) > eps
-                              for i in range(num_atoms)])
-        if isotopes_found:
-            for i in range(num_atoms):
-                z_num = Atom(symbol=data["atoms"]["atom_{}".format(i)]["symbol"]).z_number
-                a_num = int(round(atoms_masses[i]))
-                try:
-                    temp = Atom(a_number=a_num, z_number=z_num).mass
-                    data["atoms"]["atom_{}".format(i)]["mass"] = temp
-                # no mass for isotopes available; assume no isotopic substitution for this atom
-                except RuntimeError:
-                    pass
+        self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses)
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              weights=None, k_coordinates=None, unit_cell=None):
@@ -543,6 +531,11 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         file_obj.readline()  # blank line
         end_message = ["INFORMATION", "*******************************************************************************",
                        "GAMMA"]
+
+        if six.PY3:
+            for i, item in enumerate(end_message):
+                end_message[i] = bytes(item, "utf8")
+
         while not self._parser.file_end(file_obj=file_obj):
 
             line = file_obj.readline()

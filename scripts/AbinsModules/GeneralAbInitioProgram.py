@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import logger
 import AbinsModules
 import six
+from mantid.kernel import Atom
 
 
 class GeneralAbInitioProgramName(type):
@@ -203,3 +204,26 @@ class GeneralAbInitioProgram(object):
             logger.notice(str(ab_initio_data) + " from ab initio input file has been loaded.")
 
         return ab_initio_data
+
+    def check_isotopes_substitution(self, atoms=None, masses=None):
+        """
+        Updates atomic mass in case of isotopes.
+        :param atoms: dictionary with atoms to check
+        :param masses: atomic masses read from an ab initio file
+        """
+        num_atoms = len(atoms)
+        eps = AbinsModules.AbinsConstants.MASS_EPS
+        isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
+                              for i in range(num_atoms)]
+
+        if any(isotopes_found):
+            for i in range(num_atoms):
+                if isotopes_found[i]:
+                    z_num = Atom(symbol=atoms["atom_{}".format(i)]["symbol"]).z_number
+                    a_num = int(round(masses[i]))
+                    try:
+                        temp = Atom(a_number=a_num, z_number=z_num).mass
+                        atoms["atom_{}".format(i)]["mass"] = temp
+                    # no mass for isotopes available; assume no isotopic substitution for this atom
+                    except RuntimeError:
+                        pass

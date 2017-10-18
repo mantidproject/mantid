@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 import AbinsModules
-
+from  mantid.kernel import Atom
 
 class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
     """
@@ -51,7 +51,7 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
         :returns: List of ions in file as list of tuple of (ion, mode number)
         """
         file_data = {"atoms": {}}
-
+        masses_from_file = []
         while True:
             line = f_handle.readline()
 
@@ -85,20 +85,23 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
                         # H:D1
                         # H:D2
                         symbol = "H"
-
+                    masses_from_file.append(float(line_data[5]))
                     ion = {"symbol": symbol,
                            "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
                                              float(line_data[2]) * file_data['unit_cell'][1] +
                                              float(line_data[3]) * file_data['unit_cell'][2]),
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "sort": indx,
-                           "mass": float(line_data[5])}
+                           "mass": Atom(symbol=symbol).mass}
                     file_data["atoms"].update({"atom_%s" % indx: ion})
+
+            self.check_isotopes_substitution(atoms=file_data["atoms"], masses=masses_from_file)
 
             if 'END header' in line:
                 if self._num_atoms is None or self._num_phonons is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
+
 
                 # ----------------------------------------------------------------------------------------
 
