@@ -1,6 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_FINDFILESTHREADPOOLMANAGER_H_
 #define MANTIDQTMANTIDWIDGETS_FINDFILESTHREADPOOLMANAGER_H_
 
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 
 #include <QRunnable>
@@ -16,7 +17,7 @@ namespace API {
 /**
  * A small helper class to hold the thread pool
  */
-class FindFilesThreadPoolManager {
+class EXPORT_OPT_MANTIDQT_COMMON FindFilesThreadPoolManager {
   typedef std::function<FindFilesWorker *(const FindFilesSearchParameters &)>
       ThreadAllocator;
 

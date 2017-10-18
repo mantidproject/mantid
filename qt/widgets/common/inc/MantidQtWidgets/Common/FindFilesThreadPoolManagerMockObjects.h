@@ -1,7 +1,8 @@
 #ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 #define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
 
-#include "FindFilesThreadPoolManager.h"
+#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 
 #include <QObject>
 
@@ -25,7 +26,7 @@ void qSleep(int ms) {
 namespace MantidQt {
 namespace API {
 
-class FakeFindFilesThread : public FindFilesWorker {
+class EXPORT_OPT_MANTIDQT_COMMON FakeFindFilesThread : public FindFilesWorker {
   Q_OBJECT
 public:
   FakeFindFilesThread(
@@ -46,7 +47,7 @@ private:
   int m_milliseconds;
 };
 
-class FakeMWRunFiles : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
   Q_OBJECT
 public slots:
   /// Slot called when file finding thread has finished.

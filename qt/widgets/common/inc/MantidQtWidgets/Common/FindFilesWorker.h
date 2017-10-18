@@ -1,6 +1,8 @@
 #ifndef MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_
 #define MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_
 
+#include "MantidQtWidgets/Common/DllOption.h"
+
 #include <QObject>
 #include <QRunnable>
 #include <QString>
@@ -47,7 +49,7 @@ struct FindFilesSearchResults {
 /**
  * A class to allow the asynchronous finding of files.
  */
-class FindFilesWorker : public QObject, public QRunnable {
+class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject, public QRunnable {
   Q_OBJECT
 
 signals:
