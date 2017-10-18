@@ -31,12 +31,12 @@ private slots:
   void plotClicked();
   void algorithmComplete(bool error);
   void modelSelection(int selected);
-  void updatePlot(int specNo);
+  void updatePlot();
   void updateProperties(int specNo);
 
 private:
   Mantid::API::IAlgorithm_sptr msdFitAlgorithm(const std::string &model,
-                                               long specMin, long specMax);
+                                               int specMin, int specMax);
   QtProperty *createModel(const QString &modelName,
                           const std::vector<QString> &modelParameters);
   QHash<QString, QString> createParameterToPropertyMap(const QString &model);

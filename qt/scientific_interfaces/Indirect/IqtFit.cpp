@@ -723,7 +723,7 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
   auto fitRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("IqtFitRange");
   auto backgroundRangeSelector =
       m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
-  auto specNo = boost::numeric_cast<size_t>(m_uiForm.spPlotSpectrum->value());
+  auto specNo = m_uiForm.spPlotSpectrum->value();
   bool autoUpdate = specNo > maximumSpectra() || specNo < minimumSpectra() ||
                     m_parameterValues[prop->propertyName()].isEmpty();
 

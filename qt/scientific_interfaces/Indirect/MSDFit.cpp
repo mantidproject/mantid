@@ -62,7 +62,7 @@ void MSDFit::setup() {
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(updatePlot(int)));
+          SLOT(updatePlot()));
 
   connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this,
           SLOT(specMinChanged(int)));
@@ -83,8 +83,8 @@ void MSDFit::run() {
   auto model = m_uiForm.cbModelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
 
-  long specMin = m_uiForm.spSpectraMin->value();
-  long specMax = m_uiForm.spSpectraMax->value();
+  int specMin = m_uiForm.spSpectraMin->value();
+  int specMax = m_uiForm.spSpectraMax->value();
 
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
@@ -108,7 +108,7 @@ void MSDFit::singleFit() {
   // Set the result workspace for Python script export
   auto model = m_uiForm.cbModelInput->currentText();
   QString dataName = m_uiForm.dsSampleInput->getCurrentDataName();
-  long fitSpec = m_uiForm.spPlotSpectrum->value();
+  int fitSpec = m_uiForm.spPlotSpectrum->value();
 
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
@@ -136,8 +136,8 @@ void MSDFit::singleFit() {
  *                will run across all spectrum between the specified
  *                minimum and maximum.
  */
-IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, long specMin,
-                                        long specMax) {
+IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
+                                        int specMax) {
   auto wsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
   double xStart = m_dblManager->value(m_properties["StartX"]);
   double xEnd = m_dblManager->value(m_properties["EndX"]);
@@ -150,8 +150,8 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, long specMin,
   msdAlg->setProperty("Model", model);
   msdAlg->setProperty("XStart", xStart);
   msdAlg->setProperty("XEnd", xEnd);
-  msdAlg->setProperty("SpecMin", specMin);
-  msdAlg->setProperty("SpecMax", specMax);
+  msdAlg->setProperty("SpecMin", boost::numeric_cast<long>(specMin));
+  msdAlg->setProperty("SpecMax", boost::numeric_cast<long>(specMax));
   msdAlg->setProperty("OutputWorkspace", m_pythonExportWsName);
 
   return msdAlg;
@@ -197,16 +197,15 @@ void MSDFit::algorithmComplete(bool error) {
       m_pythonExportWsName + "_Parameters",
       m_parameterToProperty.keys().toSet(), minimumSpectra(), maximumSpectra());
   updateProperties(m_uiForm.spPlotSpectrum->value());
-  updatePlot(m_uiForm.spPlotSpectrum->value());
+  updatePlot();
 
   // Enable plot and save
   m_uiForm.pbPlot->setEnabled(true);
   m_uiForm.pbSave->setEnabled(true);
 }
 
-void MSDFit::updatePlot(int spectrumNo) {
+void MSDFit::updatePlot() {
   const auto groupName = m_pythonExportWsName + "_Workspaces";
-
   IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
@@ -241,7 +240,7 @@ void MSDFit::newDataLoaded(const QString wsName) {
   m_uiForm.spSpectraMax->setMinimum(0);
   m_uiForm.spSpectraMax->setValue(maxWsIndex);
 
-  updatePlot(m_uiForm.spPlotSpectrum->value());
+  updatePlot();
 }
 
 /**
