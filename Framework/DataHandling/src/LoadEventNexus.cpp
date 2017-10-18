@@ -864,11 +864,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     try {
       ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
       loaded = true;
+      shortest_tof = 0.0;
+      longest_tof = 1e10;
     } catch (const std::runtime_error &) {
     }
     safeOpenFile(m_filename);
-    shortest_tof = 0.0;
-    longest_tof = 1e10;
   }
   if (!loaded) {
     bool precount = getProperty("Precount");
