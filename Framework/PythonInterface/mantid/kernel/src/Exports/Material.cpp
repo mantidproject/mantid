@@ -112,18 +112,20 @@ void export_Material() {
                                         const)(&Material::cohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Coherent Scattering Length <b^2> for the given wavelength in fm^2")
+           "Coherent Scattering Length Squared <b^2> for the given wavelength "
+           "in fm^2")
       .def("incohScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::incohScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Incoherent Scattering Length <b^2> for the given wavelength in "
-           "fm^2")
+           "Incoherent Scattering Length Squared <b^2> for the given "
+           "wavelength in fm^2")
       .def("totalScatterLengthSqrd", (double (Material::*)(double) const)(
                                          &Material::totalScatterLengthSqrd),
            (arg("self"),
             arg("lambda") = static_cast<double>(NeutronAtom::ReferenceLambda)),
-           "Total Scattering Length <b^2> for the given wavelength in fm^2")
+           "Total Scattering Length Squared <b^2> for the given wavelength in "
+           "fm^2")
 
       .def("chemicalFormula", &chemicalFormula, arg("self"), "Chemical Formula")
       .def("relativeMolecularMass", &relativeMolecularMass, arg("self"),
