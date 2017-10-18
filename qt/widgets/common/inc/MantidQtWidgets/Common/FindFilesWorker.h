@@ -57,7 +57,6 @@ signals:
 public:
   /// Constructor.
   FindFilesWorker(const FindFilesSearchParameters& parameters);
-  static FindFilesWorker *create();
 
 protected:
   /// Override parent class run().
