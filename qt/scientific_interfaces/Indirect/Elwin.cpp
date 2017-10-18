@@ -293,7 +293,7 @@ void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
       auto params = comp->getNumberParameter("resolution", true);
 
       // set the default instrument resolution
-      if (params.size() > 0) {
+      if (!params.empty()) {
         double res = params[0];
         m_dblManager->setValue(m_properties["IntegrationStart"], -res);
         m_dblManager->setValue(m_properties["IntegrationEnd"], res);
