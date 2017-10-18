@@ -49,7 +49,8 @@ struct FindFilesSearchResults {
 /**
  * A class to allow the asynchronous finding of files.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject, public QRunnable {
+class EXPORT_OPT_MANTIDQT_COMMON FindFilesWorker : public QObject,
+                                                   public QRunnable {
   Q_OBJECT
 
 signals:
