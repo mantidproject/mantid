@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments
+# pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments,C901
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
@@ -402,19 +402,22 @@ class MainWindow(QtGui.QMainWindow):
         # pylint: disable=protected-access
         self.collectionFile = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
-        self.qtUrl = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/HFIRPowderReduction.html'
-        self.externalUrl = 'http://docs.mantidproject.org/nightly/interfaces/HFIRPowderReduction.html'
+        self.qtUrl = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/HFIR Powder Reduction.html'
+        self.externalUrl = 'http://docs.mantidproject.org/nightly/interfaces/HFIR Powder Reduction.html'
 
         # Initial setup for tab
         self.ui.tabWidget.setCurrentIndex(0)
         cache_dir = str(self.ui.lineEdit_cache.text()).strip()
         if len(cache_dir) == 0 or os.path.exists(cache_dir) is False:
             invalid_cache = cache_dir
-            cache_dir = os.getcwd()
+            cache_dir = os.path.expanduser('~')
             self.ui.lineEdit_cache.setText(cache_dir)
-            self._logWarning("Cache directory %s is not valid. "
-                             "Using current workspace directory %s as cache." %
-                             (invalid_cache, cache_dir))
+            if len(invalid_cache) == 0:
+                warning_msg = 'Cache directory is not set. '
+            else:
+                warning_msg = 'Cache directory {0} does not exist. '.format(invalid_cache)
+            warning_msg += 'Using {0} for caching dowloaded file instead.'.format(cache_dir)
+            print ('[WARNING] {0}'.format(warning_msg))
 
         # Get on hold of raw data file
         useserver = self.ui.radioButton_useServer.isChecked()
@@ -575,21 +578,23 @@ class MainWindow(QtGui.QMainWindow):
         """ Show help
         Copied from DGSPlanner
         """
-        self.assistantProcess.close()
-        self.assistantProcess.waitForFinished()
-        helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
-        helpapp += 'assistant'
-        args = ['-enableRemoteControl', '-collectionFile', self.collectionFile, '-showUrl', self.qtUrl]
-        if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
+        try:
+            import pymantidplot
+            pymantidplot.proxies.showCustomInterfaceHelp('HFIR Powder Reduction')
+        except ImportError:
             self.assistantProcess.close()
             self.assistantProcess.waitForFinished()
-            self.assistantProcess.start(helpapp, args)
-            print("Show help from (app) ", helpapp)
-        else:
-            mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
-            print("Show help from (url)", QtCore.QUrl(self.externalUrl))
-
+            helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
+            helpapp += 'assistant'
+            args = ['-enableRemoteControl', '-collectionFile', self.collectionFile, '-showUrl', self.qtUrl]
+            if os.path.isfile(helpapp) and os.path.isfile(self.collectionFile):
+                self.assistantProcess.close()
+                self.assistantProcess.waitForFinished()
+                self.assistantProcess.start(helpapp, args)
+            else:
+                mqt.MantidQt.API.MantidDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
     def _load_spice_data_to_raw_table(self, exp_no, scan_no, data_file_name):
+    # flake8: noqa
         try:
             success = self._myControl.loadSpicePDData(exp_no, scan_no, data_file_name)
             return success, "" if success else "Load data failed."
@@ -2015,7 +2020,7 @@ class MainWindow(QtGui.QMainWindow):
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = urllib.downloadFile(fullurl, srcFileName)
+            status, errmsg = HfirPDReductionControl.downloadFile(fullurl, srcFileName)
             if not status:
                 self._logError(errmsg)
                 srcFileName = None

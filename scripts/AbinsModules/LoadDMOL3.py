@@ -6,23 +6,23 @@ from math import sqrt
 from mantid.kernel import Atom
 
 
-class LoadDMOL3(AbinsModules.GeneralDFTProgram):
+class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading DMOL3 DFT phonon data.
+    Class for loading DMOL3 ab initio vibrational data.
     """
-    def __init__(self, input_dft_filename):
+    def __init__(self, input_ab_initio_filename):
         """
-        :param input_dft_filename: name of file with phonon data (foo.outmol)
+        :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
         """
-        super(LoadDMOL3, self).__init__(input_dft_filename=input_dft_filename)
-        self._dft_program = "DMOL3"
+        super(LoadDMOL3, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
+        self._ab_initio_program = "DMOL3"
         self._norm = 0
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
-        Reads phonon data from DMOL3 output files. Saves frequencies, weights of k-point vectors, k-point vectors,
-        amplitudes of atomic displacements, hash of the phonon file (hash) to <>.hdf5
+        Reads vibrational data from DMOL3 output files. Saves frequencies, weights of k-point vectors,
+        k-point vectors, amplitudes of atomic displacements, hash of file  with vibrational data to <>.hdf5
         :returns: object of type AbinsData.
         """
         data = {}  # container to store read data
@@ -30,8 +30,8 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
         with io.open(self._clerk.get_input_filename(), "rb", ) as dmol3_file:
 
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
-            # geometry optimization. The last calculation in the file is expected to be calculation of vibrational
-            # data. There may be some intermediate resume calculations.
+            # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
+            # There may be some intermediate resume calculations.
             self._parser.find_last(file_obj=dmol3_file, msg="$cell vectors")
 
             # read lattice vectors
@@ -45,7 +45,7 @@ class LoadDMOL3(AbinsModules.GeneralDFTProgram):
             self._read_modes(file_obj=dmol3_file, data=data)
 
             # save data to hdf file
-            self.save_dft_data(data=data)
+            self.save_ab_initio_data(data=data)
 
             # return AbinsData object
             return self._rearrange_data(data=data)
