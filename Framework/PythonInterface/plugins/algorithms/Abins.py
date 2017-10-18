@@ -443,7 +443,11 @@ class Abins(PythonAlgorithm):
         :returns: cross section for that element
         """
         if self._isotopes_found:
-            atom = Atom(a_number=nucleons_number, z_number=protons_number)
+            try:
+                atom = Atom(a_number=nucleons_number, z_number=protons_number)
+            # isotopes are not implemented for all elements so use different constructor in that cases
+            except RuntimeError:
+                atom = Atom(symbol=Atom(z_number=protons_number).symbol)
         else:
             atom = Atom(symbol=Atom(z_number=protons_number).symbol)
 
