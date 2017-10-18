@@ -52,6 +52,8 @@ class FindFilesWorker : public QObject, public QRunnable {
   Q_OBJECT
 
 signals:
+  /// Signal emitted after the search is finished, regardless of whether
+  /// any file was found.
   void finished(const FindFilesSearchResults&);
 
 public:
@@ -68,7 +70,7 @@ private:
   std::pair<std::vector<std::string>, std::string> getFilesFromAlgorithm();
   /// Helper method to create a search result object
   FindFilesSearchResults createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty);
-
+  /// Struct to hold the parameters of the search
   FindFilesSearchParameters m_parameters;
 };
 

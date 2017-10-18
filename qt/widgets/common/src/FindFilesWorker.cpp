@@ -20,7 +20,7 @@ using namespace MantidQt::API;
 /**
  * Constructor.
  *
- * @param parent :: pointer to the parent QObject.
+ * @param parameters :: a struct representing the parameters of the file search
  */
 FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters& parameters)
     : QRunnable(), m_parameters(parameters) {
@@ -35,9 +35,8 @@ FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters& parameters)
  *
  * 1. Files are found directly by the FileFinder.  This is the default case.
  * 2. Files are found using the specified algorithm property.  In this case, a
- *class user must have
- *    specified the algorithm and property via
- *MWRunFiles::setAlgorithmProperty().
+ *    class user must have specified the algorithm and property via
+ *    MWRunFiles::setAlgorithmProperty().
  */
 void FindFilesWorker::run() {
   // Reset result member vars.
@@ -113,6 +112,9 @@ void FindFilesWorker::run() {
 
 /**
  * Create a list of files from the given algorithm property.
+ *
+ * @return a tuple with a vector of filenames and a string for the property
+ * value
  */
 std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAlgorithm() {
   std::vector<std::string> filenames;
@@ -146,10 +148,19 @@ std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAl
     filenames = VectorHelper::flattenVector(propertyFilenames);
   }
 
-  auto p = std::make_pair(filenames, valueForProperty);
-  return p;
+  return std::make_pair(filenames, valueForProperty);
 }
 
+/** Create a struct containing the results of the search.
+ *
+ * This will contain a string with an error (empty string if no error occured),
+ * a vector of filenames, and a value to display on the property of an algorithm
+ *
+ * @param error :: A user friendly error message or the empty string
+ * @param filenames :: a vector of paths to files found by the search
+ * @param valueForProperty :: a message to display on the algorithm's property
+ * @return A struct holding the results of this search.
+ */
 FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty) {
   FindFilesSearchResults results;
   results.error = error;

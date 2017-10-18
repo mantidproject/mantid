@@ -51,6 +51,7 @@ public:
     // Assert
     const auto results = widget.getResults();
 
+    TS_ASSERT(!poolManager.isSearchRunning())
     TS_ASSERT(widget.isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
@@ -101,6 +102,8 @@ public:
 
     // Assert
     const auto results = widget.getResults();
+
+    TS_ASSERT(!poolManager.isSearchRunning())
     TS_ASSERT(widget.isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
