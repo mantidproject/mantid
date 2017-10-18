@@ -152,17 +152,11 @@ public:
   }
 
   void testConvertEventIDToGlobalSpectrumIndex() {
-    std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1000};
-    std::vector<std::vector<TofEvent> *> eventLists(10);
-
-    Parallel::Communicator comm;
-    EventParser<int64_t, int64_t, double> parser(comm, rankGroups, bankOffsets,
-                                                 eventLists);
-
     std::vector<int32_t> eventId{1001, 1002, 1004, 1004};
     auto eventIdCopy = eventId;
-    parser.eventIdToGlobalSpectrumIndex(eventId.data(), eventId.size(), 0);
+    detail::eventIdToGlobalSpectrumIndex(eventId.data(), eventId.size(),
+                                         bankOffsets[0]);
 
     TS_ASSERT_EQUALS(eventId[0], eventIdCopy[0] - bankOffsets[0]);
     TS_ASSERT_EQUALS(eventId[1], eventIdCopy[1] - bankOffsets[0]);
@@ -178,8 +172,8 @@ public:
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = gen.generateBasicRange(0);
 
-    parser->eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
-                                         range.eventCount, range.bankIndex);
+    detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
+                                         range.eventCount, 1000);
     std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
         rankData;
     // event_id now contains spectrum indices
@@ -201,8 +195,8 @@ public:
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = Chunker::LoadRange{0, 5, 100};
 
-    parser->eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
-                                         range.eventCount, range.bankIndex);
+    detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
+                                         range.eventCount, 1000);
     std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
         rankData;
     // event_id now contains spectrum indices
@@ -355,6 +349,8 @@ public:
     }
 
     parser = gen.generateTestParser();
+    for (auto &eventList : m_eventLists)
+      m_eventListPtrs.emplace_back(&eventList);
   }
 
   void testCompletePerformance() {
@@ -373,8 +369,8 @@ public:
                                     gen.generateBasicRange(bank));
   }
 
-  void testPopulateEventListPerformance() {
-    parser->populateEventList(rankData[0]);
+  void testPopulateEventListsPerformance() {
+    detail::populateEventLists(rankData[0], m_eventListPtrs);
   }
 
 private:
@@ -385,5 +381,7 @@ private:
   boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
   std::vector<std::vector<EventParser<int32_t, int64_t, double>::Event>>
       rankData;
+  std::vector<std::vector<TofEvent>> m_eventLists{NUM_BANKS * 1000};
+  std::vector<std::vector<TofEvent> *> m_eventListPtrs;
 };
 #endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */

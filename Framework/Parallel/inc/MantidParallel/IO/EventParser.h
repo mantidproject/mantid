@@ -55,6 +55,20 @@ template <class TimeOffsetType> struct Event {
   TimeOffsetType tof;
   Types::Core::DateAndTime pulseTime;
 };
+
+void MANTID_PARALLEL_DLL eventIdToGlobalSpectrumIndex(int32_t *event_id_start,
+                                                      size_t count,
+                                                      const int32_t bankOffset);
+
+template <class TimeOffsetType>
+void redistributeDataMPI(
+    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
+    const std::vector<std::vector<Event<TimeOffsetType>>> &data);
+
+template <class TimeOffsetType>
+void populateEventLists(
+    const std::vector<Event<TimeOffsetType>> &events,
+    std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -78,15 +92,6 @@ public:
                              const int32_t *globalSpectrumIndex,
                              const TimeOffsetType *eventTimeOffset,
                              const Chunker::LoadRange &range);
-
-  void eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                    size_t bankIndex) const;
-
-  void populateEventList(const std::vector<Event> &events);
-
-  const std::vector<std::vector<Event>> &rankData() const {
-    return m_allRankData;
-  }
 
   void wait() const;
 
@@ -142,24 +147,6 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::setPulseInformation(
       event_time_zero_offset);
 }
 
-/** Transform event IDs to global spectrum numbers using the bankOffsets stored
- * at object creation.
- *
- * The transformation is in-place to save memory bandwidth and modifies the
- * range pointed to by `event_id_start`.
- * @param event_id_start Starting position of chunk of data containing event
- * IDs.
- * @param count Number of items in data chunk
- * @param bankIndex Index into the list of bank offsets.
- */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    eventIdToGlobalSpectrumIndex(int32_t *event_id_start, size_t count,
-                                 size_t bankIndex) const {
-  for (size_t i = 0; i < count; ++i)
-    event_id_start[i] -= m_bankOffsets[bankIndex];
-}
-
 /** Extracts event information from the list of time offsets and global spectrum
  * indices using the event_index and event_time_offset tables provided from
  * file. These events are separated according to MPI ranks.
@@ -191,6 +178,7 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
   }
 }
 
+namespace detail {
 /** Uses MPI calls to redistribute chunks which must be processed on certain
  * ranks.
  * @param comm MPI communicator.
@@ -200,9 +188,9 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
  */
 template <class TimeOffsetType>
 void redistributeDataMPI(
-    Communicator &comm, std::vector<detail::Event<TimeOffsetType>> &result,
-    const std::vector<std::vector<detail::Event<TimeOffsetType>>> &data) {
-  using Event = detail::Event<TimeOffsetType>;
+    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
+    const std::vector<std::vector<Event<TimeOffsetType>>> &data) {
+  using Event = Event<TimeOffsetType>;
   if (comm.size() == 1) {
     result = data.front();
     return;
@@ -248,19 +236,20 @@ void redistributeDataMPI(
 /** Fills the workspace EventList with extracted events
  * @param events Events extracted from file according to mpi rank.
  */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::populateEventList(
-    const std::vector<Event> &events) {
+template <class TimeOffsetType>
+void populateEventLists(
+    const std::vector<Event<TimeOffsetType>> &events,
+    std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
   for (const auto &event : events) {
-    m_eventLists[event.index]->emplace_back(event.tof, event.pulseTime);
+    eventLists[event.index]->emplace_back(event.tof, event.pulseTime);
     // In general `index` is random so this loop suffers from frequent cache
     // misses (probably because the hardware prefetchers cannot keep up with the
     // number of different memory locations that are getting accessed). We
     // manually prefetch into L2 cache to reduce the amount of misses.
-    _mm_prefetch(
-        reinterpret_cast<char *>(&m_eventLists[event.index]->back() + 1),
-        _MM_HINT_T1);
+    _mm_prefetch(reinterpret_cast<char *>(&eventLists[event.index]->back() + 1),
+                 _MM_HINT_T1);
   }
+}
 }
 
 /** Accepts raw data from file which has been pre-treated and sorted into chunks
@@ -292,16 +281,16 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
   // change event_id_start in place
-  eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
-                               range.bankIndex);
+  detail::eventIdToGlobalSpectrumIndex(event_id_start, range.eventCount,
+                                       m_bankOffsets[range.bankIndex]);
 
   // event_id_start now contains globalSpectrumIndex
   extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
                         range);
 
-  redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
+  detail::redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
   // TODO: accept something which translates from global to local spectrum index
-  populateEventList(m_thisRankData);
+  populateEventLists(m_thisRankData, m_eventLists);
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>

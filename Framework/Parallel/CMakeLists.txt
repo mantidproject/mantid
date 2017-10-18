@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/ExecutionMode.cpp
 	src/IO/Chunker.cpp
 	src/IO/EventLoader.cpp
+	src/IO/EventParser.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
