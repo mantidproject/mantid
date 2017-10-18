@@ -150,10 +150,10 @@ bool MonIDPropChanger::monitorIdReader(
 
 bool spectrumDefinitionsMatchTimeIndex(const SpectrumDefinition &specDef,
                                        const size_t timeIndex) {
-  if (specDef.size() > 0)
-    for (const auto &spec : specDef)
-      if (spec.second != timeIndex)
-        return false;
+
+  for (const auto &spec : specDef)
+    if (spec.second != timeIndex)
+      return false;
   return true;
 }
 
