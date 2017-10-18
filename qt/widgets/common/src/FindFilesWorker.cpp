@@ -11,6 +11,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 
+#include <utility>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::API;
@@ -20,28 +22,8 @@ using namespace MantidQt::API;
  *
  * @param parent :: pointer to the parent QObject.
  */
-FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
-    : QRunnable(), m_error(), m_filenames(), m_valueForProperty(), m_text(),
-      m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional() {
-  set(parameters);
-}
-
-/**
- * Set the values needed for the thread to run.
- *
- * @param text              :: the text containing the file names, typed in by
- *the user
- * @param isForRunFiles     :: whether or not we are finding run files.
- * @param isOptional        :: whether or not the files are optional.
- * @param algorithmProperty :: the algorithm and property to use as an
- *alternative to FileFinder.  Optional.
- */
-void FindFilesWorker::set(const FindFilesSearchParameters &parameters) {
-  m_text = parameters.searchText.trimmed().toStdString();
-  m_isForRunFiles = parameters.isForRunFiles;
-  m_isOptional = parameters.isOptional;
-  m_algorithm = parameters.algorithmName;
-  m_property = parameters.algorithmProperty;
+FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters& parameters)
+    : QRunnable(), m_parameters(parameters) {
 }
 
 /**
@@ -59,17 +41,17 @@ void FindFilesWorker::set(const FindFilesSearchParameters &parameters) {
  */
 void FindFilesWorker::run() {
   // Reset result member vars.
-  m_error.clear();
-  m_filenames.clear();
-  m_valueForProperty.clear();
+  std::string error;
+  std::vector<std::string> filenames;
+  QString valueForProperty;
 
-  if (m_text.empty()) {
-    if (m_isOptional)
-      m_error = "";
+  if (m_parameters.searchText.empty()) {
+    if (m_parameters.isOptional)
+      error = "";
     else
-      m_error = "No files specified.";
+      error = "No files specified.";
 
-    const auto result = createFindFilesSearchResult();
+    const auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
     emit finished(result);
     return;
   }
@@ -80,24 +62,26 @@ void FindFilesWorker::run() {
   try {
     // Use the property of the algorithm to find files, if one has been
     // specified.
-    if (m_algorithm.length() != 0 && m_property.length() != 0) {
-      getFilesFromAlgorithm();
+    if (m_parameters.algorithmName.length() != 0 && m_parameters.algorithmProperty.length() != 0) {
+      auto searchResult = getFilesFromAlgorithm();
+      filenames = std::get<0>(searchResult);
+      valueForProperty = QString::fromStdString(std::get<1>(searchResult));
     }
     // Else if we are loading run files, then use findRuns.
-    else if (m_isForRunFiles) {
-      m_filenames = fileSearcher.findRuns(m_text);
-      m_valueForProperty = "";
-      for (auto cit = m_filenames.begin(); cit != m_filenames.end(); ++cit) {
-        m_valueForProperty += QString::fromStdString(*cit) + ",";
+    else if (m_parameters.isForRunFiles) {
+      filenames = fileSearcher.findRuns(m_parameters.searchText);
+      valueForProperty = "";
+      for (auto cit = filenames.begin(); cit != filenames.end(); ++cit) {
+        valueForProperty += QString::fromStdString(*cit) + ",";
       }
-      m_valueForProperty.chop(1);
+      valueForProperty.chop(1);
     }
     // Else try to run a simple parsing on the string, and find the full paths
     // individually.
     else {
       // Tokenise on ","
       std::vector<std::string> filestext;
-      filestext = boost::split(filestext, m_text, boost::is_any_of(","));
+      filestext = boost::split(filestext, m_parameters.searchText, boost::is_any_of(","));
 
       // Iterate over tokens.
       auto it = filestext.begin();
@@ -106,72 +90,70 @@ void FindFilesWorker::run() {
         std::string result = fileSearcher.getFullPath(*it);
         Poco::File test(result);
         if ((!result.empty()) && test.exists()) {
-          m_filenames.push_back(*it);
-          m_valueForProperty += QString::fromStdString(*it) + ",";
+          filenames.push_back(*it);
+          valueForProperty += QString::fromStdString(*it) + ",";
         } else {
           throw std::invalid_argument("File \"" + (*it) + "\" not found");
         }
       }
-      m_valueForProperty.chop(1);
+      valueForProperty.chop(1);
     }
   } catch (std::exception &exc) {
-    m_error = exc.what();
-    m_filenames.clear();
+    error = exc.what();
+    filenames.clear();
   } catch (...) {
-    m_error = "An unknown error occurred while trying to locate the file(s). "
+    error = "An unknown error occurred while trying to locate the file(s). "
               "Please contact the development team";
-    m_filenames.clear();
+    filenames.clear();
   }
 
-  auto result = createFindFilesSearchResult();
+  auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
   emit finished(result);
 }
 
 /**
  * Create a list of files from the given algorithm property.
  */
-void FindFilesWorker::getFilesFromAlgorithm() {
+std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAlgorithm() {
+  std::vector<std::string> filenames;
   Mantid::API::IAlgorithm_sptr algorithm =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-          m_algorithm.toStdString());
+          m_parameters.algorithmName);
 
   if (!algorithm)
     throw std::invalid_argument("Cannot create algorithm " +
-                                m_algorithm.toStdString() + ".");
+                                m_parameters.algorithmName + ".");
 
   algorithm->initialize();
-  const std::string propName = m_property.toStdString();
-  algorithm->setProperty(propName, m_text);
+  const std::string propName = m_parameters.algorithmProperty;
+  algorithm->setProperty(propName, m_parameters.searchText);
 
   Property *prop = algorithm->getProperty(propName);
-  m_valueForProperty = QString::fromStdString(prop->value());
+  std::string valueForProperty = prop->value();
 
   FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
   MultipleFileProperty *multiFileProp =
       dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
-    m_filenames.push_back(fileProp->value());
+    filenames.push_back(fileProp->value());
   } else if (multiFileProp) {
     // This flattens any summed files to a set of single files so that you lose
     // the information about
     // what was summed
-    std::vector<std::vector<std::string>> filenames =
+    std::vector<std::vector<std::string>> propertyFilenames =
         algorithm->getProperty(propName);
-    std::vector<std::string> flattenedNames =
-        VectorHelper::flattenVector(filenames);
-
-    for (auto filename = flattenedNames.begin();
-         filename != flattenedNames.end(); ++filename) {
-      m_filenames.push_back(*filename);
-    }
+    filenames = VectorHelper::flattenVector(propertyFilenames);
   }
+
+  auto p = std::make_pair(filenames, valueForProperty);
+  return p;
 }
 
-FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult() {
+FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty) {
   FindFilesSearchResults results;
-  results.error = m_error;
-  results.filenames = m_filenames;
-  results.valueForProperty = m_valueForProperty.toStdString();
+  results.error = error;
+  results.filenames = filenames;
+  results.valueForProperty = valueForProperty;
   return results;
 }

@@ -567,7 +567,7 @@ void MWRunFiles::findFiles() {
     }
 
     if (!searchText.isEmpty()) {
-      const auto parameters = createFindFilesSearchParameters(searchText);
+      const auto parameters = createFindFilesSearchParameters(searchText.toStdString());
       m_pool.createWorker(this, parameters);
     }
 
@@ -952,8 +952,8 @@ void MWRunFiles::setValidatorDisplay(bool display) {
   m_showValidator = display;
 }
 
-FindFilesSearchParameters
-MWRunFiles::createFindFilesSearchParameters(const QString &text) const {
+FindFilesSearchParameters MWRunFiles::createFindFilesSearchParameters(const std::string& text) const
+{
   FindFilesSearchParameters parameters;
   parameters.searchText = text;
   parameters.isOptional = isOptional();
@@ -962,8 +962,8 @@ MWRunFiles::createFindFilesSearchParameters(const QString &text) const {
   // parse the algorithm - property name string
   QStringList elements = m_algorithmProperty.split("|");
   if (elements.size() == 2) {
-    parameters.algorithmName = elements[0];
-    parameters.algorithmProperty = elements[1];
+    parameters.algorithmName = elements[0].toStdString();
+    parameters.algorithmProperty = elements[1].toStdString();
   }
 
   return parameters;

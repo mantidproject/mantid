@@ -227,8 +227,7 @@ private:
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
   /// Helper method to create a FindFilesSearchParameters object
-  FindFilesSearchParameters
-  createFindFilesSearchParameters(const QString &text) const;
+  FindFilesSearchParameters createFindFilesSearchParameters(const std::string& text) const;
 
 private slots:
   /// Browse clicked slot

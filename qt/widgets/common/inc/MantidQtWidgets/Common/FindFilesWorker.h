@@ -18,15 +18,15 @@ namespace API {
  */
 struct FindFilesSearchParameters {
   /// The text to use as a hint to search for files.
-  QString searchText;
+  std::string searchText;
   /// Whether the search is for experimental run data.
   bool isForRunFiles;
   /// Whether the search is optional (i.e. a failed search means no error).
   bool isOptional;
   /// The name of the algorithm to load files with
-  QString algorithmName;
+  std::string algorithmName;
   /// The name of the property on the algorithm to use for searching
-  QString algorithmProperty;
+  std::string algorithmProperty;
 };
 
 /**
@@ -63,27 +63,13 @@ protected:
   virtual void run() override;
 
 private:
-  /// Set the various file-finding values / options.
-  void set(const FindFilesSearchParameters &parameters);
   /// Use the specified algorithm and property to find files instead of using
   /// the FileFinder.
-  void getFilesFromAlgorithm();
+  std::pair<std::vector<std::string>, std::string> getFilesFromAlgorithm();
   /// Helper method to create a search result object
-  FindFilesSearchResults createFindFilesSearchResult();
+  FindFilesSearchResults createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty);
 
-  /// Storage for any error thrown while trying to find files.
-  std::string m_error;
-  /// Filenames found during execution of the thread.
-  std::vector<std::string> m_filenames;
-  /// Stores the string value to be used as input for an algorithm property
-  QString m_valueForProperty;
-  /// File name text typed in by the user.
-  std::string m_text;
-
-  QString m_algorithm;
-  QString m_property;
-  bool m_isForRunFiles;
-  bool m_isOptional;
+  FindFilesSearchParameters m_parameters;
 };
 
 }

@@ -111,7 +111,7 @@ public:
   }
 
 private:
-  FindFilesSearchParameters createFileSearch(const QString &searchText) {
+  FindFilesSearchParameters createFileSearch(const std::string& searchText) {
     FindFilesSearchParameters parameters;
     parameters.searchText = searchText;
     parameters.algorithmName = "Load";
