@@ -5,15 +5,16 @@ import AbinsModules
 from mantid.kernel import Atom, logger
 
 
-class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
+class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
     """
-    Class for loading CRYSTAL DFT phonon data. Special thanks to Leonardo Bernasconi for contributing to this module.
+    Class for loading CRYSTAL ab initio vibrational or phonon data. Special thanks to Leonardo Bernasconi for
+    contributing to this module.
     """
-    def __init__(self, input_dft_filename=None):
+    def __init__(self, input_ab_initio_filename=None):
         """
-        :param input_dft_filename: name of a file with phonon data (foo.out)
+        :param input_ab_initio_filename: name of a file with vibrational or phonon data (foo.out)
         """
-        super(LoadCRYSTAL, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadCRYSTAL, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         self._num_k = None
         self._num_modes = None
@@ -23,15 +24,15 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
         # More info in 'Creating a super cell' at
         # http://www.theochem.unito.it/crystal_tuto/mssc2008_cd/tutorials/geometry/geom_tut.html
         self._inv_expansion_matrix = np.eye(3, dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
-        self._parser = AbinsModules.GeneralDFTParser()
+        self._parser = AbinsModules.GeneralAbInitioParser()
 
-        self._dft_program = "CRYSTAL"
+        self._ab_initio_program = "CRYSTAL"
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
-        Reads phonon data from CRYSTAL output files. Saves frequencies, weights of k-point vectors, k-point vectors,
-        amplitudes of atomic displacements, hash of the phonon file (hash) to <>.hdf5
-
+        Reads vibrational or phonon data from CRYSTAL output files. Saves frequencies, weights of k-point vectors,
+        k-point vectors, amplitudes of atomic displacements, hash of the vibrational or phonon data file (hash) to
+        <>.hdf5.
         :return  object of type AbinsData.
         """
 
@@ -63,7 +64,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
                                   k_coordinates=k_coordinates, unit_cell=lattice_vectors)
 
         # save data to hdf file
-        self.save_dft_data(data=data)
+        self.save_ab_initio_data(data=data)
 
         # return AbinsData object
         return self._rearrange_data(data=data)
@@ -163,7 +164,7 @@ class LoadCRYSTAL(AbinsModules.GeneralDFTProgram):
 
     def _read_modes(self, file_obj=None, phonon_dispersion=None):
         """
-        Reads vibrational modes (frequencies and atomic displacements).
+        Reads vibrational or phonon modes (frequencies and atomic displacements).
         :param phonon_dispersion: True if more then one k-point to parse, otherwise False.
         :param file_obj: file object from which we read
         :returns: Tuple with frequencies and corresponding atomic displacements, weights of k-points and coordinates of

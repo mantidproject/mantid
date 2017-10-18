@@ -30,7 +30,7 @@
 #include "MantidQtWidgets/Common/ScaleEngine.h"
 #include "MantidQtWidgets/Common/PowerScaleEngine.h"
 #include "MantidQtWidgets/Common/qwt_compat.h"
-#include <limits.h>
+#include <climits>
 
 QwtScaleTransformation *ScaleEngine::transformation() const {
   return new ScaleTransformation(this);
@@ -179,7 +179,7 @@ QwtScaleTransformation *ScaleTransformation::copy() const {
 }
 
 QwtScaleTransformation *ScaleTransformation::newScaleTransformation() const {
-  QwtScaleTransformation *transform = NULL;
+  QwtScaleTransformation *transform = nullptr;
   switch (d_engine->type()) {
   case ScaleTransformation::Log10:
     transform = new QwtScaleTransformation(QwtScaleTransformation::Log10);
@@ -355,7 +355,7 @@ void ScaleEngine::autoScale(int maxNumSteps, double &x1, double &x2,
 }
 
 QwtScaleEngine *ScaleEngine::newScaleEngine() const {
-  QwtScaleEngine *engine = NULL;
+  QwtScaleEngine *engine = nullptr;
   switch (d_type) {
   case ScaleTransformation::Log10:
     engine = new QwtLog10ScaleEngine();

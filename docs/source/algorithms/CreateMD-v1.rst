@@ -80,7 +80,7 @@ Workflow
    ndims = new_mdew.getNumDims()
    for i in range(ndims):
        dim = new_mdew.getDimension(i)
-       print dim.getName()
+       print(dim.getName())
   
 Output
 ^^^^^^
@@ -116,7 +116,7 @@ Output
    ndims = new_merged.getNumDims()
    for i in range(ndims):
        dim = new_merged.getDimension(i)
-       print dim.getName()
+       print(dim.getName())
 
 Output
 ^^^^^^
@@ -152,7 +152,7 @@ Output
    ndims = new_merged.getNumDims()
    for i in range(ndims):
        dim = new_merged.getDimension(i)
-       print dim.getName()
+       print(dim.getName())
 
 Output
 ^^^^^^

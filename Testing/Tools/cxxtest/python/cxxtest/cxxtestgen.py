@@ -355,7 +355,7 @@ def writeSuitePointer( output, suite ):
     if options.noStaticInit:
         output.write( 'static %s *%s;\n\n' % (suite['name'], suite['object']) )
     else:
-        output.write( 'static %s *%s = 0;\n\n' % (suite['name'], suite['object']) )
+        output.write( 'static %s *%s = nullptr;\n\n' % (suite['name'], suite['object']) )
 
 def writeSuiteObject( output, suite ):
     '''Create static suite object for non-dynamic suites'''
@@ -366,7 +366,7 @@ def writeTestList( output, suite ):
     if options.noStaticInit:
         output.write( 'static CxxTest::List %s;\n' % suite['tlist'] )
     else:
-        output.write( 'static CxxTest::List %s = { 0, 0 };\n' % suite['tlist'] )
+        output.write( 'static CxxTest::List %s = { nullptr, nullptr };\n' % suite['tlist'] )
 
 def writeWorldDescr( output ):
     '''Write the static name of the world name'''
@@ -387,7 +387,7 @@ def writeTestDescription( output, suite, test ):
     if not options.noStaticInit:
         output.write( ' %s() : CxxTest::RealTestDescription( %s, %s, %s, "%s" ) {}\n' %
                       (test['class'], suite['tlist'], suite['dobject'], test['line'], test['name']) )
-    output.write( ' void runTest() override final { %s }\n' % runBody( suite, test ) )
+    output.write( ' void runTest() override final { %s } // NOLINT\n' % runBody( suite, test ) )
     output.write( '} %s;\n\n' % test['object'] )
 
 def runBody( suite, test ):

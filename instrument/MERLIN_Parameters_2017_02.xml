@@ -63,7 +63,7 @@
 
 <!-- Monitor used to estimate total current on the sample while normalizing by monitor 1.  -->
 <parameter name="norm-mon1-spec"   >
-  <value val="71681"/>
+  <value val="69633"/>
 </parameter>
 
 <!-- Time interval used for integration to estimate current on the sample 
@@ -80,7 +80,7 @@
 
 <!-- Monitor after chopper used to estimate total current on the sample, if normalization is done on monitor 2  -->
 <parameter name="norm-mon2-spec"  type="int">
-    <value val="71682"/>
+    <value val="69634"/>
 </parameter>
 <!-- Relative energy range (wrt. to the incident energy) in which monitor 2 signal is present and the integration to 
      calculate monitor-2 current occurs   -->
@@ -99,7 +99,7 @@
 
 <!-- -->
 <parameter name="ei-mon1-spec"  type="string">
-  <value val="71682,71683,71684,71685"/>
+  <value val="69634,69635,69636,69637"/>
   <description is="First spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
      Should be spectra with well defined energy peak or monitor's spectra.
@@ -109,7 +109,7 @@
 </parameter>
 <!-- -->
 <parameter name="ei-mon2-spec"  type="string">
-  <value val="71686,71687,71688,71689"/>
+  <value val="69638,69639,69640,69641"/>
   <description is="Second spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
      Should be spectra with well defined energy peak or monitor's spectra.
@@ -137,7 +137,7 @@
 
 <!-- -->
 <parameter name="multirep_tof_specta_list"  type="string">
-    <value val="20860,20480"/>
+    <value val="1,129"/>
     <description is="List of two spectra corresponding to the detectors which are closest and furthest from the sample.
     These detectors locations are used to identify TOF range, contributing into each energy range
      in multirep mode"/>
@@ -284,7 +284,7 @@
 <parameter name="bleed_pixels">
     <value val="80"/>
 </parameter>
-<!--  the maximum framerate allowed in a tube -->
+<!--  the maximum frame rate allowed in a tube -->
 <parameter name="bleed_maxrate">
     <value val="0.01"/>
 </parameter>
@@ -347,7 +347,7 @@
 <parameter name="sample_rmm">
   <value val="1"/>
 </parameter>
-<!-- Vanaduim mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
+<!-- Vanadium mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
 <parameter name="vanadium-mass">
   <value val="7.85"/>
 </parameter>

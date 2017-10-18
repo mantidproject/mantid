@@ -42,7 +42,7 @@ class DLLExport IndirectMoments : public IndirectDataReductionTab {
   Q_OBJECT
 
 public:
-  IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent = 0);
+  IndirectMoments(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
   ~IndirectMoments() override;
 
   void setup() override;

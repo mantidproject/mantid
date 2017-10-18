@@ -13,6 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using Mantid::Types::Core::DateAndTime;
 
 class AddSampleLogTest : public CxxTest::TestSuite {
 public:
@@ -204,7 +205,7 @@ public:
             alg.getProperty("Workspace"));
 
     const Run &wSpaceRun = output->run();
-    Property *prop = NULL;
+    Property *prop = nullptr;
     TS_ASSERT_THROWS_NOTHING(prop = wSpaceRun.getLogData(LogName);)
     if (!prop)
       return;

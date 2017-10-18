@@ -36,8 +36,7 @@ class AppendRowCommand : public CommandBase {
 public:
   AppendRowCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  AppendRowCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  AppendRowCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~AppendRowCommand(){};
 
   void execute() override {

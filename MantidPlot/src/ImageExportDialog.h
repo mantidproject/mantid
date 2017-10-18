@@ -74,8 +74,8 @@ public:
    * @param extended :: flag: show/hide the advanced options on start-up
    * @param flags :: window flags
    */
-  ImageExportDialog(QWidget *parent = 0, bool vector_options = true,
-                    bool extended = true, Qt::WFlags flags = 0);
+  ImageExportDialog(QWidget *parent = nullptr, bool vector_options = true,
+                    bool extended = true, Qt::WFlags flags = nullptr);
   //! For vector formats: returns the output resolution the user selected,
   // defaulting to the screen resolution.
   int resolution() const { return d_resolution->value(); }

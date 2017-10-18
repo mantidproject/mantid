@@ -15,7 +15,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER XYLimitsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  XYLimitsDialog(QWidget *parent = 0);
+  XYLimitsDialog(QWidget *parent = nullptr);
   ~XYLimitsDialog() override;
 
   void setXDim(Mantid::Geometry::IMDDimension_const_sptr dim);

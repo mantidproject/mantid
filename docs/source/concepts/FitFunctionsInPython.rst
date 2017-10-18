@@ -202,6 +202,30 @@ Also one can put parameters into the function when evaluating.
    p = Polynomial(n=2)
    print p([0,1,2,3], 0.0, 0.5, 0.5) #expect [ 0. 1. 3. 6.]
 
-This enables one to fit the functions with ``scipy.optimize.curve_fit``.   
+This enables one to fit the functions with ``scipy.optimize.curve_fit``.  
+
+Plotting
+--------
+Functions may be plotted by calling the ``plot`` method of the function.
+``mantidplot`` must be available to import for ``plot`` to work.
+
+This method can be called in any of the following manners:
+
+.. code:: python
+
+   f.plot(xValues=[0,2,2.5,3,5]) # for these x-values
+   f.plot(workspace=ws) # for the x-values of workspace ws
+   f.plot(workspace=ws, workspaceIndex=i)   # for x-values of workspace index i of ws
+   f.plot(startX=xmin, endX=xmax)  # for 20 x-values between xmin and xmax
+   f.plot(startX=xmin, endX=xmax, nSteps=10) # for 10 x-values between xmin and xmax
+   f.plot(workspace=ws, startX=xmin, endX=xmax) # for x-values of ws between xmin & xmax
+   f.plot(workspace=ws, name='Fred') # for plot & its workspace to be called 'Fred'  
+
+If you use ``xValues``, then the list of x values must be in numerical order. 
+This is not checked and if they are not in order the plot may fail to display properly.
+
+If you want to display multiple plots of the same function, then use
+``name`` to give each plot a unique name. The default value of ``name`` 
+is the name of the function. 
 
 .. categories:: Concepts

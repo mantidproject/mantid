@@ -64,7 +64,7 @@ public:
    * Tests a standard run of algorithms.
    */
   void test_basicBatch() {
-    BatchAlgorithmRunner runner(NULL);
+    BatchAlgorithmRunner runner(nullptr);
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
@@ -95,7 +95,7 @@ public:
    * Tests runs of multiple batches on the same runner.
    */
   void test_basicMultipleBatch() {
-    BatchAlgorithmRunner runner(NULL);
+    BatchAlgorithmRunner runner(nullptr);
     std::string wsName = "BatchAlgorithmRunnerTest_Crop";
 
     // Run 1
@@ -130,7 +130,7 @@ public:
    * Tests failure caused by setting a property such that it fails validation.
    */
   void test_basicBatchWorkspaceFailure() {
-    BatchAlgorithmRunner runner(NULL);
+    BatchAlgorithmRunner runner(nullptr);
 
     inputFromCreateProps["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
 
@@ -148,7 +148,7 @@ public:
    * Tests failure casused by setting a property that does not exist.
    */
   void test_basicBatchPropertyFailure() {
-    BatchAlgorithmRunner runner(NULL);
+    BatchAlgorithmRunner runner(nullptr);
 
     inputFromCreateProps["NotAValidProperty"] = "sample_data.nxs";
 

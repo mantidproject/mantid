@@ -56,7 +56,7 @@ class EXPORT_OPT_MANTIDQT_COMMON InstrumentSelector : public QComboBox {
 
 public:
   /// Default Constructor
-  InstrumentSelector(QWidget *parent = NULL, bool init = true);
+  InstrumentSelector(QWidget *parent = nullptr, bool init = true);
   /// Destructor
   ~InstrumentSelector() override;
   /// Return the list of techniques

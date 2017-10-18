@@ -28,8 +28,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace HistogramData;
-using boost::function;
-using boost::bind;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertUnitsUsingDetectorTable)

@@ -35,8 +35,7 @@ class SaveTableCommand : public CommandBase {
 public:
   SaveTableCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  SaveTableCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  SaveTableCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~SaveTableCommand(){};
 
   void execute() override {

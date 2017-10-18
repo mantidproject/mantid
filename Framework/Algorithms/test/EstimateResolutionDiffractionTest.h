@@ -18,6 +18,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
+using Mantid::Types::Core::DateAndTime;
 
 class EstimateResolutionDiffractionTest : public CxxTest::TestSuite {
 public:

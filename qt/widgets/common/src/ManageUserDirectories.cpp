@@ -146,7 +146,7 @@ QListWidget *ManageUserDirectories::listWidget() {
              m_uiForm.tabPythonDirectories) {
     return m_uiForm.lwUserSearchDirs;
   } else {
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -162,7 +162,7 @@ void ManageUserDirectories::confirmClicked() {
 }
 
 void ManageUserDirectories::addDirectory() {
-  QLineEdit *input(NULL);
+  QLineEdit *input(nullptr);
 
   if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch) {
     input = m_uiForm.leDirectoryPath;

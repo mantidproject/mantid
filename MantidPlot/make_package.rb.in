@@ -34,6 +34,32 @@ def addPythonLibrariesInDirectory(input, output)
   end
 end
 
+# Find the qscintilla2 library. This is different depending
+# on what library you have installed from homebrew.
+def findQScintilla2(lib_dir)
+    if File.file?(lib_dir+"libqscintilla2_qt4.dylib")
+        return "libqscintilla2_qt4.dylib"
+    elsif File.file?(lib_dir+"libqscintilla2.dylib")
+        return "libqscintilla2.dylib"
+    else
+        p 'Could not file the libqscintilla2 library'
+        exit 1
+    end
+end
+
+# Find the qt folder. This is different depending on
+# what tap you're using in homebrew
+def findQtFolder()
+    if Dir.exist?("/usr/local/opt/qt@4")
+        return '/usr/local/opt/qt@4'
+    elsif Dir.exist?("/usr/local/opt/qt")
+        return '/usr/local/opt/qt'
+    else
+        p 'Could not find the qt folder'
+        exit 1
+    end
+end
+
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 ParaView_dir = Pathname.new("@ParaView_DIR@")
@@ -72,7 +98,6 @@ library_filenames = ["libboost_regex-mt.dylib",
                      "libTKGeomBase.dylib",
                      "libqwt.dylib",
                      "libqwtplot3d.dylib",
-                     "libqscintilla2.dylib",
                      "libmxml.dylib",
                      "libhdf5.dylib",
                      "libhdf5_hl.dylib",
@@ -98,6 +123,8 @@ end
 if("@OPENMP_FOUND@" == "TRUE")
   library_filenames << "libomp.dylib"
 end
+
+library_filenames << findQScintilla2(lib_dir)
 
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
@@ -194,7 +221,9 @@ search_patterns.each do |pattern|
 end
 
 #We'll use macdeployqt to fix qt dependencies.
-Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib -executable=Contents/MacOS/libqscintilla2.dylib"
+Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib "
+Qt_Executables << "-executable=Contents/MacOS/#{findQScintilla2(lib_dir)}" 
+
 if( "@MAKE_VATES@" == "ON" )
   list = ["Contents/Libraries/vtkParaViewWebCorePython.so",
           "Contents/Libraries/vtkPVAnimationPython.so",
@@ -213,6 +242,14 @@ if( "@MAKE_VATES@" == "ON" )
     Qt_Executables << " -executable=#{filename}"
    end
 end
+
+qt_folder = findQtFolder()
+if not Dir.exist?("#{qt_folder}/plugins")
+    p "Cannot find the Qt4 plugins folder"
+    p "You probably need to simlink the plugins folder in #{qt_folder}/lib/qt/plugins to #{qt_folder}/plugins"
+    exit 1
+end
+
 `macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
 if Dir.exist?("Contents/PlugIns")
@@ -268,7 +305,7 @@ end
 pyqt4_patterns = ["**/PyQt4/*.so"]
 change_id(pyqt4_patterns, "Contents/MacOS/PyQt4/")
 
-QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*', '/usr/local/opt/qt/lib')
+QtLinkingDir = find_linking_directories(pyqt4_patterns, 'Qt.*.framework/Versions/\d/Qt.*',"#{qt_folder}/lib")
 
 if QtLinkingDir.uniq != [QtLinkingDir[0]]
   p "Error updating PyQt4 dynamic linking!"
@@ -342,6 +379,11 @@ h5py_patterns.each do |pattern|
   end
 end
 
+# ---------------------------------------------
+# Fix imports for Mantid Scientific Interfaces
+# ---------------------------------------------
+`install_name_tool -add_rpath @loader_path/../../../plugins/qtplugins/mantid ./plugins/qtplugins/mantid/libMantidScientificInterfacesEnggDiffraction.dylib`
+# ---------------------------------------------
 
 files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py"]
 files.each do |file|

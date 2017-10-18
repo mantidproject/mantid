@@ -25,6 +25,30 @@
 			<value val="sqrt(e/25.3)" />
 		</parameter>
 
+                <!-- parameters to merge sample logs by MergeRuns algorithm -->
+                <parameter name="sample_logs_sum" type="string">
+                    <value val="monitor_counts, duration" />
+                </parameter>
+                <parameter name="sample_logs_time_series" type="string">
+                    <value val="temperature" />
+                </parameter>
+                <parameter name="sample_logs_list" type="string">
+                    <value val="run_number,run_start,run_end" />
+                </parameter>
+                <parameter name="sample_logs_warn" type="string">
+                    <value val="temperature, run_title" />
+                </parameter>
+                <parameter name="sample_logs_warn_tolerances" type="string">
+                    <value val="1.0, 0" />
+                </parameter>
+                <parameter name="sample_logs_fail" type="string">
+                    <value val="chopper_speed, channel_width, chopper_ratio, Ei, wavelength, full_channels, EPP" />
+                </parameter>
+                <parameter name="sample_logs_fail_tolerances" type="string">
+                    <value val="10, 0.01, 0.01, 0.0001, 0.001, 0.1, 0.1" />
+                </parameter>
+
+
           
 	</component-link>
 

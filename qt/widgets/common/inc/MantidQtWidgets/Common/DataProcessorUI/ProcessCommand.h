@@ -36,8 +36,7 @@ class ProcessCommand : public CommandBase {
 public:
   ProcessCommand(DataProcessorPresenter *tablePresenter)
       : CommandBase(tablePresenter){};
-  ProcessCommand(const QDataProcessorWidget &widget)
-      : CommandBase(widget){};
+  ProcessCommand(const QDataProcessorWidget &widget) : CommandBase(widget){};
   virtual ~ProcessCommand(){};
 
   void execute() override {
