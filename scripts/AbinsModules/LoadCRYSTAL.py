@@ -389,7 +389,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
                 "symbol": symbol, "mass": atom.mass, "sort": i,
                 "coord": np.asarray(l[3:6]).astype(dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)}
 
-        self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses)
+        self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)
 
     def _create_kpoints_data(self, data=None, freq=None, atomic_displacements=None, atomic_coordinates=None,
                              weights=None, k_coordinates=None, unit_cell=None):

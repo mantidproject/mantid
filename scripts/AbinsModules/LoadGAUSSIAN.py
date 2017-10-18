@@ -82,7 +82,7 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
                                                   "coord": coord}
 
             atom_indx += 1
-        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file)
+        self.check_isotopes_substitution(atoms=atoms, masses=masses_from_file, approximate=True)
 
         self._num_atoms = len(atoms)
         data["atoms"] = atoms

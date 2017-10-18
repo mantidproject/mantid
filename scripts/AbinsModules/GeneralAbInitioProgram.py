@@ -205,15 +205,20 @@ class GeneralAbInitioProgram(object):
 
         return ab_initio_data
 
-    def check_isotopes_substitution(self, atoms=None, masses=None):
+    def check_isotopes_substitution(self, atoms=None, masses=None, approximate=False):
         """
         Updates atomic mass in case of isotopes.
         :param atoms: dictionary with atoms to check
         :param masses: atomic masses read from an ab initio file
+        :param approximate: whether or not look for isotopes in the approximated way
         """
         num_atoms = len(atoms)
         eps = AbinsModules.AbinsConstants.MASS_EPS
-        isotopes_found = [abs(atoms["atom_%s" % i]["mass"] - masses[i]) > eps for i in range(num_atoms)]
+        if approximate:
+            isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
+                              for i in range(num_atoms)]
+        else:
+            isotopes_found = [abs(atoms["atom_%s" % i]["mass"] - masses[i]) > eps for i in range(num_atoms)]
 
         if any(isotopes_found):
             for i in range(num_atoms):
