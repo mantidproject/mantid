@@ -119,7 +119,7 @@ void FitPeaks::init() {
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
                   boost::make_shared<StringListValidator>(peakNames));
-  vector<string> bkgdtypes{"Flat", "Linear"};
+  vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
                   boost::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
@@ -182,6 +182,10 @@ void FitPeaks::init() {
   setPropertyGroup("CostFunction", optimizergrp);
 
   // other helping information
+  declareProperty("FindBackgroundSigma", 1.0,
+                  "Multiplier of standard deviations of the variance for convergence of "
+                  "peak elimination.  Default is 1.0. ");
+
   declareProperty("HighBackground", true,
                   "Flag whether the data has high background comparing to "
                   "peaks' intensities. "
@@ -260,6 +264,7 @@ void FitPeaks::processInputs() {
     m_stopWorkspaceIndex = m_inputWS->getNumberHistograms();
 
   m_highBackground = getProperty("HighBackground");
+  m_bkgdSimga = getProperty("FindBackgroundSigma");
 
   // Set up peak and background functions
   processInputFunctions();
@@ -285,8 +290,15 @@ void FitPeaks::processInputFunctions() {
 
   // background functions
   std::string bkgdfunctiontype = getPropertyValue("BackgroundType");
+  std::string bkgdname;
+  if (bkgdfunctiontype.compare("Linear") == 0)
+    bkgdname = "LinearBackground";
+  else if (bkgdfunctiontype.compare("Flat") == 0)
+    bkgdname = "FlatBackground";
+  else
+    bkgdname = bkgdfunctiontype;
   m_bkgdFunction = boost::dynamic_pointer_cast<IBackgroundFunction>(
-      API::FunctionFactory::Instance().createFunction(bkgdfunctiontype));
+      API::FunctionFactory::Instance().createFunction(bkgdname));
 
   // input peak parameters
   std::string partablename = getPropertyValue("PeakParameterValueTable");
@@ -465,8 +477,47 @@ void FitPeaks::processInputPeakCenters() {
   return;
 }
 
-//---
-void FitPeaks::convert_parameter_name_to_index() {}
+//----------------------------------------------------------------------------------------------
+/** convert the input initial parameter name/value to parameter index/value for faster access
+ * @brief FitPeaks::convert_parameter_name_to_index
+ */
+void FitPeaks::convert_parameter_name_to_index() {
+
+  // get a map for parameter name and parameter index
+  std::map<std::string, size_t> parname_index_map;
+  for (size_t iparam = 0; iparam < m_peakFunction->nParams(); ++iparam)
+  {
+    parname_index_map.insert(std::make_pair(m_peakFunction->parameterName(iparam), iparam));
+  }
+
+  // map the input parameter names to parameter indexes
+  std::vector<std::string> init_param_names = getProperty("PeakParameterNames");
+  API::ITableWorkspace_const_sptr param_table = getProperty("PeakParameterValueTable");
+  if (param_table && init_param_names.size() > 0)
+    throw std::invalid_argument("Parameter value table and initial parameter name/value vectors cannot be given simultanenously.");
+  else if (!param_table && init_param_names.size() == 0)
+    throw std::invalid_argument("Neither parameter value table nor initial parameter name/value vectors is specified.");
+  else if (param_table) {
+    init_param_names = param_table->getColumnNames();
+  }
+
+  // convert
+  std::vector<double> m_initParamIndexes;
+  for (size_t i = 0; i < init_param_names.size(); ++i)
+  {
+    std::map<std::string, size_t>::iterator locator = parname_index_map.find(init_param_names[i]);
+    if (locator != parname_index_map.end())
+      m_initParamIndexes.push_back(locator->second);
+    else
+    {
+      g_log.warning() << "Given peak parameter " << init_param_names[i] << " is not an allowed parameter of peak "
+                         "function " << m_peakFunction->name() << "\n";
+      m_initParamIndexes.push_back(m_peakFunction->nParams()*10);
+    }
+  }
+
+  return;
+}
 
 //----------------------------------------------------------------------------------------------
 /** main method to fit peaks among all
@@ -1083,9 +1134,12 @@ void FitPeaks::generateOutputWorkspaces() {
   for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
     auto out_vecx = m_fittedPeakWS->histogram(iws).x();
     auto in_vecx = m_inputWS->histogram(iws).x();
+    // TODO/ISSUE/NOW - Need to test whether X shall be really copied like this?
     for (size_t j = 0; j < out_vecx.size(); ++j)
+    {
+      // m_fittedPeakWS->setHistogram(iws, in_vecx);
       m_fittedPeakWS->dataX(iws)[j] = in_vecx[j];
-    // out_vecx[j] = in_vecx[j];
+    }
   }
 }
 
@@ -1387,9 +1441,27 @@ void FitPeaks::reduceBackground(const std::vector<double> &vec_x,
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Get index of X value in a given spectrum
+ * @brief FitPeaks::getXIndex
+ * @param wi
+ * @param x
+ * @return
+ */
 size_t FitPeaks::getXIndex(size_t wi, double x) {
-  // TODO - Implement NOW
-  return 0;
+  // check input
+  if (wi >= m_inputWS->getNumberHistograms())
+  {
+    g_log.error() << "getXIndex(): given workspace index " << wi << " is out of range [0, "
+                  << m_inputWS->getNumberHistograms() << ")" << "\n";
+    throw std::runtime_error("getXIndex() is given an out-of-range workspace index");
+  }
+
+  // get value
+  auto vec_x = m_inputWS->histogram(wi).x();
+  auto finditer = std::lower_bound(vec_x.begin(), vec_x.end(), x);
+  size_t index = static_cast<size_t>(finditer - vec_x.begin());
+  return index;
 }
 
 //----------------------------------------------------------------------------------------------
