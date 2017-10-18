@@ -58,7 +58,7 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTes
     # |   Use case: system with isotope Li7 and D                                       |
     # ===================================================================================
     #
-    _li7_d2 = "LiOH_H2O_7Li_2D2O"
+    _li7_d2 = "LiOH_H2O_7Li_2D2O_LoadCASTEP"
 
     def test_isotopes(self):
         self.check(name=self._li7_d2, loader=AbinsModules.LoadCASTEP)
