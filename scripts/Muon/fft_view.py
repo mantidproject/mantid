@@ -130,7 +130,7 @@ class FFTView(QtGui.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
-    # responses to cpmmands
+    # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
 

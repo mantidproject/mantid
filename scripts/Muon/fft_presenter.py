@@ -104,7 +104,7 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.thread.deleteLater
+        self.thread.deleteLater()
         self.thread=None
 
     def get_FFT_input(self):
