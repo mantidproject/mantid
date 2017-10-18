@@ -37,7 +37,6 @@ class Abins(PythonAlgorithm):
     _out_ws_name = None
     _num_quantum_order_events = None
     _extracted_ab_initio_data = None
-    _isotopes_found = None
 
     def category(self):
         return "Simulation"
@@ -265,56 +264,33 @@ class Abins(PythonAlgorithm):
         temp_s_atom_data = np.copy(s_atom_data)
 
         result = []
+        masses = {}
+        for i in range(num_atoms):
+            symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
+            mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
+            if symbol not in masses:
+                masses[symbol] = set()
+            masses[symbol].add(mass)
 
-        # check if isotopes are in the system, e.g, if there is any isotope substitution in the system
+        one_m = AbinsModules.AbinsConstants.ONLY_ONE_MASS
         eps = AbinsModules.AbinsConstants.MASS_EPS
-        data = self._extracted_ab_initio_data
-
-        # here Atom(symbol=data["atom_%s" % atom]["symbol"]).mass corresponds to the average mass weighted over all
-        # isotopes for the given element. In this formula it is assumed that one isotope is much more abundant than
-        # others.
-        self._isotopes_found = any([abs(data["atom_%s" % atom]["mass"] -
-                                   Atom(symbol=data["atom_%s" % atom]["symbol"]).mass) > eps
-                                   for atom in range(num_atoms)])
-
-        # if isotopes found then find corresponding masses
-        if self._isotopes_found:
-
-            masses = {}
-            for i in range(num_atoms):
-                symbol = self._extracted_ab_initio_data["atom_%s" % i]["symbol"]
-                mass = self._extracted_ab_initio_data["atom_%s" % i]["mass"]
-                if symbol not in masses:
-                    masses[symbol] = set()
-                masses[symbol].add(mass)
-
-            # convert set to list to fix order
-            for s in masses:
-                masses[s] = list(set(masses[s]))
+        # convert set to list to fix order
+        for s in masses:
+            masses[s] = list(set(masses[s]))
 
         for symbol in atoms_symbols:
 
-            # This object stores mass averaged over all isotopes.
-            element = Atom(symbol=symbol)
+            sub = len(masses[symbol]) > one_m or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > eps
+            for m in masses[symbol]:
 
-            if self._isotopes_found:
-
-                for m in masses[symbol]:
-
-                    result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
-                                                    element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
-                                                    s_atom_data=s_atom_data, element=element))
-
-            else:
-
-                result.extend(self._atom_type_s(num_atoms=num_atoms, mass=element.mass, s_data_extracted=s_data_extracted,
+                result.extend(self._atom_type_s(num_atoms=num_atoms, mass=m, s_data_extracted=s_data_extracted,
                                                 element_symbol=symbol, temp_s_atom_data=temp_s_atom_data,
-                                                s_atom_data=s_atom_data, element=element))
+                                                s_atom_data=s_atom_data, substitution=sub))
 
         return result
 
     def _atom_type_s(self, num_atoms=None, mass=None, s_data_extracted=None, element_symbol=None, temp_s_atom_data=None,
-                     s_atom_data=None, element=None):
+                     s_atom_data=None, substitution=None):
         """
         Helper function for calculating S for the given type of atom
 
@@ -323,10 +299,12 @@ class Abins(PythonAlgorithm):
         :param element_symbol: label for the type of atom
         :param temp_s_atom_data: helper array to store S
         :param s_atom_data: stores all S for the given type of atom
-        :param element: object of type mantid.kernel.Atom
+        :param substitution: True if isotope substitution and False otherwise
         """
         atom_workspaces = []
         s_atom_data.fill(0.0)
+
+        element = Atom(symbol=element_symbol)
 
         for atom in range(num_atoms):
 
@@ -347,17 +325,25 @@ class Abins(PythonAlgorithm):
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
         nucleons_number = int(round(mass))
-        if self._isotopes_found:
-            symbol = element_symbol + str(nucleons_number)
-        else:
-            symbol = element_symbol
 
-        main_protons_num = element.z_number
-        atom_workspaces.append(self._create_workspace(atom_name=symbol, s_points=np.copy(total_s_atom_data),
-                                                      optional_name="_total", protons_number=main_protons_num,
-                                                      nucleons_number=nucleons_number))
-        atom_workspaces.append(self._create_workspace(atom_name=symbol, s_points=np.copy(s_atom_data),
-                                                      protons_number=main_protons_num, nucleons_number=nucleons_number))
+        if substitution:
+
+            atom_workspaces.append(self._create_workspace(atom_name=element_symbol + str(nucleons_number),
+                                                          s_points=np.copy(total_s_atom_data),
+                                                          optional_name="_total", protons_number=element.z_number,
+                                                          nucleons_number=nucleons_number))
+            atom_workspaces.append(self._create_workspace(atom_name=element_symbol + str(nucleons_number),
+                                                          s_points=np.copy(s_atom_data),
+                                                          protons_number=element.z_number,
+                                                          nucleons_number=nucleons_number))
+        else:
+
+            atom_workspaces.append(self._create_workspace(atom_name=element_symbol,
+                                                          s_points=np.copy(total_s_atom_data),
+                                                          optional_name="_total", protons_number=element.z_number))
+            atom_workspaces.append(self._create_workspace(atom_name=element_symbol,
+                                                          s_points=np.copy(s_atom_data),
+                                                          protons_number=element.z_number))
 
         return atom_workspaces
 
@@ -420,7 +406,7 @@ class Abins(PythonAlgorithm):
         :param s_points: dynamical factor for the given atom
         :param workspace: workspace to be filled with S
         """
-        if protons_number is not None and nucleons_number is not None:
+        if protons_number is not None:
 
             s_points = s_points * self._scale * self._get_cross_section(protons_number=protons_number,
                                                                         nucleons_number=nucleons_number)
@@ -442,14 +428,14 @@ class Abins(PythonAlgorithm):
         :param nucleons_number: number of nucleons in the given type of atom
         :returns: cross section for that element
         """
-        if self._isotopes_found:
+        if nucleons_number is not None:
             try:
                 atom = Atom(a_number=nucleons_number, z_number=protons_number)
             # isotopes are not implemented for all elements so use different constructor in that cases
             except RuntimeError:
-                atom = Atom(symbol=Atom(z_number=protons_number).symbol)
+                atom = Atom(z_number=protons_number)
         else:
-            atom = Atom(symbol=Atom(z_number=protons_number).symbol)
+            atom = Atom(z_number=protons_number)
 
         cross_section = None
         if self._scale_by_cross_section == 'Incoherent':

@@ -213,8 +213,7 @@ class GeneralAbInitioProgram(object):
         """
         num_atoms = len(atoms)
         eps = AbinsModules.AbinsConstants.MASS_EPS
-        isotopes_found = [abs(round(atoms["atom_%s" % i]["mass"]) - round(masses[i])) > eps
-                              for i in range(num_atoms)]
+        isotopes_found = [abs(atoms["atom_%s" % i]["mass"] - masses[i]) > eps for i in range(num_atoms)]
 
         if any(isotopes_found):
             for i in range(num_atoms):
