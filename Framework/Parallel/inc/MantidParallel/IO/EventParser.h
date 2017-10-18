@@ -10,8 +10,8 @@
 #include "MantidTypes/Event/TofEvent.h"
 
 #include <cstdint>
-#include <future>
 #include <numeric>
+#include <thread>
 #include <vector>
 #include <xmmintrin.h>
 
@@ -91,7 +91,7 @@ public:
                              const TimeOffsetType *eventTimeOffset,
                              const Chunker::LoadRange &range);
 
-  void wait() const;
+  void wait();
 
 private:
   void doParsing(int32_t *event_id_start,
@@ -104,7 +104,7 @@ private:
   PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
-  std::future<void> m_future;
+  std::thread m_thread;
 };
 
 /** Constructor for EventParser.
@@ -256,13 +256,12 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
-  // Wrapped in lambda because std::async is unable to specialize doParsing on
+  // Wrapped in lambda because std::thread is unable to specialize doParsing on
   // its own
-  m_future =
-      std::async(std::launch::async,
-                 [this, event_id_start, event_time_offset_start, &range] {
-                   doParsing(event_id_start, event_time_offset_start, range);
-                 });
+  m_thread =
+      std::thread([this, event_id_start, event_time_offset_start, &range] {
+        doParsing(event_id_start, event_time_offset_start, range);
+      });
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
@@ -283,9 +282,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
 }
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() const {
-  if (m_future.valid())
-    m_future.wait();
+void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() {
+  m_thread.join();
 }
 
 } // namespace IO

@@ -76,7 +76,7 @@ public:
 
 private:
   const size_t m_pixelsPerBank{77};
-  size_t m_bank;
+  size_t m_bank{0};
 };
 
 void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
