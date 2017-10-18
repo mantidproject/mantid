@@ -534,10 +534,6 @@ void MWRunFiles::findFiles() {
     // Reset modified flag.
     m_uiForm.fileEditor->setModified(false);
 
-    if (m_pool.isSearchRunning()) {
-      m_pool.cancelWorker(this);
-    }
-
     emit findingFiles();
 
     // If we have an override instrument then add it in appropriate places to
@@ -572,7 +568,7 @@ void MWRunFiles::findFiles() {
 
     if (!searchText.isEmpty()) {
       const auto parameters = createFindFilesSearchParameters(searchText);
-      //      m_pool.createWorker(this, parameters);
+      m_pool.createWorker(this, parameters);
     }
 
   } else {

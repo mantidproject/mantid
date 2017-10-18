@@ -6,6 +6,7 @@
 #include <QString>
 #include <string>
 #include <vector>
+#include <functional>
 
 namespace MantidQt {
 namespace API {
@@ -55,15 +56,16 @@ signals:
 
 public:
   /// Constructor.
-  FindFilesThread();
-  /// Set the various file-finding values / options.
-  void set(const FindFilesSearchParameters &parameters);
+  FindFilesThread(const FindFilesSearchParameters &parameters);
+  static FindFilesThread *create();
 
 protected:
   /// Override parent class run().
-  void run() override;
+  virtual void run() override;
 
 private:
+  /// Set the various file-finding values / options.
+  void set(const FindFilesSearchParameters &parameters);
   /// Use the specified algorithm and property to find files instead of using
   /// the FileFinder.
   void getFilesFromAlgorithm();
@@ -89,9 +91,13 @@ private:
  * A small helper class to hold the thread pool
  */
 class FindFilesThreadPoolManager {
+  typedef std::function<FindFilesThread *(const FindFilesSearchParameters &)>
+      ThreadAllocator;
 
 public:
   FindFilesThreadPoolManager();
+  void setAllocator(ThreadAllocator allocator);;
+
   void createWorker(const QObject* parent,
                     const FindFilesSearchParameters& parameters);
   void cancelWorker(const QObject *parent);
@@ -99,9 +105,9 @@ public:
   void waitForDone() const;
 
 private:
-  // make a local thread pool
   FindFilesThread *m_currentWorker;
   static QThreadPool m_pool;
+  ThreadAllocator m_workerAllocator;
 };
 
 }

@@ -24,9 +24,11 @@ using namespace MantidQt::API;
  *
  * @param parent :: pointer to the parent QObject.
  */
-FindFilesThread::FindFilesThread()
+FindFilesThread::FindFilesThread(const FindFilesSearchParameters &parameters)
     : QRunnable(), m_error(), m_filenames(), m_valueForProperty(), m_text(),
-      m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional() {}
+      m_algorithm(), m_property(), m_isForRunFiles(), m_isOptional() {
+  set(parameters);
+}
 
 /**
  * Set the values needed for the thread to run.
@@ -185,16 +187,26 @@ FindFilesSearchResults FindFilesThread::createFindFilesSearchResult() {
 QThreadPool FindFilesThreadPoolManager::m_pool;
 
 FindFilesThreadPoolManager::FindFilesThreadPoolManager()
-    : m_currentWorker(nullptr) {}
+  : m_currentWorker{nullptr}
+{
+  m_workerAllocator = [](const FindFilesSearchParameters &parameters) {
+    return new FindFilesThread(parameters);
+  };
+}
+
+void FindFilesThreadPoolManager::setAllocator(ThreadAllocator allocator) {
+  m_workerAllocator = allocator;
+}
 
 void FindFilesThreadPoolManager::createWorker(
     const QObject *parent, const FindFilesSearchParameters &parameters) {
+  cancelWorker(parent);
   // if parent is null then don't do anything as there will be no
   // object listening for the search result
   if (!parent)
     return;
 
-  m_currentWorker = new FindFilesThread();
+  m_currentWorker = m_workerAllocator(parameters);
 
   // Hook up slots for when the thread finishes. By default Qt uses queued
   // connections when connecting signals/slots between threads. Instead here
@@ -208,9 +220,6 @@ void FindFilesThreadPoolManager::createWorker(
                   SIGNAL(finished(const FindFilesSearchResults &)), parent,
                   SIGNAL(fileFindingFinished()),
                   Qt::DirectConnection);
-
-  // Set the search parameters
-  m_currentWorker->set(parameters);
 
   // pass ownership to the thread pool
   // we do not need to worry about deleting m_currentWorker
