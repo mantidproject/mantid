@@ -4,6 +4,7 @@ import re
 import AbinsModules
 from  mantid.kernel import Atom
 
+
 class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
@@ -101,9 +102,6 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
                 if self._num_atoms is None or self._num_phonons is None:
                     raise IOError("Failed to parse file. Invalid file header.")
                 return file_data
-
-
-                # ----------------------------------------------------------------------------------------
 
     def _parse_phonon_freq_block(self, f_handle):
         """
