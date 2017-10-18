@@ -6,6 +6,7 @@ from sans.algorithm_detail.batch_execution import (single_reduction_for_batch)
 from sans.common.enums import (OutputMode, FindDirectionEnum)
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
+
 class SANSBatchReduction(object):
     def __init__(self):
         super(SANSBatchReduction, self).__init__()
@@ -68,27 +69,33 @@ class SANSBatchReduction(object):
             errors.update({"SANSBatchReduction": str(err)})
         return errors
 
+
 class SANSCentreFinder(object):
     def __init__(self):
         super(SANSCentreFinder, self).__init__()
 
-    def __call__(self, state, r_min = 0.06, r_max = 0.026, max_iter = 20, xstart = 0.0 , ystart = 0.0, tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True):
+    def __call__(self, state, r_min = 0.06, r_max = 0.026, max_iter = 20, x_start = 0.0, y_start = 0.0,
+                 tolerance = 1.251e-4, find_direction = FindDirectionEnum.All, reduction_method = True):
         """
-        This is the start of any reduction.
+        This is the start of the beam centre finder algorithm.
 
-        :param states: This is a list of sans states. Each state in the list corresponds to a single reduction.
-        :param use_optimizations: if True then the optimizations for file reloading are used.
-        :param output_mode: The output mode defines how the reduced data should be published. This can be
-                            1. PublishToADS
-                            2. SaveToFile
-                            3. Both
+        :param state: This is a sans state, to find the beam centre for.
+        :param r_min: This is the inner radius of the quartile mask.
+        :param r_max: This is the outer radius of the quartile mask.
+        :param max_iter: This is the maximum number of iterations.
+        :param x_start: This is the starting position of the search on the x axis.
+        :param y_start: This is the starting position of the search on the y axis.
+        :param tolerance: This is the tolerance for the search.
+        :param fine_direction: This is an enumerator controlling which axis or both should be searched.
+        :param reduction_method: This is a bool controlling which centre finder algorithm to use. By default the
+        reduction method is used.
         """
-        self.validate_inputs(state, r_min, r_max, max_iter, xstart, ystart, tolerance)
+        self.validate_inputs(state, r_min, r_max, max_iter, x_start, y_start, tolerance)
 
         if reduction_method:
-            return self._execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction)
+            return self._execute_reduction_method(state, r_min, r_max, max_iter, x_start, y_start, tolerance, find_direction)
         else:
-            return self._execute_mass_method(state, r_min, max_iter, xstart, ystart, tolerance)
+            return self._execute_mass_method(state, r_min, max_iter, x_start, y_start, tolerance)
 
     @staticmethod
     def _execute_reduction_method(state, r_min, r_max, max_iter, xstart, ystart, tolerance, find_direction):
@@ -103,9 +110,9 @@ class SANSCentreFinder(object):
     def validate_inputs(self, state, r_min, r_max, max_iter, xstart, ystart, tolerance):
         # We are strict about the types here.
         # 1. state has to be a sans state object
-        # 2. r_min, r_max, tolerance have to be posotive floats
-        # 3. xstart, ysrart have to be floats
-        # 4. max_iter has to be an intiger
+        # 2. r_min, r_max, tolerance have to be positive floats
+        # 3. xstart, ystart have to be floats
+        # 4. max_iter has to be an integer
 
         if not isinstance(state, State):
             raise RuntimeError("The entries have to be sans state objects. "

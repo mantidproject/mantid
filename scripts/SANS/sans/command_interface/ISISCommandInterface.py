@@ -17,7 +17,7 @@ from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDi
                                ISISReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
-from sans.algorithm_detail.centre_finder_new import centre_finder_new
+
 # Disable plotting if running outside Mantidplot
 try:
     import mantidplot
@@ -1009,12 +1009,15 @@ def PhiRanges(phis, plot=True):
     # Return just the workspace name of the full range
     return reduced_workspace_names[0]
 
-def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4, find_direction=FindDirectionEnum.All, reduction_method=True):
+
+def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,
+                   find_direction=FindDirectionEnum.All, reduction_method=True):
     state = director.process_commands()
     centre_finder = SANSCentreFinder()
     centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
     SetCentre(centre['pos1'], centre['pos2'], bank='rear')
     SetCentre(centre['pos1'], centre['pos2'], bank='front')
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General commands

@@ -62,9 +62,6 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         if state.mask.phi_max:
             state.mask.phi_max = 0.0
 
-        # Set compatibility mode
-        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
-
         # Set test centre
         state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = self.getProperty(
             "Centre1").value
@@ -141,7 +138,6 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         #    a user-specified value which can be obtained with the help of the beam centre finder.
         # ------------------------------------------------------------
         scatter_data = self._move(state_serialized, scatter_data, component_as_string)
-        monitor_scatter_date = self._move(state_serialized, monitor_scatter_date, component_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
         # 5. Apply masking (pixel masking and time masking)
