@@ -85,7 +85,7 @@ class FFTModel(object):
         mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)
 
     def FFTAlg(self,FFTInputs):
-        """ 
+        """
         Use the FFT alg
         """
         alg=mantid.AlgorithmManager.create("FFT")
