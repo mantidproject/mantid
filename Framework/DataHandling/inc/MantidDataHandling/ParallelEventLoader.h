@@ -12,7 +12,13 @@ class EventWorkspace;
 }
 namespace DataHandling {
 
-/** ParallelEventLoader : TODO: DESCRIPTION
+/** Loader for event data from Nexus files with parallelism based on multiple
+  processes (MPI) for performance. This class provides integration of the low
+  level loader component Parallel::IO::EventLoader with higher level concepts
+  such as DataObjects::EventWorkspace and the instrument.
+
+  @author Simon Heybrock
+  @date 2017
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source

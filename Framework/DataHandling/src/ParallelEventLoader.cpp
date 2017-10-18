@@ -44,8 +44,9 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
         throw std::runtime_error("Detector ID range in bank is not contiguous. "
                                  "Cannot use ParallelEventLoader.");
     } else {
-      printf("bank %s not found\n", bankName.c_str());
-      throw std::runtime_error("");
+      throw std::runtime_error(
+          "ParallelEventLoader: Bank " + bankName +
+          " not found. Cannot determine detector ID offset.");
     }
   }
   return bankOffsets;
