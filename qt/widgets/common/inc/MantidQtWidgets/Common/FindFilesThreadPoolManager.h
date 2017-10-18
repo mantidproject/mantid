@@ -26,7 +26,7 @@ public:
   FindFilesThreadPoolManager();
   /// Set the worker object allocator for this thread pool
   void setAllocator(ThreadAllocator allocator);
-  ;
+
   /// Create a new worker thread. This will cancel any currently running threads
   void createWorker(const QObject *parent,
                     const FindFilesSearchParameters &parameters);
