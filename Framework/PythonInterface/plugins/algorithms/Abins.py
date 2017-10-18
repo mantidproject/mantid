@@ -442,7 +442,11 @@ class Abins(PythonAlgorithm):
         :param nucleons_number: number of nucleons in the given type of atom
         :returns: cross section for that element
         """
-        atom = Atom(a_number=nucleons_number, z_number=protons_number)
+        if self._isotopes_found:
+            atom = Atom(a_number=nucleons_number, z_number=protons_number)
+        else:
+            atom = Atom(symbol=Atom(z_number=protons_number).symbol)
+
         cross_section = None
         if self._scale_by_cross_section == 'Incoherent':
             cross_section = atom.neutron()["inc_scatt_xs"]
