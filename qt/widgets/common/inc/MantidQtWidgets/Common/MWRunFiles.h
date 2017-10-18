@@ -1,14 +1,14 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 #define MANTIDQTMANTIDWIDGETS_MWRUNFILES_H_
 
-#include "ui_MWRunFiles.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
-#include <QString>
-#include <QSettings>
+#include "MantidQtWidgets/Common/MantidWidget.h"
+#include "ui_MWRunFiles.h"
 #include <QComboBox>
 #include <QMessageBox>
+#include <QSettings>
+#include <QString>
 #include <QStringList>
 #include <boost/shared_ptr.hpp>
 
@@ -227,7 +227,8 @@ private:
   /// Turn on/off display of validator red star (default is on)
   void setValidatorDisplay(bool display);
   /// Helper method to create a FindFilesSearchParameters object
-  FindFilesSearchParameters createFindFilesSearchParameters(const std::string& text) const;
+  FindFilesSearchParameters
+  createFindFilesSearchParameters(const std::string &text) const;
 
 private slots:
   /// Browse clicked slot
@@ -235,7 +236,8 @@ private slots:
   /// currently checks only if the entry number is any integer > 0
   void checkEntry();
   /// Slot called when file finding thread has finished.
-  void inspectThreadResult(const FindFilesSearchResults& results = FindFilesSearchResults());
+  void inspectThreadResult(
+      const FindFilesSearchResults &results = FindFilesSearchResults());
 
 private:
   /// Is the widget for run files or standard files

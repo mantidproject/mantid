@@ -44,7 +44,6 @@ struct FindFilesSearchResults {
   std::string valueForProperty;
 };
 
-
 /**
  * A class to allow the asynchronous finding of files.
  */
@@ -54,11 +53,11 @@ class FindFilesWorker : public QObject, public QRunnable {
 signals:
   /// Signal emitted after the search is finished, regardless of whether
   /// any file was found.
-  void finished(const FindFilesSearchResults&);
+  void finished(const FindFilesSearchResults &);
 
 public:
   /// Constructor.
-  FindFilesWorker(const FindFilesSearchParameters& parameters);
+  FindFilesWorker(const FindFilesSearchParameters &parameters);
 
 protected:
   /// Override parent class run().
@@ -69,12 +68,15 @@ private:
   /// the FileFinder.
   std::pair<std::vector<std::string>, std::string> getFilesFromAlgorithm();
   /// Helper method to create a search result object
-  FindFilesSearchResults createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty);
+  FindFilesSearchResults
+  createFindFilesSearchResult(const std::string &error,
+                              const std::vector<std::string> &filenames,
+                              const std::string &valueForProperty);
   /// Struct to hold the parameters of the search
   FindFilesSearchParameters m_parameters;
 };
 
-}
-}
+} // namespace API
+} // namespace MantidQt
 
 #endif // MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_

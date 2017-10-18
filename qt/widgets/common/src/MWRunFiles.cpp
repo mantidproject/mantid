@@ -304,9 +304,7 @@ bool MWRunFiles::isValid() const { return m_uiForm.valid->isHidden(); }
  * Is the widget currently searching
  * @return True if a search is inprogress
  */
-bool MWRunFiles::isSearching() const {
-  return m_pool.isSearchRunning();
-}
+bool MWRunFiles::isSearching() const { return m_pool.isSearchRunning(); }
 
 /**
 * Returns the names of the files found
@@ -567,7 +565,8 @@ void MWRunFiles::findFiles() {
     }
 
     if (!searchText.isEmpty()) {
-      const auto parameters = createFindFilesSearchParameters(searchText.toStdString());
+      const auto parameters =
+          createFindFilesSearchParameters(searchText.toStdString());
       m_pool.createWorker(this, parameters);
     }
 
@@ -596,7 +595,7 @@ IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm() {
  * Called when the file finding thread finishes.  Inspects the result
  * of the thread, and emits fileFound() if it has been successful.
  */
-void MWRunFiles::inspectThreadResult(const FindFilesSearchResults& results) {
+void MWRunFiles::inspectThreadResult(const FindFilesSearchResults &results) {
   // Unpack the search results
   const auto error = results.error;
   const auto filenames = results.filenames;
@@ -952,8 +951,8 @@ void MWRunFiles::setValidatorDisplay(bool display) {
   m_showValidator = display;
 }
 
-FindFilesSearchParameters MWRunFiles::createFindFilesSearchParameters(const std::string& text) const
-{
+FindFilesSearchParameters
+MWRunFiles::createFindFilesSearchParameters(const std::string &text) const {
   FindFilesSearchParameters parameters;
   parameters.searchText = text;
   parameters.isOptional = isOptional();

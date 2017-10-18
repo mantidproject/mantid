@@ -4,9 +4,9 @@
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
 
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
 
 using MantidQt::API::FindFilesThreadPoolManager;
 using MantidQt::API::FindFilesSearchParameters;
@@ -18,8 +18,12 @@ class FindFilesThreadPoolManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindFilesThreadPoolManagerTest *createSuite() { return new FindFilesThreadPoolManagerTest(); }
-  static void destroySuite(FindFilesThreadPoolManagerTest *suite) { delete suite; }
+  static FindFilesThreadPoolManagerTest *createSuite() {
+    return new FindFilesThreadPoolManagerTest();
+  }
+  static void destroySuite(FindFilesThreadPoolManagerTest *suite) {
+    delete suite;
+  }
 
   void test_find_single_file() {
     // Arrange
@@ -37,9 +41,10 @@ public:
     FindFilesSearchResults exp_results;
     exp_results.filenames.push_back("FoundFile");
 
-    auto fakeAllocator = [&exp_results](const FindFilesSearchParameters& parameters) {
-      return new FakeFindFilesThread(parameters, exp_results);
-    };
+    auto fakeAllocator =
+        [&exp_results](const FindFilesSearchParameters &parameters) {
+          return new FakeFindFilesThread(parameters, exp_results);
+        };
     FindFilesThreadPoolManager poolManager;
     poolManager.setAllocator(fakeAllocator);
 
@@ -74,15 +79,20 @@ public:
     FindFilesSearchResults exp_results;
     exp_results.filenames.push_back("FoundFile");
 
-    auto fakeAllocatorNoResults = [](const FindFilesSearchParameters& parameters) {
-      // Run a thread that returns nothing and takes 1000 milliseconds to do so
-      return new FakeFindFilesThread(parameters, FindFilesSearchResults(), 1000);
-    };
+    auto fakeAllocatorNoResults =
+        [](const FindFilesSearchParameters &parameters) {
+          // Run a thread that returns nothing and takes 1000 milliseconds to do
+          // so
+          return new FakeFindFilesThread(parameters, FindFilesSearchResults(),
+                                         1000);
+        };
 
-    auto fakeAllocatorSomeResults = [&exp_results](const FindFilesSearchParameters& parameters) {
-      // Run a thread that returns something and takes 100 milliseconds to do so
-      return new FakeFindFilesThread(parameters, exp_results);
-    };
+    auto fakeAllocatorSomeResults =
+        [&exp_results](const FindFilesSearchParameters &parameters) {
+          // Run a thread that returns something and takes 100 milliseconds to
+          // do so
+          return new FakeFindFilesThread(parameters, exp_results);
+        };
 
     // Act
     FindFilesThreadPoolManager poolManager;
@@ -108,9 +118,7 @@ public:
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
-
   }
-
 };
 
 #endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST */

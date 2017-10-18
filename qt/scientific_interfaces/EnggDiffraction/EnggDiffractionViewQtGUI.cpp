@@ -363,7 +363,6 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_uiTabPreproc.doubleSpinBox_step_time->setValue(
       qs.value("user-params-step-time", 1).toDouble());
 
-
   // settings
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();

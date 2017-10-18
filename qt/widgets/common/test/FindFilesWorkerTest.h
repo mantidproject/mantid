@@ -2,12 +2,12 @@
 #define MANTIDQT_API_FINDFILESWORKERTEST_H_
 
 #include "MantidKernel/make_unique.h"
-#include "MantidQtWidgets/Common/FindFilesWorker.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
+#include "MantidQtWidgets/Common/FindFilesWorker.h"
 
 #include <QThreadPool>
-#include <cxxtest/TestSuite.h>
 #include <boost/algorithm/string/predicate.hpp>
+#include <cxxtest/TestSuite.h>
 
 using MantidQt::API::FindFilesSearchParameters;
 using MantidQt::API::FindFilesSearchResults;
@@ -19,7 +19,9 @@ class FindFilesWorkerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static FindFilesWorkerTest *createSuite() { return new FindFilesWorkerTest(); }
+  static FindFilesWorkerTest *createSuite() {
+    return new FindFilesWorkerTest();
+  }
   static void destroySuite(FindFilesWorkerTest *suite) { delete suite; }
 
   void test_find_file_with_algorithm() {
@@ -36,11 +38,12 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(
+        boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
-  void test_find_run_files(){
+  void test_find_run_files() {
     // Arrange
     auto parameters = createFileSearch("IRS26173");
     parameters.algorithmName = "";
@@ -57,7 +60,8 @@ public:
     TS_ASSERT(widget->isFinishedSignalRecieved())
     TS_ASSERT_EQUALS(results.error, "")
     TS_ASSERT_EQUALS(results.filenames.size(), 1)
-    TS_ASSERT(boost::algorithm::contains(results.filenames[0], parameters.searchText))
+    TS_ASSERT(
+        boost::algorithm::contains(results.filenames[0], parameters.searchText))
     TS_ASSERT_EQUALS(results.valueForProperty, results.filenames[0])
   }
 
@@ -111,30 +115,29 @@ public:
   }
 
 private:
-  FindFilesSearchParameters createFileSearch(const std::string& searchText) {
+  FindFilesSearchParameters createFileSearch(const std::string &searchText) {
     FindFilesSearchParameters parameters;
     parameters.searchText = searchText;
     parameters.algorithmName = "Load";
     parameters.algorithmProperty = "Filename";
-    parameters.isOptional= false;
+    parameters.isOptional = false;
     parameters.isForRunFiles = false;
     return parameters;
   }
 
-FakeMWRunFiles* createWidget(FindFilesWorker* worker) {
+  FakeMWRunFiles *createWidget(FindFilesWorker *worker) {
     auto widget = new FakeMWRunFiles();
-    widget->connect(worker,
-                    SIGNAL(finished(const FindFilesSearchResults &)), widget,
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
+                    widget,
                     SLOT(inspectThreadResult(const FindFilesSearchResults &)),
                     Qt::DirectConnection);
-    widget->connect(worker,
-                    SIGNAL(finished(const FindFilesSearchResults &)), widget,
-                    SIGNAL(fileFindingFinished()),
+    widget->connect(worker, SIGNAL(finished(const FindFilesSearchResults &)),
+                    widget, SIGNAL(fileFindingFinished()),
                     Qt::DirectConnection);
     return widget;
   }
 
-  void executeWorker(FindFilesWorker* worker) {
+  void executeWorker(FindFilesWorker *worker) {
     auto threadPool = QThreadPool::globalInstance();
     threadPool->start(worker);
     threadPool->waitForDone();

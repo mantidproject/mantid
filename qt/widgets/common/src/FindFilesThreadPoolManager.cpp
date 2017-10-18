@@ -18,9 +18,8 @@ using namespace MantidQt::API;
 QThreadPool FindFilesThreadPoolManager::m_pool;
 
 FindFilesThreadPoolManager::FindFilesThreadPoolManager()
-  : m_currentWorker{nullptr}
-{
-  m_workerAllocator = [](const FindFilesSearchParameters& parameters) {
+    : m_currentWorker{nullptr} {
+  m_workerAllocator = [](const FindFilesSearchParameters &parameters) {
     return new FindFilesWorker(parameters);
   };
 }
@@ -58,8 +57,7 @@ void FindFilesThreadPoolManager::createWorker(
                   Qt::DirectConnection);
   parent->connect(m_currentWorker,
                   SIGNAL(finished(const FindFilesSearchResults &)), parent,
-                  SIGNAL(fileFindingFinished()),
-                  Qt::DirectConnection);
+                  SIGNAL(fileFindingFinished()), Qt::DirectConnection);
 
   // pass ownership to the thread pool
   // we do not need to worry about deleting m_currentWorker

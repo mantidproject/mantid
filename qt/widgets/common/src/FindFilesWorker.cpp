@@ -1,3 +1,4 @@
+#include "MantidQtWidgets/Common/FindFilesWorker.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
@@ -5,7 +6,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidQtWidgets/Common/FindFilesWorker.h"
 
 #include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
@@ -22,9 +22,8 @@ using namespace MantidQt::API;
  *
  * @param parameters :: a struct representing the parameters of the file search
  */
-FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters& parameters)
-    : QRunnable(), m_parameters(parameters) {
-}
+FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
+    : QRunnable(), m_parameters(parameters) {}
 
 /**
  * Called when the thread is ran via start().  Tries to find the files, and
@@ -50,7 +49,8 @@ void FindFilesWorker::run() {
     else
       error = "No files specified.";
 
-    const auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
+    const auto result = createFindFilesSearchResult(
+        error, filenames, valueForProperty.toStdString());
     emit finished(result);
     return;
   }
@@ -61,7 +61,8 @@ void FindFilesWorker::run() {
   try {
     // Use the property of the algorithm to find files, if one has been
     // specified.
-    if (m_parameters.algorithmName.length() != 0 && m_parameters.algorithmProperty.length() != 0) {
+    if (m_parameters.algorithmName.length() != 0 &&
+        m_parameters.algorithmProperty.length() != 0) {
       auto searchResult = getFilesFromAlgorithm();
       filenames = std::get<0>(searchResult);
       valueForProperty = QString::fromStdString(std::get<1>(searchResult));
@@ -80,7 +81,8 @@ void FindFilesWorker::run() {
     else {
       // Tokenise on ","
       std::vector<std::string> filestext;
-      filestext = boost::split(filestext, m_parameters.searchText, boost::is_any_of(","));
+      filestext = boost::split(filestext, m_parameters.searchText,
+                               boost::is_any_of(","));
 
       // Iterate over tokens.
       auto it = filestext.begin();
@@ -102,11 +104,12 @@ void FindFilesWorker::run() {
     filenames.clear();
   } catch (...) {
     error = "An unknown error occurred while trying to locate the file(s). "
-              "Please contact the development team";
+            "Please contact the development team";
     filenames.clear();
   }
 
-  auto result = createFindFilesSearchResult(error, filenames, valueForProperty.toStdString());
+  auto result = createFindFilesSearchResult(error, filenames,
+                                            valueForProperty.toStdString());
   emit finished(result);
 }
 
@@ -116,7 +119,8 @@ void FindFilesWorker::run() {
  * @return a tuple with a vector of filenames and a string for the property
  * value
  */
-std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAlgorithm() {
+std::pair<std::vector<std::string>, std::string>
+FindFilesWorker::getFilesFromAlgorithm() {
   std::vector<std::string> filenames;
   Mantid::API::IAlgorithm_sptr algorithm =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -161,7 +165,9 @@ std::pair<std::vector<std::string>, std::string> FindFilesWorker::getFilesFromAl
  * @param valueForProperty :: a message to display on the algorithm's property
  * @return A struct holding the results of this search.
  */
-FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(const std::string& error, const std::vector<std::string>& filenames, const std::string& valueForProperty) {
+FindFilesSearchResults FindFilesWorker::createFindFilesSearchResult(
+    const std::string &error, const std::vector<std::string> &filenames,
+    const std::string &valueForProperty) {
   FindFilesSearchResults results;
   results.error = error;
   results.filenames = filenames;
