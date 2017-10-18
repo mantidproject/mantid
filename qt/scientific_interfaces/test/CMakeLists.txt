@@ -55,6 +55,7 @@ if ( CXXTEST_FOUND )
             DataObjects
             Geometry
             HistogramData
+            Indexing
             Types
             Kernel
             ${Boost_LIBRARIES}

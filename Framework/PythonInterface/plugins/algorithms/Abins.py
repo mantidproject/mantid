@@ -414,6 +414,8 @@ class Abins(PythonAlgorithm):
         dim = 1
         length = s_points.size
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=dim, XLength=length + 1, YLength=length)
+        for i in range(dim):
+            wrk.getSpectrum(i).setDetectorID(i + 1)
         wrk.setX(0, self._bins)
         wrk.setY(0, s_points)
         AnalysisDataService.addOrReplace(workspace, wrk)
