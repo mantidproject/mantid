@@ -431,7 +431,6 @@ class VesuvioCorrections(VesuvioBase):
         fit.setProperty("Output", param_table_name)
         fit.setProperty("CreateOutput", True)
         fit.execute()
-
         return fit.getProperty('OutputParameters').value
 
     # ------------------------------------------------------------------------------
@@ -456,7 +455,11 @@ class VesuvioCorrections(VesuvioBase):
         params_dict = TableWorkspaceDictionaryFacade(params_ws)
         scale_param_name = 'f%d.Scaling' % index
 
-        return params_dict[scale_param_name]
+        try:
+            return params_dict[scale_param_name]
+        except KeyError:
+            raise RuntimeError("Unable to find parameter '" + scale_param_name + "'"
+                               + " in workspace '" + params_ws.getName() + "'.")
 
     # ------------------------------------------------------------------------------
 
