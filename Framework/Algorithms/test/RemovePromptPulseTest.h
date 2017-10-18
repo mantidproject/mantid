@@ -98,7 +98,7 @@ public:
 
     // Verify the results
     // drop events 36 spectra, 2 events/bin, 10 bins/pulse, 9 pulses
-    TS_ASSERT_EQUALS(num_events-36*2*10*9, ws->getNumberEvents());
+    TS_ASSERT_EQUALS(num_events - 36 * 2 * 10 * 9, ws->getNumberEvents());
 
     AnalysisDataService::Instance().remove(inWSName);
     AnalysisDataService::Instance().remove(outWSName);
