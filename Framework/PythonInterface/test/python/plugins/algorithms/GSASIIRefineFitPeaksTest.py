@@ -1,65 +1,66 @@
 from __future__ import (absolute_import, division, print_function)
 
+import os
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
+class _GSASFinder(object):
+    @staticmethod
+    def _find_directory_by_name(cur_dir_name, cur_dir_path, name_to_find, level, max_level):
+        if level == max_level:
+            return None
+
+        if cur_dir_name == name_to_find:
+            return cur_dir_path
+
+        list_dir = os.listdir(cur_dir_path)
+        for child in list_dir:
+            child_path = os.path.join(cur_dir_path, child)
+            if os.path.isdir(child_path):
+                try:
+                    path = _GSASFinder._find_directory_by_name(cur_dir_name=child, cur_dir_path=child_path,
+                                                               level=level + 1, name_to_find=name_to_find,
+                                                               max_level=max_level)
+                except WindowsError:
+                    pass
+                else:
+                    if path is not None:
+                        return path
+
+    @staticmethod
+    def _path_to_g2conda():
+        root_directory = os.path.abspath(os.sep)
+        return _GSASFinder._find_directory_by_name(cur_dir_path=root_directory, cur_dir_name=root_directory, level=0,
+                                                   name_to_find="g2conda", max_level=5)
+
+    @staticmethod
+    def GSASIIscriptable_location():
+        path_to_g2conda = _GSASFinder._path_to_g2conda()
+        if path_to_g2conda is None:
+            return None
+
+        path_to_gsasii_scriptable = os.path.join(path_to_g2conda, "GSASII")
+        if os.path.isfile(os.path.join(path_to_gsasii_scriptable, "GSASIIscriptable.py")):
+            return path_to_gsasii_scriptable
+
+        return None
+
+
 class GSASIIRefineFitPeaksTest(unittest.TestCase):
-    """
-    Very limited test, as executing this algorithm requires a modified
-    version of GSASII. At least it does some check that the algorithm is
-    registered succesfully and basic sanity checks.
-    """
 
-    def test_wrong_properties(self):
-        """
-        Handle in/out property issues appropriately.
-        """
-        ws_name = 'out_ws'
-        peak = "name=BackToBackExponential, I=5000,A=1, B=1., X0=10000, S=150"
-        sws = CreateSampleWorkspace(Function="User Defined", UserDefinedFunction=peak,
-                                    NumBanks=1, BankPixelWidth=1, XMin=5000, XMax=30000,
-                                    BinWidth=5, OutputWorkspace=ws_name)
-        instr_filename = 'inexistent_instr_par_file'
+    _path_to_gsas = None
 
-        # No InputWorkspace property (required)
-        self.assertRaises(RuntimeError,
-                          GSASIIRefineFitPeaks,
-                          WorkspaceIndex=0, ExpectedPeaks='1.2, 3.1')
+    def setUp(self):
+        self._path_to_gsas = _GSASFinder.GSASIIscriptable_location()
+        if self._path_to_gsas is None:
+            self.skipTest("Could not find GSASIIscriptable.py")
 
-        # Wrong WorkspaceIndex value
-        self.assertRaises(RuntimeError,
-                          GSASIIRefineFitPeaks,
-                          InputWorkspace=ws_name,
-                          WorkspaceIndex=-3)
+    def test_rietveld_refinement(self):
+        pass
 
-        # Wrong property
-        self.assertRaises(RuntimeError,
-                          GSASIIRefineFitPeaks,
-                          InputWorkspace=ws_name, BankPixelFoo=33,
-                          WorkspaceIndex=0)
-
-        # missing instrument file property
-        self.assertRaises(RuntimeError,
-                          GSASIIRefineFitPeaks,
-                          InputWorkspace=ws_name,
-                          WorkspaceIndex=0)
-
-        # Wrong InstrumentFile property name
-        self.assertRaises(ValueError,
-                          GSASIIRefineFitPeaks,
-                          InputWorkspace=ws_name,
-                          InstruMentFile=instr_filename,
-                          WorkspaceIndex=0, ExpectedPeaks='a')
-
-        # Missing file for InstrumentFile
-        self.assertRaises(ValueError,
-                          GSASIIRefineFitPeaks,
-                          InputWorkspace=ws_name,
-                          InstrumentFile=instr_filename,
-                          WorkspaceIndex=0, ExpectedPeaks='a')
-
-    def test_exec_import_fails(self):
+    def test_pawley_refinement(self):
         pass
 
 
