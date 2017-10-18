@@ -367,8 +367,6 @@ public:
   }
 
   void testExtractEventsPerformance() {
-    std::vector<std::vector<EventParser<int32_t, int64_t, double>::Event>>
-        rankData;
     for (size_t bank = 0; bank < NUM_BANKS; bank++)
       parser->extractEventsForRanks(rankData, event_ids[bank].data(),
                                     event_time_offsets[bank].data(),
@@ -376,7 +374,7 @@ public:
   }
 
   void testPopulateEventListPerformance() {
-    parser->populateEventList(parser->rankData()[0]);
+    parser->populateEventList(rankData[0]);
   }
 
 private:
@@ -385,5 +383,7 @@ private:
   std::vector<std::vector<double>> event_time_offsets;
   anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen;
   boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
+  std::vector<std::vector<EventParser<int32_t, int64_t, double>::Event>>
+      rankData;
 };
 #endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */
