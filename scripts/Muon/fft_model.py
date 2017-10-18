@@ -16,10 +16,10 @@ class FFTWrapper(object):
         self.name="FFT"
         self.model=FFT
 
-    """
-    store the data in the wrapper for later
-    """
     def loadData(self,inputs):
+        """
+        store the data in the wrapper for later
+        """
         if "phaseTable" in inputs:
             self.phaseTable=inputs["phaseTable"]
         else:
@@ -38,10 +38,10 @@ class FFTWrapper(object):
             self.FFT=None
         self.model.setRun(inputs["Run"])
 
-    """
-    runs the relevant parts of the FFT and the preprocessing
-    """
     def execute(self):
+        """
+        runs the relevant parts of the FFT and the preprocessing
+        """
         if self.phaseTable is not None:
             if self.phaseTable["newTable"]:
                 self.model.makePhaseQuadTable(self.phaseTable["axis"],self.phaseTable["Instrument"])
@@ -72,10 +72,10 @@ class FFTModel(object):
     def setRun(self,run):
         self.runName=run
 
-    """
-    PaddingAndApodization alg on the data
-    """
     def preAlg(self,preInputs):
+        """
+        PaddingAndApodization alg on the data
+        """
         preAlg=mantid.AlgorithmManager.create("PaddingAndApodization")
         preAlg.initialize()
         preAlg.setChild(True)
@@ -84,10 +84,10 @@ class FFTModel(object):
         preAlg.execute()
         mantid.AnalysisDataService.addOrReplace(preInputs["OutputWorkspace"],preAlg.getProperty("OutputWorkspace").value)
 
-    """ 
-    Use the FFT alg
-    """
     def FFTAlg(self,FFTInputs):
+        """ 
+        Use the FFT alg
+        """
         alg=mantid.AlgorithmManager.create("FFT")
         alg.initialize()
         alg.setChild(True)
@@ -100,11 +100,11 @@ class FFTModel(object):
         group = mantid.AnalysisDataService.retrieve(self.runName)
         group.add(ws)
 
-    """
-    generates a phase table based on the detector setup
-    need to become an algorithm
-    """
     def makePhaseQuadTable(self,axis,instrument):
+        """
+        generates a phase table based on the detector setup
+        need to become an algorithm
+        """
         wsAlg=mantid.AlgorithmManager.create("CreateSimulationWorkspace")
         wsAlg.initialize()
         wsAlg.setChild(True)
@@ -139,11 +139,11 @@ class FFTModel(object):
                 asym=math.sqrt(det.Y()**2+det.X()**2)/r
             phaseTable.addRow([j,asym,phi])
 
-    """
-    do the phaseQuad algorithm
-    groups data into a single set
-    """
     def PhaseQuad(self):
+        """
+        do the phaseQuad algorithm
+        groups data into a single set
+         """
         phaseQuad=mantid.AlgorithmManager.create("PhaseQuad")
         phaseQuad.initialize()
         phaseQuad.setChild(False)

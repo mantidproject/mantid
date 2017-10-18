@@ -38,7 +38,7 @@ class MaxEntPresenter(object):
 
     def handleFinished(self):
         self.activate()
-        self.thread.deleteLater
+        self.thread.deleteLater()
         self.thread=None
 
     def activate(self):
