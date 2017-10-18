@@ -143,13 +143,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def PyExec(self):
-        self._load_common_inst_parameters()
         self._retrieve_input()
 
         if "Difference" in self._diff_opt:
-            self._exec_difference_mode()
+            self._exec_difference_mode(self._run_ranges)
         else:
-            self._exec_single_foil_state_mode()
+            self._exec_single_foil_state_mode(self._run_ranges)
 
 #----------------------------------------------------------------------------------------
 
@@ -158,54 +157,66 @@ class LoadVesuvio(LoadEmptyVesuvio):
         issues = {}
 
         # Validate run number ranges
-        user_input = self.getProperty(RUN_PROP).value
-        run_str = os.path.basename(user_input)
-        # String could be a full file path
-        if "-" in run_str:
-            lower, upper = run_str.split("-")
-            issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
+        run_input = self.getProperty(RUN_PROP).value
+        run_input = run_input.replace(';', ',')
+        try:
+            self._run_ranges = self._parse_range_input(run_input)
+        except RuntimeError as exc:
+            issues[RUN_PROP] = str(exc)
 
-        # Validate SpectrumList
-        grp_spectra_list = self.getProperty(SPECTRA_PROP).value
-        if "," in grp_spectra_list:
-            # Split on ',' if in form of 2-3,6-7
-            grp_spectra_list = grp_spectra_list.split(",")
-        elif ";" in grp_spectra_list:
-            # Split on ';' if in form of 2-3;6-7
-            grp_spectra_list = grp_spectra_list.split(";")
-        else:
-            # Treat input as a list (for use in loop)
-            grp_spectra_list = [grp_spectra_list]
+        spectra_input = self.getProperty(SPECTRA_PROP).value
+        spectra_groups = spectra_input.split(';')
+        try:
+            self._spectra_groups = [self._parse_range_input(spectra_group, True)
+                                    for spectra_group in spectra_groups]
+        except RuntimeError as exc:
+            issues[SPECTRA_PROP] = str(exc)
 
-        for spectra_grp in grp_spectra_list:
-            spectra_list = None
-            if "-" in spectra_grp:
-                # Split ranges
-                spectra_list = spectra_grp.split("-")
-                # Validate format
-                issues = self._validate_range_formatting(spectra_list[0], spectra_list[1], SPECTRA_PROP, issues)
-            else:
-                # Single spectra (put into list for use in loop)
-                spectra_list = [spectra_grp]
+        self._spectra_list = []
+        for spectra_group in self._spectra_groups:
+            if self._mon_spectra in spectra_group:
+                spectra_group.remove(self._mon_spectra)
 
-            # Validate boundaries
-            for spec in spectra_list:
-                spec = int(spec)
+            for spec in spectra_group:
                 issues = self._validate_spec_min_max(spec, issues)
+                self._spectra_list.append(spec)
 
         return issues
 
 #----------------------------------------------------------------------------------------
 
-    def _validate_range_formatting(self, lower, upper, property_name, issues):
+    def _parse_range_input(self, input_str, convert_all_to_integer=False):
         """
-        Validates is a range style input is in the correct form of lower-upper
+        Parses an input string of comma separated ranges and single values.
+        Ranges are of the format A-B, where A and B are integers and A <= B.
+
+        :param input_str:               The input string to parse.
+        :param convert_all_to_integer:  If true converts non-range values to ints.
+        :return:                        A list of values, where the ranges have been
+                                        expanded.
         """
-        upper = int(upper)
-        lower = int(lower)
-        if upper < lower:
-            issues[property_name] = "Range must be in format lower-upper"
-        return issues
+        input_str = input_str.replace(' ', '')
+        input_ranges = input_str.split(',')
+        input_ranges = map(os.path.basename, input_ranges)
+        parsed_ranges = []
+
+        for input_range in input_ranges:
+            parsed = input_range.split('-', 1)
+            if len(parsed) == 2:
+                try:
+                    if int(parsed[1]) < int(parsed[0]):
+                        raise RuntimeError("Upper bound value in range must be less than lower bound, found "
+                                           + str(parsed[1]) + " < " + str(parsed[0]))
+                    else:
+                        lower, upper = int(parsed[0]), int(parsed[1])
+                        parsed_ranges.extend(range(lower, upper+1))
+                except:
+                    raise RuntimeError("Values specifying a range must be integers, found "
+                                       + str(parsed[0]) + " and " + str(parsed[1]))
+            else:
+                input_range = int(input_range) if convert_all_to_integer else input_range
+                parsed_ranges.append(input_range)
+        return parsed_ranges
 
 #----------------------------------------------------------------------------------------
 
@@ -218,27 +229,28 @@ class LoadVesuvio(LoadEmptyVesuvio):
             specMin = self._backward_spectra_list[0]
             specMax = self._forward_spectra_list[-1]
             if spectra < specMin:
-                issues[SPECTRA_PROP] = ("Lower limit for spectra is %d in difference mode" % specMin)
+                issues[SPECTRA_PROP] = "Lower limit for spectra is " + str(specMin) + \
+                                       " in difference mode, found " + str(spectra)
             if spectra > specMax:
-                issues[SPECTRA_PROP] = ("Upper limit for spectra is %d in difference mode" % specMax)
+                issues[SPECTRA_PROP] = "Upper limit for spectra is " + str(specMax) + \
+                                       " in difference mode, found " + str(spectra)
 
         return issues
 
 #----------------------------------------------------------------------------------------
 
-    def _exec_difference_mode(self):
+    def _exec_difference_mode(self, runs):
         """
            Execution path when a difference mode is selected
         """
         try:
-            all_spectra = [item for sublist in self._spectra for item in sublist]
-            self._raise_error_if_mix_fwd_back(all_spectra)
+            self._raise_error_if_mix_fwd_back(self._spectra_list)
             self._raise_error_mode_scatter(self._diff_opt, self._back_scattering)
-            self._set_spectra_type(all_spectra[0])
-            self._setup_raw(all_spectra)
+            self._set_spectra_type(self._spectra_list[0])
+            self._setup_raw(self._spectra_list, runs)
             self._create_foil_workspaces()
 
-            for ws_index, spectrum_no in enumerate(all_spectra):
+            for ws_index, spectrum_no in enumerate(self._spectra_list):
                 self._ws_index, self._spectrum_no = ws_index, spectrum_no
                 self.foil_map = SpectraToFoilPeriodMap(self._nperiods)
 
@@ -316,19 +328,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _exec_single_foil_state_mode(self):
+    def _exec_single_foil_state_mode(self, runs):
         """
         Execution path when a single foil state is requested
         """
-
-        runs = self._get_runs()
-        all_spectra = [item for sublist in self._spectra for item in sublist]
-
         if len(runs) > 1:
-            self._set_spectra_type(all_spectra[0])
-            self._setup_raw(all_spectra)
+            self._set_spectra_type(self._spectra_list[0])
+            self._setup_raw(self._spectra_list)
         else:
-            self._load_single_run_spec_and_mon(all_spectra, self._get_filename(runs[0]))
+            self._load_single_run_spec_and_mon(self._spectra_list, self._get_filename(runs[0]))
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -338,7 +346,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.foil_out = foil_out
 
         foil_map = SpectraToFoilPeriodMap(self._nperiods)
-        for ws_index, spectrum_no in enumerate(all_spectra):
+        for ws_index, spectrum_no in enumerate(self._spectra_list):
             self._set_spectra_type(spectrum_no)
             foil_out_periods, foil_thin_periods, _ = self._get_foil_periods()
 
@@ -549,26 +557,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
         self._load_monitors = self.getProperty(LOAD_MON).value
-        # Check for sets of spectra to sum. Semi colon delimits sets
-        # that should be summed
-        spectra_str = self.getPropertyValue(SPECTRA_PROP)
-        summed_blocks = spectra_str.split(";")
-        self._spectra = []
-        for block in summed_blocks:
-            prop = IntArrayProperty("unnamed", block)
-            numbers = prop.value.tolist()
-            if self._mon_spectra in numbers:
-                numbers.remove(self._spectra)
-            numbers.sort()
-            self._spectra.append(numbers)
-        #endfor
-
         self._sumspectra = self.getProperty(SUM_PROP).value
 
 #----------------------------------------------------------------------------------------
 
-    def _setup_raw(self, spectra):
-        self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra)
+    def _setup_raw(self, spectra, runs):
+        self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra, runs)
         nperiods = self._raw_grp.size()
 
         first_ws = self._raw_grp[0]
@@ -591,14 +585,12 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_and_sum_runs(self, spectra):
+    def _load_and_sum_runs(self, spectra, runs):
         """Load the input set of runs & sum them if there
         is more than one.
             @param spectra :: The list of spectra to load
             @returns a tuple of length 2 containing (main_detector_ws, monitor_ws)
         """
-        runs = self._get_runs()
-
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         spec_inc_mon = self._mon_spectra
         spec_inc_mon.extend(spectra)
@@ -679,28 +671,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
             output_ws = plus.getProperty("OutputWorkspace").value
         return output_ws
 
-
-#----------------------------------------------------------------------------------------
-
-    def _get_runs(self):
-        """
-        Returns the runs as a list of strings
-        """
-        # String could be a full file path
-        user_input = self.getProperty(RUN_PROP).value
-        run_str = os.path.basename(user_input)
-        # Load is not doing the right thing when summing. The numbers don't look correct
-        if "-" in run_str:
-            lower, upper = run_str.split("-")
-            # Range goes lower to up-1 but we want to include the last number
-            runs = list(range(int(lower), int(upper)+1))
-        elif "," in run_str:
-            runs = run_str.split(",")
-        else:
-            # Leave it as it is
-            runs = [user_input]
-
-        return runs
 
 #----------------------------------------------------------------------------------------
 
