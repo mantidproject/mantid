@@ -2137,15 +2137,20 @@ public:
     HistogramData::Counts counts(points.size(), 0.0);
     // This value should be excluded.
     counts.mutableData()[2] = 10.0;
-    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(1, HistogramData::Histogram(points, counts)).release());
+    MatrixWorkspace_sptr ws(
+        DataObjects::create<Workspace2D>(
+            1, HistogramData::Histogram(points, counts)).release());
     Fit fit;
     fit.initialize();
     fit.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
     TS_ASSERT_THROWS_NOTHING(fit.setProperty("InputWorkspace", ws))
     TS_ASSERT_THROWS_NOTHING(fit.setPropertyValue("Exclude", "-0.5, 0.5"))
-    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
-    TS_ASSERT_THROWS_NOTHING(fit.setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("CostFunction", "Unweighted least squares"))
     TS_ASSERT_THROWS_NOTHING(fit.setProperty("Output", "fit_test_output"))
     TS_ASSERT_THROWS_NOTHING(fit.execute())
     const std::string status = fit.getProperty("OutputStatus");
