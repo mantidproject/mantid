@@ -158,17 +158,17 @@ and the overal intensity of the signal with a fit to the following model:
             break  # We got the three parameters we are interested in
     # Check nominal and optimal values are within error ranges:
     if abs(H-Height)/H < 0.1:
-        print "Optimal Height within 10% of nominal value"
+        print("Optimal Height within 10% of nominal value")
     else:
-        print "Error. Obtained Height=",Height," instead of",H
+        print("Error. Obtained Height= {0} instead of {1}".format(Height,H))
     if abs(R-Radius)/R < 0.05:
-        print "Optimal Radius within 5% of nominal value"
+        print("Optimal Radius within 5% of nominal value")
     else:
-        print "Error. Obtained Radius=",Radius," instead of",R
+        print("Error. Obtained Radius= {0} instead of {1}".format(Radius,R))
     if abs(tau-Tau)/tau < 0.1:
-        print "Optimal Tau within 10% of nominal value"
+        print("Optimal Tau within 10% of nominal value")
     else:
-        print "Error. Obtained Tau=",Tau," instead of",tau
+        print("Error. Obtained Tau= {0} instead of {1}".format(Tau,tau))
 
 Output:
 

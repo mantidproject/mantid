@@ -132,6 +132,7 @@ Output:
 
     group=GroupWorkspaces('ws1,ws2')
     groupmerged=TOFTOFMergeRuns(group)
+
     print("Monitor counts for 1st workspace: {}".format(ws1.getRun().getLogData('monitor_counts').value))
     print("Monitor counts for 2nd workspace: {}".format(ws2.getRun().getLogData('monitor_counts').value))
     print("Monitor counts for merged workspaces = sum over all workspaces: {}".format(groupmerged.getRun().getLogData('monitor_counts').value))

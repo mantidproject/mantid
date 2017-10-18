@@ -64,8 +64,22 @@ static void GetOrientations(vtkSMSourceProxy *producer,
 MultiSliceView::MultiSliceView(QWidget *parent,
                                RebinnedSourcesManager *rebinnedSourcesManager,
                                bool createRenderProxy)
-    : ViewBase(parent, rebinnedSourcesManager) {
+    : ViewBase(parent, rebinnedSourcesManager),
+      m_contextMenu(new QMenu(tr("Context menu"), this)),
+      m_edit(new QLineEdit(this)) {
   this->m_ui.setupUi(this);
+
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
+  m_edit->setPlaceholderText(QString("Slice Position"));
+  auto action = new QWidgetAction(this);
+  action->setDefaultWidget(m_edit);
+  m_contextMenu->addAction(action);
+
+  QObject::connect(this->m_edit, SIGNAL(textChanged(const QString &)), this,
+                   SLOT(checkState(const QString &)));
+  QObject::connect(this->m_edit, SIGNAL(editingFinished()), this,
+                   SLOT(setSlicePosition()));
+
   if (createRenderProxy) {
     pqRenderView *tmp =
         this->createRenderView(this->m_ui.renderFrame, QString("MultiSlice"));
@@ -150,11 +164,79 @@ void MultiSliceView::resetCamera() { this->m_mainView->resetCamera(); }
  */
 void MultiSliceView::checkSliceClicked(int axisIndex, double sliceOffsetOnAxis,
                                        int button, int modifier) {
-  if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER &&
-      (button == vtkContextMouseEvent::LEFT_BUTTON ||
-       button == vtkContextMouseEvent::RIGHT_BUTTON)) {
-    this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
+  if (button == vtkContextMouseEvent::LEFT_BUTTON ||
+      button == vtkContextMouseEvent::RIGHT_BUTTON) {
+    if (modifier == vtkContextMouseEvent::SHIFT_MODIFIER) {
+      this->showCutInSliceViewer(axisIndex, sliceOffsetOnAxis);
+    } else if (modifier == vtkContextMouseEvent::ALT_MODIFIER) {
+      this->editSlicePosition(axisIndex, sliceOffsetOnAxis);
+    }
   }
+}
+
+void MultiSliceView::editSlicePosition(int axisIndex,
+                                       double sliceOffsetOnAxis) {
+
+  m_axisIndex = axisIndex;
+  m_sliceOffsetOnAxis = sliceOffsetOnAxis;
+
+  double bounds[6];
+  vtkSMMultiSliceViewProxy::GetDataBounds(this->origSrc->getSourceProxy(), 0,
+                                          bounds);
+  if (axisIndex == 0) {
+    m_edit->setValidator(new QDoubleValidator(bounds[0], bounds[1], 5, this));
+  } else if (axisIndex == 1) {
+    m_edit->setValidator(new QDoubleValidator(bounds[2], bounds[3], 5, this));
+  } else if (axisIndex == 2) {
+    m_edit->setValidator(new QDoubleValidator(bounds[4], bounds[5], 5, this));
+  }
+  m_contextMenu->exec(QCursor::pos());
+}
+
+void MultiSliceView::checkState(const QString &input) {
+  auto validator = m_edit->validator();
+  // temporary required to convert between const reference and reference.
+  QString tmp_input = input;
+  int ignored = 0;
+  auto state = validator->validate(tmp_input, ignored);
+  QString color = "QLineEdit { background-color: ";
+  if (state == QValidator::Acceptable) {
+    color.append("#c4df9b"); // green
+  } else if (state == QValidator::Intermediate) {
+    color.append("#fff79a"); // yellow
+  } else {
+    color.append("#f6989d"); // red
+  }
+  color.append(" }");
+  m_edit->setStyleSheet(color);
+}
+
+void MultiSliceView::setSlicePosition() {
+
+  double newPosition = m_edit->text().toDouble();
+
+  std::string name;
+  if (m_axisIndex == 0) {
+    name = "XSlicesValues";
+  } else if (m_axisIndex == 1) {
+    name = "YSlicesValues";
+  } else if (m_axisIndex == 2) {
+    name = "ZSlicesValues";
+  }
+
+  auto viewProxy = m_mainView->getViewProxy();
+  std::vector<double> slices =
+      vtkSMPropertyHelper(viewProxy, name.c_str()).GetDoubleArray();
+  auto it = std::find(slices.begin(), slices.end(), m_sliceOffsetOnAxis);
+  if (it != slices.end()) {
+    *it = newPosition;
+  }
+  vtkSMPropertyHelper(viewProxy, name.c_str())
+      .Set(slices.data(), static_cast<int>(slices.size()));
+  viewProxy->UpdateVTKObjects();
+
+  m_contextMenu->hide();
+  m_edit->clear();
 }
 
 /**

@@ -189,6 +189,14 @@ void checkDetectorInfoSize(const Instrument &instr,
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   m_spectrumInfoWrapper = nullptr;
+
+  // Detector IDs that were previously dropped because they were not part of the
+  // instrument may now suddenly be valid, so we have to reinitialize the
+  // detector grouping. Also the index corresponding to specific IDs may have
+  // changed.
+  if (sptr_instrument !=
+      (instr->isParametrized() ? instr->baseInstrument() : instr))
+    invalidateAllSpectrumDefinitions();
   if (instr->isParametrized()) {
     sptr_instrument = instr->baseInstrument();
     // We take a *copy* of the ParameterMap since we are modifying it by setting
@@ -200,12 +208,6 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = boost::make_shared<ParameterMap>();
   }
   m_parmap->setInstrument(sptr_instrument.get());
-
-  // Detector IDs that were previously dropped because they were not part of the
-  // instrument may now suddenly be valid, so we have to reinitialize the
-  // detector grouping. Also the index corresponding to specific IDs may have
-  // changed.
-  invalidateAllSpectrumDefinitions();
 }
 
 /** Get a shared pointer to the parametrized instrument associated with this
@@ -484,6 +486,14 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
   m_spectrumInfoWrapper = nullptr;
 }
 
+/** Returns the number of detector groups.
+ *
+ * For MatrixWorkspace this is equal to getNumberHistograms() (after
+ *initialization). */
+size_t ExperimentInfo::numberOfDetectorGroups() const {
+  return m_spectrumDefinitionNeedsUpdate.size();
+}
+
 /** Sets the detector grouping for the spectrum with the given `index`.
  *
  * This method should not need to be called explicitly. Groupings are updated
@@ -491,16 +501,12 @@ void ExperimentInfo::setNumberOfDetectorGroups(const size_t count) const {
 void ExperimentInfo::setDetectorGrouping(
     const size_t index, const std::set<detid_t> &detIDs) const {
   SpectrumDefinition specDef;
-  // Wrap translation in check for detector count as an optimization of
-  // otherwise slow failures via exceptions.
-  if (detectorInfo().size() > 0) {
-    for (const auto detID : detIDs) {
-      try {
-        const size_t detIndex = detectorInfo().indexOf(detID);
-        specDef.add(detIndex);
-      } catch (std::out_of_range &) {
-        // Silently strip bad detector IDs
-      }
+  for (const auto detID : detIDs) {
+    try {
+      const size_t detIndex = detectorInfo().indexOf(detID);
+      specDef.add(detIndex);
+    } catch (std::out_of_range &) {
+      // Silently strip bad detector IDs
     }
   }
   m_spectrumInfo->setSpectrumDefinition(index, std::move(specDef));
