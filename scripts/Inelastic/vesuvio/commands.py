@@ -110,7 +110,8 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
                                                                    ignore_indices=hydrogen_indices)
 
         print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
+        results = fit_tof_iteration(sample_data, container_data,
+                                    runs.replace(', ', '+'), iteration_flags)
         exit_iteration += 1
 
         if last_results is not None and convergence_threshold is not None:
@@ -238,7 +239,6 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
                               GammaBackgroundScale=flags.get('fixed_gamma_scaling', 0.0),
                               ContainerScale=flags.get('fixed_container_scaling', 0.0),
                               **corrections_args)
-
         # Final fit
         fit_ws_name = runs + "_data" + suffix
         pars_name = runs + "_params" + suffix
@@ -542,7 +542,7 @@ def _update_fit_params(params_ws, spec_idx, params_table, name):
 
 
 def _create_tof_workspace_suffix(runs, spectra):
-    return runs + "_" + spectra + "_tof"
+    return runs.replace(', ', '+') + "_" + spectra + "_tof"
 
 
 def _create_fit_workspace_suffix(index, tof_data, fit_mode, spectra, iteration=None):
