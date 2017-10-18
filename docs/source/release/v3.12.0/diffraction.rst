@@ -11,6 +11,7 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+- :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` has been amended to write the metadata (e.g. temperature) value in the header, in the form of the Fullprof readable keyword.
 
 Engineering Diffraction
 -----------------------
