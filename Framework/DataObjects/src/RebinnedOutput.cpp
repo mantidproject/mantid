@@ -142,8 +142,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
 }
 
 /**
- * This function "unfinalizes" the workspace by taking the data/error arrays 
- * and multiplying them by the corresponding fractional area array. 
+ * This function "unfinalizes" the workspace by taking the data/error arrays
+ * and multiplying them by the corresponding fractional area array.
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
 void RebinnedOutput::unfinalize(bool hasSqrdErrs) {

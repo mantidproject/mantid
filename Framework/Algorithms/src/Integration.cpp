@@ -150,13 +150,12 @@ void Integration::exec() {
   }
 
   // Create the 2D workspace (with 1 bin) for the output
-  MatrixWorkspace_sptr outputWorkspace = 
-      API::WorkspaceFactory::Instance().create(localworkspace,
-                                               maxWsIndex - minWsIndex + 1,
-                                               2, 1);
-  auto rebinned_input = 
+  MatrixWorkspace_sptr outputWorkspace =
+      API::WorkspaceFactory::Instance().create(
+          localworkspace, maxWsIndex - minWsIndex + 1, 2, 1);
+  auto rebinned_input =
       boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
-  auto rebinned_output = 
+  auto rebinned_output =
       boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
 
   bool is_distrib = outputWorkspace->isDistribution();
