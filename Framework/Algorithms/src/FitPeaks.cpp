@@ -33,8 +33,6 @@ using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
-const size_t X0 = 3;
-const size_t HEIGHT = 0;
 const size_t MIN_EVENTS = 100;
 
 namespace Mantid {
@@ -70,7 +68,8 @@ enum { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
  * @brief FitPeaks::FitPeaks
  */
 FitPeaks::FitPeaks()
-    : m_numPeaksToFit(9), m_minPeakMaxValue(20.), m_bkgdSimga(1.) {}
+    : m_numPeaksToFit(9), m_minPeakHeight(20.), m_bkgdSimga(1.),
+      m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -107,11 +106,6 @@ void FitPeaks::init() {
       Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "PeakCentersWorkspace", "", Direction::Input, PropertyMode::Optional),
       "MatrixWorkspace containing peak centers");
-
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
-      "List of tolerance on fitted peak positions against given peak positions."
-      "If there is only one value given, then ");
 
   std::string peakcentergrp("Peak Positions");
   setPropertyGroup("PeakCenters", peakcentergrp);
@@ -160,7 +154,6 @@ void FitPeaks::init() {
   setPropertyGroup("PeakParameterValueTable", startvaluegrp);
   setPropertyGroup("FitWindowBoundaryList", startvaluegrp);
   setPropertyGroup("FitPeakWindowWorkspace", startvaluegrp);
-  //  setPropertyGroup("", startvaluegrp);
 
   // optimization setup
   std::vector<std::string> minimizerOptions =
@@ -202,6 +195,15 @@ void FitPeaks::init() {
       "in input workspace. "
       "It has 1 value of each spectrum, standing for the number of events of "
       "the corresponding spectrum.");
+
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("PositionTolerance"),
+      "List of tolerance on fitted peak positions against given peak positions."
+      "If there is only one value given, then ");
+
+  declareProperty("MinimumPeakHeight", 10.0,
+                  "Minimum peak height such that all the fitted peaks with "
+                  "height under this value will be excluded.");
 
   std::string helpgrp("Additional Information");
 
@@ -297,7 +299,8 @@ void FitPeaks::processInputs() {
   processInputFitRanges();
 
   // process peak tolerance
-  setPeakPosTolerance();
+  std::vector<double> peaktols = getProperty("PositionTolerance");
+  setPeakPosTolerance(peaktols);
 
   // set up background
   m_highBackground = getProperty("HighBackground");
@@ -677,16 +680,13 @@ void FitPeaks::fitSpectrumPeaks(
     // Estimate peak profile parameter
     estimatePeakParameters(wi, peak_window_i, peakfunction, bkgdfunction);
 
-    // Fit peak
-    double tol = 0.001;
+    // do fitting with peak and background function (no analysis at this point)
     double cost =
         fitIndividualPeak(wi, peak_fitter, compfunc, peakfunction, bkgdfunction,
-                          peak_window_i, center_i, tol, m_highBackground);
+                          peak_window_i, center_i, m_highBackground);
 
     // process fitting result
-    // TODO/NOW - Study FindPeaks and FitPeak to figure out how to get result
-    // from fitting
-    processSinglePeakFitResult(wi, ipeak, compfunc, peakfunction, bkgdfunction,
+    processSinglePeakFitResult(wi, ipeak, center_i, peakfunction, bkgdfunction,
                                cost, fitted_peak_centers,
                                fitted_function_parameters, peak_chi2_vec);
   }
@@ -695,57 +695,169 @@ void FitPeaks::fitSpectrumPeaks(
 }
 
 //------
+/** retrieve the fitted peak information from functions and set to output
+ * vectors
+ * @brief FitPeaks::processSinglePeakFitResult
+ * @param peakindex
+ * @param peakbkgdfunction
+ * @param peakfunction
+ * @param bkgdfunction
+ * @param chi2
+ * @param fitted_peak_positions
+ * @param peak_params_vector
+ * @param peak_chi2_vec
+ */
 void FitPeaks::processSinglePeakFitResult(
-    size_t wi, size_t peakindex, API::IFunction_sptr peakbkgdfunction,
+    size_t wsindex, size_t peakindex, const double &expected_peak_pos,
     API::IPeakFunction_sptr peakfunction,
-    API::IBackgroundFunction_sptr bkgdfunction, double chi2,
+    API::IBackgroundFunction_sptr bkgdfunction, double cost,
     std::vector<double> &fitted_peak_positions,
-    std::vector<std::vector<double>> &peak_params_vector,
+    std::vector<std::vector<double>> &function_parameters_vector,
     std::vector<double> &peak_chi2_vec) {
   // check input
   if (peakindex >= fitted_peak_positions.size() ||
-      peakindex >= peak_params_vector.size() ||
+      peakindex >= function_parameters_vector.size() ||
       peakindex >= peak_chi2_vec.size()) {
     throw std::runtime_error("peak index size is out of boundary for fitted "
                              "peaks positions, peak parameters or chi2s");
   }
 
-  // peak position
-  fitted_peak_positions[peakindex] = peakfunction->centre();
+  // check cost (chi2 or etc), peak center and peak heigh
 
-  // new method
-  // TODO/NOW/How to get the peak parameters out?
-  std::vector<double> peak_params;
-  for (size_t iparam = 0; iparam < peakfunction->nParams(); ++iparam)
-    peak_params.push_back(peakfunction->getParameter(iparam));
-  peak_params_vector[peakindex] = peak_params;
+  // determine peak position tolerance
+  double postol(DBL_MAX);
+  bool case23(false);
+  if (m_peakPosTolCase234) {
+    if (m_numPeaksToFit == 1) {
+      // case (d) one peak only
+      postol = m_inputMatrixWS->histogram(wsindex).x().back() -
+               m_inputMatrixWS->histogram(wsindex).x().back();
+    } else {
+      // case b and c
+      case23 = true;
+    }
+  } else {
+    // user explicitly specified
+    postol = m_peakPosTolerances[peakindex];
+  }
+
+  double peak_pos(0);
+  bool good_fit = false;
+  if ((cost < 0) || (cost > DBL_MAX - 1.))
+    peak_pos = -4; // unphysical cost function value
+  else if (peakfunction->height() < m_minPeakHeight)
+    peak_pos = -3; // peak height is under minimum request
+  else if (case23) {
+    // case b and c
+    std::pair<double, double> fitwindow = getPeakFitWindow(wsindex, peakindex);
+    if (fitwindow.first < fitwindow.second) {
+      // peak fit window is specified or calculated
+      peak_pos = d;
+    }
+
+  }
+
+  else if (fabs(peakfunction->centre() - exppeakcenter) > postol)
+    peak_pos = -2; // peak center is not within tolerance
+  else {
+    // all criteria are passed
+    good_fit = true;
+  }
+
+  // set cost function to DBL_MAX if fitting is bad
+  if (good_fit) {
+    // convert fitting result to analysis data structure
+    std::cout << "pass";
+  } else {
+    // set the cost function value to DBL_MAX
+    cost = DBL_MAX;
+  }
 
   // chi2
-  peak_chi2_vec[peakindex] = chi2;
+  peak_chi2_vec[peakindex] = cost;
+
+  double peak_positon(-1);
+  if (cost < DBL_MAX - 1) {
+    // at least it is a fit!
+    peak_positon = peakfunction->centre();
+  } else {
+    // no fit at all
+    peak_positon = -5; // NOT FIT
+    peakfunction->setIntensity(0);
+  }
+
+  // set peak position
+  fitted_peak_positions[peakindex] = peak_positon;
+
+  // transfer from peak function to vector
+  size_t peak_num_params = m_peakFunction->nParams();
+  for (size_t ipar = 0; ipar < peak_num_params; ++ipar) {
+    // peak function
+    function_parameters_vector[peakindex][ipar] =
+        peakfunction->getParameter(ipar);
+  }
+  for (size_t ipar = 0; ipar < m_bkgdFunction->nParams(); ++ipar) {
+    // background function
+    function_parameters_vector[peakindex][ipar + peak_num_params] =
+        bkgdfunction->getParameter(ipar);
+  }
 
   return;
 }
 
-//-----
+//----------------------------------------------------------------------------------------------
 // TODO/NOW - Implement such that it can be parallelized
+/** calculate fitted peaks with background in the output workspace
+ * @brief FitPeaks::calculateFittedPeaks
+ */
 void FitPeaks::calculateFittedPeaks() {
-  // TODO/NOW - use m_fittedParamTable to get the functions!
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
 
-  // blabla
+  size_t num_peakfunc_params = m_peakFunction->nParams();
+  size_t num_bkgdfunc_params = m_bkgdFunction->nParams();
 
-  //    HistogramData::Histogram &fitted_data,
-  //    const std::pair<double, double> &peakwindow;
+  // TODO/LATER - Implement OpenMP parallelizatoin
+  for (size_t iws = 0; iws < m_fittedPeakWS->getNumberHistograms(); ++iws) {
+    // TODO/LATER - Parallelization macro shall be put here
 
-  //    // calculate fitted peak with background
-  //    size_t start_x_index = getXIndex(wi, peakwindow.first);
-  //    size_t end_x_index = getXIndex(wi, peakwindow.second);
-  //    for (size_t i = start_x_index; i < end_x_index; ++i) {
-  //      peakbkgdfunction->function(fitted_data.mutableX(),
-  //      fitted_data.mutableY());
-  //    }
+    // get a copy of peak function and background function
+    IPeakFunction_sptr peak_function =
+        boost::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
+    IBackgroundFunction_sptr bkgd_function =
+        boost::dynamic_pointer_cast<IBackgroundFunction>(
+            m_bkgdFunction->clone());
+
+    for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+      // get and set the peak function parameters
+      size_t row_index = iws * m_numPeaksToFit + ipeak;
+      for (size_t ipar = 0; ipar < num_peakfunc_params; ++ipar) {
+        double value_i = m_fittedParamTable->cell<double>(row_index, 2 + ipar);
+        peak_function->setParameter(ipar, value_i);
+      }
+      // get and set the background function parameters
+      for (size_t ipar = 0; ipar < num_bkgdfunc_params; ++ipar) {
+        double value_i = m_fittedParamTable->cell<double>(
+            row_index, 2 + num_peakfunc_params + ipar);
+        bkgd_function->setParameter(ipar, value_i);
+      }
+
+      // use domain and function to calcualte
+      // get the range of start and stop to construct a function domain
+      auto vec_x = m_inputMatrixWS->x(iws);
+      std::pair<double, double> peakwindow = getPeakFitWindow(iws, ipeak);
+      std::vector<double>::const_iterator istart =
+          std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.first);
+      std::vector<double>::const_iterator istop =
+          std::lower_bound(vec_x.begin(), vec_x.end(), peakwindow.second);
+
+      FunctionDomain1DVector domain(istart, istop);
+      FunctionValues values(domain);
+      peak_function->function(domain, values);
+      bkgd_function->function(domain, values);
+    } // END-FOR (ipeak)
+  }   // END-FOR (iws)
 
   return;
 }
@@ -874,7 +986,7 @@ int FitPeaks::estimatePeakParameters(
   if (real_y_max < 1.0) {
     // none-event, but no signal within region
     result = NOSIGNAL;
-  } else if (max_value < m_minPeakMaxValue) {
+  } else if (max_value < m_minPeakHeight) {
     // peak too low
     result = LOWPEAK;
   } else if ((peak_center_index - ileft) < MAGIC3 ||
@@ -971,7 +1083,7 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                                    API::IBackgroundFunction_sptr bkgdfunc,
                                    const std::pair<double, double> &fitwindow,
                                    const double &exppeakcenter,
-                                   const double &postol, const bool high) {
+                                   const bool high) {
 
   if (high) {
     // high background : create a new workspace with high background
@@ -991,30 +1103,6 @@ double FitPeaks::fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
     // fit peak and background
     cost = fitFunctionSD(fitter, peakbkgdfunc, m_inputMatrixWS, wi,
                          fitwindow.first, fitwindow.second);
-
-    // check cost (chi2 or etc), peak center and peak height
-    double peak_pos(0);
-    bool good_fit = false;
-
-    if ((cost < 0) || (cost > DBL_MAX - 1.))
-      peak_pos = -4; // unphysical cost function value
-    else if (peakfunction->height() < m_minHeight)
-      peak_pos = -3; // peak height is under minimum request
-    else if (fabs(peakfunction->centre() - exppeakcenter) > postol)
-      peak_pos = -2; // peak center is not within tolerance
-    else {
-      // all criteria are passed
-      good_fit = true;
-    }
-
-    // set cost function to DBL_MAX if fitting is bad
-    if (good_fit) {
-      // convert fitting result to analysis data structure
-      std::cout << "pass";
-    } else {
-      // set the cost function value to DBL_MAX
-      cost = DBL_MAX;
-    }
   }
 
   return cost;
@@ -1676,10 +1764,31 @@ void FitPeaks::estimateLinearBackground(size_t wi, double left_window_boundary,
   c) half distance to the neighboring peak (if not (a) and not (b))
   d) whole range of X-axis (if there is one and only one peak in a spectrum)
 
+  case (b), (c) and (d) will be dealt at the scence to use tolerance to judge
+ whether a fitted
+  peak position is acceptible or not
+
  * @brief FitPeaks::setPeakPosTolerance
  */
-void FitPeaks::setPeakPosTolerance() {
-  // TODO/ISSUE/NOW - Implement (as doc)
+void FitPeaks::setPeakPosTolerance(
+    const std::vector<double> &peak_pos_tolerances) {
+
+  if (peak_pos_tolerances.size() == 0) {
+    // case 2, 3, 4
+    m_peakPosTolerances.clear();
+    m_peakPosTolCase234 = true;
+  } else if (peak_pos_tolerances.size() == 1) {
+    // only 1 uniform peak position tolerance is defined
+    m_peakPosTolerances.resize(m_numPeaksToFit, peak_pos_tolerances[0]);
+  } else {
+    // a vector is defined
+    m_peakPosTolerances = peak_pos_tolerances;
+  }
+
+  // final check
+  if (m_peakPosTolerances.size() != m_numPeaksToFit)
+    throw std::runtime_error("Number of peak position tolerances and number of "
+                             "peaks to fit are inconsistent.");
 
   return;
 }

@@ -70,8 +70,7 @@ private:
                            API::IPeakFunction_sptr peakfunction,
                            API::IBackgroundFunction_sptr bkgdfunc,
                            const std::pair<double, double> &fitwindow,
-                           const double &exppeakcenter, const double &postol,
-                           const bool high);
+                           const double &exppeakcenter, const bool high);
 
   /// Methods to fit functions (general)
   double fitFunctionSD(API::IAlgorithm_sptr fit, API::IFunction_sptr fitfunc,
@@ -101,11 +100,11 @@ private:
                       double &max_value);
 
   void processSinglePeakFitResult(
-      size_t wi, size_t peakindex, API::IFunction_sptr peakbkgdfunction,
+      size_t wsindex, size_t peakindex, const double &expected_peak_pos,
       API::IPeakFunction_sptr peakfunction,
-      API::IBackgroundFunction_sptr bkgdfunction, double chi2,
+      API::IBackgroundFunction_sptr bkgdfunction, double cost,
       std::vector<double> &fitted_peak_positions,
-      std::vector<std::vector<double>> &peak_params_vector,
+      std::vector<std::vector<double>> &function_parameters_vector,
       std::vector<double> &peak_chi2_vec);
 
   /// calculate peak+background for fitted
@@ -140,7 +139,7 @@ private:
                                 double &bkgd_a0);
 
   /// set peak positions tolerance
-  void setPeakPosTolerance();
+  void setPeakPosTolerance(const std::vector<double> &peak_pos_tolerances);
 
   //------- Workspaces
   //-------------------------------------------------------------
@@ -205,9 +204,10 @@ private:
   /// flag for profile startng value being uniform or not
   bool m_uniformProfileStartingValue;
 
-  // Peak information
-  double m_minHeight; // TODO - Implement in init() and processInput()
-  double m_minPeakMaxValue;
+  // Criteria for fitting peaks
+  /// minimum peak height without background and it also serves as the criteria
+  /// for observed peak parameter
+  double m_minPeakHeight;
 
   bool m_checkPeakPositionByTolerance;
 
@@ -215,7 +215,10 @@ private:
   bool m_highBackground;
   double m_bkgdSimga; // TODO - add to properties
 
-  /// global message
+  //----- Result criterias ---------------
+  /// peak positon tolerance case b, c and d
+  bool m_peakPosTolCase234;
+
   std::stringstream m_sstream;
 };
 
