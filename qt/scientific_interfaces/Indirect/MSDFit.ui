@@ -57,42 +57,61 @@
    <item>
     <layout class="QHBoxLayout" name="loMSDFit">
      <item>
-      <layout class="QVBoxLayout" name="properties"/>
-     </item>
-     <item>
       <layout class="QVBoxLayout" name="loMSDPlot">
        <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
-         <property name="showLegend" stdset="0">
-          <bool>true</bool>
-         </property>
-         <property name="curveErrorBars" stdset="0">
-          <stringlist>
-           <string>Sample</string>
-          </stringlist>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
-         <property name="showLegend" stdset="0">
-          <bool>true</bool>
-         </property>
-         <property name="canvasColour" stdset="0">
-          <color>
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="loPlotProperties">
+         <item>
+          <layout class="QVBoxLayout" name="loProperties">
+           <item>
+            <widget class="QCheckBox" name="ckPlotGuess">
+             <property name="text">
+              <string>Plot Guess</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="properties"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="loPlotsLayout">
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="curveErrorBars" stdset="0">
+              <stringlist>
+               <string>Sample</string>
+              </stringlist>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
+             <property name="showLegend" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="canvasColour" stdset="0">
+              <color>
+               <red>255</red>
+               <green>255</green>
+               <blue>255</blue>
+              </color>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="loPlotOptions">
