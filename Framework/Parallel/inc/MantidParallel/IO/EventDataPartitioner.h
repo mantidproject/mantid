@@ -51,17 +51,18 @@ template <class TimeOffsetType> struct Event {
 template <class TimeOffsetType> class AbstractEventDataPartitioner {
 public:
   using Event = detail::Event<TimeOffsetType>;
-  AbstractEventDataPartitioner(const int numWorkers) : m_numWorkers(numWorkers) {}
+  AbstractEventDataPartitioner(const int numWorkers)
+      : m_numWorkers(numWorkers) {}
   virtual ~AbstractEventDataPartitioner() = default;
 
   /** Partition given data.
    *
-   * @param rankData output vector data vectors for each MPI rank.
+   * @param partitioned output vector of data for each partition
    * @param globalSpectrumIndex list of spectrum indices
    * @param eventTimeOffset list TOF values, same length as globalSpectrumIndex
    * @param range defines start and end of data for lookup in PulseTimeGenerator
    */
-  virtual void partition(std::vector<std::vector<Event>> &rankData,
+  virtual void partition(std::vector<std::vector<Event>> &partitioned,
                          const int32_t *globalSpectrumIndex,
                          const TimeOffsetType *eventTimeOffset,
                          const Chunker::LoadRange &range) = 0;
@@ -80,7 +81,7 @@ public:
       : AbstractEventDataPartitioner<TimeOffsetType>(numWorkers),
         m_pulseTimes(std::move(gen)) {}
 
-  void partition(std::vector<std::vector<Event>> &rankData,
+  void partition(std::vector<std::vector<Event>> &partitioned,
                  const int32_t *globalSpectrumIndex,
                  const TimeOffsetType *eventTimeOffset,
                  const Chunker::LoadRange &range) override;
@@ -90,24 +91,22 @@ private:
 };
 
 template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventDataPartitioner<
-    IndexType, TimeZeroType,
-    TimeOffsetType>::partition(std::vector<std::vector<Event>> &rankData,
-                               const int32_t *globalSpectrumIndex,
-                               const TimeOffsetType *eventTimeOffset,
-                               const Chunker::LoadRange &range) {
-  for (auto &item : rankData)
+void EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>::partition(
+    std::vector<std::vector<Event>> &partitioned,
+    const int32_t *globalSpectrumIndex, const TimeOffsetType *eventTimeOffset,
+    const Chunker::LoadRange &range) {
+  for (auto &item : partitioned)
     item.clear();
   const auto workers =
       AbstractEventDataPartitioner<TimeOffsetType>::m_numWorkers;
-  rankData.resize(workers);
+  partitioned.resize(workers);
 
   m_pulseTimes.seek(range.eventOffset);
   for (size_t event = 0; event < range.eventCount; ++event) {
     // Currently this supports only a hard-coded round-robin partitioning.
-    int rank = globalSpectrumIndex[event] % workers;
+    int partition = globalSpectrumIndex[event] % workers;
     auto index = globalSpectrumIndex[event] / workers;
-    rankData[rank].emplace_back(detail::Event<TimeOffsetType>{
+    partitioned[partition].emplace_back(detail::Event<TimeOffsetType>{
         index, eventTimeOffset[event], m_pulseTimes.next()});
   }
 }
