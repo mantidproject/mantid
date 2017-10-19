@@ -15,6 +15,9 @@ Installation
 Workbench
 ---------
 
+- Fixed an issue where updating a workspace changes the number format from decimal to scientific notation if the workspace is being viewed.
+
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
