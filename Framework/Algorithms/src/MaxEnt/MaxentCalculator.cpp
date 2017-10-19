@@ -45,9 +45,10 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
   // muon code.
   size_t sizeDatCalc = m_dataCalc.size();
   std::vector<double> cgrad(sizeDatCalc, 0.);
+  auto dpoints = static_cast<double>(sizeDat);
   for (size_t i = 0; i < sizeDat; i++) {
     if (m_errors[i] != 0)
-      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i];
+      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i] / dpoints;
   }
 
   return cgrad;
@@ -243,7 +244,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 
   calculateChisq();
   double chiSq = getChisq();
-  double fac = chiSq / 4;
+  double fac = chiSq * double(npoints) / 2;
 
   // Calculate the quadratic coefficients SB. eq 24
 
@@ -256,7 +257,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.s1[k][0] += m_directionsIm[k][i] * sgrad[i];
       m_coeffs.c1[k][0] += m_directionsIm[k][i] * cgrad[i];
     }
-    m_coeffs.c1[k][0] /= fac * npoints;
+    m_coeffs.c1[k][0] /= fac;
   }
 
   // Then s2
@@ -302,22 +303,16 @@ void MaxentCalculator::calculateChisq() {
   if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
     throw std::runtime_error("Cannot calculate chi-square");
   }
-  size_t npoints = m_data.size();
 
   // Calculate
   // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
-  m_chisq = 0;
-  for (size_t i = 0; i < npoints; i++) {
-    if (m_errors[i] != 0.0) {
-      double term = (m_data[i] - m_dataCalc[i]) / m_errors[i];
-      m_chisq += term * term;
-    }
-  }
+  m_chisq = calculateChiSquared(m_dataCalc);
 }
 
 double
 MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
   size_t npoints = m_data.size();
+  auto dpoints = static_cast<double>(npoints);
 
   // Calculate
   // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
@@ -325,7 +320,7 @@ MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
   for (size_t i = 0; i < npoints; i++) {
     if (m_errors[i] != 0.0) {
       double term = (m_data[i] - data[i]) / m_errors[i];
-      chisq += term * term;
+      chisq += term * term / dpoints;
     }
   }
   return chisq;

@@ -131,7 +131,7 @@ void MaxEnt::init() {
                       "A", 0.001, mustBeNonNegative, Direction::Input),
                   "A maximum entropy constant");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("ChiTarget", 1.0e-12,
+  declareProperty(make_unique<PropertyWithValue<double>>("ChiTarget", 1.0,
                                                          mustBeNonNegative,
                                                          Direction::Input),
                   "Target value of Chi-square");
@@ -238,13 +238,6 @@ void MaxEnt::exec() {
   size_t npoints = inWS->blocksize() * resolutionFactor;
   // Number of X bins
   const size_t npointsX = inWS->isHistogramData() ? npoints + 1 : npoints;
-
-  // Default target chi squared = the number of data points:
-  // it is what is expected from a good fit with a smooth function
-  // (given that the error values are correct)
-  if (chiTarget <= 1.0e-12) {
-    chiTarget = static_cast<double>(npoints);
-  }
 
   // Is our data space real or complex?
   MaxentSpace_sptr dataSpace;

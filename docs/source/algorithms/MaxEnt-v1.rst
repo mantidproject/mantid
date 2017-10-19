@@ -17,11 +17,11 @@ image from the many images which fit the data with the same value of the statist
 has minimum information (maximum entropy).
 More specifically, the algorithm maximizes the entropy :math:`S\left(x\right)` subject to the constraint:
 
-.. math:: \chi^2 = \sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
+.. math:: \chi^2 = \frac{1}{N}\sum_m \frac{\left(d_m - d_m^c\right)^2}{\sigma_m^2} \leq C_{target}
 
 where :math:`d_m` are the experimental data, :math:`\sigma_m` the associated errors, and :math:`d_m^c`
 the calculated or reconstructed data. The image is a set of numbers
-:math:`\{x_0, x_1, \dots, x_N\}` related to the measured data via a 1D Fourier transform:
+:math:`\{x_0, x_1, \dots, x_{N-1}\}` related to the measured data via a 1D Fourier transform:
 
 .. math:: d_m = \sum_{j=0}^{N-1} x_j e^{i 2\pi m j / N}
 

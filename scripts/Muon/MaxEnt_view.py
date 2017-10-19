@@ -78,7 +78,7 @@ class MaxEntView(QtGui.QWidget):
         table_utils.setTableHeaders(self.tableA)
 
         table_utils.setRowName(self.tableA,0,"Chi target")
-        self.chiTarget= table_utils.addDoubleToTable(self.tableA,1.0e-12,0)
+        self.chiTarget= table_utils.addDoubleToTable(self.tableA,1.0,0)
 
         table_utils.setRowName(self.tableA,1,"Chi (precision)")
         self.chiEps= table_utils.addDoubleToTable(self.tableA,0.001,1)
