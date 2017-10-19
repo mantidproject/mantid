@@ -328,11 +328,11 @@ class Abins(PythonAlgorithm):
 
         if substitution:
 
-            atom_workspaces.append(self._create_workspace(atom_name=element_symbol + str(nucleons_number),
+            atom_workspaces.append(self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
                                                           s_points=np.copy(total_s_atom_data),
                                                           optional_name="_total", protons_number=element.z_number,
                                                           nucleons_number=nucleons_number))
-            atom_workspaces.append(self._create_workspace(atom_name=element_symbol + str(nucleons_number),
+            atom_workspaces.append(self._create_workspace(atom_name=str(nucleons_number) + element_symbol,
                                                           s_points=np.copy(s_atom_data),
                                                           protons_number=element.z_number,
                                                           nucleons_number=nucleons_number))
