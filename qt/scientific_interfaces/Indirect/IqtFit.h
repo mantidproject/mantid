@@ -86,7 +86,6 @@ private:
   Ui::IqtFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
   QtTreePropertyBrowser *m_iqtFTree;           ///< IqtFit Property Browser
-  QtDoublePropertyManager *m_iqtFRangeManager; ///< StartX and EndX for IqtFit
   QMap<QtProperty *, QtProperty *> m_fixedProps;
   QString m_ties;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;

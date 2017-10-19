@@ -25,8 +25,8 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
-      m_ties(), m_fitFunctions(), m_parameterValues(), m_parameterToProperty() {
+      m_iqtFTree(nullptr), m_fixedProps(), m_ties(), m_fitFunctions(),
+      m_parameterValues(), m_parameterToProperty() {
   m_uiForm.setupUi(parent);
 }
 
@@ -53,15 +53,15 @@ void IqtFit::setup() {
           SLOT(backgroundSelected(double)));
 
   // setupTreePropertyBrowser
-  m_iqtFRangeManager = new QtDoublePropertyManager(m_parentWidget);
+  m_dblManager = new QtDoublePropertyManager(m_parentWidget);
 
   m_iqtFTree->setFactoryForManager(m_blnManager, m_blnEdFac);
   m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_iqtFTree->setFactoryForManager(m_iqtFRangeManager, m_dblEdFac);
+  m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  m_properties["StartX"] = m_iqtFRangeManager->addProperty("StartX");
-  m_iqtFRangeManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
-  m_properties["EndX"] = m_iqtFRangeManager->addProperty("EndX");
+  m_properties["StartX"] = m_dblManager->addProperty("StartX");
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
   m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
   m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
@@ -83,7 +83,7 @@ void IqtFit::setup() {
   m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
   m_iqtFTree->addProperty(m_properties["FABADA"]);
 
-  connect(m_iqtFRangeManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
@@ -361,8 +361,8 @@ bool IqtFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
-  auto range = std::make_pair(m_iqtFRangeManager->value(m_properties["StartX"]),
-                              m_iqtFRangeManager->value(m_properties["EndX"]));
+  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                              m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("Ranges", range);
 
   QString error = uiv.generateErrorMessage();
@@ -704,11 +704,11 @@ void IqtFit::specMaxChanged(int value) {
 }
 
 void IqtFit::xMinSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["StartX"], val);
+  m_dblManager->setValue(m_properties["StartX"], val);
 }
 
 void IqtFit::xMaxSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["EndX"], val);
+  m_dblManager->setValue(m_properties["EndX"], val);
 }
 
 void IqtFit::backgroundSelected(double val) {
@@ -880,7 +880,8 @@ void IqtFit::updateGuessPlot() {
 void IqtFit::plotGuess(QtProperty *) {
 
   if (m_uiForm.ckPlotGuess->isChecked())
-    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop, createFunction(true));
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(true));
   else
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
 }

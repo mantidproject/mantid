@@ -285,10 +285,10 @@ void IndirectDataAnalysisTab::plotGuess(
 MatrixWorkspace_sptr
 IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   const auto inputWS = inputWorkspace();
-  const size_t binIndexLow =
-      inputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
-  const size_t binIndexHigh =
-      inputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
+  const auto startX = m_dblManager->value(m_properties["StartX"]);
+  const auto endX = m_dblManager->value(m_properties["EndX"]);
+  const size_t binIndexLow = inputWS->binIndexOf(startX);
+  const size_t binIndexHigh = inputWS->binIndexOf(endX);
   const size_t nData = binIndexHigh - binIndexLow;
 
   const auto &xPoints = inputWS->points(0);
