@@ -30,6 +30,9 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
                 'BSS_74799_event.nxs',
+
+                'BSS_74800_event.nxs',
+
                 'BSS_74801_event.nxs',
                 'BSS_74802_event.nxs',
                 'BSS_74803_event.nxs',
@@ -43,8 +46,8 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
         Override parent method, does the work of running the test
         """
         try:
-            BASISDiffraction(SampleOrientation=True,
-                             RunNumbers='74799-74804',
+            BASISDiffraction(SingleCrystalDiffraction=True,
+                             RunNumbers='74799-74800',
                              MaskFile='BASIS_Mask_default_diff.xml',
                              VanadiumRuns='64642',
                              BackgroundRun='75527',

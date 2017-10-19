@@ -49,27 +49,34 @@ corresponding goniometer's rotation should be logged under log name
 **PsiAngleLog**. Option **PsiOffset** allows user to enter a shift for this
 angle.
 
-**VectorU**: h, k, l indexes for the crystal plane providing the sought Bragg
-peak.
+Sample orientation
+~~~~~~~~~~~~~~~~~~
 
-**VectorV**: h, k, l indexes perpendicular to *VectorU* and the vertical axis.
+**VectorU**: Vector along k_i, when goniometer is at offset.
 
-**Uproj**: h, k, l indexes for the abscissa axis of the diffraction pattern to
-be viewed.
+**VectorV**: In plane vector perpendicular to VectorU, when goniometer is at
+offset.
 
-**Vproj**: h, k, l indexes for the ordinate axis of the diffraction pattern to
-be viewed.
+Diffraction preferences
+~~~~~~~~~~~~~~~~~~~~~~~
 
-**Wproj**: h, k, l indexes for the axis independent of the abcissa and ordinate
-axes. Typically, **Wproj** is perpendicular both to Uproj and Vproj.
+Most of the scattering occurs in the plane defined by VectorU and VectorV.
+Please choose Uproj and Vproj defining a plane that is as close as possible
+to the scattering plane.
+
+**Uproj**: Defines the first projection vector. Default (1,0,0).
+
+**Vproj**: Defines the second projection vector. Default (0,1,0).
+
+**Wproj**: Defines the third projection vector. Default (0,0,1).
 
 **Nbins**: the diffraction pattern to be viewed is partitioned into an
 Nbins x Nbins grid, each grid rectangle assigned a particular scattered
 intensity.
 
-**OutputWorkspace**: a :ref:`MDHistoWorkspace <MDHistoWorkspace>` containing
-the intensities projected onto the reciprocal slice, integrated over the
-independent axis *Wproj*. The diffraction pattern can be visualized with
+**OutputWorkspace**: a two-dimensionall :ref:`MDHistoWorkspace <MDHistoWorkspace>`
+containing the intensities projected onto the reciprocal slice, integrated over
+the independent axis *Wproj*. The diffraction pattern can be visualized with
 the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
 
 If a background run is provided, two additional workspaces
