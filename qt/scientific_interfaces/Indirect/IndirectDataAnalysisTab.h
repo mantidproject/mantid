@@ -105,12 +105,12 @@ protected:
                        const QString &endRangePropName = "EndX");
 
   void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                 Mantid::API::CompositeFunction_sptr function);
+                 Mantid::API::IFunction_sptr function);
 
   Mantid::API::MatrixWorkspace_sptr
-  createGuessWorkspace(Mantid::API::CompositeFunction_sptr func);
+  createGuessWorkspace(Mantid::API::IFunction_sptr func);
 
-  std::vector<double> computeOutput(Mantid::API::CompositeFunction_sptr func,
+  std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
                                     const std::vector<double> &dataX);
 
   Mantid::API::IAlgorithm_sptr
