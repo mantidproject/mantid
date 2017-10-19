@@ -7,11 +7,6 @@ import mantid.simpleapi as mantid
 from mantid.api import *
 
 
-# Define WindowsError if it doesn't exist, so we can use it on Linux
-if not getattr(__builtins__, "WindowsError", None):
-    class WindowsError(OSError): pass
-
-
 class _GSASFinder(object):
     """
     Helper class for unit test - the algorithm can't run without a version of GSAS-II that includes the module
@@ -36,7 +31,7 @@ class _GSASFinder(object):
                     path = _GSASFinder._find_directory_by_name(cur_dir_name=child, cur_dir_path=child_path,
                                                                level=level + 1, name_to_find=name_to_find,
                                                                max_level=max_level)
-                except (WindowsError, OSError):  # Probably "Permission denied". Either way, just ignore it
+                except OSError:  # Probably "Permission denied". Either way, just ignore it
                     pass
                 else:
                     if path is not None:
