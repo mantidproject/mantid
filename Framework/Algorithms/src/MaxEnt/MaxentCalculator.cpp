@@ -48,7 +48,8 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
   auto dpoints = static_cast<double>(sizeDat);
   for (size_t i = 0; i < sizeDat; i++) {
     if (m_errors[i] != 0)
-      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i] / dpoints;
+      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i] /
+                 dpoints;
   }
 
   return cgrad;

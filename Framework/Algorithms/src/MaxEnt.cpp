@@ -127,20 +127,24 @@ void MaxEnt::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "A", 0.4, mustBeNonNegative, Direction::Input),
-                  "A maximum entropy constant. This algorithm was first developed for the "
-                  "ISIS muon group where the default 0.4 was found to give good reconstructions."
-                  "In general the user will need to experiment with this value. Chosen a "
-                  "small value may lead to unphysical spiky reconstructions and a too large "
-                  "value the reconstruction will start to resamble that of a direct fourier "
-                  "transform reconstruction. However, where data contain a strongly determined zero "
-                  "Fourier data point the reconstruction will be insensitive to the choice "
-                  "of this property.");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
+                                             Direction::Input),
+      "A maximum entropy constant. This algorithm was first developed for the "
+      "ISIS muon group where the default 0.4 was found to give good "
+      "reconstructions."
+      "In general the user will need to experiment with this value. Chosen a "
+      "small value may lead to unphysical spiky reconstructions and a too "
+      "large "
+      "value the reconstruction will start to resamble that of a direct "
+      "fourier "
+      "transform reconstruction. However, where data contain a strongly "
+      "determined zero "
+      "Fourier data point the reconstruction will be insensitive to the choice "
+      "of this property.");
 
-  declareProperty(make_unique<PropertyWithValue<double>>("ChiTarget", 1.0,
-                                                         mustBeNonNegative,
-                                                         Direction::Input),
+  declareProperty(make_unique<PropertyWithValue<double>>(
+                      "ChiTarget", 1.0, mustBeNonNegative, Direction::Input),
                   "Target value of Chi-square");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
