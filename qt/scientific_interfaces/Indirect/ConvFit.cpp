@@ -983,8 +983,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1179,13 +1179,10 @@ void ConvFit::typeSelection(int index) {
     hwhmRangeSelector->setVisible(true);
   } else {
     hwhmRangeSelector->setVisible(false);
-    m_uiForm.ckPlotGuess->setChecked(false);
     m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
   }
 
-  // Disable Plot Guess and Use Delta Function for DiffSphere and
-  // DiffRotDiscreteCircle
-  m_uiForm.ckPlotGuess->setEnabled(index < 3 || index == 7);
+  // Disable Use Delta Function for DiffSphere and DiffRotDiscreteCircle
   m_properties["UseDeltaFunc"]->setEnabled(index < 3 || index == 7);
 
   updatePlotOptions();
@@ -1285,61 +1282,16 @@ QVector<QString> ConvFit::indexToFitFunctions(const int &fitTypeIndex) {
  * Updates the guess for the plot
  */
 void ConvFit::plotGuess() {
-  m_uiForm.ppPlotTop->removeSpectrum("Guess");
 
   // Do nothing if there is not a sample and resolution
-  if (!(m_uiForm.dsSampleInput->isValid() && m_uiForm.dsResInput->isValid() &&
-        m_uiForm.ckPlotGuess->isChecked()))
-    return;
-
-  if (m_uiForm.cbFitType->currentIndex() > 2 &&
-      m_uiForm.cbFitType->currentIndex() != 7) {
-    return;
+  if (m_uiForm.dsResInput->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
+    extendResolutionWorkspace();
+    bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(tieCentres));
+  } else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
   }
-
-  bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
-  CompositeFunction_sptr function = createFunction(tieCentres);
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    updatePlot();
-    return;
-  }
-
-  const size_t binIndexLow =
-      inputWs->binIndexOf(m_dblManager->value(m_properties["StartX"]));
-  const size_t binIndexHigh =
-      inputWs->binIndexOf(m_dblManager->value(m_properties["EndX"]));
-  const size_t nData = binIndexHigh - binIndexLow;
-
-  const auto &xPoints = inputWs->points(0);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
-            dataX.begin());
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  function->function(domain, outputData);
-
-  std::vector<double> dataY(nData);
-  for (size_t i = 0; i < nData; i++) {
-    dataY[i] = outputData.getCalculated(i);
-  }
-
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
-  createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  createWsAlg->execute();
-  MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
-
-  m_uiForm.ppPlotTop->addSpectrum("Guess", guessWs, 0, Qt::green);
 }
 
 /**
@@ -1685,7 +1637,6 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
   m_uiForm.ckPlotGuess->setChecked(false);
 
   updatePlotOptions();
-  addDefaultParametersToTree(fitFunctions);
 
   // Two Lorentzians Fit
   if (lastFunction == "Lorentzian 2") {
@@ -1697,6 +1648,7 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_properties["FitFunction1"] = m_grpManager->addProperty(lastFunction);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
+  addDefaultParametersToTree(fitFunctions);
   updateProperties(selectedSpectra());
 }
 
