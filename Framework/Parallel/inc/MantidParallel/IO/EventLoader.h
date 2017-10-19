@@ -16,6 +16,7 @@ class TofEvent;
 }
 }
 namespace Parallel {
+class Communicator;
 namespace IO {
 
 /** Loader for event data from Nexus files with parallelism based on multiple
@@ -50,8 +51,8 @@ MANTID_PARALLEL_DLL std::vector<boost::optional<int32_t>>
 anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
                     const std::vector<std::string> &bankNames);
 MANTID_PARALLEL_DLL void
-load(const std::string &filename, const std::string &groupName,
-     const std::vector<std::string> &bankNames,
+load(const Communicator &communicator, const std::string &filename,
+     const std::string &groupName, const std::vector<std::string> &bankNames,
      const std::vector<int32_t> &bankOffsets,
      std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 }

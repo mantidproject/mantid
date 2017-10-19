@@ -91,13 +91,13 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
 }
 
 template <class TimeOffsetType>
-void load(const H5::Group &group, const std::vector<std::string> &bankNames,
+void load(const Communicator &comm, const H5::Group &group,
+          const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
   // TODO automatically(?) determine good chunk size
   // TODO automatically(?) determine good number of ranks to use for load
   const size_t chunkSize = 1024 * 1024;
-  Communicator comm;
   const Chunker chunker(comm.size(), comm.rank(),
                         readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<TimeOffsetType> loader(comm.size(), group, bankNames);

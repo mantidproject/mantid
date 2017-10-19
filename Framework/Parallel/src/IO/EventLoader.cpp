@@ -29,14 +29,15 @@ anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
 }
 
 /// Load events from given banks into event lists.
-void load(const std::string &filename, const std::string &groupName,
+void load(const Communicator &comm, const std::string &filename,
+          const std::string &groupName,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
   H5::H5File file(filename, H5F_ACC_RDONLY);
   H5::Group group = file.openGroup(groupName);
-  load(readDataType(group, bankNames, "event_time_offset"), group, bankNames,
-       bankOffsets, std::move(eventLists));
+  load(readDataType(group, bankNames, "event_time_offset"), comm, group,
+       bankNames, bankOffsets, std::move(eventLists));
 }
 }
 

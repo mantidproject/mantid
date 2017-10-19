@@ -1,6 +1,7 @@
 #include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidParallel/IO/EventLoader.h"
 #include "MantidTypes/SpectrumDefinition.h"
 #include "MantidTypes/Event/TofEvent.h"
@@ -54,7 +55,7 @@ void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
     DataObjects::getEventsFrom(ws.getSpectrum(i), eventLists[i]);
 
   Parallel::IO::EventLoader::load(
-      filename, groupName, bankNames,
+      ws.indexInfo().communicator(), filename, groupName, bankNames,
       bankOffsets(ws, filename, groupName, bankNames), std::move(eventLists));
 }
 
