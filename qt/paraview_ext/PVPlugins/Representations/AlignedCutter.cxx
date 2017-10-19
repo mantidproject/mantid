@@ -33,6 +33,21 @@ AlignedCutter::AlignedCutter(vtkImplicitFunction *cf) : vtkCutter(cf) {}
 //----------------------------------------------------------------------------
 AlignedCutter::~AlignedCutter() = default;
 
+namespace {
+std::array<double, 3> getOffset(vtkDataArray *input, int64_t lastPos,
+                                double celldim) {
+  double first[3], last[3];
+  std::array<double, 3> offset;
+  input->GetTuple(0, first);
+  input->GetTuple(lastPos, last);
+  double prefactor = 0.5 / celldim;
+  for (size_t i = 0; i < 3; ++i) {
+    offset[i] = prefactor * (last[i] - first[i]);
+  }
+  return offset;
+}
+}
+
 //----------------------------------------------------------------------------
 void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
                                                 vtkPolyData *thisOutput) {
@@ -79,12 +94,8 @@ void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
   {
     double value = this->ContourValues->GetValue(i);
     if (AxisNumber == 0) {
-      double first[3], last[3], offset[3];
-      dataArrayInput->GetTuple(0,first);
-      dataArrayInput->GetTuple(celldims[0], last);
-      for(size_t i = 0 ; i < 3; ++i) {
-        offset[i] = 0.5 * (last[i] - first[i]) / celldims[0];
-      }
+      std::array<double, 3> offset =
+          getOffset(dataArrayInput, celldims[0], celldims[0]);
       cutScalars->SetNumberOfTuples(dims[0]);
       for(vtkIdType i = 0; i < dims[0]; ++i) {
         double x[3];
@@ -96,12 +107,8 @@ void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
         cutScalars->SetTypedComponent(i, 0, std::abs(FuncVal - value));
       }
     } else if (AxisNumber == 1) {
-      double first[3], last[3], offset[3];
-      dataArrayInput->GetTuple(0,first);
-      dataArrayInput->GetTuple(d01 - dims[0], last);
-      for(size_t i = 0 ; i < 3; ++i) {
-        offset[i] = 0.5 * (last[i] - first[i]) / celldims[1];
-      }
+      std::array<double, 3> offset =
+          getOffset(dataArrayInput, d01 - dims[0], celldims[1]);
       cutScalars->SetNumberOfTuples(dims[1]);
       for (vtkIdType i = 0, j = 0; i < d01; i = i + dims[0], ++j) {
         double x[3];
@@ -113,12 +120,8 @@ void AlignedCutter::AlignedStructuredGridCutter(vtkDataSet *dataSetInput,
         cutScalars->SetTypedComponent(j, 0, std::abs(FuncVal - value));
       }
     } else if (AxisNumber == 2) {
-      double first[3], last[3], offset[3];
-      dataArrayInput->GetTuple(0,first);
-      dataArrayInput->GetTuple(numPts - d01, last);
-      for(size_t i = 0 ; i < 3; ++i) {
-        offset[i] = 0.5 * (last[i] - first[i]) / celldims[2];
-      }
+      std::array<double, 3> offset =
+          getOffset(dataArrayInput, numPts - d01, celldims[2]);
       cutScalars->SetNumberOfTuples(dims[2]);
       for (vtkIdType i = 0, j = 0; i < numPts; i = i + d01, ++j) {
         double x[3];
