@@ -74,8 +74,8 @@ public:
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
-  template <class IndexType, class TimeZeroType>
-  void setPulseTimeGenerator(PulseTimeGenerator<IndexType, TimeZeroType> &&gen);
+  void setEventDataPartitioner(std::unique_ptr<
+      AbstractEventDataPartitioner<TimeOffsetType>> partitioner);
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
@@ -119,17 +119,14 @@ EventParser<TimeOffsetType>::EventParser(
       m_bankOffsets(std::move(bankOffsets)),
       m_eventLists(std::move(eventLists)) {}
 
-/// Set the PulseTimeGenerator to use for parsing subsequent events.
+/// Set the EventDataPartitioner to use for parsing subsequent events.
 template <class TimeOffsetType>
-template <class IndexType, class TimeZeroType>
-void EventParser<TimeOffsetType>::setPulseTimeGenerator(
-    PulseTimeGenerator<IndexType, TimeZeroType> &&gen) {
+void EventParser<TimeOffsetType>::setEventDataPartitioner(
+    std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>> partitioner) {
   // We hold (and use) the PulseTimeGenerator via a virtual base class to avoid
   // the need of having IndexType and TimeZeroType as templates for the whole
   // class.
-  m_partitioner = Kernel::make_unique<
-      EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
-      m_comm.size(), std::move(gen));
+  m_partitioner = std::move(partitioner);
 }
 
 namespace detail {

@@ -58,11 +58,9 @@ H5::DataType readDataType(const H5::Group &group,
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void load(
-    const Chunker &chunker,
-    NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource,
-    EventParser<TimeOffsetType> &dataSink) {
+template <class TimeOffsetType>
+void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
+          EventParser<TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
   std::vector<int32_t> event_id(2 * chunkSize);
@@ -71,9 +69,9 @@ void load(
   int64_t previousBank = -1;
   size_t bufferOffset{0};
   for (const auto &range : ranges) {
-    PulseTimeGenerator<IndexType, TimeZeroType> pulseTimeGenerator;
+    std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>> partitioner;
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      pulseTimeGenerator = dataSource.setBankIndex(range.bankIndex);
+      partitioner = dataSource.setBankIndex(range.bankIndex);
     }
     dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset,
                            range.eventCount);
@@ -82,7 +80,7 @@ void load(
     if (previousBank != -1)
       dataSink.wait();
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      dataSink.setPulseTimeGenerator(std::move(pulseTimeGenerator));
+      dataSink.setEventDataPartitioner(std::move(partitioner));
       previousBank = range.bankIndex;
     }
     dataSink.startAsync(event_id.data() + bufferOffset,
@@ -92,7 +90,7 @@ void load(
   dataSink.wait();
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
+template <class TimeOffsetType>
 void load(const H5::Group &group, const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
@@ -102,35 +100,10 @@ void load(const H5::Group &group, const std::vector<std::string> &bankNames,
   Communicator comm;
   const Chunker chunker(comm.size(), comm.rank(),
                         readBankSizes(group, bankNames), chunkSize);
-  NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType> loader(group,
-                                                                    bankNames);
+  NXEventDataLoader<TimeOffsetType> loader(comm.size(), group, bankNames);
   EventParser<TimeOffsetType> consumer(comm, chunker.makeWorkerGroups(),
                                        bankOffsets, eventLists);
-  load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader, consumer);
-}
-
-template <class... T1, class... T2>
-void load(const H5::DataType &type, T2 &&... args);
-
-template <class... T1> struct ConditionalFloat {
-  template <class... T2>
-  static void forward_load(const H5::DataType &type, T2 &&... args) {
-    if (type == H5::PredType::NATIVE_FLOAT)
-      return load<T1..., float>(args...);
-    if (type == H5::PredType::NATIVE_DOUBLE)
-      return load<T1..., double>(args...);
-    throw std::runtime_error(
-        "Unsupported H5::DataType for entry in NXevent_data");
-  }
-};
-
-// Specialization for empty T1, i.e., first type argument `event_index`, which
-// must be integer.
-template <>
-template <class... T2>
-void ConditionalFloat<>::forward_load(const H5::DataType &type, T2 &&... args) {
-  throw std::runtime_error("Unsupported H5::DataType for event_index in "
-                           "NXevent_data, must be integer");
+  load<TimeOffsetType>(chunker, loader, consumer);
 }
 
 template <class... T1, class... T2>
@@ -150,8 +123,12 @@ void load(const H5::DataType &type, T2 &&... args) {
     return load<T1..., uint32_t>(args...);
   if (type == H5::PredType::NATIVE_UINT64)
     return load<T1..., uint64_t>(args...);
-  // Compile-time branching for float types.
-  ConditionalFloat<T1...>::forward_load(type, args...);
+  if (type == H5::PredType::NATIVE_FLOAT)
+    return load<T1..., float>(args...);
+  if (type == H5::PredType::NATIVE_DOUBLE)
+    return load<T1..., double>(args...);
+  throw std::runtime_error(
+      "Unsupported H5::DataType for entry in NXevent_data");
 }
 }
 

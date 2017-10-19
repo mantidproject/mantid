@@ -23,11 +23,6 @@ template <> void load<uint32_t>() { throw std::runtime_error("uint32_t"); }
 template <> void load<uint64_t>() { throw std::runtime_error("uint64_t"); }
 template <> void load<float>() { throw std::runtime_error("float"); }
 template <> void load<double>() { throw std::runtime_error("double"); }
-template <class T1, class T2> void load() {
-  throw std::runtime_error("unknown");
-}
-template <> void load<int32_t, float>() { throw std::runtime_error("float"); }
-template <> void load<int32_t, double>() { throw std::runtime_error("double"); }
 }
 }
 }
@@ -41,9 +36,10 @@ using namespace Parallel::IO;
 
 namespace {
 
-class FakeDataSource : public NXEventDataSource<int64_t, int64_t, int32_t> {
+class FakeDataSource : public NXEventDataSource<int32_t> {
 public:
-  PulseTimeGenerator<int64_t, int64_t>
+  FakeDataSource(const int numWorkers) : m_numWorkers(numWorkers) {}
+  std::unique_ptr<AbstractEventDataPartitioner<int32_t>>
   setBankIndex(const size_t bank) override {
     m_bank = bank;
     auto index = std::vector<int64_t>{0, 100, 100,
@@ -57,7 +53,9 @@ public:
     // Drift depening on bank to ensure correct offset is used for every bank.
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
 
-    return {index, time_zero, time_zero_offset};
+    return Kernel::make_unique<EventDataPartitioner<int64_t, int64_t, int32_t>>(
+        m_numWorkers, PulseTimeGenerator<int64_t, int64_t>{index, time_zero,
+                                                           time_zero_offset});
   }
 
   void readEventID(int32_t *event_id, size_t start,
@@ -75,6 +73,7 @@ public:
   }
 
 private:
+  const int m_numWorkers;
   const size_t m_pixelsPerBank{77};
   size_t m_bank{0};
 };
@@ -84,7 +83,7 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
   Chunker chunker(comm.size(), comm.rank(), bankSizes, chunkSize);
   // FakeDataSource encodes information on bank and position in file into TOF
   // and pulse times, such that we can verify correct mapping.
-  FakeDataSource dataSource;
+  FakeDataSource dataSource(comm.size());
   const std::vector<int32_t> bankOffsets{0, 12 * 77, 24 * 77};
   std::vector<std::vector<Types::Event::TofEvent>> eventLists(
       (3 * 77 + comm.size() - 1 - comm.rank()) / comm.size());
@@ -94,8 +93,8 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
 
   EventParser<int32_t> dataSink(comm, chunker.makeWorkerGroups(), bankOffsets,
                                 eventListPtrs);
-  TS_ASSERT_THROWS_NOTHING((EventLoader::load<int64_t, int64_t, int32_t>(
-      chunker, dataSource, dataSink)));
+  TS_ASSERT_THROWS_NOTHING(
+      (EventLoader::load<int32_t>(chunker, dataSource, dataSink)));
 
   for (size_t localSpectrumIndex = 0; localSpectrumIndex < eventLists.size();
        ++localSpectrumIndex) {
@@ -163,25 +162,15 @@ public:
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_UINT64),
                             const std::runtime_error &e, std::string(e.what()),
                             "uint64_t");
-    // Only integers accepted for first argument since this is the event index.
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_FLOAT),
                             const std::runtime_error &e, std::string(e.what()),
-                            "Unsupported H5::DataType for event_index in "
-                            "NXevent_data, must be integer");
+                            "float");
     TS_ASSERT_THROWS_EQUALS(load(H5::PredType::NATIVE_DOUBLE),
                             const std::runtime_error &e, std::string(e.what()),
-                            "Unsupported H5::DataType for event_index in "
-                            "NXevent_data, must be integer");
-    // Other arguments (event_time_zero and event_time_offset) can be floats.
+                            "double");
     TS_ASSERT_THROWS_EQUALS(
-        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_FLOAT),
-        const std::runtime_error &e, std::string(e.what()), "float");
-    TS_ASSERT_THROWS_EQUALS(
-        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_DOUBLE),
-        const std::runtime_error &e, std::string(e.what()), "double");
-    TS_ASSERT_THROWS_EQUALS(
-        load(H5::PredType::NATIVE_INT32, H5::PredType::NATIVE_CHAR),
-        const std::runtime_error &e, std::string(e.what()),
+        load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
+        std::string(e.what()),
         "Unsupported H5::DataType for entry in NXevent_data");
   }
 
