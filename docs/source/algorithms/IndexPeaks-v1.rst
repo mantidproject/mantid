@@ -52,6 +52,13 @@ Output:
 
    Number of Indexed Peaks: 147
 
+Related Algorithms
+------------------
+
+:ref:`IndexSXPeaks <algm-IndexSXPeaks>`
+will index peaks given a PeaksWorkspace and lattice parameters
+
+
 .. categories::
 
 .. sourcelink::

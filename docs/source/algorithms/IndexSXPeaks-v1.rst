@@ -28,7 +28,13 @@ Usage
 .. warning::
 
     This algorithm is deprecated and should no longer be used. One should consider using
-    :ref:`FindPeaksMD <algm-FindPeaksMD>`
+    :ref:`IndexPeaksMD <algm-IndexPeaksMD>`
+
+Related Algorithms
+------------------
+
+:ref:`IndexPeaks <algm-IndexPeaks>`
+will use UB inverse to index peaks given a PeaksWorkspace with a UB matrix stored with the sample
 
 .. categories::
 
