@@ -62,7 +62,7 @@ template <class IndexType, class TimeZeroType, class TimeOffsetType>
 void load(
     const Chunker &chunker,
     NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource,
-    EventParser<IndexType, TimeZeroType, TimeOffsetType> &dataSink) {
+    EventParser<TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
   std::vector<int32_t> event_id(2 * chunkSize);
@@ -104,8 +104,8 @@ void load(const H5::Group &group, const std::vector<std::string> &bankNames,
                         readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType> loader(group,
                                                                     bankNames);
-  EventParser<IndexType, TimeZeroType, TimeOffsetType> consumer(
-      comm, chunker.makeWorkerGroups(), bankOffsets, eventLists);
+  EventParser<TimeOffsetType> consumer(comm, chunker.makeWorkerGroups(),
+                                       bankOffsets, eventLists);
   load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader, consumer);
 }
 

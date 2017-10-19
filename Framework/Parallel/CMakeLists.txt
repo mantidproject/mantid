@@ -14,6 +14,7 @@ set ( INC_FILES
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
 	inc/MantidParallel/IO/Chunker.h
+	inc/MantidParallel/IO/EventDataPartitioner.h
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/EventLoaderHelpers.h
 	inc/MantidParallel/IO/EventParser.h
@@ -30,6 +31,7 @@ set ( TEST_FILES
 	ChunkerTest.h
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventDataPartitionerTest.h
 	EventLoaderTest.h
 	EventParserTest.h
 	ExecutionModeTest.h

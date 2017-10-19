@@ -48,16 +48,14 @@ public:
     return range;
   }
 
-  boost::shared_ptr<EventParser<IndexType, TimeZeroType, TimeOffsetType>>
-  generateTestParser() {
+  boost::shared_ptr<EventParser<TimeOffsetType>> generateTestParser() {
     test_event_lists.clear();
     test_event_lists.resize(m_referenceEventLists.size());
     std::vector<std::vector<TofEvent> *> eventLists;
     for (auto &eventList : test_event_lists)
       eventLists.emplace_back(&eventList);
     Parallel::Communicator comm;
-    return boost::make_shared<
-        EventParser<IndexType, TimeZeroType, TimeOffsetType>>(
+    return boost::make_shared<EventParser<TimeOffsetType>>(
         comm, std::vector<std::vector<int>>{}, m_bank_offsets, eventLists);
   }
 
@@ -147,8 +145,8 @@ public:
     std::vector<std::vector<TofEvent> *> eventLists(4);
 
     Parallel::Communicator comm;
-    TS_ASSERT_THROWS_NOTHING((EventParser<int64_t, int64_t, double>(
-        comm, rankGroups, bankOffsets, eventLists)));
+    TS_ASSERT_THROWS_NOTHING(
+        (EventParser<double>(comm, rankGroups, bankOffsets, eventLists)));
   }
 
   void testConvertEventIDToGlobalSpectrumIndex() {
@@ -166,55 +164,56 @@ public:
 
   void testExtractEventsFull() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
-    auto parser = gen.generateTestParser();
-    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = gen.generateBasicRange(0);
 
     detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, 1000);
-    std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
-        rankData;
+    std::vector<std::vector<EventParser<int64_t>::Event>> rankData;
     // event_id now contains spectrum indices
-    parser->extractEventsForRanks(rankData, event_id.data(),
-                                  event_time_offset.data() + range.eventOffset,
-                                  range);
+    EventDataPartitioner<int32_t, int64_t, int64_t> partitioner(
+        1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
+    partitioner.partition(rankData, event_id.data(),
+                          event_time_offset.data() + range.eventOffset, range);
+
     TS_ASSERT(std::equal(
         rankData[0].cbegin(), rankData[0].cend(), event_time_offset.cbegin(),
-        [](const EventParser<int32_t, int64_t, int64_t>::Event &e,
-           const int64_t tof) { return static_cast<double>(tof) == e.tof; }));
+        [](const EventParser<int64_t>::Event &e, const int64_t tof) {
+          return static_cast<double>(tof) == e.tof;
+        }));
     doTestRankData(rankData, gen, range);
   }
 
   void testExtractEventsPartial() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
-    auto parser = gen.generateTestParser();
-    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = Chunker::LoadRange{0, 5, 100};
 
     detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, 1000);
-    std::vector<std::vector<EventParser<int32_t, int64_t, int64_t>::Event>>
-        rankData;
+    std::vector<std::vector<EventParser<int64_t>::Event>> rankData;
     // event_id now contains spectrum indices
-    parser->extractEventsForRanks(rankData, event_id.data(),
-                                  event_time_offset.data() + range.eventOffset,
-                                  range);
-    TS_ASSERT(std::equal(
-        rankData[0].cbegin(), rankData[0].cend(),
-        event_time_offset.cbegin() + range.eventOffset,
-        [](const EventParser<int32_t, int64_t, int64_t>::Event &e,
-           const int64_t tof) { return static_cast<double>(tof) == e.tof; }));
+    EventDataPartitioner<int32_t, int64_t, int64_t> partitioner(
+        1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
+    partitioner.partition(rankData, event_id.data(),
+                          event_time_offset.data() + range.eventOffset, range);
+
+    TS_ASSERT(
+        std::equal(rankData[0].cbegin(), rankData[0].cend(),
+                   event_time_offset.cbegin() + range.eventOffset,
+                   [](const EventParser<int64_t>::Event &e, const int64_t tof) {
+                     return static_cast<double>(tof) == e.tof;
+                   }));
     doTestRankData(rankData, gen, range);
   }
 
   void testParsingFull_1Pulse_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int32_t, double> gen(1, 10, 1);
     auto parser = gen.generateTestParser();
-    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
+    parser->setPulseTimeGenerator<int32_t, int32_t>(
+        {gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -228,7 +227,8 @@ public:
   void testParsingFull_1Rank_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
-    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
+    parser->setPulseTimeGenerator<int32_t, int64_t>(
+        {gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -246,7 +246,7 @@ public:
     auto parser = gen.generateTestParser();
 
     for (int i = 0; i < numBanks; i++) {
-      parser->setPulseTimeGenerator(
+      parser->setPulseTimeGenerator<int32_t, int64_t>(
           {gen.eventIndex(i), gen.eventTimeZero(), 0});
       auto event_id = gen.eventId(i);
       auto event_time_offset = gen.eventTimeOffset(i);
@@ -261,7 +261,8 @@ public:
   void testParsingFull_InParts_1Rank_1Bank() {
     anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 11, 7);
     auto parser = gen.generateTestParser();
-    parser->setPulseTimeGenerator({gen.eventIndex(0), gen.eventTimeZero(), 0});
+    parser->setPulseTimeGenerator<int32_t, int64_t>(
+        {gen.eventIndex(0), gen.eventTimeZero(), 0});
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -289,7 +290,7 @@ public:
     auto parser = gen.generateTestParser();
 
     for (size_t bank = 0; bank < numBanks; bank++) {
-      parser->setPulseTimeGenerator(
+      parser->setPulseTimeGenerator<int32_t, int64_t>(
           {gen.eventIndex(bank), gen.eventTimeZero(), 0});
       auto event_id = gen.eventId(bank);
       auto event_time_offset = gen.eventTimeOffset(bank);
@@ -357,7 +358,7 @@ public:
 
   void testCompletePerformance() {
     for (size_t i = 0; i < NUM_BANKS; ++i) {
-      parser->setPulseTimeGenerator(
+      parser->setPulseTimeGenerator<int32_t, int64_t>(
           {gen.eventIndex(i), gen.eventTimeZero(), 0});
       parser->startAsync(event_ids[i].data(), event_time_offsets[i].data(),
                          gen.generateBasicRange(i));
@@ -366,10 +367,13 @@ public:
   }
 
   void testExtractEventsPerformance() {
-    for (size_t bank = 0; bank < NUM_BANKS; bank++)
-      parser->extractEventsForRanks(rankData, event_ids[bank].data(),
-                                    event_time_offsets[bank].data(),
-                                    gen.generateBasicRange(bank));
+    for (size_t bank = 0; bank < NUM_BANKS; bank++) {
+      EventDataPartitioner<int32_t, int64_t, double> partitioner(
+          1, {gen.eventIndex(bank), gen.eventTimeZero(), 0});
+      partitioner.partition(rankData, event_ids[bank].data(),
+                            event_time_offsets[bank].data(),
+                            gen.generateBasicRange(bank));
+    }
   }
 
   void testPopulateEventListsPerformance() {
@@ -381,9 +385,8 @@ private:
   std::vector<std::vector<int32_t>> event_ids;
   std::vector<std::vector<double>> event_time_offsets;
   anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen;
-  boost::shared_ptr<EventParser<int32_t, int64_t, double>> parser;
-  std::vector<std::vector<EventParser<int32_t, int64_t, double>::Event>>
-      rankData;
+  boost::shared_ptr<EventParser<double>> parser;
+  std::vector<std::vector<EventParser<double>::Event>> rankData;
   std::vector<std::vector<TofEvent>> m_eventLists{NUM_BANKS * 1000};
   std::vector<std::vector<TofEvent> *> m_eventListPtrs;
 };

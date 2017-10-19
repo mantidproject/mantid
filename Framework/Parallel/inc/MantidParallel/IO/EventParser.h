@@ -6,6 +6,7 @@
 #include "MantidParallel/Nonblocking.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
+#include "MantidParallel/IO/EventDataPartitioner.h"
 #include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Event/TofEvent.h"
 
@@ -50,12 +51,6 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace detail {
-template <class TimeOffsetType> struct Event {
-  int32_t index; // local spectrum index
-  TimeOffsetType tof;
-  Types::Core::DateAndTime pulseTime;
-};
-
 void MANTID_PARALLEL_DLL eventIdToGlobalSpectrumIndex(int32_t *event_id_start,
                                                       size_t count,
                                                       const int32_t bankOffset);
@@ -71,8 +66,7 @@ void populateEventLists(
     std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-class EventParser {
+template <class TimeOffsetType> class EventParser {
 public:
   using Event = detail::Event<TimeOffsetType>;
   EventParser(const Communicator &comm,
@@ -80,16 +74,12 @@ public:
               std::vector<int32_t> bankOffsets,
               std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
 
+  template <class IndexType, class TimeZeroType>
   void setPulseTimeGenerator(PulseTimeGenerator<IndexType, TimeZeroType> &&gen);
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
                   const Chunker::LoadRange &range);
-
-  void extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
-                             const int32_t *globalSpectrumIndex,
-                             const TimeOffsetType *eventTimeOffset,
-                             const Chunker::LoadRange &range);
 
   void wait();
 
@@ -101,7 +91,7 @@ private:
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
   std::vector<std::vector<Types::Event::TofEvent> *> m_eventLists;
-  PulseTimeGenerator<IndexType, TimeZeroType> m_pulseTimes;
+  std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>> m_partitioner;
   std::vector<std::vector<Event>> m_allRankData;
   std::vector<Event> m_thisRankData;
   std::thread m_thread;
@@ -120,8 +110,8 @@ private:
  * @param globalToLocalSpectrumIndex lookup table which converts a global
  * spectrum index to a spectrum index local to a given mpi rank
  */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
+template <class TimeOffsetType>
+EventParser<TimeOffsetType>::EventParser(
     const Communicator &comm, std::vector<std::vector<int>> rankGroups,
     std::vector<int32_t> bankOffsets,
     std::vector<std::vector<TofEvent> *> eventLists)
@@ -130,41 +120,16 @@ EventParser<IndexType, TimeZeroType, TimeOffsetType>::EventParser(
       m_eventLists(std::move(eventLists)) {}
 
 /// Set the PulseTimeGenerator to use for parsing subsequent events.
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    setPulseTimeGenerator(PulseTimeGenerator<IndexType, TimeZeroType> &&gen) {
-  m_pulseTimes = std::move(gen);
-}
-
-/** Extracts event information from the list of time offsets and global spectrum
- * indices using the event_index and event_time_offset tables provided from
- * file. These events are separated according to MPI ranks.
- * @param rankData vector which stores vectors of data for each MPI rank.
- * @param globalSpectrumIndex list of spectrum indices corresponding to tof data
- * @param eventTimeOffset tof data
- * @param offset File offset (index) for tof data. Used to track event_index and
- * event_time_zero positions
- */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::
-    extractEventsForRanks(std::vector<std::vector<Event>> &rankData,
-                          const int32_t *globalSpectrumIndex,
-                          const TimeOffsetType *eventTimeOffset,
-                          const Chunker::LoadRange &range) {
-  for (auto &item : rankData)
-    item.clear();
-
-  rankData.resize(m_comm.size());
-
-  m_pulseTimes.seek(range.eventOffset);
-  int ranks = m_comm.size();
-  for (size_t event = 0; event < range.eventCount; ++event) {
-    // Currently this supports only a hard-coded round-robin partitioning.
-    int rank = globalSpectrumIndex[event] % ranks;
-    auto index = globalSpectrumIndex[event] / ranks;
-    rankData[rank].emplace_back(
-        Event{index, eventTimeOffset[event], m_pulseTimes.next()});
-  }
+template <class TimeOffsetType>
+template <class IndexType, class TimeZeroType>
+void EventParser<TimeOffsetType>::setPulseTimeGenerator(
+    PulseTimeGenerator<IndexType, TimeZeroType> &&gen) {
+  // We hold (and use) the PulseTimeGenerator via a virtual base class to avoid
+  // the need of having IndexType and TimeZeroType as templates for the whole
+  // class.
+  m_partitioner = Kernel::make_unique<
+      EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
+      m_comm.size(), std::move(gen));
 }
 
 namespace detail {
@@ -252,8 +217,8 @@ void populateEventLists(
  * the data in the buffers, the file index offset where data starts and the
  * number of elements in the data array.
  */
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
+template <class TimeOffsetType>
+void EventParser<TimeOffsetType>::startAsync(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
   // Wrapped in lambda because std::thread is unable to specialize doParsing on
@@ -264,8 +229,8 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::startAsync(
       });
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
+template <class TimeOffsetType>
+void EventParser<TimeOffsetType>::doParsing(
     int32_t *event_id_start, const TimeOffsetType *event_time_offset_start,
     const Chunker::LoadRange &range) {
   // change event_id_start in place
@@ -273,16 +238,15 @@ void EventParser<IndexType, TimeZeroType, TimeOffsetType>::doParsing(
                                        m_bankOffsets[range.bankIndex]);
 
   // event_id_start now contains globalSpectrumIndex
-  extractEventsForRanks(m_allRankData, event_id_start, event_time_offset_start,
-                        range);
+  m_partitioner->partition(m_allRankData, event_id_start,
+                           event_time_offset_start, range);
 
   detail::redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
   // TODO: accept something which translates from global to local spectrum index
   populateEventLists(m_thisRankData, m_eventLists);
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void EventParser<IndexType, TimeZeroType, TimeOffsetType>::wait() {
+template <class TimeOffsetType> void EventParser<TimeOffsetType>::wait() {
   m_thread.join();
 }
 
