@@ -16,18 +16,13 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -384,8 +379,7 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
 
 /// Create a 2D workspace with one detector and one monitor based around a
 /// virtual reflectometry instrument.
-Mantid::API::MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrument(double startX = 0);
+Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX);
 
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.

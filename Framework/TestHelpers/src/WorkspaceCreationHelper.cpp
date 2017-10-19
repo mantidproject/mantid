@@ -12,11 +12,9 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -37,11 +35,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/make_unique.h"
 #include "MantidIndexing/IndexInfo.h"
-
-#include <cmath>
-#include <sstream>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;
@@ -516,8 +510,7 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
  * @return workspace with instrument attached.
  * @param startX : X Tof start value for the workspace.
  */
-MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrument(double startX) {
+MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(double startX = 0) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
@@ -528,7 +521,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->markAsSource(source);
 
   Detector *monitor = new Detector("Monitor", 1, nullptr);
-  monitor->setPos(14, 0, 0);
+  monitor->setPos(V3D(14, 0, 0));
   instrument->add(monitor);
   instrument->markAsMonitor(monitor);
 
