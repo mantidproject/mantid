@@ -1,8 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 import os
+import tempfile
 import unittest
-from mantid.simpleapi import *
+import mantid.simpleapi as mantid
 from mantid.api import *
 
 
@@ -51,18 +52,66 @@ class _GSASFinder(object):
 class GSASIIRefineFitPeaksTest(unittest.TestCase):
 
     _path_to_gsas = None
+    _gsas_proj = None
+    _input_ws = None
+    _phase_file = None
+    _inst_file = None
 
     def setUp(self):
+        data_dir = mantid.config["datasearch.directories"].split(";")[0]
+
+        self._phase_file = os.path.join(data_dir, "FE_ALPHA.cif")
+        self._inst_file = os.path.join(data_dir, "template_ENGINX_241391_236516_North_bank.prm")
+
         self._path_to_gsas = _GSASFinder.GSASIIscriptable_location()
         if self._path_to_gsas is None:
             self.skipTest("Could not find GSASIIscriptable.py")
 
-    def test_rietveld_refinement(self):
-        pass
+        temp_dir = tempfile.gettempdir()
+        self._gsas_proj = os.path.join(temp_dir, "GSASIIRefineFitPeaksTest.gpx")
 
-    def test_pawley_refinement(self):
-        pass
+        spectrum_file = os.path.join(data_dir, "focused_bank1_ENGINX00256663.nxs")
+        self._input_ws = mantid.Load(Filename=spectrum_file, OutputWorkspace="input")
 
+    def test_rietveld_refinement_with_default_params(self):
+        gof, rwp, lattice_table = mantid.GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
+                                                              InputWorkspace=self._input_ws,
+                                                              PhaseInfoFile=self._phase_file,
+                                                              InstrumentFile=self._inst_file,
+                                                              PathToGSASII=self._path_to_gsas,
+                                                              SaveGSASIIProjectFile=self._gsas_proj,
+                                                              MuteGSASII=True)
+
+        self.assertAlmostEqual(gof, 3.57776, delta=1e-6)
+        self.assertAlmostEquals(rwp, 77.75499, delta=1e6)
+        row = lattice_table.row(0)
+        self.assertAlmostEqual(row["a"], 2.8665)
+        self.assertAlmostEqual(row["b"], 2.8665)
+        self.assertAlmostEqual(row["c"], 2.8665)
+        self.assertAlmostEqual(row["alpha"], 90)
+        self.assertAlmostEqual(row["beta"], 90)
+        self.assertAlmostEqual(row["gamma"], 90)
+        self.assertAlmostEqual(row["volume"], 23.554, delta=1e4)
+
+    def test_pawley_refinement_with_default_params(self):
+        gof, rwp, lattice_table = mantid.GSASIIRefineFitPeaks(RefinementMethod="Pawley refinement",
+                                                              InputWorkspace=self._input_ws,
+                                                              PhaseInfoFile=self._phase_file,
+                                                              InstrumentFile=self._inst_file,
+                                                              PathToGSASII=self._path_to_gsas,
+                                                              SaveGSASIIProjectFile=self._gsas_proj,
+                                                              MuteGSASII=True)
+
+        self.assertAlmostEqual(gof, 3.57847, delta=1e-6)
+        self.assertAlmostEquals(rwp, 77.75515, delta=1e6)
+        row = lattice_table.row(0)
+        self.assertAlmostEqual(row["a"], 2.8665)
+        self.assertAlmostEqual(row["b"], 2.8665)
+        self.assertAlmostEqual(row["c"], 2.8665)
+        self.assertAlmostEqual(row["alpha"], 90)
+        self.assertAlmostEqual(row["beta"], 90)
+        self.assertAlmostEqual(row["gamma"], 90)
+        self.assertAlmostEqual(row["volume"], 23.554, delta=1e4)
 
 if __name__ == '__main__':
     unittest.main()
