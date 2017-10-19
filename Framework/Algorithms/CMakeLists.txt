@@ -151,6 +151,7 @@ set ( SRC_FILES
 	src/GetEi2.cpp
 	src/GetEiMonDet2.cpp
 	src/GetTimeSeriesLogInformation.cpp
+        src/GravityCorrection.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
@@ -470,6 +471,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEiMonDet2.h
 	inc/MantidAlgorithms/GetTimeSeriesLogInformation.h
+        inc/MantidAlgorithms/GravityCorrection.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
@@ -800,6 +802,7 @@ set ( TEST_FILES
 	GetEiTest.h
 	GetEiV1Test.h
 	GetTimeSeriesLogInformationTest.h
+        GravityCorrectionTest.h
 	GroupWorkspacesTest.h
 	HRPDSlabCanAbsorptionTest.h
 	He3TubeEfficiencyTest.h
