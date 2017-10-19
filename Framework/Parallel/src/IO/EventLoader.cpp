@@ -9,6 +9,7 @@ namespace Parallel {
 namespace IO {
 namespace EventLoader {
 
+/// Load and return one event_id entry from given banks, if available.
 std::vector<boost::optional<int32_t>>
 anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
                     const std::vector<std::string> &bankNames) {
@@ -27,6 +28,7 @@ anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
   return eventIds;
 }
 
+/// Load events from given banks into event lists.
 void load(const std::string &filename, const std::string &groupName,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,

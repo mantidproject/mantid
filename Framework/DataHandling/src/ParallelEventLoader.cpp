@@ -8,6 +8,7 @@
 namespace Mantid {
 namespace DataHandling {
 
+/// Return offset between global spectrum index and detector ID for given banks.
 std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
                                  const std::string &filename,
                                  const std::string &groupName,
@@ -42,6 +43,7 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
   return bankOffsets;
 }
 
+/// Load events from given banks into given EventWorkspace.
 void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
                                const std::string &filename,
                                const std::string &groupName,
