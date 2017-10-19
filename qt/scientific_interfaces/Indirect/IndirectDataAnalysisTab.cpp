@@ -273,7 +273,7 @@ void IndirectDataAnalysisTab::updatePlotRange(
 
 void IndirectDataAnalysisTab::plotGuess(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-    Mantid::API::CompositeFunction_sptr function) {
+    IFunction_sptr function) {
   previewPlot->removeSpectrum("Guess");
 
   if (inputWorkspace()) {
@@ -283,7 +283,7 @@ void IndirectDataAnalysisTab::plotGuess(
 }
 
 MatrixWorkspace_sptr
-IndirectDataAnalysisTab::createGuessWorkspace(CompositeFunction_sptr func) {
+IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   const auto inputWS = inputWorkspace();
   const size_t binIndexLow =
       inputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
@@ -305,7 +305,7 @@ IndirectDataAnalysisTab::createGuessWorkspace(CompositeFunction_sptr func) {
 }
 
 std::vector<double>
-IndirectDataAnalysisTab::computeOutput(CompositeFunction_sptr func,
+IndirectDataAnalysisTab::computeOutput(IFunction_sptr func,
                                        const std::vector<double> &dataX) {
   FunctionDomain1DVector domain(dataX);
   FunctionValues outputData(domain);

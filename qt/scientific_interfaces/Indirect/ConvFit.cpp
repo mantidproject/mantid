@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
