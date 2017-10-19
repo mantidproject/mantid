@@ -879,43 +879,11 @@ void IqtFit::updateGuessPlot() {
 }
 
 void IqtFit::plotGuess(QtProperty *) {
-  CompositeFunction_sptr function = createFunction(true);
-  auto inputWs = inputWorkspace();
 
-  // Create the double* array from the input workspace
-  const size_t binIndxLow =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
-  const size_t nData = binIndxHigh - binIndxLow;
-
-  const auto &xPoints = inputWs->points(0);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  function->function(domain, outputData);
-
-  std::vector<double> dataY(nData);
-  for (size_t i = 0; i < nData; i++) {
-    dataY[i] = outputData.getCalculated(i);
-  }
-
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
-  createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  createWsAlg->execute();
-  MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
-
-  m_uiForm.ppPlotTop->addSpectrum("Guess", guessWs, 0, Qt::green);
+  if (m_uiForm.ckPlotGuess->isChecked())
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop, createFunction(true));
+  else
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
 }
 
 /*
