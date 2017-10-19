@@ -45,12 +45,12 @@ class _GSASFinder(object):
         """
         root_directory = os.path.abspath(os.sep)
         return _GSASFinder._find_directory_by_name(cur_dir_path=root_directory, cur_dir_name=root_directory, level=0,
-                                                   name_to_find="g2conda", max_level=5)
+                                                   name_to_find="g2conda", max_level=3)
 
     @staticmethod
     def GSASIIscriptable_location():
         """
-        Find the path to GSASIIscriptable.py, if it exists and is less than 5 levels away from the root directory
+        Find the path to GSASIIscriptable.py, if it exists and is less than 3 levels away from the root directory
         """
         path_to_g2conda = _GSASFinder._path_to_g2conda()
         if path_to_g2conda is None:
