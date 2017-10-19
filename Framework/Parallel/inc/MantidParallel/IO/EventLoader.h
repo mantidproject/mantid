@@ -1,11 +1,9 @@
 #ifndef MANTID_PARALLEL_EVENTLOADER_H_
 #define MANTID_PARALLEL_EVENTLOADER_H_
 
-#include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include "MantidParallel/DllConfig.h"
 
@@ -47,9 +45,10 @@ namespace IO {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace EventLoader {
-MANTID_PARALLEL_DLL std::vector<boost::optional<int32_t>>
-anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
-                    const std::vector<std::string> &bankNames);
+MANTID_PARALLEL_DLL std::unordered_map<int32_t, size_t>
+makeAnyEventIdToBankMap(const std::string &filename,
+                        const std::string &groupName,
+                        const std::vector<std::string> &bankNames);
 MANTID_PARALLEL_DLL void
 load(const Communicator &communicator, const std::string &filename,
      const std::string &groupName, const std::vector<std::string> &bankNames,

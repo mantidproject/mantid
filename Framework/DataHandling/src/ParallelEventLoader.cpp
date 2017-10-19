@@ -14,33 +14,33 @@ std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
                                  const std::string &filename,
                                  const std::string &groupName,
                                  const std::vector<std::string> &bankNames) {
-  // Build detector ID to spectrum index map. Used only in LoadEventNexus so we
-  // know there is a 1:1 mapping, omitting monitors.
+  // Read an event ID for each bank. This is always a detector ID since the
+  // parallel loader is disabled otherwise. It is assumed that detector IDs
+  // within a bank are contiguous.
+  const auto &idToBank = Parallel::IO::EventLoader::makeAnyEventIdToBankMap(
+      filename, groupName, bankNames);
+
   const auto &detInfo = ws.detectorInfo();
-  const auto &detIDs = detInfo.detectorIDs();
-  std::unordered_map<detid_t, int32_t> map;
+  const auto &detIds = detInfo.detectorIDs();
   int32_t spectrumIndex{0}; // *global* index
-  for (size_t i = 0; i < detInfo.size(); ++i)
-    if (!detInfo.isMonitor(i))
-      map[detIDs[i]] = spectrumIndex++;
-
-  // Load any event ID and determine offset from it. This is always a detector
-  // ID since the parallel loader is disabled otherwise. It is assumed that
-  // detector IDs within a bank are contiguous.
-  std::vector<int32_t> bankOffsets;
-  for (const auto &eventId : Parallel::IO::EventLoader::anyEventIdFromBanks(
-           filename, groupName, bankNames)) {
-    // The offset is the difference between the event ID and the spectrum index
-    // and can then be used to translate from the former to the latter by simple
-    // subtraction.
-    // If no eventId could be read for a bank it implies that there are no
-    // events, so any offset will do since it is unused. Set to 0.
-    if (eventId)
-      bankOffsets.emplace_back(*eventId - map.at(*eventId));
-    else
-      bankOffsets.emplace_back(0);
+  std::vector<int32_t> bankOffsets(bankNames.size(), 0);
+  for (size_t i = 0; i < detInfo.size(); ++i) {
+    // Used only in LoadEventNexus so we know there is a 1:1 mapping, omitting
+    // monitors.
+    if (!detInfo.isMonitor(i)) {
+      detid_t detId = detIds[i];
+      // The offset is the difference between the event ID and the spectrum
+      // index and can then be used to translate from the former to the latter
+      // by simple subtraction. If no eventId could be read for a bank it
+      // implies that there are no events, so any offset will do since it is
+      // unused, keeping as initialized to 0 above.
+      if (idToBank.count(detId) == 1) {
+        size_t bank = idToBank.at(detId);
+        bankOffsets[bank] = detId - spectrumIndex;
+      }
+      spectrumIndex++;
+    }
   }
-
   return bankOffsets;
 }
 

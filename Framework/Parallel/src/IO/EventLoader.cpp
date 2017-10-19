@@ -9,23 +9,28 @@ namespace Parallel {
 namespace IO {
 namespace EventLoader {
 
-/// Load and return one event_id entry from given banks, if available.
-std::vector<boost::optional<int32_t>>
-anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
-                    const std::vector<std::string> &bankNames) {
-  std::vector<boost::optional<int32_t>> eventIds(bankNames.size());
+/** Return a map from any one event ID in a bank to the bank index.
+ *
+ * For every bank there is one map entry, i.e., this is NOT a mapping from all
+ * IDs in a bank to the bank. The returned map will not contain an entry for
+ * banks that contain no events. */
+std::unordered_map<int32_t, size_t>
+makeAnyEventIdToBankMap(const std::string &filename,
+                        const std::string &groupName,
+                        const std::vector<std::string> &bankNames) {
+  std::unordered_map<int32_t, size_t> idToBank;
   H5::H5File file(filename, H5F_ACC_RDONLY);
   H5::Group group = file.openGroup(groupName);
   for (size_t i = 0; i < bankNames.size(); ++i) {
     try {
       int32_t eventId;
       detail::read<int32_t>(&eventId, group, bankNames[i] + "/event_id", 0, 1);
-      eventIds[i] = eventId;
+      idToBank[eventId] = i;
     } catch (const std::out_of_range &) {
-      // No event in file, keep eventIds uninitialized for this bank.
+      // No event in file, do not add to map.
     }
   }
-  return eventIds;
+  return idToBank;
 }
 
 /// Load events from given banks into event lists.
