@@ -37,10 +37,10 @@ namespace {
 std::array<double, 3> getOffset(vtkDataArray *input, int64_t lastPos,
                                 double celldim) {
   double first[3], last[3];
-  std::array<double, 3> offset;
   input->GetTuple(0, first);
   input->GetTuple(lastPos, last);
   double prefactor = 0.5 / celldim;
+  std::array<double, 3> offset;
   for (size_t i = 0; i < 3; ++i) {
     offset[i] = prefactor * (last[i] - first[i]);
   }
