@@ -1,10 +1,10 @@
 import sys
 
 from  Muon import load_utils
-from  Muon import FFT_presenter
-from  Muon import FFT_view
-from  Muon import FFT_model
-from  Muon import ThreadModel
+from  Muon import fft_presenter
+from  Muon import fft_view
+from  Muon import fft_model
+from  Muon import thread_model
 
 import unittest
 
@@ -19,7 +19,7 @@ class FFTPresenterTest(unittest.TestCase):
         self.load=mock.create_autospec(load_utils.LoadUtils,spec_set=True)
         self.load.getCurrentWS=mock.Mock(return_value=["TEST00000001",["fwd","bkwd"]])
         self.load.getRunName=mock.MagicMock(return_value="MUSR00023456")
-        self.view=mock.create_autospec(FFT_view.FFTView,spec_set=True)
+        self.view=mock.create_autospec(fft_view.FFTView,spec_set=True)
         #signals
         self.view.tableClickSignal=mock.Mock(return_value=[3,1])
         self.view.phaseCheckSignal=mock.Mock(return_value =True)
@@ -46,21 +46,20 @@ class FFTPresenterTest(unittest.TestCase):
         self.view.activateButton=mock.Mock()
         self.view.deactivateButton=mock.Mock()
         # setup model
-        self.model1=mock.create_autospec(FFT_model.FFTModel,spec_set=False)
-        self.model=mock.create_autospec(FFT_model.FFTWrapper,spec_set=False)
-        
-        #set presenter
-        self.presenter=FFT_presenter.FFTPresenter(self.view,self.model,self.load)
+        self.model1=mock.create_autospec(fft_model.FFTModel,spec_set=False)
+        self.model=mock.create_autospec(fft_model.FFTWrapper,spec_set=False)
 
-        self.thread=mock.create_autospec(ThreadModel.ThreadModel)
+        #set presenter
+        self.presenter=fft_presenter.FFTPresenter(self.view,self.model,self.load)
+
+        # mock thread
+        self.thread=mock.create_autospec(thread_model.ThreadModel)
         self.thread.start=mock.Mock()
         self.thread.started=mock.Mock()
         self.thread.finished=mock.Mock()
         self.thread.setInputs=mock.Mock()
         self.thread.loadData=mock.Mock()
-       
         self.presenter.createThread=mock.Mock(return_value=self.thread)
-
 
     def sendSignal(self):
         row,col=self.view.tableClickSignal()
