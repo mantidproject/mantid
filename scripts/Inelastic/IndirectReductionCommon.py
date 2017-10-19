@@ -40,7 +40,10 @@ def create_file_range_parser(instrument):
         if '-' in file_range:
             return [[instrument + str(run) for run in create_range_from(file_range, '-')]]
         elif ':' in file_range:
-            return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
+            try:
+                return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
+            except ValueError:
+                return [[file_range]]
         elif '+' in file_range:
             return [[instrument + run for run in file_range.split('+')]]
         else:
