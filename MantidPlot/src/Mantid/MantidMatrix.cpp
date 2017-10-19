@@ -1343,7 +1343,8 @@ void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
         auto format = m_extensionRequest.getFormat(
             type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
         auto precision = m_extensionRequest.getPrecision(
-            type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberPrecisionY());
         setNumberFormat(modelTypeToInt(type), format, precision);
         ++it;
       } else {
