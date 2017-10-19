@@ -1,61 +1,44 @@
 #include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidParallel/IO/EventLoader.h"
+#include "MantidTypes/SpectrumDefinition.h"
 #include "MantidTypes/Event/TofEvent.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws,
+                                 const std::string &filename,
+                                 const std::string &groupName,
                                  const std::vector<std::string> &bankNames) {
-  const auto instrument = ws.getInstrument();
-  const auto &compInfo = ws.componentInfo();
+  // Build detector ID to spectrum index map. Used only in LoadEventNexus so we
+  // know there is a 1:1 mapping, omitting monitors.
   const auto &detInfo = ws.detectorInfo();
   const auto &detIDs = detInfo.detectorIDs();
+  std::unordered_map<detid_t, int32_t> map;
+  int32_t spectrumIndex{0}; // *global* index
+  for (size_t i = 0; i < detInfo.size(); ++i)
+    if (!detInfo.isMonitor(i))
+      map[detIDs[i]] = spectrumIndex++;
 
-  // Monitors are not loaded by LoadEventNexus, so we have to exclude them when
-  // computing an offset based on detector IDs. Currently this is computed in a
-  // naive way and works only if all monitors have IDs smaller than any
-  // detector.
-  int32_t monitorOffset{0};
-  bool sawDetector{false};
-  for (size_t i = 0; i < detInfo.size(); ++i) {
-    if (detInfo.isMonitor(i)) {
-      if (sawDetector)
-        throw std::runtime_error("Monitors are not corresponding to the first "
-                                 "detector IDs in the instrument. This is "
-                                 "currently not supported by "
-                                 "ParallelEventLoader");
-      ++monitorOffset;
-    } else {
-      sawDetector = true;
-    }
-  }
-
+  // Load any event ID and determine offset from it. This is always a detector
+  // ID since the parallel loader is disabled otherwise. It is assumed that
+  // detector IDs within a bank are contiguous.
   std::vector<int32_t> bankOffsets;
-  for (const auto &bankName : bankNames) {
-    // Removing "_events" from bankName
-    auto bank =
-        instrument->getComponentByName(bankName.substr(0, bankName.size() - 7));
-    if (bank) {
-      const auto &detectors =
-          compInfo.detectorsInSubtree(compInfo.indexOf(bank->getComponentID()));
-      const size_t detIndex = detectors.front();
-      bankOffsets.push_back(detIDs[detIndex] - static_cast<int32_t>(detIndex) +
-                            monitorOffset);
-      if ((detIDs[detectors.back()] - detIDs[detectors.front()]) !=
-          static_cast<int32_t>(detectors.size()) - 1)
-        throw std::runtime_error("Detector ID range in bank is not contiguous. "
-                                 "Cannot use ParallelEventLoader.");
-    } else {
-      throw std::runtime_error(
-          "ParallelEventLoader: Bank " + bankName +
-          " not found. Cannot determine detector ID offset.");
-    }
+  for (const auto &eventId : Parallel::IO::EventLoader::anyEventIdFromBanks(
+           filename, groupName, bankNames)) {
+    // The offset is the difference between the event ID and the spectrum index
+    // and can then be used to translate from the former to the latter by simple
+    // subtraction.
+    // If no eventId could be read for a bank it implies that there are no
+    // events, so any offset will do since it is unused. Set to 0.
+    if (eventId)
+      bankOffsets.emplace_back(*eventId - map.at(*eventId));
+    else
+      bankOffsets.emplace_back(0);
   }
+
   return bankOffsets;
 }
 
@@ -68,9 +51,9 @@ void ParallelEventLoader::load(DataObjects::EventWorkspace &ws,
   for (size_t i = 0; i < size; ++i)
     DataObjects::getEventsFrom(ws.getSpectrum(i), eventLists[i]);
 
-  Parallel::IO::EventLoader::load(filename, groupName, bankNames,
-                                  bankOffsets(ws, bankNames),
-                                  std::move(eventLists));
+  Parallel::IO::EventLoader::load(
+      filename, groupName, bankNames,
+      bankOffsets(ws, filename, groupName, bankNames), std::move(eventLists));
 }
 
 } // namespace DataHandling

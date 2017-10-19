@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 #include "MantidParallel/DllConfig.h"
 
 namespace Mantid {
@@ -44,6 +46,9 @@ namespace IO {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace EventLoader {
+MANTID_PARALLEL_DLL std::vector<boost::optional<int32_t>>
+anyEventIdFromBanks(const std::string &filename, const std::string &groupName,
+                    const std::vector<std::string> &bankNames);
 MANTID_PARALLEL_DLL void
 load(const std::string &filename, const std::string &groupName,
      const std::vector<std::string> &bankNames,
