@@ -8,9 +8,13 @@
 using namespace Mantid::Parallel::IO;
 using Mantid::Types::Core::DateAndTime;
 using Event = detail::Event<double>;
-namespace {
+namespace Mantid {
+namespace Parallel {
+namespace IO {
 bool operator==(const Event &a, const Event &b) {
   return a.index == b.index && a.tof == b.tof && a.pulseTime == b.pulseTime;
+}
+}
 }
 }
 
