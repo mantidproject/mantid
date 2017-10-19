@@ -15,6 +15,10 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- :ref:`algm-GSASIIRefineFitPeaks>` has been re-integrated with the
+  latest version of GSAS-II, allowing Rietveld and Pawley refinement
+  within Mantid.
+
 Single Crystal Diffraction
 --------------------------
 
