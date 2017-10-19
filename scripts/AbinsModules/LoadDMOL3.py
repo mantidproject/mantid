@@ -249,7 +249,7 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
 
         end_msg = "Molecular Mass:"
         key = "Atom"
-        if six.PY3:
+        if not six.PY2:
             end_msg = bytes(end_msg, "utf8")
             key = bytes(key, "utf8")
 

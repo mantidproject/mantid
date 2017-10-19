@@ -532,7 +532,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         end_message = ["INFORMATION", "*******************************************************************************",
                        "GAMMA"]
 
-        if six.PY3:
+        if not six.PY2:
             for i, item in enumerate(end_message):
                 end_message[i] = bytes(item, "utf8")
 
