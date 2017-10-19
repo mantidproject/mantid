@@ -57,7 +57,6 @@ void IqtFit::setup() {
 
   m_iqtFTree->setFactoryForManager(m_blnManager, m_blnEdFac);
   m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   m_properties["StartX"] = m_dblManager->addProperty("StartX");
   m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
