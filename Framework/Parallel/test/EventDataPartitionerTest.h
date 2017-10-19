@@ -28,6 +28,21 @@ public:
         7, PulseTimeGenerator<int32_t, int64_t>{})));
   }
 
+  void test_empty_range() {
+    for (const auto workers : {1, 2, 3}) {
+      EventDataPartitioner<int32_t, int64_t, double> partitioner(
+          workers,
+          PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
+      size_t count = 0;
+      std::vector<std::vector<Event>> data;
+      partitioner.partition(data, nullptr, nullptr, {0, 1, count});
+      TS_ASSERT_EQUALS(data.size(), workers);
+      for (int worker = 0; worker < workers; ++worker) {
+        TS_ASSERT_EQUALS(data[worker].size(), 0);
+      }
+    }
+  }
+
   void test_partition_1_worker() {
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
         1, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
@@ -59,7 +74,7 @@ public:
     // Starting at beginning, length 4
     partitioner.partition(data, index.data(), tof.data(), {0, 0, 4});
     TS_ASSERT_EQUALS(data.size(), 2);
-    // Even indices go to worker 0, odd indices to worker 1
+    // Worker is given by index%workers
     TS_ASSERT_EQUALS(data[0].size(), 1);
     TS_ASSERT_EQUALS(data[1].size(), 3);
     // Index is translated to local index = index/workers
