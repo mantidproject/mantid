@@ -22,6 +22,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
     _crop_negative = None
     _zero_counting_option = None
     _zero_cells = []
+    _rebin_width = 0
 
     def _hide(self, name):
         return '__' + self._out_name + '_' + name
@@ -76,6 +77,9 @@ class PowderDiffILLReduction(PythonAlgorithm):
                              defaultValue=False,
                              doc='Whether or not to sort the scanning observable axis.')
 
+        self.declareProperty(name='RebinToWidth', defaultValue=0,
+                             doc='Bin width to rebin the observable axis. Default is to not rebin.')
+
         self.declareProperty(name='CropNegative2Theta', defaultValue=True,
                              doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
 
@@ -103,6 +107,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._unit = self.getPropertyValue('Unit')
         self._crop_negative = self.getProperty('CropNegative2Theta').value
         self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
+        self._rebin_width = self.getProperty('RebinToWidth').value
         if self._normalise_option == 'ROI':
             self._region_of_interest = self.getProperty('ROI').value
 
@@ -192,6 +197,18 @@ class PowderDiffILLReduction(PythonAlgorithm):
             target = 'ElasticDSpacing'
 
         ConvertSpectrumAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Target=target)
+
+        if self._rebin_width != 0:
+            ConvertToHistogram(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
+            x_axis = mtd[joined_ws].getAxis(0).extractValues()
+            bin_widths = np.diff(x_axis)
+            for spectrum in range(mtd[joined_ws].getNumberHistograms()):
+                mtd[joined_ws].setY(spectrum, mtd[joined_ws].readY(spectrum) * bin_widths)
+                mtd[joined_ws].setE(spectrum, mtd[joined_ws].readE(spectrum) * bin_widths)
+            Rebin(InputWorkspace=joined_ws, OutputWorkspace=joined_ws, Params=self._rebin_width)
+            Scale(InputWorkspace=joined_ws, Factor=1 / self._rebin_width)
+            ConvertToPointData(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
+
         Transpose(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
         RenameWorkspace(InputWorkspace=joined_ws, OutputWorkspace=self._out_name)
         self.setProperty('OutputWorkspace', self._out_name)
