@@ -26,6 +26,8 @@
 #include "vtkRectilinearGrid.h"
 #include "vtkStructuredGrid.h"
 
+#include <array>
+
 vtkStandardNewMacro(AlignedCutter);
 
 AlignedCutter::AlignedCutter(vtkImplicitFunction *cf) : vtkCutter(cf) {}
