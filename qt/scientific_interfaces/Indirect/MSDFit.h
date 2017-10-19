@@ -45,7 +45,6 @@ private:
   QHash<QString, QString> createParameterToPropertyMap(const QString &model);
   std::string modelToAlgorithmProperty(const QString &model);
   Mantid::API::IFunction_sptr createFunction(const QString &modelName);
-  void populateFunction(IFunction_sptr func, QtProperty *group);
 
   Ui::MSDFit m_uiForm;
   QtTreePropertyBrowser *m_msdTree;

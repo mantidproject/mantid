@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
@@ -331,6 +332,73 @@ IAlgorithm_sptr IndirectDataAnalysisTab::createWorkspaceAlgorithm(
   createWsAlg->setProperty("DataX", dataX);
   createWsAlg->setProperty("DataY", dataY);
   return createWsAlg;
+}
+
+/**
+ * Create and populates a function with given values
+ * @param funcName The name of the function to create and populate populate
+ * @param group    The QtProperty representing the fit type
+ */
+IFunction_sptr IndirectDataAnalysisTab::createPopulatedFunction(
+    const std::string &funcName, IFunction_sptr comp, QtProperty *group,
+    bool tie, const std::string &pref) {
+  IFunction_sptr func = FunctionFactory::Instance().createFunction(funcName);
+  populateFunction(func, comp, group, pref, tie);
+  return func;
+}
+
+IFunction_sptr
+IndirectDataAnalysisTab::createPopulatedFunction(const std::string &funcName,
+                                                 QtProperty *group, bool tie,
+                                                 const std::string &pref) {
+  IFunction_sptr func = FunctionFactory::Instance().createFunction(funcName);
+  populateFunction(func, func, group, pref, tie);
+  return func;
+}
+
+/**
+ * Populates the properties of a function with given values
+ * @param func The function to populate
+ * @param group The QtProperty representing the fit type
+ */
+void IndirectDataAnalysisTab::populateFunction(IFunction_sptr func,
+                                               QtProperty *group, bool tie,
+                                               const std::string &pref) {
+  populateFunction(func, func, group, pref, tie);
+}
+
+/**
+ * Populates the properties of a function with given values
+ * @param func The function currently being added to the composite
+ * @param comp A composite function of the previously called functions
+ * @param group The QtProperty representing the fit type
+ * @param pref The index of the functions eg. (f0.f1)
+ * @param tie Bool to state if parameters are to be tied together
+ */
+void IndirectDataAnalysisTab::populateFunction(IFunction_sptr func,
+                                               IFunction_sptr comp,
+                                               QtProperty *group, bool tie,
+                                               const std::string &pref) {
+  // Get sub-properties of group and apply them as parameters on the function
+  // object
+  QList<QtProperty *> props = group->subProperties();
+
+  for (const auto &prop : props) {
+    if (tie || !prop->subProperties().isEmpty()) {
+      std::string name = pref + prop->propertyName().toStdString();
+      std::string value = prop->valueText().toStdString();
+      comp->tie(name, value);
+    } else {
+      std::string propName = prop->propertyName().toStdString();
+      double propValue = prop->valueText().toDouble();
+      if (propValue != 0.0) {
+        if (func->hasAttribute(propName))
+          func->setAttributeValue(propName, propValue);
+        else
+          func->setParameter(propName, propValue);
+      }
+    }
+  }
 }
 
 } // namespace IDA

@@ -827,8 +827,7 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
     func = FunctionFactory::Instance().createFunction("DeltaFunction");
     index = model->addFunction(func);
     std::string parName = createParName(index);
-    populateFunction(func, model, m_properties["Delta Function"], parName,
-                     false);
+    populateFunction(func, model, m_properties["Delta Function"], false, parName);
   }
 
   // ------------------------------------------------------------
@@ -872,7 +871,7 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
     index = model->addFunction(product);
     prefix1 = createParName(index, subIndex);
 
-    populateFunction(func, model, m_properties["FitFunction1"], prefix1, false);
+    populateFunction(func, model, m_properties["FitFunction1"], false, prefix1);
 
     // Add 2nd Lorentzian
     if (fitTypeIndex == 2) {
@@ -890,8 +889,7 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
 
-      populateFunction(func, model, m_properties["FitFunction2"], prefix2,
-                       false);
+      populateFunction(func, model, m_properties["FitFunction2"], false, prefix2);
     }
   }
 
@@ -1023,39 +1021,6 @@ QtProperty *ConvFit::createFitType(QtProperty *fitTypeGroup,
       fitTypeGroup->addSubProperty(m_properties[paramName]);
   }
   return fitTypeGroup;
-}
-
-/**
- * Populates the properties of a function with given values
- * @param func The function currently being added to the composite
- * @param comp A composite function of the previously called functions
- * @param group The QtProperty representing the fit type
- * @param pref The index of the functions eg. (f0.f1)
- * @param tie Bool to state if parameters are to be tied together
- */
-void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
-                               QtProperty *group, const std::string &pref,
-                               bool tie) {
-  // Get sub-properties of group and apply them as parameters on the function
-  // object
-  QList<QtProperty *> props = group->subProperties();
-
-  for (int i = 0; i < props.size(); i++) {
-    if (tie || !props[i]->subProperties().isEmpty()) {
-      std::string name = pref + props[i]->propertyName().toStdString();
-      std::string value = props[i]->valueText().toStdString();
-      comp->tie(name, value);
-    } else {
-      std::string propName = props[i]->propertyName().toStdString();
-      double propValue = props[i]->valueText().toDouble();
-      if (propValue != 0.0) {
-        if (func->hasAttribute(propName))
-          func->setAttributeValue(propName, propValue);
-        else
-          func->setParameter(propName, propValue);
-      }
-    }
-  }
 }
 
 /**

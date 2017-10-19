@@ -224,20 +224,8 @@ void MSDFit::plotGuess() {
 }
 
 IFunction_sptr MSDFit::createFunction(const QString &modelName) {
-  IFunction_sptr func =
-      FunctionFactory::Instance().createFunction(modelName.toStdString());
-  populateFunction(func, m_properties[modelName]);
-  return func;
-}
-
-void populateFunction(IFunction_sptr func, QtProperty *group) {
-  QList<QtProperty *> props = group->subProperties();
-
-  for (const auto &prop : props) {
-    auto name = prop->propertyName().toStdString();
-    auto value = prop->valueText().toDouble();
-    func->setParameter(name, value);
-  }
+  return createPopulatedFunction(modelName.toStdString(),
+                                 m_properties[modelName]);
 }
 
 /**

@@ -118,6 +118,22 @@ protected:
                            const std::vector<double> &dataX,
                            const std::vector<double> &dataY);
 
+  IFunction_sptr createPopulatedFunction(const std::string &funcName,
+                                         IFunction_sptr comp, QtProperty *group,
+                                         bool tie = false,
+                                         const std::string &pref = "");
+
+  IFunction_sptr createPopulatedFunction(const std::string &funcName,
+                                         QtProperty *group, bool tie = false,
+                                         const std::string &pref = "");
+
+  void populateFunction(IFunction_sptr func, QtProperty *group,
+                        bool tie = false, const std::string &pref = "");
+
+  void populateFunction(IFunction_sptr func, IFunction_sptr comp,
+                        QtProperty *group, bool tie = false,
+                        const std::string &pref = "");
+
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
