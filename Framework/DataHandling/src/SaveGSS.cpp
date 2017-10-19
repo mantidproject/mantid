@@ -2,8 +2,8 @@
 
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,6 +20,7 @@ namespace Mantid {
 namespace DataHandling {
 
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
@@ -100,10 +101,8 @@ SaveGSS::SaveGSS() : Mantid::API::Algorithm() {}
 
 // Initialise the algorithm
 void SaveGSS::init() {
-  // Data must be in TOF
   declareProperty(Kernel::make_unique<API::WorkspaceProperty<>>(
-                      "InputWorkspace", "", Kernel::Direction::Input,
-                      boost::make_shared<API::WorkspaceUnitValidator>("TOF")),
+                      "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace, which must be in time-of-flight");
 
   declareProperty(Kernel::make_unique<API::FileProperty>(
@@ -614,12 +613,13 @@ void SaveGSS::setOtherProperties(IAlgorithm *alg,
 void SaveGSS::validateUserInput() const {
   // Check whether it is PointData or Histogram
   if (!m_inputWS->isHistogramData())
-    g_log.warning("Input workspace is NOT histogram! SaveGSS may not work "
-                  "well with PointData.");
+    g_log.notice("Input workspace is NOT histogram! SaveGSS may not work "
+                 "well with PointData.");
 
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(m_inputWS->getNumberHistograms());
-  if (nHist > 99) {
+  const bool split = getProperty("SplitFiles");
+  if (nHist > 99 && !split) {
     std::string outError = "Number of Spectra(" + std::to_string(nHist) +
                            ") cannot be larger than 99 for GSAS file";
     g_log.error(outError);
