@@ -1,6 +1,7 @@
 #include "IndirectDataAnalysisTab.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
@@ -154,9 +155,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectra)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectra)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectra);
   }
@@ -269,6 +269,68 @@ void IndirectDataAnalysisTab::updatePlotRange(
   } catch (std::invalid_argument &exc) {
     showMessageBox(exc.what());
   }
+}
+
+void IndirectDataAnalysisTab::plotGuess(
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+    Mantid::API::CompositeFunction_sptr function) {
+  previewPlot->removeSpectrum("Guess");
+
+  if (inputWorkspace()) {
+    auto guessWs = createGuessWorkspace(function);
+    previewPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+  }
+}
+
+MatrixWorkspace_sptr
+IndirectDataAnalysisTab::createGuessWorkspace(CompositeFunction_sptr func) {
+  const auto inputWS = inputWorkspace();
+  const size_t binIndexLow =
+      inputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
+  const size_t binIndexHigh =
+      inputWS->binIndexOf(m_dblManager->value(m_properties["EndX"]));
+  const size_t nData = binIndexHigh - binIndexLow;
+
+  const auto &xPoints = inputWS->points(0);
+
+  std::vector<double> dataX(nData);
+  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
+            dataX.begin());
+  std::vector<double> dataY = computeOutput(func, dataX);
+
+  IAlgorithm_sptr createWsAlg =
+      createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
+  createWsAlg->execute();
+  return createWsAlg->getProperty("OutputWorkspace");
+}
+
+std::vector<double>
+IndirectDataAnalysisTab::computeOutput(CompositeFunction_sptr func,
+                                       const std::vector<double> &dataX) {
+  FunctionDomain1DVector domain(dataX);
+  FunctionValues outputData(domain);
+  func->function(domain, outputData);
+
+  std::vector<double> dataY(dataX.size());
+  for (size_t i = 0; i < dataY.size(); i++) {
+    dataY[i] = outputData.getCalculated(i);
+  }
+  return dataY;
+}
+
+IAlgorithm_sptr IndirectDataAnalysisTab::createWorkspaceAlgorithm(
+    const std::string &workspaceName, int numSpec,
+    const std::vector<double> &dataX, const std::vector<double> &dataY) {
+  IAlgorithm_sptr createWsAlg =
+      AlgorithmManager::Instance().create("CreateWorkspace");
+  createWsAlg->initialize();
+  createWsAlg->setChild(true);
+  createWsAlg->setLogging(false);
+  createWsAlg->setProperty("OutputWorkspace", workspaceName);
+  createWsAlg->setProperty("NSpec", numSpec);
+  createWsAlg->setProperty("DataX", dataX);
+  createWsAlg->setProperty("DataY", dataY);
+  return createWsAlg;
 }
 
 } // namespace IDA

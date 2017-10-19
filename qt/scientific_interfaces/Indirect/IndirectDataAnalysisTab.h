@@ -4,6 +4,7 @@
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -103,6 +104,20 @@ protected:
                        const QString &startRangePropName = "StartX",
                        const QString &endRangePropName = "EndX");
 
+  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                 Mantid::API::CompositeFunction_sptr function);
+
+  Mantid::API::MatrixWorkspace_sptr
+  createGuessWorkspace(Mantid::API::CompositeFunction_sptr func);
+
+  std::vector<double> computeOutput(Mantid::API::CompositeFunction_sptr func,
+                                    const std::vector<double> &dataX);
+
+  Mantid::API::IAlgorithm_sptr
+  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
+                           const std::vector<double> &dataX,
+                           const std::vector<double> &dataY);
+
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
@@ -143,6 +158,7 @@ private:
   int m_minSpectra;
   int m_maxSpectra;
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
