@@ -7,6 +7,11 @@ import mantid.simpleapi as mantid
 from mantid.api import *
 
 
+# Define WindowsError if it doesn't exist, so we can use it on Linux
+if not getattr(__builtins__, "WindowsError", None):
+    class WindowsError(OSError): pass
+
+
 class _GSASFinder(object):
     """
     Helper class for unit test - the algorithm can't run without a version of GSAS-II that includes the module
@@ -31,7 +36,7 @@ class _GSASFinder(object):
                     path = _GSASFinder._find_directory_by_name(cur_dir_name=child, cur_dir_path=child_path,
                                                                level=level + 1, name_to_find=name_to_find,
                                                                max_level=max_level)
-                except WindowsError:
+                except (WindowsError, OSError):  # Probably "Permission denied". Either way, just ignore it
                     pass
                 else:
                     if path is not None:
@@ -73,7 +78,8 @@ class GSASIIRefineFitPeaksTest(unittest.TestCase):
 
     def setUp(self):
         data_dir = mantid.config["datasearch.directories"].split(";")[0]
-
+        print(mantid.config["datasearch.directories"].split(";"))
+        
         self._phase_file = os.path.join(data_dir, "FE_ALPHA.cif")
         self._inst_file = os.path.join(data_dir, "template_ENGINX_241391_236516_North_bank.prm")
 
@@ -88,7 +94,8 @@ class GSASIIRefineFitPeaksTest(unittest.TestCase):
         self._input_ws = mantid.Load(Filename=spectrum_file, OutputWorkspace="input")
 
     def tearDown(self):
-        os.remove(self._gsas_proj)
+        if os.path.isfile(self._gsas_proj):
+            os.remove(self._gsas_proj)
 
     def test_rietveld_refinement_with_default_params(self):
         gof, rwp, lattice_table = mantid.GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
