@@ -23,5 +23,6 @@ struct MantidMatrixTabExtension {
   MantidMatrixModel::Type type;
 };
 
-using MantidMatrixTabExtensionMap = std::map<MantidMatrixModel::Type, MantidMatrixTabExtension>;
+using MantidMatrixTabExtensionMap =
+    std::map<MantidMatrixModel::Type, MantidMatrixTabExtension>;
 #endif
