@@ -4,23 +4,23 @@ import re
 import AbinsModules
 
 
-class LoadCASTEP(AbinsModules.GeneralDFTProgram):
+class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
     """
     Class which handles loading files from foo.phonon output CASTEP files.
     Functions to read phonon file taken from SimulatedDensityOfStates (credits for Elliot Oram.).
     """
 
-    def __init__(self, input_dft_filename):
+    def __init__(self, input_ab_initio_filename):
         """
 
-        :param input_dft_filename: name of file with phonon data (foo.phonon)
+        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
         """
-        super(LoadCASTEP, self).__init__(input_dft_filename=input_dft_filename)
+        super(LoadCASTEP, self).__init__(input_ab_initio_filename=input_ab_initio_filename)
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
         self._sum_rule = None
-        self._dft_program = "CASTEP"
+        self._ab_initio_program = "CASTEP"
 
     # noinspection PyMethodMayBeStatic
     def _parse_block_header(self, header_match, block_count):
@@ -167,7 +167,7 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
 
             return found
 
-    def read_phonon_file(self):
+    def read_vibrational_or_phonon_data(self):
         """
         Reads frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic displacements
         from a <>.phonon file. Save frequencies, weights of k-point vectors, k-point vectors, amplitudes of atomic
@@ -255,6 +255,6 @@ class LoadCASTEP(AbinsModules.GeneralDFTProgram):
         for key in data_to_save:
             data[key] = file_data[key]
 
-        self.save_dft_data(data=data)
+        self.save_ab_initio_data(data=data)
 
         return self._rearrange_data(data=file_data)
