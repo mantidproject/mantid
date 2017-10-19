@@ -336,44 +336,57 @@ IAlgorithm_sptr IndirectDataAnalysisTab::createWorkspaceAlgorithm(
 
 /**
  * Create and populates a function with given values
- * @param funcName The name of the function to create and populate populate
- * @param group    The QtProperty representing the fit type
+ * @param funcName  The name of the function to create and populate populate
+ * @param group     The QtProperty representing the fit type
+ * @param comp      A composite function of the previously called functions to
+ *                  be used in tie
+ * @param tie       Bool to state if parameters are to be tied together
+ * @param pref      The index of the functions eg. (f0.f1)
  */
 IFunction_sptr IndirectDataAnalysisTab::createPopulatedFunction(
     const std::string &funcName, IFunction_sptr comp, QtProperty *group,
     bool tie, const std::string &pref) {
   IFunction_sptr func = FunctionFactory::Instance().createFunction(funcName);
-  populateFunction(func, comp, group, pref, tie);
+  populateFunction(func, comp, group, tie, pref);
   return func;
 }
 
+/**
+ * Create and populates a function with given values
+ * @param func  The function to populate
+ * @param group The QtProperty representing the fit type
+ * @param tie   Bool to state if parameters are to be tied together
+ * @param pref  The index of the functions eg. (f0.f1)
+ */
 IFunction_sptr
 IndirectDataAnalysisTab::createPopulatedFunction(const std::string &funcName,
                                                  QtProperty *group, bool tie,
                                                  const std::string &pref) {
   IFunction_sptr func = FunctionFactory::Instance().createFunction(funcName);
-  populateFunction(func, func, group, pref, tie);
+  populateFunction(func, group, tie, pref);
   return func;
 }
 
 /**
  * Populates the properties of a function with given values
- * @param func The function to populate
+ * @param func  The function to populate
  * @param group The QtProperty representing the fit type
+ * @param tie   Bool to state if parameters are to be tied together
+ * @param pref  The index of the functions eg. (f0.f1)
  */
 void IndirectDataAnalysisTab::populateFunction(IFunction_sptr func,
                                                QtProperty *group, bool tie,
                                                const std::string &pref) {
-  populateFunction(func, func, group, pref, tie);
+  populateFunction(func, func, group, tie, pref);
 }
 
 /**
  * Populates the properties of a function with given values
- * @param func The function currently being added to the composite
- * @param comp A composite function of the previously called functions
+ * @param func  The function currently being added to the composite
+ * @param comp  A composite function of the previously called functions
  * @param group The QtProperty representing the fit type
- * @param pref The index of the functions eg. (f0.f1)
- * @param tie Bool to state if parameters are to be tied together
+ * @param pref  The index of the functions eg. (f0.f1)
+ * @param tie   Bool to state if parameters are to be tied together
  */
 void IndirectDataAnalysisTab::populateFunction(IFunction_sptr func,
                                                IFunction_sptr comp,
