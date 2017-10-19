@@ -8,8 +8,15 @@ from mantid.api import *
 
 
 class _GSASFinder(object):
+    """
+    Helper class for unit test - the algorithm can't run without a version of GSAS-II that includes the module
+    GSASIIscriptable (added April 2017)
+    """
     @staticmethod
     def _find_directory_by_name(cur_dir_name, cur_dir_path, name_to_find, level, max_level):
+        """
+        Perform a depth-limited depth-first search to try and find a directory with a given name
+        """
         if level == max_level:
             return None
 
@@ -32,12 +39,19 @@ class _GSASFinder(object):
 
     @staticmethod
     def _path_to_g2conda():
+        """
+        Find the g2conda directory (where GSAS-II normally sits), as long as it exists less than 5 levels away from
+        the root directory
+        """
         root_directory = os.path.abspath(os.sep)
         return _GSASFinder._find_directory_by_name(cur_dir_path=root_directory, cur_dir_name=root_directory, level=0,
                                                    name_to_find="g2conda", max_level=5)
 
     @staticmethod
     def GSASIIscriptable_location():
+        """
+        Find the path to GSASIIscriptable.py, if it exists and is less than 5 levels away from the root directory
+        """
         path_to_g2conda = _GSASFinder._path_to_g2conda()
         if path_to_g2conda is None:
             return None
@@ -72,6 +86,9 @@ class GSASIIRefineFitPeaksTest(unittest.TestCase):
 
         spectrum_file = os.path.join(data_dir, "focused_bank1_ENGINX00256663.nxs")
         self._input_ws = mantid.Load(Filename=spectrum_file, OutputWorkspace="input")
+
+    def tearDown(self):
+        os.remove(self._gsas_proj)
 
     def test_rietveld_refinement_with_default_params(self):
         gof, rwp, lattice_table = mantid.GSASIIRefineFitPeaks(RefinementMethod="Rietveld refinement",
