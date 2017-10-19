@@ -1663,9 +1663,17 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
   }
 }
 
+/// The parallel loader currently has no support for a series of special cases,
+/// as indicated by the return value of this method.
 bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
                                           const bool oldNeXusFileNames,
                                           const std::string &classType) const {
+#ifndef MPI_EXPERIMENTAL
+  // Actually the parallel loader would work also in non-MPI builds but it is
+  // likely to be slower than the default loader and may also exhibit unusual
+  // behavior for non-standard Nexus files.
+  return false;
+#endif
   if (m_ws->nPeriods() != 1)
     return false;
   if (haveWeights)
