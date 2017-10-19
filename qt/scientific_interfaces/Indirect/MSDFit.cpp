@@ -1,6 +1,7 @@
 #include "MSDFit.h"
 #include "../General/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/RangeSelector.h"
 
@@ -209,6 +210,34 @@ void MSDFit::updatePlot() {
   IndirectDataAnalysisTab::updatePlot(groupName, m_uiForm.ppPlotTop,
                                       m_uiForm.ppPlotBottom);
   IndirectDataAnalysisTab::updatePlotRange("MSDRange", m_uiForm.ppPlotTop);
+}
+
+void MSDFit::plotGuess() {
+
+  if (m_uiForm.ckPlotGuess->isChecked()) {
+    QString modelName = m_uiForm.cbModelInput->currentText();
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(modelName));
+  } else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+  }
+}
+
+IFunction_sptr MSDFit::createFunction(const QString &modelName) {
+  IFunction_sptr func =
+      FunctionFactory::Instance().createFunction(modelName.toStdString());
+  populateFunction(func, m_properties[modelName]);
+  return func;
+}
+
+void populateFunction(IFunction_sptr func, QtProperty *group) {
+  QList<QtProperty *> props = group->subProperties();
+
+  for (const auto &prop : props) {
+    auto name = prop->propertyName().toStdString();
+    auto value = prop->valueText().toDouble();
+    func->setParameter(name, value);
+  }
 }
 
 /**
