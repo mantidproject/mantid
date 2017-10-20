@@ -53,8 +53,7 @@ private:
   QStringList getFunctionParameters(const QString &functionName);
 
   /// Creates the function for fitting
-  Mantid::API::IFunction_sptr
-  createFunction(const QString &functionName);
+  Mantid::API::IFunction_sptr createFunction(const QString &functionName);
 
   /// Clears the mini plot of data excluding sample
   void clearPlot();
