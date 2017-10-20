@@ -1,8 +1,10 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "ui_JumpFit.h"
 #include "IndirectDataAnalysisTab.h"
+#include "ui_JumpFit.h"
+
+#include "MantidAPI/IFunction.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -43,12 +45,18 @@ private slots:
   void saveClicked();
   void plotClicked();
 
+protected:
+  /// Creates the algorithm to use in fitting.
+  Mantid::API::IAlgorithm_sptr
+  JumpFit::createFitAlgorithm(Mantid::API::IFunction_sptr func);
+
 private:
   /// Gets a list of parameter names for a given fit function
   QStringList getFunctionParameters(const QString &functionName);
 
-  /// Generates the function string for fitting
-  std::string generateFunctionName(const QString &functionName);
+  /// Creates the function for fitting
+  Mantid::API::IFunction_sptr
+  JumpFit::createFunction(const QString &functionName);
 
   /// Clears the mini plot of data excluding sample
   void clearPlot();
