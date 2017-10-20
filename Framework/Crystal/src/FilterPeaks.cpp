@@ -83,26 +83,26 @@ void FilterPeaks::exec() {
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
-  const std::string FilterVariable = getProperty("FilterVariable");
+  const std::string filterVariable = getProperty("FilterVariable");
   double (*filterFunction)(const Mantid::Geometry::IPeak &) = nullptr;
-  if (FilterVariable == "h+k+l")
+  if (filterVariable == "h+k+l")
     filterFunction = &HKLSum;
-  else if (FilterVariable == "h^2+k^2+l^2")
+  else if (filterVariable == "h^2+k^2+l^2")
     filterFunction = &HKL2;
-  else if (FilterVariable == "Intensity")
+  else if (filterVariable == "Intensity")
     filterFunction = &intensity;
-  else if (FilterVariable == "Wavelength")
+  else if (filterVariable == "Wavelength")
     filterFunction = &wavelength;
-  else if (FilterVariable == "DSpacing")
+  else if (filterVariable == "DSpacing")
     filterFunction = &dspacing;
-  else if (FilterVariable == "TOF")
+  else if (filterVariable == "TOF")
     filterFunction = &tof;
-  else if (FilterVariable == "Signal/Noise")
+  else if (filterVariable == "Signal/Noise")
     filterFunction = &SN;
-  else if (FilterVariable == "QMod")
+  else if (filterVariable == "QMod")
     filterFunction = &QMOD;
   else
-    throw std::invalid_argument("Unknown FilterVariable: " + FilterVariable);
+    throw std::invalid_argument("Unknown FilterVariable: " + filterVariable);
 
   const double FilterValue = getProperty("FilterValue");
   const std::string Operator = getProperty("Operator");
