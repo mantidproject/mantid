@@ -313,7 +313,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         posTableName = self._names.withSuffix('peak_position_table')
         posTable = CreateEmptyTableWorkspace(OutputWorkspace=posTableName,
                                              EnableLogging=self._subalgLogging)
-        posTable.addColumn('double', 'FittedPeakCentre')
+        posTable.addColumn('double', 'PeakCentre')
         posTable.addRow((peakPos,))
         return posTable
 
@@ -339,7 +339,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
     def _foregroundCentre(self, ws, beamPosWS):
         """Return the detector id of the foreground centre pixel."""
         if self.getProperty(Prop.FOREGROUND_CENTRE).isDefault:
-            return int(numpy.rint(beamPosWS.cell('FittedPeakCentre', 0)))
+            return int(numpy.rint(beamPosWS.cell('PeakCentre', 0)))
         spectrumNo = self.getProperty(Prop.FOREGROUND_CENTRE).value
         return ws.getIndexFromSpectrumNumber(spectrumNo)
 
@@ -486,7 +486,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         ranges = self._flatBkgRanges(ws, peakPosWS)
         polynomialDegree = 0 if self.getProperty(Prop.BKG_METHOD).value == BkgMethod.CONSTANT else 1
         transposedBkgWSName = self._names.withSuffix('transposed_flat_background')
-        self.log().warning('Flat bakground ranges {}'.format(ranges))
         transposedBkgWS = CalculatePolynomialBackground(InputWorkspace=transposedWS,
                                                         OutputWorkspace=transposedBkgWSName,
                                                         Degree=polynomialDegree,
@@ -514,8 +513,9 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             return ws
         elif method == Summation.COHERENT:
             ws = self._groupForeground(ws, peakPosWS)
-            ConvertToDistribution(Workspace=ws,
-                                  EnableLogging=self._subalgLogging)
+            if not ws.isDistribution():
+                ConvertToDistribution(Workspace=ws,
+                                      EnableLogging=self._subalgLogging)
             return ws
         else:
             raise RuntimeError('Selected output summation method is not implemented.')
