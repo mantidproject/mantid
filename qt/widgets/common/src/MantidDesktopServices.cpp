@@ -71,6 +71,8 @@ void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
   QDesktopServices::unsetUrlHandler(scheme);
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+
 /**
  * Pass through method to MantidDesktopServices::storageLocation. See Qt
  * documentation for
@@ -93,5 +95,7 @@ QString
 MantidDesktopServices::displayName(QDesktopServices::StandardLocation type) {
   return QDesktopServices::displayName(type);
 }
+
+#endif
 }
 }
