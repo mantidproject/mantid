@@ -17,9 +17,10 @@ Description
 
 Set properties of the sample & its environment on a workspace.
 
-The 3 arguments to this algorithm ``Environment``, ``Geometry`` & ``Material``
-are all expected to be dictionaries specifying multiple parameters that
-relate to the respective argument.
+The 3 arguments to this algorithm ``Environment``, ``Geometry`` and
+:py:obj:`Material <mantid.kernel.Material>` are all expected to be
+dictionaries specifying multiple parameters that relate to the
+respective argument.
 
 Environment
 ###########
