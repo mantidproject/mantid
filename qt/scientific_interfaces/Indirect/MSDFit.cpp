@@ -37,11 +37,15 @@ void MSDFit::setup() {
   m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
-  m_properties["Gaussian"] = createModel("Gaussian", {"Intensity", "MSD"});
-  m_properties["Peters"] = createModel("Peters", {"Intensity", "MSD", "Beta"});
-  m_properties["Yi"] = createModel("Yi", {"Intensity", "MSD", "Sigma"});
+  m_properties["Gaussian"] = createModel("MsdGauss", {"Intensity", "MSD"});
+  m_properties["Peters"] =
+      createModel("MsdPeters", {"Intensity", "MSD", "Beta"});
+  m_properties["Yi"] = createModel("MsdYi", {"Intensity", "MSD", "Sigma"});
 
   auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
+  m_dblManager->setValue(m_properties["StartX"],
+                         fitRangeSelector->getMinimum());
+  m_dblManager->setValue(m_properties["EndX"], fitRangeSelector->getMaximum());
 
   modelSelection(m_uiForm.cbModelInput->currentIndex());
 
@@ -231,8 +235,9 @@ void MSDFit::plotGuess() {
 }
 
 IFunction_sptr MSDFit::createFunction(const QString &modelName) {
-  return createPopulatedFunction(modelName.toStdString(),
-                                 m_properties[modelName]);
+  return createPopulatedFunction(
+      m_properties[modelName]->propertyName().toStdString(),
+      m_properties[modelName]);
 }
 
 /**
