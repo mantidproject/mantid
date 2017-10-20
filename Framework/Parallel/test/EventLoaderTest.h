@@ -144,8 +144,9 @@ public:
   static void destroySuite(EventLoaderTest *suite) { delete suite; }
 
   void test_throws_if_file_does_not_exist() {
-    TS_ASSERT_THROWS(EventLoader::load("abcdefg", "", {}, {}, {}),
-                     H5::FileIException);
+    TS_ASSERT_THROWS(
+        EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}),
+        H5::FileIException);
   }
 
   void test_H5DataType_parameter_pack_conversion() {
