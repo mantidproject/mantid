@@ -12,7 +12,7 @@ import numpy as np
 from mantid import config as mantid_config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         WorkspaceProperty, FileAction, PropertyMode, mtd,
-                        AnalysisDataService)
+                        AnalysisDataService, Progress)
 from mantid.simpleapi import (DeleteWorkspace, LoadEventNexus, SetGoniometer,
                               SetUB, ModeratorTzeroLinear, SaveNexus,
                               ConvertToMD, LoadMask, MaskDetectors, LoadNexus,
@@ -118,7 +118,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('LambdaRange',
                                                 self._lambda_range,
                                                 direction=Direction.Input),
-                             doc='Considered incoming neutron wavelength range')
+                             doc='Incoming neutron wavelength range')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
@@ -130,9 +130,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
         #
         # Background for the sample runs
         #
-        background_title = 'Background run'
-        self.declareProperty('BackgroundRun', '', 'Background run number')
-        self.setPropertyGroup('BackgroundRun', background_title)
+        background_title = 'Background runs'
+        self.declareProperty('BackgroundRuns', '', 'Background run numbers')
+        self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
                              doc='The background will be scaled by this '+
                                  'number before being subtracted.')
@@ -221,36 +221,60 @@ class BASISDiffraction(DataProcessorAlgorithm):
                               'datasearch.searcharchive': 'On'}
 
         # Find valid incoming momentum range
-        self._lambda_range = np.array(self.getProperty("LambdaRange").value)
+        self._lambda_range = np.array(self.getProperty('LambdaRange').value)
         self._momentum_range = np.sort(2 * np.pi / self._lambda_range)
 
         # implement with ContextDecorator after python2 is deprecated)
         with pyexec_setup(config_new_options) as self._temps:
             # Load the mask to a workspace
             self._t_mask = LoadMask(Instrument='BASIS',
-                                    InputFile=self.getProperty("MaskFile").
+                                    InputFile=self.getProperty('MaskFile').
                                     value,
                                     OutputWorkspace='_t_mask')
 
-            # Preprocess the background run
-            if self.getProperty("BackgroundRun").value:
-                self._bkg = self._mask_t0_crop(
-                    self.getProperty("BackgroundRun").value, '_bkg')
-                self._temps.workspaces.append('_bkg')
+            # Pre-process the background runs
+            if self.getProperty('BackgroundRuns').value:
+                bkg_run_numbers = self._getRuns(
+                    self.getProperty('BackgroundRuns').value,
+                    doIndiv=True)
+                bkg_run_numbers = \
+                    list(itertools.chain.from_iterable(bkg_run_numbers))
+                background_reporter = Progress(self, start=0.0, end=1.0,
+                                               nreports=len(bkg_run_numbers))
+                for i, run in enumerate(bkg_run_numbers):
+                    if self._bkg is None:
+                        self._bkg = self._mask_t0_crop(run, '_bkg')
+                        self._temps.workspaces.append('_bkg')
+                    else:
+                        _ws = self._mask_t0_crop(run, '_ws')
+                        self._bkg += _ws
+                        if '_ws' not in self._temps.workspaces:
+                            self._temps.workspaces.append('_ws')
+                    message = 'Pre-processing background: {} of {}'.\
+                        format(i, len(bkg_run_numbers))
+                    background_reporter.report(message)
                 SetGoniometer(self._bkg, Axis0='0,0,1,0,1')
-                self._bkg_scale = self.getProperty(
-                    "BackgroundScale").value
+                self._bkg_scale = self.getProperty('BackgroundScale').value
+                background_reporter.report(len(bkg_run_numbers), 'Done')
 
-            # Preprocess the vanadium run(s)
-            if self.getProperty("VanadiumRuns").value:
+            # Pre-process the vanadium run(s)
+            if self.getProperty('VanadiumRuns').value:
                 run_numbers = self._getRuns(
-                    self.getProperty("VanadiumRuns").value,
+                    self.getProperty('VanadiumRuns').value,
                     doIndiv=True)
                 run_numbers = list(itertools.chain.from_iterable(run_numbers))
-                self._vanadium_files = [self._save_t0(r) for r in run_numbers]
+                vanadium_reporter = Progress(self, start=0.0, end=1.0,
+                                             nreports=len(run_numbers))
+                self._vanadium_files = list()
+                for i, run in enumerate(run_numbers):
+                    self._vanadium_files.append(self._save_t0(run))
+                    message = 'Pre-processing vanadium: {} of {}'. \
+                        format(i, len(run_numbers))
+                    vanadium_reporter.report(message)
+                vanadium_reporter.report(len(run_numbers), 'Done')
 
             # Determination of single crystal diffraction
-            if self.getProperty("SingleCrystalDiffraction").value:
+            if self.getProperty('SingleCrystalDiffraction').value:
                 self._determine_single_crystal_diffraction()
 
     def _determine_single_crystal_diffraction(self):
@@ -300,7 +324,10 @@ class BASISDiffraction(DataProcessorAlgorithm):
         # Process a sample at a time
         run_numbers = self._getRuns(self.getProperty("RunNumbers").value,
                                     doIndiv=True)
-        for run in list(itertools.chain.from_iterable(run_numbers)):
+        run_numbers = list(itertools.chain.from_iterable(run_numbers))
+        diffraction_reporter = Progress(self, start=0.0, end=1.0,
+                                        nreports=len(run_numbers))
+        for i_run, run in enumerate(run_numbers):
             _t_sample = self._mask_t0_crop(run, '_t_sample')
 
             # Set Goniometer and UB matrix
@@ -363,6 +390,9 @@ class BASISDiffraction(DataProcessorAlgorithm):
                           TemporaryNormalizationWorkspace='_t_bkg_norm'
                           if mtd.doesExist('_t_bkg_norm') else None,
                           **mdn_args)
+            message = 'Processing sample {} of {}'.\
+                format(i_run, len(run_numbers))
+            diffraction_reporter.report(message)
         self._temps.workspaces.append('PreprocessedDetectorsWS')  # to remove
         # Iteration over the sample runs is done.
 
@@ -381,6 +411,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
             ws = _t_data
         RenameWorkspace(ws, OutputWorkspace=name)
         self.setProperty("OutputWorkspace", ws)
+        diffraction_reporter.report(len(run_numbers), 'Done')
 
     def _save_t0(self, run_number, name='_t_ws'):
         """
