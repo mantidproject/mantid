@@ -209,6 +209,20 @@ Therefore, *FitPeaks* supports various fexible and informative outputs.
 OutputWorkspace
 ###############
 
+It is a MatrixWorkspace containing the peak positions expected and fitted.
+
+- The output workspace has *N* spectra corresponding to the spectra that are specified by user via **MinimumWorkspaceIndex** and **MaximumWorkspaceIndex**.
+- If there are *m* peaks that are required to fit for, then each spectrum in the output workspace has *m* data points.
+- In each spectrum, *x(i)* is the expected position of *i-th* peak; *y(i)* is the fitted position of *i-th* peak; and *e(i)* is the cost from fitting.
+- There are several cases that the fitting could fail.  A negative peak position *y(i)* combined with *e(i)* equal to *DBL_MAX* denote such failure.
+- Cause of fitting failure is denoted by different negative value of *y(i)*
+  * -1: empty spectrum
+  * -2: spectrum with too few counts
+  * -3: peak is low
+  * -4: blabla
+
+
+
 It is a TableWorkspace containing peak parameters.
 According to user's specication, it will contain one parameter, i.e., peak position, or all parameters.
 

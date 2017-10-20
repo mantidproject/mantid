@@ -686,8 +686,8 @@ void FitPeaks::fitSpectrumPeaks(
                           peak_window_i, center_i, m_highBackground);
 
     // process fitting result
-    processSinglePeakFitResult(wi, ipeak, center_i, peakfunction, bkgdfunction,
-                               cost, fitted_peak_centers,
+    processSinglePeakFitResult(wi, ipeak, expected_peak_centers, peakfunction,
+                               bkgdfunction, cost, fitted_peak_centers,
                                fitted_function_parameters, peak_chi2_vec);
   }
 
@@ -708,7 +708,8 @@ void FitPeaks::fitSpectrumPeaks(
  * @param peak_chi2_vec
  */
 void FitPeaks::processSinglePeakFitResult(
-    size_t wsindex, size_t peakindex, const double &expected_peak_pos,
+    size_t wsindex, size_t peakindex,
+    const std::vector<double> &expected_peak_positions,
     API::IPeakFunction_sptr peakfunction,
     API::IBackgroundFunction_sptr bkgdfunction, double cost,
     std::vector<double> &fitted_peak_positions,
@@ -741,25 +742,51 @@ void FitPeaks::processSinglePeakFitResult(
     postol = m_peakPosTolerances[peakindex];
   }
 
-  double peak_pos(0);
-  bool good_fit = false;
-  if ((cost < 0) || (cost > DBL_MAX - 1.))
-    peak_pos = -4; // unphysical cost function value
-  else if (peakfunction->height() < m_minPeakHeight)
-    peak_pos = -3; // peak height is under minimum request
-  else if (case23) {
-    // case b and c
+  // get peak position and analyze the fitting is good or not by various
+  // criteria
+  double peak_pos = peakfunction->centre();
+  bool good_fit(false);
+
+  if ((cost < 0) || (cost > DBL_MAX - 1.)) {
+    // unphysical cost function value
+    peak_pos = -4;
+  } else if (peakfunction->height() < m_minPeakHeight) {
+    // peak height is under minimum request
+    peak_pos = -3;
+  } else if (case23) {
+    // case b and c to check peak position
     std::pair<double, double> fitwindow = getPeakFitWindow(wsindex, peakindex);
     if (fitwindow.first < fitwindow.second) {
       // peak fit window is specified or calculated
-      peak_pos = d;
+      if (peak_pos < fitwindow.first || peak_pos > fitwindow.second) {
+        // peak is out of fit window
+        peak_pos = -2;
+      }
+    } else {
+      // use the 1/2 distance to neiboring peak
+      double left_bound(-1);
+      if (peakindex > 0)
+        left_bound = 0.5 * (expected_peak_positions[peakindex] -
+                            expected_peak_positions[peakindex - 1]);
+      double right_bound(-1);
+      if (peakindex < m_numPeaksToFit - 1)
+        right_bound = 0.5 * (expected_peak_positions[peakindex + 1] -
+                             expected_peak_positions[peakindex]);
+      if (left_bound < 0)
+        left_bound = right_bound;
+      if (right_bound < 0)
+        right_bound = left_bound;
+      if (left_bound < 0 || right_bound < 0)
+        throw std::runtime_error("Code logic error such that left or right "
+                                 "boundary of peak position is negative.");
+      if (peak_pos < left_bound || peak_pos > right_bound)
+        peak_pos = -2;
     }
-
-  }
-
-  else if (fabs(peakfunction->centre() - exppeakcenter) > postol)
-    peak_pos = -2; // peak center is not within tolerance
-  else {
+  } else if (fabs(peakfunction->centre() - expected_peak_positions[peakindex]) >
+             postol) {
+    // peak center is not within tolerance
+    peak_pos = -2;
+  } else {
     // all criteria are passed
     good_fit = true;
   }
@@ -767,7 +794,7 @@ void FitPeaks::processSinglePeakFitResult(
   // set cost function to DBL_MAX if fitting is bad
   if (good_fit) {
     // convert fitting result to analysis data structure
-    std::cout << "pass";
+    ;
   } else {
     // set the cost function value to DBL_MAX
     cost = DBL_MAX;
@@ -1825,65 +1852,48 @@ void FitPeaks::writeFitResult(size_t wi,
                               std::vector<std::vector<double>> &peak_parameters,
                               std::vector<double> &peak_chi2_vec) {
 
-  // TODO/NOW - Refine this part!
+  // check inputs
+  if (fitted_positions.size() != expected_positions.size() ||
+      fitted_positions.size() != m_numPeaksToFit)
+    throw std::runtime_error("Coding logic error such that the number of peaks "
+                             "of expected and fitted peak positions "
+                             "are not equal.");
 
-  // set the fitted peaks' value to output workspace
-  // TODO/NOW/ISSUE - Diabled temporarily
-  //  for (size_t ipeak = 0; ipeak < fitted_peaks.size(); ++ipeak) {
-  //    // set the peak positions
-  //    if (peak_positions[ipeak] > 0) {
-  //      m_outputWS->dataX(wi)[m_numPeaksToFit - ipeak - 1] =
-  //          peak_positions[ipeak];
-  //      m_outputWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
-  //          peak_parameters[ipeak][HEIGHT];
-  //      m_outputWS->dataE(wi)[m_numPeaksToFit - ipeak - 1] =
-  //      peak_chi2_vec[ipeak];
-  //    } else {
-  //      m_outputWS->dataY(wi)[m_numPeaksToFit - ipeak - 1] =
-  //          peak_positions[ipeak];
-  //    }
+  // Fill the output peak position workspace
+  auto vecx = m_outputWS->mutableX(wi);
+  auto vecy = m_outputWS->mutableY(wi);
+  auto vece = m_outputWS->mutableE(wi);
+  // TODO? DO I NEED TO REVERSE THE ORDER?
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+    vecx[ipeak] = expected_positions[ipeak];
+    vecy[ipeak] = fitted_positions[ipeak];
+    vece[ipeak] = peak_chi2_vec[ipeak];
+  }
 
-  // TODO/ISSUE/NOW - Need to set the value to the table workspace with all
-  // rows appended
-  // ......
-  // ......
-  // ......
+  // return if it is not asked to write fitted peak parameters
+  if (!m_fittedParamTable)
+    return;
 
-  //    // peak parameters
-  //    size_t xindex = wi - m_startWorkspaceIndex;
-  //    size_t spec_index = 5 * ipeak;
-  //    for (size_t ipar = 0; ipar < 5; ++ipar) {
-  //      if (peak_parameters[ipeak].size() < 5) {
-  //        std::stringstream errss;
-  //        errss << "wsindex: " << wi
-  //              << "  Data Y size = " <<
-  //              m_peakParamsWS->getNumberHistograms()
-  //              << "; Working on spectrum " << spec_index + ipar << " with
-  //              size "
-  //              << m_peakParamsWS->histogram(spec_index + ipar).y().size()
-  //              << " and set value to index " << xindex << "\n"
-  //              << "Peak parameters size = " <<
-  //              peak_parameters[ipeak].size();
-  //        throw std::runtime_error(errss.str());
-  //      }
+  // Output the peak parameters to the table workspace
+  // check vector size
+  if (peak_parameters.size() != m_numPeaksToFit)
+    throw std::runtime_error("Size of peak parameters vector is not equal to "
+                             "number of peaks to fit.");
 
-  //      m_peakParamsWS->dataY(spec_index + ipar)[xindex] =
-  //          peak_parameters[ipeak][ipar];
-  //    }
+  for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
+    // get row number
+    size_t row_index = wi * m_numPeaksToFit;
+    // check again with the column size versus peak parameter values
+    if (peak_parameters[ipeak].size() != m_fittedParamTable->columnCount() + 3)
+      throw std::runtime_error(
+          "Peak parameter vector for one peak has different sizes to output "
+          "table workspace");
 
-  // about the peak: if fitting is bad, then the fitted peak window is
-  // empty
-  //    if (fitted_peaks_windows[ipeak].size() == 2) {
-  //      auto vec_x = m_fittedPeakWS->histogram(wi).x();
-  //      double window_left = fitted_peaks_windows[ipeak][0];
-  //      double window_right = fitted_peaks_windows[ipeak][1];
-  //      size_t window_left_index = findXIndex(vec_x, window_left);
-  //      size_t window_right_index = findXIndex(vec_x, window_right);
-  //      for (size_t ix = window_left_index; ix < window_right_index; ++ix)
-  //        m_fittedPeakWS->dataY(wi)[ix] =
-  //            fitted_peaks[ipeak][ix - window_left_index];
-  // }
-  //  }
+    for (size_t iparam = 0; iparam < peak_parameters.size(); ++iparam) {
+      m_fittedParamTable->cell<double>(row_index, iparam + 2) =
+          peak_parameters[ipeak][iparam];
+    }
+  }
 
   return;
 }

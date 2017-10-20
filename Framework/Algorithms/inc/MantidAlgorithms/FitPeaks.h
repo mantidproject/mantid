@@ -100,7 +100,8 @@ private:
                       double &max_value);
 
   void processSinglePeakFitResult(
-      size_t wsindex, size_t peakindex, const double &expected_peak_pos,
+      size_t wsindex, size_t peakindex,
+      const std::vector<double> &expected_peak_positions,
       API::IPeakFunction_sptr peakfunction,
       API::IBackgroundFunction_sptr bkgdfunction, double cost,
       std::vector<double> &fitted_peak_positions,
