@@ -45,9 +45,11 @@ std::vector<double> MaxentCalculator::calculateChiGrad() const {
   // muon code.
   size_t sizeDatCalc = m_dataCalc.size();
   std::vector<double> cgrad(sizeDatCalc, 0.);
+  auto dpoints = static_cast<double>(sizeDat);
   for (size_t i = 0; i < sizeDat; i++) {
     if (m_errors[i] != 0)
-      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i];
+      cgrad[i] = -2. * (m_data[i] - m_dataCalc[i]) / m_errors[i] / m_errors[i] /
+                 dpoints;
   }
 
   return cgrad;
@@ -127,6 +129,16 @@ double MaxentCalculator::getChisq() {
     throw std::runtime_error("Chisq has not been calculated");
   }
   return m_chisq;
+}
+
+std::vector<double>
+MaxentCalculator::calculateData(const std::vector<double> &image) const {
+  return m_transform->imageToData(image);
+}
+
+std::vector<double>
+MaxentCalculator::calculateImage(const std::vector<double> &data) const {
+  return m_transform->dataToImage(data);
 }
 
 /**
@@ -232,7 +244,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   directionsDat[1] = m_transform->imageToData(m_directionsIm[1]);
 
   calculateChisq();
-  double chiSq = getChisq();
+  double factor = getChisq() * double(npoints) / 2;
 
   // Calculate the quadratic coefficients SB. eq 24
 
@@ -245,7 +257,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
       m_coeffs.s1[k][0] += m_directionsIm[k][i] * sgrad[i];
       m_coeffs.c1[k][0] += m_directionsIm[k][i] * cgrad[i];
     }
-    m_coeffs.c1[k][0] /= chiSq;
+    m_coeffs.c1[k][0] /= factor;
   }
 
   // Then s2
@@ -257,7 +269,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
         m_coeffs.s2[k][l] -=
             m_directionsIm[k][i] * m_directionsIm[l][i] / metric[i];
       }
-      m_coeffs.s2[k][l] *= 1.0 / m_background;
     }
   }
   // Then c2
@@ -271,7 +282,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
           m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
                                m_errors[i] / m_errors[i];
       }
-      m_coeffs.c2[k][l] *= 2.0 / chiSq;
+      m_coeffs.c2[k][l] *= 2.0 / factor;
     }
   }
 
@@ -292,17 +303,27 @@ void MaxentCalculator::calculateChisq() {
   if (m_data.empty() || m_errors.empty() || m_dataCalc.empty()) {
     throw std::runtime_error("Cannot calculate chi-square");
   }
-  size_t npoints = m_data.size();
 
   // Calculate
   // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
-  m_chisq = 0;
+  m_chisq = calculateChiSquared(m_dataCalc);
+}
+
+double
+MaxentCalculator::calculateChiSquared(const std::vector<double> &data) const {
+  size_t npoints = m_data.size();
+  auto dpoints = static_cast<double>(npoints);
+
+  // Calculate
+  // ChiSq = sum_i [ data_i - dataCalc_i ]^2 / [ error_i ]^2
+  double chisq = 0;
   for (size_t i = 0; i < npoints; i++) {
     if (m_errors[i] != 0.0) {
-      double term = (m_data[i] - m_dataCalc[i]) / m_errors[i];
-      m_chisq += term * term;
+      double term = (m_data[i] - data[i]) / m_errors[i];
+      chisq += term * term / dpoints;
     }
   }
+  return chisq;
 }
 
 } // namespace Algorithms

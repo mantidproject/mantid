@@ -47,6 +47,16 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"MHz", "microsecond"},
                                                    {"Angstrom", "Angstrom^-1"},
                                                    {"Angstrom^-1", "Angstrom"}};
+
+double calcEntropy(const std::vector<double> &image, double a) {
+  double entropy = 0.0;
+  for (auto f : image) {
+    auto fa = f / a;
+    auto root = sqrt(fa * fa + 1.0);
+    entropy += a * root - f * log(fa + root);
+  }
+  return entropy;
+}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,12 +127,24 @@ void MaxEnt::init() {
 
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<double>>();
   mustBeNonNegative->setLower(1E-12);
-  declareProperty(make_unique<PropertyWithValue<double>>(
-                      "A", 0.4, mustBeNonNegative, Direction::Input),
-                  "A maximum entropy constant");
+  declareProperty(
+      make_unique<PropertyWithValue<double>>("A", 0.4, mustBeNonNegative,
+                                             Direction::Input),
+      "A maximum entropy constant. This algorithm was first developed for the "
+      "ISIS muon group where the default 0.4 was found to give good "
+      "reconstructions."
+      "In general the user will need to experiment with this value. Chosen a "
+      "small value may lead to unphysical spiky reconstructions and a too "
+      "large "
+      "value the reconstruction will start to resamble that of a direct "
+      "fourier "
+      "transform reconstruction. However, where data contain a strongly "
+      "determined zero "
+      "Fourier data point the reconstruction will be insensitive to the choice "
+      "of this property.");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
-                      "ChiTarget", 100.0, mustBeNonNegative, Direction::Input),
+                      "ChiTarget", 1.0, mustBeNonNegative, Direction::Input),
                   "Target value of Chi-square");
 
   declareProperty(make_unique<PropertyWithValue<double>>(
@@ -323,11 +345,14 @@ void MaxEnt::exec() {
       // Record the evolution of Chi-square and angle(S,C)
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
-      evolTest[it] = currAngle;
+      // evolTest[it] = currAngle;
+      evolTest[it] = calcEntropy(image, background);
 
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
           (currAngle < angle)) {
+        g_log.information() << "Stopped after " << it << " iterations "
+                            << currChisq << ' ' << chiTarget << std::endl;
         break;
       }
 
@@ -447,7 +472,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
 
   std::vector<double> delta(dim, 0); // delta at current alpha
 
-  while ((fabs(eps) > chiEps) && (iter < alphaIter)) {
+  while ((fabs(eps / chiTarget) > chiEps) && (iter < alphaIter)) {
 
     double aMid = 0.5 * (aMin + aMax);
     double chiMid = calculateChi(coeffs, aMid, delta);
@@ -468,8 +493,7 @@ std::vector<double> MaxEnt::move(const QuadraticCoefficients &coeffs,
   }
 
   // Check if move was successful
-  if ((fabs(eps) > chiEps) || (iter > alphaIter)) {
-
+  if ((fabs(eps / chiTarget) > chiEps) || (iter > alphaIter)) {
     throw std::runtime_error("Error encountered when calculating solution "
                              "image. No convergence in alpha chop.\n");
   }
@@ -622,7 +646,7 @@ std::vector<double> MaxEnt::applyDistancePenalty(
   auto newDelta = delta;
   if (dist > distEps * sum / background) {
     for (size_t k = 0; k < delta.size(); k++) {
-      newDelta[k] *= sqrt(sum / dist / background);
+      newDelta[k] *= sqrt(distEps * sum / dist / background);
     }
   }
   return newDelta;
