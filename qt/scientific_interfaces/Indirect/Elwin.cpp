@@ -393,7 +393,8 @@ void Elwin::plotInput() {
   IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
                                            m_uiForm.ppPlot, "IntegrationStart",
                                            "IntegrationEnd");
-  setDefaultResolution(inputWorkspace(), m_uiForm.ppPlot->getCurveRange("Sample"));
+  setDefaultResolution(inputWorkspace(),
+                       m_uiForm.ppPlot->getCurveRange("Sample"));
   setDefaultSampleLog(inputWorkspace());
 }
 
