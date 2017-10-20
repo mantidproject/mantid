@@ -348,6 +348,15 @@ void MSDFit::modelSelection(int selected) {
   m_msdTree->addProperty(m_properties["StartX"]);
   m_msdTree->addProperty(m_properties["EndX"]);
   m_msdTree->addProperty(m_properties[model]);
+
+  if (!m_pythonExportWsName.empty()) {
+    size_t idx = m_pythonExportWsName.find_last_of("_msd");
+    m_pythonExportWsName =
+        m_pythonExportWsName.substr(0, idx) + "_msd_" + model.toStdString();
+  }
+
+  m_uiForm.ckPlotGuess->setChecked(false);
+  updatePlot();
 }
 
 /*
