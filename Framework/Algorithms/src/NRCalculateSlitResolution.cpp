@@ -6,7 +6,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <cmath>
 
 #include <boost/shared_ptr.hpp>
 
