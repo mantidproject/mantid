@@ -266,7 +266,7 @@ void IndirectDataAnalysisTab::updatePlotRange(
     auto rangeSelector = previewPlot->getRangeSelector(rangeName);
     setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
                          m_properties[endRangePropName], curveRange);
-  } catch (std::invalid_argument &exc) {
+  } catch (std::exception &exc) {
     showMessageBox(exc.what());
   }
 }

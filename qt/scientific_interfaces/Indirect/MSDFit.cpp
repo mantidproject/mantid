@@ -222,7 +222,13 @@ void MSDFit::newDataLoaded(const QString wsName) {
   auto workspace =
       Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           wsName.toStdString());
-  int maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
+
+  int maxWsIndex = 0;
+
+  if(workspace) {
+    maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
+  }
+
   setInputWorkspace(workspace);
   setPreviewPlotWorkspace(workspace);
   m_parameterValues.clear();
