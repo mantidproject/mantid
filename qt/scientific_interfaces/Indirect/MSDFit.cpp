@@ -225,7 +225,7 @@ void MSDFit::newDataLoaded(const QString wsName) {
 
   int maxWsIndex = 0;
 
-  if(workspace) {
+  if (workspace) {
     maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
   }
 
