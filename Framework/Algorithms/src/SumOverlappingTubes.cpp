@@ -13,6 +13,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/make_unique.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -74,6 +75,11 @@ void SumOverlappingTubes::init() {
       "scattering angle. If the maximum entries accross all the scattering "
       "angles is N_MAX, and the number of entries for a scattering angle is N, "
       "the normalisation is performed as N_MAX / N.");
+  std::vector<std::string> outputTypes{"2D", "2DStraight", "1D"};
+  declareProperty("OutputType", "2D",
+                  boost::make_shared<StringListValidator>(outputTypes),
+                  "Whether to have the output in 2D, 2D with straightened "
+                  "Debye-Scherrer cones, or 1D.");
 }
 
 std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
@@ -160,13 +166,14 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
   std::vector<double> scatteringBinning = getProperty("ScatteringAngleBinning");
   if (scatteringBinning.size() == 1) {
     m_stepScatteringAngle = scatteringBinning[0];
-    //    const auto roundingFactor = 1.0 / m_stepScatteringAngle;
-    //    m_startScatteringAngle =
-    //        std::round(m_startScatteringAngle * roundingFactor) /
-    //        roundingFactor;
-    //    m_endScatteringAngle =
-    //        std::round(m_endScatteringAngle * roundingFactor) /
-    //        roundingFactor;
+
+    // Round to the nearest m_stepScatteringAngle, normally detectors will be
+    // aiming for this.
+    const auto roundingFactor = 1.0 / m_stepScatteringAngle;
+    m_startScatteringAngle =
+        std::round(m_startScatteringAngle * roundingFactor) / roundingFactor;
+    m_endScatteringAngle =
+        std::round(m_endScatteringAngle * roundingFactor) / roundingFactor;
   } else if (scatteringBinning.size() == 3) {
     if (scatteringBinning[0] > m_startScatteringAngle ||
         scatteringBinning[2] < m_endScatteringAngle)
@@ -187,7 +194,7 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
 }
 
 void SumOverlappingTubes::getHeightAxis() {
-  std::string componentName = getProperty("ComponentForHeightAxis");
+  const std::string componentName = getProperty("ComponentForHeightAxis");
   if (componentName.length() > 0) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
@@ -229,6 +236,8 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
   std::vector<double> normalisation(m_numPoints, 0.0);
 
+  const auto outputType = getPropertyValue("OutputType");
+
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
     // loop over spectra
@@ -238,17 +247,29 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         continue;
 
       const auto &pos = specInfo.position(i);
-      const auto y = pos.Y();
-      size_t heightIndex =
-          Kernel::VectorHelper::indexOfValueFromCenters(m_heightAxis, y);
+      const auto height = pos.Y();
 
-      auto angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+      size_t heightIndex;
+      try {
+        heightIndex =
+            Kernel::VectorHelper::indexOfValueFromCenters(m_heightAxis, height);
+      } catch (std::out_of_range &) {
+        continue;
+      }
+
+      double angle;
+      if (outputType == "2D")
+        angle = -atan2(pos.X(), pos.Z());
+      else if (outputType == "2DStraight")
+        angle = specInfo.twoTheta(i);
+      angle *= 180.0 / M_PI;
+
       size_t angleIndex = size_t(
           (angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
 
       // point is out of range, a warning should have been generated already for
       // the theta index
-      if (heightIndex >= m_numHistograms || angleIndex >= m_numPoints)
+      if (angleIndex >= m_numPoints)
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
