@@ -1255,6 +1255,7 @@ void ConvFit::plotGuess() {
                                        createFunction(tieCentres));
   } else {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   }
 }
 

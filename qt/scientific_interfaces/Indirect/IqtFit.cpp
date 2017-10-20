@@ -57,7 +57,6 @@ void IqtFit::setup() {
 
   m_iqtFTree->setFactoryForManager(m_blnManager, m_blnEdFac);
   m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   m_properties["StartX"] = m_dblManager->addProperty("StartX");
   m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
@@ -833,6 +832,7 @@ void IqtFit::updateGuessPlot() {
   // Don't plot guess if plot guess is unchecked
   if (!m_uiForm.ckPlotGuess->isChecked()) {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   } else {
     plotGuess(NULL);
   }
@@ -843,8 +843,10 @@ void IqtFit::plotGuess(QtProperty *) {
   if (m_uiForm.ckPlotGuess->isChecked())
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
                                        createFunction(true));
-  else
+  else {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
+  }
 }
 
 /*
