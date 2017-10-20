@@ -389,27 +389,12 @@ void Elwin::newPreviewFileSelected(int index) {
  * Replots the preview plot.
  */
 void Elwin::plotInput() {
-  QString wsName = m_uiForm.cbPreviewFile->currentText();
-
-  if (!AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
-    g_log.error("Workspace not found in ADS. Try reloading input files.");
-    return;
-  }
-
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      wsName.toStdString());
-
-  if (!ws) {
-    g_log.error("Failed to get input workspace from ADS.");
-    return;
-  }
-
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
                                            m_uiForm.ppPlot, "IntegrationStart",
                                            "IntegrationEnd");
-  setDefaultResolution(ws, m_uiForm.ppPlot->getCurveRange("Sample"));
-  setDefaultSampleLog(ws);
+  setDefaultResolution(inputWorkspace(), m_uiForm.ppPlot->getCurveRange("Sample"));
+  setDefaultSampleLog(inputWorkspace());
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
