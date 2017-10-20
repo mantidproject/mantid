@@ -405,7 +405,6 @@ void NormaliseToMonitor::checkProperties(
   // Do a check for common binning and store
   m_commonBins = WorkspaceHelpers::commonBoundaries(*inputWorkspace);
 
-  int specNum(-1);
   // Check the monitor spectrum or workspace and extract into new workspace
   m_monitor = sepWS ? getMonitorWorkspace(inputWorkspace)
                     : getInWSMonitorSpectrum(inputWorkspace);
@@ -416,7 +415,7 @@ void NormaliseToMonitor::checkProperties(
     const auto &monitorSpecInfo = m_monitor->spectrumInfo();
     for (const auto workspaceIndex : m_workspaceIndexes)
       if (!monitorSpecInfo.isMonitor(workspaceIndex))
-        g_log.warning() << "The spectrum N: " << specNum
+        g_log.warning() << "The spectrum N: " << workspaceIndex
                         << " in MonitorWorkspace does not refer to a monitor.\n"
                         << "Continuing with normalization regardless.";
   } catch (Kernel::Exception::NotFoundError &e) {
