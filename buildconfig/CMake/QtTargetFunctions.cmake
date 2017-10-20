@@ -42,25 +42,6 @@ function (mtd_add_qt_executable)
   endforeach()
 endfunction()
 
-# Given a list of arguments decide which Qt versions
-# should be built. If ENABLE_MANTIPLOT is true the Qt4 is built.
-# QT_VERSION can be specified to override this.
-function (_qt_versions output_list)
-  # process argument list
-  list (FIND ARGN "QT_VERSION" _ver_idx)
-  if (_ver_idx EQUAL -1)
-    set (_qt_vers 4)
-  else()
-    math (EXPR _ver_value_idx "${_ver_idx}+1")
-    list (GET ARGN ${_ver_value_idx} _ver_value)
-    list (APPEND _qt_vers ${_ver_value})
-  endif()
-  if(NOT ENABLE_MANTIDPLOT)
-    list (REMOVE_ITEM _qt_vers 4)
-  endif()
-  set (${output_list} ${_qt_vers} PARENT_SCOPE)
-endfunction()
-
 # Target agnostic function to add either an executable or library linked to Qt
 # option: LIBRARY If included define a library target
 # option: EXECUTABLE If included define an executable target
@@ -195,9 +176,11 @@ function (mtd_add_qt_target)
 endfunction()
 
 function (mtd_add_qt_tests)
-  if(ENABLE_MANTIDPLOT)
-    mtd_add_qt_test_executable (QT_VERSION 4 ${ARGN})
-  endif()
+  _qt_versions(_qt_vers ${ARGN})
+  # Create targets
+  foreach(_ver ${_qt_vers})
+    mtd_add_qt_test_executable (QT_VERSION ${_ver} ${ARGN})
+  endforeach()
 endfunction()
 
 # Wrap generation of moc files
@@ -220,8 +203,6 @@ function(_internal_qt_wrap_cpp qtversion outfiles)
   set (${outfiles} ${${outfiles}} PARENT_SCOPE)
 endfunction()
 
-
-
 # Create an executable target for running a set of unit tests
 # linked to Qt
 # keyword: TEST_NAME The name of the test suite. The version of Qt will be appended to it
@@ -243,18 +224,28 @@ endfunction()
 function (mtd_add_qt_test_executable)
   set (options)
   set (oneValueArgs TARGET_NAME QT_VERSION)
-  set (multiValueArgs SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
+  set (multiValueArgs SRC QT4_SRC INCLUDE_DIRS TEST_HELPER_SRCS LINK_LIBS
        QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
-
+   # target name
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target_name
                      ${PARSED_TARGET_NAME})
-  # cxxtest_add_test expects this
+  # test generation
+  list (APPEND PARSED_SRC ${PARSED_QT${PARSED_QT_VERSION}_SRC})
+  set (CXXTEST_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/Qt${PARSED_QT_VERSION})
   set (TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
   cxxtest_add_test ( ${_target_name} ${PARSED_SRC} )
 
   # libraries
+  set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
+  if (PARSED_QT_VERSION EQUAL 4)
+   set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
+  elseif (PARSED_QT_VERSION EQUAL 5)
+   set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
+  else ()
+   message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
+  endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})
   _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
@@ -265,14 +256,6 @@ function (mtd_add_qt_test_executable)
   target_include_directories ( ${_target_name} SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR}
                                ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
-  if (PARSED_QT_VERSION EQUAL 4)
-    set (_link_libs Qt4::QtGui ${PARSED_QT4_LINK_LIBS} ${_link_libs})
-  elseif (PARSED_QT_VERSION EQUAL 5)
-    set (_link_libs Qt5::Widgets ${PARSED_QT5_LINK_LIBS} ${_link_libs})
-  else ()
-    message (FATAL_ERROR "Unknown Qt version. Please specify only the major version.")
-  endif()
   target_link_libraries (${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs})
 
   # Add dependency to any parents
@@ -280,6 +263,29 @@ function (mtd_add_qt_test_executable)
     add_dependencies (${_dep} ${_target_name})
   endforeach()
 endfunction ()
+
+# Given a list of arguments decide which Qt versions
+# should be built. If ENABLE_MANTIPLOT is true the Qt4 is built.
+# QT_VERSION can be specified to override this.
+function (_qt_versions output_list)
+  # process argument list
+  list (FIND ARGN "QT_VERSION" _ver_idx)
+  if (_ver_idx EQUAL -1)
+    # default versions
+    set (_qt_vers 4 5)
+  else()
+    math (EXPR _ver_value_idx "${_ver_idx}+1")
+    list (GET ARGN ${_ver_value_idx} _ver_value)
+    list (APPEND _qt_vers ${_ver_value})
+  endif()
+  if(NOT ENABLE_MANTIDPLOT)
+    list (REMOVE_ITEM _qt_vers 4)
+  endif()
+  if(NOT ENABLE_WORKBENCH)
+    list (REMOVE_ITEM _qt_vers 5)
+  endif()
+  set (${output_list} ${_qt_vers} PARENT_SCOPE)
+endfunction()
 
 # Appends a string to the given variable to define the Qt version
 # the library is built against.

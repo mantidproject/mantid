@@ -21,6 +21,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../../sliceviewer )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}

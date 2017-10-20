@@ -3,8 +3,6 @@
 ###########################################################################
 find_package ( QScintillaQt4 REQUIRED )
 
-include ( UseQt4 )
-
 # Utilities for defining targets
 include (QtTargetFunctions)
 

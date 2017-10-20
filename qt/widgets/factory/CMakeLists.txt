@@ -27,6 +27,7 @@ add_definitions ( -DIN_MANTIDQT_FACTORY )
 
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}

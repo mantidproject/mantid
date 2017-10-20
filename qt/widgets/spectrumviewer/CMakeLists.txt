@@ -52,17 +52,18 @@ set ( UI_FILES
        inc/MantidQtWidgets/SpectrumViewer/SpectrumView.ui
 )
 
-include_directories ( inc )
-
 ###########################################################################
 # Main Library Target
 ###########################################################################
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_SPECTRUMVIEWER
+  INCLUDE_DIRS
+   inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}

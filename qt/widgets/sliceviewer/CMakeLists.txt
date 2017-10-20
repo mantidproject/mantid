@@ -115,6 +115,7 @@ set ( UI_FILES
 # Main Library Target
 ###########################################################################
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -158,6 +159,7 @@ set ( TEST_FILES
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsSliceViewerTest
+  QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../Framework/TestHelpers/inc

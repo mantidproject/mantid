@@ -36,6 +36,7 @@ include_directories ( ../spectrumviewer/inc )
 # Main Library Target
 ###########################################################################
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
@@ -60,14 +61,14 @@ endif ()
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
-                        SRC src/RefDetectorViewDemo.cpp
-                        LINK_LIBS 
-                            ${TCMALLOC_LIBRARIES_LINKTIME}
-                            ${Boost_LIBRARIES}
-                            ${POCO_LIBRARIES}
-                            ${QT_LIBRARIES}
-                        MTD_QT_LINK_LIBS
-                            MantidQtWidgetsRefDetectorView
-                            MantidQtWidgetsSpectrumViewer
-                        EXCLUDE_FROM_ALL
+  QT_VERSION 4
+  SRC src/RefDetectorViewDemo.cpp
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${Boost_LIBRARIES}
+      ${POCO_LIBRARIES}
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsRefDetectorView
+      MantidQtWidgetsSpectrumViewer
+  EXCLUDE_FROM_ALL
 )

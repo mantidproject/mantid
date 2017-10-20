@@ -55,6 +55,7 @@ set ( TEST_FILES
 )
 
 mtd_add_qt_tests (TARGET_NAME MantidQtScientificInterfacesTest
+  QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../Framework/DataObjects/inc
