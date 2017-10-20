@@ -10,39 +10,35 @@
 Description
 -----------
 
+This algorithm estimates the divergence of a diffraction instrument using equation 6.9 of Windsor
+
 .. math:: \Delta\theta_{div} = \frac{1}{2}
           \sqrt{\Delta(2\theta)^2 + \alpha_0
           + \frac{4\left(\beta_0^2 + \beta_1^2\right)}{\sin^2(2\theta)}}
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Where :math:`\Delta\theta_{div}` is the divergence, :math:`\Delta(2\theta)` is the uncertainty angular uncertainty due to the detector size, :math:`\alpha_0` is the uncertainty in the incident collimation in the scatterng plane, and the :math:`\beta` terms are the angular uncertainties out of the scattering plane.
+
+The results of this calculation can be supplied as an optional workspace to :ref:`EstimateResolutionDiffraction <algm-EstimateResolutionDiffraction>`.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - EstimateDivergence**
 
 .. testcode:: EstimateDivergenceExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = EstimateDivergence()
+   LoadEmptyInstrument(Filename='POWGEN_Definition_2017-05-01.xml', OutputWorkspace='PG3')
+   ws = EstimateDivergence(InputWorkspace='PG3')
 
    # Print the result
-   print "The output workspace has %%i spectra" %% wsOut.getNumberHistograms()
+   print "The output workspace has %%i spectra" %% ws.getNumberHistograms()
 
 Output:
 
 .. testoutput:: EstimateDivergenceExample
 
-  The output workspace has ?? spectra
+  The output workspace has 43121 spectra
 
 References
 ----------
