@@ -177,4 +177,6 @@ ROTATIONS_AND_TRANSLATIONS = 6
 # specific isotope is used.
 MASS_EPS = 1e-2  # in amu units.
 
+# this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
+# the same mass
 ONLY_ONE_MASS = 1
