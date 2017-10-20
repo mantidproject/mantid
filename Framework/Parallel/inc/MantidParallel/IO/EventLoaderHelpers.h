@@ -95,9 +95,14 @@ void load(const Communicator &comm, const H5::Group &group,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
-  // TODO automatically(?) determine good chunk size
-  // TODO automatically(?) determine good number of ranks to use for load
+  // In tests loading from a single SSD this chunk size seems close to the
+  // optimum. May need to be adjusted in the future (potentially dynamically)
+  // when loading from parallel file systems and running on a cluster.
   const size_t chunkSize = 1024 * 1024;
+  // In tests loading from a single SSD there was no advantage using fewer
+  // processes for loading than for processing. This may be different in larger
+  // MPI runs on a cluster where limiting the number of IO processes may be
+  // required when accessing the parallel file system.
   const Chunker chunker(comm.size(), comm.rank(),
                         readBankSizes(group, bankNames), chunkSize);
   NXEventDataLoader<TimeOffsetType> loader(comm.size(), group, bankNames);
