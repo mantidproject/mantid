@@ -25,10 +25,33 @@ transfered between workspaces.
 Usage
 -----
 
-.. warning::
+**Example - a simple example of IndexPeaks**
 
-    This algorithm is deprecated and should no longer be used. One should consider using
-    :ref:`FindPeaksMD <algm-FindPeaksMD>`
+.. include:: ../usagedata-note.txt
+
+.. testcode:: ExIndexSXPeaksSimple
+
+   # Load Peaks
+   ws=LoadIsawPeaks(Filename='TOPAZ_3007.peaks')
+ 
+   # Run Algorithm
+   IndexSXPeaks(PeaksWorkspace=ws, a=8.605819, b=11.935925, c=11.941813, alpha=107.429088, beta=98.752912, gamma=98.951193, dTolerance=0.15)
+
+   # Print number of indexed peaks
+   ws=FilterPeaks(InputWorkspace=ws, FilterVariable='h^2+k^2+l^2', FilterValue=0, Operator='>')
+   print("Number of Indexed Peaks: {:d}".format(ws.getNumberPeaks()))
+
+Output:
+
+.. testoutput:: ExIndexSXPeaksSimple
+       
+   Number of Indexed Peaks: 43
+
+Related Algorithms
+------------------
+
+:ref:`IndexPeaks <algm-IndexPeaks>`
+will use UB inverse to index peaks given a PeaksWorkspace with a UB matrix stored with the sample
 
 .. categories::
 
