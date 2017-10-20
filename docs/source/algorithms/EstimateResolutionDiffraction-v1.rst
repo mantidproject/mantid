@@ -76,7 +76,7 @@ Usage
   # Load a Nexus file
   Load(Filename="PG3_2538_2k.nxs", OutputWorkspace="PG3_2538")
   # Run the algorithm to estimate detector's resolution
-  EstimateResolutionDiffraction(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution"
+  EstimateResolutionDiffraction(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution",
                                 PartialResolutionWorkspaces="PG3_Resolution_partials")
   resws = mtd["PG3_Resolution"]
 
