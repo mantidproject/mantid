@@ -828,7 +828,8 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres,
     func = FunctionFactory::Instance().createFunction("DeltaFunction");
     index = model->addFunction(func);
     std::string parName = createParName(index);
-    populateFunction(func, model, m_properties["Delta Function"], false, parName);
+    populateFunction(func, model, m_properties["Delta Function"], false,
+                     parName);
   }
 
   // ------------------------------------------------------------
@@ -897,7 +898,8 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres,
       index = model->addFunction(product);
       prefix2 = createParName(index, subIndex);
 
-      populateFunction(func, model, m_properties["FitFunction2"], false, prefix2);
+      populateFunction(func, model, m_properties["FitFunction2"], false,
+                       prefix2);
     }
   }
 
