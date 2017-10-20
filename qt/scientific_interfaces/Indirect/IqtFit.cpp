@@ -871,6 +871,7 @@ void IqtFit::updateGuessPlot() {
   // Don't plot guess if plot guess is unchecked
   if (!m_uiForm.ckPlotGuess->isChecked()) {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   } else {
     plotGuess(NULL);
   }
@@ -881,8 +882,10 @@ void IqtFit::plotGuess(QtProperty *) {
   if (m_uiForm.ckPlotGuess->isChecked())
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
                                        createFunction(true));
-  else
+  else {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
+  }
 }
 
 /*
