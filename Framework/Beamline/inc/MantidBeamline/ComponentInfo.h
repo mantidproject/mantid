@@ -59,8 +59,16 @@ private:
   const int64_t m_sourceIndex = -1;
   const int64_t m_sampleIndex = -1;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
-
+  Kernel::cow_ptr<std::vector<size_t>> m_scanCounts{nullptr};
+  bool m_isSyncScan{true};
+  Kernel::cow_ptr<std::vector<std::pair<int64_t, int64_t>>> m_scanIntervals{nullptr};
+  /// For (component index, time index) -> linear index conversions
+  Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   void failIfScanning() const;
+  size_t linearIndex(const std::pair<size_t, size_t> &index) const;
+  void initScanCounts();
+  void initScanIntervals();
+  void checkNoTimeDependence() const;
 
 public:
   ComponentInfo();
@@ -115,6 +123,14 @@ public:
                       const Eigen::Vector3d &scaleFactor);
   bool isStructuredBank(const size_t componentIndex) const;
 
+  size_t scanCount(const size_t index) const;
+  size_t scanSize() const;
+  bool isScanning() const;
+  std::pair<int64_t, int64_t>
+  scanInterval(const std::pair<size_t, size_t> &index) const;
+  void setScanInterval(const size_t index,
+                       const std::pair<int64_t, int64_t> &interval);
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
   class Range {
   private:
     const std::vector<size_t>::const_iterator m_begin;

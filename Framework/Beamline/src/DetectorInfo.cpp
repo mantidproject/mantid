@@ -210,7 +210,8 @@ void DetectorInfo::setScanInterval(
     m_scanIntervals =
         Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
             1, std::pair<int64_t, int64_t>{0, 1});
-  } else if (!m_isSyncScan) {
+  }
+  if (!m_isSyncScan) {
     throw std::runtime_error(
         "DetectorInfo has been initialized with a "
         "asynchonous scan, cannot set synchronous scan interval.");

@@ -641,5 +641,54 @@ public:
     // Read-back
     TS_ASSERT_EQUALS(compInfo.scaleFactor(0), newFactor);
   }
+
+  void test_scan_count_no_scanning(){
+      ComponentInfo info;
+      TS_ASSERT_EQUALS(info.scanCount(0), 1);
+  }
+
+  void test_isScanning(){
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+
+    TSM_ASSERT("No time indexed points added so should not be scanning", !compInfo.isScanning());
+    // Add a scan interval
+    compInfo.setScanInterval(std::pair<int64_t, int64_t>{1000, 1001});
+    TSM_ASSERT("No time indexed points added so should still not be scanning", !compInfo.isScanning());
+  }
+
+  void test_set_sync_interval_then_async_interval_throws(){
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+      // Using the indexed overload implies a non-sync scan
+      std::pair<int64_t, int64_t> interval{1000, 1001};
+      // Set the scanning up to be synchronous (no index provided)
+      compInfo.setScanInterval(interval);
+      // Now try setting an asynchronous scan point.
+      TS_ASSERT_THROWS(compInfo.setScanInterval(0 /*index used*/, interval), std::runtime_error&);
+  }
+
+  void test_set_async_interval_then_sync_interval_throws(){
+      auto infos = makeTreeExample();
+      auto& compInfo = std::get<0>(infos);
+      // Using the indexed overload implies a non-sync scan
+      std::pair<int64_t, int64_t> interval{1000, 1001};
+      // Set the scanning up to be synchronous (no index provided)
+      compInfo.setScanInterval(0 /*index used*/, interval);
+      // Now try setting an asynchronous scan point.
+      TS_ASSERT_THROWS(compInfo.setScanInterval(interval), std::runtime_error&);
+  }
+
+  void test_set_scan_interval_sync_scan(){
+    auto infos = makeTreeExample();
+    auto &compInfo = std::get<0>(infos);
+      auto interval = std::pair<int64_t, int64_t>{10000,10001};
+      compInfo.setScanInterval(interval);
+      auto outInterval = compInfo.scanInterval(std::pair<size_t, size_t>{0,0});
+      TS_ASSERT_EQUALS(interval, outInterval);
+  }
+
+
+
 };
 #endif /* MANTID_BEAMLINE_COMPONENTINFOTEST_H_ */

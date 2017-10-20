@@ -1,5 +1,6 @@
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
+#include "MantidKernel/make_cow.h"
 #include <boost/make_shared.hpp>
 #include <numeric>
 #include <utility>
@@ -266,6 +267,20 @@ void ComponentInfo::failIfScanning() const {
   }
 }
 
+size_t ComponentInfo::linearIndex(const std::pair<size_t, size_t> &index) const
+{
+    // The most common case are beamlines with static components. In that case the
+    // time index is always 0 and we avoid expensive map lookups. Linear indices
+    // are ordered such that the first block contains everything for time index 0
+    // so even in the time dependent case no translation is necessary.
+    if (index.second == 0)
+      return index.first;
+    // Calculate the linear index without a lookup
+    if (m_isSyncScan)
+      return index.first + size() * index.second;
+    return (*m_indexMap)[index.first][index.second];
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const {
   return (*m_parentIndices)[componentIndex];
 }
@@ -358,6 +373,124 @@ bool ComponentInfo::isStructuredBank(const size_t componentIndex) const {
   const auto rangesIndex = compOffsetIndex(componentIndex);
   return !isDetector(componentIndex) && (*m_isStructuredBank)[rangesIndex];
 }
+
+/**
+ * Get the number of scans for detector index
+ * @param index : Detector Index
+ * @return Number of scans for detector index
+ */
+size_t ComponentInfo::scanCount(const size_t index) const
+{
+   if(!m_scanCounts){
+       return 1;
+   }
+   if(m_isSyncScan){
+       return (*m_scanCounts)[0];
+   }
+   return (*m_scanCounts)[index];
+}
+
+size_t ComponentInfo::scanSize() const
+{
+    const auto detectorScanSize = m_detectorInfo ? m_detectorInfo->scanSize() : 0;
+    if (!m_positions)
+      return 0 + detectorScanSize;
+    return m_positions->size() + detectorScanSize;
+}
+
+bool ComponentInfo::isScanning() const
+{
+    if (m_detectorInfo && m_detectorInfo->isScanning()) {
+        return true;
+    }
+    else if (!m_positions)
+      return false;
+    return m_componentRanges->size() != m_positions->size();
+}
+
+/// Throws if this has time-dependent data.
+void ComponentInfo::checkNoTimeDependence() const {
+  if (isScanning())
+    throw std::runtime_error("ComponentInfo accessed without time index but the "
+                             "beamline has time-dependent (moving) components.");
+}
+
+std::pair<int64_t, int64_t> ComponentInfo::scanInterval(const std::pair<size_t, size_t> &index) const
+{
+    if (!m_scanIntervals)
+      return {0, 0};
+    if (m_isSyncScan)
+      return (*m_scanIntervals)[index.second];
+    return (*m_scanIntervals)[linearIndex(index)];
+}
+
+/**
+ * Set the scan interval using nanosecond offsets from 00:00:00 01/01/1990 epoch
+ * @param index : linear index taking into account both detectors and scans per detector
+ * @param interval : Time interval for scan point
+ */
+void ComponentInfo::setScanInterval(const size_t index, const std::pair<int64_t, int64_t> &interval)
+{
+    // Enforces setting scan intervals BEFORE time indexed positions and rotations
+    checkNoTimeDependence();
+    //checkScanInterval(interval);
+    if (m_scanIntervals && m_isSyncScan)
+      throw std::runtime_error("ComponentInfo has been initialized with a "
+                               "synchonous scan, cannot set scan interval for "
+                               "individual component.");
+    if (!m_scanIntervals) {
+      m_isSyncScan = false;
+      initScanIntervals();
+    }
+    m_scanIntervals.access()[index] = interval;
+
+}
+
+void ComponentInfo::setScanInterval(const std::pair<int64_t, int64_t> &interval)
+{
+    // Enforces setting scan intervals BEFORE time indexed positions and rotations
+    checkNoTimeDependence();
+    //checkScanInterval(interval);
+    if (m_scanIntervals && !m_isSyncScan) {
+      throw std::runtime_error(
+          "DetectorInfo has been initialized with a "
+          "asynchonous scan, cannot set synchronous scan interval.");
+    }
+    if (!m_scanIntervals) {
+        m_isSyncScan = true;
+        initScanIntervals();
+    }
+    m_scanIntervals.access()[0] = interval;
+}
+
+void ComponentInfo::initScanCounts() {
+  //checkNoTimeDependence();
+  if (m_isSyncScan)
+    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(1, 1);
+  else
+    m_scanCounts = Kernel::make_cow<std::vector<size_t>>(size(), 1);
+}
+
+void ComponentInfo::initScanIntervals() {
+  //checkNoTimeDependence();
+  if(m_isSyncScan){
+      m_scanIntervals =
+          Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+              1, std::pair<int64_t, int64_t>{0, 1});
+  }
+  else {
+    m_scanIntervals = Kernel::make_cow<std::vector<std::pair<int64_t, int64_t>>>(
+      size(), std::pair<int64_t, int64_t>{0, 1});
+  }
+}
+
+
+/*
+void ComponentInfo::setScanInterval(const std::pair<int64_t, int64_t> &interval)
+{
+
+}
+*/
 
 } // namespace Beamline
 } // namespace Mantid
