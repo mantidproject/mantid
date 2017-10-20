@@ -94,6 +94,7 @@ void Elwin::setup() {
 
   connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this,
           SLOT(newInputFiles()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
   connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this,
           SLOT(newPreviewFileSelected(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
@@ -381,8 +382,6 @@ void Elwin::newPreviewFileSelected(int index) {
 
   m_uiForm.spPreviewSpec->setMaximum(numHist);
   m_uiForm.spPreviewSpec->setValue(0);
-
-  plotInput();
 }
 
 /**
