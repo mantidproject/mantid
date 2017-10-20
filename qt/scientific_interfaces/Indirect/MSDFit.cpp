@@ -342,7 +342,7 @@ QtProperty *MSDFit::createModel(const QString &modelName,
 }
 
 void MSDFit::modelSelection(int selected) {
-  QString model = m_uiForm.cbModelInput->itemText(selected);
+  auto model = m_uiForm.cbModelInput->itemText(selected);
   m_msdTree->clear();
 
   m_msdTree->addProperty(m_properties["StartX"]);
@@ -350,9 +350,11 @@ void MSDFit::modelSelection(int selected) {
   m_msdTree->addProperty(m_properties[model]);
 
   if (!m_pythonExportWsName.empty()) {
-    size_t idx = m_pythonExportWsName.find_last_of("_msd");
-    m_pythonExportWsName =
-        m_pythonExportWsName.substr(0, idx) + "_msd_" + model.toStdString();
+    auto idx = m_pythonExportWsName.rfind("_");
+    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
+    idx = m_pythonExportWsName.rfind("_");
+    m_pythonExportWsName = m_pythonExportWsName.substr(0, idx);
+    m_pythonExportWsName += "_" + model.toStdString() + "_msd";
   }
 
   m_uiForm.ckPlotGuess->setChecked(false);
