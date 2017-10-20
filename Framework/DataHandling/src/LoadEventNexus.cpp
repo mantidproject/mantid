@@ -308,6 +308,12 @@ void LoadEventNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
+
+#ifdef MPI_EXPERIMENTAL
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseParallelLoader",
+                                                       true, Direction::Input),
+                  "Use experimental parallel loader for loading event data.");
+#endif
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1673,6 +1679,10 @@ bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
   // likely to be slower than the default loader and may also exhibit unusual
   // behavior for non-standard Nexus files.
   return false;
+#else
+  bool useParallelLoader = getProperty("UseParallelLoader");
+  if (!useParallelLoader)
+    return false;
 #endif
   if (m_ws->nPeriods() != 1)
     return false;
