@@ -37,10 +37,9 @@ void MSDFit::setup() {
   m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
 
-  m_properties["Gaussian"] = createModel("MsdGauss", {"Intensity", "MSD"});
-  m_properties["Peters"] =
-      createModel("MsdPeters", {"Intensity", "MSD", "Beta"});
-  m_properties["Yi"] = createModel("MsdYi", {"Intensity", "MSD", "Sigma"});
+  m_properties["Gaussian"] = createModel("MsdGauss", {"Height", "MSD"});
+  m_properties["Peters"] = createModel("MsdPeters", {"Height", "MSD", "Beta"});
+  m_properties["Yi"] = createModel("MsdYi", {"Height", "MSD", "Sigma"});
 
   auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("MSDRange");
   m_dblManager->setValue(m_properties["StartX"],
@@ -254,7 +253,7 @@ void MSDFit::newDataLoaded(const QString wsName) {
 
   int maxWsIndex = 0;
 
-  if(workspace) {
+  if (workspace) {
     maxWsIndex = static_cast<int>(workspace->getNumberHistograms()) - 1;
   }
 
