@@ -101,7 +101,8 @@ void MSDFit::run() {
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(specMin) + "_to_s" + std::to_string(specMax) + "_" +
       model.toStdString() + "_msd";
-  m_parameterToProperty = createParameterToPropertyMap(model);
+  m_parameterToProperty =
+      createParameterToPropertyMap(m_properties[model]->propertyName());
 
   IAlgorithm_sptr msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), specMin, specMax);
@@ -124,7 +125,8 @@ void MSDFit::singleFit() {
   m_pythonExportWsName =
       dataName.left(dataName.lastIndexOf("_")).toStdString() + "_s" +
       std::to_string(fitSpec) + "_" + model.toStdString() + "_msd";
-  m_parameterToProperty = createParameterToPropertyMap(model);
+  m_parameterToProperty =
+      createParameterToPropertyMap(m_properties[model]->propertyName());
 
   IAlgorithm_sptr msdAlg =
       msdFitAlgorithm(modelToAlgorithmProperty(model), fitSpec, fitSpec);
@@ -360,7 +362,7 @@ void MSDFit::modelSelection(int selected) {
 QHash<QString, QString>
 MSDFit::createParameterToPropertyMap(const QString &model) {
   QHash<QString, QString> parameterToProperty;
-  parameterToProperty["Height"] = model + ".Intensity";
+  parameterToProperty["Height"] = model + ".Height";
   parameterToProperty["MSD"] = model + ".MSD";
 
   if (model == "Peters")
