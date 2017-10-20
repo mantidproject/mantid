@@ -53,7 +53,7 @@ private slots:
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
-  createFunction(bool tieCentres = false);
+  createFunction(bool tieCentres = false, bool addQValues = false);
   double
   getInstrumentResolution(Mantid::API::MatrixWorkspace_sptr workspaceName);
   QtProperty *createFitType(const QString &);

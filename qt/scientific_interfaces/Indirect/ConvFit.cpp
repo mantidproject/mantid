@@ -773,7 +773,8 @@ std::string createParName(size_t index, size_t subIndex,
  *
  * @returns the composite fitting function.
  */
-CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
+CompositeFunction_sptr ConvFit::createFunction(bool tieCentres,
+                                               bool addQValues) {
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
   CompositeFunction_sptr comp(new CompositeFunction);
@@ -867,6 +868,13 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
       functionName = "Lorentzian";
     }
     func = FunctionFactory::Instance().createFunction(functionName);
+    // If addQValues is true and the selected fit function is an inelastic
+    // diffusion function, add the Q-Values from the input workspace to the
+    // function.
+    if ((fitTypeIndex == 3 || fitTypeIndex == 4) && addQValues) {
+      func->setWorkspace(inputWorkspace());
+    }
+
     subIndex = product->addFunction(func);
     index = model->addFunction(product);
     prefix1 = createParName(index, subIndex);
@@ -1252,7 +1260,7 @@ void ConvFit::plotGuess() {
     extendResolutionWorkspace();
     bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
-                                       createFunction(tieCentres));
+                                       createFunction(tieCentres, true));
   } else {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
     m_uiForm.ckPlotGuess->setChecked(false);

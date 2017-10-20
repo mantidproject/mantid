@@ -66,10 +66,10 @@ void JumpFit::setup() {
 
   // Update plot Guess
   connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this,
-          SLOT(generatePlotGuess()));
+          SLOT(plotGuess()));
 
   connect(m_dblManager, SIGNAL(propertyChanged(QtProperty *)), this,
-          SLOT(generatePlotGuess()));
+          SLOT(plotGuess()));
 
   // Handle plotting and saving
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
@@ -400,7 +400,7 @@ void JumpFit::clearPlot() {
   }
 }
 
-void JumpFit::generatePlotGuess() {
+void JumpFit::plotGuess() {
   // Do nothing if there is not a sample
   if (m_uiForm.dsSample->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
     const QString functionName = m_uiForm.cbFunction->currentText();

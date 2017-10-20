@@ -38,9 +38,7 @@ private slots:
   /// Handles a fit algorithm being selected
   void fitFunctionSelected(const QString &functionName);
   /// Generates the plot guess data
-  void generatePlotGuess();
-  /// Add the plot guess to the mini plot
-  void plotGuess(bool error);
+  void plotGuess();
   /// Handles plotting and saving
   void saveClicked();
   void plotClicked();
