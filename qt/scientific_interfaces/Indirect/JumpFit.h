@@ -46,7 +46,7 @@ private slots:
 protected:
   /// Creates the algorithm to use in fitting.
   Mantid::API::IAlgorithm_sptr
-  JumpFit::createFitAlgorithm(Mantid::API::IFunction_sptr func);
+  createFitAlgorithm(Mantid::API::IFunction_sptr func);
 
 private:
   /// Gets a list of parameter names for a given fit function
@@ -54,7 +54,7 @@ private:
 
   /// Creates the function for fitting
   Mantid::API::IFunction_sptr
-  JumpFit::createFunction(const QString &functionName);
+  createFunction(const QString &functionName);
 
   /// Clears the mini plot of data excluding sample
   void clearPlot();
