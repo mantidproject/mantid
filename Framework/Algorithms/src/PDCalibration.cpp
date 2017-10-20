@@ -543,11 +543,11 @@ void PDCalibration::exec() {
   API::AnalysisDataService::Instance().addOrReplace(
       partials_prefix + "_dspacing", m_peakPositionTable);
   diagnosticGroup->addWorkspace(m_peakPositionTable);
-  API::AnalysisDataService::Instance().addOrReplace(
-      partials_prefix + "_width", m_peakWidthTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_width",
+                                                    m_peakWidthTable);
   diagnosticGroup->addWorkspace(m_peakWidthTable);
-  API::AnalysisDataService::Instance().addOrReplace(
-      partials_prefix + "_height", m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(partials_prefix + "_height",
+                                                    m_peakHeightTable);
   diagnosticGroup->addWorkspace(m_peakHeightTable);
   setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
@@ -1058,7 +1058,8 @@ void PDCalibration::createInformationWorkspaces() {
   }
 }
 
-API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
+API::ITableWorkspace_sptr
+PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
   auto alg = createChildAlgorithm("SortTableWorkspace");
   alg->setLoggingOffset(1);
   alg->setProperty("InputWorkspace", table);
