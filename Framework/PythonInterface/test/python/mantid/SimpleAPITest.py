@@ -454,5 +454,12 @@ class SimpleAPITest(unittest.TestCase):
         self.assertTrue(out)
         self.assertTrue('out' not in mtd)
 
+    def test_same_var_name_with_and_without_ADS(self):
+        from mantid.simpleapi import CreateSampleWorkspace
+        ws = CreateSampleWorkspace() # in ADS
+        ws = CreateSampleWorkspace(StoreInADS=False) # not in ADS
+        mtd.remove('ws')
+        self.assertTrue(ws)
+
 if __name__ == '__main__':
     unittest.main()
