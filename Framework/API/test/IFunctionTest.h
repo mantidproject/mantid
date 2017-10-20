@@ -7,38 +7,59 @@
 
 using namespace Mantid::API;
 
-class MockFunction: public IFunction {
+class MockFunction : public IFunction {
 public:
-  MockFunction() : IFunction(), m_parameterValues(4),
-    m_parameterIndexes{{"A", 0}, {"B", 1}, {"C", 2}, {"D", 3}},
-    m_parameterNames{{0, "A"}, {1, "B"}, {2, "C"}, {3, "D"}},
-    m_parameterStatus{Active, Active, Active, Active}
-    {}
-  std::string name() const {return "MockFunction";}
-  void function(const Mantid::API::FunctionDomain &,Mantid::API::FunctionValues &) const {}
-  void setParameter(const std::string &parName, const double &value, bool = true) {m_parameterValues[m_parameterIndexes.find(parName)->second] = value;}
-  void setParameter(std::size_t index,const double &value, bool = true) {m_parameterValues[index] = value;}
-  void setParameterDescription(const std::string &,const std::string &) {}
-  void setParameterDescription(std::size_t,const std::string &) {}
-  double getParameter(const std::string &parName) const {return m_parameterValues[m_parameterIndexes.find(parName)->second];}
-  double getParameter(std::size_t index) const {return m_parameterValues[index];}
-  bool hasParameter(const std::string &parName) const {return m_parameterIndexes.count(parName) > 0; }
-  size_t nParams() const {return m_parameterValues.size();}
-  size_t parameterIndex(const std::string &parName) const {return m_parameterIndexes.find(parName)->second;}
-  std::string parameterName(std::size_t index) const {return m_parameterNames.find(index)->second;}
-  std::string parameterDescription(std::size_t) const {return "";}
-  bool isExplicitlySet(std::size_t) const {return true;}
-  double getError(std::size_t) const {return 0.0;}
-  void setError(std::size_t,double) {}
+  MockFunction()
+      : IFunction(), m_parameterValues(4),
+        m_parameterIndexes{{"A", 0}, {"B", 1}, {"C", 2}, {"D", 3}},
+        m_parameterNames{{0, "A"}, {1, "B"}, {2, "C"}, {3, "D"}},
+        m_parameterStatus{Active, Active, Active, Active} {}
+  std::string name() const { return "MockFunction"; }
+  void function(const Mantid::API::FunctionDomain &,
+                Mantid::API::FunctionValues &) const {}
+  void setParameter(const std::string &parName, const double &value,
+                    bool = true) {
+    m_parameterValues[m_parameterIndexes.find(parName)->second] = value;
+  }
+  void setParameter(std::size_t index, const double &value, bool = true) {
+    m_parameterValues[index] = value;
+  }
+  void setParameterDescription(const std::string &, const std::string &) {}
+  void setParameterDescription(std::size_t, const std::string &) {}
+  double getParameter(const std::string &parName) const {
+    return m_parameterValues[m_parameterIndexes.find(parName)->second];
+  }
+  double getParameter(std::size_t index) const {
+    return m_parameterValues[index];
+  }
+  bool hasParameter(const std::string &parName) const {
+    return m_parameterIndexes.count(parName) > 0;
+  }
+  size_t nParams() const { return m_parameterValues.size(); }
+  size_t parameterIndex(const std::string &parName) const {
+    return m_parameterIndexes.find(parName)->second;
+  }
+  std::string parameterName(std::size_t index) const {
+    return m_parameterNames.find(index)->second;
+  }
+  std::string parameterDescription(std::size_t) const { return ""; }
+  bool isExplicitlySet(std::size_t) const { return true; }
+  double getError(std::size_t) const { return 0.0; }
+  void setError(std::size_t, double) {}
   size_t getParameterIndex(const Mantid::API::ParameterReference &ref) const {
     if (ref.getLocalFunction() == this && ref.getLocalIndex() < nParams()) {
       return ref.getLocalIndex();
     }
     return nParams();
   }
-  void setParameterStatus(std::size_t index, ParameterStatus status) {m_parameterStatus[index] = status;}
-  ParameterStatus getParameterStatus(std::size_t index) const {return m_parameterStatus[index];}
-  void declareParameter(const std::string &,double,const std::string &) {}
+  void setParameterStatus(std::size_t index, ParameterStatus status) {
+    m_parameterStatus[index] = status;
+  }
+  ParameterStatus getParameterStatus(std::size_t index) const {
+    return m_parameterStatus[index];
+  }
+  void declareParameter(const std::string &, double, const std::string &) {}
+
 private:
   std::vector<double> m_parameterValues;
   std::map<std::string, size_t> m_parameterIndexes;
@@ -50,9 +71,7 @@ class IFunctionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static IFunctionTest *createSuite() {
-    return new IFunctionTest();
-  }
+  static IFunctionTest *createSuite() { return new IFunctionTest(); }
   static void destroySuite(IFunctionTest *suite) { delete suite; }
 
   void testTie() {
@@ -113,7 +132,6 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("C"), 0.0);
     TS_ASSERT_EQUALS(fun.getParameter("D"), 0.0);
   }
-
 };
 
 #endif /* MANTID_API_IFUNCTIONTEST_H_*/
