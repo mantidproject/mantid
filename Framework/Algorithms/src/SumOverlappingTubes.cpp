@@ -263,10 +263,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       double angle;
       if (outputType == "2D")
-        angle = -atan2(pos.X(), pos.Z());
+        angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
       else if (outputType == "2DStraight")
-        angle = specInfo.twoTheta(i);
-      angle *= 180.0 / M_PI;
+        angle = specInfo.twoTheta(i) * 180.0 / M_PI;
 
       size_t angleIndex = size_t(
           (angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
