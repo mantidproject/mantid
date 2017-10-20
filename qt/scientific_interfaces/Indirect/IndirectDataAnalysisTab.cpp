@@ -155,9 +155,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectra)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectra)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectra);
   }
@@ -267,7 +266,7 @@ void IndirectDataAnalysisTab::updatePlotRange(
     auto rangeSelector = previewPlot->getRangeSelector(rangeName);
     setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
                          m_properties[endRangePropName], curveRange);
-  } catch (std::invalid_argument &exc) {
+  } catch (std::exception &exc) {
     showMessageBox(exc.what());
   }
 }
