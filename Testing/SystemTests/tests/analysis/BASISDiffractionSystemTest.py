@@ -30,13 +30,7 @@ class OrientedSampleTest(stresstesting.MantidStressTest):
     def requiredFiles(self):
         return ['BASIS_Mask_default_diff.xml',
                 'BSS_74799_event.nxs',
-
                 'BSS_74800_event.nxs',
-
-                'BSS_74801_event.nxs',
-                'BSS_74802_event.nxs',
-                'BSS_74803_event.nxs',
-                'BSS_74804_event.nxs',
                 'BSS_64642_event.nxs',
                 'BSS_75527_event.nxs',
                 'BASISOrientedSample.nxs']
