@@ -7,16 +7,18 @@
 
 using namespace Mantid::Parallel::IO;
 using Mantid::Types::Core::DateAndTime;
-using Event = detail::Event<double>;
 namespace Mantid {
 namespace Parallel {
 namespace IO {
-bool operator==(const Event &a, const Event &b) {
+namespace detail {
+bool operator==(const Event<double> &a, const Event<double> &b) {
   return a.index == b.index && a.tof == b.tof && a.pulseTime == b.pulseTime;
 }
 }
 }
 }
+}
+using Event = detail::Event<double>;
 
 class EventDataPartitionerTest : public CxxTest::TestSuite {
 public:
