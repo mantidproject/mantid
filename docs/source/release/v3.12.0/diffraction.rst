@@ -14,6 +14,7 @@ Powder Diffraction
 
 Engineering Diffraction
 -----------------------
+ - Fixed a bug where the engineering diffraction GUI could hang when performing a long running file search.
 
 Single Crystal Diffraction
 --------------------------
