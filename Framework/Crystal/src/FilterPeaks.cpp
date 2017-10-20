@@ -104,7 +104,7 @@ void FilterPeaks::exec() {
   else
     throw std::invalid_argument("Unknown FilterVariable: " + filterVariable);
 
-  const double FilterValue = getProperty("FilterValue");
+  const double filterValue = getProperty("FilterValue");
   const std::string Operator = getProperty("Operator");
 
   for (int i = 0; i < inputWS->getNumberPeaks(); ++i) {
@@ -114,15 +114,15 @@ void FilterPeaks::exec() {
         filterFunction(currentPeak); // filterFunction pointer set above
 
     if (Operator == "<")
-      pass = (currentValue < FilterValue);
+      pass = (currentValue < filterValue);
     else if (Operator == ">")
-      pass = (currentValue > FilterValue);
+      pass = (currentValue > filterValue);
     else if (Operator == "=")
-      pass = (currentValue == FilterValue);
+      pass = (currentValue == filterValue);
     else if (Operator == "<=")
-      pass = (currentValue <= FilterValue);
+      pass = (currentValue <= filterValue);
     else if (Operator == ">=")
-      pass = (currentValue >= FilterValue);
+      pass = (currentValue >= filterValue);
 
     if (pass)
       filteredWS->addPeak(currentPeak);
