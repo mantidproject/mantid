@@ -172,5 +172,9 @@ ONE_CHARACTER = 1
 EOF = b""
 
 ROTATIONS_AND_TRANSLATIONS = 6
-MASS_EPS = 1e-2
+
+# This constant is used to check whether for the given atom mass averaged over all isotopes or mass of the
+# specific isotope is used.
+MASS_EPS = 1e-2  # in amu units.
+
 ONLY_ONE_MASS = 1
