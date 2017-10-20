@@ -251,7 +251,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
                         if '_ws' not in self._temps.workspaces:
                             self._temps.workspaces.append('_ws')
                     message = 'Pre-processing background: {} of {}'.\
-                        format(i, len(bkg_run_numbers))
+                        format(i+1, len(bkg_run_numbers))
                     background_reporter.report(message)
                 SetGoniometer(self._bkg, Axis0='0,0,1,0,1')
                 self._bkg_scale = self.getProperty('BackgroundScale').value
@@ -269,7 +269,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
                 for i, run in enumerate(run_numbers):
                     self._vanadium_files.append(self._save_t0(run))
                     message = 'Pre-processing vanadium: {} of {}'. \
-                        format(i, len(run_numbers))
+                        format(i+1, len(run_numbers))
                     vanadium_reporter.report(message)
                 vanadium_reporter.report(len(run_numbers), 'Done')
 
@@ -391,7 +391,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
                           if mtd.doesExist('_t_bkg_norm') else None,
                           **mdn_args)
             message = 'Processing sample {} of {}'.\
-                format(i_run, len(run_numbers))
+                format(i_run+1, len(run_numbers))
             diffraction_reporter.report(message)
         self._temps.workspaces.append('PreprocessedDetectorsWS')  # to remove
         # Iteration over the sample runs is done.
