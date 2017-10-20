@@ -299,9 +299,9 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         fig.labels['title']=prob.name[:-4]+" "+str(count)
         fig.title_size=10
         fit_result= msapi.Fit(user_func, wks, Output='ws_fitting_test',
-                          Minimizer='Levenberg-Marquardt',
-                          CostFunction='Least squares',IgnoreInvalidData=True,
-                          StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
+                              Minimizer='Levenberg-Marquardt',
+                              CostFunction='Least squares',IgnoreInvalidData=True,
+                              StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
         tmp=msapi.ConvertToPointData(fit_result.OutputWorkspace)
         xData = tmp.readX(1)
         yData = tmp.readY(1)
@@ -356,10 +356,10 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
             ignore_invalid = False
 
         fit_result = msapi.Fit(function, wks, Output='ws_fitting_test',
-                           Minimizer=minimizer,
-                           CostFunction=cost_function,
-                           IgnoreInvalidData=ignore_invalid,
-                           StartX=prob.start_x, EndX=prob.end_x)
+                               Minimizer=minimizer,
+                               CostFunction=cost_function,
+                               IgnoreInvalidData=ignore_invalid,
+                               StartX=prob.start_x, EndX=prob.end_x)
 
         calc_chi2 = msapi.CalculateChiSquared(Function=function,
                                               InputWorkspace=wks, IgnoreInvalidData=ignore_invalid)
