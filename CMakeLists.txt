@@ -13,7 +13,9 @@ set ( SYSTEM_PACKAGE_TARGET "")
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 
-set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the gui components")
+set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & components")
+# TODO: Switch this on by default when the builders all have Qt5 installed
+set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
 
 SET (CPACK_INSTALL_CMAKE_PROJECTS
      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
@@ -108,6 +110,13 @@ if (ENABLE_MANTIDPLOT)
   separate_arguments ( PYQT4_SIP_FLAGS )
 endif()
 
+if (ENABLE_WORKBENCH)
+  find_package ( Qt5 COMPONENTS Widgets REQUIRED )
+  find_package ( PyQt5 REQUIRED )
+  find_package ( SIP REQUIRED )
+  separate_arguments ( PYQT5_SIP_FLAGS )
+endif()
+
 ###########################################################################
 # gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
 ###########################################################################
@@ -166,19 +175,22 @@ if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
-if (ENABLE_MANTIDPLOT)
+if ( ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH )
   add_custom_target ( GUITests )
   add_dependencies ( check GUITests )
   # Collect all tests together
   add_custom_target ( AllTests )
   add_dependencies ( AllTests FrameworkTests GUITests )
   add_subdirectory ( qt )
+endif()
+
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( MantidPlot )
 endif()
 
 add_subdirectory ( scripts )
 
-if (ENABLE_MANTIDPLOT)
+if ( ENABLE_MANTIDPLOT )
   add_subdirectory ( docs )
 endif()
 
