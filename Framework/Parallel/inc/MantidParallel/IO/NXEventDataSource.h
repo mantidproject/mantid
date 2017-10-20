@@ -38,8 +38,7 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <class TimeOffsetType>
-class NXEventDataSource {
+template <class TimeOffsetType> class NXEventDataSource {
 public:
   virtual ~NXEventDataSource() = default;
 
