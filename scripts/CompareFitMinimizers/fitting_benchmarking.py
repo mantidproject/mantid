@@ -298,11 +298,11 @@ def do_fitting_benchmark_one_problem(prob, minimizers, use_errors=True,count=0,p
         #fig.labels['y']="something "
         fig.labels['title']=prob.name[:-4]+" "+str(count)
         fig.title_size=10
-        status= msapi.Fit(user_func, wks, Output='ws_fitting_test',
+        fit_result= msapi.Fit(user_func, wks, Output='ws_fitting_test',
                           Minimizer='Levenberg-Marquardt',
                           CostFunction='Least squares',IgnoreInvalidData=True,
                           StartX=prob.start_x, EndX=prob.end_x,MaxIterations=0)
-        tmp=msapi.ConvertToPointData(status.OutputWorkspace)
+        tmp=msapi.ConvertToPointData(fit_result.OutputWorkspace)
         xData = tmp.readX(1)
         yData = tmp.readY(1)
         startData=data("Start Guess",xData,yData)
@@ -345,7 +345,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     @returns the fitted parameter values and error estimates for these
     """
-    status = None
+    fit_result = None
     param_tbl = None
     try:
         # When using 'Least squares' (weighted by errors), ignore nans and zero errors, but don't
@@ -355,7 +355,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         if 'WISH17701' in prob.name:
             ignore_invalid = False
 
-        status = msapi.Fit(function, wks, Output='ws_fitting_test',
+        fit_result = msapi.Fit(function, wks, Output='ws_fitting_test',
                            Minimizer=minimizer,
                            CostFunction=cost_function,
                            IgnoreInvalidData=ignore_invalid,
@@ -367,7 +367,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
 
     except RuntimeError as rerr:
         print("Warning, Fit probably failed. Going on. Error: {0}".format(str(rerr)))
-    param_tbl = status.OutputParameters
+    param_tbl = fit_result.OutputParameters
     if param_tbl:
         params = param_tbl.column(1)[:-1]
         errors = param_tbl.column(2)[:-1]
@@ -375,7 +375,7 @@ def run_fit(wks, prob, function, minimizer='Levenberg-Marquardt', cost_function=
         params = None
         errors = None
 
-    return status.OutputStatus, status.OutputChi2overDoF, status.OutputWorkspace, params, errors
+    return fit_result.OutputStatus, fit_result.OutputChi2overDoF, fit_result.OutputWorkspace, params, errors
 
 
 def prepare_wks_cost_function(prob, use_errors):
