@@ -72,6 +72,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/MatrixSizeDialog.cpp
                    src/MatrixValuesDialog.cpp
                    src/MdiSubWindow.cpp
+                   src/MdPlottingCmapsProvider.cpp
                    src/MultiLayer.cpp
                    src/MultiPeakFit.cpp
                    src/MultiPeakFitTool.cpp
@@ -269,6 +270,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/MatrixSizeDialog.h
                    src/MatrixValuesDialog.h
                    src/MdiSubWindow.h
+                   src/MdPlottingCmapsProvider.h
                    src/MultiLayer.h
                    src/MultiPeakFit.h
                    src/MultiPeakFitTool.h
@@ -674,13 +676,12 @@ endif()
 include_directories ( SYSTEM ${MUPARSER_INCLUDE_DIR} )
 include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 find_package ( QwtPlot3d REQUIRED )
 include_directories ( SYSTEM ${QWTPLOT3D_INCLUDE_DIR} )
 
-find_package ( QScintilla REQUIRED )
-include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+find_package ( QScintillaQt4 REQUIRED )
 
 ###########################################################################
 # Now create the target and add its dependencies and flags
@@ -790,19 +791,19 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
-            MantidQtWidgetsCommon
-            MantidQtWidgetsInstrumentView
-            MantidQtWidgetsSliceViewer
-            MantidQtWidgetsFactory
-            MantidQtWidgetsSpectrumViewer
+            MantidQtWidgetsCommonQt4
+            MantidQtWidgetsFactoryQt4
+            MantidQtWidgetsInstrumentViewQt4
+            MantidQtWidgetsSliceViewerQt4
+            MantidQtWidgetsSpectrumViewerQt4
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GSL_LIBRARIES}
             ${MUPARSER_LIBRARIES}
             ${QT_LIBRARIES}
-            ${QWT_LIBRARIES}
+            ${QWT5_LIBRARIES}
             ${QWTPLOT3D_LIBRARIES}
-            ${QSCINTILLA_LIBRARIES}
+            Qt4::Qscintilla
             ${PYTHON_LIBRARIES}
             ${ZLIB_LIBRARIES}
             ${OPENGL_LIBRARIES}
@@ -810,7 +811,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 
 if(MAKE_VATES)
   target_include_directories( MantidPlot SYSTEM PRIVATE ${PARAVIEW_INCLUDE_DIRS} )
-  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering )
+  target_link_libraries ( MantidPlot LINK_PRIVATE vtkPVClientServerCoreRendering vtkPVServerManagerRendering ${vtkjsoncpp_LIBRARIES})
 endif()
 
 if (WITH_ASAN)

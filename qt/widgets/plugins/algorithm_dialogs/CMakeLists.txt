@@ -16,9 +16,6 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/SortTableWorkspaceDialog.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES )
-
-
 set ( MOC_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtWidgets/Plugins/AlgorithmDialogs/ConvertTableToMatrixWorkspaceDialog.h
@@ -56,37 +53,23 @@ set ( UI_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog
 
 include_directories ( inc inc/MantidQtWidgets/Plugins/AlgorithmDialogs )
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS -p.)
-
-set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(MantidQtWidgetsPluginsAlgorithmDialogs SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
-# Use a precompiled header where they are supported
-enable_precompiled_headers( inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h ALL_SRC )
-add_library ( MantidQtWidgetsPluginsAlgorithmDialogs ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
-
-if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties ( MantidQtWidgetsPluginsAlgorithmDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
-endif () 
-
-target_link_libraries ( MantidQtWidgetsPluginsAlgorithmDialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
-            MantidQtWidgetsCommon
-            ${CORE_MANTIDLIBS}
-            ${QT_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${OPENGL_LIBRARIES}
-            )
-
-###########################################################################
-# Installation settings
-###########################################################################
-
-install ( TARGETS MantidQtWidgetsPluginsAlgorithmDialogs ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
+mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  PRECOMPILED
+    inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      ${CORE_MANTIDLIBS}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${QT_LIBRARIES}
+      ${OPENGL_LIBRARIES}
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+  OSX_INSTALL_RPATH
+    "@loader_path/../../../Contents/MacOS"
+  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
+)

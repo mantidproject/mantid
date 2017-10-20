@@ -104,7 +104,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtButtonPropertyBrowser
     : public QtAbstractPropertyBrowser {
   Q_OBJECT
 public:
-  QtButtonPropertyBrowser(QWidget *parent = 0);
+  QtButtonPropertyBrowser(QWidget *parent = nullptr);
   ~QtButtonPropertyBrowser() override;
 
   void setExpanded(QtBrowserItem *item, bool expanded);
@@ -148,8 +148,9 @@ public:
 
   struct WidgetItem {
     WidgetItem()
-        : widget(0), label(0), widgetLabel(0), button(0), container(0),
-          layout(0), /*line(0), */ parent(0), expanded(false) {}
+        : widget(nullptr), label(nullptr), widgetLabel(nullptr),
+          button(nullptr), container(nullptr), layout(nullptr),
+          /*line(0), */ parent(nullptr), expanded(false) {}
     QWidget *widget;     // can be null
     QLabel *label;       // main label with property name
     QLabel *widgetLabel; // label substitute showing the current value if there
@@ -171,7 +172,7 @@ private:
   int gridRow(WidgetItem *item) const;
   int gridSpan(WidgetItem *item) const;
   void setExpanded(WidgetItem *item, bool expanded);
-  QToolButton *createButton(QWidget *panret = 0) const;
+  QToolButton *createButton(QWidget *panret = nullptr) const;
 
   QMap<QtBrowserItem *, WidgetItem *> m_indexToItem;
   QMap<WidgetItem *, QtBrowserItem *> m_itemToIndex;

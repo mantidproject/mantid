@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 
-#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MdPlottingCmapsProvider.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 
@@ -13,8 +13,6 @@
 #include "vtk_jsoncpp.h"
 #endif
 
-namespace MantidQt {
-namespace API {
 namespace {
 /// Static logger
 Mantid::Kernel::Logger g_log("MdViewerWidget");
@@ -116,6 +114,4 @@ MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
   }
 
   return indexVector;
-}
-}
 }
