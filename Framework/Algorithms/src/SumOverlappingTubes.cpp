@@ -183,6 +183,10 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     m_endScatteringAngle = scatteringBinning[2];
   }
 
+  const std::string outputType = getProperty("OutputType");
+  if (outputType == "2DStraight" && m_startScatteringAngle < 0)
+    m_startScatteringAngle = 0.0;
+
   m_numPoints = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
                          m_stepScatteringAngle)) +
                 1;
