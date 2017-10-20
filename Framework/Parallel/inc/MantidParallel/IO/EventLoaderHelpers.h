@@ -111,29 +111,22 @@ void load(const Communicator &comm, const H5::Group &group,
   load<TimeOffsetType>(chunker, loader, consumer);
 }
 
-template <class... T1, class... T2>
-void load(const H5::DataType &type, T2 &&... args) {
-  // Translate from H5::DataType to actual type. Done step by step to avoid
-  // combinatoric explosion. The T1 parameter pack holds the final template
-  // arguments we want. The T2 parameter pack represents the remaining
-  // H5::DataType arguments and any other arguments. In every call we peel off
-  // the first entry from the T2 pack and append it to T1. This stops once the
-  // next argument in args is not of type H5::DataType anymore, allowing us to
-  // pass arbitrary extra arguments in the second part of args.
+/// Translate from H5::DataType to actual type, forward to load implementation.
+template <class... T> void load(const H5::DataType &type, T &&... args) {
   if (type == H5::PredType::NATIVE_INT32)
-    return load<T1..., int32_t>(args...);
+    return load<int32_t>(args...);
   if (type == H5::PredType::NATIVE_INT64)
-    return load<T1..., int64_t>(args...);
+    return load<int64_t>(args...);
   if (type == H5::PredType::NATIVE_UINT32)
-    return load<T1..., uint32_t>(args...);
+    return load<uint32_t>(args...);
   if (type == H5::PredType::NATIVE_UINT64)
-    return load<T1..., uint64_t>(args...);
+    return load<uint64_t>(args...);
   if (type == H5::PredType::NATIVE_FLOAT)
-    return load<T1..., float>(args...);
+    return load<float>(args...);
   if (type == H5::PredType::NATIVE_DOUBLE)
-    return load<T1..., double>(args...);
+    return load<double>(args...);
   throw std::runtime_error(
-      "Unsupported H5::DataType for entry in NXevent_data");
+      "Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
 }
 

@@ -172,7 +172,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
         std::string(e.what()),
-        "Unsupported H5::DataType for entry in NXevent_data");
+        "Unsupported H5::DataType for event_time_offset in NXevent_data");
   }
 
   void test_load() {
