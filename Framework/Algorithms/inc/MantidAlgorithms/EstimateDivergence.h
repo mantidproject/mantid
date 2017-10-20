@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** EstimateDivergence : TODO: DESCRIPTION
+/** EstimateDivergence : Calculate the instrument divergence according to Windsor.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
