@@ -1,7 +1,6 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/Logger.h"
 
 #include <algorithm>
 #include <iterator>
@@ -9,10 +8,6 @@
 
 namespace Mantid {
 namespace DataObjects {
-namespace {
-/// static logger
-Kernel::Logger g_log("RebinnedOutput");
-}
 
 DECLARE_WORKSPACE(RebinnedOutput)
 
@@ -103,19 +98,12 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
   if (m_finalized) {
     return;
   }
-  g_log.debug() << "Starting finalize procedure.\n";
   std::size_t nHist = this->getNumberHistograms();
-  g_log.debug() << "Number of histograms: " << nHist << '\n';
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (std::size_t i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
-
-    g_log.debug() << "Data (" << i << "): ";
-    std::copy(data.begin(), data.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
-
     std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                    std::divides<double>());
     if (hasSqrdErrs) {
@@ -128,14 +116,6 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
       std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                      std::divides<double>());
     }
-    g_log.debug() << "Data Final(" << i << "): ";
-    std::copy(data.begin(), data.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
-    g_log.debug() << "FArea (" << i << "): ";
-    std::copy(frac.begin(), frac.end(),
-              std::ostream_iterator<double>(g_log.debug(), " "));
-    g_log.debug() << '\n';
   }
   // Sets flag so subsequent algorithms know to correctly treat data
   m_finalized = true;
@@ -151,6 +131,7 @@ void RebinnedOutput::unfinalize(bool hasSqrdErrs) {
     return;
   }
   std::size_t nHist = this->getNumberHistograms();
+  PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (std::size_t i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
