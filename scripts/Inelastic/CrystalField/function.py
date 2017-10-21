@@ -433,7 +433,7 @@ class ResolutionModel:
             x = self._mergeArrays(x, xx)
             y = self._mergeArrays(y, yy)
             n = len(x)
-        return x, y
+        return list(x), list(y)
 
 
 class PhysicalProperties(object):

@@ -26,7 +26,7 @@ def makeWorkspace(xArray, yArray):
 
 
 def islistlike(arg):
-    return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__"))
+    return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
 
 
 #pylint: disable=too-many-instance-attributes,too-many-public-methods
@@ -1088,226 +1088,6 @@ class CrystalFieldSite(object):
                                      abundances=abundances, parameters=params)
 
 
-class CrystalFieldMulti(object):
-    """CrystalFieldMulti represents crystal field of multiple ions."""
-
-    def __init__(self, *args):
-        self.sites = []
-        self.abundances = []
-        for arg in args:
-            if isinstance(arg, CrystalField):
-                self.sites.append(arg)
-                self.abundances.append(1.0)
-            elif isinstance(arg, CrystalFieldSite):
-                self.sites.append(arg.crystalField)
-                self.abundances.append(arg.abundance)
-            else:
-                raise RuntimeError('Cannot include an object of type %s into a CrystalFieldMulti' % type(arg))
-        self._ties = {}
-
-    def makeSpectrumFunction(self):
-        fun = ';'.join([a.makeSpectrumFunction() for a in self.sites])
-        fun += self._makeIntensityScalingTies()
-        ties = self.getTies()
-        if len(ties) > 0:
-            fun += ';ties=(%s)' % ties
-        return 'composite=CompositeFunction,NumDeriv=1;' + fun
-
-    def makePhysicalPropertiesFunction(self):
-        # Handles relative intensities. Scaling factors here a fixed attributes not
-        # variable parameters and we require the sum to be unity.
-        factors = np.array(self.abundances)
-        sum_factors = np.sum(factors)
-        factstr = [',ScaleFactor=%s' % (str(factors[i] / sum_factors)) for i in range(len(self.sites))]
-        fun = ';'.join([a.makePhysicalPropertiesFunction()+factstr[i] for a,i in enumerate(self.sites)])
-        ties = self.getTies()
-        if len(ties) > 0:
-            fun += ';ties=(%s)' % ties
-        return fun
-
-    def makeMultiSpectrumFunction(self):
-        fun = ';'.join([a.makeMultiSpectrumFunction() for a in self.sites])
-        fun += self._makeIntensityScalingTiesMulti()
-        ties = self.getTies()
-        if len(ties) > 0:
-            fun += ';ties=(%s)' % ties
-        return 'composite=CompositeFunction,NumDeriv=1;' + fun
-
-    def ties(self, **kwargs):
-        """Set ties on the parameters."""
-        for tie in kwargs:
-            self._ties[tie] = kwargs[tie]
-
-    def getTies(self):
-        ties = ['%s=%s' % item for item in self._ties.items()]
-        return ','.join(ties)
-
-    def getSpectrum(self, i=0, workspace=None, ws_index=0):
-        tt = []
-        for site in self.sites:
-            tt = tt + (list(site.Temperature) if islistlike(site.Temperature) else [site.Temperature])
-        if any([val < 0 for val in tt]):
-            raise RuntimeError('You must first define a temperature for the spectrum')
-        largest_abundance= max(self.abundances)
-        if workspace is not None:
-            xArray, yArray = self.sites[0].getSpectrum(i, workspace, ws_index)
-            yArray *= self.abundances[0] / largest_abundance
-            ia = 1
-            for arg in self.sites[1:]:
-                _, yyArray = arg.getSpectrum(i, workspace, ws_index)
-                yArray += yyArray * self.abundances[ia] / largest_abundance
-                ia += 1
-            return xArray, yArray
-        x_min = 0.0
-        x_max = 0.0
-        for arg in self.sites:
-            xmin, xmax = arg.calc_xmin_xmax(i)
-            if xmin < x_min:
-                x_min = xmin
-            if xmax > x_max:
-                x_max = xmax
-        xArray = np.linspace(x_min, x_max, CrystalField.default_spectrum_size)
-        _, yArray = self.sites[0].getSpectrum(i, xArray, ws_index)
-        yArray *= self.abundances[0] / largest_abundance
-        ia = 1
-        for arg in self.sites[1:]:
-            _, yyArray = arg.getSpectrum(i, xArray, ws_index)
-            yArray += yyArray * self.abundances[ia] / largest_abundance
-            ia += 1
-        return xArray, yArray
-
-    def update(self, func):
-        nFunc = func.nFunctions()
-        assert nFunc == len(self.sites)
-        for i in range(nFunc):
-            self.sites[i].update(func[i])
-
-    def update_multi(self, func):
-        nFunc = func.nFunctions()
-        assert nFunc == len(self.sites)
-        for i in range(nFunc):
-            self.sites[i].update_multi(func[i])
-
-    def _makeIntensityScalingTies(self):
-        """
-        Make a tie string that ties IntensityScaling's of the sites according to their abundances.
-        """
-        n_sites = len(self.sites)
-        if n_sites < 2:
-            return ''
-        factors = np.array(self.abundances)
-        i_largest = np.argmax(factors)
-        largest_factor = factors[i_largest]
-        tie_template = 'f%s.IntensityScaling=%s*' + 'f%s.IntensityScaling' % i_largest
-        ties = []
-        for i in range(n_sites):
-            if i != i_largest:
-                ties.append(tie_template % (i, factors[i] / largest_factor))
-        s = ';ties=(%s)' % ','.join(ties)
-        return s
-
-    def _makeIntensityScalingTiesMulti(self):
-        """
-        Make a tie string that ties IntensityScaling's of the sites according to their abundances.
-        """
-        n_sites = len(self.sites)
-        if n_sites < 2:
-            return ''
-        factors = np.array(self.abundances)
-        i_largest = np.argmax(factors)
-        largest_factor = factors[i_largest]
-        tie_template = 'f{1}.IntensityScaling{0}={2}*f%s.IntensityScaling{0}' % i_largest
-        ties = []
-        n_spectra = self.sites[0].NumberOfSpectra
-        for spec in range(n_spectra):
-            for i in range(n_sites):
-                if i != i_largest:
-                    ties.append(tie_template.format(spec, i, factors[i] / largest_factor))
-        s = ';ties=(%s)' % ','.join(ties)
-        return s
-
-    @property
-    def isPhysicalPropertyOnly(self):
-        return all([a.isPhysicalPropertyOnly for a in self.sites])
-
-    @property
-    def PhysicalProperty(self):
-        return [a.PhysicalProperty for a in self.sites]
-
-    @PhysicalProperty.setter
-    def PhysicalProperty(self, value):
-        for a in self.sites:
-            a.PhysicalProperty = value
-
-    @property
-    def NumberOfSpectra(self):
-        """ Returns the number of expected workspaces """
-        num_spec = []
-        for site in self.sites:
-            num_spec.append(site.NumberOfSpectra)
-        if len(set(num_spec)) > 1:
-            raise ValueError('Number of spectra for each site not consistent with each other')
-        return num_spec[0]
-
-    @property
-    def Temperature(self):
-        tt = []
-        for site in self.sites:
-            tt.append([val for val in (site.Temperature if islistlike(site.Temperature) else [site.Temperature])])
-        if len(set([tuple(val) for val in tt])) > 1:
-            raise ValueError('Temperatures of spectra for each site not consistent with each other')
-        return tt[0]
-
-    @Temperature.setter
-    def Temperature(self, value):
-        for site in self.sites:
-            site.Temperature = value
-
-    def __add__(self, other):
-        if isinstance(other, CrystalFieldMulti):
-            cfm = CrystalFieldMulti()
-            cfm.sites += self.sites + other.sites
-            cfm.abundances += self.abundances + other.abundances
-            return cfm
-        elif isinstance(other, CrystalField):
-            cfm = CrystalFieldMulti()
-            cfm.sites += self.sites + [other]
-            cfm.abundances += self.abundances + [1]
-            return cfm
-        elif isinstance(other, CrystalFieldSite):
-            cfm = CrystalFieldMulti()
-            cfm.sites += self.sites + [other.crystalField]
-            cfm.abundances += self.abundances + [other.abundance]
-            return cfm
-        else:
-            raise TypeError('Cannot add %s to CrystalFieldMulti' % other.__class__.__name__)
-
-    def __radd__(self, other):
-        if isinstance(other, CrystalFieldMulti):
-            cfm = CrystalFieldMulti()
-            cfm.sites += other.sites + self.sites
-            cfm.abundances += other.abundances + self.abundances
-            return cfm
-        elif isinstance(other, CrystalField):
-            cfm = CrystalFieldMulti()
-            cfm.sites += [other] + self.sites
-            cfm.abundances += [1] + self.abundances
-            return cfm
-        elif isinstance(other, CrystalFieldSite):
-            cfm = CrystalFieldMulti()
-            cfm.sites += [other.crystalField] + self.sites
-            cfm.abundances += [other.abundance] + self.abundances
-            return cfm
-        else:
-            raise TypeError('Cannot add %s to CrystalFieldMulti' % other.__class__.__name__)
-
-    def __len__(self):
-        return len(self.sites)
-
-    def __getitem__(self, item):
-        return self.sites[item]
-
-
 #pylint: disable=too-few-public-methods
 class CrystalFieldFit(object):
     """
@@ -1347,11 +1127,22 @@ class CrystalFieldFit(object):
 
     def estimate_parameters(self, EnergySplitting, Parameters, **kwargs):
         from CrystalField.normalisation import split2range
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         from mantid.api import mtd
         self.check_consistency()
-        ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
-                             Parameters=Parameters)
-        constraints = [('%s<%s<%s' % (-bound, parName, bound)) for parName, bound in ranges.items()]
+        if isinstance(self.model, CrystalFieldMultiSite):
+            constraints = []
+            for ni in range(len(self.model.Ions)):
+                pars = Parameters[ni] if islistlike(Parameters[ni]) else Parameters
+                ion = self.model.Ions[ni]
+                ranges = split2range(Ion=ion, EnergySplitting=EnergySplitting, Parameters=pars)
+                constraints += [('%s<ion%d.%s<%s' % (-bound, ni, parName, bound)) 
+                                for parName, bound in ranges.items()]
+        else:
+            ranges = split2range(Ion=self.model.Ion, EnergySplitting=EnergySplitting,
+                                 Parameters=Parameters)
+            constraints = [('%s<%s<%s' % (-bound, parName, bound)) 
+                           for parName, bound in ranges.items()]
         self.model.constraints(*constraints)
         if 'Type' not in kwargs or kwargs['Type'] == 'Monte Carlo':
             if 'OutputWorkspace' in kwargs and kwargs['OutputWorkspace'].strip() != '':
@@ -1378,12 +1169,14 @@ class CrystalFieldFit(object):
         ne = self.get_number_estimates()
         if ne == 0:
             raise RuntimeError('There are no estimated parameters.')
-        if index >= ne:
+        if index > ne:
             raise RuntimeError('There are only %s sets of estimated parameters, requested set #%s' % (ne, index))
+        from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
         for row in range(self._estimated_parameters.rowCount()):
             name = self._estimated_parameters.cell(row, 0)
             value = self._estimated_parameters.cell(row, index)
-            self.model[name] = value
+            model_pname = name if isinstance(self.model, CrystalFieldMultiSite) else [name.split('.')[-1]]
+            self.model[model_pname] = value
             if self._function is not None:
                 self._function.setParameter(name, value)
 

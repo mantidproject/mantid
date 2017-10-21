@@ -78,6 +78,8 @@ class CrystalFieldMultiSite(object):
 
         self._setRemainingArguments(kwargs)
 
+        self.default_spectrum_size = 200
+
         if attribute_dict is not None:
             for name, value in attribute_dict.items():
                 self.function.setAttributeValue(name, value)
@@ -137,6 +139,16 @@ class CrystalFieldMultiSite(object):
 
         return self._calcSpectrum(i, ws, ws_index)
 
+    def calc_xmin_xmax(self, i=0): 
+        peaks = np.array([])
+        for idx in range(len(self.Ions)):
+            blm = {}
+            for bparam in CrystalField.field_parameter_names:
+                blm[bparam] = self.function.getParameterValue('ion{}.'.format(idx) + bparam)
+            _cft = CrystalField(self.Ions[idx], 'C1', Temperature=self.Temperatures[i], **blm)
+            peaks = np.append(peaks, _cft.getPeakList()[0])
+        return np.min(peaks), np.max(peaks)
+
     def getSpectrum(self, *args):
         """
         Get a specified spectrum calculated with the current field and peak parameters.
@@ -144,14 +156,16 @@ class CrystalFieldMultiSite(object):
         Alternatively can be called getSpectrum(workspace, ws_index). Spectrum index is assumed zero.
 
         Examples:
+            cf.getSpectrum()         # Calculate the first spectrum using automatically generated x-values
+            cf.getSpectrum(1)        # Calculate the second spectrum using automatically generated x-values
             cf.getSpectrum(1, ws, 5) # Calculate the second spectrum using the x-values from the 6th spectrum
                                      # in workspace ws.
-            cf.getSpectrum(ws) # Calculate the first spectrum using the x-values from the 1st spectrum
-                               # in workspace ws.
-            cf.getSpectrum(ws, 3) # Calculate the first spectrum using the x-values from the 4th spectrum
-                                  # in workspace ws.
-            cf.getSpectrum(3, ws) # Calculate the third spectrum using the x-values from the 1st spectrum
-                                  # in workspace ws.
+            cf.getSpectrum(ws)       # Calculate the first spectrum using the x-values from the 1st spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(ws, 3)    # Calculate the first spectrum using the x-values from the 4th spectrum
+                                     # in workspace ws.
+            cf.getSpectrum(2, ws)    # Calculate the third spectrum using the x-values from the 1st spectrum
+                                     # in workspace ws.
 
         @return: A tuple of (x, y) arrays
         """
@@ -160,11 +174,18 @@ class CrystalFieldMultiSite(object):
                 raise RuntimeError('You must first define a temperature for the spectrum')
             return self._calcSpectrum(args[0], args[1], args[2])
         elif len(args) == 1:
-            return self._calcSpectrum(0, args[0], 0)
+            if isinstance(args[0], int):
+                x_min, x_max = self.calc_xmin_xmax(args[0])
+                xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+                return self._calcSpectrum(args[0], xArray, 0)
+            else:
+                return self._calcSpectrum(0, args[0], 0)
         elif len(args) == 2:
             return self._getSpectrumTwoArgs(*args)
         else:
-            raise RuntimeError('getSpectrum expected 1-3 arguments, got {}s'.format(len(args)))
+            x_min, x_max = self.calc_xmin_xmax()
+            xArray = np.linspace(x_min, x_max, self.default_spectrum_size)
+            return self._calcSpectrum(0, xArray, 0)
 
     def _convertToWS(self, wksp_list):
         """
