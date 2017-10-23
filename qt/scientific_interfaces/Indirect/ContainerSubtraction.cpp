@@ -51,7 +51,7 @@ void ContainerSubtraction::run() {
   const bool shift = m_uiForm.ckShiftCan->isChecked();
   const bool scale = m_uiForm.ckScaleCan->isChecked();
 
-  auto containerWs = m_csContainerWS;
+  auto containerWs = convertToHistogram(m_csContainerWS);
   if (shift) {
     containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
     containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
@@ -241,7 +241,7 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
   // Plot container
   if (m_csContainerWS) {
     m_uiForm.ppPreview->addSpectrum("Container", m_transformedContainerWS,
-      wsIndex, Qt::red);
+                                    wsIndex, Qt::red);
   }
 
   // Plot sample
@@ -385,7 +385,7 @@ ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) {
                                      QMessageBox::NoButton);
 
   if (result == QMessageBox::Yes)
-    return rebinToWorkspace(workspace, m_csSampleWS);
+    return rebinToWorkspace(workspace, convertToHistogram(m_csSampleWS));
   else
     return workspace;
 }
@@ -420,6 +420,13 @@ ContainerSubtraction::rebinToWorkspace(MatrixWorkspace_sptr workspaceToRebin,
   auto rebinAlg = rebinToWorkspaceAlgorithm(workspaceToRebin, workspaceToMatch);
   rebinAlg->execute();
   return rebinAlg->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) {
+  auto convertAlg = convertToHistogramAlgorithm(workspace);
+  convertAlg->execute();
+  return convertAlg->getProperty("OutputWorkspace");
 }
 
 IAlgorithm_sptr
@@ -476,6 +483,18 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
   rebin->setProperty("WorkspaceToMatch", workspaceToMatch);
   rebin->setProperty("OutputWorkspace", "rebinned");
   return rebin;
+}
+
+IAlgorithm_sptr ContainerSubtraction::convertToHistogramAlgorithm(
+    MatrixWorkspace_sptr workspace) {
+  IAlgorithm_sptr convert =
+      AlgorithmManager::Instance().create("ConvertToHistogram");
+  convert->initialize();
+  convert->setChild(true);
+  convert->setLogging(false);
+  convert->setProperty("InputWorkspace", workspace);
+  convert->setProperty("OutputWorkspace", "converted");
+  return convert;
 }
 
 } // namespace CustomInterfaces

@@ -58,6 +58,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   rebinToWorkspace(Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
                    Mantid::API::MatrixWorkspace_sptr workspaceToMatch);
+  Mantid::API::MatrixWorkspace_sptr
+  convertToHistogram(Mantid::API::MatrixWorkspace_sptr workspace);
 
   Mantid::API::IAlgorithm_sptr
   shiftAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -71,6 +73,8 @@ private:
   Mantid::API::IAlgorithm_sptr
   rebinToWorkspaceAlgorithm(Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
                             Mantid::API::MatrixWorkspace_sptr workspaceToMatch);
+  Mantid::API::IAlgorithm_sptr
+  convertToHistogramAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace);
 
   Ui::ContainerSubtraction m_uiForm;
   std::string m_originalSampleUnits;
