@@ -188,11 +188,10 @@ public:
     partitioner.partition(rankData, event_id.data(),
                           event_time_offset.data() + range.eventOffset, range);
 
-    TS_ASSERT(std::equal(
-        rankData[0].cbegin(), rankData[0].cend(), event_time_offset.cbegin(),
-        [](const EventParser<double>::Event &e, const int64_t tof) {
-          return static_cast<double>(tof) == e.tof;
-        }));
+    TS_ASSERT(std::equal(rankData[0].cbegin(), rankData[0].cend(),
+                         event_time_offset.cbegin(),
+                         [](const EventParser<double>::Event &e,
+                            const double tof) { return tof == e.tof; }));
     doTestRankData(rankData, gen, range);
   }
 
