@@ -194,6 +194,7 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
+  m_transformedContainerWS = m_csContainerWS;
 
   // Plot new container
   plotInPreview("Container", m_csContainerWS, Qt::red);
@@ -207,6 +208,7 @@ void ContainerSubtraction::updateCan() {
   auto scale = m_uiForm.ckScaleCan->isChecked();
 
   if (m_csContainerWS) {
+    m_transformedContainerWS = m_csContainerWS;
 
     if (shift) {
       m_transformedContainerWS =
@@ -221,7 +223,7 @@ void ContainerSubtraction::updateCan() {
 
     if (scale) {
       m_transformedContainerWS =
-          scaleWorkspace(m_csContainerWS, m_uiForm.spCanScale->value());
+          scaleWorkspace(m_transformedContainerWS, m_uiForm.spCanScale->value());
     }
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
@@ -422,6 +424,7 @@ ContainerSubtraction::rebinToWorkspace(MatrixWorkspace_sptr workspaceToRebin,
 IAlgorithm_sptr
 ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
                                      double shiftValue) {
+  MatrixWorkspace_sptr outputWS;
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
   shift->setChild(true);
@@ -429,6 +432,7 @@ ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
   shift->setProperty("InputWorkspace", workspace);
   shift->setProperty("Operation", "Add");
   shift->setProperty("Factor", shiftValue);
+  shift->setProperty("OutputWorkspace", "shifted");
   return shift;
 }
 
@@ -442,6 +446,7 @@ ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
   scale->setProperty("InputWorkspace", workspace);
   scale->setProperty("Operation", "Multiply");
   scale->setProperty("Factor", m_uiForm.spCanScale->value());
+  scale->setProperty("OutputWorkspace", "scaled");
   return scale;
 }
 
@@ -454,6 +459,7 @@ ContainerSubtraction::minusAlgorithm(MatrixWorkspace_sptr lhsWorkspace,
   minus->setLogging(false);
   minus->setProperty("LHSWorkspace", lhsWorkspace);
   minus->setProperty("RHSWorkspace", rhsWorkspace);
+  minus->setProperty("OutputWorkspace", "subtracted");
   return minus;
 }
 
@@ -467,6 +473,7 @@ IAlgorithm_sptr ContainerSubtraction::rebinToWorkspaceAlgorithm(
   rebin->setLogging(false);
   rebin->setProperty("WorkspaceToRebin", workspaceToRebin);
   rebin->setProperty("WorkspaceToMatch", workspaceToMatch);
+  rebin->setProperty("OutputWorkspace", "rebinned");
   return rebin;
 }
 
