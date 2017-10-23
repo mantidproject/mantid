@@ -547,8 +547,8 @@ void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
   instrument->markAsDetector(detector);
 }
 
-Workspace2D_sptr reflectometryWorkspace(const double startX, const int nSpectra,
-                                        const int nBins, const int deltaX) {
+auto reflectometryWorkspace(const double startX, const int nSpectra,
+                            const int nBins, const double deltaX) {
 
   auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
@@ -564,8 +564,8 @@ Workspace2D_sptr reflectometryWorkspace(const double startX, const int nSpectra,
  * @return workspace with instrument attached.
  * @param startX : X Tof start value for the workspace.
  */
-Workspace2D_sptr create2DWorkspaceWithReflectometryInstrument(
-    double startX, int nSpectra, int nBins, int deltaX, V3D slit1Pos,
+MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
+    double startX, int nSpectra, int nBins, double deltaX, V3D slit1Pos,
     V3D slit2Pos, double vg1, double vg2) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
@@ -602,8 +602,9 @@ Workspace2D_sptr create2DWorkspaceWithReflectometryInstrument(
 * @param detSize : optional detector height (default is 0 which puts all
 * detectors at the same position)
 */
-Workspace2D_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    double startX, double detSize, int nSpectra, int nBins, int deltaX) {
+MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+    double startX, double detSize, int nSpectra, int nBins,
+    const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
