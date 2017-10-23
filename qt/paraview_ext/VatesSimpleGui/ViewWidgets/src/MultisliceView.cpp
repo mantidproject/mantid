@@ -37,30 +37,6 @@ namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
 
-static void GetOrientations(vtkSMSourceProxy *producer,
-                            vtkVector3d sliceNormals[3]) {
-  bool isvalid = false;
-  vtkTuple<double, 16> cobm =
-      pqModelTransformSupportBehavior::getChangeOfBasisMatrix(producer, 0,
-                                                              &isvalid);
-  if (isvalid) {
-    vtkNew<vtkMatrix4x4> changeOfBasisMatrix;
-    std::copy(&cobm[0], &cobm[0] + 16, &changeOfBasisMatrix->Element[0][0]);
-    vtkVector3d axisBases[3];
-    vtkPVChangeOfBasisHelper::GetBasisVectors(changeOfBasisMatrix.GetPointer(),
-                                              axisBases[0], axisBases[1],
-                                              axisBases[2]);
-    for (int cc = 0; cc < 3; cc++) {
-      sliceNormals[cc] = axisBases[(cc + 1) % 3].Cross(axisBases[(cc + 2) % 3]);
-      sliceNormals[cc].Normalize();
-    }
-  } else {
-    sliceNormals[0] = vtkVector3d(1, 0, 0);
-    sliceNormals[1] = vtkVector3d(0, 1, 0);
-    sliceNormals[2] = vtkVector3d(0, 0, 1);
-  }
-}
-
 MultiSliceView::MultiSliceView(QWidget *parent,
                                RebinnedSourcesManager *rebinnedSourcesManager,
                                bool createRenderProxy)
