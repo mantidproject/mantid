@@ -56,9 +56,9 @@ void ContainerSubtraction::run() {
     containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
     containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
   } else if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
-    m_transformedContainerWS = requestRebinToSample(containerWs);
+    containerWs = requestRebinToSample(containerWs);
 
-    if (!checkWorkspaceBinningMatches(m_csSampleWS, m_transformedContainerWS)) {
+    if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
       g_log.error("Cannot apply container corrections using a sample and "
                   "container with different binning.");
       return;
@@ -116,21 +116,16 @@ bool ContainerSubtraction::validate() {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
   if (samValid && canValid) {
-    // Check Sample is of same type as container (e.g. _red/_sqw)
-    const auto QStrSampleName = QString::fromStdString(m_csSampleWS->getName());
-    const auto sampleType = QStrSampleName.right(
-        QStrSampleName.length() - QStrSampleName.lastIndexOf("_"));
-    const QString containerName = m_uiForm.dsContainer->getCurrentDataName();
-    const QString containerType = containerName.right(
-        containerName.length() - containerName.lastIndexOf("_"));
+    // Check Sample is of same type as container
+    const auto containerType = m_csContainerWS->YUnit();
+    const auto sampleType = m_csSampleWS->YUnit();
 
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
-    g_log.debug() << "Container type is: " << containerType.toStdString()
-                  << '\n';
+    g_log.debug() << "Sample Y-Unit is: " << sampleType << '\n';
+    g_log.debug() << "Container Y-Unit is: " << containerType << '\n';
 
     if (containerType != sampleType)
-      uiv.addErrorMessage(
-          "Sample and can workspaces must contain the same type of data.");
+      uiv.addErrorMessage("Sample and can workspaces must contain the same "
+                          "type of data; have the same Y-Unit.");
 
     // Check sample has the same number of Histograms as the contianer
     const size_t sampleHist = m_csSampleWS->getNumberHistograms();
@@ -434,7 +429,6 @@ ContainerSubtraction::convertToHistogram(MatrixWorkspace_sptr workspace) {
 IAlgorithm_sptr
 ContainerSubtraction::shiftAlgorithm(MatrixWorkspace_sptr workspace,
                                      double shiftValue) {
-  MatrixWorkspace_sptr outputWS;
   IAlgorithm_sptr shift = AlgorithmManager::Instance().create("ScaleX");
   shift->initialize();
   shift->setChild(true);
