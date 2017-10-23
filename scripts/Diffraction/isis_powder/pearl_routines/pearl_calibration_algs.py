@@ -8,6 +8,19 @@ from isis_powder.routines.common_enums import INPUT_BATCHING, WORKSPACE_UNITS
 
 def create_calibration(calibration_runs, instrument, offset_file_name, grouping_file_name, calibration_dir,
                        rebin_1_params, rebin_2_params, cross_correlate_params, get_det_offset_params):
+    """
+    Create a calibration file from (usually) a ceria run
+    :param calibration_runs: Run number(s) for this run
+    :param instrument: The PEARL instrument object
+    :param offset_file_name: Name of the file to write detector offset information to
+    :param grouping_file_name: Name of grouping calibration file
+    :param calibration_dir: Path to directory containing calibration information
+    :param rebin_1_params: Parameters for the first rebin step (as a string in the usual format)
+    :param rebin_2_params: Parameters for the second rebin step (as a string in the usual format)
+    :param cross_correlate_params: Parameters for CrossCorrelate (as a dictionary PropertyName: PropertyValue)
+    :param get_det_offset_params: Parameters for GetDetectorOffsets (as a dictionary PropertyName: PropertyValue)
+    :return:
+    """
     input_ws_list = common.load_current_normalised_ws_list(run_number_string=calibration_runs, instrument=instrument,
                                                            input_batching=INPUT_BATCHING.Summed)
     input_ws = input_ws_list[0]
