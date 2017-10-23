@@ -326,24 +326,20 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
     }
   }
 
-  vtkVector3d sliceNormals[3];
-  GetOrientations(vtkSMSourceProxy::SafeDownCast(src1->getProxy()),
-                  sliceNormals);
-  vtkVector3d &orient = sliceNormals[axisIndex];
-
   // Construct origin vector from orientation vector
-  double origin[3];
-  origin[0] = sliceOffsetOnAxis * orient[0];
-  origin[1] = sliceOffsetOnAxis * orient[1];
-  origin[2] = sliceOffsetOnAxis * orient[2];
+  double origin[3] = {0.0, 0.0, 0.0};
+  origin[axisIndex] = sliceOffsetOnAxis;
+
+  vtkVector3d sliceNormalsInBasis[3] = {
+      {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}};
 
   // Create the XML holder
   VATES::VatesKnowledgeSerializer rks;
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
-  rks.setImplicitFunction(
-      boost::make_shared<MDPlaneImplicitFunction>(3, orient.GetData(), origin));
+  rks.setImplicitFunction(boost::make_shared<MDPlaneImplicitFunction>(
+      3, sliceNormalsInBasis[axisIndex].GetData(), origin));
   QString titleAddition = "";
 
   // Use the WidgetFactory to create the slice viewer window
