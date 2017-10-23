@@ -348,9 +348,8 @@ void TwoLevelTreeManager::pasteSelected(const QString &text) {
         auto const valuesSizeLessOne = static_cast<int>(values.size()) - 1;
 
         // Paste as many columns as we can from this line
-        for (int col = 0; col < m_model->columnCount() &&
-                              col < valuesSizeLessOne;
-             ++col)
+        for (int col = 0;
+             col < m_model->columnCount() && col < valuesSizeLessOne; ++col)
           m_model->setData(
               m_model->index(*rowIt, col, m_model->index(groupId, 0)),
               values[col + 1]);
