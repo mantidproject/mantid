@@ -145,7 +145,7 @@
  
   <type name="panel" is="rectangular_detector" type="linear-detector-pixel" 
     xpixels="1" xstart="0.0" xstep="0.05"
-    ypixels="243" ystart="y" ystep="+0.0012" >
+    ypixels="243" ystart="0.0" ystep="+0.0012" >
     <properties/>
   </type>  
   <!--"-0.0576"-->
