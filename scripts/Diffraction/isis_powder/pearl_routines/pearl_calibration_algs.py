@@ -24,8 +24,8 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     cross_correlated = mantid.CrossCorrelate(InputWorkspace=rebinned, **cross_correlate_params)
 
     offset_file = os.path.join(calibration_dir, offset_file_name)
-    offsets = mantid.GetDetectorOffsets(InputWorkspace=cross_correlated, GroupingFileName=offset_file,
-                                        **get_det_offset_params)
+    mantid.GetDetectorOffsets(InputWorkspace=cross_correlated, GroupingFileName=offset_file, OutputWorkspace="offsets",
+                              **get_det_offset_params)
 
     rebinned_tof = mantid.ConvertUnits(InputWorkspace=rebinned, Target="TOF")
     aligned = mantid.AlignDetectors(InputWorkspace=rebinned_tof, CalibrationFile=offset_file)
@@ -33,12 +33,10 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     grouping_file = os.path.join(calibration_dir, grouping_file_name)
     focused = mantid.DiffractionFocussing(InputWorkspace=aligned, GroupingFileName=grouping_file,
                                           OutputWorkspace=instrument._generate_output_file_name(calibration_runs)
-                                          + "_cal")
+                                          + "_grouped")
 
-    #common.remove_intermediate_workspace(calibration_ws)
-    #common.remove_intermediate_workspace(rebinned)
-    #common.remove_intermediate_workspace(cross_correlated)
-    #common.remove_intermediate_workspace(rebinned_tof)
-    #common.remove_intermediate_workspace(aligned)
+    # Note: offsets must be deleted as a string, as the simpleapi doesn't recognise it as a workspace
+    common.remove_intermediate_workspace([calibration_ws, rebinned, cross_correlated,
+                                          "offsets", rebinned_tof, aligned])
 
     return focused
