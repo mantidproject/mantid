@@ -61,12 +61,14 @@
          <stringlist>
           <string>_red</string>
           <string>_sqw</string>
+          <string>_elf</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
           <string>_red.nxs</string>
           <string>_sqw.nxs</string>
+          <string>_elf.nxs</string>
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
@@ -92,12 +94,14 @@
          <stringlist>
           <string>_red</string>
           <string>_sqw</string>
+          <string>_elf</string>
          </stringlist>
         </property>
         <property name="fileBrowserSuffixes" stdset="0">
          <stringlist>
           <string>_red.nxs</string>
           <string>_sqw.nxs</string>
+          <string>_elf.nxs</string>
          </stringlist>
         </property>
         <property name="showLoad" stdset="0">
