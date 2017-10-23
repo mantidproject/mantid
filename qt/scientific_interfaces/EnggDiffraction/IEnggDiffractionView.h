@@ -318,10 +318,9 @@ public:
   /**
    * Show the message requesting the user to enter a valid RB number, if the
    * current RB number is not valid
-   * @param True if the current entered RB number is not valid
+   * @param rbNumberIsValid True if the current entered RB number is not valid
    */
   virtual void showInvalidRBNumber(const bool rbNumberIsValid) = 0;
-  ;
 
   /**
   * Produces vanadium curves graph with three spectrum and
