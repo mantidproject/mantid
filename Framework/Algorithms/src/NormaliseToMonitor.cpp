@@ -570,7 +570,6 @@ void NormaliseToMonitor::normaliseBinByBin(
     this->normalisationFactor(monX, monY, monE);
 
   const size_t numHists = inputWorkspace->getNumberHistograms();
-  auto specLength = inputWorkspace->blocksize();
   // Flag set when a division by 0 is found
   bool hasZeroDivision = false;
   Progress prog(this, 0.0, 1.0, numHists);
@@ -585,6 +584,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     // If not rebinning, just point to our monitor spectra, otherwise create new
     // vectors
 
+    const size_t specLength = inputWorkspace->y(i).size();
     auto Y = (m_commonBins ? monY : Counts(specLength));
     auto E = (m_commonBins ? monE : CountStandardDeviations(specLength));
 
