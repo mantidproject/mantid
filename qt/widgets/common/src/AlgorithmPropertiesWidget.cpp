@@ -10,6 +10,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
+
+#include <QCoreApplication>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QScrollArea>
+
 #include <algorithm>
 #include <vector>
 

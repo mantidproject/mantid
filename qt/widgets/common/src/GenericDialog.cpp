@@ -13,6 +13,7 @@
 #include <QDesktopWidget>
 #include <QScrollArea>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -24,7 +25,7 @@
 #include <QSignalMapper>
 #include <QFileInfo>
 #include <QDir>
-#include <QGroupBox>
+#include <QMessageBox>
 #include <climits>
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
