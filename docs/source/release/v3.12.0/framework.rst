@@ -35,5 +35,6 @@ Performance
 
 Python
 ------
+setConstraintPenaltyFactor is now exposed to Python to set the penalty for the constraints in the fitting function
 
 :ref:`Release 3.12.0 <v3.12.0>`

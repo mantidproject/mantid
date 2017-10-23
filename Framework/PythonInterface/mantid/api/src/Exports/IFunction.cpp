@@ -218,6 +218,10 @@ void export_IFunction() {
            (arg("self"), arg("name")),
            "Remove the constraint on the named parameter")
 
+      .def("setConstraintPenaltyFactor", &IFunction::setConstraintPenaltyFactor,
+           (arg("self"), arg("name"), arg("value")),
+           "Set the constraint penalty factor for named parameter")
+
       .def("getNumberDomains", &IFunction::getNumberDomains, (arg("self")),
            "Get number of domains of a multi-domain function")
 
