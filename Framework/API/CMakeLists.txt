@@ -394,6 +394,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	IFunctionTest.h
 	ILatticeFunctionTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
