@@ -167,7 +167,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         spectra_input = self.getProperty(SPECTRA_PROP).value
         spectra_groups = spectra_input.split(';')
         try:
-            self._spectra_groups = [self._parse_range_input(spectra_group, True)
+            self._spectra_groups = [self._parse_range_input(spectra_group, True).sort()
                                     for spectra_group in spectra_groups]
         except RuntimeError as exc:
             issues[SPECTRA_PROP] = str(exc)
