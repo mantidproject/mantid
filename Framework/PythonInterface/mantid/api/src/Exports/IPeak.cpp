@@ -8,7 +8,7 @@
 using Mantid::Geometry::IPeak;
 using namespace boost::python;
 
-// GET_POINTER_SPECIALIZATION(IPeak)
+GET_POINTER_SPECIALIZATION(IPeak)
 
 namespace {
 using namespace Mantid::PythonInterface;

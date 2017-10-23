@@ -16,7 +16,7 @@ namespace Policies = Mantid::PythonInterface::Policies;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
-// GET_POINTER_SPECIALIZATION(IEventList)
+GET_POINTER_SPECIALIZATION(IEventList)
 
 /// return_value_policy for copied numpy array
 typedef return_value_policy<Policies::VectorToNumpy> return_clone_numpy;
