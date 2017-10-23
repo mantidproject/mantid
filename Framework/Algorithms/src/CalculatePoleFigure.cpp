@@ -2,6 +2,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -56,13 +59,11 @@ void CalculatePoleFigure::init() {
   declareProperty("WHATEVERNAME", "WHATEVERT",
                   "Second name of some log for pole figure.");
 
-  auto polefigurproperty = make_unique<ArrayProperty<double>>("PoleFigure");
-  declareProperty(polefigurproperty,
+  declareProperty(make_unique<Kernel::ArrayProperty<double>>("PoleFigure"),
                   "Output 2D vector for calcualte pole figure.");
 
-  auto polefigurefileproperty =
-      make_unique<FileProperty>("PoleFigureFile", "", FileMode::OptionalSave);
-  declareProperty(polefigurefileproperty,
+  declareProperty(make_unique<API::FileProperty>(
+                      "PoleFigureFile", "", API::FileProperty::OptionalSave),
                   "Name of optional output file for pole figure.");
 
   declareProperty("MinD", EMPTY_DBL(), "Lower boundary of peak in dSpacing.");
@@ -77,32 +78,22 @@ void CalculatePoleFigure::init() {
   // Set up input data type
 }
 
-std::map<string, string> CalculatePoleFigure::validateInputs() {
-
-  // check for null pointers - this is to protect against workspace groups
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  if (!inputWS) {
-    return result;
-  }
-
-  return result;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Process input properties
  */
 void CalculatePoleFigure::processInputs() {
 
-  m_nameHROT = getProperty("HROTName");
-  m_nameWhatever = getProperty("Whatever");
+  // get inputs
+  m_nameHROT = getPropertyValue("HROTName");
+  m_nameOmega = getPropertyValue("Whatever");
 
   //
-  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  m_inputWS = getProperty("InputWorkspace");
 
   // check whether the log exists
-  auto hrot = inputWS->run().getProperty(m_nameHROT);
+  auto hrot = m_inputWS->run().getProperty(m_nameHROT);
   if (!hrot) {
-    throw std::invalid_input("HROT does not exist in sample log.");
+    throw std::invalid_argument("HROT does not exist in sample log.");
   }
 }
 
@@ -114,7 +105,7 @@ void CalculatePoleFigure::exec() {
   processInputs();
 
   // calcualte pole figure
-  calcualtePoleFigure();
+  calculatePoleFigure();
 
   // set property
   setProperty("OutputWorkspace", outputWS);
@@ -126,19 +117,21 @@ void CalculatePoleFigure::exec() {
 void CalculatePoleFigure::calculatePoleFigure() {
 
   // get hrot and etc.
-  auto hrotprop = inputWS->run().getProperty(m_nameHROT);
+  TimeSeriesProperty<double> *hrotprop =
+      dynamic_cast<TimeSeriesProperty<double> *>(
+          m_inputWS->run().getProperty(m_nameHROT));
   double hrot = hrotprop->lastValue();
 
   // get source and positons
-  Kernel::V3D srcpos = inputWS->getInstrument()->getSource().getPos();
-  Kernel::V3D samplepos = inputWS->getInstrument()->getSample().getPos();
+  Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
+  Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
   Kernel::V3D k_sample_srcpos = samplepos - srcpos;
 
   std::vector<std::vector<double>> polefigurevector();
 
-  for (size_t iws = 0; iws < inputWS->getNumberHistograms(); ++iws) {
+  for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
-    Kernel::V3D detpos = inputWS->getInstrument()->getDetector(iws).getPos();
+    Kernel::V3D detpos = m_inputWS->getInstrument()->getDetector(iws)->getPos();
     Kernel::V3D k_det_sample = detpos - samplepos;
 
     // calcualte pole figure position
@@ -155,7 +148,7 @@ double CalculatePoleFigure::calculatePeakIntensitySimple(size_t iws,
                                                          double dmax) {
 
   // check
-  if (iws >= inputWS->getNumberHistograms())
+  if (iws >= m_inputWS->getNumberHistograms())
     throw std::runtime_error("Input workspace index exceeds input workspace's "
                              "number of histograms.");
 
@@ -163,8 +156,8 @@ double CalculatePoleFigure::calculatePeakIntensitySimple(size_t iws,
   double intensity(0);
 
   // convert from dmin and dmax in double to index of X-axis
-  auto vecx = inputWS->histogram(iws).x();
-  auto vecy = inputWS->histogram(iws).y();
+  auto vecx = m_inputWS->histogram(iws).x();
+  auto vecy = m_inputWS->histogram(iws).y();
   size_t dmin_index = static_cast<size_t>(
       std::lower_bound(vecx.begin(), vecx.end(), dmin) - vecx.begin());
   size_t dmax_index = static_cast<size_t>(
@@ -173,8 +166,8 @@ double CalculatePoleFigure::calculatePeakIntensitySimple(size_t iws,
   if (dmax_index <= dmin_index)
     throw std::runtime_error("dmin and dmax either not in order or exceeds the "
                              "range of vector of X.");
-  if (dmax_index >= y.size())
-    dmax_index = y.size() - 1;
+  if (dmax_index >= vecy.size())
+    dmax_index = vecy.size() - 1;
 
   for (auto d_index = dmin_index; d_index < dmax_index; ++d_index) {
     double y_i = vecy[d_index];

@@ -24,8 +24,6 @@ public:
   int version() const override;
   /// Algorithm's category for identification
   const std::string category() const override;
-  /// @copydoc Algorithm::validateInputs()
-  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialize the properties
@@ -41,7 +39,11 @@ private:
   double calculatePeakIntensitySimple(size_t iws, double dmin, double dmax);
 
   /// input workspace
-  API::MatrixWorkspace_const_sptr inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
+
+  /// sample log name
+  std::string m_nameHROT;
+  std::string m_nameOmega;
 };
 
 } // namespace Mantid
