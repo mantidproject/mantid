@@ -616,7 +616,9 @@ void NormaliseToMonitor::performHistogramDivision(
     // http://docs.mantidproject.org/nightly/concepts/ErrorPropagation.html#error-propagation
     // This is similar to that in MantidAlgorithms::Divide
 
-    size_t timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
+    size_t timeIndex = 0;
+    if (m_syncScanInput)
+      size_t timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
 
     const auto newYFactor =
         1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
