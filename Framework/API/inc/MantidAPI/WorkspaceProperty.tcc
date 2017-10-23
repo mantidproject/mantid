@@ -144,7 +144,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
  */
 template<typename TYPE>
 bool WorkspaceProperty<TYPE>::isValueSerializable() const {
-  return !m_workspaceName.empty() || (m_workspaceName.empty() && !this->m_value);
+  return !m_workspaceName.empty() || !this->m_value;
 }
 
 /** Get the value the property was initialised with -its default value
@@ -265,7 +265,7 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
 */
 template <typename TYPE> bool WorkspaceProperty<TYPE>::isDefault() const {
   if (m_initialWSName.empty()) {
-    return !(!m_workspaceName.empty() || static_cast<bool>(this->m_value));
+    return m_workspaceName.empty() && !this->m_value;
   }
   return m_initialWSName == m_workspaceName;
 }
