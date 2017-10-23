@@ -1,11 +1,11 @@
- set ( SRC_FILES
+set ( SRC_FILES
 	src/AlgorithmDialog.cpp
 	src/AlgorithmInputHistory.cpp
 	src/AlgorithmPropertiesWidget.cpp
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
-        src/DropEventHelper.cpp
+	src/DropEventHelper.cpp
 	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -15,12 +15,9 @@
 	src/InterfaceManager.cpp
 	src/ListPropertyWidget.cpp
 	src/ManageUserDirectories.cpp
-	src/MantidColorMap.cpp
 	src/MantidDesktopServices.cpp
 	src/MantidDialog.cpp
 	src/MantidHelpInterface.cpp
-	src/MantidQwtIMDWorkspaceData.cpp
-	src/MantidQwtWorkspaceData.cpp
 	src/MantidWidget.cpp
 	src/MdConstants.cpp
 	src/MdSettings.cpp
@@ -30,20 +27,13 @@
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
 	src/PlotAxis.cpp
-	src/PowerScaleEngine.cpp
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
 	src/PythonThreading.cpp
 	src/QScienceSpinBox.cpp
 	src/QtSignalChannel.cpp
-  src/QwtHelper.cpp
-	src/QwtRasterDataMD.cpp
-	src/QwtRasterDataMDNonOrthogonal.cpp
-	src/QwtWorkspaceBinData.cpp
-	src/QwtWorkspaceSpectrumData.cpp
 	src/RepoModel.cpp
-	src/ScaleEngine.cpp
 	src/ScriptRepositoryView.cpp
 	src/SelectionNotificationService.cpp
 	src/SignalBlocker.cpp
@@ -54,7 +44,7 @@
 	src/UserSubWindow.cpp
 	src/VatesViewerInterface.cpp
 	src/WidgetScrollbarDecorator.cpp
-    src/WindowIcons.cpp
+	src/WindowIcons.cpp
 	src/WorkspaceObserver.cpp
 	src/WorkspaceIcons.cpp
 	src/AlgorithmSelectorWidget.cpp
@@ -62,7 +52,6 @@
 	src/CatalogSearch.cpp
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
-	src/ColorBarWidget.cpp
 	src/DataProcessorUI/AbstractTreeModel.cpp
 	src/DataProcessorUI/GenerateNotebook.cpp
 	src/DataProcessorUI/OneLevelTreeManager.cpp
@@ -83,9 +72,7 @@
 	src/DataProcessorUI/VectorString.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
-	src/DisplayCurveFit.cpp
 	src/DoubleSpinBox.cpp
-	src/ErrorCurve.cpp
 	src/FindDialog.cpp
 	src/FindReplaceDialog.cpp
 	src/FitOptionsBrowser.cpp
@@ -98,7 +85,6 @@
 	src/LineEditWithClear.cpp
 	src/LogValueSelector.cpp
 	src/MWDiag.cpp
-	src/MWView.cpp
 	src/MantidHelpWindow.cpp
 	src/MantidTreeWidget.cpp
 	src/MantidTreeWidgetItem.cpp
@@ -108,16 +94,12 @@
 	src/MuonFitDataSelector.cpp
 	src/MuonFitPropertyBrowser.cpp
 	src/MuonFunctionBrowser.cpp
-	src/PeakPicker.cpp
 	src/PeriodicTableWidget.cpp
-	src/PreviewPlot.cpp
 	src/ProcessingAlgoWidget.cpp
   src/ProjectSavePresenter.cpp
   src/ProjectSaveModel.cpp
 	src/PropertyHandler.cpp
-	src/RangeSelector.cpp
 	src/RenameParDialog.cpp
-	src/SafeQwtPlot.cpp
 	src/SaveWorkspaces.cpp
 	src/ScriptEditor.cpp
 	src/SelectFunctionDialog.cpp
@@ -182,7 +164,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/SelectionNotificationService.h
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
-  inc/MantidQtWidgets/Common/ColorBarWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
@@ -195,7 +176,6 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
   inc/MantidQtWidgets/Common/DataSelector.h
   inc/MantidQtWidgets/Common/DiagResults.h
-  inc/MantidQtWidgets/Common/DisplayCurveFit.h
   inc/MantidQtWidgets/Common/DoubleSpinBox.h
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FindDialog.h
@@ -217,17 +197,12 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
   inc/MantidQtWidgets/Common/MWDiag.h
-  inc/MantidQtWidgets/Common/MWView.h
-  inc/MantidQtWidgets/Common/PeakPicker.h
   inc/MantidQtWidgets/Common/PeriodicTableWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
-  inc/MantidQtWidgets/Common/PreviewPlot.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
   inc/MantidQtWidgets/Common/pythonCalc.h
-  inc/MantidQtWidgets/Common/RangeSelector.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
-  inc/MantidQtWidgets/Common/SafeQwtPlot.h
   inc/MantidQtWidgets/Common/SaveWorkspaces.h
   inc/MantidQtWidgets/Common/ScriptEditor.h
   inc/MantidQtWidgets/Common/SelectFunctionDialog.h
@@ -276,33 +251,22 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/InterfaceFactory.h
 	inc/MantidQtWidgets/Common/InterfaceManager.h
 	inc/MantidQtWidgets/Common/IProjectSerialisable.h
-	inc/MantidQtWidgets/Common/MantidColorMap.h
 	inc/MantidQtWidgets/Common/MantidDesktopServices.h
-	inc/MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h
-	inc/MantidQtWidgets/Common/MantidQwtWorkspaceData.h
 	inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
 	inc/MantidQtWidgets/Common/MdConstants.h
 	inc/MantidQtWidgets/Common/MdSettings.h
 	inc/MantidQtWidgets/Common/NonOrthogonal.h
 	inc/MantidQtWidgets/Common/pixmaps.h
 	inc/MantidQtWidgets/Common/PlotAxis.h
-	inc/MantidQtWidgets/Common/PowerScaleEngine.h
 	inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h
 	inc/MantidQtWidgets/Common/QScienceSpinBox.h
-	inc/MantidQtWidgets/Common/QwtHelper.h
-	inc/MantidQtWidgets/Common/QwtRasterDataMD.h
-	inc/MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h
-	inc/MantidQtWidgets/Common/QwtWorkspaceBinData.h
-	inc/MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h
-	inc/MantidQtWidgets/Common/ScaleEngine.h
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
 	inc/MantidQtWidgets/Common/SignalRange.h
 	inc/MantidQtWidgets/Common/TSVSerialiser.h
-	inc/MantidQtWidgets/Common/qwt_compat.h
 	inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
 	inc/MantidQtWidgets/Common/WindowIcons.h
 	inc/MantidQtWidgets/Common/WorkspaceIcons.h
@@ -353,7 +317,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
 	inc/MantidQtWidgets/Common/ParseKeyValueString.h
 	inc/MantidQtWidgets/Common/ParseNumerics.h
-	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
@@ -407,12 +370,9 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/DataSelector.ui
   inc/MantidQtWidgets/Common/CatalogSearch.ui
   inc/MantidQtWidgets/Common/CatalogSelector.ui
-  inc/MantidQtWidgets/Common/ColorBarWidget.ui
-  inc/MantidQtWidgets/Common/DisplayCurveFit.ui
   inc/MantidQtWidgets/Common/IndirectInstrumentConfig.ui
   inc/MantidQtWidgets/Common/LogValueSelector.ui
   inc/MantidQtWidgets/Common/MWDiag.ui
-  inc/MantidQtWidgets/Common/MWView.ui
   inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
   inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
@@ -423,7 +383,6 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/SlitCalculator.ui
   inc/MantidQtWidgets/Common/UserFunctionDialog.ui
   inc/MantidQtWidgets/Common/PeriodicTableWidget.ui
-  inc/MantidQtWidgets/Common/PreviewPlot.ui
   inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
@@ -465,7 +424,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt4::Qscintilla
     Qwt5
   OSX_INSTALL_RPATH
-    "@loader_path/../MacOS;@loader_path/../Libraries"
+    @loader_path/../MacOS
+    @loader_path/../Libraries
 )
 
 ###########################################################################
@@ -475,11 +435,8 @@ set( TEST_FILES
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
   test/InterfaceManagerTest.h
-  test/MantidColorMapTest.h
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h
-  test/QwtWorkspaceBinDataTest.h
-  test/QwtWorkspaceSpectrumDataTest.h
   test/SelectionNotificationServiceTest.h
   test/SignalRangeTest.h
   test/SignalBlockerTest.h

@@ -74,12 +74,15 @@ endfunction()
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
-    TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR OSX_INSTALL_RPATH PRECOMPILED)
+    TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR PRECOMPILED)
   set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
     NOMOC RES DEFS INCLUDE_DIRS UI_INCLUDE_DIRS LINK_LIBS
-    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS)
+    QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
+  if (PARSED_UNPARSED_ARGUMENTS)
+    message ( FATAL_ERROR "Unexpected arguments found: ${PARSED_UNPARSED_ARGUMENTS}" )
+  endif()
 
   if (${PARSED_LIBRARY} AND ${PARSED_EXECUTABLE})
     message (FATAL_ERROR "Both LIBRARY and EXECUTABLE options specified. Please choose only one.")
@@ -148,7 +151,7 @@ function (mtd_add_qt_target)
 
   if (OSX_VERSION VERSION_GREATER 10.8)
     if (PARSED_OSX_INSTALL_RPATH)
-      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH ${PARSED_OSX_INSTALL_RPATH})
+      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  ${PARSED_OSX_INSTALL_RPATH} )
     endif()
   endif ()
 
@@ -228,7 +231,9 @@ function (mtd_add_qt_test_executable)
        QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS PARENT_DEPENDENCIES)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
-   # target name
+  if (PARSED_UNPARSED_ARGUMENTS)
+    message ( FATAL_ERROR "Unexpected arguments found: ${PARSED_UNPARSED_ARGUMENTS}" )
+  endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target_name
                      ${PARSED_TARGET_NAME})
   # test generation

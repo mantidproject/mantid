@@ -20,6 +20,7 @@ endif ( MAKE_VATES )
 if ( MSVC_IDE )
 #  # Add to the 'MantidQt' group in VS
   set_property ( TARGET MantidQtWidgetsCommonQt4 PROPERTY FOLDER "MantidQt" )
+  set_property ( TARGET MantidQtWidgetsLegacyQwtQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsFactoryQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsInstrumentViewQt4 PROPERTY FOLDER "MantidQt" )
   set_property ( TARGET MantidQtWidgetsRefDetectorViewQt4 PROPERTY FOLDER "MantidQt" )
@@ -30,12 +31,13 @@ if ( MSVC_IDE )
   set_property ( TARGET mantidqtpython PROPERTY FOLDER "MantidQt" )
 else ()
   add_custom_target ( MantidQt DEPENDS MantidQtWidgetsCommonQt4
-                                       MantidQtWidgetsFactoryQt4
-                                       MantidQtWidgetsInstrumentViewQt4
-                                       MantidQtWidgetsSliceViewerQt4
-                                       MantidQtWidgetsSpectrumViewerQt4
-                                       MantidQtWidgetsRefDetectorViewQt4
-                                       MantidQtWidgetsPluginsAlgorithmDialogsQt4
-                                       mantidqtpython
+     MantidQtWidgetsLegacyQwtQt4
+     MantidQtWidgetsFactoryQt4
+     MantidQtWidgetsInstrumentViewQt4
+     MantidQtWidgetsSliceViewerQt4
+     MantidQtWidgetsSpectrumViewerQt4
+     MantidQtWidgetsRefDetectorViewQt4
+     MantidQtWidgetsPluginsAlgorithmDialogsQt4
+     mantidqtpython
   )
 endif ()
