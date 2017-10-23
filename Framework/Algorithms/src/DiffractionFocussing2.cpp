@@ -309,9 +309,10 @@ void DiffractionFocussing2::exec() {
     std::transform(Yout.begin(), Yout.end(), Yout.begin(),
                    std::bind2nd(std::multiplies<double>(),
                                 static_cast<double>(groupSize)));
-    std::transform(Eout.begin(), Eout.end(), Eout.begin(),
-                   std::bind2nd(std::multiplies<double>(),
-                                static_cast<double>(groupSize)));
+    std::for_each(Yout.begin(), Yout.end(),
+                  [groupSize](double &val) { val *= groupSize; });
+    std::for_each(Eout.begin(), Eout.end(),
+                  [groupSize](double &val) { val *= groupSize; });
 
     prog->report();
     PARALLEL_END_INTERUPT_REGION
