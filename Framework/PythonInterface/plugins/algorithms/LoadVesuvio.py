@@ -1013,13 +1013,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
             Sum requested sets of spectra together
         """
-        nspectra_out = len(self._spectra_list)
+        nspectra_out = len(self._spectra_groups)
         ws_out = WorkspaceFactory.create(self.foil_out, NVectors=nspectra_out)
         # foil_out has all spectra in order specified by input
         foil_start = 0
-        for idx_out in range(len(self._spectra_list)):
+        for idx_out in range(nspectra_out):
             ws_out.setX(idx_out, self.foil_out.readX(foil_start))
-            summed_set = self._spectra_list[idx_out]
+            summed_set = self._spectra_groups[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
             spec_out = ws_out.getSpectrum(idx_out)
