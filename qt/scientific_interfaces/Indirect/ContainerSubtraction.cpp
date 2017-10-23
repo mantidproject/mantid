@@ -445,7 +445,7 @@ ContainerSubtraction::scaleAlgorithm(MatrixWorkspace_sptr workspace,
   scale->setLogging(false);
   scale->setProperty("InputWorkspace", workspace);
   scale->setProperty("Operation", "Multiply");
-  scale->setProperty("Factor", m_uiForm.spCanScale->value());
+  scale->setProperty("Factor", scaleValue);
   scale->setProperty("OutputWorkspace", "scaled");
   return scale;
 }
