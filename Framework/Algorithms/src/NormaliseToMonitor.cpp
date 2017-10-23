@@ -618,7 +618,7 @@ void NormaliseToMonitor::performHistogramDivision(
 
     size_t timeIndex = 0;
     if (m_syncScanInput)
-      size_t timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
+      timeIndex = specInfo.spectrumDefinition(workspaceIndex)[0].second;
 
     const auto newYFactor =
         1.0 / m_monitor->histogram(monitorWorkspaceIndex).y()[0];
