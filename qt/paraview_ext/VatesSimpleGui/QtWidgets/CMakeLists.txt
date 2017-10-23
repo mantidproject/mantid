@@ -33,23 +33,26 @@ include_directories(inc)
 
 
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
-                    SRC ${SOURCE_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INCLUDE_FILES}
-                    UI ${UI_FILES}
-                    RES ${RES_FILES}
-                    DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
-                    INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        ${POCO_LIBRARIES}
-                        ${QT_LIBRARIES}
-                        ${QWT5_LIBRARIES}
-                        ${MANTID_SUBPROJECT_LIBS}
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
-                    INSTALL_DIR ${PVPLUGINS_DIR}
-                    OSX_INSTALL_RPATH "@loader_path/../Contents/Libraries;@loader_path/../Contents/MacOS"
+  QT_VERSION 4
+  SRC ${SOURCE_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INCLUDE_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
+  INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
+  LINK_LIBS
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${POCO_LIBRARIES}
+    ${QT_LIBRARIES}
+    ${QWT5_LIBRARIES}
+    ${MANTID_SUBPROJECT_LIBS}
+  MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
+  INSTALL_DIR ${PVPLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../Contents/Libraries
+    @loader_path/../Contents/MacOS
 )
 
 # Set the name of the generated library

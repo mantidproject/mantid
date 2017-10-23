@@ -54,9 +54,6 @@ set( SOURCE_FILES
   src/VsiApplyBehaviour.cpp
 )
 
-set( TEST_FILES
-)
-
 # These are the headers to be preprocessed using
 # Qt's moc preprocessor.
 set( MOC_FILES
@@ -111,70 +108,43 @@ include_directories(
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT5_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
 
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
-                    SRC ${SOURCE_FILES}
-                    MOC ${MOC_FILES}
-                    NOMOC ${INCLUDE_FILES}
-                    UI ${UI_FILES}
-                    RES ${RES_FILES}
-                    DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
-                    INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
-                    LINK_LIBS
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
-                        pqApplicationComponents
-                        pqComponents
-                        ${vtkjsoncpp_LIBRARIES}
-                        vtkPVServerManagerRendering
-                        vtkRenderingFreeType
-                        vtksys
-                        ${QT_LIBRARIES}
-                        VatesAPI
-                        ${PYTHON_LIBRARIES}
-                        ${POCO_LIBRARIES}
-                        ${Boost_LIBRARIES}
-                        ${CORE_MANTIDLIBS}
-                        DataObjects
-                    MTD_QT_LINK_LIBS
-                        MantidQtWidgetsCommon
-                        VatesSimpleGuiQtWidgets
-                        MantidQtWidgetsFactory
-                        MantidQtWidgetsSliceViewer
-                    INSTALL_DIR ${PVPLUGINS_DIR}
-                    OSX_INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Contents/Libraries"
+  QT_VERSION 4
+  SRC ${SOURCE_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INCLUDE_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
+  LINK_LIBS
+      ${TCMALLOC_LIBRARIES_LINKTIME}
+      pqApplicationComponents
+      pqComponents
+      ${vtkjsoncpp_LIBRARIES}
+      vtkPVServerManagerRendering
+      vtkRenderingFreeType
+      vtksys
+      ${QT_LIBRARIES}
+      VatesAPI
+      ${PYTHON_LIBRARIES}
+      ${POCO_LIBRARIES}
+      ${Boost_LIBRARIES}
+      ${CORE_MANTIDLIBS}
+      DataObjects
+  MTD_QT_LINK_LIBS
+      MantidQtWidgetsCommon
+      VatesSimpleGuiQtWidgets
+      MantidQtWidgetsFactory
+      MantidQtWidgetsSliceViewer
+  INSTALL_DIR ${PVPLUGINS_DIR}
+  OSX_INSTALL_RPATH
+    @loader_path/../Contents/MacOS
+    @loader_path/../Contents/Libraries
 )
 
 # Set the name of the generated library
 set_target_properties( VatesSimpleGuiViewWidgetsQt4 PROPERTIES OUTPUT_NAME MantidVatesSimpleGuiViewWidgetsQt4 )
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiViewWidgetsQt4 PROPERTY FOLDER MantidVatesSimpleGui )
-
-# Create test file projects
-include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
-
-include_directories( inc ../../../../Framework/TestHelpers/inc ../../../../Framework/DataHandling/inc ../../../../Framework/DataObjects/inc)
-set ( TESTHELPER_SRCS ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                      ../../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-                      ../../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
-cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-
-target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-  VatesSimpleGuiViewWidgetsQt4
-  ${vtkjsoncpp_LIBRARIES}
-  DataHandling
-  Kernel
-  HistogramData
-  DataObjects
-  MantidQtWidgetsCommonQt4
-  ${CORE_MANTIDLIBS}
-  ${POCO_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${GMOCK_LIBRARIES}
-  ${GTEST_LIBRARIES} )
-
-add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
-# Add to the 'UnitTests' group in VS
-set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )
 
 if( SQUISH_FOUND )
   # Need to set the AUT first

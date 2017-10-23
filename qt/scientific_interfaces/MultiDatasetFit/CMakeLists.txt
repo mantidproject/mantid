@@ -44,6 +44,7 @@ set ( UI_FILES
 )
 
 mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
+  QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}

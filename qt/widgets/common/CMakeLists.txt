@@ -422,7 +422,6 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt4::QtWebKit
     Qt4::QtNetwork
     Qt4::Qscintilla
-    Qwt5
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
@@ -478,8 +477,6 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsCommonTest
     DataObjects
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
-  QT4_LINK_LIBS
-    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   PARENT_DEPENDENCIES
