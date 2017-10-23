@@ -606,8 +606,12 @@ def RenameWorkspace(*args, **kwargs):
     (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
     algm = _create_algorithm_object('RenameWorkspace', startProgress=_startProgress,
                                     endProgress=_endProgress)
-    _set_logging_option(algm, kwargs)
-    _set_store_ads(algm, kwargs)
+    _set_logging_option(algm, arguments)
+    algm.setAlwaysStoreInADS(True)
+    # does not make sense otherwise, this overwrites even the __STORE_ADS_DEFAULT__
+    if __STORE_KEYWORD__ in arguments and not (arguments[__STORE_KEYWORD__] == True):
+        raise KeyError("RenameWorkspace operates only on named workspaces in ADS.")
+
     for key, val in arguments.items():
         algm.setProperty(key, val)
 
