@@ -4,7 +4,8 @@ import mantid.simpleapi as mantid
 
 from isis_powder.routines import common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
-from isis_powder.pearl_routines import pearl_algs, pearl_output, pearl_advanced_config, pearl_param_mapping
+from isis_powder.pearl_routines import pearl_advanced_config, pearl_algs, pearl_calibration_algs, pearl_output, \
+    pearl_param_mapping
 
 
 class Pearl(AbstractInst):
@@ -40,6 +41,21 @@ class Pearl(AbstractInst):
                 self._run_create_vanadium()
         else:
             self._run_create_vanadium()
+
+    def create_cal(self, **kwargs):
+        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        self._inst_settings.update_attributes(kwargs=kwargs)
+        run_details = self._get_run_details(self._inst_settings.run_number)
+
+        return pearl_calibration_algs.create_calibration(calibration_runs=run_details.run_number,
+                                                         instrument=self,
+                                                         offset_file_name=run_details.offset_file_path,
+                                                         grouping_file_name=run_details.grouping_file_path,
+                                                         calibration_dir=self._inst_settings.calibration_dir,
+                                                         rebin_1_params=self._inst_settings.cal_rebin_1,
+                                                         rebin_2_params=self._inst_settings.cal_rebin_2,
+                                                         cross_correlate_params=self._inst_settings.cal_cross_correlate,
+                                                         get_det_offset_params=self._inst_settings.cal_get_det_offsets)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round

@@ -7,16 +7,14 @@ general_params = {
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60,
-
-    "file_names": {
-        "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
-        "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
-        "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
-        "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
-    },
+    "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
+    "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
+    "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
+    "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
 }
 
 long_mode_off_params = {
+    "create_cal_rebin_1_params": "100,-0.0006,19950",
     "monitor_lambda_crop_range": (0.03, 6.00),
     "monitor_integration_range": (0.6, 5.0),
     # This needs to be greater than the bank TOF cropping values or you will get data that divides to 0/inf
@@ -41,6 +39,7 @@ long_mode_off_params = {
 }
 
 long_mode_on_params = {
+    "create_cal_rebin_1_params": "20300,-0.0006,39990",
     "monitor_lambda_crop_range": (5.9, 12.0),
     "monitor_integration_range": (6, 10),
     # raw_data_tof_cropping needs to be have smaller/larger values than the bank TOF cropping values or
@@ -65,6 +64,22 @@ long_mode_on_params = {
     ]
 }
 
+calibration_params = {
+    "create_cal_rebin_2_params": "1.8,0.002,2.1",
+    "create_cal_cross_correlate_params": {
+        "ReferenceSpectra": 20,
+        "WorkspaceIndexMin": 9,
+        "WorkspaceIndexMax": 1063,
+        "XMin": 1.8,
+        "XMax": 2.1
+    },
+    "create_cal_get_detector_offsets_params": {
+        "Step": 0.002,
+        "XMin": -200,
+        "XMax": 200,
+        "DReference": 1.912795
+    }
+}
 
 variable_help = {
     "long_mode_<on/off>_params": {
@@ -100,6 +115,16 @@ variable_help = {
                                       "workspace. This is used to normalise the workspace current.",
         "spline_coefficient": "The coefficient to use whilst calculating a spline for each bank during "
                               "a vanadium calibration."
+    },
+
+    "calibration_params": {
+        "create_cal_rebin_1_params": "The parameters for the first rebin step used to create a calibration file",
+        "create_cal_rebin_2_params": "The parameters for the second rebin step used to create a calibration file",
+        "create_cal_cross_correlate_params": "Parameters used for cross-correlation in calibration creation. "
+                                             "Keys needed are: [Reference Spectra, WorkspaceIndexMin, "
+                                             "WorkspaceIndexMax, XMin, XMax]",
+        "create_cal_get_detector_offsets_params": "Parameters used for GetDetectorOffsets in calibration creation. "
+                                                  "Keys needed are: [Step, XMin, XMax, DReference]"
     }
 }
 
@@ -107,6 +132,7 @@ variable_help = {
 def get_all_adv_variables(is_long_mode_on=False):
     long_mode_params = long_mode_on_params if is_long_mode_on else long_mode_off_params
     advanced_config_dict = {}
+    advanced_config_dict.update(calibration_params)
     advanced_config_dict.update(general_params)
     advanced_config_dict.update(long_mode_params)
     return advanced_config_dict
