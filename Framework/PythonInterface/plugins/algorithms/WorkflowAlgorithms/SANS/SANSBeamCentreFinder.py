@@ -13,7 +13,7 @@ from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-
+from sans.algorithm_detail.single_execution import perform_can_subtraction
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def category(self):
@@ -137,6 +137,10 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         centre1 = x_start
         centre2 = y_start
         for j in range(0, max_iterations + 1):
+            if(j != 0):
+                centre1 += position_1_step
+                centre2 += position_2_step
+
             progress.report("Reducing ... Pos1 " + str(centre1) + " Pos2 " + str(centre2))
             sample_quartiles = self._run_quartile_reduction(sample_scatter, sample_transmission, sample_direct,
                                                             "Sample", sample_scatter_monitor, component,
@@ -147,13 +151,11 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                                                              can_scatter_monitor, component, state_serialized, centre1,
                                                              centre2, r_min, r_max)
                 for i in range(0,3):
-                    sample_quartiles -= can_quartiles
+                    sample_quartiles[i] = perform_can_subtraction(sample_quartiles[i], can_quartiles[i], self)
 
             residueLR = self._calculate_residuals(sample_quartiles[0], sample_quartiles[1])
             residueTB = self._calculate_residuals(sample_quartiles[2], sample_quartiles[3])
             if(j == 0):
-                resLR_old = residueLR
-                resTB_old = residueTB
                 logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX=" + str(
                     residueLR) + "  ResY=" + str(residueTB))
             else:
@@ -172,8 +174,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                     logger.notice("Converged - check if stuck in local minimum! ")
                     break
 
-            centre1 += position_1_step
-            centre2 += position_2_step
             resLR_old = residueLR
             resTB_old = residueTB
 
@@ -233,31 +233,21 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         yvalsBX = quartile2.readY(0)
         qvalsAX = quartile1.readX(0)
         qvalsBX = quartile2.readX(0)
-        qrangeX = [len(yvalsAX), len(yvalsBX)]
-        nvalsX = min(qrangeX)
-        residue = self._residual_calculation_for_single_direction(yvalsA=yvalsAX,
-                                                                  yvalsB=yvalsBX,
-                                                                  qvalsA=qvalsAX,
-                                                                  qvalsB=qvalsBX,
-                                                                  nvals=nvalsX,
-                                                                  )
-        return residue
+        A_vals_dict = dict(zip(qvalsAX, yvalsAX))
+        B_vals_dict = dict(zip(qvalsBX, yvalsBX))
 
-    def _residual_calculation_for_single_direction(self, yvalsA, yvalsB, qvalsA, qvalsB, nvals):
-        residue = 0
-        indexB = 0
-        for indexA in range(0, nvals):
-            if qvalsA[indexA] < qvalsB[indexB]:
-                #self.logger.notice(id1 + " " +str(indexA)+" "+str(indexB))
-                continue
-            elif qvalsA[indexA] > qvalsB[indexB]:
-                while qvalsA[indexA] > qvalsB[indexB]:
-                    #self.logger(id2 + " " +str(indexA)+" "+str(indexB))
-                    indexB += 1
-            if indexA > nvals - 1 or indexB > nvals - 1:
-                break
-            residue += pow(yvalsA[indexA] - yvalsB[indexB], 2)
-            indexB += 1
+        residue = 0.0
+        for key in B_vals_dict:
+            if key not in A_vals_dict:
+                A_vals_dict[key] = 0.0
+
+        for key in A_vals_dict:
+            if key not in B_vals_dict:
+                B_vals_dict[key] = 0.0
+
+        for key in A_vals_dict and B_vals_dict:
+            residue += pow(A_vals_dict[key] - B_vals_dict[key], 2)
+
         return residue
 
     def _get_progress(self):

@@ -1017,6 +1017,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     centre = centre_finder(state, rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction, reduction_method)
     SetCentre(centre['pos1'], centre['pos2'], bank='rear')
     SetCentre(centre['pos1'], centre['pos2'], bank='front')
+    return centre
 
 
 # ----------------------------------------------------------------------------------------------------------------------
