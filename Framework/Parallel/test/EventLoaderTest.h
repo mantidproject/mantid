@@ -108,8 +108,10 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
          ++event) {
       // Every 77th event in the input is in this list so our TOF should jump
       // over 77 TOFs in the input.
+      double microseconds =
+          static_cast<double>(17 * bank + 77 * event + pixelInBank) / 1000.0;
       TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),
-                       17 * bank + 77 * event + pixelInBank);
+                       microseconds);
       size_t index = event * 77 + pixelInBank;
       size_t pulse = 0;
       if (index >= 100)
