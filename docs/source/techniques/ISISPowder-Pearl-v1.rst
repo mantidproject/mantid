@@ -144,6 +144,20 @@ scripts. The following parameters are required:
 - :ref:`long_mode_pearl_isis-powder-diffraction-ref`
 - :ref:`run_number_pearl_isis-powder-diffraction-ref`
 
+Example
+=======
+
+.. code-block:: python
+
+  # Notice how the filename ends with .yaml
+  cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
+  
+  pearl_example.create_cal(run_number=95671, 
+                           tt_mode="tt70",
+                           long_mode=True,
+                           calibration_mapping_file=cal_mapping_file)
+
+
 .. _calibration_mapping_pearl_isis-powder-diffraction-ref:
 
 Calibration Mapping File
