@@ -20,7 +20,6 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-
 using namespace std;
 
 namespace Mantid {
@@ -187,7 +186,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
   const size_t numspec = m_inputWS->getNumberHistograms();
 
-  double mintwotheta = 10000.;
+  double mintwotheta = 2. * M_PI; // a bit more than 2*pi
   double maxtwotheta = 0.;
 
   double mint3 = 1.;
@@ -237,15 +236,15 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     // Resolution
     const double t1 = m_deltaT / centraltof;
     const double t2 = detdim / (l1 + l2);
-    const double t3 = deltatheta * (cos(theta) / sin(theta));
+    const double t3 = deltatheta / tan(theta);
 
-    const double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
     if (spectrumInfo.isMonitor(i)) {
       m_resTof->mutableY(i)[0] = 0.;
       m_resPathLength->mutableY(i)[0] = 0.;
       m_resAngle->mutableY(i)[0] = 0.;
       m_outputWS->mutableY(i)[0] = 0.;
     } else { // not a monitor
+      const double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
       m_resTof->mutableY(i)[0] = t1;
       m_resPathLength->mutableY(i)[0] = t2;
       m_resAngle->mutableY(i)[0] = t3;
@@ -257,10 +256,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     m_resAngle->mutableX(i)[0] = static_cast<double>(i);
     m_outputWS->mutableX(i)[0] = static_cast<double>(i);
 
-    if (twotheta > maxtwotheta)
-      maxtwotheta = twotheta;
-    else if (twotheta < mintwotheta)
-      mintwotheta = twotheta;
+    maxtwotheta = std::max(twotheta, maxtwotheta);
+    mintwotheta = std::min(twotheta, mintwotheta);
 
     if (fabs(t3) < mint3)
       mint3 = fabs(t3);
