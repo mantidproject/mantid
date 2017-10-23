@@ -720,12 +720,12 @@ std::pair<double, double> LoadILLReflectometry::detectorAndBraggAngles() {
   }
   const auto dbPeak = parseBeamPositionTable(*posTable);
   const double dbOffset = offsetAngle(dbPeak.peakCentre, m_pixelCentre, m_pixelWidth, dbPeak.detectorDistance);
-  const double detectorAngle = nominalDetectorAngle - dbPeak.detectorAngle - 2 * dbOffset + offset;
   if (userAngle == EMPTY_DBL()) {
+    const double detectorAngle = nominalDetectorAngle - dbPeak.detectorAngle - 2 * dbOffset + offset;
     const double bragg = (detectorAngle + offset) / 2;
     return std::make_pair(detectorAngle, bragg);
   }
-  const double userDetectorAngle = detectorAngle / 2 + userAngle - offset / 2;
+  const double userDetectorAngle = 2 * userAngle - offset + (dbOffset - offset);
   return std::make_pair(userDetectorAngle, userAngle);
 }
 
