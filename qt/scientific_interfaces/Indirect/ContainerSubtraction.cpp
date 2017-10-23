@@ -222,8 +222,8 @@ void ContainerSubtraction::updateCan() {
     }
 
     if (scale) {
-      m_transformedContainerWS =
-          scaleWorkspace(m_transformedContainerWS, m_uiForm.spCanScale->value());
+      m_transformedContainerWS = scaleWorkspace(m_transformedContainerWS,
+                                                m_uiForm.spCanScale->value());
     }
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
