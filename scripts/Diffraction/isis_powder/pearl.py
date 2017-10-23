@@ -47,6 +47,16 @@ class Pearl(AbstractInst):
         self._inst_settings.update_attributes(kwargs=kwargs)
         run_details = self._get_run_details(self._inst_settings.run_number)
 
+        cross_correlate_params = {"ReferenceSpectra": self._inst_settings.reference_spectra,
+                                  "WorkspaceIndexMin": self._inst_settings.cross_corr_ws_min,
+                                  "WorkspaceIndexMax": self._inst_settings.cross_corr_ws_max,
+                                  "XMin": self._inst_settings.cross_corr_x_min,
+                                  "XMax": self._inst_settings.cross_corr_x_max}
+        get_detector_offsets_params = {"DReference": self._inst_settings.d_reference,
+                                       "Step": self._inst_settings.get_det_offsets_step,
+                                       "XMin": self._inst_settings.get_det_offsets_x_min,
+                                       "XMax": self._inst_settings.get_det_offsets_x_max}
+
         return pearl_calibration_algs.create_calibration(calibration_runs=run_details.run_number,
                                                          instrument=self,
                                                          offset_file_name=run_details.offset_file_path,
@@ -54,8 +64,8 @@ class Pearl(AbstractInst):
                                                          calibration_dir=self._inst_settings.calibration_dir,
                                                          rebin_1_params=self._inst_settings.cal_rebin_1,
                                                          rebin_2_params=self._inst_settings.cal_rebin_2,
-                                                         cross_correlate_params=self._inst_settings.cal_cross_correlate,
-                                                         get_det_offset_params=self._inst_settings.cal_get_det_offsets)
+                                                         cross_correlate_params=cross_correlate_params,
+                                                         get_det_offset_params=get_detector_offsets_params)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round

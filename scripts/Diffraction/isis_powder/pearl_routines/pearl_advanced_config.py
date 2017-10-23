@@ -67,17 +67,17 @@ long_mode_on_params = {
 calibration_params = {
     "create_cal_rebin_2_params": "1.8,0.002,2.1",
     "create_cal_cross_correlate_params": {
-        "ReferenceSpectra": 20,
-        "WorkspaceIndexMin": 9,
-        "WorkspaceIndexMax": 1063,
-        "XMin": 1.8,
-        "XMax": 2.1
+        "cross_corr_reference_spectra": 20,
+        "cross_corr_ws_index_min": 9,
+        "cross_corr_ws_index_max": 1063,
+        "cross_corr_x_min": 1.8,
+        "cross_corr_x_max": 2.1
     },
     "create_cal_get_detector_offsets_params": {
-        "Step": 0.002,
-        "XMin": -200,
-        "XMax": 200,
-        "DReference": 1.912795
+        "get_det_offsets_step": 0.002,
+        "get_det_offsets_x_min": -200,
+        "get_det_offsets_x_max": 200,
+        "get_det_offsets_d_ref": 1.912795
     }
 }
 
@@ -120,11 +120,17 @@ variable_help = {
     "calibration_params": {
         "create_cal_rebin_1_params": "The parameters for the first rebin step used to create a calibration file",
         "create_cal_rebin_2_params": "The parameters for the second rebin step used to create a calibration file",
-        "create_cal_cross_correlate_params": "Parameters used for cross-correlation in calibration creation. "
-                                             "Keys needed are: [Reference Spectra, WorkspaceIndexMin, "
-                                             "WorkspaceIndexMax, XMin, XMax]",
-        "create_cal_get_detector_offsets_params": "Parameters used for GetDetectorOffsets in calibration creation. "
-                                                  "Keys needed are: [Step, XMin, XMax, DReference]"
+        "cross_corr_reference_spectra": "The Workspace Index of the spectra to correlate all other spectra against",
+        "cross_corr_ws_index_min": "The workspace index of the first member of the range of spectra to cross-correlate "
+                                   "against",
+        "cross_corr_ws_index_max": "The workspace index of the last member of the range of spectra to cross-correlate "
+                                   "against",
+        "cross_corr_x_min": "The starting point of the region to be cross correlated",
+        "cross_corr_x_max": "The ending point of the region to be cross correlated",
+        "get_det_offsets_step": "Step size used to bin d-spacing data in GetDetectorOffsets",
+        "get_det_offsets_x_min": "Minimum of CrossCorrelation data to search for peak, usually negative",
+        "get_det_offsets_x_max": "Maximum of CrossCorrelation data to search for peak, usually positive",
+        "get_det_offsets_d_ref": "Center of reference peak in d-space"
     }
 }
 
