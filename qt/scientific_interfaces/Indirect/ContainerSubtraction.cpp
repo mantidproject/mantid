@@ -51,7 +51,7 @@ void ContainerSubtraction::run() {
   const bool shift = m_uiForm.ckShiftCan->isChecked();
   const bool scale = m_uiForm.ckScaleCan->isChecked();
 
-  auto containerWs = convertToHistogram(m_csContainerWS);
+  auto containerWs = m_csContainerWS;
   if (shift) {
     containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
     containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
@@ -165,6 +165,7 @@ void ContainerSubtraction::newSample(const QString &dataName) {
 
   m_csSampleWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
+  m_csSampleWS = convertToHistogram(m_csSampleWS);
   // Get new workspace
   if (m_csSampleWS) {
     m_uiForm.spPreviewSpec->setMaximum(
@@ -194,6 +195,7 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
   // Get new workspace
   m_csContainerWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       dataName.toStdString());
+  m_csContainerWS = convertToHistogram(m_csContainerWS);
   m_transformedContainerWS = m_csContainerWS;
 
   // Plot new container
@@ -208,7 +210,7 @@ void ContainerSubtraction::updateCan() {
   auto scale = m_uiForm.ckScaleCan->isChecked();
 
   if (m_csContainerWS) {
-    m_transformedContainerWS = convertToHistogram(m_csContainerWS);
+    m_transformedContainerWS = m_csContainerWS;
 
     if (shift) {
       m_transformedContainerWS =
@@ -218,7 +220,7 @@ void ContainerSubtraction::updateCan() {
     } else if (m_csSampleWS &&
                !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
       m_transformedContainerWS =
-          rebinToWorkspace(m_transformedContainerWS, convertToHistogram(m_csSampleWS));
+          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
     }
 
     if (scale) {
