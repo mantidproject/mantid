@@ -504,8 +504,16 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   return ws;
 }
 
+void addComponent(Instrument_sptr &instrument, const V3D &position,
+                  std::string name = "component") {
+  ObjComponent *component = new ObjComponent(name);
+  component->setPos(position);
+  instrument->add(component);
+}
+
 void addSource(Instrument_sptr &instrument, const V3D &position,
                std::string name = "source") {
+  addComponent(instrument, position, name);
   ObjComponent *source = new ObjComponent(name);
   source->setPos(position);
   instrument->add(source);
@@ -539,13 +547,6 @@ void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
   instrument->markAsDetector(detector);
 }
 
-void addSlit(ObjComponent *slit, Instrument_sptr &instrument,
-             const V3D &position, std::string name = "slit") {
-  slit = new ObjComponent(name);
-  slit->setPos(position);
-  instrument->add(slit);
-}
-
 Workspace2D_sptr reflectometryWorkspace(const double startX, const int nSpectra,
                                         const int nBins, const int deltaX) {
 
@@ -574,31 +575,22 @@ Workspace2D_sptr create2DWorkspaceWithReflectometryInstrument(
   addSample(instrument, V3D(15, 0, 0));
   addMonitor(instrument, V3D(14, 0, 0), 1);
   addDetector(instrument, V3D(20, (20 - 15), 0), 2);
+  addComponent(instrument, slit1Pos, "slit1");
+  addComponent(instrument, slit2Pos, "slit2");
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
-
-  ObjComponent *slit1 = nullptr, *slit2 = nullptr;
-
-  slit1 = new ObjComponent("slit1");
-  slit1->setPos(slit1Pos);
-  instrument->add(slit1);
-  slit2 = new ObjComponent("slit2");
-  slit2->setPos(slit2Pos);
-  instrument->add(slit2);
-
-  /*
-  addSlit(slit1, instrument, slit1Pos, "slit1");
-  addSlit(slit2, instrument, slit2Pos, "slit2");
-  */
-
   workspace->setInstrument(instrument);
 
+  IComponent_const_sptr slit1 = instrument->getComponentByName("slit1");
+  IComponent_const_sptr slit2 = instrument->getComponentByName("slit2");
+
   ParameterMap &pmap = workspace->instrumentParameters();
-  pmap.addDouble(slit1, "vertical gap", vg1);
-  pmap.addDouble(slit2, "vertical gap", vg2);
+  pmap.addDouble(slit1.get(), "vertical gap", vg1);
+  pmap.addDouble(slit2.get(), "vertical gap", vg2);
 
   workspace->getSpectrum(0).setDetectorID(2);
   workspace->getSpectrum(1).setDetectorID(1);
+
   return workspace;
 }
 
@@ -631,8 +623,6 @@ Workspace2D_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
               4); // offset above centre
 
   auto workspace = reflectometryWorkspace(startX, nSpectra, nBins, deltaX);
-  // addSlit(instrument, V3D(4, 3, 0), "slit1");
-  // addSlit(instrument, V3D(5, 2, 0), "slit2");
   workspace->setInstrument(instrument);
   workspace->getSpectrum(0).setDetectorID(1);
   workspace->getSpectrum(1).setDetectorID(2);
