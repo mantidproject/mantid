@@ -11,6 +11,7 @@
 namespace Mantid {
 namespace Algorithms {
 
+using namespace std;
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
 
