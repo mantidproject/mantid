@@ -893,18 +893,19 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=None, inout=False):
         prop = algm_obj.getProperty(name)
 
         if _is_workspace_property(prop):
-            value = prop.value
+            value = None
+            if hasattr(prop, 'value'):
+                value = prop.value
             if value is not None:
                 retvals[name] = value
             else:
-                value_str = prop.valueAsStr
                 try:
+                    value_str = prop.valueAsStr
                     retvals[name] = _api.AnalysisDataService[value_str]
                 except KeyError:
-                    if not prop.isOptional() and (prop.direction == _kernel.Direction.Input or prop.direction == _kernel.Direction.InOut):
-                        raise RuntimeError("Internal error. Input/InOut workspace property '%s' on "
-                                           "algorithm '%s' has not been set correctly. "
-                                           "Please contact development team." % (name,  algm_obj.name()))
+                    if not prop.isOptional() and prop.direction == _kernel.Direction.InOut:
+                        raise RuntimeError("Mandatory InOut workspace property '%s' on "
+                                           "algorithm '%s' has not been set correctly. " % (name,  algm_obj.name()))
         elif _is_function_property(prop):
             retvals[name] = FunctionWrapper(prop.value)
         else:
