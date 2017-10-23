@@ -987,8 +987,8 @@ bool EnggDiffractionViewQtGUI::saveFocusedOutputFiles() const {
 }
 
 void MantidQt::CustomInterfaces::EnggDiffractionViewQtGUI::showInvalidRBNumber(
-	const bool rbNumberIsValid) {
-	m_ui.label_invalidRBNumber->setVisible(!rbNumberIsValid);
+    const bool rbNumberIsValid) {
+  m_ui.label_invalidRBNumber->setVisible(!rbNumberIsValid);
 }
 
 void EnggDiffractionViewQtGUI::plotFocusStatus() {

@@ -307,20 +307,21 @@ public:
    */
   virtual void saveSettings() const = 0;
 
- /**
- * Saves the ouput files which are generated, this can be done
- * via Output Files checkbox on the focus tab
- *
- * @return bool
- */
+  /**
+  * Saves the ouput files which are generated, this can be done
+  * via Output Files checkbox on the focus tab
+  *
+  * @return bool
+  */
   virtual bool saveFocusedOutputFiles() const = 0;
 
- /**
-  * Show the message requesting the user to enter a valid RB number, if the
-  * current RB number is not valid
-  * @param True if the current entered RB number is not valid
-  */
-  virtual void showInvalidRBNumber(const bool rbNumberIsValid) = 0;;
+  /**
+   * Show the message requesting the user to enter a valid RB number, if the
+   * current RB number is not valid
+   * @param True if the current entered RB number is not valid
+   */
+  virtual void showInvalidRBNumber(const bool rbNumberIsValid) = 0;
+  ;
 
   /**
   * Produces vanadium curves graph with three spectrum and
