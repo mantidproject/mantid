@@ -213,14 +213,20 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
  */
 void ContainerSubtraction::updateCan() {
   if (m_csContainerWS) {
-    m_previewContainerWS =
-        scaleWorkspace(m_csContainerWS, m_uiForm.spCanScale->value());
-    m_previewContainerWS =
-        shiftWorkspace(m_previewContainerWS, m_uiForm.spShift->value());
+
+    if (m_uiForm.ckShiftCan->isChecked()) {
+      m_transformedContainerWS =
+          shiftWorkspace(m_transformedContainerWS, m_uiForm.spShift->value());
+    } else if (m_uiForm.ckScaleCan->isChecked()) {
+      m_transformedContainerWS =
+          scaleWorkspace(m_csContainerWS, m_uiForm.spCanScale->value());
+    } else {
+      m_transformedContainerWS = m_csContainerWS;
+    }
 
     if (m_csSampleWS) {
-      m_previewContainerWS =
-          rebinToWorkspace(m_previewContainerWS, m_csSampleWS);
+      m_transformedContainerWS =
+          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
     }
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
@@ -241,8 +247,8 @@ void ContainerSubtraction::plotPreview(int wsIndex) {
 
   // Plot container
   if (m_csContainerWS) {
-    m_uiForm.ppPreview->addSpectrum("Container", m_csContainerWS, wsIndex,
-                                    Qt::red);
+    m_uiForm.ppPreview->addSpectrum("Container", m_transformedContainerWS,
+                                    wsIndex, Qt::red);
   }
 
   // Plot result

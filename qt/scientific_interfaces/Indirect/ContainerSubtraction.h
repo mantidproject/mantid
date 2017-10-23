@@ -76,7 +76,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_csSampleWS;
   Mantid::API::MatrixWorkspace_sptr m_csContainerWS;
   Mantid::API::MatrixWorkspace_sptr m_csSubtractedWS;
-  Mantid::API::MatrixWorkspace_sptr m_previewContainerWS;
+  Mantid::API::MatrixWorkspace_sptr m_transformedContainerWS;
 
   size_t m_spectra;
 };
