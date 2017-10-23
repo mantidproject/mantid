@@ -44,6 +44,9 @@ private:
   std::string createOutputName();
 
   Mantid::API::MatrixWorkspace_sptr
+  requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace);
+
+  Mantid::API::MatrixWorkspace_sptr
   shiftWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                  double shiftValue);
   Mantid::API::MatrixWorkspace_sptr

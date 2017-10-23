@@ -56,18 +56,9 @@ void ContainerSubtraction::run() {
     containerWs = shiftWorkspace(containerWs, m_uiForm.spShift->value());
     containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
   } else if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
-    const char *text =
-        "Binning on sample and container does not match."
-        "Would you like to rebin the container to match the sample?";
+    m_transformedContainerWS = requestRebinToSample(containerWs);
 
-    int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
-                                       QMessageBox::Yes, QMessageBox::No,
-                                       QMessageBox::NoButton);
-
-    if (result == QMessageBox::Yes) {
-      containerWs = rebinToWorkspace(containerWs, m_csSampleWS);
-    } else {
-      m_batchAlgoRunner->clearQueue();
+    if (!checkWorkspaceBinningMatches(m_csSampleWS, m_transformedContainerWS)) {
       g_log.error("Cannot apply container corrections using a sample and "
                   "container with different binning.");
       return;
@@ -212,21 +203,25 @@ void ContainerSubtraction::newContainer(const QString &dataName) {
  * Handles Container curve in the miniplot when scale or shift is updated
  */
 void ContainerSubtraction::updateCan() {
+  auto shift = m_uiForm.ckShiftCan->isChecked();
+  auto scale = m_uiForm.ckScaleCan->isChecked();
+
   if (m_csContainerWS) {
 
-    if (m_uiForm.ckShiftCan->isChecked()) {
+    if (shift) {
       m_transformedContainerWS =
           shiftWorkspace(m_transformedContainerWS, m_uiForm.spShift->value());
-    } else if (m_uiForm.ckScaleCan->isChecked()) {
-      m_transformedContainerWS =
-          scaleWorkspace(m_csContainerWS, m_uiForm.spCanScale->value());
-    } else {
-      m_transformedContainerWS = m_csContainerWS;
-    }
-
-    if (m_csSampleWS) {
       m_transformedContainerWS =
           rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+    } else if (m_csSampleWS &&
+               !checkWorkspaceBinningMatches(m_csSampleWS, m_csContainerWS)) {
+      m_transformedContainerWS =
+          rebinToWorkspace(m_transformedContainerWS, m_csSampleWS);
+    }
+
+    if (scale) {
+      m_transformedContainerWS =
+          scaleWorkspace(m_csContainerWS, m_uiForm.spCanScale->value());
     }
   }
   plotPreview(m_uiForm.spPreviewSpec->value());
@@ -374,6 +369,22 @@ void ContainerSubtraction::plotInPreview(const QString &curveName,
     m_spectra = specNo;
     m_uiForm.spPreviewSpec->setMaximum(boost::numeric_cast<int>(m_spectra));
   }
+}
+
+MatrixWorkspace_sptr
+ContainerSubtraction::requestRebinToSample(MatrixWorkspace_sptr workspace) {
+  const char *text =
+      "Binning on sample and container does not match."
+      "Would you like to rebin the container to match the sample?";
+
+  int result = QMessageBox::question(nullptr, tr("Rebin sample?"), tr(text),
+                                     QMessageBox::Yes, QMessageBox::No,
+                                     QMessageBox::NoButton);
+
+  if (result == QMessageBox::Yes)
+    return rebinToWorkspace(workspace, m_csSampleWS);
+  else
+    return workspace;
 }
 
 MatrixWorkspace_sptr
