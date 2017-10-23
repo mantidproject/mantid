@@ -174,39 +174,39 @@ public:
   }
 
   void testExtractEventsFull() {
-    anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 10, 5);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = gen.generateBasicRange(0);
 
     detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, 1000);
-    std::vector<std::vector<EventParser<int64_t>::Event>> rankData;
+    std::vector<std::vector<EventParser<double>::Event>> rankData;
     // event_id now contains spectrum indices
-    EventDataPartitioner<int32_t, int64_t, int64_t> partitioner(
+    EventDataPartitioner<int32_t, int64_t, double> partitioner(
         1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
     partitioner.partition(rankData, event_id.data(),
                           event_time_offset.data() + range.eventOffset, range);
 
     TS_ASSERT(std::equal(
         rankData[0].cbegin(), rankData[0].cend(), event_time_offset.cbegin(),
-        [](const EventParser<int64_t>::Event &e, const int64_t tof) {
+        [](const EventParser<double>::Event &e, const int64_t tof) {
           return static_cast<double>(tof) == e.tof;
         }));
     doTestRankData(rankData, gen, range);
   }
 
   void testExtractEventsPartial() {
-    anonymous::FakeParserDataGenerator<int32_t, int64_t, int64_t> gen(1, 10, 5);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, double> gen(1, 10, 5);
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
     auto range = Chunker::LoadRange{0, 5, 100};
 
     detail::eventIdToGlobalSpectrumIndex(event_id.data() + range.eventOffset,
                                          range.eventCount, 1000);
-    std::vector<std::vector<EventParser<int64_t>::Event>> rankData;
+    std::vector<std::vector<EventParser<double>::Event>> rankData;
     // event_id now contains spectrum indices
-    EventDataPartitioner<int32_t, int64_t, int64_t> partitioner(
+    EventDataPartitioner<int32_t, int64_t, double> partitioner(
         1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
     partitioner.partition(rankData, event_id.data(),
                           event_time_offset.data() + range.eventOffset, range);
@@ -214,7 +214,7 @@ public:
     TS_ASSERT(
         std::equal(rankData[0].cbegin(), rankData[0].cend(),
                    event_time_offset.cbegin() + range.eventOffset,
-                   [](const EventParser<int64_t>::Event &e, const int64_t tof) {
+                   [](const EventParser<double>::Event &e, const double tof) {
                      return static_cast<double>(tof) == e.tof;
                    }));
     doTestRankData(rankData, gen, range);
@@ -238,10 +238,10 @@ public:
   }
 
   void testParsingFull_1Rank_1Bank() {
-    anonymous::FakeParserDataGenerator<int32_t, int64_t, int32_t> gen(1, 10, 2);
+    anonymous::FakeParserDataGenerator<int32_t, int64_t, float> gen(1, 10, 2);
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
-        Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, int32_t>>(
+        Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, float>>(
             1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(0),
                                                     gen.eventTimeZero(), 0}));
     auto event_id = gen.eventId(0);
