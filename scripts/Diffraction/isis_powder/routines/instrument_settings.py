@@ -84,7 +84,12 @@ class InstrumentSettings(object):
             return
 
         for config_key in dict_to_parse:
-            # Update attributes from dictionary
+            # Recurse down all dictionaries
+            if isinstance(dict_to_parse[config_key], dict):
+                self._parse_attributes(dict_to_parse[config_key])
+                continue  # Skip so we don't accidentally re-add this dictionary
+
+            # Update attributes from said dictionary
             found_param_entry = next((param_entry for param_entry in self._param_map
                                       if config_key == param_entry.ext_name), None)
             if found_param_entry:
