@@ -139,6 +139,17 @@ public:
   static EventParserTest *createSuite() { return new EventParserTest(); }
   static void destroySuite(EventParserTest *suite) { delete suite; }
 
+  void test_conversion_to_time_of_flight() {
+    using detail::microseconds;
+    double tof{1.2345678987654321};
+    TS_ASSERT_EQUALS(microseconds(tof), tof);
+    TS_ASSERT_DELTA(microseconds(static_cast<float>(tof)), tof, 1e-7);
+    TS_ASSERT_EQUALS(microseconds(static_cast<int32_t>(1500)), double{1.5});
+    TS_ASSERT_EQUALS(microseconds(static_cast<int64_t>(1500)), double{1.5});
+    TS_ASSERT_EQUALS(microseconds(static_cast<uint32_t>(1500)), double{1.5});
+    TS_ASSERT_EQUALS(microseconds(static_cast<uint64_t>(1500)), double{1.5});
+  }
+
   void testConstruct() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1, 2, 3, 4};

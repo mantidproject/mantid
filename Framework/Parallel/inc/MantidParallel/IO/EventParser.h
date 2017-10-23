@@ -10,6 +10,7 @@
 #include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Event/TofEvent.h"
 
+#include <chrono>
 #include <cstdint>
 #include <numeric>
 #include <thread>
@@ -64,6 +65,22 @@ template <class TimeOffsetType>
 void populateEventLists(
     const std::vector<Event<TimeOffsetType>> &events,
     std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
+
+template <class T>
+double
+microseconds(const T &duration,
+             typename std::enable_if<std::is_floating_point<T>::value>::type * =
+                 nullptr) {
+  return duration;
+}
+
+template <class T>
+double microseconds(
+    const T &duration,
+    typename std::enable_if<std::is_integral<T>::value>::type * = nullptr) {
+  // If duration is integer it is assumed to be nanoseconds, like DateAndTime.
+  return static_cast<double>(std::chrono::nanoseconds(duration).count()) / 1000;
+}
 }
 
 template <class TimeOffsetType> class EventParser {
@@ -192,7 +209,8 @@ void populateEventLists(
     const std::vector<Event<TimeOffsetType>> &events,
     std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
   for (const auto &event : events) {
-    eventLists[event.index]->emplace_back(event.tof, event.pulseTime);
+    eventLists[event.index]->emplace_back(detail::microseconds(event.tof),
+                                          event.pulseTime);
     // In general `index` is random so this loop suffers from frequent cache
     // misses (probably because the hardware prefetchers cannot keep up with the
     // number of different memory locations that are getting accessed). We
