@@ -42,6 +42,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     # Load
     spectra = flags['spectra']
     fit_mode = flags['fit_mode']
+    flags['runs'] = str(runs)
 
     if isinstance(runs, MatrixWorkspace):
         sample_data = runs
@@ -101,7 +102,6 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
     if flags['back_scattering']:
         hydrogen_indices = {int(k) for k, _ in filter(lambda x: x[1] == 'H',
                                                       index_to_symbol_map.items())}
-
         symbols = set()
         for symbol in flags['ms_flags']['HydrogenConstraints']:
             symbols.add(symbol)
@@ -123,7 +123,7 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
                                                                    ignore_indices=hydrogen_indices)
 
         print("=== Iteration {0} out of a possible {1}".format(iteration, iterations))
-        results = fit_tof_iteration(sample_data, container_data, runs, iteration_flags)
+        results = fit_tof_iteration(sample_data, container_data, iteration_flags)
         exit_iteration += 1
 
         if last_results is not None and convergence_threshold is not None:
@@ -142,7 +142,7 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
-def fit_tof_iteration(sample_data, container_data, runs, flags):
+def fit_tof_iteration(sample_data, container_data, flags):
     """
     Performs a single iterations of the time of flight corrections and fitting
     workflow.
@@ -184,6 +184,7 @@ def fit_tof_iteration(sample_data, container_data, runs, flags):
     chi2_values = []
     data_workspaces = []
     result_workspaces = []
+    runs = flags['runs']
     group_name = runs + '_result'
 
     # Create function for retrieving profiles by index outside of loop,
