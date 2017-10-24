@@ -153,7 +153,7 @@ private:
                         const QStringList &expanded);
   MantidTreeWidgetItem *
   addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
-               QTreeWidgetItem *parent = NULL);
+               QTreeWidgetItem *parent = nullptr);
   bool shouldBeSelected(QString name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();

@@ -1,17 +1,17 @@
 #include "MantidCurveFitting/Functions/CrystalFieldSusceptibility.h"
-#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
-#include "MantidCurveFitting/Functions/CrystalElectricField.h"
-#include "MantidCurveFitting/FortranDefs.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidCurveFitting/FortranDefs.h"
+#include "MantidCurveFitting/Functions/CrystalElectricField.h"
+#include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <cmath>
 #include <boost/algorithm/string/predicate.hpp>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -90,33 +90,21 @@ void calculate_powder(double *out, const double *xValues, const size_t nData,
     out[j] /= 3.;
   }
 }
-}
+} // namespace
 
-DECLARE_FUNCTION(CrystalFieldSusceptibility)
-
-CrystalFieldSusceptibility::CrystalFieldSusceptibility()
-    : CrystalFieldPeaksBase(), API::IFunction1D(), m_nre(0),
-      m_setDirect(false) {
+CrystalFieldSusceptibilityBase::CrystalFieldSusceptibilityBase() : m_nre(0) {
+  // Declare attributes inherited by subclasses
   declareAttribute("Hdir", Attribute(std::vector<double>{0., 0., 1.}));
   declareAttribute("Unit", Attribute("cgs"));
   declareAttribute("inverse", Attribute(false));
   declareAttribute("powder", Attribute(false));
   declareAttribute("ScaleFactor", Attribute(1.0)); // Only for multi-site use
-  declareParameter("Lambda", 0.0, "Effective exchange interaction");
+  // Cannot declare fitting parameters as this is not a ParamFunction
 }
 
-// Sets the eigenvectors / values directly
-void CrystalFieldSusceptibility::setEigensystem(const DoubleFortranVector &en,
-                                                const ComplexFortranMatrix &wf,
-                                                const int nre) {
-  m_setDirect = true;
-  m_en = en;
-  m_wf = wf;
-  m_nre = nre;
-}
-
-void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
-                                            const size_t nData) const {
+void CrystalFieldSusceptibilityBase::function1D(double *out,
+                                                const double *xValues,
+                                                const size_t nData) const {
   auto H = getAttribute("Hdir").asVector();
   if (H.size() != 3) {
     throw std::invalid_argument("Hdir must be a three-element vector.");
@@ -145,25 +133,11 @@ void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
   // give the susceptibility in "atomic" units of uB/T/ion.
   // Note that chi_SI = (4pi*10^-6)chi_cgs
   // Default unit is cgs (cm^3/mol).
-  if (!m_setDirect) {
-    // Because this method is const, we can't change the stored en / wf
-    // Use temporary variables instead.
-    DoubleFortranVector en;
-    ComplexFortranMatrix wf;
-    int nre = 0;
-    calculateEigenSystem(en, wf, nre);
-    if (powder) {
-      calculate_powder(out, xValues, nData, en, wf, nre, convfact);
-    } else {
-      calculate(out, xValues, nData, en, wf, nre, H, convfact);
-    }
+  // Use stored values
+  if (powder) {
+    calculate_powder(out, xValues, nData, m_en, m_wf, m_nre, convfact);
   } else {
-    // Use stored values
-    if (powder) {
-      calculate_powder(out, xValues, nData, m_en, m_wf, m_nre, convfact);
-    } else {
-      calculate(out, xValues, nData, m_en, m_wf, m_nre, H, convfact);
-    }
+    calculate(out, xValues, nData, m_en, m_wf, m_nre, H, convfact);
   }
   if (getAttribute("inverse").asBool()) {
     for (size_t i = 0; i < nData; i++) {
@@ -182,6 +156,45 @@ void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
       out[i] /= (1. - lambda * out[i]); // chi = chi0/(1 - lambda.chi0)
     }
   }
+}
+
+DECLARE_FUNCTION(CrystalFieldSusceptibility)
+
+CrystalFieldSusceptibility::CrystalFieldSusceptibility()
+    : CrystalFieldPeaksBase(), CrystalFieldSusceptibilityBase(),
+      m_setDirect(false) {
+  declareParameter("Lambda", 0.0, "Effective exchange interaction");
+}
+
+// Sets the eigenvectors / values directly
+void CrystalFieldSusceptibility::setEigensystem(const DoubleFortranVector &en,
+                                                const ComplexFortranMatrix &wf,
+                                                const int nre) {
+  m_en = en;
+  m_wf = wf;
+  m_nre = nre;
+  m_setDirect = true;
+}
+
+void CrystalFieldSusceptibility::function1D(double *out, const double *xValues,
+                                            const size_t nData) const {
+  if (!m_setDirect) {
+    calculateEigenSystem(m_en, m_wf, m_nre);
+  }
+  CrystalFieldSusceptibilityBase::function1D(out, xValues, nData);
+}
+
+CrystalFieldSusceptibilityCalculation::CrystalFieldSusceptibilityCalculation() {
+  declareParameter("Lambda", 0.0, "Effective exchange interaction");
+}
+
+// Sets the eigenvectors / values directly
+void CrystalFieldSusceptibilityCalculation::setEigensystem(
+    const DoubleFortranVector &en, const ComplexFortranMatrix &wf,
+    const int nre) {
+  m_en = en;
+  m_wf = wf;
+  m_nre = nre;
 }
 
 } // namespace Functions

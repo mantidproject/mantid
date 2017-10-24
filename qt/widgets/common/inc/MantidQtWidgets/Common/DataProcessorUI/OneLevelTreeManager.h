@@ -39,16 +39,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager
-    : public TreeManager {
+class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager : public TreeManager {
 public:
   /// Constructor
   OneLevelTreeManager(DataProcessorPresenter *presenter,
-                                   Mantid::API::ITableWorkspace_sptr table,
-                                   const WhiteList &whitelist);
+                      Mantid::API::ITableWorkspace_sptr table,
+                      const WhiteList &whitelist);
   /// Constructor (no table ws given)
   OneLevelTreeManager(DataProcessorPresenter *presenter,
-                                   const WhiteList &whitelist);
+                      const WhiteList &whitelist);
   /// Destructor
   ~OneLevelTreeManager() override;
 
@@ -110,6 +109,13 @@ public:
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
 private:
+  bool isEmptyTable() const;
+  bool shouldProcessAll() const;
+  bool askUserIfShouldProcessAll() const;
+  std::set<int> allRows() const;
+  std::set<int> noRows() const;
+  std::set<int> getRowsToProcess(bool prompt) const;
+  TreeData handleEmptyTable(bool prompt);
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model

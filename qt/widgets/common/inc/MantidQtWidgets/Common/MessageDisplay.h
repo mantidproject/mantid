@@ -46,10 +46,10 @@ public:
   enum LogLevelControl { EnableLogLevelControl = 0, DisableLogLevelControl };
 
   /// Default constructor with optional parent
-  MessageDisplay(QWidget *parent = NULL);
+  MessageDisplay(QWidget *parent = nullptr);
   /// Constructor specifying if whether control over the global log level is
   /// allowed
-  MessageDisplay(LogLevelControl logLevelControl, QWidget *parent = NULL);
+  MessageDisplay(LogLevelControl logLevelControl, QWidget *parent = nullptr);
   /// Destructor
   ~MessageDisplay() override;
 

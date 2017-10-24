@@ -225,7 +225,7 @@ void makeTestWorkspace(const int ndets, const int nbins,
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "det-" << i;
-    Detector *d = new Detector(os.str(), i, 0);
+    Detector *d = new Detector(os.str(), i, nullptr);
     instr->add(d);
     instr->markAsDetector(d);
   }

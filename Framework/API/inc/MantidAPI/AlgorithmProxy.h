@@ -108,8 +108,15 @@ public:
   /// To query whether algorithm is a child. A proxy is always at top level,
   /// returns false
   bool isChild() const override { return m_isChild; }
-  void setAlwaysStoreInADS(const bool) override {}
-  void setChild(const bool val) override { m_isChild = val; }
+  void setChild(const bool val) override {
+    m_isChild = val;
+    setAlwaysStoreInADS(!val);
+  }
+  void setAlwaysStoreInADS(const bool val) override {
+    m_setAlwaysStoreInADS = val;
+  }
+  bool getAlwaysStoreInADS() const { return m_setAlwaysStoreInADS; }
+
   /// Proxies only manage parent algorithms
   void enableHistoryRecordingForChild(const bool) override{};
   void setRethrows(const bool rethrow) override;
@@ -193,6 +200,7 @@ private:
                                      /// (default = true)
   bool m_rethrow;                    ///< Whether or not to rethrow exceptions.
   bool m_isChild;                    ///< Is this a child algo
+  bool m_setAlwaysStoreInADS;        ///< If this will save in ADS
 
   /// Temporary holder of external observers wishing to subscribe
   mutable std::vector<const Poco::AbstractObserver *> m_externalObservers;

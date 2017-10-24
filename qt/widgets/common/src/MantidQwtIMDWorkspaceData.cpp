@@ -33,7 +33,7 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(
     Mantid::API::MDNormalization normalize, bool isDistribution)
     : MantidQwtWorkspaceData(logScaleY), m_workspace(workspace),
       m_preview(false), m_start(start), m_end(end), m_normalization(normalize),
-      m_isDistribution(isDistribution), m_transform(NULL),
+      m_isDistribution(isDistribution), m_transform(nullptr),
       m_plotAxis(PlotDistance), m_currentPlotAxis(PlotDistance) {
   if (start.getNumDims() == 1 && end.getNumDims() == 1) {
     if (start[0] == 0.0 && end[0] == 0.0) {

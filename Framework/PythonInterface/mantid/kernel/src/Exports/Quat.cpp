@@ -12,7 +12,6 @@ using Mantid::Kernel::V3D;
 using boost::python::arg;
 using boost::python::init;
 using boost::python::class_;
-using boost::python::self;
 using boost::python::copy_const_reference;
 using boost::python::return_value_policy;
 

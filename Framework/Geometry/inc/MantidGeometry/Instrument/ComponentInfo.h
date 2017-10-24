@@ -14,6 +14,7 @@ class V3D;
 }
 
 namespace Geometry {
+class BoundingBox;
 class IComponent;
 class Object;
 }
@@ -63,6 +64,9 @@ private:
   boost::shared_ptr<std::vector<boost::shared_ptr<const Geometry::Object>>>
       m_shapes;
 
+  BoundingBox componentBoundingBox(const size_t index,
+                                   const BoundingBox *reference) const;
+
 public:
   ComponentInfo(
       std::unique_ptr<Beamline::ComponentInfo> componentInfo,
@@ -90,6 +94,8 @@ public:
   bool hasParent(const size_t componentIndex) const;
   Kernel::V3D sourcePosition() const;
   Kernel::V3D samplePosition() const;
+  bool hasSource() const;
+  bool hasSample() const;
   size_t source() const;
   size_t sample() const;
   double l1() const;
@@ -101,9 +107,13 @@ public:
   const IComponent *componentID(const size_t componentIndex) const {
     return m_componentIds->operator[](componentIndex);
   }
+  bool hasShape(const size_t componentIndex) const;
   const Geometry::Object &shape(const size_t componentIndex) const;
   double solidAngle(const size_t componentIndex,
                     const Kernel::V3D &observer) const;
+  BoundingBox boundingBox(const size_t componentIndex,
+                          const BoundingBox *reference = nullptr) const;
+  bool isStructuredBank(const size_t componentIndex) const;
   friend class Instrument;
 };
 

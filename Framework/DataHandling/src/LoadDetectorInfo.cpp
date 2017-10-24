@@ -314,13 +314,11 @@ void LoadDetectorInfo::readLibisisNxs(::NeXus::File &nxsFile,
   nxsFile.readData<double>("gas_pressure", pressure);
   nxsFile.readData<double>("wall_thickness", thickness);
   nxsFile.closeGroup();
-  // cppcheck-suppress knownConditionTrueFalse
   if (pressure <= 0.0) {
     g_log.warning("The data file does not contain correct He3 pressure, "
                   "default value of 10 bar is used instead");
     pressure = 10.0;
   }
-  // cppcheck-suppress knownConditionTrueFalse
   if (thickness <= 0.0) {
     g_log.warning("The data file does not contain correct detector's wall "
                   "thickness, default value of 0.8mm is used instead");

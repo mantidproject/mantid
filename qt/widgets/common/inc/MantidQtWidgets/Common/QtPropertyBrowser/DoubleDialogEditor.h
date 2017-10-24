@@ -50,7 +50,7 @@ class DoubleDialogEditorFactory
     : public QtAbstractEditorFactory<ParameterPropertyManager> {
   Q_OBJECT
 public:
-  DoubleDialogEditorFactory(QObject *parent = 0)
+  DoubleDialogEditorFactory(QObject *parent = nullptr)
       : QtAbstractEditorFactory<ParameterPropertyManager>(parent) {}
   QWidget *createEditorForManager(ParameterPropertyManager *,
                                   QtProperty *property,

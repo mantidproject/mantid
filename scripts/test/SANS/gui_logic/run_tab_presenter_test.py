@@ -286,6 +286,67 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self._clear_property_manager_data_service()
 
+    def test_that_calls_halt_process_flag_if_user_file_has_not_been_loaded_and_process_is_run(self):
+        # Arrange
+        self._clear_property_manager_data_service()
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+
+        with self.assertRaises(RuntimeError):
+            presenter.on_processed_clicked()
+
+        # Assert
+        # We should have raised an exception and called halt process flag
+        self.assertTrue(view.halt_process_flag.call_count == 1)
+        # clean up
+        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+        self._clear_property_manager_data_service()
+
+    def test_that_calls_halt_process_flag_if_state_are_invalid_and_process_is_run(self):
+        # Arrange
+        self._clear_property_manager_data_service()
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+
+        presenter.on_batch_file_load()
+        presenter.on_user_file_load()
+
+        #Set invalid state
+        presenter._state_model.event_slices = 'Hello'
+
+        with self.assertRaises(RuntimeError):
+            presenter.on_processed_clicked()
+
+        # Assert
+        # We should have raised an exception and called halt process flag
+        self.assertTrue(view.halt_process_flag.call_count == 1)
+        #self.assertTrue(has_raised)
+        # clean up
+        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+        self._clear_property_manager_data_service()
+
+    def test_that_calls_halt_process_flag_if_states_are_not_retrievable_and_process_is_run(self):
+        # Arrange
+        self._clear_property_manager_data_service()
+        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+
+        presenter.on_batch_file_load()
+        presenter.on_user_file_load()
+
+        presenter.get_states = mock.MagicMock(return_value='')
+
+        with self.assertRaises(RuntimeError):
+            presenter.on_processed_clicked()
+
+        # Assert
+        # We should have raised an exception and called halt process flag
+        self.assertTrue(view.halt_process_flag.call_count == 1)
+        #self.assertTrue(has_raised)
+        # clean up
+        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+
+        self._clear_property_manager_data_service()
+
     def test_that_can_add_new_masks(self):
         # Arrange
         self._clear_property_manager_data_service()

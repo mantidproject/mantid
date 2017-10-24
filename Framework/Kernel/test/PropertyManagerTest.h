@@ -191,7 +191,7 @@ public:
         "myProp", "theValue",
         boost::make_shared<MandatoryValidator<std::string>>(), "hello"));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp"), "theValue");
-    Property *p = NULL;
+    Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(p = mgr.getProperty("myProp"));
     TS_ASSERT_EQUALS(p->documentation(), "hello");
 

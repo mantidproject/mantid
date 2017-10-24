@@ -384,6 +384,7 @@ void CrystalFieldMultiSpectrum::updateTargetFunction() const {
       updateSpectrum(*fun.getFunction(i), nre, en, wf, ham, m_temperatures[i],
                      m_FWHMs[i], i);
     }
+    fun.checkFunction();
   } catch (std::out_of_range &) {
     buildTargetFunction();
     return;

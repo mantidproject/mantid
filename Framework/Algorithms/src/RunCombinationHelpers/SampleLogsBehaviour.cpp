@@ -510,7 +510,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
   } catch (std::invalid_argument &) {
     auto timeSeriesProp =
         outWS.mutableRun().getTimeSeriesProperty<double>(name);
-    Kernel::DateAndTime startTime = addeeWS.mutableRun().startTime();
+    Types::Core::DateAndTime startTime = addeeWS.mutableRun().startTime();
     double value = addeeWS.mutableRun().getLogAsSingleValue(name);
     timeSeriesProp->addValue(startTime, value);
     // Remove this to supress a warning, we will put it back after adding the
@@ -676,7 +676,7 @@ void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
  * @param addeeWS the workspace being merged
  */
 void SampleLogsBehaviour::readdSampleLogToWorkspace(MatrixWorkspace &addeeWS) {
-  for (auto item : m_addeeLogMap) {
+  for (const auto &item : m_addeeLogMap) {
     auto property = std::unique_ptr<Kernel::Property>(item->clone());
     addeeWS.mutableRun().addProperty(std::move(property));
   }

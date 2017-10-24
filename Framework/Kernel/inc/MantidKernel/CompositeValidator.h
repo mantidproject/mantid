@@ -71,10 +71,10 @@ public:
 private:
   /// Verify the value with the child validators
   std::string check(const boost::any &value) const override;
-  /// Verify the value with the child validators with logical "and"
-  std::string checkLogicalAnd(const boost::any &value) const;
-  /// Verify the value with the child validators with logical "and"
-  std::string checkLogicalOr(const boost::any &value) const;
+  /// Verify the value with the child validators with logical "and" relationship
+  std::string checkAll(const boost::any &value) const;
+  /// Verify the value with the child validators with logical "or" relationship
+  std::string checkAny(const boost::any &value) const;
   /// build an error message for OR relations
   std::string buildErrorMessage(const bool valid,
                                 const std::string &errors) const;

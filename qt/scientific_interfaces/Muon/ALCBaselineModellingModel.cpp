@@ -78,11 +78,12 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
     MatrixWorkspace_sptr ws,
     const std::vector<IALCBaselineModellingModel::Section> &sections) {
   // Whether point with particular index should be disabled
-  std::vector<bool> toDisable(ws->blocksize(), true);
+  const size_t numBins = ws->blocksize();
+  std::vector<bool> toDisable(numBins, true);
 
   // Find points which are in at least one section, and exclude them from
   // disable list
-  for (size_t i = 0; i < ws->blocksize(); ++i) {
+  for (size_t i = 0; i < numBins; ++i) {
     for (auto it = sections.begin(); it != sections.end(); ++it) {
       if (ws->x(0)[i] >= it->first && ws->x(0)[i] <= it->second) {
         toDisable[i] = false;
@@ -99,7 +100,7 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
   const double DISABLED_ERR = std::numeric_limits<double>::max();
 
   // Disable chosen points
-  for (size_t i = 0; i < ws->blocksize(); ++i) {
+  for (size_t i = 0; i < numBins; ++i) {
     if (toDisable[i]) {
       ws->mutableE(0)[i] = DISABLED_ERR;
     }

@@ -134,10 +134,8 @@ public:
     check_size(ws);
     TS_ASSERT_EQUALS(ws.getSpectrum(0).getSpectrumNo(), 1);
     TS_ASSERT_EQUALS(ws.getSpectrum(1).getSpectrumNo(), 2);
-    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(),
-                     (std::set<detid_t>{1}));
-    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(),
-                     (std::set<detid_t>{2}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs(), (std::set<detid_t>{}));
+    TS_ASSERT_EQUALS(ws.getSpectrum(1).getDetectorIDs(), (std::set<detid_t>{}));
   }
 
   void check_indices(const MatrixWorkspace &ws) {

@@ -42,9 +42,9 @@ class Filter : public QObject {
   Q_OBJECT
 
 public:
-  Filter(ApplicationWindow *parent, Table *t = 0,
+  Filter(ApplicationWindow *parent, Table *t = nullptr,
          const QString &name = QString());
-  Filter(ApplicationWindow *parent, Graph *g = 0,
+  Filter(ApplicationWindow *parent, Graph *g = nullptr,
          const QString &name = QString());
   ~Filter() override;
 
@@ -52,9 +52,9 @@ public:
   virtual bool run();
 
   virtual void setDataCurve(int curve, double start, double end);
-  bool setDataFromCurve(const QString &curveTitle, Graph *g = 0);
+  bool setDataFromCurve(const QString &curveTitle, Graph *g = nullptr);
   bool setDataFromCurve(const QString &curveTitle, double from, double to,
-                        Graph *g = 0);
+                        Graph *g = nullptr);
 
   virtual bool setDataFromTable(Table *, const QString &, const QString &,
                                 int = 1, int = -1);
@@ -100,7 +100,7 @@ public:
 
   bool error() { return d_init_err; };
 
-  virtual void enableGraphicsDisplay(bool on = true, Graph *g = 0);
+  virtual void enableGraphicsDisplay(bool on = true, Graph *g = nullptr);
 
 protected:
   void init();

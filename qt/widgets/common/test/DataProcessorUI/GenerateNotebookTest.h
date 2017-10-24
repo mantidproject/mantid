@@ -27,13 +27,13 @@ private:
 
     // Reflectometry pre-process map
     return std::map<QString, PreprocessingAlgorithm>{
-        {"Run(s)", PreprocessingAlgorithm("Plus", plusPrefix,
-                                                       std::set<QString>())},
+        {"Run(s)",
+         PreprocessingAlgorithm("Plus", plusPrefix, std::set<QString>())},
         {"Transmission Run(s)",
-         PreprocessingAlgorithm(
-             "CreateTransmissionWorkspaceAuto", "TRANS_",
-             std::set<QString>{"FirstTransmissionRun", "SecondTransmissionRun",
-                               "OutputWorkspace"})}};
+         PreprocessingAlgorithm("CreateTransmissionWorkspaceAuto", "TRANS_",
+                                std::set<QString>{"FirstTransmissionRun",
+                                                  "SecondTransmissionRun",
+                                                  "OutputWorkspace"})}};
   }
 
   // Creates a reflectometry processing algorithm
@@ -98,9 +98,7 @@ public:
   static GenerateNotebookTest *createSuite() {
     return new GenerateNotebookTest();
   }
-  static void destroySuite(GenerateNotebookTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(GenerateNotebookTest *suite) { delete suite; }
 
   static QStringList splitIntoLines(QString const &notebook) {
     return notebook.split("\n");
@@ -139,9 +137,10 @@ public:
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         m_wsName, m_instrument, reflWhitelist(),
-        std::map<QString, PreprocessingAlgorithm>(),
-        reflProcessor(), reflPostprocessor(), std::map<QString, QString>(), "",
-        "");
+        std::map<QString, PreprocessingAlgorithm>(), reflProcessor(),
+        PostprocessingStep("", reflPostprocessor(),
+                           std::map<QString, QString>()),
+        std::map<QString, QString>(), "");
 
     auto generatedNotebook = notebook->generateNotebook(TreeData());
 
@@ -331,8 +330,7 @@ public:
 
     // Create a pre-process map
     std::map<QString, PreprocessingAlgorithm> preprocessMap = {
-        {"Run", PreprocessingAlgorithm("Plus", "RUN_",
-                                                    std::set<QString>())}};
+        {"Run", PreprocessingAlgorithm("Plus", "RUN_", std::set<QString>())}};
     // Specify some pre-processing options
     std::map<QString, QString> userPreProcessingOptions = {
         {"Run", "Property=prop"}};
@@ -480,9 +478,10 @@ public:
     RowData rowData1 = {"12346", "", "", "", "", "", "", "", ""};
     GroupData groupData = {{0, rowData0}, {1, rowData1}};
 
-    auto output =
-        postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
-                               reflPostprocessor(), userOptions);
+    auto output = postprocessGroupString(
+        groupData, reflWhitelist(), reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(),
+                           std::map<QString, QString>()));
 
     std::vector<QString> result = {
         "#Post-process workspaces",
@@ -499,8 +498,10 @@ public:
     rowData0 = {"24681", "", "", "", "", "", "", "", ""};
     rowData1 = {"24682", "", "", "", "", "", "", "", ""};
     groupData = {{0, rowData0}, {1, rowData1}};
-    output = postprocessGroupString(groupData, reflWhitelist(), reflProcessor(),
-                                    reflPostprocessor(), userOptions);
+    output = postprocessGroupString(
+        groupData, reflWhitelist(), reflProcessor(),
+        PostprocessingStep(userOptions, reflPostprocessor(),
+                           std::map<QString, QString>()));
 
     result = {"#Post-process workspaces",
               "IvsQ_TOF_24681_TOF_24682, _ = "
@@ -623,11 +624,12 @@ public:
                                    {"Transmission Run(s)", "Property=Value"}};
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
+    auto postprocessingStep = PostprocessingStep(
+        postprocessingOptions, postProcessor, std::map<QString, QString>());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postProcessor, preprocessingOptions, processingOptions,
-        postprocessingOptions);
+        postprocessingStep, preprocessingOptions, processingOptions);
 
     auto generatedNotebook = notebook->generateNotebook(reflData());
 
@@ -720,11 +722,12 @@ public:
                                    {"Transmission Run(s)", "Property=Value"}};
     auto processingOptions = "AnalysisMode=MultiDetectorAnalysis";
     auto postprocessingOptions = "Params=0.04";
+    auto postprocessingStep = PostprocessingStep(
+        postprocessingOptions, postProcessor, std::map<QString, QString>());
 
     auto notebook = Mantid::Kernel::make_unique<GenerateNotebook>(
         "TableName", "INTER", whitelist, preprocessMap, processor,
-        postProcessor, preprocessingOptions, processingOptions,
-        postprocessingOptions);
+        postprocessingStep, preprocessingOptions, processingOptions);
 
     RowData rowData0 = {"12345", "0.5", "", "0.1", "1.6", "0.04", "1", "", ""};
     RowData rowData1 = {"12346", "1.5", "", "1.4", "2.9", "0.04", "1", "", ""};

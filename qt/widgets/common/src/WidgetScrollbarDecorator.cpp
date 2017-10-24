@@ -19,7 +19,7 @@ using namespace MantidQt::API;
 WidgetScrollbarDecorator::WidgetScrollbarDecorator(QWidget *target)
     : m_target(target), m_enabled(false) {
   // Off-screen widget to hold layout/widgets when scrolling disabled
-  m_offscreen = new QWidget(0);
+  m_offscreen = new QWidget(nullptr);
 
   // This layout replaces dialog's main layout when scrolling enabled
   m_layout = new QVBoxLayout(m_offscreen);
