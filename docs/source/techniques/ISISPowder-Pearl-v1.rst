@@ -490,7 +490,7 @@ run_number
 ^^^^^^^^^^
 Specifies the run number(s) to process when calling the
 :ref:`focus_pearl_isis-powder-diffraction-ref` and
-:ref:`create_cal_isis-powder-diffraction-ref` method.
+:ref:`create_cal_isis-powder-diffraction-ref` methods.
 
 This parameter accepts a single value or a range
 of values with the following syntax:

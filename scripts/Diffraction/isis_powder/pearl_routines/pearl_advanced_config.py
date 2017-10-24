@@ -7,10 +7,13 @@ general_params = {
     "monitor_spectrum_number": 1,
     "monitor_spline_coefficient": 20,
     "spline_coefficient": 60,
-    "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
-    "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
-    "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
-    "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
+
+    "file_names": {
+         "vanadium_absorb_filename": "pearl_absorp_sphere_10mm_newinst2_long.nxs",
+         "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
+         "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
+         "tt35_grouping_filename": "pearl_group_12_1_TT35.cal"
+    },
 }
 
 long_mode_off_params = {
