@@ -57,7 +57,7 @@ class Pearl(AbstractInst):
                                        "XMin": self._inst_settings.get_det_offsets_x_min,
                                        "XMax": self._inst_settings.get_det_offsets_x_max}
 
-        return pearl_calibration_algs.create_calibration(calibration_runs=run_details.run_number,
+        return pearl_calibration_algs.create_calibration(calibration_runs=self._inst_settings.run_number,
                                                          instrument=self,
                                                          offset_file_name=run_details.offset_file_path,
                                                          grouping_file_name=run_details.grouping_file_path,
