@@ -795,8 +795,14 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # Return the name fo the reduced workspace (or WorkspaceGroup)
     # -----------------------------------------------------------
     reduction_mode = state.reduction.reduction_mode
-    is_group = is_part_of_reduced_output_workspace_group(state)
-    _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+    if reduction_mode != ISISReductionMode.All:
+        is_group = is_part_of_reduced_output_workspace_group(state)
+        _, output_workspace_base_name = get_output_name(state, reduction_mode, is_group)
+    else:
+        is_group = is_part_of_reduced_output_workspace_group(state)
+        _, output_workspace_base_name_hab = get_output_name(state, ISISReductionMode.HAB, is_group)
+        _, output_workspace_base_name_lab = get_output_name(state, ISISReductionMode.LAB, is_group)
+        output_workspace_base_name = [output_workspace_base_name_lab, output_workspace_base_name_hab]
     return output_workspace_base_name
 
 
