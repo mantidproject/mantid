@@ -12,6 +12,8 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- ISIS_Powder scripts for PEARL now support creation of grouping .cal files from ceria run(s)
+
 Engineering Diffraction
 -----------------------
 
