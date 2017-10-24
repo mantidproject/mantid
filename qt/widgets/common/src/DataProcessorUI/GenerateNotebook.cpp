@@ -48,8 +48,7 @@ specified via the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 GenerateNotebook::GenerateNotebook(
-    QString name, const QString instrument,
-    const WhiteList &whitelist,
+    QString name, const QString instrument, const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
     const ProcessingAlgorithm &processor,
     const PostprocessingAlgorithm &postprocessor,
@@ -232,8 +231,7 @@ QString plotsString(const QStringList &output_ws, const QString &stitched_wsStr,
   @param whitelist : the whitelist defining the table columns
   @return string containing the markdown code
   */
-QString tableString(const TreeData &treeData,
-                    const WhiteList &whitelist) {
+QString tableString(const TreeData &treeData, const WhiteList &whitelist) {
 
   QString tableString;
 
@@ -286,11 +284,11 @@ QString tableString(const TreeData &treeData,
   HintingLineEdit
   @return tuple containing the python code string and the output workspace name
   */
-boost::tuple<QString, QString> postprocessGroupString(
-    const GroupData &rowMap, const WhiteList &whitelist,
-    const ProcessingAlgorithm &processor,
-    const PostprocessingAlgorithm &postprocessor,
-    const QString &postprocessingOptions) {
+boost::tuple<QString, QString>
+postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
+                       const ProcessingAlgorithm &processor,
+                       const PostprocessingAlgorithm &postprocessor,
+                       const QString &postprocessingOptions) {
   QString stitchString;
 
   stitchString += "#Post-process workspaces\n";
@@ -351,8 +349,7 @@ QString plot1DString(const QStringList &ws_names) {
  @param prefix : wheter to return the name with the prefix or not
  @return : the workspace name
 */
-QString getReducedWorkspaceName(const RowData &data,
-                                const WhiteList &whitelist,
+QString getReducedWorkspaceName(const RowData &data, const WhiteList &whitelist,
                                 const QString &prefix) {
 
   int ncols = static_cast<int>(whitelist.size());
@@ -366,7 +363,7 @@ QString getReducedWorkspaceName(const RowData &data,
     // Do we want to use this column to generate the name of the output ws?
     if (whitelist.showValue(col)) {
       // Get what's in the column
-      const QString valueStr = data.at(col);
+      const QString &valueStr = data.at(col);
       if (!valueStr.isEmpty()) {
         // But we may have things like '1+2' which we want to replace with '1_2'
         auto value = valueStr.split(QRegExp("[+,]"), QString::SkipEmptyParts);
@@ -401,13 +398,13 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
  First item in the tuple is the python code that performs the reduction, and
  second item are the names of the output workspaces.
 */
-boost::tuple<QString, QString> reduceRowString(
-    const RowData &data, const QString &instrument,
-    const WhiteList &whitelist,
-    const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-    const ProcessingAlgorithm &processor,
-    const std::map<QString, QString> &preprocessingOptionsMap,
-    const QString &processingOptions) {
+boost::tuple<QString, QString>
+reduceRowString(const RowData &data, const QString &instrument,
+                const WhiteList &whitelist,
+                const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
+                const ProcessingAlgorithm &processor,
+                const std::map<QString, QString> &preprocessingOptionsMap,
+                const QString &processingOptions) {
 
   if (static_cast<int>(whitelist.size()) != data.size()) {
     throw std::invalid_argument("Can't generate notebook");
@@ -436,14 +433,13 @@ boost::tuple<QString, QString> reduceRowString(
       // instructions
 
       // Get the runs
-      const QString runStr = data.at(col);
+      const QString &runStr = data.at(col);
 
       if (!runStr.isEmpty()) {
         // Some runs were given for pre-processing
 
         // The pre-processing alg
-        const PreprocessingAlgorithm preprocessor =
-            preprocessMap.at(colName);
+        const PreprocessingAlgorithm &preprocessor = preprocessMap.at(colName);
         // The pre-processing options
         const QString options = preprocessingOptionsMap.count(colName) > 0
                                     ? preprocessingOptionsMap.at(colName)
@@ -461,7 +457,7 @@ boost::tuple<QString, QString> reduceRowString(
       // No pre-processing
 
       // Just read the property value from the table
-      const QString propStr = data.at(col);
+      const QString &propStr = data.at(col);
 
       if (!propStr.isEmpty()) {
         // If it was not empty, we used it as an input property to the reduction
@@ -473,14 +469,14 @@ boost::tuple<QString, QString> reduceRowString(
 
   auto options = parseKeyValueString(processingOptions.toStdString());
 
-  const auto hiddenOptionsStr = data.back();
+  const auto &hiddenOptionsStr = data.back();
   // Parse and set any user-specified options
   auto hiddenOptionsMap = parseKeyValueString(hiddenOptionsStr.toStdString());
   // Options specified via 'Hidden Options' column will be preferred
   addProperties(algProperties, hiddenOptionsMap);
 
   // 'Options' specified either via 'Options' column or HintinLineEdit
-  const auto optionsStr = data.at(ncols - 2);
+  const auto &optionsStr = data.at(ncols - 2);
   // Parse and set any user-specified options
   auto optionsMap = parseKeyValueString(optionsStr.toStdString());
   // Options specified via 'Options' column will be preferred

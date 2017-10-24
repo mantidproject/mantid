@@ -63,7 +63,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtReflRunsTabView
   Q_OBJECT
 public:
   /// Constructor
-  QtReflRunsTabView(QWidget *parent = 0);
+  QtReflRunsTabView(QWidget *parent = nullptr);
   /// Destructor
   ~QtReflRunsTabView() override;
   // Connect the model

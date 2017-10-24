@@ -44,7 +44,7 @@ class Shape2DCollection : public QObject, public Shape2D {
 public:
   Shape2DCollection();
   ~Shape2DCollection() override;
-  Shape2D *clone() const override { return NULL; }
+  Shape2D *clone() const override { return nullptr; }
   void setWindow(const RectF &surface, const QRect &viewport) const;
   void draw(QPainter &painter) const override;
   virtual void addShape(Shape2D *, bool slct = false);

@@ -73,7 +73,7 @@ private:
     auto source = createTestSeries("name");
     auto filter = createTestFilter();
 
-    FilteredTimeSeriesProperty<double> *filtered(NULL);
+    FilteredTimeSeriesProperty<double> *filtered(nullptr);
     TS_ASSERT_THROWS_NOTHING(filtered = new FilteredTimeSeriesProperty<double>(
                                  source, *filter, transferOwnership));
 

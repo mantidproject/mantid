@@ -28,10 +28,10 @@ Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // initialise VATES factory
 Mantid::Kernel::AbstractInstantiator<VatesViewerInterface> *
-    InterfaceManager::m_vatesGuiFactory = NULL;
+    InterfaceManager::m_vatesGuiFactory = nullptr;
 // initialise HelpWindow factory
 Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *
-    InterfaceManager::m_helpViewer = NULL;
+    InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
@@ -56,7 +56,7 @@ AlgorithmDialog *InterfaceManager::createDialog(
     bool forScript, const QHash<QString, QString> &presetValues,
     const QString &optionalMsg, const QStringList &enabled,
     const QStringList &disabled) {
-  AlgorithmDialog *dlg = NULL;
+  AlgorithmDialog *dlg = nullptr;
   if (AlgorithmDialogFactory::Instance().exists(alg->name() + "Dialog")) {
     g_log.debug() << "Creating a specialised dialog for " << alg->name()
                   << '\n';
@@ -73,8 +73,8 @@ AlgorithmDialog *InterfaceManager::createDialog(
   dlg->setAttribute(Qt::WA_DeleteOnClose, true);
 
   // Set the QDialog window flags to ensure the dialog ends up on top
-  Qt::WindowFlags flags = 0;
-  flags |= Qt::Window;
+  Qt::WindowFlags flags = nullptr;
+  flags |= Qt::Dialog;
   flags |= Qt::WindowCloseButtonHint;
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
@@ -137,12 +137,12 @@ AlgorithmDialog *InterfaceManager::createDialogFromName(
  */
 UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
                                                  QWidget *parent) {
-  UserSubWindow *user_win = NULL;
+  UserSubWindow *user_win = nullptr;
   std::string iname = interface_name.toStdString();
   try {
     user_win = UserSubWindowFactory::Instance().createUnwrapped(iname);
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
-    user_win = NULL;
+    user_win = nullptr;
   }
   if (user_win) {
     g_log.debug() << "Created a specialised interface for " << iname << '\n';
@@ -210,10 +210,12 @@ void InterfaceManager::registerVatesGuiFactory(
 Getter to determine if vates components have been installed.
 @return true if they are available.
 */
-bool InterfaceManager::hasVatesLibraries() { return NULL != m_vatesGuiFactory; }
+bool InterfaceManager::hasVatesLibraries() {
+  return nullptr != m_vatesGuiFactory;
+}
 
 VatesViewerInterface *InterfaceManager::createVatesSimpleGui() const {
-  if (m_vatesGuiFactory == NULL) {
+  if (m_vatesGuiFactory == nullptr) {
     g_log.error() << "InterfaceManager::createVatesSimpleGui is null. Mantid "
                      "Vates package is probably not installed.\n";
     throw Mantid::Kernel::Exception::NullPointerException(
@@ -234,7 +236,7 @@ void InterfaceManager::registerHelpWindowFactory(
 }
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
-  if (m_helpViewer == NULL) {
+  if (m_helpViewer == nullptr) {
     g_log.error("InterfaceManager::createHelpWindow is null.");
     throw Mantid::Kernel::Exception::NullPointerException(
         "InterfaceManager::createHelpWindow", "m_helpViewer");

@@ -46,12 +46,12 @@ Usage
 .. testcode:: ExFindUBUsingFFT
 
     ws=LoadIsawPeaks("TOPAZ_3007.peaks")
-    print "After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After LoadIsawPeaks does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
     FindUBUsingFFT(ws,MinD=8.0,MaxD=13.0)
-    print "After FindUBUsingFFT does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice()
+    print("After FindUBUsingFFT does the workspace have an orientedLattice: %s" % ws.sample().hasOrientedLattice())
 
-    print ws.sample().getOrientedLattice().getUB()
+    print(ws.sample().getOrientedLattice().getUB())
 
 
 Output:

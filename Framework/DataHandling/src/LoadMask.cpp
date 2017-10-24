@@ -29,8 +29,6 @@
 #include <boost/algorithm/string.hpp>
 
 using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;

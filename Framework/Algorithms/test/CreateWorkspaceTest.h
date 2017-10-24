@@ -88,6 +88,8 @@ public:
 
     TS_ASSERT(!ws->isHistogramData());
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+    // No parent workspace -> no instrument -> no detectors -> no mapping.
+    TS_ASSERT_EQUALS(ws->getSpectrum(0).getDetectorIDs().size(), 0);
 
     TS_ASSERT_EQUALS(ws->x(0)[0], 0);
     TS_ASSERT_EQUALS(ws->x(0)[1], 1.234);

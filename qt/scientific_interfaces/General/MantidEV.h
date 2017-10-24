@@ -192,7 +192,7 @@ class MantidEV : public API::UserSubWindow {
 
 public:
   /// Constructor
-  explicit MantidEV(QWidget *parent = 0);
+  explicit MantidEV(QWidget *parent = nullptr);
 
   /// Destructor
   ~MantidEV() override;

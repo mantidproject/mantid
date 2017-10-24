@@ -915,9 +915,21 @@ void QWorkspaceDockView::addMatrixWorkspaceMenuItems(
   menu->addAction(m_plotAdvanced);
 
   // Don't plot a spectrum if only one X value
-  m_plotSpec->setEnabled(matrixWS->blocksize() > 1);
-  m_plotSpecErr->setEnabled(matrixWS->blocksize() > 1);
-  m_plotAdvanced->setEnabled(matrixWS->blocksize() > 1);
+  bool multipleBins = false;
+  try {
+    multipleBins = (matrixWS->blocksize() > 1);
+  } catch (...) {
+    const size_t numHist = matrixWS->getNumberHistograms();
+    for (size_t i = 0; i < numHist; ++i) {
+      if (matrixWS->y(i).size() > 1) {
+        multipleBins = true;
+        break;
+      }
+    }
+  }
+  m_plotSpec->setEnabled(multipleBins);
+  m_plotSpecErr->setEnabled(multipleBins);
+  m_plotAdvanced->setEnabled(multipleBins);
 
   menu->addAction(m_showSpectrumViewer); // The 2D spectrum viewer
 
@@ -1107,7 +1119,7 @@ void QWorkspaceDockView::workspaceSelected() {
             SLOT(saveWorkspaceCollection()));
 
     // Don't display as a group
-    m_saveButton->setMenu(NULL);
+    m_saveButton->setMenu(nullptr);
   } else {
     // Don't run the save group function when clicked
     disconnect(m_saveButton, SIGNAL(clicked()), this,

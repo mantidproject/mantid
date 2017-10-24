@@ -73,7 +73,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidDialog : public QDialog {
 
 public:
   /// DefaultConstructor
-  MantidDialog(QWidget *parent = 0);
+  MantidDialog(QWidget *parent = nullptr);
   /// Destructor
   ~MantidDialog() override;
 

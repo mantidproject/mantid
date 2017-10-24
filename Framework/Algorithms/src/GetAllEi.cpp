@@ -1036,10 +1036,10 @@ namespace { // former lambda function for findChopSpeedAndDelay
 *@return true if selection interval is completed
 *        (current interval is not selected) and false otherwise
 */
-bool SelectInterval(const Kernel::DateAndTime &t_beg,
-                    const Kernel::DateAndTime &t_end, double value,
-                    bool &inSelection, Kernel::DateAndTime &startTime,
-                    Kernel::DateAndTime &endTime) {
+bool SelectInterval(const Types::Core::DateAndTime &t_beg,
+                    const Types::Core::DateAndTime &t_end, double value,
+                    bool &inSelection, Types::Core::DateAndTime &startTime,
+                    Types::Core::DateAndTime &endTime) {
 
   if (value > 0) {
     if (!inSelection) {
@@ -1074,14 +1074,14 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
     // Define selecting function
     bool inSelection(false);
     // time interval to select (start-end)
-    Kernel::DateAndTime startTime, endTime;
+    Types::Core::DateAndTime startTime, endTime;
     //
     // Analyze filtering log
     auto dateAndTimes = m_pFilterLog->valueAsCorrectMap();
     auto it = dateAndTimes.begin();
     auto next = it;
     next++;
-    std::map<Kernel::DateAndTime, double> derivMap;
+    std::map<Types::Core::DateAndTime, double> derivMap;
     auto itder = it;
     if (m_FilterWithDerivative) {
       pDerivative = m_pFilterLog->getDerivative();

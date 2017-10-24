@@ -27,10 +27,10 @@ Usage
     FindUBUsingFFT(PeaksWorkspace='peaks', MinD=2, MaxD=16)
     IndexPeaks(PeaksWorkspace='peaks', NumIndexed=100, AverageError=0.013759860303255647)
     peak = peaks.getPeak(0)
-    print peak.getBinCount()
+    print(peak.getBinCount())
     peaks = CentroidPeaks(InPeaksWorkspace='peaks', InputWorkspace='TOPAZ_3132_nxs')
     peak = peaks.getPeak(0)
-    print peak.getBinCount()
+    print(peak.getBinCount())
 
 
 .. categories::

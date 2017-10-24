@@ -4,13 +4,14 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ProductLinearExp.h"
+
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidCurveFitting/Functions/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/FunctionFactory.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -128,9 +129,9 @@ public:
   void test_registered_with_factory() {
     IFunction_sptr func =
         FunctionFactory::Instance().createFunction("ProductLinearExp");
-    TS_ASSERT(func != NULL);
+    TS_ASSERT(func != nullptr);
     TS_ASSERT_EQUALS(func->name(), "ProductLinearExp");
-    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != NULL);
+    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != nullptr);
   }
 
   void test_set_parameters() {

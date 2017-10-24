@@ -16,7 +16,7 @@ InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget) {
   QVBoxLayout *layout = new QVBoxLayout(this);
   // Tree Controls
-  m_instrumentTree = new InstrumentTreeWidget(0);
+  m_instrumentTree = new InstrumentTreeWidget(nullptr);
   layout->addWidget(m_instrumentTree);
   connect(m_instrumentTree,
           SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
@@ -107,7 +107,7 @@ std::string InstrumentWidgetTreeTab::saveToProject() const {
 
   auto names = m_instrumentTree->findExpandedComponents();
   tab.writeLine("ExpandedItems");
-  for (auto name : names) {
+  for (const auto &name : names) {
     tab << name;
   }
 

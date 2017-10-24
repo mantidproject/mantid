@@ -11,7 +11,6 @@ namespace Mantid {
 namespace Geometry {
 using Geometry::BoundingBox;
 using Geometry::Track;
-using Kernel::Material;
 using Kernel::V3D;
 
 //------------------------------------------------------------------------------

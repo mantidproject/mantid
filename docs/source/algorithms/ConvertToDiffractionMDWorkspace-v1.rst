@@ -99,8 +99,8 @@ Usage
    md = ConvertToDiffractionMDWorkspace(InputWorkspace=events, OutputWorkspace='md', OneEventPerBin=False, LorentzCorrection=True, SplitThreshold=150, Version=1)
 
    # A way to look at these results as a text:
-   print "Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims())
-   print "Workspace Type is: ",md.id()
+   print("Resulting MD workspace has {0} events and {1} dimensions".format(md.getNEvents(),md.getNumDims()))
+   print("Workspace Type is:  {}".format(md.id()))
 
 
 **Output:**

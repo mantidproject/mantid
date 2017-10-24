@@ -22,6 +22,10 @@ Usage
 
 .. testcode:: SortTableWorkspaceExample
 
+    # a method to print a row
+    def print_row(row):
+        print("{{'y': '{0}', 'x': {1}, 'z': {2}}}".format(row["y"],row["x"],row["z"]))
+
     # Create a host workspace
     table = CreateEmptyTableWorkspace()
     table.addColumn("int", "x")
@@ -42,15 +46,15 @@ Usage
 
     # Sort in ascending order
     sorted_asc = SortTableWorkspace(table, Columns = ['x','y','z'])
-    print 'Sorted ascending'
+    print('Sorted ascending')
     for i in range(sorted_asc.rowCount()):
-        print sorted_asc.row(i)
+        print_row(sorted_asc.row(i))
 
     # Sort in descending order
     sorted_des = SortTableWorkspace(table, Columns = ['x','y','z'], Ascending = [False])
-    print 'Sorted descending'
+    print('Sorted descending')
     for i in range(sorted_des.rowCount()):
-        print sorted_des.row(i)
+        print_row(sorted_des.row(i))
 
 
 Output:
