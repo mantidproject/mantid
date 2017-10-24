@@ -54,8 +54,8 @@ public:
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
 
     return Kernel::make_unique<EventDataPartitioner<int64_t, int64_t, int32_t>>(
-        m_numWorkers, PulseTimeGenerator<int64_t, int64_t>{index, time_zero,
-                                                           time_zero_offset});
+        m_numWorkers, PulseTimeGenerator<int64_t, int64_t>{
+                          index, time_zero, "nanosecond", time_zero_offset});
   }
 
   void readEventID(int32_t *event_id, size_t start,

@@ -37,8 +37,8 @@ public:
   void test_empty_range() {
     for (const auto workers : {1, 2, 3}) {
       EventDataPartitioner<int32_t, int64_t, double> partitioner(
-          workers,
-          PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
+          workers, PulseTimeGenerator<int32_t, int64_t>(
+                       {0, 2, 2, 3}, {2, 4, 6, 8}, "nanosecond", 0));
       size_t count = 0;
       std::vector<std::vector<Event>> data;
       partitioner.partition(data, nullptr, nullptr, {0, 1, count});
@@ -51,7 +51,8 @@ public:
 
   void test_partition_1_worker() {
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
-        1, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
+        1, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8},
+                                                "nanosecond", 0));
     std::vector<std::vector<Event>> data;
     std::vector<int32_t> index{5, 1, 4};
     std::vector<double> tof{1.1, 2.2, 3.3};
@@ -73,7 +74,8 @@ public:
 
   void test_partition_2_workers() {
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
-        2, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
+        2, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8},
+                                                "nanosecond", 0));
     std::vector<std::vector<Event>> data;
     std::vector<int32_t> index{5, 1, 4, 1};
     std::vector<double> tof{1.1, 2.2, 3.3, 4.4};
@@ -101,7 +103,8 @@ public:
 
   void test_partition_3_workers() {
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
-        3, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8}, 0));
+        3, PulseTimeGenerator<int32_t, int64_t>({0, 2, 2, 3}, {2, 4, 6, 8},
+                                                "nanosecond", 0));
     std::vector<std::vector<Event>> data;
     std::vector<int32_t> index{5, 1, 4, 1};
     std::vector<double> tof{1.1, 2.2, 3.3, 4.4};

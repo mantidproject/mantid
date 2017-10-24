@@ -116,6 +116,7 @@ makeEventDataPartitioner(const H5::Group &group, const int numWorkers) {
       numWorkers, PulseTimeGenerator<IndexType, TimeZeroType>{
                       detail::read<IndexType>(group, "event_index"),
                       detail::read<TimeZeroType>(group, "event_time_zero"),
+                      "",
                       time_zero_offset});
 }
 
