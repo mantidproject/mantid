@@ -160,6 +160,19 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
+  int timeoutinSec = 30;
+#ifdef WIN32
+  // WINDOWS
+  DWORD timeout = timeoutinSec * 1000;
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+#else
+  // LINUX
+  struct timeval tv;
+  tv.tv_sec = timeoutinSec;  /* 30 Secs Timeout */
+  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(struct timeval));
+#endif // WIN
+  
   /* socket connected */
   op.ver_major = ISISDS_MAJOR_VER;
   op.ver_minor = ISISDS_MINOR_VER;
@@ -302,8 +315,10 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
   }
   n = recv_all(s, *data, len_data, 0);
   if (n != len_data) {
-    free(*data);
-    *data = nullptr;
+    if (do_alloc) {
+      free(*data);
+      *data = nullptr;
+    }
     len_data = 0;
     return -1;
   }
