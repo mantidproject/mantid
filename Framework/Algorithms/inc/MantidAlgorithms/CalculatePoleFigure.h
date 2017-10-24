@@ -36,7 +36,14 @@ private:
 
   /// calculate pole figure
   void calculatePoleFigure();
-  double calculatePeakIntensitySimple(size_t iws, double dmin, double dmax);
+  double
+  calculatePeakIntensitySimple(size_t iws,
+                               const std::pair<double, double> &peak_range);
+  void convertCoordinates(Kernel::V3D unitQ, const double &hrot,
+                          const double &omega, double &r_td, double &r_nd);
+
+  /// generatae output workspace and set output properties
+  void generateOutputs();
 
   /// input workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
@@ -44,6 +51,13 @@ private:
   /// sample log name
   std::string m_nameHROT;
   std::string m_nameOmega;
+
+  /// range of dspacing
+  std::pair<double, double> m_peakDRange;
+
+  /// vector to record pole figure
+  std::vector<std::vector<double>> m_poleFigureVector;
+  ///
 };
 
 } // namespace Mantid
