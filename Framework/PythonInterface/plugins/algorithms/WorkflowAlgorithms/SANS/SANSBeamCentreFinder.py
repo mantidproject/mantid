@@ -8,12 +8,13 @@ from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidat
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, FindDirectionEnum)
+from sans.common.enums import (DetectorType, MaskingQuadrant, FindDirectionEnum)
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.algorithm_detail.single_execution import perform_can_subtraction
+
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def category(self):
@@ -128,6 +129,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 instrument_file[1], "centre-finder-step-size2", float)['centre-finder-step-size2']
         except:
             position_2_step = position_1_step
+
         find_direction = self.getProperty("Direction").value
         if find_direction == FindDirectionEnum.to_string(FindDirectionEnum.Left_Right):
             position_2_step = 0.0
@@ -136,6 +138,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
         centre1 = x_start
         centre2 = y_start
+        resLR_old = 0.0
+        resTB_old = 0.0
         for j in range(0, max_iterations + 1):
             if(j != 0):
                 centre1 += position_1_step
@@ -150,14 +154,16 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 can_quartiles = self._run_quartile_reduction(can_scatter, can_transmission, can_direct, "Can",
                                                              can_scatter_monitor, component, state_serialized, centre1,
                                                              centre2, r_min, r_max)
-                for i in range(0,3):
-                    sample_quartiles[i] = perform_can_subtraction(sample_quartiles[i], can_quartiles[i], self)
+                for key in sample_quartiles:
+                    sample_quartiles[key] = perform_can_subtraction(sample_quartiles[key], can_quartiles[key], self)
 
-            residueLR = self._calculate_residuals(sample_quartiles[0], sample_quartiles[1])
-            residueTB = self._calculate_residuals(sample_quartiles[2], sample_quartiles[3])
+            residueLR = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Left],
+                                                  sample_quartiles[MaskingQuadrant.Right])
+            residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
+                                                  sample_quartiles[MaskingQuadrant.Bottom])
             if(j == 0):
-                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX=" + str(
-                    residueLR) + "  ResY=" + str(residueTB))
+                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX="
+                              + str(residueLR) + "  ResY=" + str(residueTB))
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR > resLR_old:
@@ -166,8 +172,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB > resTB_old:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX=" + str(
-                    residueLR) + "  ResY=" + str(residueTB))
+                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX="
+                              + str(residueLR) + "  ResY=" + str(residueTB))
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center
@@ -215,7 +221,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         out_right = strip_end_nans(alg.getProperty("OutputWorkspaceRight").value, self)
         out_top = strip_end_nans(alg.getProperty("OutputWorkspaceTop").value, self)
         out_bottom = strip_end_nans(alg.getProperty("OutputWorkspaceBottom").value, self)
-        return [out_left, out_right, out_top, out_bottom]
+        return {MaskingQuadrant.Left: out_left, MaskingQuadrant.Right: out_right, MaskingQuadrant.Top: out_top,
+                MaskingQuadrant.Bottom: out_bottom}
 
     def _get_component(self, workspace):
         component_as_string = self.getProperty("Component").value

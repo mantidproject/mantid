@@ -3,16 +3,15 @@
 """ Finds the beam centre."""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
+                        IEventWorkspace)
 from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
-from mantid.simpleapi import MaskDetectorsInShape
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-
 from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
-
 from sans.algorithm_detail.xml_shapes import quadrant_xml
+
 
 class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
     def category(self):
@@ -76,16 +75,20 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         # ----------
         # OUTPUT
         # ----------
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceLeft", 'Left', optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceLeft", 'Left', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The left output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceTop", 'Top', optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceTop", 'Top', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The top output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceRight", 'Right', optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceRight", 'Right', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The right output workspace.')
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceBottom", 'Bottom', optional=PropertyMode.Optional, direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspaceBottom", 'Bottom', optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc='The bottom output workspace.')
 
     def PyExec(self):
@@ -107,8 +110,10 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         #state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
 
         # Set test centre
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = self.getProperty("Centre1").value
-        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = self.getProperty("Centre2").value
+        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1 = \
+            self.getProperty("Centre1").value
+        state.move.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos2 = \
+            self.getProperty("Centre2").value
 
         state_serialized = state.property_manager
 
@@ -137,8 +142,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_scatter_date = self._get_monitor_workspace()
-        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state_serialized, scatter_data, monitor_scatter_date,
-                                                                             data_type_as_string)
+        scatter_data, monitor_scatter_date, slice_event_factor = self._slice(state_serialized, scatter_data,
+                                                                             monitor_scatter_date, data_type_as_string)
 
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # COMPATIBILITY BEGIN
@@ -213,7 +218,8 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         data_type_as_string = self.getProperty("DataType").value
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace = \
-            self._adjustment(state_serialized, scatter_data, monitor_scatter_date, component_as_string, data_type_as_string)
+            self._adjustment(state_serialized, scatter_data, monitor_scatter_date, component_as_string,
+                             data_type_as_string)
 
         # ------------------------------------------------------------
         # 9. Convert event workspaces to histogram workspaces
