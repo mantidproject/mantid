@@ -135,6 +135,8 @@ void ThreadingBackend::recv(int dest, int source, int tag, T &&... args) {
   const auto key = std::make_tuple(source, dest, tag);
   std::unique_ptr<std::stringbuf> buf;
   while (true) {
+    // Sleep to reduce lock contention. Without this execution times can grow
+    // enormously on Windows.
     std::this_thread::sleep_for(std::chrono::microseconds(10));
     std::lock_guard<std::mutex> lock(m_mutex);
     auto it = m_buffer.find(key);
