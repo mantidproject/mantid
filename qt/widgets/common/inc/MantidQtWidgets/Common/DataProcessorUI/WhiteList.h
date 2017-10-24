@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/ConstColumnIterator.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
-#include <map>
 #include <vector>
 
 #include <QString>
@@ -48,7 +47,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:
   using const_iterator = ConstColumnIterator;
-  virtual ~WhiteList(){};
 
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,
