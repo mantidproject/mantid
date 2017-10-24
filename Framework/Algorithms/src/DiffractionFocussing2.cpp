@@ -306,9 +306,6 @@ void DiffractionFocussing2::exec() {
     std::transform(Eout.begin(), Eout.end(), groupWgt.begin(), Eout.begin(),
                    std::divides<double>());
     // Now multiply by the number of spectra in the group
-    std::transform(Yout.begin(), Yout.end(), Yout.begin(),
-                   std::bind2nd(std::multiplies<double>(),
-                                static_cast<double>(groupSize)));
     std::for_each(Yout.begin(), Yout.end(),
                   [groupSize](double &val) { val *= groupSize; });
     std::for_each(Eout.begin(), Eout.end(),
