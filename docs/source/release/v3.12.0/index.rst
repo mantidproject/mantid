@@ -58,6 +58,7 @@ Changes
    LowQ <lowq>
    Muon Analysis <muon>
    Spectroscopy <spectroscopy>
+   SANS <sans>
 
 Full Change Listings
 --------------------
