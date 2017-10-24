@@ -91,7 +91,7 @@ Algorithm::Algorithm()
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
-      m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
+      m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
       m_runningAsync(false), m_running(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
@@ -140,7 +140,10 @@ bool Algorithm::isChild() const { return m_isChildAlgorithm; }
  *  @param isChild :: True - the algorithm is a child algorithm.  False - this
  * is a full managed algorithm.
  */
-void Algorithm::setChild(const bool isChild) { m_isChildAlgorithm = isChild; }
+void Algorithm::setChild(const bool isChild) {
+  m_isChildAlgorithm = isChild;
+  this->setAlwaysStoreInADS(!isChild);
+}
 
 /**
  * Change the state of the history recording flag. Only applicable for
@@ -568,9 +571,8 @@ bool Algorithm::execute() {
         linkHistoryWithLastChild();
       }
 
-      // Put any output workspaces into the AnalysisDataService - if this is not
-      // a child algorithm
-      if (!isChild() || m_alwaysStoreInADS)
+      // Put the output workspaces into the AnalysisDataService - if requested
+      if (m_alwaysStoreInADS)
         this->store();
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
@@ -897,6 +899,7 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
   setLoggingOffset(proxy.getLoggingOffset());
   setAlgStartupLogging(proxy.getAlgStartupLogging());
   setChild(proxy.isChild());
+  setAlwaysStoreInADS(proxy.getAlwaysStoreInADS());
 }
 
 /** Fills History, Algorithm History and Algorithm Parameters
@@ -1245,7 +1248,7 @@ bool Algorithm::doCallProcessGroups(
 
   if (completed) {
     // in the base processGroups each individual exec stores its outputs
-    if (!m_usingBaseProcessGroups && (!isChild() || m_alwaysStoreInADS))
+    if (!m_usingBaseProcessGroups && m_alwaysStoreInADS)
       this->store();
 
     // Get how long this algorithm took to run

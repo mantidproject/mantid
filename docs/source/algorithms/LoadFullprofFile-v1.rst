@@ -58,7 +58,8 @@ Usage
   infotablews = mtd["LaB6_InfoTable"]
   dataws = mtd["PG3_LaB6_Bank3"]
 
-  print("LaB6: A = B = C = {:.5f}, Alpha = Beta = Gamma = {:.5f}".format(infotablews.cell(0, 1), infotablews.cell(5, 1)))
+  print("LaB6: A = B = C = {:.5f}, Alpha = Beta = Gamma = {:.5f}".format(infotablews.column('Value')[infotablews.column('Name').index('A')],
+                                                                         infotablews.column('Value')[infotablews.column('Name').index('Alpha')]))
 
   maxy = max(dataws.readY(1))
   print("Maximum peak value (calculated) = {:.5f}".format(maxy))

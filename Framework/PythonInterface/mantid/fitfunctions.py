@@ -256,8 +256,7 @@ class FunctionWrapper(object):
   def fixAllParameters(self):
        """ Fix all parameters.
        """
-       for i in range(0, self.fun.numParams()):
-          self.fix(self.getParameterName(i))
+       self.fun.fixAll()
        
   def untie(self, name):
       """ Remove tie from parameter.
