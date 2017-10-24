@@ -306,10 +306,12 @@ void DiffractionFocussing2::exec() {
     std::transform(Eout.begin(), Eout.end(), groupWgt.begin(), Eout.begin(),
                    std::divides<double>());
     // Now multiply by the number of spectra in the group
-    std::for_each(Yout.begin(), Yout.end(),
-                  [groupSize](double &val) { val *= groupSize; });
-    std::for_each(Eout.begin(), Eout.end(),
-                  [groupSize](double &val) { val *= groupSize; });
+    std::for_each(Yout.begin(), Yout.end(), [groupSize](double &val) {
+      val *= static_cast<double>(groupSize);
+    });
+    std::for_each(Eout.begin(), Eout.end(), [groupSize](double &val) {
+      val *= static_cast<double>(groupSize);
+    });
 
     prog->report();
     PARALLEL_END_INTERUPT_REGION
