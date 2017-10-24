@@ -504,6 +504,12 @@ createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents) {
   return ws;
 }
 
+/** Adds a component to an instrument
+ *
+ * @param instrument :: instrument to which the component will be added
+ * @param position :: position of the component
+ * @param name :: name of the component
+ */
 void addComponent(Instrument_sptr &instrument, const V3D &position,
                   std::string name = "component") {
   ObjComponent *component = new ObjComponent(name);
@@ -511,6 +517,12 @@ void addComponent(Instrument_sptr &instrument, const V3D &position,
   instrument->add(component);
 }
 
+/** Adds a source to an instrument
+ *
+ * @param instrument :: instrument to which the source will be added
+ * @param position :: position of the source
+ * @param name :: name of the source
+ */
 void addSource(Instrument_sptr &instrument, const V3D &position,
                std::string name = "source") {
   addComponent(instrument, position, name);
@@ -520,6 +532,12 @@ void addSource(Instrument_sptr &instrument, const V3D &position,
   instrument->markAsSource(source);
 }
 
+/** Adds a sample to an instrument
+ *
+ * @param instrument :: instrument to which the sample will be added
+ * @param position :: position of the sample
+ * @param name :: name of the sample
+ */
 void addSample(Instrument_sptr &instrument, const V3D &position,
                std::string name = "some-surface-holder") {
   ObjComponent *sample = new ObjComponent(name);
@@ -528,6 +546,13 @@ void addSample(Instrument_sptr &instrument, const V3D &position,
   instrument->markAsSamplePos(sample);
 }
 
+/** Adds a monitor to an instrument
+ *
+ * @param instrument :: instrument to which the monitor will be added
+ * @param position :: position of the monitor
+ * @param ID :: identification number of the monitor
+ * @param name :: name of the monitor
+ */
 void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
                 std::string name = "Monitor") {
   Detector *monitor = new Detector(name, ID, nullptr);
@@ -536,6 +561,13 @@ void addMonitor(Instrument_sptr &instrument, const V3D &position, const int ID,
   instrument->markAsMonitor(monitor);
 }
 
+/** Adds a detector to an instrument
+ *
+ * @param instrument :: instrument to which the detector will be added
+ * @param position :: position of the detector
+ * @param ID :: identification number of the detector
+ * @param name :: name of the detector
+ */
 void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
                  std::string name = "point-detector") {
   // Where 0.01 is half detector width etc.
@@ -547,8 +579,18 @@ void addDetector(Instrument_sptr &instrument, const V3D &position, const int ID,
   instrument->markAsDetector(detector);
 }
 
-auto reflectometryWorkspace(const double startX, const int nSpectra,
-                            const int nBins, const double deltaX) {
+/** Creates a binned 2DWorkspace with title and TOF x-axis and counts y-axis
+ *
+ * @param startX :: start TOF x-value
+ * @param nSpectra :: number of spectra
+ * @param nBins :: number of bins
+ * @param deltaX :: TOF delta x-value
+ * @return a Workspace2D
+ */
+DataObjects::Workspace2D_sptr reflectometryWorkspace(const double startX,
+                                                     const int nSpectra,
+                                                     const int nBins,
+                                                     const double deltaX) {
 
   auto workspace = create2DWorkspaceBinned(nSpectra, nBins, startX, deltaX);
 
@@ -563,17 +605,24 @@ auto reflectometryWorkspace(const double startX, const int nSpectra,
  * Create a very small 2D workspace for a virtual reflectometry instrument.
  * @return workspace with instrument attached.
  * @param startX : X Tof start value for the workspace.
+ * @param slit1Pos :: slit 1 position
+ * @param slit2Pos :: slit 2 position
+ * @param vg1 :: vertical slit 1
+ * @param vg2 :: vertical slit 2
+ * @param nSpectra :: number of spectra
+ * @param nBins :: number of bins
+ * @param deltaX :: TOF delta x-value
  */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
-    double startX, int nSpectra, int nBins, double deltaX, V3D slit1Pos,
-    V3D slit2Pos, double vg1, double vg2) {
+    double startX, V3D slit1Pos, V3D slit2Pos, double vg1, double vg2,
+    const int nSpectra, const int nBins, const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Y /*up*/, X /*along*/, Left, "0,0,0"));
 
   addSource(instrument, V3D(0, 0, 0));
-  addSample(instrument, V3D(15, 0, 0));
   addMonitor(instrument, V3D(14, 0, 0), 1);
+  addSample(instrument, V3D(15, 0, 0));
   addDetector(instrument, V3D(20, (20 - 15), 0), 2);
   addComponent(instrument, slit1Pos, "slit1");
   addComponent(instrument, slit2Pos, "slit2");
@@ -601,9 +650,12 @@ MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
 * @param startX : X Tof start value for the workspace.
 * @param detSize : optional detector height (default is 0 which puts all
 * detectors at the same position)
+* @param nSpectra :: number of spectra
+* @param nBins :: number of bins
+* @param deltaX :: TOF delta x-value
 */
 MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    double startX, double detSize, int nSpectra, int nBins,
+    double startX, const double detSize, const int nSpectra, const int nBins,
     const double deltaX) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
