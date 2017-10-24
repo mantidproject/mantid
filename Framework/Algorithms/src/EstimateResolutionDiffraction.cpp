@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/EstimateResolutionDiffraction.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -8,11 +7,13 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>
 
@@ -179,10 +180,10 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   */
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
-  const auto &detectorInfo = m_inputWS->detectorInfo();
   const auto l1 = spectrumInfo.l1();
+  const auto &componentInfo = m_inputWS->componentInfo();
   g_log.notice() << "L1 = " << l1 << "\n";
-  const V3D samplepos = spectrumInfo.samplePosition();
+  const auto samplepos = spectrumInfo.samplePosition();
 
   const size_t numspec = m_inputWS->getNumberHistograms();
 
@@ -221,14 +222,13 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
 
     double deltatheta = 0.;
     if (m_divergenceWS) {
-      deltatheta = m_divergenceWS->readY(i)[0];
+      deltatheta = m_divergenceWS->y(i)[0];
     } else {
       double solidangle = 0.0;
-
-      for (const auto detID : m_inputWS->getSpectrum(i).getDetectorIDs()) {
-        const auto index = detectorInfo.indexOf(detID);
-        if (!detectorInfo.isMasked(index))
-          solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+      for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
+        // No scanning support for solidAngle currently, use only first
+        // component of index, ignore time index
+        solidangle += componentInfo.solidAngle(index.first, samplepos);
       }
       deltatheta = sqrt(solidangle);
     }
@@ -239,22 +239,22 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
     const double t3 = deltatheta / tan(theta);
 
     if (spectrumInfo.isMonitor(i)) {
-      m_resTof->mutableY(i)[0] = 0.;
-      m_resPathLength->mutableY(i)[0] = 0.;
-      m_resAngle->mutableY(i)[0] = 0.;
-      m_outputWS->mutableY(i)[0] = 0.;
+      m_resTof->mutableY(i) = 0.;
+      m_resPathLength->mutableY(i) = 0.;
+      m_resAngle->mutableY(i) = 0.;
+      m_outputWS->mutableY(i) = 0.;
     } else { // not a monitor
       const double resolution = sqrt(t1 * t1 + t2 * t2 + t3 * t3);
-      m_resTof->mutableY(i)[0] = t1;
-      m_resPathLength->mutableY(i)[0] = t2;
-      m_resAngle->mutableY(i)[0] = t3;
-      m_outputWS->mutableY(i)[0] = resolution;
+      m_resTof->mutableY(i) = t1;
+      m_resPathLength->mutableY(i) = t2;
+      m_resAngle->mutableY(i) = t3;
+      m_outputWS->mutableY(i) = resolution;
     }
 
-    m_resTof->mutableX(i)[0] = static_cast<double>(i);
-    m_resPathLength->mutableX(i)[0] = static_cast<double>(i);
-    m_resAngle->mutableX(i)[0] = static_cast<double>(i);
-    m_outputWS->mutableX(i)[0] = static_cast<double>(i);
+    m_resTof->mutableX(i) = static_cast<double>(i);
+    m_resPathLength->mutableX(i) = static_cast<double>(i);
+    m_resAngle->mutableX(i) = static_cast<double>(i);
+    m_outputWS->mutableX(i) = static_cast<double>(i);
 
     maxtwotheta = std::max(twotheta, maxtwotheta);
     mintwotheta = std::min(twotheta, mintwotheta);

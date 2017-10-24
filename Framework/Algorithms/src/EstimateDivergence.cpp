@@ -4,9 +4,10 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/SpectrumDefinition.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -85,8 +86,8 @@ void EstimateDivergence::exec() {
 
   // do the math
   const auto &spectrumInfo = inputWS->spectrumInfo();
-  const auto &detectorInfo = inputWS->detectorInfo();
   const auto samplepos = spectrumInfo.samplePosition();
+  const auto &componentInfo = inputWS->componentInfo();
   size_t numspec = inputWS->getNumberHistograms();
   double solidangletotal = 0.;
   for (size_t i = 0; i < numspec; ++i) {
@@ -99,10 +100,10 @@ void EstimateDivergence::exec() {
 
     // solid angle
     double solidangle = 0.0;
-    for (const auto detID : inputWS->getSpectrum(i).getDetectorIDs()) {
-      const auto index = detectorInfo.indexOf(detID);
-      if (!detectorInfo.isMasked(index))
-        solidangle += detectorInfo.detector(index).solidAngle(samplepos);
+    for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
+      // No scanning support for solidAngle currently, use only first component
+      // of index, ignore time index
+      solidangle += componentInfo.solidAngle(index.first, samplepos);
     }
     solidangletotal += solidangle;
     const double deltatwotheta = sqrt(solidangle);
