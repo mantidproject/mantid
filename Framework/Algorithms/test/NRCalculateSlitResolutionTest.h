@@ -10,7 +10,6 @@
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
 class NRCalculateSlitResolutionTest : public CxxTest::TestSuite {
@@ -86,12 +85,13 @@ public:
     TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
   }
 
-  Workspace2D_sptr createWorkspace(const std::string &name, const V3D &s1Pos,
-                                   double s1VG, const V3D &s2Pos, double s2VG) {
+  MatrixWorkspace_sptr createWorkspace(const std::string &name,
+                                       const V3D &s1Pos, double s1VG,
+                                       const V3D &s2Pos, double s2VG) {
 
-    Workspace2D_sptr ws =
+    auto ws =
         WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-            0.0, 2, 100, 2000, s1Pos, s2Pos, s1VG, s2VG);
+            0.0, s1Pos, s2Pos, s1VG, s2VG);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(name, ws));
     return ws;
