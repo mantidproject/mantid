@@ -56,7 +56,10 @@ private:
   std::pair<double, double> m_peakDRange;
 
   /// vector to record pole figure
-  std::vector<std::vector<double>> m_poleFigureVector;
+  std::vector<double> m_poleFigureRTDVector;
+  std::vector<double> m_poleFigureRNDVector;
+  std::vector<double> m_poleFigurePeakIntensityVector;
+
   ///
 };
 

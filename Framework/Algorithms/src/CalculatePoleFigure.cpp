@@ -79,6 +79,18 @@ void CalculatePoleFigure::init() {
   declareProperty("PeakIntensityCalculation", "SimpleIntegration",
                   "Algorithm type to calcualte the peak intensity.");
 
+  // output vectors
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "R_TD", Direction::Output),
+                  "Array for R_TD");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "R_ND", Direction::Output),
+                  "Array for R_ND");
+  declareProperty(Kernel::make_unique<ArrayProperty<double>>(
+                      "PeakIntensity", Direction::Output),
+                  "Array for peak intensities");
+
+
   // Set up input data type
 }
 
@@ -126,7 +138,9 @@ void CalculatePoleFigure::exec() {
  */
 void CalculatePoleFigure::calculatePoleFigure() {
   // initialize output
-  m_poleFigureVector.resize(m_inputWS->getNumberHistograms());
+  m_poleFigureRTDVector.resize(m_inputWS->getNumberHistograms());
+  m_poleFigureRNDVector.resize(m_inputWS->getNumberHistograms());
+  m_poleFigurePeakIntensityVector.resize(m_inputWS->getNumberHistograms());
 
   // get hrot and etc.
   TimeSeriesProperty<double> *hrotprop =
@@ -144,13 +158,13 @@ void CalculatePoleFigure::calculatePoleFigure() {
   Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
   Kernel::V3D k_sample_srcpos = samplepos - srcpos;
 
-  std::vector<std::vector<double>> polefigurevector();
-
+  // TODO/NEXT - After unit test and user test are passed. try to parallelize this loop by openMP
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
-    Kernel::V3D detpos = m_inputWS->getInstrument()->getDetector(iws)->getPos();
+    Kernel::V3D detpos = m_inputWS->getInstrument()->getDetector(static_cast<detid_t>(iws))->getPos();
     Kernel::V3D k_det_sample = detpos - samplepos;
-    Kernel::V3D unit_q = k_det_sample / k_det_sample.norm();
+    Kernel::V3D qvector = k_sample_srcpos - k_det_sample;
+    Kernel::V3D unit_q = qvector / qvector.norm();
 
     // calcualte pole figure position
     double r_td, r_nd;
@@ -159,8 +173,10 @@ void CalculatePoleFigure::calculatePoleFigure() {
     // calcualte peak intensity
     double peak_intensity_i = calculatePeakIntensitySimple(iws, m_peakDRange);
 
-    std::vector<double> pole_pair_i({r_td, r_nd, peak_intensity_i});
-    m_poleFigureVector[iws] = pole_pair_i;
+    // set up value
+    m_poleFigureRTDVector[iws] = r_td;
+    m_poleFigureRNDVector[iws] = r_nd;
+    m_poleFigurePeakIntensityVector[iws] = peak_intensity_i;
   }
 
   return;
@@ -220,14 +236,19 @@ void CalculatePoleFigure::generateOutputs() {
   output_table->addColumn("double", "Intensity");
 
   // add values
-  for (size_t iws = 0; iws < m_poleFigureVector.size(); ++iws) {
+  for (size_t iws = 0; iws < m_poleFigurePeakIntensityVector.size(); ++iws) {
     API::TableRow row_i = output_table->appendRow();
-    row_i << static_cast<int>(iws) << m_poleFigureVector[iws][0]
-          << m_poleFigureVector[iws][1] << m_poleFigureVector[iws][2];
+    row_i << static_cast<int>(iws) << m_poleFigureRTDVector[iws]
+          << m_poleFigureRNDVector[iws] << m_poleFigurePeakIntensityVector[iws];
   }
 
-  // set property
+  // set properties for output
   setProperty("OutputWorkspace", output_table);
+
+  setProperty("R_TD", m_poleFigureRTDVector);
+  setProperty("R_ND", m_poleFigureRNDVector);
+  setProperty("PeakIntensity", m_poleFigurePeakIntensityVector);
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -251,7 +272,8 @@ void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
   double tau_pp = -hrot - phi;
 
   //
-  double omega_prim_rad = (omega_prime)*M_PI / 180.;
+  double omega_prim_rad = omega_prime * M_PI / 180.;
+  double tau_pp_rad = tau_pp * M_PI / 180.;
 
   // calculate first rotation
   Kernel::V3D k1(0, 1, 0);
@@ -261,7 +283,22 @@ void CalculatePoleFigure::convertCoordinates(Kernel::V3D unitQ,
       k1 * ((1 - cos(omega_prim_rad)) * (k1.scalar_prod(unitQ)));
   Kernel::V3D unitQPrime = part1 + part2 + part3;
 
-  // to be continued...
+  // calcualte second rotation
+  Kernel::V3D k2(0, 0, 1);
+  part1 = unitQPrime * cos(tau_pp_rad);
+  part2 = (k2.cross_prod(unitQPrime)) * sin(tau_pp_rad);
+  part3 = k2 * (k2.scalar_prod(unitQPrime) * (1-cos(tau_pp_rad)));
+  Kernel::V3D unitQpp = part1 + part2 + part3;
+
+  // project to the pole figure
+  double sign(1);
+  if (unitQpp.Z() < 0)
+    sign = -1;
+
+  r_td = unitQpp.Y() * sign;
+  r_nd = - unitQpp.X() * sign;
+
+  return;
 }
 
 // TODO/ISSUE/NOW - Implement HDF5 output by H5Util
