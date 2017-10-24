@@ -6,7 +6,7 @@ absorption_correction_params = {
     # These are read directly by the generate absorb corrections functions instead of being parsed.
     # Therefore they cannot be overridden using basic config files or keyword arguments.
     "cylinder_sample_height": 4.0,
-    "cylinder_sample_radius": 0.4,
+    "cylinder_sample_radius": 0.25,
     "cylinder_position": [0., 0., 0.],
 
     "chemical_formula": "V",

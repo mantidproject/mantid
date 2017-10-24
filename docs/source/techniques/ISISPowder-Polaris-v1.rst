@@ -738,7 +738,7 @@ On POLARIS this is set to the following:
 
 .. code-block:: python
 		
-  cylinder_sample_radius = 0.4
+  cylinder_sample_radius = 0.25
 
 cylinder_position
 =================
