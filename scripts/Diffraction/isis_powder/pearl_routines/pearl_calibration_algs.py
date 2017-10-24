@@ -35,8 +35,8 @@ def create_calibration(calibration_runs, instrument, offset_file_name, grouping_
     offset_file = os.path.join(calibration_dir, offset_file_name)
     # Offsets workspace must be referenced as string so it can be deleted, as simpleapi doesn't recognise it as a ws
     offsets_ws_name = "offsets"
-    offsets = mantid.GetDetectorOffsets(InputWorkspace=cross_correlated, GroupingFileName=offset_file,
-                                        OutputWorkspace=offsets_ws_name, **get_det_offset_params)
+    mantid.GetDetectorOffsets(InputWorkspace=cross_correlated, GroupingFileName=offset_file,
+                              OutputWorkspace=offsets_ws_name, **get_det_offset_params)
 
     rebinned_tof = mantid.ConvertUnits(InputWorkspace=rebinned, Target="TOF")
     aligned = mantid.AlignDetectors(InputWorkspace=rebinned_tof, CalibrationFile=offset_file)
