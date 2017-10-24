@@ -2,6 +2,7 @@
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/DefaultEventLoader.h"
+#include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -307,6 +308,12 @@ void LoadEventNexus::init() {
   declareProperty(
       make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
       "Load the Sample/DAS logs from the file (default True).");
+
+#ifdef MPI_EXPERIMENTAL
+  declareProperty(make_unique<PropertyWithValue<bool>>("UseParallelLoader",
+                                                       true, Direction::Input),
+                  "Use experimental parallel loader for loading event data.");
+#endif
 }
 
 //----------------------------------------------------------------------------------------------
@@ -447,6 +454,7 @@ void LoadEventNexus::exec() {
       this->runLoadMonitors();
     }
   }
+  m_file->close();
 }
 
 /**
@@ -855,13 +863,28 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  bool precount = getProperty("Precount");
-  int chunk = getProperty("ChunkNumber");
-  int totalChunks = getProperty("TotalChunks");
-  DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
-                           bankNames, periodLog->valuesAsVector(), classType,
-                           bankNumEvents, oldNeXusFileNames, precount, chunk,
-                           totalChunks);
+  bool loaded{false};
+  if (canUseParallelLoader(haveWeights, oldNeXusFileNames, classType)) {
+    auto ws = m_ws->getSingleHeldWorkspace();
+    m_file->close();
+    try {
+      ParallelEventLoader::load(*ws, m_filename, m_top_entry_name, bankNames);
+      loaded = true;
+      shortest_tof = 0.0;
+      longest_tof = 1e10;
+    } catch (const std::runtime_error &) {
+    }
+    safeOpenFile(m_filename);
+  }
+  if (!loaded) {
+    bool precount = getProperty("Precount");
+    int chunk = getProperty("ChunkNumber");
+    int totalChunks = getProperty("TotalChunks");
+    DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec,
+                             bankNames, periodLog->valuesAsVector(), classType,
+                             bankNumEvents, oldNeXusFileNames, precount, chunk,
+                             totalChunks);
+  }
 
   // Info reporting
   const std::size_t eventsLoaded = m_ws->getNumberEvents();
@@ -1644,6 +1667,43 @@ void LoadEventNexus::safeOpenFile(const std::string fname) {
                              "file: " +
                              fname);
   }
+}
+
+/// The parallel loader currently has no support for a series of special cases,
+/// as indicated by the return value of this method.
+bool LoadEventNexus::canUseParallelLoader(const bool haveWeights,
+                                          const bool oldNeXusFileNames,
+                                          const std::string &classType) const {
+#ifndef MPI_EXPERIMENTAL
+  // Actually the parallel loader would work also in non-MPI builds but it is
+  // likely to be slower than the default loader and may also exhibit unusual
+  // behavior for non-standard Nexus files.
+  return false;
+#else
+  bool useParallelLoader = getProperty("UseParallelLoader");
+  if (!useParallelLoader)
+    return false;
+#endif
+  if (m_ws->nPeriods() != 1)
+    return false;
+  if (haveWeights)
+    return false;
+  if (event_id_is_spec)
+    return false;
+  if (oldNeXusFileNames)
+    return false;
+  if (filter_tof_min != -1e20 || filter_tof_max != 1e20)
+    return false;
+  if (filter_time_start != Types::Core::DateAndTime::minimum() ||
+      filter_time_stop != Types::Core::DateAndTime::maximum())
+    return false;
+  if (!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+      !isDefault("SpectrumMax") || !isDefault("SpectrumList") ||
+      !isDefault("ChunkNumber"))
+    return false;
+  if (classType != "NXevent_data")
+    return false;
+  return true;
 }
 
 Parallel::ExecutionMode LoadEventNexus::getParallelExecutionMode(

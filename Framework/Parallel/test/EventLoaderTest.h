@@ -2,10 +2,13 @@
 #define MANTID_PARALLEL_EVENTLOADERTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/ParallelRunner.h"
 
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventLoader.h"
+#include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataSource.h"
+#include "MantidTypes/Event/TofEvent.h"
 
 #include <H5Cpp.h>
 
@@ -27,41 +30,112 @@ template <> void load<double>() { throw std::runtime_error("double"); }
 
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
-using namespace Mantid::Parallel::IO;
+using namespace Mantid;
+using namespace Parallel;
+using namespace Parallel::IO;
 
-namespace detail {
-class FakeDataSource : public NXEventDataSource<int64_t, int64_t, int32_t> {
+namespace {
+
+class FakeDataSource : public NXEventDataSource<int32_t> {
 public:
-  void setBankIndex(const size_t bank) override {
+  FakeDataSource(const int numWorkers) : m_numWorkers(numWorkers) {}
+  std::unique_ptr<AbstractEventDataPartitioner<int32_t>>
+  setBankIndex(const size_t bank) override {
     m_bank = bank;
-    m_index = std::vector<int64_t>{0, 2, 4, 8};
-    m_time_zero.clear();
-    for (size_t i = 0; i < m_index.size(); ++i)
-      m_time_zero.push_back(static_cast<int64_t>(1000 * i + bank));
+    auto index = std::vector<int64_t>{0, 100, 100,
+                                      300 * static_cast<int64_t>(m_bank + 1),
+                                      500 * static_cast<int64_t>(m_bank + 1),
+                                      700 * static_cast<int64_t>(m_bank + 1)};
+    std::vector<int64_t> time_zero;
+    for (size_t i = 0; i < index.size(); ++i)
+      time_zero.push_back(static_cast<int64_t>(100000 * i + bank));
+
+    // Drift depening on bank to ensure correct offset is used for every bank.
+    int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
+
+    return Kernel::make_unique<EventDataPartitioner<int64_t, int64_t, int32_t>>(
+        m_numWorkers, PulseTimeGenerator<int64_t, int64_t>{index, time_zero,
+                                                           time_zero_offset});
   }
 
-  const std::vector<int64_t> &eventIndex() const override { return m_index; }
-  const std::vector<int64_t> &eventTimeZero() const override {
-    return m_time_zero;
-  }
   void readEventID(int32_t *event_id, size_t start,
                    size_t count) const override {
+    // Factor 13 such that there is a gap in the detector IDs between banks.
     for (size_t i = 0; i < count; ++i)
-      event_id[i] = static_cast<int32_t>(m_bank * m_bankSize +
-                                         (start + count) % m_bankSize);
+      event_id[i] = static_cast<int32_t>(m_bank * 13 * m_pixelsPerBank +
+                                         (start + i) % m_pixelsPerBank);
   }
+
   void readEventTimeOffset(int32_t *event_time_offset, size_t start,
                            size_t count) const override {
     for (size_t i = 0; i < count; ++i)
-      event_time_offset[i] = static_cast<int32_t>(start + count);
+      event_time_offset[i] = static_cast<int32_t>(17 * m_bank + start + i);
   }
 
 private:
-  const size_t m_bankSize{10};
-  size_t m_bank;
-  std::vector<int64_t> m_index;
-  std::vector<int64_t> m_time_zero;
+  const int m_numWorkers;
+  const size_t m_pixelsPerBank{77};
+  size_t m_bank{0};
 };
+
+void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
+  const std::vector<size_t> bankSizes{111, 1111, 11111};
+  Chunker chunker(comm.size(), comm.rank(), bankSizes, chunkSize);
+  // FakeDataSource encodes information on bank and position in file into TOF
+  // and pulse times, such that we can verify correct mapping.
+  FakeDataSource dataSource(comm.size());
+  const std::vector<int32_t> bankOffsets{0, 12 * 77, 24 * 77};
+  std::vector<std::vector<Types::Event::TofEvent>> eventLists(
+      (3 * 77 + comm.size() - 1 - comm.rank()) / comm.size());
+  std::vector<std::vector<Types::Event::TofEvent> *> eventListPtrs;
+  for (auto &eventList : eventLists)
+    eventListPtrs.emplace_back(&eventList);
+
+  EventParser<int32_t> dataSink(comm, chunker.makeWorkerGroups(), bankOffsets,
+                                eventListPtrs);
+  TS_ASSERT_THROWS_NOTHING(
+      (EventLoader::load<int32_t>(chunker, dataSource, dataSink)));
+
+  for (size_t localSpectrumIndex = 0; localSpectrumIndex < eventLists.size();
+       ++localSpectrumIndex) {
+    size_t globalSpectrumIndex = comm.size() * localSpectrumIndex + comm.rank();
+    size_t bank = globalSpectrumIndex / 77;
+    size_t pixelInBank = globalSpectrumIndex % 77;
+    TS_ASSERT_EQUALS(eventLists[localSpectrumIndex].size(),
+                     (bankSizes[bank] + 77 - 1 - pixelInBank) / 77);
+    int64_t previousPulseTime{0};
+    for (size_t event = 0; event < eventLists[localSpectrumIndex].size();
+         ++event) {
+      // Every 77th event in the input is in this list so our TOF should jump
+      // over 77 TOFs in the input.
+      double microseconds =
+          static_cast<double>(17 * bank + 77 * event + pixelInBank) / 1000.0;
+      TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),
+                       microseconds);
+      size_t index = event * 77 + pixelInBank;
+      size_t pulse = 0;
+      if (index >= 100)
+        pulse = 2;
+      if (index >= 300 * static_cast<size_t>(bank + 1))
+        pulse = 3;
+      if (index >= 500 * static_cast<size_t>(bank + 1))
+        pulse = 4;
+      if (index >= 700 * static_cast<size_t>(bank + 1))
+        pulse = 5;
+      // Testing different aspects that affect pulse time:
+      // - `123456789 + 1000000 * bank` confirms that the event_time_zero
+      //   offset attribute is taken into account, and for correct bank.
+      // - `100000 * pulse + bank` confirms that currect event_index is used
+      //   and event_time_offset is used correctly, and for correct bank.
+      const auto pulseTime =
+          eventLists[localSpectrumIndex][event].pulseTime().totalNanoseconds();
+      TS_ASSERT_EQUALS(pulseTime,
+                       123456789 + 1000000 * bank + 100000 * pulse + bank);
+      TS_ASSERT(pulseTime >= previousPulseTime);
+      previousPulseTime = pulseTime;
+    }
+  }
+}
 }
 
 class EventLoaderTest : public CxxTest::TestSuite {
@@ -72,8 +146,9 @@ public:
   static void destroySuite(EventLoaderTest *suite) { delete suite; }
 
   void test_throws_if_file_does_not_exist() {
-    TS_ASSERT_THROWS(EventLoader::load("abcdefg", "", {}, {}, {}),
-                     H5::FileIException);
+    TS_ASSERT_THROWS(
+        EventLoader::load(Communicator{}, "abcdefg", "", {}, {}, {}),
+        H5::FileIException);
   }
 
   void test_H5DataType_parameter_pack_conversion() {
@@ -99,17 +174,16 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         load(H5::PredType::NATIVE_CHAR), const std::runtime_error &e,
         std::string(e.what()),
-        "Unsupported H5::DataType for entry in NXevent_data");
+        "Unsupported H5::DataType for event_time_offset in NXevent_data");
   }
 
   void test_load() {
-    const std::vector<size_t> bankSizes{10, 100, 1000};
-    const size_t chunkSize{37};
-    Chunker chunker(1, 0, bankSizes, chunkSize);
-    ::detail::FakeDataSource dataSource;
-    TS_ASSERT_THROWS_NOTHING(
-        (EventLoader::load<int64_t, int64_t, int32_t>(chunker, dataSource)));
-    // TODO cannot test anything useful before we have the parser.
+    for (const size_t chunkSize : {37, 123, 1111}) {
+      for (const auto threads : {1, 2, 3, 5, 7, 13}) {
+        ParallelTestHelpers::ParallelRunner runner(threads);
+        runner.run(do_test_load, chunkSize);
+      }
+    }
   }
 };
 

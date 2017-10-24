@@ -5,7 +5,9 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
+#include "MantidParallel/IO/EventParser.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
+#include "MantidParallel/IO/PulseTimeGenerator.h"
 
 namespace Mantid {
 namespace Parallel {
@@ -56,89 +58,75 @@ H5::DataType readDataType(const H5::Group &group,
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void load(
-    const Chunker &chunker,
-    NXEventDataSource<IndexType, TimeZeroType, TimeOffsetType> &dataSource) {
+template <class TimeOffsetType>
+void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
+          EventParser<TimeOffsetType> &dataSink) {
   const size_t chunkSize = chunker.chunkSize();
   const auto &ranges = chunker.makeLoadRanges();
-  // const auto &rankGroups = chunker.makeRankGroups();
   std::vector<int32_t> event_id(2 * chunkSize);
   std::vector<TimeOffsetType> event_time_offset(2 * chunkSize);
 
-  // TODO Create parser. Constructor arguments:
-  // - rankGroups (parser must insert events received from ranks within group
-  //   always in that order, to preserve pulse time ordering)
-  // - m_bankOffsets (use to translate from event_id to global spectrum index)
-  // - m_eventLists (index is workspace index)
-  // - Later: Pass something to translate (global spectrum index -> (rank,
-  //   workspace index))
   int64_t previousBank = -1;
+  size_t bufferOffset{0};
   for (const auto &range : ranges) {
+    std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>> partitioner;
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
-      dataSource.setBankIndex(range.bankIndex);
-      // TODO
-      // parser.setEventIndex(dataSource->eventIndex());
-      // parser.setEventTimeZero(dataSource->eventTimeZero());
+      partitioner = dataSource.setBankIndex(range.bankIndex);
     }
-    // TODO use double buffer or something
-    // parser.wait()
-    // TODO use and manage bufferOffset
-    dataSource.readEventID(event_id.data(), range.eventOffset,
+    dataSource.readEventID(event_id.data() + bufferOffset, range.eventOffset,
                            range.eventCount);
-    dataSource.readEventTimeOffset(event_time_offset.data(), range.eventOffset,
-                                   range.eventCount);
-    // TODO
-    // parser.startProcessChunk(event_id.data() + bufferOffset,
-    //                          event_time_offset.data() + bufferOffset,
-    //                          range.eventCount);
-    // parser can assume that event_index and event_time_zero stay the same and
-    // chunks are ordered, i.e., current position in event_index can be reused,
-    // no need to iterate in event_index from the start for every chunk.
+    dataSource.readEventTimeOffset(event_time_offset.data() + bufferOffset,
+                                   range.eventOffset, range.eventCount);
+    if (previousBank != -1)
+      dataSink.wait();
+    if (static_cast<int64_t>(range.bankIndex) != previousBank) {
+      dataSink.setEventDataPartitioner(std::move(partitioner));
+      previousBank = range.bankIndex;
+    }
+    dataSink.startAsync(event_id.data() + bufferOffset,
+                        event_time_offset.data() + bufferOffset, range);
+    bufferOffset = (bufferOffset + chunkSize) % (2 * chunkSize);
   }
+  dataSink.wait();
 }
 
-template <class IndexType, class TimeZeroType, class TimeOffsetType>
-void load(const H5::Group &group, const std::vector<std::string> &bankNames,
+template <class TimeOffsetType>
+void load(const Communicator &comm, const H5::Group &group,
+          const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
           std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
-  // TODO automatically(?) determine good chunk size
-  // TODO automatically(?) determine good number of ranks to use for load
+  // In tests loading from a single SSD this chunk size seems close to the
+  // optimum. May need to be adjusted in the future (potentially dynamically)
+  // when loading from parallel file systems and running on a cluster.
   const size_t chunkSize = 1024 * 1024;
-  Communicator comm;
+  // In tests loading from a single SSD there was no advantage using fewer
+  // processes for loading than for processing. This may be different in larger
+  // MPI runs on a cluster where limiting the number of IO processes may be
+  // required when accessing the parallel file system.
   const Chunker chunker(comm.size(), comm.rank(),
                         readBankSizes(group, bankNames), chunkSize);
-  NXEventDataLoader<IndexType, TimeZeroType, TimeOffsetType> loader(group,
-                                                                    bankNames);
-  // EventParser consumer(bankOffsets, eventLists);
-  static_cast<void>(bankOffsets);
-  static_cast<void>(eventLists);
-  load<IndexType, TimeZeroType, TimeOffsetType>(chunker, loader);
+  NXEventDataLoader<TimeOffsetType> loader(comm.size(), group, bankNames);
+  EventParser<TimeOffsetType> consumer(comm, chunker.makeWorkerGroups(),
+                                       bankOffsets, eventLists);
+  load<TimeOffsetType>(chunker, loader, consumer);
 }
 
-template <class... T1, class... T2>
-void load(const H5::DataType &type, T2 &&... args) {
-  // Translate from H5::DataType to actual type. Done step by step to avoid
-  // combinatoric explosion. The T1 parameter pack holds the final template
-  // arguments we want. The T2 parameter pack represents the remaining
-  // H5::DataType arguments and any other arguments. In every call we peel off
-  // the first entry from the T2 pack and append it to T1. This stops once the
-  // next argument in args is not of type H5::DataType anymore, allowing us to
-  // pass arbitrary extra arguments in the second part of args.
+/// Translate from H5::DataType to actual type, forward to load implementation.
+template <class... T> void load(const H5::DataType &type, T &&... args) {
   if (type == H5::PredType::NATIVE_INT32)
-    return load<T1..., int32_t>(args...);
+    return load<int32_t>(args...);
   if (type == H5::PredType::NATIVE_INT64)
-    return load<T1..., int64_t>(args...);
+    return load<int64_t>(args...);
   if (type == H5::PredType::NATIVE_UINT32)
-    return load<T1..., uint32_t>(args...);
+    return load<uint32_t>(args...);
   if (type == H5::PredType::NATIVE_UINT64)
-    return load<T1..., uint64_t>(args...);
+    return load<uint64_t>(args...);
   if (type == H5::PredType::NATIVE_FLOAT)
-    return load<T1..., float>(args...);
+    return load<float>(args...);
   if (type == H5::PredType::NATIVE_DOUBLE)
-    return load<T1..., double>(args...);
+    return load<double>(args...);
   throw std::runtime_error(
-      "Unsupported H5::DataType for entry in NXevent_data");
+      "Unsupported H5::DataType for event_time_offset in NXevent_data");
 }
 }
 

@@ -11,7 +11,7 @@ using namespace Parallel;
 
 namespace {
 void run_gather(const Communicator &comm) {
-  int root = 2;
+  int root = std::min(comm.size() - 1, 2);
   int value = 123 * comm.rank();
   std::vector<int> result;
   TS_ASSERT_THROWS_NOTHING(Parallel::gather(comm, value, result, root));
@@ -26,7 +26,7 @@ void run_gather(const Communicator &comm) {
 }
 
 void run_gather_short_version(const Communicator &comm) {
-  int root = 2;
+  int root = std::min(comm.size() - 1, 2);
   int value = 123 * comm.rank();
   if (comm.rank() == root) {
     std::vector<int> result;

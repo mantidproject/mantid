@@ -1,24 +1,21 @@
-#ifndef MANTID_PARALLEL_EVENTLOADER_H_
-#define MANTID_PARALLEL_EVENTLOADER_H_
+#ifndef MANTID_DATAHANDLING_PARALLELEVENTLOADER_H_
+#define MANTID_DATAHANDLING_PARALLELEVENTLOADER_H_
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-#include "MantidParallel/DllConfig.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
-namespace Types {
-namespace Event {
-class TofEvent;
+namespace DataObjects {
+class EventWorkspace;
 }
-}
-namespace Parallel {
-class Communicator;
-namespace IO {
+namespace DataHandling {
 
 /** Loader for event data from Nexus files with parallelism based on multiple
-  processes (MPI) for performance.
+  processes (MPI) for performance. This class provides integration of the low
+  level loader component Parallel::IO::EventLoader with higher level concepts
+  such as DataObjects::EventWorkspace and the instrument.
 
   @author Simon Heybrock
   @date 2017
@@ -44,20 +41,14 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace EventLoader {
-MANTID_PARALLEL_DLL std::unordered_map<int32_t, size_t>
-makeAnyEventIdToBankMap(const std::string &filename,
-                        const std::string &groupName,
-                        const std::vector<std::string> &bankNames);
-MANTID_PARALLEL_DLL void
-load(const Communicator &communicator, const std::string &filename,
-     const std::string &groupName, const std::vector<std::string> &bankNames,
-     const std::vector<int32_t> &bankOffsets,
-     std::vector<std::vector<Types::Event::TofEvent> *> eventLists);
-}
+class MANTID_DATAHANDLING_DLL ParallelEventLoader {
+public:
+  static void load(DataObjects::EventWorkspace &ws, const std::string &filename,
+                   const std::string &groupName,
+                   const std::vector<std::string> &bankNames);
+};
 
-} // namespace IO
-} // namespace Parallel
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_PARALLEL_EVENTLOADER_H_ */
+#endif /* MANTID_DATAHANDLING_PARALLELEVENTLOADER_H_ */

@@ -62,6 +62,24 @@ public:
     TS_ASSERT_EQUALS(groups[1][0], 3);
   }
 
+  void test_makeRankGroups_4_ranks_zero_size_bank() {
+    const int ranks = 4;
+    const int rank = 1;
+    const std::vector<size_t> bankSizes{9, 0, 1, 1};
+    const size_t chunkSize = 2;
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto &groups = chunker.makeWorkerGroups();
+    TS_ASSERT_EQUALS(groups.size(), 2);
+    TS_ASSERT_EQUALS(groups[0].size(), 3);
+    TS_ASSERT_EQUALS(groups[1].size(), 1);
+    TS_ASSERT_EQUALS(groups[0][0], 0);
+    TS_ASSERT_EQUALS(groups[0][1], 1);
+    // This should be the size-zero bank. It is currently added to the first
+    // group, but in principle this could be changed.
+    TS_ASSERT_EQUALS(groups[0][2], 2);
+    TS_ASSERT_EQUALS(groups[1][0], 3);
+  }
+
   void test_makeLoadRanges_1_rank() {
     const int ranks = 1;
     const int rank = 0;
@@ -82,6 +100,27 @@ public:
     TS_ASSERT_EQUALS(ranges[6], (Chunker::LoadRange{bank, 0, 2}));
     bank = 3;
     TS_ASSERT_EQUALS(ranges[7], (Chunker::LoadRange{bank, 0, 1}));
+  }
+
+  void test_makeLoadRanges_zero_size_bank() {
+    const int ranks = 1;
+    const int rank = 0;
+    const std::vector<size_t> bankSizes{7, 0, 4, 1};
+    const size_t chunkSize = 2;
+    const Chunker chunker(ranks, rank, bankSizes, chunkSize);
+    const auto ranges = chunker.makeLoadRanges();
+    TS_ASSERT_EQUALS(ranges.size(), 4 + 0 + 2 + 1);
+    size_t bank = 0;
+    TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 0, 2}));
+    TS_ASSERT_EQUALS(ranges[1], (Chunker::LoadRange{bank, 2, 2}));
+    TS_ASSERT_EQUALS(ranges[2], (Chunker::LoadRange{bank, 4, 2}));
+    TS_ASSERT_EQUALS(ranges[3], (Chunker::LoadRange{bank, 6, 1}));
+    bank = 2;
+    TS_ASSERT_EQUALS(ranges[4], (Chunker::LoadRange{bank, 0, 2}));
+    TS_ASSERT_EQUALS(ranges[5], (Chunker::LoadRange{bank, 2, 2}));
+    bank = 3;
+    TS_ASSERT_EQUALS(ranges[6], (Chunker::LoadRange{bank, 0, 1}));
+    // Note: No entry for bank = 1.
   }
 
   void test_makeLoadRanges_2_ranks_rank0() {
@@ -132,6 +171,32 @@ public:
     TS_ASSERT_EQUALS(ranges[0], (Chunker::LoadRange{bank, 2, 2}));
     bank = 1;
     TS_ASSERT_EQUALS(ranges[1], (Chunker::LoadRange{bank, 0, 1}));
+  }
+
+  void test_makeLoadRange_many_random_banks() {
+    for (int workers = 1; workers < 100; ++workers) {
+      for (int worker = 0; worker < workers; ++worker) {
+        // The following bank sizes come from actual files which have cause
+        // trouble so this also servers as a regression test.
+        for (const auto &bankSizes :
+             {std::vector<size_t>{2091281, 520340, 841355, 912704, 1435110,
+                                  567885, 1850044, 1333453, 1507522, 1396560,
+                                  1699092, 1484645, 515805, 474417, 633111,
+                                  600780, 638784, 572031, 741562, 593741,
+                                  546107, 552800, 556607},
+              std::vector<size_t>{
+                  5158050, 5566070, 5528000, 5461070, 5937410, 7415620, 5720310,
+                  6387840, 6007800, 6331110, 4744170, 20912810, 14846450,
+                  16990920, 13965600, 15075220, 13334530, 18500440, 5678850,
+                  14351100, 9127040, 8413550, 5203400}}) {
+          const size_t chunkSize = 1024 * 1024;
+          TS_ASSERT_THROWS_NOTHING(
+              Chunker chunker(workers, worker, bankSizes, chunkSize));
+          Chunker chunker(workers, worker, bankSizes, chunkSize);
+          TS_ASSERT_THROWS_NOTHING(chunker.makeLoadRanges());
+        }
+      }
+    }
   }
 
   void test_makeBalancedPartitioning_1_worker() {
@@ -275,6 +340,23 @@ public:
                        (banks + workers - 1) / workers);
       TS_ASSERT_EQUALS(result[1].second.size(), banks / workers);
     }
+  }
+
+  void test_makeBalancedPartitioning_zero_size_bank() {
+    const size_t workers = 2;
+    const std::vector<size_t> sizes{5, 0, 3};
+    const auto result = Chunker::makeBalancedPartitioning(workers, sizes);
+    TS_ASSERT_EQUALS(result.size(), 1);
+    TS_ASSERT_EQUALS(result[0].first, 2);
+    TS_ASSERT_EQUALS(result[0].second, (std::vector<size_t>{0, 2, 1}));
+  }
+
+  void test_makeBalancedPartitioning_all_banks_empty() {
+    const size_t workers = 2;
+    const std::vector<size_t> sizes{0, 0, 0};
+    const auto result = Chunker::makeBalancedPartitioning(workers, sizes);
+    TS_ASSERT_EQUALS(result.size(), 1);
+    TS_ASSERT_EQUALS(result[0].first, 2);
   }
 };
 

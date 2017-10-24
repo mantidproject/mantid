@@ -3,10 +3,10 @@ set ( SRC_FILES
 	src/ExecutionMode.cpp
 	src/IO/Chunker.cpp
 	src/IO/EventLoader.cpp
+	src/IO/EventParser.cpp
 	src/Request.cpp
 	src/StorageMode.cpp
 	src/ThreadingBackend.cpp
-        src/IO/EventParser.cpp
 )
 
 set ( INC_FILES
@@ -14,11 +14,13 @@ set ( INC_FILES
 	inc/MantidParallel/Communicator.h
 	inc/MantidParallel/ExecutionMode.h
 	inc/MantidParallel/IO/Chunker.h
+	inc/MantidParallel/IO/EventDataPartitioner.h
 	inc/MantidParallel/IO/EventLoader.h
 	inc/MantidParallel/IO/EventLoaderHelpers.h
+	inc/MantidParallel/IO/EventParser.h
 	inc/MantidParallel/IO/NXEventDataLoader.h
 	inc/MantidParallel/IO/NXEventDataSource.h
-	inc/MantidParallel/IO/EventParser.h
+	inc/MantidParallel/IO/PulseTimeGenerator.h
 	inc/MantidParallel/Nonblocking.h
 	inc/MantidParallel/Request.h
 	inc/MantidParallel/StorageMode.h
@@ -29,11 +31,13 @@ set ( TEST_FILES
 	ChunkerTest.h
 	CollectivesTest.h
 	CommunicatorTest.h
+	EventDataPartitionerTest.h
 	EventLoaderTest.h
 	EventParserTest.h
 	ExecutionModeTest.h
 	NonblockingTest.h
 	ParallelRunnerTest.h
+	PulseTimeGeneratorTest.h
 	RequestTest.h
 	StorageModeTest.h
 	ThreadingBackendTest.h

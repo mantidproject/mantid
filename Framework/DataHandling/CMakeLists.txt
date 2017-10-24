@@ -117,6 +117,7 @@ set ( SRC_FILES
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
 	src/PDLoadCharacterizations.cpp
+	src/ParallelEventLoader.cpp
 	src/PatchBBY.cpp
 	src/ProcessBankData.cpp
 	src/RawFileInfo.cpp
@@ -290,6 +291,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/NXcanSASDefinitions.h
 	inc/MantidDataHandling/NexusTester.h
 	inc/MantidDataHandling/PDLoadCharacterizations.h
+	inc/MantidDataHandling/ParallelEventLoader.h
 	inc/MantidDataHandling/PatchBBY.h
 	inc/MantidDataHandling/ProcessBankData.h
 	inc/MantidDataHandling/RawFileInfo.h
