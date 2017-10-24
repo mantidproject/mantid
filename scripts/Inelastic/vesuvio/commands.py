@@ -64,6 +64,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     return fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold)
 
+
 def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold):
     spectra = flags['spectra']
 
@@ -142,6 +143,7 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
 
     return last_results[0], last_results[2], last_results[3], exit_iteration
 
+
 def fit_tof_iteration(sample_data, container_data, flags):
     """
     Performs a single iterations of the time of flight corrections and fitting
@@ -149,7 +151,6 @@ def fit_tof_iteration(sample_data, container_data, flags):
 
     :param sample_data: Loaded sample data workspaces
     :param container_data: Loaded container data workspaces
-    :param runs: A string specifying the runs to process
     :param flags: A dictionary of flags to control the processing
     :return: Tuple of (workspace group name, pre correction fit parameters,
              final fit parameters, chi^2 values)
