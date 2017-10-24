@@ -130,6 +130,7 @@ def create_line_mask(start_point, length, width, angle):
     return finite_cylinder(start_point, width / 2., length, [cos(angle * pi / 180.0), sin(angle * pi / 180.0), 0.0],
                            "arm")
 
+
 def quadrant_xml(centre,rmin,rmax,quadrant):
     cin_id = 'cyl-in'
     xmlstring = infinite_cylinder(centre, rmin, [0,0,1], cin_id)

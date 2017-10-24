@@ -3,17 +3,13 @@
 """ Finds the beam centre for SANS"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace, ITableWorkspace)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator, Logger)
+from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, IEventWorkspace)
+from mantid.kernel import (Direction, PropertyManagerProperty)
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
 from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import (DetectorType, DataType, MaskingQuadrant, FindDirectionEnum)
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
-import pydevd
+from sans.common.enums import (DetectorType)
+
 
 class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
     def category(self):
@@ -163,7 +159,6 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         self.setProperty("Centre1", centre1_out + centre1)
         self.setProperty("Centre2", centre2_out + centre2)
 
-
     def _run_center_of_mass_position(self, scatter_workspace, centre1, centre2, r_min, tolerance):
         algorithm_name = "FindCenterOfMassPosition"
         alg_options = {"InputWorkspace": scatter_workspace,
@@ -285,6 +280,7 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSBeamCentreFinderMassMethod)

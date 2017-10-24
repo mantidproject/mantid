@@ -84,7 +84,6 @@ class SANS2DSearchCentreGUI_V2(stresstesting.MantidStressTest):
         self.assertDelta(centre['pos2'], -0.145, 0.0001)
         self.assertDelta(centre['pos1'], 0.15, 0.0001)
 
-
     def validate(self):
         # there is no workspace to be checked against
         return True

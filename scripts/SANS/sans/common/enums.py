@@ -328,6 +328,7 @@ class BatchReductionEntry(object):
     """
     pass
 
+
 # ------------------------------
 # Quadrants for beam centre finder
 # -------------------------------
@@ -338,6 +339,7 @@ class MaskingQuadrant(object):
     Defines the entries of a batch reduction file.
     """
     pass
+
 
 # ------------------------------
 # Directions for Beam centre finder

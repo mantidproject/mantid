@@ -10,6 +10,7 @@ from sans.common.enums import (SANSInstrument, CanonicalCoordinates, DetectorTyp
 from sans.common.general_functions import (create_unmanaged_algorithm, get_single_valued_logs_from_workspace,
                                            quaternion_to_angle_and_axis, sanitise_instrument_name)
 
+
 # -------------------------------------------------
 # Free functions
 # -------------------------------------------------

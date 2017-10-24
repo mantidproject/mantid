@@ -168,7 +168,7 @@ class SANSBeamCentreFinderCoreTest(unittest.TestCase):
 
         # Act
         reduction_core_alg = self._run_beam_centre_core(state, workspace, workspace_monitor,
-                                                      transmission_workspace, direct_workspace)
+                                                        transmission_workspace, direct_workspace)
         output_workspace_left = reduction_core_alg.getProperty("OutputWorkspaceLeft").value
         output_workspace_right = reduction_core_alg.getProperty("OutputWorkspaceRight").value
         output_workspace_top = reduction_core_alg.getProperty("OutputWorkspaceTop").value
