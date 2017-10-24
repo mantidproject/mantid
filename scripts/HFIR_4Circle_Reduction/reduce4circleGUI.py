@@ -108,14 +108,14 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_apply_setup)
         self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_spice_data)
-        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
-                     self.do_test_url)
-        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
-                     self.do_list_scans)
-        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
-                     self.do_download_spice_data)
-        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_change_data_access_mode)
+        # self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
+        #              self.do_test_url)
+        # self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
+        #              self.do_list_scans)
+        # self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
+        #              self.do_download_spice_data)
+        # self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
+        #              self.do_change_data_access_mode)
         self.connect(self.ui.pushButton_applyCalibratedSampleDistance, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_detector_distance)
         self.connect(self.ui.pushButton_applyUserDetCenter, QtCore.SIGNAL('clicked()'),
@@ -230,14 +230,17 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_select_all_peaks)
 
         # Tab 'Setup'
-        self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
-                     self.do_setup_dir_default)
-        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_cache_dir)
+        # self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
+        #              self.do_setup_dir_default)
+        # self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
+        #              self.do_browse_local_cache_dir)
         self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
                      self.do_browse_working_dir)
         self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_change_instrument_name)
+        # TODO/NOW/ISSUE - 
+        # self.connect(self.ui.pushButton_browsePreprocessed, ... ...)
+        # related: lineEdit_preprocessedDir, checkBox_searchPreprocessedFirst
 
         # Tab 'UB Matrix'
         self.connect(self.ui.pushButton_showUB2Edit, QtCore.SIGNAL('clicked()'),
@@ -320,6 +323,11 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
                      self.menu_pre_process)
+
+        # menu
+        # TODO/ISSUE/NOW
+        # self.connect(self.ui.actionData_Downloading, QtCore.SIGNAL('triggered()'),
+        #              self.menu_download_data)
 
         # Validator ... (NEXT)
 
@@ -423,8 +431,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.radioButton_ubSelectNoScan.setChecked(True)
 
         # Tab 'Access'
-        self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
-        self.ui.comboBox_mode.setCurrentIndex(0)
+        # self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
+        # self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(True)
         self.ui.pushButton_browseLocalDataDir.setEnabled(True)
 
