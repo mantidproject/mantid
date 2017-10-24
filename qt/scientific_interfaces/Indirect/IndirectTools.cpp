@@ -115,7 +115,7 @@ void IndirectTools::runClicked() {
  */
 void IndirectTools::helpClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(nullptr,
-                                                 QString("Indirect_Tools"));
+                                                 QString("Indirect Tools"));
 }
 
 /**
