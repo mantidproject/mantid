@@ -57,7 +57,7 @@ void SumOverlappingTubes::init() {
                   "option.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
-          "HeightBinning", boost::make_shared<RebinParamsValidator>(true)),
+          "HeightAxis", boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. Optionally this can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
@@ -66,7 +66,7 @@ void SumOverlappingTubes::init() {
   auto toleranceValidator =
       boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
   toleranceValidator->clearUpper();
-  declareProperty("ScatteringAngleTolerance", 0.1, toleranceValidator,
+  declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
                   "The relative tolerance for the scattering angles before the "
                   "counts are split.");
   declareProperty(
@@ -75,7 +75,7 @@ void SumOverlappingTubes::init() {
       "scattering angle. If the maximum entries accross all the scattering "
       "angles is N_MAX, and the number of entries for a scattering angle is N, "
       "the normalisation is performed as N_MAX / N.");
-  std::vector<std::string> outputTypes{"2D", "2DStraight", "1D"};
+  std::vector<std::string> outputTypes{"2D", "2DStraight", "1DStraight"};
   declareProperty("OutputType", "2D",
                   boost::make_shared<StringListValidator>(outputTypes),
                   "Whether to have the output in 2D, 2D with straightened "
@@ -87,9 +87,9 @@ std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {
 
   const std::string componentForHeightAxis =
       getProperty("ComponentForHeightAxis");
-  const std::string heightBinning = getProperty("HeightBinning");
+  const std::string heightAxis = getProperty("HeightAxis");
 
-  if (componentForHeightAxis.empty() && heightBinning.empty()) {
+  if (componentForHeightAxis.empty() && heightAxis.empty()) {
     std::string message =
         "Either a component, such as a tube, must be specified "
         "to get the height axis, or the binning given explicitly.";
@@ -142,6 +142,8 @@ void SumOverlappingTubes::getInputParameters() {
   RunCombinationHelper combHelper;
   m_workspaceList = combHelper.validateInputWorkspaces(workspaces, g_log);
 
+  m_outputType = getPropertyValue("OutputType");
+
   getScatteringAngleBinning();
   getHeightAxis();
 }
@@ -183,8 +185,8 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
     m_endScatteringAngle = scatteringBinning[2];
   }
 
-  const std::string outputType = getProperty("OutputType");
-  if (outputType == "2DStraight" && m_startScatteringAngle < 0)
+  if ((m_outputType == "2DStraight" || m_outputType == "1DStraight") &&
+      m_startScatteringAngle < 0)
     m_startScatteringAngle = 0.0;
 
   m_numPoints = int(ceil((m_endScatteringAngle - m_startScatteringAngle) /
@@ -199,7 +201,8 @@ void SumOverlappingTubes::getScatteringAngleBinning() {
 
 void SumOverlappingTubes::getHeightAxis() {
   const std::string componentName = getProperty("ComponentForHeightAxis");
-  if (componentName.length() > 0) {
+  std::vector<double> heightBinning = getProperty("HeightAxis");
+  if (componentName.length() > 0 && heightBinning.empty()) {
     // Try to get the component. It should be a tube with pixels in the
     // y-direction, the height bins are then taken as the detector positions.
     const auto &ws = m_workspaceList.front();
@@ -214,23 +217,30 @@ void SumOverlappingTubes::getHeightAxis() {
     for (const auto &thing : children)
       m_heightAxis.push_back(thing->getPos().Y());
   } else {
-    std::vector<double> heightBinning = getProperty("HeightBinning");
     if (heightBinning.size() != 3)
       throw std::runtime_error(
-          "Currently height binning must have start, step and end values.");
+          "Height binning must have start, step and end values.");
     double height = heightBinning[0];
     while (height < heightBinning[2]) {
       m_heightAxis.push_back(height);
       height += heightBinning[1];
     }
+    m_heightAxis.push_back(heightBinning[2]);
   }
+
+  m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
+  m_endHeight = *max_element(m_heightAxis.begin(), m_heightAxis.end());
+
+  if (m_outputType == "1DStraight")
+    m_heightAxis = {(m_heightAxis.front() + m_heightAxis.back()) * 0.5};
 
   m_numHistograms = m_heightAxis.size();
 
   g_log.information() << "Number of histograms in output workspace:"
                       << m_numHistograms << ".\n";
   g_log.information() << "Height axis:" << m_heightAxis[0] << " to "
-                      << m_heightAxis[m_numHistograms - 1] << "\n";
+                      << m_heightAxis[m_numHistograms - 1] << " with "
+                      << m_heightAxis.size() << " entries.\n";
 }
 
 std::vector<double>
@@ -239,8 +249,6 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       getProperty("ScatteringAngleTolerance");
 
   std::vector<double> normalisation(m_numPoints, 0.0);
-
-  const auto outputType = getPropertyValue("OutputType");
 
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
@@ -253,6 +261,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       const auto &pos = specInfo.position(i);
       const auto height = pos.Y();
 
+      if (height < m_startHeight || height > m_endHeight)
+        continue;
+
       size_t heightIndex;
       try {
         heightIndex =
@@ -262,9 +273,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       }
 
       double angle;
-      if (outputType == "2D")
+      if (m_outputType == "2D")
         angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
-      else if (outputType == "2DStraight")
+      else
         angle = specInfo.twoTheta(i) * 180.0 / M_PI;
 
       size_t angleIndex = size_t(

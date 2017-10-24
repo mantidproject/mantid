@@ -52,7 +52,10 @@ private:
   double m_endScatteringAngle;
   double m_stepScatteringAngle;
 
+  double m_startHeight;
+  double m_endHeight;
   std::vector<double> m_heightAxis;
+  std::string m_outputType;
 
   void getInputParameters();
   void getScatteringAngleBinning();
