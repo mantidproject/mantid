@@ -100,24 +100,29 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
   dataSet.read(buffer, dataType, memSpace, dataSpace);
 }
 
+std::string readAttribute(const H5::DataSet &dataSet,
+                          const std::string &attributeName) {
+  const auto &attr = dataSet.openAttribute(attributeName);
+  std::string value;
+  attr.read(attr.getDataType(), value);
+  return value;
+}
+
 template <class TimeOffsetType, class IndexType, class TimeZeroType>
 std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
 makeEventDataPartitioner(const H5::Group &group, const int numWorkers) {
-  const auto dataSet = group.openDataSet("event_time_zero");
+  const auto timeZero = group.openDataSet("event_time_zero");
   int64_t time_zero_offset{0};
-  if (dataSet.attrExists("offset")) {
-    const auto &attr = dataSet.openAttribute("offset");
-    std::string offset;
-    attr.read(attr.getDataType(), offset);
+  if (timeZero.attrExists("offset")) {
+    const auto &offset = readAttribute(timeZero, "offset");
     time_zero_offset = Types::Core::DateAndTime(offset).totalNanoseconds();
   }
   return Kernel::make_unique<
       EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>>(
       numWorkers, PulseTimeGenerator<IndexType, TimeZeroType>{
-                      detail::read<IndexType>(group, "event_index"),
-                      detail::read<TimeZeroType>(group, "event_time_zero"),
-                      "",
-                      time_zero_offset});
+                      read<IndexType>(group, "event_index"),
+                      read<TimeZeroType>(group, "event_time_zero"),
+                      readAttribute(timeZero, "units"), time_zero_offset});
 }
 
 template <class R, class... T1, class... T2>
