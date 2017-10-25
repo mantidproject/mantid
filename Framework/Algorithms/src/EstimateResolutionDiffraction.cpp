@@ -9,6 +9,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -182,6 +183,7 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
   const auto l1 = spectrumInfo.l1();
   const auto &componentInfo = m_inputWS->componentInfo();
+  const auto &detectorInfo = m_inputWS->detectorInfo();
   g_log.notice() << "L1 = " << l1 << "\n";
   const auto samplepos = spectrumInfo.samplePosition();
 
@@ -228,7 +230,8 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
       for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
         // No scanning support for solidAngle currently, use only first
         // component of index, ignore time index
-        solidangle += componentInfo.solidAngle(index.first, samplepos);
+        if (!detectorInfo.isMasked(i))
+          solidangle += componentInfo.solidAngle(index.first, samplepos);
       }
       deltatheta = sqrt(solidangle);
     }

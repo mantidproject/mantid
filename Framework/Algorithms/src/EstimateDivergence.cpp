@@ -5,6 +5,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
@@ -13,8 +14,8 @@ namespace Mantid {
 namespace Algorithms {
 
 using namespace std;
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;      // NOLINT
+using Mantid::API::WorkspaceProperty; // NOLINT
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EstimateDivergence)
@@ -88,6 +89,7 @@ void EstimateDivergence::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto samplepos = spectrumInfo.samplePosition();
   const auto &componentInfo = inputWS->componentInfo();
+  const auto &detectorInfo = inputWS->detectorInfo();
   size_t numspec = inputWS->getNumberHistograms();
   double solidangletotal = 0.;
   for (size_t i = 0; i < numspec; ++i) {
@@ -103,7 +105,8 @@ void EstimateDivergence::exec() {
     for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
       // No scanning support for solidAngle currently, use only first component
       // of index, ignore time index
-      solidangle += componentInfo.solidAngle(index.first, samplepos);
+      if (!detectorInfo.isMasked(i))
+        solidangle += componentInfo.solidAngle(index.first, samplepos);
     }
     solidangletotal += solidangle;
     const double deltatwotheta = sqrt(solidangle);
