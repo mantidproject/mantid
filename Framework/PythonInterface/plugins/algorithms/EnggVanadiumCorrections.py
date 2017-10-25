@@ -90,7 +90,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         curvesWS = self.getProperty('CurvesWorkspace').value
         spline_breaks = self.getProperty('SplineBreakPoints').value
 
-        max_reports = 100
+        max_reports = 50
         prog = Progress(self, start=0, end=1, nreports=max_reports)
 
         prog.report('Checking availability of vanadium correction features')
@@ -110,6 +110,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         if ws:
             self._applyVanadiumCorrections(ws, integWS, curvesWS, prog)
             self.setProperty('Workspace', ws)
+
+        prog.report(max_reports, "Finished")
 
     def _applyVanadiumCorrections(self, ws, integWS, curvesWS, prog):
         """
