@@ -54,6 +54,15 @@ class AbinsLoadCASTEPTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTes
     def test_no_sum_correction_single_crystal(self):
         self.check(name=self._many_k_no_sum, loader=AbinsModules.LoadCASTEP)
 
+    # ===================================================================================
+    # |   Use case: system with isotope Li7 and D                                       |
+    # ===================================================================================
+    #
+    _li7_d2 = "LiOH_H2O_7Li_2D2O_LoadCASTEP"
+
+    def test_isotopes(self):
+        self.check(name=self._li7_d2, loader=AbinsModules.LoadCASTEP)
+
 
 if __name__ == '__main__':
     unittest.main()

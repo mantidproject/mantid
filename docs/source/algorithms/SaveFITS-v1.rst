@@ -34,7 +34,7 @@ files include the following basic standard headers: SIMPLE, BITPIX,
 NAXIS, (NAXIS1 and NAXIS2), EXTEND, and a COMMENT header with the
 format description.
 
-See also :ref:`algm-LoadFITS`.
+.. seealso:: :ref:`algm-LoadFITS`.
 
 
 Usage
@@ -81,11 +81,11 @@ Usage
     pos_x, pos_y = 22, 33
     print("Pixel value at coordinates ({0},{1}), first image: {2:.1f}, second image: {3:.1f}".
            format(pos_x, pos_y, ws.readY(pos_y)[pos_x], ws_reload.readY(pos_y)[pos_x]))
-                
+
 .. testcleanup:: LoadSaveLoadFITS
 
     import os
-                 
+
     DeleteWorkspace(wsg_name)
     DeleteWorkspace(wsg_reload_name)
     os.remove(save_name)
