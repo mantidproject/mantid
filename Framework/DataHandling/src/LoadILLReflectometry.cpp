@@ -506,17 +506,20 @@ std::vector<double> LoadILLReflectometry::getXValues() {
   try {
     if (m_acqMode) {
       std::string chopper{"Chopper"};
-      double chop1Speed{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
+      double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
       if (m_instrumentName == "D17") {
+        // TODO: This is a temporary hack. It seems that some VirtualChopper
+        // fields in the NeXus files are mixed so we need to load chopper 1
+        // phase from the chopper2_speed_average field.
         chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-        chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
+        chop1Phase = doubleFromRun("VirtualChopper.chopper2_speed_average");
+        // TODO: This is a temporary hack, see above.
+        chop2Speed = doubleFromRun("VirtualChopper.chopper1_phase_average");
         chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
-      }
-      // use phase of first chopper
-      double chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
-      if (m_instrumentName == "Figaro" && chop1Phase > 360.0) {
+      } else if (m_instrumentName == "Figaro") {
+        chop1Phase = doubleFromRun(m_chopper1Name + ".phase");
         // Chopper 1 phase on Figaro is set to an arbitrary value (999.9)
-        chop1Phase = 0.0;
+        if (chop1Phase > 360.0) chop1Phase = 0.0;
       }
       const double POFF = doubleFromRun(m_offsetFrom + ".poff");
       const double openOffset =
@@ -543,14 +546,16 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         g_log.error() << "First chopper velocity " << chop1Speed
                       << ". Check you NeXus file.\n";
       }
+      const double chopWindow = 45.0;
       const double t_TOF2 =
           m_tofDelay -
-          1.e+6 * 60.0 * (POFF - 45.0 + chop2Phase - chop1Phase + openOffset) /
+          1.e+6 * 60.0 * (POFF - chopWindow + chop2Phase - chop1Phase + openOffset) /
               (2.0 * 360 * chop1Speed);
       g_log.debug() << "t_TOF2: " << t_TOF2 << '\n';
       // compute tof values
+      xVals.emplace_back(t_TOF2 - 0.5 * m_channelWidth);
       for (int channelIndex = 0;
-           channelIndex <= static_cast<int>(m_numberOfChannels);
+           channelIndex < static_cast<int>(m_numberOfChannels);
            ++channelIndex) {
         const double t_TOF1 = (channelIndex + 0.5) * m_channelWidth;
         xVals.push_back(t_TOF1 + t_TOF2);
