@@ -105,7 +105,7 @@ void EstimateDivergence::exec() {
     for (const auto &index : spectrumInfo.spectrumDefinition(i)) {
       // No scanning support for solidAngle currently, use only first component
       // of index, ignore time index
-      if (!detectorInfo.isMasked(i))
+      if (!detectorInfo.isMasked(index.first))
         solidangle += componentInfo.solidAngle(index.first, samplepos);
     }
     solidangletotal += solidangle;
