@@ -2,6 +2,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
+import mantid.simpleapi as mantid
 
 
 class EnggCalibrate(PythonAlgorithm):
@@ -127,14 +128,15 @@ class EnggCalibrate(PythonAlgorithm):
 
         import EnggUtils
 
+        prog = Progress(self, start=0, end=1, nreports=4)
+
         # Get peaks in dSpacing from file
+        prog.report("Reading peaks")
         expected_peaks_dsp = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                               self.getProperty('ExpectedPeaks').value)
 
         if len(expected_peaks_dsp) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
-
-        prog = Progress(self, start=0, end=1, nreports=2)
 
         prog.report('Focusing the input workspace')
         focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
@@ -151,6 +153,7 @@ class EnggCalibrate(PythonAlgorithm):
                                format(fitted_peaks.column("dSpacing"),
                                       fitted_peaks.column("X0")))
 
+        prog.report("Producing outputs")
         self._produce_outputs(difa, difc, zero, fitted_peaks)
 
     def _fit_params(self, focused_ws, expected_peaks_d):
@@ -187,43 +190,37 @@ class EnggCalibrate(PythonAlgorithm):
 
         return (difa, difc, zero, fitted_peaks)
 
-    def _focus_run(self, ws, vanWS, bank, indices):
+    def _focus_run(self, ws, vanadium_ws, bank, indices):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.
 
         @param ws :: workspace to focus
-        @param vanWS :: workspace with Vanadium run for corrections
+        @param vanadium_ws :: workspace with Vanadium run for corrections
         @param bank :: the focussing will be applied on the detectors of this bank
         @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
         mutually exclusive)
 
         @return focussed (summed) workspace
         """
-        alg = self.createChildAlgorithm('EnggFocus')
-        alg.setProperty('InputWorkspace', ws)
+        detector_positions = self.getProperty('DetectorPositions').value
+        if not detector_positions:
+            detector_positions = ""
 
-        alg.setProperty('Bank', bank)
-        alg.setProperty(self.INDICES_PROP_NAME, indices)
+        if not vanadium_ws:
+            vanadium_ws = ""
 
-        detPos = self.getProperty('DetectorPositions').value
-        if detPos:
-            alg.setProperty('DetectorPositions', detPos)
+        van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
+        if not van_integration_ws:
+            van_integration_ws = ""
 
-        if vanWS:
-            alg.setProperty('VanadiumWorkspace', vanWS)
+        van_curves_ws = self.getProperty('VanCurvesWorkspace').value
+        if not van_curves_ws:
+            van_curves_ws = ""
 
-        integWS = self.getProperty('VanIntegrationWorkspace').value
-        if integWS:
-            alg.setProperty('VanIntegrationWorkspace', integWS)
-
-        curvesWS = self.getProperty('VanCurvesWorkspace').value
-        if curvesWS:
-            alg.setProperty('VanCurvesWorkspace', curvesWS)
-
-        alg.execute()
-
-        return alg.getProperty('OutputWorkspace').value
+        return mantid.EnggFocus(InputWorkspace=ws, Bank=bank, SpectrumNumbers=indices,
+                                DetectorPositions=detector_positions, VanadiumWorkspace=vanadium_ws,
+                                VanIntegrationWorkspace=van_integration_ws, VanCurvesWorkspace=van_curves_ws)
 
     def _produce_outputs(self, difa, difc, zero, fitted_peaks):
         """
