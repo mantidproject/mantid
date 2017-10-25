@@ -37,8 +37,8 @@ ConvFit::ConvFit(QWidget *parent)
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
-  setMinimumSpectra(0);
-  setMaximumSpectra(0);
+  setMinimumSpectrum(0);
+  setMaximumSpectrum(0);
 
   // Initialise fitTypeStrings
   m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
@@ -174,7 +174,7 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectra(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -293,8 +293,8 @@ void ConvFit::initFABADAOptions() {
  */
 void ConvFit::run() {
   // Get input from interface
-  setMinimumSpectra(m_uiForm.spSpectraMin->value());
-  setMaximumSpectra(m_uiForm.spSpectraMax->value());
+  setMinimumSpectrum(m_uiForm.spSpectraMin->value());
+  setMaximumSpectrum(m_uiForm.spSpectraMax->value());
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
@@ -490,8 +490,8 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
     m_propertyToParameter = createPropertyToParameterMap(
         m_fitFunctions, prefixPrefix, prefixSuffix);
     m_parameterValues = IndirectTab::extractParametersFromTable(
-        paramWsName, m_propertyToParameter.values().toSet(), minimumSpectra(),
-        maximumSpectra());
+        paramWsName, m_propertyToParameter.values().toSet(), minimumSpectrum(),
+        maximumSpectrum());
 
     updateProperties(m_uiForm.spPlotSpectrum->value());
   }
@@ -1238,7 +1238,7 @@ void ConvFit::updateProperties(int specNo) {
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
   bool isTwoLorentzian = fitFunction == "Lorentzian 2";
-  bool specOutOfBounds = specNo < minimumSpectra() || maximumSpectra() < specNo;
+  bool specOutOfBounds = specNo < minimumSpectrum() || maximumSpectrum() < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
     auto propertyName = fitFunction + "." + param;
@@ -1657,7 +1657,7 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
   addDefaultParametersToTree(fitFunctions);
-  updateProperties(selectedSpectra());
+  updateProperties(selectedSpectrum());
 }
 
 /**

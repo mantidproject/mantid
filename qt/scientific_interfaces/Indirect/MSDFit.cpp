@@ -58,7 +58,7 @@ void MSDFit::setup() {
   connect(m_uiForm.pbSingleFit, SIGNAL(clicked()), this, SLOT(singleFit()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectra(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -141,8 +141,8 @@ IAlgorithm_sptr MSDFit::msdFitAlgorithm(const std::string &model, int specMin,
   auto wsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
   double xStart = m_dblManager->value(m_properties["StartX"]);
   double xEnd = m_dblManager->value(m_properties["EndX"]);
-  setMinimumSpectra(specMin);
-  setMaximumSpectra(specMax);
+  setMinimumSpectrum(specMin);
+  setMaximumSpectrum(specMax);
 
   IAlgorithm_sptr msdAlg = AlgorithmManager::Instance().create("MSDFit");
   msdAlg->initialize();
@@ -195,7 +195,7 @@ void MSDFit::algorithmComplete(bool error) {
 
   m_parameterValues = IndirectTab::extractParametersFromTable(
       m_pythonExportWsName + "_Parameters",
-      m_parameterToProperty.keys().toSet(), minimumSpectra(), maximumSpectra());
+      m_parameterToProperty.keys().toSet(), minimumSpectrum(), maximumSpectrum());
   updateProperties(m_uiForm.spPlotSpectrum->value());
   updatePlot();
 
