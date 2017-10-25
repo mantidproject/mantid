@@ -3,11 +3,13 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-from Muon import ThreadModel
+from Muon import thread_model
 
 
 class FFTPresenter(object):
-
+    """
+    This class links the FFT model to the GUI
+    """
     def __init__(self,view,alg,load):
         self.view=view
         self.alg=alg
@@ -19,20 +21,16 @@ class FFTPresenter(object):
         self.view.buttonSignal.connect(self.handleButton)
         self.view.phaseCheckSignal.connect(self.phaseCheck)
 
+    # turn on button
     def activate(self):
         self.view.activateButton()
 
+    # turn off button
     def deactivate(self):
         self.view.deactivateButton()
 
-    # only get ws that are groups or pairs
-    # ignore raw
     def getWorkspaceNames(self):
-        runName,options = self.load.getCurrentWS()
-        final_options = []
-        for pick in options:
-            if ";" in pick and "Raw" not in pick and runName in pick:
-                final_options.append(pick)
+        final_options=self.load.getWorkspaceNames()
         self.view.addItems(final_options)
 
     #functions
@@ -49,13 +47,18 @@ class FFTPresenter(object):
             self.view.changed(self.view.getShiftBox(),self.view.getShiftBoxRow()+1)
 
     def createThread(self):
-        return ThreadModel.ThreadModel(self.alg)
+        return thread_model.ThreadModel(self.alg)
 
+    # constructs the inputs for the FFT algorithms
+    # then executes them (see fft_model to see the order
+    # of execution
     def handleButton(self):
+        # put this on its own thread so not to freeze Mantid
         self.thread=self.createThread()
         self.thread.started.connect(self.deactivate)
         self.thread.finished.connect(self.handleFinished)
 
+        # make some inputs
         inputs={}
         inputs["Run"]=self.load.getRunName()
 
@@ -69,8 +72,6 @@ class FFTPresenter(object):
             phaseTable["axis"]=self.view.getAxis()
             phaseTable["Instrument"]=self.load.getInstrument()
             inputs["phaseTable"]=phaseTable
-            #model.makePhaseQuadTable(axis,self.load.getInstrument())
-            #self.model.PhaseQuad()
             self.view.RePhaseAdvanced(preInputs)
         else:
             self.view.ReAdvanced(preInputs)
@@ -100,9 +101,10 @@ class FFTPresenter(object):
         self.thread.start()
         self.view.setPhaseBox()
 
+    # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.thread.deleteLater
+        self.thread.deleteLater()
         self.thread=None
 
     def get_FFT_input(self):

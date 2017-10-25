@@ -21,7 +21,7 @@ Usage
 .. code-block:: python
 
     # Load a SCD data set from systemtests Data and find the peaks
-    LoadEventNexus(Filename='/home/vel/workspace/TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_nxs')
+    LoadEventNexus(Filename='TOPAZ_3132_event.nxs', OutputWorkspace='TOPAZ_3132_nxs')
     ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132_nxs', OutputWorkspace='TOPAZ_3132_md', LorentzCorrection=True)
     peaks = FindPeaksMD(InputWorkspace='TOPAZ_3132_md', PeakDistanceThreshold=0.14999999999999999, MaxPeaks=100)
     FindUBUsingFFT(PeaksWorkspace='peaks', MinD=2, MaxD=16)

@@ -43,7 +43,7 @@ Types of Conversion
    out, to give Q in the frame of the sample. See
    :ref:`algm-SetGoniometer` to specify the goniometer used in
    the experiment.
--  **HKL**: uses the UB matrix (see :ref:`algm-SetUB`,
+-  **HKL**: uses the :ref:`UB matrix <Lattice>` (see :ref:`algm-SetUB`,
    :ref:`algm-FindUBUsingFFT` and others) to calculate the HKL
    Miller indices of each event.
 
