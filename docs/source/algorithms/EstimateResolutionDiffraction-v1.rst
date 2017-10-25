@@ -22,11 +22,11 @@ Starting from the Bragg equation for T.O.F. diffractometer,
 
 as
 
-.. math:: \Delta d = \sqrt{(\Delta T)^2 + (\Delta L)^2 + (\Delta\theta)^2}
+.. math:: \Delta d = \sqrt{\left(\Delta T \frac{\partial d}{\partial T}\right)^2 + \left(\Delta L \frac{\partial d}{\partial L}\right)^2 + \left(\Delta \theta \frac{\partial d}{\partial \theta}\right)^2}
 
 and thus
 
-.. math:: \frac{\Delta d}{d} = \sqrt{(\frac{\Delta T}{T})^2 + (\frac{\Delta L}{L})^2 + (\Delta\theta\cdot\cot(\theta))^2}
+.. math:: \frac{\Delta d}{d} = \sqrt{\left(\frac{\Delta T}{T}\right)^2 + \left(\frac{\Delta L}{L}\right)^2 + \left(\Delta\theta\cdot\cot(\theta)\right)^2}
 
 where,
 
@@ -35,6 +35,8 @@ where,
    approximated from the square root of the solid angle of the detector
    to sample;
 -  :math:`L` is the flight path of the neutron from source to detector.
+
+Note that :math:`\frac{\Delta d}{d} = \frac{\Delta Q}{Q}`.
 
 Factor Sheet
 ------------
