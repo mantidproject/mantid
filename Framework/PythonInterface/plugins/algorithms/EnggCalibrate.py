@@ -2,7 +2,6 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as mantid
 
 
 class EnggCalibrate(PythonAlgorithm):
@@ -203,24 +202,30 @@ class EnggCalibrate(PythonAlgorithm):
 
         @return focussed (summed) workspace
         """
-        detector_positions = self.getProperty('DetectorPositions').value
-        if not detector_positions:
-            detector_positions = ""
+        alg = self.createChildAlgorithm('EnggFocus')
+        alg.setProperty('InputWorkspace', ws)
 
-        if not vanadium_ws:
-            vanadium_ws = ""
+        alg.setProperty('Bank', bank)
+        alg.setProperty(self.INDICES_PROP_NAME, indices)
+
+        detector_positions = self.getProperty('DetectorPositions').value
+        if detector_positions:
+            alg.setProperty('DetectorPositions', detector_positions)
+
+        if vanadium_ws:
+            alg.setProperty('VanadiumWorkspace', vanadium_ws)
 
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
-        if not van_integration_ws:
-            van_integration_ws = ""
+        if van_integration_ws:
+            alg.setProperty('VanIntegrationWorkspace', van_integration_ws)
 
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
-        if not van_curves_ws:
-            van_curves_ws = ""
+        if van_curves_ws:
+            alg.setProperty('VanCurvesWorkspace', van_curves_ws)
 
-        return mantid.EnggFocus(InputWorkspace=ws, Bank=bank, SpectrumNumbers=indices,
-                                DetectorPositions=detector_positions, VanadiumWorkspace=vanadium_ws,
-                                VanIntegrationWorkspace=van_integration_ws, VanCurvesWorkspace=van_curves_ws)
+        alg.execute()
+
+        return alg.getProperty('OutputWorkspace').value
 
     def _produce_outputs(self, difa, difc, zero, fitted_peaks):
         """
