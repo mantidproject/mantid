@@ -63,8 +63,8 @@ private:
   const H5::Group m_root;
   H5::Group m_group;
   const std::vector<std::string> m_bankNames;
-  const std::string m_id_path;
-  const std::string m_time_offset_path;
+  H5::DataSet m_id;
+  H5::DataSet m_time_offset;
 };
 
 namespace detail {
@@ -80,15 +80,13 @@ std::vector<T> read(const H5::Group &group, const std::string &dataSetName) {
   return result;
 }
 
-/** Read subset of data set from group and write the result into buffer.
+/** Read subset of data set and write the result into buffer.
  *
  * The subset is given by a start index and a count. */
 template <class T>
-void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
-          size_t start, size_t count) {
+void read(T *buffer, const H5::DataSet &dataSet, size_t start, size_t count) {
   auto hstart = static_cast<hsize_t>(start);
   auto hcount = static_cast<hsize_t>(count);
-  H5::DataSet dataSet = group.openDataSet(dataSetName);
   H5::DataType dataType = dataSet.getDataType();
   H5::DataSpace dataSpace = dataSet.getSpace();
   if ((static_cast<int64_t>(dataSpace.getSelectNpoints()) -
@@ -99,6 +97,16 @@ void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
   dataSpace.selectHyperslab(H5S_SELECT_SET, &hcount, &hstart);
   H5::DataSpace memSpace(1, &hcount);
   dataSet.read(buffer, dataType, memSpace, dataSpace);
+}
+
+/** Read subset of data set from group and write the result into buffer.
+ *
+ * The subset is given by a start index and a count. */
+template <class T>
+void read(T *buffer, const H5::Group &group, const std::string &dataSetName,
+          size_t start, size_t count) {
+  H5::DataSet dataSet = group.openDataSet(dataSetName);
+  read(buffer, dataSet, start, count);
 }
 
 std::string readAttribute(const H5::DataSet &dataSet,
@@ -192,6 +200,8 @@ template <class TimeOffsetType>
 std::unique_ptr<AbstractEventDataPartitioner<TimeOffsetType>>
 NXEventDataLoader<TimeOffsetType>::setBankIndex(const size_t bank) {
   m_group = m_root.openGroup(m_bankNames[bank]);
+  m_id = m_group.openDataSet("event_id");
+  m_time_offset = m_group.openDataSet("event_time_offset");
   return detail::makeEventDataPartitioner<TimeOffsetType>(
       m_group.openDataSet("event_index").getDataType(),
       m_group.openDataSet("event_time_zero").getDataType(), m_group,
@@ -203,7 +213,7 @@ template <class TimeOffsetType>
 void NXEventDataLoader<TimeOffsetType>::readEventID(int32_t *buffer,
                                                     size_t start,
                                                     size_t count) const {
-  detail::read<int32_t>(buffer, m_group, "event_id", start, count);
+  detail::read(buffer, m_id, start, count);
 }
 
 /// Read subset given by start and count from event_time_offset and write it
@@ -211,15 +221,13 @@ void NXEventDataLoader<TimeOffsetType>::readEventID(int32_t *buffer,
 template <class TimeOffsetType>
 void NXEventDataLoader<TimeOffsetType>::readEventTimeOffset(
     TimeOffsetType *buffer, size_t start, size_t count) const {
-  detail::read<TimeOffsetType>(buffer, m_group, "event_time_offset", start,
-                               count);
+  detail::read(buffer, m_time_offset, start, count);
 }
 
 /// Read and return the `units` attribute from event_time_offset.
 template <class TimeOffsetType>
 std::string NXEventDataLoader<TimeOffsetType>::readEventTimeOffsetUnit() const {
-  const auto timeOffset = m_group.openDataSet("event_time_offset");
-  return detail::readAttribute(timeOffset, "units");
+  return detail::readAttribute(m_time_offset, "units");
 }
 
 } // namespace IO
