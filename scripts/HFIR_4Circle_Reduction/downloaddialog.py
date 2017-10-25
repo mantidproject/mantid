@@ -5,6 +5,8 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
 import HFIR_4Circle_Reduction.guiutility as gutil
+from HFIR_4Circle_Reduction import ui_httpserversetup as ui_http
+
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -24,6 +26,10 @@ class DataDownloadDialog(QtGui.QDialog):
         """
         super(DataDownloadDialog, self).__init__(parent)
 
+        # set up UI
+        self.ui = ui_http.Ui_Dialog()
+        self.ui.setupUi(self)
+
         # define event handing
         self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
                      self.do_test_url)
@@ -37,12 +43,41 @@ class DataDownloadDialog(QtGui.QDialog):
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.do_change_data_access_mode)
 
-        self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
-                     self.do_setup_dir_default)
+        # self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
+        #              self.do_setup_dir_default)
         self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_cache_dir)
 
+        # Set the URL red as it is better not check at this stage. Leave it to user
+        self.ui.lineEdit_url.setStyleSheet("color: black;")
+
         return
+
+    def do_change_data_access_mode(self):
+        """ Change data access mode between downloading from server and local
+        Event handling methods
+        :return:
+        """
+        new_mode = str(self.ui.comboBox_mode.currentText())
+        self._dataAccessMode = new_mode
+
+        if new_mode.startswith('Local') is True:
+            self.ui.lineEdit_localSpiceDir.setEnabled(True)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
+            self.ui.lineEdit_url.setEnabled(False)
+            self.ui.lineEdit_localSrcDir.setEnabled(False)
+            self.ui.pushButton_browseLocalCache.setEnabled(False)
+            self._allowDownload = False
+        else:
+            self.ui.lineEdit_localSpiceDir.setEnabled(False)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+            self.ui.lineEdit_url.setEnabled(True)
+            self.ui.lineEdit_localSrcDir.setEnabled(True)
+            self.ui.pushButton_browseLocalCache.setEnabled(True)
+            self._allowDownload = True
+
+        return
+
 
     def do_download_spice_data(self):
         """ Download SPICE data

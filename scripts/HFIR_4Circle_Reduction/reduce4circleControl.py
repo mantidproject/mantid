@@ -1587,7 +1587,26 @@ class CWSCDReductionControl(object):
 
         return binning_script
 
-    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list):
+    def load_preprocessed_scan(self):
+        """
+
+        :return:
+        """
+        # TODO/TODO/ - Implement
+        if False:
+            md_file_path = os.path.join(self._wsDir, ws_name + '.nxs')
+            try:
+                mantidsimple.LoadMD(Filename=md_file_path, OutputWorkspace=ws_name)
+            except RuntimeError as run_err:
+                print('[DB] Unable to load file {0} due to RuntimeError {1}.'.format(md_file_path, run_err))
+            except OSError as run_err:
+                print('[DB] Unable to load file {0} due to OSError {1}.'.format(md_file_path, run_err))
+            except IOError as run_err:
+                print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
+        # END-FOR
+
+    # TODO/TODO/FIXME - Signature changed... Applied to all callers
+    def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
         """
         Merge Pts in Scan
         All the workspaces generated as internal results will be grouped
@@ -1598,6 +1617,8 @@ class CWSCDReductionControl(object):
         :param exp_no:
         :param scan_no:
         :param pt_num_list: If empty, then merge all Pt. in the scan
+        :param rewrite: if True, then the data will be re-merged regardless workspace exists or not
+        :param preprocessed_dir: If None, then merge Pts. Otherwise, try to search and load preprocessed data first
         :return: (boolean, error message) # (merged workspace name, workspace group name)
         """
         # Check
@@ -1635,7 +1656,23 @@ class CWSCDReductionControl(object):
 
         # create output workspace's name
         out_q_name = get_merged_md_name(self._instrumentName, exp_no, scan_no, pt_num_list)
-        if AnalysisDataService.doesExist(out_q_name) is False:
+
+        # find out the cases that rewriting is True
+        if not rewrite:
+            if AnalysisDataService.doesExist(out_q_name):
+                # not re-write, target workspace exists
+                rewrite = False
+            elif preprocessed_dir is not None:
+                # not re-write, target workspace does not exist, attempt to load from preprocessed
+                data_loaded = self.load_preprocessed_scan(exp_no, scan_no, pt_num_list, preprocessed_dir, out_q_name)
+                rewrite = not data_loaded
+            # END-IF (ADS)
+        # END-IF
+        # END-IF
+
+        # now to load the data
+        # check whether it is an option load preprocessed (merged) data
+        if rewrite:
             # collect HB3A Exp/Scan information
             # - construct a configuration with 1 scan and multiple Pts.
             scan_info_table_name = get_merge_pt_info_ws_name(exp_no, scan_no)

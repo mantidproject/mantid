@@ -154,6 +154,7 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             os.mkdir(output_dir)
             os.chmod(output_dir, 0o777)
 
+        # TODO/TODO/TODO/ - Make this part standard in a util module and can be called in public
         file_list = list()
         for scan in scan_list:
             md_file_name = os.path.join(output_dir, 'Exp{0}_Scan{1}_MD.nxs'.format(exp_number, scan))

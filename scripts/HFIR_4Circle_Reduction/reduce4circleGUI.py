@@ -877,14 +877,12 @@ class MainWindow(QtGui.QMainWindow):
         # get data directory, working directory and data server URL from GUI
         local_data_dir = str(self.ui.lineEdit_localSpiceDir.text()).strip()
         working_dir = str(self.ui.lineEdit_workDir.text()).strip()
-        data_server = str(self.ui.lineEdit_url.text()).strip()
 
         # set to my controller
         status, err_msg = self._myControl.set_local_data_dir(local_data_dir)
         if not status:
             raise RuntimeError(err_msg)
         self._myControl.set_working_directory(working_dir)
-        self._myControl.set_server_url(data_server, check_link=False)
 
         # check
         error_message = ''
@@ -919,9 +917,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             self.ui.lineEdit_workDir.setStyleSheet("color: green;")
         # END-IF-ELSE
-
-        # Set the URL red as it is better not check at this stage. Leave it to user
-        self.ui.lineEdit_url.setStyleSheet("color: black;")
 
         if len(error_message) > 0:
             self.pop_one_button_dialog(error_message)
@@ -1036,31 +1031,6 @@ class MainWindow(QtGui.QMainWindow):
         else:
             err_msg = ub_matrix
             self.pop_one_button_dialog(err_msg)
-
-        return
-
-    def do_change_data_access_mode(self):
-        """ Change data access mode between downloading from server and local
-        Event handling methods
-        :return:
-        """
-        new_mode = str(self.ui.comboBox_mode.currentText())
-        self._dataAccessMode = new_mode
-
-        if new_mode.startswith('Local') is True:
-            self.ui.lineEdit_localSpiceDir.setEnabled(True)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
-            self.ui.lineEdit_url.setEnabled(False)
-            self.ui.lineEdit_localSrcDir.setEnabled(False)
-            self.ui.pushButton_browseLocalCache.setEnabled(False)
-            self._allowDownload = False
-        else:
-            self.ui.lineEdit_localSpiceDir.setEnabled(False)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
-            self.ui.lineEdit_url.setEnabled(True)
-            self.ui.lineEdit_localSrcDir.setEnabled(True)
-            self.ui.pushButton_browseLocalCache.setEnabled(True)
-            self._allowDownload = True
 
         return
 
@@ -1180,7 +1150,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def find_peak_in_scan(self , scan_number, load_spice_hkl):
+    def find_peak_in_scan(self, scan_number, load_spice_hkl):
         """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
