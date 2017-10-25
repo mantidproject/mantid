@@ -7,7 +7,7 @@
 #include "AlgorithmDialog.h"
 
 #include <QHash>
-#include <QtCore/qvariant.h>
+#include <qvariant.h>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Property.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"

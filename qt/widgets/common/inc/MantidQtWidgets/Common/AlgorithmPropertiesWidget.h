@@ -9,8 +9,8 @@
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include <qgridlayout.h>
-#include <QtCore/qvariant.h>
-#include <QtGui/qwidget.h>
+#include <qvariant.h>
+#include <qwidget.h>
 #include <QtGui>
 
 namespace MantidQt {

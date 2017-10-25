@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 #include <qgridlayout.h>
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 

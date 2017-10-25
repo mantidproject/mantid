@@ -1,8 +1,8 @@
 #ifndef SV_CONNECTIONS_H
 #define SV_CONNECTIONS_H
 
-#include <QtCore/QtCore>
-#include <QtGui/QWidget>
+#include <QtCore>
+#include <QWidget>
 #include <QActionGroup>
 
 #include "ui_SpectrumView.h"

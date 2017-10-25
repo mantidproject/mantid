@@ -1,8 +1,8 @@
 #ifndef REF_IV_CONNECTIONS_H
 #define REF_IV_CONNECTIONS_H
 
-#include <QtCore/QtCore>
-#include <QtGui/QWidget>
+#include <QtCore>
+#include <QWidget>
 #include <QActionGroup>
 
 #include "ui_RefImageView.h"

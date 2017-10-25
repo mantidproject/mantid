@@ -2,8 +2,8 @@
 #define MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_
 
 #include "DllOption.h"
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
+#include <QtCore>
+#include <qwidget.h>
 #include <qwt_plot.h>
 #include <qwt_valuelist.h>
 #include <qpainter.h>

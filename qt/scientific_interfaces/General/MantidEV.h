@@ -1,8 +1,8 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 #define MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 
-#include <QtCore/QtCore>
-#include <QtGui/QWidget>
+#include <QtCore>
+#include <QWidget>
 #include <QActionGroup>
 #include <QRunnable>
 #include <Poco/NObserver.h>

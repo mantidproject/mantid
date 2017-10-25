@@ -3,7 +3,7 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 #include <qwt_plot.h>
 #include <qcolor.h>
 

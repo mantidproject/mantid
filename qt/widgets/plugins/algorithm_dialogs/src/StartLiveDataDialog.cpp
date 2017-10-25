@@ -6,8 +6,8 @@
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "qboxlayout.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <QtCore/qvariant.h>
-#include <QtCore/qstringlist.h>
+#include <qvariant.h>
+#include <qstringlist.h>
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"

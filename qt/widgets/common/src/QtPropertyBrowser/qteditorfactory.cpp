@@ -87,22 +87,22 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
-#include <QtGui/QSpinBox>
-#include <QtGui/QScrollBar>
-#include <QtGui/QComboBox>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QLineEdit>
-#include <QtGui/QDateTimeEdit>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QMenu>
-#include <QtGui/QKeyEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QLabel>
-#include <QtGui/QToolButton>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFontDialog>
-#include <QtGui/QSpacerItem>
-#include <QtCore/QMap>
+#include <QSpinBox>
+#include <QScrollBar>
+#include <QComboBox>
+#include <QAbstractItemView>
+#include <QLineEdit>
+#include <QDateTimeEdit>
+#include <QHBoxLayout>
+#include <QMenu>
+#include <QKeyEvent>
+#include <QApplication>
+#include <QLabel>
+#include <QToolButton>
+#include <QColorDialog>
+#include <QFontDialog>
+#include <QSpacerItem>
+#include <QMap>
 
 #if defined(Q_CC_MSVC)
 #pragma warning(                                                               \

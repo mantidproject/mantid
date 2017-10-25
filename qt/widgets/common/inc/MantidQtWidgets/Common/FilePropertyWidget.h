@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
-#include <QtCore/qstringlist.h>
-#include <QtCore/qstring.h>
+#include <qstringlist.h>
+#include <qstring.h>
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include <qpushbutton.h>

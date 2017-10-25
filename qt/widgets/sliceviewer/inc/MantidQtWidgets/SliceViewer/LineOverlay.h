@@ -3,8 +3,8 @@
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
+#include <QtCore>
+#include <qwidget.h>
 #include <qwt_plot.h>
 #include <qpainter.h>
 

@@ -21,9 +21,9 @@
 #include <qlayout.h>
 #include <QMessageBox>
 #include <QSplashScreen>
-#include <QtCore/qstring.h>
+#include <qstring.h>
 #include <QThread>
-#include <QtCore/qstringlist.h>
+#include <qstringlist.h>
 #include "qapplication.h"
 
 using namespace Mantid::Kernel;

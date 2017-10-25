@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "qapplication.h"
 #include <Qsci/qscilexer.h>
-#include <QtCore/QtCore>
+#include <QtCore>
 #include <QVector>
 
 namespace MantidQt {

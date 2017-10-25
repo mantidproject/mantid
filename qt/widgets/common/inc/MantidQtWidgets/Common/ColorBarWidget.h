@@ -4,7 +4,7 @@
 #include "MantidQtWidgets/Common/MantidColorMap.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_ColorBarWidget.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QtGui>
 #include <qwt_scale_widget.h>
 

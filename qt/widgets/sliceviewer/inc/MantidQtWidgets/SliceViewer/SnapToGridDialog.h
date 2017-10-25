@@ -1,7 +1,7 @@
 #ifndef SNAPTOGRIDDIALOG_H
 #define SNAPTOGRIDDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "ui_SnapToGridDialog.h"
 #include "DllOption.h"
 

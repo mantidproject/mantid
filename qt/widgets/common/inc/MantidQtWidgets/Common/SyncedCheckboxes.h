@@ -3,9 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "DllOption.h"
-#include <QtGui/qwidget.h>
+#include <qwidget.h>
 #include <qpushbutton.h>
-#include <QtGui/qaction.h>
+#include <qaction.h>
 
 namespace MantidQt {
 namespace API {
