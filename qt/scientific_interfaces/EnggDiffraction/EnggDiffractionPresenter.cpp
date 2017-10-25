@@ -1142,7 +1142,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
         "EnggCalibrate");
 
     alg->initialize();
@@ -1793,7 +1793,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   } else {
     try {
       auto load =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+          Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
       load->setPropertyValue("Filename", instStr + runNo);
       load->setPropertyValue("OutputWorkspace", inWSName);
@@ -1829,7 +1829,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
   try {
     auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFocus");
+        Mantid::API::AlgorithmManager::Instance().create("EnggFocus");
     alg->initialize();
     alg->setProperty("InputWorkspace", inWSName);
     alg->setProperty("OutputWorkspace", outWSName);
@@ -2132,7 +2132,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   // TODO?: maybe use setChild() and then
   // load->getProperty("OutputWorkspace");
 
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "EnggVanadiumCorrections");
   alg->initialize();
   alg->setProperty("VanadiumWorkspace", vanWS);
