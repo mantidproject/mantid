@@ -14,5 +14,6 @@ Reflectometry
 
 Small Angle Scattering
 ----------------------
+Have added the functionality to show diagnostic transmission workspaces to new GUI.
 
 :ref:`Release 3.12.0 <v3.12.0>`

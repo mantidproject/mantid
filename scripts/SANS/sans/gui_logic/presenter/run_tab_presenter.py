@@ -484,6 +484,7 @@ class RunTabPresenter(object):
         self._set_on_view("transmission_radius")
         self._set_on_view("transmission_monitor")
         self._set_on_view("transmission_mn_shift")
+        self._set_on_view("show_transmission")
 
         self._set_on_view_transmission_fit()
 
@@ -663,6 +664,7 @@ class RunTabPresenter(object):
         self._set_on_state_model("transmission_radius", state_model)
         self._set_on_state_model("transmission_monitor", state_model)
         self._set_on_state_model("transmission_mn_shift", state_model)
+        self._set_on_state_model("show_transmission", state_model)
 
         self._set_on_state_model_transmission_fit(state_model)
 
