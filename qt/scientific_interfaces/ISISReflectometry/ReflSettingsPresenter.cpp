@@ -1,11 +1,11 @@
 #include "ReflSettingsPresenter.h"
+#include "IReflSettingsTabPresenter.h"
+#include "IReflSettingsView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "IReflSettingsTabPresenter.h"
-#include "IReflSettingsView.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 
 namespace MantidQt {
@@ -281,23 +281,43 @@ std::string ReflSettingsPresenter::getReductionOptions() const {
 * @return :: transmission run(s) as a string that will be used for the reduction
 */
 std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
-
-  auto runs = m_view->getTransmissionRuns();
-  if (runs.empty())
+  auto transmissionRunsString = m_view->getTransmissionRuns();
+  if (transmissionRunsString.empty())
     return "";
 
-  std::vector<std::string> transRuns;
-  boost::split(transRuns, runs, boost::is_any_of(","));
+  std::vector<std::string> transmissionRuns;
+  boost::split(transmissionRuns, transmissionRunsString, boost::is_any_of(","));
 
-  if (transRuns.size() > 2)
+  if (loadRuns)
+    loadTransmissionRuns(transmissionRuns);
+
+  switch (transmissionRuns.size()) {
+  case 1:
+    return firstTransmissionRunLabelled(transmissionRuns);
+  case 2:
+    return firstTransmissionRunLabelled(transmissionRuns) + "," +
+           secondTransmissionRunLabelled(transmissionRuns);
+  default:
     throw std::invalid_argument("Only one transmission run or two "
                                 "transmission runs separated by ',' "
                                 "are allowed.");
+  }
+}
 
-  if (loadRuns) {
-    for (const auto &run : transRuns) {
-      if (AnalysisDataService::Instance().doesExist("TRANS_" + run))
-        continue;
+std::string ReflSettingsPresenter::firstTransmissionRunLabelled(
+    std::vector<std::string> const &runNumbers) const {
+  return "FirstTransmissionRun=" + runNumbers[0];
+}
+
+std::string ReflSettingsPresenter::secondTransmissionRunLabelled(
+    std::vector<std::string> const &runNumbers) const {
+  return "SecondTransmissionRun=" + runNumbers[1];
+}
+
+void ReflSettingsPresenter::loadTransmissionRuns(
+    std::vector<std::string> const &transmissionRuns) const {
+  for (const auto &run : transmissionRuns) {
+    if (!AnalysisDataService::Instance().doesExist("TRANS_" + run)) {
       // Load transmission runs and put them in the ADS
       IAlgorithm_sptr alg =
           AlgorithmManager::Instance().create("LoadISISNexus");
@@ -306,13 +326,6 @@ std::string ReflSettingsPresenter::getTransmissionRuns(bool loadRuns) const {
       alg->execute();
     }
   }
-
-  // Attach labels to the runs and return them as a single string
-  std::string labelledRuns = "FirstTransmissionRun=" + transRuns[0];
-  if (runs.size() > 1)
-    labelledRuns += ",SecondTransmissionRun=" + transRuns[1];
-
-  return labelledRuns;
 }
 
 /** Returns global options for 'Stitch1DMany'

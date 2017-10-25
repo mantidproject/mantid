@@ -31,34 +31,36 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
 endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
-# C++-specific flags
-set( GNUFLAGS_CXX "-Woverloaded-virtual -fno-operator-names")
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
 # -Wno-write-strings: Do not warn about deprecated conversions of char*->const char*
 # -Wno-unused-result: Do not warn about unused return values in some C functions
-set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings -Wno-unused-result")
+add_compile_options ( -Wall -Wextra -Wconversion -Winit-self -Wpointer-arith
+                      -Wcast-qual -Wcast-align -fno-common -Wno-deprecated
+                      -Wno-write-strings -Wno-unused-result )
+# C++-specific flags
+add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>
+  $<$<COMPILE_LANGUAGE:CXX>:-fno-operator-names>
+)
 
 # Check if we have a new enough version for these flags
 if ( CMAKE_COMPILER_IS_GNUCXX )
-  set (GNUFLAGS "${GNUFLAGS} -Wpedantic")
+  add_compile_options ( -Wpedantic )
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "5.1"))
-    set(GNUFLAGS_CXX "${GNUFLAGS_CXX} -Wsuggest-override")
+    add_compile_options ( $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override> )
   endif()
   if (NOT (GCC_COMPILER_VERSION VERSION_LESS "7.1"))
     # Consider enabling once [[fallthrough]] is available on all platforms.
     # https://developers.redhat.com/blog/2017/03/10/wimplicit-fallthrough-in-gcc-7/
-    set(GNUFLAGS "${GNUFLAGS} -Wimplicit-fallthrough=0")
+    add_compile_options ( -Wimplicit-fallthrough=0 )
   endif()
 elseif ( "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" )
-  set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
+  add_compile_options ( -Wno-sign-conversion )
 endif()
 
 # Add some options for debug build to help the Zoom profiler
-set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fno-omit-frame-pointer" )
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer" )
+add_compile_options ( $<$<CONFIG:Debug>:-fno-omit-frame-pointer> )
 
 option(WITH_ASAN "Enable address sanitizer" OFF)
 if(WITH_ASAN)
@@ -84,10 +86,6 @@ if(WITH_UBSAN)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SAN_FLAGS}" )
 endif()
 
-# Set the options for gcc and g++
-set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GNUFLAGS}" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GNUFLAGS} ${GNUFLAGS_CXX}" )
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 
@@ -102,12 +100,11 @@ if( CMAKE_COMPILER_IS_GNUCXX )
   # Define an option to statically link libstdc++
   option( STATIC_LIBSTDCXX "If ON then statically link with the C++ standard library" OFF )
   if( STATIC_LIBSTDCXX )
-    set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static-libgcc" )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libgcc -static-libstdc++" )
+    add_compile_options (
+      -static-libgcc
+      $<$<COMPILE_LANGUAGE:CXX>:-static-libstdc++>
+    )
     set( CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_C_FLAGS} -static-libgcc" )
     set( CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -static-libgcc -static-libstdc++" )
   endif()
 endif()
-
-# Cleanup
-set ( GNUFLAGS )

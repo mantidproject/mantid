@@ -728,7 +728,7 @@ void IndirectDiffractionReduction::openDirectoryDialog() {
  */
 void IndirectDiffractionReduction::help() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Indirect_Diffraction"));
+      nullptr, QString("Indirect Diffraction"));
 }
 
 void IndirectDiffractionReduction::initLocalPython() {}

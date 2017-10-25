@@ -4,7 +4,7 @@ from mantid.simpleapi import logger
 import AbinsModules
 
 
-class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester):
+class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadAbInitioTester):
 
     def tearDown(self):
         AbinsModules.AbinsTestHelpers.remove_output_files(list_of_names=["LoadCRYSTAL"])
@@ -37,6 +37,7 @@ class AbinsLoadCRYSTALTest(unittest.TestCase, AbinsModules.GeneralLoadDFTTester)
     def test_phonon_dispersion_crystal(self):
         self.check(name=self._phonon_dispersion_v1, loader=AbinsModules.LoadCRYSTAL)
         self.check(name=self._phonon_dispersion_v2, loader=AbinsModules.LoadCRYSTAL)
+
 
 if __name__ == '__main__':
     unittest.main()

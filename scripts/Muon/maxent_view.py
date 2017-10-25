@@ -6,6 +6,10 @@ from Muon import table_utils
 
 
 class MaxEntView(QtGui.QWidget):
+    """
+    The view for the MaxEnt widget. This
+    creates the look of the widget
+    """
     # signals
     maxEntButtonSignal = QtCore.pyqtSignal()
 
@@ -14,7 +18,6 @@ class MaxEntView(QtGui.QWidget):
         self.grid = QtGui.QGridLayout(self)
 
         #make table
-
         self.table = QtGui.QTableWidget(self)
         self.table.resize(800, 800)
 
@@ -25,11 +28,9 @@ class MaxEntView(QtGui.QWidget):
         self.table.verticalHeader().setVisible(False)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(("MaxEnt Property;Value").split(";"))
-
         table_utils.setTableHeaders(self.table)
 
         # populate table
-
         table_utils.setRowName(self.table,0,"Complex Data")
         self.complex_data_box= table_utils.addCheckBoxToTable(self.table,False,0)
         self.complex_data_box.setFlags(QtCore.Qt.ItemIsEnabled)
@@ -97,7 +98,6 @@ class MaxEntView(QtGui.QWidget):
 
         #layout
         # this is if complex data is unhidden
-        #self.table.setMinimumSize(40,228)
         self.table.setMinimumSize(40,203)
         self.tableA.setMinimumSize(40,207)
         self.horizontalSpacer1 = QtGui.QSpacerItem(20, 30, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -105,7 +105,7 @@ class MaxEntView(QtGui.QWidget):
         #make button
         self.button = QtGui.QPushButton('Calculate MaxEnt', self)
         self.button.setStyleSheet("background-color:lightgrey")
-#        #connects
+#       #connects
         self.button.clicked.connect(self.MaxEntButtonClick)
         # add to layout
         self.grid.addWidget(self.table)
@@ -120,9 +120,11 @@ class MaxEntView(QtGui.QWidget):
         self.ws.clear()
         self.ws.addItems(options)
 
+    # send signal
     def MaxEntButtonClick(self):
         self.maxEntButtonSignal.emit()
 
+    # get some inputs for model
     def initMaxEntInput(self):
         inputs={}
 
@@ -159,6 +161,7 @@ class MaxEntView(QtGui.QWidget):
     def isRaw(self):
         return self.raw_box.checkState() == QtCore.Qt.Checked
 
+    # turn button on and off
     def activateButton(self):
         self.button.setEnabled(True)
 

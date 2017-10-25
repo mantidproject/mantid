@@ -61,8 +61,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport LoadEmptyInstrument
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// Default constructor
-  LoadEmptyInstrument();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadEmptyInstrument"; }
   /// Summary of algorithms purpose

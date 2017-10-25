@@ -773,6 +773,10 @@
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
+
+  <instrument name="POWTEX">
+	<technique>Neutron Diffraction</technique>
+  </instrument>
 </facility>
 
 <!-- ANSTO -->
