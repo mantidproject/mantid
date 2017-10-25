@@ -49,7 +49,7 @@
     <value val="10"/>
   </parameter>
 
-  <parameter name="TransRunStartOverlap"> <!-- in wavelength -->
+  <parameter name="TransRunEndOverlap"> <!-- in wavelength -->
     <value val="12"/>
   </parameter>
 
