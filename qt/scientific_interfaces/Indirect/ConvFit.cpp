@@ -1238,7 +1238,8 @@ void ConvFit::updateProperties(int specNo) {
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
   bool isTwoLorentzian = fitFunction == "Lorentzian 2";
-  bool specOutOfBounds = specNo < minimumSpectrum() || maximumSpectrum() < specNo;
+  bool specOutOfBounds =
+      specNo < minimumSpectrum() || maximumSpectrum() < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
     auto propertyName = fitFunction + "." + param;

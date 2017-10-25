@@ -195,7 +195,8 @@ void MSDFit::algorithmComplete(bool error) {
 
   m_parameterValues = IndirectTab::extractParametersFromTable(
       m_pythonExportWsName + "_Parameters",
-      m_parameterToProperty.keys().toSet(), minimumSpectrum(), maximumSpectrum());
+      m_parameterToProperty.keys().toSet(), minimumSpectrum(),
+      maximumSpectrum());
   updateProperties(m_uiForm.spPlotSpectrum->value());
   updatePlot();
 
