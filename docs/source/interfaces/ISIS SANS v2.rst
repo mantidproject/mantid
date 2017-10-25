@@ -91,9 +91,8 @@ Columns
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **OutputName**           |   Name of output workspace                                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
-| **User File**            |   User file to use for this row, if none is specified default will be used,                     |
-|                          |   if one is specified it will be used instead additionaly overiding any options                 |
-|                          |   set in the gui.                                                                               |
+| **User File**            |   User file to use for this row. If specified it will override any options set in the GUI,      |
+|                          |   otherwise the default file will be used.                                                      |
 +--------------------------+-------------------------------------------------------------------------------------------------+
 | **Options**              |   This column allows the user to provide row specific settings. Currently only **WavelengthMin**|
 |                          |   and WavelengthMax can be set here.                                                            |

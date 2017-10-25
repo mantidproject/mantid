@@ -861,12 +861,10 @@ class RunTabPresenter(object):
             state = director.create_state(row)
             states.update({row: state})
         except ValueError as e:
-            self.sans_logger.error("There was a bad entry for row {}. Ensure that the path to your files has "
-                                   "been added to the Mantid search directories! See here for more "
-                                   "details: {}".format(row, str(e)))
-            raise RuntimeError("There was a bad entry for row {}. Ensure that the path to your files has "
-                               "been added to the Mantid search directories! See here for more "
-                               "details: {}".format(row, str(e)))
+            error_msg = "There was a bad entry for row {}. Ensure that the path to your files has been added to the " \
+                        "Mantid search directories! See here for more details: {}"
+            self.sans_logger.error(error_msg.format(row, str(e)))
+            raise RuntimeError(error_msg.format(row, str(e)))
 
     def _populate_row_in_table(self, row):
         """
