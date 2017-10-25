@@ -29,7 +29,7 @@
     */
 
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
@@ -58,8 +58,7 @@ QString DLLExport titleString(const QString &wsName);
 boost::tuple<QString, QString> DLLExport
 postprocessGroupString(const GroupData &rowMap, const WhiteList &whitelist,
                        const ProcessingAlgorithm &processor,
-                       const PostprocessingAlgorithm &postprocessor,
-                       const QString &postprocessingOptions);
+                       const PostprocessingStep &postprocessingStep);
 
 QString DLLExport plotsString(const QStringList &output_ws,
                               const QString &stitched_wsStr,
@@ -96,21 +95,19 @@ completeOutputProperties(const QString &algName, size_t currentProperties);
 class DLLExport GenerateNotebook {
 
 public:
-  GenerateNotebook(
-      QString name, const QString instrument, const WhiteList &whitelist,
-      const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
-      const ProcessingAlgorithm &processor,
-      const PostprocessingAlgorithm &postprocessor,
-      const std::map<QString, QString> preprocessingInstructionsMap,
-      const QString processingInstructions,
-      const QString postprocessingInstructions);
-  virtual ~GenerateNotebook(){};
+  GenerateNotebook(QString name, QString instrument, WhiteList whitelist,
+                   std::map<QString, PreprocessingAlgorithm> preprocessMap,
+                   ProcessingAlgorithm processor,
+                   PostprocessingStep postprocessingStep,
+                   std::map<QString, QString> preprocessingInstructionsMap,
+                   QString processingInstructions);
+  virtual ~GenerateNotebook() = default;
 
   QString generateNotebook(const TreeData &data);
 
 private:
   // The table ws name
-  QString m_wsName;
+  const QString m_wsName;
   // The instrument
   const QString m_instrument;
   // The whitelist defining the number of columns, their names and how they
@@ -122,7 +119,7 @@ private:
   // The processing (reduction) algorithm
   ProcessingAlgorithm m_processor;
   // The post-processing algorithm
-  PostprocessingAlgorithm m_postprocessor;
+  PostprocessingStep m_postprocessingStep;
   // A map containing pre-processing instructions displayed in the view via
   // hinting line edits
   std::map<QString, QString> m_preprocessingOptionsMap;
@@ -130,7 +127,6 @@ private:
   QString m_processingOptions;
   // Options to post-processing algorithm specified in the view via hinting line
   // edit
-  QString m_postprocessingOptions;
 };
 }
 }

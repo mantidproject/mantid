@@ -60,7 +60,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instname = self.instrument.getName()
 
         # special cases are defined, default value is in front
-        self.bankmin=defaultdict(lambda: 1, {"MANDI":10,"SEQUOIA":38,"TOPAZ":10})
+        self.bankmin=defaultdict(lambda: 1, {"MANDI":1,"SEQUOIA":38,"TOPAZ":10})
         self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"REF_M":1,
                       "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
         tubemin=defaultdict(int, {"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"NOMAD":1,"SEQUOIA":1,"WISH":1})

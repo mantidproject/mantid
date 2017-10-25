@@ -72,9 +72,11 @@ Usage
     # Basic reduction with no transmission run
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
@@ -93,9 +95,11 @@ Output:
     # Basic reduction with a transmission run
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
@@ -113,9 +117,11 @@ Output:
     # Reduction overriding the default values for MonitorBackgroundWavelengthMin and MonitorBackgroundWavelengthMax which would otherwise be retirieved from the workspace
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, MonitorBackgroundWavelengthMin=0.0, MonitorBackgroundWavelengthMax=1.0, Version=1)
 
-    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])
-    print "The first four IvsQ Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3])
-    print "Theta out is the same as theta in:",thetaOut
+    print("The first four IvsLam Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+  	   IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3]))
+    print("The first four IvsQ Y values are: [ {:.4e}, {:.4e}, {:.4e}, {:.4e} ]".format(
+	   IvsQ.readY(0)[0], IvsQ.readY(0)[1], IvsQ.readY(0)[2], IvsQ.readY(0)[3]))
+    print("Theta out is the same as theta in: {}".format(thetaOut))
 
 Output:
 
@@ -137,7 +143,7 @@ Output:
     IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7, Version=1)
 
     def findByName(histories, name):
-        return filter(lambda x: x.name() == name, histories)[0]
+        return next(x for x in histories if x.name() == name)
 
     # Find the PolynomialCorrection entry in the workspace's history
     algHist = IvsLam.getHistory()
@@ -147,7 +153,7 @@ Output:
 
     coefProp = findByName(polyCorHist.getProperties(), "Coefficients")
 
-    print "Coefficients: '" + coefProp.value() + "'"
+    print("Coefficients: '{}'".format(coefProp.value()))
 
 Output:
 

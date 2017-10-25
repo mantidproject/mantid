@@ -279,6 +279,8 @@ if platform.system() == "Windows":
             e_data2 = np.append(self._sample_ws.readE(1), 0)
             e_data = np.concatenate((e_data1, e_data2), axis=0)
             sample = CreateWorkspace(x_data, y_data, e_data, NSpec=2, ParentWorkspace=self._sample_ws)
+            sample.getSpectrum(0).setDetectorID(1);
+            sample.getSpectrum(1).setDetectorID(2);
             return sample
 
 
