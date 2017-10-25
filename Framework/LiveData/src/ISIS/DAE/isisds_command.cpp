@@ -161,25 +161,26 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  auto& configService = Mantid::Kernel::ConfigService::Instance();
   int timeoutinSec = 120;
   if (!Mantid::Kernel::ConfigService::Instance().getValue("ISISDAE.Timeout",
-    timeoutinSec) ||
-    timeoutinSec < 1) {
+                                                          timeoutinSec) ||
+      timeoutinSec < 1) {
     timeoutinSec = 120; // Default to  120 seconds if not specified
   }
 #ifdef WIN32
   // WINDOWS
   DWORD timeout = timeoutinSec * 1000;
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&timeout, sizeof(timeout));
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeout,
+             sizeof(timeout));
 #else
   // LINUX
   struct timeval tv;
-  tv.tv_sec = timeoutinSec;  /* 30 Secs Timeout */
-  tv.tv_usec = 0;  // Not init'ing this can cause strange errors
-  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(struct timeval));
+  tv.tv_sec = timeoutinSec; /* 30 Secs Timeout */
+  tv.tv_usec = 0;           // Not init'ing this can cause strange errors
+  setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv,
+             sizeof(struct timeval));
 #endif // WIN
-  
+
   /* socket connected */
   op.ver_major = ISISDS_MAJOR_VER;
   op.ver_minor = ISISDS_MINOR_VER;
