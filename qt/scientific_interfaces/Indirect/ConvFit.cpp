@@ -1316,8 +1316,8 @@ void ConvFit::singleFit() {
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
   int specNo = m_uiForm.spPlotSpectrum->value();
-  setMinimumSpectra(specNo);
-  setMaximumSpectra(specNo);
+  setMinimumSpectrum(specNo);
+  setMaximumSpectrum(specNo);
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
