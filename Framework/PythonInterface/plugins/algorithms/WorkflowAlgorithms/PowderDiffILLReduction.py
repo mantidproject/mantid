@@ -186,7 +186,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._find_zero_counting_cells(joined_ws)
 
         if self._zero_counting_option == 'Crop':
-            self._crop_zero_cells(joined_ws)
+            self._crop_zero_cells(joined_ws, self._zero_cells)
         elif self._zero_counting_option == 'Interpolate':
             self._interpolate_zero_cells(joined_ws, theta_axis)
 
@@ -222,17 +222,18 @@ class PowderDiffILLReduction(PythonAlgorithm):
         size = mtd[ws].blocksize()
         for spectrum in range(mtd[ws].getNumberHistograms()):
             counts = mtd[ws].readY(spectrum)
-            if np.count_nonzero(counts) < size/10:
+            if np.count_nonzero(counts) < size/5:
                 self._zero_cells.append(spectrum)
         self._zero_cells.sort()
         self.log().information('Found zero counting cells at indices: ' + str(self._zero_cells))
 
-    def _crop_zero_cells(self, ws):
+    def _crop_zero_cells(self, ws, wsIndexList):
         """
             Crops out the spectra corresponding to zero counting pixels
             @param ws: the input workspace
+            @param wsIndexList: list of workspace indices to crop out
         """
-        MaskDetectors(Workspace=ws, WorkspaceIndexList=self._zero_cells)
+        MaskDetectors(Workspace=ws, WorkspaceIndexList=wsIndexList)
         ExtractUnmaskedSpectra(InputWorkspace=ws, OutputWorkspace=ws)
 
     def _interpolate_zero_cells(self, ws, theta_axis):
@@ -242,6 +243,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             @param ws: the input workspace
             @param theta_axis: the unordered signed 2theta axis
         """
+        unable_to_interpolate = []
         for cell in self._zero_cells:
             prev_cell = cell - 1
             next_cell = cell + 1
@@ -252,11 +254,13 @@ class PowderDiffILLReduction(PythonAlgorithm):
                 next_cell+=1
 
             if prev_cell == -1:
-                self.log().warning('Unable to interpolate for cell #'+str(cell)+
-                ' No non-zero neighbour cell was found on the left side.')
+                self.log().notice('Unable to interpolate for cell #'+str(cell)+
+                ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
+                unable_to_interpolate.append(cell)
             if next_cell == mtd[ws].getNumberHistograms():
-                self.log().warning('Unable to interpolate for cell #'+str(cell)+
-                ' No non-zero neighbour cell was found on the right side.')
+                self.log().notice('Unable to interpolate for cell #'+str(cell)+
+                ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
+                unable_to_interpolate.append(cell)
 
             if prev_cell >= 0 and next_cell < mtd[ws].getNumberHistograms():
                 theta_prev = theta_axis[prev_cell]
@@ -271,6 +275,8 @@ class PowderDiffILLReduction(PythonAlgorithm):
                 errors = errors_prev + coefficient * (errors_next - errors_prev)
                 mtd[ws].setY(cell,counts)
                 mtd[ws].setE(cell,errors)
+
+        self._crop_zero_cells(ws, unable_to_interpolate)
 
     def _normalise_to_roi(self, ws):
         """
