@@ -180,9 +180,8 @@ std::string WorkspaceProperty<TYPE>::setDataItem(
     const boost::shared_ptr<Kernel::DataItem> value) {
   boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
-    std::string wsName = typed->getName();
     if (this->direction() == Kernel::Direction::Input) {
-      m_workspaceName = wsName;
+      m_workspaceName = typed->getName();
     }
     Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = typed;
   } else {
