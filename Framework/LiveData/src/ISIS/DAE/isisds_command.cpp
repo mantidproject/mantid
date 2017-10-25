@@ -31,6 +31,7 @@
 
 #include "isisds_command.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ConfigService.h"
 #include <cstdio>
 
 /*
@@ -160,7 +161,13 @@ SOCKET isisds_send_open(const char *host, ISISDSAccessMode access_type,
     return INVALID_SOCKET;
   }
 
-  int timeoutinSec = 30;
+  auto& configService = Mantid::Kernel::ConfigService::Instance();
+  int timeoutinSec = 120;
+  if (!Mantid::Kernel::ConfigService::Instance().getValue("ISISDAE.Timeout",
+    timeoutinSec) ||
+    timeoutinSec < 1) {
+    timeoutinSec = 120; // Default to  120 seconds if not specified
+  }
 #ifdef WIN32
   // WINDOWS
   DWORD timeout = timeoutinSec * 1000;
