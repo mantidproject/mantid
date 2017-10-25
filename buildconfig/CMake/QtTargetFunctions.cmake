@@ -139,6 +139,16 @@ function (mtd_add_qt_target)
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
 
+  # For Qt < 5.6.2 gcc-5 produces warnings when it encounters the Q_OBJECT
+  # macro. We disable the warning in this case
+  if ( PARSED_QT_VERSION EQUAL 5 AND CMAKE_COMPILER_IS_GNUCXX AND
+       Qt5Core_VERSION_STRING VERSION_LESS "5.6.2" )
+    get_target_property ( _options ${_target} COMPILE_OPTIONS )
+    string ( REPLACE "-Wsuggest-override" "" _options "${_options}" )
+    set_target_properties ( ${_target} PROPERTIES
+      COMPILE_OPTIONS "${_options}" )
+  endif()
+
   _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
