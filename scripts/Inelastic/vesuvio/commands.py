@@ -45,11 +45,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     if isinstance(runs, MatrixWorkspace):
         sample_data = runs
+        flags['runs'] = runs.getName()
     else:
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
                                          flags.get('bin_parameters', None))
-        flags['runs'] = runs.getName()
 
     # Load container runs if provided
     container_data = None
