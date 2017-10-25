@@ -46,16 +46,16 @@ public:
                                       300 * static_cast<int64_t>(m_bank + 1),
                                       500 * static_cast<int64_t>(m_bank + 1),
                                       700 * static_cast<int64_t>(m_bank + 1)};
-    std::vector<int64_t> time_zero;
+    std::vector<double> time_zero;
     for (size_t i = 0; i < index.size(); ++i)
-      time_zero.push_back(static_cast<int64_t>(100000 * i + bank));
+      time_zero.push_back(static_cast<double>(10 * i + bank));
 
     // Drift depening on bank to ensure correct offset is used for every bank.
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
 
-    return Kernel::make_unique<EventDataPartitioner<int64_t, int64_t, int32_t>>(
-        m_numWorkers, PulseTimeGenerator<int64_t, int64_t>{
-                          index, time_zero, "nanosecond", time_zero_offset});
+    return Kernel::make_unique<EventDataPartitioner<int64_t, double, int32_t>>(
+        m_numWorkers, PulseTimeGenerator<int64_t, double>{
+                          index, time_zero, "second", time_zero_offset});
   }
 
   void readEventID(int32_t *event_id, size_t start,
@@ -70,6 +70,12 @@ public:
                            size_t count) const override {
     for (size_t i = 0; i < count; ++i)
       event_time_offset[i] = static_cast<int32_t>(17 * m_bank + start + i);
+  }
+
+  std::string readEventTimeOffsetUnit() const override {
+    // Using nanosecond implies that EventLoader must convert to microsecond,
+    // allowing us to see and test the conversion in action.
+    return "nanosecond";
   }
 
 private:
@@ -109,7 +115,7 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
       // Every 77th event in the input is in this list so our TOF should jump
       // over 77 TOFs in the input.
       double microseconds =
-          static_cast<double>(17 * bank + 77 * event + pixelInBank) / 1000.0;
+          static_cast<double>(17 * bank + 77 * event + pixelInBank) * 1e-3;
       TS_ASSERT_EQUALS(eventLists[localSpectrumIndex][event].tof(),
                        microseconds);
       size_t index = event * 77 + pixelInBank;
@@ -125,12 +131,14 @@ void do_test_load(const Parallel::Communicator &comm, const size_t chunkSize) {
       // Testing different aspects that affect pulse time:
       // - `123456789 + 1000000 * bank` confirms that the event_time_zero
       //   offset attribute is taken into account, and for correct bank.
-      // - `100000 * pulse + bank` confirms that currect event_index is used
-      //   and event_time_offset is used correctly, and for correct bank.
+      // - `10 * pulse + bank` confirms that currect event_index is used and
+      //   event_time_offset is used correctly, and for correct bank.
+      // - The factor 1000000000 converts event_time_offset from input unit
+      //   seconds to nanoseconds, confirming that the input unit is adhered to.
       const auto pulseTime =
           eventLists[localSpectrumIndex][event].pulseTime().totalNanoseconds();
-      TS_ASSERT_EQUALS(pulseTime,
-                       123456789 + 1000000 * bank + 100000 * pulse + bank);
+      TS_ASSERT_EQUALS(pulseTime, 123456789 + 1000000 * bank +
+                                      (10 * pulse + bank) * 1000000000);
       TS_ASSERT(pulseTime >= previousPulseTime);
       previousPulseTime = pulseTime;
     }

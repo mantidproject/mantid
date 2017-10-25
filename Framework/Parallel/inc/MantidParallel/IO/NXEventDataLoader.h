@@ -56,6 +56,7 @@ public:
                    size_t count) const override;
   void readEventTimeOffset(TimeOffsetType *event_time_offset, size_t start,
                            size_t count) const override;
+  std::string readEventTimeOffsetUnit() const override;
 
 private:
   const int m_numWorkers;
@@ -212,6 +213,13 @@ void NXEventDataLoader<TimeOffsetType>::readEventTimeOffset(
     TimeOffsetType *buffer, size_t start, size_t count) const {
   detail::read<TimeOffsetType>(buffer, m_group, "event_time_offset", start,
                                count);
+}
+
+/// Read and return the `units` attribute from event_time_offset.
+template <class TimeOffsetType>
+std::string NXEventDataLoader<TimeOffsetType>::readEventTimeOffsetUnit() const {
+  const auto timeOffset = m_group.openDataSet("event_time_offset");
+  return detail::readAttribute(timeOffset, "units");
 }
 
 } // namespace IO
