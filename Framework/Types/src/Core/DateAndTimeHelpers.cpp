@@ -18,7 +18,8 @@ bool stringIsISO8601(const std::string &date) {
   const boost::regex extendedFormat(
       R"(^\d{4}-[01]\d-[0-3]\d([T\s][0-2]\d:[0-5]\d(:\d{2})?(.\d+)?(Z|[+-]\d{2}(:?\d{2})?)?)?$)");
   if (!boost::regex_match(date, extendedFormat)) {
-    const boost::regex basicFormat(R"(^\d{4}[01]\d[0-3]\d([T\s][0-2]\d[0-5]\d(\d{2})?(.\d+)?(Z|[+-]\d{2}(:?\d{2})?)?)?$)");
+    const boost::regex basicFormat(
+        R"(^\d{4}[01]\d[0-3]\d([T\s][0-2]\d[0-5]\d(\d{2})?(.\d+)?(Z|[+-]\d{2}(:?\d{2})?)?)?$)");
     return boost::regex_match(date, basicFormat);
   }
   return true;
@@ -31,7 +32,8 @@ bool stringIsISO8601(const std::string &date) {
  */
 bool stringIsPosix(const std::string &date) {
   // Formatting taken from boost::to_simple_string.
-  const boost::regex format(R"(^\d{4}-[A-Z][a-z]{2}-[0-3]\d\s[0-2]\d:[0-5]\d:\d{2}(.\d+)?$)");
+  const boost::regex format(
+      R"(^\d{4}-[A-Z][a-z]{2}-[0-3]\d\s[0-2]\d:[0-5]\d:\d{2}(.\d+)?$)");
   return boost::regex_match(date, format);
 }
 } // namespace DateAndTimeHelpers

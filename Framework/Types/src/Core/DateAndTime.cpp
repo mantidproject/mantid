@@ -367,7 +367,8 @@ const DateAndTime &DateAndTime::defaultTime() {
  *               "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz" or "yyy-MMM-dd hh:mm:ss.ssss"
  */
 void DateAndTime::setFromISO8601(const std::string &str) {
-  if (!DateAndTimeHelpers::stringIsISO8601(str) && !DateAndTimeHelpers::stringIsPosix(str)) {
+  if (!DateAndTimeHelpers::stringIsISO8601(str) &&
+      !DateAndTimeHelpers::stringIsPosix(str)) {
     throw std::invalid_argument("Error interpreting string '" + str +
                                 "' as a date/time.");
   }
