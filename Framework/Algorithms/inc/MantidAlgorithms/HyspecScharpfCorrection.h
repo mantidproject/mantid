@@ -49,6 +49,8 @@ private:
   Mantid::API::MatrixWorkspace_sptr outputWS;
   /// In plane angle beween polarization and incident beam (in degrees)
   double angle;
+  /// Lower limit  for abs(cos(2*Scharpf angle)), below which intensities are 0
+  double precision;
   /// Incident energy
   double Ei;
 };
