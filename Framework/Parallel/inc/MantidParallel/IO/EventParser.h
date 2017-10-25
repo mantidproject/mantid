@@ -54,11 +54,6 @@ namespace detail {
 void MANTID_PARALLEL_DLL eventIdToGlobalSpectrumIndex(int32_t *event_id_start,
                                                       size_t count,
                                                       const int32_t bankOffset);
-
-template <class TimeOffsetType>
-void redistributeDataMPI(
-    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
-    const std::vector<std::vector<Event<TimeOffsetType>>> &data);
 }
 
 template <class TimeOffsetType> class EventParser {
@@ -84,6 +79,7 @@ private:
                  const TimeOffsetType *event_time_offset_start,
                  const Chunker::LoadRange &range);
 
+  void redistributeDataMPI();
   void populateEventLists();
 
   // Default to 0 such that failure to set unit is easily detected.
@@ -157,60 +153,50 @@ void EventParser<TimeOffsetType>::setEventTimeOffsetUnit(
                            "` for event_time_offset");
 }
 
-namespace detail {
-/** Uses MPI calls to redistribute chunks which must be processed on certain
- * ranks.
- * @param comm MPI communicator.
- * @param result output data which must be processed on current rank. (May
- * be updated by other ranks)
- * @param data Data on this rank which belongs to several other ranks.
- */
+/// Convert m_allRankData into m_thisRankData by means of redistribution via
+/// MPI.
 template <class TimeOffsetType>
-void redistributeDataMPI(
-    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
-    const std::vector<std::vector<Event<TimeOffsetType>>> &data) {
-  using Event = Event<TimeOffsetType>;
-  if (comm.size() == 1) {
-    result = data.front();
+void EventParser<TimeOffsetType>::redistributeDataMPI() {
+  if (m_comm.size() == 1) {
+    m_thisRankData = m_allRankData.front();
     return;
   }
 
-  std::vector<int> sizes(data.size());
-  std::transform(data.cbegin(), data.cend(), sizes.begin(),
+  std::vector<int> sizes(m_allRankData.size());
+  std::transform(m_allRankData.cbegin(), m_allRankData.cend(), sizes.begin(),
                  [](const std::vector<Event> &vec) {
                    return static_cast<int>(vec.size());
                  });
-  std::vector<int> recv_sizes(data.size());
-  Parallel::all_to_all(comm, sizes, recv_sizes);
+  std::vector<int> recv_sizes(m_allRankData.size());
+  Parallel::all_to_all(m_comm, sizes, recv_sizes);
 
   auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(), 0);
-  result.resize(total_size);
+  m_thisRankData.resize(total_size);
   size_t offset = 0;
   std::vector<Parallel::Request> recv_requests;
-  for (int rank = 0; rank < comm.size(); ++rank) {
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
     if (recv_sizes[rank] == 0)
       continue;
     int tag = 0;
-    auto buffer = reinterpret_cast<char *>(result.data() + offset);
+    auto buffer = reinterpret_cast<char *>(m_thisRankData.data() + offset);
     int size = recv_sizes[rank] * static_cast<int>(sizeof(Event));
-    recv_requests.emplace_back(comm.irecv(rank, tag, buffer, size));
+    recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
     offset += recv_sizes[rank];
   }
 
   std::vector<Parallel::Request> send_requests;
-  for (int rank = 0; rank < comm.size(); ++rank) {
-    const auto &vec = data[rank];
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
+    const auto &vec = m_allRankData[rank];
     if (vec.size() == 0)
       continue;
     int tag = 0;
     send_requests.emplace_back(
-        comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
-                   static_cast<int>(vec.size() * sizeof(Event))));
+        m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
+                     static_cast<int>(vec.size() * sizeof(Event))));
   }
 
   Parallel::wait_all(send_requests.begin(), send_requests.end());
   Parallel::wait_all(recv_requests.begin(), recv_requests.end());
-}
 }
 
 /// Append events in m_thisRankData to m_eventLists.
@@ -264,7 +250,7 @@ void EventParser<TimeOffsetType>::doParsing(
   m_partitioner->partition(m_allRankData, event_id_start,
                            event_time_offset_start, range);
 
-  detail::redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
+  redistributeDataMPI();
   populateEventLists();
 }
 
