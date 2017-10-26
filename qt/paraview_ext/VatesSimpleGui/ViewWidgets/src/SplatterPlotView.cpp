@@ -555,7 +555,8 @@ void SplatterPlotView::setPeakSourceFrame(pqPipelineSource *source) {
   int peakViewCoords =
       vtkSMPropertyHelper(
           this->origSrc->getProxy(),
-          MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates.toLatin1()
+          MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates
+              .toLatin1()
               .constData()).GetAsInt();
   peakViewCoords--;
   vtkSMPropertyHelper(
