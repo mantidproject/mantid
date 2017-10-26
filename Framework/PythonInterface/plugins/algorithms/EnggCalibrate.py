@@ -28,9 +28,8 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             doc="Load from file a list of dSpacing values to be translated into TOF to "
-                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
-                             "options are given.")
+                             doc="Load from file a list of dSpacing values to be translated into TOF to find expected "
+                                 "peaks. This takes precedence over 'ExpectedPeaks' if both options are given.")
 
         peaks_grp = 'Peaks to fit'
         self.setPropertyGroup('ExpectedPeaks', peaks_grp)
@@ -38,9 +37,8 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
-                             doc='Workspace with the Vanadium (correction and calibration) run. '
-                             'Alternatively, when the Vanadium run has been already processed, '
-                             'the properties can be used')
+                             doc='Workspace with the Vanadium (correction and calibration) run. Alternatively, '
+                                 'when the Vanadium run has been already processed, the properties can be used')
 
         self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
                                                      Direction.Input, PropertyMode.Optional),
@@ -51,11 +49,10 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
                                                      PropertyMode.Optional),
-                             doc = 'A workspace2D with the fitting workspaces corresponding to '
-                             'the instrument banks. This workspace has three spectra per bank, as produced '
-                             'by the algorithm Fit. This is meant to be used as an alternative input '
-                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
-                             'workspace is generated.')
+                             doc='A workspace2D with the fitting workspaces corresponding to the instrument banks. '
+                                 'This workspace has three spectra per bank, as produced by the algorithm Fit. '
+                                 'This is meant to be used as an alternative input VanadiumWorkspace for testing and '
+                                 'performance reasons. If not given, no workspace is generated.')
 
         vana_grp = 'Vanadium (open beam) properties'
         self.setPropertyGroup('VanadiumWorkspace', vana_grp)
@@ -64,12 +61,12 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
-                             doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
+                             doc="Which bank to calibrate. It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the spectrum numbers for the detectors '
+                             doc='Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
@@ -84,26 +81,22 @@ class EnggCalibrate(PythonAlgorithm):
                              "current instrument definition) are used.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
-                             doc = 'Name for a table workspace with the calibration parameters calculated '
+                             doc='Name for a table workspace with the calibration parameters calculated '
                              'from this algorithm: difc and zero parameters for GSAS. these two parameters '
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
         self.declareProperty("DIFA", 0.0, direction = Direction.Output,
-                             doc = "Calibration parameter DIFA for the bank or range of pixels/detectors "
-                             "given")
+                             doc="Calibration parameter DIFA for the bank or range of pixels/detectors given")
 
         self.declareProperty("DIFC", 0.0, direction = Direction.Output,
-                             doc = "Calibration parameter DIFC for the bank or range of pixels/detectors "
-                             "given")
+                             doc="Calibration parameter DIFC for the bank or range of pixels/detectors given")
 
         self.declareProperty("TZERO", 0.0, direction = Direction.Output,
-                             doc = "Calibration parameter TZERO for the bank or range of pixels/detectors "
-                             "given")
+                             doc="Calibration parameter TZERO for the bank or range of pixels/detectors given")
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
-                             doc = "Information on fitted peaks as produced by the (child) algorithm "
-                             "EnggFitPeaks.")
+                             doc="Information on fitted peaks as produced by the (child) algorithm EnggFitPeaks.")
 
         out_grp = 'Outputs'
         self.setPropertyGroup('DetectorPositions', out_grp)
@@ -123,15 +116,13 @@ class EnggCalibrate(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-
         import EnggUtils
 
         prog = Progress(self, start=0, end=1, nreports=4)
-
         # Get peaks in dSpacing from file
         prog.report("Reading peaks")
-        expected_peaks_dsp = EnggUtils.read_in_expected_peaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                              self.getProperty('ExpectedPeaks').value)
+        expected_peaks_dsp = EnggUtils.read_in_expected_peaks(filename=self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                              expected_peaks=self.getProperty('ExpectedPeaks').value)
 
         if len(expected_peaks_dsp) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")

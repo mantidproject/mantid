@@ -4,7 +4,6 @@ from mantid.api import *
 import mantid.simpleapi as mantid
 
 import numpy as np
-
 import EnggUtils
 
 
@@ -91,8 +90,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         max_reports = 50
         prog = Progress(self, start=0, end=1, nreports=max_reports)
-
         prog.report('Checking availability of vanadium correction features')
+        
         # figure out if we are calculating or re-using pre-calculated corrections
         if vanadium_ws:
             self.log().information("A workspace with reference Vanadium data was passed. Calculating corrections")
@@ -124,7 +123,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         spectra = ws.getNumberHistograms()
         if num_integration_spectra < spectra:
             raise ValueError("The number of histograms in the input data workspace (%d) is bigger "
-                             "than the number of spectra (rows) in the integration workspace (%d)"%
+                             "than the number of spectra (rows) in the integration workspace (%d)" %
                              (spectra, num_integration_spectra))
 
         prog.report('Applying sensitivity correction')
@@ -176,8 +175,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         van_integration_ws = self._calculate_integration_spectra(vanadium_ws)
 
         # Have to calculate curves. get one curve per bank, in d-spacing
-        van_curves_ws = self._fit_curves_per_bank(vanadium_ws, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR, spline_breaks, prog)
-
+        van_curves_ws = self._fit_curves_per_bank(vanadium_ws, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR, spline_breaks,
+                                                  prog)
         return van_integration_ws, van_curves_ws
 
     def _calculate_integration_spectra(self, vanadium_ws):
@@ -366,7 +365,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             # This RebinToWorkspace is required here: normal runs will have narrower range of X values,
             # and possibly different bin size, as compared to (long) Vanadium runs. Same applies to short
             # Ceria runs (for Calibrate -non-full) and even long Ceria runs (for Calibrate-Full).
-            rebinned_fit_curve = mantid.RebinToWorkspace(InputWorkspace=fitted_curve, WorkspaceToMatch=ws)
+            rebinned_fit_curve = mantid.RebinToWorkspace(WorkspaceToRebin=fitted_curve, WorkspaceToMatch=ws)
 
             for i in idxs:
                 # take values of the second spectrum of the workspace (fit simulation - fitted curve)
@@ -390,7 +389,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         if 0 != (ws.getNumberHistograms() % 3):
             raise RuntimeError("A workspace without instrument definition has been passed, so it is "
                                "expected to have fitting results, but it does not have a number of "
-                               "histograms multiple of 3. Number of hsitograms found: %d"%
+                               "histograms multiple of 3. Number of hsitograms found: %d" %
                                ws.getNumberHistograms())
 
         for wi in range(0, int(ws.getNumberHistograms()/3)):

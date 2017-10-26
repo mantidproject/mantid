@@ -137,7 +137,7 @@ class EnggFocus(PythonAlgorithm):
 
         # Apply calibration
         if detector_positions:
-            self._applyCalibration(input_ws, detector_positions)
+            self._apply_calibration(input_ws, detector_positions)
 
         # Convert to dSpacing
         input_ws = EnggUtils.convert_to_d_spacing(self, input_ws)
@@ -156,7 +156,7 @@ class EnggFocus(PythonAlgorithm):
 
         # OpenGenie displays distributions instead of pure counts (this is done implicitly when
         # converting units), so I guess that's what users will expect
-        self._convertToDistr(input_ws)
+        self._convert_to_distribution(input_ws)
 
         self.setProperty("OutputWorkspace", input_ws)
 
@@ -195,7 +195,7 @@ class EnggFocus(PythonAlgorithm):
         alg.setProperty('OutputWorkspace', wks)
         alg.execute()
 
-    def _applyCalibration(self, wks, detector_positions):
+    def _apply_calibration(self, wks, detector_positions):
         """
         Refines the detector positions using the result of calibration (if one is specified).
 
@@ -207,7 +207,7 @@ class EnggFocus(PythonAlgorithm):
         alg.setProperty('PositionTable', detector_positions)
         alg.execute()
 
-    def _convertToDistr(self, wks):
+    def _convert_to_distribution(self, wks):
         """
         Convert workspace to distribution
 
