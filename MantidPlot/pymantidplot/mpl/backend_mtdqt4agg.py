@@ -19,6 +19,7 @@ except ImportError:
     from matplotlib.backends.qt4_compat import QtGui as QtWidgets
 # Import everything from the *real* matplotlib backend
 from matplotlib.backends.backend_qt4agg import *
+from matplotlib.figure import Figure
 import six
 
 # Remove the implementations of new_figure_manager_*. We replace them below

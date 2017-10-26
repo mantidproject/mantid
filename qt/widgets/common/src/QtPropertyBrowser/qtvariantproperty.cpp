@@ -88,10 +88,10 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtvariantproperty.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qteditorfactory.h"
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
-#include <QtCore/QDate>
-#include <QtCore/QLocale>
+#include <QVariant>
+#include <QIcon>
+#include <QDate>
+#include <QLocale>
 
 #if defined(Q_CC_MSVC)
 #pragma warning(                                                               \

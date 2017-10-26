@@ -12,6 +12,7 @@
 // includes for interface development
 #include "MantidQtWidgets/LegacyQwt/QwtRasterDataMD.h"
 #include "MantidQtWidgets/LegacyQwt/MantidColorMap.h"
+#include <QSettings>
 #include <qwt_color_map.h>
 #include <qwt_double_rect.h>
 // system includes

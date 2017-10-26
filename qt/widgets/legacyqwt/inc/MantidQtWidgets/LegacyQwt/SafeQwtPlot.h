@@ -3,7 +3,7 @@
 
 #include "MantidQtWidgets/LegacyQwt/DllOption.h"
 #include <qwt_plot.h>
-#include <qpainter.h>
+#include <QPainter>
 #include "qwt_text.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "DllOption.h"

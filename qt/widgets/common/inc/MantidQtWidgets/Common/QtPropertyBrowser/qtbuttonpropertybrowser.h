@@ -89,7 +89,7 @@
 #define QTBUTTONPROPERTYBROWSER_H
 
 #include "qtpropertybrowser.h"
-#include <QtCore/QMap>
+#include <QMap>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

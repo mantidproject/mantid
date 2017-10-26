@@ -10,22 +10,23 @@
 #include "MantidKernel/MaskedProperty.h"
 
 #include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QDesktopWidget>
-#include <QScrollArea>
+#include <QDir>
+#include <QFileInfo>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
 #include <QLabel>
-#include <QPalette>
-#include <QCheckBox>
-#include <QComboBox>
 #include <QLineEdit>
-#include <QSignalMapper>
-#include <QFileInfo>
-#include <QDir>
 #include <QMessageBox>
+#include <QPalette>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSignalMapper>
+#include <QVBoxLayout>
+
 #include <climits>
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"

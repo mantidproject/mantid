@@ -9,12 +9,11 @@
 #include <string>
 #include <cmath>
 
-#include <iostream>
 #include <QRgb>
 #include <limits>
 
 #include "MantidKernel/ConfigService.h"
-#include <qfiledialog.h>
+#include <QFileDialog>
 
 using Mantid::Kernel::ConfigService;
 

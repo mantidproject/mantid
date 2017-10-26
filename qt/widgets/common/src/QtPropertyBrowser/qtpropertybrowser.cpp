@@ -86,8 +86,8 @@
 ****************************************************************************/
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h"
-#include <QtCore/QSet>
-#include <QtGui/QIcon>
+#include <QSet>
+#include <QIcon>
 
 #if defined(Q_CC_MSVC)
 #pragma warning(                                                               \
