@@ -179,34 +179,34 @@ void IndirectDataAnalysisTab::plotInput(
 /**
  * Plots the workspace at the specified index in the specified workspace
  * group. Plots the sample and fit spectrum in the specified top preview
- * plot. Plots the diff spectra in the specified bottom preview plot.
+ * plot. Plots the diff spectra in the specified difference preview plot.
  *
  * @param outputWS          The output workspace group.
  * @param index             The index of the workspace (in the group)
  *                          to plot.
- * @param topPreviewPlot    The top preview plot.
- * @param bottomPreviewPlot The bottom preview plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS, size_t index,
-    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   // Check whether the specified index is within the bounds of the
   // fitted spectrum.
   if (outputWS && index < outputWS->size()) {
     auto workspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
-    updatePlot(workspace, topPreviewPlot, bottomPreviewPlot);
+    updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
   } else {
-    bottomPreviewPlot->clear();
-    plotInput(topPreviewPlot);
+    diffPreviewPlot->clear();
+    plotInput(fitPreviewPlot);
   }
 }
 
 void IndirectDataAnalysisTab::updatePlot(
     const std::string &workspaceName,
-    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
 
   if (AnalysisDataService::Instance().doesExist(workspaceName)) {
     auto groupWorkspace =
@@ -214,47 +214,47 @@ void IndirectDataAnalysisTab::updatePlot(
             workspaceName);
     // Check whether the specified workspace is a workspace group.
     if (groupWorkspace) {
-      updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
+      updatePlot(groupWorkspace, fitPreviewPlot, diffPreviewPlot);
     } else {
       auto matWorkspace =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               workspaceName);
-      updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
+      updatePlot(matWorkspace, fitPreviewPlot, diffPreviewPlot);
     }
   } else {
-    bottomPreviewPlot->clear();
-    plotInput(topPreviewPlot);
+    diffPreviewPlot->clear();
+    plotInput(fitPreviewPlot);
   }
 }
 
 void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS,
-    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   if (outputWS && selectedSpectra() >= minimumSpectra())
-    updatePlot(outputWS, selectedSpectra() - minimumSpectra(), topPreviewPlot,
-               bottomPreviewPlot);
+    updatePlot(outputWS, selectedSpectra() - minimumSpectra(), fitPreviewPlot,
+               diffPreviewPlot);
   else {
-    bottomPreviewPlot->clear();
-    plotInput(topPreviewPlot);
+    diffPreviewPlot->clear();
+    plotInput(fitPreviewPlot);
   }
 }
 
 void IndirectDataAnalysisTab::updatePlot(
     MatrixWorkspace_sptr outputWS,
-    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
-  topPreviewPlot->clear();
-  bottomPreviewPlot->clear();
+    MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
+  fitPreviewPlot->clear();
+  diffPreviewPlot->clear();
 
   if (outputWS) {
     setPreviewPlotWorkspace(outputWS);
-    topPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
-    topPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
-    bottomPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
+    fitPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
+    fitPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
+    diffPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
   } else {
-    bottomPreviewPlot->clear();
-    plotInput(topPreviewPlot);
+    diffPreviewPlot->clear();
+    plotInput(fitPreviewPlot);
   }
 }
 

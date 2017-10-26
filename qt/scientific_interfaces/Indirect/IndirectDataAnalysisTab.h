@@ -84,20 +84,20 @@ protected:
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(const std::string &workspaceName,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlotRange(const QString &rangeName,
                        MantidQt::MantidWidgets::PreviewPlot *previewPlot,
