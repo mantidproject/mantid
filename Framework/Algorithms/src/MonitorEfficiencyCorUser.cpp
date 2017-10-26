@@ -56,7 +56,8 @@ void MonitorEfficiencyCorUser::exec() {
     mon_counts_log = "monitor_counts";
   }
 
-  m_monitorCounts = m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
+  m_monitorCounts =
+      m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
 
   // get Efficiency formula from the IDF - Parameters file
   const std::string effFormula = getValFromInstrumentDef("formula_mon_eff");

@@ -302,7 +302,8 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
     runDetails.addProperty("temperature", temperature, "K", true);
   }
 
-  runDetails.addProperty("monitor_counts", static_cast<double>(m_monitorCounts));
+  runDetails.addProperty("monitor_counts",
+                         static_cast<double>(m_monitorCounts));
   runDetails.addProperty("chopper_speed", m_chopper_speed);
   runDetails.addProperty("chopper_ratio", m_chopper_ratio);
   runDetails.addProperty("channel_width", m_channelWidth, "microseconds", true);
