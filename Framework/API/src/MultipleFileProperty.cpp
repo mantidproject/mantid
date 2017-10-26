@@ -1,7 +1,7 @@
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiFileValidator.h"
@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -58,15 +58,17 @@ static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
 namespace Mantid {
 namespace API {
 /**
- * Alternative constructor with action
+ * Alternative constructor with action and prefix
  *
  * @param name   :: The name of the property
  * @param action :: File action
- * @param exts   ::  The allowed/suggested extensions
+ * @param exts   :: The allowed/suggested extensions
+ * @param prefix :: The prefix to prepend to the property value when set
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
                                            unsigned int action,
-                                           const std::vector<std::string> &exts)
+                                           const std::vector<std::string> &exts,
+                                           const std::string &prefix)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
           boost::make_shared<MultiFileValidator>(
@@ -83,6 +85,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
   m_multiFileLoadingEnabled = boost::iequals(allowMultiFileLoading, "On");
+  m_prefix = prefix;
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
@@ -90,19 +93,44 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
 }
 
 /**
- * Default constructor with default action
+ * Alternative constructor with action and prefix but no extensions
  *
- * @param name :: The name of the property
- * @param exts ::  The allowed/suggested extensions
+ * @param name   :: The name of the property
+ * @param action :: File action
+ * @param prefix :: The prefix to prepend to the property value when set
  */
 MultipleFileProperty::MultipleFileProperty(const std::string &name,
-                                           const std::vector<std::string> &exts)
-    : MultipleFileProperty(name, FileProperty::Load, exts) {}
+                                           unsigned int action,
+                                           const std::string &prefix = "")
+    : MultipleFileProperty(name, action, std::vector<std::string>(), prefix) {}
 
 /**
-* Check if this property is optional
-* @returns True if the property is optinal, false otherwise
-*/
+ * Alternative constructor with prefix, default action and no extensions
+ *
+ * @param name   :: The name of the property
+ * @param prefix :: The prefix to prepend to the property value when set
+ */
+MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           const std::string &prefix = "")
+    : MultipleFileProperty(name, FileProperty::Load, std::vector<std::string>(),
+                           prefix) {}
+
+/**
+ * Default constructor with default action
+ *
+ * @param name   :: The name of the property
+ * @param exts   :: The allowed/suggested extensions
+ * @param prefix :: The prefix to prepend to the property value when set
+ */
+MultipleFileProperty::MultipleFileProperty(const std::string &name,
+                                           const std::vector<std::string> &exts,
+                                           const std::string &prefix)
+    : MultipleFileProperty(name, FileProperty::Load, exts, prefix) {}
+
+/**
+ * Check if this property is optional
+ * @returns True if the property is optinal, false otherwise
+ */
 bool MultipleFileProperty::isOptional() const {
   return (m_action == FileProperty::OptionalLoad);
 }
@@ -131,11 +159,20 @@ std::string MultipleFileProperty::isEmptyValueValid() const {
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
+  std::string propValueWithPrefix;
+
+  // Add prefix to the specified property value, if this property's
+  // prefix is not empty.
+  if (!m_prefix.empty())
+    propValueWithPrefix = m_prefix + propValue;
+  else
+    propValueWithPrefix = propValue;
+
   // No empty value is allowed, unless optional.
   // This is yet aditional check that is beyond the underlying
   // MultiFileValidator,
   // so isOptional needs to be inspected here as well
-  if (propValue.empty() && !isOptional())
+  if (propValueWithPrefix.empty() && !isOptional())
     return "No file(s) specified.";
 
   // If multiple file loading is disabled, then set value assuming it is a
@@ -143,12 +180,12 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
   if (!m_multiFileLoadingEnabled) {
     g_log.debug(
         "MultiFile loading is not enabled, acting as standard FileProperty.");
-    return setValueAsSingleFile(propValue);
+    return setValueAsSingleFile(propValueWithPrefix);
   }
 
   try {
     // Else try and set the value, assuming it could be one or more files.
-    return setValueAsMultipleFiles(propValue);
+    return setValueAsMultipleFiles(propValueWithPrefix);
   } catch (const std::range_error &re) {
     // it was a valid multi file string but for too many files.
     return std::string(re.what());
@@ -156,7 +193,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
     g_log.debug(
         "MultiFile loading has failed. Trying as standard FileProperty.");
 
-    const std::string error = setValueAsSingleFile(propValue);
+    const std::string error = setValueAsSingleFile(propValueWithPrefix);
 
     if (error.empty())
       return SUCCESS;
@@ -429,5 +466,5 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   return SUCCESS;
 }
 
-} // namespace Mantid
 } // namespace API
+} // namespace Mantid

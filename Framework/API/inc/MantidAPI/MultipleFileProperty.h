@@ -1,10 +1,10 @@
 #ifndef MANTID_API_MULTIPLEFILEPROPERTY_H_
 #define MANTID_API_MULTIPLEFILEPROPERTY_H_
 
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include <vector>
+#include "MantidKernel/PropertyWithValue.h"
 #include <set>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -131,11 +131,18 @@ class DLLExport MultipleFileProperty
 public:
   MultipleFileProperty(
       const std::string &name, unsigned int action,
-      const std::vector<std::string> &exts = std::vector<std::string>());
+      const std::vector<std::string> &exts = std::vector<std::string>(),
+      const std::string &prefix = "");
 
   MultipleFileProperty(
       const std::string &name,
-      const std::vector<std::string> &exts = std::vector<std::string>());
+      const std::vector<std::string> &exts = std::vector<std::string>(),
+      const std::string &prefix = "");
+
+  MultipleFileProperty(const std::string &name, unsigned int action,
+                       const std::string &prefix = "");
+
+  MultipleFileProperty(const std::string &name, const std::string &prefix = "");
 
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
@@ -166,6 +173,8 @@ private:
 
   /// Suggested extensions
   std::vector<std::string> m_exts;
+  /// Prefix to add to filenames when loading
+  std::string m_prefix;
   /// Parser used to parse multi-file strings.
   Kernel::MultiFileNameParsing::Parser m_parser;
   /// The default file extension associated with the type of file this property
