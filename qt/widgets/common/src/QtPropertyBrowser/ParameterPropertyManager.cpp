@@ -1,8 +1,8 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/ParameterPropertyManager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 
+#include <cmath>
 #include <stdexcept>
-#include <math.h>
 
 const QString ParameterPropertyManager::ERROR_TOOLTIP(" (Error)");
 
