@@ -153,7 +153,7 @@ Editor *EditorFactoryPrivate<Editor>::createEditor(QtProperty *property,
 template <class Editor>
 void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property,
                                                     Editor *editor) {
-  Q_TYPENAME PropertyToEditorListMap::iterator it =
+  typename PropertyToEditorListMap::iterator it =
       m_createdEditors.find(property);
   if (it == m_createdEditors.end())
     it = m_createdEditors.insert(property, EditorList());
@@ -163,15 +163,15 @@ void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property,
 
 template <class Editor>
 void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object) {
-  const Q_TYPENAME EditorToPropertyMap::iterator ecend =
+  const typename EditorToPropertyMap::iterator ecend =
       m_editorToProperty.end();
-  for (Q_TYPENAME EditorToPropertyMap::iterator itEditor =
+  for (typename EditorToPropertyMap::iterator itEditor =
            m_editorToProperty.begin();
        itEditor != ecend; ++itEditor) {
     if (itEditor.key() == object) {
       Editor *editor = itEditor.key();
       QtProperty *property = itEditor.value();
-      const Q_TYPENAME PropertyToEditorListMap::iterator pit =
+      const typename PropertyToEditorListMap::iterator pit =
           m_createdEditors.find(property);
       if (pit != m_createdEditors.end()) {
         pit.value().removeAll(editor);
