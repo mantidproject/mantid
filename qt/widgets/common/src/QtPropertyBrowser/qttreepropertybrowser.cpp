@@ -97,8 +97,8 @@
 #include <QFocusEvent>
 #include <QStyle>
 #include <QPalette>
-#include <qcheckbox.h>
-#include <qlineedit.h>
+#include <QCheckBox>
+#include <QLineEdit>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

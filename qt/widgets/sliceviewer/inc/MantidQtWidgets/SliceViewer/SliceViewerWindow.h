@@ -9,8 +9,7 @@
 #include "MantidQtWidgets/SliceViewer/PeaksViewer.h"
 #include <QMainWindow>
 #include <QSplitter>
-#include <qdialog.h>
-#include <qmainwindow.h>
+#include <QDialog>
 #include <QShowEvent>
 #include "DllOption.h"
 #include "MantidKernel/VMD.h"

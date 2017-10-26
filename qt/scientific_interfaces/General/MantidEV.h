@@ -1,7 +1,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 #define MANTIDQTCUSTOMINTERFACES_MANTID_EV_H_
 
-#include <QtCore>
 #include <QWidget>
 #include <QActionGroup>
 #include <QRunnable>
@@ -13,6 +12,9 @@
 #include "MantidEVWorker.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
+
+class QSettings;
+class QThreadPool;
 
 namespace MantidQt {
 namespace CustomInterfaces {

@@ -4,8 +4,8 @@
 #include "MantidQtWidgets/Common/MantidColorMap.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_ColorBarWidget.h"
+#include <QMouseEvent>
 #include <QWidget>
-#include <QtGui>
 #include <qwt_scale_widget.h>
 
 namespace MantidQt {

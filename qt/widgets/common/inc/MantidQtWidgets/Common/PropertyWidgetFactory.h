@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
-#include <qwidget.h>
-#include <qgridlayout.h>
+#include <QWidget>
+#include <QGridLayout>
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 
 namespace MantidQt {

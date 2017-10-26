@@ -1,7 +1,6 @@
 #ifndef SV_CONNECTIONS_H
 #define SV_CONNECTIONS_H
 
-#include <QtCore>
 #include <QWidget>
 #include <QActionGroup>
 

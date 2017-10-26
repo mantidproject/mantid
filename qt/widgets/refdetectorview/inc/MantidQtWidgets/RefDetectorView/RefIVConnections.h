@@ -1,7 +1,6 @@
 #ifndef REF_IV_CONNECTIONS_H
 #define REF_IV_CONNECTIONS_H
 
-#include <QtCore>
 #include <QWidget>
 #include <QActionGroup>
 
