@@ -140,9 +140,9 @@ public:
       const std::string &prefix = "");
 
   MultipleFileProperty(const std::string &name, unsigned int action,
-                       const std::string &prefix = "");
+                       const std::string &prefix);
 
-  MultipleFileProperty(const std::string &name, const std::string &prefix = "");
+  MultipleFileProperty(const std::string &name, const std::string &prefix);
 
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
