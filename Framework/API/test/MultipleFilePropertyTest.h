@@ -3,15 +3,15 @@
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <unordered_set>
@@ -25,7 +25,7 @@ using Mantid::API::FileProperty;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Given a directory name, create the directory and return its absolute path.
  *
@@ -633,6 +633,163 @@ public:
     MultipleFileProperty p("Filename", FileProperty::OptionalLoad);
     p.setValue("");
     TS_ASSERT(p.isValid().empty());
+  }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // Testing of MultipleFileProperty objects when a prefix is given
+  //////////////////////////////////////////////////////////////////////////////////////////////
+
+  void test_singleFile_usingPrefix_noDir() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+  }
+
+  void test_multipleFiles_usingPrefix_shortFormComma() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1,2,3,4,5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_usingPrefix_shortFormPlus() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1+2+3+4+5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_usingPrefix_range() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1:5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_usingPrefix_addedRange() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1-5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][4], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_usingPrefix_steppedRange() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1:5:2.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_usingPrefix_steppedAddedRange() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1-5:2.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_shortForm_usingPrefix_complex() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1,2:5,1+2+3,2-4.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+    TS_ASSERT_EQUALS(fileNames[5][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[5][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[5][2], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[6][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[6][1], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[6][2], dummyFile("TSC00004.raw"));
+  }
+
+  void test_multipleFiles_usingPrefix_longForm() {
+    MultipleFileProperty p("Filename", "IRS");
+    p.setValue("10001-10005_graphite002_info.nxs");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0],
+                     dummyFile("IRS10001-10005_graphite002_info.nxs"));
+  }
+
+  void test_multipleFiles_longForm_usingPrefix_plusList() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1.raw+2.raw+3.raw+4.raw+5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][4], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_longForm_nonRunFiles() {
+    MultipleFileProperty p("Filename", "IRS");
+    p.setValue("10001_graphite002_info.nxs+10002_graphite002_info.nxs,"
+               "10003_graphite002_info.nxs");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0],
+                     dummyFile("IRS10001_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[0][1],
+                     dummyFile("IRS10002_graphite002_info.nxs"));
+    TS_ASSERT_EQUALS(fileNames[1][0],
+                     dummyFile("IRS10003_graphite002_info.nxs"));
+  }
+
+  void test_multipleFiles_usingPrefix_mixedForm_1() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1,2.raw,3,4,5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+  }
+
+  void test_multipleFiles_mixedForm_2() {
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1,2.raw,3:5.raw");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
+    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
   }
 
 private:
