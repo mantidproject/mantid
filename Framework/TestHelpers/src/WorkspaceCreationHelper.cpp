@@ -525,7 +525,6 @@ void addComponent(Instrument_sptr &instrument, const V3D &position,
  */
 void addSource(Instrument_sptr &instrument, const V3D &position,
                std::string name = "source") {
-  addComponent(instrument, position, name);
   ObjComponent *source = new ObjComponent(name);
   source->setPos(position);
   instrument->add(source);
