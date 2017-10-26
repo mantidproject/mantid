@@ -113,7 +113,7 @@ class EnggFocus(PythonAlgorithm):
         # Get spectra indices either from bank or direct list of indices, checking for errors
         bank = self.getProperty('Bank').value
         spectra = self.getProperty(self.INDICES_PROP_NAME).value
-        indices = EnggUtils.getWsIndicesFromInProperties(input_ws, bank, spectra)
+        indices = EnggUtils.get_ws_indices_from_input_properties(input_ws, bank, spectra)
 
         detector_positions = self.getProperty("DetectorPositions").value
         n_reports = 5
@@ -123,7 +123,7 @@ class EnggFocus(PythonAlgorithm):
 
         # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')
-        input_ws = EnggUtils.cropData(self, input_ws, indices)
+        input_ws = EnggUtils.crop_data(self, input_ws, indices)
 
         prog.report('Masking some bins if requested')
         self._mask_bins(input_ws, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
@@ -133,22 +133,22 @@ class EnggFocus(PythonAlgorithm):
         vanadium_ws = self.getProperty('VanadiumWorkspace').value
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
-        EnggUtils.applyVanadiumCorrections(input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
+        EnggUtils.apply_vanadium_corrections(input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
 
         # Apply calibration
         if detector_positions:
             self._applyCalibration(input_ws, detector_positions)
 
         # Convert to dSpacing
-        input_ws = EnggUtils.convertToDSpacing(self, input_ws)
+        input_ws = EnggUtils.convert_to_d_spacing(self, input_ws)
 
         prog.report('Summing spectra')
         # Sum the values across spectra
-        input_ws = EnggUtils.sumSpectra(self, input_ws)
+        input_ws = EnggUtils.sum_spectra(self, input_ws)
 
         prog.report('Preparing output workspace')
         # Convert back to time of flight
-        input_ws = EnggUtils.convertToToF(self, input_ws)
+        input_ws = EnggUtils.convert_to_TOF(self, input_ws)
 
         prog.report('Normalizing input workspace if needed')
         if self.getProperty('NormaliseByCurrent').value:

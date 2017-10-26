@@ -117,15 +117,15 @@ class EnggCalibrateFull(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         in_wks = self.getProperty('Workspace').value
-        wks_indices = EnggUtils.getWsIndicesFromInProperties(in_wks, self.getProperty('Bank').value,
-                                                             self.getProperty(self.INDICES_PROP_NAME).value)
+        wks_indices = EnggUtils.get_ws_indices_from_input_properties(in_wks, self.getProperty('Bank').value,
+                                                                     self.getProperty(self.INDICES_PROP_NAME).value)
 
         van_wks = self.getProperty("VanadiumWorkspace").value
         van_integ_wks = self.getProperty('VanIntegrationWorkspace').value
         van_curves_wks = self.getProperty('VanCurvesWorkspace').value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnggUtils.applyVanadiumCorrections(in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
+        EnggUtils.apply_vanadium_corrections(in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
         rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty('RebinBinWidth').value)
         pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expectedPeaksD)

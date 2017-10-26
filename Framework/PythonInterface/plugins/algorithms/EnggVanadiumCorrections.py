@@ -229,15 +229,15 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         curves = {}
         for bank_number, bank in enumerate(banks):
             prog.report("Fitting bank {} of {}".format(bank_number, len(banks)))
-            indices = EnggUtils.getWsIndicesForBank(vanadium_ws, bank)
+            indices = EnggUtils.get_ws_indices_for_bank(vanadium_ws, bank)
             if not indices:
                 # no indices at all for this bank, not interested in it, don't add it to the dictionary
                 # (as when doing Calibrate (not-full)) which does CropData() the original workspace
                 continue
 
-            ws_to_fit = EnggUtils.cropData(self, vanadium_ws, indices)
-            ws_to_fit = EnggUtils.convertToDSpacing(self, ws_to_fit)
-            ws_to_fit = EnggUtils.sumSpectra(self, ws_to_fit)
+            ws_to_fit = EnggUtils.crop_data(self, vanadium_ws, indices)
+            ws_to_fit = EnggUtils.convert_to_d_spacing(self, ws_to_fit)
+            ws_to_fit = EnggUtils.sum_spectra(self, ws_to_fit)
 
             fit_ws = self._fitBankCurve(ws_to_fit, bank, spline_breaks)
             curves.update({bank: fit_ws})
@@ -360,11 +360,11 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         # This is simple and more efficient than using divide workspace, which requires
         # cropping separate workspaces, dividing them separately, then appending them
         # with AppendSpectra, etc.
-        ws = EnggUtils.convertToDSpacing(self, ws)
+        ws = EnggUtils.convert_to_d_spacing(self, ws)
         for b in curves:
             # process all the spectra (indices) in one bank
             fitted_curve = curves[b]
-            idxs = EnggUtils.getWsIndicesForBank(ws, b)
+            idxs = EnggUtils.get_ws_indices_for_bank(ws, b)
 
             if not idxs:
                 pass
@@ -379,7 +379,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                 ws.setY(i, np.divide(ws.dataY(i), rebinned_fit_curve.readY(1)))
 
         # finally, convert back to ToF
-        EnggUtils.convertToToF(self, ws)
+        EnggUtils.convert_to_TOF(self, ws)
 
     def _precalcWStoDict(self, ws):
         """
@@ -400,7 +400,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                ws.getNumberHistograms())
 
         for wi in range(0, int(ws.getNumberHistograms()/3)):
-            indiv = EnggUtils.cropData(self, ws, [wi, wi+2])
+            indiv = EnggUtils.crop_data(self, ws, [wi, wi+2])
             # the bank id is +1 because wi starts from 0
             bankid = wi + 1
             curves.update({bankid: indiv})

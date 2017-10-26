@@ -130,7 +130,7 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         # optional outputs
         if tbl_name:
-            EnggUtils.generateOutputParTable(tbl_name, difa, difc, tzero)
+            EnggUtils.generate_output_param_table(tbl_name, difa, difc, tzero)
             self.log().information("Output parameters added into a table workspace: %s" % tbl_name)
 
 

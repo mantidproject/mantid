@@ -76,7 +76,7 @@ def read_in_expected_peaks(filename, expected_peaks):
     return expected_peaks_d
 
 
-def getWsIndicesFromInProperties(workspace, bank, detector_indices):
+def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
     """
     Get the detector indices that the user requests, either through the input property 'Bank' or
     'DetectorIndices'
@@ -95,13 +95,13 @@ def getWsIndicesFromInProperties(workspace, bank, detector_indices):
     elif bank:
         bank_aliases = {'North': '1', 'South': '2', 'Both: North, South': '-1'}
         bank = bank_aliases.get(bank, bank)
-        indices = getWsIndicesForBank(workspace, bank)
+        indices = get_ws_indices_for_bank(workspace, bank)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
                                "bank passed: %s. Please check the inputs." % bank)
         return indices
     elif detector_indices:
-        indices = parseSpectrumIndices(workspace, detector_indices)
+        indices = parse_spectrum_indices(workspace, detector_indices)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
                                "range(s) of detectors passed: %s. Please check the inputs." % detector_indices)
@@ -111,7 +111,7 @@ def getWsIndicesFromInProperties(workspace, bank, detector_indices):
                          "One of them is required")
 
 
-def parseSpectrumIndices(workspace, spectrum_numbers):
+def parse_spectrum_indices(workspace, spectrum_numbers):
     """
     Get a usable list of workspace indices from a user provided list of spectra that can look like:
     '8-10, 20-40, 100-110'. For that example this method will produce: [7,8,9,19, 20,... , 109]
@@ -134,7 +134,7 @@ def parseSpectrumIndices(workspace, spectrum_numbers):
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]
 
 
-def getWsIndicesForBank(workspace, bank):
+def get_ws_indices_for_bank(workspace, bank):
     """
     Finds the workspace indices of all the pixels/detectors/spectra corresponding to a bank.
 
@@ -143,7 +143,7 @@ def getWsIndicesForBank(workspace, bank):
 
     @returns :: list of workspace indices for the bank
     """
-    detector_ids = getDetIDsForBank(bank)
+    detector_ids = get_detector_ids_for_bank(bank)
 
     def index_in_bank(index):
         try:
@@ -155,7 +155,7 @@ def getWsIndicesForBank(workspace, bank):
     return [i for i in range(workspace.getNumberHistograms()) if index_in_bank(i)]
 
 
-def getDetIDsForBank(bank):
+def get_detector_ids_for_bank(bank):
     """
     Find the detector IDs for an instrument bank. Note this is at this point specific to
     the ENGINX instrument.
@@ -208,7 +208,7 @@ def getDetIDsForBank(bank):
     return detector_ids
 
 
-def generateOutputParTable(name, difa, difc, tzero):
+def generate_output_param_table(name, difa, difc, tzero):
     """
     Produces a table workspace with the two fitted calibration parameters
 
@@ -230,7 +230,7 @@ def _default_if_false(value, default):
     return default
 
 
-def applyVanadiumCorrections(ws, indices, vanadium_ws, van_integration_ws, van_curves_ws):
+def apply_vanadium_corrections(ws, indices, vanadium_ws, van_integration_ws, van_curves_ws):
     """
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
     EnggVanadiumCorrections
@@ -263,7 +263,7 @@ def applyVanadiumCorrections(ws, indices, vanadium_ws, van_integration_ws, van_c
                                    CurvesWorkspace=van_curves_ws)
 
 
-def convertToDSpacing(parent, ws):
+def convert_to_d_spacing(parent, ws):
     """
     Converts a workspace to dSpacing using 'ConvertUnits' as a child algorithm.
 
@@ -288,7 +288,7 @@ def convertToDSpacing(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 
-def convertToToF(parent, ws):
+def convert_to_TOF(parent, ws):
     """
     Converts workspace to Time-of-Flight using 'ConvertUnits' as a child algorithm.
 
@@ -304,7 +304,7 @@ def convertToToF(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 
-def cropData(parent, ws, indices):
+def crop_data(parent, ws, indices):
     """
     Produces a cropped workspace from the input workspace so that only
     data for the specified bank (given as a list of indices) is left.
@@ -327,7 +327,7 @@ def cropData(parent, ws, indices):
     return alg.getProperty('OutputWorkspace').value
 
 
-def sumSpectra(parent, ws):
+def sum_spectra(parent, ws):
     """
     Focuses/sums up all the spectra into a single one (calls the SumSpectra algorithm)
 

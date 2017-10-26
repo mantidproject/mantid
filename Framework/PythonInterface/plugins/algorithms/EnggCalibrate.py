@@ -246,7 +246,7 @@ class EnggCalibrate(PythonAlgorithm):
         # make output table if requested
         table_name = self.getPropertyValue("OutputParametersTableName")
         if '' != table_name:
-            EnggUtils.generateOutputParTable(table_name, difa, difc, zero)
+            EnggUtils.generate_output_param_table(table_name, difa, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % table_name)
 
 
