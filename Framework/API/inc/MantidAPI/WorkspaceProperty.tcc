@@ -158,16 +158,7 @@ std::string WorkspaceProperty<TYPE>::setValue(const std::string &value) {
   if (Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::autoTrim()) {
     boost::trim(m_workspaceName);
   }
-  // Try and get the workspace from the ADS, but don't worry if we can't
-  try {
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value =
-        AnalysisDataService::Instance().retrieveWS<TYPE>(m_workspaceName);
-  } catch (Kernel::Exception::NotFoundError &) {
-    // Set to null property if not found
-    this->clear();
-    // the workspace name is not reset here, however.
-  }
-
+  retrieveWorkspaceFromADS();
   return isValid();
 }
 

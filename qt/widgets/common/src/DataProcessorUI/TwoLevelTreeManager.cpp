@@ -532,10 +532,9 @@ void TwoLevelTreeManager::transfer(
       ws->removeRow(0);
   }
 
-  // Loop over the rows (vector elements)
   for (const auto &row : runs) {
-
     TableRow newRow = ws->appendRow();
+
     try {
       newRow << (row.at("Group")).toStdString();
     } catch (std::out_of_range &) {
@@ -545,8 +544,8 @@ void TwoLevelTreeManager::transfer(
     }
 
     try {
-      for (int i = 0; i < static_cast<int>(whitelist.size()); i++)
-        newRow << (row.at(whitelist.colNameFromColIndex(i))).toStdString();
+      for (auto const &columnName : whitelist.names())
+        newRow << (row.at(columnName)).toStdString();
     } catch (std::out_of_range &) {
       // OK, this column will not be populated
       continue;
@@ -649,10 +648,8 @@ TwoLevelTreeManager::createDefaultWorkspace(const WhiteList &whitelist) {
   auto column = ws->addColumn("str", "Group");
   column->setPlotType(0);
 
-  for (int col = 0; col < static_cast<int>(whitelist.size()); col++) {
-    // The columns provided to this presenter
-    auto column =
-        ws->addColumn("str", whitelist.colNameFromColIndex(col).toStdString());
+  for (const auto &columnName : whitelist.names()) {
+    auto column = ws->addColumn("str", columnName.toStdString());
     column->setPlotType(0);
   }
   ws->appendRow();

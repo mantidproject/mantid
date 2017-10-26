@@ -145,12 +145,10 @@ double DiffractionEventCalibrateDetectors::intensity(
   EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>(
       AnalysisDataService::Instance().retrieve(inname));
 
-  bool debug = true;
   CPUTimer tim;
 
   movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
-  if (debug)
-    std::cout << tim << " to movedetector()\n";
+  g_log.debug() << tim << " to movedetector()\n";
 
   IAlgorithm_sptr alg3 = createChildAlgorithm("ConvertUnits");
   alg3->setProperty<EventWorkspace_sptr>("InputWorkspace", inputW);
@@ -159,8 +157,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   alg3->executeAsChildAlg();
   MatrixWorkspace_sptr outputW = alg3->getProperty("OutputWorkspace");
 
-  if (debug)
-    std::cout << tim << " to ConvertUnits\n";
+  g_log.debug() << tim << " to ConvertUnits\n";
 
   IAlgorithm_sptr alg4 = createChildAlgorithm("DiffractionFocussing");
   alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
@@ -171,8 +168,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   outputW = alg4->getProperty("OutputWorkspace");
 
   // Remove file
-  if (debug)
-    std::cout << tim << " to DiffractionFocussing\n";
+  g_log.debug() << tim << " to DiffractionFocussing\n";
 
   IAlgorithm_sptr alg5 = createChildAlgorithm("Rebin");
   alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
@@ -181,8 +177,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   alg5->executeAsChildAlg();
   outputW = alg5->getProperty("OutputWorkspace");
 
-  if (debug)
-    std::cout << tim << " to Rebin\n";
+  g_log.debug() << tim << " to Rebin\n";
 
   // Find point of peak centre
   const MantidVec &yValues = outputW->readY(0);
@@ -212,8 +207,7 @@ double DiffractionEventCalibrateDetectors::intensity(
   fit_alg->setProperty("Output", "fit");
   fit_alg->executeAsChildAlg();
 
-  if (debug)
-    std::cout << tim << " to Fit\n";
+  g_log.debug() << tim << " to Fit\n";
 
   std::vector<double> params; // = fit_alg->getProperty("Parameters");
   Mantid::API::IFunction_sptr fun_res = fit_alg->getProperty("Function");
@@ -225,8 +219,7 @@ double DiffractionEventCalibrateDetectors::intensity(
 
   movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
-  if (debug)
-    std::cout << tim << " to movedetector()\n";
+  g_log.debug() << tim << " to movedetector()\n";
 
   // Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of
   // events
