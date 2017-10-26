@@ -40,8 +40,6 @@ def read_in_expected_peaks(filename, expected_peaks):
     @returns the expected peaks either from a file or input list, sorted in ascending order
     """
 
-    expected_peaks_d = None
-
     if filename:
         ex_peak_array = []
         read_in_array = []
@@ -166,7 +164,7 @@ def get_detector_ids_for_bank(bank):
     """
     import os
     grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(),
-                                    'Grouping', 'ENGINX_Grouping.xml')
+                                      'Grouping', 'ENGINX_Grouping.xml')
 
     alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
     alg.initialize()
@@ -278,7 +276,7 @@ def convert_to_d_spacing(parent, ws):
     if expected_dimension != dimension:
         raise ValueError("This function expects a workspace with %s X dimension, but "
                          "the X dimension of the input workspace is: '%s'. This is an internal logic "
-                         "error. "% (expected_dimension, dimension))
+                         "error. " % (expected_dimension, dimension))
 
     alg = parent.createChildAlgorithm('ConvertUnits')
     alg.setProperty('InputWorkspace', ws)
@@ -406,7 +404,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
     # - instrument calibration comment with run numbers (CALIB)
     output_lines = []
     for b_idx, _bank_name in enumerate(bank_names):
-        patterns = ["INS  %d ICONS"%(b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
+        patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
                     "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
                     "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
                     ]
