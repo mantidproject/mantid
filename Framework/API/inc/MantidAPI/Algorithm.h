@@ -403,13 +403,13 @@ protected:
   /// versions
   bool m_usingBaseProcessGroups = false;
 
-  template <typename T, typename = typename std::enable_if<std::is_convertible<
-                            T *, MatrixWorkspace *>::value>::type>
+  template <typename T, typename... WSPropArgs,
+            typename = typename std::enable_if<
+                std::is_convertible<T *, MatrixWorkspace *>::value>::type>
   void declareWorkspaceInputProperties(
-      const std::string &propertyName,
+      const std::string &propertyName, WSPropArgs... wsPropArgs,
       const int allowedIndexTypes = IndexType::WorkspaceIndex,
-      PropertyMode::Type optional = PropertyMode::Type::Mandatory,
-      LockMode::Type lock = LockMode::Type::Lock, const std::string &doc = "");
+      const std::string &doc = "");
 
 private:
   template <typename T1, typename T2, typename WsType>

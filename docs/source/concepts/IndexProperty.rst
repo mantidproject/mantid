@@ -44,14 +44,16 @@ Property declaration is as shown below:
 
 .. code-block:: cpp
 
-  //Declare property with default settings
+  // Declare property with default settings
   // IndexType::WorkspaceIndex is default
   declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace");
   
-  //Declare all arguments
-  declareWorkspaceInputProperties<MatrixWorkspace>("InputWorkspace", 
-    IndexType::SpectrumNum|IndexType::WorkspaceIndex, PropertyMode::Type::Mandatory, 
-    LockMode::Type::Lock, "This is an input workspace with associated index handling")
+  // Declare all arguments
+  declareWorkspaceInputProperties<MatrixWorkspace>(
+      "InputWorkspace", /* optional PropertyMode, LockMode, and validator
+                           forwarded to WorkspaceProperty */
+      IndexType::SpectrumNum | IndexType::WorkspaceIndex,
+      "This is an input workspace with associated index handling");
 
 Internally, a ``WorkspaceProperty`` is created along with an ``IndexTypeProperty`` for
 managing the workspace and the type of user-defined input index list respectively. Their names are

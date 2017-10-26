@@ -2015,7 +2015,28 @@ namespace API {
 template DLLExport void
 Algorithm::declareWorkspaceInputProperties<MatrixWorkspace>(
     const std::string &propertyName, const int allowedIndexTypes,
-    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
+    const std::string &doc);
+
+template DLLExport void Algorithm::declareWorkspaceInputProperties<
+    MatrixWorkspace, Kernel::IValidator_sptr>(const std::string &propertyName,
+                                              Kernel::IValidator_sptr validator,
+                                              const int allowedIndexTypes,
+                                              const std::string &doc);
+
+template DLLExport void
+Algorithm::declareWorkspaceInputProperties<MatrixWorkspace, PropertyMode::Type,
+                                           Kernel::IValidator_sptr>(
+    const std::string &propertyName, PropertyMode::Type optional,
+    Kernel::IValidator_sptr validator, const int allowedIndexTypes,
+    const std::string &doc);
+
+template DLLExport void Algorithm::declareWorkspaceInputProperties<
+    MatrixWorkspace, PropertyMode::Type, LockMode::Type,
+    Kernel::IValidator_sptr>(const std::string &propertyName,
+                             PropertyMode::Type optional, LockMode::Type lock,
+                             Kernel::IValidator_sptr validator,
+                             const int allowedIndexTypes,
+                             const std::string &doc);
 
 template DLLExport void
 Algorithm::setWorkspaceInputProperties<MatrixWorkspace, std::vector<int>>(

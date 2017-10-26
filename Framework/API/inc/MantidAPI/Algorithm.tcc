@@ -25,20 +25,17 @@ namespace API {
 @param propertyName Name of property which will be reserved
 @param allowedIndexTypes combination of allowed index types. Default
 IndexType::WorkspaceIndex
-@param optional Determines if workspace property is optional. Default
-PropertyMode::Type::Mandatory
-@param lock Determines whether or not the workspace is locked. Default
-LockMode::Type::Lock
+@param wsPropArgs a parameter pack of arguments forwarded to WorkspaceProperty.
+Can contain PropertyMode, LockMode, and validators.
 @param doc Property documentation string.
 */
-template <typename T, typename>
+template <typename T, typename... WSPropArgs, typename>
 void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
+                                                WSPropArgs... wsPropArgs,
                                                 const int allowedIndexTypes,
-                                                PropertyMode::Type optional,
-                                                LockMode::Type lock,
                                                 const std::string &doc) {
   auto wsProp = Kernel::make_unique<WorkspaceProperty<T>>(
-      propertyName, "", Kernel::Direction::Input, optional, lock);
+      propertyName, "", Kernel::Direction::Input, wsPropArgs...);
   const auto &wsPropRef = *wsProp;
   declareProperty(std::move(wsProp), doc);
 

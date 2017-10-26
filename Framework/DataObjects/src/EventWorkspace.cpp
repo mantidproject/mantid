@@ -680,7 +680,27 @@ namespace API {
 template DLLExport void
 Algorithm::declareWorkspaceInputProperties<DataObjects::EventWorkspace>(
     const std::string &propertyName, const int allowedIndexTypes,
-    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
+    const std::string &doc);
+
+template DLLExport void
+Algorithm::declareWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                           Kernel::IValidator_sptr>(
+    const std::string &propertyName, Kernel::IValidator_sptr validator,
+    const int allowedIndexTypes, const std::string &doc);
+
+template DLLExport void Algorithm::declareWorkspaceInputProperties<
+    DataObjects::EventWorkspace, PropertyMode::Type, Kernel::IValidator_sptr>(
+    const std::string &propertyName, PropertyMode::Type optional,
+    Kernel::IValidator_sptr validator, const int allowedIndexTypes,
+    const std::string &doc);
+
+template DLLExport void Algorithm::declareWorkspaceInputProperties<
+    DataObjects::EventWorkspace, PropertyMode::Type, LockMode::Type,
+    Kernel::IValidator_sptr>(const std::string &propertyName,
+                             PropertyMode::Type optional, LockMode::Type lock,
+                             Kernel::IValidator_sptr validator,
+                             const int allowedIndexTypes,
+                             const std::string &doc);
 
 template DLLExport void
 Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
