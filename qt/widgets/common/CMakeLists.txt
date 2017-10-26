@@ -37,7 +37,6 @@ set ( SRC_FILES
 	src/ScriptRepositoryView.cpp
 	src/SelectionNotificationService.cpp
 	src/SignalBlocker.cpp
-	src/SignalRange.cpp
 	src/SyncedCheckboxes.cpp
 	src/TextPropertyWidget.cpp
 	src/TSVSerialiser.cpp
@@ -265,7 +264,6 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/ScriptRepositoryView.h
 	inc/MantidQtWidgets/Common/SelectionNotificationService.h
 	inc/MantidQtWidgets/Common/SignalBlocker.h
-	inc/MantidQtWidgets/Common/SignalRange.h
 	inc/MantidQtWidgets/Common/TSVSerialiser.h
 	inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
 	inc/MantidQtWidgets/Common/WindowIcons.h
@@ -437,7 +435,6 @@ set( TEST_FILES
   test/NonOrthogonalTest.h
   test/PlotAxisTest.h
   test/SelectionNotificationServiceTest.h
-  test/SignalRangeTest.h
   test/SignalBlockerTest.h
   test/AlgorithmHintStrategyTest.h
   test/TrackedActionTest.h

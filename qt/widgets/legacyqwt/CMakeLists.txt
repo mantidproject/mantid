@@ -17,6 +17,7 @@
   src/PreviewPlot.cpp
   src/RangeSelector.cpp
   src/SafeQwtPlot.cpp
+  src/SignalRange.cpp
 )
 
 set ( MOC_FILES
@@ -43,6 +44,7 @@ set ( INC_FILES
   inc/MantidQtWidgets/LegacyQwt/QwtWorkspaceSpectrumData.h
   inc/MantidQtWidgets/LegacyQwt/QwtHelper.h
   inc/MantidQtWidgets/LegacyQwt/qwt_compat.h
+  inc/MantidQtWidgets/LegacyQwt/SignalRange.h
 )
 
 set ( UI_FILES
