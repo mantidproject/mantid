@@ -1656,6 +1656,7 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_properties["FitFunction1"] = m_grpManager->addProperty(lastFunction);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
+
   addDefaultParametersToTree(fitFunctions);
   updateProperties(selectedSpectra());
 }
