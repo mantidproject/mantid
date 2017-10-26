@@ -60,7 +60,8 @@ private:
   void getInputParameters();
   void getScatteringAngleBinning();
   void getHeightAxis();
-  std::vector<double> performBinning(API::MatrixWorkspace_sptr &outputWS);
+  std::vector<std::vector<double>>
+  performBinning(API::MatrixWorkspace_sptr &outputWS);
 
   double distanceFromAngle(const int angleIndex, const double angle) const;
 };

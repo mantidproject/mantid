@@ -125,12 +125,14 @@ void SumOverlappingTubes::exec() {
 
   const auto normalisation = performBinning(outputWS);
 
-  const auto maxEntry =
-      *std::max_element(normalisation.begin(), normalisation.end());
+  auto maxEntry = 0.0;
+  for (const auto &vector : normalisation)
+    maxEntry =
+        std::max(*std::max_element(vector.begin(), vector.end()), maxEntry);
   if (getProperty("Normalise"))
-    for (size_t i = 0; i < outputWS->spectrumInfo().size(); ++i)
-      for (size_t j = 0; j < outputWS->histogram(i).size(); ++j)
-        outputWS->mutableY(i)[j] *= maxEntry / normalisation[j];
+    for (size_t i = 0; i < m_numPoints; ++i)
+      for (size_t j = 0; j < m_numHistograms; ++j)
+        outputWS->mutableY(j)[i] *= maxEntry / normalisation[j][i];
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -247,12 +249,13 @@ void SumOverlappingTubes::getHeightAxis() {
                       << m_heightAxis.size() << " entries.\n";
 }
 
-std::vector<double>
+std::vector<std::vector<double>>
 SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   const double scatteringAngleTolerance =
       getProperty("ScatteringAngleTolerance");
 
-  std::vector<double> normalisation(m_numPoints, 0.0);
+  std::vector<std::vector<double>> normalisation(
+      m_numHistograms, std::vector<double>(m_numPoints, 0.0));
 
   // loop over all workspaces
   for (auto &ws : m_workspaceList) {
@@ -317,21 +320,18 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         yData[angleIndex] +=
             counts * deltaAngleNeighbor / m_stepScatteringAngle;
 
-        if (heightIndex == 0)
-          normalisation[angleIndex] +=
-              (deltaAngleNeighbor / m_stepScatteringAngle);
+        normalisation[heightIndex][angleIndex] +=
+            (deltaAngleNeighbor / m_stepScatteringAngle);
 
-        if (angleIndexNeighbor >= 0 && angleIndexNeighbor < int(yData.size())) {
+        if (angleIndexNeighbor >= 0 && angleIndexNeighbor < int(m_numPoints)) {
           yData[angleIndexNeighbor] +=
               counts * deltaAngle / m_stepScatteringAngle;
-          if (heightIndex == 0)
-            normalisation[angleIndexNeighbor] +=
-                (deltaAngle / m_stepScatteringAngle);
+          normalisation[heightIndex][angleIndexNeighbor] +=
+              (deltaAngle / m_stepScatteringAngle);
         }
       } else {
         yData[angleIndex] += counts;
-        if (heightIndex == 0)
-          normalisation[angleIndex]++;
+        normalisation[heightIndex][angleIndex]++;
       }
     }
   }
