@@ -160,7 +160,7 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("HeightBinning", "0.0, 0.003, 0.027");
+    alg.setProperty("HeightAxis", "0.0, 0.003, 0.027");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     verifySuccessCase();
@@ -211,10 +211,10 @@ public:
     alg.setProperty("InputWorkspaces", "testWS");
     alg.setProperty("OutputWorkspace", "outWS");
     alg.setProperty("ScatteringAngleBinning", "22.5");
-    alg.setProperty("HeightBinning", "0.003");
+    alg.setProperty("HeightAxis", "0.003");
     TS_ASSERT_THROWS_EQUALS(
         alg.execute(), std::runtime_error & e, std::string(e.what()),
-        "Currently height binning must have start, step and end values.");
+        "Height binning must have start, step and end values.");
     AnalysisDataService::Instance().remove("testWS");
   }
 
