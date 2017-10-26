@@ -185,7 +185,10 @@ void SumSpectra::exec() {
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
-    m_calculateWeightedSum = false;
+    if (m_calculateWeightedSum) {
+      g_log.warning("Ignoring request for WeightedSum");
+      m_calculateWeightedSum = false;
+    }
     execEvent(eventW, m_indices);
   } else {
     //-------Workspace 2D mode -----
@@ -213,20 +216,20 @@ void SumSpectra::exec() {
     outSpec.clearDetectorIDs();
 
     if (localworkspace->id() == "RebinnedOutput") {
-      doRebinnedOutput(outputWorkspace, progress, numSpectra, numMasked,
-                       numZeros);
+      // this version is for a special workspace that has fractional overlap
+      // information
+      doFractionalSum(outputWorkspace, progress, numSpectra, numMasked,
+                      numZeros);
     } else {
-      doWorkspace2D(outSpec, progress, numSpectra, numMasked, numZeros);
+      // for things where all the bins are lined up
+      doSimpleSum(outSpec, progress, numSpectra, numMasked, numZeros);
     }
-
-    // Pointer to sqrt function
-    typedef double (*uf)(double);
-    uf rs = std::sqrt;
 
     auto &YError = outSpec.mutableE();
     // take the square root of all the accumulated squared errors - Assumes
     // Gaussian errors
-    std::transform(YError.begin(), YError.end(), YError.begin(), rs);
+    std::transform(YError.begin(), YError.end(), YError.begin(),
+                   (double (*)(double))std::sqrt);
 
     // set up the summing statistics
     outputWorkspace->mutableRun().addProperty("NumAllSpectra", int(numSpectra),
@@ -303,9 +306,9 @@ SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
-                               size_t &numSpectra, size_t &numMasked,
-                               size_t &numZeros) {
+void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
+                             size_t &numSpectra, size_t &numMasked,
+                             size_t &numZeros) {
   // Get references to the output workspaces's data vectors
   auto &OutputYSum = outSpec.mutableY();
   auto &OutputYError = outSpec.mutableE();
@@ -349,22 +352,22 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
     const auto &YErrors = localworkspace->e(wsIndex);
     if (m_calculateWeightedSum) {
       // Retrieve the spectrum into a vector
-      for (int i = 0; i < m_yLength; ++i) {
-        if (std::isnormal(YErrors[i])) {
-          const double yErrorsVal = YErrors[i];
+      for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
+        const double yErrorsVal = YErrors[yIndex];
+        if (std::isnormal(yErrorsVal)) { // is non-zero, nan, or infinity
           const double errsq = yErrorsVal * yErrorsVal;
-          OutputYError[i] += errsq;
-          Weight[i] += 1. / errsq;
-          OutputYSum[i] += YValues[i] / errsq;
+          OutputYError[yIndex] += errsq;
+          Weight[yIndex] += 1. / errsq;
+          OutputYSum[yIndex] += YValues[yIndex] / errsq;
         } else {
-          nZeros[i]++;
+          nZeros[yIndex]++;
         }
       }
     } else {
       OutputYSum += YValues;
-      for (int i = 0; i < m_yLength; ++i) {
-        const auto yErrorsVal = YErrors[i];
-        OutputYError[i] += yErrorsVal * yErrorsVal;
+      for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
+        const auto yErrorsVal = YErrors[yIndex];
+        OutputYError[yIndex] += yErrorsVal * yErrorsVal;
       }
     }
 
@@ -377,11 +380,12 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
 
   if (m_calculateWeightedSum) {
     numZeros = 0;
-    for (size_t i = 0; i < Weight.size(); i++) {
-      if (numSpectra > nZeros[i])
-        OutputYSum[i] *= double(numSpectra - nZeros[i]) / Weight[i];
-      if (nZeros[i] != 0)
-        numZeros += nZeros[i];
+    for (size_t yIndex = 0; yIndex < static_cast<size_t>(m_yLength); yIndex++) {
+      if (numSpectra > nZeros[yIndex])
+        OutputYSum[yIndex] *=
+            double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
+      if (nZeros[yIndex] != 0)
+        numZeros += nZeros[yIndex];
     }
   }
 }
@@ -394,9 +398,9 @@ void SumSpectra::doWorkspace2D(ISpectrum &outSpec, Progress &progress,
  * @param numMasked
  * @param numZeros
  */
-void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
-                                  Progress &progress, size_t &numSpectra,
-                                  size_t &numMasked, size_t &numZeros) {
+void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
+                                 Progress &progress, size_t &numSpectra,
+                                 size_t &numMasked, size_t &numZeros) {
   // Get a copy of the input workspace
   MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
 
@@ -428,20 +432,20 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
 
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
-  for (const auto i : m_indices) {
+  for (const auto wsIndex : m_indices) {
     // Don't go outside the range.
-    if ((i >= m_numberOfSpectra) || (i < 0)) {
-      g_log.error() << "Invalid index " << i
+    if ((wsIndex >= m_numberOfSpectra) || (wsIndex < 0)) {
+      g_log.error() << "Invalid index " << wsIndex
                     << " was specified. Sum was aborted.\n";
       break;
     }
 
-    if (spectrumInfo.hasDetectors(i)) {
+    if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
-      if (!m_keepMonitors && spectrumInfo.isMonitor(i))
+      if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))
         continue;
       // Skip masked detectors
-      if (spectrumInfo.isMasked(i)) {
+      if (spectrumInfo.isMasked(wsIndex)) {
         numMasked++;
         continue;
       }
@@ -449,44 +453,47 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     numSpectra++;
 
     // Retrieve the spectrum into a vector
-    const auto &YValues = localworkspace->y(i);
-    const auto &YErrors = localworkspace->e(i);
-    const auto &FracArea = inWS->readF(i);
+    const auto &YValues = localworkspace->y(wsIndex);
+    const auto &YErrors = localworkspace->e(wsIndex);
+    const auto &FracArea = inWS->readF(wsIndex);
 
     if (m_calculateWeightedSum) {
-      for (int k = 0; k < m_yLength; ++k) {
-        if (YErrors[k] != 0) {
-          double errsq = YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
-          YError[k] += errsq;
-          Weight[k] += 1. / errsq;
-          YSum[k] += YValues[k] * FracArea[k] / errsq;
-          FracSum[k] += FracArea[k];
+      for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
+        if (YErrors[yIndex] != 0) {
+          double errsq = YErrors[yIndex] * YErrors[yIndex] * FracArea[yIndex] *
+                         FracArea[yIndex];
+          YError[yIndex] += errsq;
+          Weight[yIndex] += 1. / errsq;
+          YSum[yIndex] += YValues[yIndex] * FracArea[yIndex] / errsq;
+          FracSum[yIndex] += FracArea[yIndex];
         } else {
-          nZeros[k]++;
-          FracSum[k] += FracArea[k];
+          nZeros[yIndex]++;
+          FracSum[yIndex] += FracArea[yIndex];
         }
       }
     } else {
-      for (int k = 0; k < m_yLength; ++k) {
-        YSum[k] += YValues[k] * FracArea[k];
-        YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
-        FracSum[k] += FracArea[k];
+      for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
+        YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
+        YError[yIndex] += YErrors[yIndex] * YErrors[yIndex] * FracArea[yIndex] *
+                          FracArea[yIndex];
+        FracSum[yIndex] += FracArea[yIndex];
       }
     }
 
     // Map all the detectors onto the spectrum of the output
-    outSpec.addDetectorIDs(localworkspace->getSpectrum(i).getDetectorIDs());
+    outSpec.addDetectorIDs(
+        localworkspace->getSpectrum(wsIndex).getDetectorIDs());
 
     progress.report();
   }
 
   if (m_calculateWeightedSum) {
     numZeros = 0;
-    for (size_t i = 0; i < Weight.size(); i++) {
-      if (numSpectra > nZeros[i])
-        YSum[i] *= double(numSpectra - nZeros[i]) / Weight[i];
-      if (nZeros[i] != 0)
-        numZeros += nZeros[i];
+    for (size_t yIndex = 0; yIndex < static_cast<size_t>(m_yLength); yIndex++) {
+      if (numSpectra > nZeros[yIndex])
+        YSum[yIndex] *= double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
+      if (nZeros[yIndex] != 0)
+        numZeros += nZeros[yIndex];
     }
   }
 

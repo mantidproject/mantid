@@ -76,12 +76,12 @@ public:
 
 private:
   /// Handle logic for RebinnedOutput workspaces
-  void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace,
-                        API::Progress &progress, size_t &numSpectra,
-                        size_t &numMasked, size_t &numZeros);
+  void doFractionalSum(API::MatrixWorkspace_sptr outputWorkspace,
+                       API::Progress &progress, size_t &numSpectra,
+                       size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doWorkspace2D(API::ISpectrum &outSpec, API::Progress &progress,
-                     size_t &numSpectra, size_t &numMasked, size_t &numZeros);
+  void doSimpleSum(API::ISpectrum &outSpec, API::Progress &progress,
+                   size_t &numSpectra, size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
   void init() override;
