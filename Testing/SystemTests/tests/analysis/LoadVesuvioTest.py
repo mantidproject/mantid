@@ -198,6 +198,16 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.0013599866184859088, evs_raw.readY(63)[1188], places=DIFF_PLACES)
         self.assertAlmostEqual(0.16935354944452052, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
+    def test_comma_separated_ranges_in_forward_scattering_spectra_gives_expected_numbers(self):
+        self._run_load("14188-14189, 14190", "135-198", "SingleDifference")
+
+        # Check some data
+        evs_raw = mtd[self.ws_name]
+        self.assertAlmostEqual(-0.33023675686822429, evs_raw.readY(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.13839181298987582, evs_raw.readE(0)[1], places=DIFF_PLACES)
+        self.assertAlmostEqual(-0.0005762703884557574, evs_raw.readY(63)[1188], places=DIFF_PLACES)
+        self.assertAlmostEqual(0.022314627606989094, evs_raw.readE(63)[1188], places=DIFF_PLACES)
+
     def test_foilout_mode_gives_expected_numbers(self):
         self._run_load("14188", "3", "FoilOut")
 

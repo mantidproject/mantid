@@ -167,7 +167,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         spectra_input = self.getProperty(SPECTRA_PROP).value
         spectra_groups = spectra_input.split(';')
         try:
-            self._spectra_groups = [self._parse_range_input(spectra_group, True)
+            self._spectra_groups = [sorted(self._parse_range_input(spectra_group, True))
                                     for spectra_group in spectra_groups]
         except RuntimeError as exc:
             issues[SPECTRA_PROP] = str(exc)
@@ -1013,13 +1013,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
             Sum requested sets of spectra together
         """
-        nspectra_out = len(self._spectra)
+        nspectra_out = len(self._spectra_groups)
         ws_out = WorkspaceFactory.create(self.foil_out, NVectors=nspectra_out)
         # foil_out has all spectra in order specified by input
         foil_start = 0
-        for idx_out in range(len(self._spectra)):
+        for idx_out in range(nspectra_out):
             ws_out.setX(idx_out, self.foil_out.readX(foil_start))
-            summed_set = self._spectra[idx_out]
+            summed_set = self._spectra_groups[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
             spec_out = ws_out.getSpectrum(idx_out)
