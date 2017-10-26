@@ -1685,7 +1685,6 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
   m_uiForm.ckPlotGuess->setChecked(false);
 
   updatePlotOptions();
-  addDefaultParametersToTree(fitFunctions);
 
   // Two Lorentzians Fit
   if (lastFunction == "Lorentzian 2") {
@@ -1697,6 +1696,8 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_properties["FitFunction1"] = m_grpManager->addProperty(lastFunction);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
+
+  addDefaultParametersToTree(fitFunctions);
   updateProperties(selectedSpectra());
 }
 
