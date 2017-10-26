@@ -1,4 +1,3 @@
-#pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -138,13 +137,13 @@ class EnggCalibrate(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Focusing the input workspace')
-        focussed_ws = self._focus_run(self.getProperty('InputWorkspace').value,
-                                      self.getProperty("VanadiumWorkspace").value,
-                                      self.getProperty('Bank').value,
-                                      self.getProperty(self.INDICES_PROP_NAME).value)
+        focused_ws = self._focus_run(self.getProperty('InputWorkspace').value,
+                                     self.getProperty("VanadiumWorkspace").value,
+                                     self.getProperty('Bank').value,
+                                     self.getProperty(self.INDICES_PROP_NAME).value)
 
         prog.report('Fitting parameters for the focused run')
-        difa, difc, zero, fitted_peaks = self._fit_params(focussed_ws, expected_peaks_dsp)
+        difa, difc, zero, fitted_peaks = self._fit_params(focused_ws, expected_peaks_dsp)
 
         self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
                                format(fitted_peaks.rowCount(), difa, difc, zero))
@@ -171,7 +170,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         fit_alg = self.createChildAlgorithm('EnggFitPeaks')
         fit_alg.setProperty('InputWorkspace', focused_ws)
-        fit_alg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
+        fit_alg.setProperty('WorkspaceIndex', 0)  # There should be only one index anyway
         fit_alg.setProperty('ExpectedPeaks', expected_peaks_d)
         # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
         # EnggFitPaks, but better to check inputs early, before this
@@ -187,7 +186,7 @@ class EnggCalibrate(PythonAlgorithm):
         difc = difc_alg.getProperty('DIFC').value
         zero = difc_alg.getProperty('TZERO').value
 
-        return (difa, difc, zero, fitted_peaks)
+        return difa, difc, zero, fitted_peaks
 
     def _focus_run(self, ws, vanadium_ws, bank, indices):
         """
@@ -245,10 +244,10 @@ class EnggCalibrate(PythonAlgorithm):
         self.setProperty('FittedPeaks', fitted_peaks)
 
         # make output table if requested
-        tblName = self.getPropertyValue("OutputParametersTableName")
-        if '' != tblName:
-            EnggUtils.generateOutputParTable(tblName, difa, difc, zero)
-            self.log().information("Output parameters added into a table workspace: %s" % tblName)
+        table_name = self.getPropertyValue("OutputParametersTableName")
+        if '' != table_name:
+            EnggUtils.generateOutputParTable(table_name, difa, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % table_name)
 
 
 AlgorithmFactory.subscribe(EnggCalibrate)

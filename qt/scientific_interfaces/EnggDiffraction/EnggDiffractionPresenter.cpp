@@ -1085,7 +1085,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   try {
     auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+        Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
     load->setPropertyValue("Filename", cerFileHint);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";

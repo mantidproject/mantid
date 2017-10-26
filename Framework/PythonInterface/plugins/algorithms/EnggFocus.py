@@ -1,4 +1,3 @@
-#pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
@@ -31,20 +30,20 @@ class EnggFocus(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
-                             doc = 'Workspace with the Vanadium (correction and calibration) run. '
+                             doc='Workspace with the Vanadium (correction and calibration) run. '
                              'Alternatively, when the Vanadium run has been already processed, '
                              'the properties can be used')
 
         self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
                                                      Direction.Input, PropertyMode.Optional),
-                             doc = 'Results of integrating the spectra of a Vanadium run, with one column '
+                             doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
 
         self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
                                                      PropertyMode.Optional),
-                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             doc='A workspace2D with the fitting workspaces corresponding to '
                              'the instrument banks. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
@@ -57,12 +56,12 @@ class EnggFocus(PythonAlgorithm):
 
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
-                             doc = "Which bank to focus: It can be specified as 1 or 2, or "
+                             doc="Which bank to focus: It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the spectrum numbers for the detectors '
+                             doc='Sets the spectrum numbers for the detectors '
                              'that should be considered in the focussing operation (all others will be '
                              'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
@@ -109,57 +108,57 @@ class EnggFocus(PythonAlgorithm):
 
     def PyExec(self):
         # Get the run workspace
-        wks = self.getProperty('InputWorkspace').value
+        input_ws = self.getProperty('InputWorkspace').value
 
         # Get spectra indices either from bank or direct list of indices, checking for errors
         bank = self.getProperty('Bank').value
         spectra = self.getProperty(self.INDICES_PROP_NAME).value
-        indices = EnggUtils.getWsIndicesFromInProperties(wks, bank, spectra)
+        indices = EnggUtils.getWsIndicesFromInProperties(input_ws, bank, spectra)
 
-        detPos = self.getProperty("DetectorPositions").value
-        nreports = 5
-        if detPos:
-            nreports += 1
-        prog = Progress(self, start=0, end=1, nreports=nreports)
+        detector_positions = self.getProperty("DetectorPositions").value
+        n_reports = 5
+        if detector_positions:
+            n_reports += 1
+        prog = Progress(self, start=0, end=1, nreports=n_reports)
 
         # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')
-        wks = EnggUtils.cropData(self, wks, indices)
+        input_ws = EnggUtils.cropData(self, input_ws, indices)
 
         prog.report('Masking some bins if requested')
-        self._mask_bins(wks, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
+        self._mask_bins(input_ws, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
         prog.report('Preparing input workspace with vanadium corrections')
         # Leave data for the same bank in the vanadium workspace too
-        vanWS = self.getProperty('VanadiumWorkspace').value
-        vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
-        vanCurvesWS = self.getProperty('VanCurvesWorkspace').value
-        EnggUtils.applyVanadiumCorrections(self, wks, indices, vanWS, vanIntegWS, vanCurvesWS)
+        vanadium_ws = self.getProperty('VanadiumWorkspace').value
+        van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
+        van_curves_ws = self.getProperty('VanCurvesWorkspace').value
+        EnggUtils.applyVanadiumCorrections(input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
 
         # Apply calibration
-        if detPos:
-            self._applyCalibration(wks, detPos)
+        if detector_positions:
+            self._applyCalibration(input_ws, detector_positions)
 
         # Convert to dSpacing
-        wks = EnggUtils.convertToDSpacing(self, wks)
+        input_ws = EnggUtils.convertToDSpacing(self, input_ws)
 
         prog.report('Summing spectra')
         # Sum the values across spectra
-        wks = EnggUtils.sumSpectra(self, wks)
+        input_ws = EnggUtils.sumSpectra(self, input_ws)
 
         prog.report('Preparing output workspace')
         # Convert back to time of flight
-        wks = EnggUtils.convertToToF(self, wks)
+        input_ws = EnggUtils.convertToToF(self, input_ws)
 
         prog.report('Normalizing input workspace if needed')
         if self.getProperty('NormaliseByCurrent').value:
-            self._normalize_by_current(wks)
+            self._normalize_by_current(input_ws)
 
         # OpenGenie displays distributions instead of pure counts (this is done implicitly when
         # converting units), so I guess that's what users will expect
-        self._convertToDistr(wks)
+        self._convertToDistr(input_ws)
 
-        self.setProperty("OutputWorkspace", wks)
+        self.setProperty("OutputWorkspace", input_ws)
 
     def _mask_bins(self, wks, min_bins, max_bins):
         """
@@ -196,16 +195,16 @@ class EnggFocus(PythonAlgorithm):
         alg.setProperty('OutputWorkspace', wks)
         alg.execute()
 
-    def _applyCalibration(self, wks, detPos):
+    def _applyCalibration(self, wks, detector_positions):
         """
         Refines the detector positions using the result of calibration (if one is specified).
 
         @param wks :: workspace to apply the calibration (on its instrument)
-        @param detPos :: detector positions (as a table of positions, one row per detector)
+        @param detector_positions :: detector positions (as a table of positions, one row per detector)
         """
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', wks)
-        alg.setProperty('PositionTable', detPos)
+        alg.setProperty('PositionTable', detector_positions)
         alg.execute()
 
     def _convertToDistr(self, wks):
