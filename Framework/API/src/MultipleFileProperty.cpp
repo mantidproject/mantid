@@ -85,6 +85,14 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
   m_multiFileLoadingEnabled = boost::iequals(allowMultiFileLoading, "On");
+
+  // Return error if there are any adjacent + or , operators in the prefix
+  boost::smatch invalid_substring;
+  if (boost::regex_search(prefix.begin(), prefix.end(), invalid_substring,
+                          REGEX_INVALID))
+    throw std::runtime_error(
+        "Specified prefix '" + prefix +
+        "' is invalid: contains adjacent '+' or ',' operators.");
   m_prefix = prefix;
 
   for (const auto &ext : exts)
@@ -159,20 +167,11 @@ std::string MultipleFileProperty::isEmptyValueValid() const {
  *An empty string indicates success.
  */
 std::string MultipleFileProperty::setValue(const std::string &propValue) {
-  std::string propValueWithPrefix;
-
-  // Add prefix to the specified property value, if this property's
-  // prefix is not empty.
-  if (!m_prefix.empty())
-    propValueWithPrefix = m_prefix + propValue;
-  else
-    propValueWithPrefix = propValue;
-
   // No empty value is allowed, unless optional.
   // This is yet aditional check that is beyond the underlying
   // MultiFileValidator,
   // so isOptional needs to be inspected here as well
-  if (propValueWithPrefix.empty() && !isOptional())
+  if (propValue.empty() && !isOptional())
     return "No file(s) specified.";
 
   // If multiple file loading is disabled, then set value assuming it is a
@@ -180,12 +179,12 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
   if (!m_multiFileLoadingEnabled) {
     g_log.debug(
         "MultiFile loading is not enabled, acting as standard FileProperty.");
-    return setValueAsSingleFile(propValueWithPrefix);
+    return setValueAsSingleFile(m_prefix + propValue);
   }
 
   try {
     // Else try and set the value, assuming it could be one or more files.
-    return setValueAsMultipleFiles(propValueWithPrefix);
+    return setValueAsMultipleFiles(propValue);
   } catch (const std::range_error &re) {
     // it was a valid multi file string but for too many files.
     return std::string(re.what());
@@ -193,7 +192,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
     g_log.debug(
         "MultiFile loading has failed. Trying as standard FileProperty.");
 
-    const std::string error = setValueAsSingleFile(propValueWithPrefix);
+    const std::string error = setValueAsSingleFile(m_prefix + propValue);
 
     if (error.empty())
       return SUCCESS;
@@ -323,7 +322,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     for (auto plusTokenString = plusTokenStrings.begin();
          plusTokenString != plusTokenStrings.end(); ++plusTokenString) {
       try {
-        m_parser.parse(*plusTokenString);
+        m_parser.parse(m_prefix + *plusTokenString);
       } catch (const std::range_error &re) {
         g_log.error(re.what());
         throw;
