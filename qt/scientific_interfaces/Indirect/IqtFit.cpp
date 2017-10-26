@@ -31,8 +31,8 @@ IqtFit::IqtFit(QWidget *parent)
 }
 
 void IqtFit::setup() {
-  setMinimumSpectra(0);
-  setMaximumSpectra(0);
+  setMinimumSpectrum(0);
+  setMaximumSpectrum(0);
 
   m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
@@ -128,7 +128,7 @@ void IqtFit::setup() {
           SLOT(updatePlot()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectra(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -165,12 +165,12 @@ void IqtFit::run() {
     showMessageBox(msg);
   }
 
-  setMinimumSpectra(m_uiForm.spSpectraMin->value());
-  setMaximumSpectra(m_uiForm.spSpectraMax->value());
+  setMinimumSpectrum(m_uiForm.spSpectraMin->value());
+  setMaximumSpectrum(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
   IAlgorithm_sptr iqtFitAlg =
-      iqtFitAlgorithm(inputWs, minimumSpectra(), maximumSpectra());
+      iqtFitAlgorithm(inputWs, minimumSpectrum(), maximumSpectrum());
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -313,7 +313,7 @@ void IqtFit::algorithmComplete(bool error) {
   m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
   m_parameterValues = IndirectTab::extractParametersFromTable(
       m_baseName + "_Parameters", m_parameterToProperty.keys().toSet(),
-      minimumSpectra(), maximumSpectra());
+      minimumSpectrum(), maximumSpectrum());
   updateProperties(m_uiForm.spPlotSpectrum->value());
 
   updatePlot();
@@ -722,7 +722,7 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
   auto specNo = m_uiForm.spPlotSpectrum->value();
-  bool autoUpdate = specNo > maximumSpectra() || specNo < minimumSpectra() ||
+  bool autoUpdate = specNo > maximumSpectrum() || specNo < minimumSpectrum() ||
                     m_parameterValues[prop->propertyName()].isEmpty();
 
   if (prop == m_properties["StartX"]) {

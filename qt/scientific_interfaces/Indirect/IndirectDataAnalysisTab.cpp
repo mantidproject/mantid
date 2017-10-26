@@ -24,7 +24,7 @@ namespace IDA {
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectra(0) {
+      m_selectedSpectrum(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -94,47 +94,47 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectra() { return m_selectedSpectra; }
+int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectra(int spectrum) {
-  m_selectedSpectra = spectrum;
+void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
+  m_selectedSpectrum = spectrum;
 }
 
 /**
- * Retrieves the selected minimum spectra.
+ * Retrieves the selected minimum spectrum.
  *
- * @return  The selected minimum spectra.
+ * @return  The selected minimum spectrum.
  */
-int IndirectDataAnalysisTab::minimumSpectra() { return m_minSpectra; }
+int IndirectDataAnalysisTab::minimumSpectrum() { return m_minSpectrum; }
 
 /**
- * Sets the selected spectra.
+ * Sets the selected spectrum.
  *
- * @param spectrum  The spectra to set.
+ * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMinimumSpectra(int spectra) {
-  m_minSpectra = spectra;
+void IndirectDataAnalysisTab::setMinimumSpectrum(int spectrum) {
+  m_minSpectrum = spectrum;
 }
 
 /**
- * Retrieves the selected maximum spectra.
+ * Retrieves the selected maximum spectrum.
  *
- * @return  The selected maximum spectra.
+ * @return  The selected maximum spectrum.
  */
-int IndirectDataAnalysisTab::maximumSpectra() { return m_maxSpectra; }
+int IndirectDataAnalysisTab::maximumSpectrum() { return m_maxSpectrum; }
 
 /**
- * Sets the selected maximum spectra.
+ * Sets the selected maximum spectrum.
  *
- * @param spectrum  The spectra to set.
+ * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setMaximumSpectra(int spectra) {
-  m_maxSpectra = spectra;
+void IndirectDataAnalysisTab::setMaximumSpectrum(int spectrum) {
+  m_maxSpectrum = spectrum;
 }
 
 /**
@@ -150,15 +150,16 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_selectedSpectra);
+                                m_selectedSpectrum);
     } else {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
+
   } else if (inputWs && inputWs->getNumberHistograms() <
-                            boost::numeric_cast<size_t>(m_selectedSpectra)) {
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              m_selectedSpectra);
+                              m_selectedSpectrum);
   }
 }
 
@@ -172,7 +173,7 @@ void IndirectDataAnalysisTab::plotInput(
   auto inputWS = inputWorkspace();
 
   if (inputWS)
-    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectra());
+    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectrum());
 }
 
 /**
@@ -230,8 +231,8 @@ void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
-  if (outputWS && selectedSpectra() >= minimumSpectra())
-    updatePlot(outputWS, selectedSpectra() - minimumSpectra(), fitPreviewPlot,
+  if (outputWS && selectedSpectrum() >= minimumSpectrum())
+    updatePlot(outputWS, selectedSpectrum() - minimumSpectrum(), fitPreviewPlot,
                diffPreviewPlot);
   else {
     diffPreviewPlot->clear();
