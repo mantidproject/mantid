@@ -56,7 +56,7 @@ void HyspecScharpfCorrection::init() {
   auto precisionValidator = boost::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   precisionValidator->setLower(0.0);
   precisionValidator->setUpper(1.0);
-  declareProperty("Precision", 1e-5, precisionValidator, "If cosine of twice the "
+  declareProperty("Precision", 0.1, precisionValidator, "If cosine of twice the "
                   "Scharpf angle is closer to 0 than the precision, the intensities "
                   "and errors will be set to 0");
   declareProperty(
@@ -152,7 +152,84 @@ void HyspecScharpfCorrection::exec() {
 /** Execute for events
  */
 void HyspecScharpfCorrection::execEvent() {
-    g_log.notice()<<"events\n";
+    g_log.information("Processing event workspace");
+
+    // If input and output workspaces are not the same, create a new workspace for
+    // the output
+    if (outputWS != inputWS) {
+      outputWS = inputWS->clone();
+      setProperty("OutputWorkspace", outputWS);
+    }
+
+    Mantid::DataObjects::EventWorkspace_sptr eventWS =
+        boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(outputWS);
+
+    const auto &spectrumInfo = inputWS->spectrumInfo();
+
+    // Get number of spectra in this workspace
+    const int64_t numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
+    Mantid::Kernel::V3D samplePos= spectrumInfo.samplePosition();
+    API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
+    for (int64_t i = 0; i < numberOfSpectra; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      prog.report();
+      // continue if no detectors, if monitor, or is masked
+      if ((!spectrumInfo.hasDetectors(i)) || spectrumInfo.isMonitor(i) || spectrumInfo.isMasked(i)) {
+          continue;
+      }
+      Mantid::Kernel::V3D detPos = spectrumInfo.position(i);
+      double thetaPlane = std::atan2((detPos-samplePos).X(), (detPos-samplePos).Z());
+      // Do the correction
+      auto &evlist = eventWS->getSpectrum(i);
+      switch (evlist.getEventType()) {
+        case Mantid::API::TOF:
+          // Switch to weights if needed.
+          evlist.switchTo(Mantid::API::WEIGHTED);
+          /* no break */
+          // Fall through
+
+        case Mantid::API::WEIGHTED:
+          ScharpfEventHelper(evlist.getWeightedEvents(), thetaPlane);
+          break;
+
+        case Mantid::API::WEIGHTED_NOTIME:
+          ScharpfEventHelper(evlist.getWeightedEventsNoTime(), thetaPlane);
+          break;
+      }
+      PARALLEL_END_INTERUPT_REGION
+    } // end for i
+    PARALLEL_CHECK_INTERUPT_REGION
+}
+
+template <class T>
+void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector, double thPlane){
+    typename std::vector<T>::iterator it;
+    double Ef;
+    for (it = wevector.begin(); it < wevector.end();) {
+       Ef = Ei - it->tof();
+       if (Ef <= 0) {
+         it = wevector.erase(it);
+       } else {
+         double kfki = std::sqrt(Ef / Ei);
+
+         // angle between in plane Q and z axis
+         double angleQ = std::atan2(kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
+         // Scarpf agle = angle - angleQ
+         float factor = static_cast<float>(std::cos(2.*(angle - angleQ)));
+         //set intensity to 0 if the Scarpf angle is close to 45 degrees
+         if(std::abs(factor) > precision){
+             factor = 1.f / factor;
+         }
+         else {
+             factor = 0.;
+         }
+
+         it->m_weight *= factor;
+         it->m_errorSquared *= factor * factor;
+         ++it;
+       }
+    }
 }
 
 } // namespace Algorithms

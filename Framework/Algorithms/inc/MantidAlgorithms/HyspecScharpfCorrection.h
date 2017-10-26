@@ -43,6 +43,13 @@ private:
   void init() override;
   void exec() override;
   void execEvent();
+  /**
+   * Execute Scharpf correction for event lists
+   * @param wevector the list of events to correct
+   * @param thPlane the in-plane angle for the detector corresponding to the event list
+   */
+  template <class T>
+  void ScharpfEventHelper(std::vector<T> &wevector, double thPlane);
   /// The user selected (input) workspace
   Mantid::API::MatrixWorkspace_const_sptr inputWS;
   /// The output workspace, maybe the same as the input one
