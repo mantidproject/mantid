@@ -62,7 +62,7 @@ private:
   void getHeightAxis();
   std::vector<double> performBinning(API::MatrixWorkspace_sptr &outputWS);
 
-  double distanceFromAngle(const size_t thetaIndex, const double theta) const;
+  double distanceFromAngle(const int angleIndex, const double angle) const;
 };
 
 } // namespace Algorithms

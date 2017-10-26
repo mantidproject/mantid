@@ -285,12 +285,12 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         angle = specInfo.twoTheta(i);
       angle *= 180.0 / M_PI;
 
-      size_t angleIndex = size_t(
-          (angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
+      int angleIndex =
+          int((angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
 
       // point is out of range, a warning should have been generated already for
       // the theta index
-      if (angleIndex >= m_numPoints)
+      if (angleIndex < 0 || angleIndex >= int(m_numPoints))
         continue;
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
@@ -304,26 +304,29 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
                       << " at spectrum " << i << " for angle " << angle
                       << ".\n";
 
-        size_t angleIndexNextClosest;
+        int angleIndexNeighbor;
         if (distanceFromAngle(angleIndex - 1, angle) <
             distanceFromAngle(angleIndex + 1, angle))
-          angleIndexNextClosest = angleIndex - 1;
+          angleIndexNeighbor = angleIndex - 1;
         else
-          angleIndexNextClosest = angleIndex + 1;
+          angleIndexNeighbor = angleIndex + 1;
 
-        double deltaAngleNextClosest =
-            distanceFromAngle(angleIndexNextClosest, angle);
+        double deltaAngleNeighbor =
+            distanceFromAngle(angleIndexNeighbor, angle);
 
         yData[angleIndex] +=
-            counts * deltaAngleNextClosest / m_stepScatteringAngle;
-        yData[angleIndexNextClosest] +=
-            counts * deltaAngle / m_stepScatteringAngle;
+            counts * deltaAngleNeighbor / m_stepScatteringAngle;
 
-        if (heightIndex == 0) {
+        if (heightIndex == 0)
           normalisation[angleIndex] +=
-              (deltaAngleNextClosest / m_stepScatteringAngle);
-          normalisation[angleIndexNextClosest] +=
-              (deltaAngle / m_stepScatteringAngle);
+              (deltaAngleNeighbor / m_stepScatteringAngle);
+
+        if (angleIndexNeighbor >= 0 && angleIndexNeighbor < int(yData.size())) {
+          yData[angleIndexNeighbor] +=
+              counts * deltaAngle / m_stepScatteringAngle;
+          if (heightIndex == 0)
+            normalisation[angleIndexNeighbor] +=
+                (deltaAngle / m_stepScatteringAngle);
         }
       } else {
         yData[angleIndex] += counts;
@@ -336,10 +339,10 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
   return normalisation;
 }
 
-double SumOverlappingTubes::distanceFromAngle(const size_t thetaIndex,
-                                              const double theta) const {
+double SumOverlappingTubes::distanceFromAngle(const int angleIndex,
+                                              const double angle) const {
   return fabs(m_startScatteringAngle +
-              double(thetaIndex) * m_stepScatteringAngle - theta);
+              double(angleIndex) * m_stepScatteringAngle - angle);
 }
 
 } // namespace Algorithms
