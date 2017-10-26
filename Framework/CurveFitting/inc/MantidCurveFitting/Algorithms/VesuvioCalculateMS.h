@@ -23,7 +23,7 @@ namespace MSVesuvioHelper {
 class RandomNumberGenerator;
 struct Simulation;
 struct SimulationWithErrors;
-}
+} // namespace MSVesuvioHelper
 
 namespace Functions {
 struct ResolutionParams;
@@ -100,39 +100,51 @@ private:
   void exec() override;
 
   void cacheInputs();
-  void calculateMS(const size_t wsIndex, API::ISpectrum &totalsc,
-                   API::ISpectrum &multsc) const;
-  void simulate(const DetectorParams &detpar,
-                const Functions::ResolutionParams &respar,
-                MSVesuvioHelper::Simulation &simulCounts) const;
+  void calculateMS(
+      const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  void
+  simulate(const DetectorParams &detpar,
+           const Functions::ResolutionParams &respar,
+           MSVesuvioHelper::Simulation &simulCounts,
+           CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
   void assignToOutput(const MSVesuvioHelper::SimulationWithErrors &avgCounts,
                       API::ISpectrum &totalsc, API::ISpectrum &multsc) const;
-  double calculateCounts(const DetectorParams &detpar,
-                         const Functions::ResolutionParams &respar,
-                         MSVesuvioHelper::Simulation &simulation) const;
+  double calculateCounts(
+      const DetectorParams &detpar, const Functions::ResolutionParams &respar,
+      MSVesuvioHelper::Simulation &simulation,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
 
   // single-event helpers
-  Kernel::V3D generateSrcPos(const double l1) const;
-  double generateE0(const double l1, const double t2, double &weight) const;
-  double generateTOF(const double en0, const double dtof,
-                     const double dl1) const;
-  bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
-                       double &weight, Kernel::V3D &scatterPt) const;
+  Kernel::V3D generateSrcPos(
+      const double l1,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  double generateE0(
+      const double l1, const double t2, double &weight,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  double generateTOF(
+      const double en0, const double dtof, const double dl1,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  bool generateScatter(
+      const Kernel::V3D &startPos, const Kernel::V3D &direc, double &weight,
+      Kernel::V3D &scatterPt,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
   std::pair<double, double> calculateE1Range(const double theta,
                                              const double en0) const;
   double partialDiffXSec(const double en0, const double en1,
                          const double theta) const;
-  Kernel::V3D generateDetectorPos(const Kernel::V3D &nominalPos,
-                                  const double energy,
-                                  const Kernel::V3D &scatterPt,
-                                  const Kernel::V3D &direcBeforeSc,
-                                  double &scang, double &distToExit) const;
-  double generateE1(const double angle, const double e1nom,
-                    const double e1res) const;
+  Kernel::V3D generateDetectorPos(
+      const Kernel::V3D &nominalPos, const double energy,
+      const Kernel::V3D &scatterPt, const Kernel::V3D &direcBeforeSc,
+      double &scang, double &distToExit,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
+  double generateE1(
+      const double angle, const double e1nom, const double e1res,
+      CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
 
   // Member Variables
-  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *
-      m_randgen; // random number generator
+  CurveFitting::MSVesuvioHelper::RandomNumberGenerator
+      *m_randgen; // random number generator
 
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
   Kernel::V3D m_beamDir;                  // Directional vector for beam
