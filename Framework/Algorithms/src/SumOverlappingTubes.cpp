@@ -220,12 +220,16 @@ void SumOverlappingTubes::getHeightAxis() {
     if (heightBinning.size() != 3)
       throw std::runtime_error(
           "Height binning must have start, step and end values.");
-    double height = heightBinning[0];
-    while (height < heightBinning[2]) {
-      m_heightAxis.push_back(height);
-      height += heightBinning[1];
+    if (m_outputType == "1DStraight") {
+      m_heightAxis.push_back(heightBinning[0]);
+      m_heightAxis.push_back(heightBinning[2]);
+    } else {
+      double height = heightBinning[0];
+      while (height < heightBinning[2]) {
+        m_heightAxis.push_back(height);
+        height += heightBinning[1];
+      }
     }
-    m_heightAxis.push_back(heightBinning[2]);
   }
 
   m_startHeight = *min_element(m_heightAxis.begin(), m_heightAxis.end());
@@ -261,7 +265,9 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
       const auto &pos = specInfo.position(i);
       const auto height = pos.Y();
 
-      if (height < m_startHeight || height > m_endHeight)
+      const double tolerance = 1e-6;
+      if (height < m_startHeight - tolerance ||
+          height > m_endHeight + tolerance)
         continue;
 
       size_t heightIndex;
@@ -274,9 +280,10 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       double angle;
       if (m_outputType == "2D")
-        angle = -atan2(pos.X(), pos.Z()) * 180.0 / M_PI;
+        angle = -atan2(pos.X(), pos.Z());
       else
-        angle = specInfo.twoTheta(i) * 180.0 / M_PI;
+        angle = specInfo.twoTheta(i);
+      angle *= 180.0 / M_PI;
 
       size_t angleIndex = size_t(
           (angle - m_startScatteringAngle) / m_stepScatteringAngle + 0.5);
