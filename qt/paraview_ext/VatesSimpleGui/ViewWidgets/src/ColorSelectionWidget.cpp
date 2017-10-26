@@ -207,7 +207,7 @@ void ColorSelectionWidget::loadPreset() {
   preset.setCustomizableUsePresetRange(false, false);
   preset.setCustomizableLoadAnnotations(false, false);
   preset.setCurrentPreset(
-      m_mdSettings.getLastSessionColorMap().toAscii().constData());
+      m_mdSettings.getLastSessionColorMap().toLatin1().constData());
   this->connect(&preset, SIGNAL(applyPreset(const Json::Value &)), this,
                 SLOT(onApplyPreset(const Json::Value &)));
   preset.exec();

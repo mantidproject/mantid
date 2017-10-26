@@ -8,10 +8,12 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
-#include <qgridlayout.h>
-#include <QtCore/qvariant.h>
-#include <QtGui/qwidget.h>
-#include <QtGui>
+#include <QGridLayout>
+#include <QVariant>
+#include <QWidget>
+
+class QGroupBox;
+class QScrollArea;
 
 namespace MantidQt {
 namespace API {
