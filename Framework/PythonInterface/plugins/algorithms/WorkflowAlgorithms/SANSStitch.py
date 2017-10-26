@@ -80,6 +80,12 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
 
+        self.declareProperty('FitMin', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+                             doc='Optional minimum q for fit')
+
+        self.declareProperty('FitMax', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
+                             doc='Optional maximum q for fit')
+
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Stitched high and low Q 1-D data')
 
@@ -206,13 +212,15 @@ class SANSStitch(DataProcessorAlgorithm):
             end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
-    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):
+    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max):
         fit_alg = self.createChildAlgorithm("SANSFitShiftScale")
         fit_alg.setProperty("HABWorkspace", q_high_angle)
         fit_alg.setProperty("LABWorkspace", q_low_angle)
         fit_alg.setProperty("Mode", self.getProperty('Mode').value)
         fit_alg.setProperty("ScaleFactor", scale_factor)
         fit_alg.setProperty("ShiftFactor", shift_factor)
+        fit_alg.setProperty("FitMin", fit_min)
+        fit_alg.setProperty("FitMax", fit_max)
         fit_alg.execute()
         scale_factor_fit = fit_alg.getProperty("OutScaleFactor").value
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
@@ -247,10 +255,12 @@ class SANSStitch(DataProcessorAlgorithm):
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
 
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
-                                                       scale_factor, shift_factor)
+                                                       scale_factor, shift_factor, fit_min, fit_max)
 
         min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
         max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))

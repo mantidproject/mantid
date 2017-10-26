@@ -18,7 +18,7 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
+import pydevd
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -418,6 +418,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
+    pydevd.settrace('localhost', port=5230, stdoutToServer=True, stderrToServer=True)
     # check if fit is required.
     fitRequired = False
     if rAnds.fitScale or rAnds.fitShift:
@@ -516,7 +517,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             consider_can = False
 
         # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
 
         kwargs_stitch = {"HABCountsSample": Cf,
                          "HABNormSample": Nf,
@@ -526,6 +527,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                          "Mode": fit_mode,
                          "ScaleFactor": scale_factor,
                          "ShiftFactor": shift_factor,
+                         "FitMin": fit_min,
+                         "FitMax": fit_max,
                          "OutputWorkspace": retWSname_merged}
         if consider_can:
             kwargs_can = {"HABCountsCan": Cf_can,
