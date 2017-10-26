@@ -43,9 +43,7 @@ void MonitorEfficiencyCorUser::exec() {
   if (m_outputWS != this->m_inputWS) {
     m_outputWS = API::WorkspaceFactory::Instance().create(m_inputWS);
   }
-  double val;
-  Strings::convert(m_inputWS->run().getProperty("Ei")->value(), val);
-  m_Ei = val;
+  m_Ei = m_inputWS->run().getPropertyValueAsType<double>("Ei");
 
   std::string mon_counts_log;
 
@@ -58,8 +56,7 @@ void MonitorEfficiencyCorUser::exec() {
     mon_counts_log = "monitor_counts";
   }
 
-  Strings::convert(m_inputWS->run().getProperty(mon_counts_log)->value(),
-                   m_monitorCounts);
+  m_monitorCounts = m_inputWS->run().getPropertyValueAsType<double>(mon_counts_log);
 
   // get Efficiency formula from the IDF - Parameters file
   const std::string effFormula = getValFromInstrumentDef("formula_mon_eff");
