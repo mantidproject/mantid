@@ -125,6 +125,32 @@ void FitPeaks::init() {
   setPropertyGroup("PeakFunction", funcgroup);
   setPropertyGroup("BackgroundType", funcgroup);
 
+  // properties about peak range including fitting window and peak width
+  // (percentage)
+  declareProperty(
+      Kernel::make_unique<ArrayProperty<double>>("FitWindowBoundaryList"),
+      "List of left boundaries of the peak fitting window corresponding to "
+      "PeakCenters.");
+
+  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "FitPeakWindowWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "MatrixWorkspace for of peak windows");
+
+  auto min = boost::make_shared<BoundedValidator<double>>();
+  min->setLower(1e-3);
+  // TODO/ISSUE/NOW - Implement this and use it as an estimation of peak fit
+  // window
+  declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
+                  "The estimated peak width as a "
+                  "percentage of the d-spacing "
+                  "of the center of the peak.");
+
+  std::string fitrangeegrp("Peak Range Setup");
+  setPropertyGroup("PeakWidthPercent", fitrangeegrp);
+  setPropertyGroup("FitWindowBoundaryList", fitrangeegrp);
+  setPropertyGroup("FitPeakWindowWorkspace", fitrangeegrp);
+
   // properties about peak parameters' names and value
   declareProperty(
         Kernel::make_unique<ArrayProperty<std::string>>("PeakParameterNames"),
@@ -139,21 +165,10 @@ void FitPeaks::init() {
                   "corresponds to given peak parameter names"
                   ", and each row corresponds to a subset of spectra.");
 
-  declareProperty(
-      Kernel::make_unique<ArrayProperty<double>>("FitWindowBoundaryList"),
-      "List of left boundaries of the peak fitting window corresponding to "
-      "PeakCenters.");
-  declareProperty(Kernel::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "FitPeakWindowWorkspace", "", Direction::Input,
-                      PropertyMode::Optional),
-                  "MatrixWorkspace for of peak windows");
-
-  std::string startvaluegrp("Fitting Setup");
+  std::string startvaluegrp("Strting Parameters Setup");
   setPropertyGroup("PeakParameterNames", startvaluegrp);
   setPropertyGroup("PeakParameterValues", startvaluegrp);
   setPropertyGroup("PeakParameterValueTable", startvaluegrp);
-  setPropertyGroup("FitWindowBoundaryList", startvaluegrp);
-  setPropertyGroup("FitPeakWindowWorkspace", startvaluegrp);
 
   // optimization setup
   std::vector<std::string> minimizerOptions =
@@ -669,6 +684,9 @@ void FitPeaks::fitSpectrumPeaks(
 
   for (size_t ipeak = 0; ipeak < m_numPeaksToFit; ++ipeak) {
 
+    g_log.notice() << "[DB] Fit ws-index = " << wi << ", peak-index = " << ipeak
+                   << ": expeted peak @ " << expected_peak_centers[wi] << "\n";
+
     // find out the peak position to fit
     // center
     double center_i = expected_peak_centers[ipeak];
@@ -903,9 +921,13 @@ void FitPeaks::estimateBackground(size_t wi,
   // call algorithm FindPeakBackground
   std::vector<size_t> peak_min_max_indexes;
   std::vector<double> vector_bkgd(3);
+
+  // peak window: if it is not valid, then use an empty peak window
   std::vector<double> peak_window_v(2);
   peak_window_v[0] = peak_window.first;
   peak_window_v[1] = peak_window.second;
+  if (peak_window_v[0] >= peak_window_v[1])
+    peak_window_v.clear();
 
   Mantid::Algorithms::FindPeakBackground bkgd_finder;
   // set values
@@ -919,6 +941,11 @@ void FitPeaks::estimateBackground(size_t wi,
   // find background
   int find_bkgd = bkgd_finder.findBackground(histogram, l0, n,
                                              peak_min_max_indexes, vector_bkgd);
+
+  g_log.notice() << "[DB] Find peak background: ws-index = " << wi
+                 << ", result = " << find_bkgd << ", X[" << l0 << ", " << n
+                 << "] = " << histogram.x()[l0] << ", " << histogram.x()[n]
+                 << "\n";
 
   // use the simple way to find linear background
   if (find_bkgd <= 0) {
@@ -1423,13 +1450,10 @@ std::pair<double, double> FitPeaks::getPeakFitWindow(size_t wi, size_t ipeak)
   }
 
   double left(0), right(0);
-  if (m_uniformPeakWindows)
-  {
+  if (m_uniformPeakWindows && m_peakWindowVector.size() > 0) {
     left = m_peakWindowVector[ipeak][0];
     right = m_peakWindowVector[ipeak][1];
-  }
-  else
-  {
+  } else if (m_peakWindowWorkspace) {
     // no uniform peak fit window.  locate peak in the workspace
     // check
     if (wi >= m_peakWindowWorkspace->getNumberHistograms())
@@ -1812,10 +1836,15 @@ void FitPeaks::setPeakPosTolerance(
     m_peakPosTolerances = peak_pos_tolerances;
   }
 
-  // final check
-  if (m_peakPosTolerances.size() != m_numPeaksToFit)
+  // final check: in case not being (b) (c) or (d)
+  if (!m_peakPosTolCase234 && (m_peakPosTolerances.size() != m_numPeaksToFit)) {
+    g_log.error() << "number of peak position tolerance "
+                  << m_peakPosTolerances.size()
+                  << " is not same as number of peaks " << m_numPeaksToFit
+                  << "\n";
     throw std::runtime_error("Number of peak position tolerances and number of "
                              "peaks to fit are inconsistent.");
+  }
 
   return;
 }
