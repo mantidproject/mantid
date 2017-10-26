@@ -45,7 +45,7 @@ void HyspecScharpfCorrection::init() {
   declareProperty(
       Kernel::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "",
                                                              Direction::Input, wsValidator),
-      "An input workspace.");
+      "An input workspace in units of energy transfer.");
 
   auto angleValidator = boost::make_shared<Mantid::Kernel::BoundedValidator<double>>();
   angleValidator->setLower(-180.0);
@@ -129,7 +129,7 @@ void HyspecScharpfCorrection::exec() {
           if(xIn[j] < Ei) {
             double kfki = std::sqrt(1. - xIn[j]/Ei); // k_f/k_i
             // angle between in plane Q and z axis
-            double angleQ = std::atan2(kfki * std::sin(thetaPlane), 1. - kfki * std::cos(thetaPlane));
+            double angleQ = std::atan2(-kfki * std::sin(thetaPlane), 1. - kfki * std::cos(thetaPlane));
             // Scarpf agle = angle - angleQ
             factor = std::cos(2.*(angle - angleQ));
             //set intensity to 0 if the Scarpf angle is close to 45 degrees
@@ -214,7 +214,7 @@ void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector, doubl
          double kfki = std::sqrt(Ef / Ei);
 
          // angle between in plane Q and z axis
-         double angleQ = std::atan2(kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
+         double angleQ = std::atan2(-kfki * std::sin(thPlane), 1. - kfki * std::cos(thPlane));
          // Scarpf agle = angle - angleQ
          float factor = static_cast<float>(std::cos(2.*(angle - angleQ)));
          //set intensity to 0 if the Scarpf angle is close to 45 degrees
