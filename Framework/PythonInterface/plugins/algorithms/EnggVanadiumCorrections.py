@@ -88,10 +88,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         van_curves_ws = self.getProperty('CurvesWorkspace').value
         spline_breaks = self.getProperty('SplineBreakPoints').value
 
-        max_reports = 50
+        max_reports = 30
         prog = Progress(self, start=0, end=1, nreports=max_reports)
+
         prog.report('Checking availability of vanadium correction features')
-        
         # figure out if we are calculating or re-using pre-calculated corrections
         if vanadium_ws:
             self.log().information("A workspace with reference Vanadium data was passed. Calculating corrections")
@@ -227,31 +227,36 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         """
         curves = {}
         for bank_number, bank in enumerate(banks):
-            prog.report("Fitting bank {} of {}".format(bank_number, len(banks)))
+            prog.report("Fitting bank {} of {}".format(bank_number + 1, len(banks)))
             indices = EnggUtils.get_ws_indices_for_bank(vanadium_ws, bank)
             if not indices:
                 # no indices at all for this bank, not interested in it, don't add it to the dictionary
                 # (as when doing Calibrate (not-full)) which does CropData() the original workspace
                 continue
 
+            prog.report("Cropping")
             ws_to_fit = EnggUtils.crop_data(self, vanadium_ws, indices)
+            prog.report("Converting to d-spacing")
             ws_to_fit = EnggUtils.convert_to_d_spacing(self, ws_to_fit)
+            prog.report("Summing spectra")
             ws_to_fit = EnggUtils.sum_spectra(self, ws_to_fit)
 
-            fit_ws = self._fit_bank_curve(ws_to_fit, bank, spline_breaks)
+            prog.report("Fitting bank {} to curve".format(bank_number))
+            fit_ws = self._fit_bank_curve(ws_to_fit, bank, spline_breaks, prog)
             curves.update({bank: fit_ws})
 
         curves_ws = self._prepare_curves_ws(curves)
 
         return curves_ws
 
-    def _fit_bank_curve(self, vanadium_ws, bank, spline_breaks):
+    def _fit_bank_curve(self, vanadium_ws, bank, spline_breaks, prog):
         """
         Fits a spline to a single-spectrum workspace (in d-spacing)
 
         @param vanadium_ws :: Vanadium workspace to fit (normally this contains spectra for a single bank)
         @param bank :: instrument bank this is fitting is done for
         @param spline_breaks :: number of break points when fitting spline functions
+        @param prog :: progress reporter
 
         @returns fit workspace (MatrixWorkspace), with the same number of bins as the input
         workspace, and the Y values simulated from the fitted curve
@@ -275,8 +280,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         # WorkspaceIndex is left to default '0' for 1D function fits
         # StartX, EndX could in principle be left to default start/end of the spectrum, but apparently
         # not safe for 'BSpline'
+        prog.report("Performing fit")
         fit_output = mantid.Fit(InputWorkspace=vanadium_ws, Function=function_descriptor, CreateOutput=True,
                                 StoreInADS=False)
+        prog.report("Fit complete")
 
         success = fit_output.OutputStatus
         self.log().information("Fitting Vanadium curve for bank %s, using function '%s', result: %s" %

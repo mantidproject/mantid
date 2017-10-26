@@ -228,11 +228,12 @@ def _default_if_false(value, default):
     return default
 
 
-def apply_vanadium_corrections(ws, indices, vanadium_ws, van_integration_ws, van_curves_ws):
+def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws):
     """
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
     EnggVanadiumCorrections
 
+    @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace to correct (modified in place)
     @param indices :: workspace indices that are being processed (those not included will be ignored)
     @param vanadium_ws :: workspace with data from a Vanadium run
@@ -244,7 +245,7 @@ def apply_vanadium_corrections(ws, indices, vanadium_ws, van_integration_ws, van
                          "the number of workspace indices to process (%d)" %
                          (vanadium_ws.getNumberHistograms(), len(indices)))
     elif van_integration_ws and van_curves_ws:
-        # filter only indices from van_integration_ws (crop the table)
+        # filter only indices from vanIntegWS (crop the table)
         tbl = mantid.CreateEmptyTableWorkspace(OutputWorkspace="__vanadium_integration_ws")
         tbl.addColumn('double', 'Spectra Integration')
         for i in indices:
@@ -252,13 +253,16 @@ def apply_vanadium_corrections(ws, indices, vanadium_ws, van_integration_ws, van
         van_integration_ws = tbl
 
     # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
-    ws = _default_if_false(value=ws, default="")
-    vanadium_ws = _default_if_false(value=vanadium_ws, default="")
-    van_integration_ws = _default_if_false(value=van_integration_ws, default="")
-    van_curves_ws = _default_if_false(value=van_curves_ws, default="")
-
-    mantid.EnggVanadiumCorrections(Workspace=ws, VanadiumWorkspace=vanadium_ws, IntegrationWorkspace=van_integration_ws,
-                                   CurvesWorkspace=van_curves_ws)
+    alg = parent.createChildAlgorithm('EnggVanadiumCorrections')
+    if ws:
+        alg.setProperty('Workspace', ws)
+    if vanadium_ws:
+        alg.setProperty('VanadiumWorkspace', vanadium_ws)
+    if van_integration_ws:
+        alg.setProperty('IntegrationWorkspace', van_integration_ws)
+    if van_curves_ws:
+        alg.setProperty('CurvesWorkspace', van_curves_ws)
+    alg.execute()
 
 
 def convert_to_d_spacing(parent, ws):

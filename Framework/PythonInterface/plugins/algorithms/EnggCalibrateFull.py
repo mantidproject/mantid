@@ -124,7 +124,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         van_curves_wks = self.getProperty('VanCurvesWorkspace').value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnggUtils.apply_vanadium_corrections(in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
+        EnggUtils.apply_vanadium_corrections(self, in_wks, wks_indices, van_wks, van_integ_wks, van_curves_wks)
 
         rebinned_ws = self._prepare_ws_for_fitting(in_wks, self.getProperty('RebinBinWidth').value)
         pos_tbl, peaks_tbl = self._calculate_calib_positions_tbl(rebinned_ws, wks_indices, expected_peaks_d)

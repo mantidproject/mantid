@@ -133,7 +133,7 @@ class EnggFocus(PythonAlgorithm):
         vanadium_ws = self.getProperty('VanadiumWorkspace').value
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
-        EnggUtils.apply_vanadium_corrections(input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
+        EnggUtils.apply_vanadium_corrections(self, input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
 
         # Apply calibration
         if detector_positions:
