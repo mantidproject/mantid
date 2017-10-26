@@ -87,10 +87,10 @@ Usage
    # Below this energy, the Scharpf angle correction is negative, above
    # is positive. If energy transfer is greater than Ei, intensity is
    # set to 0 
-   print('Intensity at DeltaE= 0meV: {0:.2f}\n'.format((intensity[energy_transfer==0])[0]))
-   print('Intensity at DeltaE= 5meV: {0:.2f}\n'.format((intensity[energy_transfer==5])[0]))
-   print('Intensity at DeltaE=10meV: {0:.2f}\n'.format((intensity[energy_transfer==10])[0]))
-   print('Intensity at DeltaE=19meV: {0:.2f}\n'.format((intensity[energy_transfer==19])[0]))  
+   print('Intensity at DeltaE= 0meV: {0:.2f}'.format((intensity[energy_transfer==0])[0]))
+   print('Intensity at DeltaE= 5meV: {0:.2f}'.format((intensity[energy_transfer==5])[0]))
+   print('Intensity at DeltaE=10meV: {0:.2f}'.format((intensity[energy_transfer==10])[0]))
+   print('Intensity at DeltaE=19meV: {0:.2f}'.format((intensity[energy_transfer==19])[0]))
 
 
 Output:
