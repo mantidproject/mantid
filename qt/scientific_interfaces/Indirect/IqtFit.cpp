@@ -927,7 +927,8 @@ void IqtFit::updateProperties(int specNo) {
   auto parameterNames = m_parameterValues.keys();
 
   // Check whether parameter values exist for the specified spectrum number
-  if (m_parameterValues[parameterNames[0]].contains(index)) {
+  if (!parameterNames.isEmpty() &&
+      m_parameterValues[parameterNames[0]].contains(index)) {
 
     for (auto &paramName : parameterNames) {
       auto propertyName = m_parameterToProperty[paramName];
