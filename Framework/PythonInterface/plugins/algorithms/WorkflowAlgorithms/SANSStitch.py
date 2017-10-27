@@ -80,10 +80,10 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
 
-        self.declareProperty('FitMin', defaultValue=1000.0, direction=Direction.Input,
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
                              doc='Optional minimum q for fit')
 
-        self.declareProperty('FitMax', defaultValue=0.0, direction=Direction.Input,
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
                              doc='Optional maximum q for fit')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
