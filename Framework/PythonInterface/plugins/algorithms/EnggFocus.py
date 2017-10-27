@@ -3,7 +3,6 @@ from mantid.kernel import *
 from mantid.api import *
 
 import EnggUtils
-import time  # REMEMBER TO TAKE THIS OUT
 
 
 class EnggFocus(PythonAlgorithm):
@@ -122,15 +121,12 @@ class EnggFocus(PythonAlgorithm):
 
         # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')
-        time.sleep(2)
         input_ws = EnggUtils.crop_data(self, input_ws, indices)
 
         prog.report('Masking some bins if requested')
-        time.sleep(2)
         self._mask_bins(input_ws, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
         prog.report('Applying vanadium corrections')
-        time.sleep(2)
         # Leave data for the same bank in the vanadium workspace too
         vanadium_ws = self.getProperty('VanadiumWorkspace').value
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
@@ -140,7 +136,6 @@ class EnggFocus(PythonAlgorithm):
                                              progress_range=(0.3, 0.6))
 
         prog.report("Applying calibration if requested")
-        time.sleep(2)
         # Apply calibration
         if detector_positions:
             self._apply_calibration(input_ws, detector_positions)
@@ -150,17 +145,14 @@ class EnggFocus(PythonAlgorithm):
         input_ws = EnggUtils.convert_to_d_spacing(self, input_ws)
 
         prog.report('Summing spectra')
-        time.sleep(2)
         # Sum the values across spectra
         input_ws = EnggUtils.sum_spectra(self, input_ws)
 
         prog.report('Preparing output workspace')
-        time.sleep(2)
         # Convert back to time of flight
         input_ws = EnggUtils.convert_to_TOF(self, input_ws)
 
         prog.report('Normalizing input workspace if needed')
-        time.sleep(2)
         if self.getProperty('NormaliseByCurrent').value:
             self._normalize_by_current(input_ws)
 

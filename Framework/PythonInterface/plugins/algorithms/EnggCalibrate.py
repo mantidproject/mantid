@@ -3,7 +3,6 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as mantid
 
-import time # REMEMBER TO TAKE THIS OUT
 
 class EnggCalibrate(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
@@ -121,16 +120,13 @@ class EnggCalibrate(PythonAlgorithm):
         prog = Progress(self, start=0, end=1, nreports=max_reports)
         # Get peaks in dSpacing from file
         prog.report("Reading peaks")
-        time.sleep(2)
 
         expected_peaks_dsp = EnggUtils.read_in_expected_peaks(filename=self.getPropertyValue("ExpectedPeaksFromFile"),
                                                               expected_peaks=self.getProperty('ExpectedPeaks').value)
-
         if len(expected_peaks_dsp) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Focusing the input workspace')
-        time.sleep(2)
         focused_ws = self._focus_run(self.getProperty('InputWorkspace').value,
                                      self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
@@ -138,7 +134,6 @@ class EnggCalibrate(PythonAlgorithm):
                                      prog)
 
         prog.report('Fitting parameters for the focused run')
-        time.sleep(2)
         difa, difc, zero, fitted_peaks = self._fit_params(focused_ws, expected_peaks_dsp, prog)
 
         self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
@@ -182,7 +177,6 @@ class EnggCalibrate(PythonAlgorithm):
         prog.report("Performing fit")
         difc_alg.execute()
         prog.report("Fit complete")
-        time.sleep(2)
 
         difa = difc_alg.getProperty('DIFA').value
         difc = difc_alg.getProperty('DIFC').value
@@ -204,7 +198,6 @@ class EnggCalibrate(PythonAlgorithm):
         @return focused (summed) workspace
         """
         prog.report("Initialising EnggFocus")
-        time.sleep(2)
 
         engg_focus_params = dict()
 
@@ -224,7 +217,6 @@ class EnggCalibrate(PythonAlgorithm):
             engg_focus_params['VanCurvesWorkspace'] = van_curves_ws
 
         prog.report("Running EnggFocus")
-        time.sleep(2)
         return mantid.EnggFocus(InputWorkspace=ws, Bank=bank, SpectrumNumbers=indices, StoreInADS=False,
                                 startProgress=0.3, endProgress=0.6, **engg_focus_params)
 
