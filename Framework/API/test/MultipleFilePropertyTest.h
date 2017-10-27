@@ -665,10 +665,10 @@ public:
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
-    TS_ASSERT_EQUALS(fileNames[1][0], dummyFile("TSC00002.raw"));
-    TS_ASSERT_EQUALS(fileNames[2][0], dummyFile("TSC00003.raw"));
-    TS_ASSERT_EQUALS(fileNames[3][0], dummyFile("TSC00004.raw"));
-    TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][1], dummyFile("TSC00002.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][2], dummyFile("TSC00003.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][3], dummyFile("TSC00004.raw"));
+    TS_ASSERT_EQUALS(fileNames[0][4], dummyFile("TSC00005.raw"));
   }
 
   void test_multipleFiles_shortForm_usingPrefix_range() {
