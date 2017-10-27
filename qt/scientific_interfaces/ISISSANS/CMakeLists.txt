@@ -56,9 +56,10 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISSANS
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
   QT4_LINK_LIBS
-      Qwt5
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
     MantidScientificInterfacesMuon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS;@loader_path/../../../plugins/qtplugins/mantid"

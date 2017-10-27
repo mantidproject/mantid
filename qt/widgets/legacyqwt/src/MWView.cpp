@@ -3,7 +3,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidQtWidgets/Common/SignalRange.h"
+#include "MantidQtWidgets/LegacyQwt/SignalRange.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <boost/pointer_cast.hpp>

@@ -111,7 +111,7 @@ if (ENABLE_MANTIDPLOT)
 endif()
 
 if (ENABLE_WORKBENCH)
-  find_package ( Qt5 COMPONENTS Widgets REQUIRED )
+  find_package ( Qt5 COMPONENTS Core Gui Widgets REQUIRED )
   find_package ( PyQt5 REQUIRED )
   find_package ( SIP REQUIRED )
   separate_arguments ( PYQT5_SIP_FLAGS )

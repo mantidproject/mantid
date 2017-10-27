@@ -64,8 +64,11 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
       Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+    MantidQtWidgetsLegacyQwt
+  INSTALL_DIR
+    ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH
+    @loader_path/../../../Contents/MacOS
 )
 
 if ( MSVC_IDE )

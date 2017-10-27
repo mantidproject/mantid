@@ -68,9 +68,11 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
       ${Boost_LIBRARIES}
       ${QT_LIBRARIES}
       ${OPENGL_LIBRARIES}
+  QT4_LINK_LIBS
+    Qt4::QtOpenGL
   MTD_QT_LINK_LIBS
       MantidQtWidgetsCommon
   OSX_INSTALL_RPATH
-    "@loader_path/../../../Contents/MacOS"
+    @loader_path/../../../Contents/MacOS
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
 )

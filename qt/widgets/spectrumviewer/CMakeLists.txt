@@ -73,6 +73,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSpectrumViewer
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

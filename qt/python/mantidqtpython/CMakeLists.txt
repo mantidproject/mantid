@@ -161,10 +161,12 @@ target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIM
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
-            ${QT_LIBRARIES}
+            Qt4::QtCore
+            Qt4::QtGui
+            Qt4::QtOpenGL
             Qwt5
             ${PYTHON_LIBRARIES}
-            )
+)
 
 
 ###########################################################################

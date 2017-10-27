@@ -7,7 +7,7 @@
 #include "EnggDiffFittingViewQtWidget.h"
 #include "IEnggDiffractionPresenter.h"
 #include "IEnggDiffractionView.h"
-#include "MantidQtWidgets/Common/PeakPicker.h"
+#include "MantidQtWidgets/LegacyQwt/PeakPicker.h"
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"

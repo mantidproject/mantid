@@ -10,7 +10,7 @@
 #include <qwt_plot.h>
 #include <qwt_painter.h>
 #include "MantidAPI/CoordTransform.h"
-#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/LegacyQwt/MantidQwtIMDWorkspaceData.h"
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 

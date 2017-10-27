@@ -62,6 +62,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
 )

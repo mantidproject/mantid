@@ -186,6 +186,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
     MantidScientificInterfacesGeneral
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS;@loader_path/../../../plugins/qtplugins/mantid"
