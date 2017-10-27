@@ -162,8 +162,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             residueTB = self._calculate_residuals(sample_quartiles[MaskingQuadrant.Top],
                                                   sample_quartiles[MaskingQuadrant.Bottom])
             if(j == 0):
-                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX="
-                              + str(residueLR) + "  ResY=" + str(residueTB))
+                logger.notice("Itr " + str(j) + ": (" + str(1000 * centre1) + ", " + str(1000 * centre2) + ")  SX="
+                              + str(residueLR) + "  SY=" + str(residueTB))
             else:
                 # have we stepped across the y-axis that goes through the beam center?
                 if residueLR > resLR_old:
@@ -172,8 +172,8 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
                 if residueTB > resTB_old:
                     position_2_step = - position_2_step / 2
 
-                logger.notice("Iteration " + str(j) + "  PosX " + str(centre1) + "  PosY " + str(centre2) + "  ResX="
-                              + str(residueLR) + "  ResY=" + str(residueTB))
+                logger.notice("Itr " + str(j) + ": (" + str(1000 * centre1) + ", " + str(1000 * centre2) + ")  SX="
+                              + str(residueLR) + "  SY=" + str(residueTB))
 
                 if abs(position_1_step) < tolerance and abs(position_2_step) < tolerance:
                     # this is the success criteria, we've close enough to the center

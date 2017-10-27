@@ -139,11 +139,6 @@ def createColetteScript(inputdata, format, reduced, centreit, plotresults, csvfi
     raise NotImplementedError("The creatColleteScript command is not implemented in SANS v2.")
 
 
-# def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1.251e-4,  find_direction=None):
-#     _, _, _, _, _, _, _ = rlow, rupp, MaxIter, xstart, ystart, tolerance, find_direction  # noqa
-#     raise NotImplementedError("The FindBeamCentre command is not implemented in SANS v2.")
-
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Data related commands
 # ----------------------------------------------------------------------------------------------------------------------
