@@ -39,11 +39,6 @@ public:
   static void setUrlHandler(const QString &scheme, QObject *receiver,
                             const char *method);
   static void unsetUrlHandler(const QString &scheme);
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  static QString storageLocation(QDesktopServices::StandardLocation type);
-  static QString displayName(QDesktopServices::StandardLocation type);
-#endif
 };
 }
 }

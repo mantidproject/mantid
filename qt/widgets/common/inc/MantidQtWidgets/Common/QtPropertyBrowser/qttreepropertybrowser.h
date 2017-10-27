@@ -90,12 +90,13 @@
 
 #include "qtpropertybrowser.h"
 
-#include <QtGui/QApplication>
-#include <QtGui/QIcon>
-#include <QtGui/QItemDelegate>
-#include <QtGui/QPainter>
-#include <QtGui/QTreeWidget>
-#include <QtGui/qevent.h>
+#include <QApplication>
+#include <QHeaderView>
+#include <QItemDelegate>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QStyleOptionButton>
+#include <QTreeWidget>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE

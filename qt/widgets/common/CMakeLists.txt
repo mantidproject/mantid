@@ -406,6 +406,9 @@ endif()
 ###########################################################################
 # Target
 ###########################################################################
+find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
+  WebKitWidgets REQUIRED )
+
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
@@ -420,9 +423,16 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     ${TARGET_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtHelp
-    Qt4::QtWebKit
+    Qt4::QtOpenGL
     Qt4::QtNetwork
+    Qt4::QtWebKit
     Qt4::Qscintilla
+  QT5_LINK_LIBS
+    Qt5::Concurrent
+    Qt5::Help
+    Qt5::Network
+    Qt5::PrintSupport
+    Qt5::WebKitWidgets
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries

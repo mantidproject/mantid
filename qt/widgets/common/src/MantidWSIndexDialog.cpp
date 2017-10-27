@@ -41,7 +41,7 @@ const QString MantidWSIndexWidget::CONTOUR_PLOT = "Contour Plot";
  * @param showTiledOption :: true if tiled plot enabled
  * @param isAdvanced :: true if advanced plotting has been selected
  */
-MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexWidget::MantidWSIndexWidget(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showTiledOption,
@@ -788,7 +788,7 @@ bool MantidWSIndexWidget::usingSpectraNumbers() const {
  * @param showTiledOption :: If true the "Tiled" option is created
  * @param isAdvanced :: true if adanced plotting dialog is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WFlags flags,
+MantidWSIndexDialog::MantidWSIndexDialog(QWidget *parent, Qt::WindowFlags flags,
                                          const QList<QString> &wsNames,
                                          const bool showWaterfallOption,
                                          const bool showPlotAll,

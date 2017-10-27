@@ -100,6 +100,19 @@
 #include <QCheckBox>
 #include <QLineEdit>
 
+namespace {
+// Translation function for Qt4/Qt5. Qt5 has no encoding option
+QString translateUtf8Encoded(const char *context, const char *key,
+                             const char *disambiguation = 0, int n = -1) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  return QApplication::translate(context, key, disambiguation,
+                                 QApplication::UnicodeUTF8, n);
+#else
+  return QApplication::translate(context, key, disambiguation, n);
+#endif
+}
+}
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
@@ -414,15 +427,14 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
   const int columnCount = 2 + m_options.size();
   m_treeWidget->setColumnCount(columnCount);
   QStringList labels;
-  labels.append(QApplication::translate("QtTreePropertyBrowser", "Property", 0,
-                                        QApplication::UnicodeUTF8));
-  labels.append(QApplication::translate("QtTreePropertyBrowser", "Value", 0,
-                                        QApplication::UnicodeUTF8));
+  labels.append(
+      translateUtf8Encoded("QtTreePropertyBrowser", "Property", nullptr));
+  labels.append(
+      QApplication::translate("QtTreePropertyBrowser", "Value", nullptr));
   // add optional columns
   foreach (auto opt, m_options) {
     labels.append(QApplication::translate("QtTreePropertyBrowser",
-                                          opt.toStdString().c_str(), 0,
-                                          QApplication::UnicodeUTF8));
+                                          opt.toStdString().c_str(), nullptr));
   }
   m_treeWidget->setHeaderLabels(labels);
   m_treeWidget->setAlternatingRowColors(true);
@@ -433,9 +445,13 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent,
       m_delegate, SIGNAL(optionChanged(QtProperty *, const QString &, bool)),
       parent, SIGNAL(optionChanged(QtProperty *, const QString &, bool)));
   m_treeWidget->setItemDelegate(m_delegate);
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_treeWidget->header()->setMovable(false);
   m_treeWidget->header()->setResizeMode(QHeaderView::Stretch);
-
+#else
+  m_treeWidget->header()->setSectionsMovable(false);
+  m_treeWidget->header()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
   m_expandIcon = drawIndicatorIcon(q_ptr->palette(), q_ptr->style());
 
   QObject::connect(m_treeWidget, SIGNAL(collapsed(const QModelIndex &)), q_ptr,
@@ -682,7 +698,11 @@ void QtTreePropertyBrowserPrivate::disableItem(QtBrowserItem *browserItem) {
 }
 
 void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2) {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   m_treeWidget->header()->setResizeMode(QHeaderView::Interactive);
+#else
+  m_treeWidget->header()->setSectionResizeMode(QHeaderView::Interactive);
+#endif
   m_treeWidget->header()->setStretchLastSection(false);
   m_treeWidget->header()->resizeSection(0, s0);
   m_treeWidget->header()->resizeSection(1, s1);
@@ -877,7 +897,11 @@ void QtTreePropertyBrowser::setResizeMode(
     m = QHeaderView::Stretch;
     break;
   }
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   d_ptr->m_treeWidget->header()->setResizeMode(m);
+#else
+  d_ptr->m_treeWidget->header()->setSectionResizeMode(m);
+#endif
 }
 
 /**
