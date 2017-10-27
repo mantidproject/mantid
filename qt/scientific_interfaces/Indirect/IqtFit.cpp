@@ -126,9 +126,6 @@ void IqtFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this,
-          SLOT(updatePlot()));
-
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectra(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
