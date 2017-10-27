@@ -25,7 +25,7 @@ using Mantid::API::FileProperty;
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-{
+    {
 /**
  * Given a directory name, create the directory and return its absolute path.
  *
