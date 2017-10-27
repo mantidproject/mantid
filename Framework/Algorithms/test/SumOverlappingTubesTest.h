@@ -111,32 +111,47 @@ public:
   }
 
   void verifySpectraHaveSameCounts(MatrixWorkspace_sptr outWS,
-                                   double expectedCounts = 2.0) {
+                                   double expectedCounts = 2.0,
+                                   bool checkErrors = true) {
     for (size_t i = 0; i < N_TUBES; ++i)
-      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], expectedCounts, 1e-6)
+        if (checkErrors)
+          TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(expectedCounts),
+                          1e-6)
+      }
   }
 
   void verifySpectraCountsForScan(MatrixWorkspace_sptr outWS) {
     size_t bin = 0;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0), 1e-6)
+    }
 
     bin = 1;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0), 1e-6)
+    }
 
     for (size_t i = 2; i < 5; ++i)
-      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
         TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(6.0), 1e-6)
+      }
 
     bin = 5;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 4.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0), 1e-6)
+    }
 
     bin = 6;
-    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j)
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0), 1e-6)
+    }
   }
 
   void test_normal_operation_with_component_specified() {
@@ -357,7 +372,64 @@ public:
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
     verifyHeightAxis(outWS);
 
-    verifySpectraHaveSameCounts(outWS, 6.0);
+    verifySpectraHaveSameCounts(outWS, 6.0, false);
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void
+  test_with_scanning_workspaces_detectors_rotated_in_overlapping_scan_with_normalisation() {
+    std::vector<double> rotations = {0, -22.5, -45};
+    auto testWS = createTestScanningWS(N_TUBES, N_PIXELS_PER_TUBE, rotations);
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("outWS"));
+
+    verifyScatteringAngleAxis(outWS, N_TUBES + 2);
+    verifyHeightAxis(outWS);
+
+    size_t bin = 0;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0) * 3.0, 1e-6)
+    }
+
+    bin = 1;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) * 3.0 / 2.0,
+                      1e-6)
+    }
+
+    for (size_t i = 2; i < 5; ++i) {
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[i], 6.0, 1e-6)
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(6.0), 1e-6)
+      }
+    }
+
+    bin = 5;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(4.0) * 3.0 / 2.0,
+                      1e-6)
+    }
+
+    bin = 6;
+    for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
+      TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0) * 3.0, 1e-6)
+    }
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");

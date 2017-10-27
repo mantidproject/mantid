@@ -131,8 +131,10 @@ void SumOverlappingTubes::exec() {
         std::max(*std::max_element(vector.begin(), vector.end()), maxEntry);
   if (getProperty("Normalise"))
     for (size_t i = 0; i < m_numPoints; ++i)
-      for (size_t j = 0; j < m_numHistograms; ++j)
+      for (size_t j = 0; j < m_numHistograms; ++j) {
         outputWS->mutableY(j)[i] *= maxEntry / normalisation[j][i];
+        outputWS->mutableE(j)[i] *= maxEntry / normalisation[j][i];
+      }
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -298,11 +300,12 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
 
       const double deltaAngle = distanceFromAngle(angleIndex, angle);
       auto counts = ws->histogram(i).y()[0];
+      auto error = ws->histogram(i).e()[0];
       auto &yData = outputWS->mutableY(heightIndex);
+      auto &eData = outputWS->mutableE(heightIndex);
 
+      // counts are split between bins if outside this tolerance
       if (deltaAngle > m_stepScatteringAngle * scatteringAngleTolerance) {
-        // counts are split between bins if outside this tolerance
-
         g_log.debug() << "Splitting counts for workspace " << ws->getName()
                       << " at spectrum " << i << " for angle " << angle
                       << ".\n";
@@ -317,20 +320,29 @@ SumOverlappingTubes::performBinning(MatrixWorkspace_sptr &outputWS) {
         double deltaAngleNeighbor =
             distanceFromAngle(angleIndexNeighbor, angle);
 
-        yData[angleIndex] +=
-            counts * deltaAngleNeighbor / m_stepScatteringAngle;
+        const auto scalingFactor = deltaAngleNeighbor / m_stepScatteringAngle;
+        const auto newError = error * scalingFactor;
+        yData[angleIndex] += counts * scalingFactor;
+        eData[angleIndex] =
+            sqrt(eData[angleIndex] * eData[angleIndex] + newError * newError);
 
         normalisation[heightIndex][angleIndex] +=
             (deltaAngleNeighbor / m_stepScatteringAngle);
 
         if (angleIndexNeighbor >= 0 && angleIndexNeighbor < int(m_numPoints)) {
-          yData[angleIndexNeighbor] +=
-              counts * deltaAngle / m_stepScatteringAngle;
+          const auto scalingFactorNeighbor = deltaAngle / m_stepScatteringAngle;
+          const auto newErrorNeighbor = error * scalingFactorNeighbor;
+          yData[angleIndexNeighbor] += counts * scalingFactorNeighbor;
+          eData[angleIndexNeighbor] =
+              sqrt(eData[angleIndexNeighbor] * eData[angleIndexNeighbor] +
+                   newErrorNeighbor * newErrorNeighbor);
           normalisation[heightIndex][angleIndexNeighbor] +=
               (deltaAngle / m_stepScatteringAngle);
         }
       } else {
         yData[angleIndex] += counts;
+        eData[angleIndex] =
+            sqrt(error * error + eData[angleIndex] * eData[angleIndex]);
         normalisation[heightIndex][angleIndex]++;
       }
     }
