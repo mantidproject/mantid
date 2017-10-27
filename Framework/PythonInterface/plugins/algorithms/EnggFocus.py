@@ -133,7 +133,7 @@ class EnggFocus(PythonAlgorithm):
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
         EnggUtils.apply_vanadium_corrections(parent=self, ws=input_ws, indices=indices, vanadium_ws=vanadium_ws,
                                              van_integration_ws=van_integration_ws, van_curves_ws=van_curves_ws,
-                                             progress_range=(0.3, 0.6))
+                                             progress_range=(0.65, 0.8))
 
         prog.report("Applying calibration if requested")
         # Apply calibration
