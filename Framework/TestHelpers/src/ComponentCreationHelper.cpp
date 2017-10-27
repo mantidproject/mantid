@@ -66,6 +66,25 @@ Object_sptr createCappedCylinder(double radius, double height,
       cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
+void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos) {
+  ObjComponent *source =
+      new ObjComponent("moderator", Object_sptr(new Object), instrument.get());
+  source->setPos(sourcePos);
+  instrument->add(source);
+  instrument->markAsSource(source);
+}
+
+void addSampleToInstrument(Instrument_sptr &instrument, const V3D &samplePos) {
+  // Define a sample as a simple sphere
+  Object_sptr sampleSphere =
+      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
+  ObjComponent *sample =
+      new ObjComponent("sample", sampleSphere, instrument.get());
+  instrument->setPos(samplePos);
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+}
+
 //----------------------------------------------------------------------------------------------
 
 /**
@@ -299,21 +318,8 @@ Instrument_sptr createTestInstrumentCylindrical(
     bank->setPos(V3D(0.0, 0.0, 5.0 * banknum));
   }
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(sourcePos);
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(samplePos);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, sourcePos);
+  addSampleToInstrument(testInst, samplePos);
 
   return testInst;
 }
@@ -391,21 +397,8 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
   testInst->add(bank);
   bank->setPos(V3D(0., 0., 0.));
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -L2_min));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(cylRadius, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -L2_min));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -471,21 +464,8 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                        pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
-  // Define a source component
-  ObjComponent *source = new ObjComponent(
-      "source", createSphere(0.01 /*1cm*/, V3D(0, 0, 0), "1"), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -541,21 +521,8 @@ Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
     bank->setRot(Quat(90.0, V3D(0, 1, 0)));
   }
 
-  // Define a source component
-  ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
-  testInst->add(source);
-  testInst->markAsSource(source);
-
-  // Define a sample as a simple sphere
-  Object_sptr sampleSphere =
-      createSphere(0.001, V3D(0.0, 0.0, 0.0), "sample-shape");
-  ObjComponent *sample =
-      new ObjComponent("sample", sampleSphere, testInst.get());
-  testInst->setPos(0.0, 0.0, 0.0);
-  testInst->add(sample);
-  testInst->markAsSamplePos(sample);
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
 }
@@ -727,6 +694,8 @@ createInstrumentWithPSDTubes(const size_t nTubes, const size_t nPixelsPerTube,
       testInst->markAsDetector(pixel);
     }
     testInst->add(tube);
+    addSourceToInstrument(testInst, V3D(0.0, 0.0, -1.0));
+    addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
   }
   return testInst;
 }
