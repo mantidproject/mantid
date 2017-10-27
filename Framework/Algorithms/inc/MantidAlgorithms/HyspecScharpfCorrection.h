@@ -46,7 +46,8 @@ private:
   /**
    * Execute Scharpf correction for event lists
    * @param wevector the list of events to correct
-   * @param thPlane the in-plane angle for the detector corresponding to the event list
+   * @param thPlane the in-plane angle for the detector corresponding to the
+   * event list
    */
   template <class T>
   void ScharpfEventHelper(std::vector<T> &wevector, double thPlane);
