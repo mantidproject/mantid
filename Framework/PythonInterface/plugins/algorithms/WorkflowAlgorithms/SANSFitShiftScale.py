@@ -239,11 +239,8 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
                                "than the max value of the REAR detector data set")
 
         # Get the min and max range
-        min_q = max(rear_q_min, front_q_min)
-        max_q = min(rear_q_max, front_q_max)
-        if fit_min and fit_max:
-            min_q = max(min_q, fit_min)
-            max_q = min(max_q, fit_max)
+        min_q = max(rear_q_min, front_q_min, fit_min)
+        max_q = min(rear_q_max, front_q_max, fit_max)
 
         return min_q, max_q
 
