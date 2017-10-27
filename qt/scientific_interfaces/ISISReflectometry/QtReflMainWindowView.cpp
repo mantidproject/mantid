@@ -5,7 +5,7 @@
 #include "QtReflSettingsTabView.h"
 #include "ReflMainWindowPresenter.h"
 
-#include <qmessagebox.h>
+#include <QMessageBox>
 
 namespace MantidQt {
 namespace CustomInterfaces {

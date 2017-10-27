@@ -45,10 +45,10 @@ Usage
 .. testcode:: ExSumSpectraSimple
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -62,10 +62,10 @@ Output:
 .. testcode:: ExSumSpectraListOfIndicies
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, ListOfWorkspaceIndices='0-3, 10-13')
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -79,10 +79,10 @@ Output:
 .. testcode:: ExSumSpectraStartEnd
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=9)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 
@@ -96,10 +96,10 @@ Output:
 .. testcode:: ExSumSpectraWeighted
 
     ws = CreateSampleWorkspace("Histogram", Random=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
     ws = SumSpectra(ws, WeightedSum=True)
-    print "Workspace has %d spectra" % ws.getNumberHistograms()
+    print("Workspace has %d spectra" % ws.getNumberHistograms())
 
 Output:
 

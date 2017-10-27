@@ -2237,7 +2237,7 @@ void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
   std::vector<std::string> values = this->valuesAsVector();
   if (values.empty())
     return;
-  file->makeGroup(this->name(), "NXlog", 1);
+  file->makeGroup(this->name(), "NXlog", true);
 
   // Find the max length of any string
   auto max_it =
@@ -2275,7 +2275,7 @@ template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
   if (value.empty())
     return;
   std::vector<uint8_t> asUint(value.begin(), value.end());
-  file->makeGroup(this->name(), "NXlog", 1);
+  file->makeGroup(this->name(), "NXlog", true);
   file->writeData("value", asUint);
   file->putAttr("boolean", "1");
   saveTimeVector(file);
@@ -2438,7 +2438,6 @@ TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   size_t index = 0;
   while (index < m_filter.size()) {
     DateAndTime start, stop;
-    // cppcheck-suppress knownConditionTrueFalse
     if (index == 0) {
       if (m_filter[0].second) {
         start = m_filter[0].first;

@@ -359,7 +359,7 @@ double Material::cohScatterLengthSqrd(const double lambda) const {
   // cross section has this properly averaged already
   double crossSection = cohScatterXSection(lambda);
 
-  // 1 barn = 100 fm
+  // 1 barn = 100 fm^2
   return 100. * crossSection * INV_FOUR_PI;
 }
 
@@ -367,7 +367,7 @@ double Material::incohScatterLengthSqrd(const double lambda) const {
   // cross section has this properly averaged already
   double crossSection = incohScatterXSection(lambda);
 
-  // 1 barn = 100 fm
+  // 1 barn = 100 fm^2
   return 100. * crossSection * INV_FOUR_PI;
 }
 
@@ -375,7 +375,7 @@ double Material::totalScatterLengthSqrd(const double lambda) const {
   // cross section has this properly averaged already
   double crossSection = totalScatterXSection(lambda);
 
-  // 1 barn = 100 fm
+  // 1 barn = 100 fm^2
   return 100. * crossSection * INV_FOUR_PI;
 }
 
@@ -384,7 +384,7 @@ double Material::totalScatterLengthSqrd(const double lambda) const {
  * @param group :: name of the group to create
  */
 void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
-  file->makeGroup(group, "NXdata", 1);
+  file->makeGroup(group, "NXdata", true);
   file->putAttr("version", 2);
   file->putAttr("name", m_name);
 

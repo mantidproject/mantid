@@ -365,7 +365,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def sliceParser(str_to_parser):
+def sliceParser(str_to_parser): # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:

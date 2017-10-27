@@ -91,7 +91,7 @@ MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis &uiForm)
 */
 void MuonAnalysisResultTableTab::helpResultsClicked() {
   MantidQt::API::HelpWindow::showCustomInterface(
-      nullptr, QString("Muon_Analysis"), QString("results-table"));
+      nullptr, QString("Muon Analysis"), QString("results-table"));
 }
 
 /**
@@ -576,7 +576,7 @@ void MuonAnalysisResultTableTab::populateLogsAndValues(
        ++logIt) {
     for (auto wsIt = m_logValues.constBegin(); wsIt != m_logValues.constEnd();
          ++wsIt) {
-      auto wsLogValues = wsIt.value();
+      const auto &wsLogValues = wsIt.value();
       if (!wsLogValues.contains(*logIt)) {
         toRemove.insert(*logIt);
         break;

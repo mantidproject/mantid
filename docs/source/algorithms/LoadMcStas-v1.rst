@@ -98,15 +98,15 @@ Usage
 
    # workspace group is first entry in tuple
    group = ws[0]
-   print "Number of entries in group: " + str(group.getNumberOfEntries())
+   print("Number of entries in group: {}".format(group.getNumberOfEntries()))
 
    eventData = ws[1]
-   print "Number of histograms in event data: " + str(eventData.getNumberHistograms())
-   print "Name of event data: " + str(eventData.getName())
+   print("Number of histograms in event data: {}".format(eventData.getNumberHistograms()))
+   print("Name of event data: {}".format(eventData.getName()))
 
    someHistogramData = ws[2]
-   print "Number of histograms in hist data: " + str(someHistogramData.getNumberHistograms())
-   print "Name of hist data: " + str(someHistogramData.getName())
+   print("Number of histograms in hist data: {}".format(someHistogramData.getNumberHistograms()))
+   print("Name of hist data: {}".format(someHistogramData.getName()))
 
 Output:
 

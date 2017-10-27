@@ -2,7 +2,6 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
-#include <QtGui>
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
@@ -11,8 +10,13 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
-#include <vector>
+
+#include <QCoreApplication>
+#include <QGroupBox>
+#include <QScrollArea>
+
 #include <algorithm>
+#include <vector>
 
 using namespace Mantid::Kernel;
 using Mantid::API::IWorkspaceProperty;
@@ -378,7 +382,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties() {
   for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end(); ++pitr) {
     PropertyWidget *widget = pitr.value();
     Mantid::Kernel::Property *prop = widget->getProperty();
-    QString propName = pitr.key();
+    const QString &propName = pitr.key();
     IPropertySettings *settings = prop->getSettings();
 
     // Set the enabled and visible flags based on what the validators say.
@@ -441,7 +445,7 @@ void AlgorithmPropertiesWidget::saveInput() {
     for (auto pitr = m_propWidgets.begin(); pitr != m_propWidgets.end();
          ++pitr) {
       PropertyWidget *widget = pitr.value();
-      QString propName = pitr.key();
+      const QString &propName = pitr.key();
       QString value = widget->getValue();
       //        Mantid::Kernel::Property *prop = widget->getProperty();
       //        if (!prop || prop->remember())

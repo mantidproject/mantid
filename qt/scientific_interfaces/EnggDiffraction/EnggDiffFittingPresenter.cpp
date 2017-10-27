@@ -1705,7 +1705,7 @@ void EnggDiffFittingPresenter::setDefaultBank(
   // can be assigned to text-field when number is given
   else if (!m_view->getFittingRunNumVec().empty()) {
     auto firstDir = m_view->getFittingRunNumVec().at(0);
-    auto intialDir = firstDir;
+    const auto &intialDir = firstDir;
     m_view->setFittingRunNo(intialDir);
   }
   // if nothing found related to text-field input

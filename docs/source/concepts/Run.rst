@@ -54,11 +54,11 @@ Run Properties
   DateAndTime("2015-01-27T11:57:51"))
 
   # Get the start and end time of a run
-  print run.startTime()
-  print run.endTime()
+  print(run.startTime())
+  print(run.endTime())
    
   # Get the total good proton charge
-  print run.getProtonCharge()
+  print(run.getProtonCharge())
 
 .. testoutput:: RunPropertiestest
   :hide:
@@ -81,11 +81,11 @@ Listing all properties
   run = ws.getRun()
 
   # Get a list of the property names 
-  print run.keys()
+  print(run.keys())
 
   # Loop over all of the Properties
   for prop in run.getProperties():
-      print prop.name, prop.value
+      print("{0} {1}".format(prop.name, prop.value))
 
 .. testoutput:: RunListPropertiestest
   :hide:
@@ -106,14 +106,14 @@ Getting a specific property
   run = ws.getRun()
 
   # Check a propetry exists
-  print "Is runstart present: {0}".format(("run_start" in run.keys()))
+  print("Is runstart present: {0}".format(("run_start" in run.keys())))
   # or
-  print "Is runstart present: {0}".format(run.hasProperty("run_start"))
+  print("Is runstart present: {0}".format(run.hasProperty("run_start")))
 
   #get the Property
   runStart = run.getProperty("run_start")
-  print "Property name: " + runStart.name
-  print "Property value: " + runStart.value
+  print("Property name: " + runStart.name)
+  print("Property value: " + runStart.value)
 
 .. testoutput:: RunGetPropertytest
   :hide:
@@ -135,7 +135,7 @@ If the instrument conatains a Goniometer it can be accessed from the run object.
   AddSampleLog(wg,"Motor1","45.","Number")
   SetGoniometer(wg,Axis0="Motor1,0,1,0,1",Axis1="5,0,1,0,1")
 
-  print "Goniometer angles: ",wg.getRun().getGoniometer().getEulerAngles('YZY')
+  print("Goniometer angles:  {}".format(wg.getRun().getGoniometer().getEulerAngles('YZY')))
 
 .. testoutput:: GetGoniometertest
   :hide:

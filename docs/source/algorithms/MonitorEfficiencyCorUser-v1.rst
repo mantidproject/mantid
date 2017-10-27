@@ -39,17 +39,17 @@ Usage
     wsSample = LoadMLZ(Filename='TOFTOFTestdata.nxs')
     wsNorm = MonitorEfficiencyCorUser(wsSample )
     # Input and output workspaces have the same structure
-    print 'Number of histograms of the input and output workspaces:'
-    print wsSample.getNumberHistograms(), wsNorm.getNumberHistograms()
-    print 'Number of time channels of the input an output workspaces:'
-    print wsSample.blocksize(), wsNorm.blocksize()
+    print('Number of histograms of the input and output workspaces:')
+    print('{} {}'.format(wsSample.getNumberHistograms(), wsNorm.getNumberHistograms()))
+    print('Number of time channels of the input an output workspaces:')
+    print('{} {}'.format( wsSample.blocksize(), wsNorm.blocksize()))
     # Check calculation of normalisation coefficient between input and output workspaces
     wsCheck = Divide(wsSample,wsNorm)
-    print "Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm: %5.3f" % wsCheck.readY(102)[1]
+    print("Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm: {:.3f}".format(wsCheck.readY(102)[1]))
     # Read the values of the incident energy and of the monitor counts from the SampleLogs of wsSample
     monitor_counts = float(mtd['wsSample'].getRun().getLogData('monitor_counts').value)
     Ei = float(mtd['wsSample'].getRun().getLogData('Ei').value)
-    print "Coefficient from theoretical formula = monitor_counts * sqrt(Ei/25.3): %5.3f" % (monitor_counts*np.sqrt(Ei/25.3))
+    print("Coefficient from theoretical formula = monitor_counts * sqrt(Ei/25.3): {:.3f}".format(monitor_counts*np.sqrt(Ei/25.3)))
  
  
 Output:

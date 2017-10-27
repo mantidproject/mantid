@@ -44,10 +44,10 @@ Usage
   # different on different systems and breaks tests
   for line in file[:9]:
       # print the line stripping any ending white spaces
-      print line.rstrip()
+      print(line.rstrip())
   for line in file[10:12]:
       # print the line stripping any ending white spaces
-      print line.rstrip()
+      print(line.rstrip())
 
 Output
 ######

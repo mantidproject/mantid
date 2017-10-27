@@ -87,18 +87,18 @@
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowserutils_p.h"
-#include <QtCore/QDateTime>
-#include <QtCore/QLocale>
-#include <QtCore/QMap>
-#include <QtCore/QTimer>
-#include <QtGui/QIcon>
-#include <QtCore/QMetaEnum>
-#include <QtGui/QFontDatabase>
-#include <QtGui/QStyleOption>
-#include <QtGui/QStyle>
-#include <QtGui/QApplication>
-#include <QtGui/QPainter>
-#include <QtGui/QLabel>
+#include <QDateTime>
+#include <QLocale>
+#include <QMap>
+#include <QTimer>
+#include <QIcon>
+#include <QMetaEnum>
+#include <QFontDatabase>
+#include <QStyleOption>
+#include <QStyle>
+#include <QApplication>
+#include <QPainter>
+#include <QLabel>
 
 #include <cfloat>
 #include <climits>
@@ -227,7 +227,7 @@ static Value getData(const QMap<const QtProperty *, PrivateData> &propertyMap,
                      Value PrivateData::*data, const QtProperty *property,
                      const Value &defaultValue = Value()) {
   typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::const_iterator PropertyToDataConstIterator;
+  typedef typename PropertyToData::const_iterator PropertyToDataConstIterator;
   const PropertyToDataConstIterator it = propertyMap.constFind(property);
   if (it == propertyMap.constEnd())
     return defaultValue;
@@ -265,7 +265,7 @@ static void setSimpleValue(
                                                 ValueChangeParameter),
     QtProperty *property, const Value &val) {
   typedef QMap<const QtProperty *, Value> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
+  typedef typename PropertyToData::iterator PropertyToDataIterator;
   const PropertyToDataIterator it = propertyMap.find(property);
   if (it == propertyMap.end())
     return;
@@ -289,9 +289,9 @@ static void setValueInRange(
     QtProperty *property, const Value &val,
     void (PropertyManagerPrivate::*setSubPropertyValue)(QtProperty *,
                                                         ValueChangeParameter)) {
-  typedef Q_TYPENAME PropertyManagerPrivate::Data PrivateData;
+  typedef typename PropertyManagerPrivate::Data PrivateData;
   typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
+  typedef typename PropertyToData::iterator PropertyToDataIterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -330,9 +330,9 @@ static void setBorderValues(
                                                         ValueChangeParameter,
                                                         ValueChangeParameter,
                                                         ValueChangeParameter)) {
-  typedef Q_TYPENAME PropertyManagerPrivate::Data PrivateData;
+  typedef typename PropertyManagerPrivate::Data PrivateData;
   typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
+  typedef typename PropertyToData::iterator PropertyToDataIterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -382,7 +382,7 @@ static void setBorderValue(
                                                         ValueChangeParameter,
                                                         ValueChangeParameter)) {
   typedef QMap<const QtProperty *, PrivateData> PropertyToData;
-  typedef Q_TYPENAME PropertyToData::iterator PropertyToDataIterator;
+  typedef typename PropertyToData::iterator PropertyToDataIterator;
   const PropertyToDataIterator it = managerPrivate->m_values.find(property);
   if (it == managerPrivate->m_values.end())
     return;
@@ -2448,7 +2448,7 @@ QString QtLocalePropertyManager::valueText(const QtProperty *property) const {
   if (it == d_ptr->m_values.constEnd())
     return QString();
 
-  QLocale loc = it.value();
+  const QLocale &loc = it.value();
 
   int langIdx = 0;
   int countryIdx = 0;

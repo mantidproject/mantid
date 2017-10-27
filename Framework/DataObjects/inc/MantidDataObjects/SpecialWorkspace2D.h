@@ -74,8 +74,7 @@ protected:
 
   void init(const size_t &NVectors, const size_t &XLength,
             const size_t &YLength) override;
-  void init(const size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// Return human-readable string
   const std::string toString() const override;

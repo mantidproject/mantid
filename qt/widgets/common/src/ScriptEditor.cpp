@@ -294,7 +294,7 @@ void ScriptEditor::saveScript(const QString &filename) {
   if (!file.open(QIODevice::WriteOnly)) {
     QString msg =
         QString("Could not open file \"%1\" for writing.").arg(filename);
-    throw std::runtime_error(msg.toAscii().data());
+    throw std::runtime_error(msg.toLatin1().data());
   }
 
   m_filename = filename;

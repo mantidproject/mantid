@@ -134,12 +134,7 @@ class BayesQuasi(PythonAlgorithm):
     # pylint: disable=too-many-locals,too-many-statements
     def PyExec(self):
 
-        # Check for platform support
-        if not is_supported_f2py_platform():
-            unsupported_msg = "This algorithm can only be run on valid platforms." \
-                              + " please view the algorithm documentation to see" \
-                              + " what platforms are currently supported"
-            raise RuntimeError(unsupported_msg)
+        self.check_platform_support()
 
         from IndirectBayes import (CalcErange, GetXYE)
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
@@ -149,19 +144,13 @@ class BayesQuasi(PythonAlgorithm):
         nbins = [self._sam_bins, self._res_bins]
         setup_prog.report('Converting to binary for Fortran')
         # convert true/false to 1/0 for fortran
-        o_el = 1 if self._elastic else 0
-        o_w1 = 1 if self._width else 0
-        o_res = 1 if self._res_norm else 0
+        o_el = int(self._elastic)
+        o_w1 = int(self._width)
+        o_res = int(self._res_norm)
 
         # fortran code uses background choices defined using the following numbers
         setup_prog.report('Encoding input options')
-        if self._background == 'Sloping':
-            o_bgd = 2
-        elif self._background == 'Flat':
-            o_bgd = 1
-        elif self._background == 'Zero':
-            o_bgd = 0
-
+        o_bgd = ['Zero', 'Flat', 'Sloping'].index(self._background)
         fitOp = [o_el, o_bgd, o_w1, o_res]
 
         setup_prog.report('Establishing save path')
@@ -182,14 +171,7 @@ class BayesQuasi(PythonAlgorithm):
         # Check for trailing and leading zeros in data
         setup_prog.report('Checking for leading and trailing zeros in the data')
         first_data_point, last_data_point = IndentifyDataBoundaries(self._samWS)
-        if first_data_point > self._e_min:
-            logger.warning("Sample workspace contains leading zeros within the energy range.")
-            logger.warning("Updating eMin: eMin = " + str(first_data_point))
-            self._e_min = first_data_point
-        if last_data_point < self._e_max:
-            logger.warning("Sample workspace contains trailing zeros within the energy range.")
-            logger.warning("Updating eMax: eMax = " + str(last_data_point))
-            self._e_max = last_data_point
+        self.check_energy_range_for_zeroes(first_data_point, last_data_point)
 
         # update erange with new values
         erange = [self._e_min, self._e_max]
@@ -278,26 +260,27 @@ class BayesQuasi(PythonAlgorithm):
                 nd, xout, yout, eout, yfit, yprob = QLr.qlres(numb, Xv, Yv, Ev, reals, fitOp,
                                                               Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                               wrks, wrkr, lwrk)
-                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(yprob[3])
+                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(
+                    yprob[3])
                 logger.information(message)
-            if prog == 'QLd':
+            elif prog == 'QLd':
                 workflow_prog.report('Processing Sample number %i' % spectrum)
                 nd, xout, yout, eout, yfit, yprob = QLd.qldata(numb, Xv, Yv, Ev, reals, fitOp,
                                                                Xdat, Xb, Yb, Eb, Wy, We,
                                                                wrks, wrkr, lwrk)
-                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(yprob[3])
+                message = ' Log(prob) : ' + str(yprob[0]) + ' ' + str(yprob[1]) + ' ' + str(yprob[2]) + ' ' + str(
+                    yprob[3])
                 logger.information(message)
-            if prog == 'QSe':
+            elif prog == 'QSe':
                 workflow_prog.report('Processing Sample number %i as Stretched Exp' % spectrum)
                 nd, xout, yout, eout, yfit, yprob = Qse.qlstexp(numb, Xv, Yv, Ev, reals, fitOp,
                                                                 Xdat, Xb, Yb, Wy, We, dtn, xsc,
                                                                 wrks, wrkr, lwrk)
+
             dataX = xout[:nd]
             dataX = np.append(dataX, 2 * xout[nd - 1] - xout[nd - 2])
             yfit_list = np.split(yfit[:4 * nd], 4)
             dataF1 = yfit_list[1]
-            if self._program == 'QL':
-                dataF2 = yfit_list[2]
             workflow_prog.report('Processing data')
             dataG = np.zeros(nd)
             datX = dataX
@@ -315,6 +298,7 @@ class BayesQuasi(PythonAlgorithm):
             res_plot = [0, 1, 2]
             if self._program == 'QL':
                 workflow_prog.report('Processing Lorentzian result data')
+                dataF2 = yfit_list[2]
                 datX = np.append(datX, dataX)
                 datY = np.append(datY, dataF2[:nd])
                 datE = np.append(datE, dataG)
@@ -359,7 +343,7 @@ class BayesQuasi(PythonAlgorithm):
             s_api.CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
                                   Nspec=3, UnitX='MomentumTransfer')
             outWS = self.C2Fw(fname)
-        if self._program == 'QSe':
+        elif self._program == 'QSe':
             comp_prog.report('Running C2Se')
             outWS = self.C2Se(fname)
 
@@ -385,6 +369,23 @@ class BayesQuasi(PythonAlgorithm):
         if self._program == 'QL':
             s_api.SortXAxis(InputWorkspace=probWS, OutputWorkspace=probWS, EnableLogging=False)
             self.setProperty('OutputWorkspaceProb', probWS)
+
+    def check_platform_support(self):
+        if not is_supported_f2py_platform():
+            unsupported_msg = "This algorithm can only be run on valid platforms." \
+                              + " please view the algorithm documentation to see" \
+                              + " what platforms are currently supported"
+            raise RuntimeError(unsupported_msg)
+
+    def check_energy_range_for_zeroes(self, first_data_point, last_data_point):
+        if first_data_point > self._e_min:
+            logger.warning("Sample workspace contains leading zeros within the energy range.")
+            logger.warning("Updating eMin: eMin = " + str(first_data_point))
+            self._e_min = first_data_point
+        if last_data_point < self._e_max:
+            logger.warning("Sample workspace contains trailing zeros within the energy range.")
+            logger.warning("Updating eMax: eMax = " + str(last_data_point))
+            self._e_max = last_data_point
 
     def _add_sample_logs(self, workspace, fit_program, e_range, binning):
 
@@ -458,7 +459,8 @@ class BayesQuasi(PythonAlgorithm):
 
         logger.information('Vaxis=' + str(Vaxis))
         s_api.CreateWorkspace(OutputWorkspace=outWS, DataX=dataX, DataY=dataY, DataE=dataE, Nspec=nhist,
-                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis, YUnitLabel='')
+                              UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis,
+                              YUnitLabel='')
 
         return outWS
 
@@ -643,7 +645,8 @@ class BayesQuasi(PythonAlgorithm):
         e = np.asarray(e).flatten()
 
         s_api.CreateWorkspace(OutputWorkspace=output_workspace, DataX=x, DataY=y, DataE=e, Nspec=num_spectra,
-                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text', VerticalAxisValues=axis_names)
+                              UnitX='MomentumTransfer', YUnitLabel='', VerticalAxisUnit='Text',
+                              VerticalAxisValues=axis_names)
 
         return output_workspace
 
