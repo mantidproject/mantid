@@ -20,10 +20,9 @@ using namespace API;
 using namespace DataObjects;
 
 SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecNum(0), m_minWsInd(0), m_maxWsInd(0),
-      m_keepMonitors(false), m_replaceSpecialValues(false),
-      m_numberOfSpectra(0), m_yLength(0), m_indices(),
-      m_calculateWeightedSum(false) {}
+    : API::Algorithm(), m_outSpecNum(0), m_keepMonitors(false),
+      m_replaceSpecialValues(false), m_numberOfSpectra(0), m_yLength(0),
+      m_indices(), m_calculateWeightedSum(false) {}
 
 /** Initialisation method.
  *
@@ -86,45 +85,49 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
   std::map<std::string, std::string> validationOutput;
 
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-  m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
+  const int numSpectra =
+      static_cast<int>(localworkspace->getNumberHistograms());
   const int minIndex = getProperty("StartWorkspaceIndex");
   const int maxIndex = getProperty("EndWorkspaceIndex");
 
-  // check StartWorkSpaceIndex in range
-  if (minIndex >= m_numberOfSpectra) {
-    validationOutput["EndWorkspaceIndex"] =
+  // check StartWorkSpaceIndex,  >=0 done by validator
+  if (minIndex >= numSpectra) {
+    validationOutput["StartWorkspaceIndex"] =
         "Selected minimum workspace index is greater than available spectra.";
   }
 
-  // check StartWorkspaceIndex < EndWorkspaceIndex
-  if (minIndex > maxIndex) {
-    validationOutput["StartWorkspaceIndex"] = "Selected minimum workspace "
-                                              "index is greater than selected "
-                                              "maximum workspace index.";
-    validationOutput["EndWorkspaceIndex"] = "Selected maximum workspace index "
-                                            "is lower than selected minimum "
-                                            "workspace index.";
-  }
-
   // check EndWorkspaceIndex in range
-  if (maxIndex != EMPTY_INT() && maxIndex >= m_numberOfSpectra) {
-    validationOutput["EndWorkspaceIndex"] =
-        "Selected maximum workspace index is greater than available spectra.";
+  if (maxIndex != EMPTY_INT()) {
+    // check EndWorkspaceIndex in range
+    if (maxIndex >= numSpectra) {
+      validationOutput["EndWorkspaceIndex"] =
+          "Selected maximum workspace index is greater than available spectra.";
+      // check StartWorkspaceIndex < EndWorkspaceIndex
+    } else if (minIndex > maxIndex) {
+      validationOutput["StartWorkspaceIndex"] =
+          "Selected minimum workspace "
+          "index is greater than selected "
+          "maximum workspace index.";
+      validationOutput["EndWorkspaceIndex"] =
+          "Selected maximum workspace index "
+          "is lower than selected minimum "
+          "workspace index.";
+    }
   }
 
   // check ListOfWorkspaceIndices in range
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-  m_indices.clear();
-  // only if specified
-  if (!indices_list.empty()) {
-    m_indices.insert(indices_list.begin(), indices_list.end());
-    const auto listMaxIndex = *m_indices.rbegin();
-    const auto listMinIndex = *m_indices.begin();
-    if ((listMaxIndex >= m_numberOfSpectra) || (listMinIndex < 0)) {
-      validationOutput["ListOfWorkspaceIndices"] =
-          "One or more indices out of range of available spectra.";
+  if (!indices_list.empty()) { // only if specified
+    // indices are assumed to be sorted
+    for (const auto index : indices_list) {
+      if ((index >= numSpectra) || (index < 0)) {
+        validationOutput["ListOfWorkspaceIndices"] =
+            "One or more indices out of range of available spectra.";
+        break;
+      }
     }
   }
+
   return validationOutput;
 }
 
@@ -133,46 +136,14 @@ std::map<std::string, std::string> SumSpectra::validateInputs() {
  */
 void SumSpectra::exec() {
   // Try and retrieve the optional properties
-  m_minWsInd = getProperty("StartWorkspaceIndex");
-  m_maxWsInd = getProperty("EndWorkspaceIndex");
-  const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
-
   m_keepMonitors = getProperty("IncludeMonitors");
   m_replaceSpecialValues = getProperty("RemoveSpecialValues");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
-
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
   m_yLength = static_cast<int>(localworkspace->blocksize());
-
-  // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
-  if (m_minWsInd >= m_numberOfSpectra) {
-    g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
-    m_minWsInd = 0;
-  }
-
-  if (indices_list.empty()) {
-    // If no list was given and no max, just do all.
-    if (isEmpty(m_maxWsInd))
-      m_maxWsInd = m_numberOfSpectra - 1;
-  }
-
-  // Something for m_maxWsIndex was given but it is out of range?
-  if (!isEmpty(m_maxWsInd) &&
-      (m_maxWsInd > m_numberOfSpectra - 1 || m_maxWsInd < m_minWsInd)) {
-    g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
-    m_maxWsInd = m_numberOfSpectra - 1;
-  }
-
-  // Make the set of indices to sum up from the list
-  m_indices.insert(indices_list.begin(), indices_list.end());
-
-  // And add the range too, if any
-  if (!isEmpty(m_maxWsInd)) {
-    for (int i = m_minWsInd; i <= m_maxWsInd; i++)
-      m_indices.insert(i);
-  }
+  determineIndices();
 
   // determine the output spectrum number
   m_outSpecNum = getOutputSpecNo(localworkspace);
@@ -196,7 +167,8 @@ void SumSpectra::exec() {
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
-            localworkspace, 1, localworkspace->x(m_minWsInd).size(), m_yLength);
+            localworkspace, 1, localworkspace->x(*(m_indices.begin())).size(),
+            m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
     size_t numZeros(0);   // number of spectra which have 0 value in the first
@@ -244,6 +216,30 @@ void SumSpectra::exec() {
   }
 }
 
+void SumSpectra::determineIndices() {
+  // assume that m_numberOfSpectra has been set
+  m_indices.clear();
+
+  // try the list form first
+  const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
+  m_indices.insert(indices_list.begin(), indices_list.end());
+
+  // add the range specified by the user
+  // this has been checked to be 0<= m_minWsInd <= maxIndex <=
+  // m_numberOfSpectra where maxIndex can be an EMPTY_INT
+  int minIndex = getProperty("StartWorkspaceIndex");
+  int maxIndex = getProperty("EndWorkspaceIndex");
+  if (isEmpty(maxIndex) && m_indices.empty()) {
+    maxIndex = m_numberOfSpectra - 1;
+  }
+
+  // create the indices in the range
+  if (!isEmpty(maxIndex)) {
+    for (int i = minIndex; i <= maxIndex; i++)
+      m_indices.insert(i);
+  }
+}
+
 /**
  * Determine the minimum spectrum No for summing. This requires that
  * SumSpectra::indices has aly been set.
@@ -252,7 +248,7 @@ void SumSpectra::exec() {
  */
 specnum_t
 SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
-  // initial value
+  // initial value - any included spectrum will do
   specnum_t specId =
       localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
 
@@ -319,9 +315,6 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
     Weight.assign(OutputYSum.size(), 0);
     nZeros.assign(OutputYSum.size(), 0);
   }
-  numSpectra = 0;
-  numMasked = 0;
-  numZeros = 0;
 
   MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
   // Clean workspace of any NANs or Inf values
@@ -329,13 +322,6 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : m_indices) {
-    // Don't go outside the range.
-    if ((wsIndex >= m_numberOfSpectra) || (wsIndex < 0)) {
-      g_log.error() << "Invalid index " << wsIndex
-                    << " was specified. Sum was aborted.\n";
-      break;
-    }
-
     if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
       if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))
@@ -426,20 +412,10 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     Weight.assign(YSum.size(), 0);
     nZeros.assign(YSum.size(), 0);
   }
-  numSpectra = 0;
-  numMasked = 0;
-  numZeros = 0;
 
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : m_indices) {
-    // Don't go outside the range.
-    if ((wsIndex >= m_numberOfSpectra) || (wsIndex < 0)) {
-      g_log.error() << "Invalid index " << wsIndex
-                    << " was specified. Sum was aborted.\n";
-      break;
-    }
-
     if (spectrumInfo.hasDetectors(wsIndex)) {
       // Skip monitors, if the property is set to do so
       if (!m_keepMonitors && spectrumInfo.isMonitor(wsIndex))

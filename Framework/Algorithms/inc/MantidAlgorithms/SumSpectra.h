@@ -93,13 +93,10 @@ private:
 
   API::MatrixWorkspace_sptr
   replaceSpecialValues(API::MatrixWorkspace_sptr inputWs);
+  void determineIndices();
 
   /// The output spectrum number
   specnum_t m_outSpecNum;
-  /// The spectrum to start the integration from
-  int m_minWsInd;
-  /// The spectrum to finish the integration at
-  int m_maxWsInd;
   /// Set true to keep monitors
   bool m_keepMonitors;
   /// Set true to remove special values before processing
