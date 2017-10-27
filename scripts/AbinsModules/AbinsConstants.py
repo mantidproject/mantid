@@ -128,7 +128,7 @@ NUM_ZERO = 10e-15
 
 MAX_ORDER = 4  # max quantum order event
 
-ALL_SUPPORTED_DFT_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
+ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 ONE_DIMENSIONAL_SPECTRUM = 1
@@ -172,3 +172,11 @@ ONE_CHARACTER = 1
 EOF = b""
 
 ROTATIONS_AND_TRANSLATIONS = 6
+
+# This constant is used to check whether for the given atom mass averaged over all isotopes or mass of the
+# specific isotope is used.
+MASS_EPS = 1e-2  # in amu units.
+
+# this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
+# the same mass
+ONLY_ONE_MASS = 1

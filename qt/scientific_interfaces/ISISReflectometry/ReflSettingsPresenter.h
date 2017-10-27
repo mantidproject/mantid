@@ -1,10 +1,11 @@
 #ifndef MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 #define MANTID_ISISREFLECTOMETRY_REFLSETTINGSPRESENTER_H
 
-#include "MantidAPI/IAlgorithm_fwd.h"
-#include "MantidGeometry/Instrument_fwd.h"
 #include "DllConfig.h"
 #include "IReflSettingsPresenter.h"
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidGeometry/Instrument_fwd.h"
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -56,6 +57,13 @@ public:
   std::string getReductionOptions() const override;
   /// Returns global options for 'Stitch1DMany'
   std::string getStitchOptions() const override;
+  // Loads the runs with the names/run numbers specified by the vector.
+  void
+  loadTransmissionRuns(std::vector<std::string> const &transmissionRuns) const;
+  std::string
+  firstTransmissionRunLabelled(std::vector<std::string> const &runNumber) const;
+  std::string secondTransmissionRunLabelled(
+      std::vector<std::string> const &runNumber) const;
 
 private:
   void createStitchHints();

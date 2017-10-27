@@ -365,26 +365,6 @@ void ExtractSpectra::execEvent() {
  * input workspace
  */
 void ExtractSpectra::checkProperties() {
-  m_minX = this->getXMin();
-  m_maxX = this->getXMax();
-  const size_t xSize = m_inputWorkspace->x(0).size();
-  if (m_minX > 0 || m_maxX < xSize) {
-    if (m_minX > m_maxX) {
-      g_log.error("XMin must be less than XMax");
-      throw std::out_of_range("XMin must be less than XMax");
-    }
-    if (m_minX == m_maxX && m_commonBoundaries && eventW == nullptr) {
-      g_log.error("The X range given lies entirely within a single bin");
-      throw std::out_of_range(
-          "The X range given lies entirely within a single bin");
-    }
-    m_croppingInX = true;
-  }
-  if (!m_commonBoundaries)
-    m_minX = 0;
-  if (!m_commonBoundaries)
-    m_maxX = static_cast<int>(m_inputWorkspace->x(0).size());
-
   // The hierarchy of inputs is (one is being selected):
   // 1. DetectorList
   // 2. WorkspaceIndexList
@@ -397,11 +377,12 @@ void ExtractSpectra::checkProperties() {
     m_workspaceIndexList = getProperty("WorkspaceIndexList");
 
     if (m_workspaceIndexList.empty()) {
-      int minSpec = getProperty("StartWorkspaceIndex");
-      const int numberOfSpectra =
-          static_cast<int>(m_inputWorkspace->getNumberHistograms());
-      int maxSpec = getProperty("EndWorkspaceIndex");
-      if (isEmpty(maxSpec))
+      int minSpec_i = getProperty("StartWorkspaceIndex");
+      size_t minSpec = static_cast<size_t>(minSpec_i);
+      const size_t numberOfSpectra = m_inputWorkspace->getNumberHistograms();
+      int maxSpec_i = getProperty("EndWorkspaceIndex");
+      size_t maxSpec = static_cast<size_t>(maxSpec_i);
+      if (isEmpty(maxSpec_i))
         maxSpec = numberOfSpectra - 1;
 
       // Check 'StartSpectrum' is in range 0-numberOfSpectra
@@ -427,6 +408,32 @@ void ExtractSpectra::checkProperties() {
       }
     }
   }
+
+  // get the x-range from the used spectra
+  size_t spectrumIndex = 0; // default is just look at the initial spectrum
+  if (!m_workspaceIndexList.empty())
+    spectrumIndex =
+        m_workspaceIndexList.front(); // or the first one being extracted
+
+  m_minX = this->getXMin(spectrumIndex);
+  m_maxX = this->getXMax(spectrumIndex);
+  const size_t xSize = m_inputWorkspace->x(spectrumIndex).size();
+  if (m_minX > 0 || m_maxX < xSize) {
+    if (m_minX > m_maxX) {
+      g_log.error("XMin must be less than XMax");
+      throw std::out_of_range("XMin must be less than XMax");
+    }
+    if (m_minX == m_maxX && m_commonBoundaries && eventW == nullptr) {
+      g_log.error("The X range given lies entirely within a single bin");
+      throw std::out_of_range(
+          "The X range given lies entirely within a single bin");
+    }
+    m_croppingInX = true;
+  }
+  if (!m_commonBoundaries)
+    m_minX = 0;
+  if (!m_commonBoundaries)
+    m_maxX = static_cast<int>(m_inputWorkspace->x(spectrumIndex).size());
 }
 
 /** Find the X index corresponding to (or just within) the value given in the
@@ -435,7 +442,7 @@ void ExtractSpectra::checkProperties() {
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMin value.
  */
-size_t ExtractSpectra::getXMin(const int wsIndex) {
+size_t ExtractSpectra::getXMin(const size_t wsIndex) {
   double minX_val = getProperty("XMin");
   size_t xIndex = 0;
   if (!isEmpty(minX_val)) { // A value has been passed to the algorithm, check
@@ -462,8 +469,8 @@ size_t ExtractSpectra::getXMin(const int wsIndex) {
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMax value.
  */
-size_t ExtractSpectra::getXMax(const int wsIndex) {
-  auto &X = m_inputWorkspace->x(wsIndex);
+size_t ExtractSpectra::getXMax(const size_t wsIndex) {
+  const auto &X = m_inputWorkspace->x(wsIndex);
   size_t xIndex = X.size();
   // get the value that the user entered if they entered one at all
   double maxX_val = getProperty("XMax");

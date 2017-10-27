@@ -41,7 +41,7 @@ Getter for the current entry.
 @return current entry value
 */
 int SimpleBinInputWidget::getEntry(double, double) const {
-  return std::stoi(std::string(m_nBinsBox->text().toAscii()));
+  return std::stoi(std::string(m_nBinsBox->text().toLatin1()));
 }
 
 /// Destructor
