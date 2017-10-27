@@ -7,6 +7,7 @@ from sans.common.general_functions import create_child_algorithm
 from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
 
+
 class Merger(with_metaclass(ABCMeta, object)):
     """ Merger interface"""
 
