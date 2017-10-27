@@ -3,6 +3,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 import EnggUtils
+import time  # REMEMBER TO TAKE THIS OUT
 
 
 class EnggFocus(PythonAlgorithm):
@@ -116,41 +117,50 @@ class EnggFocus(PythonAlgorithm):
         indices = EnggUtils.get_ws_indices_from_input_properties(input_ws, bank, spectra)
 
         detector_positions = self.getProperty("DetectorPositions").value
-        n_reports = 5
-        if detector_positions:
-            n_reports += 1
+        n_reports = 8
         prog = Progress(self, start=0, end=1, nreports=n_reports)
 
         # Leave only the data for the bank/spectra list requested
         prog.report('Selecting spectra from input workspace')
+        time.sleep(2)
         input_ws = EnggUtils.crop_data(self, input_ws, indices)
 
         prog.report('Masking some bins if requested')
+        time.sleep(2)
         self._mask_bins(input_ws, self.getProperty('MaskBinsXMins').value, self.getProperty('MaskBinsXMaxs').value)
 
-        prog.report('Preparing input workspace with vanadium corrections')
+        prog.report('Applying vanadium corrections')
+        time.sleep(2)
         # Leave data for the same bank in the vanadium workspace too
         vanadium_ws = self.getProperty('VanadiumWorkspace').value
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
-        EnggUtils.apply_vanadium_corrections(self, input_ws, indices, vanadium_ws, van_integration_ws, van_curves_ws)
+        EnggUtils.apply_vanadium_corrections(parent=self, ws=input_ws, indices=indices, vanadium_ws=vanadium_ws,
+                                             van_integration_ws=van_integration_ws, van_curves_ws=van_curves_ws,
+                                             progress_range=(0.3, 0.6))
 
+        prog.report("Applying calibration if requested")
+        time.sleep(2)
         # Apply calibration
         if detector_positions:
             self._apply_calibration(input_ws, detector_positions)
 
         # Convert to dSpacing
+        prog.report("Converting to d")
         input_ws = EnggUtils.convert_to_d_spacing(self, input_ws)
 
         prog.report('Summing spectra')
+        time.sleep(2)
         # Sum the values across spectra
         input_ws = EnggUtils.sum_spectra(self, input_ws)
 
         prog.report('Preparing output workspace')
+        time.sleep(2)
         # Convert back to time of flight
         input_ws = EnggUtils.convert_to_TOF(self, input_ws)
 
         prog.report('Normalizing input workspace if needed')
+        time.sleep(2)
         if self.getProperty('NormaliseByCurrent').value:
             self._normalize_by_current(input_ws)
 

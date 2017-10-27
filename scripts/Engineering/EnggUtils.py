@@ -228,7 +228,8 @@ def _default_if_false(value, default):
     return default
 
 
-def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws):
+def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws,
+                               progress_range=None):
     """
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
     EnggVanadiumCorrections
@@ -239,6 +240,7 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
     @param vanadium_ws :: workspace with data from a Vanadium run
     @param van_integration_ws :: alternatively to vanWS, pre-calculated integration from Vanadium data
     @param van_curves_ws :: alternatively to vanWS, pre-calculated bank curves from Vanadium data
+    @param progress_range :: pair for (startProgress, endProgress) with respect to the parent algorithm
     """
     if vanadium_ws and vanadium_ws.getNumberHistograms() < len(indices):
         raise ValueError("Inconsistency in inputs: the Vanadium workspace has less spectra (%d) than "
@@ -253,7 +255,12 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
         van_integration_ws = tbl
 
     # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
-    alg = parent.createChildAlgorithm('EnggVanadiumCorrections')
+    progress_params = dict()
+    if progress_range:
+        progress_params["startProgress"] = progress_range[0]
+        progress_params["endProgress"] = progress_range[1]
+
+    alg = parent.createChildAlgorithm('EnggVanadiumCorrections', **progress_params)
     if ws:
         alg.setProperty('Workspace', ws)
     if vanadium_ws:
@@ -262,6 +269,7 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
         alg.setProperty('IntegrationWorkspace', van_integration_ws)
     if van_curves_ws:
         alg.setProperty('CurvesWorkspace', van_curves_ws)
+
     alg.execute()
 
 

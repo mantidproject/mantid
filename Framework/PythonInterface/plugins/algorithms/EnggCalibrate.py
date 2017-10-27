@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
+import mantid.simpleapi as mantid
 
+import time # REMEMBER TO TAKE THIS OUT
 
 class EnggCalibrate(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
@@ -26,8 +28,8 @@ class EnggCalibrate(PythonAlgorithm):
                                                 direction=Direction.Input),
                              doc="A list of dSpacing values where peaks are expected.")
 
-        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
-                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile", defaultValue="", action=FileAction.OptionalLoad,
+                                          extensions=[".csv"]),
                              doc="Load from file a list of dSpacing values to be translated into TOF to find expected "
                                  "peaks. This takes precedence over 'ExpectedPeaks' if both options are given.")
 
@@ -35,20 +37,18 @@ class EnggCalibrate(PythonAlgorithm):
         self.setPropertyGroup('ExpectedPeaks', peaks_grp)
         self.setPropertyGroup('ExpectedPeaksFromFile', peaks_grp)
 
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input, PropertyMode.Optional),
                              doc='Workspace with the Vanadium (correction and calibration) run. Alternatively, '
                                  'when the Vanadium run has been already processed, the properties can be used')
 
-        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
-                                                     Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "", Direction.Input,
+                                                     PropertyMode.Optional),
                              doc='Results of integrating the spectra of a Vanadium run, with one column '
                              '(integration result) and one row per spectrum. This can be used in '
                              'combination with OutVanadiumCurveFits from a previous execution and '
                              'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
 
-        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
-                                                     PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input, PropertyMode.Optional),
                              doc='A workspace2D with the fitting workspaces corresponding to the instrument banks. '
                                  'This workspace has three spectra per bank, as produced by the algorithm Fit. '
                                  'This is meant to be used as an alternative input VanadiumWorkspace for testing and '
@@ -75,8 +75,7 @@ class EnggCalibrate(PythonAlgorithm):
         self.setPropertyGroup('Bank', banks_grp)
         self.setPropertyGroup(self.INDICES_PROP_NAME, banks_grp)
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",
-                                                     Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),
                              "Calibrated detector positions. If not specified, default ones (from the "
                              "current instrument definition) are used.")
 
@@ -86,13 +85,13 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
-        self.declareProperty("DIFA", 0.0, direction = Direction.Output,
+        self.declareProperty("DIFA", 0.0, direction=Direction.Output,
                              doc="Calibration parameter DIFA for the bank or range of pixels/detectors given")
 
-        self.declareProperty("DIFC", 0.0, direction = Direction.Output,
+        self.declareProperty("DIFC", 0.0, direction=Direction.Output,
                              doc="Calibration parameter DIFC for the bank or range of pixels/detectors given")
 
-        self.declareProperty("TZERO", 0.0, direction = Direction.Output,
+        self.declareProperty("TZERO", 0.0, direction=Direction.Output,
                              doc="Calibration parameter TZERO for the bank or range of pixels/detectors given")
 
         self.declareProperty(ITableWorkspaceProperty("FittedPeaks", "", Direction.Output),
@@ -118,9 +117,12 @@ class EnggCalibrate(PythonAlgorithm):
     def PyExec(self):
         import EnggUtils
 
-        prog = Progress(self, start=0, end=1, nreports=4)
+        max_reports = 20
+        prog = Progress(self, start=0, end=1, nreports=max_reports)
         # Get peaks in dSpacing from file
         prog.report("Reading peaks")
+        time.sleep(2)
+
         expected_peaks_dsp = EnggUtils.read_in_expected_peaks(filename=self.getPropertyValue("ExpectedPeaksFromFile"),
                                                               expected_peaks=self.getProperty('ExpectedPeaks').value)
 
@@ -128,13 +130,16 @@ class EnggCalibrate(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         prog.report('Focusing the input workspace')
+        time.sleep(2)
         focused_ws = self._focus_run(self.getProperty('InputWorkspace').value,
                                      self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
-                                     self.getProperty(self.INDICES_PROP_NAME).value)
+                                     self.getProperty(self.INDICES_PROP_NAME).value,
+                                     prog)
 
         prog.report('Fitting parameters for the focused run')
-        difa, difc, zero, fitted_peaks = self._fit_params(focused_ws, expected_peaks_dsp)
+        time.sleep(2)
+        difa, difc, zero, fitted_peaks = self._fit_params(focused_ws, expected_peaks_dsp, prog)
 
         self.log().information("Fitted {0} peaks. Resulting DIFA: {1}, DIFC: {2}, TZERO: {3}".
                                format(fitted_peaks.rowCount(), difa, difc, zero))
@@ -145,7 +150,9 @@ class EnggCalibrate(PythonAlgorithm):
         prog.report("Producing outputs")
         self._produce_outputs(difa, difc, zero, fitted_peaks)
 
-    def _fit_params(self, focused_ws, expected_peaks_d):
+        prog.report(max_reports, "Calibration complete")
+
+    def _fit_params(self, focused_ws, expected_peaks_d, prog):
         """
         Fit the GSAS parameters that this algorithm produces: DIFC and TZERO. Fits a
         number of peaks starting from the expected peak positions. Then it fits a line
@@ -154,6 +161,7 @@ class EnggCalibrate(PythonAlgorithm):
         @param focused_ws :: focused workspace to do the fitting on
         @param expected_peaks_d :: expected peaks, used as intial peak positions for the
         fitting, in d-spacing units
+        @param prog :: progress reporter
 
         @returns a tuple with three GSAS calibration parameters (DIFA, DIFC, ZERO),
         and a list of peak centers as fitted
@@ -171,7 +179,10 @@ class EnggCalibrate(PythonAlgorithm):
 
         difc_alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
         difc_alg.setProperty('FittedPeaks', fitted_peaks)
+        prog.report("Performing fit")
         difc_alg.execute()
+        prog.report("Fit complete")
+        time.sleep(2)
 
         difa = difc_alg.getProperty('DIFA').value
         difc = difc_alg.getProperty('DIFC').value
@@ -179,43 +190,43 @@ class EnggCalibrate(PythonAlgorithm):
 
         return difa, difc, zero, fitted_peaks
 
-    def _focus_run(self, ws, vanadium_ws, bank, indices):
+    def _focus_run(self, ws, vanadium_ws, bank, indices, prog):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.
 
         @param ws :: workspace to focus
         @param vanadium_ws :: workspace with Vanadium run for corrections
-        @param bank :: the focussing will be applied on the detectors of this bank
+        @param bank :: the focusing will be applied on the detectors of this bank
         @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
         mutually exclusive)
 
-        @return focussed (summed) workspace
+        @return focused (summed) workspace
         """
-        alg = self.createChildAlgorithm('EnggFocus')
-        alg.setProperty('InputWorkspace', ws)
+        prog.report("Initialising EnggFocus")
+        time.sleep(2)
 
-        alg.setProperty('Bank', bank)
-        alg.setProperty(self.INDICES_PROP_NAME, indices)
+        engg_focus_params = dict()
 
         detector_positions = self.getProperty('DetectorPositions').value
         if detector_positions:
-            alg.setProperty('DetectorPositions', detector_positions)
+            engg_focus_params["DetectorPositions"] = detector_positions
 
         if vanadium_ws:
-            alg.setProperty('VanadiumWorkspace', vanadium_ws)
+            engg_focus_params["VanadiumWorkspace"] = vanadium_ws
 
         van_integration_ws = self.getProperty('VanIntegrationWorkspace').value
         if van_integration_ws:
-            alg.setProperty('VanIntegrationWorkspace', van_integration_ws)
+            engg_focus_params["VanIntegrationWorkspace"] = van_integration_ws
 
         van_curves_ws = self.getProperty('VanCurvesWorkspace').value
         if van_curves_ws:
-            alg.setProperty('VanCurvesWorkspace', van_curves_ws)
+            engg_focus_params['VanCurvesWorkspace'] = van_curves_ws
 
-        alg.execute()
-
-        return alg.getProperty('OutputWorkspace').value
+        prog.report("Running EnggFocus")
+        time.sleep(2)
+        return mantid.EnggFocus(InputWorkspace=ws, Bank=bank, SpectrumNumbers=indices, StoreInADS=False,
+                                startProgress=0.3, endProgress=0.6, **engg_focus_params)
 
     def _produce_outputs(self, difa, difc, zero, fitted_peaks):
         """
