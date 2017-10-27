@@ -754,7 +754,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][4], dummyFile("TSC00005.raw"));
   }
 
-  void test_multipleFiles_longForm_nonRunFiles() {
+  void test_multipleFiles_longForm_usingPrefix_nonRunFiles() {
     MultipleFileProperty p("Filename", "IRS");
     p.setValue("10001_graphite002_info.nxs+10002_graphite002_info.nxs,"
                "10003_graphite002_info.nxs");
@@ -780,7 +780,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[4][0], dummyFile("TSC00005.raw"));
   }
 
-  void test_multipleFiles_mixedForm_2() {
+  void test_multipleFiles_usingPrefix_mixedForm_2() {
     MultipleFileProperty p("Filename", "TSC");
     p.setValue("1,2.raw,3:5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
