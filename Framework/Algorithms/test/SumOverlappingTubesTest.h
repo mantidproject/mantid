@@ -6,10 +6,13 @@
 #include "MantidAlgorithms/SumOverlappingTubes.h"
 
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 using Mantid::Algorithms::SumOverlappingTubes;
@@ -17,6 +20,7 @@ using Mantid::Algorithms::SumOverlappingTubes;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
+using namespace Mantid::Indexing;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
 
@@ -36,12 +40,12 @@ public:
     const size_t nSpectra = nTubes * nPixelsPerTube;
     const size_t nBins = 1;
 
-    MatrixWorkspace_sptr testWS =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(int(nSpectra),
-                                                         int(nBins));
-
-    testWS->setInstrument(ComponentCreationHelper::createInstrumentWithPSDTubes(
-        nTubes, nPixelsPerTube, true));
+    MatrixWorkspace_sptr testWS = create<Workspace2D>(
+        ComponentCreationHelper::createInstrumentWithPSDTubes(
+            nTubes, nPixelsPerTube, true),
+        IndexInfo(nSpectra),
+        Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
+                  Counts(nBins, 2.0)));
 
     // This has to be added to the ADS so that it can be used with the string
     // validator used in the algorithm.
