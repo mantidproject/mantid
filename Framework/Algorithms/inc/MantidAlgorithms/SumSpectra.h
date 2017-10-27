@@ -80,8 +80,9 @@ private:
                        API::Progress &progress, size_t &numSpectra,
                        size_t &numMasked, size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
-  void doSimpleSum(API::ISpectrum &outSpec, API::Progress &progress,
-                   size_t &numSpectra, size_t &numMasked, size_t &numZeros);
+  void doSimpleSum(API::MatrixWorkspace_sptr outputWorkspace,
+                   API::Progress &progress, size_t &numSpectra,
+                   size_t &numMasked, size_t &numZeros);
 
   // Overridden Algorithm methods
   void init() override;
@@ -91,9 +92,8 @@ private:
                  std::set<int> &indices);
   specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
-  API::MatrixWorkspace_sptr
-  replaceSpecialValues(API::MatrixWorkspace_sptr inputWs);
-  void determineIndices();
+  API::MatrixWorkspace_sptr replaceSpecialValues();
+  void determineIndices(const int numberOfSpectra);
 
   /// The output spectrum number
   specnum_t m_outSpecNum;

@@ -142,8 +142,8 @@ void SumSpectra::exec() {
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
   m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  m_yLength = static_cast<int>(localworkspace->blocksize());
-  determineIndices();
+  determineIndices(m_numberOfSpectra);
+  m_yLength = static_cast<int>(localworkspace->y(*(m_indices.begin())).size());
 
   // determine the output spectrum number
   m_outSpecNum = getOutputSpecNo(localworkspace);
@@ -194,7 +194,7 @@ void SumSpectra::exec() {
                       numZeros);
     } else {
       // for things where all the bins are lined up
-      doSimpleSum(outSpec, progress, numSpectra, numMasked, numZeros);
+      doSimpleSum(outputWorkspace, progress, numSpectra, numMasked, numZeros);
     }
 
     auto &YError = outSpec.mutableE();
@@ -216,7 +216,7 @@ void SumSpectra::exec() {
   }
 }
 
-void SumSpectra::determineIndices() {
+void SumSpectra::determineIndices(const int numberOfSpectra) {
   // assume that m_numberOfSpectra has been set
   m_indices.clear();
 
@@ -230,7 +230,7 @@ void SumSpectra::determineIndices() {
   int minIndex = getProperty("StartWorkspaceIndex");
   int maxIndex = getProperty("EndWorkspaceIndex");
   if (isEmpty(maxIndex) && m_indices.empty()) {
-    maxIndex = m_numberOfSpectra - 1;
+    maxIndex = numberOfSpectra - 1;
   }
 
   // create the indices in the range
@@ -273,16 +273,18 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
   * @param inputWs The workspace to process
   * @return The workspace with special floating point values set to 0
   */
-API::MatrixWorkspace_sptr
-SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
+API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
+  // Get a copy of the input workspace
+  MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
+
   if (!m_replaceSpecialValues) {
     // Skip any additional processing
-    return inputWs;
+    return wksp;
   }
 
   IAlgorithm_sptr alg = createChildAlgorithm("ReplaceSpecialValues");
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
-  std::string outName = "_" + inputWs->getName() + "_clean";
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", wksp);
+  std::string outName = "_" + wksp->getName() + "_clean";
   alg->setProperty("OutputWorkspace", outName);
   alg->setProperty("NaNValue", 0.0);
   alg->setProperty("NaNError", 0.0);
@@ -302,23 +304,24 @@ SumSpectra::replaceSpecialValues(API::MatrixWorkspace_sptr inputWs) {
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
-                             size_t &numSpectra, size_t &numMasked,
-                             size_t &numZeros) {
+void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
+                             Progress &progress, size_t &numSpectra,
+                             size_t &numMasked, size_t &numZeros) {
+  // Clean workspace of any NANs or Inf values
+  auto localworkspace = replaceSpecialValues();
+
   // Get references to the output workspaces's data vectors
-  auto &OutputYSum = outSpec.mutableY();
-  auto &OutputYError = outSpec.mutableE();
+  auto &outSpec = outputWorkspace->getSpectrum(0);
+  auto &YSum = outSpec.mutableY();
+  auto &YErrorSum = outSpec.mutableE();
 
   std::vector<double> Weight;
   std::vector<size_t> nZeros;
   if (m_calculateWeightedSum) {
-    Weight.assign(OutputYSum.size(), 0);
-    nZeros.assign(OutputYSum.size(), 0);
+    Weight.assign(YSum.size(), 0);
+    nZeros.assign(YSum.size(), 0);
   }
 
-  MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
-  // Clean workspace of any NANs or Inf values
-  auto localworkspace = replaceSpecialValues(in_ws);
   const auto &spectrumInfo = localworkspace->spectrumInfo();
   // Loop over spectra
   for (const auto wsIndex : m_indices) {
@@ -336,24 +339,25 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
 
     const auto &YValues = localworkspace->y(wsIndex);
     const auto &YErrors = localworkspace->e(wsIndex);
+
     if (m_calculateWeightedSum) {
       // Retrieve the spectrum into a vector
       for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const double yErrorsVal = YErrors[yIndex];
         if (std::isnormal(yErrorsVal)) { // is non-zero, nan, or infinity
           const double errsq = yErrorsVal * yErrorsVal;
-          OutputYError[yIndex] += errsq;
+          YErrorSum[yIndex] += errsq;
           Weight[yIndex] += 1. / errsq;
-          OutputYSum[yIndex] += YValues[yIndex] / errsq;
+          YSum[yIndex] += YValues[yIndex] / errsq;
         } else {
           nZeros[yIndex]++;
         }
       }
     } else {
-      OutputYSum += YValues;
+      YSum += YValues;
       for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const auto yErrorsVal = YErrors[yIndex];
-        OutputYError[yIndex] += yErrorsVal * yErrorsVal;
+        YErrorSum[yIndex] += yErrorsVal * yErrorsVal;
       }
     }
 
@@ -365,11 +369,9 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
   }
 
   if (m_calculateWeightedSum) {
-    numZeros = 0;
     for (size_t yIndex = 0; yIndex < static_cast<size_t>(m_yLength); yIndex++) {
       if (numSpectra > nZeros[yIndex])
-        OutputYSum[yIndex] *=
-            double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
+        YSum[yIndex] *= double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
       if (nZeros[yIndex] != 0)
         numZeros += nZeros[yIndex];
     }
@@ -387,13 +389,10 @@ void SumSpectra::doSimpleSum(ISpectrum &outSpec, Progress &progress,
 void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
                                  Progress &progress, size_t &numSpectra,
                                  size_t &numMasked, size_t &numZeros) {
-  // Get a copy of the input workspace
-  MatrixWorkspace_sptr in_ws = getProperty("InputWorkspace");
-
   // First, we need to clean the input workspace for nan's and inf's in order
   // to treat the data correctly later. This will create a new private
   // workspace that will be retrieved as mutable.
-  auto localworkspace = replaceSpecialValues(in_ws);
+  auto localworkspace = replaceSpecialValues();
 
   // Transform to real workspace types
   RebinnedOutput_sptr inWS =
@@ -404,8 +403,9 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   // Get references to the output workspaces's data vectors
   auto &outSpec = outputWorkspace->getSpectrum(0);
   auto &YSum = outSpec.mutableY();
-  auto &YError = outSpec.mutableE();
+  auto &YErrorSum = outSpec.mutableE();
   auto &FracSum = outWS->dataF(0);
+
   std::vector<double> Weight;
   std::vector<size_t> nZeros;
   if (m_calculateWeightedSum) {
@@ -438,20 +438,19 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
         if (YErrors[yIndex] != 0) {
           double errsq = YErrors[yIndex] * YErrors[yIndex] * FracArea[yIndex] *
                          FracArea[yIndex];
-          YError[yIndex] += errsq;
+          YErrorSum[yIndex] += errsq;
           Weight[yIndex] += 1. / errsq;
           YSum[yIndex] += YValues[yIndex] * FracArea[yIndex] / errsq;
-          FracSum[yIndex] += FracArea[yIndex];
         } else {
           nZeros[yIndex]++;
-          FracSum[yIndex] += FracArea[yIndex];
         }
+        FracSum[yIndex] += FracArea[yIndex];
       }
     } else {
       for (int yIndex = 0; yIndex < m_yLength; ++yIndex) {
         YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
-        YError[yIndex] += YErrors[yIndex] * YErrors[yIndex] * FracArea[yIndex] *
-                          FracArea[yIndex];
+        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] *
+                             FracArea[yIndex] * FracArea[yIndex];
         FracSum[yIndex] += FracArea[yIndex];
       }
     }
@@ -464,7 +463,6 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
   }
 
   if (m_calculateWeightedSum) {
-    numZeros = 0;
     for (size_t yIndex = 0; yIndex < static_cast<size_t>(m_yLength); yIndex++) {
       if (numSpectra > nZeros[yIndex])
         YSum[yIndex] *= double(numSpectra - nZeros[yIndex]) / Weight[yIndex];
