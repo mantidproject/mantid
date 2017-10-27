@@ -7,7 +7,7 @@
 #include "MantidKernel/make_unique.h"
 
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 
 namespace Mantid {

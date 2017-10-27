@@ -21,8 +21,8 @@ The output workspace is created with these dimensions and the box
 parameters specified above. Then the events from each input workspace
 are appended to the output.
 
-See also: :ref:`algm-MergeMDFiles`, for merging when system
-memory is too small to keep the entire workspace in memory.
+.. seealso:: :ref:`algm-MergeMDFiles`, for merging when system
+             memory is too small to keep the entire workspace.
 
 Usage
 -----
@@ -32,16 +32,16 @@ Usage
 .. testcode:: ExMergeMD
 
    from mantid.api import IMDEventWorkspace
-   # Create sample inelastic workspace for MARI instrument containing 1 at all spectra 
+   # Create sample inelastic workspace for MARI instrument containing 1 at all spectra
    ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10',UnitX='DeltaE')
    AddSampleLog(ws1,'Ei','12.','Number')
    # get first MD workspace;
-   mdWs1 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-10',MaxValues='5,10')   
+   mdWs1 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-10',MaxValues='5,10')
    # Create another inelastic workspace
    ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-5,1,15',UnitX='DeltaE')
    AddSampleLog(ws1,'Ei','20.','Number')
    # get second MD workspace;
-   mdWs2 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-5',MaxValues='10,15')   
+   mdWs2 =ConvertToMD(InputWorkspace=ws1,QDimensions='|Q|',QConversionScales='Q in A^-1',MinValues='0,-5',MaxValues='10,15')
 
    # Merge MD workspaces
    SumWS=MergeMD(InputWorkspaces='mdWs1,mdWs2',SplitInto='100,100')
@@ -63,7 +63,7 @@ Usage
    print('with d1 min_max={0}:{1}, d2 min_max={2}:{3}'.format(d1.getMinimum(),d1.getMaximum(),d2.getMinimum(),d2.getMaximum()))
    print('****************************************************************')
 
-   
+
 **Output:**
 
 .. testoutput:: ExMergeMD

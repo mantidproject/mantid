@@ -26,15 +26,26 @@ as
 
 and thus
 
-.. math:: \frac{\Delta d}{d} = \sqrt{(\frac{\Delta T}{T})^2 + (\frac{\Delta L}{L})^2 + (\Delta\theta\cdot\cot(\theta))^2}
+.. math:: \frac{\Delta d}{d} = \sqrt{\left(\frac{\Delta T}{T}\right)^2 + \left(\frac{\Delta L}{L}\right)^2 + \left(\Delta\theta\cdot\cot(\theta)\right)^2}
 
 where,
 
--  :math:`\Delta T` is the time resolution from modulator;
+-  :math:`\Delta T` is the time resolution from modulator
 -  :math:`\Delta\theta` is the coverage of the detector, and can be
    approximated from the square root of the solid angle of the detector
-   to sample;
--  :math:`L` is the flight path of the neutron from source to detector.
+   to sample
+-  :math:`L` is the flight path of the neutron from source to detector
+-  :math:`\theta` is half the Bragg angle :math:`2 \theta`, or half of the angle from the downstream beam
+
+The optional ``DivergenceWorkspace`` specifies the values of
+:math:`\Delta\theta` to use rather than those derived from the solid
+angle of the detectors. :ref:`EstimateDivergence
+<algm-EstimateDivergence>` can be used for estimating the divergence.
+
+``PartialResolutionWorkspaces`` is a collection of partial resolution
+functions where ``_tof`` is the time-of-flight term, ``_length`` is
+the path length term, and ``_angle`` is the angular term. Note that
+the total resolution is these terms added in quadriture.
 
 Factor Sheet
 ------------
@@ -65,7 +76,8 @@ Usage
   # Load a Nexus file
   Load(Filename="PG3_2538_2k.nxs", OutputWorkspace="PG3_2538")
   # Run the algorithm to estimate detector's resolution
-  EstimateResolutionDiffraction(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution")
+  EstimateResolutionDiffraction(InputWorkspace="PG3_2538", DeltaTOF=40.0, OutputWorkspace="PG3_Resolution",
+                                PartialResolutionWorkspaces="PG3_Resolution_partials")
   resws = mtd["PG3_Resolution"]
 
   print("Size of workspace 'PG3_Resolution' =  {}".format(resws.getNumberHistograms()))
@@ -86,7 +98,8 @@ Output:
   Estimated resolution of detector of spectrum 100 =  0.00323608373204
   Estimated resolution of detector of spectrum 999 =  0.00354849279137
 
-.. seealso :: Algorithms :ref:`algm-CalibrateRectangularDetectors` and :ref:`algm-GetDetOffsetsMultiPeaks`
+.. seealso :: Algorithms :ref:`algm-EstimateDivergence`, :ref:`algm-CalibrateRectangularDetectors` and
+   :ref:`algm-GetDetOffsetsMultiPeaks`
 
 .. categories::
 
