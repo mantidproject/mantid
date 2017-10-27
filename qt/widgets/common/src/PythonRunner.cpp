@@ -26,7 +26,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   using Mantid::Kernel::Logger;
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Running Python code:\n" << code.toAscii().data() << "\n";
+    g_log.debug() << "Running Python code:\n" << code.toLatin1().data() << "\n";
 
   if (no_output) {
     emit runAsPythonScript(code, true);
@@ -64,7 +64,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   // with clang
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
     g_log.debug() << "Raw output from execution:\n"
-                  << tmpstring.toAscii().data() << "\n";
+                  << tmpstring.toLatin1().data() << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one
