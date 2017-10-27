@@ -592,7 +592,7 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
 
   // compress the project if needed
   if (compress) {
-    file_compress(projectName.toLatin1().constData(), "w9");
+    file_compress(qPrintable(projectName), "w9");
   }
 
   QApplication::restoreOverrideCursor();
