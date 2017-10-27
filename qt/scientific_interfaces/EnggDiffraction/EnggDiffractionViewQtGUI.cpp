@@ -22,7 +22,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
-// Temporarily disabled to prevent freezing when opening the file dialog. 
+// Temporarily disabled to prevent freezing when opening the file dialog.
 // DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
