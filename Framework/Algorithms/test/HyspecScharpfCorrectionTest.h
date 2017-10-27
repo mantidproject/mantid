@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/HyspecScharpfCorrection.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::HyspecScharpfCorrection;
 
@@ -24,32 +25,41 @@ public:
 
   void test_exec()
   {
-    // Create test input if necessary
-    MatrixWorkspace_sptr inputWS = //-- Fill in appropriate code. Consider using TestHelpers/WorkspaceCreationHelpers.h --
-
+    // Create test input
+    std::vector<double> L2 = {1.0}, polar={M_PI_4}, azimuthal ={0.};
+    auto inputWS = WorkspaceCreationHelper::createProcessedInelasticWS(L2,polar,azimuthal,30,-10,20,17.1);
     HyspecScharpfCorrection alg;
-    // Don't put output in ADS by default
+
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "_unused_for_child") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "HyspecScharpfCorrectionOutput") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PolarizationAngle", -11.0) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
-    Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    // Retrieve the workspace from the algorithm.
+    Mantid::API::MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+    auto histo=outputWS->histogram(0);
+    auto x=histo.points();
+    auto y=histo.y();
+    for(size_t i=0; i<x.size(); ++i){
+        if(x[i]<4){
+            TS_ASSERT_LESS_THAN(y[i],0);
+        }else if (x[i]<6. || x[i]>17.) {
+            TS_ASSERT_EQUALS(y[i],0.);
+        } else {
+            TS_ASSERT_LESS_THAN(0,y[i]);
+        }
+    }
+    // test one value, say DeltaE=6.5
+    double kikf=std::sqrt(1.-6.5/17.1);
+    auto alpha=std::atan2(-kikf*std::sin(M_PI_4),1.-kikf*std::cos(M_PI_4))+11.*M_PI/180.;
+    TS_ASSERT_DELTA(x[16],6.5,1e-10);
+    TS_ASSERT_DELTA(y[16],1./std::cos(2.*alpha),1e-10);
   }
-  
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
-  }
-
 
 };
 
