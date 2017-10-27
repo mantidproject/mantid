@@ -7,7 +7,6 @@ from sans.common.general_functions import create_child_algorithm
 from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
 
-
 class Merger(with_metaclass(ABCMeta, object)):
     """ Merger interface"""
 
@@ -62,8 +61,6 @@ class ISIS1DMerger(Merger):
                           "Mode": fit_mode_as_string,
                           "ScaleFactor": scale_factor,
                           "ShiftFactor": shift_factor,
-                          "FitMin": fit_min,
-                          "FitMax": fit_max,
                           "OutputWorkspace": "dummy"}
 
         if can_count_primary is not None and can_norm_primary is not None \
@@ -74,6 +71,11 @@ class ISIS1DMerger(Merger):
                                   "LABNormCan": can_norm_primary,
                                   "ProcessCan": True}
             stitch_options.update(stitch_options_can)
+
+        if fit_min and fit_max:
+            q_range_options = {"FitMin": fit_min,
+                               "FitMax": fit_max}
+            stitch_options.update(q_range_options)
 
         stitch_alg = create_child_algorithm(parent_alg, stitch_name, **stitch_options)
         stitch_alg.execute()

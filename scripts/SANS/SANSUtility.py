@@ -15,7 +15,7 @@ import re
 from six import types, iteritems, PY3
 import numpy as np
 import h5py as h5
-import pydevd
+
 sanslog = Logger("SANS")
 ADDED_TAG = '-add'
 ADDED_EVENT_DATA_TAG = '_added_event_data'
@@ -1563,7 +1563,6 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     '''
     min_q = None
     max_q = None
-    pydevd.settrace('localhost', port=5230, stdoutToServer=True, stderrToServer=True)
     front_data = mtd[front_data_name]
     front_dataX = front_data.readX(0)
 
