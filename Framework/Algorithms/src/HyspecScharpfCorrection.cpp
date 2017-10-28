@@ -218,8 +218,8 @@ template <class T>
 void HyspecScharpfCorrection::ScharpfEventHelper(std::vector<T> &wevector,
                                                  double thPlane) {
   typename std::vector<T>::iterator it;
-  double Ef;
   for (it = wevector.begin(); it < wevector.end();) {
+    double Ef;
     Ef = Ei - it->tof();
     if (Ef <= 0) {
       it = wevector.erase(it);
