@@ -12,6 +12,7 @@ Spectroscopy Changes
 Direct Geometry
 ---------------
 
+- New algorithm :ref:`HyspecScharpfCorrection <algm-HyspecScharpfCorrection-v1>` that can be used to calculate spin incoherent scattering frompolarized neutron data
 - TOFTOF data reduction GUI has been improved. In the new version it has options to delete intermediate workspaces, to replace NaNs in S(Q,W), to create diffractograms and to save the reduced data in NXSPE and NeXus format.
 
 Indirect Geometry
