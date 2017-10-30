@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_API_SIGNALRANGE_H_
 #define MANTIDQT_API_SIGNALRANGE_H_
 
-#include "MantidQtWidgets/Common/DllOption.h"
+#include "MantidQtWidgets/LegacyQwt/DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 #include <qwt_double_interval.h>
@@ -32,7 +32,7 @@ namespace API {
  File change history is stored at: <https://github.com/mantidproject/mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON SignalRange {
+class EXPORT_OPT_MANTIDQT_LEGACYQWT SignalRange {
 public:
   SignalRange(const Mantid::API::IMDWorkspace &workspace,
               const Mantid::API::MDNormalization normalization =

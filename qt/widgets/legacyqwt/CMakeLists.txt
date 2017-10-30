@@ -27,6 +27,7 @@ set ( MOC_FILES
   inc/MantidQtWidgets/LegacyQwt/PeakPicker.h
   inc/MantidQtWidgets/LegacyQwt/DisplayCurveFit.h
   inc/MantidQtWidgets/LegacyQwt/PreviewPlot.h
+  inc/MantidQtWidgets/LegacyQwt/SafeQwtPlot.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio

@@ -387,6 +387,19 @@ set ( UI_FILES
   inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
 
+# Temporary workaround to remove stale ui_* header files after they
+# were moved to a separate library. They cause build problems if they're not
+# deleted
+set ( OLD_UI_HEDAERS
+  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_ColorBarWidget.h
+  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_DisplayCurveFit.h
+  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_MWView.h
+  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_PreviewPlot.h
+)
+foreach (_header ${OLD_UI_HEADERS})
+  file (REMOVE ${_heaader})
+endforeach()
+
 # Python unit tests
 set ( TEST_PY_FILES
   test/MWRunFilesTest.py

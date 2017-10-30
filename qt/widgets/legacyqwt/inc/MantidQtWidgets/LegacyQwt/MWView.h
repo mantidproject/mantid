@@ -5,8 +5,8 @@
 #include <QWidget>
 #include <qwt_plot_spectrogram.h>
 #include "ui_MWView.h"
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
-#include "MantidQtWidgets/Common/DllOption.h"
 // includes for workspace handling
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -66,7 +66,7 @@ using MWDimension_const_sptr =
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTIDQT_COMMON MWView
+class EXPORT_OPT_MANTIDQT_LEGACYQWT MWView
     : public QWidget,
       public MantidQt::API::WorkspaceObserver {
   Q_OBJECT

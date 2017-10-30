@@ -792,6 +792,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             MantidQtWidgetsCommonQt4
+            MantidQtWidgetsLegacyQwtQt4
             MantidQtWidgetsFactoryQt4
             MantidQtWidgetsInstrumentViewQt4
             MantidQtWidgetsSliceViewerQt4
