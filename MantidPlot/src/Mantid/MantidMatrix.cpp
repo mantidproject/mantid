@@ -1293,42 +1293,41 @@ void MantidMatrix::addMantidMatrixTabExtension(MantidMatrixModel::Type type) {
  */
 void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   switch (type) {
-  case MantidMatrixMode::DX:
-    if (ws->hasDx(0)) {
-      // Provide an extension
-      auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
+  case MantidMatrixModel::DX: {
+    // Provide an extension
+    auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
 
-      // We need to hook up the extension
-      extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
-                                              m_cols, m_startRow, type);
-      extension.tableView = Mantid::Kernel::make_unique<QTableView>();
+    // We need to hook up the extension
+    extension.model = new MantidMatrixModel(this, m_workspace.get(), m_rows,
+                                            m_cols, m_startRow, type);
+    extension.tableView = Mantid::Kernel::make_unique<QTableView>();
 
-      // Add a new tab
-      m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),
-                        extension.label);
+    // Add a new tab
+    m_tabs->insertTab(modelTypeToInt(type), extension.tableView.get(),
+                      extension.label);
 
-      // Install the eventfilter
-      extension.tableView->installEventFilter(this);
+    // Install the eventfilter
+    extension.tableView->installEventFilter(this);
 
-      // Connect Table View
-      connectTableView(extension.tableView.get(), extension.model);
+    // Connect Table View
+    connectTableView(extension.tableView.get(), extension.model);
 
-      m_extensions.emplace(type, std::move(extension));
+    m_extensions.emplace(type, std::move(extension));
 
-      // Set the column width
-      auto columnWidth = m_extensionRequest.getColumnWidthPreference(
-          type, m_extensions, MantidPreferences::MantidMatrixColumnWidthDx());
-      setColumnsWidth(modelTypeToInt(type), columnWidth);
+    // Set the column width
+    auto columnWidth = m_extensionRequest.getColumnWidthPreference(
+        type, m_extensions, MantidPreferences::MantidMatrixColumnWidthDx());
+    setColumnsWidth(modelTypeToInt(type), columnWidth);
 
-      // Set the number format
-      auto format = m_extensionRequest.getFormat(
-          type, m_extensions, MantidPreferences::MantidMatrixNumberFormatDx());
-      auto precision = m_extensionRequest.getPrecision(
-          type, m_extensions,
-          MantidPreferences::MantidMatrixNumberPrecisionDx());
-      setNumberFormat(modelTypeToInt(type), format, precision);
-    }
+    // Set the number format
+    auto format = m_extensionRequest.getFormat(
+        type, m_extensions, MantidPreferences::MantidMatrixNumberFormatDx());
+    auto precision = m_extensionRequest.getPrecision(
+        type, m_extensions,
+        MantidPreferences::MantidMatrixNumberPrecisionDx());
+    setNumberFormat(modelTypeToInt(type), format, precision);
     break;
+    }
   default:
     throw std::runtime_error("Unknown MantidMatrix extension.");
   }
