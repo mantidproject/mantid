@@ -69,13 +69,16 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsLegacyQwt
   INCLUDE_DIRS
     inc
   LINK_LIBS
-    ${TARGET_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
   QT4_LINK_LIBS
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   OSX_INSTALL_RPATH
-    "@loader_path/../MacOS;"
+    @loader_path/../MacOS
 )
 
 ###########################################################################
