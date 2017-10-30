@@ -103,7 +103,7 @@ function (mtd_add_qt_target)
     set (_qt_link_libraries Qt4::QtGui ${PARSED_QT4_LINK_LIBS})
   elseif (PARSED_QT_VERSION EQUAL 5)
     qt5_wrap_ui (UI_HEADERS ${PARSED_UI})
-    _internal_qt_wrap_cpp (5 MOC_GENERATED ${PARSED_MOC})
+    _internal_qt_wrap_cpp ( 5 MOC_GENERATED ${PARSED_MOC} )
     set (ALL_SRC ${PARSED_SRC} ${PARSED_QT5_SRC} ${MOC_GENERATED})
     qt5_add_resources (RES_FILES ${PARSED_RES})
     set (_qt_link_libraries Qt5::Widgets ${PARSED_QT5_LINK_LIBS})
@@ -140,17 +140,8 @@ function (mtd_add_qt_target)
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
 
-  # For Qt < 5.6.2 gcc-5 produces warnings when it encounters the Q_OBJECT
-  # macro. We disable the warning in this case
-  if ( PARSED_QT_VERSION EQUAL 5 AND CMAKE_COMPILER_IS_GNUCXX AND
-       Qt5Core_VERSION_STRING VERSION_LESS "5.6.2" )
-    get_target_property ( _options ${_target} COMPILE_OPTIONS )
-    string ( REPLACE "-Wsuggest-override" "" _options "${_options}" )
-    set_target_properties ( ${_target} PROPERTIES
-      COMPILE_OPTIONS "${_options}" )
-  endif()
-
   # Target properties
+  _disable_suggest_override( ${PARSED_QT_VERSION} ${_target} )
   _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
@@ -201,26 +192,6 @@ function (mtd_add_qt_tests)
   endforeach()
 endfunction()
 
-# Wrap generation of moc files
-# We call the qt{4|5}_wrap_cpp individually for each file and force the include
-# path to be absolute to avoid relative paths whose length exceed the maximum
-# allowed limit on Windows (260 chars). It is assumed that the input paths
-# can be made absolute by prefixing them with ${CMAKE_CURRENT_LIST_DIR}
-# It assumes that the unnamed arguments are the input files to run through moc
-function(_internal_qt_wrap_cpp qtversion outfiles)
-  foreach (_infile ${ARGN})
-    if(qtversion EQUAL 4)
-      qt4_wrap_cpp (outfiles ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
-    elseif (qtversion EQUAL 5)
-      qt5_wrap_cpp (outfiles ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
-    else()
-      message (FATAL_ERROR "Unknown Qt version='${qtversion}'.")
-    endif()
-  endforeach()
-  # Pass the output variable out
-  set (${outfiles} ${${outfiles}} PARENT_SCOPE)
-endfunction()
-
 # Create an executable target for running a set of unit tests
 # linked to Qt
 # keyword: TEST_NAME The name of the test suite. The version of Qt will be appended to it
@@ -257,6 +228,9 @@ function (mtd_add_qt_test_executable)
   set (TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
   cxxtest_add_test ( ${_target_name} ${PARSED_SRC} )
 
+  # Warning suppression
+  _disable_suggest_override( ${PARSED_QT_VERSION} ${_target_name} )
+
   # libraries
   set (_link_libs ${PARSED_LINK_LIBS} ${_mtd_qt_libs} )
   if (PARSED_QT_VERSION EQUAL 4)
@@ -276,7 +250,8 @@ function (mtd_add_qt_test_executable)
   target_include_directories ( ${_target_name} SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR}
                                ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  target_link_libraries (${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs})
+  target_link_libraries (${_target_name} LINK_PRIVATE ${LINK_LIBS}
+    ${_link_libs} ${_mtd_qt_libs} )
 
   # Add dependency to any parents
   foreach (_dep ${PARSED_PARENT_DEPENDENCIES})
@@ -331,6 +306,40 @@ function (_append_qt_suffix)
       list (APPEND _out ${_item}${_sep}${_target_suffix})
   endforeach ()
   set (${PARSED_OUTPUT_VARIABLE} ${_out} PARENT_SCOPE)
+endfunction ()
+
+# Wrap generation of moc files
+# We call the qt{4|5}_wrap_cpp individually for each file and force the include
+# path to be absolute to avoid relative paths whose length exceed the maximum
+# allowed limit on Windows (260 chars). It is assumed that the input paths
+# can be made absolute by prefixing them with ${CMAKE_CURRENT_LIST_DIR}
+# It assumes that the unnamed arguments are the input files to run through moc
+function(_internal_qt_wrap_cpp qtversion moc_generated)
+  foreach (_infile ${ARGN})
+    if(qtversion EQUAL 4)
+      qt4_wrap_cpp (moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+    elseif (qtversion EQUAL 5)
+      qt5_wrap_cpp (moc_generated ${_infile} OPTIONS -i -f${CMAKE_CURRENT_LIST_DIR}/${_infile} )
+    else()
+      message (FATAL_ERROR "Unknown Qt version='${qtversion}'.")
+    endif()
+  endforeach()
+  # Pass the output variable out
+  set (${moc_generated} ${${moc_generated}} PARENT_SCOPE)
+endfunction()
+
+# Disables suggest override for versions of Qt < 5.6.2 as
+# Q_OBJECT produces them and the cannot be avoided.
+function (_disable_suggest_override _qt_version _target)
+  # For Qt < 5.6.2 gcc-5 produces warnings when it encounters the Q_OBJECT
+  # macro. We disable the warning in this case
+  if ( _qt_version EQUAL 5 AND CMAKE_COMPILER_IS_GNUCXX AND
+       Qt5Core_VERSION_STRING VERSION_LESS "5.6.2" )
+    get_target_property ( _options ${_target} COMPILE_OPTIONS )
+    string ( REPLACE "-Wsuggest-override" "" _options "${_options}" )
+    set_target_properties ( ${_target} PROPERTIES
+      COMPILE_OPTIONS "${_options}" )
+  endif()
 endfunction ()
 
 # Given a list of target libraries extract the INTERFACE_INCLUDE_DIRECTORIES

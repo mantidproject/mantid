@@ -422,6 +422,7 @@ endif()
 if (ENABLE_WORKBENCH)
   find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
     WebKitWidgets REQUIRED )
+  find_package ( QScintillaQt5 REQUIRED )
 endif()
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
@@ -448,6 +449,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
     Qt5::Network
     Qt5::PrintSupport
     Qt5::WebKitWidgets
+    Qt5::Qscintilla
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
     @loader_path/../Libraries
