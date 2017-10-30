@@ -3,7 +3,6 @@
 
 #include "CorrectionsTab.h"
 #include "ui_ContainerSubtraction.h"
-#include <boost/weak_ptr.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
