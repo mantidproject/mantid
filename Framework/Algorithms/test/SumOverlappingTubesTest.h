@@ -12,6 +12,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
@@ -36,13 +37,14 @@ public:
   const size_t N_TUBES = 5;
   const size_t N_PIXELS_PER_TUBE = 10;
 
-  MatrixWorkspace_sptr createTestWS(size_t nTubes, size_t nPixelsPerTube) {
+  MatrixWorkspace_sptr createTestWS(size_t nTubes, size_t nPixelsPerTube,
+                                    bool mirror = true) {
     const size_t nSpectra = nTubes * nPixelsPerTube;
     const size_t nBins = 1;
 
     MatrixWorkspace_sptr testWS = create<Workspace2D>(
         ComponentCreationHelper::createInstrumentWithPSDTubes(
-            nTubes, nPixelsPerTube, true),
+            nTubes, nPixelsPerTube, mirror),
         IndexInfo(nSpectra),
         Histogram(BinEdges(nBins + 1, LinearGenerator(0.0, 1.0)),
                   Counts(nBins, 2.0)));
@@ -430,6 +432,89 @@ public:
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 6.0, 1e-6)
       TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[bin], sqrt(2.0) * 3.0, 1e-6)
     }
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  MatrixWorkspace_sptr do_straight_option(bool oneDimensional = false) {
+    auto testWS = createTestWS(N_TUBES, N_PIXELS_PER_TUBE, false);
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", "testWS");
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "22.5");
+    alg.setProperty("ComponentForHeightAxis", "tube-1");
+    alg.setProperty("Normalise", false);
+    if (oneDimensional)
+      alg.setProperty("OutputType", "1DStraight");
+    else
+      alg.setProperty("OutputType", "2DStraight");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outWS"));
+  }
+
+  void test_normal_operation_with_2d_straight_option() {
+    auto outWS = do_straight_option();
+
+    // Check x-axis goes from 0 -> 90
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), N_TUBES)
+    for (size_t i = 0; i < N_TUBES; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), 0.0 + 22.5 * double(i), 1e-6)
+
+    verifyHeightAxis(outWS);
+
+    double totalCounts = 0.0;
+    for (size_t i = 0; i < N_TUBES; ++i)
+      for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
+        auto counts = outWS->getSpectrum(j).y()[i];
+        // Tolerance on error is quite large, due to repeated rounding
+        TS_ASSERT_DELTA(outWS->getSpectrum(j).e()[i], sqrt(counts), 0.1)
+        totalCounts += counts;
+      }
+
+    TS_ASSERT_DELTA(totalCounts,
+                    double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
+
+    // An analytic comparison is a little harder for this case, do a quick check
+    // of an arbitary value
+    TS_ASSERT_DELTA(outWS->getSpectrum(8).y()[2], 2.0020706794, 1e-6)
+
+    AnalysisDataService::Instance().remove("testWS");
+    AnalysisDataService::Instance().remove("outWS");
+  }
+
+  void test_normal_operation_with_1d_straight_option() {
+    auto outWS = do_straight_option(true);
+
+    // Check x-axis goes from 0 -> 90
+    const auto &xAxis = outWS->getAxis(0);
+    TS_ASSERT_EQUALS(xAxis->length(), N_TUBES)
+    for (size_t i = 0; i < N_TUBES; ++i)
+      TS_ASSERT_DELTA(xAxis->getValue(i), 0.0 + 22.5 * double(i), 1e-6)
+
+    const auto &yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(yAxis->length(), 1)
+    TS_ASSERT_DELTA(yAxis->getValue(0), 0.027 * 0.5, 1e-6)
+
+    double totalCounts = 0.0;
+    for (size_t i = 0; i < N_TUBES; ++i) {
+      auto counts = outWS->getSpectrum(0).y()[i];
+      // Tolerance on error is quite large, due to repeated rounding
+      TS_ASSERT_DELTA(outWS->getSpectrum(0).e()[i], sqrt(counts), 0.1)
+      totalCounts += counts;
+    }
+
+    TS_ASSERT_DELTA(totalCounts,
+                    double(N_TUBES) * double(N_PIXELS_PER_TUBE) * 2.0, 1e-6)
+
+    // An analytic comparison is a little harder for this case, do a quick check
+    // of an arbitary value
+    TS_ASSERT_DELTA(outWS->getSpectrum(0).y()[2], 20.0092235812, 1e-6)
 
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
