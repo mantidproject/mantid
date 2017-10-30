@@ -57,7 +57,7 @@ void SumOverlappingTubes::init() {
                   "option.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
-          "HeightAxis", boost::make_shared<RebinParamsValidator>(true)),
+          "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
       "A comma separated list of the first y value, the y value step size and "
       "the final y value. Optionally this can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
@@ -221,10 +221,14 @@ void SumOverlappingTubes::getHeightAxis() {
     for (const auto &thing : children)
       m_heightAxis.push_back(thing->getPos().Y());
   } else {
-    if (heightBinning.size() != 3)
-      throw std::runtime_error(
-          "Height binning must have start, step and end values.");
-    if (m_outputType == "1DStraight") {
+    if (heightBinning.size() != 3) {
+      if (heightBinning.size() == 2 && m_outputType == "1DStraight") {
+        m_heightAxis.push_back(heightBinning[0]);
+        m_heightAxis.push_back(heightBinning[1]);
+      } else
+        throw std::runtime_error("Height binning must have start, step and end "
+                                 "values (except for 1DStraight option).");
+    } else if (m_outputType == "1DStraight") {
       m_heightAxis.push_back(heightBinning[0]);
       m_heightAxis.push_back(heightBinning[2]);
     } else {
