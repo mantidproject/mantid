@@ -140,14 +140,17 @@ void FirstTimeSetup::allowUsageDataStateChanged(int checkedState) {
                                         // clickable
     msgBox.setText("Are you sure you want to disable reporting of <a "
                    "href='http://reports.mantidproject.org'>usage data</a>?"
-                   "\t(full details in our <a href='http://www.mantidproject.org/MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'>Privacy Policy</a>)");
+                   "\t(full details in our <a "
+                   "href='http://www.mantidproject.org/"
+                   "MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'"
+                   ">Privacy Policy</a>)");
     msgBox.setInformativeText(
-      "All usage data is anonymous and untraceable.\n"
-      "We use the usage data to inform the future development of Mantid.\n"
-      "If you click \"Yes\" aspects you need risk being deprecated in "
-      "future versions if we think they are not used.\n\n"
-      "Are you sure you still want to disable reporting usage data?\n"
-      "Please click \"No\".");
+        "All usage data is anonymous and untraceable.\n"
+        "We use the usage data to inform the future development of Mantid.\n"
+        "If you click \"Yes\" aspects you need risk being deprecated in "
+        "future versions if we think they are not used.\n\n"
+        "Are you sure you still want to disable reporting usage data?\n"
+        "Please click \"No\".");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
     msgBox.setEscapeButton(QMessageBox::No);
