@@ -40,6 +40,11 @@ void SumOverlappingTubes::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name of the output workspace.");
+  std::vector<std::string> outputTypes{"2D", "2DStraight", "1DStraight"};
+  declareProperty("OutputType", "2D",
+                  boost::make_shared<StringListValidator>(outputTypes),
+                  "Whether to have the output in 2D, 2D with straightened "
+                  "Debye-Scherrer cones, or 1D.");
   declareProperty(
       make_unique<ArrayProperty<double>>(
           "ScatteringAngleBinning", "0.05",
@@ -59,27 +64,23 @@ void SumOverlappingTubes::init() {
       make_unique<ArrayProperty<double>>(
           "HeightAxis", boost::make_shared<RebinParamsValidator>(true, true)),
       "A comma separated list of the first y value, the y value step size and "
-      "the final y value. Optionally this can also be a single number, which "
+      "the final y value. This can also be a single number, which "
       "is the y value step size. In this case, the boundary of binning will "
       "be determined by minimum and maximum y values present in the "
-      "workspaces.");
-  auto toleranceValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
-  toleranceValidator->clearUpper();
-  declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
-                  "The relative tolerance for the scattering angles before the "
-                  "counts are split.");
+      "workspaces. For the 1DStraight case only this can also be two numbers, "
+      "to give the range desired.");
   declareProperty(
       make_unique<PropertyWithValue<bool>>("Normalise", true, Direction::Input),
       "If true normalise to the number of entries added for a particular "
       "scattering angle. If the maximum entries accross all the scattering "
       "angles is N_MAX, and the number of entries for a scattering angle is N, "
       "the normalisation is performed as N_MAX / N.");
-  std::vector<std::string> outputTypes{"2D", "2DStraight", "1DStraight"};
-  declareProperty("OutputType", "2D",
-                  boost::make_shared<StringListValidator>(outputTypes),
-                  "Whether to have the output in 2D, 2D with straightened "
-                  "Debye-Scherrer cones, or 1D.");
+  auto toleranceValidator =
+      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+  toleranceValidator->clearUpper();
+  declareProperty("ScatteringAngleTolerance", 0.0, toleranceValidator,
+                  "The relative tolerance for the scattering angles before the "
+                  "counts are split.");
 }
 
 std::map<std::string, std::string> SumOverlappingTubes::validateInputs() {

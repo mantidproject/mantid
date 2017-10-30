@@ -35,7 +35,12 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL SumOverlappingTubes : public API::Algorithm {
 public:
   const std::string name() const override { return "SumOverlappingTubes"; }
-  const std::string summary() const override { return "TODO: fill this out."; }
+  const std::string summary() const override {
+    return "Takes a workspace containing an instrument with PSD and tubes, and "
+           "converts to a workspace with counts as a function of height and "
+           "scattering angle. Detector scans with overlapping tubes are "
+           "supported.";
+  }
   std::map<std::string, std::string> validateInputs() override;
   int version() const override { return 1; }
 
