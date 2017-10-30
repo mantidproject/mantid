@@ -332,7 +332,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         ws = curves_dict[keys[0]]
         for idx in range(1, len(keys)):
             next_ws = curves_dict[keys[idx]]
-            ws = mantid.AppendSpectra(InputWorkspace1=ws, InputWorkspace2=next_ws)
+            ws = self._append_spectra(ws, next_ws)
 
         return ws
 
@@ -407,6 +407,24 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             curves.update({bankid: indiv})
 
         return curves
+
+
+    def _append_spectra(self, ws1, ws2):
+        """
+        Uses the algorithm 'AppendSpectra' to append the spectra of ws1 and ws2
+
+        @param ws1 :: first workspace
+        @param ws2 :: second workspace
+
+        @returns workspace with the concatenation of the spectra ws1+ws2
+        """
+        alg = self.createChildAlgorithm('AppendSpectra')
+        alg.setProperty('InputWorkspace1', ws1)
+        alg.setProperty('InputWorkspace2', ws2)
+        alg.execute()
+
+        result = alg.getProperty('OutputWorkspace').value
+        return result
 
 
 AlgorithmFactory.subscribe(EnggVanadiumCorrections)
