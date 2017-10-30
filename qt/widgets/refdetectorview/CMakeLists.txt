@@ -67,6 +67,8 @@ mtd_add_qt_executable (TARGET_NAME RefDetectorViewDemo
       ${TCMALLOC_LIBRARIES_LINKTIME}
       ${Boost_LIBRARIES}
       ${POCO_LIBRARIES}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
       MantidQtWidgetsRefDetectorView
       MantidQtWidgetsSpectrumViewer
