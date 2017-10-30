@@ -13,6 +13,8 @@ Powder Diffraction
 ------------------
 
 - The ``CalibrationFile`` is now optional in :ref:`SNSPowderReduction <algm-SNSPowderReduction>`. In this case time focussing will use :ref:`ConvertUnits <algm-ConvertUnits>` and the instrument geometry. Care must be taken to supply a ``GroupingFile`` otherwise all of the spectra will be kept separate.
+- New algorithm :ref:`algm-EstimateDivergence` estimates the beam divergence due to finite slit size
+- :ref:`PDCalibration <algm-PDCalibration>` returns two more diagnostic workspaces: one for the fitted peak heights, one for the fitted peak widths.
 
 Engineering Diffraction
 -----------------------
