@@ -18,7 +18,7 @@
 #include "vtkAppendPolyData.h"
 #include "vtkPlane.h"
 
-#include <math.h>
+#include <cmath>
 
 vtkStandardNewMacro(AlignedThreeSliceFilter);
 

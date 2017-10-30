@@ -96,7 +96,7 @@ class CalculatePowder(object):
     def get_formatted_data(self):
         """
         Method to obtain data.
-        :return: obtained data
+        :returns: obtained data
         """
         try:
             self._clerk.check_previous_data()
@@ -114,7 +114,7 @@ class CalculatePowder(object):
     def calculate_data(self):
         """
         Calculates mean square displacements.
-        :return: object of type PowderData with mean square displacements.
+        :returns: object of type PowderData with mean square displacements.
         """
 
         data = self._calculate_powder()
@@ -128,7 +128,7 @@ class CalculatePowder(object):
     def load_formatted_data(self):
         """
         Loads mean square displacements.
-        :return: object of type PowderData with mean square displacements.
+        :returns: object of type PowderData with mean square displacements.
         """
         data = self._clerk.load(list_of_datasets=["powder_data"])
         k_pkt = AbinsModules.AbinsConstants.GAMMA_POINT

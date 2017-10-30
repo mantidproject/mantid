@@ -31,10 +31,10 @@ public:
   void test_That_Constructor_Does_Not_Throw_On_Giving_A_Valid_Instrument() {
     boost::shared_ptr<Instrument> testInst =
         boost::make_shared<Instrument>("empty");
-    ObjComponent *source = new ObjComponent("moderator", NULL);
+    ObjComponent *source = new ObjComponent("moderator", nullptr);
     testInst->add(source);
     testInst->markAsSource(source);
-    InstrumentRayTracer *rayTracker(NULL);
+    InstrumentRayTracer *rayTracker(nullptr);
     TS_ASSERT_THROWS_NOTHING(rayTracker = new InstrumentRayTracer(testInst));
     delete rayTracker;
   }

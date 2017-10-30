@@ -64,5 +64,6 @@ class Guinier(IFunction1D):
             jacobian.set(i,1, -self.getParameterValue("Scale") * math.exp(-(rg*x)**2/3.0 )*2.0/3.0*rg*x*x )
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(Guinier)

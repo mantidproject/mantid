@@ -19,20 +19,16 @@ public:
 
   void test_has_correct_mixins() {
     Counts data;
-// AppleClang gives warning if the result is unused.
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-value"
-#endif
+    TS_ASSERT_THROWS_NOTHING(UNUSED_ARG(
+        (dynamic_cast<detail::VectorOf<Counts, HistogramY> &>(data))));
     TS_ASSERT_THROWS_NOTHING(
-        (dynamic_cast<detail::VectorOf<Counts, HistogramY> &>(data)));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Addable<Counts> &>(data));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Iterable<Counts> &>(data));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Offsetable<Counts> &>(data));
-    TS_ASSERT_THROWS_NOTHING(dynamic_cast<detail::Scalable<Counts> &>(data));
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+        UNUSED_ARG(dynamic_cast<detail::Addable<Counts> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Iterable<Counts> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Offsetable<Counts> &>(data)));
+    TS_ASSERT_THROWS_NOTHING(
+        UNUSED_ARG(dynamic_cast<detail::Scalable<Counts> &>(data)));
   }
 
   void test_construct_default() {

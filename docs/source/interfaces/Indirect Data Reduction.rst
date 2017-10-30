@@ -216,6 +216,9 @@ Background Subtraction for Calibration
 Output Name
   This will be the name of the resulting reduced workspace group.
 
+Spectrum Axis
+  This lets to convert the spectrum axis to elastic momentum transfer or scattering angle if desired.
+
 Plot
   If enabled, will plot the result (of the first run) as a contour plot.
 
@@ -326,14 +329,6 @@ Background Start & Background End
 
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
-
-ILL Calibration
----------------
-
-.. interface:: Data Reduction
-  :widget: tabILLCalibration
-
-**This tab is deprecated.** Use CalibrationRun in EnergyTransfer tab.
 
 Options
 ~~~~~~~

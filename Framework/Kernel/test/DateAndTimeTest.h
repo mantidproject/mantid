@@ -8,12 +8,12 @@
 #ifndef DATEANDTIMETEST_H_
 #define DATEANDTIMETEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
-#include <sys/stat.h>
-#include <time.h>
+#include <ctime>
+#include <cxxtest/TestSuite.h>
 #include <sstream>
+#include <sys/stat.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -21,7 +21,6 @@ using namespace Mantid::Kernel;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
-using std::cout;
 
 //==========================================================================================
 class DateAndTimeTest : public CxxTest::TestSuite {
@@ -56,6 +55,14 @@ public:
     TS_ASSERT_EQUALS(d, expected);
     d.setFromISO8601("1990-01-02 00:01:02.345");
     TS_ASSERT_EQUALS(d, expected);
+  }
+
+  void test_constructor_fails_invalid_string() {
+    TS_ASSERT_THROWS(DateAndTime("invalid time string"), std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("1909-01-31  22:59:59"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(DateAndTime("2017-09-27T 07:03:49+00:00"),
+                     std::invalid_argument);
   }
 
   void test_limits_on_construction() {
@@ -273,7 +280,7 @@ public:
 
   void test_time_t_support() {
     DateAndTime t;
-    std::time_t current = time(NULL);
+    std::time_t current = time(nullptr);
     t.set_from_time_t(current);
     //    if (cur.day() < 28) // Annoying bug at the end of a month
     { TS_ASSERT_EQUALS(current, t.to_time_t()); }
@@ -305,8 +312,7 @@ public:
     timeinfo->tm_min = 0;
     timeinfo->tm_sec = 0;
     // Convert to time_t but assuming the tm is specified in UTC time.
-    std::time_t utc_time_t =
-        Mantid::Kernel::DateAndTimeHelpers::utc_mktime(timeinfo);
+    std::time_t utc_time_t = Mantid::Kernel::DateAndTime::utc_mktime(timeinfo);
     // This will be the local time
     std::time_t local_time_t = std::mktime(timeinfo);
 
@@ -448,19 +454,6 @@ public:
     TS_ASSERT_EQUALS(times[1], DateAndTime("1990-01-02 03:04:07.000"));
     TS_ASSERT_EQUALS(times[2], DateAndTime("1990-01-02 03:04:05.500"));
     TS_ASSERT_EQUALS(times[3], DateAndTime("1990-01-02 03:04:02.000"));
-  }
-
-  void test_stringIsISO8601() {
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02 03:04:02.000"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02T03:04:02.000+05:30"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02 03:04"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1990-01-02"));
-    TS_ASSERT(DateAndTime::stringIsISO8601("1822-01-02"));
-
-    TS_ASSERT(!DateAndTime::stringIsISO8601("January 1, 2345"));
-    TS_ASSERT(!DateAndTime::stringIsISO8601("2010-31-56"));
-    TS_ASSERT(!DateAndTime::stringIsISO8601("1990-01-02 45:92:22"));
   }
 };
 

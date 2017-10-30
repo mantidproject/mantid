@@ -174,7 +174,7 @@ void TabulatedFunction::setAttribute(const std::string &attName,
     }
     FileValidator fval;
     std::string error = fval.isValid(fileName);
-    if (error == "") {
+    if (error.empty()) {
       storeAttributeValue(attName, Attribute(fileName, true));
       storeAttributeValue("Workspace", Attribute(""));
     } else {

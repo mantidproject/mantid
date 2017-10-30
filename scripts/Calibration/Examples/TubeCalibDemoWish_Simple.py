@@ -4,6 +4,9 @@
 #
 # Here we run the calibration of WISH panel03 using a simple CalibrateWish function.
 #
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 import tube
 import mantid.simpleapi as mantid
@@ -58,9 +61,9 @@ def CalibrateWish(RunNumber, PanelNumber):
 
     # == Save workspace ==
     # uncomment these lines to save the workspace
-    # nexusName = "TubeCalibDemoWish"+PanelNumber+"Result.nxs"
-    # SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoWishResult.nxs',"Result of Running TubeCalibWishMerlin_Simple.py")
-    # print "saved calibrated workspace (CalibInstWS) into Nexus file",nexusName
+    # nexusName = "TubeCalibDemoWish" + PanelNumber + "Result.nxs"
+    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoWishResult.nxs', "Result of Running TubeCalibWishMerlin_Simple.py")
+    # print("saved calibrated workspace (CalibInstWS) into Nexus file", nexusName)
 
     # == Reset dafault instrument ==
     mantid.config['default.instrument'] = previousDefaultInstrument

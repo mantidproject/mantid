@@ -7,10 +7,6 @@ try:
 except ImportError:
     canMantidPlot = False  #
 
-import ui_refl_window
-import refl_save
-import refl_choose_col
-import refl_options
 import csv
 import os
 import re
@@ -26,6 +22,11 @@ import mantidqtpython
 from mantid.api import Workspace, WorkspaceGroup, CatalogManager, AlgorithmManager
 from mantid import UsageService
 
+from ui.reflectometer.ui_refl_window import Ui_windowRefl
+from ui.reflectometer.refl_save import Ui_SaveWindow
+from ui.reflectometer.refl_choose_col import ReflChoose
+from ui.reflectometer.refl_options import ReflOptions
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -35,7 +36,7 @@ except AttributeError:
 canMantidPlot = True
 
 
-class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, Ui_windowRefl):
     current_instrument = None
     current_table = None
     current_polarisation_method = None
@@ -253,7 +254,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
         # Setup polarisation options with default assigned
         self.comboPolarCorrect.clear()
-        self.comboPolarCorrect.addItems(self.polarisation_options.keys())
+        self.comboPolarCorrect.addItems(list(self.polarisation_options.keys()))
         self.comboPolarCorrect.setCurrentIndex(self.comboPolarCorrect.findText('None'))
         self.current_polarisation_method = self.polarisation_options['None']
         self.comboPolarCorrect.setEnabled(self.current_instrument in self.polarisation_instruments)
@@ -692,7 +693,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
     def __checked_row_stiched(self, row):
         return self.tableMain.cellWidget(row, self.stitch_col).children()[1].checkState() > 0
 
-    def _process(self):
+    def _process(self):  # noqa: C901
         """
         Process has been pressed, check what has been selected then pass the selection (or whole table) to quick
         """
@@ -744,27 +745,29 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                             else:
                                 Load(Filename=runno[0], OutputWorkspace="_run")
                                 loadedRun = mtd["_run"]
-                                two_theta_str = str(self.tableMain.item(row, 1).text())
+                                theta_in_str = str(self.tableMain.item(row, 1).text())
                             try:
-                                two_theta = None
-                                if len(two_theta_str) > 0:
-                                    two_theta = float(two_theta_str)
+                                theta_in = None
+                                if len(theta_in_str) > 0:
+                                    theta_in = float(theta_in_str)
 
                                 # Make sure we only ever run calculate resolution on a non-group workspace.
                                 # If we're given a group workspace, we can just run it on the first member of the group instead
                                 thetaRun = loadedRun
                                 if isinstance(thetaRun, WorkspaceGroup):
                                     thetaRun = thetaRun[0]
-                                dqq, two_theta = CalculateResolution(Workspace=thetaRun, TwoTheta=two_theta)
+                                if not theta_in:
+                                    theta_in = getLogValue(thetaRun, "Theta")
+                                dqq = NRCalculateSlitResolution(Workspace=thetaRun, TwoTheta=2 * theta_in)
 
                                 # Put the calculated resolution into the table
                                 resItem = QtGui.QTableWidgetItem()
                                 resItem.setText(str(dqq))
                                 self.tableMain.setItem(row, 15, resItem)
 
-                                # Update the value for two_theta in the table
+                                # Update the value for theta_in in the table
                                 ttItem = QtGui.QTableWidgetItem()
-                                ttItem.setText(str(two_theta))
+                                ttItem.setText(str(theta_in))
                                 self.tableMain.setItem(row, 1, ttItem)
 
                                 logger.notice("Calculated resolution: " + str(dqq))
@@ -777,7 +780,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                         else:
                             dqq = float(self.tableMain.item(row, 15).text())
 
-                        # Check secondary and tertiary two_theta columns, if they're
+                        # Check secondary and tertiary theta_in columns, if they're
                         # blank and their corresponding run columns are set, fill them.
                         for run_col in [5, 10]:
                             tht_col = run_col + 1
@@ -966,7 +969,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
                 name += '_' + str(t)
         return name
 
-    def _do_run(self, runno, row, which):
+    def _do_run(self, runno, row, which):  # noqa: C901
         """
         Run quick on the given run and row
         """
@@ -1294,7 +1297,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
             Dialog = QtGui.QDialog()
-            u = refl_save.Ui_SaveWindow()
+            u = Ui_SaveWindow()
             u.setupUi(Dialog)
             Dialog.exec_()
         except Exception as ex:
@@ -1307,11 +1310,11 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         """
         try:
 
-            dialog_controller = refl_options.ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
-                                                         def_alg_use=self.__alg_use,
-                                                         def_icat_download=self.__icat_download,
-                                                         def_group_tof_workspaces=self.__group_tof_workspaces,
-                                                         def_stitch_right=self.__scale_right)
+            dialog_controller = ReflOptions(def_method=self.live_method, def_freq=self.live_freq,
+                                            def_alg_use=self.__alg_use,
+                                            def_icat_download=self.__icat_download,
+                                            def_group_tof_workspaces=self.__group_tof_workspaces,
+                                            def_stitch_right=self.__scale_right)
             if dialog_controller.exec_():
                 # Fetch the settings back off the controller
                 self.live_freq = dialog_controller.frequency()
@@ -1343,7 +1346,7 @@ class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
         shows the choose columns dialog for hiding and revealing of columns
         """
         try:
-            dialog = refl_choose_col.ReflChoose(self.shown_cols, self.tableMain)
+            dialog = ReflChoose(self.shown_cols, self.tableMain)
             if dialog.exec_():
                 settings = QtCore.QSettings()
                 settings.beginGroup(self.__column_settings)

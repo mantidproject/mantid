@@ -19,20 +19,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-using Mantid::HistogramData::Histogram;
-using Mantid::HistogramData::Points;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::LinearGenerator;
-using Mantid::DataObjects::create;
-using Mantid::DataObjects::Workspace2D;
-
 namespace {
-/// A helper type to define the position of a peak.
-struct Peak {
-  double fittedCentre;
-  double positionOfMaximum;
-};
-
 /// A struct for information needed for detector angle calibration.
 struct DirectBeamMeasurement {
   double detectorAngle;
@@ -199,11 +186,6 @@ using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
-
-/// A list of supported instruments.
-const std::unordered_set<std::string>
-    LoadILLReflectometry::m_supportedInstruments{"D17", "d17", "Figaro",
-                                                 "figaro"};
 
 /**
  * Return the confidence with this algorithm can load the file
@@ -613,12 +595,13 @@ void LoadILLReflectometry::loadData(
     // write data
     for (size_t j = 0; j < m_numberOfHistograms; ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
-      const Counts counts(data_p, data_p + m_numberOfChannels);
+      const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
       progress.report();
       for (size_t im = 0; im < nb_monitors; ++im) {
         const int *monitor_p = monitorsData[im].data();
-        const Counts counts(monitor_p, monitor_p + m_numberOfChannels);
+        const HistogramData::Counts counts(monitor_p,
+                                           monitor_p + m_numberOfChannels);
         m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
                                        std::move(counts));
         progress.report();

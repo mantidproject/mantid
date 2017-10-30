@@ -227,7 +227,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
     {
       std::unique_lock<std::mutex> lk(m_callbackMutex);
-      this->m_callbackCondition.wait(lk, [this, &decoder, maxIterations]() {
+      this->m_callbackCondition.wait(lk, [this, maxIterations]() {
         return this->m_niterations == maxIterations;
       });
     }

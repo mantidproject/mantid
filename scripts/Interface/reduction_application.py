@@ -621,5 +621,6 @@ def start(argv):
     reducer.show()
     app.exec_()
 
+
 if __name__ == '__main__':
     start(argv=sys.argv)

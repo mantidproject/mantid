@@ -601,8 +601,8 @@ void SVConnections::showColorScale(std::vector<QRgb> &positiveColorTable,
  * Slot to open the online help webapge for the interface.
  */
 void SVConnections::openOnlineHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL,
-                                                 QString("SpectrumViewer"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Spectrum Viewer"));
 }
 
 /// Set the display which is currently visible
@@ -624,7 +624,7 @@ void SVConnections::removeSpectrumDisplay(SpectrumDisplay *spectrumDisplay) {
     m_spectrumDisplays.removeAll(spectrumDisplay);
   }
   if (m_spectrumDisplays.isEmpty()) {
-    m_currentSpectrumDisplay = NULL;
+    m_currentSpectrumDisplay = nullptr;
   } else {
     m_currentSpectrumDisplay = m_spectrumDisplays.back();
   }

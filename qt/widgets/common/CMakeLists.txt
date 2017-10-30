@@ -5,6 +5,7 @@
 	src/AlgorithmRunner.cpp
 	src/BatchAlgorithmRunner.cpp
 	src/BoolPropertyWidget.cpp
+        src/DropEventHelper.cpp
 	src/FileDialogHandler.cpp
 	src/FilePropertyWidget.cpp
 	src/GenericDialog.cpp
@@ -63,24 +64,27 @@
 	src/CatalogSelector.cpp
 	src/CheckboxHeader.cpp
 	src/ColorBarWidget.cpp
-	src/DataProcessorUI/AbstractDataProcessorTreeModel.cpp
-	src/DataProcessorUI/DataProcessorGenerateNotebook.cpp
-	src/DataProcessorUI/DataProcessorOneLevelTreeManager.cpp
-	src/DataProcessorUI/DataProcessorPostprocessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorPreprocessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorPreprocessMap.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithm.cpp
-	src/DataProcessorUI/DataProcessorProcessingAlgorithmBase.cpp
-	src/DataProcessorUI/DataProcessorTwoLevelTreeManager.cpp
-	src/DataProcessorUI/DataProcessorWhiteList.cpp
+	src/DataProcessorUI/AbstractTreeModel.cpp
+	src/DataProcessorUI/GenerateNotebook.cpp
+	src/DataProcessorUI/OneLevelTreeManager.cpp
+	src/DataProcessorUI/PostprocessingAlgorithm.cpp
+	src/DataProcessorUI/PreprocessingAlgorithm.cpp
+	src/DataProcessorUI/PreprocessMap.cpp
+	src/DataProcessorUI/ProcessingAlgorithm.cpp
+	src/DataProcessorUI/ProcessingAlgorithmBase.cpp
+	src/DataProcessorUI/TwoLevelTreeManager.cpp
+	src/DataProcessorUI/WhiteList.cpp
+    src/DataProcessorUI/PostprocessingStep.cpp
 	src/DataProcessorUI/GenericDataProcessorPresenter.cpp
-	src/DataProcessorUI/ParseKeyValueString.cpp
-	src/DataProcessorUI/ParseNumerics.cpp
-	src/DataProcessorUI/QDataProcessorOneLevelTreeModel.cpp
-	src/DataProcessorUI/QDataProcessorTwoLevelTreeModel.cpp
+    src/DataProcessorUI/Column.cpp
+    src/DataProcessorUI/ConstColumnIterator.cpp
+	src/ParseKeyValueString.cpp
+	src/ParseNumerics.cpp
+	src/DataProcessorUI/QOneLevelTreeModel.cpp
+	src/DataProcessorUI/QTwoLevelTreeModel.cpp
 	src/DataProcessorUI/QDataProcessorWidget.cpp
 	src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
-	src/DataProcessorUI/DataProcessorVectorString.cpp
+	src/DataProcessorUI/VectorString.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
 	src/DisplayCurveFit.cpp
@@ -183,14 +187,14 @@ set ( MOC_FILES
   inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
   inc/MantidQtWidgets/Common/CheckboxHeader.h
   inc/MantidQtWidgets/Common/ColorBarWidget.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/AbstractDataProcessorTreeModel.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandAdapter.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QtCommandAdapter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterThread.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterRowReducerWorker.h
   inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterGroupReducerWorker.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorOneLevelTreeModel.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorTwoLevelTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QOneLevelTreeModel.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/QTwoLevelTreeModel.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h
   inc/MantidQtWidgets/Common/DataProcessorUI/QtDataProcessorOptionsDialog.h
   inc/MantidQtWidgets/Common/DataProcessorUI/TreeData.h
@@ -261,7 +265,8 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/AlgorithmRunner.h
 	inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
 	inc/MantidQtWidgets/Common/DllOption.h
-	inc/MantidQtWidgets/Common/FileDialogHandler.h
+        inc/MantidQtWidgets/Common/DropEventHelper.h
+  inc/MantidQtWidgets/Common/FileDialogHandler.h
 	inc/MantidQtWidgets/Common/FlowLayout.h
 	inc/MantidQtWidgets/Common/GraphOptions.h
 	inc/MantidQtWidgets/Common/DistributionOptions.h
@@ -302,49 +307,49 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/WorkspaceIcons.h
 	inc/MantidQtWidgets/Common/AlgorithmHintStrategy.h
 	inc/MantidQtWidgets/Common/CatalogHelper.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendGroupCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorAppendRowCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorClearSelectedCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommandBase.h
-  inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCollapseGroupsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCopySelectedCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorCutSelectedCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteGroupCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorDeleteRowCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExpandGroupsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorExportTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGenerateNotebook.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorGroupRowsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorImportTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/AppendGroupCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/AppendRowCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ClearSelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/Command.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/CommandBase.h
+  inc/MantidQtWidgets/Common/DataProcessorUI/CollapseGroupsCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/CopySelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/CutSelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/DeleteGroupCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/DeleteRowCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ExpandGroupsCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ExportTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/GroupRowsCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ImportTableCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorNewTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOneLevelTreeManager.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOpenTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPasteSelectedCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPauseCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotGroupCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPlotRowCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPostprocessingAlgorithm.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessingAlgorithm.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPreprocessMap.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/NewTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/OneLevelTreeManager.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/OpenTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/OptionsCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PasteSelectedCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PauseCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PlotGroupCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PlotRowCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/PreprocessMap.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithm.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorProcessingAlgorithmBase.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableAsCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorSaveTableCommand.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorTreeManager.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorTwoLevelTreeManager.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorVectorString.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithm.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableAsCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/SaveTableCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/TreeManager.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/TwoLevelTreeManager.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/VectorString.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorView.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWhiteList.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWorkspaceCommand.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/WhiteList.h
+	inc/MantidQtWidgets/Common/DataProcessorUI/WorkspaceCommand.h
 	inc/MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenterFactory.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/ParseKeyValueString.h
-	inc/MantidQtWidgets/Common/DataProcessorUI/ParseNumerics.h
+	inc/MantidQtWidgets/Common/ParseKeyValueString.h
+	inc/MantidQtWidgets/Common/ParseNumerics.h
 	inc/MantidQtWidgets/Common/ErrorCurve.h
 	inc/MantidQtWidgets/Common/HintStrategy.h
 	inc/MantidQtWidgets/Common/IFunctionBrowser.h
@@ -440,20 +445,20 @@ set( TEST_FILES
    SignalBlockerTest.h
    AlgorithmHintStrategyTest.h
    TrackedActionTest.h
-   DataProcessorUI/DataProcessorCommandsTest.h
-   DataProcessorUI/DataProcessorGenerateNotebookTest.h
-   DataProcessorUI/DataProcessorOneLevelTreeManagerTest.h
-   DataProcessorUI/DataProcessorPostprocessingAlgorithmTest.h
-   DataProcessorUI/DataProcessorPreprocessingAlgorithmTest.h
-   DataProcessorUI/DataProcessorPreprocessMapTest.h
-   DataProcessorUI/DataProcessorProcessingAlgorithmBaseTest.h
-   DataProcessorUI/DataProcessorProcessingAlgorithmTest.h
-   DataProcessorUI/DataProcessorTwoLevelTreeManagerTest.h
-   DataProcessorUI/DataProcessorWhiteListTest.h
+   DataProcessorUI/CommandsTest.h
+   DataProcessorUI/GenerateNotebookTest.h
+   DataProcessorUI/OneLevelTreeManagerTest.h
+   DataProcessorUI/PostprocessingAlgorithmTest.h
+   DataProcessorUI/PreprocessingAlgorithmTest.h
+   DataProcessorUI/PreprocessMapTest.h
+   DataProcessorUI/ProcessingAlgorithmBaseTest.h
+   DataProcessorUI/ProcessingAlgorithmTest.h
+   DataProcessorUI/TwoLevelTreeManagerTest.h
+   DataProcessorUI/WhiteListTest.h
    DataProcessorUI/GenericDataProcessorPresenterTest.h
-   DataProcessorUI/ParseKeyValueStringTest.h
-   DataProcessorUI/QDataProcessorOneLevelTreeModelTest.h
-   DataProcessorUI/QDataProcessorTwoLevelTreeModelTest.h
+   ParseKeyValueStringTest.h
+   DataProcessorUI/QOneLevelTreeModelTest.h
+   DataProcessorUI/QTwoLevelTreeModelTest.h
    ProjectSaveModelTest.h
    ProjectSavePresenterTest.h
    WorkspacePresenter/ADSAdapterTest.h
@@ -574,6 +579,11 @@ add_library ( MantidQtWidgetsCommon ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 set_target_properties ( MantidQtWidgetsCommon PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_COMMON )
 
+# Add support for OSX system libraries if this is an OSX machine
+if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+ SET( APPLE_SYSTEM_LIBRARIES "-framework CoreFoundation")
+endif()
+
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtWidgetsCommon PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
 endif ()
@@ -581,6 +591,7 @@ endif ()
 target_link_libraries ( MantidQtWidgetsCommon LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${QSCINTILLA_LIBRARIES}
+  ${APPLE_SYSTEM_LIBRARIES}
 )
 
 if(MAKE_VATES AND ParaView_FOUND)

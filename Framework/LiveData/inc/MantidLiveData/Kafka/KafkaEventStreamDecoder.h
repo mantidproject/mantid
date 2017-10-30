@@ -114,7 +114,7 @@ private:
   /// Mapping of spectrum number to workspace index.
   spec2index_map m_specToIdx;
   /// Start time of the run
-  Kernel::DateAndTime m_runStart;
+  Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
   /// Subscriber for the run info stream

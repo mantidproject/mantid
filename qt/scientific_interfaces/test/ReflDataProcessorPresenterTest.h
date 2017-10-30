@@ -5,11 +5,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "../ISISReflectometry/ReflGenericDataProcessorPresenterFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "../ISISReflectometry/ReflGenericDataProcessorPresenterFactory.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMockObjects.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -25,20 +25,17 @@ std::ostream &operator<<(std::ostream &os, QString const &str) {
 class ReflDataProcessorPresenterTest : public CxxTest::TestSuite {
 
 private:
-  ITableWorkspace_sptr
-  createWorkspace(const QString &wsName,
-                  const DataProcessorWhiteList &whitelist) {
-    ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-
-    const int ncols = static_cast<int>(whitelist.size());
+  ITableWorkspace_sptr createWorkspace(const QString &wsName,
+                                       const WhiteList &whitelist) {
+    auto ws = WorkspaceFactory::Instance().createTable();
 
     auto colGroup = ws->addColumn("str", "Group");
     colGroup->setPlotType(0);
 
-    for (int col = 0; col < ncols; col++) {
-      auto column = ws->addColumn(
-          "str", whitelist.colNameFromColIndex(col).toStdString());
-      column->setPlotType(0);
+    for (auto const &column : whitelist) {
+      auto newWorkspaceColumn =
+          ws->addColumn("str", column.name().toStdString());
+      newWorkspaceColumn->setPlotType(0);
     }
 
     if (wsName.length() > 0)
@@ -47,9 +44,8 @@ private:
     return ws;
   }
 
-  ITableWorkspace_sptr
-  createPrefilledWorkspace(const QString &wsName,
-                           const DataProcessorWhiteList &whitelist) {
+  ITableWorkspace_sptr createPrefilledWorkspace(const QString &wsName,
+                                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::vector<std::string> group{"0", "0", "1", "1"};
     const std::vector<std::string> run{"13460", "13462", "13469", "13470"};
@@ -70,7 +66,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMixedWorkspace(const QString &wsName,
-                                const DataProcessorWhiteList &whitelist) {
+                                const WhiteList &whitelist) {
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";
     const std::vector<std::string> run{"38415", "38417"};
@@ -91,7 +87,7 @@ private:
 
   ITableWorkspace_sptr
   createPrefilledMinimalWorkspace(const QString &wsName,
-                                  const DataProcessorWhiteList &whitelist) {
+                                  const WhiteList &whitelist) {
 
     auto ws = createWorkspace(wsName, whitelist);
     const std::string group = "0";

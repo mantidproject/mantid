@@ -44,7 +44,7 @@ EventNexusLoadingPresenter::EventNexusLoadingPresenter(
  */
 bool EventNexusLoadingPresenter::canReadFile() const {
   if (!canLoadFileBasedOnExtension(m_filename, ".nxs")) {
-    return 0;
+    return false;
   }
 
   std::unique_ptr<NeXus::File> file;
@@ -55,7 +55,7 @@ bool EventNexusLoadingPresenter::canReadFile() const {
       file->openGroup("entry", "NXentry");
     } catch (::NeXus::Exception &) {
       file->close();
-      return 0;
+      return false;
     }
     // But only eventNexus files have bank123_events as a group name
     std::map<std::string, std::string> entries = file->getEntries();
@@ -74,7 +74,7 @@ bool EventNexusLoadingPresenter::canReadFile() const {
     if (file)
       file->close();
   }
-  return 0;
+  return false;
 }
 
 /*

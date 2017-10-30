@@ -1,6 +1,7 @@
 #pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
+from six import PY2
 
 
 def rel_err_less_delta(val, ref, epsilon):
@@ -234,7 +235,8 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         for idx in [0, 12, 516, 789, 891, 1112]:
             cell_val = self.peaks_info.cell(idx,1)
             self.assertTrue(isinstance(cell_val, str))
-            self.assertEquals(cell_val[0:11], '{"1": {"A":')
+            if PY2: # This test depends on consistent ordering of a dict which is not guaranteed for python 3
+                self.assertEquals(cell_val[0:11], '{"1": {"A":')
             self.assertEquals(cell_val[-2:], '}}')
 
         self.assertEquals(self.difa, 0)

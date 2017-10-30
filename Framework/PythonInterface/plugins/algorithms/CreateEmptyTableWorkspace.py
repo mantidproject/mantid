@@ -26,5 +26,6 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", tableWS)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateEmptyTableWorkspace)

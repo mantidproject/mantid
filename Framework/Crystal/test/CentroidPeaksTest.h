@@ -31,6 +31,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class CentroidPeaksTest : public CxxTest::TestSuite {
 public:
@@ -139,10 +141,14 @@ public:
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
     // pkws->setName("TOPAZ");
 
-    // Create a single peak on that particular detector
-    Peak PeakObj(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    // Create two peaks on that particular detector
+    // First peak is at edge to check EdgePixels option
+    Peak PeakObj(in_ws->getInstrument(), 0, 2., V3D(1, 1, 1));
     PeakObj.setRunNumber(3007);
     pkws->addPeak(PeakObj);
+    Peak PeakObj2(in_ws->getInstrument(), 5050, 2., V3D(1, 1, 1));
+    PeakObj2.setRunNumber(3007);
+    pkws->addPeak(PeakObj2);
     AnalysisDataService::Instance().addOrReplace("TOPAZ", pkws);
 
     inputW->mutableRun().addProperty("run_number", 3007);

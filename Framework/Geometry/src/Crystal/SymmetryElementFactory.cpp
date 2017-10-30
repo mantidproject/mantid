@@ -313,7 +313,7 @@ std::string SymmetryElementMirrorGenerator::determineSymbol(
    * proper symbol, so the general symbol "g" is used for these cases.
    * Examples can be found in No. 227 (Fd-3m).
    */
-  if (symbol == "") {
+  if (symbol.empty()) {
     return "g";
   }
 

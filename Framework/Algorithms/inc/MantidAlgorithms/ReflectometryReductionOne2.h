@@ -8,6 +8,9 @@ namespace Mantid {
 namespace API {
 class SpectrumInfo;
 }
+namespace Geometry {
+class ReferenceFrame;
+}
 namespace HistogramData {
 class HistogramX;
 class HistogramY;
@@ -88,6 +91,8 @@ private:
   // convert to momentum transfer
   Mantid::API::MatrixWorkspace_sptr
   convertToQ(Mantid::API::MatrixWorkspace_sptr inputWS);
+  // Get the twoTheta width of a given detector
+  double getDetectorTwoThetaRange(const size_t spectrumIdx);
   // Utility function to create name for diagnostic workspaces
   std::string createDebugWorkspaceName(const std::string &inputName);
   // Utility function to output a diagnostic workspace to the ADS
@@ -152,6 +157,7 @@ private:
 
   API::MatrixWorkspace_sptr m_runWS;
   const API::SpectrumInfo *m_spectrumInfo;
+  boost::shared_ptr<const Mantid::Geometry::ReferenceFrame> m_refFrame;
   bool m_convertUnits;          // convert the input workspace to lambda
   bool m_normaliseMonitors;     // normalise by monitors and direct beam
   bool m_normaliseTransmission; // transmission or algorithmic correction

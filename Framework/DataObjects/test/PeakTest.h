@@ -454,7 +454,6 @@ public:
   }
 
   void test_setQSampleFrameVirtualDetectorWithScatteringAngle() {
-    constexpr auto radius = 10.;
     auto sphereInst =
         ComponentCreationHelper::createTestInstrumentRectangular(5, 100);
     auto extendedSpaceObj =
@@ -467,7 +466,8 @@ public:
     // test with & without extended detector space
     // extended space is a sphere, so all points should fall radius*detector
     // direction away from the detector direction with extended space
-    auto testTheta = [this, &sphereInst, &radius](const double theta) {
+    auto testTheta = [this, &sphereInst](const double theta) {
+      constexpr auto radius = 10.;
       const auto expectedDir = V3D(sin(theta), 0., cos(theta));
 
       // test without extended detector space

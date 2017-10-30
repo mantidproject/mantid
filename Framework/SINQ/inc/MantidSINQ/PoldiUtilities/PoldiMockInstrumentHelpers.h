@@ -121,7 +121,7 @@ public:
 };
 class PoldiFakeSourceComponent : public ObjComponent {
 public:
-  PoldiFakeSourceComponent() : ObjComponent("FakePoldiSource", 0) {}
+  PoldiFakeSourceComponent() : ObjComponent("FakePoldiSource", nullptr) {}
 };
 
 class PoldiAbstractFakeInstrument : public Instrument {

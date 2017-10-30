@@ -42,7 +42,7 @@ using namespace Mantid::API;
 * Default Constructor
 */
 GenericDialog::GenericDialog(QWidget *parent)
-    : AlgorithmDialog(parent), m_algoPropertiesWidget(NULL) {}
+    : AlgorithmDialog(parent), m_algoPropertiesWidget(nullptr) {}
 
 /**
 * Destructor

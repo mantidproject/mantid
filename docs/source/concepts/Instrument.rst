@@ -73,17 +73,17 @@ Instrument Properties
     instrument = ws.getInstrument()
 
     # get the instrument name
-    print instrument.getName()
+    print(instrument.getName())
     # Get the validity dates for this instrument definition
-    print instrument.getValidToDate()
-    print instrument.getValidFromDate()
+    print(instrument.getValidToDate())
+    print(instrument.getValidFromDate())
     # Get the X,Y,Z position of the source and sample
     source = instrument.getSource()
     sample = instrument.getSample()
-    print source.getPos()
-    print sample.getPos()
+    print(source.getPos())
+    print(sample.getPos())
     # Get the distance from the source to the sample
-    print sample.getDistance(source)
+    print(sample.getDistance(source))
 
 .. testoutput:: InstrumentPropertiestest
     :hide:
@@ -138,19 +138,19 @@ Instruments, or any component within them (bank, detector, chopper, slit etc) ca
     bank1=instrument.getComponentByName("bank1")
     bank2=instrument.getComponentByName("bank2")
 
-    print ("The whole instrument parameter can be read from anywhere.")
-    print ("  The instrument: " + instrument.getStringParameter("TestParam")[0])
-    print ("  bank 1: " + bank1.getStringParameter("TestParam")[0])
-    print ("  bank 2: " + bank2.getStringParameter("TestParam")[0])
+    print("The whole instrument parameter can be read from anywhere.")
+    print("  The instrument: " + instrument.getStringParameter("TestParam")[0])
+    print("  bank 1: " + bank1.getStringParameter("TestParam")[0])
+    print("  bank 2: " + bank2.getStringParameter("TestParam")[0])
 
-    print ("The parameters  on the Bank 1 can be read from the bank or below.")
+    print("The parameters  on the Bank 1 can be read from the bank or below.")
     #For this one call getIntParameter as the number was an int
-    print ("  bank 1: " + str(bank1.getIntParameter("NumberParam")[0]))
+    print("  bank 1: " + str(bank1.getIntParameter("NumberParam")[0]))
     #For this one call getNumberParameter as the number was a float
-    print ("  bank 2: " + str(bank2.getNumberParameter("NumberParam")[0]))
+    print("  bank 2: " + str(bank2.getNumberParameter("NumberParam")[0]))
     #if you are not sure of the type of a parameter you can call getParameterType
-    print ("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))
-    print ("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
+    print("  The type of NumberParam in bank 1: " + bank1.getParameterType("NumberParam"))
+    print("  The type of NumberParam in bank 2: " + bank2.getParameterType("NumberParam"))
 
 Output: 
 
@@ -191,13 +191,13 @@ Getting all the Parameters on an instrument component
     det101=instrument.getDetector(101)
 
     for name in det101.getParameterNames() :
-        print name,
         if det101.getParameterType(name) == "int":
-            print det101.getIntParameter(name)
+            value = det101.getIntParameter(name)
         if det101.getParameterType(name) == "double":
-            print det101.getNumberParameter(name)
+            value = det101.getNumberParameter(name)
         if det101.getParameterType(name) == "string":
-            print det101.getStringParameter(name)              
+            value = det101.getStringParameter(name)
+        print("{0} {1}".format(name,value))
 
 
 Output:

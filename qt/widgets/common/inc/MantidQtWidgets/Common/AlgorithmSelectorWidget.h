@@ -44,8 +44,7 @@ struct SelectedAlgorithm {
 
   @date 2012-03-06
   */
-class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget
-    : public QWidget {
+class EXPORT_OPT_MANTIDQT_COMMON AlgorithmSelectorWidget : public QWidget {
   Q_OBJECT
   Q_PROPERTY(bool showExecuteButton READ showExecuteButton WRITE
                  showExecuteButton)

@@ -42,9 +42,8 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   }
 }
 
-void RebinnedOutput::init(const std::size_t &NVectors,
-                          const HistogramData::Histogram &histogram) {
-  Workspace2D::init(NVectors, histogram);
+void RebinnedOutput::init(const HistogramData::Histogram &histogram) {
+  Workspace2D::init(histogram);
   std::size_t nHist = this->getNumberHistograms();
   this->fracArea.resize(nHist);
   for (std::size_t i = 0; i < nHist; ++i) {

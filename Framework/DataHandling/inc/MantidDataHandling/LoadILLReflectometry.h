@@ -98,7 +98,6 @@ private:
   double m_detectorDistanceValue{0.0};
   double m_pixelCentre{0.0};
   double m_pixelWidth{0.0};
-  const static std::unordered_set<std::string> m_supportedInstruments;
   Mantid::DataHandling::LoadHelper m_loader;
 };
 

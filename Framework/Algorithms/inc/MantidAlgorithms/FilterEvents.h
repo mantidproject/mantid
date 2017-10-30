@@ -72,6 +72,7 @@ public:
   const std::string category() const override {
     return "Events\\EventFiltering";
   }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   // Implement abstract Algorithm methods
@@ -155,14 +156,14 @@ private:
       std::vector<Kernel::TimeSeriesProperty<bool> *> &bool_tsp_name_vector);
 
   template <typename TYPE>
-  void
-  splitTimeSeriesProperty(Kernel::TimeSeriesProperty<TYPE> *tsp,
-                          std::vector<Kernel::DateAndTime> &split_datetime_vec,
-                          const int max_target_index);
+  void splitTimeSeriesProperty(
+      Kernel::TimeSeriesProperty<TYPE> *tsp,
+      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
+      const int max_target_index);
 
   void splitDoubleTimeSeriesLogs(
       const std::vector<Kernel::TimeSeriesProperty<double> *> &dbl_tsp_vector,
-      std::vector<Kernel::DateAndTime> &split_datetime_vec,
+      std::vector<Types::Core::DateAndTime> &split_datetime_vec,
       const int max_target_index);
 
   void groupOutputWorkspace();
@@ -232,9 +233,9 @@ private:
   // Flag to have relative time in splitters workspace
   bool m_isSplittersRelativeTime;
   // Starting time for starting time of event filters
-  Kernel::DateAndTime m_filterStartTime;
+  Types::Core::DateAndTime m_filterStartTime;
   // EventWorkspace (aka. run)'s starting time
-  Kernel::DateAndTime m_runStartTime;
+  Types::Core::DateAndTime m_runStartTime;
 };
 
 } // namespace Algorithms

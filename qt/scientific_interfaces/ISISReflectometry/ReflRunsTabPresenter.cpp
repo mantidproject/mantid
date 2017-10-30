@@ -15,7 +15,7 @@
 #include "ReflNexusMeasurementItemSource.h"
 #include "ReflSearchModel.h"
 #include "ReflFromStdStringMap.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorCommand.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/Command.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/ProgressPresenter.h"
 
@@ -165,12 +165,12 @@ void ReflRunsTabPresenter::pushCommands() {
   const size_t rowCommStart = 10u;
   // We want to have two menus
   // Populate the "Reflectometry" menu
-  std::vector<DataProcessorCommand_uptr> tableCommands;
+  std::vector<MantidWidgets::DataProcessor::Command_uptr> tableCommands;
   for (size_t i = 0; i < rowCommStart; i++)
     tableCommands.push_back(std::move(commands[i]));
   m_view->setTableCommands(std::move(tableCommands));
   // Populate the "Edit" menu
-  std::vector<DataProcessorCommand_uptr> rowCommands;
+  std::vector<MantidWidgets::DataProcessor::Command_uptr> rowCommands;
   for (size_t i = rowCommStart; i < nCommands; i++)
     rowCommands.push_back(std::move(commands[i]));
   m_view->setRowCommands(std::move(rowCommands));

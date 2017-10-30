@@ -26,8 +26,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-using namespace std;
-
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
@@ -47,11 +45,11 @@ void LoadVulcanCalFile::init() {
                                                     FileProperty::Load, ".dat"),
                   "Path to the VULCAN offset file. ");
 
-  vector<string> groupoptions{"6Modules", "2Banks", "1Bank"};
+  std::array<std::string, 3> groupoptions = {{"6Modules", "2Banks", "1Bank"}};
 
   declareProperty(
       "Grouping", "6Modules",
-      boost::make_shared<ListValidator<string>>(groupoptions),
+      boost::make_shared<ListValidator<std::string>>(groupoptions),
       "Choices to output group workspace for 1 bank, 2 banks or 6 modules. ");
 
   declareProperty(Kernel::make_unique<FileProperty>("BadPixelFilename", "",
@@ -114,7 +112,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   m_offsetFilename = getPropertyValue("OffsetFilename");
   m_badPixFilename = getPropertyValue("BadPixelFilename");
 
-  string WorkspaceName = getPropertyValue("WorkspaceName");
+  std::string WorkspaceName = getPropertyValue("WorkspaceName");
   if (WorkspaceName.empty())
     throw std::invalid_argument("Must specify WorkspaceName.");
 
@@ -122,7 +120,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   m_instrument = getInstrument();
 
   // Grouping
-  string grouptypestr = getPropertyValue("Grouping");
+  std::string grouptypestr = getPropertyValue("Grouping");
   size_t numeffbanks = 6;
   if (grouptypestr == "6Modules") {
     m_groupingType = VULCAN_OFFSET_BANK;
@@ -131,15 +129,15 @@ void LoadVulcanCalFile::processInOutProperites() {
   } else if (grouptypestr == "1Bank") {
     m_groupingType = VULCAN_OFFSET_STACK;
   } else {
-    stringstream ess;
+    std::stringstream ess;
     ess << "Group type " << grouptypestr << " is not supported. ";
-    throw runtime_error(ess.str());
+    throw std::runtime_error(ess.str());
   }
 
   // Effective L and 2thetas
-  vector<int> vec_bankids = getProperty("BankIDs");
-  vector<double> vec_difcs = getProperty("EffectiveDIFCs");
-  vector<double> vec_2thetas = getProperty("Effective2Thetas");
+  std::vector<int> vec_bankids = getProperty("BankIDs");
+  std::vector<double> vec_difcs = getProperty("EffectiveDIFCs");
+  std::vector<double> vec_2thetas = getProperty("Effective2Thetas");
   if (vec_bankids.size() != numeffbanks || vec_difcs.size() != numeffbanks ||
       vec_2thetas.size() != numeffbanks) {
     std::stringstream ess;
@@ -147,7 +145,7 @@ void LoadVulcanCalFile::processInOutProperites() {
         << "), EffectiveDIFCs (" << vec_difcs.size()
         << ") and Effective2Thetas (" << vec_2thetas.size() << ") must be "
         << numeffbanks << " in mode '" << grouptypestr << "'! ";
-    throw runtime_error(ess.str());
+    throw std::runtime_error(ess.str());
   }
 
   for (size_t i = 0; i < numeffbanks; ++i) {
@@ -156,7 +154,7 @@ void LoadVulcanCalFile::processInOutProperites() {
     double theta = 0.5 * vec_2thetas[i];
     double effl = difc / (252.777 * 2.0 * sin(theta / 180. * M_PI));
 
-    m_effLTheta.emplace(bankid, make_pair(effl, theta));
+    m_effLTheta.emplace(bankid, std::make_pair(effl, theta));
   }
 
   // Create offset workspace
@@ -206,7 +204,7 @@ void LoadVulcanCalFile::processInOutProperites() {
   */
 void LoadVulcanCalFile::setupGroupingWorkspace() {
   // Get the right group option for CreateGroupingWorkspace
-  string groupdetby;
+  std::string groupdetby;
   switch (m_groupingType) {
   case VULCAN_OFFSET_BANK:
     groupdetby = "bank";
@@ -221,7 +219,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
     break;
 
   default:
-    throw runtime_error("Grouping type is not supported. ");
+    throw std::runtime_error("Grouping type is not supported. ");
     break;
   }
 
@@ -235,7 +233,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
 
   creategroupws->execute();
   if (!creategroupws->isExecuted())
-    throw runtime_error("Unable to create grouping workspace.");
+    throw std::runtime_error("Unable to create grouping workspace.");
 
   m_groupWS = creategroupws->getProperty("OutputWorkspace");
 
@@ -243,7 +241,7 @@ void LoadVulcanCalFile::setupGroupingWorkspace() {
   m_groupWS->setTitle(groupdetby);
 
   // Output
-  string WorkspaceName = getPropertyValue("WorkspaceName");
+  std::string WorkspaceName = getPropertyValue("WorkspaceName");
   declareProperty(Kernel::make_unique<WorkspaceProperty<GroupingWorkspace>>(
                       "OutputGroupingWorkspace", WorkspaceName + "_group",
                       Direction::Output),
@@ -267,12 +265,12 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
     return;
   }
 
-  string line;
+  std::string line;
   while (std::getline(maskss, line)) {
     boost::algorithm::trim(line);
     if (!line.empty()) {
       // Get the bad pixel's detector ID.  One per line
-      stringstream liness(line);
+      std::stringstream liness(line);
       try {
         int pixelid;
         liness >> pixelid;
@@ -306,7 +304,7 @@ void LoadVulcanCalFile::setupMaskWorkspace() {
 /** Generate offset workspace
   */
 void LoadVulcanCalFile::generateOffsetsWorkspace() {
-  map<detid_t, double> map_detoffset;
+  std::map<detid_t, double> map_detoffset;
 
   // Read offset file
   readOffsetFile(map_detoffset);
@@ -327,14 +325,14 @@ void LoadVulcanCalFile::generateOffsetsWorkspace() {
 void LoadVulcanCalFile::readOffsetFile(
     std::map<detid_t, double> &map_detoffset) {
   // Read file
-  ifstream infile(m_offsetFilename.c_str());
+  std::ifstream infile(m_offsetFilename.c_str());
   if (!infile.is_open()) {
-    stringstream errss;
+    std::stringstream errss;
     errss << "Input offset file " << m_offsetFilename << " cannot be opened.";
-    throw runtime_error(errss.str());
+    throw std::runtime_error(errss.str());
   }
 
-  string line;
+  std::string line;
   while (std::getline(infile, line)) {
     std::istringstream iss(line);
     int pid;
@@ -356,7 +354,7 @@ void LoadVulcanCalFile::processOffsets(
   const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
 
   // Map from Mantid instrument to VULCAN offset
-  map<detid_t, size_t> map_det2index;
+  std::map<detid_t, size_t> map_det2index;
   for (size_t i = 0; i < numspec; ++i) {
     detid_t tmpid = spectrumInfo.detector(i).getID();
 
@@ -366,34 +364,34 @@ void LoadVulcanCalFile::processOffsets(
 
   // Map from VULCAN offset to Mantid instrument: Validate
   std::set<int> set_bankID;
-  map<detid_t, pair<bool, int>>
+  std::map<detid_t, std::pair<bool, int>>
       map_verify; // key: detector ID, value: flag to have a match, bank ID
   for (auto &miter : map_detoffset) {
     detid_t pid = miter.first;
     auto fiter = map_det2index.find(pid);
     if (fiter == map_det2index.end()) {
-      map_verify.emplace(pid, make_pair(false, -1));
+      map_verify.emplace(pid, std::make_pair(false, -1));
     } else {
       size_t wsindex = fiter->second;
       // Get bank ID from instrument tree
       const auto &det = spectrumInfo.detector(wsindex);
       Geometry::IComponent_const_sptr parent = det.getParent();
-      string pname = parent->getName();
+      std::string pname = parent->getName();
 
-      vector<string> terms;
+      std::vector<std::string> terms;
       boost::split(terms, pname, boost::is_any_of("("));
-      vector<string> terms2;
+      std::vector<std::string> terms2;
       boost::split(terms2, terms[0], boost::is_any_of("bank"));
       int bank = std::stoi(terms2.back());
       set_bankID.insert(bank);
 
-      map_verify.emplace(pid, make_pair(true, bank));
+      map_verify.emplace(pid, std::make_pair(true, bank));
     }
   }
 
   // Verify
   static const size_t arr[] = {21, 22, 23, 26, 27, 28};
-  vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
+  std::vector<size_t> vec_banks(arr, arr + sizeof(arr) / sizeof(arr[0]));
 
   for (auto bankindex : vec_banks) {
     for (size_t j = 0; j < NUMBERDETECTORPERMODULE; ++j) {
@@ -401,21 +399,21 @@ void LoadVulcanCalFile::processOffsets(
           static_cast<detid_t>(bankindex * NUMBERRESERVEDPERMODULE + j);
       auto miter = map_verify.find(detindex);
       if (miter == map_verify.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       bool exist = miter->second.first;
       int tmpbank = miter->second.second;
       if (!exist)
-        throw runtime_error(
+        throw std::runtime_error(
             "Define VULCAN offset pixel is not defined in Mantid.");
       if (tmpbank != static_cast<int>(bankindex))
-        throw runtime_error("Bank ID does not match!");
+        throw std::runtime_error("Bank ID does not match!");
     }
   }
 
   // Get the global correction
   g_log.information() << "Number of bankds to process = " << set_bankID.size()
                       << "\n";
-  map<int, double> map_bankLogCorr;
+  std::map<int, double> map_bankLogCorr;
   for (const auto bankid : set_bankID) {
     // Locate inter bank and inter pack correction (log)
     double globalfactor = 0.;
@@ -430,7 +428,7 @@ void LoadVulcanCalFile::processOffsets(
 
       const auto offsetiter = map_detoffset.find(interbank_detid);
       if (offsetiter == map_detoffset.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       double interbanklogcorr = offsetiter->second;
 
       globalfactor += interbanklogcorr;
@@ -445,7 +443,7 @@ void LoadVulcanCalFile::processOffsets(
           static_cast<detid_t>((bankid + 1) * NUMBERRESERVEDPERMODULE) - 1;
       const auto offsetiter = map_detoffset.find(intermodule_detid);
       if (offsetiter == map_detoffset.end())
-        throw runtime_error("It cannot happen!");
+        throw std::runtime_error("It cannot happen!");
       double intermodulelogcorr = offsetiter->second;
 
       globalfactor += intermodulelogcorr;
@@ -455,19 +453,19 @@ void LoadVulcanCalFile::processOffsets(
   }
 
   // Calcualte the offset for each detector (log now still)
-  map<detid_t, double>::iterator offsetiter;
-  map<int, double>::iterator bankcorriter;
+  std::map<detid_t, double>::iterator offsetiter;
+  std::map<int, double>::iterator bankcorriter;
   for (size_t iws = 0; iws < numspec; ++iws) {
     detid_t detid = spectrumInfo.detector(iws).getID();
     offsetiter = map_detoffset.find(detid);
     if (offsetiter == map_detoffset.end())
-      throw runtime_error("It cannot happen!");
+      throw std::runtime_error("It cannot happen!");
 
     int bankid =
         static_cast<int>(detid) / static_cast<int>(NUMBERRESERVEDPERMODULE);
     bankcorriter = map_bankLogCorr.find(bankid);
     if (bankcorriter == map_bankLogCorr.end())
-      throw runtime_error("It cannot happen!");
+      throw std::runtime_error("It cannot happen!");
 
     double offset = offsetiter->second + bankcorriter->second;
     m_tofOffsetsWS->mutableY(iws)[0] = pow(10., offset);
@@ -481,7 +479,7 @@ void LoadVulcanCalFile::alignEventWorkspace() {
 
   size_t numberOfSpectra = m_eventWS->getNumberHistograms();
   if (numberOfSpectra != m_tofOffsetsWS->getNumberHistograms())
-    throw runtime_error("Number of histograms are different!");
+    throw std::runtime_error("Number of histograms are different!");
 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
@@ -519,7 +517,7 @@ void LoadVulcanCalFile::convertOffsets() {
   const auto &spectrumInfo = m_tofOffsetsWS->spectrumInfo();
   double l1 = spectrumInfo.l1();
 
-  map<int, pair<double, double>>::iterator mfiter;
+  std::map<int, std::pair<double, double>>::iterator mfiter;
   for (size_t iws = 0; iws < numspec; ++iws) {
     // Get detector's information including bank belonged to and geometry
     // parameters
@@ -533,7 +531,8 @@ void LoadVulcanCalFile::convertOffsets() {
     // Get effective
     mfiter = m_effLTheta.find(bankid);
     if (mfiter == m_effLTheta.end())
-      throw runtime_error("Effective DIFC and 2theta information is missed. ");
+      throw std::runtime_error(
+          "Effective DIFC and 2theta information is missed. ");
 
     double effL = mfiter->second.first;
     double effTheta = mfiter->second.second;

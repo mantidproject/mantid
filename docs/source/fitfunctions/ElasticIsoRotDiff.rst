@@ -149,9 +149,9 @@ following model:
         if nparms==2:
             break
     if abs(H-Height)/H < 0.1:
-        print "Optimal Height within 10% of nominal value"
+        print("Optimal Height within 10% of nominal value")
     if abs(R-Radius)/R < 0.05:
-        print "Optimal Radius within 5% of nominal value"
+        print("Optimal Radius within 5% of nominal value")
 
 .. testcleanup:: ExampleElasticIsoRotDiff
 

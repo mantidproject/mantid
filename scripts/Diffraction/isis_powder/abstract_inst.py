@@ -70,14 +70,13 @@ class AbstractInst(object):
         """
         raise NotImplementedError("get_run_details must be implemented per instrument")
 
-    @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(self, run_number):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        raise NotImplementedError("generate_input_file_name must be implemented per instrument")
+        return self._generate_inst_filename(run_number=run_number)
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """
@@ -95,7 +94,7 @@ class AbstractInst(object):
         :param run_number_string: The run string to uniquely identify the run
         :return: The file name which identifies the run and appropriate parameter settings
         """
-        raise NotImplementedError("generate_output_file_name must be implemented per instrument")
+        return self._generate_input_file_name(run_number=run_number_string)
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         """
@@ -106,16 +105,6 @@ class AbstractInst(object):
         # XXX: Although this could be moved to common if enough instruments spline the same way and have
         # the instrument override the optional behaviour
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
-
-    # Optional overrides
-    @staticmethod
-    def _can_auto_gen_vanadium_cal():
-        """
-        Can be overridden and returned true by instruments who can automatically run generate vanadium calculation
-        if the splines cannot be found during the focus routine
-        :return: False by default, True by instruments who can automatically generate these
-        """
-        return False
 
     def _crop_banks_to_user_tof(self, focused_banks):
         """
@@ -160,17 +149,6 @@ class AbstractInst(object):
         :return: List of bin widths or None if no rebinning should take place
         """
         return None
-
-    def _generate_auto_vanadium_calibration(self, run_details):
-        """
-        Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
-        has indicated support by overriding can_auto_gen_vanadium_cal
-        :param run_details: The run details of the current run
-        :return: None
-        """
-        # If the instrument overrides can_auto_gen_vanadium_cal it needs to implement this method to perform the
-        # automatic calibration
-        raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")
 
     def _get_input_batching_mode(self):
         """
@@ -251,3 +229,11 @@ class AbstractInst(object):
                           "output_folder": output_directory}
 
         return out_file_names
+
+    def _generate_inst_filename(self, run_number):
+        if isinstance(run_number, list):
+            # Multiple entries
+            return [self._generate_inst_filename(run) for run in run_number]
+        else:
+            # Individual entry
+            return self._inst_prefix + str(run_number)

@@ -808,7 +808,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   const Run &run = ws.run();
 
   // Get the start & end time for the run
-  Mantid::Kernel::DateAndTime start, end;
+  Mantid::Types::Core::DateAndTime start, end;
   if (run.hasProperty("run_start") && run.hasProperty("run_end")) {
     start = run.getProperty("run_start")->value();
     end = run.getProperty("run_end")->value();

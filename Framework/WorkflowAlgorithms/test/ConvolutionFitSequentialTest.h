@@ -8,6 +8,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidDataHandling/Load.h"
+
 #include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -247,7 +249,81 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_exec_with_extract_members() {
+    std::string runName = "irs26173";
+    std::string runSample = "graphite002";
+    std::string fileName = runName + "_" + runSample;
+
+    auto resWs = loadWorkspace(fileName + "_res.nxs");
+    auto redWs = loadWorkspace(fileName + "_red.nxs");
+    createConvFitResWorkspace(redWs->getNumberHistograms(), redWs->blocksize());
+    AnalysisDataService::Instance().add("ResolutionWs_", resWs);
+    AnalysisDataService::Instance().add(fileName, redWs);
+
+    size_t specMin = 0;
+    size_t specMax = 5;
+
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", redWs);
+    alg.setProperty("Function",
+                    "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+                    "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    "name=Resolution,Workspace=__ConvFit_Resolution,"
+                    "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+                    "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+                    "0175)))");
+    alg.setProperty("BackgroundType", "Fixed Flat");
+    alg.setProperty("StartX", 0.0);
+    alg.setProperty("EndX", 3.0);
+    alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
+    alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
+    alg.setProperty("Convolve", true);
+    alg.setProperty("ExtractMembers", true);
+    alg.setProperty("Minimizer", "Levenberg-Marquardt");
+    alg.setProperty("MaxIterations", 500);
+    alg.setProperty("OutputWorkspace", "Result");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check members group workspace was created
+    WorkspaceGroup_const_sptr membersGroupWs;
+    TS_ASSERT_THROWS_NOTHING(
+        membersGroupWs =
+            AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+                runName + "_conv_1LFixF_s" + std::to_string(specMin) + "_to_" +
+                std::to_string(specMax) + "_Members"));
+
+    // Check all members have been extracted into their own workspace and
+    // grouped
+    // inside the members group workspace.
+    std::unordered_set<std::string> members = {
+        "Data", "Calc", "Diff", "LinearBackground", "Lorentzian1"};
+    for (size_t i = 0; i < membersGroupWs->size(); i++) {
+      MatrixWorkspace_const_sptr ws =
+          boost::dynamic_pointer_cast<const MatrixWorkspace>(
+              membersGroupWs->getItem(i));
+      TS_ASSERT(ws->getNumberHistograms() == specMax - specMin + 1);
+      std::string name = ws->getName();
+      members.erase(name.substr(name.find_last_of('_') + 1));
+    }
+    TS_ASSERT(members.empty());
+
+    AnalysisDataService::Instance().clear();
+  }
+
   //------------------------ Private Functions---------------------------
+
+  MatrixWorkspace_sptr loadWorkspace(const std::string &fileName) {
+    Mantid::DataHandling::Load loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setProperty("Filename", fileName);
+    loadAlg.setProperty("OutputWorkspace", "__temp");
+    loadAlg.executeAsChildAlg();
+    Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
 
   MatrixWorkspace_sptr createGenericWorkspace(const std::string &wsName,
                                               const bool numericAxis) {
@@ -308,7 +384,7 @@ public:
     return ws;
   }
 
-  void createConvFitResWorkspace(int totalHist, int totalBins) {
+  void createConvFitResWorkspace(size_t totalHist, size_t totalBins) {
     auto convFitRes =
         createWorkspace<Workspace2D>(totalHist + 1, totalBins + 1, totalBins);
     BinEdges x1(totalBins + 1, 0.0);
@@ -318,7 +394,7 @@ public:
     int j = 0;
     std::generate(begin(x1), end(x1), [&j] { return 0.5 + 0.75 * j++; });
 
-    for (int i = 0; i < totalBins; i++) {
+    for (size_t i = 0; i < totalHist; i++) {
       convFitRes->setBinEdges(i, x1);
       convFitRes->setCounts(i, y1);
       convFitRes->setCountStandardDeviations(i, e1);

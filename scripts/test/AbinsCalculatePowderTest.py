@@ -6,34 +6,6 @@ import AbinsModules
 import json
 
 
-def old_modules():
-    """" Check if there are proper versions of  Python and numpy."""
-    is_python_old = AbinsModules.AbinsTestHelpers.old_python()
-    if is_python_old:
-        logger.warning("Skipping AbinsCalculatePowderTest because Python is too old.")
-
-    is_numpy_old = AbinsModules.AbinsTestHelpers.is_numpy_valid(np.__version__)
-    if is_numpy_old:
-        logger.warning("Skipping AbinsCalculatePowderTest because numpy is too old.")
-
-    return is_python_old or is_numpy_old
-
-
-def skip_if(skipping_criteria):
-    """
-    Skip all tests if the supplied function returns true.
-    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
-    """
-    def decorate(cls):
-        if skipping_criteria():
-            for attr in cls.__dict__.keys():
-                if callable(getattr(cls, attr)) and 'test' in attr:
-                    delattr(cls, attr)
-        return cls
-    return decorate
-
-
-@skip_if(old_modules)
 class AbinsCalculatePowderTest(unittest.TestCase):
 
     # data
@@ -51,8 +23,8 @@ class AbinsCalculatePowderTest(unittest.TestCase):
 
         full_path_filename = AbinsModules.AbinsTestHelpers.find_file(filename=self._si2 + ".phonon")
 
-        castep_reader = AbinsModules.LoadCASTEP(input_dft_filename=full_path_filename)
-        good_data = castep_reader.read_phonon_file()
+        castep_reader = AbinsModules.LoadCASTEP(input_ab_initio_filename=full_path_filename)
+        good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong filename
         self.assertRaises(ValueError, AbinsModules.CalculatePowder,
@@ -96,10 +68,10 @@ class AbinsCalculatePowderTest(unittest.TestCase):
     def _get_good_data(self, filename=None):
 
         castep_reader = AbinsModules.LoadCASTEP(
-            input_dft_filename=AbinsModules.AbinsTestHelpers.find_file(filename + ".phonon"))
+            input_ab_initio_filename=AbinsModules.AbinsTestHelpers.find_file(filename + ".phonon"))
         powder = self._prepare_data(filename=AbinsModules.AbinsTestHelpers.find_file(filename + "_powder.txt"))
 
-        return {"DFT": castep_reader.read_phonon_file(), "powder": powder}
+        return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "powder": powder}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

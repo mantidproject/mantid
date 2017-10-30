@@ -176,7 +176,7 @@ std::string suggestWorkspaceName(const std::vector<std::string> &fileNames) {
  * overkill.
  */
 bool ReverseCaselessCompare::operator()(const std::string &a,
-                                        const std::string &b) {
+                                        const std::string &b) const {
   std::string lowerA(a);
   std::string lowerB(b);
 

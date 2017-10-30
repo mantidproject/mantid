@@ -22,7 +22,7 @@ boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
                                            size_t wsIndex) {
   const double *x = &ws->x(wsIndex)[0];
   const double *y = &ws->y(wsIndex)[0];
-  size_t size = ws->blocksize();
+  size_t size = ws->y(wsIndex).size();
 
   return boost::make_shared<QwtArrayData>(x, y, size);
 }

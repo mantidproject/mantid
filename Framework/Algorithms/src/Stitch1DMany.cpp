@@ -205,7 +205,7 @@ void Stitch1DMany::validateGroupWorkspacesInputs() {
 
   // Log all errors and throw a runtime error if an error is found
   validateCommonInputs(errors);
-  if (errors.size() > 0) {
+  if (!errors.empty()) {
     auto &warnLog = getLogger().warning();
     for (const auto &error : errors) {
       warnLog << "Invalid value for " << error.first << ": " << error.second
@@ -241,7 +241,7 @@ void Stitch1DMany::validateCommonInputs(
   m_useManualScaleFactors = this->getProperty("UseManualScaleFactors");
   m_manualScaleFactors = this->getProperty("ManualScaleFactors");
 
-  if (m_manualScaleFactors.size() > 0) {
+  if (!m_manualScaleFactors.empty()) {
     if (m_manualScaleFactors.size() == 1) {
       // Single value: fill with list of the same scale factor value
       m_manualScaleFactors = std::vector<double>(numStitchableWS - 1,

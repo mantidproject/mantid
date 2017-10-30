@@ -9,6 +9,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/make_unique.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -80,7 +81,7 @@ std::unique_ptr<std::stringstream> makeStringStream() {
   // so there are lots of restrictions in place with stream.
   // Instead we can work around this by using pointers to streams.
   // Tl;dr - This is a workaround for GCC 4.x (RHEL7)
-  return std::move(std::unique_ptr<std::stringstream>(new std::stringstream()));
+  return Mantid::Kernel::make_unique<std::stringstream>();
 }
 
 void writeBankHeader(std::stringstream &out, const std::string &bintype,

@@ -8,7 +8,7 @@
 * The progress bar and Details button
 */
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w)
-    : QDockWidget(w), m_progressBar(NULL), m_algID(), m_mantidUI(mui) {
+    : QDockWidget(w), m_progressBar(nullptr), m_algID(), m_mantidUI(mui) {
   setWindowTitle(tr("Algorithms"));
   setObjectName(
       "exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
@@ -112,7 +112,7 @@ void AlgorithmDockWidget::algorithmFinished(void *alg) {
 }
 
 void AlgorithmDockWidget::showProgressBar() {
-  if (m_progressBar == NULL) {
+  if (m_progressBar == nullptr) {
     // insert progress bar
     m_progressBar = new QProgressBar();
     m_progressBar->setAlignment(Qt::AlignHCenter);
@@ -130,6 +130,6 @@ void AlgorithmDockWidget::hideProgressBar(void *alg) {
     m_runningLayout->removeWidget(m_progressBar);
     m_progressBar->close();
     delete m_progressBar;
-    m_progressBar = NULL;
+    m_progressBar = nullptr;
   }
 }

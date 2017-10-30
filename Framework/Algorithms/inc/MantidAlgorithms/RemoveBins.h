@@ -3,7 +3,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -80,9 +79,9 @@ public:
 private:
   // Overridden Algorithm methods
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
-  void checkProperties();
   void crop(const double &start, const double &end);
   void transformRangeUnit(const int index, double &startX, double &endX);
   void calculateDetectorPosition(const int index, double &l1, double &l2,

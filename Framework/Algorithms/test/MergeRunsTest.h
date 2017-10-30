@@ -7,6 +7,8 @@
 #include <stdarg.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -22,15 +24,19 @@
 #include <boost/make_shared.hpp>
 #include <MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h>
 #include <MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h>
+#include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 class MergeRunsTest : public CxxTest::TestSuite {
 
 private:
+  MergeRuns merge;
+
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
   void add_periods_logs(WorkspaceGroup_sptr ws, bool calculateNPeriods = true,
                         int nperiods = -1) {
@@ -181,6 +187,43 @@ private:
     b->instrumentParameters().addString(
         b->getInstrument()->getComponentID(),
         SampleLogsBehaviour::FAIL_MERGE_TOLERANCES, tolerances);
+
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+
+    AnalysisDataService::Instance().addOrReplace("a1", a);
+    AnalysisDataService::Instance().addOrReplace("b1", b);
+    AnalysisDataService::Instance().addOrReplace("group1", group);
+    return group;
+  }
+
+  WorkspaceGroup_sptr create_group_detector_scan_workspaces(
+      size_t nTimeIndexes = 2, size_t startTimeForSecondWorkspace = 0) {
+    const int N_HIST = 2;
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(N_HIST, 1000,
+                                                        nTimeIndexes, 0);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(
+            N_HIST, 1000, nTimeIndexes, startTimeForSecondWorkspace);
+
+    // Change the values in the histogram for the workspaces, so we can do
+    // some extra checks
+    for (size_t i = 0; i < a->getNumberHistograms(); ++i) {
+      auto histogram = a->histogram(i);
+      auto &counts = histogram.mutableY();
+      std::transform(counts.begin(), counts.end(), counts.begin(),
+                     [](double count) { return count + 1; });
+      a->setHistogram(i, histogram);
+    }
+    for (size_t i = 0; i < b->getNumberHistograms(); ++i) {
+      auto histogram = b->histogram(i);
+      auto &counts = histogram.mutableY();
+      std::transform(counts.begin(), counts.end(), counts.begin(),
+                     [](double count) { return count + 2; });
+      b->setHistogram(i, histogram);
+    }
 
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
     group->addWorkspace(a);
@@ -1474,8 +1517,219 @@ public:
     do_test_mergeSampleLogs(ws, "prop1", mergeType, "1", 1, true);
   }
 
-private:
-  MergeRuns merge;
+  MatrixWorkspace_sptr
+  do_MergeRuns_with_scanning_workspaces(size_t startTime = 0) {
+    auto ws = create_group_detector_scan_workspaces(2, startTime);
+    MatrixWorkspace_sptr outputWS;
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+
+    return outputWS;
+  }
+
+  void assert_scan_intervals_are_correct(const DetectorInfo &detInfo,
+                                         bool extraTimes = false) {
+    const auto TIME_1 = DateAndTime(0, 0);
+    const auto TIME_2 = DateAndTime(1, 0);
+    const auto TIME_3 = DateAndTime(3, 0);
+
+    const auto PAIR_1 = std::pair<DateAndTime, DateAndTime>(TIME_1, TIME_2);
+    const auto PAIR_2 = std::pair<DateAndTime, DateAndTime>(TIME_2, TIME_3);
+
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 0}), PAIR_1)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({0, 1}), PAIR_2)
+    TS_ASSERT_EQUALS(detInfo.scanInterval({1, 1}), PAIR_2)
+
+    if (extraTimes) {
+      const auto TIME_4 = DateAndTime(20, 0);
+      const auto TIME_5 = DateAndTime(21, 0);
+      const auto TIME_6 = DateAndTime(23, 0);
+
+      const auto PAIR_3 = std::pair<DateAndTime, DateAndTime>(TIME_4, TIME_5);
+      const auto PAIR_4 = std::pair<DateAndTime, DateAndTime>(TIME_5, TIME_6);
+
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 2}), PAIR_3)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({0, 3}), PAIR_4)
+      TS_ASSERT_EQUALS(detInfo.scanInterval({1, 3}), PAIR_4)
+    }
+  }
+
+  void assert_scanning_indexing_is_correct(const SpectrumInfo &specInfo,
+                                           bool extraSpectra = false) {
+
+    for (size_t i = 0; i < specInfo.size(); ++i) {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(i).size(), 1)
+    }
+
+    const auto SPEC_DEF_1 = std::pair<size_t, size_t>(0, 0);
+    const auto SPEC_DEF_2 = std::pair<size_t, size_t>(0, 1);
+    const auto SPEC_DEF_3 = std::pair<size_t, size_t>(1, 0);
+    const auto SPEC_DEF_4 = std::pair<size_t, size_t>(1, 1);
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(0)[0], SPEC_DEF_1)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(1)[0], SPEC_DEF_2)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(2)[0], SPEC_DEF_3)
+    TS_ASSERT_EQUALS(specInfo.spectrumDefinition(3)[0], SPEC_DEF_4)
+
+    if (extraSpectra) {
+      const auto SPEC_DEF_5 = std::pair<size_t, size_t>(0, 2);
+      const auto SPEC_DEF_6 = std::pair<size_t, size_t>(0, 3);
+      const auto SPEC_DEF_7 = std::pair<size_t, size_t>(1, 2);
+      const auto SPEC_DEF_8 = std::pair<size_t, size_t>(1, 3);
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_5)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_6)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_7)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_8)
+    } else {
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(4)[0], SPEC_DEF_1)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(5)[0], SPEC_DEF_2)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(6)[0], SPEC_DEF_3)
+      TS_ASSERT_EQUALS(specInfo.spectrumDefinition(7)[0], SPEC_DEF_4)
+    }
+  }
+
+  void
+  assert_scanning_histograms_correctly_set(const MatrixWorkspace_sptr &ws) {
+    TS_ASSERT_EQUALS(ws->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(3).y()[0], 1)
+    TS_ASSERT_EQUALS(ws->histogram(4).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(5).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(6).y()[0], 2)
+    TS_ASSERT_EQUALS(ws->histogram(7).y()[0], 2)
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_different_start_times_appends_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces(20);
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(detInfo.size(), 2)
+    TS_ASSERT_EQUALS(detInfo.scanCount(0), 4)
+    TS_ASSERT_EQUALS(detInfo.scanCount(1), 4)
+    assert_scan_intervals_are_correct(detInfo, true);
+
+    const auto &specInfo = outputWS->spectrumInfo();
+    TS_ASSERT_EQUALS(specInfo.size(), 8)
+
+    assert_scanning_indexing_is_correct(specInfo, true);
+    assert_scanning_histograms_correctly_set(outputWS);
+  }
+
+  void
+  test_merging_detector_scan_workspaces_with_overlapping_time_intervals_throws() {
+    auto ws = create_group_detector_scan_workspaces(2, 1);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
+  }
+
+  void test_merging_detector_scan_workspaces_does_not_append_workspaces() {
+    auto outputWS = do_MergeRuns_with_scanning_workspaces();
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 3)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 3)
+  }
+
+  void test_merging_detector_scan_workspaces_with_different_positions_throws() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+
+    wsA->mutableDetectorInfo().setPosition(std::pair<size_t, size_t>(0, 0),
+                                           V3D(5, 6, 7));
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "matching scan interval but "
+                                                   "positions differ")
+  }
+
+  void test_merging_partially_overlapping_detector_scan_workspaces_throws() {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, 2, 0);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::
+        create2DDetectorScanWorkspaceWithFullInstrument(2, 1000, 2, 0, 2);
+
+    AnalysisDataService::Instance().addOrReplace("a", a);
+    AnalysisDataService::Instance().addOrReplace("b", b);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspaces", "a, b");
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e,
+                            std::string(e.what()), "Cannot merge DetectorInfo: "
+                                                   "sync scan intervals "
+                                                   "overlap but not identical")
+  }
+
+  void test_merging_detector_scan_workspaces_failure_case() {
+    auto ws = create_group_detector_scan_workspaces(2);
+
+    auto wsA =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("a1");
+    Property *prop1 = new PropertyWithValue<int>("prop1", 1);
+    wsA->mutableRun().addLogData(prop1);
+
+    auto wsB =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("b1");
+    Property *prop2 = new PropertyWithValue<int>("prop1", 2);
+    wsB->mutableRun().addLogData(prop2);
+
+    MergeRuns alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", ws->getName());
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setPropertyValue("SampleLogsFail", "prop1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute();)
+
+    MatrixWorkspace_sptr outputWS;
+    TS_ASSERT_THROWS_NOTHING(
+        outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "outWS"));
+
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().size(), 2)
+    TS_ASSERT_EQUALS(outputWS->detectorInfo().scanCount(0), 2)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4)
+
+    // Check bins are set correctly
+    TS_ASSERT_EQUALS(outputWS->histogram(0).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(1).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(2).y()[0], 1)
+    TS_ASSERT_EQUALS(outputWS->histogram(3).y()[0], 1)
+  }
 };
 
 #endif /*MERGERUNSTEST_H_*/

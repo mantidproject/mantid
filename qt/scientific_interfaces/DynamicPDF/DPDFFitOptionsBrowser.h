@@ -46,7 +46,7 @@ class MANTIDQT_DYNAMICPDF_DLL DPDFFitOptionsBrowser
   Q_OBJECT
 
 public:
-  DPDFFitOptionsBrowser(QWidget *parent = NULL);
+  DPDFFitOptionsBrowser(QWidget *parent = nullptr);
 
 private:
   void createAdditionalProperties();

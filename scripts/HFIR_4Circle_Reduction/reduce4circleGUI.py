@@ -24,6 +24,7 @@ from HFIR_4Circle_Reduction import viewspicedialog
 from HFIR_4Circle_Reduction import peak_integration_utility
 from HFIR_4Circle_Reduction import FindUBUtility
 from HFIR_4Circle_Reduction import message_dialog
+from HFIR_4Circle_Reduction import PreprocessWindow
 
 # import line for the UI python class
 from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
@@ -45,7 +46,6 @@ except ImportError as e:
     NO_SCROLL = True
 else:
     NO_SCROLL = False
-
 
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
@@ -79,6 +79,7 @@ class MainWindow(QtGui.QMainWindow):
         self._addUBPeaksDialog = None
         self._spiceViewer = None
         self._mySinglePeakIntegrationDialog = None
+        self._preProcessWindow = None
         self._singlePeakIntegrationDialogBuffer = ''
 
         # Make UI scrollable
@@ -316,6 +317,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
+
+        self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
+                     self.menu_pre_process)
 
         # Validator ... (NEXT)
 
@@ -1529,8 +1533,9 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_roi(self):
-        """
-        integrate the detector counts in the region of interest (2D) along axis-0 and axis-1 respectively.
+        """integrate the detector counts in the region of interest
+
+        Integrate the detector's counts (2D) along axis-0 and axis-1 respectively.
         and save the result (1D data) to file
         :return:
         """
@@ -1546,7 +1551,8 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks tab-'scan processing'.
+        """Integrate selected peaks tab-'scan processing'.
+
         If any scan is not merged, then it will merge the scan first.
         Integrate peaks from the table of merged peak.
         It will so the simple cuboid integration with region of interest and background subtraction.
@@ -3483,6 +3489,52 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.save_settings()
         self.close()
+
+    def menu_pre_process(self):
+        """
+        blabla
+        :return:
+        """
+        # initialize the pre processing window if it is not initialized
+        reset_pre_process_window = False
+        if self._preProcessWindow is None:
+            # initialize the instance
+            self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
+            self._preProcessWindow.setup(self._myControl)
+            reset_pre_process_window = True
+
+        # show the window
+        self._preProcessWindow.show()
+
+        # setup the parameters
+        if reset_pre_process_window:
+            exp_number = int(str(self.ui.lineEdit_exp.text()))
+            # detector size/pixel numbers
+            det_size_str = str(self.ui.comboBox_detectorSize.currentText())
+            det_size = int(det_size_str.split()[0])
+            # detector center
+            det_center = str(self.ui.lineEdit_infoDetCenter.text())
+            # sample detector distance
+            det_sample_dist = str(self.ui.lineEdit_infoDetSampleDistance.text())
+            try:
+                det_sample_dist = float(det_sample_dist)
+            except ValueError:
+                det_sample_dist = None
+            # wave length
+            wave_length = str(self.ui.lineEdit_infoWavelength.text())
+            try:
+                wave_length = float(wave_length)
+            except ValueError:
+                wave_length = None
+
+            # set up the other calibration parameters
+            self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
+                                                              det_center=det_center,
+                                                              det_sample_distance=det_sample_dist,
+                                                              wave_length=wave_length)
+        # END-IF
+
+        return
 
     def show_scan_pt_list(self):
         """ Show the range of Pt. in a scan

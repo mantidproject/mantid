@@ -85,7 +85,7 @@ public:
     return true;
   }
   static bool ExtractCachedBounds(vtkDataObject *dataObject, double bounds[6]) {
-    if (dataObject == NULL || dataObject->GetFieldData() == NULL) {
+    if (dataObject == nullptr || dataObject->GetFieldData() == nullptr) {
       return false;
     }
     vtkFieldData *fd = dataObject->GetFieldData();
@@ -108,9 +108,8 @@ public:
   static vtkGSRGeometryFilter *New();
   vtkTypeMacro(vtkGSRGeometryFilter, vtkPVGeometryFilter);
 
-  virtual int RequestData(vtkInformation *req,
-                          vtkInformationVector **inputVector,
-                          vtkInformationVector *outputVector) VTK_OVERRIDE {
+  int RequestData(vtkInformation *req, vtkInformationVector **inputVector,
+                  vtkInformationVector *outputVector) VTK_OVERRIDE {
     vtkSmartPointer<vtkDataObject> inputDO =
         vtkDataObject::GetData(inputVector[0]);
     vtkSmartPointer<vtkMatrix4x4> changeOfBasisMatrix =
@@ -165,7 +164,7 @@ public:
 protected:
   vtkGSRGeometryFilter() {}
 
-  virtual ~vtkGSRGeometryFilter() {}
+  ~vtkGSRGeometryFilter() override {}
 
 private:
   vtkGSRGeometryFilter(const vtkGSRGeometryFilter &);
@@ -214,7 +213,7 @@ void vtkAlignedGeometrySliceRepresentation::SetupDefaults() {
       this->Internals->OutlineSource->GetOutputPort());
   this->Internals->OutlineActor->SetMapper(
       this->Internals->OutlineMapper.GetPointer());
-  this->Internals->OutlineActor->SetUseBounds(0);
+  this->Internals->OutlineActor->SetUseBounds(false);
   this->Internals->OutlineActor->SetVisibility(0);
 }
 

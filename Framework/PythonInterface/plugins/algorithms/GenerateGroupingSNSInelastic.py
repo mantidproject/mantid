@@ -95,4 +95,5 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace(__w.name())
         return
 
+
 mantid.api.AlgorithmFactory.subscribe(GenerateGroupingSNSInelastic)

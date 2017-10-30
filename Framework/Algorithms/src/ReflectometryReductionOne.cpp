@@ -364,8 +364,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryReductionOne::toIvsQ(
   if (!thetaInDeg.is_initialized()) {
     g_log.debug("Calculating final theta.");
 
-    auto correctThetaAlg =
-        this->createChildAlgorithm("SpecularReflectionCalculateTheta");
+    auto correctThetaAlg = this->createChildAlgorithm(
+        "SpecularReflectionCalculateTheta", -1, -1, true, 1);
     correctThetaAlg->initialize();
     correctThetaAlg->setProperty("InputWorkspace", toConvert);
     const std::string analysisMode = this->getProperty("AnalysisMode");
@@ -628,15 +628,17 @@ void ReflectometryReductionOne::exec() {
     momentumTransferMaximum = calculateQ(IvsLam->x(0).front(), theta.get());
   if (isDefault("MomentumTransferStep")) {
     // if the DQQ is not given for this run.
-    // we will use CalculateResoltion to produce this value
+    // we will use NRCalculateSlitResolution to produce this value
     // for us.
-    IAlgorithm_sptr calcResAlg = createChildAlgorithm("CalculateResolution");
+    IAlgorithm_sptr calcResAlg =
+        createChildAlgorithm("NRCalculateSlitResolution");
     calcResAlg->setProperty("Workspace", runWS);
     calcResAlg->setProperty("TwoTheta", theta.get());
     calcResAlg->execute();
     if (!calcResAlg->isExecuted())
-      throw std::runtime_error("CalculateResolution failed. Please manually "
-                               "enter a value for MomentumTransferStep.");
+      throw std::runtime_error(
+          "NRCalculateSlitResolution failed. Please manually "
+          "enter a value for MomentumTransferStep.");
     momentumTransferStep = calcResAlg->getProperty("Resolution");
   }
   if (momentumTransferMinimum > momentumTransferMaximum)

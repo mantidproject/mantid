@@ -52,6 +52,8 @@ Calibration technique: Finding tubes not well calibrated
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 import mantid.simpleapi as mantid
 import tube
 import numpy
@@ -500,8 +502,8 @@ def completeCalibration(filename):
     mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
 
     # == Save workspace ==
-    # SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps.py")
-    # print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
+    # mantid.SaveNexusProcessed(CalibInstWS, path+'TubeCalibDemoMapsResult.nxs', "Result of Running TCDemoMaps.py")
+    # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs")
 
 
 ####

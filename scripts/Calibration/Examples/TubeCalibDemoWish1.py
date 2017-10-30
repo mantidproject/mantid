@@ -5,6 +5,9 @@
 # Here we run the calibration of WISH panel03
 # We base the ideal tube on one tube of this door.
 #
+
+from __future__ import absolute_import, division, print_function
+
 import tube
 reload(tube) # noqa
 from tube_spec import TubeSpec
@@ -42,5 +45,5 @@ calibrationTable = tube.calibrate( CalibInstWS, 'WISH/panel03', known_pos, func_
 print("Got calibration (new positions of detectors)")
 
 #Apply the calibration
-mantid.ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
 print("Applied calibration")

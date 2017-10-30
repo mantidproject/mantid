@@ -326,6 +326,7 @@ void LoadTBL::exec() {
     auto colDqq = ws->addColumn("str", "dq/q");
     auto colScale = ws->addColumn("str", "Scale");
     auto colOptions = ws->addColumn("str", "Options");
+    auto colHiddenOptions = ws->addColumn("str", "HiddenOptions");
 
     for (size_t i = 0; i < ws->columnCount(); i++) {
       auto col = ws->getColumn(i);
@@ -342,7 +343,7 @@ void LoadTBL::exec() {
     std::string line;
     int stitchID = 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
-      if (line == "" || line == ",,,,,,,,,,,,,,,,") {
+      if (line.empty() || line == ",,,,,,,,,,,,,,,,") {
         continue;
       }
       getCells(line, rowVec, 16, isOld);
@@ -351,8 +352,8 @@ void LoadTBL::exec() {
 
       // check if the first run in the row has any data associated with it
       // 0 = runs, 1 = theta, 2 = trans, 3 = qmin, 4 = qmax
-      if (rowVec[0] != "" || rowVec[1] != "" || rowVec[2] != "" ||
-          rowVec[3] != "" || rowVec[4] != "") {
+      if (!rowVec[0].empty() || !rowVec[1].empty() || !rowVec[2].empty() ||
+          !rowVec[3].empty() || !rowVec[4].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 0; i < 5; ++i) {
@@ -364,8 +365,8 @@ void LoadTBL::exec() {
 
       // check if the second run in the row has any data associated with it
       // 5 = runs, 6 = theta, 7 = trans, 8 = qmin, 9 = qmax
-      if (rowVec[5] != "" || rowVec[6] != "" || rowVec[7] != "" ||
-          rowVec[8] != "" || rowVec[9] != "") {
+      if (!rowVec[5].empty() || !rowVec[6].empty() || !rowVec[7].empty() ||
+          !rowVec[8].empty() || !rowVec[9].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 5; i < 10; ++i) {
@@ -377,8 +378,8 @@ void LoadTBL::exec() {
 
       // check if the third run in the row has any data associated with it
       // 10 = runs, 11 = theta, 12 = trans, 13 = qmin, 14 = qmax
-      if (rowVec[10] != "" || rowVec[11] != "" || rowVec[12] != "" ||
-          rowVec[13] != "" || rowVec[14] != "") {
+      if (!rowVec[10].empty() || !rowVec[11].empty() || !rowVec[12].empty() ||
+          !rowVec[13].empty() || !rowVec[14].empty()) {
         TableRow row = ws->appendRow();
         row << stitchStr;
         for (int i = 10; i < 17; ++i) {
@@ -413,7 +414,7 @@ void LoadTBL::exec() {
     }
     size_t expectedCommas = columnHeadings.size() - 1;
     while (Kernel::Strings::extractToEOL(file, line)) {
-      if (line == "" || line == ",,,,,,,,,,,,,,,,") {
+      if (line.empty() || line == ",,,,,,,,,,,,,,,,") {
         // skip over any empty lines
         continue;
       }

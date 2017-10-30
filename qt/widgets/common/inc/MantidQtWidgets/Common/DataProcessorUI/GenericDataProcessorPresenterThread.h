@@ -8,6 +8,7 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace DataProcessor {
 
 /**
 GenericDataProcessorPresenterThread class to handle a single worker
@@ -68,6 +69,7 @@ private:
   QObject *const m_worker;
 };
 
+} // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
 

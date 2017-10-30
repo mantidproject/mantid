@@ -22,7 +22,9 @@ This workflow makes use of :ref:`ConvertToMD <algm-ConvertToMD>` and
 :ref:`MDNormSCD <algm-MDNormSCD>` so these should be reviewed to
 better understand all the options. An example of creating the Solid
 Angle and Flux workspaces are included in :ref:`MDNormSCD
-<algm-MDNormSCD>`.
+<algm-MDNormSCD>`. :ref:`MDNormSCDPreprocessIncoherent
+<algm-MDNormSCDPreprocessIncoherent>` can be used to process Vanadium
+data for the Solid Angle and Flux workspaces.
 
 The resulting workspaces can be saved and loaded with :ref:`SaveMD
 <algm-SaveMD>` and :ref:`LoadMD <algm-LoadMD>` respectively.
@@ -39,7 +41,7 @@ Background
 ##########
 
 The background is processed the same as the data except that the
-Goniometer is copied from the data before setting the UB. If a
+Goniometer is copied from the data before setting the :ref:`UB matrix <Lattice>`. If a
 background is included three workspaces are create. If
 "OutputWorkspace" is set to "ws" you will get the following.
 
@@ -59,8 +61,8 @@ If no background is used then the "ws" is just the normalised data.
 Symmetries
 ##########
 
-The symmetry is applied by manipulating the UB matrix. The SymmetryOps
-parameters can either be defined as a :ref:`space group <Point and
+The symmetry is applied by manipulating the :ref:`UB matrix <Lattice>`.
+The SymmetryOps parameters can either be defined as a :ref:`space group <Point and
 space groups>` (number or name) were all the symmetries for that group
 is applied, or you can specify individual :ref:`symmetries <Symmetry
 groups>` to apply.

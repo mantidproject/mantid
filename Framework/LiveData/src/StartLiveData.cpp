@@ -1,19 +1,21 @@
 #include "MantidLiveData/StartLiveData.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/AlgorithmProxy.h"
+#include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
-#include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 #include <Poco/ActiveResult.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace LiveData {

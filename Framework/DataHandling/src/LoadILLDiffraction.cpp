@@ -29,6 +29,7 @@ using namespace Geometry;
 using namespace H5;
 using namespace Kernel;
 using namespace NeXus;
+using Types::Core::DateAndTime;
 
 namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
@@ -281,7 +282,7 @@ V3D LoadILLDiffraction::getReferenceComponentPosition(
     const MatrixWorkspace_sptr &instrumentWorkspace) {
   if (m_instName == "D2B") {
     return instrumentWorkspace->getInstrument()
-        ->getComponentByName("tube_1")
+        ->getComponentByName("tube_128")
         ->getPos();
   }
 
@@ -308,8 +309,14 @@ void LoadILLDiffraction::calculateRelativeRotations(
   double firstTubeRotationAngle =
       firstTubePosition.angle(V3D(0, 0, 1)) * rad2deg;
 
-  if (m_instName == "D20")
+  if (m_instName == "D20") {
     firstTubeRotationAngle += D20_NUMBER_DEAD_PIXELS * D20_PIXEL_SIZE;
+  } else if (m_instName == "D2B") {
+    firstTubeRotationAngle = -firstTubeRotationAngle;
+    std::transform(tubeRotations.begin(), tubeRotations.end(),
+                   tubeRotations.begin(),
+                   [&](double angle) { return (-angle); });
+  }
 
   g_log.debug() << "First tube rotation:" << firstTubeRotationAngle << "\n";
 
@@ -480,7 +487,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
     }
   }
 
-  if (scannedVariable.size() == 0)
+  if (scannedVariable.empty())
     throw std::runtime_error(
         "Can not load file because scanned variable with property name " +
         propertyName + " was not found");

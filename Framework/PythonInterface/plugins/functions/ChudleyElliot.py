@@ -59,5 +59,6 @@ class ChudleyElliot(IFunction1D):
             jacobian.set(i,1,(math.cos(x*length)-s)/(length*tau))
             i += 1
 
+
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(ChudleyElliot)

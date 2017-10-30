@@ -11,6 +11,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace {
 Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
@@ -80,8 +81,8 @@ void GenerateIPythonNotebook::exec() {
   }
 
   // Need at least a start time to do time filter
-  if (startTime != "") {
-    if (endTime == "") {
+  if (!startTime.empty()) {
+    if (endTime.empty()) {
       // If no end time was given then filter up to now
       view->filterBetweenExecDate(DateAndTime(startTime));
     } else {

@@ -42,6 +42,9 @@ The previous calibrated instrument view:
 
 .. sectionauthor:: Gesner Passos - ISIS
 """
+
+from __future__ import absolute_import, division, print_function
+
 import numpy
 import mantid.simpleapi as mantid
 import tube
@@ -149,7 +152,8 @@ def calibrateMerlin(filename):
     CalibratedComponent = ['MERLIN/door3/tube_1_%d' % (i) for i in range(1, 9)]
 
     half_diff_center = (
-                           2.92713867188 - 1.22879882813) / 2  # difference among the expected center position for
+                           2.92713867188 - 1.22879882813) / 2
+    # difference among the expected center position for
     # both tubes here a little bit of attempts is necessary.
     # The effective center position and lengh is different for the calibrated tube, that is the reason,
     # the calibrated values of the smaller tube does not seems aligned with the others. By, finding the
@@ -174,11 +178,10 @@ def calibrateMerlin(filename):
     analisePeakTable(peakTable, 'door3_tube1_peaks')
 
     # calibrating tubes 2_x
-    CalibratedComponent = ['MERLIN/door3/tube_2_%d' % (i) for i in range(1, 9)]
+    CalibratedComponent = ['MERLIN/door3/tube_2_%d' % (i) for i in range(1,9)]
     # the knownpositions were given with the center of the bigger tube as origin, to convert
     # to the center of the lower tube as origin is necessary to sum them with  (len_big - len_small)/2
     doorpos = knownPositions[[0, 1, 2, 3]] + half_diff_center
-    # print doorpos
     doorfunc = [2, 2, 1, 1]
 
     # for the smal tubes, automatically searching for the peak position in pixel was not working quite well,
@@ -226,8 +229,8 @@ def calibrateMerlin(filename):
     print("Applied calibration")
 
     # == Save workspace ==
-    # SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TCDemoMerlin.py")
-    # print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+    # mantid.SaveNexusProcessed(CalibInstWS, 'TubeCalibDemoMerlinResult.nxs', "Result of Running TCDemoMerlin.py")
+    # print("saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs")
 
 
 if __name__ == "__main__":

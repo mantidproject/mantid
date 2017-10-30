@@ -5,29 +5,6 @@ import numpy as np
 from AbinsModules import DWSingleCrystalData, AbinsTestHelpers
 
 
-def old_python():
-    """" Check if Python has proper version."""
-    is_python_old = AbinsTestHelpers.old_python()
-    if is_python_old:
-        logger.warning("Skipping AbinsDWSingleCrystalTest because Python is too old.")
-    return is_python_old
-
-
-def skip_if(skipping_criteria):
-    """
-    Skip all tests if the supplied function returns true.
-    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
-    """
-    def decorate(cls):
-        if skipping_criteria():
-            for attr in cls.__dict__.keys():
-                if callable(getattr(cls, attr)) and 'test' in attr:
-                    delattr(cls, attr)
-        return cls
-    return decorate
-
-
-@skip_if(old_python)
 class AbinsDWSingleCrystalTest(unittest.TestCase):
     # fake DW tensors for two atoms
     _good_data = np.asarray([[[1.0, 1.0, 1.0],

@@ -37,6 +37,7 @@
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::Types::Core;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -1282,7 +1283,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(
     std::stringstream ss1, ss2;
     ss1 << idList.vec.size();
     ss2 << idList.counted;
-    if (idList.idname == "") {
+    if (idList.idname.empty()) {
       g_log.error("No list of detector IDs found for location element " + name);
       throw Kernel::Exception::InstrumentDefinitionError(
           "Detector location element " + name + " has no idlist.", filename);

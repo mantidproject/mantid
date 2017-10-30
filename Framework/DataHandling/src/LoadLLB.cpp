@@ -104,7 +104,7 @@ void LoadLLB::setInstrumentName(NeXus::NXEntry &entry) {
   m_instrumentName =
       m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
 
-  if (m_instrumentName == "") {
+  if (m_instrumentName.empty()) {
     throw std::runtime_error(
         "Cannot read the instrument name from the Nexus file!");
   }

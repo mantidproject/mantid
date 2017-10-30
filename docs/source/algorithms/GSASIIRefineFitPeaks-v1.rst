@@ -106,11 +106,10 @@ table give the parameters fitted, similarly to the information found
 in the "Peaks List" window of the GSAS-II GUI. These results are
 printed in the log messages as well.
 
-For fitting single peaks, one at a time, see also :ref:`EnggFitPeaks
-<algm-EnggFitPeaks>`. For other algorithms that implement different
-variants of whole diffraction pattern refinement and fitting see also
-:ref:`PawleyFit <algm-PawleyFit>` and :ref:`LeBailFit
-<algm-LeBailFit>`.
+.. seealso:: For fitting single peaks, one at a time, :ref:`EnggFitPeaks
+             <algm-EnggFitPeaks>`. For other algorithms that implement different
+             variants of whole diffraction pattern refinement and fitting by
+             :ref:`PawleyFit <algm-PawleyFit>` and :ref:`LeBailFit <algm-LeBailFit>`.
 
 
 *References*:

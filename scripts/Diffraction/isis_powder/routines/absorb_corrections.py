@@ -26,7 +26,7 @@ def create_vanadium_sample_details_obj(config_dict):
     formula = common.dictionary_key_helper(dictionary=config_dict, key=formula_key, exception_msg=e_msg + formula_key)
     number_density = common.dictionary_key_helper(dictionary=config_dict, key=number_density_key, throws=False)
 
-    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, center=pos)
+    vanadium_sample_details = sample_details.SampleDetails(height=height, radius=radius, center=pos, shape="cylinder")
     vanadium_sample_details.set_material(chemical_formula=formula, number_density=number_density)
     return vanadium_sample_details
 
@@ -86,8 +86,8 @@ def _calculate__cylinder_absorb_corrections(ws_to_correct, multiple_scattering, 
 
 def _setup_sample_for_cylinder_absorb_corrections(ws_to_correct, sample_details_obj):
     geometry_json = {'Shape': 'Cylinder',
-                     'Height': sample_details_obj.height, 'Radius': sample_details_obj.radius,
-                     'Center': sample_details_obj.center}
+                     'Height': sample_details_obj.height(), 'Radius': sample_details_obj.radius(),
+                     'Center': sample_details_obj.center()}
     material = sample_details_obj.material_object
     # See SetSampleMaterial for documentation on this dictionary
     material_json = {'ChemicalFormula': material.chemical_formula}

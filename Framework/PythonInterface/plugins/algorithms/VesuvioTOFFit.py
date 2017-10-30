@@ -180,5 +180,6 @@ class VesuvioTOFFit(VesuvioBase):
 
         return reduced_chi_squared, params, fitted_data
 
+
 # -----------------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(VesuvioTOFFit)

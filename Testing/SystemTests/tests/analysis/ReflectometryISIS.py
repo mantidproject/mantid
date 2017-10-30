@@ -3,15 +3,15 @@
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 
-class ReflectometryISIS(stresstesting.MantidStressTest):
-
-    __metaclass__ = ABCMeta # Mark as an abstract class
+class ReflectometryISIS(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     @abstractmethod
     def get_workspace_name(self):

@@ -13,7 +13,6 @@ namespace Algorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::IAlgorithm_sptr;
-using Mantid::API::ISpectrum;
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::Progress;
@@ -22,7 +21,6 @@ using Mantid::DataObjects::OffsetsWorkspace;
 using Mantid::DataObjects::OffsetsWorkspace_const_sptr;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_const_sptr;
 
 // Register the algorithm into the AlgorithmFactory

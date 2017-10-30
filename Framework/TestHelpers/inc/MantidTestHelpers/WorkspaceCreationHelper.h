@@ -16,18 +16,13 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/make_unique.h"
 
@@ -89,9 +84,13 @@ struct EPPTableRow {
 
   /// Construct a row with the default values.
   EPPTableRow() = default;
-  /// Construct a row with errors set to zero.
+  /// Construct a row with default workspace index and errors set to zero.
   EPPTableRow(const double peakCentre, const double sigma, const double height,
               const FitStatus fitStatus);
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const int index, const double peakCentre, const double sigma,
+              const double height, const FitStatus fitStatus);
+  int workspaceIndex = -1;
   double peakCentre = 0;
   double peakCentreError = 0;
   double sigma = 0;
@@ -227,6 +226,20 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     const std::string &instrumentName = std::string("testInst"));
 
 /**
+ * Create a workspace as for create2DWorkspaceWithFullInstrument, but including
+ *time indexing, i.e. detector scans. Note that no positions or rotations are
+ *currently changed for the detector scan workspaces.
+ *
+ * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ */
+Mantid::API::MatrixWorkspace_sptr
+create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime = 0,
+    size_t firstInterval = 1, bool includeMonitors = false,
+    bool startYNegative = false, bool isHistogram = true,
+    const std::string &instrumentName = std::string("testInst"));
+
+/**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis
  * the values run from 1 to nhist
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
@@ -288,8 +301,8 @@ createEventWorkspace(int numPixels, int numBins, int numEvents = 100,
 Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
     double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
-    Mantid::Kernel::DateAndTime run_start =
-        Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
+    Mantid::Types::Core::DateAndTime run_start =
+        Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00"));
 
 Mantid::DataObjects::EventWorkspace_sptr
 createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
@@ -366,14 +379,19 @@ void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
 
 /// Create a 2D workspace with one detector and one monitor based around a
 /// virtual reflectometry instrument.
-Mantid::API::MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrument(double startX = 0);
+Mantid::API::MatrixWorkspace_sptr create2DWorkspaceWithReflectometryInstrument(
+    double startX = 0.0,
+    Mantid::Kernel::V3D slit1Pos = Mantid::Kernel::V3D(0, 0, 0),
+    Mantid::Kernel::V3D slit2Pos = Mantid::Kernel::V3D(0, 0, 1),
+    double vg1 = 0.5, double vg2 = 1.0, const int nSpectra = 2,
+    const int nBins = 100, const double deltaX = 2000.0);
 
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.
 Mantid::API::MatrixWorkspace_sptr
 create2DWorkspaceWithReflectometryInstrumentMultiDetector(
-    double startX = 0, const double detSize = 0.0);
+    const double startX = 0.0, const double detSize = 0.0,
+    const int nSpectra = 4, const int nBins = 20, const double deltaX = 5000.0);
 
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,

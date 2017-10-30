@@ -579,24 +579,44 @@ void EQSANSLoad::exec() {
       throw std::runtime_error("Could not cast (interpret) the property " +
                                dzName + " as a time series property value.");
     sfdd = dp->getStatistics().mean;
-    s2d = sfdd;
 
     // Modify SDD according to the DetectorDistance offset if given
     const double sampleflange_det_offset = getProperty("DetectorOffset");
     if (!isEmpty(sampleflange_det_offset))
       sfdd += sampleflange_det_offset;
 
-    // Modify S2D according to the SampleDistance offset if given
-    // This assumes that a positive offset moves the sample toward the detector
-    const double sampleflange_sample_offset = getProperty("SampleOffset");
-    if (!isEmpty(sampleflange_sample_offset))
-      s2d = s2d - sampleflange_sample_offset + sampleflange_det_offset;
-
-    // Modify SDD according to SampleDetectorDistanceOffset offset if given
+    // Modify SDD according to SampleDetectorDistanceOffset offset if given.
+    // This is here for backward compatibility.
     const double sample_det_offset =
         getProperty("SampleDetectorDistanceOffset");
     if (!isEmpty(sample_det_offset))
-      s2d += sample_det_offset;
+      sfdd += sample_det_offset;
+    if (!isEmpty(sample_det_offset) && !isEmpty(sampleflange_det_offset))
+      g_log.error() << "Both DetectorOffset and SampleDetectorDistanceOffset "
+                       "are set. Only one should be used.\n";
+
+    s2d = sfdd;
+    // Modify S2D according to the SampleDistance offset if given
+    // This assumes that a positive offset moves the sample toward the detector
+    const double sampleflange_sample_offset = getProperty("SampleOffset");
+    if (!isEmpty(sampleflange_sample_offset)) {
+      s2d -= sampleflange_sample_offset;
+
+      // Move the sample to its correct position
+      IAlgorithm_sptr mvAlg =
+          createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+      mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
+      mvAlg->setProperty("ComponentName", "sample-position");
+      mvAlg->setProperty("Z", sampleflange_sample_offset / 1000.0);
+      mvAlg->setProperty("RelativePosition", false);
+      mvAlg->executeAsChildAlg();
+      g_log.information() << "Moving sample to "
+                          << sampleflange_sample_offset / 1000.0 << " meters\n";
+      m_output_message += "   Sample position: " +
+                          Poco::NumberFormatter::format(
+                              sampleflange_sample_offset / 1000.0, 3) +
+                          " m\n";
+    }
   }
   dataWS->mutableRun().addProperty("sampleflange_detector_distance", sfdd, "mm",
                                    true);
@@ -812,7 +832,6 @@ void EQSANSLoad::exec() {
                                    getPropertyValue("OutputWorkspace"), true);
   setProperty<MatrixWorkspace_sptr>(
       "OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS));
-  // m_output_message = "Loaded " + fileName + '\n' + m_output_message;
   setPropertyValue("OutputMessage", m_output_message);
 }
 

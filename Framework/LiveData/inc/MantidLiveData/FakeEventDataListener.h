@@ -46,7 +46,8 @@ public:
   bool buffersEvents() const override { return true; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Kernel::DateAndTime startTime = Kernel::DateAndTime()) override;
+  void start(
+      Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   boost::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
@@ -71,7 +72,7 @@ private:
   int m_numExtractDataCalls; ///< Number of times extractData has been called
 
   /// Date and time of the next time to end the run
-  Mantid::Kernel::DateAndTime m_nextEndRunTime;
+  Mantid::Types::Core::DateAndTime m_nextEndRunTime;
 
   /// Fake run number to give
   int m_runNumber;
