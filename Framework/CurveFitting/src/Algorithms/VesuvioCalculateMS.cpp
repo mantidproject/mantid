@@ -141,7 +141,7 @@ void VesuvioCalculateMS::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*totalsc, *multsc))
-  for (size_t i = 0; i < nhist; ++i) {
+  for (int64_t i = 0; i < nhist; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
