@@ -62,17 +62,25 @@ function (find_qscintilla qt_version)
     if ( NOT QScintillaQt${qt_version}_FIND_QUIETLY )
       message ( STATUS "Found QScintilla2 linked against Qt${qt_version}: ${${_library_var}}")
     endif()
+    
     set ( _target_name Qt${qt_version}::Qscintilla )
-    add_library ( ${_target_name} UNKNOWN IMPORTED )
+    add_library ( ${_target_name} SHARED IMPORTED )
+    if ( WIN32 )
+      set ( _lib_import_var IMPORTED_IMPLIB )
+    else ()
+      set ( _lib_import_var IMPORTED_LOCATION )
+    endif ()
+    set_property ( TARGET ${_target_name} APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE )
     set_target_properties ( ${_target_name} PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES ${${_include_var}}
-      IMPORTED_LOCATION ${${_library_var}}
+      ${_lib_import_var}_RELEASE "${${_library_var}}"
     )
-    if (${_library_var_debug})
+    if ( ${_library_var_debug} )
+      set_property ( TARGET ${_target_name} APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
       set_target_properties ( ${_target_name} PROPERTIES
-        IMPORTED_LOCATION_DEBUG ${${_library_var_debug}}
+        ${_lib_import_var}_DEBUG "${${_library_var_debug}}"
       )
-    endif()
+    endif ()
   else ()
     if ( QScintillaQt${qt_version}_FIND_REQUIRED )
       message ( FATAL_ERROR "Failed to find Qscintilla linked against Qt${qt_version}" )
@@ -82,6 +90,5 @@ function (find_qscintilla qt_version)
   endif ()
 
   mark_as_advanced (${_include_var} ${_library_var} ${_library_var_debug})
-#endif()
 
 endfunction()

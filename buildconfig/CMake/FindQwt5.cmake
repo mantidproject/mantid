@@ -29,17 +29,22 @@ string( REGEX REPLACE "^#define[ \t]+QWT_VERSION_STR[ \t]+\"" "" QWT5_VERSION ${
 #   hack off the portion from the second double quote to the end of the line
 string( REGEX REPLACE "\"$" "" QWT5_VERSION ${QWT5_VERSION} )
 
-if ( QWT5_LIBRARY_DEBUG )
-  set( QWT5_LIBRARIES optimized ${QWT5_LIBRARY} debug ${QWT5_LIBRARY_DEBUG} )
-else ()
-  set( QWT5_LIBRARIES ${QWT5_LIBRARY} )
-endif ()
-
 # Create an import target
-add_library ( Qwt5 UNKNOWN IMPORTED )
+add_library ( Qwt5 SHARED IMPORTED )
+if ( WIN32 )
+  set ( _lib_import_var IMPORTED_IMPLIB )
+else ()
+  set ( _lib_import_var IMPORTED_LOCATION )
+endif ()
+set_property ( TARGET Qwt5 APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties ( Qwt5 PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES ${QWT5_INCLUDE_DIR}
-  IMPORTED_LOCATION ${QWT5_LIBRARIES}
+  ${_lib_import_var}_RELEASE "${QWT5_LIBRARY}"
 )
-
+if ( QWT5_LIBRARY_DEBUG )
+  set_property ( TARGET Qwt5 APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+  set_target_properties ( Qwt5 PROPERTIES
+    ${_lib_import_var}_DEBUG "${QWT5_LIBRARY_DEBUG}"
+)
+endif()
 mark_as_advanced ( QWT5_INCLUDE_DIR QWT5_LIBRARY QWT5_LIBRARY_DEBUG )

@@ -691,20 +691,6 @@ add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
-include_directories ( src )
-include_directories ( src/lib/include )
-include_directories ( src/lib/3rdparty/qtcolorpicker/src )
-
-include_directories ( ../qt/widgets/common/inc )
-include_directories ( ../qt/widgets/instrumentview/inc )
-include_directories ( ../qt/widgets/sliceviewer/inc )
-include_directories ( ../qt/widgets/spectrumviewer/inc )
-include_directories ( ../qt/widgets/factory/inc )
-# ui_ files end up in these places
-include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/common )
-include_directories ( ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer )
-
-
 ###########################################################################
 # Application icon files
 ###########################################################################
@@ -788,26 +774,38 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
                                                         ${CONFIG_RESET_SCRIPT_FILE} ${IPYTHON_INSTALL_FILES}
 )
 
+target_include_directories ( MantidPlot PRIVATE
+  src
+  src/lib/include
+  src/lib/3rdparty/qtcolorpicker/src
+  ../qt/widgets/common/inc
+  ../qt/widgets/instrumentview/inc
+  ../qt/widgets/sliceviewer/inc
+  ../qt/widgets/spectrumviewer/inc
+  ../qt/widgets/factory/inc
+)
+
 # Library dependencies
-target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            ${CORE_MANTIDLIBS}
-            MantidQtWidgetsCommonQt4
-            MantidQtWidgetsLegacyQwtQt4
-            MantidQtWidgetsFactoryQt4
-            MantidQtWidgetsInstrumentViewQt4
-            MantidQtWidgetsSliceViewerQt4
-            MantidQtWidgetsSpectrumViewerQt4
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
-            ${GSL_LIBRARIES}
-            ${MUPARSER_LIBRARIES}
-            ${QT_LIBRARIES}
-            ${QWT5_LIBRARIES}
-            ${QWTPLOT3D_LIBRARIES}
-            Qt4::Qscintilla
-            ${PYTHON_LIBRARIES}
-            ${ZLIB_LIBRARIES}
-            ${OPENGL_LIBRARIES}
+target_link_libraries ( MantidPlot LINK_PRIVATE
+  ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS}
+  MantidQtWidgetsCommonQt4
+  MantidQtWidgetsLegacyQwtQt4
+  MantidQtWidgetsFactoryQt4
+  MantidQtWidgetsInstrumentViewQt4
+  MantidQtWidgetsSliceViewerQt4
+  MantidQtWidgetsSpectrumViewerQt4
+  ${Boost_LIBRARIES}
+  ${POCO_LIBRARIES}
+  ${GSL_LIBRARIES}
+  ${MUPARSER_LIBRARIES}
+  ${QT_LIBRARIES}
+  Qwt5
+  ${QWTPLOT3D_LIBRARIES}
+  Qt4::Qscintilla
+  ${PYTHON_LIBRARIES}
+  ${ZLIB_LIBRARIES}
+  ${OPENGL_LIBRARIES}
 )
 
 if(MAKE_VATES)

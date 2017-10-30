@@ -7,6 +7,11 @@ cmake_minimum_required ( VERSION 3.5 )
 # Define the project name.
 project ( Mantid )
 
+# Policy settings
+if (POLICY CMP0022)
+  cmake_policy (SET CMP0022 NEW)
+endif ()
+
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
 
@@ -97,6 +102,7 @@ endif()
 # Qt/Qwt/PyQt/sip
 ###########################################################################
 if (ENABLE_MANTIDPLOT)
+  set ( QT_USE_IMPORTED_TARGETS ON )
   find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg REQUIRED )
 
   find_package ( Qwt5 REQUIRED )
