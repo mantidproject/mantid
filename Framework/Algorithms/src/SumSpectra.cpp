@@ -274,7 +274,6 @@ SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
 /**
   * Calls an algorithm to replace special values within the workspace
   * such as NaN or Inf to 0.
-  * @param inputWs The workspace to process
   * @return The workspace with special floating point values set to 0
   */
 API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
@@ -300,8 +299,8 @@ API::MatrixWorkspace_sptr SumSpectra::replaceSpecialValues() {
 
 /**
  * This function deals with the logic necessary for summing a Workspace2D.
- * @param outSpec The spectrum for the summed output.
- * @param progress The progress indicator.
+ * @param outputWorkspace the workspace to hold the summed input
+ * @param progress the progress indicator
  * @param numSpectra The number of spectra contributed to the sum.
  * @param numMasked The spectra dropped from the summations because they are
  * masked.
@@ -386,9 +385,11 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
  * This function handles the logic for summing RebinnedOutput workspaces.
  * @param outputWorkspace the workspace to hold the summed input
  * @param progress the progress indicator
- * @param numSpectra
- * @param numMasked
- * @param numZeros
+ * @param numSpectra The number of spectra contributed to the sum.
+ * @param numMasked The spectra dropped from the summations because they are
+ * masked.
+ * @param numZeros The number of zero bins in histogram workspace or empty
+ * spectra for event workspace.
  */
 void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
                                  Progress &progress, size_t &numSpectra,
@@ -481,8 +482,13 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
 }
 
 /** Executes the algorithm
- *@param localworkspace :: the input workspace
- *@param indices :: set of indices to sum up
+ * @param outputWorkspace the workspace to hold the summed input
+ * @param progress the progress indicator
+ * @param numSpectra The number of spectra contributed to the sum.
+ * @param numMasked The spectra dropped from the summations because they are
+ * masked.
+ * @param numZeros The number of zero bins in histogram workspace or empty
+ * spectra for event workspace.
  */
 void SumSpectra::execEvent(MatrixWorkspace_sptr outputWorkspace,
                            Progress &progress, size_t &numSpectra,
