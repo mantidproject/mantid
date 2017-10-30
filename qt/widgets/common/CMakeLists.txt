@@ -419,8 +419,10 @@ endif()
 ###########################################################################
 # Target
 ###########################################################################
-find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
-  WebKitWidgets REQUIRED )
+if (ENABLE_WORKBENCH)
+  find_package ( Qt5 COMPONENTS Concurrent Help Network PrintSupport
+    WebKitWidgets REQUIRED )
+endif()
 
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsCommon
   SRC ${SRC_FILES}
