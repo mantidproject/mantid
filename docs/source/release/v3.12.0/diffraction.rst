@@ -17,6 +17,9 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- Usability improvements in the GUI:
+  - Improvwd progress reporting for Calibration and Focus
+
 Single Crystal Diffraction
 --------------------------
 

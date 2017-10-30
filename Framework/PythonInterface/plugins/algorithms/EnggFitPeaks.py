@@ -177,7 +177,7 @@ class EnggFitPeaks(PythonAlgorithm):
                                    .format(peaks[1][i], initial_params[0]))
                 continue
 
-            fitted_params = dict()
+            fitted_params = {}
             fitted_params['dSpacing'] = peaks[1][i]
             fitted_params['Chi'] = chi_over_dof
             self._add_parameters_to_map(fitted_params, param_table)
