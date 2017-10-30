@@ -408,7 +408,6 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         return curves
 
-
     def _append_spectra(self, ws1, ws2):
         """
         Uses the algorithm 'AppendSpectra' to append the spectra of ws1 and ws2
