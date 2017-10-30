@@ -245,6 +245,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
 
   calculateChisq();
   double factor = getChisq() * double(npoints) / 2;
+  double resolutionFactor = static_cast<double>(m_dataCalc.size() / m_data.size());
 
   // Calculate the quadratic coefficients SB. eq 24
 
@@ -282,7 +283,7 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
           m_coeffs.c2[k][l] += directionsDat[k][i] * directionsDat[l][i] /
                                m_errors[i] / m_errors[i];
       }
-      m_coeffs.c2[k][l] *= 2.0 / factor;
+      m_coeffs.c2[k][l] *= 2.0 / factor * resolutionFactor;
     }
   }
 

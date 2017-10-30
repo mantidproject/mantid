@@ -331,11 +331,11 @@ public:
     TS_ASSERT_EQUALS(data->readX(0).size(), data->readY(0).size());
 
     // Test some values
-    TS_ASSERT_DELTA(image->y(0)[70], 6.8835, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[70], 5.89939, 0.0001);
     // Fails on RHEL and Ubuntu with delta 0.0001
-    TS_ASSERT_DELTA(image->y(0)[71], 1.3045, 0.001);
-    TS_ASSERT_DELTA(image->y(1)[78], 0.0999, 0.0001);
-    TS_ASSERT_DELTA(image->y(1)[79], 0.4176, 0.0001);
+    TS_ASSERT_DELTA(image->y(0)[71], 1.18050, 0.001);
+    TS_ASSERT_DELTA(image->y(1)[78], 0.148485, 0.0001);
+    TS_ASSERT_DELTA(image->y(1)[79], 1.10635, 0.0001);
   }
 
   void test_output_label() {

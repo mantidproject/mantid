@@ -351,8 +351,7 @@ void MaxEnt::exec() {
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
           (currAngle < angle)) {
-        g_log.information() << "Stopped after " << it << " iterations "
-                            << currChisq << ' ' << chiTarget << std::endl;
+        g_log.information() << "Stopped after " << it << " iterations" << std::endl;
         break;
       }
 
