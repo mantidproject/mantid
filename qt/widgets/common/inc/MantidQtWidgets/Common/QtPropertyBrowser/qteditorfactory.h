@@ -548,8 +548,7 @@ void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property,
 
 template <class Editor>
 void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object) {
-  const typename EditorToPropertyMap::iterator ecend =
-      m_editorToProperty.end();
+  const typename EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
   for (typename EditorToPropertyMap::iterator itEditor =
            m_editorToProperty.begin();
        itEditor != ecend; ++itEditor) {

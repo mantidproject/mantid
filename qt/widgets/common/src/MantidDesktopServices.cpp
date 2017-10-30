@@ -70,6 +70,5 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme,
 void MantidDesktopServices::unsetUrlHandler(const QString &scheme) {
   QDesktopServices::unsetUrlHandler(scheme);
 }
-
 }
 }

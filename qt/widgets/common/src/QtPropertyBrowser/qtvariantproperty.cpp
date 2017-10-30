@@ -1672,7 +1672,7 @@ void QtVariantPropertyManager::setValue(QtProperty *property,
     return;
   } else if (QtDoublePropertyManager *doubleManager =
                  qobject_cast<QtDoublePropertyManager *>(manager)) {
-    doubleManager->setValue(internProp,  val.value<double>());
+    doubleManager->setValue(internProp, val.value<double>());
     return;
   } else if (QtBoolPropertyManager *boolManager =
                  qobject_cast<QtBoolPropertyManager *>(manager)) {
