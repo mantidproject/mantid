@@ -17,20 +17,16 @@ set ( TEST_FILES
 	test/WidgetFactoryTest.h
 )
 
-include_directories ( inc )
-include_directories ( ../sliceviewer/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../sliceviewer )
-
-# For Windows:
-add_definitions ( -DIN_MANTIDQT_FACTORY )
-
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
   QT_VERSION 4
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
+  DEFS
+    IN_MANTIDQT_FACTORY
+  INCLUDE_DIRS
+    inc
   LINK_LIBS
     ${CORE_MANTIDLIBS}
     ${POCO_LIBRARIES}
@@ -39,6 +35,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsFactory
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
     MantidQtWidgetsSliceViewer
 )
 
