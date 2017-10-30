@@ -59,8 +59,11 @@ namespace CustomDialogs {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class PreventLoadRequests;
+
 class LoadDialog : public API::AlgorithmDialog {
   Q_OBJECT
+  friend PreventLoadRequests;
 
 public:
   /// Default constructor

@@ -35,6 +35,20 @@ struct HoldFlag {
 };
 }
 
+// Blocks signals sent to the load button for the duration
+// of it's lifetime.
+class PreventLoadRequests {
+public:
+  PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) {
+    m_dialog.disableLoadRequests();
+  }
+
+  ~PreventLoadRequests() { m_dialog.enableLoadRequests(); }
+
+private:
+  LoadDialog &m_dialog;
+};
+
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(LoadDialog)
 
@@ -67,8 +81,7 @@ void LoadDialog::createDynamicWidgets() {
 
 /// Override the help button clicked method
 void LoadDialog::helpClicked() {
-  const std::string &loaderName =
-      getAlgorithm()->getPropertyValue("LoaderName");
+  const auto loaderName = getAlgorithm()->getPropertyValue("LoaderName");
   QString helpPage = (loaderName.empty()) ? QString("Load")
                                           : QString::fromStdString(loaderName);
   MantidQt::API::HelpWindow::showAlgorithm(this->nativeParentWidget(),
@@ -123,7 +136,7 @@ void LoadDialog::accept() {
   // wasn't attempted for the new contents. Force one here.
   // The widget does nothing if the contents have not changed so it will be
   // quick for this case
-  disableLoadRequests();
+  auto preventLoadRequestsWhileAlive = PreventLoadRequests(*this);
   m_form.fileWidget->findFiles();
   while (m_form.fileWidget->isSearching() || m_populating)
     QApplication::instance()->processEvents();
@@ -136,7 +149,6 @@ void LoadDialog::accept() {
     createDynamicWidgets();
   } else
     AlgorithmDialog::accept();
-  enableLoadRequests();
 }
 
 //--------------------------------------------------------------------------
