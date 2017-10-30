@@ -20,7 +20,7 @@ set ( INC_FILES
 	IEnggDiffractionView.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
@@ -29,7 +29,7 @@ set ( MOC_FILES
     EnggDiffractionViewQtGUI.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
    EnggDiffractionQtGUI.ui
    EnggDiffractionQtTabCalib.ui
    EnggDiffractionQtTabFocus.ui
@@ -58,6 +58,7 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesEnggDiffraction
       Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
     MantidScientificInterfacesMuon
   INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS;@loader_path/../../../plugins/qtplugins/mantid"
