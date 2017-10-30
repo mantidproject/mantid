@@ -141,7 +141,7 @@ void VesuvioCalculateMS::exec() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*totalsc, *multsc))
-  for (int64_t i = 0; i < nhist; ++i) {
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // set common X-values
     totalsc->setSharedX(i, m_inputWS->sharedX(i));
@@ -161,8 +161,8 @@ void VesuvioCalculateMS::exec() {
             getProperty("Seed"));
     // the output spectrum objects have references to where the data will be
     // stored
-    calculateMS((size_t)i, totalsc->getSpectrum(i), multsc->getSpectrum(i),
-                randgen.get());
+    calculateMS(static_cast<size_t>(i), totalsc->getSpectrum(i),
+                multsc->getSpectrum(i), randgen.get());
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -225,7 +225,7 @@ void VesuvioCalculateMS::cacheInputs() {
   if (nInputAtomProps != nExptdAtomProp * nmasses) {
     std::ostringstream os;
     os << "Inconsistent AtomicProperties list defined. Expected "
-       << nExptdAtomProp *nmasses << " values, however, only "
+       << nExptdAtomProp * nmasses << " values, however, only "
        << sampleInfo.size() << " have been given.";
     throw std::invalid_argument(os.str());
   }
