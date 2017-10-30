@@ -338,7 +338,6 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
     break;
   default:
     throw std::runtime_error("Scaling error.");
-    return;
   }
 
   // Now we have the w.diagonal scaling matrix, actually scale the

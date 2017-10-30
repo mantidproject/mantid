@@ -287,7 +287,6 @@ void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J,
       } else {
         // we're not going to make progress...jump out
         throw std::runtime_error("Not making progress.");
-        break;
       }
     } else {
       sigma = sigma + sigma_shift;
