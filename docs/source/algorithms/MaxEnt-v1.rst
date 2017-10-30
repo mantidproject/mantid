@@ -201,9 +201,9 @@ Output:
 
 .. testoutput:: ExMUSR00022725
 
-   Image at -1.359: 0.100
-   Image at 0.000: 0.009
-   Image at 1.359: 0.100
+   Image at -1.359: 0.096
+   Image at 0.000: 0.001
+   Image at 1.359: 0.096
 
 .. figure:: ../images/MaxEntMUSR00022725.png
    :align: center
@@ -225,20 +225,20 @@ and its imaginary part (right).
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
    print("Image (real part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
    print("Image (real part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
-   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(0)[129], image.readY(0)[129]))
-   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(0)[135], image.readY(0)[135]))
-   print("Image (imaginary part) at  {:.3f}: {:.3f}".format(image.readX(0)[141], image.readY(0)[141]))
+   print("Image (imaginary part) at {:.3f}: {:.3f}".format(image.readX(1)[129], image.readY(1)[129]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[135], image.readY(1)[135]))
+   print("Image (imaginary part) at  {:.3f}:  {:.3f}".format(image.readX(1)[141], image.readY(1)[141]))
 
 Output:
 
 .. testoutput:: ExEMU00020884
 
-   Image (real part) at -1.389: -0.079
-   Image (real part) at  0.000:  0.015
-   Image (real part) at  1.389: -0.079
-   Image (imaginary part) at -1.389: -0.079
-   Image (imaginary part) at  0.000:  0.015
-   Image (imaginary part) at  1.389: -0.079
+   Image (real part) at -1.389: -0.063
+   Image (real part) at  0.000:  0.000
+   Image (real part) at  1.389: -0.063
+   Image (imaginary part) at -1.389: -0.286
+   Image (imaginary part) at  0.000:  0.000
+   Image (imaginary part) at  1.389:  0.287
 
 .. figure:: ../images/MaxEntMUSR00020884.png
    :align: center
