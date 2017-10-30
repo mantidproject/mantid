@@ -15,6 +15,8 @@ Installation
 Workbench
 ---------
 
+- Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
