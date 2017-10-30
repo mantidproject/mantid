@@ -47,16 +47,6 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"MHz", "microsecond"},
                                                    {"Angstrom", "Angstrom^-1"},
                                                    {"Angstrom^-1", "Angstrom"}};
-
-double calcEntropy(const std::vector<double> &image, double a) {
-  double entropy = 0.0;
-  for (auto f : image) {
-    auto fa = f / a;
-    auto root = sqrt(fa * fa + 1.0);
-    entropy += a * root - f * log(fa + root);
-  }
-  return entropy;
-}
 }
 
 //----------------------------------------------------------------------------------------------
@@ -345,8 +335,7 @@ void MaxEnt::exec() {
       // Record the evolution of Chi-square and angle(S,C)
       double currAngle = maxentCalculator.getAngle();
       evolChi[it] = currChisq;
-      // evolTest[it] = currAngle;
-      evolTest[it] = calcEntropy(image, background);
+      evolTest[it] = currAngle;
 
       // Stop condition, solution found
       if ((std::abs(currChisq / chiTarget - 1.) < chiEps) &&
