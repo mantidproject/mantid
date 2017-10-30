@@ -13,11 +13,16 @@ function (find_qscintilla qt_version)
       libqscintilla2
       qscintilla2_qt4
     )
+    set ( _qsci_lib_names_debug
+      qscintilla2d
+    )
     set ( _qsci_lib_paths
       ${QT_LIBRARY_DIR}
     )
     set ( _qsci_include_paths
       ${QT_INCLUDE_DIR}
+      # required for OSX
+      /usr/local/include
     )
   else()
     if ( NOT Qt5_FOUND)
@@ -42,9 +47,14 @@ function (find_qscintilla qt_version)
       PATHS ${_qsci_include_paths}
       NO_DEFAULT_PATH
   )
-set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
+  set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
   find_library ( ${_library_var}
     NAMES ${_qsci_lib_names}
+    PATHS ${_qsci_lib_paths}
+  )
+  set ( _library_var_debug QSCINTILLA_QT${qt_version}_LIBRARY_DEBUG )
+  find_library ( ${_library_var_debug}
+    NAMES ${_qsci_lib_names_debug}
     PATHS ${_qsci_lib_paths}
   )
 
@@ -58,6 +68,11 @@ set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
       INTERFACE_INCLUDE_DIRECTORIES ${${_include_var}}
       IMPORTED_LOCATION ${${_library_var}}
     )
+    if (${_library_var_debug})
+      set_target_properties ( ${_target_name} PROPERTIES
+        IMPORTED_LOCATION_DEBUG ${${_library_var_debug}}
+      )
+    endif()
   else ()
     if ( QScintillaQt${qt_version}_FIND_REQUIRED )
       message ( FATAL_ERROR "Failed to find Qscintilla linked against Qt${qt_version}" )
@@ -66,7 +81,7 @@ set ( _library_var QSCINTILLA_QT${qt_version}_LIBRARY )
     endif()
   endif ()
 
-  mark_as_advanced (${_include_var} ${_library_var})
+  mark_as_advanced (${_include_var} ${_library_var} ${_library_var_debug})
 #endif()
 
 endfunction()
