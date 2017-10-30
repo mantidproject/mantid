@@ -196,7 +196,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
                              "the X dimension of the input workspace is: '%s'" % (expected_dim, dim_type))
 
-        vanadium_integration_ws = mantid.Integration(InputWorkspace=vanadium_ws)
+        vanadium_integration_ws = mantid.Integration(InputWorkspace=vanadium_ws, StoreInADS=False)
         if 1 != vanadium_integration_ws.blocksize() or \
                 vanadium_integration_ws.getNumberHistograms() < vanadium_ws.getNumberHistograms():
 
@@ -373,7 +373,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             # This RebinToWorkspace is required here: normal runs will have narrower range of X values,
             # and possibly different bin size, as compared to (long) Vanadium runs. Same applies to short
             # Ceria runs (for Calibrate -non-full) and even long Ceria runs (for Calibrate-Full).
-            rebinned_fit_curve = mantid.RebinToWorkspace(WorkspaceToRebin=fitted_curve, WorkspaceToMatch=ws)
+            rebinned_fit_curve = mantid.RebinToWorkspace(WorkspaceToRebin=fitted_curve, WorkspaceToMatch=ws,
+                                                         StoreInADS=False)
 
             for i in idxs:
                 # take values of the second spectrum of the workspace (fit simulation - fitted curve)
