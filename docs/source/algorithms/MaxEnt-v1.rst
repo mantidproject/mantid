@@ -155,7 +155,7 @@ and the reconstructed image, i.e. Fourier transform (right).
    Y[12] = Y[188] = 0.90
    Y[14] = Y[186] = 0.90
    CreateWorkspace(OutputWorkspace='inputws',DataX=X,DataY=Y,DataE=E,NSpec=1)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', chiTarget=N, A=0.0001)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='inputws', A=0.0001)
 
    print("First  reconstructed coefficient: {:.3f}".format(data.readY(0)[5]))
    print("Second reconstructed coefficient: {:.3f}".format(data.readY(0)[10]))
@@ -170,7 +170,7 @@ Output:
    First  reconstructed coefficient: 0.847
    Second reconstructed coefficient: 0.846
    Third  reconstructed coefficient: 0.846
-   Fourth reconstructed coefficient: 0.896
+   Fourth reconstructed coefficient: 0.897
    Fifth  reconstructed coefficient: 0.896
 
 .. figure:: ../images/MaxEntFourierCoefficients.png
@@ -189,7 +189,7 @@ and :ref:`algm-FFT` (right).
    CropWorkspace(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', XMin=0.11, XMax=1.6, EndWorkspaceIndex=0)
    RemoveExpDecay(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725')
    Rebin(InputWorkspace='MUSR00022725', OutputWorkspace='MUSR00022725', Params='0.016')
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='MUSR00022725', A=0.005, ChiTarget=90)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='MUSR00022725', A=0.005)
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='MUSR00022725')
 
@@ -218,7 +218,7 @@ and its imaginary part (right).
    CropWorkspace(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    RemoveExpDecay(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884')
    Rebin(InputWorkspace='EMU00020884', OutputWorkspace='EMU00020884', Params='0.016')
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, ChiTarget=300, MaxIterations=2500)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='EMU00020884', A=0.0001, MaxIterations=2500)
    # Compare MaxEnt to FFT
    imageFFT = FFT(InputWorkspace='EMU00020884')
 
@@ -266,7 +266,7 @@ the original and reconstructed data (left), and the reconstructed image (right).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001)
 
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[102], image.readY(0)[102]))
    print("Image (real part) at {:.3f}: {:.3f}".format(image.readX(0)[103], image.readY(0)[103]))
@@ -277,7 +277,7 @@ Output:
 .. testoutput:: ExRealImage
 
    Image (real part) at 0.318: 0.000
-   Image (real part) at 0.477: 5.842
+   Image (real part) at 0.477: 5.862
    Image (real part) at 0.637: 0.000
 
 .. figure:: ../images/MaxEntComplexData.png
@@ -317,8 +317,8 @@ image in order to obtain smooth results).
        YIm.append(sin(w*x)+(random()-0.5)*0.3)
        E.append(0.1)
    CreateWorkspace(OutputWorkspace='ws',DataX=X+X,DataY=YRe+YIm,DataE=E+E,NSpec=2)
-   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=False)
-   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, chiTarget=2*N, A=0.001, PositiveImage=True)
+   evolChi, evolAngle, image, data = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=False)
+   evolChiP, evolAngleP, imageP, dataP = MaxEnt(InputWorkspace='ws', ComplexData=True, A=0.001, PositiveImage=True)
 
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[102], image.readY(0)[102], imageP.readY(0)[102]))
    print("Image at {:.3f}: {:.3f} (PositiveImage=False), {:.3f} (PositiveImage=True)".format(image.readX(0)[103], image.readY(0)[103], imageP.readY(0)[103]))
@@ -329,7 +329,7 @@ Output:
 .. testoutput:: ExRealPosImage
 
    Image at 0.318: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
-   Image at 0.477: 5.842 (PositiveImage=False), 5.842 (PositiveImage=True)
+   Image at 0.477: 5.862 (PositiveImage=False), 5.913 (PositiveImage=True)
    Image at 0.637: 0.000 (PositiveImage=False), 0.000 (PositiveImage=True)
 
 .. figure:: ../images/MaxEntPositiveImage.png
@@ -364,8 +364,8 @@ the reconstructed data is twice the size of the original (experimental) data.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
-   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=5000, ResolutionFactor=2)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1)
+   evolChi2, evolAngle2, image2, data2 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=5000, ResolutionFactor=2)
 
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=1)".format(image1.readX(0)[135], image1.readY(0)[135]))
    print("Image at {:.3f}: {:.3f} (ResolutionFactor=2)".format(image2.readX(0)[270], image2.readY(0)[270]))
@@ -374,8 +374,8 @@ Output:
 
 .. testoutput:: ExResolutionFactor
 
-   Image at 0.000: 0.015 (ResolutionFactor=1)
-   Image at 0.000: 0.079 (ResolutionFactor=2)
+   Image at 0.000: 0.000 (ResolutionFactor=1)
+   Image at 0.000: 0.000 (ResolutionFactor=2)
 
 .. figure:: ../images/MaxEntResolutionFactor.png
    :align: center
@@ -389,10 +389,10 @@ a zoom into the region :math:`0.82 < x < 1.44` and :math:`-0.187 < y < 0.004`.
    CropWorkspace(InputWorkspace='ws', OutputWorkspace='ws', XMin=0.17, XMax=4.5, EndWorkspaceIndex=0)
    ws = RemoveExpDecay(InputWorkspace='ws')
    ws = Rebin(InputWorkspace='ws', Params='0.016')
-   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=2500, ResolutionFactor=1)
-   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=25000, ResolutionFactor=10)
-   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=50000, ResolutionFactor=20)
-   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, ChiTarget=300, MaxIterations=75000, ResolutionFactor=40)
+   evolChi1, evolAngle1, image1, data1 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=2500, ResolutionFactor=1)
+   evolChi10, evolAngle10, image10, data10 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=25000, ResolutionFactor=10)
+   evolChi20, evolAngle20, image20, data20 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=50000, ResolutionFactor=20)
+   evolChi40, evolAngle40, image40, data40 = MaxEnt(InputWorkspace='ws', A=0.0001, MaxIterations=75000, ResolutionFactor=40)
 
 .. figure:: ../images/MaxEntResolutionFactor2.png
    :align: center
