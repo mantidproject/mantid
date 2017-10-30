@@ -34,7 +34,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
     Qt4::Qscintilla
     Qwt5
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
-      MantidQtWidgetsSliceViewer
+    MantidQtWidgetsCommon
+    MantidQtWidgetsLegacyQwt
+    MantidQtWidgetsSliceViewer
   EXCLUDE_FROM_ALL
 )
