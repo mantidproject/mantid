@@ -38,26 +38,25 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   alg->setRethrows(rethrow);
   alg->initialize();
 
-  if (child) {
+  if (lhs->getName().empty()) {
     alg->setProperty<LHSType>("LHSWorkspace", lhs);
-    alg->setProperty<RHSType>("RHSWorkspace", rhs);
-    // Have to set a text name for the output workspace if the algorithm is a
-    // child even
-    // though it will not be used.
-    alg->setPropertyValue("OutputWorkspace", "��NotApplicable");
-    if (lhsAsOutput) {
-      alg->setProperty<LHSType>("OutputWorkspace", lhs);
-    }
-  }
-  // If this is not a child algorithm then we need names for the properties
-  else {
+  } else {
     alg->setPropertyValue("LHSWorkspace", lhs->getName());
+  }
+  if (rhs->getName().empty()) {
+    alg->setProperty<RHSType>("RHSWorkspace", rhs);
+  } else {
     alg->setPropertyValue("RHSWorkspace", rhs->getName());
-    if (lhsAsOutput) {
+  }
+  if (lhsAsOutput) {
+    if (!lhs->getName().empty()) {
       alg->setPropertyValue("OutputWorkspace", lhs->getName());
     } else {
-      alg->setPropertyValue("OutputWorkspace", name);
+      alg->setAlwaysStoreInADS(false);
+      alg->setPropertyValue("OutputWorkspace", "NotApplicable");
     }
+  } else {
+    alg->setPropertyValue("OutputWorkspace", name);
   }
 
   alg->execute();
@@ -68,8 +67,10 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   }
 
   // Get the output workspace property
-  if (child) {
-    return alg->getProperty("OutputWorkspace");
+  if (!alg->getAlwaysStoreInADS()) {
+    API::MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<typename ResultType::element_type>(
+          result);
   } else {
     API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
         alg->getPropertyValue("OutputWorkspace"));
