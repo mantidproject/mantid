@@ -143,9 +143,6 @@ private:
       CurveFitting::MSVesuvioHelper::RandomNumberGenerator *randgen) const;
 
   // Member Variables
-  CurveFitting::MSVesuvioHelper::RandomNumberGenerator *
-      m_randgen; // random number generator
-
   size_t m_acrossIdx, m_upIdx, m_beamIdx; // indices of each direction
   Kernel::V3D m_beamDir;                  // Directional vector for beam
   double m_srcR2;                         // beam penumbra radius (m)
