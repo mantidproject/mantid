@@ -25,6 +25,7 @@ Algorithms
 :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports workspaces with detector scans and workspaces with single-count point data.
 - :ref:`CreateWorkspace <algm-CreateWorkspace>` will no longer create a default (and potentially wrong) mapping from spectra to detectors, unless a parent workspace is given. This change ensures that accidental bad mappings that could lead to corrupted data are not created silently anymore. This change does *not* affect the use of this algorithm if: (1) a parent workspace is given, or (2) no instrument is loaded into to workspace at a later point, or (3) an instrument is loaded at a later point but ``LoadInstrument`` is used with ``RewriteSpectraMapping=True``. See also the algorithm documentation for details.
 - :ref:`Fit <algm-Fit>` will now respect excluded ranges when ``CostFunction = 'Unweighted least squares'``.
+- :ref:`NormaliseToMonitor <algm-NormaliseToMonitor>` now supports non-constant number of bins.
 
 Core Functionality
 ------------------
@@ -40,5 +41,7 @@ Python
 ------
 In `mantid.simpleapi`, a keyword has been implemented for function-like algorithm calls to control the storing on the Analysis Data Service.
 `StoreInADS=False` can be passed to function calls to not to store their output on the ADS.
+
+- The ``isDefault`` attribute for workspace properties now works correctly with workspaces not in the ADS.
 
 :ref:`Release 3.12.0 <v3.12.0>`

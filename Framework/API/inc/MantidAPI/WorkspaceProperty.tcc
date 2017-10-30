@@ -139,6 +139,14 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::value() const {
   return m_workspaceName;
 }
 
+/** Returns true if the workspace is in the ADS or there is none.
+ * @return true if the string returned by value() is valid
+ */
+template<typename TYPE>
+bool WorkspaceProperty<TYPE>::isValueSerializable() const {
+  return !m_workspaceName.empty() || !this->m_value;
+}
+
 /** Get the value the property was initialised with -its default value
 *  @return The default value
 */
@@ -172,9 +180,8 @@ std::string WorkspaceProperty<TYPE>::setDataItem(
     const boost::shared_ptr<Kernel::DataItem> value) {
   boost::shared_ptr<TYPE> typed = boost::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
-    std::string wsName = typed->getName();
-    if (this->direction() == Kernel::Direction::Input && !wsName.empty()) {
-      m_workspaceName = wsName;
+    if (this->direction() == Kernel::Direction::Input) {
+      m_workspaceName = typed->getName();
     }
     Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = typed;
   } else {
@@ -242,12 +249,14 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
   return Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::isValid();
 }
 
-/** Indicates if the object is still pointing to the same workspace, using the
-* workspace name
+/** Indicates if the object is still pointing to the same workspace
 *  @return true if the value is the same as the initial value or false
 * otherwise
 */
 template <typename TYPE> bool WorkspaceProperty<TYPE>::isDefault() const {
+  if (m_initialWSName.empty()) {
+    return m_workspaceName.empty() && !this->m_value;
+  }
   return m_initialWSName == m_workspaceName;
 }
 
