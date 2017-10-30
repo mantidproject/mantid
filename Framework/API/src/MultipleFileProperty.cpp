@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -289,86 +289,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     return SUCCESS;
   }
 
-  // Return error if there are any adjacent + or , operators.
-  boost::smatch invalid_substring;
-  if (boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
-                          REGEX_INVALID))
-    return "Unable to parse filename due to an empty token.";
-
-  std::stringstream errorMsg;
-  std::vector<std::vector<std::string>> fileNames;
-
-  // Tokenise on allowed comma operators, and iterate over each token.
-  boost::sregex_token_iterator end;
-  boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(),
-                                          REGEX_COMMA_OPERATORS, -1);
-
-  for (; commaToken != end; ++commaToken) {
-    const std::string commaTokenString = commaToken->str();
-
-    // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(commaTokenString.begin(),
-                                           commaTokenString.end(),
-                                           REGEX_PLUS_OPERATORS, -1);
-
-    std::vector<std::vector<std::string>> temp;
-
-    // Put the tokens into a vector before iterating over it this time,
-    // so we can see how many we have.
-    std::vector<std::string> plusTokenStrings;
-    for (; plusToken != end; ++plusToken)
-      plusTokenStrings.push_back(plusToken->str());
-
-    for (auto plusTokenString = plusTokenStrings.begin();
-         plusTokenString != plusTokenStrings.end(); ++plusTokenString) {
-      try {
-        m_parser.parse(m_prefix + *plusTokenString);
-      } catch (const std::range_error &re) {
-        g_log.error(re.what());
-        throw;
-      } catch (const std::runtime_error &re) {
-        errorMsg << "Unable to parse run(s): \"" << re.what();
-      }
-
-      std::vector<std::vector<std::string>> f = m_parser.fileNames();
-
-      // If there are no files, then we should keep this token as it was passed
-      // to the property,
-      // in its untampered form. This will enable us to deal with the case where
-      // a user is trying to
-      // load a single (and possibly existing) file within a token, but which
-      // has unexpected zero
-      // padding, or some other anomaly.
-      if (VectorHelper::flattenVector(f).empty())
-        f.push_back(std::vector<std::string>(1, *plusTokenString));
-
-      if (plusTokenStrings.size() > 1) {
-        // See [3] in header documentation.  Basically, for reasons of
-        // ambiguity, we cant add
-        // together plusTokens if they contain a range of files.  So throw on
-        // any instances of this
-        // when there is more than plusToken.
-        if (f.size() > 1)
-          return "Adding a range of files to another file(s) is not currently "
-                 "supported.";
-
-        if (temp.empty())
-          temp.push_back(f[0]);
-        else {
-          for (auto parsedFile = f[0].begin(); parsedFile != f[0].end();
-               ++parsedFile)
-            temp[0].push_back(*parsedFile);
-        }
-      } else {
-        temp.insert(temp.end(), f.begin(), f.end());
-      }
-    }
-
-    fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()),
-                     std::make_move_iterator(temp.end()));
-  }
-
-  std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
+  m_parser.parse(propValue);
+  std::vector<std::vector<std::string>> allUnresolvedFileNames =
+      m_parser.fileNames();
   std::vector<std::vector<std::string>> allFullFileNames;
 
   // First, find the default extension.  Flatten all the unresolved filenames

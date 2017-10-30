@@ -8,9 +8,9 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <set>
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 /**
   Copyright &copy; 2010-2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -53,7 +53,7 @@ extern const std::string COMMA, PLUS, MINUS, COLON;
 extern const std::string SINGLE, RANGE, STEP_RANGE, ADD_LIST, ADD_RANGE,
     ADD_STEP_RANGE;
 extern const std::string ANY, LIST;
-}
+} // namespace Regexs
 
 /**
  * Comparator for set that holds instrument names in Parser.
@@ -91,6 +91,9 @@ public:
 
   /// Parse the given multiFileNameString.
   void parse(const std::string &multiFileName);
+  /// Parse the given single step of a multiFileNameString
+  std::vector<std::vector<std::string>>
+  parseStep(const std::string &multiFileName);
 
   /// Return the vector of vectors of parsed file names.
   std::vector<std::vector<unsigned int>> runs() const { return m_runs; }
@@ -114,7 +117,6 @@ private:
   void clear();
   /// Split the string to parse into its component parts.
   void split();
-
   /// A vector of vectors of the parsed runs.
   std::vector<std::vector<unsigned int>> m_runs;
   /// A vector of vectors of the parsed file names.

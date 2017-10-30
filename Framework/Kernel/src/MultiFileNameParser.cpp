@@ -6,14 +6,15 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <numeric>
 #include <sstream>
 
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -46,7 +47,28 @@ const std::string ANY = "(" + ADD_STEP_RANGE + "|" + ADD_RANGE + "|" +
                         ADD_LIST + "|" + STEP_RANGE + "|" + RANGE + "|" +
                         SINGLE + ")";
 const std::string LIST = "(" + ANY + "(" + COMMA + ANY + ")*" + ")";
-}
+
+// Regular expressions for any adjacent + or , operators
+const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
+static const boost::regex REGEX_INVALID(INVALID);
+
+// Regular expressions that represent the allowed instances of , operators
+const std::string NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
+const std::string ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
+const std::string ALPHA_COMMA_NUM("(?<=\\D)\\s*,\\s*(?=\\d)");
+const std::string COMMA_OPERATORS =
+    NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA + "|" + ALPHA_COMMA_NUM;
+static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
+
+// Regular expressions that represent the allowed instances of + operators
+const std::string NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
+const std::string ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
+const std::string ALPHA_PLUS_NUM("(?<=\\D)\\s*\\+\\s*(?=\\d)");
+const std::string PLUS_OPERATORS =
+    NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA + "|" + ALPHA_PLUS_NUM;
+static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
+                                               boost::regex_constants::perl);
+} // namespace Regexs
 
 /////////////////////////////////////////////////////////////////////////////
 // Forward declarations.
@@ -84,7 +106,7 @@ struct RangeContainsRun {
 std::string toString(const RunRangeList &runRangeList);
 std::string &accumulateString(std::string &output,
                               std::pair<unsigned int, unsigned int> runRange);
-}
+} // namespace
 
 /////////////////////////////////////////////////////////////////////////////
 // Scoped, global functions.
@@ -220,6 +242,91 @@ void Parser::parse(const std::string &multiFileName) {
   // Clear any contents of the member variables.
   clear();
 
+  // Return error if there are any adjacent + or , operators.
+  boost::smatch invalid_substring;
+  if (boost::regex_search(multiFileName.begin(), multiFileName.end(),
+                          invalid_substring, Regexs::REGEX_INVALID))
+    throw std::runtime_error("Unable to parse filename due to an empty token.");
+
+  std::stringstream errorMsg;
+
+  // Tokenise on allowed comma operators, and iterate over each token.
+  boost::sregex_token_iterator end;
+  boost::sregex_token_iterator commaToken(multiFileName.begin(),
+                                          multiFileName.end(),
+                                          Regexs::REGEX_COMMA_OPERATORS, -1);
+
+  for (; commaToken != end; ++commaToken) {
+    const std::string commaTokenString = commaToken->str();
+
+    // Tokenise on allowed plus operators.
+    boost::sregex_token_iterator plusToken(commaTokenString.begin(),
+                                           commaTokenString.end(),
+                                           Regexs::REGEX_PLUS_OPERATORS, -1);
+
+    std::vector<std::vector<std::string>> temp;
+
+    // Put the tokens into a vector before iterating over it this time,
+    // so we can see how many we have.
+    std::vector<std::string> plusTokenStrings;
+    for (; plusToken != end; ++plusToken)
+      plusTokenStrings.push_back(plusToken->str());
+
+    for (auto plusTokenString = plusTokenStrings.begin();
+         plusTokenString != plusTokenStrings.end(); ++plusTokenString) {
+      std::vector<std::vector<std::string>> f;
+      try {
+        f = parseStep(*plusTokenString);
+      } catch (const std::runtime_error &re) {
+        errorMsg << "Unable to parse run(s): \"" << re.what();
+      }
+
+      // If there are no files, then we should keep this token as it was passed,
+      // in its untampered form. This will enable us to deal with the case where
+      // a user is trying to
+      // load a single (and possibly existing) file within a token, but which
+      // has unexpected zero
+      // padding, or some other anomaly.
+      if (VectorHelper::flattenVector(f).empty())
+        f.push_back(std::vector<std::string>(1, *plusTokenString));
+
+      if (plusTokenStrings.size() > 1) {
+        // See [3] in header documentation.  Basically, for reasons of
+        // ambiguity, we cant add
+        // together plusTokens if they contain a range of files.  So throw on
+        // any instances of this
+        // when there is more than plusToken.
+        if (f.size() > 1)
+          throw std::runtime_error(
+              "Adding a range of files to another file(s) is not currently "
+              "supported.");
+
+        if (temp.empty())
+          temp.push_back(f[0]);
+        else {
+          for (auto parsedFile = f[0].begin(); parsedFile != f[0].end();
+               ++parsedFile)
+            temp[0].push_back(*parsedFile);
+        }
+      } else {
+        temp.insert(temp.end(), f.begin(), f.end());
+      }
+    }
+
+    m_fileNames.insert(m_fileNames.end(), std::make_move_iterator(temp.begin()),
+                       std::make_move_iterator(temp.end()));
+  }
+
+  if (!errorMsg.str().empty())
+    throw std::runtime_error(errorMsg.str());
+}
+
+std::vector<std::vector<std::string>>
+Parser::parseStep(const std::string &multiFileName) {
+  m_underscoreString.clear();
+  m_extString.clear();
+  m_dirString.clear();
+
   // Set the string to parse.
   m_multiFileName = multiFileName;
 
@@ -233,8 +340,10 @@ void Parser::parse(const std::string &multiFileName) {
   GenerateFileName generateFileName(m_dirString, m_extString, m_instString);
 
   // Generate complete file names for each run using helper functor.
-  std::transform(m_runs.begin(), m_runs.end(), std::back_inserter(m_fileNames),
+  std::vector<std::vector<std::string>> fileNames;
+  std::transform(m_runs.begin(), m_runs.end(), std::back_inserter(fileNames),
                  generateFileName);
+  return fileNames;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -372,7 +481,7 @@ operator()(const std::vector<unsigned int> &runs) {
 
   std::transform(runs.begin(), runs.end(), std::back_inserter(fileNames),
                  (*this) // Call other overloaded function operator.
-                 );
+  );
 
   return fileNames;
 }
@@ -446,7 +555,7 @@ void RunRangeList::addRunRange(std::pair<unsigned int, unsigned int> range) {
 /////////////////////////////////////////////////////////////////////////////
 
 namespace // anonymous
-    {
+{
 /**
  * Parses a string containing a run "token".
  *
