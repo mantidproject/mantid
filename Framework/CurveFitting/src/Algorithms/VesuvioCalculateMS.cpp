@@ -306,6 +306,7 @@ void VesuvioCalculateMS::cacheInputs() {
  * total scattering calculation
  * @param multsc A non-const reference to the spectrum that will contain the
  * multiple scattering contribution
+ * @param randgen A random number generator
  */
 void VesuvioCalculateMS::calculateMS(
     const size_t wsIndex, API::ISpectrum &totalsc, API::ISpectrum &multsc,
@@ -346,6 +347,7 @@ void VesuvioCalculateMS::calculateMS(
  * @param respar Resolution information on the intrument as a whole
  * @param simulCounts Simulation object used to storing the calculated number of
  * counts
+ * @param randgen A random number generator
  */
 void VesuvioCalculateMS::simulate(
     const DetectorParams &detpar, const ResolutionParams &respar,
@@ -397,7 +399,7 @@ void VesuvioCalculateMS::assignToOutput(
  * @param detpar Detector information describing the final detector position
  * @param respar Resolution information on the intrument as a whole
  * @param simulation [Output] Store the calculated counts here
- * @param randgen Random number generator
+ * @param randgen A random number generator
  * @return The sum of the weights for all scatters
  */
 double VesuvioCalculateMS::calculateCounts(
@@ -520,7 +522,7 @@ double VesuvioCalculateMS::calculateCounts(
  * Sample from the moderator assuming it can be seen
  * as a cylindrical ring with inner and outer radius
  * @param l1 Src-sample distance (m)
- * @param randgen Random number generator
+ * @param randgen A random number generator
  * @returns Position on the moderator of the generated point
  */
 V3D VesuvioCalculateMS::generateSrcPos(
@@ -548,7 +550,7 @@ V3D VesuvioCalculateMS::generateSrcPos(
  * @param l1 Distance from src to sample (metres)
  * @param t2 Nominal time from sample to detector (seconds)
  * @param weight [Out] Weight factor to modify for the generated energy value
- * @param randgen Random number generator
+ * @param randgen A random number generator
  * @return
  */
 double VesuvioCalculateMS::generateE0(
@@ -572,6 +574,7 @@ double VesuvioCalculateMS::generateE0(
  * @param dtof Error in time resolution (us)
  * @param en0 Value of the incident energy
  * @param dl1 S.d of moderator to sample distance
+ * @param randgen A random number generator
  * @return tof Guass TOF modified for asymmetric pulse
  */
 double VesuvioCalculateMS::generateTOF(
@@ -612,6 +615,7 @@ double VesuvioCalculateMS::generateTOF(
  * @param weight [InOut] Multiply the incoming weight by the attenuation
  * factor
  * @param scatterPt [Out] Generated scattering point
+ * @param randgen A random number generator
  * @return True if the scatter event was generated, false otherwise
  */
 bool VesuvioCalculateMS::generateScatter(
@@ -729,6 +733,7 @@ double VesuvioCalculateMS::partialDiffXSec(const double en0, const double en1,
  * point
  * @param distToExit [Output] The distance covered within the object from
  * scatter to exit
+ * @param randgen A random number generator
  * @return A new position in the detector
  */
 V3D VesuvioCalculateMS::generateDetectorPos(
@@ -783,6 +788,7 @@ V3D VesuvioCalculateMS::generateDetectorPos(
  * @param angle Detector angle from sample
  * @param e1nom The nominal final energy of the analyzer
  * @param e1res The resoltion in energy of the analyser
+ * @param randgen A random number generator
  * @return A value for the final energy of the neutron
  */
 double VesuvioCalculateMS::generateE1(
