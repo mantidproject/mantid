@@ -78,6 +78,7 @@ def _get_peak_height_and_index(workspace, ws_index):
 
     return peak_height, peak_bin
 
+
 def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
                        fit_mode='spectra', rebin_params=None):
     """
@@ -358,6 +359,7 @@ class SpectraBySpectraForwardSpectraNoBackground(stresstesting.MantidStressTest)
 
         exit_iteration = self._fit_results[3]
         self.assertTrue(isinstance(exit_iteration, int))
+
 
 # ====================================================================================
 
