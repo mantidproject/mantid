@@ -5,8 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-
+#include "MantidGeometry/IDTypes.h"
 #include <set>
 
 namespace Mantid {
@@ -88,12 +87,13 @@ private:
   void init() override;
   std::map<std::string, std::string> validateInputs() override;
   void exec() override;
-  void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace,
-                 std::set<int> &indices);
+  void execEvent(API::MatrixWorkspace_sptr outputWorkspace,
+                 API::Progress &progress, size_t &numSpectra, size_t &numMasked,
+                 size_t &numZeros);
   specnum_t getOutputSpecNo(API::MatrixWorkspace_const_sptr localworkspace);
 
   API::MatrixWorkspace_sptr replaceSpecialValues();
-  void determineIndices(const int numberOfSpectra);
+  void determineIndices(const size_t numberOfSpectra);
 
   /// The output spectrum number
   specnum_t m_outSpecNum;
@@ -102,11 +102,11 @@ private:
   /// Set true to remove special values before processing
   bool m_replaceSpecialValues;
   /// numberOfSpectra in the input
-  int m_numberOfSpectra;
+  size_t m_numberOfSpectra;
   /// Blocksize of the input workspace
-  int m_yLength;
+  size_t m_yLength;
   /// Set of indices to sum
-  std::set<int> m_indices;
+  std::set<size_t> m_indices;
 
   // if calculating additional workspace with specially weighted averages is
   // necessary
