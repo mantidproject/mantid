@@ -936,7 +936,7 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranV
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, m_A, m_v, m_apply_scaling_ws, options);
+    applyScaling(J, m_A, m_v, m_scale, options);
   }
 
   // Now that we have the unprocessed matrices, we need to get an
@@ -981,7 +981,7 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranV
 
   if (options.scale != 0) {
     for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1, n)
-      d(ii) = d(ii) / m_apply_scaling_ws.diag(ii);
+      d(ii) = d(ii) / m_scale(ii);
     }
   }
 

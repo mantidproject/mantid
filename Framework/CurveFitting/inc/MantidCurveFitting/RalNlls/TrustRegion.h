@@ -28,7 +28,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w);
 void testConvergence(double normF, double normJF, double normF0, double normJF0,
                      const nlls_options &options, nlls_inform &inform);
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, apply_scaling_work &w,
+                  DoubleFortranVector &v, DoubleFortranVector &scale,
                   const nlls_options &options);
 void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
                 DoubleFortranMatrix &ev);

@@ -289,12 +289,12 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
 /// @param options :: The options.
 /// @param inform :: The information.
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
-                  DoubleFortranVector &v, apply_scaling_work &w,
+                  DoubleFortranVector &v, DoubleFortranVector &scale,
                   const nlls_options &options) {
   auto m = J.len1();
   auto n = J.len2();
-  if (w.diag.len() != n) {
-    w.diag.allocate(n);
+  if (scale.len() != n) {
+    scale.allocate(n);
   }
 
   switch (options.scale) {
@@ -330,9 +330,9 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
       }
       temp = sqrt(temp);
       if (options.scale_require_increase) {
-        w.diag(ii) = std::max(temp, w.diag(ii));
+        scale(ii) = std::max(temp, scale(ii));
       } else {
-        w.diag(ii) = temp;
+        scale(ii) = temp;
       }
     }
     break;
@@ -344,7 +344,7 @@ void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,
   // Now we have the w.diagonal scaling matrix, actually scale the
   // Hessian approximation and J^Tf
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-    double temp = w.diag(ii);
+    double temp = scale(ii);
     v(ii) = v(ii) / temp;
     for (int jj = 1; jj <= n; ++jj) { // for_do(jj,1,n)
       A(ii, jj) = A(ii, jj) / temp;

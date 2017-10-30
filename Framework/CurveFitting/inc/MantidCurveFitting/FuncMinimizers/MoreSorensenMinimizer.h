@@ -59,7 +59,7 @@ private:
   DoubleFortranMatrix m_A, m_LtL, m_AplusSigma;
   DoubleFortranVector m_v, m_q, m_y1;
   NLLS::min_eig_symm_work m_min_eig_symm_ws;
-  NLLS::apply_scaling_work m_apply_scaling_ws;
+  DoubleFortranVector m_scale;
 };
 
 } // namespace FuncMinimisers

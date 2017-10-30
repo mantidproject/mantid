@@ -197,14 +197,14 @@ void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J, const Dou
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, m_A, m_v, m_apply_scaling_ws, options);
+    applyScaling(J, m_A, m_v, m_scale, options);
   }
 
   auto n = J.len2();
   auto scaleBack = [n, &d, &options, this]() {
     if (options.scale != 0) {
       for (int i = 1; i <= n; ++i) {
-        d(i) = d(i) / m_apply_scaling_ws.diag(i);
+        d(i) = d(i) / m_scale(i);
       }
     }
   };

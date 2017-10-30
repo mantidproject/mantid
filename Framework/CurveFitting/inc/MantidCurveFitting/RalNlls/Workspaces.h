@@ -237,11 +237,6 @@ struct all_eig_symm_work {
   DoubleFortranVector work;
 };
 
-/// workspace for subroutine applyScaling
-struct apply_scaling_work {
-  DoubleFortranVector diag;
-};
-
 /// workspace for subroutine getSvdJ
 struct get_svd_J_work {
   DoubleFortranVector Jcopy, S, work;

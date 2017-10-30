@@ -53,7 +53,7 @@ private:
   DoubleFortranMatrix m_A, m_ev;
   DoubleFortranVector m_ew, m_v, m_v_trans, m_d_trans;
   NLLS::all_eig_symm_work m_all_eig_symm_ws;
-  NLLS::apply_scaling_work m_apply_scaling_ws;
+  DoubleFortranVector m_scale;
 };
 
 } // namespace FuncMinimisers
