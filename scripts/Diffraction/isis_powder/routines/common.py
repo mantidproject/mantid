@@ -149,6 +149,12 @@ def generate_run_numbers(run_number_string):
 
 
 def _generate_vanadium_name(vanadium_string, is_spline, *args):
+    """
+    :param vanadium_string: The number of the run being processed
+    :param is_spline: True if the workspace to save out is a spline
+    :param args: Any other strings to append to the filename
+    :return: A filename for the vanadium
+    """
     out_name = 'Van'
     if is_spline:
         out_name += 'Splined'
