@@ -46,6 +46,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
     if isinstance(runs, MatrixWorkspace):
         sample_data = runs
         flags['runs'] = runs.getName()
+        flags['spectra'] = sample_data.getAxis(0).extractValues()
     else:
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
