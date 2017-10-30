@@ -172,8 +172,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
   alg->execute();
   MatrixWorkspace_sptr singleValue;
   if (alg->isExecuted()) {
-    singleValue =
-        alg->getProperty("OutputWorkspace");
+    singleValue = alg->getProperty("OutputWorkspace");
   } else {
     throw std::runtime_error(
         "performBinaryOp: Error in execution of CreateSingleValuedWorkspace");

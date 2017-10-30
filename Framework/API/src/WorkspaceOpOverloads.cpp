@@ -70,7 +70,7 @@ ResultType executeBinaryOperation(const std::string &algorithmName,
   if (!alg->getAlwaysStoreInADS()) {
     API::MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");
     return boost::dynamic_pointer_cast<typename ResultType::element_type>(
-          result);
+        result);
   } else {
     API::Workspace_sptr result = API::AnalysisDataService::Instance().retrieve(
         alg->getPropertyValue("OutputWorkspace"));
