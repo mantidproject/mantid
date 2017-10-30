@@ -138,7 +138,7 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsSliceViewer
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
   OSX_INSTALL_RPATH
-    "@loader_path/../MacOS"
+    loader_path/../MacOS
 )
 
 ###########################################################################

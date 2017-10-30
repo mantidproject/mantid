@@ -95,18 +95,6 @@ set( UI_FILES
 # Add the QtWidgets icons
 set ( RES_FILES ../../../resources/icons/ViewWidgetsIcons.qrc )
 
-# Setup the include locations.
-include_directories(
-  inc
-  ${CMAKE_SOURCE_DIR}/qt/widgets/sliceviewer/inc
-  ${CMAKE_BINARY_DIR}/qt/widgets/sliceviewer
-  ${CMAKE_SOURCE_DIR}/qt/widgets/factory/inc
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
-  ${CMAKE_SOURCE_DIR}/MantidPlot/src
-)
-include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} ${QWT5_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR} )
-
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
   QT_VERSION 4
   SRC ${SOURCE_FILES}
@@ -114,22 +102,28 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
   NOMOC ${INCLUDE_FILES}
   UI ${UI_FILES}
   RES ${RES_FILES}
-  DEFS IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
+  DEFS
+    IN_MANTID_VATES_SIMPLEGUI_VIEWWIDGETS
+  INCLUDE_DIRS
+    inc
+  SYSTEM_INCLUDE_DIRS
+    ${PARAVIEW_INCLUDE_DIRS}
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      pqApplicationComponents
-      pqComponents
-      ${vtkjsoncpp_LIBRARIES}
-      vtkPVServerManagerRendering
-      vtkRenderingFreeType
-      vtksys
-      ${QT_LIBRARIES}
-      VatesAPI
-      ${PYTHON_LIBRARIES}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${CORE_MANTIDLIBS}
-      DataObjects
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    pqApplicationComponents
+    pqComponents
+    ${vtkjsoncpp_LIBRARIES}
+    vtkPVServerManagerRendering
+    vtkRenderingFreeType
+    vtksys
+    VatesAPI
+    ${PYTHON_LIBRARIES}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${CORE_MANTIDLIBS}
+    DataObjects
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
       MantidQtWidgetsCommon
       VatesSimpleGuiQtWidgets

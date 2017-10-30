@@ -59,6 +59,7 @@ endfunction()
 # keyword: DEFS Compiler definitions to set to the target
 # keyword: QT_PLUGIN If included, the target is a Qt plugin. The value is the name of the plugin library
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
+# keyword: SYSTEM_INCLUDE_DIRS A list of include directories to add to the target and marked as system headers
 # keyword: PRECOMPILED A name of the precompiled header
 # keyword: LINK_LIBS A list of additional libraries to link to the
 #          target that are not dependent on Qt
@@ -76,7 +77,7 @@ function (mtd_add_qt_target)
   set (oneValueArgs
     TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR PRECOMPILED)
   set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
-    NOMOC RES DEFS INCLUDE_DIRS UI_INCLUDE_DIRS LINK_LIBS
+    NOMOC RES DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
@@ -149,10 +150,14 @@ function (mtd_add_qt_target)
       COMPILE_OPTIONS "${_options}" )
   endif()
 
+  # Target properties
   _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
                               ${_mtd_includes} ${PARSED_INCLUDE_DIRS})
+  if ( PARSED_SYSTEM_INCLUDE_DIRS )
+    target_include_directories (${_target} SYSTEM PUBLIC ${PARSED_SYSTEM_INCLUDE_DIRS})
+  endif()
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(PARSED_DEFS)

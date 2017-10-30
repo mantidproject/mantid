@@ -28,10 +28,6 @@ set( UI_FILES
   inc/MantidVatesSimpleGuiQtWidgets/RotationPointDialog.ui
 )
 
-# Setup the include locations.
-include_directories(inc)
-
-
 mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
   QT_VERSION 4
   SRC ${SOURCE_FILES}
@@ -40,13 +36,14 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiQtWidgets
   UI ${UI_FILES}
   RES ${RES_FILES}
   DEFS IN_MANTID_VATES_SIMPLEGUI_QTWIDGETS
-  INCLUDE_DIRS ${QWT5_INCLUDE_DIR}
+  INCLUDE_DIRS
+    inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${POCO_LIBRARIES}
-    ${QT_LIBRARIES}
-    ${QWT5_LIBRARIES}
     ${MANTID_SUBPROJECT_LIBS}
+  QT4_LINK_LIBS
+    Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   INSTALL_DIR ${PVPLUGINS_DIR}
