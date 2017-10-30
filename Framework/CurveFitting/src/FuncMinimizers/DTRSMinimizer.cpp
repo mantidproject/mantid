@@ -196,9 +196,9 @@ double maxVal(const DoubleFortranVector &v, int n) {
 }
 
 /**  Find the number and values of real roots of the quadratic equation
- * 
+ *
  *                    a2 * x**2 + a1 * x + a0 = 0
- * 
+ *
  *   where a0, a1 and a2 are real
  *  @param a0 :: The free coefficient.
  *  @param a1 :: The coefficient at the linear term.
@@ -279,9 +279,9 @@ void rootsQuadratic(double a0, double a1, double a2, double tol, int &nroots,
 }
 
 /**  Find the number and values of real roots of the cubic equation
- * 
+ *
  *                 a3 * x**3 + a2 * x**2 + a1 * x + a0 = 0
- * 
+ *
  *   where a0, a1, a2 and a3 are real
  *  @param a0 :: The free coefficient.
  *  @param a1 :: The coefficient at the linear term.
@@ -424,7 +424,7 @@ void rootsCubic(double a0, double a1, double a2, double a3, double tol,
 
 /**  Compute pi_beta = ||x||^beta and its derivatives
  *   Extracted wholesale from module RAL_NLLS_RQS
- * 
+ *
  *  @param max_order :: Maximum order of derivative.
  *  @param beta :: Power.
  *  @param x_norm2 :: (0) value of ||x||^2,
@@ -451,7 +451,7 @@ void dtrsPiDerivs(int max_order, double beta,
 }
 
 /**  Set initial values for the TRS control parameters
- * 
+ *
  *  @param control :: A structure containing control information.
  */
 void dtrsInitialize(dtrs_control_type &control) {
@@ -460,12 +460,12 @@ void dtrsInitialize(dtrs_control_type &control) {
 }
 
 /**  Solve the trust-region subproblem
- * 
+ *
  *       minimize     1/2 <x, H x> + <c, x> + f
  *       subject to    ||x||_2 <= radius  or ||x||_2 = radius
- * 
+ *
  *   where H is diagonal, using a secular iteration
- * 
+ *
  *  @param n :: The number of unknowns.
  *  @param radius :: The trust-region radius.
  *  @param f :: The value of constant term for the quadratic function
@@ -492,10 +492,12 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 
   //  Check that arguments are OK
   if (n < 0) {
-      throw std::runtime_error("Number of unknowns for trust-region subproblem is negative.");
+    throw std::runtime_error(
+        "Number of unknowns for trust-region subproblem is negative.");
   }
   if (radius < 0) {
-      throw std::runtime_error("Trust-region radius for trust-region subproblem is negative");
+    throw std::runtime_error(
+        "Trust-region radius for trust-region subproblem is negative");
   }
 
   DoubleFortranVector x_norm2(0, MAX_DEGREE), pi_beta(0, MAX_DEGREE);
@@ -668,7 +670,8 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
     //  precaution against rounding producing lambda outside L
 
     if (lambda > lambda_u) {
-      throw std::runtime_error("Lambda for trust-region subproblem is ill conditioned");
+      throw std::runtime_error(
+          "Lambda for trust-region subproblem is ill conditioned");
     }
 
     //  compute first derivatives of x^T M x
@@ -789,12 +792,12 @@ void dtrsSolveMain(int n, double radius, double f, const DoubleFortranVector &c,
 }
 
 /**  Solve the trust-region subproblem
- * 
+ *
  *       minimize     q(x) = 1/2 <x, H x> + <c, x> + f
  *       subject to   ||x||_2 <= radius  or ||x||_2 = radius
- * 
+ *
  *   where H is diagonal, using a secular iteration
- * 
+ *
  *  @param n :: The number of unknowns.
  *  @param radius :: The trust-region radius.
  *  @param f :: The value of constant term for the quadratic function.
@@ -889,10 +892,10 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
 
 /**   Solve the trust-region subproblem using
  *    the DTRS method from Galahad
- * 
+ *
  *    This method needs H to be diagonal, so we need to
  *    pre-process
- * 
+ *
  *    main output  d, the soln to the TR subproblem
  *  @param J :: The Jacobian.
  *  @param f :: The residuals.
@@ -905,10 +908,11 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
  *  @param inform :: The inform struct.
  *  @param w :: The work struct.
  */
-void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
+                              const DoubleFortranVector &f,
                               const DoubleFortranMatrix &hf, double Delta,
                               DoubleFortranVector &d, double &normd,
-               const NLLS::nlls_options &options) {
+                              const NLLS::nlls_options &options) {
 
   dtrs_control_type dtrs_options;
   dtrs_inform_type dtrs_inform;
@@ -989,10 +993,12 @@ void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranV
 
 /** Implements the abstarct method of TrustRegionMinimizer.
  */
-void DTRSMinimizer::calculateStep(
-    const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-    const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
-    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options) {
+void DTRSMinimizer::calculateStep(const DoubleFortranMatrix &J,
+                                  const DoubleFortranVector &f,
+                                  const DoubleFortranMatrix &hf,
+                                  const DoubleFortranVector &, double Delta,
+                                  DoubleFortranVector &d, double &normd,
+                                  const NLLS::nlls_options &options) {
   solveDtrs(J, f, hf, Delta, d, normd, options);
 }
 

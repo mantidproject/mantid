@@ -24,9 +24,7 @@ class MoreSorensenTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MoreSorensenTest *createSuite() {
-    return new MoreSorensenTest();
-  }
+  static MoreSorensenTest *createSuite() { return new MoreSorensenTest(); }
   static void destroySuite(MoreSorensenTest *suite) { delete suite; }
 
   void test_Linear() {

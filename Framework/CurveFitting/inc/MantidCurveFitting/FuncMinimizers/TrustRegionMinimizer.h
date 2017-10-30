@@ -58,11 +58,12 @@ private:
   void evalHF(const DoubleFortranVector &x, const DoubleFortranVector &f,
               DoubleFortranMatrix &h) const;
   /// Find a correction vector to the parameters.
-  virtual void
-  calculateStep(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                const DoubleFortranMatrix &hf, const DoubleFortranVector &g,
-                double Delta, DoubleFortranVector &d, double &normd,
-                const NLLS::nlls_options &options) = 0;
+  virtual void calculateStep(const DoubleFortranMatrix &J,
+                             const DoubleFortranVector &f,
+                             const DoubleFortranMatrix &hf,
+                             const DoubleFortranVector &g, double Delta,
+                             DoubleFortranVector &d, double &normd,
+                             const NLLS::nlls_options &options) = 0;
 
   /// Stored cost function
   boost::shared_ptr<CostFunctions::CostFuncLeastSquares> m_leastSquares;

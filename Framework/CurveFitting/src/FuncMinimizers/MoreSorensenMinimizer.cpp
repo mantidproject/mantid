@@ -27,7 +27,7 @@ namespace {
 
 /** Solve a system of linear equations. The system's matrix must be
  *  positive-definite.
- *  @param A :: A matrix of a system of equations. 
+ *  @param A :: A matrix of a system of equations.
  *     Must be positive-definite for success.
  *  @param b :: A vector of the right-hand side.
  *  @param LtL :: A work matrix.
@@ -93,10 +93,9 @@ DoubleFortranVector negative(const DoubleFortranVector &v) {
   return neg;
 }
 
-
 /**  A subroutine to find the optimal beta such that
  *    || d || = Delta, where d = a + beta * b
- * 
+ *
  *    uses the approach from equation (3.20b),
  *     "Methods for non-linear least squares problems" (2nd edition, 2004)
  *     by Madsen, Nielsen and Tingleff
@@ -129,18 +128,18 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 
 } // namespace
 
-  /** Given an indefinite matrix m_A, find a shift sigma
-  *  such that (A + sigma I) is positive definite.
-  *  @param sigma :: The result (shift).
-  *  @param d :: A solution vector to the system of linear equations
-  *     with the found positive defimnite matrix. The RHS vector is -m_v.
-  *  @param options :: The options.
-  *  @param inform :: The inform struct.
-  *  @param w :: The work struct.
-  *  @return true if successful
-  */
+/** Given an indefinite matrix m_A, find a shift sigma
+*  such that (A + sigma I) is positive definite.
+*  @param sigma :: The result (shift).
+*  @param d :: A solution vector to the system of linear equations
+*     with the found positive defimnite matrix. The RHS vector is -m_v.
+*  @param options :: The options.
+*  @param inform :: The inform struct.
+*  @param w :: The work struct.
+*  @return true if successful
+*/
 bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
-  const NLLS::nlls_options &options) {
+                                       const NLLS::nlls_options &options) {
   int no_shifts = 0;
   bool successful_shift = false;
   while (!successful_shift) {
@@ -160,10 +159,10 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
 
 /** Solve the trust-region subproblem using
  *  the method of More and Sorensen
- * 
+ *
  *  Using the implementation as in Algorithm 7.3.6
  *  of Trust Region Methods
- * 
+ *
  *  main output  d, the soln to the TR subproblem
  *  @param J :: The Jacobian.
  *  @param f :: The residuals.
@@ -176,10 +175,12 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param inform :: The inform struct.
  *  @param w :: The work struct.
  */
-void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-                  const DoubleFortranMatrix &hf, double Delta,
-                  DoubleFortranVector &d, double &nd,
-                  const NLLS::nlls_options &options) {
+void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J,
+                                         const DoubleFortranVector &f,
+                                         const DoubleFortranMatrix &hf,
+                                         double Delta, DoubleFortranVector &d,
+                                         double &nd,
+                                         const NLLS::nlls_options &options) {
 
   // The code finds
   //  d = arg min_p   v^T p + 0.5 * p^T A p
@@ -253,7 +254,7 @@ void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J, const Dou
       }
       if (m_y1.len() == n) {
         double alpha = 0.0;
-        if(findBeta(d, m_y1, Delta, alpha)) {
+        if (findBeta(d, m_y1, Delta, alpha)) {
           DoubleFortranVector tmp = m_y1;
           tmp *= alpha;
           d += tmp;
@@ -309,7 +310,6 @@ void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J, const Dou
   }
   scaleBack();
 }
-
 
 /** Implements the abstract method of TrustRegionMinimizer.
  */

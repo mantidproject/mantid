@@ -286,7 +286,8 @@ bool TrustRegionMinimizer::iterate(size_t) {
 
     if (!success) {
       // finally, check d makes progress
-      if (NLLS::norm2(w.d) < std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
+      if (NLLS::norm2(w.d) <
+          std::numeric_limits<double>::epsilon() * NLLS::norm2(w.Xnew)) {
         m_errorString = "Failed to make progress.";
         return false;
       }
