@@ -240,31 +240,6 @@ struct all_eig_symm_work {
 /// workspace for subroutine applyScaling
 struct apply_scaling_work {
   DoubleFortranVector diag;
-  DoubleFortranMatrix ev;
-  DoubleFortranVector tempvec;
-  all_eig_symm_work all_eig_symm_ws;
-};
-
-/// workspace for subroutine dtrs_work
-struct solve_dtrs_work {
-  DoubleFortranMatrix A, ev;
-  DoubleFortranVector ew, v, v_trans, d_trans;
-  all_eig_symm_work all_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-/// workspace for subroutine moreSorensen
-struct more_sorensen_work {
-  DoubleFortranMatrix A, LtL, AplusSigma;
-  DoubleFortranVector v, q, y1;
-  min_eig_symm_work min_eig_symm_ws;
-  apply_scaling_work apply_scaling_ws;
-};
-
-/// workspace for subroutine calculateStep
-struct calculate_step_work {
-  more_sorensen_work more_sorensen_ws;
-  solve_dtrs_work solve_dtrs_ws;
 };
 
 /// workspace for subroutine getSvdJ
@@ -295,7 +270,7 @@ struct NLLS_workspace {
   DoubleFortranVector resvec, gradvec;
   DoubleFortranVector largest_sv, smallest_sv;
   get_svd_J_work get_svd_J_ws;
-  calculate_step_work calculate_step_ws;
+  //calculate_step_work calculate_step_ws;
   evaluate_model_work evaluate_model_ws;
   NLLS_workspace();
   void initialize(int n, int m, const nlls_options &options);

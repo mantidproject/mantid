@@ -885,6 +885,8 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
   }
 }
 
+} // namespace
+
 /**   Solve the trust-region subproblem using
  *    the DTRS method from Galahad
  * 
@@ -903,11 +905,10 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
  *  @param inform :: The inform struct.
  *  @param w :: The work struct.
  */
-void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
-               const DoubleFortranMatrix &hf, double Delta,
-               DoubleFortranVector &d, double &normd,
-               const NLLS::nlls_options &options, 
-               NLLS::solve_dtrs_work &w) {
+void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                              const DoubleFortranMatrix &hf, double Delta,
+                              DoubleFortranVector &d, double &normd,
+               const NLLS::nlls_options &options) {
 
   dtrs_control_type dtrs_options;
   dtrs_inform_type dtrs_inform;
@@ -925,23 +926,23 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //
   //  first, find the matrix H and vector v
   //  Set A = J^T J
-  NLLS::matmultInner(J, w.A);
+  NLLS::matmultInner(J, m_A);
   // add any second order information...
   // so A = J^T J + HF
-  w.A += hf;
+  m_A += hf;
 
   // now form v = J^T f
-  NLLS::multJt(J, f, w.v);
+  NLLS::multJt(J, f, m_v);
 
   // if scaling needed, do it
   if (options.scale != 0) {
-    applyScaling(J, w.A, w.v, w.apply_scaling_ws, options);
+    applyScaling(J, m_A, m_v, m_apply_scaling_ws, options);
   }
 
   // Now that we have the unprocessed matrices, we need to get an
   // eigendecomposition to make A diagonal
   //
-  NLLS::allEigSymm(w.A, w.ew, w.ev);
+  NLLS::allEigSymm(m_A, m_ew, m_ev);
 
   // We can now change variables, setting y = Vp, getting
   // Vd = arg min_(Vx) v^T p + 0.5 * (Vp)^T D (Vp)
@@ -951,51 +952,48 @@ void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
   //       s.t.  ||x|| \leq Delta
   // <=>
   // we need to get the transformed vector v
-  NLLS::multJt(w.ev, w.v, w.v_trans);
+  NLLS::multJt(m_ev, m_v, m_v_trans);
 
   // we've now got the vectors we need, pass to dtrsSolve
   dtrsInitialize(dtrs_options);
 
   auto n = J.len2();
-  if (w.v_trans.len() != n) {
-    w.v_trans.allocate(n);
+  if (m_v_trans.len() != n) {
+    m_v_trans.allocate(n);
   }
 
   for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1,n)
-    if (fabs(w.v_trans(ii)) < EPSILON_MCH) {
-      w.v_trans(ii) = ZERO;
+    if (fabs(m_v_trans(ii)) < EPSILON_MCH) {
+      m_v_trans(ii) = ZERO;
     }
-    if (fabs(w.ew(ii)) < EPSILON_MCH) {
-      w.ew(ii) = ZERO;
+    if (fabs(m_ew(ii)) < EPSILON_MCH) {
+      m_ew(ii) = ZERO;
     }
   }
 
-  dtrsSolve(n, Delta, ZERO, w.v_trans, w.ew, w.d_trans, dtrs_options,
+  dtrsSolve(n, Delta, ZERO, m_v_trans, m_ew, m_d_trans, dtrs_options,
             dtrs_inform);
 
   // and return the un-transformed vector
-  NLLS::multJ(w.ev, w.d_trans, d);
+  NLLS::multJ(m_ev, m_d_trans, d);
 
   normd = NLLS::norm2(d); // ! ||d||_D
 
   if (options.scale != 0) {
     for (int ii = 1; ii <= n; ++ii) { // for_do(ii, 1, n)
-      d(ii) = d(ii) / w.apply_scaling_ws.diag(ii);
+      d(ii) = d(ii) / m_apply_scaling_ws.diag(ii);
     }
   }
 
 } // solveDtrs
-
-} // namespace
 
 /** Implements the abstarct method of TrustRegionMinimizer.
  */
 void DTRSMinimizer::calculateStep(
     const DoubleFortranMatrix &J, const DoubleFortranVector &f,
     const DoubleFortranMatrix &hf, const DoubleFortranVector &, double Delta,
-    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options,
-    NLLS::calculate_step_work &w) {
-  solveDtrs(J, f, hf, Delta, d, normd, options, w.solve_dtrs_ws);
+    DoubleFortranVector &d, double &normd, const NLLS::nlls_options &options) {
+  solveDtrs(J, f, hf, Delta, d, normd, options);
 }
 
 } // namespace FuncMinimisers

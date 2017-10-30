@@ -45,8 +45,21 @@ private:
                      const DoubleFortranMatrix &hf,
                      const DoubleFortranVector &g, double Delta,
                      DoubleFortranVector &d, double &normd,
-                     const NLLS::nlls_options &options,
-                     NLLS::calculate_step_work &w) override;
+                     const NLLS::nlls_options &options) override;
+
+  void moreSorensen(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                    const DoubleFortranMatrix &hf, double Delta,
+                    DoubleFortranVector &d, double &nd,
+                    const NLLS::nlls_options &options);
+
+  bool getPdShift(double &sigma, DoubleFortranVector &d,
+                  const NLLS::nlls_options &options);
+
+  // Used for calculating step
+  DoubleFortranMatrix m_A, m_LtL, m_AplusSigma;
+  DoubleFortranVector m_v, m_q, m_y1;
+  NLLS::min_eig_symm_work m_min_eig_symm_ws;
+  NLLS::apply_scaling_work m_apply_scaling_ws;
 };
 
 } // namespace FuncMinimisers

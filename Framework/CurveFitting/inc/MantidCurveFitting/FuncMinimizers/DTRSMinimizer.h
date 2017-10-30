@@ -42,8 +42,18 @@ private:
                      const DoubleFortranMatrix &hf,
                      const DoubleFortranVector &g, double Delta,
                      DoubleFortranVector &d, double &normd,
-                     const NLLS::nlls_options &options,
-                     NLLS::calculate_step_work &w) override;
+                     const NLLS::nlls_options &options) override;
+
+  void solveDtrs(const DoubleFortranMatrix &J, const DoubleFortranVector &f,
+                 const DoubleFortranMatrix &hf, double Delta,
+                 DoubleFortranVector &d, double &normd,
+                 const NLLS::nlls_options &options);
+
+  // Used for calculating step
+  DoubleFortranMatrix m_A, m_ev;
+  DoubleFortranVector m_ew, m_v, m_v_trans, m_d_trans;
+  NLLS::all_eig_symm_work m_all_eig_symm_ws;
+  NLLS::apply_scaling_work m_apply_scaling_ws;
 };
 
 } // namespace FuncMinimisers
