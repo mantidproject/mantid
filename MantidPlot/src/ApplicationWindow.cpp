@@ -13827,7 +13827,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
         (str == "-r" || str == "--revision") ||
         (str == "-a" || str == "--about") || (str == "-h" || str == "--help")) {
       g_log.warning()
-          << str.toLatin1().constData()
+          << qPrintable(str)
           << ": This command line option must be used without other arguments!";
     } else if ((str == "-d" || str == "--default-settings")) {
       default_settings = true;
@@ -13845,8 +13845,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList &args) {
     else if (m_cmdline_filename.isEmpty() &&
              (str.startsWith("-") || str.startsWith("--"))) {
       g_log.warning()
-          << "'" << str.toLatin1().constData()
-          << "' unknown command line option!\n"
+          << "'" << qPrintable(str) << "' unknown command line option!\n"
           << "Type 'MantidPlot -h'' to see the list of the valid options.";
       unknown_opt_found = true;
       break;

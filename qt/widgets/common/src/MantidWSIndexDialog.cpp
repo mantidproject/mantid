@@ -457,7 +457,7 @@ void MantidWSIndexWidget::initWorkspaceBox() {
   m_wsBox = new QVBoxLayout;
   const QString wsIndices = m_wsIndexIntervals.toQString();
   const QString label = "Enter Workspace Indices: " + wsIndices;
-  m_wsMessage = new QLabel(tr(label.toLatin1().constData()));
+  m_wsMessage = new QLabel(tr(qPrintable(label)));
   m_wsField = new QLineEditWithErrorMark();
 
   m_wsField->lineEdit()->setValidator(
@@ -481,7 +481,7 @@ void MantidWSIndexWidget::initSpectraBox() {
   m_spectraBox = new QVBoxLayout;
   const QString spectraNumbers = m_spectraNumIntervals.toQString();
   const QString label = "Enter Spectra Numbers: " + spectraNumbers;
-  m_spectraMessage = new QLabel(tr(label.toLatin1().constData()));
+  m_spectraMessage = new QLabel(tr(qPrintable(label)));
   m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
