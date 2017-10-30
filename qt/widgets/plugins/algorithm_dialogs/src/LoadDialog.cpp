@@ -39,7 +39,7 @@ struct HoldFlag {
 // of it's lifetime.
 class PreventLoadRequests {
 public:
-  PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) {
+  explicit PreventLoadRequests(LoadDialog &dialog) : m_dialog(dialog) {
     m_dialog.disableLoadRequests();
   }
 
