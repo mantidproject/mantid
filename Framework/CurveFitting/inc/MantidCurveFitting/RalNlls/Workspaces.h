@@ -265,7 +265,6 @@ struct NLLS_workspace {
   DoubleFortranVector resvec, gradvec;
   DoubleFortranVector largest_sv, smallest_sv;
   get_svd_J_work get_svd_J_ws;
-  //calculate_step_work calculate_step_ws;
   evaluate_model_work evaluate_model_ws;
   NLLS_workspace();
   void initialize(int n, int m, const nlls_options &options);
