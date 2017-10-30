@@ -118,6 +118,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         @param ws :: workspace to correct (modified in-place)
         @param van_integration_ws :: table workspace with spectra integration values, one row per spectra
         @param van_curves_ws ::workspace with "Vanadium curves" for every bank
+        @param prog :: progress reporter
         """
         num_integration_spectra = van_integration_ws.rowCount()
         spectra = ws.getNumberHistograms()
