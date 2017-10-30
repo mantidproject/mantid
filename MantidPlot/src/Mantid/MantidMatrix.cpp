@@ -1341,10 +1341,11 @@ void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
                                                 m_startRow, type);
         connectTableView(extension.tableView.get(), extension.model);
         auto format = m_extensionRequest.getFormat(
-            type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
+            type, m_extensions,
+            MantidPreferences::MantidMatrixNumberFormatDx());
         auto precision = m_extensionRequest.getPrecision(
             type, m_extensions,
-            MantidPreferences::MantidMatrixNumberPrecisionY());
+            MantidPreferences::MantidMatrixNumberPrecisionDx());
         setNumberFormat(modelTypeToInt(type), format, precision);
         ++it;
       } else {
