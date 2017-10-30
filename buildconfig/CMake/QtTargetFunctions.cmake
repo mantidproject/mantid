@@ -161,7 +161,7 @@ function (mtd_add_qt_target)
 
   if (OSX_VERSION VERSION_GREATER 10.8)
     if (PARSED_OSX_INSTALL_RPATH)
-      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  ${PARSED_OSX_INSTALL_RPATH} )
+      set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()
   endif ()
 
