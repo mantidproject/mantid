@@ -119,8 +119,8 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode='single',
     kwargs = {"Filename": runs,
               "Mode": diff_mode, "InstrumentParFile": ip_file,
               "SpectrumList": spectra, "SumSpectra": sum_spectra,
-              "OutputWorkspace": output_name}
-    full_range = LoadVesuvio(**kwargs, StoreInADS=False)
+              "OutputWorkspace": output_name, "StoreInADS": False}
+    full_range = LoadVesuvio(**kwargs)
     tof_data = CropWorkspace(InputWorkspace=full_range,
                              XMin=instrument.tof_range[0],
                              XMax=instrument.tof_range[1],
