@@ -69,7 +69,7 @@ void FilterPeaks::init() {
                   boost::make_shared<MandatoryValidator<double>>(),
                   "The value of the FilterVariable to compare each peak to");
 
-  std::vector<std::string> operation{"<", ">", "=", "<=", ">="};
+  std::vector<std::string> operation{"<", ">", "=", "!=", "<=", ">="};
   declareProperty("Operator", "<",
                   boost::make_shared<StringListValidator>(operation), "");
 }
@@ -99,6 +99,9 @@ void FilterPeaks::exec() {
   else if (Operator == "=")
     filterPeaks<std::equal_to<double>>(inputWS, filteredWS, filterFunction,
                                        filterValue);
+  else if (Operator == "!=")
+    filterPeaks<std::not_equal_to<double>>(inputWS, filteredWS, filterFunction,
+                                           filterValue);
   else if (Operator == "<=")
     filterPeaks<std::less_equal<double>>(inputWS, filteredWS, filterFunction,
                                          filterValue);

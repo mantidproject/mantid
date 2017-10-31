@@ -119,6 +119,9 @@ public:
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "h+k+l", h + k + l, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -143,6 +146,9 @@ public:
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "!=");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "h^2+k^2+l^2", h * h + k * k + l * l, "=");
@@ -172,6 +178,9 @@ public:
     outWS = runAlgorithm(inWS, "Intensity", intensity, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "Intensity", intensity, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "Intensity", intensity, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -197,6 +206,9 @@ public:
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "Wavelength", wavelength, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Wavelength", wavelength, "!=");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "Wavelength", wavelength, "=");
@@ -226,6 +238,9 @@ public:
     outWS = runAlgorithm(inWS, "TOF", tof, ">");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
+    outWS = runAlgorithm(inWS, "TOF", tof, "!=");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
     outWS = runAlgorithm(inWS, "TOF", tof, "=");
     TS_ASSERT_EQUALS(1, outWS->getNumberPeaks());
 
@@ -251,6 +266,9 @@ public:
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "DSpacing", dspacing, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "DSpacing", dspacing, "!=");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "DSpacing", dspacing, "=");
@@ -280,6 +298,9 @@ public:
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, ">");
+    TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
+
+    outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "!=");
     TS_ASSERT_EQUALS(0, outWS->getNumberPeaks());
 
     outWS = runAlgorithm(inWS, "Signal/Noise", ratio, "=");
