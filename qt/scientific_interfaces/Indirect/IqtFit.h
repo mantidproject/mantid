@@ -74,7 +74,6 @@ private:
   iqtFitAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWs,
                   const size_t &specMin, const size_t &specMax);
   void updateFitFunctions();
-  void plotResult(const std::string &groupName, const size_t &specNo);
   void resizePlotRange(MantidQt::MantidWidgets::PreviewPlot *preview);
   QHash<QString, QString>
   createParameterToPropertyMap(const QVector<QString> &functionNames);
@@ -94,8 +93,6 @@ private:
   QString m_singleFitOutputName;
   std::string m_plotOption;
   std::string m_baseName;
-  size_t m_runMin;
-  size_t m_runMax;
 
   QVector<QString> m_fitFunctions;
   QHash<QString, QHash<size_t, double>> m_parameterValues;

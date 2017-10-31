@@ -23,7 +23,7 @@ JumpFit::JumpFit(QWidget *parent)
 
 void JumpFit::setup() {
   // Create range selector
-  auto qRangeSelector = m_uiForm.ppPlot->addRangeSelector("JumpFitQ");
+  auto qRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("JumpFitQ");
   connect(qRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
           SLOT(qRangeChanged(double, double)));
 
@@ -75,7 +75,7 @@ void JumpFit::setup() {
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
-          SLOT(IndirectDataAnalysisTab::plotCurrentPreview()));
+          SLOT(plotCurrentPreview()));
 }
 
 /**
@@ -164,26 +164,8 @@ void JumpFit::fitAlgDone(bool error) {
 
   // Get output workspace name
   std::string outWsName = outName + "_Workspace";
-
-  // Get the output workspace group
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
-  TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
-
-  // Find the fit and diff curves (data should already be plotted)
-  for (unsigned int histIndex = 0;
-       histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
-    QString specName = QString::fromStdString(axis->label(histIndex));
-
-    // Fit curve is red
-    if (specName == "Calc")
-      m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
-
-    // Difference curve is green
-    if (specName == "Diff")
-      m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
-                                   Qt::blue);
-  }
+  IndirectDataAnalysisTab::updatePlot(outWsName, m_uiForm.ppPlotTop,
+                                      m_uiForm.ppPlotBottom);
 
   // Update parameters in UI
   std::string paramTableName = outName + "_Parameters";
@@ -240,17 +222,17 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
 
   findAllWidths(inputWorkspace());
 
-  auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
+  auto qRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("JumpFitQ");
 
   if (m_spectraList.size() > 0) {
     m_uiForm.cbWidth->setEnabled(true);
     std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
-    setSelectedSpectrum(m_spectraList[currentWidth]);
-    m_uiForm.ppPlot->clear();
-    m_uiForm.ppPlot->addSpectrum("Sample", sample, selectedSpectrum());
+    setSelectedSpectra(m_spectraList[currentWidth]);
+    m_uiForm.ppPlotBottom->clear();
+    plotInput(m_uiForm.ppPlotTop);
 
     QPair<double, double> res;
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+    QPair<double, double> range = m_uiForm.ppPlotTop->getCurveRange("Sample");
 
     // Use the values from the instrument parameter file if we can
     if (getResolutionRangeFromWs(sample, res))
@@ -326,9 +308,9 @@ void JumpFit::handleWidthChange(const QString &text) {
 
   if (!sampleName.isEmpty() && m_spectraList.size() > 0) {
     if (validate()) {
-      m_uiForm.ppPlot->clear();
-      m_uiForm.ppPlot->addSpectrum("Sample", sampleName,
-                                   m_spectraList[text.toStdString()]);
+      m_uiForm.ppPlotTop->clear();
+      m_uiForm.ppPlotTop->addSpectrum("Sample", sampleName,
+                                      m_spectraList[text.toStdString()]);
     }
   }
 }
@@ -354,7 +336,7 @@ void JumpFit::qRangeChanged(double min, double max) {
 void JumpFit::updateProperties(QtProperty *prop, double val) {
   UNUSED_ARG(val);
 
-  auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
+  auto qRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("JumpFitQ");
 
   if (prop == m_properties["QMin"] || prop == m_properties["QMax"]) {
     auto bounds = qMakePair(m_dblManager->value(m_properties["QMin"]),
@@ -420,7 +402,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
  * clears the previous plot curves and readds sample
  */
 void JumpFit::clearPlot() {
-  m_uiForm.ppPlot->clear();
+  m_uiForm.ppPlotTop->clear();
   const std::string sampleName =
       (m_uiForm.dsSample->getCurrentDataName().toStdString());
   if (sampleName.compare("") != 0) {
@@ -432,9 +414,9 @@ void JumpFit::clearPlot() {
 
       std::string currentWidth = m_uiForm.cbWidth->currentText().toStdString();
 
-      m_uiForm.ppPlot->clear();
-      m_uiForm.ppPlot->addSpectrum("Sample", sample,
-                                   m_spectraList[currentWidth]);
+      m_uiForm.ppPlotTop->clear();
+      m_uiForm.ppPlotTop->addSpectrum("Sample", sample,
+                                      m_spectraList[currentWidth]);
     }
   }
 }
@@ -444,7 +426,7 @@ void JumpFit::generatePlotGuess() {
   if (!(m_uiForm.dsSample->isValid()) && m_uiForm.ckPlotGuess->isChecked())
     return;
   if (!m_uiForm.ckPlotGuess->isChecked()) {
-    m_uiForm.ppPlot->removeSpectrum("PlotGuess");
+    m_uiForm.ppPlotTop->removeSpectrum("PlotGuess");
     deletePlotGuessWorkspaces(true);
     return;
   }
@@ -485,8 +467,8 @@ void JumpFit::plotGuess(bool error) {
 
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(plotGuess(bool)));
-  m_uiForm.ppPlot->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
-                               Qt::green);
+  m_uiForm.ppPlotTop->addSpectrum("PlotGuess", "__PlotGuessData_Workspace", 1,
+                                  Qt::green);
   deletePlotGuessWorkspaces(false);
 }
 
