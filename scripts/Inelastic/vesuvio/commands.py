@@ -47,11 +47,11 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         flags['runs'] = runs.getName()
         flags['spectra'] = sample_data.getAxis(0).extractValues()
     else:
+        spectra = flags['spectra']
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
                                          flags.get('bin_parameters', None))
         flags['runs'] = runs
-        spectra = flags['spectra']
         if spectra == 'backward' or spectra == 'forward':
             flags['back_scattering'] = spectra == 'backward'
         else:
@@ -79,8 +79,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
 
 def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_threshold):
-    spectra = flags['spectra']
-
     # Check if multiple scattering flags have been defined
     if 'ms_flags' in flags:
 
