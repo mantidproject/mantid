@@ -888,55 +888,28 @@ if ( MAKE_VATES )
  list  ( APPEND MANTIDPLOT_TEST_PY_FILES MantidPlotPVPythonTest.py )
 endif ()
 
-if ( 0 )
-	message (STATUS "Your CMAKE_SYSTEM string is '${CMAKE_SYSTEM}'")
-	message (STATUS "Your CMAKE_SYSTEM_NAME string is '${CMAKE_SYSTEM_NAME}'")
-	message (STATUS "Your CMAKE_BINARY_DIR string is '${CMAKE_BINARY_DIR}'")
-	message (STATUS "Your BIN_DIR string is '${BIN_DIR}'")
-	message (STATUS "Your CMAKE_LIBRARY_OUTPUT_DIRECTORY string is '${CMAKE_LIBRARY_OUTPUT_DIRECTORY}'")
-	message (STATUS "Your CMAKE_CFG_INTDIR string is '${CMAKE_CFG_INTDIR}'")
-	message (STATUS "Your CMAKE_CURRENT_BINARY_DIR string is '${CMAKE_CURRENT_BINARY_DIR}'")
+
+# Screenshots destination
+if ("$ENV{WORKSPACE}" STREQUAL "")
+  set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
+else ()
+  set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
 endif ()
 
+# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
+set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
+# Make a ctest target for each file
+foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
+  # Add the test. Name of test = name of the file
+  add_test ( NAME ${PYFILE} COMMAND $<TARGET_FILE:MantidPlot> -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
+  # Set the previously-built environment
+  set_tests_properties ( ${PYFILE} PROPERTIES
+    RUN_SERIAL 1
+    ENVIRONMENT "${TEST_ENVIRONMENT}"
+    TIMEOUT ${TESTING_TIMEOUT} )
+endforeach ()
 
-# Check system version
-if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
-  	# This is RHEL5. GUI tests hang on this platform for some reason
-  	message ( "RHEL5 hangs on GUI tests. Disabling MantidPlot python tests." )
-else ()
-	# Find the path to the built MantidPlot app. Need different paths for MAC for some reason.
-	set (MANTIDPLOT_PATH  "${CMAKE_BINARY_DIR}/${BIN_DIR}/MantidPlot" )
-
-	# Screenshots destination
-	if ("$ENV{WORKSPACE}" STREQUAL "")
-		set (SCREENSHOTS_DIR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/screenshots" )
-	else ()
-		set (SCREENSHOTS_DIR "$ENV{WORKSPACE}/screenshots" )
-	endif ()
-
-	# Add an environment property MANTID_SOURCE so that the script can find the source of xmlrunner
-	set (TEST_ENVIRONMENT "MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-
-	# Fixes for Darwin (MacOS)
-	if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		set (MANTIDPLOT_PATH  "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${BIN_DIR}/MantidPlot" )
-		# Append to the path and set MANTIDPATH for MacOS' MantidPlot to run
-		set (TEST_ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTIDPATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY};MANTID_SOURCE=${CMAKE_SOURCE_DIR};PYTHONPATH=${PYTHON_XMLRUNNER_DIR};MANTID_SCREENSHOT_REPORT=${SCREENSHOTS_DIR}" )
-	endif ()
-
-	# Make a ctest target for each file
-	foreach  ( PYFILE ${MANTIDPLOT_TEST_PY_FILES} )
-	 	# Add the test. Name of test = name of the file
-		add_test ( ${PYFILE} ${MANTIDPLOT_PATH} -xq ${CMAKE_CURRENT_SOURCE_DIR}/test/${PYFILE} )
-		# Set the previously-built environment
-		set_tests_properties ( ${PYFILE} PROPERTIES
-                           RUN_SERIAL 1
-                           ENVIRONMENT "${TEST_ENVIRONMENT}"
-                           TIMEOUT ${TESTING_TIMEOUT} )
-	endforeach ()
-
-    add_dependencies( GUITests MantidPlot )
-endif()
+add_dependencies( GUITests MantidPlot )
 
 ###########################################################################
 # Installation settings
