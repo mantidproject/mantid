@@ -188,9 +188,12 @@ class AbstractInst(object):
                                                                                    processed_spectra=processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
+        file_ext = run_details.file_extension[1:] if run_details.file_extension else ""
+
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                         output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.output_run_string)
+                                        run_number_string=run_details.output_run_string,
+                                        file_ext=file_ext)
 
         return d_spacing_group, tof_group
 
