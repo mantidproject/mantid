@@ -240,13 +240,13 @@ for further processing.
                                Logname="SampleTemp", MinimumLogValue=279.9, MaximumLogValue=279.98,
                                LogValueInterval=0.01)
     # The first workspace is the SplittersWorkspace and the second is the InformationWorkspace
-    print "Number of workspaces =", len(ws2)
-    print "First workspace type =", ws2[0].id()
-    print "Second workspace type =", ws2[1].id()
-    print "Number of columns in first TableWorkspace =", ws2[0].columnCount()
-    print "Number of rows in first TableWorkspace =", ws2[0].rowCount()
-    print "Number of columns in second TableWorkspace =", ws2[1].columnCount()
-    print "Number of rows in second TableWorkspace =", ws2[1].rowCount()
+    print("Number of workspaces = {}".format(len(ws2)))
+    print("First workspace type = {}".format(ws2[0].id()))
+    print("Second workspace type = {}".format(ws2[1].id()))
+    print("Number of columns in first TableWorkspace = {}".format(ws2[0].columnCount()))
+    print("Number of rows in first TableWorkspace = {}".format(ws2[0].rowCount()))
+    print("Number of columns in second TableWorkspace = {}".format(ws2[1].columnCount()))
+    print("Number of rows in second TableWorkspace = {}".format(ws2[1].rowCount()))
 
 Output:
 

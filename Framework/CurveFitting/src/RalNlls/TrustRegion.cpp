@@ -10,9 +10,9 @@
 #include <limits>
 #include <string>
 
+#include <cmath>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-#include <math.h>
 
 namespace Mantid {
 namespace CurveFitting {

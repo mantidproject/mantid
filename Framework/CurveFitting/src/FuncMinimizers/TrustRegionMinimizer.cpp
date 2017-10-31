@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {

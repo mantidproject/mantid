@@ -17,7 +17,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using API::MatrixWorkspace_sptr;
-namespace Exception = Kernel::Exception;
 using Geometry::IDetector_const_sptr;
 using Kernel::Direction;
 using Kernel::V3D;

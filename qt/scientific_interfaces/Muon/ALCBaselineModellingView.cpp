@@ -257,7 +257,7 @@ void ALCBaselineModellingView::setSelectorValues(
 }
 
 void ALCBaselineModellingView::help() {
-  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon_ALC"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr, QString("Muon ALC"));
 }
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }

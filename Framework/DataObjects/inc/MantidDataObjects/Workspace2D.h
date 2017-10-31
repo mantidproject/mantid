@@ -102,11 +102,7 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
-  void init(const std::size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// a vector holding workspace index of monitors in the workspace
   std::vector<specnum_t> m_monitorList;

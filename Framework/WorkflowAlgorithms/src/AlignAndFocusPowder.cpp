@@ -944,6 +944,9 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
     this->setPropertyValue("GroupingWorkspace", name);
   }
 
+  if (calFilename.empty())
+    return;
+
   g_log.information() << "Loading Calibration file \"" << calFilename << "\"\n";
 
   // bunch of booleans to keep track of things

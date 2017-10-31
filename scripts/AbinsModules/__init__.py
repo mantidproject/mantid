@@ -19,12 +19,12 @@ from .IOmodule import IOmodule
 from .FrequencyPowderGenerator import FrequencyPowderGenerator
 
 # Loading modules
-from .GeneralDFTProgram import GeneralDFTProgram
+from .GeneralAbInitioProgram import GeneralAbInitioProgram
 from .LoadCASTEP import LoadCASTEP
 from .LoadCRYSTAL import LoadCRYSTAL
 from .LoadDMOL3 import LoadDMOL3
 from .LoadGAUSSIAN import LoadGAUSSIAN
-from .GeneralDFTParser import GeneralDFTParser
+from .GeneralAbInitioParser import GeneralAbInitioParser
 
 # Calculating modules
 from .CalculatePowder import CalculatePowder
@@ -50,4 +50,4 @@ from . import AbinsParameters
 from . import AbinsConstants
 from . import AbinsTestHelpers
 
-from .GeneralLoadDFTTester import GeneralLoadDFTTester
+from .GeneralLoadAbInitioTester import GeneralLoadAbInitioTester
