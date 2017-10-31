@@ -191,16 +191,6 @@ public:
 
   const std::string id() const override { return "WorkspaceTester"; }
 
-  /// Returns a clone of the workspace
-  std::unique_ptr<WorkspaceTester> clone() const {
-    return std::unique_ptr<WorkspaceTester>(doClone());
-  }
-
-  /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<WorkspaceTester> cloneEmpty() const {
-    return std::unique_ptr<WorkspaceTester>(doCloneEmpty());
-  }
-
 protected:
   void init(const size_t &numspec, const size_t &j, const size_t &k) override {
     AxeslessWorkspaceTester::init(numspec, j, k);
@@ -231,16 +221,6 @@ private:
 //===================================================================================================================
 class TableWorkspaceTester : public ITableWorkspace {
 public:
-  /// Returns a clone of the workspace
-  std::unique_ptr<TableWorkspaceTester> clone() const {
-    return std::unique_ptr<TableWorkspaceTester>(doClone());
-  }
-
-  /// Returns a default-initialized clone of the workspace
-  std::unique_ptr<TableWorkspaceTester> cloneEmpty() const {
-    return std::unique_ptr<TableWorkspaceTester>(doCloneEmpty());
-  }
-
   const std::string id() const override { return "TableWorkspaceTester"; }
 
   size_t getMemorySize() const override {
