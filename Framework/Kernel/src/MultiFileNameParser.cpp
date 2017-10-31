@@ -214,7 +214,7 @@ bool ReverseCaselessCompare::operator()(const std::string &a,
 
 /// Constructor.
 Parser::Parser()
-    : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(),
+    : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instrumentAlias(),
       m_underscoreString(), m_runString(), m_extString(),
       // m_zeroPadding(),
       m_validInstNames() {
@@ -279,6 +279,11 @@ void Parser::parse(const std::string &multiFileName) {
         f = parseStep(*plusTokenString);
       } catch (const std::runtime_error &re) {
         errorMsg << "Unable to parse run(s): \"" << re.what();
+
+        // If an error has occurred and token doesn't have most recently
+        // found instrument - prepend most recent instrument alias.
+        if (!boost::starts_with(*plusTokenString, m_instrumentAlias))
+          *plusTokenString = m_instrumentAlias + *plusTokenString;
       }
 
       // If there are no files, then we should keep this token as it was passed,
@@ -337,7 +342,7 @@ Parser::parseStep(const std::string &multiFileName) {
   m_runs = parseMultiRunString(m_runString);
 
   // Set up helper functor.
-  GenerateFileName generateFileName(m_dirString, m_extString, m_instString);
+  GenerateFileName generateFileName(m_dirString, m_extString, m_instrumentAlias);
 
   // Generate complete file names for each run using helper functor.
   std::vector<std::vector<std::string>> fileNames;
@@ -358,7 +363,7 @@ void Parser::clear() {
   m_fileNames.clear();
   m_multiFileName.clear();
   m_dirString.clear();
-  m_instString.clear();
+  m_instrumentAlias.clear();
   m_underscoreString.clear();
   m_runString.clear();
   m_extString.clear();
@@ -407,34 +412,34 @@ void Parser::split() {
   for (const auto &validInstName : m_validInstNames) {
     // USE CASELESS MATCHES HERE.
     if (matchesFully(base, validInstName + ".*", true)) {
-      m_instString = getMatchingString("^" + validInstName, base, true);
+      m_instrumentAlias = getMatchingString("^" + validInstName, base, true);
       break;
     }
   }
 
   // If not, use the default, or throw if we encounter an unrecognisable
   // non-numeric string.
-  if (m_instString.empty()) {
+  if (m_instrumentAlias.empty()) {
     if (base.empty())
       throw std::runtime_error("There does not appear to be any runs present.");
 
     if (isdigit(base[0]))
-      m_instString = ConfigService::Instance().getString("default.instrument");
+      m_instrumentAlias = ConfigService::Instance().getString("default.instrument");
     else
       throw std::runtime_error(
           "There does not appear to be a valid instrument name present.");
-  } else {
-    // Chop off instrument name.
-    base = base.substr(m_instString.size(), base.size());
+  } else if(boost::starts_with(base, m_instrumentAlias)) {
+    // Chop off instrument name
+    base = base.substr(m_instrumentAlias.size(), base.size());
   }
 
   if (base.empty())
     throw std::runtime_error("There does not appear to be any runs present.");
 
   InstrumentInfo instInfo =
-      ConfigService::Instance().getInstrument(m_instString);
+      ConfigService::Instance().getInstrument(m_instrumentAlias);
   // why?
-  // m_instString = instInfo.shortName(); // Make sure we're using the shortened
+  // m_instrumentAlias = instInfo.shortName(); // Make sure we're using the shortened
   // form of the isntrument name.
 
   if (boost::starts_with(base, instInfo.delimiter())) {
@@ -465,7 +470,7 @@ void Parser::split() {
 GenerateFileName::GenerateFileName(const std::string &prefix,
                                    const std::string &suffix,
                                    const std::string &instString)
-    : m_prefix(prefix), m_suffix(suffix), m_instString(instString) {}
+    : m_prefix(prefix), m_suffix(suffix), m_instrumentAlias(instString) {}
 
 /**
  * Overloaded function operator that takes in a vector of runs, and returns a
@@ -496,7 +501,7 @@ operator()(const std::vector<unsigned int> &runs) {
 std::string GenerateFileName::operator()(unsigned int run) {
   std::stringstream fileName;
 
-  fileName << m_prefix << pad(run, m_instString) << m_suffix;
+  fileName << m_prefix << pad(run, m_instrumentAlias) << m_suffix;
 
   return fileName.str();
 }

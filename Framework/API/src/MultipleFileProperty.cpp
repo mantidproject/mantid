@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -289,7 +289,15 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     return SUCCESS;
   }
 
-  m_parser.parse(propValue);
+  std::string errorMsg;
+  try {
+    m_parser.parse(m_prefix + propValue);
+  } catch (const std::range_error &re) {
+    g_log.error(re.what());
+    throw;
+  } catch (const std::runtime_error &re) {
+    errorMsg = re.what();
+  }
   std::vector<std::vector<std::string>> allUnresolvedFileNames =
       m_parser.fileNames();
   std::vector<std::vector<std::string>> allFullFileNames;
@@ -377,15 +385,19 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     allFullFileNames.push_back(std::move(fullFileNames));
   }
 
-  // Now re-set the value using the full paths found.
-  PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
-      allFullFileNames);
+  if (!allFullFileNames.empty()) {
+    // Now re-set the value using the full paths found.
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        allFullFileNames);
+  }
 
-  // cache the new version of things
-  m_oldPropValue = propValue;
-  m_oldFoundValue = std::move(allFullFileNames);
-
-  return SUCCESS;
+  if (errorMsg.empty()) {
+    // cache the new version of things
+    m_oldPropValue = propValue;
+    m_oldFoundValue = std::move(allFullFileNames);
+    return SUCCESS;
+  } else
+    return errorMsg;
 }
 
 } // namespace API

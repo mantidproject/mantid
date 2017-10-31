@@ -189,7 +189,7 @@ public:
   // switched ON.
   //////////////////////////////////////////////////////////////////////////////////////////////
 
-  void test_singeFile_fullPath() {
+  void test_singleFile_fullPath() {
     MultipleFileProperty p("Filename");
     p.setValue(dummyFile("TSC1.raw"));
     std::vector<std::vector<std::string>> fileNames = p();
@@ -197,7 +197,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noInst() {
+  void test_singleFile_noInst() {
     MultipleFileProperty p("Filename");
     p.setValue(dummyFile("1.raw"));
     std::vector<std::vector<std::string>> fileNames = p();
@@ -205,7 +205,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noExt() {
+  void test_singleFile_noExt() {
     MultipleFileProperty p("Filename", m_exts);
     p.setValue(dummyFile("TSC1"));
     std::vector<std::vector<std::string>> fileNames = p();
@@ -213,7 +213,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noInstNoExt() {
+  void test_singleFile_noInstNoExt() {
     MultipleFileProperty p("Filename", m_exts);
     p.setValue(dummyFile("1"));
     std::vector<std::vector<std::string>> fileNames = p();
@@ -221,7 +221,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noDir() {
+  void test_singleFile_noDir() {
     MultipleFileProperty p("Filename");
     p.setValue("TSC1.raw");
     std::vector<std::vector<std::string>> fileNames = p();
@@ -229,7 +229,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noDirNoInst() {
+  void test_singleFile_noDirNoInst() {
     MultipleFileProperty p("Filename");
     p.setValue("1.raw");
     std::vector<std::vector<std::string>> fileNames = p();
@@ -237,7 +237,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noDirNoExt() {
+  void test_singleFile_noDirNoExt() {
     MultipleFileProperty p("Filename", m_exts);
     p.setValue("TSC1");
     std::vector<std::vector<std::string>> fileNames = p();
@@ -245,7 +245,7 @@ public:
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));
   }
 
-  void test_singeFile_noDirNoInstNoExt() {
+  void test_singleFile_noDirNoInstNoExt() {
     MultipleFileProperty p("Filename", m_exts);
     p.setValue("1");
     std::vector<std::vector<std::string>> fileNames = p();
@@ -743,8 +743,8 @@ public:
   }
 
   void test_multipleFiles_longForm_usingPrefix_plusList() {
-    MultipleFileProperty p("Filename");
-    p.setValue("TSC1.raw+TSC2.raw+TSC3.raw+TSC4.raw+TSC5.raw");
+    MultipleFileProperty p("Filename", "TSC");
+    p.setValue("1.raw+2.raw+3.raw+4.raw+5.raw");
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("TSC00001.raw"));

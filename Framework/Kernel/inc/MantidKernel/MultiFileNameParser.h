@@ -104,7 +104,7 @@ public:
   /// Return the parsed directory string.
   std::string dirString() const { return m_dirString; }
   /// Return the parsed instrument string.
-  std::string instString() const { return m_instString; }
+  std::string instString() const { return m_instrumentAlias; }
   /// Return the parsed underscore string.
   std::string underscoreString() const { return m_underscoreString; }
   /// Return the parsed run string.
@@ -124,7 +124,7 @@ private:
   /// The given string to parse.
   std::string m_multiFileName;
   /// The various sections of the given string to parse.
-  std::string m_dirString, m_instString, m_underscoreString, m_runString,
+  std::string m_dirString, m_instrumentAlias, m_underscoreString, m_runString,
       m_extString;
   /// The instrument-specific run zero padding value.
   // int m_zeroPadding;
@@ -155,7 +155,7 @@ private:
   /// String that suffixes any generated file names.
   std::string m_suffix;
   /// String that identifies the instrument
-  std::string m_instString;
+  std::string m_instrumentAlias;
 };
 
 /**
