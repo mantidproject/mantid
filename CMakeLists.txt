@@ -22,8 +22,8 @@ set ( ENABLE_MANTIDPLOT ON CACHE BOOL "Switch for compiling the Qt4-based gui & 
 # TODO: Switch this on by default when the builders all have Qt5 installed
 set ( ENABLE_WORKBENCH OFF CACHE BOOL "Switch for compiling the Qt5-based gui & components")
 
-SET (CPACK_INSTALL_CMAKE_PROJECTS
-     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+set ( CPACK_INSTALL_CMAKE_PROJECTS
+      "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/" )
 
 ###########################################################################
 # Quick exit if we only want data targets
