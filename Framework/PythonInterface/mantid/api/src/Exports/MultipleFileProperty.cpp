@@ -66,7 +66,7 @@ MultipleFileProperty *
 createMultipleFilePropertyDefaultAction(const std::string &name,
                                         const object &extensions = object(),
                                         const std::string &prefix = "") {
-  return createMultipleFilePropertyWithAction(
+  return createMultipleFileProperty(
       name, FileProperty::FileAction::Load, extensions, prefix);
 }
 } // namespace
