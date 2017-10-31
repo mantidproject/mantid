@@ -109,7 +109,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 #----------------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
+        self.declareProperty(MultipleFileProperty(RUN_PROP, prefix="VESUVIO"),
                              doc="The run numbers that should be loaded. E.g."
                                  "14188  - for single run"
                                  "14188-14195 - for summed consecutive runs"
@@ -146,9 +146,9 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._retrieve_input()
 
         if "Difference" in self._diff_opt:
-            self._exec_difference_mode(self._run_ranges)
+            self._exec_difference_mode(self._run_files)
         else:
-            self._exec_single_foil_state_mode(self._run_ranges)
+            self._exec_single_foil_state_mode(self._run_files)
 
 #----------------------------------------------------------------------------------------
 
@@ -157,12 +157,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         issues = {}
 
         # Validate run number ranges
-        run_input = self.getProperty(RUN_PROP).value
-        run_input = run_input.replace(';', ',')
-        try:
-            self._run_ranges = self._parse_range_input(run_input)
-        except RuntimeError as exc:
-            issues[RUN_PROP] = str(exc)
+        self._run_files = self.getProperty(RUN_PROP).value
 
         spectra_input = self.getProperty(SPECTRA_PROP).value
         spectra_groups = spectra_input.split(';')
@@ -239,7 +234,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _exec_difference_mode(self, runs):
+    def _exec_difference_mode(self, run_files):
         """
            Execution path when a difference mode is selected
         """
@@ -247,7 +242,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             self._raise_error_if_mix_fwd_back(self._spectra_list)
             self._raise_error_mode_scatter(self._diff_opt, self._back_scattering)
             self._set_spectra_type(self._spectra_list[0])
-            self._setup_raw(self._spectra_list, runs)
+            self._setup_raw(self._spectra_list, run_files)
             self._create_foil_workspaces()
 
             for ws_index, spectrum_no in enumerate(self._spectra_list):
@@ -328,15 +323,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _exec_single_foil_state_mode(self, runs):
+    def _exec_single_foil_state_mode(self, run_files):
         """
         Execution path when a single foil state is requested
         """
-        if len(runs) > 1:
+        if len(run_files) > 1:
             self._set_spectra_type(self._spectra_list[0])
             self._setup_raw(self._spectra_list)
         else:
-            self._load_single_run_spec_and_mon(self._spectra_list, self._get_filename(runs[0]))
+            self._load_single_run_spec_and_mon(self._spectra_list, run_files[0])
 
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
@@ -369,7 +364,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
 
-            if len(runs) > 1:
+            if len(run_files) > 1:
                 # Create monitor workspace for normalisation
                 first_mon_ws = self._raw_monitors[0]
                 nmonitor_bins = first_mon_ws.blocksize()
@@ -413,25 +408,6 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self._cleanup_raw()
 
 #----------------------------------------------------------------------------------------
-
-    def _get_filename(self, run_or_filename):
-        """Given a string containing either a filename/partial filename or run number find the correct
-        file prefix"""
-        isis = config.getFacility("ISIS")
-        vesuvio = isis.instrument("VESUVIO")
-        if isinstance(run_or_filename, six.integer_types):
-            run_no = run_or_filename
-            return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
-        else:
-            match = FILENAME_RE.match(run_or_filename)
-            if match:
-                run_no = match.group(1)
-                return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
-            else:
-                # Assume file is okay and give it a go with Load
-                return run_or_filename
-
-    #----------------------------------------------------------------------------------------
 
     def _load_single_run_spec_and_mon(self, all_spectra, run_str):
         self._raise_error_period_scatter(run_str, self._back_scattering)
@@ -561,8 +537,8 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _setup_raw(self, spectra, runs):
-        self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra, runs)
+    def _setup_raw(self, spectra, run_files):
+        self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra, run_files)
         nperiods = self._raw_grp.size()
 
         first_ws = self._raw_grp[0]
@@ -585,7 +561,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_and_sum_runs(self, spectra, runs):
+    def _load_and_sum_runs(self, spectra, run_files):
         """Load the input set of runs & sum them if there
         is more than one.
             @param spectra :: The list of spectra to load
@@ -594,16 +570,15 @@ class LoadVesuvio(LoadEmptyVesuvio):
         self.summed_ws, self.summed_mon = "__loadraw_evs", "__loadraw_evs_monitors"
         spec_inc_mon = self._mon_spectra
         spec_inc_mon.extend(spectra)
-        for index, run in enumerate(runs):
-            filename = self._get_filename(run)
-            self._raise_error_period_scatter(filename, self._back_scattering)
+        for index, run_file in enumerate(run_files):
+            self._raise_error_period_scatter(run_file, self._back_scattering)
             if index == 0:
                 out_name, out_mon = SUMMED_WS, SUMMED_WS + '_monitors'
             else:
                 out_name, out_mon = SUMMED_WS + 'tmp', SUMMED_WS + 'tmp_monitors'
 
             # Load data
-            ms.Load(Filename=filename,
+            ms.Load(Filename=run_file,
                     SpectrumList=spec_inc_mon,
                     OutputWorkspace=out_name,
                     LoadMonitors='Separate',
