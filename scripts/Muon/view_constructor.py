@@ -1,7 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
-from Muon import FFT_view
-from Muon import MaxEnt_view
+from Muon import fft_view
+from Muon import maxent_view
 from Muon import transform_selection_view
 
 
@@ -17,8 +17,9 @@ class ViewConstructor(object):
         # construct transformation memebers
         if includeTransform:
             self.transformMethods = {}
-            self.transformMethods["FFT"] = FFT_view.FFTView(parent)
-            self.transformMethods["MaxEnt"] = MaxEnt_view.MaxEntView(parent)
+            self.transformMethods["FFT"] = fft_view.FFTView(parent)
+            self.transformMethods["MaxEnt"] = maxent_view.MaxEntView(parent)
+            # create default transform selection widget
             self.transformSelector = transform_selection_view.TransformSelectionView(parent)
 
     def getTransformMethods(self):

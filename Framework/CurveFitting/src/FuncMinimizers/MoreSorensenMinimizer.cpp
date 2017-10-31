@@ -4,9 +4,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/FuncMinimizers/MoreSorensenMinimizer.h"
-#include "MantidCurveFitting/RalNlls/TrustRegion.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
-#include <math.h>
+#include "MantidCurveFitting/RalNlls/TrustRegion.h"
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {

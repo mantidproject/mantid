@@ -37,17 +37,17 @@ def create_file_range_parser(instrument):
     def parser(file_range):
         file_range = file_range.strip()
         # Check whether this is a range or single file
-        if '-' in file_range:
-            return [[instrument + str(run) for run in create_range_from(file_range, '-')]]
-        elif ':' in file_range:
-            return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
-        elif '+' in file_range:
-            return [[instrument + run for run in file_range.split('+')]]
-        else:
-            try:
+        try:
+            if '-' in file_range:
+                return [[instrument + str(run) for run in create_range_from(file_range, '-')]]
+            elif ':' in file_range:
+                return [[instrument + str(run)] for run in create_range_from(file_range, ':')]
+            elif '+' in file_range:
+                return [[instrument + run for run in file_range.split('+')]]
+            else:
                 return [[instrument + str(int(file_range))]]
-            except ValueError:
-                return [[file_range]]
+        except ValueError:
+            return [[file_range]]
 
     return parser
 

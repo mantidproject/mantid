@@ -14,10 +14,11 @@
 
 #include <Poco/Path.h>
 
+#include <QEvent>
 #include <QFileDialog>
+#include <QHelpEvent>
 #include <QSettings>
 
-#include <qevent.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_symbol.h>
