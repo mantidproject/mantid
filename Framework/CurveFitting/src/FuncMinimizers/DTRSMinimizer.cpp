@@ -28,9 +28,9 @@ std::string DTRSMinimizer::name() const { return "Trust Region"; }
 
 namespace {
 
-const double HUGE = std::numeric_limits<double>::max();
+const double HUGEST = std::numeric_limits<double>::max();
 const double EPSILON_MCH = std::numeric_limits<double>::epsilon();
-const double LARGEST = HUGE;
+const double LARGEST = HUGEST;
 const double LOWER_DEFAULT = -0.5 * LARGEST;
 const double UPPER_DEFAULT = LARGEST;
 const double POINT4 = 0.4;
@@ -51,7 +51,7 @@ const int MAX_DEGREE = 3;
 const int HISTORY_MAX = 100;
 const double TEN_EPSILON_MCH = 10.0 * EPSILON_MCH;
 const double ROOTS_TOL = TEN_EPSILON_MCH;
-const double INFINITE_NUMBER = HUGE;
+const double INFINITE_NUMBER = HUGEST;
 
 /** Replacement for FORTRAN's SIGN intrinsic function
  */
@@ -105,7 +105,7 @@ struct dtrs_inform_type {
   int len_history = 0;
 
   //!  the value of the quadratic function
-  double obj = HUGE;
+  double obj = HUGEST;
 
   //!  the M-norm of x, ||x||_M
   double x_norm = 0.0;
