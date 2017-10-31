@@ -1,4 +1,3 @@
-#include <QtGui>
 #include "MantidQtWidgets/Common/RepoModel.h"
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
@@ -8,12 +7,11 @@
 #include "MantidKernel/Logger.h"
 #include <QIcon>
 #include <QPixmap>
-using namespace MantidQt::API;
-using Mantid::Kernel::ConfigServiceImpl;
-using Mantid::Kernel::ConfigService;
+
 #include <QDebug>
 #include <stdexcept>
 #include <QCheckBox>
+#include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -21,7 +19,13 @@ using Mantid::Kernel::ConfigService;
 #include <QGroupBox>
 #include <QDialogButtonBox>
 #include <QtConcurrentRun>
+#include <QSettings>
+#include <QTextEdit>
 #include <QTextStream>
+
+using namespace MantidQt::API;
+using Mantid::Kernel::ConfigServiceImpl;
+using Mantid::Kernel::ConfigService;
 
 namespace {
 /// static logger

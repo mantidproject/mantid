@@ -15,9 +15,12 @@ Installation
 Workbench
 ---------
 
+- Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
+- Update SwitchToSliceViewer (shift + click) in MultiSlice view to work with nonorthogonal axes.
 - Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
 
 .. figure:: ../../images/VatesMultiSliceView.png

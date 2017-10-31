@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "boost/shared_ptr.hpp"
 
 #include <QSettings>
@@ -22,7 +23,7 @@ namespace IDA {
 IndirectDataAnalysisTab::IndirectDataAnalysisTab(QWidget *parent)
     : IndirectTab(parent), m_dblEdFac(nullptr), m_blnEdFac(nullptr),
       m_parent(nullptr), m_inputWorkspace(), m_previewPlotWorkspace(),
-      m_selectedSpectrum(0) {
+      m_selectedSpectra(0) {
   m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
 
   // Create Editor Factories
@@ -92,15 +93,47 @@ void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
  *
  * @return  The selected spectrum.
  */
-int IndirectDataAnalysisTab::selectedSpectrum() { return m_selectedSpectrum; }
+int IndirectDataAnalysisTab::selectedSpectra() { return m_selectedSpectra; }
 
 /**
  * Sets the selected spectrum.
  *
  * @param spectrum  The spectrum to set.
  */
-void IndirectDataAnalysisTab::setSelectedSpectrum(int spectrum) {
-  m_selectedSpectrum = spectrum;
+void IndirectDataAnalysisTab::setSelectedSpectra(int spectrum) {
+  m_selectedSpectra = spectrum;
+}
+
+/**
+ * Retrieves the selected minimum spectra.
+ *
+ * @return  The selected minimum spectra.
+ */
+int IndirectDataAnalysisTab::minimumSpectra() { return m_minSpectra; }
+
+/**
+ * Sets the selected spectra.
+ *
+ * @param spectrum  The spectra to set.
+ */
+void IndirectDataAnalysisTab::setMinimumSpectra(int spectra) {
+  m_minSpectra = spectra;
+}
+
+/**
+ * Retrieves the selected maximum spectra.
+ *
+ * @return  The selected maximum spectra.
+ */
+int IndirectDataAnalysisTab::maximumSpectra() { return m_maxSpectra; }
+
+/**
+ * Sets the selected maximum spectra.
+ *
+ * @param spectrum  The spectra to set.
+ */
+void IndirectDataAnalysisTab::setMaximumSpectra(int spectra) {
+  m_maxSpectra = spectra;
 }
 
 /**
@@ -116,16 +149,125 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 
     if (inputWs && previewWs->getName() == inputWs->getName()) {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()),
-                                m_selectedSpectrum);
+                                m_selectedSpectra);
     } else {
       IndirectTab::plotSpectrum(QString::fromStdString(previewWs->getName()), 0,
                                 2);
     }
   } else if (inputWs &&
              inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+                 boost::numeric_cast<size_t>(m_selectedSpectra)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
-                              m_selectedSpectrum);
+                              m_selectedSpectra);
+  }
+}
+
+/**
+ * Plots the selected spectrum of the input workspace in this indirect data
+ * analysis tab.
+ */
+void IndirectDataAnalysisTab::plotInput(
+    MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
+  previewPlot->clear();
+  auto inputWS = inputWorkspace();
+
+  if (inputWS)
+    previewPlot->addSpectrum("Sample", inputWorkspace(), selectedSpectra());
+}
+
+/**
+ * Plots the workspace at the specified index in the specified workspace
+ * group. Plots the sample and fit spectrum in the specified top preview
+ * plot. Plots the diff spectra in the specified bottom preview plot.
+ *
+ * @param outputWS          The output workspace group.
+ * @param index             The index of the workspace (in the group)
+ *                          to plot.
+ * @param topPreviewPlot    The top preview plot.
+ * @param bottomPreviewPlot The bottom preview plot.
+ */
+void IndirectDataAnalysisTab::updatePlot(
+    WorkspaceGroup_sptr outputWS, size_t index,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  // Check whether the specified index is within the bounds of the
+  // fitted spectrum.
+  if (outputWS && index < outputWS->size()) {
+    auto workspace =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+    updatePlot(workspace, topPreviewPlot, bottomPreviewPlot);
+  } else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlot(
+    const std::string &workspaceName,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+
+  if (AnalysisDataService::Instance().doesExist(workspaceName)) {
+    auto groupWorkspace =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            workspaceName);
+    // Check whether the specified workspace is a workspace group.
+    if (groupWorkspace) {
+      updatePlot(groupWorkspace, topPreviewPlot, bottomPreviewPlot);
+    } else {
+      auto matWorkspace =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              workspaceName);
+      updatePlot(matWorkspace, topPreviewPlot, bottomPreviewPlot);
+    }
+  } else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlot(
+    WorkspaceGroup_sptr outputWS,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  if (outputWS && selectedSpectra() >= minimumSpectra())
+    updatePlot(outputWS, selectedSpectra() - minimumSpectra(), topPreviewPlot,
+               bottomPreviewPlot);
+  else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlot(
+    MatrixWorkspace_sptr outputWS,
+    MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
+    MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot) {
+  topPreviewPlot->clear();
+  bottomPreviewPlot->clear();
+
+  if (outputWS) {
+    setPreviewPlotWorkspace(outputWS);
+    topPreviewPlot->addSpectrum("Sample", outputWS, 0, Qt::black);
+    topPreviewPlot->addSpectrum("Fit", outputWS, 1, Qt::red);
+    bottomPreviewPlot->addSpectrum("Diff", outputWS, 2, Qt::blue);
+  } else {
+    bottomPreviewPlot->clear();
+    plotInput(topPreviewPlot);
+  }
+}
+
+void IndirectDataAnalysisTab::updatePlotRange(
+    const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+    const QString &startRangePropName, const QString &endRangePropName) {
+  try {
+    const QPair<double, double> curveRange =
+        previewPlot->getCurveRange("Sample");
+    auto rangeSelector = previewPlot->getRangeSelector(rangeName);
+    setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
+                         m_properties[endRangePropName], curveRange);
+  } catch (std::exception &exc) {
+    showMessageBox(exc.what());
   }
 }
 

@@ -398,4 +398,15 @@ protected:
     throw std::runtime_error("void_pointer const not implemented");
   }
 };
+
+class VariableBinThrowingTester : public AxeslessWorkspaceTester {
+  size_t blocksize() const override {
+    if (getSpectrum(0).dataY().size() == getSpectrum(1).dataY().size())
+      return getSpectrum(0).dataY().size();
+    else
+      throw std::length_error("Mismatched bins sizes");
+
+    return 0;
+  }
+};
 #endif /* FAKEOBJECTS_H_ */
