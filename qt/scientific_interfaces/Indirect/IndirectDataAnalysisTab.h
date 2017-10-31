@@ -4,6 +4,7 @@
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
@@ -71,37 +72,51 @@ protected:
   void setPreviewPlotWorkspace(
       Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
 
-  /// Retrieve the selected spectra
-  int selectedSpectra();
+  /// Retrieve the selected spectrum
+  int selectedSpectrum();
 
-  /// Retrieve the selected minimum spectra
-  int minimumSpectra();
+  /// Retrieve the selected minimum spectrum
+  int minimumSpectrum();
 
-  /// Retrieve the selected maximum spectra
-  int maximumSpectra();
+  /// Retrieve the selected maximum spectrum
+  int maximumSpectrum();
 
   void plotInput(MantidQt::MantidWidgets::PreviewPlot *previewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(const std::string &workspaceName,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
-                  MantidQt::MantidWidgets::PreviewPlot *topPreviewPlot,
-                  MantidQt::MantidWidgets::PreviewPlot *bottomPreviewPlot);
+                  MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
+                  MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
   void updatePlotRange(const QString &rangeName,
                        MantidQt::MantidWidgets::PreviewPlot *previewPlot,
                        const QString &startRangePropName = "StartX",
                        const QString &endRangePropName = "EndX");
+
+  void plotGuess(MantidQt::MantidWidgets::PreviewPlot *previewPlot,
+                 Mantid::API::IFunction_sptr function);
+
+  Mantid::API::MatrixWorkspace_sptr
+  createGuessWorkspace(Mantid::API::IFunction_sptr func);
+
+  std::vector<double> computeOutput(Mantid::API::IFunction_sptr func,
+                                    const std::vector<double> &dataX);
+
+  Mantid::API::IAlgorithm_sptr
+  createWorkspaceAlgorithm(const std::string &workspaceName, int numSpec,
+                           const std::vector<double> &dataX,
+                           const std::vector<double> &dataY);
 
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
@@ -115,14 +130,14 @@ protected slots:
   /// Plots the current preview data
   void plotCurrentPreview();
 
-  /// Sets the selected spectra
-  void setSelectedSpectra(int spectra);
+  /// Sets the selected spectrum
+  void setSelectedSpectrum(int spectrum);
 
-  /// Sets the maximum spectra
-  void setMaximumSpectra(int spectra);
+  /// Sets the maximum spectrum
+  void setMaximumSpectrum(int spectrum);
 
-  /// Sets the minimum spectra
-  void setMinimumSpectra(int spectra);
+  /// Sets the minimum spectrum
+  void setMinimumSpectrum(int spectrum);
 
 private:
   /// Overidden by child class.
@@ -139,10 +154,11 @@ private:
   IndirectDataAnalysis *m_parent;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_inputWorkspace;
   boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
-  int m_selectedSpectra;
-  int m_minSpectra;
-  int m_maxSpectra;
+  int m_selectedSpectrum;
+  int m_minSpectrum;
+  int m_maxSpectrum;
 };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

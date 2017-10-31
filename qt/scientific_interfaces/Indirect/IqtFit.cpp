@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -26,14 +25,14 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_iqtFTree(nullptr), m_iqtFRangeManager(nullptr), m_fixedProps(),
-      m_ties(), m_fitFunctions(), m_parameterValues(), m_parameterToProperty() {
+      m_iqtFTree(nullptr), m_fixedProps(), m_ties(), m_fitFunctions(),
+      m_parameterValues(), m_parameterToProperty() {
   m_uiForm.setupUi(parent);
 }
 
 void IqtFit::setup() {
-  setMinimumSpectra(0);
-  setMaximumSpectra(0);
+  setMinimumSpectrum(0);
+  setMaximumSpectrum(0);
 
   m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
@@ -54,15 +53,14 @@ void IqtFit::setup() {
           SLOT(backgroundSelected(double)));
 
   // setupTreePropertyBrowser
-  m_iqtFRangeManager = new QtDoublePropertyManager(m_parentWidget);
+  m_dblManager = new QtDoublePropertyManager(m_parentWidget);
 
   m_iqtFTree->setFactoryForManager(m_blnManager, m_blnEdFac);
   m_iqtFTree->setFactoryForManager(m_dblManager, m_dblEdFac);
-  m_iqtFTree->setFactoryForManager(m_iqtFRangeManager, m_dblEdFac);
 
-  m_properties["StartX"] = m_iqtFRangeManager->addProperty("StartX");
-  m_iqtFRangeManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
-  m_properties["EndX"] = m_iqtFRangeManager->addProperty("EndX");
+  m_properties["StartX"] = m_dblManager->addProperty("StartX");
+  m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
+  m_properties["EndX"] = m_dblManager->addProperty("EndX");
   m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
   m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
   m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
@@ -84,7 +82,7 @@ void IqtFit::setup() {
   m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
   m_iqtFTree->addProperty(m_properties["FABADA"]);
 
-  connect(m_iqtFRangeManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(propertyChanged(QtProperty *, double)));
@@ -127,7 +125,7 @@ void IqtFit::setup() {
   connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(setSelectedSpectra(int)));
+          SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -164,12 +162,12 @@ void IqtFit::run() {
     showMessageBox(msg);
   }
 
-  setMinimumSpectra(m_uiForm.spSpectraMin->value());
-  setMaximumSpectra(m_uiForm.spSpectraMax->value());
+  setMinimumSpectrum(m_uiForm.spSpectraMin->value());
+  setMaximumSpectrum(m_uiForm.spSpectraMax->value());
 
   updateFitFunctions();
   IAlgorithm_sptr iqtFitAlg =
-      iqtFitAlgorithm(inputWs, minimumSpectra(), maximumSpectra());
+      iqtFitAlgorithm(inputWs, minimumSpectrum(), maximumSpectrum());
 
   m_batchAlgoRunner->addAlgorithm(iqtFitAlg);
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
@@ -312,7 +310,7 @@ void IqtFit::algorithmComplete(bool error) {
   m_parameterToProperty = createParameterToPropertyMap(m_fitFunctions);
   m_parameterValues = IndirectTab::extractParametersFromTable(
       m_baseName + "_Parameters", m_parameterToProperty.keys().toSet(),
-      minimumSpectra(), maximumSpectra());
+      minimumSpectrum(), maximumSpectrum());
   updateProperties(m_uiForm.spPlotSpectrum->value());
 
   updatePlot();
@@ -359,8 +357,8 @@ bool IqtFit::validate() {
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
-  auto range = std::make_pair(m_iqtFRangeManager->value(m_properties["StartX"]),
-                              m_iqtFRangeManager->value(m_properties["EndX"]));
+  auto range = std::make_pair(m_dblManager->value(m_properties["StartX"]),
+                              m_dblManager->value(m_properties["EndX"]));
   uiv.checkValidRange("Ranges", range);
 
   QString error = uiv.generateErrorMessage();
@@ -702,11 +700,11 @@ void IqtFit::specMaxChanged(int value) {
 }
 
 void IqtFit::xMinSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["StartX"], val);
+  m_dblManager->setValue(m_properties["StartX"], val);
 }
 
 void IqtFit::xMaxSelected(double val) {
-  m_iqtFRangeManager->setValue(m_properties["EndX"], val);
+  m_dblManager->setValue(m_properties["EndX"], val);
 }
 
 void IqtFit::backgroundSelected(double val) {
@@ -721,7 +719,7 @@ void IqtFit::propertyChanged(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlotTop->getRangeSelector("IqtFitBackground");
   auto specNo = m_uiForm.spPlotSpectrum->value();
-  bool autoUpdate = specNo > maximumSpectra() || specNo < minimumSpectra() ||
+  bool autoUpdate = specNo > maximumSpectrum() || specNo < minimumSpectrum() ||
                     m_parameterValues[prop->propertyName()].isEmpty();
 
   if (prop == m_properties["StartX"]) {
@@ -870,49 +868,21 @@ void IqtFit::updateGuessPlot() {
   // Don't plot guess if plot guess is unchecked
   if (!m_uiForm.ckPlotGuess->isChecked()) {
     m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   } else {
     plotGuess(NULL);
   }
 }
 
 void IqtFit::plotGuess(QtProperty *) {
-  CompositeFunction_sptr function = createFunction(true);
-  auto inputWs = inputWorkspace();
 
-  // Create the double* array from the input workspace
-  const size_t binIndxLow =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["StartX"]));
-  const size_t binIndxHigh =
-      inputWs->binIndexOf(m_iqtFRangeManager->value(m_properties["EndX"]));
-  const size_t nData = binIndxHigh - binIndxLow;
-
-  const auto &xPoints = inputWs->points(0);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndxLow], &xPoints[binIndxLow + nData], dataX.begin());
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  function->function(domain, outputData);
-
-  std::vector<double> dataY(nData);
-  for (size_t i = 0; i < nData; i++) {
-    dataY[i] = outputData.getCalculated(i);
+  if (m_uiForm.ckPlotGuess->isChecked())
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(true));
+  else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   }
-
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
-  createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  createWsAlg->execute();
-  MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
-
-  m_uiForm.ppPlotTop->addSpectrum("Guess", guessWs, 0, Qt::green);
 }
 
 /*

@@ -26,6 +26,7 @@ New
 
 Improved
 ########
+- The Plot Guess Feature in the ConvFit Interface is now enabled for the diffusion functions.
 
 Bugfixes
 ########
