@@ -1,5 +1,9 @@
 #include "MantidQtWidgets/Common/HintingLineEdit.h"
 
+#include <boost/algorithm/string.hpp>
+#include <QKeyEvent>
+#include <QLabel>
+#include <QStyle>
 #include <QToolTip>
 #include <boost/algorithm/string.hpp>
 

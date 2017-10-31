@@ -9,17 +9,17 @@
 Description
 -----------
 
-Loads the UB matrix into a workspace from an ISAW-style UB matrix ASCII
-file.
+Loads the :ref:`UB matrix <Lattice>` into a workspace from an
+ISAW-style :ref:`UB matrix <Lattice>` ASCII file.
 
 You can use the :ref:`algm-SaveIsawUB` algorithm to save to this
 format.
 
-The matrix in the file is the transpose of the UB Matrix. The UB matrix
-maps the column vector (h,k,l ) to the column vector (q'x,q'y,q'z).
-\|Q'\|=1/dspacing and its coordinates are a right-hand coordinate system
-where x is the beam direction and z is vertically upward. (IPNS
-convention)
+The matrix in the file is the transpose of the :ref:`UB matrix
+<Lattice>`. The :ref:`UB matrix <Lattice>` maps the column vector
+(h,k,l ) to the column vector (q'x,q'y,q'z).  \|Q'\|=1/dspacing and
+its coordinates are a right-hand coordinate system where x is the beam
+direction and z is vertically upward. (IPNS convention)
 
 Note: for an MDEventWorkspace, all experimentInfo objects will contain
 the oriented lattice loaded from the IsawUB file
@@ -30,8 +30,8 @@ Usage
 .. testcode:: LoadIsawUB
 
     #Write a ISAW UB file
-    import mantid   
-    filename=mantid.config.getString("defaultsave.directory")+"loadIsawUBTest.mat" 
+    import mantid
+    filename=mantid.config.getString("defaultsave.directory")+"loadIsawUBTest.mat"
     f=open(filename,'w')
     f.write("0.0  0.5  0.0  \n")
     f.write("0.0  0.0  0.25  \n")
@@ -40,11 +40,11 @@ Usage
     f.write("0.0  0.0  0.0   0   0   0   0  \n")
     f.write("\n\nsome text about IPNS convention")
     f.close()
-    
-    
+
+
     w=CreateSingleValuedWorkspace()
     LoadIsawUB(w,filename)
-    
+
     #check the results
     ol=w.sample().getOrientedLattice()
     print("a= {}".format(ol.a()))
@@ -54,11 +54,11 @@ Usage
     print("beta= {}".format(ol.beta()))
     print("gamma= {}".format(ol.gamma() ))
     print("The following vectors are in the horizontal plane:  {} {}".format(ol.getuVector(), ol.getvVector()))
-    
+
 .. testcleanup:: LoadIsawUB
 
    DeleteWorkspace('w')
-   import os,mantid   
+   import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"loadIsawUBTest.mat"
    os.remove(filename)
 

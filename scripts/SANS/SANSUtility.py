@@ -216,7 +216,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     #    for the slice region we don't want to be masked.
     # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
     #    cylinder.
-    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 

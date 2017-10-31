@@ -52,9 +52,9 @@ used to generate Bragg reflections that are expected for the crystal structure o
     a = np.round(parameters.cell(0, 1), 7)
     a_err = np.round(parameters.cell(0, 2), 16)
 
-    print "Refined lattice parameter: a =", a, "+/-", a_err
-    print "Difference from expected value: a_observed - a_expected =", np.round(a - a_true, 7)
-    print "Is this difference within the standard deviation?", "Yes" if np.fabs(a - a_true) <= a_err else "No"
+    print("Refined lattice parameter: a = {0} +/- {1}".format(a, a_err))
+    print("Difference from expected value: a_observed - a_expected = {0}".format(np.round(a - a_true, 7)))
+    print("Is this difference within the standard deviation? {0}".format("Yes" if np.fabs(a - a_true) <= a_err else "No"))
 
 Executing the script produces some output with information about the fit:
 

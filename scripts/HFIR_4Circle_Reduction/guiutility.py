@@ -172,7 +172,8 @@ def parse_float_array(array_str):
     :param array_str:
     :return: boolean, list of floats/error message
     """
-    assert isinstance(array_str, str), 'Input array for parsing must be of type string.'
+    assert isinstance(array_str, str), 'Input array {0} for parsing must be of type string but not a {1}.' \
+                                       ''.format(array_str, type(array_str))
     array_str = array_str.replace(',', ' ')
     array_str = array_str.replace('\n', ' ')
     array_str = array_str.replace('\t ', ' ')
@@ -261,7 +262,8 @@ def parse_float_editors(line_edits, allow_blank=False):
     - return a list of float
     :param line_edits: list/line edit
     :param allow_blank: flag to allow blanks
-    :return: (True, list of floats); (False, error message)
+    :return: (True, list of floats); (False, error message).  If blank is allowed, None value is used for the blank
+        LineEdit.
     """
     # Set flag
     return_single_value = False
