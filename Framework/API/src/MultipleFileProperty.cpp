@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -297,7 +297,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     throw;
   } catch (const std::runtime_error &re) {
     errorMsg =
-        "Failures found when parsing input as multiple files:\n" + re.what();
+        std::string("Failures found when parsing input as multiple files:\n") +
+        re.what();
   }
   std::vector<std::vector<std::string>> allUnresolvedFileNames =
       m_parser.fileNames();
