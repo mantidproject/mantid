@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-    {
+{
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 
@@ -296,7 +296,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     g_log.error(re.what());
     throw;
   } catch (const std::runtime_error &re) {
-    errorMsg = re.what();
+    errorMsg =
+        "Failures found when parsing input as multiple files:\n" + re.what();
   }
   std::vector<std::vector<std::string>> allUnresolvedFileNames =
       m_parser.fileNames();
@@ -330,8 +331,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     // filenames just join them together
     // and search for "*" in the result.)
     if (std::string::npos !=
-        boost::algorithm::join(unresolvedFileNames, "").find("*"))
+        boost::algorithm::join(unresolvedFileNames, "").find("*")) {
+      g_log.debug(errorMsg);
       return "Searching for files by wildcards is not currently supported.";
+    }
 
     std::vector<std::string> fullFileNames;
 
@@ -372,11 +375,13 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
           fullyResolvedFile =
               FileFinder::Instance().findRun(unresolvedFileName, m_exts);
         }
-        if (fullyResolvedFile.empty())
+        if (fullyResolvedFile.empty()) {
+          g_log.debug(errorMsg);
           throw std::runtime_error(
               "Unable to find file matching the string \"" +
               unresolvedFileName +
               "\", even after appending suggested file extensions.");
+        }
       }
 
       // Append the file name to result.
