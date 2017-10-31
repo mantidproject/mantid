@@ -4,6 +4,7 @@
 #include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include <QKeyEvent>
+#include <QToolTip>
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
 #include <qwt_scale_widget.h>

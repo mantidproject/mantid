@@ -187,7 +187,24 @@ class FitFunctionsTest(unittest.TestCase):
         c.untieAllParameters()
         cz_str = str(c)
         self.assertEqual(cz_str.count("ties="),0)
-    
+
+    def test_fix_all_parameters_with_ties(self):
+        g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
+        c = CompositeFunctionWrapper(g0, g1)
+        c.tie({"f1.Sigma":"f0.Sigma"})
+
+        c.fixAllParameters()
+        c_str = str(c)
+        self.assertEqual(c_str.count("ties="),3)
+        self.assertEqual(c_str.count("ties=(Height=7.5,PeakCentre=10,Sigma=1.2)"),1)
+        self.assertEqual(c_str.count("ties=(Height=7.5,PeakCentre=10)"),1)
+        self.assertEqual(c_str.count("ties=(f1.Sigma=f0.Sigma)"),1)
+
+        c.untieAllParameters()
+        cz_str = str(c)
+        self.assertEqual(cz_str.count("ties="),0)
+
 
     def test_tie(self):
         g = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=15)
