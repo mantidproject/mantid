@@ -46,6 +46,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         sample_data = runs
         flags['runs'] = runs.getName()
         flags['spectra'] = sample_data.getAxis(0).extractValues()
+        flags['back_scattering'] = any([lower <= flags['spectra'] <= upper for lower, upper in back_banks])
     else:
         spectra = flags['spectra']
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
