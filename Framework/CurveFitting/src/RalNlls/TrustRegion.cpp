@@ -296,7 +296,7 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
  *  @param J :: The Jacobian.
  *  @param A :: The Hessian.
  *  @param v :: The gradient (?).
- *  @param w :: Stored scaling data.
+ *  @param scale :: Stored scaling data.
  *  @param options :: The options.
  */
 void applyScaling(const DoubleFortranMatrix &J, DoubleFortranMatrix &A,

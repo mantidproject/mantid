@@ -134,8 +134,6 @@ bool findBeta(const DoubleFortranVector &a, const DoubleFortranVector &b,
 *  @param d :: A solution vector to the system of linear equations
 *     with the found positive defimnite matrix. The RHS vector is -m_v.
 *  @param options :: The options.
-*  @param inform :: The inform struct.
-*  @param w :: The work struct.
 *  @return true if successful
 */
 bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
