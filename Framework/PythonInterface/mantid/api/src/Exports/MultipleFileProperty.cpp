@@ -1,5 +1,5 @@
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
@@ -47,9 +47,9 @@ boost::python::object valueAsPyObject(MultipleFileProperty &self) {
 }
 
 MultipleFileProperty *
-createMultipleFilePropertyWithAction(const std::string &name,
-                                     unsigned int action,
-                                     const object &extensions = object()) {
+createMultipleFileProperty(const std::string &name, unsigned int action,
+                           const object &extensions = object(),
+                           const std::string &prefix = "") {
   std::vector<std::string> extsAsVector;
   if (!Mantid::PythonInterface::isNone(extensions)) {
     extract<std::string> extractor(extensions);
@@ -63,12 +63,13 @@ createMultipleFilePropertyWithAction(const std::string &name,
 }
 
 MultipleFileProperty *
-createMultipleFileProperty(const std::string &name,
-                           const object &extensions = object()) {
+createMultipleFilePropertyDefaultAction(const std::string &name,
+                                        const object &extensions = object(),
+                                        const std::string &prefix = "") {
   return createMultipleFilePropertyWithAction(
-      name, FileProperty::FileAction::Load, extensions);
+      name, FileProperty::FileAction::Load, extensions, prefix);
 }
-}
+} // namespace
 
 void export_MultipleFileProperty() {
   typedef PropertyWithValue<HeldType> BaseClass;
@@ -77,13 +78,15 @@ void export_MultipleFileProperty() {
 
   class_<MultipleFileProperty, bases<BaseClass>, boost::noncopyable>(
       "MultipleFileProperty", no_init)
-      .def("__init__", make_constructor(
-                           &createMultipleFileProperty, default_call_policies(),
-                           (arg("name"), arg("extensions") = object())))
       .def("__init__",
            make_constructor(
-               &createMultipleFilePropertyWithAction, default_call_policies(),
-               (arg("name"), arg("action"), arg("extensions") = object())))
+               &createMultipleFilePropertyDefaultAction,
+               default_call_policies(),
+               (arg("name"), arg("extensions") = object(), arg("prefix") = "")))
+      .def("__init__", make_constructor(
+                           &createMultipleFileProperty, default_call_policies(),
+                           (arg("name"), arg("action"),
+                            arg("extensions") = object(), arg("prefix") = "")))
       // Override the base class one to do something more appropriate
       .add_property("value", &valueAsPyObject);
 }
