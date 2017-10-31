@@ -17,6 +17,19 @@ Improved
 Bugfixes
 ########
 
+Vesuvio
+-------
+
+New
+###
+
+Improved
+########
+- :ref:`LoadVesuvio <algm-LoadVesuvio>` can now accept a discontinuous range of sample runs - uses the same syntax as the Load algorithm.
+
+Bugfixes
+########
+
 Data Analysis Interfaces
 ------------------------
 
