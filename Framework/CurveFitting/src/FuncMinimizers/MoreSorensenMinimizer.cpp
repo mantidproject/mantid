@@ -172,7 +172,6 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
  *        solution to the TR subproblem.
  *  @param nd :: The 2-norm of d.
  *  @param options :: The options.
- *  @param inform :: The inform struct.
  */
 void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J,
                                          const DoubleFortranVector &f,
