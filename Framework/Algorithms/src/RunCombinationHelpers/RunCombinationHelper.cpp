@@ -99,6 +99,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second) {
  * the same units
  *  and the same instrument name. Will throw if they don't.
  *  @param  inputWorkspaces The names of the input workspaces
+ *  @param g_log A logger to send error messages to
  *  @return A list of pointers to the input workspace, ordered by increasing
  * frame starting point
  *  @throw  Exception::NotFoundError If an input workspace doesn't exist

@@ -66,9 +66,10 @@ Object_sptr createCappedCylinder(double radius, double height,
       cappedCylinderXML(radius, height, baseCentre, axis, id));
 }
 
-void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos) {
+void addSourceToInstrument(Instrument_sptr &instrument, const V3D &sourcePos,
+                           std::string name = "moderator") {
   ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), instrument.get());
+      new ObjComponent(name, Object_sptr(new Object), instrument.get());
   source->setPos(sourcePos);
   instrument->add(source);
   instrument->markAsSource(source);
@@ -464,7 +465,7 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                        pixelSpacing, bankName.str(), bankPos, bankRot);
   }
 
-  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0));
+  addSourceToInstrument(testInst, V3D(0.0, 0.0, -10.0), "source");
   addSampleToInstrument(testInst, V3D(0.0, 0.0, 0.0));
 
   return testInst;
