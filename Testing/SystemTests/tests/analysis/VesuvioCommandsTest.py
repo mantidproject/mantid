@@ -145,6 +145,7 @@ class FitSingleSpectrumNoBackgroundTest(stresstesting.MantidStressTest):
     def runTest(self):
         flags = _create_test_flags(background=False)
         runs = "15039-15045"
+        flags['spectra'] = '135'
         self._fit_results = fit_tof(runs, flags)
 
     def validate(self):
