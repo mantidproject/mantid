@@ -222,12 +222,6 @@ def generate_output_param_table(name, difa, difc, tzero):
     tbl.addRow([float(difa), float(difc), float(tzero)])
 
 
-def _default_if_false(value, default):
-    if value:
-        return value
-    return default
-
-
 def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws,
                                progress_range=None):
     """
