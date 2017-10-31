@@ -204,9 +204,10 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   // SB. eq 22 -> |grad S|, |grad C|
   // SB. eq 37 -> test
   for (size_t i = 0; i < npoints; i++) {
-    cnorm += cgrad[i] * cgrad[i] * metric[i] * metric[i];
-    snorm += sgrad[i] * sgrad[i] * metric[i] * metric[i];
-    csnorm += cgrad[i] * sgrad[i] * metric[i] * metric[i];
+    auto metric2 = metric[i] * metric[i];
+    cnorm += cgrad[i] * cgrad[i] * metric2;
+    snorm += sgrad[i] * sgrad[i] * metric2;
+    csnorm += cgrad[i] * sgrad[i] * metric2;
   }
   cnorm = sqrt(cnorm);
   snorm = sqrt(snorm);
@@ -221,8 +222,9 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   m_angle = sqrt(0.5 * (1. - csnorm / snorm / cnorm));
   // csnorm could be greater than snorm * cnorm due to rounding issues
   // so check for nan
-  if (m_angle != m_angle)
+  if (!std::isfinite(m_angle)) {
     m_angle = 0.;
+  }
 
   // Calculate the search directions
 
@@ -233,7 +235,6 @@ void MaxentCalculator::iterate(const std::vector<double> &data,
   for (size_t i = 0; i < npoints; i++) {
     m_directionsIm[0][i] = metric[i] * cgrad[i] / cnorm;
     m_directionsIm[1][i] = metric[i] * sgrad[i] / snorm;
-    // m_directionsIm[1][i] = metric[i] * (sgrad[i] / snorm - cgrad[i] / cnorm);
   }
 
   // Search directions (data space)
