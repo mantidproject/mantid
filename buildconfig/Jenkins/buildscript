@@ -282,7 +282,7 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 ###############################################################################
 # Run the documentation tests on Ubuntu when doing a pull request build but not for python 3.
 ###############################################################################
-if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]] && [[ ! ${JOB_NAME} == *python3* ]]; then
+if [[ ${ON_UBUNTU} == true ]] && [[ ${PRBUILD} == true ]]; then
   # Remove doctrees directory so it forces a full reparse. It seems that
   # without this newly added doctests are not executed
   if [ -d $BUILD_DIR/docs/doctrees ]; then

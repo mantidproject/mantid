@@ -284,8 +284,9 @@ def removeoutlayer(wksp):
                 a1.dataE(i)[j] = 0.0
 
 
-def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPeriod, downPeriod, existingP0,
-               SEConstants, gparams, convertToSEL, lnPOverLam, diagnostics="0", removeoutlayer="0", floodfile="none", ):
+def nrSESANSFn(runList, nameList, P0runList, P0nameList, minSpec, maxSpec, upPeriod, downPeriod,  # noqa: C901
+               existingP0, SEConstants, gparams, convertToSEL, lnPOverLam, diagnostics="0", removeoutlayer="0",
+               floodfile="none"):
     nlist = parseNameList(nameList)
     mtd.sendLogMessage("This is the sample nameslist:" + str(nlist))
     rlist = parseRunList(runList)
@@ -1122,8 +1123,8 @@ def nrPACorrection(UpUpWksp, UpDownWksp, DownUpWksp, DownDownWksp):
     mtd.deleteWorkspace('D')
 
 
-def nrPNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpec, gparams, floodfile, PNRwithPA, pnums,
-            doCorrs, doLDCorrs="0", subbgd=0, diagnostics=0):
+def nrPNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpec, gparams, floodfile,  # noqa: C901
+            PNRwithPA, pnums, doCorrs, doLDCorrs="0", subbgd=0, diagnostics=0):
     nlist = parseNameList(nameList)
     mtd.sendLogMessage("This is the sample nameslist:" + str(nlist))
     rlist = parseRunList(runList)
@@ -1192,7 +1193,6 @@ def nrPNRFn(runList, nameList, incidentAngles, DBList, specChan, minSpec, maxSpe
             MoveInstrumentComponent(wksp + "det", "DetectorBench", Y=str((125.0 - float(minSpec)) * 1.2e-3))
             # add a bit to the angle to put the first spectrum of the group in the right place
             a1 = 2.0 * float(incAngles[k]) + atan((float(minSpec) - float(specChan)) * 1.2e-3 / 3.53) * 180.0 / pi
-            # print str(2.0*float(incAngles[k]))+" "+str(atan((float(minSpec)-float(specChan))*1.2e-3/3.63)*180.0/pi)+" "+str(a1)
             RotateInstrumentComponent(wksp + "det", "DetectorBench", X="-1.0", Angle=str(a1))
             floodnorm(wksp + "det", floodfile)
             if subbgd == 1:

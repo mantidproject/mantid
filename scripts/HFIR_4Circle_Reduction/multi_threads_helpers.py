@@ -25,13 +25,14 @@ class AddPeaksThread(QThread):
         :param exp_number:
         :param scan_number_list:
         """
-        QThread.__init__(self)
-
         # check
         assert main_window is not None, 'Main window cannot be None'
         assert isinstance(exp_number, int), 'Experiment number must be an integer.'
         assert isinstance(scan_number_list, list), 'Scan number list must be a list but not %s.' \
                                                    '' % str(type(scan_number_list))
+
+        # init thread
+        super(AddPeaksThread, self).__init__()
 
         # set values
         self._mainWindow = main_window
@@ -335,5 +336,123 @@ class IntegratePeaksThread(QThread):
         peak_info_obj.set_motor(motor_name, motor_step, motor_std_dev)
         # set peak integration dictionary
         peak_info_obj.set_integration(peak_integration_dict)
+
+        return
+
+
+class MergePeaksThread(QThread):
+    """A thread to integrate peaks
+
+    """
+    # signal to report state: (1) scan, (2) message
+    mergeMsgSignal = QtCore.pyqtSignal(int, str)
+    saveMsgSignal = QtCore.pyqtSignal(int, str)
+
+    def __init__(self, main_window, exp_number, scan_number_list, md_file_list):
+        """Initialization
+
+        :param main_window:
+        :param exp_number:
+        :param scan_number_list: list of tuples for scan as (scan number, pt number list, state as merged)
+        :param md_file_list:
+        """
+        # check
+        assert main_window is not None, 'Main window cannot be None'
+        assert isinstance(exp_number, int), 'Experiment number must be an integer.'
+        assert isinstance(scan_number_list, list), 'Scan (info) tuple list {0} must be a list but not {1}.' \
+                                                   ''.format(scan_number_list, type(scan_number_list))
+        assert isinstance(md_file_list, list) or md_file_list is None, 'Output MDWorkspace file name list {0} ' \
+                                                                       'must be either a list or None but not {1}.' \
+                                                                       ''.format(md_file_list, type(md_file_list))
+
+        if md_file_list is not None and len(scan_number_list) != len(md_file_list):
+            raise RuntimeError('If MD file list is not None, then it must have the same size ({0}) as the '
+                               'scans ({1}) to merge.'.format(len(md_file_list), len(scan_number_list)))
+
+        # start thread
+        QThread.__init__(self)
+
+        # set values
+        self._mainWindow = main_window
+        self._expNumber = exp_number
+        self._scanNumberList = scan_number_list[:]
+        self._outputMDFileList = None
+        if md_file_list is not None:
+            self._outputMDFileList = md_file_list[:]
+
+        # link signals
+        self.mergeMsgSignal.connect(self._mainWindow.update_merge_value)
+        self.saveMsgSignal.connect(self._mainWindow.update_file_name)
+
+        return
+
+    def __del__(self):
+        """Delete signal
+
+        :return:
+        """
+        self.wait()
+
+        return
+
+    def run(self):
+        """Execute the thread!
+
+        i.e., merging the scans
+        :return:
+        """
+        if self._outputMDFileList is None or len(self._outputMDFileList) == 0:
+            save_file = False
+        else:
+            save_file = True
+
+        for index, scan_number in enumerate(self._scanNumberList):
+            # set up merging parameters
+            pt_number_list = list()
+
+            # emit signal for run start (mode 0)
+            # self.peakMergeSignal.emit(scan_number, 'In merging')
+            self.mergeMsgSignal.emit(scan_number, 'Being merged')
+
+            # merge if not merged
+            merged_ws_name = None
+            out_file_name = 'No File To Save'
+            try:
+                status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
+                                                                                scan_no=scan_number,
+                                                                                pt_num_list=pt_number_list)
+                if status:
+                    merged_ws_name = str(ret_tup[0])
+                    error_message = ''
+                else:
+                    error_message = str(ret_tup)
+
+                # save
+                if save_file:
+                    out_file_name = self._outputMDFileList[index]
+                    self._mainWindow.controller.save_merged_scan(exp_number=self._expNumber,
+                                                                 scan_number=scan_number,
+                                                                 pt_number_list=pt_number_list,
+                                                                 merged_ws_name=merged_ws_name,
+                                                                 output=out_file_name)
+                # END-IF-ELSE
+
+            except RuntimeError as run_err:
+                # error
+                status = False
+                error_message = 'Failed: {0}'.format(run_err)
+
+            # continue to
+            if status:
+                # successfully merge peak
+                assert merged_ws_name is not None, 'Impossible situation'
+                self.mergeMsgSignal.emit(scan_number, merged_ws_name)
+                self.saveMsgSignal.emit(scan_number, out_file_name)
+            else:
+                # merging error
+                self.mergeMsgSignal.emit(scan_number, error_message)
+                continue
+                # self._mainWindow.ui.tableWidget_mergeScans.set_status(scan_number, 'Merged')
+            # END-IF
 
         return
