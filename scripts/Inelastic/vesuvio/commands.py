@@ -41,6 +41,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
 
     # Load
     fit_mode = flags['fit_mode']
+    back_banks = VESUVIO().backward_banks
 
     if isinstance(runs, MatrixWorkspace):
         sample_data = runs
@@ -58,7 +59,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         else:
             try:
                 first_spec = int(spectra.split("-")[0])
-                back_banks = VESUVIO().backward_banks
                 flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
             except:
                 raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
