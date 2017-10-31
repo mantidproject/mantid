@@ -82,9 +82,7 @@ public:
   };
 
   /// Returns a clone of the workspace
-  std::unique_ptr<IMDWorkspace> clone() const {
-    return std::unique_ptr<IMDWorkspace>(doClone());
-  }
+  std::unique_ptr<IMDWorkspace> clone() const;
 
   /// Returns a default-initialized clone of the workspace
   std::unique_ptr<IMDWorkspace> cloneEmpty() const {

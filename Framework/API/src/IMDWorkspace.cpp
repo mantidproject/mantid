@@ -18,6 +18,17 @@ IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 
+/** Returns a clone of the workspace. The name of the clone is cleared
+ * as the clone is not in the ADS.
+ * This method shadows Workspace::clone().
+ * @return a nameless clone.
+ */
+std::unique_ptr<IMDWorkspace> IMDWorkspace::clone() const {
+  std::unique_ptr<IMDWorkspace> ws{doClone()};
+  ws->clearName();
+  return ws;
+}
+
 /** Creates a single iterator and returns it.
  *
  * This calls createIterators(), a pure virtual method on IMDWorkspace which
