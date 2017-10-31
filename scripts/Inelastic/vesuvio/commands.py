@@ -40,7 +40,6 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         raise ValueError('Must perform at least one iteration')
 
     # Load
-    spectra = flags['spectra']
     fit_mode = flags['fit_mode']
 
     if isinstance(runs, MatrixWorkspace):
@@ -48,6 +47,7 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         flags['runs'] = runs.getName()
         flags['spectra'] = sample_data.getAxis(0).extractValues()
     else:
+        spectra = flags['spectra']
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
                                          flags.get('bin_parameters', None))
