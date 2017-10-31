@@ -28,7 +28,6 @@ Workspace_uptr Workspace::clone() const {
   return ws;
 }
 
-
 /** Set the title of the workspace
  *
  *  @param t :: The title
