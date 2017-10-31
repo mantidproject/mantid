@@ -83,8 +83,47 @@ void FilterPeaks::exec() {
   // Copy over ExperimentInfo from input workspace
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
+  const double filterValue = getProperty("FilterValue");
+  const std::string Operator = getProperty("Operator");
   const std::string filterVariable = getProperty("FilterVariable");
-  double (*filterFunction)(const Mantid::Geometry::IPeak &) = nullptr;
+
+  const auto filterFunction = getFilterVariableFunction(filterVariable);
+
+  // Choose which version of the function to use based on the operator
+  if (Operator == "<")
+    filterPeaks<std::less<double>>(inputWS, filteredWS, filterFunction,
+                                   filterValue);
+  else if (Operator == ">")
+    filterPeaks<std::greater<double>>(inputWS, filteredWS, filterFunction,
+                                      filterValue);
+  else if (Operator == "=")
+    filterPeaks<std::equal_to<double>>(inputWS, filteredWS, filterFunction,
+                                       filterValue);
+  else if (Operator == "<=")
+    filterPeaks<std::less_equal<double>>(inputWS, filteredWS, filterFunction,
+                                         filterValue);
+  else if (Operator == ">=")
+    filterPeaks<std::greater_equal<double>>(inputWS, filteredWS, filterFunction,
+                                            filterValue);
+  else
+    throw std::invalid_argument("Unknown Operator " + Operator);
+
+  setProperty("OutputWorkspace", filteredWS);
+}
+
+/** Get the filter function to use to filter peaks
+ *
+ * This will return a std::function object that takes a peak
+ * and returns a double representing the current value of this
+ * peak to be compared against the user's filter value.
+ *
+ * @param filterVariable :: a string representing the filter function to use.
+ * e.g. "h+k+l" or "TOF".
+ * @return a function object which will return the a value for a given peak
+ */
+FilterPeaks::FilterFunction FilterPeaks::getFilterVariableFunction(
+    const std::string &filterVariable) const {
+  FilterFunction filterFunction;
   if (filterVariable == "h+k+l")
     filterFunction = &HKLSum;
   else if (filterVariable == "h^2+k^2+l^2")
@@ -103,32 +142,7 @@ void FilterPeaks::exec() {
     filterFunction = &QMOD;
   else
     throw std::invalid_argument("Unknown FilterVariable: " + filterVariable);
-
-  const double filterValue = getProperty("FilterValue");
-  const std::string Operator = getProperty("Operator");
-
-  for (int i = 0; i < inputWS->getNumberPeaks(); ++i) {
-    bool pass(false);
-    const Geometry::IPeak &currentPeak = inputWS->getPeak(i);
-    const double currentValue =
-        filterFunction(currentPeak); // filterFunction pointer set above
-
-    if (Operator == "<")
-      pass = (currentValue < filterValue);
-    else if (Operator == ">")
-      pass = (currentValue > filterValue);
-    else if (Operator == "=")
-      pass = (currentValue == filterValue);
-    else if (Operator == "<=")
-      pass = (currentValue <= filterValue);
-    else if (Operator == ">=")
-      pass = (currentValue >= filterValue);
-
-    if (pass)
-      filteredWS->addPeak(currentPeak);
-  }
-
-  setProperty("OutputWorkspace", filteredWS);
+  return filterFunction;
 }
 
 } // namespace Crystal
