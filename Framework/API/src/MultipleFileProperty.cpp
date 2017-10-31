@@ -391,12 +391,12 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         allFullFileNames);
   }
 
-  if (errorMsg.empty()) {
-    // cache the new version of things
-    m_oldPropValue = propValue;
-    m_oldFoundValue = std::move(allFullFileNames);
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = std::move(allFullFileNames);
+  if (errorMsg.empty())
     return SUCCESS;
-  } else
+  else
     return errorMsg;
 }
 

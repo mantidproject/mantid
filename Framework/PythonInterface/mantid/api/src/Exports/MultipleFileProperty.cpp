@@ -59,7 +59,7 @@ createMultipleFileProperty(const std::string &name, unsigned int action,
       extsAsVector = PySequenceToVector<std::string>(extensions)();
     }
   }
-  return new MultipleFileProperty(name, action, extsAsVector);
+  return new MultipleFileProperty(name, action, extsAsVector, prefix);
 }
 
 MultipleFileProperty *
