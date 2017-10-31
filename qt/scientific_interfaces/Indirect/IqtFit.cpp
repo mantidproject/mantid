@@ -124,9 +124,6 @@ void IqtFit::setup() {
           SLOT(typeSelection(int)));
   connect(m_uiForm.pbSingle, SIGNAL(clicked()), this, SLOT(singleFit()));
 
-  connect(m_uiForm.dsSampleInput, SIGNAL(filesFound()), this,
-          SLOT(updatePlot()));
-
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
@@ -900,7 +897,8 @@ void IqtFit::updateProperties(int specNo) {
   auto parameterNames = m_parameterValues.keys();
 
   // Check whether parameter values exist for the specified spectrum number
-  if (m_parameterValues[parameterNames[0]].contains(index)) {
+  if (!parameterNames.isEmpty() &&
+      m_parameterValues[parameterNames[0]].contains(index)) {
 
     for (auto &paramName : parameterNames) {
       auto propertyName = m_parameterToProperty[paramName];
