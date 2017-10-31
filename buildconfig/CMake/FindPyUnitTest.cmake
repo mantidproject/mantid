@@ -6,7 +6,7 @@
 #       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
 #                           ${_testname_prefix}_TestName
 #       ${ARGN} :: List of test files
-macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
+function ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
   # Property for the module directory
   set ( _working_dir ${CMAKE_BINARY_DIR}/bin/Testing )
   if ( MSVC )
@@ -50,7 +50,7 @@ macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
                              TIMEOUT ${TESTING_TIMEOUT} )
     endif()
   endforeach ( part ${ARGN} )
-endmacro ( PYUNITTEST_ADD_TEST )
+endfunction ()
 
 #=============================================================
 # main()
