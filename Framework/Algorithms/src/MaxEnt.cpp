@@ -50,7 +50,6 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"Angstrom^-1", "Angstrom"}};
 // A threshold for small singular values
 const double THRESHOLD = 1E-6;
-
 }
 
 //----------------------------------------------------------------------------------------------
@@ -554,7 +553,7 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
   auto a = gsl_matrix_view_array(A[0], dim, dim);
   auto b = gsl_vector_const_view_array(B[0], dim);
 
-  std::vector<double> vVec(dim*dim), sVec(dim), wVec(dim), delta(dim);
+  std::vector<double> vVec(dim * dim), sVec(dim), wVec(dim), delta(dim);
 
   auto v = gsl_matrix_view_array(vVec.data(), dim, dim);
   auto s = gsl_vector_view_array(sVec.data(), dim);
@@ -573,7 +572,8 @@ std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   // Apply a threshold to small singular values
   double threshold = THRESHOLD * max;
-  std::transform(sVec.begin(), sVec.end(), sVec.begin(), [&threshold](double el){return el > threshold ? el : 0.0;});
+  std::transform(sVec.begin(), sVec.end(), sVec.begin(),
+                 [&threshold](double el) { return el > threshold ? el : 0.0; });
 
   // Solve A*x = B
   gsl_linalg_SV_solve(&a.matrix, &v.matrix, &s.vector, &b.vector, &x.vector);
