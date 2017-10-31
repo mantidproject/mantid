@@ -47,11 +47,21 @@ def fit_tof(runs, flags, iterations=1, convergence_threshold=None):
         flags['runs'] = runs.getName()
         flags['spectra'] = sample_data.getAxis(0).extractValues()
     else:
-        spectra = flags['spectra']
         sample_data = load_and_crop_data(runs, spectra, flags['ip_file'],
                                          flags['diff_mode'], fit_mode,
                                          flags.get('bin_parameters', None))
         flags['runs'] = runs
+        spectra = flags['spectra']
+        if spectra == 'backward' or spectra == 'forward':
+            flags['back_scattering'] = spectra == 'backward'
+        else:
+            try:
+                first_spec = int(spectra.split("-")[0])
+                back_banks = VESUVIO().backward_banks
+                flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
+            except:
+                raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
+                                   "'backward' or specified with the syntax 'a-b'.")
 
     # Load container runs if provided
     container_data = None
@@ -84,19 +94,7 @@ def fit_tof_impl(sample_data, container_data, flags, iterations, convergence_thr
         raise RuntimeError("Multiple scattering flags not provided. Set the ms_flag, 'ms_enabled' "
                            "to false, in order to disable multiple scattering corrections.")
 
-    if spectra == 'backward' or spectra == 'forward':
-        flags['back_scattering'] = spectra == 'backward'
-    else:
-        try:
-            first_spec = int(spectra.split("-")[0])
-            back_banks = VESUVIO().backward_banks
-            flags['back_scattering'] = any([lower <= first_spec <= upper for lower, upper in back_banks])
-        except:
-            raise RuntimeError("Invalid value given for spectrum range: Range must either be 'forward', "
-                               "'backward' or specified with the syntax 'a-b'.")
-
     last_results = None
-
     exit_iteration = 0
 
     index_to_symbol_map = filter(lambda x: 'symbol' in x[1], enumerate(flags['masses']))
