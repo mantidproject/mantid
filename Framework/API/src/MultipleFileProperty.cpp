@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace // anonymous
-{
+    {
 /// static logger
 Mantid::Kernel::Logger g_log("MultipleFileProperty");
 

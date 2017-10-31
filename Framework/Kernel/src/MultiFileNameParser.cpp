@@ -214,8 +214,8 @@ bool ReverseCaselessCompare::operator()(const std::string &a,
 
 /// Constructor.
 Parser::Parser()
-    : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instrumentAlias(),
-      m_underscoreString(), m_runString(), m_extString(),
+    : m_runs(), m_fileNames(), m_multiFileName(), m_dirString(),
+      m_instrumentAlias(), m_underscoreString(), m_runString(), m_extString(),
       // m_zeroPadding(),
       m_validInstNames() {
   ConfigServiceImpl &config = ConfigService::Instance();
@@ -342,7 +342,8 @@ Parser::parseStep(const std::string &multiFileName) {
   m_runs = parseMultiRunString(m_runString);
 
   // Set up helper functor.
-  GenerateFileName generateFileName(m_dirString, m_extString, m_instrumentAlias);
+  GenerateFileName generateFileName(m_dirString, m_extString,
+                                    m_instrumentAlias);
 
   // Generate complete file names for each run using helper functor.
   std::vector<std::vector<std::string>> fileNames;
@@ -424,11 +425,12 @@ void Parser::split() {
       throw std::runtime_error("There does not appear to be any runs present.");
 
     if (isdigit(base[0]))
-      m_instrumentAlias = ConfigService::Instance().getString("default.instrument");
+      m_instrumentAlias =
+          ConfigService::Instance().getString("default.instrument");
     else
       throw std::runtime_error(
           "There does not appear to be a valid instrument name present.");
-  } else if(boost::starts_with(base, m_instrumentAlias)) {
+  } else if (boost::starts_with(base, m_instrumentAlias)) {
     // Chop off instrument name
     base = base.substr(m_instrumentAlias.size(), base.size());
   }
@@ -439,7 +441,8 @@ void Parser::split() {
   InstrumentInfo instInfo =
       ConfigService::Instance().getInstrument(m_instrumentAlias);
   // why?
-  // m_instrumentAlias = instInfo.shortName(); // Make sure we're using the shortened
+  // m_instrumentAlias = instInfo.shortName(); // Make sure we're using the
+  // shortened
   // form of the isntrument name.
 
   if (boost::starts_with(base, instInfo.delimiter())) {
