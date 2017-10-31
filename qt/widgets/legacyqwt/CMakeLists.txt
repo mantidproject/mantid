@@ -111,6 +111,7 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsLegacyQwtTest
   QT4_LINK_LIBS
     Qwt5
   MTD_QT_LINK_LIBS
+    MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
   PARENT_DEPENDENCIES
     GUITests

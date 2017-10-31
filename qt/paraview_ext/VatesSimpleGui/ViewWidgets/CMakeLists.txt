@@ -126,6 +126,7 @@ mtd_add_qt_library (TARGET_NAME VatesSimpleGuiViewWidgets
     Qwt5
   MTD_QT_LINK_LIBS
       MantidQtWidgetsCommon
+      MantidQtWidgetsLegacyQwt
       VatesSimpleGuiQtWidgets
       MantidQtWidgetsFactory
       MantidQtWidgetsSliceViewer

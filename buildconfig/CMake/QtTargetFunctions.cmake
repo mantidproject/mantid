@@ -142,10 +142,9 @@ function (mtd_add_qt_target)
 
   # Target properties
   _disable_suggest_override( ${PARSED_QT_VERSION} ${_target} )
-  _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
-                              ${_mtd_includes} ${PARSED_INCLUDE_DIRS})
+                              ${PARSED_INCLUDE_DIRS})
   if ( PARSED_SYSTEM_INCLUDE_DIRS )
     target_include_directories (${_target} SYSTEM PUBLIC ${PARSED_SYSTEM_INCLUDE_DIRS})
   endif()
@@ -173,7 +172,7 @@ function (mtd_add_qt_target)
     # Set the name of the generated library
     set_target_properties ( ${_target} PROPERTIES OUTPUT_NAME ${PARSED_QT_PLUGIN} )
   endif()
-  
+
   if (NOT ${PARSED_EXCLUDE_FROM_ALL})
     if (NOT ${PARSED_INSTALL_DIR})
         set(INSTALL_DESTINATION_DIR ${PARSED_INSTALL_DIR})
@@ -242,11 +241,9 @@ function (mtd_add_qt_test_executable)
   endif()
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})
-  _extract_interface_includes (_mtd_includes ${_mtd_qt_libs})
 
   # client and system headers
-  target_include_directories ( ${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS}
-                               ${_mtd_includes} )
+  target_include_directories ( ${_target_name} PRIVATE ${PARSED_INCLUDE_DIRS} )
   target_include_directories ( ${_target_name} SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR}
                                ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
@@ -341,15 +338,3 @@ function (_disable_suggest_override _qt_version _target)
       COMPILE_OPTIONS "${_options}" )
   endif()
 endfunction ()
-
-# Given a list of target libraries extract the INTERFACE_INCLUDE_DIRECTORIES
-# output_variable: The name of the variable to set in the parent scope
-# argn: A list of existing target names
-function (_extract_interface_includes output_variable)
-  set (_out)
-  foreach (_item ${ARGN})
-    get_target_property (_interface_inc ${_item} INTERFACE_INCLUDE_DIRECTORIES)
-    list (APPEND _out ${_interface_inc})
-  endforeach()
-  set (${output_variable} ${_out} PARENT_SCOPE)
-endfunction()

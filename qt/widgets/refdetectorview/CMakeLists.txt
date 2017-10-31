@@ -29,9 +29,6 @@ set ( UI_FILES
        inc/MantidQtWidgets/RefDetectorView/RefImageView.ui
 )
 
-include_directories ( inc )
-include_directories ( ../spectrumviewer/inc )
-
 ###########################################################################
 # Main Library Target
 ###########################################################################
@@ -42,6 +39,8 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsRefDetectorView
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
   DEFS IN_MANTIDQT_REFDETECTORVIEWER
+  INCLUDE_DIRS
+    inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}

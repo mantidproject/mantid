@@ -126,8 +126,6 @@ set ( UI_FILES
   inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui
 )
 
-include_directories ( inc )
-
 # Target
 mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   QT_VERSION 4
@@ -135,7 +133,10 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsInstrumentView
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
   UI ${UI_FILES}
-  DEFS IN_MANTIDQT_INSTRUMENTVIEW
+  DEFS
+    IN_MANTIDQT_INSTRUMENTVIEW
+  INCLUDE_DIRS
+    inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
