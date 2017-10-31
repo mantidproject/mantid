@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/VMD.h"
 #include "ui_LineViewer.h"
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
 #include <qwt_painter.h>

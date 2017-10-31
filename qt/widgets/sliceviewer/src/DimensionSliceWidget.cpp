@@ -1,7 +1,7 @@
 #include "MantidQtWidgets/SliceViewer/DimensionSliceWidget.h"
 #include "MantidKernel/UnitLabel.h"
 #include <iosfwd>
-#include <qlayout.h>
+#include <QLayout>
 
 namespace MantidQt {
 namespace SliceViewer {

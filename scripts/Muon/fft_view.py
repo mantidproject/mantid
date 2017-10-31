@@ -8,6 +8,9 @@ from Muon import table_utils
 
 
 class FFTView(QtGui.QWidget):
+    """
+    creates the layout for the FFT GUI
+    """
     # signals
     buttonSignal = QtCore.pyqtSignal()
     tableClickSignal = QtCore.pyqtSignal(object,object)
@@ -127,7 +130,7 @@ class FFTView(QtGui.QWidget):
     def buttonClick(self):
         self.buttonSignal.emit()
 
-    #functions
+    # responses to commands
     def activateButton(self):
         self.button.setEnabled(True)
 
@@ -149,6 +152,7 @@ class FFTView(QtGui.QWidget):
         #hide complex ws
         self.FFTTable.setRowHidden(2,self.getWS()=="PhaseQuad")
 
+    # these are for getting inputs
     def getRunName(self):
         if mantid.AnalysisDataService.doesExist("MuonAnalysis_1"):
             tmpWS=mantid.AnalysisDataService.retrieve("MuonAnalysis_1")
@@ -166,7 +170,7 @@ class FFTView(QtGui.QWidget):
         return inputs
 
     def addFFTComplex(self,inputs):
-        inputs["InputImagWorkspace"]="__ImTmp__"#str( self.Im_ws.currentText()).replace(";","; ")
+        inputs["InputImagWorkspace"]="__ImTmp__"
         inputs["Imaginary"] = 0 #always zero
 
     def addFFTShift(self,inputs):
@@ -204,7 +208,7 @@ class FFTView(QtGui.QWidget):
         inputs['InputWorkspace']="__phaseQuad__"
         inputs['OutputWorkspace']="__ReTmp__"
 
-    # get methods
+    # get methods (from the GUI)
     def getWS(self):
         return str( self.ws.currentText()).replace(";","; ")
 

@@ -67,9 +67,13 @@ private:
                            const std::vector<double> &tof,
                            const std::vector<double> &height2, double &difc,
                            double &t0, double &difa);
+  API::ITableWorkspace_sptr
+  sortTableWorkspace(API::ITableWorkspace_sptr &table);
   API::MatrixWorkspace_sptr m_uncalibratedWS;
   API::ITableWorkspace_sptr m_calibrationTable;
   API::ITableWorkspace_sptr m_peakPositionTable;
+  API::ITableWorkspace_sptr m_peakWidthTable;
+  API::ITableWorkspace_sptr m_peakHeightTable;
   std::vector<double> m_peaksInDspacing;
   std::map<detid_t, size_t> m_detidToRow;
   double m_tofMin{0.};

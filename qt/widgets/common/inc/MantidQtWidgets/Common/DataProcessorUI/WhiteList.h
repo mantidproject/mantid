@@ -1,9 +1,10 @@
 #ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H
 #define MANTIDQTMANTIDWIDGETS_DATAPROCESSORWHITELIST_H
 
+#include "MantidQtWidgets/Common/DataProcessorUI/Column.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/ConstColumnIterator.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 
-#include <map>
 #include <vector>
 
 #include <QString>
@@ -14,7 +15,12 @@ namespace DataProcessor {
 
 /** @class WhiteList
 
-WhiteList is an class defining a whitelist
+A whitelist is a ordered collection of algorithm properties,
+the values of which can be set from the DataProcessorWidget's
+processing table.
+
+Each entry in the whitelist also contains meta-data such as a description
+and visability status which are used when displaying the processing table.
 
 Copyright &copy; 2011-14 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -37,30 +43,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
 class EXPORT_OPT_MANTIDQT_COMMON WhiteList {
 public:
-  WhiteList() : m_lastIndex(0){};
-  virtual ~WhiteList(){};
+  using const_iterator = ConstColumnIterator;
 
   void addElement(const QString &colName, const QString &algProperty,
                   const QString &description, bool showValue = false,
                   const QString &prefix = "");
-  int colIndexFromColName(const QString &colName) const;
-  QString colNameFromColIndex(int index) const;
-  QString algPropFromColIndex(int index) const;
+  int indexFromName(const QString &colName) const;
+  QString name(int index) const;
+  QString algorithmProperty(int index) const;
   QString description(int index) const;
   QString prefix(int index) const;
-  bool showValue(int index) const;
-  size_t size() const;
+  bool isShown(int index) const;
+  std::size_t size() const;
+  const_iterator cbegin() const;
+  const_iterator begin() const;
+  const_iterator cend() const;
+  const_iterator end() const;
+  std::vector<QString> const &names() const;
 
 private:
-  int m_lastIndex;
-  std::map<QString, int> m_colNameToColIndex;
-  std::vector<QString> m_colIndexToColName;
-  std::vector<QString> m_colIndexToAlgProp;
-  std::vector<bool> m_showValue;
-  std::vector<QString> m_prefix;
-  std::vector<QString> m_description;
+  std::vector<QString> m_names;
+  std::vector<QString> m_algorithmProperties;
+  std::vector<bool> m_isShown;
+  std::vector<QString> m_prefixes;
+  std::vector<QString> m_descriptions;
 };
 }
 }

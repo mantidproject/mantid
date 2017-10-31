@@ -1325,7 +1325,7 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
  */
 void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
   auto it = m_extensions.begin();
-  while (it != m_extensions.cend()) {
+  while (it != m_extensions.end()) {
     switch (it->first) {
     case MantidMatrixModel::DX:
       if (ws->hasDx(0)) {
