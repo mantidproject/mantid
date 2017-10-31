@@ -99,10 +99,10 @@ double dotProduct(const DoubleFortranVector &x, const DoubleFortranVector &y) {
 /** Input:
  *  f = f(x_k), J = J(x_k),
  *  hf = \\sum_{i=1}^m f_i(x_k) \\nabla^2 f_i(x_k) (or an approx)
- * 
+ *
  *  We have a model
  *       m_k(d) = 0.5 f^T f  + d^T J f + 0.5 d^T (J^T J + HF) d
- * 
+ *
  *  This subroutine evaluates the model at the point d
  *  This value is returned as the scalar
  *        md :=m_k(d)
@@ -144,7 +144,7 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
  *          0.5||f||^2 - 0.5||fnew||^2     actual_reduction
  *    rho = -------------------------- = -------------------
  *              m_k(0)  - m_k(d)         predicted_reduction
- * 
+ *
  *  if model is good, rho should be close to one
  *  @param normf :: The 2-norm of the residuals vector at d = 0.
  *  @param normfnew :: The 2-norm of the residuals vector at d != 0.
@@ -289,7 +289,7 @@ void testConvergence(double normF, double normJF, double normF0, double normJF0,
 /**  Apply_scaling
  *   input  Jacobian matrix, J
  *   ouput  scaled Hessisan, H, and J^Tf, v.
- * 
+ *
  *   Calculates a diagonal scaling W, stored in w.diag
  *   updates v(i) -> (1/W_i) * v(i)
  *           A(i,j) -> (1 / (W_i * W_j)) * A(i,j)
