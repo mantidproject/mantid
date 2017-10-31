@@ -9,7 +9,9 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** SumOverlappingTubes : TODO: DESCRIPTION
+/** SumOverlappingTubes : Converts workspaces containing an instrument with PSD
+  tubes into a workspace with counts as a function of height and scattering
+  angle. Currently works for the D2B instrument geometry.
 
   Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -35,6 +37,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL SumOverlappingTubes : public API::Algorithm {
 public:
   const std::string name() const override { return "SumOverlappingTubes"; }
+  const std::string category() const override { return "ILL\\Diffraction"; }
   const std::string summary() const override {
     return "Takes workspaces containing an instrument with PSD and tubes, and "
            "converts to a workspace with counts as a function of height and "
