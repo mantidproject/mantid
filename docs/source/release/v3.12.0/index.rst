@@ -58,6 +58,7 @@ Changes
    LowQ <lowq>
    Muon Analysis <muon>
    Spectroscopy <spectroscopy>
+   Indirect Inelastic <indirect_inelastic>
 
 Full Change Listings
 --------------------
