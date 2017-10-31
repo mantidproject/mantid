@@ -50,7 +50,8 @@ public:
   ~Workspace();
 
   /** Returns a clone (copy) of the workspace with covariant return type in all
-   * derived classes.
+   * derived classes. Note that the name of the clone will be cleared as it
+   * is not stored in the ADS.
    *
    * Note that this public function is *not* virtual. This has two reasons:
    * - We want to enforce covariant return types. If this public clone() method
@@ -68,7 +69,7 @@ public:
    * - Covariant return types are in conflict with smart pointers, but if
    *   clone() is not virtual this is a non-issue.
    */
-  Workspace_uptr clone() const { return Workspace_uptr(doClone()); }
+  Workspace_uptr clone() const;
 
   /// Returns a default-initialized clone of the workspace
   Workspace_uptr cloneEmpty() const { return Workspace_uptr(doCloneEmpty()); }
@@ -104,6 +105,7 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   Workspace(const Workspace &);
+  void clearName() { m_name.clear(); }
   void setStorageMode(Parallel::StorageMode mode);
 
 private:

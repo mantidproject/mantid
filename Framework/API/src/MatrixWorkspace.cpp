@@ -76,6 +76,16 @@ MatrixWorkspace::~MatrixWorkspace() {
   }
 }
 
+/** Returns a clone of the workspace.
+ *  The name of the clone is cleared since it is not in the ADS.
+ *  @return a clone
+ */
+MatrixWorkspace_uptr MatrixWorkspace::clone() const {
+  MatrixWorkspace_uptr ws{doClone()};
+  ws->clearName();
+  return ws;
+}
+
 /** Returns a const reference to the IndexInfo object of the workspace.
  *
  * Used for access to spectrum number and detector ID information of spectra.
