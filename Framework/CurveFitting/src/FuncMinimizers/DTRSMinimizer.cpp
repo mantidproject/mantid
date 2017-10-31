@@ -905,8 +905,6 @@ void dtrsSolve(int n, double radius, double f, const DoubleFortranVector &c,
  *        solution to the TR subproblem.
  *  @param normd :: The 2-norm of d.
  *  @param options :: The options.
- *  @param inform :: The inform struct.
- *  @param w :: The work struct.
  */
 void DTRSMinimizer::solveDtrs(const DoubleFortranMatrix &J,
                               const DoubleFortranVector &f,

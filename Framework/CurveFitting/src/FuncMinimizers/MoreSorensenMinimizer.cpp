@@ -173,7 +173,6 @@ bool MoreSorensenMinimizer::getPdShift(double &sigma, DoubleFortranVector &d,
  *  @param nd :: The 2-norm of d.
  *  @param options :: The options.
  *  @param inform :: The inform struct.
- *  @param w :: The work struct.
  */
 void MoreSorensenMinimizer::moreSorensen(const DoubleFortranMatrix &J,
                                          const DoubleFortranVector &f,
