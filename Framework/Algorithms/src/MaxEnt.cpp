@@ -14,6 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include <gsl/gsl_linalg.h>
+#include <algorithm>
 #include <numeric>
 
 namespace Mantid {
@@ -47,6 +48,9 @@ std::map<std::string, std::string> inverseLabel = {{"s", "Hz"},
                                                    {"MHz", "microsecond"},
                                                    {"Angstrom", "Angstrom^-1"},
                                                    {"Angstrom^-1", "Angstrom"}};
+// A threshold for small singular values
+const double THRESHOLD = 1E-6;
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -543,64 +547,36 @@ double MaxEnt::calculateChi(const QuadraticCoefficients &coeffs, double a,
 * @param B :: [input] The vector B
 * @return :: The solution x
 */
-std::vector<double> MaxEnt::solveSVD(const DblMatrix &A, const DblMatrix &B) {
+std::vector<double> MaxEnt::solveSVD(DblMatrix &A, const DblMatrix &B) {
 
   size_t dim = A.size().first;
 
-  gsl_matrix *a = gsl_matrix_alloc(dim, dim);
-  gsl_matrix *v = gsl_matrix_alloc(dim, dim);
-  gsl_vector *s = gsl_vector_alloc(dim);
-  gsl_vector *w = gsl_vector_alloc(dim);
-  gsl_vector *x = gsl_vector_alloc(dim);
-  gsl_vector *b = gsl_vector_alloc(dim);
+  auto a = gsl_matrix_view_array(A[0], dim, dim);
+  auto b = gsl_vector_const_view_array(B[0], dim);
 
-  // Need to copy from DblMatrix to gsl matrix
+  std::vector<double> vVec(dim*dim), sVec(dim), wVec(dim), delta(dim);
 
-  for (size_t k = 0; k < dim; k++)
-    for (size_t l = 0; l < dim; l++)
-      gsl_matrix_set(a, k, l, A[k][l]);
-  for (size_t k = 0; k < dim; k++)
-    gsl_vector_set(b, k, B[k][0]);
+  auto v = gsl_matrix_view_array(vVec.data(), dim, dim);
+  auto s = gsl_vector_view_array(sVec.data(), dim);
+  auto w = gsl_vector_view_array(wVec.data(), dim);
+  auto x = gsl_vector_view_array(delta.data(), dim);
 
   // Singular value decomposition
-  gsl_linalg_SV_decomp(a, v, s, w);
+  gsl_linalg_SV_decomp(&a.matrix, &v.matrix, &s.vector, &w.vector);
 
   // A could be singular or ill-conditioned. We can use SVD to obtain a least
-  // squares
-  // solution by setting the small (compared to the maximum) singular values to
-  // zero
+  // squares solution by setting the small (compared to the maximum) singular
+  // values to zero
 
   // Find largest sing value
-  double max = gsl_vector_get(s, 0);
-  for (size_t i = 0; i < dim; i++) {
-    if (max < gsl_vector_get(s, i))
-      max = gsl_vector_get(s, i);
-  }
+  double max = *std::max_element(sVec.begin(), sVec.end());
 
   // Apply a threshold to small singular values
-  const double THRESHOLD = 1E-6;
   double threshold = THRESHOLD * max;
-
-  for (size_t i = 0; i < dim; i++)
-    if (gsl_vector_get(s, i) > threshold)
-      gsl_vector_set(s, i, gsl_vector_get(s, i));
-    else
-      gsl_vector_set(s, i, 0);
+  std::transform(sVec.begin(), sVec.end(), sVec.begin(), [&threshold](double el){return el > threshold ? el : 0.0;});
 
   // Solve A*x = B
-  gsl_linalg_SV_solve(a, v, s, b, x);
-
-  // From gsl_vector to vector
-  std::vector<double> delta(dim);
-  for (size_t k = 0; k < dim; k++)
-    delta[k] = gsl_vector_get(x, k);
-
-  gsl_matrix_free(a);
-  gsl_matrix_free(v);
-  gsl_vector_free(s);
-  gsl_vector_free(w);
-  gsl_vector_free(x);
-  gsl_vector_free(b);
+  gsl_linalg_SV_solve(&a.matrix, &v.matrix, &s.vector, &b.vector, &x.vector);
 
   return delta;
 }
@@ -632,13 +608,14 @@ std::vector<double> MaxEnt::applyDistancePenalty(
     dist += delta[k] * sum;
   }
 
-  auto newDelta = delta;
   if (dist > distEps * sum / background) {
+    auto newDelta = delta;
     for (size_t k = 0; k < delta.size(); k++) {
       newDelta[k] *= sqrt(distEps * sum / dist / background);
     }
+    return newDelta;
   }
-  return newDelta;
+  return delta;
 }
 
 /**
@@ -654,16 +631,16 @@ MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,
                     const std::vector<std::vector<double>> dirs) {
 
-  std::vector<double> newImage = image;
-
   if (image.empty() || dirs.empty() || (delta.size() != dirs.size())) {
     throw std::runtime_error("Cannot calculate new image");
   }
 
+  std::vector<double> newImage = image;
+
   // Calculate the new image
   for (size_t i = 0; i < image.size(); i++) {
     for (size_t k = 0; k < delta.size(); k++) {
-      newImage[i] = newImage[i] + delta[k] * dirs[k][i];
+      newImage[i] += delta[k] * dirs[k][i];
     }
   }
   return newImage;
