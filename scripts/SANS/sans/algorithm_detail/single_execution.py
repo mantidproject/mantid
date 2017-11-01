@@ -7,7 +7,6 @@ from sans.common.enums import (ISISReductionMode, DetectorType, DataType, Output
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle)
-import pydevd
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
     """
@@ -45,7 +44,6 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     output_workspace = reduction_alg.getProperty("OutputWorkspace").value
     output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
     output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
-    pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
     # Pull the result out of the workspace
     output_bundle = OutputBundle(state=reduction_setting_bundle.state,
                                  data_type=reduction_setting_bundle.data_type,

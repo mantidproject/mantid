@@ -251,7 +251,7 @@ class StateGuiModel(object):
     def merge_mask(self):
         return self.get_simple_element(element_id=OtherId.merge_mask, default_value=False)
 
-    @merge_scale_fit.setter
+    @merge_mask.setter
     def merge_mask(self, value):
         self.set_simple_element(element_id=OtherId.merge_mask, value=value)
 
