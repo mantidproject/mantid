@@ -26,7 +26,7 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   using Mantid::Kernel::Logger;
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Running Python code:\n" << code.toLatin1().data() << "\n";
+    g_log.debug() << "Running Python code:\n" << qPrintable(code) << "\n";
 
   if (no_output) {
     emit runAsPythonScript(code, true);
@@ -63,8 +63,8 @@ QString PythonRunner::runPythonCode(const QString &code, bool no_output) {
   // FIXME: Ticket-9217 - Commented out for the moment to try and get working
   // with clang
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
-    g_log.debug() << "Raw output from execution:\n"
-                  << tmpstring.toLatin1().data() << "\n";
+    g_log.debug() << "Raw output from execution:\n" << qPrintable(tmpstring)
+                  << "\n";
   return tmpstring;
 }
 /** This Python helper function converts a list of strings into one
