@@ -71,17 +71,17 @@ private:
    * @param filterValue :: the value to compare the filter variable against
    */
   template <typename Comparator>
-  void filterPeaks(Mantid::API::IPeaksWorkspace_const_sptr inputWS,
-                   Mantid::API::IPeaksWorkspace_sptr filteredWS,
+  void filterPeaks(const Mantid::API::IPeaksWorkspace &inputWS,
+                   Mantid::API::IPeaksWorkspace &filteredWS,
                    const FilterFunction &filterFunction,
                    const double filterValue) {
     Comparator operatorFunc;
-    for (int i = 0; i < inputWS->getNumberPeaks(); ++i) {
-      const Geometry::IPeak &currentPeak = inputWS->getPeak(i);
+    for (int i = 0; i < inputWS.getNumberPeaks(); ++i) {
+      const Geometry::IPeak &currentPeak = inputWS.getPeak(i);
       const auto currentValue = filterFunction(currentPeak);
 
       if (operatorFunc(currentValue, filterValue))
-        filteredWS->addPeak(currentPeak);
+        filteredWS.addPeak(currentPeak);
     }
   }
 };

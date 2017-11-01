@@ -91,23 +91,23 @@ void FilterPeaks::exec() {
 
   // Choose which version of the function to use based on the operator
   if (Operator == "<")
-    filterPeaks<std::less<double>>(inputWS, filteredWS, filterFunction,
+    filterPeaks<std::less<double>>(*inputWS, *filteredWS, filterFunction,
                                    filterValue);
   else if (Operator == ">")
-    filterPeaks<std::greater<double>>(inputWS, filteredWS, filterFunction,
+    filterPeaks<std::greater<double>>(*inputWS, *filteredWS, filterFunction,
                                       filterValue);
   else if (Operator == "=")
-    filterPeaks<std::equal_to<double>>(inputWS, filteredWS, filterFunction,
+    filterPeaks<std::equal_to<double>>(*inputWS, *filteredWS, filterFunction,
                                        filterValue);
   else if (Operator == "!=")
-    filterPeaks<std::not_equal_to<double>>(inputWS, filteredWS, filterFunction,
-                                           filterValue);
+    filterPeaks<std::not_equal_to<double>>(*inputWS, *filteredWS,
+                                           filterFunction, filterValue);
   else if (Operator == "<=")
-    filterPeaks<std::less_equal<double>>(inputWS, filteredWS, filterFunction,
+    filterPeaks<std::less_equal<double>>(*inputWS, *filteredWS, filterFunction,
                                          filterValue);
   else if (Operator == ">=")
-    filterPeaks<std::greater_equal<double>>(inputWS, filteredWS, filterFunction,
-                                            filterValue);
+    filterPeaks<std::greater_equal<double>>(*inputWS, *filteredWS,
+                                            filterFunction, filterValue);
   else
     throw std::invalid_argument("Unknown Operator " + Operator);
 
