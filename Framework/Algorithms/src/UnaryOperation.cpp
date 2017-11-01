@@ -50,7 +50,12 @@ void UnaryOperation::exec() {
   MatrixWorkspace_sptr out_work = getProperty(outputPropName());
   // Only create output workspace if different to input one
   if (out_work != in_work) {
-    out_work = WorkspaceFactory::Instance().create(in_work);
+    if (in_work->id() == "EventWorkspace") {
+      // Handles the case of EventList which needs to be converted to Workspace2D
+      out_work = WorkspaceFactory::Instance().create(in_work);
+    } else {
+      out_work = in_work->clone();
+    }
     if (out_work->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr intemp =
           boost::dynamic_pointer_cast<const RebinnedOutput>(in_work);
@@ -62,7 +67,6 @@ void UnaryOperation::exec() {
         F.access() = intemp->dataF(i);
         outtemp->setF(i, F);
       }
-      outtemp->setFinalized(intemp->isFinalized());
     }
     setProperty(outputPropName(), out_work);
   }

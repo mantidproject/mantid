@@ -40,7 +40,8 @@ namespace DataObjects {
 */
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
-  RebinnedOutput() = default;
+  RebinnedOutput() : m_finalized(false) {}
+  RebinnedOutput(bool finalized) : m_finalized(finalized) {}
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
@@ -66,7 +67,6 @@ public:
 
   /// Returns if finalize has been called, or sets this flag
   bool isFinalized() const { return m_finalized; }
-  void setFinalized(bool isFinal) { m_finalized = isFinal; }
 
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;
@@ -92,7 +92,7 @@ protected:
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
-  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(); }
+  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(m_finalized); }
 };
 
 /// shared pointer to the RebinnedOutput class

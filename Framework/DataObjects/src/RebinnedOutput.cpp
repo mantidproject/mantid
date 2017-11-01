@@ -35,7 +35,6 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   for (std::size_t i = 0; i < nHist; ++i) {
     this->fracArea[i].resize(YLength);
   }
-  m_finalized = false;
 }
 
 void RebinnedOutput::init(const std::size_t &NVectors,
@@ -46,7 +45,6 @@ void RebinnedOutput::init(const std::size_t &NVectors,
   for (std::size_t i = 0; i < nHist; ++i) {
     this->fracArea[i].resize(histogram.size());
   }
-  m_finalized = false;
 }
 
 /**
