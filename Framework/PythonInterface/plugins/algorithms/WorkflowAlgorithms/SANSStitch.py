@@ -8,6 +8,8 @@ from mantid.kernel import Direction, Property, StringListValidator, UnitFactory,
     EnabledWhenProperty, PropertyCriterion
 import numpy as np
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.constants import EMPTY_NAME
+import pydevd
 
 
 class Mode(object):
@@ -87,7 +89,7 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('MergeMin', defaultValue=0.0, direction=Direction.Input,
                              doc='The minimum of the merge region in q')
 
-        self.declareProperty('MergeMax', defaultValue=1000.0, direction=Direction.Input,
+        self.declareProperty('MergeMax', defaultValue=1000, direction=Direction.Input,
                              doc='The maximum of the merge region in q')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -228,38 +230,57 @@ class SANSStitch(DataProcessorAlgorithm):
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
         return  scale_factor_fit, shift_factor_fit
 
-    def _apply_user_mask_ranges(self, cF, cR, merge_min, merge_max):
+    def _apply_user_mask_ranges(self, cF, cR, nR, nF, merge_min, merge_max):
         mask_name = "MaskBins"
         mask_options = {"InputWorkspace": cF}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-
+        if merge_min < min(cF.dataX(0)):
+            merge_min = min(cF.dataX(0))
+        if merge_max > max(cR.dataX(0)):
+            merge_max = max(cR.dataX(0))
         mask_alg.setProperty("InputWorkspace", cF)
-        mask_alg.setProperty("OutputWorkspace", cF)
-        mask_alg.setProperty("XMin", merge_min)
-        mask_alg.setProperty("XMax", max(cF.xData(0)))
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", min(cF.dataX(0)))
+        mask_alg.setProperty("XMax", merge_min)
         mask_alg.execute()
+        cF = mask_alg.getProperty("OutputWorkspace").value
+
+        mask_alg.setProperty("InputWorkspace", nF)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", min(nF.dataX(0)))
+        mask_alg.setProperty("XMax", merge_min)
+        mask_alg.execute()
+        nF = mask_alg.getProperty("OutputWorkspace").value
 
         mask_alg.setProperty("InputWorkspace", cR)
-        mask_alg.setProperty("OutputWorkspace", cR)
-        mask_alg.setProperty("XMin", min(cR.xData(0)))
-        mask_alg.setProperty("XMax", merge_max)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", merge_max)
+        mask_alg.setProperty("XMax", max(cR.dataX(0)))
         mask_alg.execute()
-        return cR, cF
+        cR = mask_alg.getProperty("OutputWorkspace").value
+
+        mask_alg.setProperty("InputWorkspace", nR)
+        mask_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+        mask_alg.setProperty("XMin", merge_max)
+        mask_alg.setProperty("XMax", max(nR.dataX(0)))
+        mask_alg.execute()
+        nR = mask_alg.getProperty("OutputWorkspace").value
+        return cR, cF, nR, nF
 
     def PyExec(self):
         enum_map = self._make_mode_map()
-
+        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         mode = enum_map[self.getProperty('Mode').value]
-        merge_mask = self.getProperty('MergeMask')
-        merge_min = self.getProperty('MergeMin')
-        merge_max = self.getProperty('MergeMax')
+        merge_mask = self.getProperty('MergeMask').value
+        merge_min = self.getProperty('MergeMin').value
+        merge_max = self.getProperty('MergeMax').value
 
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
         nF = self.getProperty('HABNormSample').value
         nR = self.getProperty('LABNormSample').value
         if merge_mask:
-            cR, cF = self._apply_user_mask_ranges(cF, cR, merge_min, merge_max)
+            cR, cF, nR, nF = self._apply_user_mask_ranges(cF, cR, nR, nF, merge_min, merge_max)
         q_high_angle = self._divide(cF, nF)
         q_low_angle = self._divide(cR, nR)
         if self.getProperty('ProcessCan').value:
