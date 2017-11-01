@@ -73,7 +73,7 @@ public:
     }
   }
 
-  void test_change_n(){
+  void test_change_n() {
     Polynomial pol;
     pol.setAttributeValue("n", 3);
     pol.setParameter("A0", 4.0);
@@ -89,7 +89,7 @@ public:
     TS_ASSERT_EQUALS(pol.getParameter(5), 0.0);
   }
 
-  void test_change_n_1(){
+  void test_change_n_1() {
     Polynomial pol;
     pol.setAttributeValue("n", 5);
     pol.setParameter("A0", 4.0);

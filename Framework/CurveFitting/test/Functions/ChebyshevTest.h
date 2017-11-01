@@ -123,7 +123,7 @@ public:
     }
   }
 
-  void test_change_n(){
+  void test_change_n() {
     Chebyshev cheb;
     cheb.setAttributeValue("n", 3);
     cheb.setParameter("A0", 4.0);
@@ -139,7 +139,7 @@ public:
     TS_ASSERT_EQUALS(cheb.getParameter(5), 0.0);
   }
 
-  void test_change_n_1(){
+  void test_change_n_1() {
     Chebyshev cheb;
     cheb.setAttributeValue("n", 5);
     cheb.setParameter("A0", 4.0);

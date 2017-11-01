@@ -19,9 +19,7 @@ DECLARE_FUNCTION(Polynomial)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-Polynomial::Polynomial() : m_n(0) {
-  declareParameter("A0");
-}
+Polynomial::Polynomial() : m_n(0) { declareParameter("A0"); }
 
 //----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial
@@ -45,7 +43,6 @@ void Polynomial::function1D(double *out, const double *xValues,
     out[i] = temp;
   }
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative analytically
@@ -103,7 +100,7 @@ void Polynomial::setAttribute(const std::string &attName,
 
     // Save old values
     std::vector<double> oldValues(std::min(m_n, newN) + 1);
-    for(size_t i = 0; i < oldValues.size(); ++i) {
+    for (size_t i = 0; i < oldValues.size(); ++i) {
       oldValues[i] = getParameter(i);
     }
 
@@ -117,10 +114,9 @@ void Polynomial::setAttribute(const std::string &attName,
     }
 
     // Reset old values to new parameters
-    for(size_t i = 0; i < oldValues.size(); ++i) {
+    for (size_t i = 0; i < oldValues.size(); ++i) {
       setParameter(i, oldValues[i]);
     }
-
   }
 }
 
