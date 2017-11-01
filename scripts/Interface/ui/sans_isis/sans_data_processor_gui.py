@@ -727,6 +727,32 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         if value is not None:
             self.update_simple_line_edit_field(line_edit="merged_q_range_stop_line_edit", value=value)
 
+    @property
+    def merge_mask(self):
+        return self.merge_mask_check_box.isChecked()
+
+    @merge_mask.setter
+    def merge_mask(self, value):
+        self.merge_mask_check_box.setChecked(value)
+
+    @property
+    def merge_max(self):
+        return self.get_simple_line_edit_field(line_edit="merged_max_line_edit", expected_type=float)
+
+    @merge_max.setter
+    def merge_max(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_max_line_edit", value=value)
+
+    @property
+    def merge_min(self):
+        return self.get_simple_line_edit_field(line_edit="merged_min_line_edit", expected_type=float)
+
+    @merge_min.setter
+    def merge_min(self, value):
+        if value is not None:
+            self.update_simple_line_edit_field(line_edit="merged_min_line_edit", value=value)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Event slices group
     # ------------------------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@ from six import (with_metaclass)
 import copy
 
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
-                                   FloatWithNoneParameter, rename_descriptor_names)
+                                   FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
@@ -36,6 +36,9 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 class StateReductionMode(StateReductionBase, StateBase):
     reduction_mode = ClassTypeParameter(ReductionMode)
     reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
+    merge_max = FloatParameter()
+    merge_min = FloatParameter()
+    merge_mask = BoolParameter()
 
     # Fitting
     merge_fit_mode = ClassTypeParameter(FitModeForMerge)
@@ -58,6 +61,9 @@ class StateReductionMode(StateReductionBase, StateBase):
         self.merge_fit_mode = FitModeForMerge.NoFit
         self.merge_range_min = None
         self.merge_range_max = None
+        merge_max = None
+        merge_min = None
+        merge_mask = False
 
         # Set the detector names to empty strings
         self.detector_names = {DetectorType.to_string(DetectorType.LAB): "",

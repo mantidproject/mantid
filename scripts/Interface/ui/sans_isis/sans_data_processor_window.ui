@@ -490,7 +490,41 @@ QGroupBox::title {
                         <item row="0" column="3" colspan="2">
                          <widget class="QLabel" name="label">
                           <property name="text">
-                           <string>Custom q range:</string>
+                           <string>Custom q range for fit:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="3">
+                         <widget class="QLabel" name="label_2">
+                          <property name="text">
+                           <string>Custom q range for merge:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="6">
+                         <widget class="QLineEdit" name="merged_max_line_edit"/>
+                        </item>
+                        <item row="3" column="5">
+                         <widget class="QLabel" name="label_5">
+                          <property name="text">
+                           <string>to</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="4">
+                         <widget class="QLineEdit" name="merged_min_line_edit"/>
+                        </item>
+                        <item row="3" column="3">
+                         <widget class="QLabel" name="label_6">
+                          <property name="text">
+                           <string>from</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="4">
+                         <widget class="QCheckBox" name="merge_mask_check_box">
+                          <property name="text">
+                           <string>Use Range</string>
                           </property>
                          </widget>
                         </item>
