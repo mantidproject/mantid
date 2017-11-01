@@ -98,9 +98,9 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
   if (m_finalized) {
     return;
   }
-  std::size_t nHist = this->getNumberHistograms();
+  int nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
-  for (std::size_t i = 0; i < nHist; ++i) {
+  for (int i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
@@ -130,9 +130,9 @@ void RebinnedOutput::unfinalize(bool hasSqrdErrs) {
   if (!m_finalized) {
     return;
   }
-  std::size_t nHist = this->getNumberHistograms();
+  int nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
-  for (std::size_t i = 0; i < nHist; ++i) {
+  for (int i = 0; i < nHist; ++i) {
     MantidVec &data = this->dataY(i);
     MantidVec &err = this->dataE(i);
     MantidVec &frac = this->dataF(i);
