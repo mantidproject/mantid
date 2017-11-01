@@ -17,7 +17,7 @@ set ( PVPLUGINS_DIR pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
 if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
-  set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
+  set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
 
 set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR};${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR} )
@@ -64,15 +64,12 @@ install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
 # These are very different depending on the distribution so are contained
 # in the Packaging/*/scripts directory as CMake templates
 ############################################################################
-if ( NOT MPI_BUILD )
-  set ( ENVVARS_ON_INSTALL ON CACHE BOOL
-        "Whether to include the scripts in /etc/profile.d to set the MANTIDPATH variable and add it to PATH. Turning this off allows installing locally without being root." )
-endif()
+# We only manipulate the environment for  nprefixed non-MPI package builds
 # for shell maintainer scripts as ENVVARS_ON_INSTALL could have ON, OFF, True, False etc
-if ( ENVVARS_ON_INSTALL )
-  set ( ENVVARS_ON_INSTALL_INT 1 )
-else ()
+if ( MPI_BUILD OR CPACK_PACKAGE_SUFFIX )
   set ( ENVVARS_ON_INSTALL_INT 0 )
+else ()
+  set ( ENVVARS_ON_INSTALL_INT 1 )
 endif()
 
 # Common filenames to hold maintainer scripts

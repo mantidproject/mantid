@@ -183,9 +183,7 @@ if [[ "$BUILDPKG" == true ]]; then
   # Set some variables relating to the linux packages
   if [[ ${ON_MACOS} != true ]]; then
     # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *release* ]]; then
-      echo "Performing release build" # do nothing
-    elif [[ ${JOB_NAME} == *master* ]]; then
+    if [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
       PACKAGE_SUFFIX="mantidunstable-pvnext"
@@ -193,19 +191,14 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
-    # Add '-python3' to package name and install path
-    if [[ ${JOB_NAME} == *python3* ]]; then
-	PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
-    fi
-
-    # Only unsuffixed release builds create envvars scripts
-    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+    if [[ ${JOB_NAME} == *release* ]]; then
+      # No suffix and traditional install path
+      PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
-    fi
-
-    if [ ! -z "$PACKAGE_SUFFIX" ]; then
+      if [[ ${JOB_NAME} == *python3* ]]; then
+        # Add '-python3' to package name and install path
+        PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+      fi
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
   fi
