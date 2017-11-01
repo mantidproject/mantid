@@ -37,6 +37,9 @@ void Transpose::exec() {
           inputWorkspace);
   DataObjects::RebinnedOutput_sptr outRebinWorkspace =
       boost::dynamic_pointer_cast<DataObjects::RebinnedOutput>(outputWorkspace);
+  if (outRebinWorkspace && inRebinWorkspace->isFinalized()) {
+    outRebinWorkspace->finalize(true, false);
+  }
 
   size_t newNhist = outputWorkspace->getNumberHistograms();
   size_t newXsize = outputWorkspace->x(0).size();
@@ -103,8 +106,8 @@ API::MatrixWorkspace_sptr Transpose::createOutputWorkspace(
   // The input Y axis may be binned so the new X data should be too
   size_t newNhist(oldYlength), newXsize(oldVerticalAxislength),
       newYsize(oldNhist);
-  MatrixWorkspace_sptr outputWorkspace = inputWorkspace->cloneEmpty();
-  outputWorkspace->initialize(newNhist, newXsize, newYsize);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
+      inputWorkspace, newNhist, newXsize, newYsize);
 
   // Create a new numeric axis for Y the same length as the old X array
   // Values come from input X

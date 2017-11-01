@@ -92,8 +92,11 @@ void RebinnedOutput::setF(const std::size_t index, const MantidVecPtr &F) {
  * undo this in order to properly treat the data.
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
-void RebinnedOutput::finalize(bool hasSqrdErrs) {
-  if (m_finalized) {
+void RebinnedOutput::finalize(bool hasSqrdErrs, bool isEmpty) {
+  if (m_finalized)
+    return;
+  if (isEmpty) {
+    m_finalized = true;
     return;
   }
   int nHist = static_cast<int>(this->getNumberHistograms());
@@ -125,9 +128,8 @@ void RebinnedOutput::finalize(bool hasSqrdErrs) {
  * @param hasSqrdErrs :: does the workspace have squared errors?
  */
 void RebinnedOutput::unfinalize(bool hasSqrdErrs) {
-  if (!m_finalized) {
+  if (!m_finalized)
     return;
-  }
   int nHist = static_cast<int>(this->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*this))
   for (int i = 0; i < nHist; ++i) {
