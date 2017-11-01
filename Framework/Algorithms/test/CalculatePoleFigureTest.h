@@ -32,6 +32,8 @@ namespace {
  */
 Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) {
 
+  // TODO/NOW - Refer to convertUnitsTest for how to build an instrument
+
   size_t n = 100;
 
   Mantid::API::FrameworkManager::Instance();
@@ -59,6 +61,23 @@ Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) 
 
   Mantid::API::AnalysisDataService::Instance().add(name, ws);
 
+  // run 153144
+  double hrot = -0.003857142;
+  double omega = 89.998;
+
+
+  auto instrument = ws->setInstrument();
+
+  // detector position
+  // det0 = ws1.getDetector(0)
+
+  //  Out[9]: [-2,0,-3.67394e-16]
+
+  // Out[11]: [2,0,1.22465e-16]
+
+  // source: [0,0,-43.754]
+
+
   return ws;
 }
 }
@@ -71,6 +90,10 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
+  //-------------------------------------------------------------------------------------------
+  /**
+   * @brief test_Execute
+   */
   void test_Execute() {
 
     API::Workspace_sptr ws =
@@ -93,6 +116,8 @@ public:
     TS_ASSERT(API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
     API::ITableWorkspace_sptr outws = boost::dynamic_pointer_cast<API::ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
     TS_ASSERT(outws);
+    if (!outws)
+        return;
 
     // shall have 2 rows
     TS_ASSERT_EQUALS(outws->rowCount(), 2);

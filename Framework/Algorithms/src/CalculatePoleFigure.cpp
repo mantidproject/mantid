@@ -6,6 +6,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/ISpectrum.h"
 
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -22,7 +23,7 @@
 #include <cmath>
 #include <sstream>
 
-#include <H5Cpp.h>
+// #include <H5Cpp.h>
 
 namespace Mantid {
 namespace Algorithms {
@@ -112,6 +113,10 @@ void CalculatePoleFigure::processInputs() {
   double dmax = getProperty("MaxD");
   if (isEmpty(dmin) || isEmpty(dmax))
     throw std::invalid_argument("Peak range (dmin and dmax) must be given!");
+  else {
+      m_peakDRange.first = dmin;
+      m_peakDRange.second = dmax;
+  }
 
   // check whether the log exists
   auto hrot = m_inputWS->run().getProperty(m_nameHROT);
@@ -163,7 +168,8 @@ void CalculatePoleFigure::calculatePoleFigure() {
   // TODO/NEXT - After unit test and user test are passed. try to parallelize this loop by openMP
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
-    Kernel::V3D detpos = m_inputWS->getInstrument()->getDetector(static_cast<detid_t>(iws))->getPos();
+    auto detector = m_inputWS->getDetector(iws);
+    Kernel::V3D detpos = detector->getPos();
     Kernel::V3D k_det_sample = detpos - samplepos;
     Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
     Kernel::V3D qvector = k_sample_src_unit - k_det_sample_unit;
@@ -211,8 +217,13 @@ double CalculatePoleFigure::calculatePeakIntensitySimple(
       std::lower_bound(vecx.begin(), vecx.end(), d_max) - vecx.begin());
 
   if (dmax_index <= dmin_index)
+  {
+    g_log.error() << "DMin " << d_min << " is equal or larger than DMax " << d_max
+                  << " or both of them exceeds range of X." << vecx.front() << ", "
+                  << vecx.back() << std::endl;
     throw std::runtime_error("dmin and dmax either not in order or exceeds the "
                              "range of vector of X.");
+  }
   if (dmax_index >= vecy.size())
     dmax_index = vecy.size() - 1;
 
