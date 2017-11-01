@@ -8,9 +8,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <numeric>
@@ -22,35 +22,38 @@ using namespace Mantid::Kernel;
 using namespace Mantid;
 
 namespace {
-/**
-* Create Workspace from 0 to N*dx
-*/
-Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
-                                           const std::string &name,
-                                           const std::string unitlabel,
-                                           const bool withBadValues = false) {
+
+//-----------------------------------------------------
+/** create a Bragg workspace containg 2 spectra.
+ * Each has 100 data points containing a Gaussian peak
+ * between d = 1.2 and 1.5
+ * @brief createBraggWorkspace
+ * @return
+ */
+Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(const std::string &name) {
+
+  size_t n = 100;
 
   Mantid::API::FrameworkManager::Instance();
   Mantid::DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
-          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 1, n,
+          Mantid::API::WorkspaceFactory::Instance().create("Workspace2D", 2, n,
                                                            n));
 
   auto &X = ws->mutableX(0);
   auto &Y = ws->mutableY(0);
   auto &E = ws->mutableE(0);
 
+  // create Gaussian peak
+  double dx = 0.01;
   for (size_t i = 0; i < n; i++) {
-    X[i] = double(i) * dx;
-    Y[i] = X[i] + 1.0;
-    E[i] = sqrt(fabs(X[i]));
+    X[i] = double(i) * dx + 1.2;
+    Y[i] = exp(-(X[i]-1.5)*(X[i]-1.5)/(0.02)) * (1.0+double(i));
+    E[i] = sqrt(fabs(Y[i]));
   }
 
-  if (withBadValues) {
-    Y[0] = std::numeric_limits<double>::quiet_NaN();
-    Y[Y.size() - 1] = std::numeric_limits<double>::quiet_NaN();
-  }
-
+  // create unit
+  std::string unitlabel("dSpacing");
   ws->getAxis(0)->unit() =
       Mantid::Kernel::UnitFactory::Instance().create(unitlabel);
 
@@ -68,74 +71,40 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void test_Init() {
-
-    CalculatePoleFigure pdfft;
-    pdfft.initialize();
-
-    TS_ASSERT(pdffit.isInitlialized());
-  }
-
   void test_Execute() {
 
     API::Workspace_sptr ws =
-        createWS(20, 0.1, "TestInput1", "MomentumTransfer");
+        createBraggWorkspace("TwoSpecPoleFigure");
 
-    CalculatePoleFigure pdfft;
-    pdfft.initialize();
-    pdfft.setProperty("InputWorkspace", ws);
-    pdfft.setProperty("OutputWorkspace", "PDFGofR");
-    pdfft.setProperty("InputSofQType", "S(Q)");
-    pdfft.setProperty("Rmax", 20.0);
-    pdfft.setProperty("DeltaR", 0.01);
-    pdfft.setProperty("Qmin", 0.0);
-    pdfft.setProperty("Qmax", 30.0);
-    pdfft.setProperty("PDFType", "G(r)");
+    CalculatePoleFigure pfcalculator;
+    pfcalculator.initialize();
 
-    pdfft.execute();
+    // set properties
+    pfcalculator.setProperty("InputWorkspace", ws);
+    pfcalculator.setProperty("OutputWorkspace", "TwoSpecPoleFigure");
+    pfcalculator.setProperty("MinD", 1.3);
+    pfcalculator.setProperty("MaxD", 1.5);
+    pfcalculator.execute();
 
-    TS_ASSERT(pdfft.isExecuted());
+    // run
+    TS_ASSERT(pfcalculator.isExecuted());
+
+    // check results
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("TwoSpecPoleFigure"));
+    API::ITableWorkspace_sptr outws = boost::dynamic_pointer_cast<API::ITableWorkspace>(API::AnalysisDataService::Instance().retrieve("TwoSpecPoleFigure"));
+    TS_ASSERT(outws);
+
+    // shall have 2 rows
+    TS_ASSERT_EQUALS(outws->rowCount(), 2);
+
+    // row 0
+    API::TableRow row0 = outws->getRow(0);
+    int wsindex;
+    double r_td, r_nd, intensity;
+    row0 >> wsindex >> r_td >> r_nd >> intensity;
+
+
   }
-};
-
-class CalculatePoleFigureTestPerformance : public CxxTest::TestSuite {
-
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static CalculatePoleFigureTestPerformance *createSuite() {
-    return new CalculatePoleFigureTestPerformance();
-  }
-
-  static void destroySuite(CalculatePoleFigureTestPerformance *suite) {
-    delete suite;
-  }
-
-  void setUp() override {
-    ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    pdfft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "CalculatePoleFigure");
-
-    pdfft->initialize();
-    pdfft->setProperty("InputWorkspace", ws);
-    pdfft->setProperty("OutputWorkspace", "outputWS");
-    pdfft->setProperty("InputSofQType", "S(Q)");
-    pdfft->setProperty("Rmax", 20.0);
-    pdfft->setProperty("DeltaR", 0.01);
-    pdfft->setProperty("Qmin", 0.0);
-    pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)");
-  }
-
-  void tearDown() override {
-    Mantid::API::AnalysisDataService::Instance().remove("outputWS");
-  }
-
-  void testPerformanceWS() { pdfft->execute(); }
-
-private:
-  Mantid::API::MatrixWorkspace_sptr ws;
-  API::IAlgorithm *pdfft;
 };
 
 #endif /* MANTID_ALGORITHMS_CALCULATEPOLEFIGURE_H_ */

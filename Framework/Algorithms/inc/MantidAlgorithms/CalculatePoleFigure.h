@@ -48,6 +48,8 @@ private:
 
   /// input workspace
   API::MatrixWorkspace_const_sptr m_inputWS;
+  /// output workspace
+  API::ITableWorkspace_sptr m_outputTableWS;
 
   /// sample log name
   std::string m_nameHROT;

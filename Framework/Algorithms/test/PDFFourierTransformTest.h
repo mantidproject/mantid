@@ -25,7 +25,7 @@ namespace {
 /**
 * Create Workspace from 0 to N*dx
 */
-Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
+Mantid::API::MatrixWorkspace_sptr createBraggWorkspace(size_t n, double dx,
                                            const std::string &name,
                                            const std::string unitlabel,
                                            const bool withBadValues = false) {
@@ -71,7 +71,7 @@ public:
   void test_Execute() {
 
     API::Workspace_sptr ws =
-        createWS(20, 0.1, "TestInput1", "MomentumTransfer");
+        createBraggWorkspace(20, 0.1, "TestInput1", "MomentumTransfer");
 
     PDFFourierTransform pdfft;
     pdfft.initialize();
@@ -92,7 +92,7 @@ public:
   void test_CheckResult() {
 
     API::Workspace_sptr ws =
-        createWS(20, 0.1, "CheckResult", "MomentumTransfer");
+        createBraggWorkspace(20, 0.1, "CheckResult", "MomentumTransfer");
 
     // 1. Run PDFFT
     API::IAlgorithm *pdfft =
@@ -126,7 +126,7 @@ public:
   void test_CheckNan() {
 
     API::Workspace_sptr ws =
-        createWS(20, 0.1, "CheckNan", "MomentumTransfer", true);
+        createBraggWorkspace(20, 0.1, "CheckNan", "MomentumTransfer", true);
 
     // 1. Run PDFFT
     API::IAlgorithm *pdfft =
@@ -161,7 +161,7 @@ public:
 
   void test_filter() {
     API::MatrixWorkspace_sptr ws =
-        createWS(200, 0.1, "filter", "MomentumTransfer");
+        createBraggWorkspace(200, 0.1, "filter", "MomentumTransfer");
     auto &SofQ = ws->mutableY(0);
     for (size_t i = 0; i < SofQ.size(); i++) {
       SofQ[i] = 1.0;
@@ -210,7 +210,7 @@ public:
   }
 
   void setUp() override {
-    ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
+    ws = createBraggWorkspace(2000000, 0.1, "inputWS", "MomentumTransfer");
     pdfft = Mantid::API::FrameworkManager::Instance().createAlgorithm(
         "PDFFourierTransform");
 

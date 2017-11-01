@@ -58,10 +58,11 @@ void CalculatePoleFigure::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "Result pole figure mapping Table");
 
-  declareProperty("HROTName", "HROT", "Log name of HROT in input workspace");
+  declareProperty("HROTName", "BL7:Mot:Parker:HROT.RBV",
+                  "Log name of HROT in input workspace");
 
-  declareProperty("WHATEVERNAME", "WHATEVERT",
-                  "Second name of some log for pole figure.");
+  declareProperty("OmegaName", "BL7:Mot:Sample:Omega.RBV",
+                  "Log name of Omega for pole figure.");
 
   declareProperty(make_unique<Kernel::ArrayProperty<double>>("PoleFigure"),
                   "Output 2D vector for calcualte pole figure.");
@@ -101,7 +102,7 @@ void CalculatePoleFigure::processInputs() {
 
   // get inputs
   m_nameHROT = getPropertyValue("HROTName");
-  m_nameOmega = getPropertyValue("Whatever");
+  m_nameOmega = getPropertyValue("OmegaName");
 
   //
   m_inputWS = getProperty("InputWorkspace");
@@ -157,13 +158,15 @@ void CalculatePoleFigure::calculatePoleFigure() {
   Kernel::V3D srcpos = m_inputWS->getInstrument()->getSource()->getPos();
   Kernel::V3D samplepos = m_inputWS->getInstrument()->getSample()->getPos();
   Kernel::V3D k_sample_srcpos = samplepos - srcpos;
+  Kernel::V3D k_sample_src_unit = k_sample_srcpos / k_sample_srcpos.norm();
 
   // TODO/NEXT - After unit test and user test are passed. try to parallelize this loop by openMP
   for (size_t iws = 0; iws < m_inputWS->getNumberHistograms(); ++iws) {
     // get detector position
     Kernel::V3D detpos = m_inputWS->getInstrument()->getDetector(static_cast<detid_t>(iws))->getPos();
     Kernel::V3D k_det_sample = detpos - samplepos;
-    Kernel::V3D qvector = k_sample_srcpos - k_det_sample;
+    Kernel::V3D k_det_sample_unit = k_det_sample / k_det_sample.norm();
+    Kernel::V3D qvector = k_sample_src_unit - k_det_sample_unit;
     Kernel::V3D unit_q = qvector / qvector.norm();
 
     // calcualte pole figure position
