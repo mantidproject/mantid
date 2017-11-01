@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
