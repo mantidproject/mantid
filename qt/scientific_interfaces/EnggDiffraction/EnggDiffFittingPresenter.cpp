@@ -1034,8 +1034,7 @@ void EnggDiffFittingPresenter::runLoadAlg(
     Mantid::API::MatrixWorkspace_sptr &focusedWS) {
   // load the focused workspace file to perform single peak fits
   try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().create("Load");
+    auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
     load->setPropertyValue("Filename", focusedFile);
     load->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
@@ -1093,8 +1092,8 @@ void MantidQt::CustomInterfaces::EnggDiffFittingPresenter::
 
   // save the results
   // run the algorithm SaveDiffFittingAscii with output of EnggFitPeaks
-  auto saveDiffFit = Mantid::API::AlgorithmManager::Instance().create(
-      "SaveDiffFittingAscii");
+  auto saveDiffFit =
+      Mantid::API::AlgorithmManager::Instance().create("SaveDiffFittingAscii");
 
   saveDiffFit->initialize();
   saveDiffFit->setProperty("InputWorkspace", tableWorkspace);
@@ -1344,8 +1343,8 @@ void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
     const std::string &OutputName, const std::string &startX,
     const std::string &endX) {
 
-  auto evalFunc = Mantid::API::AlgorithmManager::Instance().create(
-      "EvaluateFunction");
+  auto evalFunc =
+      Mantid::API::AlgorithmManager::Instance().create("EvaluateFunction");
   g_log.notice() << "EvaluateFunction algorithm has started\n";
   try {
     evalFunc->initialize();
@@ -1363,8 +1362,8 @@ void EnggDiffFittingPresenter::runEvaluateFunctionAlg(
 }
 
 void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
-  auto cropWS = Mantid::API::AlgorithmManager::Instance().create(
-      "CropWorkspace");
+  auto cropWS =
+      Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
   try {
     cropWS->initialize();
     cropWS->setProperty("InputWorkspace", workspaceName);
@@ -1381,8 +1380,8 @@ void EnggDiffFittingPresenter::runCropWorkspaceAlg(std::string workspaceName) {
 
 void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
                                                    std::string workspace2Name) {
-  auto appendSpec = Mantid::API::AlgorithmManager::Instance().create(
-      "AppendSpectra");
+  auto appendSpec =
+      Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
   try {
     appendSpec->initialize();
     appendSpec->setProperty("InputWorkspace1", workspace1Name);
@@ -1398,8 +1397,8 @@ void EnggDiffFittingPresenter::runAppendSpectraAlg(std::string workspace1Name,
 
 void EnggDiffFittingPresenter::runRebinToWorkspaceAlg(
     std::string workspaceName) {
-  auto RebinToWs = Mantid::API::AlgorithmManager::Instance().create(
-      "RebinToWorkspace");
+  auto RebinToWs =
+      Mantid::API::AlgorithmManager::Instance().create("RebinToWorkspace");
   try {
     RebinToWs->initialize();
     RebinToWs->setProperty("WorkspaceToRebin", workspaceName);
@@ -1520,8 +1519,7 @@ void EnggDiffFittingPresenter::runAlignDetectorsAlg(std::string workspaceName) {
   }
 
   try {
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().create(algName);
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(algName);
     alg->initialize();
     alg->setProperty("InputWorkspace", workspaceName);
     alg->setProperty("OutputWorkspace", workspaceName);
@@ -1558,8 +1556,7 @@ void EnggDiffFittingPresenter::runCloneWorkspaceAlg(
     std::string inputWorkspace, const std::string &outputWorkspace) {
 
   auto cloneWorkspace =
-      Mantid::API::AlgorithmManager::Instance().create(
-          "CloneWorkspace");
+      Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
   try {
     cloneWorkspace->initialize();
     cloneWorkspace->setProperty("InputWorkspace", inputWorkspace);
