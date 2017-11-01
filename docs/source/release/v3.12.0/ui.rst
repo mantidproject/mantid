@@ -20,6 +20,7 @@ SliceViewer and Vates Simple Interface
 
 - Update SwitchToSliceViewer (shift + click) in MultiSlice view to work with nonorthogonal axes.
 - Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
+- Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
 
 .. figure:: ../../images/VatesMultiSliceView.png
    :class: screenshot
