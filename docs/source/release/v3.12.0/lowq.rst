@@ -14,5 +14,6 @@ Reflectometry
 
 Small Angle Scattering
 ----------------------
+* Fixed issue where specifying fit range was not working for merged reductions. Previously the user specified range was being ignored.
 
 :ref:`Release 3.12.0 <v3.12.0>`
