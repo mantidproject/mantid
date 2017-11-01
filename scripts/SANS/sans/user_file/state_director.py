@@ -511,6 +511,12 @@ class StateDirectorISIS(object):
         set_single_entry(self._reduction_builder, "set_merge_shift", DetectorId.shift, user_file_items)
 
         # -------------------------------
+        # User masking
+        # -------------------------------
+        set_single_entry(self._reduction_builder, "set_merge_mask", OtherId.merge_mask, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_max", OtherId.merge_max, user_file_items)
+        set_single_entry(self._reduction_builder, "set_merge_min", OtherId.merge_min, user_file_items)
+        # -------------------------------
         # Fitting merged
         # -------------------------------
         q_range_min_scale = None
