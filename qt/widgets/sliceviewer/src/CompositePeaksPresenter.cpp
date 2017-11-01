@@ -337,11 +337,12 @@ void CompositePeaksPresenter::setShown(
     return m_default->setShown(shown);
   }
   auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  // Need to check if the iterator exists as the workspace
-  // might have just been deleted.
-  if (*iterator) {
-    (*iterator)->setShown(shown);
-  }
+  if(iterator == m_subjects.end())
+    return;
+
+  auto presenter = *iterator;
+  if(presenter)
+    presenter->setShown(shown);
 }
 
 /**
