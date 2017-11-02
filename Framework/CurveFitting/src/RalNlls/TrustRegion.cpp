@@ -215,7 +215,7 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
  *  (w.Delta).
  */
 void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             nlls_inform &inform, NLLS_workspace &w) {
+                             NLLS_workspace &w) {
 
   switch (options.tr_update_strategy) {
   case 1: // default, step-function

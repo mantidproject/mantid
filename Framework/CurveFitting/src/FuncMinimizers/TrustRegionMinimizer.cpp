@@ -282,7 +282,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
     }
 
     // Update the TR radius
-    updateTrustRegionRadius(rho, options, inform, w);
+    updateTrustRegionRadius(rho, options, w);
 
     if (!success) {
       // finally, check d makes progress

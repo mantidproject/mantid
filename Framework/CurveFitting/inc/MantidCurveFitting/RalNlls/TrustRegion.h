@@ -23,7 +23,7 @@ double evaluateModel(const DoubleFortranVector &f, const DoubleFortranMatrix &J,
 double calculateRho(double normf, double normfnew, double md,
                     const nlls_options &options);
 void updateTrustRegionRadius(double &rho, const nlls_options &options,
-                             nlls_inform &inform, NLLS_workspace &w);
+                             NLLS_workspace &w);
 void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w);
 void testConvergence(double normF, double normJF, double normF0, double normJF0,
                      const nlls_options &options, nlls_inform &inform);
