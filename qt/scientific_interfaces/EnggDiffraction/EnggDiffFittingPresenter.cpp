@@ -791,8 +791,11 @@ void EnggDiffFittingPresenter::processLoad() {
 	std::transform(runNumberInts.begin(), runNumberInts.end(), std::back_inserter(runNumbers),
 		[](const int num) {return std::to_string(num); });
 
-	m_view->setFittingRunNumVec(runNumbers);
-
+	m_view->clearFittingListWidget();
+	std::for_each(runNumbers.begin(), runNumbers.end(),
+		[&](const std::string &runNumber) {
+		m_view->addRunNoItem(runNumber);
+	});
 }
 
 void EnggDiffFittingPresenter::processShutDown() {

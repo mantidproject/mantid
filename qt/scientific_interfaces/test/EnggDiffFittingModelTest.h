@@ -13,6 +13,16 @@
 using namespace Mantid;
 using namespace MantidQT::CustomInterfaces;
 
+namespace {
+
+void addSampleWorkspaceToModel(const int runNumber, const int bank, EnggDiffFittingModel &model) {
+	API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create(
+		"Workspace2D", 1, 10, 10);
+	model.addWorkspace(runNumber, bank, ws);
+}
+
+} // anonymous namespace
+
 class EnggDiffFittingModelTest : public CxxTest::TestSuite {
 public:
 	// This pair of boilerplate methods prevent the suite being created statically
@@ -36,21 +46,10 @@ public:
 	void test_getAllRunNumbers() {
 		auto model = EnggDiffFittingModel();
 		
-		API::MatrixWorkspace_sptr ws1 = API::WorkspaceFactory::Instance().
-			create("Workspace2D", 1, 10, 10);
-		model.addWorkspace(123, 1, ws1);
-
-		API::MatrixWorkspace_sptr ws2 = API::WorkspaceFactory::Instance().
-			create("Workspace2D", 1, 10, 10);
-		model.addWorkspace(456, 2, ws2);
-
-		API::MatrixWorkspace_sptr ws3 = API::WorkspaceFactory::Instance().
-			create("Workspace2D", 1, 10, 10);
-		model.addWorkspace(789, 1, ws3);
-
-		API::MatrixWorkspace_sptr ws4 = API::WorkspaceFactory::Instance().
-			create("Workspace2D", 1, 10, 10);
-		model.addWorkspace(123, 2, ws1);
+		addSampleWorkspaceToModel(123, 1, model);
+		addSampleWorkspaceToModel(456, 2, model);
+		addSampleWorkspaceToModel(789, 1, model);
+		addSampleWorkspaceToModel(123, 2, model);
 
 		const auto runNumbers = model.getAllRunNumbers();
 
