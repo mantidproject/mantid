@@ -343,8 +343,8 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             y = mtd[ws].readY(0)
             x = mtd[ws].readX(0)
             # keep track of dead pixels
-            if np.any(y):
-                self._live_pixels[det - 1] = True
+            if np.count_nonzero(y) > self._scan_points/5:
+                self._live_pixels[det] = True
 
             if det == self._pixel_range[0] - 1:
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=ref_ws, XMin=x[self._bin_offset])
@@ -353,7 +353,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
                 cropped_ws = ws + '_cropped'
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws, XMax=x[-(self._bin_offset+1)])
 
-                if self._interpolate:
+                if self._interpolate and self._live_pixels[det]:
                     # SplineInterpolation invalidates the errors, so we need to copy them over
                     interp_ws = ws + '_interp'
                     SplineInterpolation(WorkspaceToInterpolate=cropped_ws, WorkspaceToMatch=ref_ws,
