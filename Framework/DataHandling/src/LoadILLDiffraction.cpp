@@ -461,8 +461,8 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
-      auto property =
-          Kernel::make_unique<TimeSeriesProperty<double>>(m_scanVar[i].name);
+      auto property = Kernel::make_unique<TimeSeriesProperty<double>>(
+          m_scanVar[i].name + "." + m_scanVar[i].property);
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));

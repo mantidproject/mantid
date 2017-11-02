@@ -278,6 +278,8 @@ public:
             1e-2)
       }
     }
+
+    TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
   }
 
 private:
