@@ -81,7 +81,7 @@ void ManageUserDirectories::loadProperties() {
   m_uiForm.cbSearchArchive->addItem(QString("default facility only - ") +
                                     defaultFacility);
   m_uiForm.cbSearchArchive->addItem("all");
-  m_uiForm.cbSearchArchive->addItem("none");
+  m_uiForm.cbSearchArchive->addItem("off");
   if (archive == "on") {
     m_uiForm.cbSearchArchive->setCurrentIndex(0);
   } else if (archive == "all") {
@@ -101,19 +101,18 @@ void ManageUserDirectories::loadProperties() {
 }
 void ManageUserDirectories::saveProperties() {
   QString newSearchArchive = m_uiForm.cbSearchArchive->currentText().toLower();
-  if (newSearchArchive == "all") {
+  if (newSearchArchive == "all" || newSearchArchive == "off") {
     // do nothing
-  } else if (newSearchArchive == "none") {
-    newSearchArchive = "off";
   } else if (newSearchArchive.startsWith("default facility only")) {
     newSearchArchive = "on";
   } else {
     // the only way "custom" gets set is by using the value in ConfigService
     // already, so just copy it
-    QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString(
+    newSearchArchive = QString::fromStdString(
+                           Mantid::Kernel::ConfigService::Instance().getString(
                                "datasearch.searcharchive"))
-        .trimmed()
-        .toLower();
+                           .trimmed()
+                           .toLower();
   }
 
   QStringList dataDirs;
