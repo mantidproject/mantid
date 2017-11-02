@@ -5,6 +5,8 @@
 
 #include "MantidQtWidgets/SpectrumViewer/SVConnections.h"
 
+#include <QWheelEvent>
+
 namespace MantidQt {
 namespace SpectrumView {
 

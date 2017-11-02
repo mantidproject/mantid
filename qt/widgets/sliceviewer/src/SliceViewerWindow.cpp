@@ -8,9 +8,10 @@
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
-#include <qboxlayout.h>
-#include <qmainwindow.h>
-#include <qlayout.h>
+#include <QBoxLayout>
+#include <QMainWindow>
+#include <QLayout>
+#include <QTimer>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

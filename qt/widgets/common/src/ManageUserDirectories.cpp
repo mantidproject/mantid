@@ -1,8 +1,10 @@
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
-#include <QtGui>
 #include <QDir>
+#include <QFileDialog>
+#include <QSettings>
+#include <QUrl>
 
 using namespace MantidQt::API;
 

@@ -38,9 +38,8 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
-
 #include "MantidQtWidgets/Common/FlowLayout.h"
+#include <QWidget>
 
 namespace MantidQt {
 namespace API {

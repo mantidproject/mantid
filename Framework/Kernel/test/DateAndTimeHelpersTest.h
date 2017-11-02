@@ -17,19 +17,6 @@ public:
   }
   static void destroySuite(DateAndTimeHelpersTest *suite) { delete suite; }
 
-  void test_stringIsISO8601() {
-    TS_ASSERT(stringIsISO8601("1990-01-02 03:04:02.000"));
-    TS_ASSERT(stringIsISO8601("1990-01-02T03:04:02.000"));
-    TS_ASSERT(stringIsISO8601("1990-01-02T03:04:02.000+05:30"));
-    TS_ASSERT(stringIsISO8601("1990-01-02 03:04"));
-    TS_ASSERT(stringIsISO8601("1990-01-02"));
-    TS_ASSERT(stringIsISO8601("1822-01-02"));
-
-    TS_ASSERT(!stringIsISO8601("January 1, 2345"));
-    TS_ASSERT(!stringIsISO8601("2010-31-56"));
-    TS_ASSERT(!stringIsISO8601("1990-01-02 45:92:22"));
-  }
-
   void test_verifyAndSanitizeISO8601() {
     TS_ASSERT_EQUALS(verifyAndSanitizeISO8601("1990- 1- 2T03:04:02.000"),
                      "1990-01-02T03:04:02.000");
