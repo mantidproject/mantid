@@ -91,4 +91,4 @@ def sample_user_file_maker(gravity = 'ON'):
 
 
 sample_user_file = sample_user_file_maker(gravity = 'ON')
-sample_user_file_2 = sample_user_file_maker(gravity = 'OFF')
+sample_user_file_gravity_ON = sample_user_file_maker(gravity ='OFF')
