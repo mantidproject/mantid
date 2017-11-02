@@ -9,23 +9,22 @@
 Description
 -----------
 
-Given a PeaksWorkspace with a UB matrix corresponding to a Niggli
+Given a PeaksWorkspace with a :ref:`UB matrix <Lattice>` corresponding to a Niggli
 reduced cell, this algorithm will allow the user to select a
 conventional cell with a specified cell type and centering. If the apply
 flag is not set, the information about the selected cell will just be
-displayed. If the apply flag is set, the UB matrix associated with the
-sample in the PeaksWorkspace will be updated to a UB corresponding to
-the selected cell AND the peaks will be re-indexed using the new UB
-matrix. NOTE: The possible conventional cells, together with the
-corresponding errors in the cell scalars can be seen by running the
-ShowPossibleCells algorithm, provided the stored UB matrix corresponds
-to a Niggli reduced cell.
+displayed. If the apply flag is set, the :ref:`UB matrix <Lattice>` associated with the
+sample in the PeaksWorkspace will be updated to a :ref:`UB matrix <Lattice>` corresponding to
+the selected cell AND the peaks will be re-indexed using the new :ref:`UB matrix <Lattice>`.
+NOTE: The possible conventional cells, together with the corresponding errors in the cell
+scalars can be seen by running the :ref:`ShowPossibleCells <algm-ShowPossibleCells>`
+algorithm, provided the stored :ref:`UB matrix <Lattice>` corresponds to a Niggli reduced cell.
 
-This algorithm is based on the paper: "Lattice Symmetry and
-Identification -- The Fundamental Role of Reduced Cells in Materials
-Characterization", Alan D. Mighell, Vol. 106, Number 6, Nov-Dec 2001,
-Journal of Research of the National Institute of Standards and
-Technology, available from: `nvlpubs <nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>`_.
+This algorithm is based on the paper: Alan D. Mighell, *Lattice
+Symmetry and Identification—The Fundamental Role of Reduced Cells in
+Materials Characterization.* Journal of research of the National
+Institute of Standards and Technology **106.6** (2001): 983, available
+from: `nvlpubs <http://nvlpubs.nist.gov/nistpubs/jres/106/6/j66mig.pdf>`_.
 
 Usage
 -----

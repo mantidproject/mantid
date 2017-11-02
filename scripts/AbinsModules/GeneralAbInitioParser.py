@@ -17,7 +17,7 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        if six.PY3:
+        if not six.PY2:
             msg = bytes(msg, "utf8")
         while not self.file_end(file_obj=file_obj):
             line = file_obj.readline()
@@ -30,7 +30,7 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        if six.PY3:
+        if not six.PY2:
             msg = bytes(msg, "utf8")
 
         found = False
@@ -74,7 +74,7 @@ class GeneralAbInitioParser(object):
             pos = file_obj.tell()
             line = file_obj.readline()
             file_obj.seek(pos)
-            if six.PY3:
+            if not six.PY2:
                 item = bytes(item, "utf8")
             if item in line:
                 return True
@@ -86,7 +86,7 @@ class GeneralAbInitioParser(object):
         :param file_obj: file object from which we read
         :param msg: keyword to find
         """
-        if six.PY3:
+        if not six.PY2:
             msg = bytes(msg, "utf8")
         while not self.file_end(file_obj=file_obj):
             pos = file_obj.tell()

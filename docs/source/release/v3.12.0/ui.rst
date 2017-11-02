@@ -15,10 +15,17 @@ Installation
 Workbench
 ---------
 
+- Fixed a bug where MantidPlot would crash if the sample log fields used for run start and end contained non-ISO8601 conforming values.
+- Fixed an issue where updating a workspace changes the number format from decimal to scientific notation if the workspace is being viewed.
+
+
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
+- Update SwitchToSliceViewer (shift + click) in MultiSlice view to work with nonorthogonal axes.
 - Pressing alt while clicking an arrow in the MultiSlice view opens a text box where one may precisely enter the slice position.
+- Fixed bug which would cause slice viewer to crash when deleting an overlaid peaks workspace.
+- Fixed a bug where overwriting peaks workspaces with overlaid in the slice viewer with peak backgrounds shown cause Mantid to crash.
 
 .. figure:: ../../images/VatesMultiSliceView.png
    :class: screenshot
