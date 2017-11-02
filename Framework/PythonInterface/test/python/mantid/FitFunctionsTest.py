@@ -8,7 +8,7 @@ import testhelpers
 import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
-from mantid.simpleapi import Gaussian, LinearBackground, Polynomial
+from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -491,11 +491,16 @@ class FitFunctionsTest(unittest.TestCase):
         for f in c:
            count += 1
         self.assertEqual( count, 3)
-        
+
     def test_productfunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, ProductFunctionWrapper, g0, g1)
+
+    def test_productfunction_creation_1(self):
+        g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
+        testhelpers.assertRaisesNothing(self, ProductFunction, g0, g1)
 
     def test_mul(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)  
@@ -520,13 +525,18 @@ class FitFunctionsTest(unittest.TestCase):
         
         g1_str = str(g1)
         p2_str = str(p[2])
-        self.assertEqual(p2_str, g1_str)   
+        self.assertEqual(p2_str, g1_str)
 
     def test_convolution_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, ConvolutionWrapper, g0, g1)
-        
+
+    def test_convolution_creation_1(self):
+        g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
+        testhelpers.assertRaisesNothing(self, Convolution, g0, g1)
+
     def test_multidomainfunction_creation(self):
         g0 = FunctionWrapper( "Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
@@ -536,7 +546,16 @@ class FitFunctionsTest(unittest.TestCase):
         m_str = str(m)
         self.assertEqual( m_str.count("ties"),1)
         self.assertEqual( m_str.count("Height"),4) # 2 in functions 2 in ties
-        
+
+    def test_multidomainfunction_creation_1(self):
+        g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
+        g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
+        m = MultiDomainFunction( g0, g1, Global=["Height"])
+        self.assertEqual( m.nDomains, 2)
+        m_str = str(m)
+        self.assertEqual( m_str.count("ties"),1)
+        self.assertEqual( m_str.count("Height"),4) # 2 in functions 2 in ties
+
     def test_generatedfunction(self):
         testhelpers.assertRaisesNothing(self, Gaussian, Height=7.5, Sigma=1.2, PeakCentre=10)
         lb = LinearBackground()

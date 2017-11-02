@@ -606,37 +606,36 @@ class ConvolutionWrapper(CompositeFunctionWrapper):
        return self.initByName("Convolution", *args)
         
 class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
-    """ Wrapper class for Product Fitting Function
+    """ Wrapper class for Multidomain Fitting Function
     """
     def __init__ (self, *args, **kwargs):
-       """ Called when creating an instance
+        """ Called when creating an instance
            It should not be called directly
            :param *args: names of functions in composite function
-       """
-       # Assume it's not safe to flatten
-       self.pureAddition = False
-       self.pureMultiplication = False
-        
-       # Create and populate with copied functions
-       self.initByName("MultiDomainFunction", *args)
-                
-       # Tie the global parameters
-       if 'Global' in kwargs:
-          list = kwargs['Global']
-          for name in list:
-             self.tieAll(name)
-        
-       # Set domain indices: 1 to 1       
-       for i in range(0, len(self)):
-          self.fun.setDomainIndex(i, i)
-     
-    @property     
+        """
+        # Assume it's not safe to flatten
+        self.pureAddition = False
+        self.pureMultiplication = False
+
+        # Create and populate with copied functions
+        self.initByName("MultiDomainFunction", *args)
+
+        # Tie the global parameters
+        if 'Global' in kwargs:
+            for name in kwargs['Global']:
+                self.tieAll(name)
+
+        # Set domain indices: 1 to 1
+        for i in range(0, len(self)):
+            self.fun.setDomainIndex(i, i)
+
+    @property
     def nDomains (self):
-       """ Return number of domains 
-       """
-       return self.fun.nDomains()
-      
- 
+        """ Return number of domains
+        """
+        return self.fun.nDomains()
+
+
 def _create_wrapper_function(name):
     """Create fake functions for the given name
        It should not be called directly
@@ -652,8 +651,9 @@ def _create_wrapper_function(name):
             'MultiDomainFunction': MultiDomainFunctionWrapper,
             }
         # constructor is FunctionWrapper if the name is not in the registry.
-        constructor = name_to_constructor.get(name, FunctionWrapper)  
-        return  constructor(name, *args, **kwargs)
+        if name in name_to_constructor:
+            return name_to_constructor[name](*args, **kwargs)
+        return  FunctionWrapper(name, *args, **kwargs)
  
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name
