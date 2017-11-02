@@ -35,6 +35,9 @@ if( DATA_TARGETS_ONLY )
   return()
 endif()
 
+###########################################################################
+# Packaging configuration
+###########################################################################
 set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 

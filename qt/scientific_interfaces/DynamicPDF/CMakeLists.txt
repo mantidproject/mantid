@@ -23,7 +23,7 @@ set ( INC_FILES
 	SliceSelector.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     DisplayCurveFitTest.h
     DPDFBackgroundRemover.h
     DPDFDisplayControl.h
@@ -34,7 +34,7 @@ set ( MOC_FILES
     SliceSelector.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     DisplayCurveFitTest.ui
     DPDFBackgroundRemover.ui
     DPDFFitControl.ui
@@ -63,8 +63,12 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesDynamicPDF
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
-  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  INSTALL_DIR
+    ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH
+    @loader_path/../../../Contents/MacOS
 )
 
 if ( MSVC_IDE )

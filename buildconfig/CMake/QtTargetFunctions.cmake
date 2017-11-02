@@ -57,7 +57,8 @@ endfunction()
 # keyword: NOMOC Additional headers that are not to be passed to moc
 # keyword: RES Any resource .qrc files
 # keyword: DEFS Compiler definitions to set to the target
-# keyword: QT_PLUGIN If included, the target is a Qt plugin. The value is the name of the plugin library
+# keyword: OUTPUT_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt version
+# keyword: OUTPUT_SUBDIR Additional directory to added to the final output path
 # keyword: INCLUDE_DIRS A list of include directories to add to the target
 # keyword: SYSTEM_INCLUDE_DIRS A list of include directories to add to the target and marked as system headers
 # keyword: PRECOMPILED A name of the precompiled header
@@ -75,7 +76,7 @@ endfunction()
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
-    TARGET_NAME QT_VERSION QT_PLUGIN INSTALL_DIR PRECOMPILED)
+    TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR INSTALL_DIR PRECOMPILED)
   set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
     NOMOC RES DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
@@ -112,7 +113,7 @@ function (mtd_add_qt_target)
   endif()
   set (CMAKE_CURRENT_BINARY_DIR ${_binary_dir_on_entry})
 
-  if (${PARSED_NO_SUFFIX})
+  if (PARSED_NO_SUFFIX)
     set (_target ${PARSED_TARGET_NAME})
   else()
     _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _target
@@ -121,26 +122,35 @@ function (mtd_add_qt_target)
   _append_qt_suffix (VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _mtd_qt_libs
                      ${PARSED_MTD_QT_LINK_LIBS})
 
-  if (${PARSED_EXCLUDE_FROM_ALL})
+  if (PARSED_EXCLUDE_FROM_ALL)
     set(_target_exclude_from_all "EXCLUDE_FROM_ALL")
   else()
     set(_target_exclude_from_all)
   endif()
 
   # Use a precompiled header where they are supported
-  if (${PARSED_PRECOMPILED})
+  if (PARSED_PRECOMPILED)
     enable_precompiled_headers( ${PARSED_PRECOMPILED}  ALL_SRC )
   endif()
 
-  if (${PARSED_LIBRARY})
+  if (PARSED_LIBRARY)
     add_library (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
-  elseif (${PARSED_EXECUTABLE})
+    set ( _output_dir_property LIBRARY_OUTPUT_DIRECTORY )
+  elseif (PARSED_EXECUTABLE)
     add_executable (${_target} ${_target_exclude_from_all} ${ALL_SRC} ${UI_HEADERS} ${PARSED_NOMOC} ${RES_FILES})
+    set ( _output_dir_property RUNTIME_OUTPUT_DIRECTORY )
   else ()
     message (FATAL_ERROR "Unknown target type. Options=LIBRARY,EXECUTABLE")
   endif()
 
   # Target properties
+  if (PARSED_OUTPUT_DIR_BASE)
+    set ( _output_dir ${PARSED_OUTPUT_DIR_BASE}/qt${PARSED_QT_VERSION} )
+    if (PARSED_OUTPUT_SUBDIR)
+      set ( _output_dir ${_output_dir}/${PARSED_OUTPUT_SUBDIR} )
+    endif()
+    set_target_properties ( ${_target} PROPERTIES ${_output_dir_property} ${_output_dir} )
+  endif()
   _disable_suggest_override( ${PARSED_QT_VERSION} ${_target} )
   # Use public headers to populate the INTERFACE_INCLUDE_DIRECTORIES target property
   target_include_directories (${_target} PUBLIC ${_ui_dir} ${_other_ui_dirs}
@@ -160,26 +170,15 @@ function (mtd_add_qt_target)
     endif()
   endif ()
 
-  if (PARSED_QT_PLUGIN)
-    # Define a compiler variable to set the name of the library within the code. This
-    # is required by the Qt plugin mechanism
-    #set( LIB_NAME MantidWidgetPlugins )
-    add_definitions( -DLIBRARY_NAME=${PARSED_QT_PLUGIN} )
-
-    # change the destination of the target as Qt expects this in a directory called "designer"
-    set_target_output_directory( ${_target} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/designer )
-
-    # Set the name of the generated library
-    set_target_properties ( ${_target} PROPERTIES OUTPUT_NAME ${PARSED_QT_PLUGIN} )
-  endif()
-
-  if (NOT ${PARSED_EXCLUDE_FROM_ALL})
-    if (NOT ${PARSED_INSTALL_DIR})
-        set(INSTALL_DESTINATION_DIR ${PARSED_INSTALL_DIR})
+  if ( PARSED_EXCLUDE_FROM_ALL )
+    set_target_properties ( ${_target} PROPERTIES EXCLUDE_FROM_ALL TRUE )
+  else ()
+    if (PARSED_INSTALL_DIR)
+        set ( _install_dir ${PARSED_INSTALL_DIR} )
     else()
-        set(INSTALL_DESTINATION_DIR ${LIB_DIR})
+        set ( _install_dir ${LIB_DIR} )
     endif()
-    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${INSTALL_DESTINATION_DIR} )
+    install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
   endif()
 endfunction()
 

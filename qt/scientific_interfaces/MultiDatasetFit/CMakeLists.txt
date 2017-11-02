@@ -27,7 +27,7 @@ set ( INC_FILES
 	MultiDatasetFit.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     MultiDatasetFit.h
     MDFAddWorkspaceDialog.h
     MDFDataController.h
@@ -37,7 +37,7 @@ set ( MOC_FILES
     MDFEditLocalParameterDialog.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
    MultiDatasetFit.ui
    MDFAddWorkspaceDialog.ui
    EditLocalParameterDialog.ui
@@ -65,6 +65,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMultiDatasetFit
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   INSTALL_DIR
     ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH

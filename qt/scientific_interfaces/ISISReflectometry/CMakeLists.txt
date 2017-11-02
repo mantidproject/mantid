@@ -74,7 +74,7 @@ set ( INC_FILES
     TransferResults.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     ReflSearchModel.h
     QtReflEventTabView.h
     QtReflEventView.h
@@ -84,7 +84,7 @@ set ( MOC_FILES
     QtReflSettingsView.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
    ReflEventTabWidget.ui
    ReflEventWidget.ui
    ReflMainWindowWidget.ui
@@ -115,8 +115,12 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesISISReflectometry
     Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
-  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS"
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  INSTALL_DIR
+    ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH
+    @loader_path/../../../Contents/MacOS
 )
 
 if ( MSVC_IDE )

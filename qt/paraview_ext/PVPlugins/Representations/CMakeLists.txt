@@ -6,11 +6,9 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewRepresentationSMPlugin "1.0"
     vtkAlignedGeometrySliceRepresentation.cxx
     AlignedThreeSliceFilter.cxx
     AlignedCutter.cxx)
-
-# Add to the 'VatesParaViewPlugins' group in VS
-set_property( TARGET MantidParaViewRepresentationSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
-
-# Put library into subfolder.
-SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewRepresentationSMPlugin  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
+set_target_properties ( MantidParaViewRepresentationSMPlugin PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
+    FOLDER "MantidVatesParaViewPlugins"
+  )
 
 install( TARGETS MantidParaViewRepresentationSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

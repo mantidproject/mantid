@@ -23,12 +23,14 @@ set( SRC_FILES
 qt4_wrap_cpp( MOCCED_FILES ${HDR_FILES} )
 
 project( MantidParaViewQtWidgets )
-add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
-# Add to the 'Vates' group in VS
-set_property( TARGET MantidParaViewQtWidgets PROPERTY FOLDER "MantidVates" )
-target_link_libraries( MantidParaViewQtWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+add_library( MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} )
+set_target_properties ( MantidParaViewQtWidgets PROPERTIES
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt4
+  FOLDER "MantidVates"
+)
+target_link_libraries( MantidParaViewQtWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 vtkRenderingFreeType
-${QT_LIBRARIES} 
+${QT_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -38,4 +40,3 @@ endif ()
 add_definitions( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 
 install( TARGETS MantidParaViewQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
-

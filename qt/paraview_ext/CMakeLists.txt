@@ -10,6 +10,9 @@ set( USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. " )
 if( ParaView_FOUND AND USE_PARAVIEW )
   message( STATUS "Using ParaView ${PARAVIEW_VERSION_FULL}" )
   include( ${PARAVIEW_USE_FILE} )
+
+  # Output PV plugins to a separate directory
+  set ( PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt4/pvplugins )
   add_subdirectory( VatesAPI )
   add_subdirectory( VatesAlgorithms )
   add_subdirectory( PVPlugins )

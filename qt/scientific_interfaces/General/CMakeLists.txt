@@ -28,7 +28,7 @@ set ( INC_FILES
 	deltaECalc.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     Background.h
     DataComparison.h
     DirectConvertToEnergy.h
@@ -38,7 +38,7 @@ set ( MOC_FILES
     StepScan.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     DataComparison.ui
     DirectConvertToEnergy.ui
     MantidEV.ui
@@ -67,6 +67,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesGeneral
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   INSTALL_DIR
     ${PLUGINS_DIR}/qtplugins/mantid
   OSX_INSTALL_RPATH

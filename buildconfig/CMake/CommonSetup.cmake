@@ -20,6 +20,12 @@ set ( BUILD_SHARED_LIBS On )
 # Send libraries to common place
 set ( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
 set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin )
+# Use subdirectories for plugins to avoid mixing Qt versions
+if ( CMAKE_GENERATOR MATCHES "Visual Studio" OR CMAKE_GENERATOR MATCHES "Xcode" )
+  set ( PLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/$<CONFIGURATION>/plugins )
+else ()
+  set ( PLUGINS_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/plugins )
+endif()
 
 # This allows us to group targets logically in Visual Studio
 set_property ( GLOBAL PROPERTY USE_FOLDERS ON )

@@ -87,7 +87,7 @@ set ( INC_FILES
 	Stretch.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     AbsorptionCorrections.h
     ApplyPaalmanPings.h
     CalculatePaalmanPings.h
@@ -130,7 +130,7 @@ set ( MOC_FILES
     ISISEnergyTransfer.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
    AbsorptionCorrections.ui
    ApplyPaalmanPings.ui
    CalculatePaalmanPings.ui
@@ -188,8 +188,13 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesIndirect
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidScientificInterfacesGeneral
-  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
-  OSX_INSTALL_RPATH "@loader_path/../../../Contents/MacOS;@loader_path/../../../plugins/qtplugins/mantid"
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  INSTALL_DIR
+    ${PLUGINS_DIR}/qtplugins/mantid
+  OSX_INSTALL_RPATH
+    @loader_path/../../../Contents/MacOS
+    @loader_path/../../../plugins/qtplugins/mantid
 )
 
 if ( MSVC_IDE )

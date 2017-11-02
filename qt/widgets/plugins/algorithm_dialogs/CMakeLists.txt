@@ -35,7 +35,7 @@ set ( MOC_FILES inc/MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialo
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( INC_FILES 
+set ( INC_FILES
     ${MOC_FILES}
 )
 
@@ -62,17 +62,20 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsAlgorithmDialogs
   PRECOMPILED
     inc/MantidQtWidgets/Plugins/AlgorithmDialogs/PrecompiledHeader.h
   LINK_LIBS
-      ${TCMALLOC_LIBRARIES_LINKTIME}
-      ${CORE_MANTIDLIBS}
-      ${POCO_LIBRARIES}
-      ${Boost_LIBRARIES}
-      ${QT_LIBRARIES}
-      ${OPENGL_LIBRARIES}
+    ${TCMALLOC_LIBRARIES_LINKTIME}
+    ${CORE_MANTIDLIBS}
+    ${POCO_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${QT_LIBRARIES}
+    ${OPENGL_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtOpenGL
   MTD_QT_LINK_LIBS
-      MantidQtWidgetsCommon
+    MantidQtWidgetsCommon
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   OSX_INSTALL_RPATH
     @loader_path/../../../Contents/MacOS
-  INSTALL_DIR ${PLUGINS_DIR}/qtplugins/mantid
+  INSTALL_DIR
+    ${PLUGINS_DIR}/qtplugins/mantid
 )
