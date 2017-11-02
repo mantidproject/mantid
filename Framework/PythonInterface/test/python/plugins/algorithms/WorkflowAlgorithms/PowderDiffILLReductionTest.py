@@ -9,7 +9,7 @@ class PowderDiffILLReductionTest(unittest.TestCase):
 
     _runs = '967087:967088'
 
-    def setUP(self):
+    def setUp(self):
         config.appendDataSearchSubDir('ILL/D20')
         config.setFacility('ILL')
 
