@@ -11,10 +11,9 @@ add_subdirectory( Filters )
 add_subdirectory( Readers )
 add_subdirectory( Representations )
 add_subdirectory( Sources )
-add_subdirectory( Widgets )
 
 # NonOrthogonalSourcePlugin is necessary for viewing materials with nonorthogonal basis vectors.
-# Copy this out of the ParaView build as a POST_BUILD step of the MantidParaViewQtWidgets library (chosen arbitrarily)
+# Added as a dependency to MantidParaViewMDEWSourceSMPlugin (chosen arbitrarily)
 set ( _plugin_filename ${CMAKE_SHARED_LIBRARY_PREFIX}NonOrthogonalSource${CMAKE_SHARED_LIBRARY_SUFFIX} )
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
   set ( _pv_library_output_dir ${ParaView_DIR}/bin )
@@ -27,7 +26,7 @@ add_custom_command ( OUTPUT ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filen
   ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filename}
 )
 add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filename} )
-add_dependencies ( MantidParaViewQtWidgets copy_nonorthogonal_plugin )
+add_dependencies ( MantidParaViewMDEWSourceSMPlugin copy_nonorthogonal_plugin )
 
 if ( (NOT APPLE) AND NonOrthogonalSourcePlugin_LOCATION)
   # make_package.rb handles this for OSX
