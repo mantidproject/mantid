@@ -11,6 +11,8 @@
 #include "MantidQtWidgets/SpectrumViewer/EModeHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/MatrixWSDataSource.h"
 
+#include <QDropEvent>
+#include <QSettings>
 #include <boost/make_shared.hpp>
 
 namespace MantidQt {

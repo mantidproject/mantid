@@ -2,11 +2,10 @@
 #define MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_
 
 #include "DllOption.h"
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
+#include <QWidget>
 #include <qwt_plot.h>
 #include <qwt_valuelist.h>
-#include <qpainter.h>
+#include <QPainter>
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/QwtRasterDataMD.h"
 #include "MantidQtWidgets/Common/QwtRasterDataMDNonOrthogonal.h"

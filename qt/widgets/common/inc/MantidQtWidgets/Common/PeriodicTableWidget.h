@@ -2,7 +2,7 @@
 #define MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
 
 #include "MantidQtWidgets/Common/DllOption.h"
-#include <qvector.h>
+#include <QVector>
 #include <QWidget>
 #include "ui_PeriodicTableWidget.h"
 

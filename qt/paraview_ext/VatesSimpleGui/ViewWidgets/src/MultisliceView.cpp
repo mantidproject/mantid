@@ -294,7 +294,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
 
     std::vector<double> scaling =
         vtkSMPropertyHelper(src2->getProxy(),
-                            scalingProperty.toAscii().constData(),
+                            scalingProperty.toLatin1().constData(),
                             true).GetDoubleArray();
 
     if (!scaling.empty()) {
@@ -334,7 +334,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
         "The slice could not be shown because of the following error:\n" +
         QString(e.what());
     QMessageBox::warning(this, tr("MantidPlot"),
-                         tr(message.toAscii().constData()), QMessageBox::Ok,
+                         tr(message.toLatin1().constData()), QMessageBox::Ok,
                          QMessageBox::Ok);
     delete w;
   }
