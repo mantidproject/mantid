@@ -559,7 +559,7 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
 endif ()
 
-set ( PLUGINS "." )
+set ( PLUGINS "./plugins" )
 if ( MAKE_VATES )
   set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
   if ( MSVC )
