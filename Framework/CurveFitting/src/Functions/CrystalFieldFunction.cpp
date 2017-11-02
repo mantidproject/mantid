@@ -628,8 +628,9 @@ void CrystalFieldFunction::buildSourceFunction() const {
   setSource(m_control.buildSource());
   m_nControlParams = m_control.nParams();
   m_nControlSourceParams = m_nControlParams + m_source->nParams();
-  if (!m_parameterResetCache.empty() && m_parameterResetCache.size() == m_source->nParams()) {
-    for(size_t i = 0; i < m_parameterResetCache.size(); ++i) {
+  if (!m_parameterResetCache.empty() &&
+      m_parameterResetCache.size() == m_source->nParams()) {
+    for (size_t i = 0; i < m_parameterResetCache.size(); ++i) {
       m_source->setParameter(i, m_parameterResetCache[i]);
     }
   }
@@ -1389,7 +1390,7 @@ void CrystalFieldFunction::cacheSourceParameters() const {
   }
   auto np = m_source->nParams();
   m_parameterResetCache.resize(np);
-  for(size_t i = 0; i < np; ++i) {
+  for (size_t i = 0; i < np; ++i) {
     m_parameterResetCache[i] = m_source->getParameter(i);
   }
 }
