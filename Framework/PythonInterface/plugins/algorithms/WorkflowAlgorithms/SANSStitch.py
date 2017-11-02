@@ -319,6 +319,8 @@ class SANSStitch(DataProcessorAlgorithm):
 
         shift_factor = self.getProperty('ShiftFactor').value
         scale_factor = self.getProperty('ScaleFactor').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
 
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
