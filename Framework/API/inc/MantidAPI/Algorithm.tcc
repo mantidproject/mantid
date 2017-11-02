@@ -29,20 +29,21 @@ IndexType::WorkspaceIndex
 Can contain PropertyMode, LockMode, and validators.
 @param doc Property documentation string.
 */
-template <typename T, typename... WSPropArgs, typename>
+template <typename T, const int AllowedIndexTypes, typename... WSPropArgs,
+          typename>
 void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
-                                                WSPropArgs... wsPropArgs,
-                                                const int allowedIndexTypes,
-                                                const std::string &doc) {
+                                                const std::string &doc,
+                                                WSPropArgs &&... wsPropArgs) {
   auto wsProp = Kernel::make_unique<WorkspaceProperty<T>>(
-      propertyName, "", Kernel::Direction::Input, wsPropArgs...);
+      propertyName, "", Kernel::Direction::Input,
+      std::forward<WSPropArgs>(wsPropArgs)...);
   const auto &wsPropRef = *wsProp;
   declareProperty(std::move(wsProp), doc);
 
   auto indexTypePropName =
       IndexTypeProperty::generatePropertyName(propertyName);
   auto indexTypeProp = Kernel::make_unique<IndexTypeProperty>(
-      indexTypePropName, allowedIndexTypes);
+      indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
   declareProperty(std::move(indexTypeProp));
