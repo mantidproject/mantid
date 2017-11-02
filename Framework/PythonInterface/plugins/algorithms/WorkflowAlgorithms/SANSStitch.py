@@ -9,7 +9,6 @@ from mantid.kernel import Direction, Property, StringListValidator, UnitFactory,
 import numpy as np
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.common.constants import EMPTY_NAME
-import pydevd
 
 
 class Mode(object):
@@ -89,7 +88,7 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('MergeMin', defaultValue=0.0, direction=Direction.Input,
                              doc='The minimum of the merge region in q')
 
-        self.declareProperty('MergeMax', defaultValue=1000, direction=Direction.Input,
+        self.declareProperty('MergeMax', defaultValue=1000.0, direction=Direction.Input,
                              doc='The maximum of the merge region in q')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
@@ -230,7 +229,15 @@ class SANSStitch(DataProcessorAlgorithm):
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
         return  scale_factor_fit, shift_factor_fit
 
+    def _check_bins(self, merge_min, merge_max, cF, cR):
+        if cF.binIndexOf(merge_min) == cR.binIndexOf(merge_max):
+            return cF.readX(0)[cR.binIndexOf(merge_max) + 1]
+        else:
+            return merge_max
+
     def _apply_user_mask_ranges(self, cF, cR, nR, nF, merge_min, merge_max):
+        merge_max = self._check_bins(merge_min, merge_max, cF, cR)
+
         mask_name = "MaskBins"
         mask_options = {"InputWorkspace": cF}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
@@ -269,7 +276,6 @@ class SANSStitch(DataProcessorAlgorithm):
 
     def PyExec(self):
         enum_map = self._make_mode_map()
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         mode = enum_map[self.getProperty('Mode').value]
         merge_mask = self.getProperty('MergeMask').value
         merge_min = self.getProperty('MergeMin').value
