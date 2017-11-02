@@ -169,10 +169,15 @@ fi
 ###############################################################################
 # Check if this is a Python 3 build and set CMake arguments.
 ###############################################################################
+PY2_BUILD=false
+PY3_BUILD=false
 if [[ ${JOB_NAME} == *python3* ]]; then
+  PY3_BUILD=true
   PYTHON3_EXECUTABLE=`which python3`
   DIST_FLAGS="${DIST_FLAGS} -DPYTHON_EXECUTABLE=$PYTHON3_EXECUTABLE"
   PARAVIEW_DIR="${PARAVIEW_DIR}-python3"
+else
+  PY2_BUILD=true
 fi
 
 ###############################################################################
@@ -191,14 +196,15 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGE_SUFFIX="unstable"
     fi
 
-    if [[ ${JOB_NAME} == *release* ]]; then
-      # No suffix and traditional install path
+    if [[ ${PY3_BUILD} == true ]]; then
+      # Add '-python3' to package name and install path
+      PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
+    fi
+    if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
+      # No suffix and traditional install path for python 2 release build
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
     else
-      if [[ ${JOB_NAME} == *python3* ]]; then
-        # Add '-python3' to package name and install path
-        PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
-      fi
+      # everything else uses lower-case values
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/mantid${PACKAGE_SUFFIX} -DCPACK_PACKAGE_SUFFIX=${PACKAGE_SUFFIX}"
     fi
   fi
