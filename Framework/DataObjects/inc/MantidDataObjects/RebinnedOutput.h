@@ -92,7 +92,9 @@ protected:
 
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
-  RebinnedOutput *doCloneEmpty() const override { return new RebinnedOutput(m_finalized); }
+  RebinnedOutput *doCloneEmpty() const override { 
+    return new RebinnedOutput(m_finalized); 
+  }
 };
 
 /// shared pointer to the RebinnedOutput class
