@@ -20,6 +20,9 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+- Usability improvements in the GUI:
+  - Improved progress reporting for Calibration and Focus
+
 Single Crystal Diffraction
 --------------------------
 - :ref:`FilterPeaks <algm-FilterPeaks>` now supports filtering peaks by TOF, d-spacing, and wavelength.
