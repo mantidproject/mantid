@@ -210,7 +210,6 @@ void rankOneUpdate(DoubleFortranMatrix &hf, NLLS_workspace &w) {
  *  @param rho :: The rho calculated by calculateRho(...). It may also be
  *  updated.
  *  @param options :: The options.
- *  @param inform :: The information.
  *  @param w :: The work struct containing the radius that is to be updated
  *  (w.Delta).
  */
