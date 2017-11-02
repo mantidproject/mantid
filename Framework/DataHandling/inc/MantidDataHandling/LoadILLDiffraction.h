@@ -64,6 +64,7 @@ private:
   };
 
   void init() override;
+  std::map<std::string, std::string> validateInputs() override;
   void exec() override;
 
   std::vector<Types::Core::DateAndTime>
@@ -72,6 +73,7 @@ private:
   std::vector<double> getDurations(const NeXus::NXDouble &) const;
   std::vector<double> getMonitor(const NeXus::NXDouble &) const;
   std::string getInstrumentFilePath(const std::string &) const;
+  bool containsCalibratedData(const std::string &filename) const;
 
   void fillDataScanMetaData(const NeXus::NXDouble &);
   std::vector<double>

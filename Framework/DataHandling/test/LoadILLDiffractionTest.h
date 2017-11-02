@@ -78,13 +78,13 @@ public:
     TS_ASSERT_EQUALS(outputWS->y(3072)[0], 0.)
     TS_ASSERT_EQUALS(outputWS->e(3072)[0], 0.)
 
-    TS_ASSERT(outputWS->run().hasProperty("simulated_d20"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
+    TS_ASSERT(outputWS->run().hasProperty("simulated_d20.TotalCount"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy.Time"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings.SampleTemp"))
 
-    const auto sim = outputWS->run().getLogData("simulated_d20");
-    const auto spy = outputWS->run().getLogData("AcquisitionSpy");
-    const auto sample = outputWS->run().getLogData("SampleSettings");
+    const auto sim = outputWS->run().getLogData("simulated_d20.TotalCount");
+    const auto spy = outputWS->run().getLogData("AcquisitionSpy.Time");
+    const auto sample = outputWS->run().getLogData("SampleSettings.SampleTemp");
 
     TS_ASSERT_EQUALS(sim->size(), 1)
     TS_ASSERT_EQUALS(spy->size(), 1)
@@ -131,13 +131,13 @@ public:
       }
     }
 
-    TS_ASSERT(outputWS->run().hasProperty("Omega"))
-    TS_ASSERT(outputWS->run().hasProperty("Detector"))
-    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy"))
-    TS_ASSERT(outputWS->run().hasProperty("SampleSettings"))
-    TS_ASSERT(outputWS->run().hasProperty("MagneticField"))
+    TS_ASSERT(outputWS->run().hasProperty("Omega.Position"))
+    TS_ASSERT(outputWS->run().hasProperty("Detector.TotalCount"))
+    TS_ASSERT(outputWS->run().hasProperty("AcquisitionSpy.Time"))
+    TS_ASSERT(outputWS->run().hasProperty("SampleSettings.SampleTemp"))
+    TS_ASSERT(outputWS->run().hasProperty("MagneticField.field"))
 
-    const auto omega = outputWS->run().getLogData("Omega");
+    const auto omega = outputWS->run().getLogData("Omega.Position");
 
     TS_ASSERT_EQUALS(omega->size(), 21)
 

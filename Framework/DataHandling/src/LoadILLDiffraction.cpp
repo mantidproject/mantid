@@ -100,6 +100,16 @@ void LoadILLDiffraction::init() {
                   "Type of data, with or without calibration already applied.");
 }
 
+std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
+  std::map<std::string, std::string> issues;
+  if (getPropertyValue("DataType") == "Calibrated" &&
+      !containsCalibratedData(getPropertyValue("Filename"))) {
+    issues["DataType"] = "Calibrated data requested, but only raw data exists "
+                         "in this NeXus file.";
+  }
+  return issues;
+}
+
 /**
  * Executes the algorithm.
  */
@@ -138,7 +148,8 @@ void LoadILLDiffraction::loadDataScan() {
   // read the detector data
 
   std::string dataName;
-  if (getPropertyValue("DataType") == "Calibrated")
+  if (getPropertyValue("DataType") == "Calibrated" ||
+      !containsCalibratedData(m_fileName))
     dataName = "data_scan/detector_data/data";
   else
     dataName = "data_scan/detector_data/raw_data";
@@ -708,6 +719,21 @@ LoadILLDiffraction::getInstrumentFilePath(const std::string &instName) const {
   Poco::Path file(instName + "_Definition.xml");
   Poco::Path fullPath(directory, file);
   return fullPath.toString();
+}
+
+/**
+ * Returns true if the file contains calibrated data
+ *
+ * @param filename The filename to check
+ * @return True if the file contains calibrated data, false otherwise
+ */
+bool LoadILLDiffraction::containsCalibratedData(
+    const std::string &filename) const {
+  NexusDescriptor descriptor(filename);
+  // This is unintuitive, but if the file has calibrated data there are entries
+  // for 'data' and 'raw_data'. If there is no calibrated data only 'data' is
+  // present.
+  return descriptor.pathExists("/entry0/data_scan/detector_data/raw_data");
 }
 
 } // namespace DataHandling
