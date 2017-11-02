@@ -188,7 +188,9 @@ if [[ "$BUILDPKG" == true ]]; then
   # Set some variables relating to the linux packages
   if [[ ${ON_MACOS} != true ]]; then
     # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *master* ]]; then
+    if [[ ${JOB_NAME} == *release* ]]; then
+       PACKAGE_SUFFIX=""
+    elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
       PACKAGE_SUFFIX="mantidunstable-pvnext"
@@ -200,6 +202,7 @@ if [[ "$BUILDPKG" == true ]]; then
       # Add '-python3' to package name and install path
       PACKAGE_SUFFIX=${PACKAGE_SUFFIX}-python3
     fi
+
     if [[ ${JOB_NAME} == *release* ]] && [[ ${PY2_BUILD} == true ]]; then
       # No suffix and traditional install path for python 2 release build
       PACKAGINGVARS="${PACKAGINGVARS} -DCMAKE_INSTALL_PREFIX=/opt/Mantid -DCPACK_PACKAGE_SUFFIX="
