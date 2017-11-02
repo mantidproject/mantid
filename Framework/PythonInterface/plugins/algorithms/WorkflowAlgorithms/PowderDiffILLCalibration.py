@@ -5,8 +5,7 @@ import numpy as np
 from mantid.kernel import StringListValidator, Direction, IntArrayBoundedValidator, IntArrayProperty, \
     CompositeValidator, IntArrayLengthValidator, IntArrayOrderedPairsValidator, FloatArrayOrderedPairsValidator, \
     FloatArrayProperty, VisibleWhenProperty, PropertyCriterion
-from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode, \
-    NumericAxis
+from mantid.api import PythonAlgorithm, FileProperty, FileAction, Progress, MatrixWorkspaceProperty, PropertyMode
 from mantid.simpleapi import *
 
 
@@ -241,6 +240,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
             last       :  10 -> 160
             ROI can not be wider than [10,120]
             @param ws_2d : 2D input workspace
+            @throws : ValueError if ROI is not fully within the detector span at any time index
         """
         roi_min = np.min(self._regions_of_interest)
         roi_max = np.max(self._regions_of_interest)
@@ -321,9 +321,10 @@ class PowderDiffILLCalibration(PythonAlgorithm):
 
     def _derive_calibration(self, ws_2d, constants_ws, response_ws):
         """
-            Computes the relative calibration factors sequentailly for all the pixels
+            Computes the relative calibration factors sequentailly for all the pixels.
             @param : 2D input workspace
             @param : the output workspace name containing the calibration constants
+            @param : the output workspace name containing the combined response
         """
         ref_ws = self._hide('ref')
         zeros = np.zeros(self._n_det)

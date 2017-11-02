@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
-    VisibleWhenProperty, PropertyCriterion, IntArrayBoundedValidator, IntArrayProperty
+    VisibleWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
@@ -255,11 +255,11 @@ class PowderDiffILLReduction(PythonAlgorithm):
 
             if prev_cell == -1:
                 self.log().notice('Unable to interpolate for cell #'+str(cell)+
-                ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
+                                  ': no non-zero neighbour cell was found on the left side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
             if next_cell == mtd[ws].getNumberHistograms():
                 self.log().notice('Unable to interpolate for cell #'+str(cell)+
-                ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
+                                  ': no non-zero neighbour cell was found on the right side. Bin will be cropped.')
                 unable_to_interpolate.append(cell)
 
             if prev_cell >= 0 and next_cell < mtd[ws].getNumberHistograms():
