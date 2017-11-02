@@ -1,3 +1,6 @@
+#ifndef MANTID_API_ALGORITHM_TCC_
+#define MANTID_API_ALGORITHM_TCC_
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -46,11 +49,19 @@ void Algorithm::declareWorkspaceInputProperties(const std::string &propertyName,
       indexTypePropName, AllowedIndexTypes);
   const auto &indexTypePropRef = *indexTypeProp;
 
-  declareProperty(std::move(indexTypeProp));
+  declareProperty(std::move(indexTypeProp),
+                  "The type of indices in the optional index set; For optimal "
+                  "performance WorkspaceIndex should be preferred;");
 
   auto indexPropName = IndexProperty::generatePropertyName(propertyName);
   declareProperty(Kernel::make_unique<IndexProperty>(indexPropName, wsPropRef,
-                                                     indexTypePropRef));
+                                                     indexTypePropRef),
+                  "An optional set of spectra that will be processed by the "
+                  "algorithm; If not set, all spectra will be processed; The "
+                  "indices in this list can be workspace indices or possibly "
+                  "spectrum numbers, depending on the selection made for the "
+                  "index type; Indices are entered as a comma-separated list "
+                  "of values, and/or ranges; For example, '4,6,10-20,1000';");
 
   m_reservedList.push_back(propertyName);
   m_reservedList.push_back(indexTypePropName);
@@ -145,3 +156,5 @@ Algorithm::getWorkspaceAndIndices(const std::string &name) const {
 }
 } // namespace API
 } // namespace Mantid
+
+#endif /*MANTID_API_ALGORITHM_TCC_*/
