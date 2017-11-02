@@ -1,6 +1,6 @@
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
-#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 #include <QDir>
 #include <QFileDialog>
 #include <QSettings>
@@ -182,8 +182,7 @@ QListWidget *ManageUserDirectories::listWidget() {
 
 // SLOTS
 void ManageUserDirectories::helpClicked() {
-  MantidDesktopServices::openUrl(
-      QUrl("http://www.mantidproject.org/ManageUserDirectories"));
+  HelpWindow::showConcept(this, QString("ManageUserDirectories"));
 }
 void ManageUserDirectories::cancelClicked() { this->close(); }
 void ManageUserDirectories::confirmClicked() {
