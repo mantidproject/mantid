@@ -20,8 +20,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
   SRC ${SRC_FILES}
   MOC ${MOC_FILES}
   NOMOC ${INC_FILES}
-  DEFS QSCINTILLA_DLL
-  QT_PLUGIN MantidWidgetPlugins
+  DEFS
+    QSCINTILLA_DLL
+    LIBRARY_NAME=MantidQtWidgetsPluginsDesigner
   INCLUDE_DIRS
     inc
   LINK_LIBS
@@ -36,5 +37,9 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPluginsDesigner
     MantidQtWidgetsCommon
     MantidQtWidgetsLegacyQwt
     MantidQtWidgetsSliceViewer
+  OUTPUT_DIR_BASE
+    ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  OUTPUT_SUBDIR
+    designer
   EXCLUDE_FROM_ALL
 )
