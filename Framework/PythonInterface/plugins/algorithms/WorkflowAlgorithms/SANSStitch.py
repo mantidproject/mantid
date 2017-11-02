@@ -82,6 +82,12 @@ class SANSStitch(DataProcessorAlgorithm):
         self.declareProperty('ShiftFactor', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='Optional shift factor')
 
+        self.declareProperty('FitMin', defaultValue=0.0, direction=Direction.Input,
+                             doc = 'Optional minimum q for fit')
+
+        self.declareProperty('FitMax', defaultValue=1000.0, direction=Direction.Input,
+                             doc = 'Optional maximum q for fit')
+
         self.declareProperty('MergeMask', defaultValue = False, direction = Direction.Input,
                              doc='Controls whether the user has manually specified the merge region')
 
@@ -217,13 +223,15 @@ class SANSStitch(DataProcessorAlgorithm):
             end_x = x_vals[stop + 1]
         return self._crop_to_x_range(ws=ws,x_min=start_x, x_max=end_x)
 
-    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor):
+    def _run_fit(self, q_high_angle, q_low_angle, scale_factor, shift_factor, fit_min, fit_max):
         fit_alg = self.createChildAlgorithm("SANSFitShiftScale")
         fit_alg.setProperty("HABWorkspace", q_high_angle)
         fit_alg.setProperty("LABWorkspace", q_low_angle)
         fit_alg.setProperty("Mode", self.getProperty('Mode').value)
         fit_alg.setProperty("ScaleFactor", scale_factor)
         fit_alg.setProperty("ShiftFactor", shift_factor)
+        fit_alg.setProperty("FitMin", fit_min)
+        fit_alg.setProperty("FitMax", fit_max)
         fit_alg.execute()
         scale_factor_fit = fit_alg.getProperty("OutScaleFactor").value
         shift_factor_fit = fit_alg.getProperty("OutShiftFactor").value
@@ -280,6 +288,8 @@ class SANSStitch(DataProcessorAlgorithm):
         merge_mask = self.getProperty('MergeMask').value
         merge_min = self.getProperty('MergeMin').value
         merge_max = self.getProperty('MergeMax').value
+        fit_min = self.getProperty('FitMin').value
+        fit_max = self.getProperty('FitMax').value
 
         cF = self.getProperty('HABCountsSample').value
         cR = self.getProperty('LABCountsSample').value
@@ -295,7 +305,7 @@ class SANSStitch(DataProcessorAlgorithm):
             nF_can = self.getProperty('HABNormCan').value
             nR_can = self.getProperty('LABNormCan').value
             if merge_mask:
-                cR_can, cF_can = self._apply_user_mask_ranges(cF_can, cR_can, merge_min, merge_max)
+                cR_can, cF_can, nR_can, nF_can = self._apply_user_mask_ranges(cF_can, cR_can, nR_can, nF_can, merge_min, merge_max)
 
             q_high_angle_can = self._divide(cF_can, nF_can)
             q_low_angle_can = self._divide(cR_can, nR_can)
@@ -312,7 +322,7 @@ class SANSStitch(DataProcessorAlgorithm):
 
         if not mode == Mode.NoneFit:
             scale_factor, shift_factor = self._run_fit(q_high_angle, q_low_angle,
-                                                       scale_factor, shift_factor)
+                                                       scale_factor, shift_factor, fit_min, fit_max)
 
         min_q = min(min(q_high_angle.dataX(0)), min(q_low_angle.dataX(0)))
         max_q = max(max(q_high_angle.dataX(0)), max(q_low_angle.dataX(0)))
