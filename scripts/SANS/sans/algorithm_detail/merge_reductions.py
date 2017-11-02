@@ -46,7 +46,7 @@ class ISIS1DMerger(Merger):
         # Get fit parameters
         shift_factor, scale_factor, fit_mode, fit_min, fit_max, merge_mask, merge_min, merge_max = \
             get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)
-          
+
         fit_mode_as_string = FitModeForMerge.to_string(fit_mode)
 
         # We need to convert NoFit to None.
@@ -82,8 +82,8 @@ class ISIS1DMerger(Merger):
 
         if merge_mask:
             if merge_min:
-               q_range_options = {"MergeMin": merge_min}
-               stitch_options.update(q_range_options)
+                q_range_options = {"MergeMin": merge_min}
+                stitch_options.update(q_range_options)
             if merge_max:
                 q_range_options = {"MergeMax": merge_max}
                 stitch_options.update(q_range_options)
@@ -188,7 +188,8 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
         fit_max = None
 
     return reduction_info.merge_shift, reduction_info.merge_scale, reduction_info.merge_fit_mode, fit_min, fit_max,\
-           reduction_info.merge_mask, reduction_info.merge_min, reduction_info.merge_max
+        reduction_info.merge_mask, reduction_info.merge_min, reduction_info.merge_max
+
 
 def is_sample(x):
     return x.data_type is DataType.Sample

@@ -8,6 +8,7 @@ from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
 from sans.algorithm_detail.bundles import (OutputBundle, OutputPartsBundle)
 
+
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
     """
     This function runs a core reduction. This is essentially half a reduction (either smaple or can).
