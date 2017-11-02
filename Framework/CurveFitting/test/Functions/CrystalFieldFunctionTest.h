@@ -691,6 +691,19 @@ public:
     ads.clear();
   }
 
+  void test_setting_peak_shape_keeps_field_parameters() {
+    CrystalFieldFunction cf;
+    cf.setAttributeValue("Ions", "Ce, Yb");
+    cf.setAttributeValue("Symmetries", "C2v, D6h");
+    cf.setAttributeValue("Temperatures", std::vector<double>({44, 50}));
+    cf.setAttributeValue("FWHMs", std::vector<double>({1, 2}));
+    cf.setParameter("ion0.B20", 1.0);
+    cf.setParameter("ion1.B20", 2.0);
+    cf.setAttributeValue("PeakShape", "Lorentzian");
+    cf.setParameter("ion0.B20", 1.0);
+    cf.setParameter("ion1.B20", 2.0);
+  }
+
 private:
   MatrixWorkspace_sptr makeDataSS() {
     auto ws = create2DWorkspaceBinned(1, 100, 0.0, 0.5);
