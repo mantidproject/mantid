@@ -497,7 +497,7 @@ class FitFunctionsTest(unittest.TestCase):
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, ProductFunctionWrapper, g0, g1)
 
-    def test_productfunction_creation_1(self):
+    def test_productfunction_creation_by_name(self):
         g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, ProductFunction, g0, g1)
@@ -532,7 +532,7 @@ class FitFunctionsTest(unittest.TestCase):
         g1 = FunctionWrapper( "Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, ConvolutionWrapper, g0, g1)
 
-    def test_convolution_creation_1(self):
+    def test_convolution_creation_by_name(self):
         g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
         testhelpers.assertRaisesNothing(self, Convolution, g0, g1)
@@ -547,7 +547,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertEqual( m_str.count("ties"),1)
         self.assertEqual( m_str.count("Height"),4) # 2 in functions 2 in ties
 
-    def test_multidomainfunction_creation_1(self):
+    def test_multidomainfunction_creation_by_name(self):
         g0 = Gaussian(Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = Gaussian(Height=8.5, Sigma=1.2, PeakCentre=11)
         m = MultiDomainFunction( g0, g1, Global=["Height"])
