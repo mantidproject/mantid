@@ -1,14 +1,14 @@
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NearestNeighbours.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
@@ -162,7 +162,7 @@ public:
     auto histoWS = std::get<0>(data);
     auto peaksWS = std::get<1>(data);
 
-    const auto& algManager = AlgorithmManager::Instance();
+    const auto &algManager = AlgorithmManager::Instance();
     auto cloneWorkspace = algManager.createUnmanaged("CloneWorkspace");
     cloneWorkspace->setChild(true);
     cloneWorkspace->initialize();
@@ -197,14 +197,13 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
 
-    const auto binWidth {0.2};
+    const auto binWidth{0.2};
     for (int i = 0; i < 5; ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
                        integratedPeaksWS->getPeak(i).getIntensity(),
-                       numEventsPerPeak*binWidth, 5);
+                       numEventsPerPeak * binWidth, 5);
     }
   }
-
 
   void test_exec_events_with_background() {
     const int numEventsPerPeak = 10000;

@@ -248,7 +248,7 @@ public:
 
   void test_execution_histograms_distribution_data() {
     using namespace Mantid::API;
-    const auto& algManager = AlgorithmManager::Instance();
+    const auto &algManager = AlgorithmManager::Instance();
 
     auto cloneWorkspace = algManager.createUnmanaged("CloneWorkspace");
     cloneWorkspace->setChild(true);
@@ -285,10 +285,10 @@ public:
     const auto &peak2 = integratedPeaksWS->getPeak(1);
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
-    const double binWidth {10.};
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1./binWidth, 1e-6);
-    TS_ASSERT_DELTA(peak2.getIntensity(), 1./binWidth, 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1./binWidth, 1e-6);
+    const double binWidth{10.};
+    TS_ASSERT_DELTA(peak1.getIntensity(), 1. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 1. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 1. / binWidth, 1e-6);
   }
 
   void test_execution_events_adaptive() {
