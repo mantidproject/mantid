@@ -56,7 +56,7 @@ Usage
   for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
-      timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
+      timetemp = mk.DateAndTime("2012-01-01T00:{:02}:{:02}".format(i, randsec))
       testprop.addValue(timetemp, randval)
   dataws.run().addProperty("Temp", testprop, True)
 
@@ -99,7 +99,7 @@ Output:
   for i in range(60):
       randsec = random.randint(0, 59)
       randval = random.random()*100.
-      timetemp = mk.DateAndTime("2012-01-01T00:%d:%d"%(i, randsec))
+      timetemp = mk.DateAndTime("2012-01-01T00:{:02}:{:02}".format(i, randsec))
       testprop.addValue(timetemp, randval)
   dataws.run().addProperty("Temp", testprop, True)
 

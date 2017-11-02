@@ -1084,8 +1084,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                vanCurvesWS, cs.m_forceRecalcOverwrite, specNos);
 
   try {
-    auto load =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+    auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
     load->initialize();
     load->setPropertyValue("Filename", cerFileHint);
     const std::string ceriaWSName = "engggui_calibration_sample_ws";
@@ -1142,8 +1141,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   }
 
   for (size_t i = 0; i < difc.size(); i++) {
-    auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
-        "EnggCalibrate");
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().create("EnggCalibrate");
 
     alg->initialize();
     alg->setProperty("InputWorkspace", ceriaWS);
@@ -1792,8 +1791,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
   } else {
     try {
-      auto load =
-          Mantid::API::AlgorithmManager::Instance().createUnmanaged("Load");
+      auto load = Mantid::API::AlgorithmManager::Instance().create("Load");
       load->initialize();
       load->setPropertyValue("Filename", instStr + runNo);
       load->setPropertyValue("OutputWorkspace", inWSName);
@@ -1828,8 +1826,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     outWSName = "engggui_focusing_output_ws_cropped";
   }
   try {
-    auto alg =
-        Mantid::API::AlgorithmManager::Instance().createUnmanaged("EnggFocus");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("EnggFocus");
     alg->initialize();
     alg->setProperty("InputWorkspace", inWSName);
     alg->setProperty("OutputWorkspace", outWSName);
@@ -2132,7 +2129,7 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
   // TODO?: maybe use setChild() and then
   // load->getProperty("OutputWorkspace");
 
-  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+  auto alg = Mantid::API::AlgorithmManager::Instance().create(
       "EnggVanadiumCorrections");
   alg->initialize();
   alg->setProperty("VanadiumWorkspace", vanWS);
