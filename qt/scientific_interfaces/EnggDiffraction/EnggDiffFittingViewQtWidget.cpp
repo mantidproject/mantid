@@ -459,17 +459,17 @@ void EnggDiffFittingViewQtWidget::browseFitFocusedRun() {
   std::string nexusFormat = "Nexus file with calibration table: NXS, NEXUS"
                             "(*.nxs *.nexus);;";
 
-  QString path(
-      QFileDialog::getOpenFileName(this, tr("Open Focused File "), prevPath,
+  QStringList paths(
+      QFileDialog::getOpenFileNames(this, tr("Open Focused File "), prevPath,
                                    QString::fromStdString(nexusFormat)));
 
-  if (path.isEmpty()) {
+  if (paths.isEmpty()) {
     return;
   }
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
-  setFittingRunNo(path.toStdString());
-  getBanks();
+  //MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(paths[0]);
+  setFittingRunNo(paths.join(",").toStdString());
+  //getBanks();
 }
 
 void EnggDiffFittingViewQtWidget::setFittingRunNo(const std::string &path) {

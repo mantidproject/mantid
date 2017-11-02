@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "DllConfig.h"
+#include "EnggDiffFittingModel.h"
 #include "IEnggDiffFittingPresenter.h"
 #include "IEnggDiffFittingView.h"
 #include "IEnggDiffractionCalibration.h"
@@ -145,6 +146,9 @@ protected slots:
   void fittingRunNoChanged();
 
 private:
+  Mantid::API::MatrixWorkspace_sptr loadSingleFile(const std::string &filename);
+  int findBankID(Mantid::API::MatrixWorkspace_sptr ws) const;
+
   bool isDigit(const std::string &text) const;
 
   // Methods related single peak fits
@@ -224,6 +228,9 @@ private:
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
+
+  /// Associated model for this presenter
+  MantidQT::CustomInterfaces::EnggDiffFittingModel m_model;
 
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;

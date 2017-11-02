@@ -1,6 +1,7 @@
 #include "EnggDiffFittingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -703,40 +704,95 @@ EnggDiffFittingPresenter::enableMultiRun(const std::string &firstRun,
 
 void EnggDiffFittingPresenter::processStart() {}
 
+
+MatrixWorkspace_sptr EnggDiffFittingPresenter::loadSingleFile(const std::string & filename) {
+	try {
+		MatrixWorkspace_sptr focusedWS;
+
+		Poco::Path selectedfPath(filename);
+
+		if (!filename.empty() && selectedfPath.isFile()) {
+			runLoadAlg(filename, focusedWS);
+			setDifcTzero(focusedWS);
+			convertUnits(g_focusedFittingWSName);
+			plotFocusedFile(false);
+
+			m_view->showStatus(
+				"Focused file loaded! (Click 'Select "
+				"Peak' to activate peak picker tool, hold Shift + Click "
+				"Peak, Click 'Add Peak')");
+			return focusedWS;
+		}
+		else {
+			m_view->userWarning("No File Found",
+				"Please select a focused file to load");
+			m_view->showStatus("Error while plotting the focused workspace");
+		}
+	}
+	catch (std::invalid_argument &ia) {
+		m_view->userWarning(
+			"Failed to load the selected focus file",
+			"The focus file failed to load, please check the logger for more"
+			" information.");
+		g_log.error("Failed to load file. Error message: ");
+		g_log.error(ia.what());
+	}
+	return nullptr;
+}
+
+int EnggDiffFittingPresenter::findBankID(Mantid::API::MatrixWorkspace_sptr ws) const{
+	size_t bankID = 1;
+	// attempt to guess bankID - this should be done in code that is currently
+	// in the view
+
+	auto name = ws->getName();
+	std::vector<std::string> chunks;
+	boost::split(chunks, name, boost::is_any_of("_"));
+	bool isNum = isDigit(chunks.back());
+	if (!chunks.empty() && isNum) {
+		try {
+			bankID = boost::lexical_cast<size_t>(chunks.back());
+		}
+		catch (boost::exception &) {
+			// If we get a bad cast or something goes wrong then
+			// the file is probably not what we were expecting
+			// so throw a runtime error
+			throw std::runtime_error(
+				"Failed to fit file: The data was not what is expected. "
+				"Does the file contain focused " +
+				m_view->getCurrentInstrument() + " workspace?");
+		}
+	}
+	return bankID;
+}
+
 void EnggDiffFittingPresenter::processLoad() {
-  // while file text-area is not empty
-  // while directory vector is not empty
-  // if loaded here set a global variable true so doesnt load again?
+	const std::string filenamesString = m_view->getFittingRunNo();
+	auto loadAlg = Mantid::API::AlgorithmManager::Instance().create("Load");
+	loadAlg->initialize();
+	loadAlg->setPropertyValue("Filename", filenamesString);
+	loadAlg->setPropertyValue("OutputWorkspace", g_focusedFittingWSName);
+	loadAlg->execute();
 
-  try {
-    MatrixWorkspace_sptr focusedWS;
-    const std::string focusedFile = m_view->getFittingRunNo();
-    Poco::Path selectedfPath(focusedFile);
+	AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+	if (filenamesString.find(",") == std::string::npos) { // Only 1 run loaded
+		const auto ws = ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
+		m_model.addWorkspace(ws->getRunNumber(), findBankID(ws), ws);
+	}
+	else {
+		const auto group_ws = ADS.retrieveWS<WorkspaceGroup>(g_focusedFittingWSName);
+		for (auto iter = group_ws->begin(); iter != group_ws->end(); iter++) {
+			const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(*iter);
+			m_model.addWorkspace(ws->getRunNumber(), findBankID(ws), ws);
+		}
+	}
+	std::vector<std::string> runNumbers;
+	const auto runNumberInts = m_model.getAllRunNumbers();
+	std::transform(runNumberInts.begin(), runNumberInts.end(), std::back_inserter(runNumbers),
+		[](const int num) {return std::to_string(num); });
 
-    if (!focusedFile.empty() && selectedfPath.isFile()) {
-      runLoadAlg(focusedFile, focusedWS);
-      setDifcTzero(focusedWS);
-      convertUnits(g_focusedFittingWSName);
-      plotFocusedFile(false);
+	m_view->setFittingRunNumVec(runNumbers);
 
-      m_view->showStatus(
-          "Focused file loaded! (Click 'Select "
-          "Peak' to activate peak picker tool, hold Shift + Click "
-          "Peak, Click 'Add Peak')");
-
-    } else {
-      m_view->userWarning("No File Found",
-                          "Please select a focused file to load");
-      m_view->showStatus("Error while plotting the focused workspace");
-    }
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning(
-        "Failed to load the selected focus file",
-        "The focus file failed to load, please check the logger for more"
-        " information.");
-    g_log.error("Failed to load file. Error message: ");
-    g_log.error(ia.what());
-  }
 }
 
 void EnggDiffFittingPresenter::processShutDown() {
@@ -921,31 +977,7 @@ std::string EnggDiffFittingPresenter::validateFittingexpectedPeaks(
 }
 
 void EnggDiffFittingPresenter::setDifcTzero(MatrixWorkspace_sptr wks) const {
-  size_t bankID = 1;
-  // attempt to guess bankID - this should be done in code that is currently
-  // in the view
-  auto fittingFilename = m_view->getFittingRunNo();
-  Poco::File fittingFile(fittingFilename);
-  if (fittingFile.exists()) {
-    Poco::Path path(fittingFile.path());
-    auto name = path.getBaseName();
-    std::vector<std::string> chunks;
-    boost::split(chunks, name, boost::is_any_of("_"));
-    bool isNum = isDigit(chunks.back());
-    if (!chunks.empty() && isNum) {
-      try {
-        bankID = boost::lexical_cast<size_t>(chunks.back());
-      } catch (boost::exception &) {
-        // If we get a bad cast or something goes wrong then
-        // the file is probably not what we were expecting
-        // so throw a runtime error
-        throw std::runtime_error(
-            "Failed to fit file: The data was not what is expected. "
-            "Does the file contain focused " +
-            m_view->getCurrentInstrument() + " workspace?");
-      }
-    }
-  }
+	const auto bankID = findBankID(wks);
 
   const std::string units = "none";
   auto &run = wks->mutableRun();

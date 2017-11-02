@@ -1,4 +1,5 @@
 set ( SRC_FILES
+    EnggDiffFittingModel.cpp
 	EnggDiffFittingPresenter.cpp
 	EnggDiffFittingViewQtWidget.cpp
 	EnggDiffractionPresenter.cpp
@@ -9,6 +10,7 @@ set ( SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to find it.
 set ( INC_FILES
 	EnggDiffCalibSettings.h
+	EnggDiffFittingModel.h
 	EnggDiffFittingPresWorker.h
 	EnggDiffFittingPresenter.h
 	EnggDiffFittingViewQtWidget.h
@@ -21,6 +23,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES 
+    EnggDiffFittingModel.h
     EnggDiffFittingPresenter.h
     EnggDiffFittingPresWorker.h
     EnggDiffFittingViewQtWidget.h
