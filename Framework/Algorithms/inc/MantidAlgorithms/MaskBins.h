@@ -1,9 +1,6 @@
 #ifndef MANTID_ALGORITHMS_MASKBINS_H_
 #define MANTID_ALGORITHMS_MASKBINS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -57,8 +54,6 @@ namespace Algorithms {
  */
 class DLLExport MaskBins : public API::Algorithm {
 public:
-  /// Constructor
-  MaskBins();
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
   /// Summary of algorithms purpose
@@ -82,10 +77,10 @@ private:
                    MantidVec::difference_type &startBin,
                    MantidVec::difference_type &endBin);
 
-  double m_startX; ///< The range start point
-  double m_endX;   ///< The range end point
-  std::vector<int>
-      spectra_list; ///<the list of Spectra (workspace index) to load
+  double m_startX{0.0}; ///< The range start point
+  double m_endX{0.0};   ///< The range end point
+  Indexing::SpectrumIndexSet
+      indexSet; ///<the list of Spectra (workspace index) to load
 };
 
 } // namespace Algorithms
