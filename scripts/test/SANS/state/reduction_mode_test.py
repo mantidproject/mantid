@@ -92,7 +92,7 @@ class StateReductionModeBuilderTest(unittest.TestCase):
         self.assertTrue(state.merge_scale == merge_scale)
         detector_names = state.detector_names
         self.assertTrue(detector_names[DetectorType.to_string(DetectorType.LAB)] == "main-detector-bank")
-        self.asserTrue(state.merge_mask)
+        self.assertTrue(state.merge_mask)
         self.assertTrue(state.merge_min == merge_min)
         self.assertTrue(state.merge_max == merge_max)
 
