@@ -1389,6 +1389,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
         self.merged_scale_line_edit.setValidator(double_validator)
         self.merged_q_range_start_line_edit.setValidator(double_validator)
         self.merged_q_range_stop_line_edit.setValidator(double_validator)
+        self.merged_max_line_edit.setValidator(double_validator)
+        self.merged_min_line_edit.setValidator(double_validator)
 
         self.wavelength_min_line_edit.setValidator(positive_double_validator)
         self.wavelength_max_line_edit.setValidator(positive_double_validator)
@@ -1443,6 +1445,8 @@ class SANSDataProcessorGui(QtGui.QMainWindow, ui_sans_data_processor_window.Ui_S
 
         self.merged_q_range_start_line_edit.setText("")
         self.merged_q_range_stop_line_edit.setText("")
+        self.merged_max_line_edit.setText("")
+        self.merged_min_line_edit.setText("")
         self.merged_scale_line_edit.setText("")
         self.merged_shift_line_edit.setText("")
         self.merged_shift_use_fit_check_box.setChecked(False)
