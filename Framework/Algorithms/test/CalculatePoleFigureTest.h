@@ -170,9 +170,14 @@ public:
 
     // row 1
     API::TableRow row1 = outws->getRow(1);
+    int wsindex1;
+    double r_td1, r_nd1, intensity1;
+    row1 >> wsindex1 >> r_td1 >> r_nd1 >> intensity1;
 
+    TS_ASSERT_EQUALS(wsindex, 0);
+    TS_ASSERT_EQUALS(r_td, r_td1);
 
-
+    return;
   }
 };
 
