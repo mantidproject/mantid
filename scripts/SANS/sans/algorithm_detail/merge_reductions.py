@@ -6,7 +6,7 @@ from six import with_metaclass
 from sans.common.general_functions import create_child_algorithm
 from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
 from sans.algorithm_detail.bundles import MergeBundle
-import pydevd
+
 
 class Merger(with_metaclass(ABCMeta, object)):
     """ Merger interface"""
@@ -43,7 +43,6 @@ class ISIS1DMerger(Merger):
         # We can have merged reductions
         can_count_primary, can_norm_primary, can_count_secondary, can_norm_secondary = \
             get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_vs_output_bundles, is_can)
-        pydevd.settrace('localhost', port=5434, stdoutToServer=True, stderrToServer=True)
         # Get fit parameters
         shift_factor, scale_factor, fit_mode, fit_min, fit_max, merge_mask, merge_min, merge_max = \
             get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)

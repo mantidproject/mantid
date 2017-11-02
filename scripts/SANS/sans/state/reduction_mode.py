@@ -6,7 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import (with_metaclass)
 import copy
-
+import json
 from sans.state.state_base import (StateBase, ClassTypeParameter, FloatParameter, DictParameter,
                                    FloatWithNoneParameter, rename_descriptor_names, BoolParameter)
 from sans.common.enums import (ReductionMode, ISISReductionMode, ReductionDimensionality, FitModeForMerge,
@@ -36,8 +36,8 @@ class StateReductionBase(with_metaclass(ABCMeta, object)):
 class StateReductionMode(StateReductionBase, StateBase):
     reduction_mode = ClassTypeParameter(ReductionMode)
     reduction_dimensionality = ClassTypeParameter(ReductionDimensionality)
-    merge_max = FloatParameter()
-    merge_min = FloatParameter()
+    merge_max = FloatWithNoneParameter()
+    merge_min = FloatWithNoneParameter()
     merge_mask = BoolParameter()
 
     # Fitting
@@ -61,9 +61,9 @@ class StateReductionMode(StateReductionBase, StateBase):
         self.merge_fit_mode = FitModeForMerge.NoFit
         self.merge_range_min = None
         self.merge_range_max = None
-        merge_max = None
-        merge_min = None
-        merge_mask = False
+        self.merge_max = None
+        self.merge_min = None
+        self.merge_mask = False
 
         # Set the detector names to empty strings
         self.detector_names = {DetectorType.to_string(DetectorType.LAB): "",
@@ -86,7 +86,13 @@ class StateReductionMode(StateReductionBase, StateBase):
         return self.detector_names[bank_type]
 
     def validate(self):
-        pass
+        is_invalid = {}
+        if self.merge_min > self.merge_max:
+            is_invalid.update({"StateReduction": "The minimum of the merge region is greater than the maximum."})
+
+        if is_invalid:
+            raise ValueError("StateReduction: The provided inputs are illegal. "
+                             "Please see: {0}".format(json.dumps(is_invalid)))
 
 
 # ----------------------------------------------------------------------------------------------------------------------
