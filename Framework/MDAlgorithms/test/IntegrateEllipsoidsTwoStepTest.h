@@ -197,7 +197,7 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       peaksWS->getNumberPeaks());
 
-    const auto binWidth{0.2};
+    const double binWidth{0.2};
     for (int i = 0; i < 5; ++i) {
       TSM_ASSERT_DELTA("Wrong intensity for peak " + std::to_string(i),
                        integratedPeaksWS->getPeak(i).getIntensity(),
