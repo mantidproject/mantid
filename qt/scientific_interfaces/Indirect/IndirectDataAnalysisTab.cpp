@@ -333,7 +333,12 @@ void IndirectDataAnalysisTab::plotGuess(
 
   if (inputWorkspace()) {
     auto guessWs = createGuessWorkspace(function);
-    previewPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+
+    // Check whether the guess workspace has enough data points
+    // to plot
+    if (guessWs->x(0).size() >= 2) {
+      previewPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
+    }
   }
 }
 
@@ -349,9 +354,9 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   const auto inputWS = inputWorkspace();
   const auto startX = m_dblManager->value(m_properties["StartX"]);
   const auto endX = m_dblManager->value(m_properties["EndX"]);
-  const size_t binIndexLow = inputWS->binIndexOf(startX);
-  const size_t binIndexHigh = inputWS->binIndexOf(endX);
-  const size_t nData = binIndexHigh - binIndexLow;
+  const auto binIndexLow = inputWS->binIndexOf(startX);
+  const auto binIndexHigh = inputWS->binIndexOf(endX);
+  const auto nData = binIndexHigh - binIndexLow;
 
   const auto &xPoints = inputWS->points(0);
 
