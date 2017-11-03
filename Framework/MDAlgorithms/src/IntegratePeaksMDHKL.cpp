@@ -70,13 +70,13 @@ void IntegratePeaksMDHKL::init() {
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
+      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", EMPTY_DBL(),
                                              Direction::Input),
       "Optional:Inner radius to use to evaluate the background of the peak.\n"
       "If omitted background is region of HKL box - peak. ");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
+      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", EMPTY_DBL(),
                                              Direction::Input),
       "Optional:Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
@@ -233,10 +233,10 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     for (int Kindex = 0; Kindex < gridPts[1]; Kindex++) {
       for (int Lindex = 0; Lindex < gridPts[2]; Lindex++) {
         int iHKL = Hindex + gridPts[0] * (Kindex + gridPts[1] * Lindex);
-        if (BackgroundOuterRadius2 > 0.0) {
+        if (BackgroundOuterRadius2 != EMPTY_DBL()) {
           double radius2 = pow((double(Hindex) - Hcenter) / gridPts[0], 2) +
                            pow((double(Kindex) - Kcenter) / gridPts[1], 2) +
-                           pow(double((Lindex)-Lcenter) / gridPts[2], 2);
+                           pow((double(Lindex) - Lcenter) / gridPts[2], 2);
           if (radius2 < BackgroundOuterRadius2 &&
               BackgroundInnerRadius2 < radius2) {
             backgroundPoints = backgroundPoints + 1;
@@ -285,8 +285,11 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
       }
     }
   }
-  if (BackgroundOuterRadius2 > 0.0) {
-    double ratio = float(peakPoints) / float(backgroundPoints);
+  if (BackgroundOuterRadius2 != EMPTY_DBL()) {
+    double ratio = 0.0;
+    if (backgroundPoints > 0) {
+      ratio = float(peakPoints) / float(backgroundPoints);
+    } 
     intensity = peakSum - ratio * (backgroundSum);
     errorSquared = errSqSum + ratio * ratio * (backgroundErrSqSum);
   } else {
