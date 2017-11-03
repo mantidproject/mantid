@@ -5,7 +5,6 @@ from mantid.api import AlgorithmManager, MatrixWorkspace
 import numpy as np
 
 from SANSStitch import QErrorCorrectionForMergedWorkspaces
-import pydevd
 
 class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):
