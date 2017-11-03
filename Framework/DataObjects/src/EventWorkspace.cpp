@@ -110,8 +110,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-void EventWorkspace::init(const std::size_t &NVectors,
-                          const HistogramData::Histogram &histogram) {
+void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
     throw std::runtime_error(
         "EventWorkspace can only be initialized with XMode::BinEdges");
@@ -120,10 +119,10 @@ void EventWorkspace::init(const std::size_t &NVectors,
     throw std::runtime_error(
         "EventWorkspace cannot be initialized non-NULL Y or E data");
 
-  data.resize(NVectors, nullptr);
+  data.resize(numberOfDetectorGroups(), nullptr);
   EventList el;
   el.setHistogram(histogram);
-  for (size_t i = 0; i < NVectors; i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     data[i] = new EventList(el);
     data[i]->setMRU(mru);
     data[i]->setSpectrumNo(specnum_t(i));

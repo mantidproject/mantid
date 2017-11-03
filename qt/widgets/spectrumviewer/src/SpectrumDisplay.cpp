@@ -1,10 +1,9 @@
 #include <sstream>
 #include <cfloat>
 
-#include <QtGui>
 #include <QVector>
 #include <QString>
-#include <qimage.h>
+#include <QImage>
 #include <qwt_scale_engine.h>
 
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDisplay.h"

@@ -1,8 +1,11 @@
 # bring in Mantid/VATES API dependencies
 set_mantid_subprojects( qt/paraview_ext/VatesAPI )
 
+
 # vtktypemacro doesn't play nicely with -Wpedantic
-string(REPLACE "-Wpedantic" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+get_property ( _compile_options DIRECTORY PROPERTY COMPILE_OPTIONS )
+list ( REMOVE_ITEM _compile_options -Wpedantic )
+set_property ( DIRECTORY PROPERTY COMPILE_OPTIONS ${_compile_options} )
 
 # NonOrthogonalSourcePlugin is necessary for viewing materials with nonorthogonal basis vectors.
 # Copy it over to the pvplugins dir

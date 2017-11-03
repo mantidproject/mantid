@@ -76,9 +76,9 @@ Usage
      alg.execute()
 
      # Properties of Algorithms can be read (but not written to) through a Python dictionary. So you may do:
-     print alg["Property1"]
+     print(alg["Property1"])
      # prints 'p1'
-     print alg["Property2"]
+     print(alg["Property2"])
      # prints 'p2', etc
 
 
