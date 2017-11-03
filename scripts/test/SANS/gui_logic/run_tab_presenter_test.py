@@ -10,7 +10,7 @@ from mantid.kernel import PropertyManagerDataService
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ISISReductionMode,
                                RangeStepType, FitType)
-from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_ON)
+from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.common import (remove_file, save_to_csv)
 
@@ -230,7 +230,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def test_that_can_get_states_from_row_user_file(self):
         # Arrange
-        row_user_file_path = create_user_file(sample_user_file_gravity_ON)
+        row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
         batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2, row_user_file_path)
 
         presenter.on_user_file_load()
