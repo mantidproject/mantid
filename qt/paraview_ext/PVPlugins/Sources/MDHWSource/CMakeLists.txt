@@ -3,10 +3,8 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewMDHWSourceSMPlugin "1.0"
 	SERVER_MANAGER_XML MDHWSource.xml
 	SERVER_MANAGER_SOURCES vtkMDHWSource.cxx)
-set_target_properties ( MantidParaViewMDHWSourceSMPlugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-  FOLDER "MantidVatesParaViewPlugins"
-)
+set_pvplugin_properties (MantidParaViewMDHWSourceSMPlugin QT_VERSION 4)
+
 include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
 target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
@@ -24,4 +22,4 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewMDHWSourceSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
 endif ()
 
-install( TARGETS MantidParaViewMDHWSourceSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+install_pvplugin (MantidParaViewMDHWSourceSMPlugin QT_VERSION 4)

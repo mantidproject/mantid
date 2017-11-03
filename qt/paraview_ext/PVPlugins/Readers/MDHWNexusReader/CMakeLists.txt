@@ -4,10 +4,7 @@ add_paraview_plugin( MantidParaViewMDHWNexusReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML MDHWNexusReader.xml
 	SERVER_MANAGER_SOURCES vtkMDHWNexusReader.cxx
 )
-set_target_properties ( MantidParaViewMDHWNexusReaderSMPlugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-  FOLDER "MantidVatesParaViewPlugins"
-)
+set_pvplugin_properties (MantidParaViewMDHWNexusReaderSMPlugin QT_VERSION 4)
 
 include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
@@ -26,6 +23,4 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewMDHWNexusReaderSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
 endif ()
 
-install( TARGETS MantidParaViewMDHWNexusReaderSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
-
-
+install_pvplugin (MantidParaViewMDHWNexusReaderSMPlugin QT_VERSION 4)

@@ -216,7 +216,7 @@ std::string UsageServiceImpl::generateStartupMessage() {
   message["osReadable"] = ConfigService::Instance().getOSVersionReadable();
 
   // paraview version or zero
-  if (ConfigService::Instance().pvPluginsAvailable()) {
+  if (MAKE_VATES) {
     message["ParaView"] = Kernel::ParaViewVersion::targetVersion();
   } else {
     message["ParaView"] = 0;

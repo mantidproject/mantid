@@ -4,10 +4,8 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 	SERVER_MANAGER_XML SplatterPlot.xml
 	SERVER_MANAGER_SOURCES vtkSplatterPlot.cxx
 	GUI_RESOURCES SplatterPlot.qrc)
-set_target_properties ( MantidParaViewSplatterPlotSMPlugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-  FOLDER "MantidVatesParaViewPlugins"
-)
+set_pvplugin_properties (MantidParaViewSplatterPlotSMPlugin QT_VERSION 4)
+
 
 include_directories ( SYSTEM ${QWT5_INCLUDE_DIR} )
 
@@ -25,5 +23,5 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewSplatterPlotSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
 endif ()
 
-install( TARGETS MantidParaViewSplatterPlotSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+install_pvplugin (MantidParaViewSplatterPlotSMPlugin QT_VERSION 4)
 

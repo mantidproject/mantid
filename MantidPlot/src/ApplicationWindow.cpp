@@ -376,21 +376,10 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  auto &config = ConfigService::Instance(); // Starts logging
+  ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel();       // Must be done after logging starts
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
-  // Load Paraview plugin libraries if possible
-  if (config.pvPluginsAvailable()) {
-    // load paraview plugins
-    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
-      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() +
-                  "\"");
-    }
-    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(),
-                                                false);
-  }
-
 #ifdef MAKE_VATES
   if (!vtkPVDisplayInformation::SupportsOpenGLLocally())
     g_log.error("The OpenGL configuration does not support the VSI.");

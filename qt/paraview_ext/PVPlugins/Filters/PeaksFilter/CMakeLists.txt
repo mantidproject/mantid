@@ -3,10 +3,7 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewPeaksFilterSMPlugin "1.0"
 SERVER_MANAGER_XML PeaksFilter.xml
 SERVER_MANAGER_SOURCES vtkPeaksFilter.cxx vtkPeaksFilter.h)
-set_target_properties ( MantidParaViewPeaksFilterSMPlugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-  FOLDER "MantidVatesParaViewPlugins"
-)
+set_pvplugin_properties (MantidParaViewPeaksFilterSMPlugin QT_VERSION 4)
 
 target_link_libraries( MantidParaViewPeaksFilterSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${CORE_MANTIDLIBS}
@@ -21,4 +18,4 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewPeaksFilterSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
 endif ()
 
-install( TARGETS MantidParaViewPeaksFilterSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
+install_pvplugin (MantidParaViewPeaksFilterSMPlugin QT_VERSION 4)

@@ -11,8 +11,19 @@ if( ParaView_FOUND AND USE_PARAVIEW )
   message( STATUS "Using ParaView ${PARAVIEW_VERSION_FULL}" )
   include( ${PARAVIEW_USE_FILE} )
 
-  # Output PV plugins to a separate directory
-  set ( PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/qt4/pvplugins )
+  function (set_pvplugin_properties target QT_VERSION vers)
+    set_target_properties ( ${target} PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}
+      FOLDER "MantidVatesParaViewPlugins"
+    )
+  endfunction()
+
+  function (install_pvplugin target QT_VERSION vers)
+    install( TARGETS ${target} ${SYSTEM_PACKAGE_TARGET}
+      DESTINATION ${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt${vers}
+    )
+  endfunction()
+
   add_subdirectory( VatesAPI )
   add_subdirectory( VatesAlgorithms )
   add_subdirectory( PVPlugins )

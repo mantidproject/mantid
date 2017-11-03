@@ -6,9 +6,6 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewRepresentationSMPlugin "1.0"
     vtkAlignedGeometrySliceRepresentation.cxx
     AlignedThreeSliceFilter.cxx
     AlignedCutter.cxx)
-set_target_properties ( MantidParaViewRepresentationSMPlugin PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-    FOLDER "MantidVatesParaViewPlugins"
-  )
+set_pvplugin_properties (MantidParaViewRepresentationSMPlugin QT_VERSION 4)
 
 install( TARGETS MantidParaViewRepresentationSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

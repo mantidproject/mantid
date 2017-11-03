@@ -20,15 +20,17 @@ if (CMAKE_GENERATOR MATCHES "Visual Studio")
 else ()
   set ( _pv_library_output_dir ${ParaView_DIR}/lib )
 endif()
-add_custom_command ( OUTPUT ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filename}
+add_custom_command ( OUTPUT ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
   ${_pv_library_output_dir}/${CMAKE_CFG_INTDIR}/${_plugin_filename}
-  ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filename}
+  ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}/${_plugin_filename}
 )
-add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}/${_plugin_filename} )
+add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename} )
 add_dependencies ( MantidParaViewMDEWSourceSMPlugin copy_nonorthogonal_plugin )
 
 if ( (NOT APPLE) AND NonOrthogonalSourcePlugin_LOCATION)
   # make_package.rb handles this for OSX
-  install( FILES ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+  install( FILES ${NonOrthogonalSourcePlugin_LOCATION} ${SYSTEM_PACKAGE_TARGET}
+    DESTINATION ${PLUGINS_DIR}/${PVPLUGINS_SUBDIR}/qt4
+  )
 endif()

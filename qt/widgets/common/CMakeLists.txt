@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/OptionsPropertyWidget.cpp
 	src/pixmaps.cpp
 	src/PlotAxis.cpp
+	src/PluginLibraries.cpp
 	src/PropertyWidget.cpp
 	src/PropertyWidgetFactory.cpp
 	src/PythonRunner.cpp
@@ -260,6 +261,7 @@ set ( INC_FILES
 	inc/MantidQtWidgets/Common/NonOrthogonal.h
 	inc/MantidQtWidgets/Common/pixmaps.h
 	inc/MantidQtWidgets/Common/PlotAxis.h
+	inc/MantidQtWidgets/Common/PluginLibraries.h
 	inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
 	inc/MantidQtWidgets/Common/PythonSystemHeader.h
 	inc/MantidQtWidgets/Common/PythonThreading.h

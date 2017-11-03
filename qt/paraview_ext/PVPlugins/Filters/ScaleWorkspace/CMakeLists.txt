@@ -3,10 +3,7 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewScaleWorkspaceSMPlugin "1.0"
 SERVER_MANAGER_XML ScaleWorkspace.xml
 SERVER_MANAGER_SOURCES vtkScaleWorkspace.cxx)
-set_target_properties ( MantidParaViewScaleWorkspaceSMPlugin PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PVPLUGIN_LIBRARY_OUTPUT_DIRECTORY}
-  FOLDER "MantidVatesParaViewPlugins"
-)
+set_pvplugin_properties (MantidParaViewScaleWorkspaceSMPlugin QT_VERSION 4)
 
 target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${CORE_MANTIDLIBS}
@@ -19,4 +16,4 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewScaleWorkspaceSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
 endif ()
 
-install( TARGETS MantidParaViewScaleWorkspaceSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
+install_pvplugin (MantidParaViewScaleWorkspaceSMPlugin QT_VERSION 4)
