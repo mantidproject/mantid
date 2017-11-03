@@ -13,7 +13,6 @@ if (CMAKE_BINARY_DIR MATCHES "^${CMAKE_SOURCE_DIR}/.+")
   string (REGEX REPLACE "^${CMAKE_SOURCE_DIR}/([^\\/]+)(.*)\$" "/\\1/" _ignore_dir "${CMAKE_BINARY_DIR}")
   set (CPACK_SOURCE_IGNORE_FILES "${CPACK_SOURCE_IGNORE_FILES};${_ignore_dir}")
 endif ()
-message("CPACK_SOURCE_IGNORE_FILES = ${CPACK_SOURCE_IGNORE_FILES}")
 
 include (DetermineLinuxDistro)
 
