@@ -2,8 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 
 import os
 import numpy as np
-from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
-    VisibleWhenProperty, PropertyCriterion
+from mantid.kernel import StringListValidator, Direction, FloatArrayProperty, \
+    FloatArrayOrderedPairsValidator, VisibleWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, \
     FileAction, Progress, MatrixWorkspaceProperty
 from mantid.simpleapi import *
@@ -37,7 +37,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         return 'Performs powder diffraction data reduction for ILL instrument D20.'
 
     def name(self):
-        return "PowderILLReduction"
+        return "PowderDiffILLReduction"
 
     def validateInputs(self):
         issues = dict()
@@ -52,7 +52,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
                                           action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the detector efficiencies.')
 
-        self.declareProperty(FileProperty('ROCFile', '',
+        self.declareProperty(FileProperty('ROCCorrectionFile', '',
                                           action=FileAction.OptionalLoad, extensions=['nxs']),
                              doc='File containing the radial oscillating collimator (ROC) corrections.')
 
@@ -168,7 +168,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             Multiply(LHSWorkspace=joined_ws, RHSWorkspace=calib_ws, OutputWorkspace=joined_ws)
             DeleteWorkspace(calib_ws)
 
-        # TODO: ROC normalisation goes here
+        # TODO: ROC correction goes here
 
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)

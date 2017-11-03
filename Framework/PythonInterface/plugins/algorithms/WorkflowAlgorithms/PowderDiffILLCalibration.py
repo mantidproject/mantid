@@ -38,7 +38,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         return "Performs detector efficiency correction calculation for powder diffraction instrument D20 at ILL."
 
     def name(self):
-        return "PowderILLCalibration"
+        return "PowderDiffILLCalibration"
 
     def PyInit(self):
         self.declareProperty(FileProperty('CalibrationRun', '', action=FileAction.Load, extensions=['nxs']),
