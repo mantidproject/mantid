@@ -169,12 +169,6 @@ void SaveFocusedXYE::exec() {
                          inputWS->getAxis(1)->unit()->caption(),
                          inputWS->getAxis(1)->unit()->label(),
                          inputWS->getAxis(1)->getValue(i));
-      // out << "# Data for spectra :" << i + startingbank << '\n';
-      // out << inputWS->getAxis(1)->unit()->caption
-      // inputWS->getAxis(1)->getValue(i) << '\n';
-      // out << "# " << inputWS->getAxis(0)->unit()->caption() << "
-      // Y                 E"
-      //    << '\n';
     }
     const size_t datasize = Y.size();
     for (size_t j = 0; j < datasize; j++) {
