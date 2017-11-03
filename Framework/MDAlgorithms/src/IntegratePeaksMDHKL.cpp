@@ -32,8 +32,8 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
   */
 void IntegratePeaksMDHKL::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
-                                                   Direction::Input),
+      make_unique<WorkspaceProperty<IMDWorkspace> >("InputWorkspace", "",
+                                                    Direction::Input),
       "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
                   "Distance from integer HKL to integrate peak.");
@@ -49,26 +49,40 @@ void IntegratePeaksMDHKL::init() {
   auto solidAngleValidator = fluxValidator->clone();
 
   declareProperty(
-      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
-                                       PropertyMode::Optional, fluxValidator),
+      make_unique<WorkspaceProperty<> >("FluxWorkspace", "", Direction::Input,
+                                        PropertyMode::Optional, fluxValidator),
       "An optional input workspace containing momentum dependent flux for "
       "normalization.");
-  declareProperty(make_unique<WorkspaceProperty<>>(
+  declareProperty(make_unique<WorkspaceProperty<> >(
                       "SolidAngleWorkspace", "", Direction::Input,
                       PropertyMode::Optional, solidAngleValidator),
                   "An optional input workspace containing momentum integrated "
                   "vanadium for normalization "
                   "(a measure of the solid angle).");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
-                                                     Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutputWorkspace", "",
+                                                      Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
+  declareProperty(
+      make_unique<PropertyWithValue<double> >("BackgroundInnerRadius", 0.0,
+                                              Direction::Input),
+      "Optional:Inner radius to use to evaluate the background of the peak.\n"
+      "If omitted background is region of HKL box - peak. ");
+
+  declareProperty(
+      make_unique<PropertyWithValue<double> >("BackgroundOuterRadius", 0.0,
+                                              Direction::Input),
+      "Optional:Outer radius to use to evaluate the background of the peak.\n"
+      "The signal density around the peak (BackgroundInnerRadius < r < "
+      "BackgroundOuterRadius) is used to estimate the background under the "
+      "peak.\n"
+      "If omitted background is region of HKL box - peak.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -177,6 +191,12 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
                                         double &intensity,
                                         double &errorSquared) {
   std::vector<int> gridPts;
+  /// Background (end) radius
+  double BackgroundOuterRadius2 = getProperty("BackgroundOuterRadius");
+  BackgroundOuterRadius2 = pow(BackgroundOuterRadius2, 2.0);
+  /// Start radius of the background
+  double BackgroundInnerRadius2 = getProperty("BackgroundInnerRadius");
+  BackgroundInnerRadius2 = pow(BackgroundInnerRadius2, 2.0);
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
     gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
@@ -202,10 +222,28 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
   double measuredSum = 0.0;
   double errSqSum = 0.0;
   double measuredErrSqSum = 0.0;
+  int backgroundPoints = 0;
+  double backgroundSum = 0.0;
+  double backgroundErrSqSum = 0.0;
+  double Hcenter = gridPts[0] * 0.5;
+  double Kcenter = gridPts[1] * 0.5;
+  double Lcenter = gridPts[2] * 0.5;
+
   for (int Hindex = 0; Hindex < gridPts[0]; Hindex++) {
     for (int Kindex = 0; Kindex < gridPts[1]; Kindex++) {
       for (int Lindex = 0; Lindex < gridPts[2]; Lindex++) {
         int iHKL = Hindex + gridPts[0] * (Kindex + gridPts[1] * Lindex);
+        if (BackgroundOuterRadius2 > 0.0) {
+          double radius2 = pow((double(Hindex) - Hcenter) / gridPts[0], 2) +
+                           pow((double(Kindex) - Kcenter) / gridPts[1], 2) +
+                           pow(double((Lindex) - Lcenter) / gridPts[2], 2);
+          if (radius2 < BackgroundOuterRadius2 &&
+              BackgroundInnerRadius2 < radius2) {
+            backgroundPoints = backgroundPoints + 1;
+            backgroundSum = backgroundSum + F[iHKL];
+            backgroundErrSqSum = backgroundErrSqSum + SqError[iHKL];
+          }
+        }
         if (std::isfinite(F[iHKL])) {
           measuredPoints = measuredPoints + 1;
           measuredSum = measuredSum + F[iHKL];
@@ -247,9 +285,15 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
       }
     }
   }
-  double ratio = float(peakPoints) / float(measuredPoints - peakPoints);
-  intensity = peakSum - ratio * (measuredSum - peakSum);
-  errorSquared = errSqSum + ratio * ratio * (measuredErrSqSum - errSqSum);
+  if (BackgroundOuterRadius2 > 0.0) {
+    double ratio = float(peakPoints) / float(backgroundPoints);
+    intensity = peakSum - ratio * (backgroundSum);
+    errorSquared = errSqSum + ratio * ratio * (backgroundErrSqSum);
+  } else {
+    double ratio = float(peakPoints) / float(measuredPoints - peakPoints);
+    intensity = peakSum - ratio * (measuredSum - peakSum);
+    errorSquared = errSqSum + ratio * ratio * (measuredErrSqSum - errSqSum);
+  }
   return;
 }
 
