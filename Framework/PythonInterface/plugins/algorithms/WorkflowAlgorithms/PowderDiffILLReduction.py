@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 class PowderDiffILLReduction(PythonAlgorithm):
 
     _calibration_file = None
+    _roc_file = None
     _normalise_option = None
     _region_of_interest = []
     _observable = None
@@ -104,6 +105,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self._sort_x_axis = self.getProperty('SortObservableAxis').value
         self._normalise_option = self.getPropertyValue('NormaliseTo')
         self._calibration_file = self.getPropertyValue('CalibrationFile')
+        self._roc_file = self.getPropertyValue('ROCCorrectionFile')
         self._unit = self.getPropertyValue('Unit')
         self._crop_negative = self.getProperty('CropNegative2Theta').value
         self._zero_counting_option = self.getPropertyValue('ZeroCountingCells')
@@ -115,7 +117,6 @@ class PowderDiffILLReduction(PythonAlgorithm):
         temp_ws = self._hide('temp')
         joined_ws = self._hide('joined')
         mon_ws = self._hide('mon')
-        calib_ws = self._hide('calib')
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=runs.count(',')+runs.count('+')+1)
 
@@ -164,11 +165,16 @@ class PowderDiffILLReduction(PythonAlgorithm):
         DeleteWorkspace(mon_ws)
 
         if self._calibration_file:
+            calib_ws = self._hide('calib')
             LoadNexusProcessed(Filename=self._calibration_file, OutputWorkspace=calib_ws)
             Multiply(LHSWorkspace=joined_ws, RHSWorkspace=calib_ws, OutputWorkspace=joined_ws)
             DeleteWorkspace(calib_ws)
 
-        # TODO: ROC correction goes here
+        if self._roc_file:
+            roc_ws = self._hide('roc')
+            LoadNexusProcessed(Filename=self._roc_file, OutputWorkspace=roc_ws)
+            Multiply(LHSWorkspace=joined_ws, RHSWorkspace=roc_ws, OutputWorkspace=joined_ws)
+            DeleteWorkspace(roc_ws)
 
         if self._sort_x_axis:
             SortXAxis(InputWorkspace=joined_ws, OutputWorkspace=joined_ws)
