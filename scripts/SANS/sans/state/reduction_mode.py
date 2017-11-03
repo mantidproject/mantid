@@ -87,8 +87,9 @@ class StateReductionMode(StateReductionBase, StateBase):
 
     def validate(self):
         is_invalid = {}
-        if self.merge_min > self.merge_max:
-            is_invalid.update({"StateReduction": "The minimum of the merge region is greater than the maximum."})
+        if self.merge_max and self.merge_min:
+            if self.merge_min > self.merge_max:
+                is_invalid.update({"StateReduction": "The minimum of the merge region is greater than the maximum."})
 
         if is_invalid:
             raise ValueError("StateReduction: The provided inputs are illegal. "
