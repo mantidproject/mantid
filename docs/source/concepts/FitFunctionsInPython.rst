@@ -100,7 +100,7 @@ Multi-Domain functions can be constructed like this:
 
 .. code:: python
 
-    md_fun = MultiDomainFunction(Gaussian(PeakCentre=1, Sigma=0.1), Gaussian(PeakCentre=1, Sigma=0.2), ..., global=['Height'])
+    md_fun = MultiDomainFunction(Gaussian(PeakCentre=1, Sigma=0.1), Gaussian(PeakCentre=1, Sigma=0.2), ..., Global=['Height'])
 
 Setting Ties
 ------------
