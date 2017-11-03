@@ -94,6 +94,10 @@ public:
     TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
     TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
+
+    TS_ASSERT_EQUALS(
+        outputWS->run().getProperty("Detector.calibration_file")->value(),
+        "none")
   }
 
   void test_D20_no_scan_requesting_calibrated_throws() {
@@ -300,10 +304,17 @@ public:
 
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
 
-    if (dataType == "Raw")
+    if (dataType == "Raw") {
       TS_ASSERT_DELTA(outputWS->y(25)[0], 0, 1e-12)
-    else
+      TS_ASSERT_EQUALS(
+          outputWS->run().getProperty("Detector.calibration_file")->value(),
+          "none")
+    } else {
       TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
+      TS_ASSERT_EQUALS(
+          outputWS->run().getProperty("Detector.calibration_file")->value(),
+          "d2bcal_23Nov16_c.2d")
+    }
   }
 
   void test_D2B_single_file() { do_test_D2B_single_file("Auto"); }

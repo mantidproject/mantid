@@ -216,7 +216,8 @@ void LoadILLDiffraction::loadDataScan() {
 */
 void LoadILLDiffraction::loadMetaData() {
 
-  m_outWorkspace->mutableRun().addProperty("Facility", std::string("ILL"));
+  auto &mutableRun = m_outWorkspace->mutableRun();
+  mutableRun.addProperty("Facility", std::string("ILL"));
 
   // Open NeXus file
   NXhandle nxHandle;
@@ -226,6 +227,14 @@ void LoadILLDiffraction::loadMetaData() {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
     nxStat = NXclose(&nxHandle);
   }
+
+  if (mutableRun.hasProperty("Detector.calibration_file")) {
+    if (getPropertyValue("DataType") == "Raw") {
+      mutableRun.getProperty("Detector.calibration_file")->setValue("none");
+      g_log.error() << "Set to none!" << std::endl;
+    }
+  } else
+    mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
 
 /**
@@ -473,6 +482,7 @@ void LoadILLDiffraction::loadScanVars() {
  */
 void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
+  auto &mutableRun = m_outWorkspace->mutableRun();
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
       auto property = Kernel::make_unique<TimeSeriesProperty<double>>(
@@ -481,7 +491,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
         property->addValue(absoluteTimes[j],
                            scan(static_cast<int>(i), static_cast<int>(j)));
       }
-      m_outWorkspace->mutableRun().addLogData(std::move(property));
+      mutableRun.addLogData(std::move(property));
     }
   }
 }
