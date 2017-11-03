@@ -481,7 +481,7 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   updatePlot();
   updatePlotRange();
 
-  std::string paramWsName = outputPrefix + "_Parameters";
+  const std::string paramWsName = outputPrefix + "_Parameters";
 
   if (AnalysisDataService::Instance().doesExist(paramWsName)) {
     QString prefixPrefix = "f1.f1.";
@@ -990,8 +990,8 @@ double ConvFit::getInstrumentResolution(MatrixWorkspace_sptr workspace) {
       inst = workspace->getInstrument();
     }
     if (inst->getComponentByName(analyser) != NULL) {
-      resolution = inst->getComponentByName(analyser)
-                       ->getNumberParameter("resolution")[0];
+      resolution = inst->getComponentByName(analyser)->getNumberParameter(
+          "resolution")[0];
     } else {
       resolution = inst->getNumberParameter("resolution")[0];
     }
@@ -1204,8 +1204,8 @@ void ConvFit::updateProperties(int specNo) {
 }
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
-  bool isTwoLorentzian = fitFunction == "Lorentzian 2";
-  bool specOutOfBounds =
+  const bool isTwoLorentzian = fitFunction == "Lorentzian 2";
+  const bool specOutOfBounds =
       specNo < minimumSpectrum() || maximumSpectrum() < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
@@ -1261,7 +1261,7 @@ void ConvFit::plotGuess() {
   // Do nothing if there is not a sample and resolution
   if (m_uiForm.dsResInput->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
     extendResolutionWorkspace();
-    bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
+    const bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
     IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
                                        createFunction(tieCentres, true));
   } else {

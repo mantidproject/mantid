@@ -157,9 +157,8 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
                                 2);
     }
 
-  } else if (inputWs &&
-             inputWs->getNumberHistograms() <
-                 boost::numeric_cast<size_t>(m_selectedSpectrum)) {
+  } else if (inputWs && inputWs->getNumberHistograms() <
+                            boost::numeric_cast<size_t>(m_selectedSpectrum)) {
     IndirectTab::plotSpectrum(QString::fromStdString(inputWs->getName()),
                               m_selectedSpectrum);
   }
@@ -168,6 +167,9 @@ void IndirectDataAnalysisTab::plotCurrentPreview() {
 /**
  * Plots the selected spectrum of the input workspace in this indirect data
  * analysis tab.
+ *
+ * @param previewPlot The preview plot widget in which to plot the input
+ *                    input workspace.
  */
 void IndirectDataAnalysisTab::plotInput(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot) {
@@ -205,6 +207,15 @@ void IndirectDataAnalysisTab::updatePlot(
   }
 }
 
+/**
+ * Plots the data in the workspace with the specified name. Plots the
+ * sample and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param workspaceName     The name of the workspace to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
 void IndirectDataAnalysisTab::updatePlot(
     const std::string &workspaceName,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
@@ -229,6 +240,17 @@ void IndirectDataAnalysisTab::updatePlot(
   }
 }
 
+/**
+ * Plots the workspace at the index specified by the selected
+ * spectrum, in the specified workspace group. Plots the sample
+ * and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWS          The group workspace containing the
+ *                          workspaced to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
 void IndirectDataAnalysisTab::updatePlot(
     WorkspaceGroup_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
@@ -242,6 +264,15 @@ void IndirectDataAnalysisTab::updatePlot(
   }
 }
 
+/**
+ * Plots the data in the specified workspace. Plots the sample
+ * and fit  spectrum in the specified top preview plot. Plots
+ * the diff spectra in the specified difference preview plot.
+ *
+ * @param outputWS          The workspace to plot.
+ * @param fitPreviewPlot    The fit preview plot.
+ * @param diffPreviewPlot   The difference preview plot.
+ */
 void IndirectDataAnalysisTab::updatePlot(
     MatrixWorkspace_sptr outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
@@ -260,6 +291,18 @@ void IndirectDataAnalysisTab::updatePlot(
   }
 }
 
+/*
+ * Updates the plot range with the specified name, to match the range of
+ * the sample curve.
+ *
+ * @param rangeName           The name of the range to update.
+ * @param previewPlot         The preview plot widget, in which the range
+ *                            is specified.
+ * @param startRangePropName  The name of the property specifying the start
+ *                            value for the range.
+ * @parma endRangePropName    The name of the property specifying the end
+ *                            value for the range.
+ */
 void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
@@ -274,6 +317,14 @@ void IndirectDataAnalysisTab::updatePlotRange(
   }
 }
 
+/*
+ * Plots a guess of the fit for the specified function, in the
+ * specified preview plot widget.
+ *
+ * @param previewPlot The preview plot widget in which to plot
+ *                    the guess.
+ * @param function    The function to fit.
+ */
 void IndirectDataAnalysisTab::plotGuess(
     MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     IFunction_sptr function) {
@@ -285,6 +336,13 @@ void IndirectDataAnalysisTab::plotGuess(
   }
 }
 
+/*
+ * Creates a guess workspace, for approximating a fit with the specified
+ * function on the input workspace.
+ *
+ * @param func  The function to fit.
+ * @return      A guess workspace containing the guess data for the fit.
+ */
 MatrixWorkspace_sptr
 IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   const auto inputWS = inputWorkspace();
@@ -296,10 +354,10 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
 
   const auto &xPoints = inputWS->points(0);
 
-  std::vector<double> dataX(nData);
+  const std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
             dataX.begin());
-  std::vector<double> dataY = computeOutput(func, dataX);
+  const auto dataY = computeOutput(func, dataX);
 
   IAlgorithm_sptr createWsAlg =
       createWorkspaceAlgorithm("__GuessAnon", 1, dataX, dataY);
@@ -307,6 +365,15 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
   return createWsAlg->getProperty("OutputWorkspace");
 }
 
+/*
+ * Computes the output vector of applying the specified function to
+ * the specified input vector.
+ *
+ * @param func    The function to apply.
+ * @param dataX   Vector of input data.
+ * @return        Vector containing values calculated from applying
+ *                the specified function to the input data.
+ */
 std::vector<double>
 IndirectDataAnalysisTab::computeOutput(IFunction_sptr func,
                                        const std::vector<double> &dataX) {
@@ -321,6 +388,17 @@ IndirectDataAnalysisTab::computeOutput(IFunction_sptr func,
   return dataY;
 }
 
+/*
+ * Generates and returns an algorithm for creating a workspace, with
+ * the specified name, number of spectra and containing the specified
+ * x data and y data.
+ *
+ * @param workspaceName The name of the workspace to create.
+ * @param numSpec       The number of spectra in the workspace to create.
+ * @param dataX         The x data to add to the created workspace.
+ * @param dataY         The y data to add to the created workspace.
+ * @return              An algorithm for creating the workspace.
+ */
 IAlgorithm_sptr IndirectDataAnalysisTab::createWorkspaceAlgorithm(
     const std::string &workspaceName, int numSpec,
     const std::vector<double> &dataX, const std::vector<double> &dataY) {
