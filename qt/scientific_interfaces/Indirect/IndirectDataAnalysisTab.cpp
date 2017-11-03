@@ -355,7 +355,7 @@ IndirectDataAnalysisTab::createGuessWorkspace(IFunction_sptr func) {
 
   const auto &xPoints = inputWS->points(0);
 
-  const std::vector<double> dataX(nData);
+  std::vector<double> dataX(nData);
   std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
             dataX.begin());
   const auto dataY = computeOutput(func, dataX);
