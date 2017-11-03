@@ -245,7 +245,7 @@ private:
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
     return Mantid::Kernel::make_unique<KafkaEventStreamDecoder>(broker, "", "",
-                                                                "");
+                                                                "", "");
   }
 
   void

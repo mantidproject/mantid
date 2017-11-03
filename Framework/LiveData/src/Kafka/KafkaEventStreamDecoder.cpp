@@ -553,7 +553,6 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   // Run start. Cache locally for computing frame times
   // Convert nanoseconds to seconds (and discard the extra precision)
   auto runStartTime = static_cast<time_t>(runStartData.startTime / 1000000000);
-  g_log.notice() << "runStartTime: " << runStartTime << std::endl;
   m_runStart.set_from_time_t(runStartTime);
   auto timeString = m_runStart.toISO8601String();
   // Run number

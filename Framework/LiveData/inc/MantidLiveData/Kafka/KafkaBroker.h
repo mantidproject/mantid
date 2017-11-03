@@ -32,7 +32,7 @@ namespace LiveData {
 */
 class DLLExport KafkaBroker : public IKafkaBroker {
 public:
-  KafkaBroker(std::string address);
+  explicit KafkaBroker(std::string address);
 
   std::unique_ptr<IKafkaStreamSubscriber>
   subscribe(std::vector<std::string> topics,

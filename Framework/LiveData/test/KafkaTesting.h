@@ -74,6 +74,11 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -97,6 +102,11 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
 };
 
 void fakeReceiveAnEventMessage(std::string *buffer, int32_t nextPeriod) {
@@ -113,7 +123,7 @@ void fakeReceiveAnEventMessage(std::string *buffer, int32_t nextPeriod) {
       FacilityData_ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
                      RunState_RUNNING, protonCharge).Union());
-  builder.Finish(messageFlatbuf);
+  FinishEventMessageBuffer(builder, messageFlatbuf);
 
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -139,21 +149,21 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 class FakeISISEventSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-  FakeISISEventSubscriber(int32_t nperiods)
+  explicit FakeISISEventSubscriber(int32_t nperiods)
       : m_nperiods(nperiods), m_nextPeriod(0), m_callNumber(0) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
-  void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
+  void consumeMessage(std::string *message, int64_t &offset, int32_t &partition,
                       std::string &topic) override {
-    assert(buffer);
+    assert(message);
 
     // Return an event message on the first call and a sample environment log
     // message on any subsequent calls
     if (m_callNumber == 0) {
-      fakeReceiveAnEventMessage(buffer, m_nextPeriod);
+      fakeReceiveAnEventMessage(message, m_nextPeriod);
       m_nextPeriod = ((m_nextPeriod + 1) % m_nperiods);
     } else {
-      fakeReceiveASampleEnvMessage(buffer);
+      fakeReceiveASampleEnvMessage(message);
     }
 
     m_callNumber++;
@@ -168,6 +178,11 @@ public:
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
   }
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
+  }
 
 private:
   const int32_t m_nperiods;
@@ -181,7 +196,7 @@ private:
 class FakeISISRunInfoStreamSubscriber
     : public Mantid::LiveData::IKafkaStreamSubscriber {
 public:
-  FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
+  explicit FakeISISRunInfoStreamSubscriber(int32_t nperiods) : m_nperiods(nperiods) {}
   void subscribe() override {}
   void subscribe(int64_t offset) override { UNUSED_ARG(offset) }
   void consumeMessage(std::string *buffer, int64_t &offset, int32_t &partition,
@@ -190,8 +205,7 @@ public:
 
     // Convert date to time_t
     auto mantidTime = Mantid::Kernel::DateAndTime(m_startTime, false);
-    auto tmb = mantidTime.to_tm();
-    uint64_t startTime = static_cast<uint64_t>(std::mktime(&tmb));
+    auto startTime = static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
     // Serialize data with flatbuffers
     flatbuffers::FlatBufferBuilder builder;
@@ -199,7 +213,7 @@ public:
         builder, InfoTypes_RunStart,
         CreateRunStart(builder, startTime, m_runNumber,
                        builder.CreateString(m_instName), m_nperiods).Union());
-    builder.Finish(runInfo);
+    FinishRunInfoBuffer(builder, runInfo);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
@@ -213,6 +227,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
   }
 
 private:
@@ -240,7 +259,7 @@ public:
     auto detIdsVector = builder.CreateVector(m_detid);
     auto spdet = CreateSpectraDetectorMapping(
         builder, specVector, detIdsVector, static_cast<int32_t>(m_spec.size()));
-    builder.Finish(spdet);
+    FinishSpectraDetectorMappingBuffer(builder, spdet);
     // Copy to provided buffer
     buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
                    builder.GetSize());
@@ -254,6 +273,11 @@ public:
     UNUSED_ARG(timestamp);
     return {
         std::pair<std::string, std::vector<int64_t>>("topic_name", {1, 2, 3})};
+  }
+  void seek(const std::string &topic, uint32_t partition, int64_t offset) override {
+    UNUSED_ARG(topic);
+    UNUSED_ARG(partition);
+    UNUSED_ARG(offset);
   }
 
 private:
