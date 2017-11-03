@@ -9,7 +9,8 @@ endif ()
 include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} )
 set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS} )
 
-find_package ( Boost REQUIRED mpi serialization )
+# Need to repeat date_time, regex, and serialization because otherwise the Boost variables are overwritten and miss those libraries required elsewhere.
+find_package ( Boost REQUIRED mpi date_time regex serialization )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
 set ( MANTIDLIBS ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )

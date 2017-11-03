@@ -4,6 +4,7 @@ Identifies upstream and downstream diamonds and assigns matrices to them
 '''
 
 # Import all needed libraries
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import itertools as itt
 
@@ -102,6 +103,7 @@ def EquivMatch(refh, hkl, gam, tol):
 
     return hklmatch
 
+
 '''Jacobsen - Implementation of method articulated in RA Jacobsen
  Zeitschrift fur Krystallographie(1996).
 
@@ -194,7 +196,7 @@ def UBMatrixGen(fileName):
         print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(
             i, h[i][0], h[i][1], h[i][2], d[i]))
 
-    nref1 = int(raw_input('Choose one reference reflection: '))
+    nref1 = int(input('Choose one reference reflection: '))
 
     print('REF | h k l | obs|  calc')
     beta = np.zeros(N)
@@ -219,7 +221,7 @@ def UBMatrixGen(fileName):
                 print('{0:0.0f} |   {1:0.0f} {2:0.0f} {3:0.0f} |    {4:0.3f} | {5:0.3f}'.format(
                     i, h[i][0], h[i][1], h[i][2], beta[i], calcang))
 
-    nref2 = int(raw_input('Choose a second reflection to use for indexing: '))
+    nref2 = int(input('Choose a second reflection to use for indexing: '))
 
     h1 = h[nref1]
     q1 = q[nref1]
@@ -231,7 +233,7 @@ def UBMatrixGen(fileName):
     # Re-index all input reflections using this UB
     hindx = (np.linalg.inv(UB1).dot(q.transpose())).transpose()
     print('Reflections will be re-indexed using this UB')
-    tol = float(raw_input('Enter tolerance for accepting index: '))
+    tol = float(input('Enter tolerance for accepting index: '))
     print('REF | h k l | obs|  calc')
     nindexed1 = 0
     for i in range(N):   # decide if reflection is indexed to being within an integer by less then the tolerance
@@ -266,7 +268,7 @@ def UBMatrixGen(fileName):
             print('{0:0.0f}    {1:0.0f} {2:0.0f} {3:0.0f}     {4:0.3f}'.format(
                 i, hsub[i][0], hsub[i][1], hsub[i][2], dsub[i]))
 
-        nref1 = int(raw_input('Choose one reference reflection: '))
+        nref1 = int(input('Choose one reference reflection: '))
 
         for i in range(nsub):
             beta[i] = np.degrees(np.arccos(np.dot(qsub[nref1], qsub[
@@ -291,7 +293,7 @@ def UBMatrixGen(fileName):
                                                                                                         2], beta[i],
                                                                                                     calcang))
         nref2 = int(
-            raw_input('Choose a second reflection to use for indexing: '))
+            input('Choose a second reflection to use for indexing: '))
 
     h1 = hsub[nref1]
     q1 = qsub[nref1]
@@ -299,6 +301,6 @@ def UBMatrixGen(fileName):
     h2 = hsub[nref2]
 
     UB2 = Jacobsen(h1, q1, h2, q2)
-    print 'UB1 = ', UB1
-    print 'UB2 = ', UB2
+    print('UB1 = ', UB1)
+    print('UB2 = ', UB2)
     return UB1, UB2

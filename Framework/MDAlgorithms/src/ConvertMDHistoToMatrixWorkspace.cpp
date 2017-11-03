@@ -11,12 +11,8 @@
 #include "MantidHistogramData/LinearGenerator.h"
 
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/mpl/if.hpp>
-#include <boost/type_traits.hpp>
 
 #include <sstream>
 
@@ -102,10 +98,8 @@ void ConvertMDHistoToMatrixWorkspace::init() {
                                                    Direction::Output),
                   "An output Workspace2D.");
 
-  std::vector<std::string> normalizations(3);
-  normalizations[0] = "NoNormalization";
-  normalizations[1] = "VolumeNormalization";
-  normalizations[2] = "NumEventsNormalization";
+  std::array<std::string, 3> normalizations = {
+      {"NoNormalization", "VolumeNormalization", "NumEventsNormalization"}};
 
   declareProperty("Normalization", normalizations[0],
                   Kernel::IValidator_sptr(

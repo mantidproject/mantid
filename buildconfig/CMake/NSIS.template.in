@@ -37,7 +37,7 @@
   ;Set compression
   SetCompressor @CPACK_NSIS_COMPRESSOR@
 
-@CPACK_NSIS_DEFINES@   
+@CPACK_NSIS_DEFINES@
 
   !include Sections.nsh
 
@@ -51,7 +51,7 @@ Var STR_CONTAINS_VAR_2
 Var STR_CONTAINS_VAR_3
 Var STR_CONTAINS_VAR_4
 Var STR_RETURN_VAR
- 
+
 Function StrContains
   Exch $STR_NEEDLE
   Exch 1
@@ -73,18 +73,18 @@ Function StrContains
       Goto str_contains_done
     str_contains_done:
    Pop $STR_NEEDLE ;Prevent "invalid opcode" errors and keep the
-   Exch $STR_RETURN_VAR  
+   Exch $STR_RETURN_VAR
 FunctionEnd
- 
+
 !macro _StrContainsConstructor OUT NEEDLE HAYSTACK
   Push "${HAYSTACK}"
   Push "${NEEDLE}"
   Call StrContains
   Pop "${OUT}"
 !macroend
- 
+
 !define StrContains '!insertmacro "_StrContainsConstructor"'
-  
+
 !macro HandleRunningMantid processname processpath message
   nsExec::ExecToStack  "wmic process where $\"name='${processname}'$\" get ExecutablePath"
   Pop $0
@@ -95,10 +95,10 @@ FunctionEnd
     Abort
   notfound:
 !macroend
-  
-;end Mantid functions and macros  
+
+;end Mantid functions and macros
 ;-------------------------------------
-  
+
 ;--- Component support macros: ---
 ; The code for the add/remove functionality is from:
 ;   http://nsis.sourceforge.net/Add/Remove_Functionality
@@ -129,10 +129,10 @@ Var AR_RegFlags
   ;  This macro reads component installed flag from the registry and
   ;changes checked state of the section on the components page.
   ;Input: section index constant name specified in Section command.
-   
+
   ClearErrors
   ;Reading component status from registry
-  ReadRegDWORD $AR_RegFlags HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@\Components\${SecName}" "Installed"
+  ReadRegDWORD $AR_RegFlags HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" "Installed"
   IfErrors "default_${SecName}"
     ;Status will stay default if registry value not found
     ;(component was never installed)
@@ -144,20 +144,20 @@ Var AR_RegFlags
   ; Note whether this component was installed before
   !insertmacro StoreVar ${SecName}_was_installed $AR_RegFlags
   IntOp $R0 $AR_RegFlags & $AR_RegFlags
-  
+
   ;Writing modified flags
   SectionSetFlags ${${SecName}} $AR_SecFlags
-  
+
  "default_${SecName}:"
  !insertmacro LoadSectionSelectedIntoVar ${SecName} ${SecName}_selected
 !macroend
- 
+
 !macro FinishSection SecName
   ;  This macro reads section flag set by user and removes the section
   ;if it is not selected.
   ;Then it writes component installed flag to registry
   ;Input: section index constant name specified in Section command.
- 
+
   SectionGetFlags ${${SecName}} $AR_SecFlags  ;Reading section flags
   ;Checking lowest bit:
   IntOp $AR_SecFlags $AR_SecFlags & ${SF_SELECTED}
@@ -165,23 +165,23 @@ Var AR_RegFlags
     ;Section is not selected:
     ;Calling Section uninstall macro and writing zero installed flag
     !insertmacro "Remove_${${SecName}}"
-    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@\Components\${SecName}" \
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" \
   "Installed" 0
     Goto "exit_${SecName}"
- 
+
  "leave_${SecName}:"
     ;Section is selected:
-    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@\Components\${SecName}" \
+    WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@\Components\${SecName}" \
   "Installed" 1
- 
+
  "exit_${SecName}:"
 !macroend
- 
-!macro RemoveSection SecName
+
+!macro RemoveSection_CPack SecName
   ;  This macro is used to call section's Remove_... macro
   ;from the uninstaller.
   ;Input: section index constant name specified in Section command.
- 
+
   !insertmacro "Remove_${${SecName}}"
 !macroend
 
@@ -190,30 +190,28 @@ Var AR_RegFlags
   !insertmacro LoadVar ${SecName}_selected
   SectionGetFlags ${${SecName}} $R1
   IntOp $R1 $R1 & ${SF_SELECTED} ;Turn off all other bits
-  
+
   ; See if the status has changed:
   IntCmp $R0 $R1 "${SecName}_unchanged"
   !insertmacro LoadSectionSelectedIntoVar ${SecName} ${SecName}_selected
-  
+
   IntCmp $R1 ${SF_SELECTED} "${SecName}_was_selected"
   !insertmacro "Deselect_required_by_${SecName}"
   goto "${SecName}_unchanged"
-  
+
   "${SecName}_was_selected:"
   !insertmacro "Select_${SecName}_depends"
-  
+
   "${SecName}_unchanged:"
 !macroend
 ;--- End of Add/Remove macros ---
-
-
 
 ;--------------------------------
 ;Interface Settings
 
   !define MUI_HEADERIMAGE
   !define MUI_ABORTWARNING
-    
+
 ;--------------------------------
 ; path functions
 
@@ -228,7 +226,7 @@ Var AR_RegFlags
 !include "WinMessages.NSH"
 !verbose 4
 ;====================================================
-; get_NT_environment 
+; get_NT_environment
 ;     Returns: the selected environment
 ;     Output : head of the stack
 ;====================================================
@@ -258,22 +256,22 @@ FunctionEnd
     !define WriteEnvStr_RegKey 'HKCU "Environment"'
   !endif
 !endif
- 
+
 ; AddToPath - Adds the given dir to the search path.
 ;        Input - head of the stack
 ;        Note - Win9x systems requires reboot
- 
+
 Function AddToPath
   Exch $0
   Push $1
   Push $2
   Push $3
- 
+
   # don't add if the path doesn't exist
   IfFileExists "$0\*.*" "" AddToPath_done
- 
+
   ReadEnvStr $1 PATH
-  ; if the path is too long for a NSIS variable NSIS will return a 0 
+  ; if the path is too long for a NSIS variable NSIS will return a 0
   ; length string.  If we find that, then warn and skip any path
   ; modification as it will trash the existing path.
   StrLen $2 $1
@@ -303,7 +301,7 @@ Function AddToPath
   Call StrStr1
   Pop $2
   StrCmp $2 "" "" AddToPath_done
- 
+
   Call IsNT
   Pop $1
   StrCmp $1 1 AddToPath_NT
@@ -318,7 +316,7 @@ Function AddToPath
     FileClose $1
     SetRebootFlag true
     Goto AddToPath_done
- 
+
   AddToPath_NT:
     StrCmp $ADD_TO_PATH_ALL_USERS "1" ReadAllKey
       ReadRegStr $1 ${NT_current_env} "PATH"
@@ -339,7 +337,7 @@ Function AddToPath
         WriteRegExpandStr ${NT_all_env} "PATH" $0
       DoSend:
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
- 
+
   AddToPath_done:
     Pop $3
     Pop $2
@@ -347,10 +345,10 @@ Function AddToPath
     Pop $0
 FunctionEnd
 
- 
+
 ; RemoveFromPath - Remove a given dir from the path
 ;     Input: head of the stack
- 
+
 Function un.RemoveFromPath
   Exch $0
   Push $1
@@ -359,9 +357,9 @@ Function un.RemoveFromPath
   Push $4
   Push $5
   Push $6
- 
+
   IntFmt $6 "%c" 26 # DOS EOF
- 
+
   Call un.IsNT
   Pop $1
   StrCmp $1 1 unRemoveFromPath_NT
@@ -373,7 +371,7 @@ Function un.RemoveFromPath
     GetFullPathName /SHORT $0 $0
     StrCpy $0 "SET PATH=%PATH%;$0"
     Goto unRemoveFromPath_dosLoop
- 
+
     unRemoveFromPath_dosLoop:
       FileRead $1 $3
       StrCpy $5 $3 1 -1 # read last char
@@ -388,7 +386,7 @@ Function un.RemoveFromPath
       unRemoveFromPath_dosLoopRemoveLine:
         SetRebootFlag true
         Goto unRemoveFromPath_dosLoop
- 
+
     unRemoveFromPath_dosLoopEnd:
       FileClose $2
       FileClose $1
@@ -397,7 +395,7 @@ Function un.RemoveFromPath
       CopyFiles /SILENT $4 "$1\autoexec.bat"
       Delete $4
       Goto unRemoveFromPath_done
- 
+
   unRemoveFromPath_NT:
     StrCmp $ADD_TO_PATH_ALL_USERS "1" unReadAllKey
       ReadRegStr $1 ${NT_current_env} "PATH"
@@ -421,11 +419,11 @@ Function un.RemoveFromPath
       StrCpy $5 $1 -$4 # $5 is now the part before the path to remove
       StrCpy $6 $2 "" $3 # $6 is now the part after the path to remove
       StrCpy $3 $5$6
- 
+
       StrCpy $5 $3 1 -1 # copy last char
       StrCmp $5 ";" 0 +2 # if last char == ;
         StrCpy $3 $3 -1 # remove last char
- 
+
       StrCmp $ADD_TO_PATH_ALL_USERS "1" unWriteAllKey
         WriteRegExpandStr ${NT_current_env} "PATH" $3
         Goto unDoSend
@@ -433,7 +431,7 @@ Function un.RemoveFromPath
         WriteRegExpandStr ${NT_all_env} "PATH" $3
       unDoSend:
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
- 
+
   unRemoveFromPath_done:
     Pop $6
     Pop $5
@@ -443,7 +441,7 @@ Function un.RemoveFromPath
     Pop $1
     Pop $0
 FunctionEnd
- 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Uninstall sutff
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -451,7 +449,7 @@ FunctionEnd
 ###########################################
 #            Utility Functions            #
 ###########################################
- 
+
 ;====================================================
 ; IsNT - Returns 1 if the current system is NT, 0
 ;        otherwise.
@@ -465,7 +463,7 @@ FunctionEnd
 ;   Call IsNT
 ;   Pop $R0
 ;  ($R0 at this point is 1 or 0)
- 
+
 !macro IsNT un
 Function ${un}IsNT
   Push $0
@@ -475,7 +473,7 @@ Function ${un}IsNT
   Pop $0
   Push 0
   Return
- 
+
   IsNT_yes:
     ; NT!!!
     Pop $0
@@ -484,7 +482,7 @@ FunctionEnd
 !macroend
 !insertmacro IsNT ""
 !insertmacro IsNT "un."
- 
+
 ; StrStr1
 ; input, top of stack = string to search for
 ;        top of stack-1 = string to search in
@@ -497,7 +495,7 @@ FunctionEnd
 ;   Call StrStr1
 ;   Pop $R0
 ;  ($R0 at this point is "ass string")
- 
+
 !macro StrStr1 un
 Function ${un}StrStr1
 Exch $R1 ; st=haystack,old$R1, $R1=needle
@@ -541,7 +539,7 @@ Loop:
 	StrCmp "$R2" "$\r" RTrim
 	StrCmp "$R2" ";" RTrim
 	GoTo Done
-RTrim:	
+RTrim:
 	StrCpy $R1 "$R1" -1
 	Goto Loop
 Done:
@@ -553,7 +551,7 @@ Function ConditionalAddToRegisty
   Pop $0
   Pop $1
   StrCmp "$0" "" ConditionalAddToRegisty_EmptyString
-    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" \
+    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" \
     "$1" "$0"
     ;MessageBox MB_OK "Set Registry: '$1' to '$0'"
     DetailPrint "Set install registry entry: '$1' to '$0'"
@@ -589,7 +587,7 @@ Function DownloadFile
 
   try_again:
     NSISdl::download "$1/$0" "$INSTDIR\$0"
-    
+
     Pop $1
     StrCmp $1 "success" success
     StrCmp $1 "Cancelled" cancel
@@ -624,9 +622,9 @@ FunctionEnd
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE in.abortIfRunning
   !insertmacro MUI_PAGE_DIRECTORY
 
- ;Start Menu Folder Page Configuration
-  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX" 
-  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" 
+  ;Start Menu Folder Page Configuration
+  !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX"
+  !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
 
@@ -662,11 +660,12 @@ Section "-Core installation"
   ;Use the entire tree produced by the INSTALL target.  Keep the
   ;list of directories here in sync with the RMDir commands below.
   SetOutPath "$INSTDIR"
+  @CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS@
   @CPACK_NSIS_FULL_INSTALL@
-  
+
   ;Store installation folder
   WriteRegStr SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "" $INSTDIR
-  
+
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   Push "DisplayName"
@@ -684,7 +683,7 @@ Section "-Core installation"
   Push "NoRepair"
   Push "1"
   Call ConditionalAddToRegisty
-  
+
   !ifdef CPACK_NSIS_ADD_REMOVE
   ;Create add/remove functionality
   Push "ModifyPath"
@@ -695,7 +694,7 @@ Section "-Core installation"
   Push "1"
   Call ConditionalAddToRegisty
   !endif
-  
+
   ; Optional registration
   Push "DisplayIcon"
   Push "$INSTDIR\@CPACK_NSIS_INSTALLED_ICON_NAME@"
@@ -711,7 +710,7 @@ Section "-Core installation"
   Call ConditionalAddToRegisty
   !insertmacro MUI_INSTALLOPTIONS_READ $INSTALL_DESKTOP "NSIS.InstallOptions.ini" "Field 5" "State"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-  
+
   ;Create shortcuts
   CreateDirectory "$SMPROGRAMS\$STARTMENU_FOLDER"
 @CPACK_NSIS_CREATE_ICONS@
@@ -749,7 +748,7 @@ SectionEnd
 Section "-Add to path"
   Push $INSTDIR\bin
   StrCmp "@CPACK_NSIS_MODIFY_PATH@" "ON" 0 doNotAddToPath
-  StrCmp $DO_NOT_ADD_TO_PATH "1" doNotAddToPath 0  
+  StrCmp $DO_NOT_ADD_TO_PATH "1" doNotAddToPath 0
     Call AddToPath
   doNotAddToPath:
 SectionEnd
@@ -780,12 +779,12 @@ Function un.onInit
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Power Users group'
     Goto done
-    
+
   noLM:
     ;Get installation folder from registry if available
 
   done:
-    
+
 FunctionEnd
 
 ;--- Add/Remove callback functions: ---
@@ -794,25 +793,25 @@ FunctionEnd
   ;List all of your components in following manner here.
 @CPACK_NSIS_COMPONENT_SECTION_LIST@
 !macroend
- 
+
 Section -FinishComponents
   ;Removes unselected components and writes component status to registry
   !insertmacro SectionList "FinishSection"
-  
-!ifdef CPACK_NSIS_ADD_REMOVE  
+
+!ifdef CPACK_NSIS_ADD_REMOVE
   ; Get the name of the installer executable
   System::Call 'kernel32::GetModuleFileNameA(i 0, t .R0, i 1024) i r1'
   StrCpy $R3 $R0
-  
+
   ; Strip off the last 13 characters, to see if we have AddRemove.exe
   StrLen $R1 $R0
   IntOp $R1 $R0 - 13
   StrCpy $R2 $R0 13 $R1
   StrCmp $R2 "AddRemove.exe" addremove_installed
-  
+
   ; We're not running AddRemove.exe, so install it
   CopyFiles $R3 $INSTDIR\AddRemove.exe
-  
+
   addremove_installed:
 !endif
 SectionEnd
@@ -842,17 +841,17 @@ FunctionEnd
 
 Section "Uninstall"
   ReadRegStr $START_MENU SHCTX \
-   "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" "StartMenu"
+   "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "StartMenu"
   ;MessageBox MB_OK "Start menu is in: $START_MENU"
   ReadRegStr $DO_NOT_ADD_TO_PATH SHCTX \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" "DoNotAddToPath"
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "DoNotAddToPath"
   ReadRegStr $ADD_TO_PATH_ALL_USERS SHCTX \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" "AddToPathAllUsers"
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "AddToPathAllUsers"
   ReadRegStr $ADD_TO_PATH_CURRENT_USER SHCTX \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" "AddToPathCurrentUser"
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "AddToPathCurrentUser"
   ;MessageBox MB_OK "Add to path: $DO_NOT_ADD_TO_PATH all users: $ADD_TO_PATH_ALL_USERS"
   ReadRegStr $INSTALL_DESKTOP SHCTX \
-    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@" "InstallToDesktop"
+    "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "InstallToDesktop"
   ;MessageBox MB_OK "Install to desktop: $INSTALL_DESKTOP "
 
 @CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS@
@@ -862,14 +861,14 @@ Section "Uninstall"
 @CPACK_NSIS_DELETE_FILES@
 @CPACK_NSIS_DELETE_DIRECTORIES@
 
-!ifdef CPACK_NSIS_ADD_REMOVE  
+!ifdef CPACK_NSIS_ADD_REMOVE
   ;Remove the add/remove program
   Delete "$INSTDIR\AddRemove.exe"
 !endif
 
   ;Remove the uninstaller itself.
   Delete "$INSTDIR\Uninstall.exe"
-  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_NAME@"
+  DeleteRegKey SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   ;Remove the installation directory if it is empty.
   RMDir "$INSTDIR"
@@ -878,24 +877,24 @@ Section "Uninstall"
   DeleteRegKey SHCTX "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@"
 
   ; Removes all optional components
-  !insertmacro SectionList "RemoveSection"
-  
+  !insertmacro SectionList "RemoveSection_CPack"
+
   !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
-    
+
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
 @CPACK_NSIS_DELETE_ICONS@
 @CPACK_NSIS_DELETE_ICONS_EXTRA@
-  
+
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
- 
+
   startMenuDeleteLoop:
     ClearErrors
     RMDir $MUI_TEMP
     GetFullPathName $MUI_TEMP "$MUI_TEMP\.."
-    
+
     IfErrors startMenuDeleteLoopDone
-  
+
     StrCmp "$MUI_TEMP" "$SMPROGRAMS" startMenuDeleteLoopDone startMenuDeleteLoop
   startMenuDeleteLoopDone:
 
@@ -904,17 +903,17 @@ Section "Uninstall"
   StrCpy $MUI_TEMP "$START_MENU"
   Delete "$SMPROGRAMS\$MUI_TEMP\Uninstall.lnk"
 @CPACK_NSIS_DELETE_ICONS_EXTRA@
-  
+
   ;Delete empty start menu parent diretories
   StrCpy $MUI_TEMP "$SMPROGRAMS\$MUI_TEMP"
- 
+
   secondStartMenuDeleteLoop:
     ClearErrors
     RMDir $MUI_TEMP
     GetFullPathName $MUI_TEMP "$MUI_TEMP\.."
-    
+
     IfErrors secondStartMenuDeleteLoopDone
-  
+
     StrCmp "$MUI_TEMP" "$SMPROGRAMS" secondStartMenuDeleteLoopDone secondStartMenuDeleteLoop
   secondStartMenuDeleteLoopDone:
 
@@ -941,14 +940,14 @@ Function .onInit
   ; Reads components status for registry
   !insertmacro SectionList "InitSection"
 
-  ; check to see if /D has been used to change 
-  ; the install directory by comparing it to the 
+  ; check to see if /D has been used to change
+  ; the install directory by comparing it to the
   ; install directory that is expected to be the
   ; default
   StrCpy $IS_DEFAULT_INSTALLDIR 0
   StrCmp "$INSTDIR" "@CPACK_NSIS_INSTALL_ROOT@\@CPACK_PACKAGE_INSTALL_DIRECTORY@" 0 +2
     StrCpy $IS_DEFAULT_INSTALLDIR 1
-  
+
   StrCpy $SV_ALLUSERS "JustMe"
   ; if default install dir then change the default
   ; if it is installed for JustMe
@@ -961,17 +960,17 @@ Function .onInit
   Pop $0
   UserInfo::GetAccountType
   Pop $1
-  StrCmp $1 "Admin" 0 +3
+  StrCmp $1 "Admin" 0 +4
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Admin group'
     StrCpy $SV_ALLUSERS "AllUsers"
     Goto done
-  StrCmp $1 "Power" 0 +3
+  StrCmp $1 "Power" 0 +4
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Power Users group'
     StrCpy $SV_ALLUSERS "AllUsers"
     Goto done
-    
+
   noLM:
     StrCpy $SV_ALLUSERS "AllUsers"
     ;Get installation folder from registry if available
@@ -1021,7 +1020,7 @@ FunctionEnd
   Pop "${ResultVar}"
 !macroend
 !define EnvVarUpdate '!insertmacro "_EnvVarUpdateConstructor"'
- 
+
 !macro _unEnvVarUpdateConstructor ResultVar EnvVarName Action Regloc PathString
   Push "${EnvVarName}"
   Push "${Action}"
@@ -1032,15 +1031,15 @@ FunctionEnd
 !macroend
 !define un.EnvVarUpdate '!insertmacro "_unEnvVarUpdateConstructor"'
 ; ---------------------------------- Macro Definitions end-------------------------------------
- 
+
 ;----------------------------------- EnvVarUpdate start----------------------------------------
 !define hklm_all_users     'HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"'
 !define hkcu_current_user  'HKCU "Environment"'
- 
+
 !macro EnvVarUpdate UN
- 
+
 Function ${UN}EnvVarUpdate
- 
+
   Push $0
   Exch 4
   Exch $1
@@ -1056,7 +1055,7 @@ Function ${UN}EnvVarUpdate
   Push $8
   Push $9
   Push $R0
- 
+
   /* After this point:
   -------------------------
      $0 = ResultVar     (returned)
@@ -1070,7 +1069,7 @@ Function ${UN}EnvVarUpdate
      $8 = Entry counter (temp)
      $9 = tempstr2      (temp)
      $R0 = tempChar     (temp)  */
- 
+
   ; Step 1:  Read contents of EnvVarName from RegLoc
   ;
   ; Check for empty EnvVarName
@@ -1079,7 +1078,7 @@ Function ${UN}EnvVarUpdate
     DetailPrint "ERROR: EnvVarName is blank"
     Goto EnvVarUpdate_Restore_Vars
   ${EndIf}
- 
+
   ; Check for valid Action
   ${If}    $2 != "A"
   ${AndIf} $2 != "P"
@@ -1088,7 +1087,7 @@ Function ${UN}EnvVarUpdate
     DetailPrint "ERROR: Invalid Action - must be A, P, or R"
     Goto EnvVarUpdate_Restore_Vars
   ${EndIf}
- 
+
   ${If} $3 == HKLM
     ReadRegStr $5 ${hklm_all_users} $1     ; Get EnvVarName from all users into $5
   ${ElseIf} $3 == HKCU
@@ -1098,14 +1097,14 @@ Function ${UN}EnvVarUpdate
     DetailPrint 'ERROR: Action is [$3] but must be "HKLM" or HKCU"'
     Goto EnvVarUpdate_Restore_Vars
   ${EndIf}
- 
+
   ; Check for empty PathString
   ${If} $4 == ""
     SetErrors
     DetailPrint "ERROR: PathString is blank"
     Goto EnvVarUpdate_Restore_Vars
   ${EndIf}
- 
+
   ; Make sure we've got some work to do
   ${If} $5 == ""
   ${AndIf} $2 == "R"
@@ -1113,7 +1112,7 @@ Function ${UN}EnvVarUpdate
     DetailPrint "$1 is empty - Nothing to remove"
     Goto EnvVarUpdate_Restore_Vars
   ${EndIf}
- 
+
   ; Step 2: Scrub EnvVar
   ;
   StrCpy $0 $5                             ; Copy the contents to $0
@@ -1135,13 +1134,13 @@ Function ${UN}EnvVarUpdate
       ${${UN}StrRep} $0  $0 "; " ";"         ; Remove ';<space>'
     ${Loop}
     ${Do}
-      ${${UN}StrStr} $7 $0 ";;" 
+      ${${UN}StrStr} $7 $0 ";;"
       ${If} $7 == ""
         ${ExitDo}
       ${EndIf}
       ${${UN}StrRep} $0  $0 ";;" ";"
     ${Loop}
- 
+
     ; Remove a leading or trailing semicolon from EnvVar
     StrCpy  $7  $0 1 0
     ${If} $7 == ";"
@@ -1155,27 +1154,27 @@ Function ${UN}EnvVarUpdate
     ${EndIf}
     ; DetailPrint "Scrubbed $1: [$0]"      ; Uncomment to debug
   ${EndIf}
- 
+
   /* Step 3. Remove all instances of the target path/string (even if "A" or "P")
      $6 = bool flag (1 = found and removed PathString)
      $7 = a string (e.g. path) delimited by semicolon(s)
      $8 = entry counter starting at 0
      $9 = copy of $0
      $R0 = tempChar      */
- 
+
   ${If} $5 != ""                           ; If EnvVar is not empty ...
     StrCpy $9 $0
     StrCpy $0 ""
     StrCpy $8 0
     StrCpy $6 0
- 
+
     ${Do}
       ${${UN}StrTok} $7 $9 ";" $8 "0"      ; $7 = next entry, $8 = entry counter
- 
+
       ${If} $7 == ""                       ; If we've run out of entries,
         ${ExitDo}                          ;    were done
       ${EndIf}                             ;
- 
+
       ; Remove leading and trailing spaces from this entry (critical step for Action=Remove)
       ${Do}
         StrCpy $R0  $7 1
@@ -1200,11 +1199,11 @@ Function ${UN}EnvVarUpdate
       ${AndIf}  $0 != ""                   ;    and this is NOT the 1st string to be added to $0,
         StrCpy $0 $0;$7                    ;    append path to $0 with a prepended semicolon
       ${EndIf}                             ;
- 
+
       IntOp $8 $8 + 1                      ; Bump counter
     ${Loop}                                ; Check for duplicates until we run out of paths
   ${EndIf}
- 
+
   ; Step 4:  Perform the requested Action
   ;
   ${If} $2 != "R"                          ; If Append or Prepend
@@ -1242,7 +1241,7 @@ Function ${UN}EnvVarUpdate
       DetailPrint "$1 is now empty"
     ${EndIf}
   ${EndIf}
- 
+
   ; Step 5:  Update the registry at RegLoc with the updated EnvVar and announce the change
   ;
   ClearErrors
@@ -1251,15 +1250,15 @@ Function ${UN}EnvVarUpdate
   ${ElseIf} $3 == HKCU
     WriteRegExpandStr ${hkcu_current_user} $1 $0  ; Write it to current user section
   ${EndIf}
- 
+
   IfErrors 0 +4
     MessageBox MB_OK|MB_ICONEXCLAMATION "Could not write updated $1 to $3"
     DetailPrint "Could not write updated $1 to $3"
     Goto EnvVarUpdate_Restore_Vars
- 
+
   ; "Export" our change
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
- 
+
   EnvVarUpdate_Restore_Vars:
   ;
   ; Restore the user's variables and return ResultVar
@@ -1276,13 +1275,13 @@ Function ${UN}EnvVarUpdate
   Push $0  ; Push my $0 (ResultVar)
   Exch
   Pop $0   ; Restore his $0
- 
+
 FunctionEnd
- 
+
 !macroend   ; EnvVarUpdate UN
 !insertmacro EnvVarUpdate ""
 !insertmacro EnvVarUpdate "un."
 ;----------------------------------- EnvVarUpdate end----------------------------------------
- 
+
 !verbose pop
 !endif

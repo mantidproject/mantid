@@ -102,6 +102,27 @@ void MDNormSCD::init() {
                   "An input workspace containing momentum integrated vanadium "
                   "(a measure of the solid angle).");
 
+  declareProperty(make_unique<PropertyWithValue<bool>>("SkipSafetyCheck", false,
+                                                       Direction::Input),
+                  "If set to true, the algorithm does "
+                  "not check history if the workspace was modified since the"
+                  "ConvertToMD algorithm was run, and assume that the elastic "
+                  "mode is used.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. "
+                  "If unspecified a blank MDHistoWorkspace will be created.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If "
+                  "unspecified a blank MDHistoWorkspace will be created.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -145,7 +166,8 @@ void MDNormSCD::exec() {
  */
 void MDNormSCD::cacheInputs() {
   m_inputWS = getProperty("InputWorkspace");
-  if (inputEnergyMode() != "Elastic") {
+  bool skipCheck = getProperty("SkipSafetyCheck");
+  if (!skipCheck && inputEnergyMode() != "Elastic") {
     throw std::invalid_argument("Invalid energy transfer mode. Algorithm "
                                 "currently only supports elastic data.");
   }
@@ -215,7 +237,9 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "FluxWorkspace" && propName != "SolidAngleWorkspace" &&
-        propName != "OutputNormalizationWorkspace") {
+        propName != "TemporaryNormalizationWorkspace" &&
+        propName != "OutputNormalizationWorkspace" &&
+        propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
     }
   }
@@ -230,8 +254,15 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
-  m_normWS->setTo(0., 0., 0.);
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+    m_normWS->setTo(0., 0., 0.);
+  } else {
+    m_accumulate = true;
+  }
 }
 
 /**
@@ -291,10 +322,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][0] == 1.) {
       m_hIntegrated = false;
       m_hIdx = row;
-      if (m_hmin < dimMin)
-        m_hmin = dimMin;
-      if (m_hmax > dimMax)
-        m_hmax = dimMax;
+      m_hmin = std::max(m_hmin, dimMin);
+      m_hmax = std::min(m_hmax, dimMax);
       if (m_hmin > dimMax || m_hmax < dimMin) {
         skipNormalization = true;
       }
@@ -302,10 +331,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][1] == 1.) {
       m_kIntegrated = false;
       m_kIdx = row;
-      if (m_kmin < dimMin)
-        m_kmin = dimMin;
-      if (m_kmax > dimMax)
-        m_kmax = dimMax;
+      m_kmin = std::max(m_kmin, dimMin);
+      m_kmax = std::min(m_kmax, dimMax);
       if (m_kmin > dimMax || m_kmax < dimMin) {
         skipNormalization = true;
       }
@@ -313,10 +340,8 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
     if (affineMat[row][2] == 1.) {
       m_lIntegrated = false;
       m_lIdx = row;
-      if (m_lmin < dimMin)
-        m_lmin = dimMin;
-      if (m_lmax > dimMax)
-        m_lmax = dimMax;
+      m_lmin = std::max(m_lmin, dimMin);
+      m_lmax = std::min(m_lmax, dimMax);
       if (m_lmin > dimMax || m_lmax < dimMin) {
         skipNormalization = true;
       }
@@ -342,36 +367,26 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
 void MDNormSCD::cacheDimensionXValues() {
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
-    m_hX.resize(hDim.getNBins());
+    m_hX.resize(hDim.getNBoundaries());
     for (size_t i = 0; i < m_hX.size(); ++i) {
       m_hX[i] = hDim.getX(i);
     }
   }
   if (!m_kIntegrated) {
     auto &kDim = *m_normWS->getDimension(m_kIdx);
-    m_kX.resize(kDim.getNBins());
+    m_kX.resize(kDim.getNBoundaries());
     for (size_t i = 0; i < m_kX.size(); ++i) {
       m_kX[i] = kDim.getX(i);
     }
   }
   if (!m_lIntegrated) {
     auto &lDim = *m_normWS->getDimension(m_lIdx);
-    m_lX.resize(lDim.getNBins());
+    m_lX.resize(lDim.getNBoundaries());
     for (size_t i = 0; i < m_lX.size(); ++i) {
       m_lX[i] = lDim.getX(i);
     }
   }
 }
-
-namespace {
-template <typename T, typename BinaryOp>
-void AtomicOp(std::atomic<T> &f, T d, BinaryOp _Op) {
-  T old = f.load();
-  T desired = _Op(old, d);
-  while (!f.compare_exchange_weak(old, desired))
-    desired = _Op(old, d);
-}
-} // namespace
 
 /**
  * Computed the normalization for the input workspace. Results are stored in
@@ -418,6 +433,7 @@ void MDNormSCD::calculateNormalization(
   std::vector<double> xValues, yValues;
   std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
+  // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, xValues, yValues, pos, posNew) if (Kernel::threadSafe(*integrFlux)))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
@@ -485,14 +501,23 @@ for (int64_t i = 0; i < ndets; i++) {
     size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
     // signal = integral between two consecutive intersections
     signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
-    AtomicOp(signalArray[linIndex], signal, std::plus<signal_t>());
+    Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
+                             std::plus<signal_t>());
   }
   prog->report();
 
   PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
-std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
+if (m_accumulate) {
+  std::transform(
+      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
+      m_normWS->getSignalArray(),
+      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+} else {
+  std::copy(signalArray.cbegin(), signalArray.cend(),
+            m_normWS->getSignalArray());
+}
 }
 
 /**

@@ -51,7 +51,7 @@ void PeakHKLErrors::init() {
   declareParameter("GonRotz", 0.0,
                    "1st Rotation of Goniometer about the z axis");
   initMode = 1;
-  if (OptRuns == "")
+  if (OptRuns.empty())
     return;
 
   initMode = 2;
@@ -479,7 +479,7 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
     for (int kk = 0; kk < static_cast<int>(nParams()); kk++) {
       out->set(i, kk, 0.0);
       out->set(i + 1, kk, 0.0);
-      out->set(i + 1, kk, 0.0);
+      out->set(i + 2, kk, 0.0);
     }
 
     double chi, phi, omega;

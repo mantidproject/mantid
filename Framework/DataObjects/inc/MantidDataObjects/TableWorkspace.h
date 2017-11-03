@@ -82,6 +82,17 @@ public:
   TableWorkspace(size_t nrows = 0);
 
   TableWorkspace &operator=(const TableWorkspace &other) = delete;
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspace> clone() const {
+    return std::unique_ptr<TableWorkspace>(doClone());
+  }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<TableWorkspace> cloneEmpty() const {
+    return std::unique_ptr<TableWorkspace>(doCloneEmpty());
+  }
+
   /// Return the workspace typeID
   const std::string id() const override { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
@@ -292,9 +303,13 @@ protected:
   TableWorkspace(const TableWorkspace &other);
 
 private:
-  // TableWorkspace *doClone() const override { return new
-  // TableWorkspace(*this); }
-  ITableWorkspace *
+  TableWorkspace *doClone() const override {
+    return doCloneColumns(std::vector<std::string>());
+  }
+
+  TableWorkspace *doCloneEmpty() const override { return new TableWorkspace(); }
+
+  TableWorkspace *
   doCloneColumns(const std::vector<std::string> &colNames) const override;
 
   /// template method to find a given value in a table.

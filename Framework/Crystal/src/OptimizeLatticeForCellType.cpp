@@ -77,15 +77,17 @@ void OptimizeLatticeForCellType::exec() {
   DataObjects::PeaksWorkspace_sptr ws = getProperty("PeaksWorkspace");
   Geometry::Instrument_const_sptr inst = ws->getInstrument();
 
+  std::vector<int> badPeaks;
   std::vector<DataObjects::PeaksWorkspace_sptr> runWS;
   if (edge > 0) {
     for (int i = int(ws->getNumberPeaks()) - 1; i >= 0; --i) {
       const std::vector<Peak> &peaks = ws->getPeaks();
       if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
-        ws->removePeak(i);
+        badPeaks.push_back(i);
       }
     }
+    ws->removePeaks(std::move(badPeaks));
   }
   runWS.push_back(ws);
 

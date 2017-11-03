@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_SPATIAL_GROUPING_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/NearestNeighbourInfo.h"
+#include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
@@ -91,7 +91,7 @@ private:
   std::vector<std::vector<int>> m_groups;
 
   /// NearestNeighbourInfo used by expandNet()
-  std::unique_ptr<API::NearestNeighbourInfo> m_neighbourInfo;
+  std::unique_ptr<API::WorkspaceNearestNeighbourInfo> m_neighbourInfo;
 };
 
 } // namespace Algorithms

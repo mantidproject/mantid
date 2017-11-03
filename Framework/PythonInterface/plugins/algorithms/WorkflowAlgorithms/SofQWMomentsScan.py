@@ -6,6 +6,8 @@ from mantid import config
 import os
 import numpy as np
 
+from IndirectCommon import formatRuns
+
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
     _data_files = None
@@ -59,14 +61,18 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         self.declareProperty(name='Reflection', defaultValue='',
                              validator=StringListValidator(['002', '004', '006']),
                              doc='Reflection number for instrument setup during run.')
-
         self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
                                               validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
-        self.declareProperty(FloatArrayProperty(name='QRange'),
-                             doc='Range of background to subtract from raw data in time of flight.')
-        self.declareProperty(FloatArrayProperty(name='EnergyRange'),
-                             doc='Range of background to subtract from raw data in time of flight.')
+
+        range_val = FloatArrayLengthValidator(3)
+
+        self.declareProperty(FloatArrayProperty(name='QRange',
+                                                validator=range_val),
+                             doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
+        self.declareProperty(FloatArrayProperty(name='EnergyRange',
+                                                validator=range_val),
+                             doc='Range of background to subtract from raw data in time of flight. Start, Width, End')
         self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
                              doc='Apply the detailed balance correction')
 
@@ -106,7 +112,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         progress.report('Energy transfer')
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty('InputFiles', self._data_files)
+        scan_alg.setProperty('InputFiles', formatRuns(self._data_files, self._instrument_name))
         scan_alg.setProperty('SumFiles', self._sum_files)
         scan_alg.setProperty('LoadLogFiles', self._load_logs)
         scan_alg.setProperty('CalibrationWorkspace', self._calibration_ws)
@@ -157,7 +163,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             sofqw_alg.setProperty("QAxisBinning", self._q_range)
             sofqw_alg.setProperty("EMode", 'Indirect')
             sofqw_alg.setProperty("ReplaceNaNs", True)
-            sofqw_alg.setProperty("Method", 'Polygon')
+            sofqw_alg.setProperty("Method", 'NormalisedPolygon')
             sofqw_alg.setProperty("OutputWorkspace", input_ws + '_sqw')
             sofqw_alg.execute()
             mtd.addOrReplace(input_ws + '_sqw', sofqw_alg.getProperty("OutputWorkspace").value)
@@ -324,20 +330,6 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
             issues['SpectraRange'] = 'Range must contain exactly two items'
         elif spectra_range[0] > spectra_range[1]:
             issues['SpectraRange'] = 'Range must be in format: lower,upper'
-
-        # Validate ranges
-        q_range = self.getProperty('QRange').value
-        if q_range is not None:
-            if len(q_range) != 3:
-                issues['QRange'] = 'Range must contain exactly two items'
-            elif q_range[0] > q_range[2]:
-                issues['QRange'] = 'Range must be in format: lower,upper'
-        energy_range = self.getProperty('EnergyRange').value
-        if energy_range is not None:
-            if len(energy_range) != 3:
-                issues['EnergyRange'] = 'Range must contain exactly two items'
-            elif energy_range[0] > energy_range[2]:
-                issues['EnergyRange'] = 'Range must be in format: lower,upper'
 
         return issues
 

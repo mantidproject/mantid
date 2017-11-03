@@ -1,6 +1,7 @@
 #ifndef MANTID_GEOMETRY_XMLLOGFILETEST_H_
 #define MANTID_GEOMETRY_XMLLOGFILETEST_H_
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/System.h"
@@ -36,7 +37,7 @@ private:
     std::string penaltyFactor;
     const std::string fitFunc;
     const std::string eq;
-    const Geometry::IComponent *comp = NULL;
+    const Geometry::IComponent *comp = nullptr;
     double angleConvertConst = 0.0;
 
     return boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
@@ -171,7 +172,7 @@ public:
     XMLInstrumentParameter testPar(
         "logfileID", "value", boost::make_shared<Interpolation>(), "formula",
         "sourceFU", "resultFU", "testPar", "aType", "noTie", constr,
-        penaltyFactor, "aFitFunc", "FilterBy", "eqTo", NULL, 0.0,
+        penaltyFactor, "aFitFunc", "FilterBy", "eqTo", nullptr, 0.0,
         "test string.     Long test string.");
 
     TS_ASSERT_EQUALS(testPar.m_description, "test string. Long test string.");

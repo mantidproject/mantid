@@ -15,11 +15,35 @@ namespace Geometry {
 */
 ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
                                Handedness handedness, std::string origin)
-    : m_up(up), m_alongBeam(alongBeam), m_handedness(handedness),
-      m_origin(origin) {
+    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(up),
+      m_handedness(handedness), m_origin(origin) {
   if (up == alongBeam) {
     throw std::invalid_argument(
         "Cannot have up direction the same as the beam direction");
+  }
+  init();
+}
+
+//----------------------------------------------------------------------------------------------
+/** Constructor
+@param up : pointing up axis
+@param alongBeam : axis pointing along the beam
+@param thetaSign : axis defining the sign of 2theta
+@param handedness : Handedness
+@param origin : origin
+*/
+ReferenceFrame::ReferenceFrame(PointingAlong up, PointingAlong alongBeam,
+                               PointingAlong thetaSign, Handedness handedness,
+                               std::string origin)
+    : m_up(up), m_alongBeam(alongBeam), m_thetaSign(thetaSign),
+      m_handedness(handedness), m_origin(origin) {
+  if (up == alongBeam) {
+    throw std::invalid_argument(
+        "Cannot have up direction the same as the beam direction");
+  }
+  if (thetaSign == alongBeam) {
+    throw std::invalid_argument(
+        "Scattering angle sign axis cannot be the same as the beam direction");
   }
   init();
 }
@@ -72,6 +96,7 @@ std::string directionToString(const PointingAlong &direction) {
 void ReferenceFrame::init() {
   m_vecPointingUp = directionToVector(m_up);
   m_vecPointingAlongBeam = directionToVector(m_alongBeam);
+  m_vecThetaSign = directionToVector(m_thetaSign);
 }
 
 /**
@@ -148,6 +173,12 @@ Getter for the up instrument direction
 @return up direction.
 */
 const V3D ReferenceFrame::vecPointingUp() const { return m_vecPointingUp; }
+
+/**
+Getter for the direction defining the theta sign
+@return theta sign direction.
+*/
+const V3D ReferenceFrame::vecThetaSign() const { return m_vecThetaSign; }
 
 /**
 Getter for the along beam vector.

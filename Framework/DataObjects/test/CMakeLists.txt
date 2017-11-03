@@ -13,20 +13,14 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/FakeObjects.cpp
+                        ../../TestHelpers/src/ParallelRunner.cpp
   )
 
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
-  target_link_libraries( DataObjectsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-            API
+  target_link_libraries( DataObjectsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             DataObjects
-            Geometry
-            HistogramData
-            Indexing
-            Kernel
             ${NEXUS_LIBRARIES}
             ${JSONCPP_LIBRARIES}
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )
   # Specify implicit dependency, but don't link to it

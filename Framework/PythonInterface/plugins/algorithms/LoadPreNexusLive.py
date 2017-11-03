@@ -133,4 +133,5 @@ class LoadPreNexusLive(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[wkspName])
 
+
 AlgorithmFactory.subscribe(LoadPreNexusLive)

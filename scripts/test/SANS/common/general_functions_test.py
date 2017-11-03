@@ -6,9 +6,13 @@ from mantid.kernel import (V3D, Quat)
 from mantid.api import AnalysisDataService
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_unmanaged_algorithm, add_to_sample_log,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
-                                           get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace)
+                                           get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
+                                           convert_instrument_and_detector_type_to_bank_name,
+                                           convert_bank_name_to_detector_type_isis,
+                                           get_facility)
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
-from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts)
+from sans.common.enums import (ISISReductionMode, ReductionDimensionality, OutputParts,
+                               SANSInstrument, DetectorType, SANSFacility)
 from sans.test_helper.test_director import TestDirector
 from sans.state.data import StateData
 
@@ -191,7 +195,7 @@ class SANSFunctionsTest(unittest.TestCase):
                                               reduction_mode=ISISReductionMode.LAB)
         # Act
         workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(state, output_parts=True,
-                                                                            reduction_mode=ISISReductionMode.LAB)
+                                                                              reduction_mode=ISISReductionMode.LAB)  # noqa
 
         # Assert
         self.assertTrue(workspace is not None)
@@ -228,6 +232,37 @@ class SANSFunctionsTest(unittest.TestCase):
         # Clean up
         SANSFunctionsTest._remove_workspaces()
 
+    def test_that_convert_instrument_and_detector_type_to_bank_name_produces_expected_results(self):
+        self.assertTrue("front-detector" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.SANS2D,
+                                                                                              DetectorType.HAB))
+        self.assertTrue("rear-detector" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.SANS2D,
+                                                                                             DetectorType.LAB))
+        self.assertTrue("HAB" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.LOQ,
+                                                                                   DetectorType.HAB))
+        self.assertTrue("main-detector-bank" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.LOQ,
+                                                                                                  DetectorType.LAB))
+        self.assertTrue("DetectorBench" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.LARMOR,
+                                                                                             DetectorType.LAB))
+        self.assertTrue("rear-detector" == convert_instrument_and_detector_type_to_bank_name(SANSInstrument.ZOOM,
+                                                                                             DetectorType.LAB))
+
+    def test_that_converts_detector_name_to_type(self):
+        self.assertTrue(convert_bank_name_to_detector_type_isis("rEar-detector") is DetectorType.LAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN-detector-BANK") is DetectorType.LAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("DeTectorBench") is DetectorType.LAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("rear") is DetectorType.LAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("MAIN") is DetectorType.LAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("FRoNT-DETECTOR") is DetectorType.HAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("HaB") is DetectorType.HAB)
+        self.assertTrue(convert_bank_name_to_detector_type_isis("front") is DetectorType.HAB)
+        self.assertRaises(RuntimeError, convert_bank_name_to_detector_type_isis, "test")
+
+    def test_that_gets_facility(self):
+        self.assertTrue(get_facility(SANSInstrument.SANS2D) is SANSFacility.ISIS)
+        self.assertTrue(get_facility(SANSInstrument.LOQ) is SANSFacility.ISIS)
+        self.assertTrue(get_facility(SANSInstrument.LARMOR) is SANSFacility.ISIS)
+        self.assertTrue(get_facility(SANSInstrument.ZOOM) is SANSFacility.ISIS)
+        self.assertTrue(get_facility(SANSInstrument.NoInstrument) is SANSFacility.NoFacility)
 
 if __name__ == '__main__':
     unittest.main()

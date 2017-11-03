@@ -22,4 +22,8 @@ Bug Fixes
 - Selecting the Center of Rotation, Area for Normalsation and Region of Interest will now always follow the exact position of the mouse.
 - Multiple success/warning/error messages will no longer be shown after an operation. 
 
+Work done on imaging has received funding from the Horizon 2020 Framework 
+Programme of the European Union under the SINE2020 project Grant No 654000.
+
+
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.9%22+is%3Amerged+label%3A%22Component%3A+Imaging%22>`__

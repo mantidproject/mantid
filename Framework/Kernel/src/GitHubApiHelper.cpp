@@ -5,13 +5,22 @@
 #include <Poco/URI.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/HTTPClientSession.h>
+
+#include <boost/lexical_cast.hpp>
+
+#include <map>
+#include <ostream>
+#include <string>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 
+// Forward declare
+class ProxyInfo;
+
 using namespace Poco::Net;
-using std::map;
 using std::string;
 
 namespace {

@@ -148,6 +148,29 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
+def _generate_vanadium_name(vanadium_string, is_spline, *args):
+    """
+    :param vanadium_string: The number of the run being processed
+    :param is_spline: True if the workspace to save out is a spline
+    :param args: Any other strings to append to the filename
+    :return: A filename for the vanadium
+    """
+    out_name = 'Van'
+    if is_spline:
+        out_name += 'Splined'
+
+    out_name += '_' + str(vanadium_string)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
+
+    out_name += ".nxs"
+    return out_name
+
+
 def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
@@ -159,16 +182,21 @@ def generate_splined_name(vanadium_string, *args):
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
     """
-    out_name = "VanSplined" + '_' + str(vanadium_string)
-    for passed_arg in args:
-        if isinstance(passed_arg, list):
-            for arg in passed_arg:
-                out_name += '_' + str(arg)
-        else:
-            out_name += '_' + (str(passed_arg))
+    return _generate_vanadium_name(vanadium_string, True, *args)
 
-    out_name += ".nxs"
-    return out_name
+
+def generate_unsplined_name(vanadium_string, *args):
+    """
+    Generates a unique unsplined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    return _generate_vanadium_name(vanadium_string, False, *args)
 
 
 def get_first_run_number(run_number_string):
@@ -184,20 +212,16 @@ def get_first_run_number(run_number_string):
     return run_numbers
 
 
-def get_monitor_ws(ws_to_process, run_number_string, instrument):
+def extract_single_spectrum(ws_to_process, spectrum_number_to_extract):
     """
     Extracts the monitor spectrum into its own individual workspaces from the input workspace
-    based on the number of this spectrum in the instrument object. The run number is used
-    to determine the monitor spectrum number on instruments who potentially have differing
-    monitor numbers depending on the age of the run.
+    based on the number of the spectrum given
     :param ws_to_process: The workspace to extract the monitor from
-    :param run_number_string: The run number as a string to determine the correct monitor position
-    :param instrument: The instrument to query for the monitor position
+    :param spectrum_number_to_extract: The spectrum of the workspace to extract
     :return: The extracted monitor as a workspace
     """
-    first_run_number = get_first_run_number(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
-    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process,
+                                                   WorkspaceIndex=spectrum_number_to_extract)
     return load_monitor_ws
 
 
@@ -244,7 +268,8 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
         input_batching = instrument._get_input_batching_mode()
 
     run_information = instrument._get_run_details(run_number_string=run_number_string)
-    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument)
+    file_ext = run_information.file_extension
+    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
 
     if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
@@ -255,6 +280,64 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
                                                instrument=instrument)
 
     return normalised_ws_list
+
+
+def rebin_workspace(workspace, new_bin_width, start_x=None, end_x=None):
+    """
+    Rebins the specified workspace with the specified new bin width. Allows the user
+    to also set optionally the first and final bin boundaries of the histogram too.
+    If the bin boundaries are not set they are preserved from the original workspace
+    :param workspace: The workspace to rebin
+    :param new_bin_width: The new bin width to use across the workspace
+    :param start_x: (Optional) The first x bin to crop to
+    :param end_x: (Optional) The final x bin to crop to
+    :return: The rebinned workspace
+    """
+
+    # Find the starting and ending bin boundaries if they were not set
+    if start_x is None:
+        start_x = workspace.readX(0)[0]
+    if end_x is None:
+        end_x = workspace.readX(0)[-1]
+
+    rebin_string = str(start_x) + ',' + str(new_bin_width) + ',' + str(end_x)
+    workspace = mantid.Rebin(InputWorkspace=workspace, OutputWorkspace=workspace, Params=rebin_string)
+    return workspace
+
+
+def rebin_workspace_list(workspace_list, bin_width_list, start_x_list=None, end_x_list=None):
+    """
+    Rebins a list of workspaces with the specified bin widths in the list provided.
+    The number of bin widths and workspaces in the list must match. Additionally if
+    the optional parameters for start_x_list or end_x_list are provided these must
+    have the same length too.
+    :param workspace_list: The list of workspaces to rebin in place
+    :param bin_width_list: The list of new bin widths to apply to each workspace
+    :param start_x_list: The list of starting x boundaries to rebin to
+    :param end_x_list: The list of ending x boundaries to rebin to
+    :return: List of rebinned workspace
+    """
+    if not isinstance(workspace_list, list) or not isinstance(bin_width_list, list):
+        raise RuntimeError("One of the types passed to rebin_workspace_list was not a list")
+
+    ws_list_len = len(workspace_list)
+    if ws_list_len != len(bin_width_list):
+        raise ValueError("The number of bin widths found to rebin to does not match the number of banks")
+    if start_x_list and len(start_x_list) != ws_list_len:
+        raise ValueError("The number of starting bin values does not match the number of banks")
+    if end_x_list and len(end_x_list) != ws_list_len:
+        raise ValueError("The number of ending bin values does not match the number of banks")
+
+    # Create a list of None types of equal length to make using zip iterator easy
+    start_x_list = [None] * ws_list_len if start_x_list is None else start_x_list
+    end_x_list = [None] * ws_list_len if end_x_list is None else end_x_list
+
+    output_list = []
+    for ws, bin_width, start_x, end_x in zip(workspace_list, bin_width_list, start_x_list, end_x_list):
+        output_list.append(rebin_workspace(workspace=ws, new_bin_width=bin_width,
+                                           start_x=start_x, end_x=end_x))
+
+    return output_list
 
 
 def remove_intermediate_workspace(workspaces):
@@ -291,10 +374,7 @@ def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
     :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
     :return: The splined vanadium workspace
     """
-    stripped_ws_list = _strip_vanadium_peaks(workspaces_to_strip=focused_vanadium_spectra)
-    splined_workspaces = spline_workspaces(stripped_ws_list, num_splines=spline_coefficient)
-
-    remove_intermediate_workspace(stripped_ws_list)
+    splined_workspaces = spline_workspaces(focused_vanadium_spectra, num_splines=spline_coefficient)
     return splined_workspaces
 
 
@@ -319,20 +399,33 @@ def spline_workspaces(focused_vanadium_spectra, num_splines):
     return splined_ws_list
 
 
-def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument):
+def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scale_factor=None):
     """
     Loads the list of empty runs specified by the empty_sample_ws_string and subtracts
     them from the workspace specified. Returns the subtracted workspace.
     :param ws_to_correct: The workspace to subtract the empty instrument runs from
     :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
     :param instrument: The instrument object these runs belong to
+    :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
-    if empty_sample_ws_string:
-        empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
-                                                       input_batching=INPUT_BATCHING.Summed)
-        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample[0], OutputWorkspace=ws_to_correct)
-        remove_intermediate_workspace(empty_sample)
+    # If an empty string was not specified just return to skip this step
+    if empty_sample_ws_string is None:
+        return ws_to_correct
+
+    empty_sample = load_current_normalised_ws_list(run_number_string=empty_sample_ws_string, instrument=instrument,
+                                                   input_batching=INPUT_BATCHING.Summed)
+    empty_sample = empty_sample[0]
+    if scale_factor:
+        empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
+                                    Operation="Multiply")
+    try:
+        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    except ValueError:
+        raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                         " the empty and sample match?")
+
+    remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
 
@@ -366,7 +459,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_details))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
 
     return output_list
 
@@ -386,7 +479,7 @@ def _check_load_range(list_of_runs_to_load):
                          " Found " + str(len(list_of_runs_to_load)) + " Aborting.")
 
 
-def _load_raw_files(run_number_string, instrument):
+def _load_raw_files(run_number_string, instrument, file_ext=None):
     """
     Uses the run number string to generate a list of run numbers to load in
     :param run_number_string: The run number string to generate
@@ -394,11 +487,11 @@ def _load_raw_files(run_number_string, instrument):
     :return: A list of loaded workspaces
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
-    load_raw_ws = _load_list_of_files(run_number_list, instrument)
+    load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
 
-def _load_list_of_files(run_numbers_list, instrument):
+def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
@@ -412,6 +505,7 @@ def _load_list_of_files(run_numbers_list, instrument):
 
     for run_number in run_numbers_list:
         file_name = instrument._generate_input_file_name(run_number=run_number)
+        file_name = file_name + str(file_ext) if file_ext else file_name
         read_ws = mantid.Load(Filename=file_name)
         read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
 
@@ -421,7 +515,7 @@ def _load_list_of_files(run_numbers_list, instrument):
 def _strip_vanadium_peaks(workspaces_to_strip):
     out_list = []
     for i, ws in enumerate(workspaces_to_strip):
-        out_name = ws.getName() + "_splined-" + str(i+1)
+        out_name = ws.getName() + "_toSpline-" + str(i+1)
         out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
     return out_list
 

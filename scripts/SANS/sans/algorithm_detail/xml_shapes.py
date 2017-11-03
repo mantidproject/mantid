@@ -1,12 +1,13 @@
 from __future__ import (absolute_import, division, print_function)
 from math import (pi, cos, sin)
+from sans.common.enums import MaskingQuadrant
 
 
 def add_xml_shape(xml, complete_xml_element):
     """
         Add an arbitrary shape to region to be masked
-        @param xml: a list of shapes to which we append here
-        @param complete_xml_element: description of the shape to add
+        :param xml: a list of shapes to which we append here
+        :param complete_xml_element: description of the shape to add
     """
     if not complete_xml_element.startswith('<'):
         raise ValueError('Excepted xml string but found: ' + str(complete_xml_element))
@@ -16,10 +17,10 @@ def add_xml_shape(xml, complete_xml_element):
 def infinite_plane(shape_id, plane_pt, normal_pt):
     """
         Generates xml code for an infinite plane
-        @param shape_id: a string to refer to the shape by
-        @param plane_pt: a point in the plane
-        @param normal_pt: the direction of a normal to the plane
-        @return the xml string
+        :param shape_id: a string to refer to the shape by
+        :param plane_pt: a point in the plane
+        :param normal_pt: the direction of a normal to the plane
+        :return the xml string
     """
     return '<infinite-plane id="' + str(shape_id) + '">' + \
            '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + \
@@ -32,11 +33,11 @@ def infinite_plane(shape_id, plane_pt, normal_pt):
 def infinite_cylinder(centre, radius, axis, shape_id='shape'):
     """
         Generates xml code for an infintely long cylinder
-        @param centre: a tupple for a point on the axis
-        @param radius: cylinder radius
-        @param axis: cylinder orientation
-        @param shape_id: a string to refer to the shape by
-        @return the xml string
+        :param centre: a tupple for a point on the axis
+        :param radius: cylinder radius
+        :param axis: cylinder orientation
+        :param shape_id: a string to refer to the shape by
+        :return the xml string
     """
     return '<infinite-cylinder id="' + str(shape_id) + '">' + \
            '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
@@ -47,12 +48,12 @@ def infinite_cylinder(centre, radius, axis, shape_id='shape'):
 def finite_cylinder(centre, radius, height, axis, shape_id='shape'):
     """
         Generates xml code for an infintely long cylinder
-        @param centre: a tuple for a point on the axis
-        @param radius: cylinder radius
-        @param height: cylinder height
-        @param axis: cylinder orientation
-        @param shape_id: a string to refer to the shape by
-        @return the xml string
+        :param centre: a tuple for a point on the axis
+        :param radius: cylinder radius
+        :param height: cylinder height
+        :param axis: cylinder orientation
+        :param shape_id: a string to refer to the shape by
+        :return the xml string
     """
     return '<cylinder id="' + str(shape_id) + '">' + \
            '<centre-of-bottom-base x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + \
@@ -128,3 +129,40 @@ def create_line_mask(start_point, length, width, angle):
     """
     return finite_cylinder(start_point, width / 2., length, [cos(angle * pi / 180.0), sin(angle * pi / 180.0), 0.0],
                            "arm")
+
+
+def quadrant_xml(centre,rmin,rmax,quadrant):
+    cin_id = 'cyl-in'
+    xmlstring = infinite_cylinder(centre, rmin, [0,0,1], cin_id)
+    cout_id = 'cyl-out'
+    xmlstring+= infinite_cylinder(centre, rmax, [0,0,1], cout_id)
+    plane1Axis=None
+    plane2Axis=None
+    if quadrant is MaskingQuadrant.Left:
+        plane1Axis = [-1,1,0]
+        plane2Axis = [-1,-1,0]
+    elif quadrant is MaskingQuadrant.Right:
+        plane1Axis = [1,-1,0]
+        plane2Axis = [1,1,0]
+    elif quadrant is MaskingQuadrant.Top:
+        plane1Axis = [1,1,0]
+        plane2Axis = [-1,1,0]
+    elif quadrant is MaskingQuadrant.Bottom:
+        plane1Axis = [-1,-1,0]
+        plane2Axis = [1,-1,0]
+    else:
+        return ''
+    p1id = 'pl-a'
+    xmlstring += infinite_plane(p1id, centre, plane1Axis)
+    p2id = 'pl-b'
+    xmlstring += infinite_plane(p2id, centre, plane2Axis)
+
+    # The composition of the shape is "(cyl-out (#cyl-in) (pl-a:pl-b))". The breakdown is:
+    # 1. Create an infinite hollow cylinder by performing "cyl-out (#cyl-in)". This is the intersection of the
+    #    outer radius cylinder with the inverse inner radius cylinder. We have a shell-like selection
+    # 2. Create a three-quarter wedge selection by performing (pl-a:pl-b). This selects everything except
+    #    for the slice region we don't want to be masked.
+    # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
+    #    cylinder.
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
+    return xmlstring

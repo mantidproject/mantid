@@ -492,7 +492,7 @@ public:
     TS_ASSERT(isFixed(fun, "B43"));
     TS_ASSERT(isFixed(fun, "IB43"));
     auto i = fun.parameterIndex("B44");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB44"));
 
     TS_ASSERT(!isFixed(fun, "B60"));
@@ -503,7 +503,7 @@ public:
     TS_ASSERT(isFixed(fun, "B63"));
     TS_ASSERT(isFixed(fun, "IB63"));
     i = fun.parameterIndex("B64");
-    TS_ASSERT(fun.isFixed(i));
+    TS_ASSERT(!fun.isActive(i));
     TS_ASSERT(isFixed(fun, "IB64"));
     TS_ASSERT(isFixed(fun, "B65"));
     TS_ASSERT(isFixed(fun, "IB65"));
@@ -517,6 +517,10 @@ public:
     i = fun.parameterIndex("B64");
     tie = fun.getTie(i);
     TS_ASSERT_EQUALS(tie->asString(), "B64=-21*B60");
+  }
+
+  void test_CrystalFieldPeaksBaseImpl() {
+    Mantid::CurveFitting::Functions::CrystalFieldPeaksBaseImpl fun;
   }
 
 private:

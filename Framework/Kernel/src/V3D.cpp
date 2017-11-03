@@ -3,11 +3,13 @@
 #include <complex>
 #include <vector>
 
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
 #include <boost/math/common_factor.hpp>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace Kernel {

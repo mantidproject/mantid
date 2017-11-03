@@ -255,17 +255,17 @@ public:
     CoordTransformAffine ct42(4, 2);
     TSM_ASSERT_THROWS_ANYTHING(
         "Null input fails.",
-        CoordTransformAffine::combineTransformations(NULL, NULL));
+        CoordTransformAffine::combineTransformations(nullptr, nullptr));
     TSM_ASSERT_THROWS_ANYTHING(
         "Null input fails.",
-        CoordTransformAffine::combineTransformations(NULL, &ct43));
+        CoordTransformAffine::combineTransformations(nullptr, &ct43));
     TSM_ASSERT_THROWS_ANYTHING(
         "Incompatible # of dimensions",
         CoordTransformAffine::combineTransformations(&ct42, &ct32));
     TSM_ASSERT_THROWS_ANYTHING(
         "Incompatible # of dimensions",
         CoordTransformAffine::combineTransformations(&ct32, &ct43));
-    CoordTransformAffine *ct(NULL);
+    CoordTransformAffine *ct(nullptr);
     TSM_ASSERT_THROWS_NOTHING(
         "Compatible # of dimensions",
         ct = CoordTransformAffine::combineTransformations(&ct43, &ct32));

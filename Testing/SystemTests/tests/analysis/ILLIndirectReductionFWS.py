@@ -1,6 +1,7 @@
 import stresstesting
-from mantid.simpleapi import *
-from mantid import config
+from mantid.simpleapi import CompareWorkspaces, LoadNexusProcessed, IndirectILLReductionFWS
+from mantid import config, mtd
+import numpy
 
 
 class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
@@ -34,7 +35,8 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         return ["165944.nxs", "165945.nxs", "165946.nxs", "165947.nxs", "165948.nxs",
                 "165949.nxs", "165950.nxs", "165951.nxs", "165952.nxs", "165953.nxs",
                 "143720.nxs", "143721.nxs", "143722.nxs", "143723.nxs", "143724.nxs",
-                "143725.nxs", "143726.nxs", "143727.nxs", "143728.nxs", "143729.nxs"]
+                "143725.nxs", "143726.nxs", "143727.nxs", "143728.nxs", "143729.nxs",
+                "140678.nxs", "140679.nxs", "140680.nxs", "140681.nxs", "140682.nxs"]
 
     def runTest(self):
 
@@ -43,6 +45,10 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         self._run_efws()
 
         self._run_sum_interpolate()
+
+        self._run_efws_mirror_sense()
+
+        self._run_calib_bg()
 
         self.tearDown()
 
@@ -79,7 +85,6 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
             self.assertTrue(result[0], "Mismatch in EFWS: " + result[1].row(0)['Message'])
 
     def _run_sum_interpolate(self):
-
         # this cross-tests if only one background point is given,
         # sum and interpolate options should give identical output
         IndirectILLReductionFWS(Run="143720:143728:2",
@@ -101,3 +106,24 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         else:
             self.assertTrue(result[0], "Sum/interpolate should be the same for one point: "
                             + result[1].row(0)['Message'])
+
+    def _run_efws_mirror_sense(self):
+        # this tests the EFWS in mirror mode: data in 140680 is indeed split to two wings,
+        # while the others have right wing empty (though mirror sense is ON!)
+        IndirectILLReductionFWS(Run="140678:140682", OutputWorkspace="efws_mirror")
+        yData = mtd["efws_mirror_red"].getItem(0).readY(17)
+        avg = numpy.average(yData)
+        for y in numpy.nditer(yData):
+            self.assertDelta(y, avg, 0.001)
+
+    def _run_calib_bg(self):
+        # this tests with the background file for calibration
+        IndirectILLReductionFWS(Run="143720:143728:2",
+                                CalibrationRun="143721",
+                                CalibrationBackgroundRun="143723",
+                                CalibrationBackgroundScalingFactor=0.1,
+                                OutputWorkspace="efws_calib_bg")
+
+        self.assertEquals(mtd['efws_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
+
+        self.assertDelta(mtd['efws_calib_bg_red'].getItem(0).readY(0)[0], 0.218, 0.001)

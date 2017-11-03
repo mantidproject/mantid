@@ -97,7 +97,7 @@ void CreatePSDBleedMask::exec() {
   typedef std::map<Geometry::ComponentID, std::vector<int>> TubeIndex;
   TubeIndex tubeMap;
 
-  API::Progress progress(this, 0, 1, numSpectra);
+  API::Progress progress(this, 0.0, 1.0, numSpectra);
 
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
 

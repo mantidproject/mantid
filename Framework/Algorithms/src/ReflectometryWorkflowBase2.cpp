@@ -1,11 +1,16 @@
 #include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::API;
@@ -14,6 +19,27 @@ using namespace Mantid::Geometry;
 
 namespace Mantid {
 namespace Algorithms {
+
+/** Initialize properties related to the type of reduction
+*/
+void ReflectometryWorkflowBase2::initReductionProperties() {
+  // Summation type
+  std::vector<std::string> summationTypes = {"SumInLambda", "SumInQ"};
+  declareProperty("SummationType", "SumInLambda",
+                  boost::make_shared<StringListValidator>(summationTypes),
+                  "The type of summation to perform.", Direction::Input);
+
+  // Reduction type
+  std::vector<std::string> reductionTypes = {"Normal", "DivergentBeam",
+                                             "NonFlatSample"};
+  declareProperty("ReductionType", "Normal",
+                  boost::make_shared<StringListValidator>(reductionTypes),
+                  "The type of reduction to perform when summing in Q.",
+                  Direction::Input);
+  setPropertySettings("ReductionType",
+                      make_unique<Kernel::EnabledWhenProperty>(
+                          "SummationType", IS_EQUAL_TO, "SumInQ"));
+}
 
 /** Initialize properties related to direct beam normalization
 */
@@ -178,6 +204,42 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
                   "Factor you wish to scale Q workspace by.", Direction::Input);
 }
 
+/** Initialize properties for diagnostics
+*/
+void ReflectometryWorkflowBase2::initDebugProperties() {
+  // Diagnostics
+  declareProperty("Diagnostics", false, "Whether to enable the output of "
+                                        "interim workspaces for debugging "
+                                        "purposes.");
+}
+
+/** Validate reduction properties, if given
+*
+* @return :: A map with results of validation
+*/
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateReductionProperties() const {
+
+  std::map<std::string, std::string> results;
+
+  // If summing in Q, then reduction type must be given
+  const std::string summationType = getProperty("SummationType");
+  const std::string reductionType = getProperty("ReductionType");
+  if (summationType == "SumInQ") {
+    if (reductionType == "Normal") {
+      results["ReductionType"] =
+          "ReductionType must be set if SummationType is SumInQ";
+    }
+  } else {
+    if (reductionType != "Normal") {
+      results["ReductionType"] =
+          "ReductionType should not be set unless SummationType is SumInQ";
+    }
+  }
+
+  return results;
+}
+
 /** Validate direct beam if given
 *
 * @return :: A map with results of validation
@@ -296,14 +358,28 @@ ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
 
 /** Crops a workspace in wavelength to specified limits
 * @param inputWS :: the workspace to crop
+* @param useArgs :: if true, use the given args as the min and max;
+* otherwise, use the input properties to the algorithm
+* @param argMin :: the minimum wavelength to crop to if useArgs is true
+* @param argMax :: the maximum wavelength to crop to if useArgs is true
 * @return :: the cropped workspace
 */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
+    MatrixWorkspace_sptr inputWS, const bool useArgs, const double argMin,
+    const double argMax) {
 
-  // Crop out the lambda x-ranges now that the workspace is in wavelength.
-  double wavelengthMin = getProperty("WavelengthMin");
-  double wavelengthMax = getProperty("WavelengthMax");
+  double wavelengthMin = 0.0;
+  double wavelengthMax = 0.0;
+
+  if (useArgs) {
+    // Use the given args
+    wavelengthMin = argMin;
+    wavelengthMax = argMax;
+  } else {
+    // Use the input properties to the algorithm
+    wavelengthMin = getProperty("WavelengthMin");
+    wavelengthMax = getProperty("WavelengthMax");
+  }
 
   auto cropWorkspaceAlg = createChildAlgorithm("CropWorkspace");
   cropWorkspaceAlg->initialize();
@@ -320,10 +396,12 @@ ReflectometryWorkflowBase2::cropWavelength(MatrixWorkspace_sptr inputWS) {
 /** Process an input workspace in TOF according to specified processing commands
 * to get a detector workspace in wavelength.
 * @param inputWS :: the input workspace in TOF
+* @param convert :: whether the result should be converted to wavelength
 * @return :: the detector workspace in wavelength
 */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
+ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
+                                           const bool convert) {
 
   const std::string processingCommands =
       getPropertyValue("ProcessingInstructions");
@@ -334,7 +412,9 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS) {
   groupAlg->execute();
   MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
 
-  detectorWS = convertToWavelength(detectorWS);
+  if (convert) {
+    detectorWS = convertToWavelength(detectorWS);
+  }
 
   return detectorWS;
 }
@@ -548,5 +628,31 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
   return transRunsExist;
 }
 
+/**
+* Get the value of theta from a named log value
+*
+* @param inputWs :: the input workspace
+* @param logName :: the name of the log value to use
+* @return :: the value of theta found from the logs
+* @throw :: NotFoundError if the log value was not found
+*/
+double
+ReflectometryWorkflowBase2::getThetaFromLogs(MatrixWorkspace_sptr inputWs,
+                                             const std::string &logName) {
+  double theta = -1.;
+  const Mantid::API::Run &run = inputWs->run();
+  Property *logData = run.getLogData(logName);
+  auto logPWV = dynamic_cast<const PropertyWithValue<double> *>(logData);
+  auto logTSP = dynamic_cast<const TimeSeriesProperty<double> *>(logData);
+
+  if (logPWV) {
+    theta = *logPWV;
+  } else if (logTSP && logTSP->realSize() > 0) {
+    theta = logTSP->lastValue();
+  } else {
+    throw Exception::NotFoundError("Theta", "Log value not found");
+  }
+  return theta;
+}
 } // namespace Algorithms
 } // namespace Mantid

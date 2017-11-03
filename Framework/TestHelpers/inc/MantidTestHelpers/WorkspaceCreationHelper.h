@@ -69,8 +69,8 @@ public:
 
   Mantid::API::Progress *getProgress() { return m_Progress.get(); }
   void resetProgress(size_t nSteps) {
-    m_Progress =
-        Mantid::Kernel::make_unique<Mantid::API::Progress>(this, 0, 1, nSteps);
+    m_Progress = Mantid::Kernel::make_unique<Mantid::API::Progress>(
+        this, 0.0, 1.0, nSteps);
   }
 
 private:
@@ -89,9 +89,13 @@ struct EPPTableRow {
 
   /// Construct a row with the default values.
   EPPTableRow() = default;
-  /// Construct a row with errors set to zero.
+  /// Construct a row with default workspace index and errors set to zero.
   EPPTableRow(const double peakCentre, const double sigma, const double height,
               const FitStatus fitStatus);
+  /// Construct a row with errors set to zero.
+  EPPTableRow(const int index, const double peakCentre, const double sigma,
+              const double height, const FitStatus fitStatus);
+  int workspaceIndex = -1;
   double peakCentre = 0;
   double peakCentreError = 0;
   double sigma = 0;
@@ -227,6 +231,20 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(
     const std::string &instrumentName = std::string("testInst"));
 
 /**
+ * Create a workspace as for create2DWorkspaceWithFullInstrument, but including
+ *time indexing, i.e. detector scans. Note that no positions or rotations are
+ *currently changed for the detector scan workspaces.
+ *
+ * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
+ */
+Mantid::API::MatrixWorkspace_sptr
+create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime = 0,
+    size_t firstInterval = 1, bool includeMonitors = false,
+    bool startYNegative = false, bool isHistogram = true,
+    const std::string &instrumentName = std::string("testInst"));
+
+/**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis
  * the values run from 1 to nhist
  * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0
@@ -288,8 +306,8 @@ createEventWorkspace(int numPixels, int numBins, int numEvents = 100,
 Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int numPixels, int numBins, int numEvents = 100, double x0 = 0.0,
     double binDelta = 1.0, int eventPattern = 1, int start_at_pixelID = 0,
-    Mantid::Kernel::DateAndTime run_start =
-        Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
+    Mantid::Types::Core::DateAndTime run_start =
+        Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00"));
 
 Mantid::DataObjects::EventWorkspace_sptr
 createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
@@ -307,16 +325,16 @@ Mantid::API::MatrixWorkspace_sptr createGroupedWorkspace2DWithRingsAndBoxes(
     size_t RootOfNumHist = 10, int numBins = 10, double binDelta = 1.0);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataY(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayData(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayData(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataX(Mantid::API::MatrixWorkspace_const_sptr ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(const Mantid::API::MatrixWorkspace_sptr ws);
+void displayDataE(Mantid::API::MatrixWorkspace_const_sptr ws);
 
 void addTSPEntry(Mantid::API::Run &runInfo, std::string name, double val);
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
@@ -372,7 +390,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX = 0);
 /// Create a 2D workspace with one monitor and three detectors based around
 /// a virtual reflectometry instrument.
 Mantid::API::MatrixWorkspace_sptr
-create2DWorkspaceWithReflectometryInstrumentMultiDetector(double startX = 0);
+create2DWorkspaceWithReflectometryInstrumentMultiDetector(
+    double startX = 0, const double detSize = 0.0);
 
 void createInstrumentForWorkspaceWithDistances(
     Mantid::API::MatrixWorkspace_sptr workspace,

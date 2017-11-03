@@ -31,7 +31,7 @@
 #include "Grid.h"
 #include "ColorBox.h"
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <qwt_plot_canvas.h>
 #include <qwt_painter.h>

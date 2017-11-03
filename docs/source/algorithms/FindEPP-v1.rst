@@ -28,12 +28,12 @@ Usage
                 XMin=4005.75, XMax=7995.75, BinWidth=10.5, BankDistanceFromSample=4.0)
 
     # search for elastic peak positions
-    table = FindEPP(ws)
+    table = FindEPP(ws, Version=1)
 
     # print some results
-    print "The fit status is", table.row(0)['FitStatus']
-    print "The peak centre is at", round(table.row(0)['PeakCentre'], 2), "microseconds"
-    print "The peak height is", round(table.row(0)['Height'],2)
+    print("The fit status is {}".format(table.row(0)['FitStatus']))
+    print("The peak centre is at {} microseconds".format(round(table.row(0)['PeakCentre'], 2)))
+    print("The peak height is {}".format(round(table.row(0)['Height'],2)))
 
 Output:
 
@@ -47,3 +47,6 @@ Output:
 .. categories::
 
 .. sourcelink::
+	:filename: FindEPP
+	:cpp: None
+	:h: None

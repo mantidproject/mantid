@@ -37,6 +37,12 @@ using namespace Mantid;
 
 class FrameworkManagerTest : public CxxTest::TestSuite {
 public:
+#ifdef MPI_EXPERIMENTAL
+  // Make sure FrameworkManager is always instantiated. This is needed to
+  // initialize the MPI environment.
+  FrameworkManagerTest() { FrameworkManager::Instance(); }
+#endif
+
   void testConstructor() {
     // Not really much to test
     TS_ASSERT_THROWS_NOTHING(FrameworkManager::Instance());

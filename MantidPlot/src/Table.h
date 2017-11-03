@@ -40,15 +40,16 @@
 #include "ScriptingEnv.h"
 #include "Scripted.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 class QTableWidgetItem;
 
 class MyTable : public QTableWidget {
   Q_OBJECT
 public:
-  MyTable(QWidget *parent = 0, const char *name = 0);
-  MyTable(int numRows, int numCols, QWidget *parent = 0, const char *name = 0);
+  MyTable(QWidget *parent = nullptr, const char *name = nullptr);
+  MyTable(int numRows, int numCols, QWidget *parent = nullptr,
+          const char *name = nullptr);
   void blockResizing(bool yes);
   QString text(int row, int col) const;
   void setText(int row, int col, const QString &txt);
@@ -116,7 +117,7 @@ public:
   };
 
   Table(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-        const QString &name = QString(), Qt::WFlags f = 0);
+        const QString &name = QString(), Qt::WFlags f = nullptr);
 
   int topSelectedRow() const { return d_table->topSelectedRow(); }
   int bottomSelectedRow() const { return d_table->bottomSelectedRow(); }
@@ -156,7 +157,8 @@ public slots:
 
   int colPlotDesignation(int col) { return col_plot_type[col]; };
   void setColPlotDesignation(int col, PlotDesignation pd);
-  void setPlotDesignation(PlotDesignation pd, bool rightColumns = false);
+  virtual void setPlotDesignation(PlotDesignation pd,
+                                  bool rightColumns = false);
   QList<int> plotDesignations() { return col_plot_type; };
 
   void setHeader(QStringList header);

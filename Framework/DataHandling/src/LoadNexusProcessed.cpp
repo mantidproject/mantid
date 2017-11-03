@@ -1,21 +1,23 @@
+#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakNoShapeFactory.h"
-#include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
+#include "MantidDataObjects/PeakShapeSphericalFactory.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
@@ -47,6 +49,8 @@ using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument_const_sptr;
+using Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 
@@ -706,9 +710,10 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
   // indices of events
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   // Create all the event lists
+  int64_t max = static_cast<int64_t>(m_filtered_spec_idxs.size());
+  Progress progress(this, progressStart, progressStart + progressRange, max);
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t j = 0; j < static_cast<int64_t>(m_filtered_spec_idxs.size());
-       j++) {
+  for (int64_t j = 0; j < max; ++j) {
     PARALLEL_START_INTERUPT_REGION
     size_t wi = m_filtered_spec_idxs[j] - 1;
     int64_t index_start = indices[wi];
@@ -749,9 +754,7 @@ LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, NXDouble &xbins,
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
       }
     }
-
-    progress(progressStart +
-             progressRange * (1.0 / static_cast<double>(numspec)));
+    progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -871,7 +874,7 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   return boost::static_pointer_cast<API::Workspace>(workspace);
 }
@@ -993,7 +996,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
     columnNumber++;
 
-  } while (1);
+  } while (true);
 
   // Get information from all but data group
   std::string parameterStr;
@@ -1011,6 +1014,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
                                     parameterStr);
+    // Populate the instrument parameters in this workspace
+    peakWS->readParameterMap(parameterStr);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -1062,14 +1067,17 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
     qSign = -1.0;
 
   for (int r = 0; r < numberPeaks; r++) {
-    Kernel::V3D v3d;
-    if (convention == "Crystallography")
-      v3d[2] = -1.0;
-    else
-      v3d[2] = 1.0;
-    Geometry::IPeak *p;
-    p = peakWS->createPeak(v3d);
-    peakWS->addPeak(*p);
+    // Warning! Do not use anything other than the default constructor here
+    // It is currently important (10/05/17) that the DetID (set in the loop
+    // below this one) is set before QLabFrame as this causes Peak to ray trace
+    // to find the location of the detector, which significantly increases
+    // loading times.
+    const auto goniometer = peakWS->run().getGoniometer();
+    Peak peak;
+    peak.setInstrument(peakWS->getInstrument());
+    peak.setGoniometerMatrix(goniometer.getR());
+    peak.setRunNumber(peakWS->getRunNumber());
+    peakWS->addPeak(std::move(peak));
   }
 
   for (const auto &str : columnNames) {
@@ -1576,18 +1584,20 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root,
     local_workspace->loadExperimentInfoNexus(
         getPropertyValue("Filename"), m_cppFile,
         parameterStr); // REQUIRED PER PERIOD
+
+    // Parameter map parsing only if instrument loaded OK.
+    progress(progressStart + 0.11 * progressRange,
+             "Reading the parameter maps...");
+    local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
-    g_log.information("Error loading Instrument section of nxs file");
-    g_log.information(e.what());
+    g_log.warning("Error loading Instrument section of nxs file");
+    g_log.warning(e.what());
+    g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
+                  "update the geometry");
   }
 
   // Now assign the spectra-detector map
   readInstrumentGroup(mtd_entry, local_workspace);
-
-  // Parameter map parsing
-  progress(progressStart + 0.11 * progressRange,
-           "Reading the parameter maps...");
-  local_workspace->readParameterMap(parameterStr);
 
   if (!local_workspace->getAxis(1)
            ->isSpectra()) { // If not a spectra axis, load the axis data into

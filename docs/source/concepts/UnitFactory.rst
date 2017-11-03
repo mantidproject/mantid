@@ -49,6 +49,9 @@ The following units are available in the default Mantid distribution.
 | Spin Echo Time                            | SpinEchoTime                    | :math:`ns`                  | | :math:`constant \times \lambda^3`                                                                              |
 |                                           |                                 |                             | |  The constant is supplied in eFixed                                                                            |
 +-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+| d-spacingPerpendicular                    | dSpacingPerpendicular           | :math:`\mathrm{\AA}`        | :math:`d_{\perp} = \sqrt{\lambda^2 - 2\log\cos\theta}`                                                           |
++-------------------------------------------+---------------------------------+-----------------------------+------------------------------------------------------------------------------------------------------------------+
+
 
 Where :math:`L_1` and :math:`L_2` are sample to the source and sample to
 detector distances respectively, :math:`L_{tot} = L_1+L_2` and
@@ -65,6 +68,10 @@ energy respectively. Units conversion into elastic momentum transfer
 (MomentumTransfer) will throw in elastic mode (emode=0) on inelastic
 workspace (when energy transfer is specified along x-axis)
 
+**d-spacingPerpendicular** is a unit invented in `J. Appl. Cryst. (2015) 48, pp. 1627--1636 <https://doi.org/10.1107/S1600576715016520>`_ for 2D Rietveld refinement
+of angular and wavelength-dispersive neutron time-of-flight powder diffraction data. Together with the d-Spacing :math:`d`,
+d-SpacingPerpendicular :math:`d_{\perp}` forms a new orthogonal coordinate system.
+
 
 Working with Units in Python
 ----------------------------
@@ -80,14 +87,14 @@ Units on MatrixWorkspaces are accessed via the Axis.
   ws = CreateSampleWorkspace()
   for i in range(ws.axes()):
       axis = ws.getAxis(i)
-      print "Axis {0} is a {1}{2}{3}".format(i,
+      print("Axis {0} is a {1}{2}{3}".format(i,
                                              "Spectrum Axis" if axis.isSpectra() else "",
                                              "Text Axis" if axis.isText() else "",
-                                             "Numeric Axis" if axis.isNumeric() else "")
+                                             "Numeric Axis" if axis.isNumeric() else ""))
 
       unit = axis.getUnit()
-      print "\t caption:{0}".format(unit.caption())
-      print "\t symbol:{0}".format(unit.symbol())
+      print("\t caption:{0}".format(unit.caption()))
+      print("\t symbol:{0}".format(unit.symbol()))
 
 Output:
 
@@ -114,8 +121,8 @@ Setting the axisLabel to a Label of your choice
   axis.setUnit("Label").setLabel('Temperature', 'K')
 
   unit = axis.getUnit()
-  print "New caption:{0}".format(unit.caption())
-  print "New symbol:{0}".format(unit.symbol())
+  print("New caption:{0}".format(unit.caption()))
+  print("New symbol:{0}".format(unit.symbol()))
 
 Output:
 

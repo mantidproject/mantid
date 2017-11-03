@@ -36,6 +36,7 @@ The elements of the wavelength conversion state are:
 | wavelength_step_type | RangeStepType enum | Wavelength step type                         | No         | None          |
 +----------------------+--------------------+----------------------------------------------+------------+---------------+
 
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 
 .. categories::

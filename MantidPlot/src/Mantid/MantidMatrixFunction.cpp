@@ -70,10 +70,11 @@ double MantidMatrixFunction::operator()(double x, double y) {
 
   size_t j = indexX(i, x);
 
-  if (j < columns())
+  if (j < columns()) {
     return m_workspace->y(i)[j];
-  else
+  } else {
     return m_outside;
+  }
 }
 
 double MantidMatrixFunction::getMinPositiveValue() const {
@@ -149,32 +150,77 @@ MantidMatrixFunction::getHistogramX(int row) const {
   return m_workspace->x(row);
 }
 
-size_t MantidMatrixFunction::indexX(size_t row, double s) const {
-  size_t n = m_workspace->blocksize();
-
+/**
+ * Performs a binary search for an x value in the x data of a particular
+ * spectrum. There are two scenarios to consider which are illustrated by
+ * examples
+ *
+ * 1. Histogram Data:
+ * The x value of the example is 6500
+ *
+ * Y:       6      6       16        6         6
+ * X: 2000    4000    8000    12000     16000     20000
+ *
+ * The algorithm will determine that the index of X which is closest to 6500 is
+ *2,
+ * but the Y index with the correct data is 1 (since the value should be 6 not
+ *16)
+ *
+ * 2. Point Data:
+ * Y:   6      6       16        6         6
+ * X: 2000    4000    8000    12000     16000
+ *
+ * The algorithm will determine that the index of X which is closest to 6500 is
+ *2,
+ * and the Y index with the correct data is 2 as well since there is a
+ *one-to-one
+ * mapping between the indices of Y and X.
+ *
+ * @param row: the workspace index to search in
+ * @param xValue: the value to search for
+ * @return the index of the Y data which is associated with the x value.
+ */
+size_t MantidMatrixFunction::indexX(size_t row, double xValue) const {
+  auto isHistogram = m_workspace->isHistogramData();
   const auto &X = m_workspace->x(row);
-  if (n == 0 || s < X[0] || s > X[n - 1])
-    return std::numeric_limits<size_t>::max();
+  const auto n = X.size();
 
-  size_t i = 0, j = n - 1, k = n / 2;
-  for (size_t it = 0; it < n; it++) {
-    const double ss = X[k];
-    if (ss == s)
-      return k;
-    if (abs(static_cast<int>(i) - static_cast<int>(j)) < 2) {
-      double ds = fabs(ss - s);
-      if (fabs(X[j] - s) < ds)
-        return j;
-      return i;
-    }
-    if (s > ss)
-      i = k;
-    else
-      j = k;
-    k = i + (j - i) / 2;
+  auto provideIndexForPointData =
+      [&X](size_t start, size_t stop, double xValue, double midValue) {
+        if (fabs(X[stop] - xValue) < fabs(midValue - xValue))
+          return stop;
+        return start;
+      };
+
+  if (n == 0 || xValue < X[0] || xValue > X[n - 1]) {
+    return std::numeric_limits<size_t>::max();
   }
 
-  return i;
+  size_t start = 0, stop = n - 1, mid = n / 2;
+  for (size_t it = 0; it < n; it++) {
+    const double midValue = X[mid];
+    if (midValue == xValue)
+      return mid;
+
+    // If we reach two neighbouring x values, then we need to decide
+    // which index to pick.
+    if (abs(static_cast<int>(start) - static_cast<int>(stop)) < 2) {
+      if (isHistogram) {
+        return start;
+      } else {
+        return provideIndexForPointData(start, stop, xValue, midValue);
+      }
+    }
+
+    // Reset the interval to search
+    if (xValue > midValue)
+      start = mid;
+    else
+      stop = mid;
+    mid = start + (stop - start) / 2;
+  }
+
+  return start;
 }
 
 size_t MantidMatrixFunction::indexY(double s) const {

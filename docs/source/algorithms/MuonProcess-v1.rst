@@ -99,7 +99,7 @@ Usage
    processed = mtd['MuonProcess_output']
    output_int = Integration(processed)
 
-   print 'Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0])
+   print('Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0]))
 
 Output:
 
@@ -132,7 +132,7 @@ Output:
 			PairSecondIndex = 0,
 			Alpha = 0.5)
    
-   print 'Output:', output.readY(0)
+   print('Output: {}'.format(output.readY(0)))
 
 Output:
 
@@ -148,8 +148,13 @@ Output:
    y1 = [100,50,10]
    y2 = [150,20,1]
    x = [1,2,3]
-   first_period = CreateWorkspace(x, y1)
-   second_period = CreateWorkspace(x, y2)
+   CreateWorkspace(x, y1,OutputWorkspace="first")
+   first_period = mtd["first"]
+   first_period.mutableRun().addProperty('goodfrm',10,True)
+   CreateWorkspace(x, y2,OutputWorkspace="second")
+   second_period = mtd["second"]
+   second_period.mutableRun().addProperty('goodfrm',10,True)
+
    input = GroupWorkspaces([first_period, second_period])
 
    # Grouping
@@ -165,15 +170,15 @@ Output:
 			SubtractedPeriodSet = 2,
 			LoadedTimeZero = 0,
 			OutputType = 'GroupAsymmetry',
-			GroupIndex = 0)
+			GroupIndex = 0,Xmin=0,Xmax=4)
 
-   print 'Output:', output.readY(0)
+   print('Output: {}'.format(output.readY(0)))
 
 Output:
 
 .. testoutput:: ExGroupAsymmetryMultiPeriod
 
-   Output: [-0.28633687  0.60594497  0.26255831]
+   Output: [-0.6449185   0.78829245  0.36003367]
 
 .. categories::
 

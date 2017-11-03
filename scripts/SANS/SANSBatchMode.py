@@ -178,7 +178,7 @@ def get_geometry_properties(reducer):
     return geometry_properties
 
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, # noqa: C901
                 centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
@@ -226,6 +226,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     original_user_file = ReductionSingleton().user_settings.filename
     current_user_file = original_user_file
 
+    # Store the original combineDet which was set either by the input. this should be used whenever we are using the
+    # original user file
+    original_combine_det = combineDet
+
     # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
         # Set the user file, if it is required
@@ -235,12 +239,16 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                                        original_user_file=original_user_file,
                                                        original_settings = settings,
                                                        original_prop_man_settings = prop_man_settings)
-            # When we set a new user file, that means that the combineDet feature could be invalid,
-            # ie if the detector under investigation changed in the user file. We need to change this
-            # here too. But only if it is not None.
-            if combineDet is not None:
-                new_combineDet = ReductionSingleton().instrument.get_detector_selection()
-                combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
+
+            if current_user_file == original_user_file:
+                combineDet = original_combine_det
+            else:
+                # When we set a new user file, that means that the combineDet feature could be invalid,
+                # ie if the detector under investigation changed in the user file. We need to change this
+                # here too. But only if it is not None.
+                if combineDet is not None:
+                    new_combineDet = ReductionSingleton().instrument.get_detector_selection()
+                    combineDet = su.get_correct_combinDet_setting(ins_name, new_combineDet)
         except (RuntimeError, ValueError) as e:
             sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(
                 str(run['user_file']), str(e)))

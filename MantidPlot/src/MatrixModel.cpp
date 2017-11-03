@@ -36,7 +36,7 @@
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
 #include "analysis/fft2D.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
 
@@ -44,8 +44,8 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_errno.h>
 
+#include <cstdlib>
 #include <qwt_color_map.h>
-#include <stdlib.h>
 
 MatrixModel::MatrixModel(QObject *parent)
     : QAbstractTableModel(parent), d_matrix(dynamic_cast<Matrix *>(parent)) {
@@ -91,9 +91,9 @@ void MatrixModel::init() {
   d_txt_format = 'g';
   d_num_precision = 6;
   d_locale = QLocale();
-  d_direct_matrix = NULL;
-  d_inv_matrix = NULL;
-  d_inv_perm = NULL;
+  d_direct_matrix = nullptr;
+  d_inv_matrix = nullptr;
+  d_inv_perm = nullptr;
 
   d_rows = 1;
   d_cols = 1;
@@ -376,7 +376,7 @@ bool MatrixModel::removeColumns(int column, int count,
   }
 
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
-  if (new_data == NULL) {
+  if (new_data == nullptr) {
     // could not realloc, but orig still valid
     QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
                                         tr("Memory Allocation Error"),
@@ -447,7 +447,7 @@ bool MatrixModel::removeRows(int row, int count, const QModelIndex &parent) {
     d_data[i] = d_data[i + removedCells];
 
   double *new_data = (double *)realloc(d_data, size * sizeof(double));
-  if (new_data == NULL) {
+  if (new_data == nullptr) {
     // could not realloc, but orig still valid
     QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " +
                                         tr("Memory Allocation Error"),
@@ -716,9 +716,9 @@ void MatrixModel::invert() {
   gsl_linalg_LU_invert(d_direct_matrix, d_inv_perm, d_inv_matrix);
 
   gsl_matrix_free(d_direct_matrix);
-  d_direct_matrix = NULL;
+  d_direct_matrix = nullptr;
   gsl_permutation_free(d_inv_perm);
-  d_inv_perm = NULL;
+  d_inv_perm = nullptr;
 
   aux = 0;
   for (int i = 0; i < d_rows; i++) {
@@ -726,7 +726,7 @@ void MatrixModel::invert() {
       d_data[aux++] = gsl_matrix_get(d_inv_matrix, i, j);
   }
   gsl_matrix_free(d_inv_matrix);
-  d_inv_matrix = NULL;
+  d_inv_matrix = nullptr;
   QApplication::restoreOverrideCursor();
 }
 
@@ -756,7 +756,7 @@ double *MatrixModel::dataCopy(int startRow, int endRow, int startCol,
   double *buffer = (double *)malloc((endRow - startRow + 1) *
                                     (endCol - startCol + 1) * sizeof(double));
   if (!buffer)
-    return NULL;
+    return nullptr;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 

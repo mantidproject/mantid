@@ -180,7 +180,14 @@ public:
   }
 
   void testExecEvent_going_too_far() {
-    dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600");
+    TS_ASSERT_THROWS(
+        dotestExecEvent("testEvent", "testEvent2", "5,10-15, 500-600"),
+        std::runtime_error);
+  }
+
+  void testExecEvent_negative_indices() {
+    TS_ASSERT_THROWS(dotestExecEvent("testEvent", "testEvent2", "5-10,-10"),
+                     std::runtime_error);
   }
 
   void dotestExecEvent(std::string inName, std::string outName,

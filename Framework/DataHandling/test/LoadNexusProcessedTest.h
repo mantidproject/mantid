@@ -19,8 +19,6 @@
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -31,6 +29,9 @@
 #include <Poco/File.h>
 
 #include <string>
+
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/HistogramDataTestHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -1075,7 +1076,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }
@@ -1096,7 +1098,8 @@ public:
     Workspace_const_sptr ws = loader.getProperty("OutputWorkspace");
     const auto outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
-    for (size_t i = 0; i < outWS->blocksize(); ++i) {
+    const size_t numBins = outWS->blocksize();
+    for (size_t i = 0; i < numBins; ++i) {
       TS_ASSERT_EQUALS(outWS->x(0)[i], i);
       TS_ASSERT_EQUALS(outWS->y(0)[i], i);
     }
@@ -1442,6 +1445,14 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "PG3_733_focussed.nxs");
     loader.setPropertyValue("OutputWorkspace", "ws");
+    TS_ASSERT(loader.execute());
+  }
+
+  void testPeaksWorkspace() {
+    LoadNexusProcessed loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "24954_allpeaksbyhand.nxs");
+    loader.setPropertyValue("OutputWorkspace", "peaks");
     TS_ASSERT(loader.execute());
   }
 };

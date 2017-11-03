@@ -28,7 +28,7 @@ if( DATA_TARGETS_ONLY )
   return()
 endif()
 
-set ( CPACK_PACKAGE_SUFFIX "" CACHE STRING "suffix used to determine the deployment type")
+set ( CPACK_PACKAGE_SUFFIX "unstable" CACHE STRING "suffix used to determine the deployment type")
 set_property(CACHE CPACK_PACKAGE_SUFFIX PROPERTY STRINGS nightly unstable "") #empty string and release are treated as the same thing
 
 #Set package name here
@@ -43,7 +43,6 @@ include ( Eigen )
 # Bootstrap any dependencies
 ###########################################################################
 include ( Bootstrap )
-
 ###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
@@ -72,7 +71,6 @@ endif ()
 # Cross-platform setup
 ###########################################################################
 include ( CommonSetup )
-
 ###########################################################################
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
@@ -125,13 +123,6 @@ endif()
 find_package ( GSL REQUIRED )
 
 ###########################################################################
-# Add QtPropertyBrowser to build
-###########################################################################
-if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( QtPropertyBrowser )
-endif(ENABLE_MANTIDPLOT)
-
-###########################################################################
 # Now add in all the components
 ###########################################################################
 # Flag that this is a full build, i.e not framework only
@@ -149,28 +140,25 @@ add_subdirectory ( Framework )
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/HistogramData/inc )
 include_directories ( Framework/Indexing/inc )
+include_directories ( Framework/Parallel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
+include_directories ( Framework/Types/inc )
 
-set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API )
+set ( CORE_MANTIDLIBS Kernel HistogramData Indexing Geometry API Types )
 
 if (ENABLE_MANTIDPLOT)
   # Add a target for all GUI tests
   add_custom_target ( GUITests )
-  add_dependencies ( GUITests MantidWidgetsTest)
+  add_dependencies ( GUITests MantidQtCommonTest)
   add_dependencies ( check GUITests )
   # Collect all tests together
   add_custom_target ( AllTests )
   add_dependencies ( AllTests FrameworkTests GUITests )
 endif()
 
-if ( UNIX )
-  #Experimental feature. Unix only at this point.
-  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
-endif ( UNIX )
+if ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
-if (ENABLE_MANTIDPLOT AND MAKE_VATES )
-  add_subdirectory ( Vates )
   if (NOT APPLE)
     LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
           "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
@@ -188,12 +176,17 @@ if (ENABLE_MANTIDPLOT AND MAKE_VATES )
 
 endif ( ENABLE_MANTIDPLOT AND MAKE_VATES )
 
+if ( UNIX )
+  #Experimental feature. Unix only at this point.
+  set ( UNITY_BUILD OFF CACHE BOOL "Switch for utilising unity builds. Faster builds for selected components.")
+endif ( UNIX )
+
 if ( MSVC )
   add_definitions ( -DQWT_DLL )
 endif ()
 
 if (ENABLE_MANTIDPLOT)
-  add_subdirectory ( MantidQt )
+  add_subdirectory ( qt )
 
   add_subdirectory ( MantidPlot )
 endif()
@@ -271,7 +264,7 @@ if ( ENABLE_CPACK )
       message ( STATUS " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
       # rhel requirements
-      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,nexus-python >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
+      set ( CPACK_RPM_PACKAGE_REQUIRES "qt4 >= 4.2,nexus >= 4.3.1,gsl,glibc,qwtplot3d-qt4,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka" )
       # OCE
       set( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization")
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
@@ -300,6 +293,8 @@ if ( ENABLE_CPACK )
         set ( DEPENDS_LIST "libboost-date-time${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-regex${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+                           "libboost-serialization${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
+                           "libboost-filesystem${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION},"
                            "libnexus0 (>= 4.3),"
                            "libgsl0ldbl,"
                            "libqtcore4 (>= 4.2),"

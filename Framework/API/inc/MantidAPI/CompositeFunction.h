@@ -66,8 +66,6 @@ public:
 
   /// Returns the function's name
   std::string name() const override { return "CompositeFunction"; }
-  /// Writes itself into a string
-  std::string asString() const override;
   /// Sets the workspace for each member function
   void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
   /// Set matrix workspace
@@ -96,6 +94,8 @@ public:
                                const std::string &description) override;
   /// Get parameter by name.
   double getParameter(const std::string &name) const override;
+  /// Check if function has a parameter with this name.
+  bool hasParameter(const std::string &name) const override;
   /// Total number of parameters
   size_t nParams() const override;
   /// Returns the index of parameter name
@@ -111,13 +111,6 @@ public:
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
 
-  /// Check if a parameter is active
-  bool isFixed(size_t i) const override;
-  /// Removes a parameter from the list of active
-  void fix(size_t i) override;
-  /// Restores a declared parameter i to the active status
-  void unfix(size_t i) override;
-
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
   double activeParameter(size_t i) const override;
@@ -130,8 +123,6 @@ public:
   std::string nameOfActive(size_t i) const override;
   /// Returns the name of active parameter i
   std::string descriptionOfActive(size_t i) const override;
-  /// Check if an active parameter i is actually active
-  bool isActive(size_t i) const override;
 
   /// Return parameter index from a parameter reference.
   size_t getParameterIndex(const ParameterReference &ref) const override;
@@ -149,11 +140,7 @@ public:
   bool removeTie(size_t i) override;
   /// Get the tie of i-th parameter
   ParameterTie *getTie(size_t i) const override;
-  /// Add a new tie
-  void addTie(std::unique_ptr<ParameterTie> tie) override;
 
-  /// Overwrite IFunction methods
-  void addConstraint(std::unique_ptr<IConstraint> ic) override;
   /// Get constraint of i-th parameter
   IConstraint *getConstraint(size_t i) const override;
   /// Prepare function for a fit
@@ -183,9 +170,9 @@ public:
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function
-  size_t parameterLocalIndex(size_t i) const;
+  size_t parameterLocalIndex(size_t i, bool recursive = false) const;
   /// Returns the name of parameter i as it declared in its function
-  std::string parameterLocalName(size_t i) const;
+  std::string parameterLocalName(size_t i, bool recursive = false) const;
   /// Check the function.
   void checkFunction();
   /// Remove all member functions
@@ -222,6 +209,10 @@ public:
                               const char *value) {
     setLocalAttribute(i, attName, Attribute(std::string(value)));
   }
+  /// Change status of parameter
+  void setParameterStatus(size_t i, ParameterStatus status) override;
+  /// Get status of parameter
+  ParameterStatus getParameterStatus(size_t i) const override;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -229,6 +220,9 @@ protected:
   /// Declare a new parameter
   void declareParameter(const std::string &name, double initValue = 0,
                         const std::string &description = "") override;
+  /// Writes itself into a string
+  std::string writeToString(
+      const std::string &parentLocalAttributesStr = "") const override;
 
   size_t paramOffset(size_t i) const { return m_paramOffsets[i]; }
 

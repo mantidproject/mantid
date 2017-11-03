@@ -1,10 +1,13 @@
 #pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import math
 import os
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import *
 from mantid.api import *
+from functools import reduce
 
 
 def do_cleanup():
@@ -191,7 +194,7 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
         output = reduce(lambda x,y:x and y, diff)
         if not output:
             for i,dqi in enumerate(dq):
-                print i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001
+                print(i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001)
         return output
 
 
@@ -257,5 +260,5 @@ class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
 
         if not output:
             for i,dqi in enumerate(dq):
-                print i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001
+                print(i, dqi, dq_ref[i], math.fabs(dq_ref[i]-dqi)<0.0001)
         return output

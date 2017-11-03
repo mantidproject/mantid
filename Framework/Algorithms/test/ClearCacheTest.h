@@ -22,6 +22,54 @@ public:
   static ClearCacheTest *createSuite() { return new ClearCacheTest(); }
   static void destroySuite(ClearCacheTest *suite) { delete suite; }
 
+  void setUp() override {
+    const std::string TEST_SUFFIX = "TEMPORARY_ClearCacheUnitTest";
+    m_originalInstDir =
+        Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+
+    // change the local download directory by adding a unittest subdirectory
+    auto testDirectories = m_originalInstDir;
+    Poco::Path localDownloadPath(m_originalInstDir[0]);
+    localDownloadPath.pushDirectory(TEST_SUFFIX);
+    m_localInstDir = localDownloadPath.toString();
+    createDirectory(localDownloadPath);
+    testDirectories[0] = m_localInstDir;
+
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        testDirectories);
+
+    // create a geometryCache subdirectory
+    Poco::Path GeomPath = localDownloadPath;
+    GeomPath.pushDirectory("geometryCache");
+    createDirectory(GeomPath);
+  }
+
+  void createDirectory(Poco::Path path) {
+    Poco::File file(path);
+    if (file.createDirectory()) {
+      m_directoriesToRemove.push_back(file);
+    }
+  }
+
+  void removeDirectories() {
+    for (auto directory : m_directoriesToRemove) {
+      try {
+        if (directory.exists()) {
+          directory.remove(true);
+        }
+      } catch (Poco::FileException &fe) {
+        std::cout << fe.what() << std::endl;
+      }
+    }
+    m_directoriesToRemove.clear();
+  }
+
+  void tearDown() override {
+    Mantid::Kernel::ConfigService::Instance().setInstrumentDirectories(
+        m_originalInstDir);
+    removeDirectories();
+  }
+
   void test_Init() {
     ClearCache alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -114,6 +162,10 @@ public:
     int filesRemoved = alg.getProperty("FilesRemoved");
     TS_ASSERT_EQUALS(filesRemoved, 0);
   }
+
+  std::string m_localInstDir;
+  std::vector<std::string> m_originalInstDir;
+  std::vector<Poco::File> m_directoriesToRemove;
 };
 
 #endif /* MANTID_ALGORITHMS_CLEARCACHETEST_H_ */

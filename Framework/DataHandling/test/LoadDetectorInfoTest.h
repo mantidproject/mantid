@@ -5,7 +5,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -17,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
+#include <nexus/NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <vector>
 
@@ -218,12 +219,13 @@ void makeTestWorkspace(const int ndets, const int nbins,
 
   Instrument_sptr instr(new Instrument);
   ObjComponent *samplePos = new ObjComponent("sample-pos", instr.get());
+  instr->add(samplePos);
   instr->markAsSamplePos(samplePos);
 
   for (int i = 0; i < ndets; ++i) {
     std::ostringstream os;
     os << "det-" << i;
-    Detector *d = new Detector(os.str(), i, 0);
+    Detector *d = new Detector(os.str(), i, nullptr);
     instr->add(d);
     instr->markAsDetector(d);
   }

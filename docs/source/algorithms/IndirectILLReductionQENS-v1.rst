@@ -20,8 +20,8 @@ needs to be specified following the syntax in :py:obj:`MultipleFileProperty <man
 When ``SumRuns=True``, all the runs will be merged while loading.
 Note, for **Range** and **Stepped Range**, ``SumRuns`` will be
 ignored.  Use **Added Range** and **Added Stepped Range** instead (see
-:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``, ``CalibrationRun``
-and ``AlignmentRun`` all the runs will be automatically summed.
+:py:obj:`MultipleFileProperty <mantid.api.MultipleFileProperty>`).  For ``BackgroundRun``,
+``CalibrationRun``, ``CalibrationBackgroundRun`` and ``AlignmentRun`` all the runs will be automatically summed.
 
 Unmirror Options
 ~~~~~~~~~~~~~~~~
@@ -91,9 +91,9 @@ Usage
 .. testcode:: ExIndirectILLReductionQENS
 
     ws = IndirectILLReductionQENS(Run='ILL/IN16B/136553:136555.nxs')
-    print "Result is a WorkspaceGroup, that contains %d workspaces" % ws.getNumberOfEntries()
-    print "the name of the first one is %s corresponding to run 136553" % ws.getItem(0).getName()
-    print "it has %d spectra and %d bins" % (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
+    print("Result is a WorkspaceGroup, that contains {:d} workspaces".format(ws.getNumberOfEntries()))
+    print("the name of the first one is {} corresponding to run 136553".format(ws.getItem(0).getName()))
+    print("it has {:d} spectra and {:d} bins".format(ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize()))
 
 Output:
 

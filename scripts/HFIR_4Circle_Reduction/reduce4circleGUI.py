@@ -4,6 +4,9 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
+import six
 import os
 import sys
 import csv
@@ -11,10 +14,26 @@ import time
 import datetime
 import random
 import numpy
-from scipy.optimize import curve_fit
+import HFIR_4Circle_Reduction.guiutility as gutil
+import HFIR_4Circle_Reduction.peakprocesshelper as peak_util
+import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
+from HFIR_4Circle_Reduction import plot3dwindow
+from HFIR_4Circle_Reduction.multi_threads_helpers import *
+import HFIR_4Circle_Reduction.optimizelatticewindow as ol_window
+from HFIR_4Circle_Reduction import viewspicedialog
+from HFIR_4Circle_Reduction import peak_integration_utility
+from HFIR_4Circle_Reduction import FindUBUtility
+from HFIR_4Circle_Reduction import message_dialog
+from HFIR_4Circle_Reduction import PreprocessWindow
 
+# import line for the UI python class
+from HFIR_4Circle_Reduction.ui_MainWindow import Ui_MainWindow
 
 from PyQt4 import QtCore, QtGui
+
+if six.PY3:
+    unicode = str
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -28,17 +47,6 @@ except ImportError as e:
 else:
     NO_SCROLL = False
 
-import guiutility as gutil
-import peakprocesshelper as peak_util
-import fourcircle_utility as hb3a_util
-import plot3dwindow
-from multi_threads_helpers import *
-import optimizelatticewindow as ol_window
-import viewspicedialog
-
-# import line for the UI python class
-from ui_MainWindow import Ui_MainWindow
-
 # define constants
 IndexFromSpice = 'From Spice (pre-defined)'
 IndexFromUB = 'From Calculation By UB'
@@ -51,7 +59,8 @@ class MainWindow(QtGui.QMainWindow):
     TabPage = {'View Raw Data': 2,
                'Calculate UB': 3,
                'UB Matrix': 4,
-               'Peak Integration': 6}
+               'Peak Integration': 6,
+               'Scans Processing': 5}
 
     def __init__(self, parent=None):
         """ Initialization and set up
@@ -62,6 +71,16 @@ class MainWindow(QtGui.QMainWindow):
         # UI Window (from Qt Designer)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+
+        # children windows
+        self._my3DWindow = None
+        self._refineConfigWindow = None
+        self._peakIntegrationInfoWindow = None
+        self._addUBPeaksDialog = None
+        self._spiceViewer = None
+        self._mySinglePeakIntegrationDialog = None
+        self._preProcessWindow = None
+        self._singlePeakIntegrationDialogBuffer = ''
 
         # Make UI scrollable
         if NO_SCROLL is False:
@@ -103,6 +122,37 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_set_user_detector_center)
         self.connect(self.ui.pushButton_applyUserWavelength, QtCore.SIGNAL('clicked()'),
                      self.do_set_user_wave_length)
+        self.connect(self.ui.pushButton_applyDetectorSize, QtCore.SIGNAL('clicked()'),
+                     self.do_set_detector_size)
+
+        # Tab survey
+        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
+                     self.do_survey)
+        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_save_survey)
+        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_load_survey)
+        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
+                     self.do_view_survey_peak)
+        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
+                     self.do_add_peaks_for_ub)
+        self.connect(self.ui.pushButton_mergeScansSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_merge_scans_survey)
+        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_select_all_survey)
+        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
+                     self.do_filter_sort_survey_table)
+        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_survey)
+        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
+                     self.do_show_spice_file)
+
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
+                     self.evt_show_survey)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
+                     self.evt_show_survey)
+        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
+                     self.evt_show_survey)
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_setScanInfo, QtCore.SIGNAL('clicked()'),
@@ -129,12 +179,14 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_mask_pt_2d)
         self.connect(self.ui.pushButton_saveMask, QtCore.SIGNAL('clicked()'),
                      self.do_save_roi)
+        self.connect(self.ui.pushButton_integrateROI, QtCore.SIGNAL('clicked()'),
+                     self.do_integrate_roi)
 
         # Tab 'calculate ub matrix'
-        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_find_peak)
-        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
-                     self.do_add_ub_peak)
+        self.connect(self.ui.pushButton_addUBScans, QtCore.SIGNAL('clicked()'),
+                     self.do_add_ub_peaks)
+        # self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
+        #              self.do_add_ub_peak)
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                      self.do_cal_ub_matrix)
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
@@ -147,8 +199,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_clear_ub_peaks)
         self.connect(self.ui.pushButton_resetPeakHKLs, QtCore.SIGNAL('clicked()'),
                      self.do_reset_ub_peaks_hkl)
-        self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_peaks)
+        # self.connect(self.ui.pushButton_selectAllPeaks, QtCore.SIGNAL('clicked()'),
+        #              self.do_select_all_peaks)
         self.connect(self.ui.pushButton_viewScan3D, QtCore.SIGNAL('clicked()'),
                      self.do_view_data_3d)
         self.connect(self.ui.pushButton_plotSelectedData, QtCore.SIGNAL('clicked()'),
@@ -162,10 +214,20 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_refineUB, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_indexed_peaks)
+        self.connect(self.ui.pushButton_refineUBCalIndex, QtCore.SIGNAL('clicked()'),
+                     self.do_refine_ub_cal_indexed_peaks)
+
         self.connect(self.ui.pushButton_refineUBFFT, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_fft)
         self.connect(self.ui.pushButton_findUBLattice, QtCore.SIGNAL('clicked()'),
                      self.do_refine_ub_lattice)
+
+        self.connect(self.ui.radioButton_ubAdvancedSelection, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectAllScans, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
+        self.connect(self.ui.radioButton_ubSelectNoScan, QtCore.SIGNAL('toggled(bool)'),
+                     self.do_select_all_peaks)
 
         # Tab 'Setup'
         self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
@@ -185,7 +247,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_saveUB, QtCore.SIGNAL('clicked()'),
                      self.do_save_ub)
 
-        # Tab 'Merge'
+        # Tab 'Scans Processing'
         self.connect(self.ui.pushButton_addScanSliceView, QtCore.SIGNAL('clicked()'),
                      self.do_add_scans_merge)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
@@ -216,50 +278,22 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_convert_merged_to_hkl)
         self.connect(self.ui.pushButton_showScanWSInfo, QtCore.SIGNAL('clicked()'),
                      self.do_show_workspaces)
+        self.connect(self.ui.pushButton_showIntegrateDetails, QtCore.SIGNAL('clicked()'),
+                     self.do_show_integration_details)
+        self.connect(self.ui.pushButton_toggleIntegrateType, QtCore.SIGNAL('clicked()'),
+                     self.do_toggle_table_integration)
+        self.connect(self.ui.pushButton_exportSelectedPeaks, QtCore.SIGNAL('clicked()'),
+                     self.do_export_selected_peaks_to_integrate)
 
-        # Tab 'Integrate Peaks'
+        # Tab 'Integrate (single) Peaks'
         self.connect(self.ui.pushButton_integratePt, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_per_pt)
+                     self.do_integrate_single_scan)
         self.connect(self.ui.comboBox_ptCountType, QtCore.SIGNAL('currentIndexChanged(int)'),
-                     self.do_plot_pt_peak)
-
-        self.connect(self.ui.pushButton_integratePeak, QtCore.SIGNAL('clicked()'),
-                     self.do_integrate_peak)
-
-        self.connect(self.ui.pushButton_fitBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_fit_bkgd)
-        self.connect(self.ui.pushButton_handPickBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_manual_bkgd)
-        self.connect(self.ui.pushButton_calBkgd, QtCore.SIGNAL('clicked()'),
-                     self.do_cal_background)
-
-        # Tab survey
-        self.connect(self.ui.pushButton_survey, QtCore.SIGNAL('clicked()'),
-                     self.do_survey)
-        self.connect(self.ui.pushButton_saveSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_save_survey)
-        self.connect(self.ui.pushButton_loadSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_load_survey)
-        self.connect(self.ui.pushButton_viewSurveyPeak, QtCore.SIGNAL('clicked()'),
-                     self.do_view_survey_peak)
-        self.connect(self.ui.pushButton_addPeaksToRefine, QtCore.SIGNAL('clicked()'),
-                     self.do_add_peaks_for_ub)
-        self.connect(self.ui.pushButton_selectAllSurveyPeaks, QtCore.SIGNAL('clicked()'),
-                     self.do_select_all_survey)
-        self.connect(self.ui.pushButton_sortInfoTable, QtCore.SIGNAL('clicked()'),
-                     self.do_filter_sort_survey_table)
-        self.connect(self.ui.pushButton_clearSurvey, QtCore.SIGNAL('clicked()'),
-                     self.do_clear_survey)
-
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('editingFinished()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('returnPressed()'),
-                     self.evt_show_survey)
-        self.connect(self.ui.lineEdit_numSurveyOutput, QtCore.SIGNAL('textEdited(const QString&)'),
-                     self.evt_show_survey)
-
-        self.connect(self.ui.pushButton_viewRawSpice, QtCore.SIGNAL('clicked()'),
-                     self.do_show_spice_file)
+                     self.evt_change_normalization)  # calculate the normalized data again
+        self.connect(self.ui.pushButton_showIntPeakDetails, QtCore.SIGNAL('clicked()'),
+                     self.do_show_single_peak_integration)
+        self.connect(self.ui.pushButton_clearPeakIntFigure, QtCore.SIGNAL('clicked()'),
+                     self.do_clear_peak_integration_canvas)
 
         # Tab k-shift vector
         self.connect(self.ui.pushButton_addKShift, QtCore.SIGNAL('clicked()'),
@@ -284,9 +318,15 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_loadLastNthProject, QtCore.SIGNAL('clicked()'),
                      self.do_load_nth_project)
 
+        self.connect(self.ui.actionPre_Processing, QtCore.SIGNAL('triggered()'),
+                     self.menu_pre_process)
+
         # Validator ... (NEXT)
 
         # Declaration of class variable
+        # IPTS number
+        self._iptsNumber = None
+
         # some configuration
         self._homeSrcDir = os.getcwd()
         self._homeDir = os.getcwd()
@@ -298,9 +338,10 @@ class MainWindow(QtGui.QMainWindow):
         self._surveyTableFlag = True
         self._ubPeakTableFlag = True
 
+        # set the detector geometry
+        self.do_set_detector_size()
+
         # Sub window
-        self._my3DWindow = None
-        self._refineConfigWindow = None
         self._baseTitle = 'Title is not initialized'
 
         # Timing and thread 'global'
@@ -309,9 +350,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # QSettings
         self.load_settings()
-
-        # pre-define child windows
-        self._spiceViewer = None
 
         return
 
@@ -331,13 +369,15 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         self._baseTitle = str(self.windowTitle())
-        self.setWindowTitle('%s: No Experiment Is Set' % self._baseTitle)
+        self.setWindowTitle('No Experiment Is Set')
+
+        # detector geometry (set to 256 x 256)
+        self.ui.comboBox_detectorSize.setCurrentIndex(0)
 
         # Table widgets
         self.ui.tableWidget_peaksCalUB.setup()
         self.ui.tableWidget_ubMatrix.setup()
         self.ui.tableWidget_surveyTable.setup()
-        self.ui.tableWidget_peakIntegration.setup()
         self.ui.tableWidget_mergeScans.setup()
         self.ui.tableWidget_ubInUse.setup()
         self.ui.tableWidget_kShift.setup()
@@ -363,14 +403,24 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indexFrom.addItem('By calculation')
         self.ui.comboBox_indexFrom.addItem('From SPICE')
 
+        self.ui.comboBox_hklType.clear()
+        self.ui.comboBox_hklType.addItem('SPICE')
+        self.ui.comboBox_hklType.addItem('Calculated')
+
+        # normalization to peak
+        self.ui.comboBox_ptCountType.clear()
+        self.ui.comboBox_ptCountType.addItem('Time')
+        self.ui.comboBox_ptCountType.addItem('Monitor')
+        self.ui.comboBox_ptCountType.addItem('Absolute')
+
         # tab
         self.ui.tabWidget.setCurrentIndex(0)
 
         self.ui.radioButton_ubMantidStyle.setChecked(True)
         self.ui.lineEdit_numSurveyOutput.setText('50')
-        self.ui.checkBox_loadHKLfromFile.setChecked(True)
         self.ui.checkBox_sortDescending.setChecked(False)
         self.ui.radioButton_sortByCounts.setChecked(True)
+        self.ui.radioButton_ubSelectNoScan.setChecked(True)
 
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
@@ -385,9 +435,12 @@ class MainWindow(QtGui.QMainWindow):
         # check boxes
         self.ui.graphicsView_detector2dPlot.set_parent_window(self)
 
+        # background points
+        self.ui.lineEdit_backgroundPts.setText('1, 1')
+
         return
 
-    def _build_peak_info_list(self, zero_hkl):
+    def _build_peak_info_list(self, zero_hkl, is_spice=True):
         """ Build a list of PeakInfo to build peak workspace
         peak HKL can be set to zero or from table
         :return: list of peak information, which is a PeakProcessRecord instance
@@ -414,10 +467,13 @@ class MainWindow(QtGui.QMainWindow):
             if zero_hkl:
                 # set HKL to zero
                 peak_info.set_hkl(0., 0., 0.)
-            else:
+            elif is_spice:
                 # set from table
-                miller_index = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
-                peak_info.set_hkl_np_array(numpy.array(miller_index))
+                spice_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, True)
+                peak_info.set_hkl_np_array(numpy.array(spice_hkl))
+            else:
+                calculated_hkl = self.ui.tableWidget_peaksCalUB.get_hkl(i_row, False)
+                peak_info.set_hkl_np_array(numpy.array(calculated_hkl))
             # END-IF-ELSE
 
             peak_info_list.append(peak_info)
@@ -468,11 +524,11 @@ class MainWindow(QtGui.QMainWindow):
             yes = gutil.show_message(self, 'Project file %s does exist. This is supposed to be '
                                            'an incremental save.' % project_file_name)
             if yes:
-                print '[INFO] Save project in incremental way.'
+                print('[INFO] Save project in incremental way.')
             else:
-                print '[INFO] Saving activity is cancelled.'
+                print('[INFO] Saving activity is cancelled.')
         else:
-            print '[INFO] Saving current project to %s.' % project_file_name
+            print('[INFO] Saving current project to %s.' % project_file_name)
 
         # gather some useful information
         ui_dict = dict()
@@ -482,16 +538,35 @@ class MainWindow(QtGui.QMainWindow):
         ui_dict['survey start'] = str(self.ui.lineEdit_surveyStartPt.text())
         ui_dict['survey stop'] = str(self.ui.lineEdit_surveyEndPt.text())
 
-        # export/save project
-        self._myControl.export_project(project_file_name, ui_dict)
+        # detector-sample distance
+        det_distance_str = str(self.ui.lineEdit_infoDetSampleDistance.text()).strip()
+        if len(det_distance_str) > 0:
+            ui_dict['det_sample_distance'] = det_distance_str
+
+        # wave length
+        wave_length_str = str(self.ui.lineEdit_infoWavelength.text()).strip()
+        if len(wave_length_str) > 0:
+            ui_dict['wave_length'] = wave_length_str
+
+        # calibrated detector center
+        det_center_str = str(self.ui.lineEdit_infoDetCenter.text())
+        if len(det_center_str) > 0:
+            ui_dict['det_center'] = det_center_str
 
         # register and make it as a queue for last n opened/saved project
         last_1_path = str(self.ui.label_last1Path.text())
         if last_1_path != project_file_name:
             self.ui.label_last3Path.setText(self.ui.label_last2Path.text())
             self.ui.label_last2Path.setText(self.ui.label_last1Path.text())
-            self.ui.label_last1Path.setText(last_1_path)
+            self.ui.label_last1Path.setText(project_file_name)
         # END-IF
+
+        self._myControl.save_project(project_file_name, ui_dict)
+
+        # TODO/NOW/TODAY - Implement a pop-up dialog for this
+        information = 'Project has been saved to {0}\n'.format(project_file_name),
+        information += 'Including dictionary keys: {0}'.format(ui_dict)
+        print('[INFO]\n{0}'.format(information))
 
         return
 
@@ -501,6 +576,9 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         project_file_name = str(QtGui.QFileDialog.getOpenFileName(self, 'Choose Project File', os.getcwd()))
+        if len(project_file_name) == 0:
+            # return if cancelled
+            return
 
         # make it as a queue for last n opened/saved project
         last_1_path = str(self.ui.label_last1Path.text())
@@ -511,34 +589,6 @@ class MainWindow(QtGui.QMainWindow):
         # END-IF
 
         self.load_project(project_file_name)
-
-        return
-
-    def load_project(self, project_file_name):
-        """
-        Load a saved project
-        :param project_file_name:
-        :return:
-        """
-        assert isinstance(project_file_name, str), 'Project file name %s must be a string but not %s.' \
-                                                   '' % (str(project_file_name), type(project_file_name))
-        assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
-
-        # load project
-        ui_dict = self._myControl.load_project(project_file_name)
-
-        # set the UI parameters to GUI
-        try:
-            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
-            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
-            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
-            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
-
-            # now try to call some actions
-            self.do_apply_setup()
-            self.do_set_experiment()
-        except KeyError:
-            print '[Error] Some field cannot be found.'
 
         return
 
@@ -564,7 +614,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.do_apply_setup()
                 self.do_set_experiment()
             except KeyError:
-                print '[Error] Some field cannot be found.'
+                print('[Error] Some field cannot be found.')
 
         return
 
@@ -626,6 +676,32 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def add_scans_ub_table(self, scan_list):
+        """
+
+        :param scan_list:
+        :return:
+        """
+        # TODO/FIXME/ISSUE/NOW - consider to refactor with do_add_peaks_for_ub() and
+        # get experiment number
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
+        if not status:
+            self.pop_one_button_dialog('Unable to get experiment number\n  due to %s.' % str(exp_number))
+            return
+
+        # switch to tab-3
+        # self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Calculate UB'])
+
+        # prototype for a new thread
+        self.ui.progressBar_add_ub_peaks.setRange(0, len(scan_list))
+        self._addUBPeaksThread = AddPeaksThread(self, exp_number, scan_list)
+        self._addUBPeaksThread.start()
+
+        # set the flag/notification where the indexing (HKL) from
+        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+
+        return
+
     def do_add_roi(self):
         """ Add region of interest to 2D image
         :return:
@@ -659,51 +735,136 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_ub_peak(self):
-        """ Add current to ub peaks
+    def do_add_ub_peaks(self):
+        """
+        Launch dialog to add UB peaks
         :return:
         """
-        # Add peak
-        status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                         self.ui.lineEdit_scanNumber])
-        if status is False:
-            self.pop_one_button_dialog(int_list)
-            return
-        exp_no, scan_no = int_list
+        if self._addUBPeaksDialog is None:
+            self._addUBPeaksDialog = FindUBUtility.AddScansForUBDialog(self)
 
-        # Get HKL from GUI
-        status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
-                                                        self.ui.lineEdit_K,
-                                                        self.ui.lineEdit_L])
+        self._addUBPeaksDialog.show()
+
+        return
+
+    # def do_add_ub_peak(self):
+    #     """ Add current to ub peaks
+    #     :return:
+    #     """
+    #     # TODO/FIXME/ISSUE/NOW - Find out whether this method is still needed
+    #     # Add peak
+    #     status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+    #                                                      self.ui.lineEdit_scanNumber])
+    #     if status is False:
+    #         self.pop_one_button_dialog(int_list)
+    #         return
+    #     exp_no, scan_no = int_list
+    #
+    #     # Get HKL from GUI
+    #     status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
+    #                                                     self.ui.lineEdit_K,
+    #                                                     self.ui.lineEdit_L])
+    #     if status is False:
+    #         err_msg = float_list
+    #         self.pop_one_button_dialog(err_msg)
+    #         return
+    #     h, k, l = float_list
+    #
+    #     try:
+    #         peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
+    #     except AssertionError as ass_err:
+    #         self.pop_one_button_dialog(str(ass_err))
+    #         return
+    #
+    #     assert isinstance(peak_info_obj, r4c.PeakProcessRecord)
+    #     peak_info_obj.set_hkl(h, k, l)
+    #     self.set_ub_peak_table(peak_info_obj)
+    #
+    #     # Clear
+    #     self.ui.lineEdit_scanNumber.setText('')
+    #
+    #     self.ui.lineEdit_sampleQx.setText('')
+    #     self.ui.lineEdit_sampleQy.setText('')
+    #     self.ui.lineEdit_sampleQz.setText('')
+    #
+    #     self.ui.lineEdit_H.setText('')
+    #     self.ui.lineEdit_K.setText('')
+    #     self.ui.lineEdit_L.setText('')
+    #
+    #     # set the flag/notification where the indexing (HKL) from
+    #     self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+    #
+    #     return
+
+    def do_add_k_shift_vector(self):
+        """ Add a k-shift vector
+        :return:
+        """
+        # parse the k-vector
+        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
+                                                    allow_blank=False)
         if status is False:
-            err_msg = float_list
-            self.pop_one_button_dialog(err_msg)
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
             return
-        h, k, l = float_list
+        else:
+            k_x, k_y, k_z = ret_obj
+
+        # add to controller
+        k_index = self._myControl.add_k_shift_vector(k_x, k_y, k_z)
+
+        # add to table and combo-box
+        self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
+
+        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
+        self.ui.comboBox_kVectors.addItem(combo_message)
+
+        return
+
+    def do_apply_k_shift(self):
+        """ Apply k-shift to selected reflections
+        :return:
+        """
+        # get the selected scans
+        scan_list = list()
+        selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
+        for row_index in selected_row_numbers:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+            scan_list.append(scan_number)
+
+        # get the k-vector
+        k_shift_message = str(self.ui.comboBox_kVectors.currentText())
+        k_index = int(k_shift_message.split(':')[0])
+
+        # set to controller
+        self._myControl.set_k_shift(scan_list, k_index)
+
+        # set k-shift to table
+        # exp_number = int(self.ui.lineEdit_exp.text())
+        for row_index in selected_row_numbers:
+            self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
+            # scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
+
+        return
+
+    def do_apply_roi(self):
+        """ Save current selection of region of interest
+        :return:
+        """
+        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
+        # at the very beginning, the lower left and upper right are same
+        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
+            return
+
+        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        assert status, str(par_val_list)
+        exp_number = par_val_list[0]
+        scan_number = par_val_list[1]
 
         try:
-            peak_info_obj = self._myControl.get_peak_info(exp_no, scan_no)
+            self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
         except AssertionError as ass_err:
-            self.pop_one_button_dialog(str(ass_err))
-            return
-
-        assert isinstance(peak_info_obj, r4c.PeakProcessRecord)
-        peak_info_obj.set_hkl(h, k, l)
-        self.set_ub_peak_table(peak_info_obj)
-
-        # Clear
-        self.ui.lineEdit_scanNumber.setText('')
-
-        self.ui.lineEdit_sampleQx.setText('')
-        self.ui.lineEdit_sampleQy.setText('')
-        self.ui.lineEdit_sampleQz.setText('')
-
-        self.ui.lineEdit_H.setText('')
-        self.ui.lineEdit_K.setText('')
-        self.ui.lineEdit_L.setText('')
-
-        # set the flag/notification where the indexing (HKL) from
-        self.ui.lineEdit_peaksIndexedBy.setText(IndexFromSpice)
+            print('[ERROR] Unable to set ROI due to {0}.'.format(ass_err))
 
         return
 
@@ -824,29 +985,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_cal_background(self):
-        """
-        calculate background
-        algorithm 1: average the selected pt's intensity.
-        :return:
-        """
-        # get the selected rows in table
-        background_rows = self.ui.tableWidget_peakIntegration.get_selected_rows(True)
-
-        # loop through the selected rows and do the average
-        intensity_sum = 0.
-        for i_row in background_rows:
-            tmp_intensity = self.ui.tableWidget_peakIntegration.get_cell_value(i_row, 2)
-            intensity_sum += tmp_intensity
-
-        # calculate background value
-        background = intensity_sum / float(len(background_rows))
-
-        # set the value
-        self.ui.lineEdit_background.setText('%.7f' % background)
-
-        return
-
     def do_cal_ub_matrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
@@ -855,7 +993,7 @@ class MainWindow(QtGui.QMainWindow):
         peak_info_list = list()
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         assert status
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
                 if pt_num < 0:
@@ -932,7 +1070,9 @@ class MainWindow(QtGui.QMainWindow):
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for i_row in range(num_rows):
-            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.])
+            self.ui.tableWidget_peaksCalUB.set_hkl(i_row, [0., 0., 0.], is_spice_hkl=False)
+
+        return
 
     def do_clear_merge_table(self):
         """
@@ -941,6 +1081,22 @@ class MainWindow(QtGui.QMainWindow):
         """
         # clear
         self.ui.tableWidget_mergeScans.remove_all_rows()
+
+    def do_clear_peak_integration_canvas(self):
+        """
+        clear the peak integration canvas and the integrated values
+        :return:
+        """
+        self.ui.graphicsView_integratedPeakView.clear_all_lines()
+
+        self.ui.lineEdit_rawSinglePeakIntensity.setText('')
+        self.ui.lineEdit_intensity2.setText('')
+        self.ui.lineEdit_gaussianPeakIntensity.setText('')
+        self.ui.lineEdit_errorIntensity1.setText('')
+        self.ui.lineEdit_errorIntensity2.setText('')
+        self.ui.lineEdit_errorIntensity3.setText('')
+
+        return
 
     def do_clear_survey(self):
         """
@@ -961,7 +1117,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
-        row_number_list = range(num_rows)
+        row_number_list = list(range(num_rows))
         self.ui.tableWidget_peaksCalUB.delete_rows(row_number_list)
 
         return
@@ -1058,85 +1214,68 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_find_peak(self):
+    def find_peak_in_scan(self , scan_number, load_spice_hkl):
         """ Find peak in a given scan and record it
         """
         # Get experiment, scan and pt
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
-                                                        self.ui.lineEdit_scanNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status is True:
-            exp_no, scan_no = ret_obj
+            exp_no = ret_obj
         else:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # merge peak if necessary
-        if self._myControl.has_merged_data(exp_no, scan_no) is False:
-            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_no, [])
+        if self._myControl.has_merged_data(exp_no, scan_number) is False:
+            status, err_msg = self._myControl.merge_pts_in_scan(exp_no, scan_number, [])
             if status is False:
                 self.pop_one_button_dialog(err_msg)
 
         # Find peak
-        status, err_msg = self._myControl.find_peak(exp_no, scan_no)
+        status, err_msg = self._myControl.find_peak(exp_no, scan_number)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
             return
 
         # Get information from the latest (integrated) peak
-        if self.ui.checkBox_loadHKLfromFile.isChecked() is True:
-            # This is the first time that in the workflow to get HKL from MD workspace
-            peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-            assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
-            # try:
-            #     peak_info.retrieve_hkl_from_spice_table()
-            # except RuntimeError as run_err:
-            #     self.pop_one_button_dialog('Unable to locate peak info due to %s.' % str(run_err))
-        # END-IF
+        # if load_spice_hkl:
+        #     # This is the first time that in the workflow to get HKL from MD workspace
+        #     peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        #     assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+        # # END-IF
 
         # Set up correct values to table tableWidget_peaksCalUB
-        peak_info = self._myControl.get_peak_info(exp_no, scan_no)
-        h, k, l = peak_info.get_spice_hkl()
-        self.ui.lineEdit_H.setText('%.2f' % h)
-        self.ui.lineEdit_K.setText('%.2f' % k)
-        self.ui.lineEdit_L.setText('%.2f' % l)
+        peak_info = self._myControl.get_peak_info(exp_no, scan_number)
+        assert peak_info is not None, 'Unable to locate PeakProcessRecord (peak info).'
+
+        if load_spice_hkl:
+            h, k, l = peak_info.get_hkl()
+            hkl = (h, k, l)
+        else:
+            hkl = ()
 
         q_x, q_y, q_z = peak_info.get_peak_centre()
-        self.ui.lineEdit_sampleQx.setText('%.5E' % q_x)
-        self.ui.lineEdit_sampleQy.setText('%.5E' % q_y)
-        self.ui.lineEdit_sampleQz.setText('%.5E' % q_z)
+        vec_q = (q_x, q_y, q_z)
 
-        return
+        return hkl, vec_q
 
-    def do_fit_bkgd(self):
-        """ Purpose: fit the Pt.-integrated peak intensity curve with Gaussian to find out the background
+    def do_export_selected_peaks_to_integrate(self):
+        """
+        export (to file or just print out) the scans that are selected for integration
+        :param self:
         :return:
         """
-        def gauss(x, a, b, c):
-            return c*numpy.exp(-(x-a)**2/b)
+        # get selected rows' scan numbers
+        scan_tuple_list = self.ui.tableWidget_mergeScans.get_selected_scans()
+        scan_number_list = list()
+        for tup in scan_tuple_list:
+            scan_number_list.append(tup[0])
+        scan_number_list.sort()
 
-        def gauss4(x, a, b, c, d):
-            return c*numpy.exp(-(x-a)**2/b)+d
+        info_str = '# Selected scans: \n'
+        info_str += '{0}'.format(scan_number_list)
 
-        # get the curve
-        vec_x, vec_y, vec_e = self.ui.graphicsView_integratedPeakView.get_xye()
-
-        # fit Gaussian for starting value of a, b and c
-        fit_result1 = curve_fit(gauss, vec_x, vec_y)
-        popt = fit_result1[0]  # popt, pcov
-        # gauss_fit = gauss(vec_x, popt[0], popt[1], popt[2])
-
-        # fit Gaussian again including background
-        p0 = [popt[0], popt[1], popt[2], 0.]
-        fit_result2 = curve_fit(gauss4, vec_x, vec_y, sigma=vec_e,  p0=p0)
-        popt2 = fit_result2[0]  # popt2, pcov2
-        gauss_fit4 = gauss4(vec_x, popt2[0], popt2[1], popt2[2], popt2[3])
-
-        # plot the result
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(vec_x, gauss_fit4, color='red', marker='-')
-
-        # write out the result
-        background_value = popt2[3]
-        self.ui.lineEdit_background.setText('%.7f' % background_value)
+        print('[TEMP] Selected scans:\n{0}'.format(info_str))
 
         return
 
@@ -1166,15 +1305,6 @@ class MainWindow(QtGui.QMainWindow):
         # write
         user_header = str(self.ui.lineEdit_fpHeader.text())
         try:
-            # # get lattice parameters from UB tab
-            # a = float(self.ui.lineEdit_aUnitCell.text())
-            # b = float(self.ui.lineEdit_bUnitCell.text())
-            # c = float(self.ui.lineEdit_cUnitCell.text())
-            # alpha = float(self.ui.lineEdit_alphaUnitCell.text())
-            # beta = float(self.ui.lineEdit_betaUnitCell.text())
-            # gamma = float(self.ui.lineEdit_gammaUnitCell.text())
-            # lattice = absorption.Lattice(a, b, c, alpha, beta, gamma)
-
             export_absorption = self.ui.checkBox_exportAbsorptionToFP.isChecked()
 
             status, file_content = self._myControl.export_to_fullprof(exp_number, scan_number_list,
@@ -1188,6 +1318,8 @@ class MainWindow(QtGui.QMainWindow):
         except AssertionError as a_err:
             self.pop_one_button_dialog(str(a_err))
             return
+        except KeyError as key_err:
+            self.pop_one_button_dialog(str(key_err))
 
         return
 
@@ -1225,7 +1357,7 @@ class MainWindow(QtGui.QMainWindow):
             start_scan_number = 0
         end_scan_number = ret_obj[1]
         if end_scan_number is None:
-            end_scan_number = sys.maxint
+            end_scan_number = sys.maxsize
 
         status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_filterCountsLower,
                                                      self.ui.lineEdit_filterCountsUpper],
@@ -1255,55 +1387,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_integrate_peak(self):
-        """ Integrate a peak in tab peak integration
+    def do_integrate_single_scan(self):
+        """
+        integrate a single scan in 'Peak Integration' tab
+        Note: this is an experimenntal replacement for do_integrate_per_pt
         :return:
         """
-        # only support the simple cuboid counts summing algorithm
-
-        # get experiment number and scan number
-        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_scanIntegratePeak],
-                                                       allow_blank=False)
-        if status is False:
-            err_msg = ret_obj
-            self.pop_one_button_dialog(err_msg)
-            return
-
-        # check table
-        table_exp, table_scan = self.ui.tableWidget_peakIntegration.get_exp_info()
-        if (table_exp, table_scan) != tuple(ret_obj):
-            err_msg = 'Table has value of a different experiment/scan (%d/%d vs %d/%d). Integrate Pt. first!' \
-                      '' % (table_exp, table_scan, ret_obj[0], ret_obj[1])
-            self.pop_one_button_dialog(err_msg)
-            return
-
-        # integrate by take account of background value
-        status, ret_obj = gutil.parse_float_editors(self.ui.lineEdit_background, allow_blank=True)
-        assert status, ret_obj
-        if ret_obj is None:
-            background = 0.
-        else:
-            background = ret_obj
-        peak_intensity = self.ui.tableWidget_peakIntegration.simple_integrate_peak(background)
-
-        # write result to label
-        norm_type = str(self.ui.comboBox_ptCountType.currentText())
-        label_str = 'Experiment %d Scan %d: Peak intensity = %.7f, Normalized by %s, Background = %.7f.' \
-                    '' % (table_exp, table_scan, peak_intensity, norm_type, background)
-        self.ui.label_peakIntegraeInfo.setText(label_str)
-
-        # set value to previous table
-        self.ui.tableWidget_mergeScans.set_peak_intensity(None, table_scan, peak_intensity)
-
-        return
-
-    def do_integrate_per_pt(self):
-        """
-        Integrate and plot per Pt.
-        :return:
-        """
-        # VZ-FUTURE: consider to compare and merge with method do_plot_pt_peak()
-        # get experiment and scan number
+        # parse experiment and scan number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanIntegratePeak])
         if not status:
@@ -1312,6 +1402,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             exp_number, scan_number = ret_obj
 
+        # parse normalization type
         normalization = str(self.ui.comboBox_ptCountType.currentText())
         if normalization.count('Time') > 0:
             norm_type = 'time'
@@ -1320,7 +1411,13 @@ class MainWindow(QtGui.QMainWindow):
         else:
             norm_type = ''
 
-        # get peak center (weighted)
+        # parse scale factor
+        try:
+            intensity_scale_factor = float(self.ui.lineEdit_scaleFactorScan.text())
+        except ValueError:
+            intensity_scale_factor = 1.
+
+        # calculate peak center (weighted)
         status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
         if status is False:
             error_message = ret_obj
@@ -1329,69 +1426,133 @@ class MainWindow(QtGui.QMainWindow):
         else:
             this_peak_centre = ret_obj
 
-        # scale factor
-        try:
-            intensity_scale_factor = float(self.ui.lineEdit_scaleFactor.text())
-        except ValueError:
-            intensity_scale_factor = 1.
-
-        # get masked workspace
+        # mask workspace
         mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        if mask_name.startswith('No Mask'):
-            mask_name = None
-        # mask workspace?
-        mask_detectors = mask_name is not None
+        if mask_name.lower() == 'no mask':
+            mask_name = ''
 
-        status, ret_obj = self._myControl.integrate_scan_peaks(exp=exp_number,
-                                                               scan=scan_number,
-                                                               peak_radius=1.0,
-                                                               peak_centre=this_peak_centre,
-                                                               merge_peaks=False,
-                                                               use_mask=mask_detectors,
-                                                               mask_ws_name=mask_name,
-                                                               normalization=norm_type,
-                                                               scale_factor=intensity_scale_factor)
+        # ui.lineEdit_backgroundPts and set default in init_widgets
+        bkgd_pt_tuple = gutil.parse_integer_list(str(self.ui.lineEdit_backgroundPts.text()), 2)
 
-        # result due to error
-        if status is False:
-            error_message = ret_obj
-            self.pop_one_button_dialog(error_message)
+        # integrate peak
+        try:
+            int_peak_dict = self._myControl.integrate_scan_peak(exp_number=exp_number,
+                                                                scan_number=scan_number,
+                                                                peak_centre=this_peak_centre,
+                                                                mask_name=mask_name,
+                                                                normalization=norm_type,
+                                                                scale_factor=intensity_scale_factor,
+                                                                background_pt_tuple=bkgd_pt_tuple)
+        except RuntimeError as run_error:
+            self.pop_one_button_dialog('Unable to integrate peak for scan {0} due to {1}.'
+                                       ''.format(scan_number, run_error))
             return
 
-        # process result
-        pt_dict = ret_obj
-        assert isinstance(pt_dict, dict)
+        # plot calculated motor position (or Pt.) - integrated intensity per Pts.
+        motor_pos_vec = int_peak_dict['motor positions']
+        pt_intensity_vec = int_peak_dict['pt intensities']
+        # print('[DB...BAT] motor position vector: {0} of type {1}'.format(motor_pos_vec, type(motor_pos_vec)))
+        motor_std = motor_pos_vec.std()
+        if motor_std > 0.005:
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(motor_pos_vec, pt_intensity_vec)
+        else:
+            # motor position fixed
+            # KEEP-IN-MIND:  Make this an option from
+            self.ui.graphicsView_integratedPeakView.plot_raw_data(numpy.arange(1, len(pt_intensity_vec)+1),
+                                                                  pt_intensity_vec)
 
-        # clear table
-        if self.ui.tableWidget_peakIntegration.rowCount() > 0:
-            self.ui.tableWidget_peakIntegration.remove_all_rows()
+        if self._mySinglePeakIntegrationDialog is None:
+            self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
+        self._mySinglePeakIntegrationDialog.set_peak_integration_details(motor_pos_vec, pt_intensity_vec)
 
-        # Append new lines
-        pt_list = sorted(pt_dict.keys())
-        intensity_list = list()
-        for pt in pt_list:
-            pt_intensity = pt_dict[pt]
-            intensity_list.append(pt_intensity)
-            status, msg = self.ui.tableWidget_peakIntegration.append_pt(pt, -1, pt_intensity)
-            if not status:
-                error_msg = '[Error!] Unable to add Pt %d due to %s.' % (pt, msg)
-                self.pop_one_button_dialog(error_msg)
+        # set calculated values
+        try:
+            self.ui.lineEdit_rawSinglePeakIntensity.setText('{0:.7f}'.format(int_peak_dict['simple intensity']))
+            self.ui.lineEdit_errorIntensity1.setText('{0:.7f}'.format(int_peak_dict['simple error']))
+            self.ui.lineEdit_avgBackground.setText('{0:.7f}'.format(int_peak_dict['simple background']))
+            self.ui.lineEdit_intensity2.setText('{0:.7f}'.format(int_peak_dict['intensity 2']))
+            if int_peak_dict['error 2'] is None:
+                self.ui.lineEdit_errorIntensity2.setText('inf')
+            else:
+                self.ui.lineEdit_errorIntensity2.setText('{0:.7f}'.format(int_peak_dict['error 2']))
+            self.ui.lineEdit_ptRange.setText('{0}'.format(int_peak_dict['pt_range']))
+            self.ui.lineEdit_gaussianPeakIntensity.setText('{0:.7f}'.format(int_peak_dict['gauss intensity']))
+            if int_peak_dict['gauss error'] is None:
+                self.ui.lineEdit_errorIntensity3.setText('inf')
+            else:
+                self.ui.lineEdit_errorIntensity3.setText('{0:.7f}'.format(int_peak_dict['gauss error']))
+            self.ui.tableWidget_covariance.set_matrix(int_peak_dict['covariance matrix'])
 
-        # Set up the experiment information to table
-        self.ui.tableWidget_peakIntegration.set_exp_info(exp_number, scan_number)
+            fit_param_dict = int_peak_dict['gauss parameters']
+            # {'A': 1208.4097237325959, 'x0': 32.175524426773507, 'B': 23.296505385975976, 's': 0.47196665622701633}
+            self.ui.lineEdit_peakBackground.setText('{0:.4f}'.format(fit_param_dict['B']))
+            self.ui.lineEdit_gaussA.setText('{0:.4f}'.format(fit_param_dict['A']))
+            self.ui.lineEdit_gaussSigma.setText('{0:.4f}'.format(fit_param_dict['s']))
+            self.ui.lineEdit_gaussB.setText('{0:.4f}'.format(fit_param_dict['B']))
 
-        # Clear previous line and plot the Pt.
-        self.ui.graphicsView_integratedPeakView.clear_all_lines()
-        x_array = numpy.array(pt_list)
-        y_array = numpy.array(intensity_list)
-        self.ui.graphicsView_integratedPeakView.add_plot_1d(x_array, y_array,
-                                                            color='blue')
-        self.ui.graphicsView_integratedPeakView.set_smart_y_limit(y_array)
+            # plot fitted Gaussian
+            fit_gauss_dict = int_peak_dict['gauss parameters']
+        except KeyError as key_err:
+            raise RuntimeError('Peak integration result dictionary has keys {0}. Error is caused by {1}.'
+                               ''.format(int_peak_dict.keys(), key_err))
+        except ValueError as value_err:
+            print('[ERROR] Unable to fit by Gaussian due to {0}.'.format(value_err))
+        else:
+            self.plot_model_data(motor_pos_vec, fit_gauss_dict)
+
+        return
+
+    def plot_model_data(self, vec_x, params):
+        """
+        calculate the Y value by the model and plot them.
+        the sparse X values will be expanded
+        :return:
+        """
+        # check inputs
+        assert isinstance(vec_x, numpy.ndarray), 'vec X {0} must be a numpy.ndarray but not a {1}.' \
+                                                 ''.format(vec_x, type(vec_x))
+        assert isinstance(params, dict), 'Model parameters {0} must be given by a dictionary but not by a {1}.' \
+                                         ''.format(params, type(params))
+
+        # get parameters
+        x0 = params['x0']
+        gauss_sigma = params['s']
+        gauss_a = params['A']
+        background = params['B']
+        info_str = 'Gaussian fit'
+
+        # plot the data
+        # make modelX and modelY for more fine grids
+        model_x = peak_integration_utility.get_finer_grid(vec_x, 10)
+        model_y = peak_integration_utility.gaussian_linear_background(model_x, x0, gauss_sigma,
+                                                                      gauss_a, background)
+
+        # plot the model
+        self.ui.graphicsView_integratedPeakView.plot_model(model_x, model_y, title=info_str)
+
+        return
+
+    def do_integrate_roi(self):
+        """integrate the detector counts in the region of interest
+
+        Integrate the detector's counts (2D) along axis-0 and axis-1 respectively.
+        and save the result (1D data) to file
+        :return:
+        """
+        exp_number = str(self.ui.lineEdit_exp.text())
+        scan_number = str(self.ui.lineEdit_run.text())
+        pt_number = str(self.ui.lineEdit_rawDataPtNo.text())
+        working_dir = str(self.ui.lineEdit_workDir.text())
+
+        msg = self.ui.graphicsView_detector2dPlot.integrate_roi_linear(exp_number, scan_number, pt_number, working_dir)
+
+        self.pop_one_button_dialog(msg)
 
         return
 
     def do_integrate_peaks(self):
-        """ Integrate selected peaks tab-merged scans.
+        """Integrate selected peaks tab-'scan processing'.
+
         If any scan is not merged, then it will merge the scan first.
         Integrate peaks from the table of merged peak.
         It will so the simple cuboid integration with region of interest and background subtraction.
@@ -1445,8 +1606,9 @@ class MainWindow(QtGui.QMainWindow):
             if status is False:
                 error_msg = 'Unable to get Pt. of experiment %d scan %d due to %s.' % (exp_number, scan_number,
                                                                                        str(pt_number_list))
-                self.controller.set_peak_intensity(exp_number, scan_number, 0.)
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False)
+                self.controller.set_zero_peak_intensity(exp_number, scan_number)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, scan_number, 0., False,
+                                                                  integrate_method='')
                 self.ui.tableWidget_mergeScans.set_status(scan_number, error_msg)
                 continue
 
@@ -1488,18 +1650,19 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get UB matrix
         ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix()
-        print '[Info] Get UB matrix from table ', ub_matrix
+        print('[Info] Get UB matrix from table ', ub_matrix)
 
         # Index all peaks
         num_peaks = self.ui.tableWidget_peaksCalUB.rowCount()
         err_msg = ''
-        for i_peak in xrange(num_peaks):
+        for i_peak in range(num_peaks):
             scan_no = self.ui.tableWidget_peaksCalUB.get_exp_info(i_peak)[0]
             status, ret_obj = self._myControl.index_peak(ub_matrix, scan_number=scan_no)
             if status is True:
                 hkl_value = ret_obj[0]
                 hkl_error = ret_obj[1]
-                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, hkl_error)
+                self.ui.tableWidget_peaksCalUB.set_hkl(i_peak, hkl_value, is_spice_hkl=False,
+                                                       error=hkl_error)
             else:
                 err_msg += ret_obj + '\n'
         # END-FOR
@@ -1512,8 +1675,8 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_peaksIndexedBy.setText(IndexFromUB)
 
         # enable/disable push buttons
-        self.ui.pushButton_setHKL2Int.setEnabled(True)
-        self.ui.pushButton_undoSetToInteger.setEnabled(False)
+        # self.ui.pushButton_setHKL2Int.setEnabled(True)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(True)
 
         return
 
@@ -1602,49 +1765,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_plot_pt_peak(self):
+    def evt_change_normalization(self):
         """
         Integrate Pt. vs integrated intensity of detectors of that Pt. if it is not calculated before
         and then plot pt vs. integrated intensity on
         :return:
         """
-        # Find out the current condition including (1) absolute (2) normalized by time
-        # (3) normalized by monitor counts
-        be_norm_str = str(self.ui.comboBox_ptCountType.currentText())
-
-        norm_by_time = False
-        norm_by_monitor = False
-
-        if be_norm_str.startswith('Absolute'):
-            # no normalization
-            pass
-        elif be_norm_str.count('Time') > 0:
-            # norm by time
-            norm_by_time = True
-        elif be_norm_str.count('Monitor') > 0:
-            # norm by monitor counts
-            norm_by_monitor = True
-        else:
-            # exception!
-            raise RuntimeError('Normalization mode %s is not supported.' % be_norm_str)
-
-        # Integrate peak if the integrated peak workspace does not exist
-        # get experiment number and scan number from the table
-        exp_number, scan_number = self.ui.tableWidget_peakIntegration.get_exp_info()
-
-        mask_name = str(self.ui.comboBox_maskNames2.currentText())
-        masked = not mask_name.startswith('No Mask')
-        has_integrated = self._myControl.has_integrated_peak(exp_number, scan_number, pt_list=None,
-                                                             normalized_by_monitor=norm_by_monitor,
-                                                             normalized_by_time=norm_by_time,
-                                                             masked=masked)
-
-        # integrate and/or plot
-        if has_integrated:
-            self.plot_pt_intensity()
-        else:
-            # VZ-FUTURE: implement this new method!
-            self.do_integrate_per_pt()
+        # integrate any how
+        # self.do_integrate_per_pt()
+        self.do_integrate_single_scan()
 
         return
 
@@ -1795,34 +1924,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_manual_bkgd(self):
-        """ Select background by moving indicator manually
-        :return:
-        """
-        if str(self.ui.pushButton_handPickBkgd.text()) == 'Customize Bkgd':
-            # get into customize background mode.  add an indicator to the line and make it movable
-            self.ui.graphicsView_integratedPeakView.add_background_indictor()
-
-            # modify the push buttons status
-            self.ui.pushButton_handPickBkgd.setText('Done')
-
-        elif str(self.ui.pushButton_handPickBkgd.text()) == 'Done':
-            # get out from the customize-background mode.  get the vertical indicator's position as background
-            background_value = self.ui.graphicsView_integratedPeakView.get_indicator_position(self._bkgdIndicatorKey)
-
-            # set the ground value to UI
-            self._myControl.set_background_value(background_value)
-            self.ui.lineEdit_bkgdValue.setText('%.7f' % background_value)
-
-            # modify the push button status
-            self.ui.pushButton_handPickBkgd.setText('Customize Bkgd')
-
-        else:
-            raise RuntimeError('Push button in state %s is not supported.' %
-                               str(self.ui.pushButton_handPickBkgd.text()))
-
-        return
-
     def do_mask_pt_2d(self):
         """ Mask a Pt and re-plot
         :return:
@@ -1840,11 +1941,14 @@ class MainWindow(QtGui.QMainWindow):
         # get the mask
         status, ret_obj = self._myControl.get_region_of_interest(exp, scan)
         if status is False:
+            # unable to get region of interest
             self.pop_one_button_dialog(ret_obj)
             return
+        else:
+            corner1, corner2 = ret_obj
 
         # create mask workspace
-        status, error = self._myControl.generate_mask_workspace(exp, scan, ret_obj[0], ret_obj[1])
+        status, error = self._myControl.generate_mask_workspace(exp, scan, corner1, corner2)
         if status is False:
             self.pop_one_button_dialog(error)
             return
@@ -1914,7 +2018,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_ub_matrix(exp_number=None, ub_matrix=ub_matrix)
 
         # Warning
-        self.pop_one_button_dialog('Data processing is long. Be patient!')
+        self.pop_one_button_dialog('Merging scans can take long time. Please be patient!')
 
         # Process
         row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows(True)
@@ -1940,10 +2044,6 @@ class MainWindow(QtGui.QMainWindow):
                                                                 pt_num_list=[])
             # find peaks too
             status, ret_obj = self._myControl.find_peak(exp_number, scan_number)
-            if status:
-                peak_centre = ret_obj
-            else:
-                peak_centre = None
 
             # process output
             if status:
@@ -1957,12 +2057,35 @@ class MainWindow(QtGui.QMainWindow):
             # update table
             self.ui.tableWidget_mergeScans.set_status(row_number, merge_status)
             self.ui.tableWidget_mergeScans.set_ws_name(row_number, merged_name)
-            if peak_centre is not None:
-                self.ui.tableWidget_mergeScans.set_peak_centre(row_number, peak_centre)
+            # if peak_centre is not None:
+            #     self.ui.tableWidget_mergeScans.set_peak_centre(row_number, peak_centre)
 
             # Sleep for a while
             time.sleep(0.1)
         # END-FOR
+
+        return
+
+    def do_merge_scans_survey(self):
+        """
+        Merge each selected scans in the 'List Scans' tab to Q-sample space
+        :return:
+        """
+        # get the selected scans
+        scan_run_list = self.ui.tableWidget_surveyTable.get_selected_run_surveyed(required_size=None)
+        if len(scan_run_list) == 0:
+            self.pop_one_button_dialog('There is no run that is selected.')
+
+        # start to add scan/run to table
+        # Set table
+        scan_list = list()
+        for scan, pt in scan_run_list:
+            scan_list.append(scan)
+        scan_list.sort()
+        self.ui.tableWidget_mergeScans.append_scans(scans=scan_list, allow_duplicate_scans=False)
+
+        # switch tab
+        self.ui.tabWidget.setCurrentIndex(MainWindow.TabPage['Scans Processing'])
 
         return
 
@@ -1973,6 +2096,26 @@ class MainWindow(QtGui.QMainWindow):
         """
         # refine UB matrix by indexed peak
         peak_info_list = self._build_peak_info_list(zero_hkl=False)
+
+        # Refine UB matrix
+        try:
+            self._myControl.refine_ub_matrix_indexed_peaks(peak_info_list)
+        except AssertionError as error:
+            self.pop_one_button_dialog(str(error))
+            return
+
+        # show result
+        self._show_refined_ub_result()
+
+        return
+
+    def do_refine_ub_cal_indexed_peaks(self):
+        """
+        refine UB matrix by indexed peaks with HKL calculated
+        :return:
+        """
+        # refine UB matrix by indexed peak
+        peak_info_list = self._build_peak_info_list(zero_hkl=False, is_spice=False)
 
         # Refine UB matrix
         try:
@@ -2000,6 +2143,65 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def load_project(self, project_file_name):
+        """
+        Load a saved project with all the setup loaded to memory
+        :param project_file_name:
+        :return:
+        """
+        assert isinstance(project_file_name, str), 'Project file name %s must be a string but not %s.' \
+                                                   '' % (str(project_file_name), type(project_file_name))
+        assert os.path.exists(project_file_name), 'Project file "%s" cannot be found.' % project_file_name
+
+        # load project
+        ui_dict = self._myControl.load_project(project_file_name)
+
+        # get experiment number and IPTS number
+        exp_number = int(ui_dict['exp number'])
+        self.ui.lineEdit_exp.setText(str(exp_number))
+        if 'ipts' in ui_dict and ui_dict['ipts'] is not None:
+            self.ui.lineEdit_iptsNumber.setText(str(ui_dict['ipts']))
+
+        # set the UI parameters to GUI
+        try:
+            self.ui.lineEdit_localSpiceDir.setText(ui_dict['local spice dir'])
+            self.ui.lineEdit_workDir.setText(ui_dict['work dir'])
+            self.ui.lineEdit_surveyStartPt.setText(ui_dict['survey start'])
+            self.ui.lineEdit_surveyEndPt.setText(ui_dict['survey stop'])
+
+            # now try to call some actions
+            self.do_apply_setup()
+            self.do_set_experiment()
+
+        except KeyError:
+            print('[Error] Some field cannot be found.')
+
+        # set experiment configurations
+        # set sample distance
+        if 'det_sample_distance' in ui_dict and ui_dict['det_sample_distance'] is not None:
+            det_sample_distance = float(ui_dict['det_sample_distance'])
+            self.ui.lineEdit_infoDetSampleDistance.setText(str(det_sample_distance))
+            self._myControl.set_default_detector_sample_distance(det_sample_distance)
+
+        # set user-specified wave length
+        if 'wave_length' in ui_dict and ui_dict['wave_length'] is not None:
+            wave_length = float(ui_dict['wave_length'])
+            self.ui.lineEdit_infoWavelength.setText(str(wave_length))
+            self._myControl.set_user_wave_length(exp_number, wave_length)
+
+        if 'det_center' in ui_dict and ui_dict['det_center'] is not None:
+            det_center_str = ui_dict['det_center'].strip()
+            terms = det_center_str.split(',')
+            center_row = int(terms[0].strip())
+            center_col = int(terms[1].strip())
+            self.ui.lineEdit_infoDetCenter.setText('{0}, {1}'.format(center_row, center_col))
+            self._myControl.set_detector_center(exp_number, center_row, center_col)
+
+        # TODO/ISSUE/NOW/TODAY - Shall pop out a dialog to notify the completion
+        print('[INFO] Project from file {0} is loaded.'.format(project_file_name))
+
+        return
+
     # add slot for UB refinement configuration window's signal to connect to
     @QtCore.pyqtSlot(int)
     def refine_ub_lattice(self, val):
@@ -2024,10 +2226,10 @@ class MainWindow(QtGui.QMainWindow):
         # get the UB matrix value
         ub_src_tab = self._refineConfigWindow.get_ub_source()
         if ub_src_tab == 3:
-            print '[INFO] UB matrix comes from tab "Calculate UB".'
+            print('[INFO] UB matrix comes from tab "Calculate UB".')
             ub_matrix = self.ui.tableWidget_ubMatrix.get_matrix_str()
         elif ub_src_tab == 4:
-            print '[INFO] UB matrix comes from tab "UB Matrix".'
+            print('[INFO] UB matrix comes from tab "UB Matrix".')
             ub_matrix = self.ui.tableWidget_ubInUse.get_matrix_str()
         else:
             self.pop_one_button_dialog('UB source tab %s is not supported.' % str(ub_src_tab))
@@ -2122,12 +2324,14 @@ class MainWindow(QtGui.QMainWindow):
         """
         # get experiment number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-        assert status, ret_obj
-        exp_number = ret_obj[0]
+        if not status:
+            raise RuntimeError(ret_obj)
+        else:
+            exp_number = ret_obj[0]
 
         # reset all rows back to SPICE HKL
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
-        for i_row in xrange(num_rows):
+        for i_row in range(num_rows):
             scan, pt = self.ui.tableWidget_peaksCalUB.get_scan_pt(i_row)
             if pt < 0:
                 pt = None
@@ -2172,73 +2376,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_add_k_shift_vector(self):
-        """ Add a k-shift vector
-        :return:
-        """
-        # parse the k-vector
-        status, ret_obj = gutil.parse_float_editors([self.ui.lineEdit_kX, self.ui.lineEdit_kY, self.ui.lineEdit_kZ],
-                                                    allow_blank=False)
-        if status is False:
-            error_message = ret_obj
-            self.pop_one_button_dialog(error_message)
-            return
-        else:
-            k_x, k_y, k_z = ret_obj
-
-        # add to controller
-        k_index = self._myControl.add_k_shift_vector(k_x, k_y, k_z)
-
-        # add to table and combo-box
-        self.ui.tableWidget_kShift.add_k_vector(k_index, k_x, k_y, k_z)
-
-        combo_message = '%d: (%.5f, %.5f, %.5f)' % (k_index, k_x, k_y, k_z)
-        self.ui.comboBox_kVectors.addItem(combo_message)
-
-        return
-
-    def do_apply_k_shift(self):
-        """ Apply k-shift to selected reflections
-        :return:
-        """
-        # get the selected scans
-        scan_list = list()
-        selected_row_numbers = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-        for row_index in selected_row_numbers:
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_index)
-            scan_list.append(scan_number)
-
-        # get the k-vector
-        k_shift_message = str(self.ui.comboBox_kVectors.currentText())
-        k_index = int(k_shift_message.split(':')[0])
-
-        # set to controller
-        self._myControl.set_k_shift(scan_list, k_index)
-
-        # set to table
-        for row_index in selected_row_numbers:
-            self.ui.tableWidget_mergeScans.set_k_shift_index(row_index, k_index)
-
-        return
-
-    def do_apply_roi(self):
-        """ Save current selection of region of interest
-        :return:
-        """
-        lower_left_c, upper_right_c = self.ui.graphicsView_detector2dPlot.get_roi()
-        # at the very beginning, the lower left and upper right are same
-        if lower_left_c[0] == upper_right_c[0] or lower_left_c[1] == upper_right_c[1]:
-            return
-
-        status, par_val_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
-        assert status, str(par_val_list)
-        exp_number = par_val_list[0]
-        scan_number = par_val_list[1]
-
-        self._myControl.set_roi(exp_number, scan_number, lower_left_c, upper_right_c)
-
-        return
-
     def do_save_survey(self):
         """
         Save the survey to a file
@@ -2274,8 +2411,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # construct string
         ub_str = '# UB matrix\n# %s\n' % str(self.ui.label_ubInfoLabel.text())
-        for i_row in xrange(3):
-            for j_col in xrange(3):
+        for i_row in range(3):
+            for j_col in range(3):
                 ub_str += '%.15f  ' % in_use_ub[i_row][j_col]
             ub_str += '\n'
 
@@ -2291,19 +2428,33 @@ class MainWindow(QtGui.QMainWindow):
         Purpose: select all peaks in table tableWidget_peaksCalUB
         :return:
         """
-        if not self._ubPeakTableFlag:
-            # turn to deselect all
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
-            # all peaks are subjected to select
-            self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
-        else:
-            # only nuclear peaks to get selected
-            self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
-        # END-IF-ELSE
+        if self.ui.radioButton_ubSelectAllScans.isChecked() and self._ubPeakTableFlag != 0:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(True)
+            self._ubPeakTableFlag = 0
+        elif self.ui.radioButton_ubSelectNoScan.isChecked() and self._ubPeakTableFlag != 1:
+            self.ui.tableWidget_peaksCalUB.select_all_rows(False)
+            self._ubPeakTableFlag = 1
+        elif self.ui.radioButton_ubAdvancedSelection.isChecked() and self._ubPeakTableFlag != 2:
+            # advanced
+            import FindUBUtility
+            self._selectUBScanDialog = FindUBUtility.SelectUBMatrixScansDialog(self)
+            self._selectUBScanDialog.show()
+            self._ubPeakTableFlag = 2
+        # END-IF
 
-        # revert the flag
-        self._ubPeakTableFlag = not self._ubPeakTableFlag
+        # if not self._ubPeakTableFlag:
+        #     # turn to deselect all
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # elif self.ui.checkBox_ubNuclearPeaks.isChecked() is False:
+        #     # all peaks are subjected to select
+        #     self.ui.tableWidget_peaksCalUB.select_all_rows(self._ubPeakTableFlag)
+        # else:
+        #     # only nuclear peaks to get selected
+        #     self.ui.tableWidget_peaksCalUB.select_all_nuclear_peaks()
+        # # END-IF-ELSE
+        #
+        # # revert the flag
+        # self._ubPeakTableFlag = not self._ubPeakTableFlag
 
         return
 
@@ -2354,10 +2505,64 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_set_detector_size(self):
+        """
+        set the detector size to controller
+        :return:
+        """
+        det_size_str = str(self.ui.comboBox_detectorSize.currentText())
+
+        if det_size_str.count('256') > 0:
+            # 256 by 256 pixels
+            det_size_row = 256
+            det_size_col = 256
+        elif det_size_str.count('512') > 0:
+            # 512 x 512
+            det_size_row = 512
+            det_size_col = 512
+        else:
+            # unsupported case yet
+            raise NotImplementedError('Detector with size {0} is not supported yet.'.format(det_size_str))
+
+        # set to controller
+        self._myControl.set_detector_geometry(det_size_row, det_size_col)
+
+        return
+
+    def do_set_ipts_number(self):
+        """
+        set IPTS number
+        :return:
+        """
+        # get IPTS number
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_iptsNumber])
+        if status:
+            # a valid IPTS number
+
+            raise NotImplementedError('The following section commented out now will be implemented when IPTS is ready.')
+            # ipts_number = ret_obj[0]
+            # search archive for available experiment number under this IPTS
+            # status, ret_obj = self._myControl.check_ipts(ipts_number=ipts_number)
+            # if status:
+            #     exp_number_list = ret_obj
+            #     self._iptsNumber = ipts_number
+            #     self.ui.comboBox_expInIPTS.clear()
+            #     for exp_number in exp_number_list:
+            #         self.ui.comboBox_expInIPTS.addItem(str(exp_number))
+            # else:
+            #     self.pop_one_button_dialog('Unable to locate IPTS {0} due to {1}'.format(ipts_number, ret_obj))
+            #     return
+        else:
+            # error
+            self.pop_one_button_dialog('User specified IPTS number {0} is not correct.'
+                                       ''.format(str(self.ui.lineEdit_iptsNumber.text())))
+            return
+
     def do_set_experiment(self):
         """ Set experiment
         :return:
         """
+        # get exp number
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
         if status:
             # new experiment number
@@ -2370,12 +2575,18 @@ class MainWindow(QtGui.QMainWindow):
             # set the new experiment number
             self._myControl.set_exp_number(exp_number)
             self.ui.lineEdit_exp.setStyleSheet('color: black')
-            self.setWindowTitle('%s: Experiment %d' % (self._baseTitle, exp_number))
+            self.setWindowTitle('Experiment %d' % exp_number)
 
             # try to set the default
-            default_data_dir = '/HFIR/HB3A/exp%d/Datafiles' % exp_number
+            if self._iptsNumber is not None:
+                default_data_dir = '/HFIR/HB3A/IPTS-{0}/exp{1}/Datafiles'.format(self._iptsNumber, exp_number)
+            else:
+                default_data_dir = '/HFIR/HB3A/exp{0}/Datafiles'.format(exp_number)
             if os.path.exists(default_data_dir):
+                # set the directory in
                 self.ui.lineEdit_localSpiceDir.setText(default_data_dir)
+                # find out the detector type
+                status, ret_obj = self._myControl.find_detector_size(default_data_dir, exp_number)
 
         else:
             err_msg = ret_obj
@@ -2418,19 +2629,62 @@ class MainWindow(QtGui.QMainWindow):
         Change to these HKL values is only related to GUI, i.e., the table
         :return:
         """
+        # get the current index source
+        hkl_type_str = str(self.ui.comboBox_hklType.currentText())
+        if hkl_type_str.lower().count('spice') > 0:
+            # set spice HKL to integer
+            is_spice = True
+        else:
+            is_spice = False
+
         # store the current value
         self.ui.tableWidget_peaksCalUB .store_current_indexing()
 
         # set the index to integer
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         for row_index in range(num_rows):
-            m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index)
-            peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
-            self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, round_error)
+            try:
+                m_h, m_l, m_k = self.ui.tableWidget_peaksCalUB.get_hkl(row_index, is_spice_hkl=is_spice)
+                peak_indexing, round_error = hb3a_util.convert_hkl_to_integer(m_h, m_l, m_k, MAGNETIC_TOL)
+                self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
+            except RuntimeError as run_err:
+                scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
+                print('[ERROR] Unable to convert HKL to integer for scan '
+                      '{0} due to {1}.'.format(scan_number, run_err))
+        # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
-        self.ui.pushButton_setHKL2Int.setEnabled(False)
-        self.ui.pushButton_undoSetToInteger.setEnabled(True)
+        # self.ui.pushButton_setHKL2Int.setEnabled(False)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(True)
+
+        return
+
+    def do_toggle_table_integration(self):
+        """
+        change the type
+        :return:
+        """
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        integrate_type = self.ui.tableWidget_mergeScans.get_integration_type()
+        if integrate_type == 'simple':
+            integrate_type = 'mixed'
+        elif integrate_type == 'mixed':
+            integrate_type = 'gaussian'
+        else:
+            integrate_type = 'simple'
+
+        for i_row in range(self.ui.tableWidget_mergeScans.rowCount()):
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(i_row)
+            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+            try:
+                intensity1, error1 = peak_info_obj.get_intensity(integrate_type, False)
+                intensity2, error2 = peak_info_obj.get_intensity(integrate_type, True)
+                self.ui.tableWidget_mergeScans.set_peak_intensity(i_row, intensity1, intensity2, error2, integrate_type)
+            except RuntimeError as run_err:
+                print('[ERROR] Unable to get peak intensity of scan'
+                      ' {0} due to {1}.'.format(self.ui.tableWidget_mergeScans.get_scan_number(i_row), run_err))
+        # END-FOR
 
         return
 
@@ -2439,12 +2693,19 @@ class MainWindow(QtGui.QMainWindow):
         After the peaks' indexing are set to integer, undo the action (i.e., revert to the original value)
         :return:
         """
+        # get the column
+        hkl_type = str(self.ui.comboBox_hklType.currentText())
+        if hkl_type.lower().count('spice') > 0:
+            is_spice = True
+        else:
+            is_spice = False
+
         # restore the value
-        self.ui.tableWidget_peaksCalUB.restore_cached_indexing()
+        self.ui.tableWidget_peaksCalUB.restore_cached_indexing(is_spice)
 
         # enable and disable the buttons
-        self.ui.pushButton_setHKL2Int.setEnabled(True)
-        self.ui.pushButton_undoSetToInteger.setEnabled(False)
+        # self.ui.pushButton_setHKL2Int.setEnabled(True)
+        # self.ui.pushButton_undoSetToInteger.setEnabled(False)
 
         return
 
@@ -2476,7 +2737,7 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    print '[Error] unable to get UB matrix: %s' % str(key_err)
+                    print('[Error] unable to get UB matrix: %s' % str(key_err))
                     self.pop_one_button_dialog('Unable to get UB matrix.\nCheck whether UB matrix is set.')
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
@@ -2638,6 +2899,38 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def do_show_integration_details(self):
+        """
+        show the details (in table) about the integration of scans
+        :return:
+        """
+        import PeaksIntegrationReport
+
+        # check whether the integration information table
+        if self._peakIntegrationInfoWindow is None:
+            self._peakIntegrationInfoWindow = PeaksIntegrationReport.PeaksIntegrationReportDialog(self)
+
+        # show
+        self._peakIntegrationInfoWindow.show()
+
+        # report
+        report_dict = self.generate_peaks_integration_report()
+        self._peakIntegrationInfoWindow.set_report(report_dict)
+
+        return
+
+    def do_show_single_peak_integration(self):
+        """
+        pop out a dialog box to show the detailed integration information
+        :return:
+        """
+        if self._mySinglePeakIntegrationDialog is None:
+            self._mySinglePeakIntegrationDialog = message_dialog.MessageDialog(self)
+
+        self._mySinglePeakIntegrationDialog.show()
+
+        return
+
     def do_show_spice_file(self):
         """
         Show SPICE file in a window
@@ -2679,8 +2972,9 @@ class MainWindow(QtGui.QMainWindow):
         try:
             scan_number = int(str(self.ui.lineEdit_run.text()))
         except ValueError as val_err:
-            self.pop_one_button_dialog('Scan number %s in raw-data-view-tab is invalid. Error: %s'
-                                       '' % str(self.ui.lineEdit_run.text()), str(val_err))
+            error_msg = 'Scan number {0} in raw-data-view-tab is invalid. FYI: {1}.' \
+                        ''.format(self.ui.lineEdit_run.text(), val_err)
+            self.pop_one_button_dialog(error_msg)
             return
 
         # get spice file
@@ -2711,8 +3005,8 @@ class MainWindow(QtGui.QMainWindow):
         ub_matrix = self.ui.tableWidget_ubInUse.get_matrix()
 
         text = ''
-        for i in xrange(3):
-            for j in xrange(3):
+        for i in range(3):
+            for j in range(3):
                 text += '%.7f, ' % ub_matrix[i][j]
             text += '\n'
 
@@ -2874,10 +3168,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def do_view_data_3d(self):
         """
-        View merged scan data in 3D after FindPeaks
+        View merged scan data in 3D after FindPeaks.
         :return:
         """
         # get experiment and scan number
+        scan_number = self.ui.tableWidget_peaksCalUB.get_selected_scans()
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanNumber])
         if status:
@@ -2901,7 +3196,7 @@ class MainWindow(QtGui.QMainWindow):
         if self._my3DWindow is None:
             self._my3DWindow = plot3dwindow.Plot3DWindow(self)
 
-        print '[INFO] Write file to %s' % md_file_name
+        print('[INFO] Write file to %s' % md_file_name)
         self._my3DWindow.add_plot_by_file(md_file_name)
         self._my3DWindow.add_plot_by_array(weight_peak_centers, weight_peak_intensities)
         self._my3DWindow.add_plot_by_array(avg_peak_centre, avg_peak_intensity)
@@ -2934,8 +3229,8 @@ class MainWindow(QtGui.QMainWindow):
 
         pt_peak_centre_array = numpy.ndarray(shape=(num_pt_peaks, 3), dtype='float')
         pt_peak_intensity_array = numpy.ndarray(shape=(num_pt_peaks,), dtype='float')
-        for i_pt in xrange(num_pt_peaks):
-            for j in xrange(3):
+        for i_pt in range(num_pt_peaks):
+            for j in range(3):
                 pt_peak_centre_array[i_pt][j] = weight_peak_centers[i_pt][j]
             pt_peak_intensity_array[i_pt] = weight_peak_intensities[i_pt]
 
@@ -2988,7 +3283,7 @@ class MainWindow(QtGui.QMainWindow):
         # get values
         try:
             scan_num, pt_num = self.ui.tableWidget_surveyTable.get_selected_run_surveyed()
-        except RuntimeError, err:
+        except RuntimeError as err:
             self.pop_one_button_dialog(str(err))
             return
 
@@ -3012,12 +3307,40 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         max_number = int(self.ui.lineEdit_numSurveyOutput.text())
+
+        # ignore the situation that this line edit is cleared
+        if max_number <= 0:
+            return
         if max_number != self.ui.tableWidget_surveyTable.rowCount():
             # re-show survey
             self.ui.tableWidget_surveyTable.remove_all_rows()
             self.ui.tableWidget_surveyTable.show_reflections(max_number)
 
         return
+
+    def generate_peaks_integration_report(self):
+        """
+        generate a report for all integrated peaks
+        :return:
+        """
+        # get experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+
+        # get all the selected peaks from table
+        row_number_list = self.ui.tableWidget_mergeScans.get_selected_rows()
+
+        # collection all the information
+        report_dict = dict()
+        print('[DB] Selected rows: {0}'.format(row_number_list))
+        for row_number in row_number_list:
+            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
+            peak_info = self._myControl.get_peak_info(exp_number, scan_number)
+            peak_integrate_dict = peak_info.generate_integration_report()
+            report_dict[scan_number] = peak_integrate_dict
+            print('[DB] Report Scan {0}. Keys: {1}'.format(scan_number, peak_integrate_dict.keys()))
+        # END-FOR
+
+        return report_dict
 
     def get_ub_from_text(self):
         """ Purpose: Set UB matrix in use from plain text edit plainTextEdit_ubInput.
@@ -3089,58 +3412,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_working_directory(str(self.ui.lineEdit_workDir.text()))
         self._myControl.set_server_url(str(self.ui.lineEdit_url.text()))
 
-        return
-
-    def ui_apply_lorentz_correction_mt(self):
-        """
-        Apply Lorentz corrections to the integrated peak intensities of all the selected peaks
-        at the UI level
-        :return:
-        """
-        # get experiment number
-        exp_number = int(self.ui.lineEdit_exp.text())
-
-        # select rows
-        selected_rows = self.ui.tableWidget_mergeScans.get_selected_rows(True)
-
-        # apply for each row selected for Lorentz correction
-        error_message = ''
-        for row_number in selected_rows:
-            # get scan number
-            scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
-            # get peak information object
-            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
-            if peak_info_obj is None:
-                error_message += 'Unable to get peak information from scan %d\n' % scan_number
-                continue
-            # get intensity
-            peak_intensity = peak_info_obj.get_intensity()
-            # get Q-vector of the peak center and calculate |Q| from it
-            q = peak_info_obj.get_peak_centre_v3d().norm()
-            # get wave length
-            wavelength = self._myControl.get_wave_length(exp_number, [scan_number])
-            self.ui.tableWidget_mergeScans.set_wave_length(row_number, wavelength)
-            # get motor step (choose from omega, phi and chi)
-            try:
-                motor_move_tup = self._myControl.get_motor_step(exp_number, scan_number)
-            except RuntimeError as run_err:
-                self.ui.tableWidget_mergeScans.set_status(row_number, str(run_err))
-                continue
-            except AssertionError as ass_err:
-                self.ui.tableWidget_mergeScans.set_status(row_number, str(ass_err))
-                continue
-            # set motor information (the moving motor)
-            self.ui.tableWidget_mergeScans.set_motor_info(row_number, motor_move_tup)
-            motor_step = motor_move_tup[1]
-            # apply the Lorentz correction to the intensity
-            corrected = self._myControl.apply_lorentz_correction(peak_intensity, q, wavelength, motor_step)
-
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, corrected, lorentz_corrected=True)
-            self._myControl.set_peak_intensity(exp_number, scan_number, corrected)
-        # END-FOR (row_number)
-
-        if len(error_message) > 0:
-            self.pop_one_button_dialog(error_message)
+        print('[INFO] Session {0} has been loaded.'.format(filename))
 
         return
 
@@ -3181,7 +3453,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Experiment
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
-        save_dict['lineEdit_scanNumber'] = self.ui.lineEdit_scanNumber.text()
 
         # Lattice
         save_dict['lineEdit_a'] = str(self.ui.lineEdit_a.text())
@@ -3193,7 +3464,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Merge scan
         save_dict['lineEdit_listScansSliceView'] = str(self.ui.lineEdit_listScansSliceView.text())
-        save_dict['lineEdit_baseMergeMDName'] = str(self.ui.lineEdit_baseMergeMDName.text())
 
         # Save to csv file
         if filename is None:
@@ -3219,6 +3489,52 @@ class MainWindow(QtGui.QMainWindow):
         """
         self.save_settings()
         self.close()
+
+    def menu_pre_process(self):
+        """
+        blabla
+        :return:
+        """
+        # initialize the pre processing window if it is not initialized
+        reset_pre_process_window = False
+        if self._preProcessWindow is None:
+            # initialize the instance
+            self._preProcessWindow = PreprocessWindow.ScanPreProcessWindow(self)
+            self._preProcessWindow.setup(self._myControl)
+            reset_pre_process_window = True
+
+        # show the window
+        self._preProcessWindow.show()
+
+        # setup the parameters
+        if reset_pre_process_window:
+            exp_number = int(str(self.ui.lineEdit_exp.text()))
+            # detector size/pixel numbers
+            det_size_str = str(self.ui.comboBox_detectorSize.currentText())
+            det_size = int(det_size_str.split()[0])
+            # detector center
+            det_center = str(self.ui.lineEdit_infoDetCenter.text())
+            # sample detector distance
+            det_sample_dist = str(self.ui.lineEdit_infoDetSampleDistance.text())
+            try:
+                det_sample_dist = float(det_sample_dist)
+            except ValueError:
+                det_sample_dist = None
+            # wave length
+            wave_length = str(self.ui.lineEdit_infoWavelength.text())
+            try:
+                wave_length = float(wave_length)
+            except ValueError:
+                wave_length = None
+
+            # set up the other calibration parameters
+            self._preProcessWindow.set_instrument_calibration(exp_number=exp_number, det_size=det_size,
+                                                              det_center=det_center,
+                                                              det_sample_distance=det_sample_dist,
+                                                              wave_length=wave_length)
+        # END-IF
+
+        return
 
     def show_scan_pt_list(self):
         """ Show the range of Pt. in a scan
@@ -3269,11 +3585,12 @@ class MainWindow(QtGui.QMainWindow):
         h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, '_m1')
+        # TODO/ISSUE/NOW consider user specified
         wave_length = hb3a_util.convert_to_wave_length(m1_position=m1)
 
         # Set to table
-        status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
-            [scan_number, -1, h, k, l, q_x, q_y, q_z, False, m1, wave_length, ''])
+        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1,
+                                                                  wave_length)
         if status is False:
             self.pop_one_button_dialog(err_msg)
 
@@ -3309,6 +3626,19 @@ class MainWindow(QtGui.QMainWindow):
         settings.setValue('beta', lattice_beta)
         lattice_gamma = str(self.ui.lineEdit_gamma.text())
         settings.setValue('gamma', lattice_gamma)
+
+        # calibrated instrument configurations
+        user_wave_length = str(self.ui.lineEdit_userWaveLength.text())
+        settings.setValue('wave_length', user_wave_length)
+
+        det_row_center = str(self.ui.lineEdit_detCenterPixHorizontal.text())
+        settings.setValue('row_center', det_row_center)
+
+        det_col_center = str(self.ui.lineEdit_detCenterPixVertical.text())
+        settings.setValue('col_center', det_col_center)
+
+        det_sample_distance_str = str(self.ui.lineEdit_userDetSampleDistance.text())
+        settings.setValue('det_sample_distance', det_sample_distance_str)
 
         # last project
         last_1_project_path = str(self.ui.label_last1Path.text())
@@ -3347,6 +3677,19 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_beta.setText(str(lattice_beta))
             lattice_gamma = settings.value('gamma')
             self.ui.lineEdit_gamma.setText(str(lattice_gamma))
+
+            # calibrated instrument configurations
+            user_wave_length = settings.value('wave_length')
+            self.ui.lineEdit_userWaveLength.setText(user_wave_length)
+
+            det_row_center = settings.value('row_center')
+            self.ui.lineEdit_detCenterPixHorizontal.setText(det_row_center)
+
+            det_col_center = settings.value('col_center')
+            self.ui.lineEdit_detCenterPixVertical.setText(det_col_center)
+
+            det_sample_distance = settings.value('det_sample_distance')
+            self.ui.lineEdit_userDetSampleDistance.setText(det_sample_distance)
 
             # last project
             last_1_project_path = str(settings.value('last1path'))
@@ -3417,8 +3760,15 @@ class MainWindow(QtGui.QMainWindow):
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
         # raw_det_data = numpy.rot90(raw_det_data, 1)
         self.ui.graphicsView_detector2dPlot.clear_canvas()
-        # TODO/FIXME - changed to 512 from 256 as prototype.  Should be via configuration
-        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=512, y_min=0, y_max=512,
+        # get the configuration of detector from GUI
+        #  FIXME/TODO/ISSUE/NOW/TODAY - use the detector size wrong!
+        if 0:
+            ret_obj = gutil.parse_integer_list(str(self.ui.lineEdit_detectorGeometry.text()), expected_size=2)
+            x_max, y_max = ret_obj
+        else:
+            x_max, y_max = 256, 256
+
+        self.ui.graphicsView_detector2dPlot.add_plot_2d(raw_det_data, x_min=0, x_max=x_max, y_min=0, y_max=y_max,
                                                         hold_prev_image=False)
         status, roi = self._myControl.get_region_of_interest(exp_no, scan_number=None)
         if status:
@@ -3426,7 +3776,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             error_msg = roi
             # self.pop_one_button_dialog(error_msg)
-            print '[Error] %s' % error_msg
+            print('[Error] %s' % error_msg)
         # END-IF
 
         # Information
@@ -3481,53 +3831,53 @@ class MainWindow(QtGui.QMainWindow):
 
         elif mode == 1:
             # receive signal from the end of processing one peak: complete the row
-            # get row number
+            # get the peak object
+            peak_info_obj = self._myControl.get_peak_info(exp_number, scan_number)
+
+            # get row number to set up the table
             try:
                 row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
             except RuntimeError as run_err:
-                self.pop_one_button_dialog(str(run_err))
-                return
+                raise RuntimeError('Unable to find scan {0} in Peak-Processing table due to {1}.'
+                                   ''.format(scan_number, run_err))
 
-            # gather values for updating
-            intensity = sig_value
+            # get peak: simple summation intensity
+            intensity, int_std_dev = peak_info_obj.get_intensity('simple intensity', False)
 
             # check intensity value
             is_error = False
             if intensity < 0:
                 # set to status
-                error_msg = 'Negative intensity: %.3f' % intensity
+                error_msg = 'Negative intensity (simple): %.3f' % intensity
                 self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=error_msg)
                 # reset intensity to 0.
                 intensity = 0.
                 is_error = True
+                int_std_dev = 0.
 
-            if len(peak_centre) != 3:
-                self.pop_one_button_dialog('Peak centre %s is not correct.' % str(peak_centre))
-                return
+            # get the corrected value
+            corrected_intensity = intensity * peak_info_obj.lorentz_correction_factor
+            corrected_std_dev = int_std_dev * peak_info_obj.lorentz_correction_factor
 
-            # set the calculated peak intensity to _peakInfoDict
-            status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
-            if status:
-                # set the value to table
-                self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
-                                                                  peak_intensity=intensity,
-                                                                  lorentz_corrected=False)
-                self.ui.tableWidget_mergeScans.set_peak_centre(row_number=row_number,
-                                                               peak_centre=peak_centre)
-                if is_error:
-                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Intensity Error')
-                else:
-                    self.ui.tableWidget_mergeScans.set_status(row_number, 'Good')
+            # status, error_msg = self._myControl.set_peak_intensity(exp_number, scan_number, intensity)
+            # if status:
+            #     # set the value to table
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number,
+                                                              peak_intensity=intensity,
+                                                              corrected_intensity=corrected_intensity,
+                                                              standard_error=corrected_std_dev,
+                                                              integrate_method='simple')
 
+            if is_error:
+                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integration Error')
             else:
-                self._errorMessageEnsemble += error_msg + '\n'
-                self.ui.tableWidget_mergeScans.set_status(row_number, error_msg)
+                self.ui.tableWidget_mergeScans.set_status(row_number, 'Integrated')
 
         elif mode == 2:
             # get signal from the end of all selected scans being integrated
 
             # apply Lorentz correction
-            self.ui_apply_lorentz_correction_mt()
+            # self.ui_apply_lorentz_correction_mt()
 
             # set progress bar
             progress = int(sig_value+0.5)
@@ -3581,12 +3931,12 @@ class MainWindow(QtGui.QMainWindow):
         # set intensity, state to table
         if mode == 0:
             # error message
-            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number=row_number, peak_intensity=0.,
-                                                              lorentz_corrected=False)
+            self.ui.tableWidget_mergeScans.set_peak_intensity(row_number, peak_intensity=0., corrected_intensity=0.,
+                                                              standard_error=0., integrate_method='simple')
             self.ui.tableWidget_mergeScans.set_status(row_number=row_number, status=message)
 
             # set peak value
-            status, ret_message = self._myControl.set_peak_intensity(exp_number, scan_number, 0.)
+            status, ret_message = self._myControl.set_zero_peak_intensity(exp_number, scan_number)
             if not status:
                 self.pop_one_button_dialog(ret_message)
 
@@ -3615,12 +3965,23 @@ class MainWindow(QtGui.QMainWindow):
         peak_info = self._myControl.get_peak_info(exp_number, scan_number)
         assert isinstance(peak_info, r4c.PeakProcessRecord)
 
-        # retrieve and set HKL from spice table
-        # peak_info.retrieve_hkl_from_spice_table()
-
         # add to table
         self.set_ub_peak_table(peak_info)
 
         return
 
-    # END-OF-DEFINITION (MainWindow)
+    @property
+    def ub_matrix_processing_table(self):
+        """
+        return the handler to the UB matrix
+        :return:
+        """
+        return self.ui.tableWidget_peaksCalUB
+
+    @property
+    def working_directory(self):
+        """
+        return the current working directory
+        :return:
+        """
+        return self._myControl._workDir

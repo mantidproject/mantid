@@ -4,7 +4,7 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "Script.h"
 #include <QMainWindow>
 
@@ -32,7 +32,7 @@ class ScriptingWindow : public QMainWindow {
 public:
   /// Constructor
   ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
-                  QWidget *parent = 0, Qt::WindowFlags flags = 0);
+                  QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
   /// Destructor
   ~ScriptingWindow() override;
   /// Override the closeEvent
@@ -144,9 +144,6 @@ private:
   void openPreviousTabs(const QStringList &tabsToOpen);
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
-
-  /// Extract py files from urllist
-  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
 
 private:
   /// The script editors' manager

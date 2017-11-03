@@ -3,20 +3,21 @@
 //-------------------------------------------
 #include "ScriptingWindow.h"
 #include "ApplicationWindow.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "ScriptingEnv.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 // MantidQt
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
 #include <QAction>
@@ -37,6 +38,7 @@
 
 using namespace Mantid;
 using namespace MantidQt::API;
+namespace DropEventHelper = MantidQt::MantidWidgets::DropEventHelper;
 
 namespace {
 /// static logger
@@ -422,8 +424,8 @@ void ScriptingWindow::clearScriptVariables() {
  * Opens the Qt help windows for the scripting window.
  */
 void ScriptingWindow::showHelp() {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL,
-                                                 QString("ScriptingWindow"));
+  MantidQt::API::HelpWindow::showCustomInterface(nullptr,
+                                                 QString("Scripting Window"));
 }
 
 /**
@@ -431,7 +433,7 @@ void ScriptingWindow::showHelp() {
  */
 void ScriptingWindow::showPythonHelp() {
   MantidQt::API::HelpWindow::showPage(
-      NULL, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
+      nullptr, QString("qthelp://org.mantidproject/doc/api/python/index.html"));
 }
 
 /**
@@ -516,7 +518,8 @@ void ScriptingWindow::customEvent(QEvent *event) {
 void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->acceptProposedAction();
     }
   }
@@ -529,7 +532,8 @@ void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
 void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
+    const auto pythonFilenames = DropEventHelper::extractPythonFiles(de);
+    if (!pythonFilenames.empty()) {
       de->accept();
     }
   }
@@ -542,11 +546,11 @@ void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
 void ScriptingWindow::dropEvent(QDropEvent *de) {
   const QMimeData *mimeData = de->mimeData();
   if (mimeData->hasUrls()) {
-    QStringList filenames = extractPyFiles(mimeData->urls());
+    const auto filenames = DropEventHelper::extractPythonFiles(de);
     de->acceptProposedAction();
 
-    for (int i = 0; i < filenames.size(); ++i) {
-      m_manager->openInNewTab(filenames[i]);
+    for (const auto &name : filenames) {
+      m_manager->openInNewTab(name);
     }
   }
 }
@@ -893,19 +897,4 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Asynchronous;
   else
     return Script::Serialised;
-}
-
-QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().toUpper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
 }

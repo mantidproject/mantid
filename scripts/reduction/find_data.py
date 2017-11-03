@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,redefined-builtin
+from __future__ import (absolute_import, division, print_function)
 import os
 import mantid.api as api
 from mantid.simpleapi import *

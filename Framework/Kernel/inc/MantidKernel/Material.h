@@ -7,7 +7,12 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
-#include <nexus/NeXusFile.hpp>
+#include <vector>
+
+// Forward Declares
+namespace NeXus {
+class File;
+}
 
 namespace Mantid {
 
@@ -24,7 +29,7 @@ namespace Kernel {
   <UL>
     <LI>temperature (Kelvin)</LI>
     <LI>pressure (KPa) </LI>
-    <LI>number density (A^-3)</LI>
+    <LI>number density (nAtoms / Angstrom^3)</LI>
   </UL>
 
 Copyright &copy; 2007-2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -92,67 +97,70 @@ public:
   double temperature() const;
   /// Get the pressure
   double pressure() const;
-  /// Get the coherent scattering cross section for a given wavelength
+  /// Get the coherent scattering cross section for a given wavelength in barns.
   double
   cohScatterXSection(const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Get the incoherent cross section for a given wavelength
+  /// Get the incoherent cross section for a given wavelength in barns.
   double incohScatterXSection(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Return the total scattering cross section for a given wavelength
+  /// Return the total scattering cross section for a given wavelength in barns.
   double totalScatterXSection(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Get the absorption cross section at a given wavelength
+  /// Get the absorption cross section at a given wavelength in barns.
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the coherent scattering length for a given wavelength
+  /// Get the coherent scattering length for a given wavelength in fm
   double
   cohScatterLength(const double lambda =
                        PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Get the incoherent length for a given wavelength
+  /// Get the incoherent length for a given wavelength in fm
   double
   incohScatterLength(const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Return the total scattering length for a given wavelength
+  /// Return the total scattering length for a given wavelength in fm
   double
   totalScatterLength(const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the coherent scattering length for a given wavelength
+  /// Get the coherent scattering length for a given wavelength in fm
   double cohScatterLengthReal(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Get the incoherent length for a given wavelength
+  /// Get the incoherent length for a given wavelength in fm
   double incohScatterLengthReal(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the real part of the coherent scattering length <b^2> for a given
-  /// wavelength
+  /// Get the real part of the coherent scattering length squared, <b^2>, for a
+  /// given wavelength in fm^2.
   double cohScatterLengthRealSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the real part of the incoherent length <b^2> for a given wavelength
+  /// Get the real part of the incoherent length squared, <b^2>, for a given
+  /// wavelength in fm^2.
   double incohScatterLengthRealSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the coherent scattering length <b^2> for a given wavelength
+  /// Get the coherent scattering length squared, <b^2>, for a given wavelength
+  /// in fm^2.
   double cohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Get the incoherent length <b^2> for a given wavelength
+  /// Get the incoherent length squared, <b^2>, for a given wavelength in fm^2.
   double incohScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
-  /// Return the total scattering length <b^2> for a given wavelength
+  /// Return the total scattering length squared, <b^2>, for a given wavelength
+  /// in fm^2.
   double totalScatterLengthSqrd(
       const double lambda =
           PhysicalConstants::NeutronAtom::ReferenceLambda) const;
@@ -171,7 +179,7 @@ private:
   ChemicalFormula m_chemicalFormula;
   /// Total number of atoms
   double m_atomTotal;
-  /// Number density in A^-3
+  /// Number density in atoms per A^-3
   double m_numberDensity;
   /// Temperature
   double m_temperature;

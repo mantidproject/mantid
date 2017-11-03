@@ -84,21 +84,22 @@ public:
   /// Return the list of event weight error values
   virtual void getWeightErrors(std::vector<double> &weightErrors) const = 0;
   /// Return the list of pulse time values
-  virtual std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const = 0;
+  virtual std::vector<Mantid::Types::Core::DateAndTime>
+  getPulseTimes() const = 0;
   /// Get the minimum TOF from the list
   virtual double getTofMin() const = 0;
   /// Get the maximum TOF from the list
   virtual double getTofMax() const = 0;
   /// Get the minimum pulse time from the list
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMin() const = 0;
   /// Get the maximum pulse time from the list
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMax() const = 0;
   /// Get the maximum time at sample.
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(const double &tofFactor,
                      const double &tofOffset) const = 0;
   /// Get the minimum time at sample
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMin(const double &tofFactor,
                      const double &tofOffset) const = 0;
   /// Set the TOFs from the given list

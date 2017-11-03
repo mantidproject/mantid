@@ -20,16 +20,16 @@
     instrument settings.
 
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time
 import types
+import uuid
 from reduction.instrument import Instrument
-import mantid
-from mantid import simpleapi
+import mantid.simpleapi as mantid
 import warnings
 import inspect
-import random
 from reduction.find_data import find_data
 
 
@@ -79,7 +79,7 @@ def validate_loader(func):
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace)
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % inputworkspace)
                     else:
                         data_file = self._data_file
 
@@ -107,7 +107,7 @@ def validate_loader(func):
                         kwargs[kwargs["AlternateName"]] = data_file
 
                     self.algorithm = alg
-                    simpleapi.set_properties(alg, *(), **kwargs)
+                    mantid.set_properties(alg, *(), **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
@@ -146,7 +146,7 @@ def validate_loader(func):
                             if data_file is None:
                                 return
                         else:
-                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace)
+                            raise RuntimeError("SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % inputworkspace)
                     else:
                         data_file = self._data_file
 
@@ -255,7 +255,7 @@ def validate_step(func):
                         kwargs["OutputWorkspace"] = outputworkspace
 
                     self.algorithm = alg
-                    simpleapi.set_properties(alg, *(), **kwargs)
+                    mantid.set_properties(alg, *(), **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
@@ -335,8 +335,8 @@ class Reducer(object):
     output_workspaces = []
 
     def __init__(self):
-        self.UID = ''.join(
-            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        # Generate UUID and trim to 5 chars
+        self.UID = str(uuid.uuid1())[:5]
         self.property_manager = "__reduction_parameters_" + self.UID
         self._data_files = {}
         self._reduction_steps = []
@@ -366,8 +366,8 @@ class Reducer(object):
             Removes all workspace flagged as dirty, use when a reduction aborts with errors
         """
         for bad_data in self._dirty:
-            if bad_data in mtd:
-                simpleapi.DeleteWorkspace(Workspace=bad_data)
+            if bad_data in mantid.mtd:
+                mantid.DeleteWorkspace(Workspace=bad_data)
             else:
                 mantid.logger.notice('reducer: Could not access tainted workspace ' + bad_data)
 
@@ -454,7 +454,7 @@ class Reducer(object):
             TODO: this needs to be an ordered list
         """
         if data_file is None:
-            if workspace in mtd:
+            if workspace in mantid.mtd:
                 self._data_files[workspace] = None
                 return
             else:
@@ -510,7 +510,7 @@ class Reducer(object):
                     if result is not None and len(str(result)) > 0:
                         self.log_text += "%s\n" % str(result)
                 except:
-                    self.log_text += "\n%s\n" % sys.exc_value
+                    self.log_text += "\n%s\n" % sys.exc_info()[1]
                     raise
 
         # any clean up, possibly removing workspaces
@@ -555,8 +555,7 @@ class ReductionStep(object):
         """
             Generate a unique name for an internal workspace
         """
-        random_str = ''.join(
-            random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        random_str = str(uuid.uuid1())[:5]
         return "__" + descriptor + "_" + extract_workspace_name(filepath) + "_" + random_str
 
     def execute(self, reducer, inputworkspace=None, outputworkspace=None):

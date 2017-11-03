@@ -7,13 +7,15 @@
 
 #ifndef SHOWPEAKHKLOFFSETSTEST_H_
 #define SHOWPEAKHKLOFFSETSTEST_H_
-#include <cxxtest/TestSuite.h>
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include <cxxtest/TestSuite.h>
 
-using Mantid::Crystal::LoadIsawPeaks;
+using Mantid::DataHandling::LoadNexusProcessed;
+using namespace Mantid::DataObjects;
 using Mantid::Crystal::LoadIsawUB;
 using Mantid::Crystal::ShowPeakHKLOffsets;
 using Mantid::DataObjects::TableWorkspace;
@@ -21,9 +23,9 @@ using Mantid::DataObjects::TableWorkspace;
 class ShowPeakHKLOffsetsTest : public CxxTest::TestSuite {
 public:
   void test_show() {
-    LoadIsawPeaks load;
+    LoadNexusProcessed load;
     load.initialize();
-    load.setProperty("Filename", "TOPAZ_3007.peaks");
+    load.setProperty("Filename", "TOPAZ_3007.peaks.nxs");
     load.setProperty("OutputWorkspace", "aaa");
     load.execute();
 

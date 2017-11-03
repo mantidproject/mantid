@@ -4,10 +4,10 @@
 #include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <list>
@@ -24,14 +24,15 @@ class DetectorInfo;
 class SpectrumInfo;
 }
 namespace Geometry {
+class ComponentInfo;
+class DetectorInfo;
+class IDetector;
 class ParameterMap;
 class XMLInstrumentParameter;
 }
 
 namespace API {
 class ChopperModel;
-class ComponentInfo;
-class DetectorInfo;
 class ModeratorModel;
 class Run;
 class Sample;
@@ -115,8 +116,9 @@ public:
   /// Easy access to the efixed value for this run & detector ID
   double getEFixed(const detid_t detID) const;
   /// Easy access to the efixed value for this run & optional detector
-  double getEFixed(const Geometry::IDetector_const_sptr detector =
-                       Geometry::IDetector_const_sptr()) const;
+  double getEFixed(const boost::shared_ptr<const Geometry::IDetector> detector =
+                       boost::shared_ptr<const Geometry::IDetector>{
+                           nullptr}) const;
   /// Set the efixed value for a given detector ID
   void setEFixed(const detid_t detID, const double value);
 
@@ -158,13 +160,14 @@ public:
   static std::string getInstrumentFilename(const std::string &instrumentName,
                                            const std::string &date = "");
 
-  const DetectorInfo &detectorInfo() const;
-  DetectorInfo &mutableDetectorInfo();
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
 
   const SpectrumInfo &spectrumInfo() const;
   SpectrumInfo &mutableSpectrumInfo();
 
-  const ComponentInfo &componentInfo() const;
+  const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
 
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
@@ -172,6 +175,7 @@ public:
   virtual size_t groupOfDetectorID(const detid_t detID) const;
 
 protected:
+  size_t numberOfDetectorGroups() const;
   /// Called as the first operation of most public methods.
   virtual void populateIfNotLoaded() const;
 
@@ -223,11 +227,6 @@ private:
   /// Mutex to protect against cow_ptr copying
   mutable std::recursive_mutex m_mutex;
 
-  boost::shared_ptr<Beamline::DetectorInfo> m_detectorInfo;
-  std::unique_ptr<DetectorInfo> m_detectorInfoWrapper;
-
-  boost::shared_ptr<Beamline::ComponentInfo> m_componentInfo;
-  std::unique_ptr<API::ComponentInfo> m_componentInfoWrapper;
   mutable std::unique_ptr<Beamline::SpectrumInfo> m_spectrumInfo;
   mutable std::unique_ptr<SpectrumInfo> m_spectrumInfoWrapper;
   mutable std::mutex m_spectrumInfoMutex;

@@ -29,10 +29,10 @@
  ***************************************************************************/
 #include "ApplicationWindow.h"
 #include "TableStatistics.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include "MantidKernel/Strings.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QList>
 #include <QHeaderView>
@@ -120,7 +120,7 @@ TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
   connect(d_base, SIGNAL(destroyed()), this, SLOT(closedBase()));
 }
 
-void TableStatistics::closedBase() { d_base = NULL; }
+void TableStatistics::closedBase() { d_base = nullptr; }
 
 void TableStatistics::update(Table *t, const QString &colName) {
   if (!d_base)

@@ -3,7 +3,7 @@ from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
 from math import sqrt
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSInstrument)
+from sans.common.enums import (SANSFacility)
 from sans.common.general_functions import create_unmanaged_algorithm
 
 
@@ -13,8 +13,8 @@ from sans.common.general_functions import create_unmanaged_algorithm
 def load_sigma_moderator_workspace(file_name):
     """
     Gets the sigma moderator workspace.
-    @param file_name: the file name of the sigma moderator
-    @returns the sigma moderator workspace
+    :param file_name: the file name of the sigma moderator
+    :returns the sigma moderator workspace
     """
     load_name = "LoadRKH"
     load_option = {"Filename": file_name,
@@ -37,8 +37,8 @@ def get_aperture_diameters(convert_to_q):
     Gets the aperture diameters for the sample and the source
     If all fields are specified for a rectangular aperture then this is used, else a circular aperture is
     used.
-    @param convert_to_q: a SANSStateConvertToQ object.
-    @return: aperture diameter for the source, aperture diameter for the sample
+    :param convert_to_q: a SANSStateConvertToQ object.
+    :return: aperture diameter for the source, aperture diameter for the sample
     """
     def set_up_diameter(height, width):
         """
@@ -64,9 +64,9 @@ def get_aperture_diameters(convert_to_q):
 def create_q_resolution_workspace(convert_to_q, data_workspace):
     """
     Provides a q resolution workspace
-    @param convert_to_q: a SANSStateConvertToQ object.
-    @param data_workspace: the workspace which is to be reduced.
-    @return: a q resolution workspace
+    :param convert_to_q: a SANSStateConvertToQ object.
+    :param data_workspace: the workspace which is to be reduced.
+    :return: a q resolution workspace
     """
     # Load the sigma moderator
     file_name = convert_to_q.moderator_file
@@ -115,9 +115,9 @@ class QResolutionCalculator(with_metaclass(ABCMeta, object)):
     def get_q_resolution_workspace(self, convert_to_q_info, data_workspace):
         """
         Calculates the q resolution workspace which is required for the Q1D algorithm
-        @param convert_to_q_info: a SANSStateConvertToQ object
-        @param data_workspace: the workspace which is being reduced.
-        @return: a q resolution workspace or None
+        :param convert_to_q_info: a SANSStateConvertToQ object
+        :param data_workspace: the workspace which is being reduced.
+        :return: a q resolution workspace or None
         """
         pass
 
@@ -145,10 +145,8 @@ class QResolutionCalculatorFactory(object):
     @staticmethod
     def create_q_resolution_calculator(state):
         data = state.data
-        instrument = data.instrument
-        is_isis_instrument = instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or\
-                             instrument is SANSInstrument.LOQ  # noqa
-        if is_isis_instrument:
+        facility = data.facility
+        if facility is SANSFacility.ISIS:
             convert_to_q = state.convert_to_q
             if convert_to_q.use_q_resolution:
                 q_resolution = QResolutionCalculatorISIS()

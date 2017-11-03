@@ -30,7 +30,7 @@
 #define GRAPH3D_H
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <qwt3d_surfaceplot.h>
 #include <qwt3d_function.h>
@@ -42,7 +42,7 @@
 
 #include "Table.h"
 #include "Matrix.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 class MantidMatrix;
 class UserFunction2D;
@@ -66,8 +66,8 @@ class Graph3D : public MdiSubWindow {
   Q_OBJECT
 
 public:
-  Graph3D(const QString &label, QWidget *parent, const char *name = 0,
-          Qt::WFlags f = 0);
+  Graph3D(const QString &label, QWidget *parent, const char *name = nullptr,
+          Qt::WFlags f = nullptr);
   ~Graph3D() override;
 
   void initPlot();

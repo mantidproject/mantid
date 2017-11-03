@@ -12,7 +12,6 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
-using Mantid::HistogramData::FrequencyVariances;
 using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {
@@ -40,8 +39,17 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
     auto owidth = xo_high - xo_low;
     auto nwidth = xn_high - xn_low;
 
-    if (owidth <= 0.0 || nwidth <= 0.0)
-      throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
+    if (owidth <= 0.0 || nwidth <= 0.0) {
+      if (xo_high == -DBL_MAX && xo_low == -DBL_MAX) {
+        throw InvalidBinEdgesError(
+            "One or more x-values was unusually low "
+            "(below -1e100). This usually occurs when a "
+            "monitor spectrum has not been masked after "
+            "ConvertUnits has been run on the workspace");
+      } else {
+        throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
+      }
+    }
 
     if (xn_high <= xo_low)
       inew++; /* old and new bins do not overlap */

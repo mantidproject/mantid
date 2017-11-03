@@ -18,12 +18,12 @@ class FrequencyPowderGenerator(object):
         """
         Generates frequencies for the given order of quantum event.
 
-        @param previous_array: array with frequencies for the previous quantum event
-        @param previous_coefficients: coefficients which correspond to the previous order quantum event
-        @param fundamentals_array: array with frequencies for fundamentals
-        @param fundamentals_coefficients: coefficients for fundamentals
-        @param quantum_order: number of quantum order event for which new array should be constructed
-        @return: array with frequencies for the required quantum number event, array which stores coefficients for all
+        :param previous_array: array with frequencies for the previous quantum event
+        :param previous_coefficients: coefficients which correspond to the previous order quantum event
+        :param fundamentals_array: array with frequencies for fundamentals
+        :param fundamentals_coefficients: coefficients for fundamentals
+        :param quantum_order: number of quantum order event for which new array should be constructed
+        :returns: array with frequencies for the required quantum number event, array which stores coefficients for all
                  frequencies
         """
         if not (isinstance(fundamentals_array, np.ndarray) and
@@ -76,7 +76,8 @@ class FrequencyPowderGenerator(object):
             # This will be the same in case full array with transitions is processed
             # but in case array of transitions is huge and we proceed chunk by chunk then
             # fundamentals_ind differ from fundamentals_coefficients
-            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size, dtype=AbinsModules.AbinsConstants.INT_TYPE)
+            fundamentals_ind = np.arange(start=0, step=1, stop=fundamentals_size,
+                                         dtype=AbinsModules.AbinsConstants.INT_TYPE)
 
             n = fundamentals_size * previous_size
             num_of_arrays = 2

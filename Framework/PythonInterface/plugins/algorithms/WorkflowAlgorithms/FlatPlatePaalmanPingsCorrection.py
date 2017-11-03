@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
                         WorkspaceGroupProperty, InstrumentValidator, Progress)
 from mantid.kernel import (StringListValidator, StringMandatoryValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, MaterialBuilder)
+                           FloatBoundedValidator, Direction, logger)
 
 
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
@@ -73,7 +73,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample thickness in cm')
 
         self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             doc='Sample angle in degrees')
+                             doc='Angle between incident beam and normal to flat plate surface')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                                                      direction=Direction.Input,
@@ -108,8 +108,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect', 'Direct', 'Efixed']),
-                             doc='Energy transfer mode. Only Efixed behaves differently. '
-                                 'Others are equivalent for this algorithm, and are left only for legacy access.')
+                             doc='Energy transfer mode.')
 
         self.declareProperty(name='Efixed', defaultValue=0.,
                              doc='Analyser energy (mev). By default will be read from the instrument parameters. '
@@ -140,7 +139,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         if self._emode != 'Efixed':
             # require both sample and can ws have wavelenght as x-axis
             if mtd[sample_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
-                issues['SampleWorkspace'] = 'Workspace must have units of wavelenght.'
+                issues['SampleWorkspace'] = 'Workspace must have units of wavelength.'
 
             if use_can and mtd[can_ws_name].getAxis(0).getUnit().unitID() != 'Wavelength':
                 issues['CanWorkspace'] = 'Workspace must have units of wavelength.'
@@ -178,6 +177,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._get_angles()
         num_angles = len(self._angles)
         workflow_prog = Progress(self, start=0.2, end=0.8, nreports=num_angles * 2)
+
         for angle_idx in range(num_angles):
             workflow_prog.report('Running flat correction for angle %s' % angle_idx)
             angle = self._angles[angle_idx]
@@ -293,13 +293,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
 
-        if self._emode == 'Efixed' and self._efixed == 0.:
+        if (self._emode == 'Efixed' or self._emode == 'Direct' or self._emode == 'Indirect') and self._efixed == 0.:
             # Efixed mode requested with default efixed, try to read from Instrument Parameters
             try:
                 self._efixed = self._getEfixed()
                 logger.information('Found Efixed = {0}'.format(self._efixed))
             except ValueError:
-                raise RuntimeError('Efixed mode requested with the default value,'
+                raise RuntimeError('Efixed, Direct or Indirect mode requested with the default value,'
                                    'but could not find the Efixed parameter in the instrument.')
 
         if self._emode == 'Efixed':
@@ -328,16 +328,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         set_material_alg = self.createChildAlgorithm('SetSampleMaterial')
         if density_type == 'Mass Density':
             set_material_alg.setProperty('SampleMassDensity', density)
-            builder = MaterialBuilder()
-            mat = builder.setFormula(chemical_formula).setMassDensity(density).build()
-            number_density = mat.numberDensity
         else:
-            number_density = density
+            set_material_alg.setProperty('SampleNumberDensity', density)
         set_material_alg.setProperty('InputWorkspace', ws_name)
         set_material_alg.setProperty('ChemicalFormula', chemical_formula)
-        set_material_alg.setProperty('SampleNumberDensity', number_density)
         set_material_alg.execute()
-        return number_density
+        ws = set_material_alg.getProperty('InputWorkspace').value
+        return ws.sample().getMaterial().numberDensity
 
     # ------------------------------------------------------------------------------
 
@@ -378,19 +375,22 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _getEfixed(self):
+        return_eFixed = 0.
         inst = mtd[self._sample_ws_name].getInstrument()
 
         if inst.hasParameter('Efixed'):
-            return inst.getNumberParameter('EFixed')[0]
-
-        if inst.hasParameter('analyser'):
+            return_eFixed = inst.getNumberParameter('EFixed')[0]
+        elif inst.hasParameter('analyser'):
             analyser_name = inst.getStringParameter('analyser')[0]
             analyser_comp = inst.getComponentByName(analyser_name)
 
             if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
-                return analyser_comp.getNumberParameter('EFixed')[0]
+                return_eFixed = analyser_comp.getNumberParameter('EFixed')[0]
 
-        raise ValueError('No Efixed parameter found')
+        if return_eFixed > 0:
+            return return_eFixed
+        else:
+            raise ValueError('No non-zero Efixed parameter found')
 
     # ------------------------------------------------------------------------------
 
@@ -439,14 +439,33 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         For more information See:
           - MODES User Guide: http://www.isis.stfc.ac.uk/instruments/iris/data-analysis/modes-v3-user-guide-6962.pdf
           - C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
+
+        The current implementation is based on:
+          - J. Wuttke: 'Absorption-Correction Factors for Scattering from Flat or Tubular Samples:
+            Open-Source Implementation libabsco, and Why it Should be Used with Caution',
+            http://apps.jcns.fz-juelich.de/doku/sc/_media/abs00.pdf
+
+        @return: A tuple containing the attenuations;
+            1) scattering and absorption in sample,
+            2) scattering in sample and absorption in sample and container
+            3) scattering in container and absorption in sample and container,
+            4) scattering and absorption in container.
         """
 
         PICONV = math.pi / 180.0
+        TABULATED_WAVELENGTH = 1.798
+        TABULATED_ENERGY = 25.305
 
-        canAngle = self._sample_angle * PICONV
-
-        # tsec is the angle the scattered beam makes with the normal to the sample surface.
-        tsec = angle - self._sample_angle
+        # self._sample_angle is the normal to the sample surface, i.e.
+        # self._sample_angle = 0 means that the sample is perpendicular
+        # to the incident beam
+        alpha = (90.0 + self._sample_angle) * PICONV
+        theta = angle * PICONV
+        salpha = np.sin(alpha)
+        if theta > (alpha + np.pi):
+            stha = np.sin(abs(theta-alpha-np.pi))
+        else:
+            stha = np.sin(abs(theta-alpha))
 
         nlam = len(self._waves)
 
@@ -455,119 +474,147 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         acsc = np.ones(nlam)
         acc = np.ones(nlam)
 
-        # Case where tsec is close to 90 degrees.
-        # CALCULATION IS UNRELIABLE
+        # Scattering in direction of slab --> calculation is not reliable
         # Default to 1 for everything
-        if abs(abs(tsec) - 90.0) < 0.1:
+        # Tolerance is 0.001 rad ~ 0.06 deg
+        if abs(theta-alpha) < 0.001:
             return ass, assc, acsc, acc
 
         sample = mtd[self._sample_ws_name].sample()
         sam_material = sample.getMaterial()
 
-        tsec *= PICONV
-
-        sec1 = 1.0 / math.cos(canAngle)
-        sec2 = 1.0 / math.cos(tsec)
-
         # List of wavelengths
         waves = np.array(self._waves)
 
-        # Sample cross section
-        sample_x_section = (sam_material.totalScatterXSection() + sam_material.absorbXSection() * waves / 1.8) * self._sample_density
+        # Sample cross section (value for each of the wavelengths and for E = Efixed)
+        sample_x_section = (sam_material.totalScatterXSection() +
+                            sam_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._sample_density
 
-        vecFact = np.vectorize(self._fact)
-        fs = vecFact(sample_x_section, self._sample_thickness, sec1, sec2)
+        if self._efixed > 0:
+            sample_x_section_efixed = (sam_material.totalScatterXSection() +
+                                       sam_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._sample_density
+        elif self._emode == 'Elastic':
+            sample_x_section_efixed = 0
 
-        sample_sect_1, sample_sect_2 = self._calc_thickness_at_x_sect(sample_x_section, self._sample_thickness, [sec1, sec2])
-
-        if sec2 < 0.0:
-            ass = fs / self._sample_thickness
+        # Sample --> Ass
+        if self._emode == 'Efixed':
+            ki_s = sample_x_section_efixed * self._sample_thickness / salpha
+            kf_s = sample_x_section_efixed * self._sample_thickness / stha
         else:
-            ass = np.exp(-sample_sect_2) * fs / self._sample_thickness
+            ki_s, kf_s = self._calc_ki_kf(waves, self._sample_thickness, salpha, stha,
+                                          sample_x_section, sample_x_section_efixed)
 
+        sst = np.vectorize(self._self_shielding_transmission)
+        ssr = np.vectorize(self._self_shielding_reflection)
+        if theta < alpha or theta > (alpha + np.pi):
+            # transmission case
+            ass = sst(ki_s, kf_s)
+        else:
+            # reflection case
+            ass = ssr(ki_s, kf_s)
+
+        # Container --> Acc, Assc, Acsc
         if self._use_can:
             can_sample = mtd[self._can_ws_name].sample()
             can_material = can_sample.getMaterial()
 
-            # Calculate can cross section
-            can_x_section = (can_material.totalScatterXSection() + can_material.absorbXSection() * waves / 1.8) * self._can_density
-            assc, acsc, acc = self._calculate_can(ass, can_x_section, sample_sect_1, sample_sect_2, [sec1, sec2])
+            # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
+            can_x_section = (can_material.totalScatterXSection() +
+                             can_material.absorbXSection() * waves / TABULATED_WAVELENGTH) * self._can_density
+
+            if self._efixed > 0:
+                can_x_section_efixed = (can_material.totalScatterXSection() +
+                                        can_material.absorbXSection() * np.sqrt(TABULATED_ENERGY/self._efixed)) * self._can_density
+            elif self._emode == 'Elastic':
+                can_x_section_efixed = 0
+
+            # Front container --> Acc1
+            if self._emode == 'Efixed':
+                ki_c1 = can_x_section_efixed * self._can_front_thickness / salpha
+                kf_c1 = can_x_section_efixed * self._can_front_thickness / stha
+            else:
+                ki_c1, kf_c1 = self._calc_ki_kf(waves, self._can_front_thickness, salpha, stha,
+                                                can_x_section, can_x_section_efixed)
+
+            if theta < alpha or theta > (alpha + np.pi):
+                # transmission case
+                acc1 = sst(ki_c1, kf_c1)
+            else:
+                # reflection case
+                acc1 = ssr(ki_c1, kf_c1)
+
+            # Back container --> Acc2
+            if self._emode == 'Efixed':
+                ki_c2 = can_x_section_efixed * self._can_back_thickness / salpha
+                kf_c2 = can_x_section_efixed * self._can_back_thickness / stha
+            else:
+                ki_c2, kf_c2 = self._calc_ki_kf(waves, self._can_back_thickness, salpha, stha,
+                                                can_x_section, can_x_section_efixed)
+
+            if theta < alpha or theta > (alpha + np.pi):
+                # transmission case
+                acc2 = sst(ki_c2, kf_c2)
+            else:
+                # reflection case
+                acc2 = ssr(ki_c2, kf_c2)
+
+            # Attenuation due to passage by other layers (sample or container)
+            if theta < alpha or theta > (alpha + np.pi):                  # transmission case
+                acc = self._can_front_thickness * acc1 * np.exp(-kf_c2)
+                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1)
+                acc /= (self._can_front_thickness + self._can_back_thickness)
+
+                acsc = self._can_front_thickness * acc1 * np.exp(-kf_s-kf_c2)
+                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s)
+                acsc /= (self._can_front_thickness + self._can_back_thickness)
+
+                assc = ass * np.exp(-ki_c1-kf_c2)
+            else:                                                          # reflection case
+                acc = self._can_front_thickness * acc1
+                acc += self._can_back_thickness * acc2 * np.exp(-ki_c1-kf_c1)
+                acc /= (self._can_front_thickness + self._can_back_thickness)
+
+                acsc = self._can_front_thickness * acc1
+                acsc += self._can_back_thickness * acc2 * np.exp(-ki_c1-ki_s-kf_s-kf_c1)
+                acsc /= (self._can_front_thickness + self._can_back_thickness)
+
+                assc = ass * np.exp(-ki_c1-kf_c1)
 
         return ass, assc, acsc, acc
 
     # ------------------------------------------------------------------------------
 
-    def _fact(self, x_section, thickness, sec1, sec2):
-        S = x_section * thickness * (sec1 - sec2)
-        F = 1.0
-        if S == 0.0:
-            F = thickness
+    def _self_shielding_transmission(self, ki, kf):
+        if abs(ki-kf) < 1.0e-3:
+            return np.exp(-ki) * ( 1.0 - 0.5*(kf-ki) + (kf-ki)**2/12.0 )
         else:
-            S = (1 - math.exp(-S)) / S
-            F = thickness * S
-        return F
+            return (np.exp(-kf)-np.exp(-ki)) / (ki-kf)
 
     # ------------------------------------------------------------------------------
 
-    def _calc_thickness_at_x_sect(self, x_section, thickness, sec):
-        sec1, sec2 = sec
-
-        thick_sec_1 = x_section * thickness * sec1
-        thick_sec_2 = x_section * thickness * sec2
-
-        return thick_sec_1, thick_sec_2
+    def _self_shielding_reflection(self, ki, kf):
+        return (1.0 - np.exp(-ki-kf)) / (ki+kf)
 
     # ------------------------------------------------------------------------------
 
-    # pylint: disable=too-many-arguments
-    def _calculate_can(self, ass, can_x_section, sample_sect_1, sample_sect_2, sec):
-        """
-        Calculates the A_s,sc, A_c,sc and A_c,c data.
-        """
+    def _calc_ki_kf(self, waves, thickness, sinangle1, sinangle2, x_section, x_section_efixed = 0):
+        ki = np.ones(waves.size)
+        kf = np.ones(waves.size)
+        if self._emode == 'Elastic':
+            ki = np.copy(x_section)
+            kf = np.copy(x_section)
+        elif self._emode == 'Direct':
+            ki *= x_section_efixed
+            kf = np.copy(x_section)
+        elif self._emode == 'Indirect':
+            ki = np.copy(x_section)
+            kf *= x_section_efixed
+        ki *= (thickness / sinangle1)
+        kf *= (thickness / sinangle2)
+        return ki, kf
 
-        assc = np.ones(ass.size)
-        acsc = np.ones(ass.size)
-        acc = np.ones(ass.size)
+    # ------------------------------------------------------------------------------
 
-        sec1, sec2 = sec
-
-        vecFact = np.vectorize(self._fact)
-        f1 = vecFact(can_x_section, self._can_front_thickness, sec1, sec2)
-        f2 = vecFact(can_x_section, self._can_back_thickness, sec1, sec2)
-
-        can_thick_1_sect_1, can_thick_1_sect_2 = self._calc_thickness_at_x_sect(can_x_section, self._can_front_thickness, sec)
-        _, can_thick_2_sect_2 = self._calc_thickness_at_x_sect(can_x_section, self._can_back_thickness, sec)
-
-        if sec2 < 0.0:
-            val = np.exp(-(can_thick_1_sect_1 - can_thick_1_sect_2))
-            assc = ass * val
-
-            acc1 = f1
-            acc2 = f2 * val
-
-            acsc1 = acc1
-            acsc2 = acc2 * np.exp(-(sample_sect_1 - sample_sect_2))
-
-        else:
-            val = np.exp(-(can_thick_1_sect_1 + can_thick_2_sect_2))
-            assc = ass * val
-
-            acc1 = f1 * np.exp(-(can_thick_1_sect_2 + can_thick_2_sect_2))
-            acc2 = f2 * val
-
-            acsc1 = acc1 * np.exp(-sample_sect_2)
-            acsc2 = acc2 * np.exp(-sample_sect_1)
-
-        can_thickness = self._can_front_thickness + self._can_back_thickness
-
-        if can_thickness > 0.0:
-            acc = (acc1 + acc2) / can_thickness
-            acsc = (acsc1 + acsc2) / can_thickness
-
-        return assc, acsc, acc
-
-
-# ------------------------------------------------------------------------------
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FlatPlatePaalmanPingsCorrection)

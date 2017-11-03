@@ -64,7 +64,7 @@ void CalculateZscore::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", numspec, sizex,
                                           sizey));
 
-  Progress progress(this, 0, 1, numspec);
+  Progress progress(this, 0.0, 1.0, numspec);
 
   // 3. Get Z values
   for (size_t i = 0; i < numspec; ++i) {

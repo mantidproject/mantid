@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -20,6 +21,13 @@ using Mantid::DataObjects::Workspace2D;
 using Mantid::DataObjects::Workspace2D_sptr;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::V3D;
+
+namespace {
+bool isDefaultScaleFactor(const V3D &scaleFactor) {
+  const V3D defaultScaleFactor(1.0, 1.0, 1.0);
+  return (scaleFactor - defaultScaleFactor).norm() < 1e-9;
+}
+}
 
 class SetScalingPSDTest : public CxxTest::TestSuite {
 public:
@@ -58,8 +66,8 @@ public:
     double expectedYPos[5] = {-0.0005, 0.0990, 0.1985, -0.002042, -0.0025133};
     double expectedYScale[3] = {0.995002, 0.995001, 0.995000};
 
-    const auto &pmap = testWS->constInstrumentParameters();
     const auto &spectrumIndexNew = testWS->spectrumInfo();
+    const auto &componentInfo = testWS->componentInfo();
     for (int i = 0; i < ndets; ++i) {
       V3D newPos = spectrumIndexNew.position(i);
       V3D oldPos = originalPositions[i];
@@ -68,14 +76,10 @@ public:
       TS_ASSERT_DELTA(fabs(oldPos.Z() - newPos.Z()), 0.0, 1e-05);
 
       if (spectrumIndexNew.isMonitor(i)) {
-        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
-                         false);
+        TS_ASSERT(isDefaultScaleFactor(componentInfo.scaleFactor(i)));
       } else {
-        TS_ASSERT_EQUALS(pmap.contains(&spectrumIndexNew.detector(i), "sca"),
-                         true);
-        Parameter_sptr scaleParam =
-            pmap.get(&spectrumIndexNew.detector(i), "sca");
-        const V3D scaleFactor = scaleParam->value<V3D>();
+        TS_ASSERT(!isDefaultScaleFactor(componentInfo.scaleFactor(i)));
+        const V3D scaleFactor = componentInfo.scaleFactor(i);
         TS_ASSERT_EQUALS(scaleFactor.X(), 1.0);
         TS_ASSERT_EQUALS(scaleFactor.Z(), 1.0);
         TS_ASSERT_DELTA(scaleFactor.Y(), expectedYScale[i], 1e-06);

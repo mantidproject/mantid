@@ -63,15 +63,21 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
   /// Constructor
-  AlignAndFocusPowder();
+  AlignAndFocusPowder() : API::DataProcessorAlgorithm() {}
   /// Destructor
-  ~AlignAndFocusPowder() override;
+  ~AlignAndFocusPowder() override {}
+
   /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override;
+  const std::string name() const override { return "AlignAndFocusPowder"; }
+
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override;
+  int version() const override { return 1; }
+
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override;
+  const std::string category() const override {
+    return "Workflow\\Diffraction";
+  }
+
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Algorithm to focus powder diffraction data into a number of "
@@ -146,7 +152,7 @@ private:
   /// Offset to low resolution TOF spectra
   size_t m_lowResSpecOffset{0};
 
-  API::Progress *m_progress{nullptr}; ///< Progress reporting
+  std::unique_ptr<API::Progress> m_progress = nullptr; ///< Progress reporting
 };
 
 } // namespace WorkflowAlgorithm

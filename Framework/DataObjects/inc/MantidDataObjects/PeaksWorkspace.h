@@ -82,6 +82,11 @@ public:
     return std::unique_ptr<PeaksWorkspace>(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<PeaksWorkspace> cloneEmpty() const {
+    return std::unique_ptr<PeaksWorkspace>(doCloneEmpty());
+  }
+
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
 
   /** @return true because this type of the workspace needs custom sorting calls
@@ -93,7 +98,10 @@ public:
   int getNumberPeaks() const override;
   std::string getConvention() const override;
   void removePeak(int peakNum) override;
-  void addPeak(const Geometry::IPeak &ipeak) override;
+  void removePeaks(std::vector<int> badPeaks) override;
+  void addPeak(const Geometry::IPeak &peak) override;
+  /// Move a peak object into this peaks workspace
+  void addPeak(Peak &&peak);
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
@@ -176,6 +184,7 @@ protected:
 
 private:
   PeaksWorkspace *doClone() const override { return new PeaksWorkspace(*this); }
+  PeaksWorkspace *doCloneEmpty() const override { return new PeaksWorkspace(); }
   ITableWorkspace *
   doCloneColumns(const std::vector<std::string> &colNames) const override;
 

@@ -32,7 +32,7 @@
 #include "Graph.h"
 #include "Plot.h"
 #include "ApplicationWindow.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
 #include <qwt_plot.h>
 
@@ -42,7 +42,7 @@
 
 LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, Qt::WFlags fl)
     : QDialog(parent, fl) {
-  unitBox = NULL;
+  unitBox = nullptr;
 
   setWindowTitle(tr("MantidPlot - Line options"));
   setAttribute(Qt::WA_DeleteOnClose);
@@ -159,7 +159,7 @@ LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, Qt::WFlags fl)
 }
 
 void LineDialog::initGeometryTab() {
-  if (unitBox == NULL)
+  if (unitBox == nullptr)
     unitBox = new QComboBox();
   unitBox->addItem(tr("Scale Coordinates"));
   unitBox->addItem(tr("Pixels"));

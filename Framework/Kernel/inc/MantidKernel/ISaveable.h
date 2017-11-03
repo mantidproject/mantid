@@ -3,8 +3,6 @@
 
 #include "MantidKernel/System.h"
 #include <list>
-#include <vector>
-#include <algorithm>
 #include <mutex>
 #ifndef Q_MOC_RUN
 #include <boost/optional.hpp>

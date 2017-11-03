@@ -17,7 +17,59 @@
 			See http://muparser.sourceforge.net/mup_features.html#idDef2 for available 
 			operators -->
 		<parameter name="formula_eff" type="string">
-			<value val="exp(-0.0565/sqrt(e))*(1.0-exp(-3.284/sqrt(e)))" />
+			<value val="1-exp(-5.6/sqrt(e))" />
+		</parameter>
+
+		<!-- Default monitor spectrum number for monitor normalisation. -->
+		<parameter name="default-incident-monitor-spectrum" type="int">
+			<value val="98305" />
+		</parameter>
+		<!-- Preferred scaling after normalisation to monitor counts. -->
+		<parameter name="scaling_after_monitor_normalisation">
+			<value val="100000" />
+		</parameter>
+		<parameter name="enable_flat_background_subtraction" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_background_diagnostics" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_peak_diagnostics" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="beam_stop_diagnostics_spectra" type="string">
+			<value val="84861-84870, 85114-85129, 85367-85388, 85620-85647, 85873-85906, 86126-86165, 86379-86424, 86632-86683, 86885-86942, 87138-87201, 87391-87460, 87644-87719, 87897-87978, 88150-88237, 88403-88496, 88656-88755, 88909-89014, 89162-89273, 89415-89532, 89668-89791, 89921-90050, 90177-90306, 90436-90559, 90695-90812, 90954-91065, 91213-91318, 91472-91571, 91731-91824, 91990-92077, 92249-92330, 92508-92583, 92767-92836, 93026-93089, 93285-93342, 93544-93595, 93803-93848, 94062-94101, 94321-94354, 94580-94607, 94839-94860, 95098-95113, 95357-95366"/>
+		</parameter>
+		<parameter name="enable_incident_energy_calibration" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_peak_fitting" type="bool">
+			<value val="false" />
+		</parameter>
+		<parameter name="enable_elastic_channel_fitting" type="bool">
+			<value val="true" />
+		</parameter>
+		<parameter name="Workflow.MaskFile" type="string">
+			<value val="IN5_Mask.xml" />
+		</parameter>
+		<!-- MergeRuns behavior when merging sample logs. -->
+		<parameter name="sample_logs_sum" type="string">
+			<value val="Detector.detsum, duration, monitor.monsum" />
+		</parameter>
+		<parameter name="sample_logs_time_series" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn" type="string">
+			<value val="sample.temperature" />
+		</parameter>
+		<parameter name="sample_logs_warn_tolerances" type="string">
+			<value val="1.0" />
+		</parameter>
+		<parameter name="sample_logs_fail" type="string">
+			<value val="monitor.time_of_flight_0, monitor.time_of_flight_1, monitor.time_of_flight_2" />
+		</parameter>
+		<parameter name="sample_logs_fail_tolerances" type="string">
+			<value val="0, 0, 0" />
 		</parameter>
 
 	</component-link>

@@ -156,7 +156,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value,
                                      const std::string &op,
                                      const std::string &name, bool inplace,
                                      bool reverse) {
-  std::string algoName = op;
+  const std::string &algoName = op;
 
   // Create the single valued workspace first so that it is run as a top-level
   // algorithm

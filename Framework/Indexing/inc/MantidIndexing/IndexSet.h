@@ -87,12 +87,16 @@ public:
   const_iterator begin() const { return const_iterator(*this, 0); }
   const_iterator end() const { return const_iterator(*this, size()); }
 
+  explicit IndexSet();
   IndexSet(size_t fullRange);
   IndexSet(int64_t min, int64_t max, size_t fullRange);
   IndexSet(const std::vector<size_t> &indices, size_t fullRange);
 
   /// Returns the size of the set.
   size_t size() const { return m_size; }
+
+  /// Returns true if the set is empty.
+  size_t empty() const { return m_size == 0; }
 
   /// Returns the element at given index (range 0...size()-1).
   size_t operator[](size_t index) const {
@@ -112,6 +116,9 @@ private:
   size_t m_size;
   std::vector<size_t> m_indices;
 };
+
+/// Default Constructor creates empty IndexSet of size 0.
+template <class T> IndexSet<T>::IndexSet() : m_size(0) {}
 
 /// Constructor for a set covering the full range from 0 to fullRange-1.
 template <class T>

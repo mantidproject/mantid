@@ -7,29 +7,6 @@ import json
 from AbinsModules import CalculateDWSingleCrystal, LoadCASTEP, AbinsTestHelpers
 
 
-def old_python():
-    """" Check if Python has proper version."""
-    is_python_old = AbinsTestHelpers.old_python()
-    if is_python_old:
-        logger.warning("Skipping AbinsCalculateDWSingleCrystalTest because Python is too old.")
-    return is_python_old
-
-
-def skip_if(skipping_criteria):
-    """
-    Skip all tests if the supplied function returns true.
-    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
-    """
-    def decorate(cls):
-        if skipping_criteria():
-            for attr in cls.__dict__.keys():
-                if callable(getattr(cls, attr)) and 'test' in attr:
-                    delattr(cls, attr)
-        return cls
-    return decorate
-
-
-@skip_if(old_python)
 class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
 
     temperature = 10  # 10 K
@@ -48,8 +25,8 @@ class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
     def test_wrong_input(self):
         filename = self._si2 + ".phonon"
 
-        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename))
-        good_data = castep_reader.read_phonon_file()
+        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename))
+        good_data = castep_reader.read_vibrational_or_phonon_data()
 
         # wrong temperature
         self.assertRaises(ValueError, CalculateDWSingleCrystal, temperature=-10, abins_data=good_data)
@@ -77,10 +54,10 @@ class AbinsCalculateDWSingleCrystalTest(unittest.TestCase):
 
     def _get_good_data(self, filename=None):
 
-        castep_reader = LoadCASTEP(input_dft_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
+        castep_reader = LoadCASTEP(input_ab_initio_filename=AbinsTestHelpers.find_file(filename=filename + ".phonon"))
         dw = self._prepare_data(filename=AbinsTestHelpers.find_file(filename=filename + "_crystal_DW.txt"))
 
-        return {"DFT": castep_reader.read_phonon_file(), "DW": dw}
+        return {"DFT": castep_reader.read_vibrational_or_phonon_data(), "DW": dw}
 
     # noinspection PyMethodMayBeStatic
     def _prepare_data(self, filename=None):

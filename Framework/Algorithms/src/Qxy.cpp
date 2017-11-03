@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -373,7 +373,7 @@ std::vector<double> Qxy::logBinning(double min, double max, int num) {
   min = log10(min);
   max = log10(max);
   double binWidth = fabs((max - min) / (num - 1));
-  for (int i = 0; i <= num; ++i) {
+  for (int i = 0; i < num; ++i) {
     outBins[i] = pow(10, min + i * binWidth);
   }
   return outBins;
@@ -407,19 +407,15 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   int nBins = static_cast<int>(max / delta);
 
   HistogramData::BinEdges axis;
-  double startVal;
   if (log_binning) {
     // get qmin from the run properties
     double qmin = getQminFromWs(*inputWorkspace);
-    // Filling the binning vector: negative, 0 and then positive
-    std::vector<double> totalBinning;
     std::vector<double> positiveBinning = logBinning(qmin, max, nBins);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
-    totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
-                        std::end(positiveBinning));
+    std::vector<double> totalBinning = positiveBinning;
     std::for_each(std::begin(totalBinning), std::end(totalBinning),
                   [](double &n) { n = -1 * n; });
-    totalBinning.push_back(0);
+    totalBinning.push_back(0.0);
     std::reverse(std::begin(positiveBinning), std::end(positiveBinning));
     totalBinning.insert(std::end(totalBinning), std::begin(positiveBinning),
                         std::end(positiveBinning));
@@ -430,7 +426,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
     if (nBins * delta != max)
       ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
                // delta
-    startVal = -1.0 * delta * nBins;
+    double startVal = -1.0 * delta * nBins;
     nBins *= 2; // go from -max to +max
     nBins += 1; // Add 1 - this is a histogram
 
@@ -443,6 +439,9 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, nBins - 1, nBins, nBins - 1);
+  // Legacy compatibility. Setting detector IDs not actually meaningful.
+  for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i)
+    outputWorkspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   // ... but clear the masking from the parameter map as we don't want to carry
   // that over since this is essentially a 2D rebin
   outputWorkspace->mutableDetectorInfo().clearMaskFlags();

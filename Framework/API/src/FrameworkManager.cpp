@@ -11,6 +11,8 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UsageService.h"
 
+#include <nexus/NeXusFile.hpp>
+
 #include <Poco/ActiveResult.h>
 
 #include <clocale>

@@ -2,6 +2,7 @@
 """
     This class holds all the necessary information to create a reduction script.
 """
+from __future__ import (absolute_import, division, print_function)
 import time
 from reduction_gui.reduction.scripter import BaseReductionScripter
 

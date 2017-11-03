@@ -1,8 +1,14 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Property.h"
+
 #include <boost/lexical_cast.hpp>
+
 #include <exception>
 #include <memory>
+#include <stdexcept>
 
 using namespace Mantid::Kernel;
 
@@ -204,7 +210,7 @@ void EnabledWhenProperty::modify_allowed_values(Property *const) {}
 *
 * @return Pointer to cloned EnabledWhenProperty object
 */
-IPropertySettings *EnabledWhenProperty::clone() {
+IPropertySettings *EnabledWhenProperty::clone() const {
   return new EnabledWhenProperty(*this);
 }
 

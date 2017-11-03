@@ -4,8 +4,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -26,6 +27,8 @@ GCC_DIAG_ON(conversion)
 #include <functional>
 #include <map>
 
+using namespace Mantid::Types;
+
 namespace {
 /// Logger
 Mantid::Kernel::Logger g_log("KafkaEventStreamDecoder");
@@ -39,12 +42,12 @@ static const std::string RUN_MESSAGE_ID = "ba57";
 static const std::string EVENT_MESSAGE_ID = "ev42";
 
 static const std::chrono::seconds MAX_LATENCY(1);
-}
+} // namespace
 
 namespace Mantid {
 namespace LiveData {
-using DataObjects::TofEvent;
-using Kernel::DateAndTime;
+using Types::Event::TofEvent;
+using Types::Core::DateAndTime;
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -62,7 +65,8 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     : m_broker(broker), m_eventTopic(eventTopic), m_runInfoTopic(runInfoTopic),
       m_spDetTopic(spDetTopic), m_interrupt(false), m_localEvents(),
       m_specToIdx(), m_runStart(), m_runNumber(-1), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false) {}
+      m_capturing(false), m_exception(), m_extractWaiting(false),
+      m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -99,7 +103,7 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   m_spDetStream =
       m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
 
-  auto m_thread = std::thread([this]() { this->captureImpl(); });
+  m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
 }
 
@@ -202,8 +206,10 @@ void KafkaEventStreamDecoder::captureImpl() noexcept {
   try {
     captureImplExcept();
   } catch (std::exception &exc) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(
         "KafkaEventStreamDecoder: Unknown exception type caught.");
   }
@@ -252,12 +258,13 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
     }
-
     // Pull in events
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
-    if (buffer.empty())
+    if (buffer.empty()) {
+      m_cbIterationEnd();
       continue;
+    }
 
     if (checkOffsets) {
       if (offset >= stopOffsets[topicName][static_cast<size_t>(partition)]) {
@@ -360,6 +367,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
         g_log.debug("Received an end-of-run message");
       }
     }
+    m_cbIterationEnd();
   }
   g_log.debug("Event capture finished");
 }
@@ -439,7 +447,7 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   auto runStartTime = static_cast<time_t>(runStartData.startTime);
   char timeString[32];
   strftime(timeString, 32, "%Y-%m-%dT%H:%M:%S", localtime(&runStartTime));
-  m_runStart.setFromISO8601(timeString, false);
+  m_runStart.setFromISO8601(timeString);
   // Run number
   mutableRun.addProperty(RUN_START_PROPERTY, std::string(timeString));
   m_runNumber = runStartData.runNumber;
@@ -573,6 +581,6 @@ void KafkaEventStreamDecoder::loadInstrument(
                     << "': " << exc.what() << "\n";
   }
 }
-}
+} // namespace LiveData
 
 } // namespace Mantid

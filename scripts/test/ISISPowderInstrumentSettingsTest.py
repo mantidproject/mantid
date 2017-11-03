@@ -7,6 +7,7 @@ import warnings
 from six_shim import assertRaisesRegex, assertRegex
 
 from isis_powder.routines import instrument_settings, param_map_entry
+from isis_powder import Polaris
 
 
 class ISISPowderInstrumentSettingsTest(unittest.TestCase):
@@ -25,7 +26,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
         # Check it still prints the acceptable values when it fails
-        with assertRaisesRegex(self, AttributeError, "a foo, A BAR"):
+        with assertRaisesRegex(self, AttributeError, "A BAR"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -192,6 +193,10 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             self.assertEqual(len(warnings_capture), num_warnings_before + 1)
 
         self.assertEqual(opt_inst_obj.script_facing_name, optional_value)
+
+    def test_POLARIS_name_suffix(self):
+        pol = Polaris(user_name="test", calibration_directory="", output_directory="", suffix="-suf")
+        self.assertEquals(pol._generate_output_file_name("123"), "POL123-suf")
 
 
 class SampleEnum(object):

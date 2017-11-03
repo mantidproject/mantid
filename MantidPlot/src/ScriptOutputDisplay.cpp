@@ -1,7 +1,7 @@
 #include "ScriptOutputDisplay.h"
 #include "TextFileIO.h"
 
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QDateTime>
 #include <QKeyEvent>
@@ -19,7 +19,7 @@ using namespace MantidQt::API;
  * @param flags :: Window flags
  */
 ScriptOutputDisplay::ScriptOutputDisplay(QWidget *parent)
-    : QTextEdit(parent), m_copy(NULL), m_clear(NULL), m_save(NULL),
+    : QTextEdit(parent), m_copy(nullptr), m_clear(nullptr), m_save(nullptr),
       m_origFontSize(8), m_zoomLevel(0) {
 #ifdef __APPLE__
   // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!

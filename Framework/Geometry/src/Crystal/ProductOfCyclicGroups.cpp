@@ -31,7 +31,7 @@ ProductOfCyclicGroups::getGeneratedGroup(const std::string &generators) const {
 std::vector<Group_const_sptr> ProductOfCyclicGroups::getFactorGroups(
     const std::vector<SymmetryOperation> &symmetryOperations) const {
   std::vector<Group_const_sptr> groups;
-
+  groups.reserve(symmetryOperations.size());
   for (const auto &symmetryOperation : symmetryOperations) {
     groups.push_back(
         GroupFactory::create<CyclicGroup>(symmetryOperation.identifier()));

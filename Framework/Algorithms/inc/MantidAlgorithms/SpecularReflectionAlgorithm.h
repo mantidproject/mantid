@@ -42,18 +42,21 @@ protected:
 
   /// Get the surface sample component
   Mantid::Geometry::IComponent_const_sptr
-  getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst);
+  getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst) const;
 
   /// Get the detector component
   Mantid::Geometry::IComponent_const_sptr
   getDetectorComponent(Mantid::API::MatrixWorkspace_sptr workspace,
-                       const bool isPointDetector);
+                       const bool isPointDetector) const;
 
   /// Does the property have a default value.
   bool isPropertyDefault(const std::string &propertyName) const;
 
   /// initialize common properties
   void initCommonProperties();
+
+  /// Calculate the twoTheta angle w.r.t the direct beam
+  double calculateTwoTheta() const;
 };
 
 } // namespace Algorithms

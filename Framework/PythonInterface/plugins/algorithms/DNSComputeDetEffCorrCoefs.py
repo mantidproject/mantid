@@ -242,5 +242,6 @@ class DNSComputeDetEffCorrCoefs(PythonAlgorithm):
 
         return
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(DNSComputeDetEffCorrCoefs)

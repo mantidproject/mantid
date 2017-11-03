@@ -12,7 +12,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems
+from six import types, iteritems, PY3
 import numpy as np
 import h5py as h5
 
@@ -26,14 +26,6 @@ REG_DATA_MONITORS_NAME = ADD_MONITORS_TAG + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 ZERO_ERROR_DEFAULT = 1e6
 INCIDENT_MONITOR_TAG = '_incident_monitor'
 MANTID_PROCESSED_WORKSPACE_TAG = 'Mantid Processed Workspace'
-
-# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
-CAN_IMPORT_NXS = True
-try:
-    import nxs
-except ImportError:
-    CAN_IMPORT_NXS = False
-# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
 
 
 def deprecated(obj):
@@ -224,7 +216,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
     #    for the slice region we don't want to be masked.
     # 3. Create the intersection between 1 and 2. This will provide a three-quarter wedge of the hollow
     #    cylinder.
-    xmlstring += '<algebra val="((' + cout_id + ' (#' + cin_id  + ')) (' + p1id + ':' + p2id + '))"/>\n'
+    xmlstring += '<algebra val="(#(' + cout_id + ' (#' + cin_id  + ')) : (' + p1id + ':' + p2id + '))"/>\n'
     return xmlstring
 
 
@@ -373,7 +365,7 @@ def slice2histogram(ws_event, time_start, time_stop, monitor, binning=""):
     return hist, (tot_t, tot_c, part_t, part_c)
 
 
-def sliceParser(str_to_parser):
+def sliceParser(str_to_parser): # noqa: C901
     """
     Create a list of boundaries from a string defing the slices.
     Valid syntax is:
@@ -735,9 +727,16 @@ def check_if_is_event_data(file_name):
         # Open instrument group
         is_event_mode = False
         for value in list(first_entry.values()):
-            if "NX_class" in value.attrs and "NXevent_data" == value.attrs["NX_class"]:
-                is_event_mode = True
-                break
+            if "NX_class" in value.attrs:
+                if PY3:
+                    if "NXevent_data" == value.attrs["NX_class"].decode() :
+                        is_event_mode = True
+                        break
+                else:
+                    if "NXevent_data" == value.attrs["NX_class"]:
+                        is_event_mode = True
+                        break
+
     return is_event_mode
 
 
@@ -1535,23 +1534,23 @@ def can_load_as_event_workspace(filename):
     # Check if it can be loaded with LoadEventNexus
     is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
 
-    # Ubuntu does not provide NEXUS for python currently, need to hedge for that
-    if CAN_IMPORT_NXS:
-        if not is_event_workspace:
-            # pylint: disable=bare-except
-            try:
-                # We only check the first entry in the root
-                # and check for event_eventworkspace in the next level
-                nxs_file =nxs.open(filename, 'r')
-                rootKeys =  list(nxs_file.getentries().keys())
-                nxs_file.opengroup(rootKeys[0])
-                nxs_file.opengroup('event_workspace')
-                is_event_workspace = True
-            except:
-                pass
-            finally:
-                nxs_file.close()
-
+    # Original code test it with nexus python. why?
+    # This is just a copy of the logic and implement it using h5py
+    if not is_event_workspace:
+        # pylint: disable=bare-except
+        try:
+            # We only check the first entry in the root
+            # and check for event_eventworkspace in the next level
+            with h5.File(filename) as h5f:
+                try:
+                    rootKeys = h5f.keys()
+                    entry0 = h5f[rootKeys[0]]
+                    ew = entry0['event_workspace']
+                    is_event_workspace = ew is not None
+                except:
+                    pass
+        except IOError:
+            pass
     return is_event_workspace
 
 
@@ -1564,7 +1563,6 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     '''
     min_q = None
     max_q = None
-
     front_data = mtd[front_data_name]
     front_dataX = front_data.readX(0)
 
@@ -1746,46 +1744,41 @@ class MeasurementTimeFromNexusFileExtractor(object):
     def __init__(self):
         super(MeasurementTimeFromNexusFileExtractor, self).__init__()
 
-    def _get_measurement_time_processed_file(self, nxs_file):
-        nxs_file.opengroup('logs')
-        nxs_file.opengroup('end_time')
-        nxs_file.opendata('value')
-        data =  nxs_file.getdata()
-        return data
+    def _get_str(self, v):
+        return v.tostring().decode('UTF-8')
 
-    def _get_measurement_time_for_non_processed_file(self, nxs_file):
-        nxs_file.opendata('end_time')
-        return nxs_file.getdata()
+    def _get_measurement_time_processed_file(self, h5entry):
+        logs = h5entry['logs']
+        end_time = logs['end_time']
+        value = end_time['value']
+        return self._get_str(value[0])
 
-    def _check_if_processed_nexus_file(self, nxs_file):
-        nxs_file.opendata('definition')
-        mantid_definition = nxs_file.getdata()
-        nxs_file.closedata()
+    def _get_measurement_time_for_non_processed_file(self, h5entry):
+        end_time = h5entry['end_time']
+        return self._get_str(end_time[0])
 
+    def _check_if_processed_nexus_file(self, h5entry):
+        definition = h5entry['definition']
+        mantid_definition = self._get_str(definition[0])
         is_processed = True if MANTID_PROCESSED_WORKSPACE_TAG in mantid_definition else False
         return is_processed
 
     def get_measurement_time(self, filename_full):
         measurement_time = ''
-        # Need to make sure that NXS module can be imported
-        if CAN_IMPORT_NXS:
-            try:
-                nxs_file = nxs.open(filename_full, 'r')
-            # pylint: disable=bare-except
+        try:
+            with h5.File(filename_full) as h5f:
                 try:
-                    rootKeys =  list(nxs_file.getentries().keys())
-                    nxs_file.opengroup(rootKeys[0])
-                    is_processed_file = self._check_if_processed_nexus_file(nxs_file)
+                    rootKeys =  list(h5f.keys())
+                    entry0 = h5f[rootKeys[0]]
+                    is_processed_file = self._check_if_processed_nexus_file(entry0)
                     if is_processed_file:
-                        measurement_time = self._get_measurement_time_processed_file(nxs_file)
+                        measurement_time = self._get_measurement_time_processed_file(entry0)
                     else:
-                        measurement_time = self._get_measurement_time_for_non_processed_file(nxs_file)
+                        measurement_time = self._get_measurement_time_for_non_processed_file(entry0)
                 except:
                     sanslog.warning("Failed to retrieve the measurement time for " + str(filename_full))
-                finally:
-                    nxs_file.close()
-            except ValueError:
-                sanslog.warning("Failed to open the file: " + str(filename_full))
+        except IOError:
+            sanslog.warning("Failed to open the file: " + str(filename_full))
         return measurement_time
 
 
@@ -1908,6 +1901,12 @@ def extract_fit_parameters(rAnds):
     scale_factor = rAnds.scale
     shift_factor = rAnds.shift
 
+    if rAnds.qRangeUserSelected:
+        fit_min = rAnds.qMin
+        fit_max = rAnds.qMax
+    else:
+        fit_min = None
+        fit_max = None
     # Set the fit mode
     fit_mode = None
     if rAnds.fitScale and rAnds.fitShift:
@@ -1918,7 +1917,7 @@ def extract_fit_parameters(rAnds):
         fit_mode = "ShiftOnly"
     else:
         fit_mode = "None"
-    return scale_factor, shift_factor, fit_mode
+    return scale_factor, shift_factor, fit_mode, fit_min, fit_max
 
 
 def check_has_bench_rot(workspace, log_dict=None):
@@ -1997,7 +1996,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
     detector_selection = detector_selection.upper()
     # If we are dealing with LOQ, then the correct combineDet selection is
     if instrument_name == "LOQ":
-        if detector_selection == "MAIN":
+        if detector_selection == "MAIN" or detector_selection == "MAIN-DETECTOR-BANK":
             new_combine_detector_selection = 'rear'
         elif detector_selection == "HAB":
             new_combine_detector_selection = 'front'
@@ -2012,9 +2011,9 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
 
     # If we are dealing with SANS2D, then the correct combineDet selection is
     if instrument_name == "SANS2D":
-        if detector_selection == "REAR":
+        if detector_selection == "REAR" or detector_selection == "REAR-DETECTOR":
             new_combine_detector_selection = 'rear'
-        elif detector_selection == "FRONT":
+        elif detector_selection == "FRONT" or detector_selection == "FRONT-DETECTOR":
             new_combine_detector_selection = 'front'
         elif detector_selection == "MERGED":
             new_combine_detector_selection = 'merged'
@@ -2330,6 +2329,7 @@ class RunDetails(object):
 ###############################################################################
 ########################## End of Deprecated Code #############################
 ###############################################################################
+
 
 if __name__ == '__main__':
     pass

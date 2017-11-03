@@ -4,10 +4,17 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/cow_ptr.h"
 
+// Forward declarations
+namespace mu {
+class Parser;
+} // namespace mu
+
 namespace Mantid {
 
 namespace HistogramData {
 class Histogram;
+class HistogramE;
+class HistogramY;
 class Points;
 }
 
@@ -61,15 +68,14 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  double calculateFormulaValue(const std::string &formula, double energy);
-  MantidVec calculateEfficiency(double eff0, const std::string &formula,
-                                const HistogramData::Points &xIn);
+  void correctHistogram(const size_t index, const double eff0, double &e,
+                        mu::Parser &parser);
 
-  std::string getValFromInstrumentDef(const std::string &parameterName);
+  double evaluate(const mu::Parser &parser) const;
 
-  HistogramData::Histogram
-  applyDetEfficiency(const size_t nChans, const Mantid::MantidVec &effVec,
-                     const HistogramData::Histogram &histogram);
+  mu::Parser generateParser(const std::string &formula, double *e) const;
+
+  std::string retrieveFormula(const size_t workspaceIndex);
 
   /// The user selected (input) workspace
   API::MatrixWorkspace_const_sptr m_inputWS;

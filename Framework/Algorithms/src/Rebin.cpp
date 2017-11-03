@@ -355,5 +355,10 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   }
 }
 
+Parallel::ExecutionMode Rebin::getParallelExecutionMode(
+    const std::map<std::string, Parallel::StorageMode> &storageModes) const {
+  return Parallel::getCorrespondingExecutionMode(storageModes.begin()->second);
+}
+
 } // namespace Algorithm
 } // namespace Mantid

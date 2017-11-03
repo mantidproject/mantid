@@ -17,8 +17,10 @@ namespace Indexing {
 class IndexInfo;
 }
 
-namespace Kernel {
+namespace Types {
+namespace Core {
 class DateAndTime;
+}
 }
 
 namespace Geometry {
@@ -102,7 +104,8 @@ public:
 
   /**@name Instrument queries */
   //@{
-  Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
+  boost::shared_ptr<const Geometry::IDetector>
+  getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(const Geometry::IDetector &det) const;
   double detectorSignedTwoTheta(const Geometry::IDetector &det) const;
 
@@ -140,7 +143,9 @@ public:
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   virtual std::size_t size() const = 0;
-  /// Returns the size of each block of data returned by the dataY accessors
+  /// Returns the size of each block of data returned by the dataY accessors.
+  /// This throws an exception if the lengths are not identical across the
+  /// spectra.
   virtual std::size_t blocksize() const = 0;
   /// Returns the number of histograms in the workspace
   virtual std::size_t getNumberHistograms() const = 0;
@@ -150,8 +155,8 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
 
-  virtual Kernel::DateAndTime getFirstPulseTime() const;
-  Kernel::DateAndTime getLastPulseTime() const;
+  virtual Types::Core::DateAndTime getFirstPulseTime() const;
+  Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
   size_t binIndexOf(const double xValue, const std::size_t = 0) const;
@@ -454,9 +459,6 @@ public:
 
   void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
-  void saveSpectraMapNexus(
-      ::NeXus::File *file, const std::vector<int> &spec,
-      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
   //=====================================================================================
   // MD Geometry methods
@@ -549,14 +551,14 @@ protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MatrixWorkspace(const MatrixWorkspace &other);
 
-  MatrixWorkspace();
+  MatrixWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
   /// be overloaded.
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength) = 0;
-  virtual void init(const std::size_t &NVectors,
-                    const HistogramData::Histogram &histogram) = 0;
+  virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   /// Invalidates the commons bins flag.  This is generally called when a method
   /// could allow the X values to be changed.
@@ -569,7 +571,7 @@ protected:
 
 private:
   MatrixWorkspace *doClone() const override = 0;
-  virtual MatrixWorkspace *doCloneEmpty() const = 0;
+  MatrixWorkspace *doCloneEmpty() const override = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr

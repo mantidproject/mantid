@@ -2,8 +2,8 @@
 #define MANTID_ALGORITHMS_UNWRAPMONITOR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/HistogramX.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,7 +47,7 @@ namespace Algorithms {
 class DLLExport UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
-  ~UnwrapMonitor() override;
+  ~UnwrapMonitor() override {}
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UnwrapMonitor"; }
   /// Summary of algorithms purpose
@@ -90,7 +90,7 @@ private:
   double m_Tmax;  ///< The end of the time-of-flight frame
   size_t m_XSize; ///< The size of the X vectors in the input workspace
   /// Progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithm

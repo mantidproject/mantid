@@ -21,7 +21,6 @@ def create_van(instrument, run_details, absorb):
                                                                input_batching=INPUT_BATCHING.Summed)
     input_van_ws = input_van_ws_list[0]  # As we asked for a summed ws there should only be one returned
 
-    # TODO where do we subtract empty can on GEM ?
     corrected_van_ws = common.subtract_summed_runs(ws_to_correct=input_van_ws,
                                                    empty_sample_ws_string=run_details.empty_runs,
                                                    instrument=instrument)
@@ -29,11 +28,12 @@ def create_van(instrument, run_details, absorb):
     # Crop the tail end of the data on PEARL if they are not capturing slow neutrons
     corrected_van_ws = instrument._crop_raw_to_expected_tof_range(ws_to_crop=corrected_van_ws)
 
+    if absorb:
+        corrected_van_ws = instrument._apply_absorb_corrections(run_details=run_details,
+                                                                ws_to_correct=corrected_van_ws)
+
     aligned_ws = mantid.AlignDetectors(InputWorkspace=corrected_van_ws,
                                        CalibrationFile=run_details.offset_file_path)
-    if absorb:
-        aligned_ws = instrument._apply_absorb_corrections(run_details=run_details, van_ws=aligned_ws)
-
     focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                    GroupingFileName=run_details.grouping_file_path)
 
@@ -41,7 +41,7 @@ def create_van(instrument, run_details, absorb):
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
-                                                               run_details=run_details, output_mode="all")
+                                                               run_details=run_details, output_mode="mods")
 
     _create_vanadium_splines(focused_spectra, instrument, run_details)
 
@@ -64,4 +64,9 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
         mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=ws, Append=append)
         append = True
     # Group for user convenience
-    mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace="Van_spline_data")
+    group_name = "Van_spline_data"
+    tt_mode = instrument._get_current_tt_mode()
+    if tt_mode:
+        group_name = group_name + '_' + tt_mode
+
+    mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace=group_name)

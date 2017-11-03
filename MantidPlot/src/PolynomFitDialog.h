@@ -45,7 +45,7 @@ class PolynomFitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  PolynomFitDialog(QWidget *parent = 0, Qt::WFlags fl = 0);
+  PolynomFitDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
 
 public slots:
   void fit();

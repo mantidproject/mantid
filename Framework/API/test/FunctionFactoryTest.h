@@ -444,7 +444,15 @@ public:
     const auto mdfunc = boost::dynamic_pointer_cast<MultiDomainFunction>(fun);
     TS_ASSERT(mdfunc);
     if (mdfunc) {
-      TS_ASSERT_EQUALS(mdfunc->asString(), fnString);
+      TS_ASSERT_EQUALS(mdfunc->asString(),
+                       "composite=MultiDomainFunction,NumDeriv=true;(composite="
+                       "CompositeFunction,NumDeriv=false,$domains=i;name="
+                       "FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2,ties=(b1=0.2))"
+                       ";(composite=CompositeFunction,NumDeriv=false,$domains="
+                       "i;name=FunctionFactoryTest_FunctA,a0=0,a1=0.5;name="
+                       "FunctionFactoryTest_FunctB,b0=0.1,b1=0.2);ties=(f1.f1."
+                       "b1=f0.f1.b1)");
       TS_ASSERT_EQUALS(mdfunc->nFunctions(), 2);
 
       // test the domains for each function

@@ -324,7 +324,7 @@ void IntegrateMDHistoWorkspace::exec() {
      */
     MDHistoWorkspace_sptr outWS = createShapedOutput(inWS.get(), pbins, g_log);
 
-    Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
+    Progress progress(this, 0.0, 1.0, size_t(outWS->getNPoints()));
 
     // Store in each dimension
     std::vector<Mantid::coord_t> binWidthsOut(nDims);

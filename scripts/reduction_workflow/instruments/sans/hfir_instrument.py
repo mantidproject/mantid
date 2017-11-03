@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name,too-many-arguments,too-many-branches
+from __future__ import (absolute_import, division, print_function)
 import sys
 from mantid.kernel import Logger
 

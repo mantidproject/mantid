@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QTreeView>
 #include <QTreeWidget>
@@ -39,7 +39,7 @@ class AlgHistoryItem : public QTreeWidgetItem, public Mantid::API::HistoryItem {
 public:
   AlgHistoryItem(const QStringList &names,
                  Mantid::API::AlgorithmHistory_const_sptr algHistory,
-                 AlgHistoryItem *parent = 0)
+                 AlgHistoryItem *parent = nullptr)
       : QTreeWidgetItem(parent, names, UserType),
         Mantid::API::HistoryItem(algHistory) {}
 };
@@ -91,7 +91,7 @@ public:
   AlgExecSummaryGrpBox(QString, QWidget *w);
   ~AlgExecSummaryGrpBox() override;
   void setData(const double execDuration,
-               const Mantid::Kernel::DateAndTime execDate);
+               const Mantid::Types::Core::DateAndTime execDate);
 
 private:
   QLineEdit *getAlgExecDurationCtrl() const { return m_execDurationEdit; }

@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -12,7 +13,10 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
+
+#include <boost/make_shared.hpp>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -20,6 +24,9 @@ namespace Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Fit)
+
+/// Default constructor
+Fit::Fit() : IFittingAlgorithm(), m_maxIterations() {}
 
 /** Initialisation method
 */
@@ -97,28 +104,8 @@ void Fit::initConcrete() {
                   "Output is an empty string).");
 }
 
-/**
-  * Copy all output workspace properties from the minimizer to Fit algorithm.
-  * @param minimizer :: The minimizer to copy from.
-  */
-void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
-  auto &properties = minimizer.getProperties();
-  for (auto property : properties) {
-    if ((*property).direction() == Kernel::Direction::Output &&
-        (*property).isValid() == "") {
-      auto clonedProperty =
-          std::unique_ptr<Kernel::Property>((*property).clone());
-      declareProperty(std::move(clonedProperty));
-    }
-  }
-}
-
-/** Executes the algorithm
-*
-*  @throw runtime_error Thrown if algorithm cannot execute
-*/
-void Fit::execConcrete() {
-
+/// Read in the properties specific to Fit.
+void Fit::readProperties() {
   std::string ties = getPropertyValue("Ties");
   if (!ties.empty()) {
     m_function->addTies(ties);
@@ -128,73 +115,122 @@ void Fit::execConcrete() {
     m_function->addConstraints(contstraints);
   }
 
-  auto costFunc = getCostFunctionInitialized();
-
   // Try to retrieve optional properties
   int intMaxIterations = getProperty("MaxIterations");
-  const size_t maxIterations = static_cast<size_t>(intMaxIterations);
+  m_maxIterations = static_cast<size_t>(intMaxIterations);
+}
 
-  // get the minimizer
+/// Initialize the minimizer for this fit.
+/// @param maxIterations :: Maximum number of iterations.
+void Fit::initializeMinimizer(size_t maxIterations) {
+  m_costFunction = getCostFunctionInitialized();
   std::string minimizerName = getPropertyValue("Minimizer");
-  API::IFuncMinimizer_sptr minimizer =
+  m_minimizer =
       API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
-  minimizer->initialize(costFunc, maxIterations);
+  m_minimizer->initialize(m_costFunction, maxIterations);
+}
 
-  const int64_t nsteps = maxIterations * m_function->estimateNoProgressCalls();
-  API::Progress prog(this, 0.0, 1.0, nsteps);
-  m_function->setProgressReporter(&prog);
+/**
+  * Copy all output workspace properties from the minimizer to Fit algorithm.
+  * @param minimizer :: The minimizer to copy from.
+  */
+void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
+  auto &properties = minimizer.getProperties();
+  for (auto property : properties) {
+    if ((*property).direction() == Kernel::Direction::Output &&
+        (*property).isValid().empty()) {
+      auto clonedProperty =
+          std::unique_ptr<Kernel::Property>((*property).clone());
+      declareProperty(std::move(clonedProperty));
+    }
+  }
+}
+
+/// Run the minimizer's iteration loop.
+/// @returns :: Number of actual iterations.
+size_t Fit::runMinimizer() {
+  const int64_t nsteps =
+      m_maxIterations * m_function->estimateNoProgressCalls();
+  auto prog = boost::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
+  m_function->setProgressReporter(prog);
 
   // do the fitting until success or iteration limit is reached
   size_t iter = 0;
-  bool success = false;
-  std::string errorString;
+  bool isFinished = false;
   g_log.debug("Starting minimizer iteration\n");
-  while (iter < maxIterations) {
+  while (iter < m_maxIterations) {
     g_log.debug() << "Starting iteration " << iter << "\n";
-    m_function->iterationStarting();
-    if (!minimizer->iterate(iter)) {
-      errorString = minimizer->getError();
-      g_log.debug() << "Iteration stopped. Minimizer status string="
-                    << errorString << "\n";
-
-      success = errorString.empty() || errorString == "success";
-      if (success) {
-        errorString = "success";
+    try {
+      // Perform a single iteration. isFinished is set when minimizer wants to
+      // quit.
+      m_function->iterationStarting();
+      isFinished = !m_minimizer->iterate(iter);
+      m_function->iterationFinished();
+    } catch (Kernel::Exception::FitSizeWarning &) {
+      // This is an attempt to recover after the function changes its number of
+      // parameters or ties during the iteration.
+      if (auto cf = dynamic_cast<API::CompositeFunction *>(m_function.get())) {
+        // Make sure the composite function is valid.
+        cf->checkFunction();
       }
+      // Re-create the cost function and minimizer.
+      initializeMinimizer(m_maxIterations - iter);
+    }
+
+    prog->report();
+    ++iter;
+    if (isFinished) {
+      // It was the last iteration. Break out of the loop and return the number
+      // of finished iterations.
       break;
     }
-    prog.report();
-    m_function->iterationFinished();
-    ++iter;
   }
   g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
+  return iter;
+}
 
-  minimizer->finalize();
+/// Finalize the minimizer.
+/// @param nIterations :: The actual number of iterations done by the minimizer.
+void Fit::finalizeMinimizer(size_t nIterations) {
+  m_minimizer->finalize();
 
-  if (iter >= maxIterations) {
+  auto errorString = m_minimizer->getError();
+  g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString
+                << "\n";
+
+  if (nIterations >= m_maxIterations) {
     if (!errorString.empty()) {
       errorString += '\n';
     }
-    errorString += "Failed to converge after " + std::to_string(maxIterations) +
-                   " iterations.";
+    errorString += "Failed to converge after " +
+                   std::to_string(m_maxIterations) + " iterations.";
+  }
+
+  if (errorString.empty()) {
+    errorString = "success";
   }
 
   // return the status flag
   setPropertyValue("OutputStatus", errorString);
+  if (!this->isChild()) {
+    auto &logStream =
+        errorString == "success" ? g_log.notice() : g_log.warning();
+    logStream << "Fit status: " << errorString << '\n';
+    logStream << "Stopped after " << nIterations << " iterations" << '\n';
+  }
+}
+
+/// Create algorithm output worksapces.
+void Fit::createOutput() {
 
   // degrees of freedom
-  size_t dof = costFunc->getDomain()->size() - costFunc->nParams();
+  size_t dof = m_costFunction->getDomain()->size() - m_costFunction->nParams();
   if (dof == 0)
     dof = 1;
-  double rawcostfuncval = minimizer->costFunctionVal();
+  double rawcostfuncval = m_minimizer->costFunctionVal();
   double finalCostFuncVal = rawcostfuncval / double(dof);
 
   setProperty("OutputChi2overDoF", finalCostFuncVal);
-
-  // fit ended, creating output
-
-  // get the workspace
-  API::Workspace_const_sptr ws = getProperty("InputWorkspace");
 
   bool doCreateOutput = getProperty("CreateOutput");
   std::string baseName = getPropertyValue("Output");
@@ -205,19 +241,22 @@ void Fit::execConcrete() {
   if (doCreateOutput) {
     doCalcErrors = true;
   }
-  if (costFunc->nParams() == 0) {
+  if (m_costFunction->nParams() == 0) {
     doCalcErrors = false;
   }
 
   GSLMatrix covar;
   if (doCalcErrors) {
     // Calculate the covariance matrix and the errors.
-    costFunc->calCovarianceMatrix(covar);
-    costFunc->calFittingErrors(covar, rawcostfuncval);
+    m_costFunction->calCovarianceMatrix(covar);
+    m_costFunction->calFittingErrors(covar, rawcostfuncval);
   }
 
   if (doCreateOutput) {
-    copyMinimizerOutput(*minimizer);
+    copyMinimizerOutput(*m_minimizer);
+
+    // get the workspace
+    API::Workspace_const_sptr ws = getProperty("InputWorkspace");
 
     if (baseName.empty()) {
       baseName = ws->getName();
@@ -240,25 +279,22 @@ void Fit::execConcrete() {
     covariance->addColumn("str", "Name");
     // set plot type to Label = 6
     covariance->getColumn(covariance->columnCount() - 1)->setPlotType(6);
-    // std::vector<std::string> paramThatAreFitted; // used for populating 1st
-    // "name" column
     for (size_t i = 0; i < m_function->nParams(); i++) {
       if (m_function->isActive(i)) {
         covariance->addColumn("double", m_function->parameterName(i));
-        // paramThatAreFitted.push_back(m_function->parameterName(i));
       }
     }
 
     size_t np = m_function->nParams();
     size_t ia = 0;
     for (size_t i = 0; i < np; i++) {
-      if (m_function->isFixed(i))
+      if (!m_function->isActive(i))
         continue;
       Mantid::API::TableRow row = covariance->appendRow();
       row << m_function->parameterName(i);
       size_t ja = 0;
       for (size_t j = 0; j < np; j++) {
-        if (m_function->isFixed(j))
+        if (!m_function->isActive(j))
           continue;
         if (j == i)
           row << 100.0;
@@ -307,23 +343,14 @@ void Fit::execConcrete() {
     }
     // Add chi-squared value at the end of parameter table
     Mantid::API::TableRow row = result->appendRow();
-#if 1
+
     std::string costfuncname = getPropertyValue("CostFunction");
     if (costfuncname == "Rwp")
       row << "Cost function value" << rawcostfuncval;
     else
       row << "Cost function value" << finalCostFuncVal;
-    setProperty("OutputParameters", result);
-#else
-    row << "Cost function value" << finalCostFuncVal;
-    Mantid::API::TableRow row2 = result->appendRow();
-    std::string name(getPropertyValue("CostFunction"));
-    name += " value";
-    row2 << name << rawcostfuncval;
-#endif
 
     setProperty("OutputParameters", result);
-
     bool outputParametersOnly = getProperty("OutputParametersOnly");
 
     if (!outputParametersOnly) {
@@ -334,10 +361,33 @@ void Fit::execConcrete() {
       }
       m_domainCreator->separateCompositeMembersInOutput(unrollComposites,
                                                         convolveMembers);
-      m_domainCreator->createOutputWorkspace(
-          baseName, m_function, costFunc->getDomain(), costFunc->getValues());
+      m_domainCreator->createOutputWorkspace(baseName, m_function,
+                                             m_costFunction->getDomain(),
+                                             m_costFunction->getValues());
     }
   }
+}
+
+/** Executes the algorithm
+*
+*  @throw runtime_error Thrown if algorithm cannot execute
+*/
+void Fit::execConcrete() {
+
+  // Read Fit's own properties
+  readProperties();
+
+  // Get the minimizer
+  initializeMinimizer(m_maxIterations);
+
+  // Run the minimizer
+  auto nIterations = runMinimizer();
+
+  // Finilize the minimizer.
+  finalizeMinimizer(nIterations);
+
+  // fit ended, creating output
+  createOutput();
 
   progress(1.0);
 }

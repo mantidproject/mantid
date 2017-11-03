@@ -19,7 +19,7 @@ private:
   public:
     Mantid::API::ImplicitFunctionParameter *
     createParameter(Poco::XML::Element *) override {
-      return NULL;
+      return nullptr;
     }
     void setSuccessorParser(
         Mantid::API::ImplicitFunctionParameterParser *) override {}
@@ -34,7 +34,7 @@ private:
 
     Mantid::API::ImplicitFunctionBuilder *
     createFunctionBuilder(Poco::XML::Element *) override {
-      return NULL;
+      return nullptr;
     }
     void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) override {}
     void setParameterParser(
@@ -50,7 +50,7 @@ private:
 
     Mantid::API::ImplicitFunctionBuilder *
     createFunctionBuilder(Poco::XML::Element *) override {
-      return NULL;
+      return nullptr;
     }
     void setSuccessorParser(Mantid::API::ImplicitFunctionParser *) override {}
     void setParameterParser(
@@ -73,7 +73,7 @@ public:
         dynamic_cast<MockImplicitFunctionParserA *>(parser);
     TSM_ASSERT("The correct implicit parserparameter parser type has not been "
                "generated",
-               NULL != a);
+               nullptr != a);
     delete parser;
   }
 
@@ -85,7 +85,7 @@ public:
         dynamic_cast<MockImplicitFunctionParserB *>(parser);
     TSM_ASSERT("The correct implicit parserparameter parser type has not been "
                "generated",
-               NULL != b);
+               nullptr != b);
     delete parser;
   }
 

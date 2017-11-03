@@ -12,6 +12,7 @@ Description
 This algorithm performs Fixed Window Scan (FWS) data reduction (both Elastic and Inelastic) for IN16B indirect geometry instrument at ILL.
 It uses internally the :ref:`IndirectILLEnergyTransfer <algm-IndirectILLEnergyTransfer>` algorithm.
 
+
 Input
 -----
 
@@ -26,7 +27,7 @@ Y-axis will be detector angle, and the values would be the intensities integrate
 (symmetric around each peak) at the beginning and the end of the spectra (for IFWS).
 Scanning observable can be any numeric or time-stamp-like string parameter.
 See ``sample.*`` or e.g. ``start_time`` in Sample Logs.
-``BackgroundRun`` s and ``CalibrationRun`` s will be averaged or interpolated over all the ovservable points according to option.
+``BackgroundRun`` s, ``CalibrationBackgroundRun`` s and ``CalibrationRun`` s will be averaged (default) or interpolated over all the observable points according to the option.
 Interpolation is provided by :ref:`SplineInterpolation <algm-SplineInterpolation>`, which does cubic spline (or linear for 2 points only) interpolation inside the range and
 flat extrapolation beyond the range. For the moment it does not give errors on interpolated results.
 Interpolated subtraction or calibration is recommended only if there is a strong dependence on the observable and many measured points in the data to be interpolated.
@@ -49,11 +50,11 @@ Usage
 .. testcode:: ExFixedWindowScans
 
     ws = IndirectILLReductionFWS(Run='ILL/IN16B/083072:083077.nxs')
-    print "Result is now a WorkspaceGroup, which has %d workspaces, one per each energy value" % ws.getNumberOfEntries()
-    print "first item, called %s corresponds to energy value of %s" % \
-    (ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1])
-    print "it has %d histograms and %d bins, one per each temperature" % \
-    (ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize())
+    print("Result is now a WorkspaceGroup, which has {:d} workspaces, one per each energy value".format( ws.getNumberOfEntries()))
+    print("first item, called {} corresponds to energy value of {}".format(
+    ws.getItem(0).getName(),ws.getItem(0).getName().split('_')[1]))
+    print("it has {:d} histograms and {:d} bins, one per each temperature".format(
+    ws.getItem(0).getNumberHistograms(),ws.getItem(0).blocksize()))
 
 Output:
 

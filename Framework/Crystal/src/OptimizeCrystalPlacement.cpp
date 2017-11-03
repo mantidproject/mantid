@@ -7,6 +7,7 @@
  */
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -25,9 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::IndexingUtils;
-using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_const_sptr;
-using Mantid::Geometry::ParameterMap;
 using namespace Mantid::Geometry;
 
 namespace Mantid {
@@ -59,7 +58,7 @@ public:
     delete Prop2;
   }
 
-  IPropertySettings *clone() override {
+  IPropertySettings *clone() const override {
     return new OrEnabledWhenProperties(propName1, Criteria1, value1, propName2,
                                        Criteria2, value2);
   }
@@ -424,9 +423,9 @@ void OptimizeCrystalPlacement::exec() {
   V3D newSampPos(Results["SampleXOffset"], Results["SampleYOffset"],
                  Results["SampleZOffset"]);
 
-  auto &detectorInfo = outPeaks->mutableDetectorInfo();
+  auto &componentInfo = outPeaks->mutableComponentInfo();
   CalibrationHelpers::adjustUpSampleAndSourcePositions(
-      *peaks->getInstrument(), detectorInfo.l1(), newSampPos, detectorInfo);
+      componentInfo.l1(), newSampPos, componentInfo);
 
   Matrix<double> GonTilt =
       PeakHKLErrors::RotationMatrixAboutRegAxis(Results["GonRotx"], 'x') *

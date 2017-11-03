@@ -137,7 +137,7 @@ void PlotPeakByLogValue::init() {
       "Convolution are output convolved\n"
       "with corresponding resolution");
 
-  std::vector<std::string> evaluationTypes{"CentrePoint", "Histogram"};
+  std::array<std::string, 2> evaluationTypes = {{"CentrePoint", "Histogram"}};
   declareProperty(
       "EvaluationType", "CentrePoint",
       Kernel::IValidator_sptr(
@@ -646,8 +646,8 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
         dynamic_cast<Mantid::API::WorkspaceProperty<> *>(minimizerProp);
     if (wsProp) {
       const std::string &wsPropValue = minimizerProp->value();
-      if (wsPropValue != "") {
-        std::string wsPropName = minimizerProp->name();
+      if (!wsPropValue.empty()) {
+        const std::string &wsPropName = minimizerProp->name();
         m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
       }
     }

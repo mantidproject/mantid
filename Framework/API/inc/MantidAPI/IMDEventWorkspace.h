@@ -38,6 +38,11 @@ public:
     return IMDEventWorkspace_uptr(doClone());
   }
 
+  /// Returns a default-initialized clone of the workspace
+  IMDEventWorkspace_uptr cloneEmpty() const {
+    return IMDEventWorkspace_uptr(doCloneEmpty());
+  }
+
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize() = 0;
   IMDEventWorkspace &operator=(const IMDEventWorkspace &) = delete;
@@ -110,6 +115,7 @@ protected:
 
 private:
   IMDEventWorkspace *doClone() const override = 0;
+  IMDEventWorkspace *doCloneEmpty() const override = 0;
 };
 
 } // namespace MDEvents

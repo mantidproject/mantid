@@ -26,6 +26,61 @@ public:
     m_test_bins[4] = 3.2;
   }
 
+  void test_indexOfFromEdges() {
+    std::vector<double> single;
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 7.1),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - vector is empty");
+    single.push_back(1.7);
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 4.8),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - requires at least two bin edges");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromEdges(m_test_bins, -1.2),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromEdges(m_test_bins, 3.3),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromEdges(m_test_bins, 0.55), 1);
+  }
+
+  void test_indexOfFromCenters() {
+    std::vector<double> single;
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 5.9),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - vector is empty");
+    single.push_back(2.5);
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 6.1),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - value out of range");
+    TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 1.9),
+                            const std::out_of_range &e, std::string(e.what()),
+                            "indexOfValue - value out of range");
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(single, 2.25), 0);
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromCenters(m_test_bins, -1.56),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_THROWS_EQUALS(
+        VectorHelper::indexOfValueFromCenters(m_test_bins, 4.1),
+        const std::out_of_range &e, std::string(e.what()),
+        "indexOfValue - value out of range");
+
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, -1.23),
+                     0);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 3.98),
+                     4);
+    TS_ASSERT_EQUALS(VectorHelper::indexOfValueFromCenters(m_test_bins, 0.8),
+                     2);
+  }
+
   void test_CreateAxisFromRebinParams_Gives_Expected_Number_Bins() {
     std::vector<double> rbParams(3);
     rbParams[0] = 1;

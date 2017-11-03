@@ -1,8 +1,11 @@
 #pylint: disable=no-init
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import re
 import mantid
 from mantid.simpleapi import *
+from six.moves import range
+from six import iteritems
 
 MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
@@ -12,10 +15,12 @@ SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
+    "Bin2DPowderDiffraction(v1)":("dSpaceBinning","dPerpendicularBinning"),
     "CalculateUMatrix(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "ConvertToMD(v1)":("dEAnalysisMode"),
     "ConvertToMDMinMaxLocal(v1)":("dEAnalysisMode"),
     "ConvertToMDMinMaxGlobal(v1)":("dEAnalysisMode"),
+    "EstimateDivergence(v1)":("alpha", "beta0", "beta1"),
     "FindUBUsingLatticeParameters(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
     "IndexSXPeaks(v1)":("a", "b", "c", "alpha", "beta", "gamma", "dTolerance"),
     "ModeratorTzero(v1)":("tolTOF"),
@@ -80,12 +85,12 @@ class Algorithms(stresstesting.MantidStressTest):
 
     def verifyAlgName(self, name):
         if not self.algRegExp.match(name):
-            print "Algorithm " + name + " has a name that violates conventions"
+            print("Algorithm " + name + " has a name that violates conventions")
             return False
 
         if bool(len(name) > MAX_ALG_LEN):
-            print "%s has a name that is longer than " % name, \
-                "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN)
+            print("%s has a name that is longer than " % name,
+                  "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
             return False
 
         # passed all of the checks
@@ -93,11 +98,11 @@ class Algorithms(stresstesting.MantidStressTest):
 
     def verifyCategories(self, name, categories):
         if len(categories) <= 0:
-            print name + " has no categories"
+            print(name + " has no categories")
 
         for category in categories:
             if not self.categoryRegExp.match(category):
-                print name + " has a bad category " + category
+                print(name + " has a bad category " + category)
                 return False
 
         return True
@@ -112,13 +117,13 @@ class Algorithms(stresstesting.MantidStressTest):
         upper = name.upper()
         if (upper in SPECIAL_UPPER) and (name not in SPECIAL):
             index = SPECIAL_UPPER.index(upper)
-            print alg_descr + " property (" + name + ") has special name "\
-                + "with wrong case: " + name + " should be " + SPECIAL[index]
+            print(alg_descr + " property (" + name + ") has special name "
+                  + "with wrong case: " + name + " should be " + SPECIAL[index])
             return False
 
         if not self.paramRegExp.match(name):
             if not self.checkAllowed(alg_descr, name):
-                print alg_descr + " property (" + name +") violates conventions"
+                print(alg_descr + " property (" + name +") violates conventions")
                 return False
 
         # passed all of the checks
@@ -127,7 +132,7 @@ class Algorithms(stresstesting.MantidStressTest):
     def runTest(self):
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-        for (name, versions) in algs.iteritems():
+        for (name, versions) in iteritems(algs):
             if not self.verifyAlgName(name):
                 self.__ranOk += 1
                 continue
@@ -148,8 +153,8 @@ class Algorithms(stresstesting.MantidStressTest):
 
     def validate(self):
         if self.__ranOk > 0:
-            print "Found %d errors. Coding conventions found at" % self.__ranOk,\
-                "http://www.mantidproject.org/Mantid_Standards"
+            print("Found %d errors. Coding conventions found at" % self.__ranOk,
+                  "http://www.mantidproject.org/Mantid_Standards")
             return False
 
         return True
@@ -168,12 +173,12 @@ class FitFunctions(stresstesting.MantidStressTest):
             return True
 
         if not self.funcRegExp.match(name):
-            print "Function " + name + " has a name that violates conventions"
+            print("Function " + name + " has a name that violates conventions")
             return False
 
         if bool(len(name) > MAX_ALG_LEN):
-            print "%s has a name that is longer than " % name, \
-                "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN)
+            print("%s has a name that is longer than " % name,
+                  "%d characters (%d > %d)" % (MAX_ALG_LEN, len(name), MAX_ALG_LEN))
             return False
 
         # passed all of the checks
@@ -181,7 +186,7 @@ class FitFunctions(stresstesting.MantidStressTest):
 
     def verifyCategories(self, name, categories):
         if len(categories) <= 0:
-            print name + " has no categories"
+            print(name + " has no categories")
 
         for category in categories:
             # TODO remove the special case
@@ -189,7 +194,7 @@ class FitFunctions(stresstesting.MantidStressTest):
                 return True
 
             if not self.categoryRegExp.match(category):
-                print name + " has a bad category " + category
+                print(name + " has a bad category " + category)
                 return False
 
         return True
@@ -204,7 +209,7 @@ class FitFunctions(stresstesting.MantidStressTest):
 
         if not self.paramRegExp.match(name):
             if not self.checkAllowed(alg_descr, name):
-                print alg_descr + " property (" + name +") violates conventions"
+                print(alg_descr + " property (" + name +") violates conventions")
                 return False
 
         # passed all of the checks
@@ -222,14 +227,14 @@ class FitFunctions(stresstesting.MantidStressTest):
             if not self.verifyCategories(name, function.categories()):
                 self.__ranOk += 1
 
-            for i in xrange(function.numParams()):
+            for i in range(function.numParams()):
                 if not self.verifyParameter(name, function.getParamName(i)):
                     self.__ranOk += 1
 
     def validate(self):
         if self.__ranOk > 0:
-            print "Found %d errors. Coding conventions found at" % self.__ranOk,\
-                "http://www.mantidproject.org/Mantid_Standards"
+            print("Found %d errors. Coding conventions found at" % self.__ranOk,
+                  "http://www.mantidproject.org/Mantid_Standards")
             return False
 
         return True

@@ -6,14 +6,14 @@ from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, F
 from sans.user_file.user_file_parser import (DetParser, LimitParser, MaskParser, SampleParser, SetParser, TransParser,
                                              TubeCalibFileParser, QResolutionParser, FitParser, GravityParser,
                                              MaskFileParser, MonParser, PrintParser, BackParser, SANS2DParser, LOQParser,
-                                             UserFileParser, LARMORParser)
-from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                             single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
-                                             simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                             mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                             position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
+                                             UserFileParser, LARMORParser, CompatibilityParser)
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
+                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
+                                          mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
+                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId, OtherId,
+                                          monitor_spectrum, PrintId, det_fit_range, q_rebin_values)
 
 
 # -----------------------------------------------------------------
@@ -26,10 +26,7 @@ def assert_valid_result(result, expected, assert_true):
     for key in keys_result:
         assert_true(key in keys_expected)
         if result[key] != expected[key]:
-            print("=================================")
-            print(result[key])
-            print(expected[key])
-        assert_true(result[key] == expected[key])
+            assert_true(result[key] == expected[key])
 
 
 def assert_valid_parse(parser, to_parse, expected, assert_true):
@@ -535,10 +532,11 @@ class TransParserTest(unittest.TestCase):
 
     def test_that_trans_spec_shift_is_parsed_correctly(self):
         valid_settings = {"TRANS/TRANSPEC=4/SHIFT=23": {TransId.spec_shift: 23, TransId.spec: 4},
-                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 4}}
+                          "TRANS/TRANSPEC =4/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 4},
+                          "TRANS/TRANSPEC =6/ SHIFT = 23": {TransId.spec_shift: 23, TransId.spec: 6},
+                          }
 
-        invalid_settings = {"TRANS/TRANSPEC=6/SHIFT=23": RuntimeError,
-                            "TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
+        invalid_settings = {"TRANS/TRANSPEC=4/SHIFT/23": RuntimeError,
                             "TRANS/TRANSPEC=4/SHIFT 23": RuntimeError,
                             "TRANS/TRANSPEC/SHIFT=23": RuntimeError,
                             "TRANS/TRANSPEC=6/SHIFT=t": RuntimeError}
@@ -663,12 +661,12 @@ class FitParserTest(unittest.TestCase):
                           "FIT/TRANS/Straight 123 3556": {FitId.general: fit_general(start=123, stop=3556,
                                                           fit_type=FitType.Linear, data_type=None, polynomial_order=0)},
                           "FIT/ tranS/LoG 123  3556.6 ": {FitId.general: fit_general(start=123, stop=3556.6,
-                                                          fit_type=FitType.Log, data_type=None, polynomial_order=0)},
+                                                          fit_type=FitType.Logarithmic, data_type=None, polynomial_order=0)},  # noqa
                           "FIT/TRANS/  YlOG 123   3556": {FitId.general: fit_general(start=123, stop=3556,
-                                                          fit_type=FitType.Log, data_type=None, polynomial_order=0)},
+                                                          fit_type=FitType.Logarithmic, data_type=None, polynomial_order=0)},  # noqa
                           "FIT/Trans/Lin": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.Linear,
                                                                        data_type=None, polynomial_order=0)},
-                          "FIT/Trans/ Log": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.Log,
+                          "FIT/Trans/ Log": {FitId.general: fit_general(start=None, stop=None, fit_type=FitType.Logarithmic,  # noqa
                                                                         data_type=None, polynomial_order=0)},
                           "FIT/Trans/ polYnomial": {FitId.general: fit_general(start=None, stop=None,
                                                     fit_type=FitType.Polynomial, data_type=None, polynomial_order=2)},
@@ -676,7 +674,7 @@ class FitParserTest(unittest.TestCase):
                                                                                  fit_type=FitType.Polynomial,
                                                                                  data_type=None, polynomial_order=3)},
                           "FIT/Trans/Sample/Log 23.4 56.7": {FitId.general: fit_general(start=23.4, stop=56.7,
-                                                             fit_type=FitType.Log, data_type=DataType.Sample,
+                                                             fit_type=FitType.Logarithmic, data_type=DataType.Sample,
                                                                                         polynomial_order=0)},
                           "FIT/Trans/can/ lIn 23.4 56.7": {FitId.general: fit_general(start=23.4, stop=56.7,
                                                            fit_type=FitType.Linear, data_type=DataType.Can,
@@ -739,6 +737,21 @@ class GravityParserTest(unittest.TestCase):
 
         gravity_parser = GravityParser()
         do_test(gravity_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
+
+
+class CompatibilityParserTest(unittest.TestCase):
+    def test_that_gets_type(self):
+        self.assertTrue(CompatibilityParser.get_type(), "COMPATIBILITY")
+
+    def test_that_compatibility_on_off_is_parsed_correctly(self):
+        valid_settings = {"COMPATIBILITY on ": {OtherId.use_compatibility_mode: True},
+                          "COMPATIBILITY   OFF ": {OtherId.use_compatibility_mode: False}}
+
+        invalid_settings = {"COMPATIBILITY ": RuntimeError,
+                            "COMPATIBILITY ONN": RuntimeError}
+
+        compatibility_parser = CompatibilityParser()
+        do_test(compatibility_parser, valid_settings, invalid_settings, self.assertTrue, self.assertRaises)
 
 
 class MaskFileParserTest(unittest.TestCase):

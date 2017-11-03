@@ -17,12 +17,9 @@ namespace Mantid {
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 }
-namespace Beamline {
+namespace Geometry {
 class ComponentInfo;
 class DetectorInfo;
-}
-namespace Geometry {
-class BoundingBox;
 class Instrument;
 
 /** @class ParameterMap ParameterMap.h
@@ -98,6 +95,7 @@ public:
   static const std::string &pString();
   static const std::string &pV3D();
   static const std::string &pQuat();
+  static const std::string &scale();
 
   const std::string diff(const ParameterMap &rhs,
                          const bool &firstDiffOnly = false) const;
@@ -319,11 +317,6 @@ public:
                          const Kernel::Quat &rotation) const;
   /// Attempts to retrieve a rotation from the rotation cache
   bool getCachedRotation(const IComponent *comp, Kernel::Quat &rotation) const;
-  /// Sets a cached bounding box
-  void setCachedBoundingBox(const IComponent *comp,
-                            const BoundingBox &box) const;
-  /// Attempts to retrieve a bounding box from the cache
-  bool getCachedBoundingBox(const IComponent *comp, BoundingBox &box) const;
   /// Persist a representation of the Parameter map to the open Nexus file
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   /// Copy pairs (oldComp->id,Parameter) to the m_map assigning the new
@@ -345,15 +338,14 @@ public:
   pmap_cit end() const { return m_map.end(); }
 
   bool hasDetectorInfo(const Instrument *instrument) const;
-  const Beamline::DetectorInfo &detectorInfo() const;
-  bool hasComponentInfo() const;
-  const Beamline::ComponentInfo &componentInfo() const;
+  bool hasComponentInfo(const Instrument *instrument) const;
+  const Geometry::DetectorInfo &detectorInfo() const;
+  Geometry::DetectorInfo &mutableDetectorInfo();
+  const Geometry::ComponentInfo &componentInfo() const;
+  Geometry::ComponentInfo &mutableComponentInfo();
   size_t detectorIndex(const detid_t detID) const;
+  size_t componentIndex(const Geometry::ComponentID componentId) const;
   const std::vector<Geometry::ComponentID> &componentIds() const;
-  void
-  setDetectorInfo(boost::shared_ptr<const Beamline::DetectorInfo> detectorInfo);
-  void setComponentInfo(
-      boost::shared_ptr<const Beamline::ComponentInfo> componentInfo);
   void setInstrument(const Instrument *instrument);
 
 private:
@@ -379,16 +371,15 @@ private:
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::V3D>> m_cacheLocMap;
   /// internal cache map instance for cached rotation values
   std::unique_ptr<Kernel::Cache<const ComponentID, Kernel::Quat>> m_cacheRotMap;
-  /// internal cache map for cached bounding boxes
-  std::unique_ptr<Kernel::Cache<const ComponentID, BoundingBox>>
-      m_boundingBoxMap;
 
-  /// Pointer to the DetectorInfo object. NULL unless the instrument is
+  /// Pointer to the DetectorInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::DetectorInfo> m_detectorInfo{nullptr};
-  /// Pointer to the ComponentInfo object. NULL unless the instrument is
+  std::unique_ptr<Geometry::DetectorInfo> m_detectorInfo;
+
+  /// Pointer to the ComponentInfo wrapper. NULL unless the instrument is
   /// associated with an ExperimentInfo object.
-  boost::shared_ptr<const Beamline::ComponentInfo> m_componentInfo{nullptr};
+  std::unique_ptr<Geometry::ComponentInfo> m_componentInfo;
+
   /// Pointer to the owning instrument for translating detector IDs into
   /// detector indices when accessing the DetectorInfo object. If the workspace
   /// distinguishes between a neutronic instrument and a physical instrument

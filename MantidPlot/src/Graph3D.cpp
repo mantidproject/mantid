@@ -33,12 +33,12 @@
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MatrixModel.h"
 #include "MyParser.h"
 #include "UserFunction.h" //Mantid
 
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 
 #include <QApplication>
 #include <QBitmap>
@@ -111,7 +111,7 @@ Triple UserParametricSurface::operator()(double u, double v) {
     parser.SetExpr((const std::string)d_z_formula.toAscii());
     z = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, "MantidPlot - Input function error",
+    QMessageBox::critical(nullptr, "MantidPlot - Input function error",
                           QString::fromStdString(e.GetMsg()));
   }
   return Triple(x, y, z);
@@ -124,8 +124,8 @@ Graph3D::Graph3D(const QString &label, QWidget *parent, const char *name,
 }
 
 void Graph3D::initPlot() {
-  d_table = 0;
-  d_matrix = 0;
+  d_table = nullptr;
+  d_matrix = nullptr;
   plotAssociation = QString();
 
   color_map = QString::null;
@@ -167,7 +167,7 @@ void Graph3D::initPlot() {
   fromColor = QColor(Qt::red);
   toColor = QColor(Qt::blue);
 
-  col_ = 0;
+  col_ = nullptr;
 
   legendOn = false;
   legendMajorTicks = 5;
@@ -182,7 +182,7 @@ void Graph3D::initPlot() {
     scaleType[j] = 0;
 
   pointStyle = None;
-  d_surface = 0;
+  d_surface = nullptr;
   alpha = 1.0;
   barsRad = 0.007;
   d_point_size = 5;
@@ -1701,15 +1701,15 @@ void Graph3D::setCrossStyle() {
 
 void Graph3D::clearData() {
   if (d_matrix)
-    d_matrix = 0;
+    d_matrix = nullptr;
   else if (d_table)
-    d_table = 0;
+    d_table = nullptr;
   else if (d_func) {
     d_func.reset();
   }
   plotAssociation = QString();
   sp->makeCurrent();
-  sp->loadFromData(0, 0, 0, false, false);
+  sp->loadFromData(nullptr, 0, 0, false, false);
   sp->updateData();
   sp->updateGL();
 }
@@ -1846,7 +1846,7 @@ void Graph3D::exportImage(const QString &fileName, int quality,
     }
     p.end();
     pic.setMask(mask);
-    pic.save(fileName, 0, quality);
+    pic.save(fileName, nullptr, quality);
   } else {
     QImage im = sp->grabFrameBuffer(true);
     QImageWriter iw(fileName);
@@ -2922,7 +2922,7 @@ Graph3D::readSurfaceFunctionType(const std::string &formula) {
   QString func = QString::fromStdString(formula);
   if (func.endsWith("(Y)", Qt::CaseSensitive))
     type = SurfaceFunctionType::Plot3D;
-  else if (func.contains("(Z)", Qt::CaseSensitive) > 0)
+  else if (func.contains("(Z)", Qt::CaseSensitive) > nullptr)
     type = SurfaceFunctionType::XYZ;
   else if (func.startsWith("matrix<", Qt::CaseSensitive) &&
            func.endsWith(">", Qt::CaseInsensitive))

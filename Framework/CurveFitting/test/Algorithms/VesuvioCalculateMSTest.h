@@ -9,7 +9,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 
@@ -135,7 +135,7 @@ void checkOutputValuesAsExpected(const Mantid::API::IAlgorithm_sptr &alg,
   const size_t checkIdx = 100;
 // OS X and GCC>=5 seems to do a terrible job with keeping the same precision
 // here.
-#if defined(__APPLE__) || (__GNUC__ >= 5)
+#if defined(__clang__) || (__GNUC__ >= 5)
   const double tolerance(1e-4);
 #else
   const double tolerance(1e-8);

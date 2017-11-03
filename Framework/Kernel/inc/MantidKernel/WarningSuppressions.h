@@ -80,7 +80,7 @@
 // Defining this macro separately since clang-tidy tries to add spaces around
 // the hyphen and we use it in a lot of test files.
 // clang-format off
-#if defined(GCC_VERSION) && GCC_VERSION >= 50000
+#if defined(__cplusplus) && defined(GCC_VERSION) && GCC_VERSION >= 50000
 #define GCC_DIAG_OFF_SUGGEST_OVERRIDE GCC_DIAG_OFF(suggest-override)
 #define GCC_DIAG_ON_SUGGEST_OVERRIDE GCC_DIAG_ON(suggest-override)
 #else

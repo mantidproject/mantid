@@ -17,7 +17,6 @@ namespace Mantid {
 namespace Algorithms {
 
 using API::MatrixWorkspace_sptr;
-namespace Exception = Kernel::Exception;
 using Geometry::IDetector_const_sptr;
 using Kernel::Direction;
 using Kernel::V3D;
@@ -110,7 +109,7 @@ void MayersSampleCorrection::exec() {
   const auto &sampleMaterial = sampleShape.material();
 
   const size_t nhist(inputWS->getNumberHistograms());
-  Progress prog(this, 0., 1., nhist);
+  Progress prog(this, 0.0, 1.0, nhist);
   prog.setNotifyStep(0.01);
 
   const auto &spectrumInfo = inputWS->spectrumInfo();

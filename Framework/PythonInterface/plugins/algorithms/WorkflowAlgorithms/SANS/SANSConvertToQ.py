@@ -139,8 +139,8 @@ class SANSConvertToQ(DataProcessorAlgorithm):
 
         Note that it does not perform any q resolution calculation, nor any wavelength-and-pixel adjustment. The
         output workspace contains two numerical axes.
-        @param state: a SANSState object
-        @return: the reduced workspace, the sum of counts workspace, the sum of norms workspace or
+        :param state: a SANSState object
+        :return: the reduced workspace, the sum of counts workspace, the sum of norms workspace or
                  the reduced workspace, None, None
         """
         data_workspace = self.getProperty("InputWorkspace").value
@@ -152,7 +152,7 @@ class SANSConvertToQ(DataProcessorAlgorithm):
         # Extract relevant settings
         convert_to_q = state.convert_to_q
         max_q_xy = convert_to_q.q_xy_max
-        delta_q_prefix = -1 if convert_to_q.q_xy_step_type is RangeStepType.Log else 1
+        delta_q_prefix = -1. if convert_to_q.q_xy_step_type is RangeStepType.Log else 1.
         delta_q = delta_q_prefix*convert_to_q.q_xy_step
         radius_cutoff = convert_to_q.radius_cutoff / 1000.  # Qxy expects the radius cutoff to be in mm
         wavelength_cutoff = convert_to_q.wavelength_cutoff
@@ -200,8 +200,8 @@ class SANSConvertToQ(DataProcessorAlgorithm):
     def _set_partial_workspaces(self, sum_of_counts_workspace, sum_of_norms_workspace):
         """
         Sets the partial output, ie the sum of the counts workspace and the sum of the normalization workspace
-        @param sum_of_counts_workspace: the sum of the counts workspace
-        @param sum_of_norms_workspace: the sum of the normalization workspace
+        :param sum_of_counts_workspace: the sum of the counts workspace
+        :param sum_of_norms_workspace: the sum of the normalization workspace
         """
         self.declareProperty(MatrixWorkspaceProperty("SumOfCounts", '',
                                                      optional=PropertyMode.Optional, direction=Direction.Output),

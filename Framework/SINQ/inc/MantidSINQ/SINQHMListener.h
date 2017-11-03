@@ -48,8 +48,8 @@ public:
   bool buffersEvents() const override { return false; }
 
   bool connect(const Poco::Net::SocketAddress &address) override;
-  void start(Mantid::Kernel::DateAndTime startTime =
-                 Mantid::Kernel::DateAndTime()) override;
+  void start(Mantid::Types::Core::DateAndTime startTime =
+                 Mantid::Types::Core::DateAndTime()) override;
   boost::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;

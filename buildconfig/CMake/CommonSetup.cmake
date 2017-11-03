@@ -1,6 +1,6 @@
 # Include useful utils
 include ( MantidUtils )
-
+include ( GenerateMantidExportHeader )
 # Make the default build type Release
 if ( NOT CMAKE_CONFIGURATION_TYPES )
   if ( NOT CMAKE_BUILD_TYPE )
@@ -40,7 +40,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost 1.53.0 REQUIRED date_time regex )
+find_package ( Boost 1.53.0 REQUIRED date_time regex serialization filesystem system)
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB )
 # Need this defined globally for our log time values
@@ -251,6 +251,26 @@ elseif ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" )
 endif ()
 
 ###########################################################################
+# Configure clang-tidy if the tool is found
+###########################################################################
+
+if ( CMAKE_VERSION GREATER "3.5" )
+  set(ENABLE_CLANG_TIDY OFF CACHE BOOL "Add clang-tidy automatically to builds")
+  if (ENABLE_CLANG_TIDY)
+    find_program (CLANG_TIDY_EXE NAMES "clang-tidy" PATHS /usr/local/opt/llvm/bin )
+    if (CLANG_TIDY_EXE)
+      message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+      set(CLANG_TIDY_CHECKS "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters")
+      set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
+        CACHE STRING "" FORCE)
+    else()
+      message(AUTHOR_WARNING "clang-tidy not found!")
+      set(CMAKE_CXX_CLANG_TIDY "" CACHE STRING "" FORCE) # delete it
+    endif()
+  endif()
+endif()
+
+###########################################################################
 # Setup cppcheck
 ###########################################################################
 include ( CppCheckSetup )
@@ -280,6 +300,7 @@ include ( GoogleTest )
 find_package ( PyUnitTest )
 if ( PYUNITTEST_FOUND )
   enable_testing ()
+  include ( Python-xmlrunner )
   message (STATUS "Found pyunittest generator")
 else()
   message (STATUS "Could NOT find PyUnitTest - unit testing of python not available" )

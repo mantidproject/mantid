@@ -1,6 +1,6 @@
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"

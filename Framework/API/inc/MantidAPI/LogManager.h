@@ -3,7 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/make_unique.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Statistics.h"
 #include <memory>
 #include <vector>
@@ -13,11 +13,17 @@ class File;
 }
 
 namespace Mantid {
+namespace Types {
+namespace Core {
+class DateAndTime;
+}
+} // namespace Types
 namespace Kernel {
 template <class KEYTYPE, class VALUETYPE> class Cache;
 template <typename TYPE> class TimeSeriesProperty;
 class SplittingInterval;
 typedef std::vector<SplittingInterval> TimeSplitterType;
+class PropertyManager;
 }
 
 namespace API {
@@ -61,17 +67,17 @@ public:
 
   //-------------------------------------------------------------
   /// Set the run start and end
-  void setStartAndEndTime(const Kernel::DateAndTime &start,
-                          const Kernel::DateAndTime &end);
+  void setStartAndEndTime(const Types::Core::DateAndTime &start,
+                          const Types::Core::DateAndTime &end);
   /// Return the run start time
-  const Kernel::DateAndTime startTime() const;
+  const Types::Core::DateAndTime startTime() const;
   /// Return the run end time
-  const Kernel::DateAndTime endTime() const;
+  const Types::Core::DateAndTime endTime() const;
   //-------------------------------------------------------------
 
   /// Filter the logs by time
-  virtual void filterByTime(const Kernel::DateAndTime start,
-                            const Kernel::DateAndTime stop);
+  virtual void filterByTime(const Types::Core::DateAndTime start,
+                            const Types::Core::DateAndTime stop);
   /// Split the logs based on the given intervals
   virtual void splitByTime(Kernel::TimeSplitterType &splitter,
                            std::vector<LogManager *> outputs) const;
@@ -102,13 +108,8 @@ public:
   bool hasProperty(const std::string &name) const;
   /// Remove a named property
   void removeProperty(const std::string &name, bool delProperty = true);
-  /**
-   * Return all of the current properties
-   * @returns A vector of the current list of properties
-   */
-  inline const std::vector<Kernel::Property *> &getProperties() const {
-    return m_manager.getProperties();
-  }
+  const std::vector<Kernel::Property *> &getProperties() const;
+
   /// Returns a property as a time series property. It will throw if it is not
   /// valid
   template <typename T>
@@ -192,8 +193,11 @@ public:
   void clearLogs();
 
 protected:
+  /// Load the run from a NeXus file with a given group name
+  void loadNexus(::NeXus::File *file,
+                 const std::map<std::string, std::string> &entries);
   /// A pointer to a property manager
-  Kernel::PropertyManager m_manager;
+  std::unique_ptr<Kernel::PropertyManager> m_manager;
   /// Name of the log entry containing the proton charge when retrieved using
   /// getProtonCharge
   static const char *PROTON_CHARGE_LOG_NAME;

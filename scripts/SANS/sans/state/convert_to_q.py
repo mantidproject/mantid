@@ -7,7 +7,7 @@ import json
 import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, BoolParameter, PositiveFloatParameter,
                                    ClassTypeParameter, StringParameter)
-from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSInstrument)
+from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
                                         validation_message)
 from sans.state.automatic_setters import (automatic_setters)
@@ -167,10 +167,10 @@ class StateConvertToQBuilder(object):
 # Factory method for StateConvertToQBuilder
 # ------------------------------------------
 def get_convert_to_q_builder(data_info):
-    # The data state has most of the information that we require to define the move. For the factory method, only
-    # the instrument is of relevance.
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or instrument is SANSInstrument.SANS2D:
+    # The data state has most of the information that we require to define the q conversion.
+    # For the factory method, only the facility/instrument is of relevance.
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateConvertToQBuilder()
     else:
         raise NotImplementedError("StateConvertToQBuilder: Could not find any valid save builder for the "

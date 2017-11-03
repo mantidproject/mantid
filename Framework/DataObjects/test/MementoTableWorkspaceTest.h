@@ -21,7 +21,7 @@ public:
         product =
             WorkspaceFactory::Instance().createTable("MementoTableWorkspace"));
     TSM_ASSERT("Product is not a MementoTableWorkspace",
-               NULL != dynamic_cast<MementoTableWorkspace *>(product.get()));
+               nullptr != dynamic_cast<MementoTableWorkspace *>(product.get()));
   }
 
   void testConstruction() {

@@ -1,17 +1,14 @@
 #ifndef MANTID_DATAHANDLING_SAVESNSNEXUS_H_
 #define MANTID_DATAHANDLING_SAVESNSNEXUS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <climits>
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/Sample.h"
 #include "MantidAPI/Progress.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include <climits>
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -78,13 +75,13 @@ private:
   /// The name and path of the input file
   std::string m_inputFilename;
   /// Pointer to the local workspace
-  API::MatrixWorkspace_const_sptr inputWorkspace;
+  API::MatrixWorkspace_const_sptr m_inputWorkspace;
 
   // Map from detector ID to WS index
-  detid2index_map map;
+  detid2index_map m_map;
 
   // Progress reporting
-  API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress;
 
   bool m_compress;
 

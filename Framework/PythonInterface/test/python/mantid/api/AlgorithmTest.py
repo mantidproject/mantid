@@ -1,10 +1,9 @@
 from __future__ import (absolute_import, division, print_function)
+import six
 
 import unittest
 from mantid.api import AlgorithmID, AlgorithmManager
 from testhelpers import run_algorithm
-
-###########################################################
 
 class AlgorithmTest(unittest.TestCase):
 
@@ -21,6 +20,7 @@ class AlgorithmTest(unittest.TestCase):
         self.assertEquals('DataHandling', self._load.category())
         self.assertEquals(1, len(self._load.categories()))
         self.assertEquals('DataHandling', self._load.categories()[0])
+        self.assertEquals('', self._load.helpURL())
 
     def test_get_unknown_property_raises_error(self):
         self.assertRaises(RuntimeError, self._load.getProperty, "NotAProperty")
@@ -51,7 +51,29 @@ class AlgorithmTest(unittest.TestCase):
         self.assertTrue(ws.getMemorySize() > 0.0 )
 
         as_str = str(alg)
-        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3","OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
+
+    def test_execute_succeeds_with_unicode_props(self):
+        data = [1.0,2.0,3.0]
+        unitx = 'Wavelength'
+        if six.PY2:
+            # force a property value to be unicode to assert conversion happens correctly
+            # this is only an issue in python2
+            unitx = unicode(unitx)
+
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX=unitx,child=True)
+        self.assertEquals(alg.isExecuted(), True)
+        self.assertEquals(alg.isRunning(), False)
+        self.assertEquals(alg.getProperty('NSpec').value, 1)
+        self.assertEquals(type(alg.getProperty('NSpec').value), int)
+        self.assertEquals(alg.getProperty('NSpec').name, 'NSpec')
+        ws = alg.getProperty('OutputWorkspace').value
+        self.assertTrue(ws.getMemorySize() > 0.0 )
+
+        as_str = str(alg)
+        self.assertEquals(as_str, '{"name":"CreateWorkspace","properties":{"DataX":"1,2,3","DataY":"1,2,3",'
+                          '"OutputWorkspace":"UNUSED_NAME_FOR_CHILD","UnitX":"Wavelength"},"version":1}\n')
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
         alg = AlgorithmManager.createUnmanaged('Load')
@@ -83,13 +105,14 @@ class AlgorithmTest(unittest.TestCase):
     def test_createChildAlgorithm_respects_keyword_arguments(self):
         parent_alg = AlgorithmManager.createUnmanaged('Load')
         try:
-            child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True)
+            child_alg = parent_alg.createChildAlgorithm(name='Rebin',version=1,startProgress=0.5,
+                                                        endProgress=0.9,enableLogging=True)
         except Exception as exc:
             self.fail("Expected createChildAlgorithm not to throw but it did: %s" % (str(exc)))
 
         # Unknown keyword
-        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True, unknownKW=1)
+        self.assertRaises(Exception, parent_alg.createChildAlgorithm, name='Rebin',version=1,startProgress=0.5,
+                          endProgress=0.9,enableLogging=True, unknownKW=1)
 
 if __name__ == '__main__':
     unittest.main()
-

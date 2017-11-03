@@ -4,14 +4,14 @@ import mantid
 import os
 from sans.common.enums import (ISISReductionMode, DetectorType, RangeStepType, FitType)
 from sans.user_file.user_file_reader import UserFileReader
-from sans.user_file.user_file_common import (DetectorId, BackId, range_entry, back_single_monitor_entry,
-                                             single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
-                                             simple_range, complex_range, MaskId, mask_block, mask_block_cross,
-                                             mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
-                                             position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
-                                             fit_general, MonId, monitor_length, monitor_file, GravityId,
-                                             monitor_spectrum, PrintId, q_rebin_values)
-from user_file_test_helper import create_user_file, sample_user_file
+from sans.user_file.settings_tags import (DetectorId, BackId, range_entry, back_single_monitor_entry,
+                                          single_entry_with_detector, mask_angle_entry, LimitsId, rebin_string_values,
+                                          simple_range, complex_range, MaskId, mask_block, mask_block_cross,
+                                          mask_line, range_entry_with_detector, SampleId, SetId, set_scales_entry,
+                                          position_entry, TransId, TubeCalibrationFileId, QResolutionId, FitId,
+                                          fit_general, MonId, monitor_length, monitor_file, GravityId,
+                                          monitor_spectrum, PrintId, q_rebin_values)
+from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 
 
 # -----------------------------------------------------------------
@@ -35,7 +35,7 @@ class UserFileReaderTest(unittest.TestCase):
                                                     back_single_monitor_entry(2, 85000, 98000)],
                            DetectorId.reduction_mode: [ISISReductionMode.LAB],
                            GravityId.on_off: [True],
-                           FitId.general: [fit_general(start=1.5, stop=12.5, fit_type=FitType.Log,
+                           FitId.general: [fit_general(start=1.5, stop=12.5, fit_type=FitType.Logarithmic,
                                                        data_type=None, polynomial_order=0)],
                            MaskId.vertical_single_strip_mask: [single_entry_with_detector(191, DetectorType.LAB),
                                                                single_entry_with_detector(191, DetectorType.HAB),
@@ -103,6 +103,7 @@ class UserFileReaderTest(unittest.TestCase):
     def _sort_list(elements):
         if len(elements) == 1:
             return
+
         if isinstance(elements[0], single_entry_with_detector):
             UserFileReaderTest._sort(elements, lambda x: x.entry)
         elif isinstance(elements[0], simple_range):

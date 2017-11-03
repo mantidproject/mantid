@@ -166,7 +166,7 @@ void SaveAscii2::exec() {
   const std::string custom = getPropertyValue("CustomSeparator");
   // If the custom separator property is not empty, then we use that under any
   // circumstance.
-  if (custom != "") {
+  if (!custom.empty()) {
     m_sep = custom;
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
@@ -261,13 +261,13 @@ void SaveAscii2::exec() {
     populateAllMetaData();
   }
   if (idx.empty()) {
-    Progress progress(this, 0, 1, nSpectra);
+    Progress progress(this, 0.0, 1.0, nSpectra);
     for (int i = 0; i < nSpectra; i++) {
       writeSpectrum(i, file);
       progress.report();
     }
   } else {
-    Progress progress(this, 0, 1, idx.size());
+    Progress progress(this, 0.0, 1.0, idx.size());
     for (auto i = idx.begin(); i != idx.end(); ++i) {
       writeSpectrum(*i, file);
       progress.report();
@@ -365,7 +365,7 @@ void SaveAscii2::populateQMetaData() {
       efixed = DBL_MIN;
     }
     // Convert to MomentumTransfer
-    auto qValue = Kernel::UnitConversion::run(theta, efixed);
+    auto qValue = Kernel::UnitConversion::convertToElasticQ(theta, efixed);
     auto qValueStr = boost::lexical_cast<std::string>(qValue);
     qValues.push_back(qValueStr);
   }

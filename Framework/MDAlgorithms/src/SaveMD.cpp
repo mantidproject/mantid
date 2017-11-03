@@ -1,21 +1,21 @@
+#include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/SaveMD.h"
-#include "MantidDataObjects/MDBox.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include <Poco/File.h>
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
+#include <Poco/File.h>
 
 typedef std::unique_ptr<::NeXus::File> file_holder_type;
 
@@ -116,7 +116,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       oldFile.remove();
   }
 
-  auto prog = new Progress(this, 0.0, 0.05, 1);
+  auto prog = make_unique<Progress>(this, 0.0, 0.05, 1);
   if (updateFileBackend) // workspace has its own file and ignores any changes
                          // to the
                          // algorithm parameters
@@ -221,8 +221,6 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (!copyFile) {
     BoxFlatStruct.saveBoxStructure(filename);
   }
-
-  delete prog;
 
   ws->setFileNeedsUpdating(false);
 }

@@ -117,7 +117,7 @@ void CalculateChiSquared::execConcrete() {
   // Get the number of free fitting parameters
   size_t nParams = 0;
   for (size_t i = 0; i < m_function->nParams(); ++i) {
-    if (!m_function->isFixed(i))
+    if (m_function->isActive(i))
       nParams += 1;
   }
 
@@ -658,7 +658,7 @@ void CalculateChiSquared::estimateErrors() {
 /// Temporary unfix any fixed parameters.
 void CalculateChiSquared::unfixParameters() {
   for (size_t i = 0; i < m_function->nParams(); ++i) {
-    if (m_function->isFixed(i)) {
+    if (!m_function->isActive(i)) {
       m_function->unfix(i);
       m_fixedParameters.push_back(i);
     }

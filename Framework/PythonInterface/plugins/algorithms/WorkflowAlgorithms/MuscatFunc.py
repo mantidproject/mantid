@@ -102,4 +102,5 @@ class MuscatFunc(PythonAlgorithm):
         saveOp = self.getProperty('Save').value
         Main.MuscatFuncStart(sname,geom,neut,beam,sam,grid,disp,coeff,kr1,verbOp,plotOp,saveOp)
 
+
 AlgorithmFactory.subscribe(MuscatFunc)         # Register algorithm with Mantid

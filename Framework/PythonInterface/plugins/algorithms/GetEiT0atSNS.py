@@ -84,4 +84,5 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
         self.setProperty("Ei",Ei)
         self.setProperty("T0",Tzero)
 
+
 mantid.api.AlgorithmFactory.subscribe(GetEiT0atSNS)

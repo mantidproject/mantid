@@ -172,7 +172,7 @@ void IntegratePeaksHybrid::exec() {
   PeakClusterProjection projection(mdWS);
   auto outImageResults = boost::make_shared<WorkspaceGroup>();
 
-  Progress progress(this, 0, 1, peakWS->getNumberPeaks());
+  Progress progress(this, 0.0, 1.0, peakWS->getNumberPeaks());
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*peakWS))
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {

@@ -176,7 +176,7 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
   }
   // Include Kfse if it is not fixed
   const size_t kIndex = this->parameterIndex(KFSE_NAME);
-  if (!isFixed(kIndex)) {
+  if (isActive(kIndex)) {
     indices.push_back(kIndex);
   }
 
@@ -375,7 +375,7 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
   // Is FSE fixed at the moment?
   // The ComptonScatteringCountRate fixes it but we still need to know if the
   // user wanted it fixed
-  m_userFixedFSE = this->isFixed(this->parameterIndex(KFSE_NAME));
+  m_userFixedFSE = !this->isActive(this->parameterIndex(KFSE_NAME));
 
   const auto &yspace = ySpace();
   const auto &modq = modQ();

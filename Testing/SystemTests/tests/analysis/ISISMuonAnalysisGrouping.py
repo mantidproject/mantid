@@ -1,13 +1,15 @@
 #pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
+class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply
@@ -23,7 +25,6 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
         - x_min: Float value of the minimum x.
         - x_max: Float value of the maximum x.
     """
-    __metaclass__ = ABCMeta # Mark as an abstract class
 
     @abstractmethod
     def get_reference_file(self):

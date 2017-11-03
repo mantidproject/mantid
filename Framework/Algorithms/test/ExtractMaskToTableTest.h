@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/ExtractMask.h"
 #include "MantidAlgorithms/SumNeighbours.h"
 #include "MantidAlgorithms/MaskDetectorsIf.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"

@@ -120,7 +120,7 @@ void HFIRLoad::exec() {
                                                         reductionManager);
   }
 
-  Progress progress(this, 0, 1, 5);
+  Progress progress(this, 0.0, 1.0, 5);
 
   progress.report();
 

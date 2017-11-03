@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0901,R0902,too-many-branches,C0302
+from __future__ import (absolute_import, division, print_function)
 import os
 import numpy as np
 
@@ -36,6 +37,14 @@ class Mpl2dGraphicsView(QtGui.QWidget):
         self._myImageDict = dict()
 
         return
+
+    @property
+    def array2d(self):
+        """
+        return the matrix (2d-array) plot on the canvas
+        :return:
+        """
+        return self._myCanvas.array2d
 
     def add_plot_2d(self, array2d, x_min, x_max, y_min, y_max, hold_prev_image=True, y_tick_label=None):
         """
@@ -148,6 +157,9 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         # polygon
         self._myPolygon = None
 
+        # Buffer of data
+        self._currentArray2D = None
+
         # image management data structure
         self._currIndex = 0
         self._imagePlotDict = dict()
@@ -157,6 +169,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         self._yLimit = [0., 1.]
 
         return
+
+    @property
+    def array2d(self):
+        """
+        get the matrix plot now
+        :return:
+        """
+        return self._currentArray2D
 
     def add_2d_plot(self, array2d, x_min, x_max, y_min, y_max, hold_prev, yticklabels=None):
         """ Add a 2D plot
@@ -187,14 +207,14 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         img_plot = self.axes.imshow(array2d,
                                     extent=[x_min, x_max, y_min, y_max],
                                     interpolation='none')
+        self._currentArray2D = array2d
 
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
             # FUTURE-VZ : The way to set up the Y-axis ticks is wrong!"
             # self.axes.set_yticklabels(yticklabels)
-            print '[Warning] The method to set up the Y-axis ticks to 2D image is ' \
-                  'wrong!'
+            print('[Warning] The method to set up the Y-axis ticks to 2D image is wrong!')
 
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')

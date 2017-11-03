@@ -32,10 +32,10 @@
 #include "Table.h"
 #include "ApplicationWindow.h"
 #include "ImportASCIIDialog.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "SortDialog.h"
 #include "muParserScript.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>
@@ -754,11 +754,11 @@ void Table::setColName(int col, const QString &text, bool enumerateRight) {
     if (enumerateRight)
       newLabel += QString::number(n);
 
-    if (col_label.contains(newLabel) > 0) {
+    if (col_label.contains(newLabel) > nullptr) {
       auto msg = "There is already a column called : <b>" + newLabel +
                  "</b> in table <b>" + caption +
                  "</b>!<p>Please choose another name!";
-      QMessageBox::critical(0, tr("MantidPlot - Error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot - Error"),
                             tr(msg.toAscii().constData()));
       return;
     }
@@ -2323,7 +2323,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
     auto msg = "Could not write to file: <br><h4>" + fname +
                "</h4><p>Please verify that you have the right to "
                "write to this location!";
-    QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - ASCII Export Error"),
                           tr(msg.toAscii().constData()).arg(fname));
     return false;
   }
@@ -2334,7 +2334,7 @@ bool Table::exportASCII(const QString &fname, const QString &separator,
   int cols = d_table->columnCount();
   int selectedCols = 0;
   int topRow = 0, bottomRow = 0;
-  int *sCols = 0;
+  int *sCols = nullptr;
   if (exportSelection) {
     for (int i = 0; i < cols; i++) {
       if (d_table->isColumnSelected(i))
@@ -2688,7 +2688,7 @@ void Table::resizeRows(int newNumRows) {
     QString text = tr("Rows will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;
@@ -2707,7 +2707,7 @@ void Table::resizeCols(int newNumCols) {
     QString text = tr("Columns will be deleted from the table!") + "<p>" +
                    tr("Do you really want to continue?");
     int answer = QMessageBox::information(this, tr("MantidPlot"), text,
-                                          tr("Yes"), tr("Cancel"), 0, 1);
+                                          tr("Yes"), tr("Cancel"), nullptr, 1);
 
     if (answer == 1)
       return;

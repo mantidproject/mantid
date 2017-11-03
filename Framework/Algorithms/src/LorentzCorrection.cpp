@@ -65,7 +65,7 @@ void LorentzCorrection::exec() {
 
   const auto numHistos = inWS->getNumberHistograms();
   const auto &spectrumInfo = inWS->spectrumInfo();
-  Progress prog(this, 0, 1, numHistos);
+  Progress prog(this, 0.0, 1.0, numHistos);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inWS))
   for (int64_t i = 0; i < int64_t(numHistos); ++i) {

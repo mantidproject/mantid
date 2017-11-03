@@ -26,10 +26,11 @@ Usage
     filepath = config["defaultsave.directory"]
   savefilename = os.path.join(filepath, "test_offset.dat")
 
-  LoadCalFile(InstrumentName='PG3',CalFilename=r'PG3_golden.cal',MakeGroupingWorkspace='0',MakeMaskWorkspace='0',WorkspaceName='PG3_gold')
+  ws = LoadEmptyInstrument(Filename="POWGEN_Definition_2015-08-01.xml")
+  LoadCalFile(InputWorkspace=ws,CalFilename=r'PG3_golden.cal',MakeGroupingWorkspace='0',MakeMaskWorkspace='0',WorkspaceName='PG3_gold')
   SaveDspacemap(InputWorkspace="PG3_gold_offsets", DspacemapFile=savefilename)
 
-  print "File created = ", os.path.exists(savefilename), ", file size = ", os.path.getsize(savefilename)
+  print("File created =  {} , file size =  {}".format(os.path.exists(savefilename),  os.path.getsize(savefilename)))
 
 .. testcleanup:: ExSavePG3Dmap
 
@@ -44,6 +45,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-

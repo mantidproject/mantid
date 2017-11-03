@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/Quat.h"
+#include "MantidKernel/V3D.h"
 
 #include <string>
 #include <typeinfo>
@@ -16,11 +18,6 @@ class XMLWriter;
 }
 
 namespace Mantid {
-namespace Kernel {
-class V3D;
-class Quat;
-}
-
 namespace Geometry {
 
 //----------------------------------------------------------------------
@@ -302,8 +299,10 @@ public:
 
   bool isParametrized() const override;
 
-  virtual void
+  virtual size_t
   registerContents(class ComponentVisitor &componentVisitor) const override;
+  bool hasComponentInfo() const;
+  size_t index() const;
 
 protected:
   /// Parent component in the tree

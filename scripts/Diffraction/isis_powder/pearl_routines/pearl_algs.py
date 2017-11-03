@@ -1,6 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as numpy
 import mantid.simpleapi as mantid
 
 import isis_powder.routines.common as common
@@ -40,11 +39,10 @@ def apply_vanadium_absorb_corrections(van_ws, run_details):
     return van_ws
 
 
-def generate_out_name(run_number_string, absorb_on, long_mode_on, tt_mode):
+def generate_out_name(run_number_string, long_mode_on, tt_mode):
     output_name = "PRL" + str(run_number_string)
     # Append each mode of operation
     output_name += "_" + str(tt_mode)
-    output_name += "_absorb" if absorb_on else ""
     output_name += "_long" if long_mode_on else ""
     return output_name
 
@@ -69,18 +67,16 @@ def generate_vanadium_absorb_corrections(van_ws):
 
 
 def get_run_details(run_number_string, inst_settings, is_vanadium_run):
-    splined_name_list = ["_tt-" + inst_settings.tt_mode]
-    if inst_settings.absorb_corrections:
-        splined_name_list.append("_abs")
+    spline_identifier = [inst_settings.tt_mode]
     if inst_settings.long_mode:
-        splined_name_list.append("_long")
+        spline_identifier.append("_long")
 
     grouping_file_name_callable = CustomFuncForRunDetails().add_to_func_chain(
         user_function=_pearl_get_tt_grouping_file_name,
         inst_settings=inst_settings)
 
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
-                                     is_vanadium_run=is_vanadium_run, splined_name_list=splined_name_list,
+                                     is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
                                      grouping_file_name_call=grouping_file_name_callable,
                                      van_abs_file_name=inst_settings.van_absorb_file)
 
@@ -94,16 +90,10 @@ def _pearl_get_tt_grouping_file_name(inst_settings):
     return grouping_file_name
 
 
-def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range):
+def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range, ex_regions):
     processed_monitor_ws = mantid.ConvertUnits(InputWorkspace=monitor_ws, Target="Wavelength")
     processed_monitor_ws = mantid.CropWorkspace(InputWorkspace=processed_monitor_ws,
                                                 XMin=lambda_values[0], XMax=lambda_values[-1])
-    # TODO move these masks to the adv. config file
-    ex_regions = numpy.zeros((2, 4))
-    ex_regions[:, 0] = [3.45, 3.7]
-    ex_regions[:, 1] = [2.96, 3.2]
-    ex_regions[:, 2] = [2.1, 2.26]
-    ex_regions[:, 3] = [1.73, 1.98]
 
     for reg in range(0, 4):
         processed_monitor_ws = mantid.MaskBins(InputWorkspace=processed_monitor_ws, XMin=ex_regions[0, reg],

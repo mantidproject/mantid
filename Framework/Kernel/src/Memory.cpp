@@ -1,6 +1,8 @@
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
+#include <cstdio>
 #include <sstream>
 
 #ifdef __linux__
@@ -562,8 +564,8 @@ size_t MemoryStats::getCurrentRSS() const {
     defined(__gnu_linux__)
   /* Linux ---------------------------------------------------- */
   long rss = 0L;
-  FILE *fp = NULL;
-  if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+  FILE *fp = nullptr;
+  if ((fp = fopen("/proc/self/statm", "r")) == nullptr)
     return (size_t)0L; /* Can't open? */
   if (fscanf(fp, "%*s%20ld", &rss) != 1) {
     fclose(fp);

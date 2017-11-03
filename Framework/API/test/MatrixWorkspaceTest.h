@@ -1,7 +1,6 @@
 #ifndef WORKSPACETEST_H_
 #define WORKSPACETEST_H_
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -10,9 +9,10 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/make_cow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
@@ -22,6 +22,7 @@
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidTestHelpers/ParallelRunner.h"
 #include "PropertyManagerHelper.h"
 
 #include <cxxtest/TestSuite.h>
@@ -35,10 +36,12 @@
 #include <numeric>
 
 using std::size_t;
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Indexing::IndexInfo;
+using Mantid::Types::Core::DateAndTime;
 
 // Declare into the factory.
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -68,6 +71,34 @@ boost::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra,
   }
   ws2->setInstrument(inst);
   return ws2;
+}
+
+namespace {
+void run_legacy_setting_spectrum_numbers_with_MPI(
+    const Parallel::Communicator &comm) {
+  using namespace Parallel;
+  for (const auto storageMode : {StorageMode::MasterOnly, StorageMode::Cloned,
+                                 StorageMode::Distributed}) {
+    WorkspaceTester ws;
+    if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+      Indexing::IndexInfo indexInfo(1000, storageMode, comm);
+      ws.initialize(indexInfo,
+                    HistogramData::Histogram(HistogramData::Points(1)));
+    }
+    if (storageMode == StorageMode::Distributed && comm.size() > 1) {
+      TS_ASSERT_THROWS_EQUALS(ws.getSpectrum(0).setSpectrumNo(42),
+                              const std::logic_error &e, std::string(e.what()),
+                              "Setting spectrum numbers in MatrixWorkspace via "
+                              "ISpectrum::setSpectrumNo is not possible in MPI "
+                              "runs for distributed workspaces. Use "
+                              "IndexInfo.");
+    } else {
+      if (comm.rank() == 0 || storageMode != StorageMode::MasterOnly) {
+        TS_ASSERT_THROWS_NOTHING(ws.getSpectrum(0).setSpectrumNo(42));
+      }
+    }
+  }
+}
 }
 
 class MatrixWorkspaceTest : public CxxTest::TestSuite {
@@ -363,6 +394,14 @@ public:
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }
 
+  void test_initialize_with_IndexInfo_does_not_set_default_detectorIDs() {
+    WorkspaceTester ws;
+    Indexing::IndexInfo indexInfo(1);
+    ws.initialize(indexInfo,
+                  HistogramData::Histogram(HistogramData::Points(1)));
+    TS_ASSERT_EQUALS(ws.getSpectrum(0).getDetectorIDs().size(), 0);
+  }
+
   void testGetSetTitle() {
     TS_ASSERT_EQUALS(ws->getTitle(), "");
     ws->setTitle("something");
@@ -402,6 +441,13 @@ public:
       TS_ASSERT_EQUALS(testWS.getSpectrum(i).getSpectrumNo(), specnum_t(i + 1));
       TS_ASSERT(testWS.getSpectrum(i).hasDetectorID(detid_t(i)));
     }
+  }
+
+  void testEmptyWorkspace() {
+    WorkspaceTester ws;
+    TS_ASSERT(ws.isCommonBins());
+    TS_ASSERT_EQUALS(ws.blocksize(), 0);
+    TS_ASSERT_EQUALS(ws.size(), 0);
   }
 
   void test_updateSpectraUsing() {
@@ -766,21 +812,6 @@ public:
     TS_ASSERT_THROWS(wkspace.binIndexOf(0.), std::out_of_range);
   }
 
-  void test_nexus_spectraMap() {
-    NexusTestHelper th(true);
-    th.createFile("MatrixWorkspaceTest.nxs");
-    auto ws = makeWorkspaceWithDetectors(100, 50);
-    std::vector<int> spec;
-    for (int i = 0; i < 100; i++) {
-      // Give some funny numbers, so it is not the default
-      ws->getSpectrum(size_t(i)).setSpectrumNo(i * 11);
-      ws->getSpectrum(size_t(i)).setDetectorID(99 - i);
-      spec.push_back(i);
-    }
-    // Save that to the NXS file
-    TS_ASSERT_THROWS_NOTHING(ws->saveSpectraMapNexus(th.file, spec););
-  }
-
   void test_hasGroupedDetectors() {
     auto ws = makeWorkspaceWithDetectors(5, 1);
     TS_ASSERT_EQUALS(ws->hasGroupedDetectors(), false);
@@ -895,16 +926,26 @@ public:
   void test_getSignalAtCoord_pointData() {
     // Create a test workspace
     const auto ws = createTestWorkspace(4, 5, 5);
+    auto normType = Mantid::API::NoNormalization;
 
     // Get signal at coordinates
-    std::vector<coord_t> coords = {0.0, 1.0};
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 0.0,
-        1e-5);
+    std::vector<coord_t> coords = {-1.0, 1.0};
+    coords[0] = -0.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
+    coords[0] = -0.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.0;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 0.0, 1e-5);
+    coords[0] = 0.75;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 1.0, 1e-5);
     coords[0] = 1.0;
-    TS_ASSERT_DELTA(
-        ws.getSignalAtCoord(coords.data(), Mantid::API::NoNormalization), 1.0,
-        1e-5);
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 1.0, 1e-5);
+    coords[0] = 4.25;
+    TS_ASSERT_DELTA(ws.getSignalAtCoord(coords.data(), normType), 4.0, 1e-5);
+    coords[0] = 4.75;
+    TS_ASSERT(std::isnan(ws.getSignalAtCoord(coords.data(), normType)));
   }
 
   void test_getCoordAtSignal_regression() {
@@ -1618,10 +1659,24 @@ public:
     // Moving parent not possible since non-detector components do not have time
     // indices and thus DetectorInfo cannot tell which set of detector positions
     // to adjust.
-    TS_ASSERT_THROWS(detInfo.setPosition(*det.getParent(), V3D(1, 2, 3)),
+
+    auto &compInfo = merged->mutableComponentInfo();
+
+    // Try to move the parent
+    TS_ASSERT_THROWS(compInfo.setPosition(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          V3D(1, 2, 3)),
                      std::runtime_error);
-    TS_ASSERT_THROWS(detInfo.setRotation(*det.getParent(), Quat(1, 2, 3, 4)),
+    // Try to rotate the parent
+    TS_ASSERT_THROWS(compInfo.setRotation(compInfo.parent(compInfo.indexOf(
+                                              det.getComponentID())),
+                                          Quat(1, 2, 3, 4)),
                      std::runtime_error);
+  }
+
+  void test_legacy_setting_spectrum_numbers_with_MPI() {
+    ParallelTestHelpers::runParallel(
+        run_legacy_setting_spectrum_numbers_with_MPI);
   }
 
 private:
@@ -1805,9 +1860,9 @@ public:
     // future updates
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1831,9 +1886,9 @@ public:
     // future updates
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       for (size_t i = 1; i < m_workspaceSans.getNumberHistograms(); ++i) {
@@ -1848,9 +1903,9 @@ public:
     int count = 0;
     while (count < 10) {
       // Rotate the bank
-      ComponentHelper::rotateComponent(
-          *m_sansBank, *m_paramMap, m_zRotation,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setRotation(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_zRotation);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();
@@ -1866,9 +1921,9 @@ public:
     int count = 0;
     while (count < 10) {
       // move the bank
-      ComponentHelper::moveComponent(
-          *m_sansBank, *m_paramMap, m_pos,
-          Mantid::Geometry::ComponentHelper::Relative);
+      auto &compInfo = m_workspaceSans.mutableComponentInfo();
+      compInfo.setPosition(compInfo.indexOf(m_sansBank->getComponentID()),
+                           m_pos);
 
       V3D pos;
       const auto &spectrumInfo = m_workspaceSans.spectrumInfo();

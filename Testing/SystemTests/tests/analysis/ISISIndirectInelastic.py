@@ -67,6 +67,7 @@ stresstesting.MantidStressTest
      |
 '''
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import os
 from abc import ABCMeta, abstractmethod
@@ -75,14 +76,13 @@ from mantid.simpleapi import *
 
 # For debugging only.
 from mantid.api import FileFinder
+from six import with_metaclass
 
 
-class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
+class ISISIndirectInelasticBase(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     @abstractmethod
     def get_reference_files(self):
@@ -138,7 +138,7 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
                                    reference_file)
 
             if not self.validateWorkspaces([result, wsName]):
-                print str([reference_file, result]) + " do not match."
+                print(str([reference_file, result]) + " do not match.")
                 return False
 
         return True
@@ -151,7 +151,7 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
 #==============================================================================
 
 
-class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
+class ISISIndirectInelasticReduction(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic reduction tests
 
     The workflow is defined in the _run() method, simply
@@ -165,8 +165,6 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
         - save_formats: A list containing the file extensions of the formats
                         to save to.
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
     sum_files = False
 
     def _run(self):
@@ -337,7 +335,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
 #==============================================================================
 
 
-class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
+class ISISIndirectInelasticCalibration(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic calibration tests
 
     The workflow is defined in the _run() method, simply
@@ -350,8 +348,6 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
         - self.analyser: a string giving the name of the analyser to use
         - self.reflection: a string giving the reflection to use
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -410,7 +406,7 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
 #==============================================================================
 
 
-class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
+class ISISIndirectInelasticResolution(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic resolution tests
 
     The workflow is defined in the _run() method, simply
@@ -424,8 +420,6 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
         - self.rebin_params: a comma separated string containing the rebin params
         - self.files: a list of strings containing filenames
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -500,15 +494,13 @@ class IRISResolution(ISISIndirectInelasticResolution):
 #==============================================================================
 
 
-class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
+class ISISIndirectInelasticDiagnostics(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic diagnostic tests
 
     The workflow is defined in the _run() method, simply
     define an __init__ method and set the following properties
     on the object
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -576,14 +568,12 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 #==============================================================================
 
 
-class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
+class ISISIndirectInelasticMoments(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
-    # Mark as an abstract class
-    __metaclass__ = ABCMeta
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -642,19 +632,19 @@ class IRISMoments(ISISIndirectInelasticMoments):
 #==============================================================================
 
 
-class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
+class ISISIndirectInelasticElwinAndMSDFit(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic Elwin/MSD Fit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
 
-    __metaclass__ = ABCMeta  # Mark as an abstract class
+    def __init__(self):
+        super(ISISIndirectInelasticElwinAndMSDFit, self).__init__()
+        self.tolerance = 1e-7
 
     def _run(self):
         '''Defines the workflow for the test'''
-        self.tolerance = 1e-7
-
         elwin_input = '__ElWinMult_in'
         elwin_results = ['__ElWinMult_q', '__ElWinMult_q2', '__ElWinMult_elf']
 
@@ -676,8 +666,8 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
             SaveNexusProcessed(Filename=filename,
                                InputWorkspace=ws)
 
-        eq2_file = elwin_results[1]
-        msdfit_result = MSDFit(InputWorkspace=eq2_file,
+        eq_file = elwin_results[0]
+        msdfit_result = MSDFit(InputWorkspace=eq_file,
                                XStart=self.startX,
                                XEnd=self.endX,
                                SpecMax=1)
@@ -711,11 +701,12 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
         ISISIndirectInelasticElwinAndMSDFit.__init__(self)
+        self.tolerance = 5e-6
         self.files = ['osi97935_graphite002_red.nxs',
                       'osi97936_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.195082
-        self.endX = 3.202128
+        self.startX = 0.189077
+        self.endX = 1.8141
 
     def get_reference_files(self):
         return ['II.OSIRISElwinEQ1.nxs',
@@ -732,8 +723,8 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
         self.files = ['irs53664_graphite002_red.nxs',
                       'irs53665_graphite002_red.nxs']
         self.eRange = [-0.02, 0.02]
-        self.startX = 0.313679
-        self.endX = 3.285377
+        self.startX = 0.441682
+        self.endX = 1.85378
 
     def get_reference_files(self):
         return ['II.IRISElwinEQ1.nxs',
@@ -743,15 +734,13 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 #==============================================================================
 
 
-class ISISIndirectInelasticIqtAndIqtFit(ISISIndirectInelasticBase):
+class ISISIndirectInelasticIqtAndIqtFit(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''
     A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
     The output of TransformToIqt is usually used with IqtFit and so we plug one into
     the other in this test.
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -871,14 +860,12 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
 #==============================================================================
 
 
-class ISISIndirectInelasticIqtAndIqtFitMulti(ISISIndirectInelasticBase):
+class ISISIndirectInelasticIqtAndIqtFitMulti(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic Iqt/IqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
     '''
-
-    __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -1000,15 +987,13 @@ class IRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
 #==============================================================================
 
 
-class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
+class ISISIndirectInelasticConvFit(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     '''A base class for the ISIS indirect inelastic ConvFit tests
 
     The workflow is defined in the _run() method, simply
     define an __init__ method and set the following properties
     on the object
     '''
-    # Mark as an abstract class
-    __metaclass__ = ABCMeta
 
     def _run(self):
         '''Defines the workflow for the test'''
@@ -1019,6 +1004,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         ConvolutionFitSequential(
             InputWorkspace=self.sample,
             Function=self.func,
+            PassWSIndexToFunction=self.passWSIndexToFunction,
             StartX=self.startx,
             EndX=self.endx,
             BackgroundType=self.bg,
@@ -1062,6 +1048,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
                     'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,FWHM=0.002,ties=(PeakCentre=0)'\
                     ',constraints=(FWHM>0.002))' % self.resolution
+        self.passWSIndexToFunction = False  # osi97935_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1089,7 +1076,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
                     '(composite=Convolution,FixResolution=true,NumDeriv=true;' \
                     'name=Resolution,Workspace="%s";name=Lorentzian,Amplitude=1.033150,FWHM=0.001576,'\
                     'ties=(PeakCentre=0.0),constraints=(FWHM>0.001))' % self.resolution
-
+        self.passWSIndexToFunction = False  # irs53664_graphite002_res is single histogram
         self.startx = -0.2
         self.endx = 0.2
         self.bg = 'Fit Linear'
@@ -1107,10 +1094,8 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
 # Transmission Monitor Test
 
 
-class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
+class ISISIndirectInelasticTransmissionMonitor(with_metaclass(ABCMeta, ISISIndirectInelasticBase)):
     # Mark as an abstract class
-    __metaclass__ = ABCMeta
-
     def _run(self):
         '''Defines the workflow for the test'''
 

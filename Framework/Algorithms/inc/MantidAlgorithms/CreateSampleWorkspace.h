@@ -63,6 +63,9 @@ private:
                            double x0, double binDelta,
                            Geometry::Instrument_sptr inst,
                            const std::string &functionString, bool isRandom);
+  API::MatrixWorkspace_sptr createScanningWorkspace(
+      int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+      const std::string &functionString, bool isRandom, int numScanPoints);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
       API::Progress &progress, int numBanks, int numMonitors, int pixels,
       double pixelSpacing, const double bankDistanceFromSample,

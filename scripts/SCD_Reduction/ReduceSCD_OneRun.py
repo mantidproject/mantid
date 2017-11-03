@@ -125,9 +125,11 @@ optimize_UB               = params_dictionary[ "optimize_UB" ]
 # Get the fully qualified input run file name, either from a specified data
 # directory or from findnexus
 #
-short_filename = "%s_%s_event.nxs" % (instrument_name, str(run))
+short_filename = "%s_%s" % (instrument_name, str(run))
 if data_directory is not None:
-    full_name = data_directory + "/" + short_filename
+    full_name = data_directory + "/" + short_filename + ".nxs.h5"
+    if not os.path.exists(full_name):
+        full_name = data_directory + "/" + short_filename + "_event.nxs"
 else:
     candidates = FileFinder.findRuns(short_filename)
     full_name = ""
@@ -135,7 +137,7 @@ else:
         if os.path.exists(item):
             full_name = str(item)
 
-    if not full_name.endswith('nxs'):
+    if not full_name.endswith('nxs') and not full_name.endswith('h5'):
         print("Exiting since the data_directory was not specified and")
         print("findnexus failed for event NeXus file: " + instrument_name + " " + str(run))
         exit(0)
@@ -362,12 +364,12 @@ else:
                           CellType=cell_type, Centering=centering,
                           AllowPermutations=allow_perm,
                           Apply=True, Tolerance=tolerance )
-    if output_nexus:
-        SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
-    else:
-        SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
-                      Filename=run_conventional_integrate_file )
-        SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
+        if output_nexus:
+            SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
+        else:
+            SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
+                          Filename=run_conventional_integrate_file )
+            SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
 
 end_time = time.time()
 print('\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec')

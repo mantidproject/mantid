@@ -16,6 +16,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Kernel;
@@ -57,7 +58,8 @@ void setup_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -92,7 +94,8 @@ void setup_Points_WS(std::string &inputSpace) {
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
   const std::string inputFile =
-      ConfigService::Instance().getInstrumentDirectory() + "HET_Definition.xml";
+      ConfigService::Instance().getInstrumentDirectory() +
+      "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -608,6 +611,23 @@ public:
     // Check EMode has been set
     TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
 
+    ConvertUnits conv4;
+    conv4.initialize();
+    conv4.setProperty("InputWorkspace", ws);
+    conv4.setPropertyValue("OutputWorkspace", outputSpace);
+    conv4.setPropertyValue("Target", "dSpacingPerpendicular");
+    conv4.setPropertyValue("Emode", "Direct");
+    conv4.execute();
+
+    TS_ASSERT_THROWS_NOTHING(
+        output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputSpace));
+    TS_ASSERT_EQUALS(output->getAxis(0)->unit()->unitID(),
+                     "dSpacingPerpendicular");
+    TS_ASSERT_EQUALS(output->blocksize(), 2663);
+    // Check EMode has been set
+    TS_ASSERT_EQUALS(Mantid::Kernel::DeltaEMode::Direct, output->getEMode());
+
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
@@ -734,9 +754,9 @@ public:
       }
     } else if (sortType == PULSETIME_SORT) {
       // Check directly that it is indeed increasing
-      Mantid::Kernel::DateAndTime last_x;
+      Mantid::Types::Core::DateAndTime last_x;
       for (size_t i = 0; i < el.getNumberEvents(); i++) {
-        Mantid::Kernel::DateAndTime x = el.getEvent(i).pulseTime();
+        Mantid::Types::Core::DateAndTime x = el.getEvent(i).pulseTime();
         TS_ASSERT(x >= last_x);
         last_x = x;
       }

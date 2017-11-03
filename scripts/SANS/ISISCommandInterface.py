@@ -18,7 +18,6 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
-
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -371,7 +370,7 @@ def GetMismatchedDetList():
 # pylint: disable = too-many-branches
 
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None,
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, # noqa: C901
                       resetSetup=True, out_fit_settings=dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
@@ -516,7 +515,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             consider_can = False
 
         # Get fit paramters
-        scale_factor, shift_factor, fit_mode = su.extract_fit_parameters(rAnds)
+        scale_factor, shift_factor, fit_mode, fit_min, fit_max = su.extract_fit_parameters(rAnds)
 
         kwargs_stitch = {"HABCountsSample": Cf,
                          "HABNormSample": Nf,
@@ -534,6 +533,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                           "LABNormCan": Nr_can,
                           "ProcessCan": True}
             kwargs_stitch.update(kwargs_can)
+
+        if rAnds.qRangeUserSelected:
+            q_range_stitch = {"FitMin": fit_min,
+                              "FitMax": fit_max}
+            kwargs_stitch.update(q_range_stitch)
 
         alg_stitch = su.createUnmanagedAlgorithm("SANSStitch", **kwargs_stitch)
         alg_stitch.execute()
@@ -730,12 +734,6 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     """
 
     _printMessage('CompWavRanges( %s,plot=%s)' % (str(wavelens), plot))
-
-    # this only makes sense for 1D reductions
-    if ReductionSingleton().to_Q.output_type == '2D':
-        issueWarning('This wave ranges check is a 1D analysis, ignoring 2D setting')
-        _printMessage('Set1D()')
-        ReductionSingleton().to_Q.output_type = '1D'
 
     if not isinstance(wavelens, type([])) or len(wavelens) < 2:
         if not isinstance(wavelens, type((1,))):
@@ -984,10 +982,6 @@ def DisplayMask(mask_worksp=None):
         @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
         @return the name of the workspace that was displayed
     """
-    # this will be copied from a sample work space if one exists
-    counts_data = None
-    _instrument = ReductionSingleton().instrument
-
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = LAST_SAMPLE
@@ -1000,18 +994,12 @@ def DisplayMask(mask_worksp=None):
                 CloneWorkspace(InputWorkspace=samp + "_monitors",
                                OutputWorkspace=mask_worksp + "_monitors")
                 su.fromEvent2Histogram(mask_worksp, mtd[mask_worksp + "_monitors"])
-
-            counts_data = '__DisplayMasked_tempory_wksp'
-            Integration(InputWorkspace=mask_worksp, OutputWorkspace=counts_data)
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log=True, no_console=False)
             return
 
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
-    if counts_data:
-        DeleteWorkspace(counts_data)
-
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
     return mask_worksp
 
 
@@ -1145,7 +1133,7 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-    beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
+    beam_center_logger.report_status(0, COORD1NEW, COORD2NEW, resCoord1_old, resCoord2_old)
 
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
@@ -1767,14 +1755,13 @@ def is_current_workspace_an_angle_workspace():
     return is_angle
 
 
-def MatchIDFInReducerAndWorkspace(file_name):
-    '''
-    This method checks if the IDF which gets loaded with the workspace associated
-    with the file name and the current instrument in the reducer singleton refer
-    to the same IDF. If not then switch the IDF in the reducer.
-    '''
-    is_matched = True
+def _get_idf_path_for_run(file_name):
+    """
+    This method finds the full file location for a run number
 
+    :param file_name: the file name or run number
+    :return: the full path to the corresponding IDF
+    """
     # Get measurement time from file
     measurement_time = su.get_measurement_time_from_file(file_name)
 
@@ -1783,16 +1770,30 @@ def MatchIDFInReducerAndWorkspace(file_name):
 
     # Get the path to the instrument definition file
     idf_path_workspace = ExperimentInfo.getInstrumentFilename(instrument_name, measurement_time)
-    idf_path_workspace = os.path.normpath(idf_path_workspace)
+    return os.path.normpath(idf_path_workspace)
+
+
+def get_idf_path_for_run(file_name):
+    idf_path_workspace = _get_idf_path_for_run(file_name)
+    print(idf_path_workspace)
+    return idf_path_workspace
+
+
+def MatchIDFInReducerAndWorkspace(file_name):
+    '''
+    This method checks if the IDF which gets loaded with the workspace associated
+    with the file name and the current instrument in the reducer singleton refer
+    to the same IDF. If not then switch the IDF in the reducer.
+    '''
+
+    # Get the IDF path
+    idf_path_workspace = _get_idf_path_for_run(file_name)
 
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    if ((idf_path_reducer == idf_path_workspace) and
-            su.are_two_files_identical(idf_path_reducer, idf_path_reducer)):
-        is_matched = True
-    else:
-        is_matched = False
+    is_matched = ((idf_path_reducer == idf_path_workspace) and
+                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 

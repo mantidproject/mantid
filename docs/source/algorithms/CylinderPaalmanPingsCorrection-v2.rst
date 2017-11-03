@@ -10,7 +10,7 @@ Description
 -----------
 
 Calculates absorption corrections for a cylindrical or annular sample giving
-output in the Paalman & Pings absorption factors: :math:`A_{s,s}` (correction
+output in the Paalman and Pings absorption factors: :math:`A_{s,s}` (correction
 factor for scattering and absorption in sample), :math:`A_{s,sc}` (scattering in
 sample and absorption in sample and container), :math:`A_{c,sc}` (scattering in
 container and absorption in sample and container) and  :math:`A_{c,c}`
@@ -74,13 +74,19 @@ Usage
                                           Emode='Indirect',
                                           Efixed=1.845)
 
-    print 'Correction workspaces: %s' % (', '.join(corr.getNames()))
+    print('Correction workspaces: {}'.format((', '.join(corr.getNames()))))
 
 Output:
 
 .. testoutput:: ExCylinderPaalmanPingsCorrection
 
     Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
+
+Related Algorithms
+------------------
+
+:ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`
+will correctly apply the partial absorption factors
 
 .. categories::
 

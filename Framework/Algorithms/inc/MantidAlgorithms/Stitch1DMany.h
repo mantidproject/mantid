@@ -52,14 +52,14 @@ public:
   void validateCommonInputs(std::map<std::string, std::string> &errors);
 
   /// Performs the Stitch1D algorithm at a specific workspace index
-  void doStitch1D(API::MatrixWorkspace_sptr lhsWS,
-                  API::MatrixWorkspace_sptr rhsWS, const size_t wsIndex,
+  void doStitch1D(const std::vector<API::MatrixWorkspace_sptr> &toStitch,
                   const std::vector<double> &startOverlaps,
                   const std::vector<double> &endOverlaps,
                   const std::vector<double> &params, const bool scaleRhsWS,
-                  const bool useManualScaleFactor,
-                  const double manualScaleFactor,
-                  API::MatrixWorkspace_sptr &outWS, double &outScaleFactor);
+                  const bool useManualScaleFactors,
+                  const std::vector<double> &manualScaleFactors,
+                  API::Workspace_sptr &outWS, std::string &outName,
+                  std::vector<double> &outScaleFactors);
 
   /// Performs the Stitch1DMany algorithm at a specific period
   void doStitch1DMany(std::vector<API::WorkspaceGroup_sptr> inputWSGroups,
@@ -67,8 +67,9 @@ public:
                       const std::vector<double> &startOverlaps,
                       const std::vector<double> &endOverlaps,
                       const std::vector<double> &params, const bool scaleRhsWS,
-                      const bool useManualScaleFactor,
-                      const double manualScaleFactor, std::string &outName,
+                      const bool useManualScaleFactors,
+                      const std::vector<double> &manualScaleFactors,
+                      std::string &outName,
                       std::vector<double> &outScaleFactors);
 
 private:
@@ -83,9 +84,7 @@ private:
   // Data
 
   // A 2D matrix holding workspaces obtained from each workspace list/group
-  // First index is the period number
-  // Second index is the index of the workspace to stitch
-  std::vector<std::vector<API::Workspace_sptr>> m_inputWSMatrix;
+  std::vector<std::vector<API::MatrixWorkspace_sptr>> m_inputWSMatrix;
 
   // List holding each workspace group
   std::vector<API::WorkspaceGroup_sptr> m_inputWSGroups;
@@ -94,13 +93,13 @@ private:
   std::vector<double> m_endOverlaps;
   std::vector<double> m_params;
   std::vector<double> m_scaleFactors;
+  std::vector<double> m_manualScaleFactors;
   API::Workspace_sptr m_outputWorkspace;
 
   size_t m_numWSPerPeriod = 0;
   size_t m_numWSPerGroup = 0;
-  double m_manualScaleFactor = 1.0;
   bool m_scaleRHSWorkspace = true;
-  bool m_useManualScaleFactor = false;
+  bool m_useManualScaleFactors = false;
   size_t m_scaleFactorFromPeriod = 0;
 };
 

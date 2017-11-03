@@ -17,6 +17,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cmath>
@@ -149,6 +150,27 @@ void PeaksWorkspace::removePeak(const int peakNum) {
   peaks.erase(peaks.begin() + peakNum);
 }
 
+/** Removes multiple peaks
+* @param badPeaks peaks to be removed
+*/
+void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
+  if (badPeaks.empty())
+    return;
+  // if index of peak is in badPeaks remove
+  int ip = -1;
+  auto it =
+      std::remove_if(peaks.begin(), peaks.end(), [&ip, badPeaks](Peak &pk) {
+        (void)pk;
+        ip++;
+        for (auto ibp = badPeaks.begin(); ibp != badPeaks.end(); ++ibp) {
+          if (*ibp == ip)
+            return true;
+        }
+        return false;
+      });
+  peaks.erase(it, peaks.end());
+}
+
 //---------------------------------------------------------------------------------------------
 /** Add a peak to the list
  * @param ipeak :: Peak object to add (copy) into this.
@@ -160,6 +182,12 @@ void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
     peaks.push_back(Peak(ipeak));
   }
 }
+
+//---------------------------------------------------------------------------------------------
+/** Add a peak to the list
+ * @param peak :: Peak object to add (move) into this.
+ */
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak

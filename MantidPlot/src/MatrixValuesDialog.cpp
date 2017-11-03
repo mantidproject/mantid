@@ -31,7 +31,7 @@
  ***************************************************************************/
 #include "MatrixValuesDialog.h"
 #include "MatrixCommand.h"
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 #include <QLayout>
 #include <QSpinBox>
@@ -48,7 +48,7 @@
 
 MatrixValuesDialog::MatrixValuesDialog(ScriptingEnv *env, QWidget *parent,
                                        Qt::WFlags fl)
-    : QDialog(parent, fl), Scripted(env), matrix(NULL) {
+    : QDialog(parent, fl), Scripted(env), matrix(nullptr) {
   setObjectName("MatrixValuesDialog");
   setWindowTitle(tr("MantidPlot - Set Matrix Values"));
   setSizeGripEnabled(true);

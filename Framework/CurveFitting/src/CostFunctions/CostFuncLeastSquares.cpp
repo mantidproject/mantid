@@ -1,14 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/CompositeDomain.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidCurveFitting/SeqDomain.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/CompositeDomain.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiThreaded.h"
+
+#include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -189,7 +191,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
     m_dirtyDeriv = false;
   }
 
-  if (evalDeriv) {
+  if (evalHessian) {
     if (m_includePenalty) {
       size_t i = 0;
       for (size_t ip = 0; ip < np; ++ip) {

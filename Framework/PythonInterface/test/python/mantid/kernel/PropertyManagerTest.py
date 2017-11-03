@@ -4,7 +4,7 @@ import unittest
 from mantid.kernel import PropertyManager, IPropertyManager
 
 class PropertyManagerTest(unittest.TestCase):
-    def test_propertymanager(self):
+    def test_propertymanager_population(self):
         manager = PropertyManager()
 
         # check that it is empty
@@ -63,6 +63,22 @@ class PropertyManagerTest(unittest.TestCase):
         self.assertTrue(len(manager), 3)
         del manager["f"]
         self.assertTrue(len(manager), 2)
+
+    def test_propertymanager_can_be_created_from_dict(self):
+        values = {
+            "int": 5,
+            "float": 20.0,
+            "str": 'a string'
+        }
+        pmgr = PropertyManager(values)
+        self.assertEquals(len(pmgr), 3)
+        self.assertEquals(5, pmgr["int"].value)
+        self.assertEquals(20.0, pmgr["float"].value)
+        self.assertEquals('a string', pmgr["str"].value)
+
+    def test_propertymanager_cannot_be_created_from_arbitrary_sequence(self):
+        with self.assertRaises(Exception):
+            PropertyManager((1,2,3,4,5))
 
 if __name__ == "__main__":
     unittest.main()

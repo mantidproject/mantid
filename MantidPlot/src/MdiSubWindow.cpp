@@ -31,7 +31,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -63,7 +63,7 @@ MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
 }
 
 MdiSubWindow::MdiSubWindow()
-    : MdiSubWindowParent_t(nullptr, 0), d_app(nullptr), d_folder(nullptr),
+    : MdiSubWindowParent_t(nullptr, nullptr), d_app(nullptr), d_folder(nullptr),
       d_label(""), d_status(Normal), d_caption_policy(Both),
       d_confirm_close(true),
       d_birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)),
@@ -222,7 +222,7 @@ void MdiSubWindow::undock() {
  * @return True if the subwindow is undocked
  */
 bool MdiSubWindow::isFloating() const {
-  return (this->getFloatingWindow() != NULL);
+  return (this->getFloatingWindow() != nullptr);
 }
 
 /**
@@ -236,7 +236,7 @@ void MdiSubWindow::dock() {
  * @return True if the subwindow is docked to the MDI area
  */
 bool MdiSubWindow::isDocked() const {
-  return (this->getDockedWindow() != NULL);
+  return (this->getDockedWindow() != nullptr);
 }
 
 /**
@@ -519,7 +519,7 @@ QString MdiSubWindow::parseMacAsciiFile(const QString &fname,
  */
 FloatingWindow *MdiSubWindow::getFloatingWindow() const {
   if (!parent() || !parent()->parent())
-    return NULL;
+    return nullptr;
   return dynamic_cast<FloatingWindow *>(parent()->parent());
 }
 
@@ -529,7 +529,7 @@ FloatingWindow *MdiSubWindow::getFloatingWindow() const {
  */
 QMdiSubWindow *MdiSubWindow::getDockedWindow() const {
   if (!parent())
-    return NULL;
+    return nullptr;
   return dynamic_cast<QMdiSubWindow *>(parent());
 }
 

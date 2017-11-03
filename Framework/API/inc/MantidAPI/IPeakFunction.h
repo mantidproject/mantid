@@ -79,7 +79,10 @@ public:
 
   /// Fix a parameter or set up a tie such that value returned
   /// by intensity() is constant during fitting.
-  virtual void fixIntensity() {
+  /// @param isDefault :: If true fix intensity by default:
+  ///    don't show it in ties
+  virtual void fixIntensity(bool isDefault = false) {
+    UNUSED_ARG(isDefault);
     throw std::runtime_error(
         "Generic intensity fixing isn't implemented for this function.");
   }

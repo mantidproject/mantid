@@ -1,12 +1,15 @@
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Matrix.h"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
+#include <NeXusFile.hpp>
+
 namespace Mantid {
 namespace Kernel {
+// Forward declare
+class PropertyManager;
 
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                   \
   template <>                                                                  \

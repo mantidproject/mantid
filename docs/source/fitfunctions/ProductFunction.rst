@@ -22,3 +22,4 @@ a ProductFunction can be a composite function itself.
 .. categories::
 
 .. sourcelink::
+     :cpp: Framework/CurveFitting/src/Functions/ProductFunction.cpp

@@ -1,5 +1,6 @@
-#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -356,8 +357,9 @@ CompAssembly::getComponentByName(const std::string &cname, int nlevels) const {
  */
 void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
   if (m_map) {
-    // Check cache for assembly, inside the ParameterMap
-    if (m_map->getCachedBoundingBox(this, assemblyBox)) {
+
+    if (hasComponentInfo()) {
+      assemblyBox = m_map->componentInfo().boundingBox(index(), &assemblyBox);
       return;
     }
 
@@ -370,8 +372,6 @@ void CompAssembly::getBoundingBox(BoundingBox &assemblyBox) const {
       comp->getBoundingBox(compBox);
       assemblyBox.grow(compBox);
     }
-    // Set the cache
-    m_map->setCachedBoundingBox(this, assemblyBox);
   }
 
   else {
@@ -459,7 +459,7 @@ void CompAssembly::printTree(std::ostream &os) const {
  * @returns A vector of the absolute position
  */
 V3D CompAssembly::getPos() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getPos();
   else {
     V3D pos;
@@ -477,7 +477,7 @@ V3D CompAssembly::getPos() const {
  * @returns A vector of the absolute position
  */
 Quat CompAssembly::getRotation() const {
-  if (!m_map)
+  if (!m_map || hasComponentInfo())
     return Component::getRotation();
   else {
     Quat rot;
@@ -489,8 +489,8 @@ Quat CompAssembly::getRotation() const {
   }
 }
 
-void CompAssembly::registerContents(ComponentVisitor &visitor) const {
-  visitor.registerComponentAssembly(*this);
+size_t CompAssembly::registerContents(ComponentVisitor &visitor) const {
+  return visitor.registerComponentAssembly(*this);
 }
 
 /** Print information about elements in the assembly to a stream

@@ -5,7 +5,7 @@
 
 #include <string>
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 

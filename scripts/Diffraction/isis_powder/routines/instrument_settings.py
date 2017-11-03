@@ -1,31 +1,42 @@
 from __future__ import (absolute_import, division, print_function)
 
 from six import iteritems
+from isis_powder.routines import yaml_parser
 import warnings
 
 
 # Have to patch warnings at runtime to not print the source code. This is even advertised as a 'feature' of
 # the warnings library in the documentation: https://docs.python.org/3/library/warnings.html#warnings.showwarning
-def warning_no_source(msg, *_):
+def _warning_no_source(msg, *_, **__):
     return str(msg) + '\n'
 
-warnings.formatwarning = warning_no_source
+
+warnings.formatwarning = _warning_no_source
 warnings.simplefilter('always', UserWarning)
 
 
 class InstrumentSettings(object):
     # Holds instance variables updated at runtime
-    def __init__(self, param_map, adv_conf_dict=None, basic_conf_dict=None, kwargs=None):
+    def __init__(self, param_map, adv_conf_dict=None, kwargs=None):
         self._param_map = param_map
         self._adv_config_dict = adv_conf_dict
-        self._basic_conf_dict = basic_conf_dict
         self._kwargs = kwargs
+        self._basic_conf_dict = None
+
+        # Check if we have kwargs otherwise this work cannot be completed (e.g. using automated testing)
+        if kwargs:
+            config_file_path = kwargs.get("config_file", None)
+            if not config_file_path:
+                warnings.warn("No config file was specified. If a configuration file  was meant to be used "
+                              "the path to the file is set with the 'config_file' parameter.\n")
+            # Always do this so we have a known state of the internal variable
+            self._basic_conf_dict = yaml_parser.open_yaml_file_as_dictionary(config_file_path)
 
         # We parse in the order advanced config, basic config (if specified), kwargs.
         # This means that users can use the advanced config as a safe set of defaults, with their own preferences as
         # the next layer which can override defaults and finally script arguments as their final override.
         self._parse_attributes(dict_to_parse=adv_conf_dict)
-        self._parse_attributes(dict_to_parse=basic_conf_dict)
+        self._parse_attributes(dict_to_parse=self._basic_conf_dict)
         self._parse_attributes(dict_to_parse=kwargs)
 
     # __getattr__ is only called if the attribute was not set so we already know
@@ -135,11 +146,10 @@ def _check_value_is_in_enum(val, enum):
     :return: The correctly cased val. Otherwise raises a value error.
     """
     seen_val_in_enum = False
-    enum_known_vals = []
+    enum_known_vals = _get_enum_values(enum_cls=enum)
     lower_string_val = str(val).lower()
 
-    known_values = _get_enum_values(enum_cls=enum)
-    for enum_val in known_values:
+    for enum_val in enum_known_vals:
 
         if lower_string_val == enum_val.lower():
             # Get the correctly capitalised value so we no longer have to call lower

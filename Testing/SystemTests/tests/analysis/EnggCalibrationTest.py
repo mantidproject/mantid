@@ -1,6 +1,7 @@
-#pylint: disable=no-init
+# pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
+from six import PY2
 
 
 def rel_err_less_delta(val, ref, epsilon):
@@ -17,7 +18,7 @@ def rel_err_less_delta(val, ref, epsilon):
     """
     if 0 == ref:
         return False
-    check = (abs((ref-val)/ref) < epsilon)
+    check = (abs((ref - val) / ref) < epsilon)
     if not check:
         print ("Value '{0}' differs from reference '{1}' by more than required epsilon '{2}' (relative)"
                .format(val, ref, epsilon))
@@ -26,7 +27,6 @@ def rel_err_less_delta(val, ref, epsilon):
 
 
 class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
-
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
 
@@ -47,30 +47,30 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         # These lines run a 'Focus' for the instrument EnginX, as an isolated step here
         # The next test about 'CalibrateFull'-'Calibrate' also includes focusing, as
         # 'Calibrate' uses 'Focus' as a child algorithm
-        long_calib_ws = Load(Filename = 'ENGINX00193749.nxs')
+        long_calib_ws = Load(Filename='ENGINX00193749.nxs')
 
-        van_ws = Load(Filename = 'ENGINX00236516.nxs')
+        van_ws = Load(Filename='ENGINX00236516.nxs')
 
         # note: not giving calibrated detector positions
         # Using just 12 break points which is enough for this test. The normal/default value would be 50
-        EnggVanadiumCorrections(VanadiumWorkspace = van_ws,
-                                SplineBreakPoints = 12,
-                                OutIntegrationWorkspace = self.van_integ_name,
-                                OutCurvesWorkspace = self.van_bank_curves_name)
+        EnggVanadiumCorrections(VanadiumWorkspace=van_ws,
+                                SplineBreakPoints=12,
+                                OutIntegrationWorkspace=self.van_integ_name,
+                                OutCurvesWorkspace=self.van_bank_curves_name)
 
         # do all calculations from raw data
-        EnggFocus(InputWorkspace = long_calib_ws,
-                  VanadiumWorkspace = van_ws,
-                  Bank = '1',
+        EnggFocus(InputWorkspace=long_calib_ws,
+                  VanadiumWorkspace=van_ws,
+                  Bank='1',
                   OutputWorkspace=self.out_ws_name)
 
         # Now with pre-calculated curves and integration values. This makes sure that these do not
         # change too much AND the final results do not change too much as a result
-        EnggFocus(InputWorkspace = long_calib_ws,
-                  VanIntegrationWorkspace = self._precalc_van_integ_tbl,
-                  VanCurvesWorkspace = self._precalc_van_ws,
-                  Bank = '1',
-                  OutputWorkspace = self.out_ws_precalc_name)
+        EnggFocus(InputWorkspace=long_calib_ws,
+                  VanIntegrationWorkspace=self._precalc_van_integ_tbl,
+                  VanCurvesWorkspace=self._precalc_van_ws,
+                  Bank='1',
+                  OutputWorkspace=self.out_ws_precalc_name)
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
@@ -110,7 +110,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         for i in range(0, len(simul)):
             self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than acceptable error (%f) when comparing bin %d "
-                            "against bank curves previously fitted. got: %f where I expect: %f"%
+                            "against bank curves previously fitted. got: %f where I expect: %f" %
                             (delta, i, simul[i], precalc_curve_simul[i]))
 
         # === check the integration table against the previously saved integration table ===
@@ -124,7 +124,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                             rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
                             "Relative difference bigger than gaccepted error (%f) when comparing the "
                             "integration of a spectrum (%f) against the integration previously calculated and "
-                            "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0) ))
+                            "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0)))
 
         # === check the 'focussed' spectrum ===
         out_precalc_ws = mtd[self.out_ws_precalc_name]
@@ -136,7 +136,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
             self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than accepted delta (%f) when comparing bin %d "
                             "of the focussed spectrum against the focussed spectrum obtained using bank curves "
-                            "and spectra integration values pre-calculated. Got: %f where I expected: %f"%
+                            "and spectra integration values pre-calculated. Got: %f where I expected: %f" %
                             (delta, i, focussed_sp[i], focussed_sp_precalc[i]))
 
     def cleanup(self):
@@ -147,8 +147,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
 
 class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
-
-    #pylint: disable=too-many-instance-attributes
+    # pylint: disable=too-many-instance-attributes
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         # difc and zero parameters for GSAS
@@ -172,43 +171,43 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         # These lines run a 'CalibrateFull' and then 'Calibrate' for the instrument EnginX
 
         # This must be the long Ceria (CeO2) run for calibrate-full
-        long_calib_ws = Load(Filename = 'ENGINX00193749.nxs')
+        long_calib_ws = Load(Filename='ENGINX00193749.nxs')
 
         # This must be the (big) Vanadium (V-Nb) run for vanadium corrections
-        van_ws = Load(Filename = 'ENGINX00194547.nxs')
+        van_ws = Load(Filename='ENGINX00194547.nxs')
         # Another vanadium run file available is 'ENGINX00236516.nxs'
         # (more recent but not matching the full calibration ceria run)
 
         # This needs a relatively long list of peaks if you want it to work
         # for every detector in all (both) banks
-        positions, peaks_params = EnggCalibrateFull(Workspace = long_calib_ws,
-                                                    VanadiumWorkspace = van_ws,
-                                                    Bank = '1',
-                                                    ExpectedPeaks = '0.855618487, 0.956610, 1.104599, '
-                                                    '1.352852, 1.562138, 1.631600, '
-                                                    '1.913221, 2.705702376, 3.124277511')
+        positions, peaks_params = EnggCalibrateFull(Workspace=long_calib_ws,
+                                                    VanadiumWorkspace=van_ws,
+                                                    Bank='1',
+                                                    ExpectedPeaks='0.855618487, 0.956610, 1.104599, '
+                                                                  '1.352852, 1.562138, 1.631600, '
+                                                                  '1.913221, 2.705702376, 3.124277511')
 
         # to protect against 'invalidated' variables with algorithm input/output workspaces
         self.pos_table = positions
         self.peaks_info = peaks_params
 
         # Bank 1
-        self.difa, self.difc, self.zero, tbl = EnggCalibrate(InputWorkspace = long_calib_ws,
-                                                             VanadiumWorkspace = van_ws,
-                                                             Bank = '1',
-                                                             ExpectedPeaks =
+        self.difa, self.difc, self.zero, tbl = EnggCalibrate(InputWorkspace=long_calib_ws,
+                                                             VanadiumWorkspace=van_ws,
+                                                             Bank='1',
+                                                             ExpectedPeaks=
                                                              '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
-                                                             DetectorPositions = self.pos_table)
+                                                             DetectorPositions=self.pos_table)
         self.peaks = tbl.column('dSpacing')
         self.peaks_fitted = tbl.column('X0')
 
         # Bank 2
-        self.difa_b2, self.difc_b2, self.zero_b2, tbl_b2 = EnggCalibrate(InputWorkspace = long_calib_ws,
-                                                                         VanadiumWorkspace = van_ws,
-                                                                         Bank = '2',
-                                                                         ExpectedPeaks =
+        self.difa_b2, self.difc_b2, self.zero_b2, tbl_b2 = EnggCalibrate(InputWorkspace=long_calib_ws,
+                                                                         VanadiumWorkspace=van_ws,
+                                                                         Bank='2',
+                                                                         ExpectedPeaks=
                                                                          '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
-                                                                         DetectorPositions = self.pos_table)
+                                                                         DetectorPositions=self.pos_table)
         self.peaks_b2 = tbl_b2.column('dSpacing')
         self.peaks_fitted_b2 = tbl_b2.column('X0')
 
@@ -217,24 +216,25 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.assertTrue(self.pos_table)
         self.assertEquals(self.pos_table.columnCount(), 10)
         self.assertEquals(self.pos_table.rowCount(), 1200)
-        self.assertEquals(self.pos_table.cell(88, 0), 100089)   # det ID
+        self.assertEquals(self.pos_table.cell(88, 0), 100089)  # det ID
         self.assertEquals(self.pos_table.cell(200, 0), 101081)  # det ID
-        self.assertEquals(self.pos_table.cell(88, 0), 100089)   # det ID
+        self.assertEquals(self.pos_table.cell(88, 0), 100089)  # det ID
 
         # The output table of peak parameters has the expected structure
         self.assertEquals(self.peaks_info.rowCount(), 1200)
         self.assertEquals(self.peaks_info.columnCount(), 2)
         self.assertEquals(self.peaks_info.keys(), ['Detector ID', 'Parameters'])
         self.assertEquals(self.peaks_info.cell(10, 0), 100011)
-        self.assertEquals(self.peaks_info.cell(100, 0),100101)
+        self.assertEquals(self.peaks_info.cell(100, 0), 100101)
         self.assertEquals(self.peaks_info.cell(123, 0), 101004)
         self.assertEquals(self.peaks_info.cell(517, 0), 104038)
         self.assertEquals(self.peaks_info.cell(987, 0), 108028)
         self.assertEquals(self.peaks_info.cell(1000, 0), 108041)
         for idx in [0, 12, 516, 789, 891, 1112]:
-            cell_val = self.peaks_info.cell(idx,1)
+            cell_val = self.peaks_info.cell(idx, 1)
             self.assertTrue(isinstance(cell_val, str))
-            self.assertEquals(cell_val[0:11], '{"1": {"A":')
+            if PY2:  # This test depends on consistent ordering of a dict which is not guaranteed for python 3
+                self.assertEquals(cell_val[0:11], '{"1": {"A":')
             self.assertEquals(cell_val[-2:], '}}')
 
         self.assertEquals(self.difa, 0)

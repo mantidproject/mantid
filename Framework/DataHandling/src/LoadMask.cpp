@@ -1,17 +1,18 @@
 #include "MantidDataHandling/LoadMask.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/OptionalBool.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 
 #include <fstream>
 #include <sstream>
@@ -28,8 +29,6 @@
 #include <boost/algorithm/string.hpp>
 
 using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;

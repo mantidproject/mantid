@@ -59,7 +59,7 @@ public:
   }
   const std::string id(void) const override { return ""; }
   void init(const size_t &, const size_t &, const size_t &) override {}
-  void init(const size_t &, const HistogramData::Histogram &) override {}
+  void init(const HistogramData::Histogram &) override {}
 
 private:
   std::vector<MocSpectrum> m_spectra;
@@ -269,7 +269,8 @@ public:
     TS_ASSERT(!f.isFixed(0));
     TS_ASSERT(f.isFixed(1));
     TS_ASSERT(!f.isFixed(2));
-    TS_ASSERT(f.isFixed(3));
+    TS_ASSERT(!f.isFixed(3));
+    TS_ASSERT(!f.isActive(3));
 
     TS_ASSERT(f.isActive(0));
     TS_ASSERT(!f.isActive(1));
@@ -334,9 +335,12 @@ public:
     TS_ASSERT_EQUALS(f.getParameter("c3"), 3.3);
 
     TS_ASSERT(!f.isFixed(0));
-    TS_ASSERT(f.isFixed(1));
+    TS_ASSERT(!f.isFixed(1));
+    TS_ASSERT(!f.isActive(1));
     TS_ASSERT(!f.isFixed(2));
+    TS_ASSERT(f.isActive(2));
     TS_ASSERT(!f.isFixed(3));
+    TS_ASSERT(f.isActive(3));
 
     TS_ASSERT(!f.getTie(0));
     TS_ASSERT(f.getTie(1) && !f.getTie(1)->isDefault());

@@ -33,7 +33,7 @@
 #include "PlotCurve.h"
 #include "SymbolBox.h"
 #include "Table.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 #include <QKeyEvent>
 #include <qwt_symbol.h>
 
@@ -68,7 +68,7 @@ void ScreenPickerTool::append(const QPoint &point) {
   emit statusText(info);
 
   d_selection_marker.setValue(pos);
-  if (d_selection_marker.plot() == NULL)
+  if (d_selection_marker.plot() == nullptr)
     d_selection_marker.attach(d_graph->plotWidget());
   d_graph->plotWidget()->replot();
 }
@@ -86,7 +86,7 @@ bool ScreenPickerTool::eventFilter(QObject *obj, QEvent *event) {
       QwtDoublePoint pos =
           invTransform(canvas()->mapFromGlobal(QCursor::pos()));
       d_selection_marker.setValue(pos);
-      if (d_selection_marker.plot() == NULL)
+      if (d_selection_marker.plot() == nullptr)
         d_selection_marker.attach(d_graph->plotWidget());
       d_graph->plotWidget()->replot();
       emit selected(d_selection_marker.value());
@@ -129,8 +129,8 @@ DrawPointTool::DrawPointTool(ApplicationWindow *app, Graph *graph,
                              const QObject *status_target,
                              const char *status_slot)
     : ScreenPickerTool(graph, status_target, status_slot), d_app(app) {
-  d_curve = NULL;
-  d_table = NULL;
+  d_curve = nullptr;
+  d_table = nullptr;
 }
 
 void DrawPointTool::appendPoint(const QwtDoublePoint &pos) {
@@ -184,7 +184,7 @@ bool DrawPointTool::eventFilter(QObject *obj, QEvent *event) {
       QwtDoublePoint pos =
           invTransform(canvas()->mapFromGlobal(QCursor::pos()));
       d_selection_marker.setValue(pos);
-      if (d_selection_marker.plot() == NULL)
+      if (d_selection_marker.plot() == nullptr)
         d_selection_marker.attach(d_graph->plotWidget());
       d_graph->plotWidget()->replot();
       emit selected(d_selection_marker.value());

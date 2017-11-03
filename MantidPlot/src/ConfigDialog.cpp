@@ -32,12 +32,12 @@ Description          : Preferences dialog
 #include "ColorButton.h"
 #include "Graph.h"
 #include "Mantid/MantidUI.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "Matrix.h"
 #include "MultiLayer.h"
 #include "SendToProgramDialog.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QComboBox>
@@ -76,10 +76,10 @@ Description          : Preferences dialog
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
-#include "MantidQtAPI/MdSettings.h"
-#include "MantidQtMantidWidgets/InstrumentSelector.h"
+#include "MantidQtWidgets/Common/MdConstants.h"
+#include "MantidQtWidgets/Common/MdPlottingCmapsProvider.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
 
 #include <limits>
 
@@ -716,7 +716,7 @@ void ConfigDialog::initMantidPage() {
 
   // Populate boxes
   auto faclist = cfgSvc.getFacilityNames();
-  for (auto it : faclist) {
+  for (const auto &it : faclist) {
     facility->addItem(QString::fromStdString(it));
   }
 
@@ -853,6 +853,15 @@ void ConfigDialog::initMdPlottingVsiTab() {
   lblVsiDefaultBackground = new QLabel();
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
+
+  // Axes Color
+  vsiAxesColor = new QGroupBox();
+  vsiAxesColor->setCheckable(true);
+  vsiAxesColor->setChecked(m_mdSettings.getUserSettingAutoColorAxes());
+  vsiAxesColor->setTitle(tr("Automatic axes color selection"));
+  vsiAxesColor->setToolTip(
+      tr("Automatically select a contrasting color for all axes"));
+  vsiTabLayout->addWidget(vsiAxesColor);
 
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
@@ -1188,7 +1197,7 @@ void ConfigDialog::populateProgramTree() {
 
 void ConfigDialog::updateProgramTree() {
   // Store into a map ready to go into config service when apply is clicked
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     // creating the map of kvps needs to happen first as createing the item
     // requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
@@ -1214,7 +1223,7 @@ void ConfigDialog::updateChildren(
     QTreeWidgetItem *program) {
   program->takeChildren();
   // get the current program's (itr) keys and values (pItr)
-  for (const auto pItr : programKeysAndDetails) {
+  for (const auto &pItr : programKeysAndDetails) {
     QTreeWidgetItem *item = new QTreeWidgetItem(program);
     QString itemText = QString("   ")
                            .append(QString::fromStdString(pItr.first))
@@ -1233,7 +1242,7 @@ void ConfigDialog::updateSendToTab() {
   std::vector<std::string> programNames =
       cfgSvc.getKeys("workspace.sendto.name");
 
-  for (const auto itr : m_sendToSettings) {
+  for (const auto &itr : m_sendToSettings) {
     for (size_t i = 0; i < programNames.size(); ++i) {
       if (programNames[i] == itr.first) {
         // The selected program hasn't been deleted so set to blank string (all
@@ -1246,7 +1255,7 @@ void ConfigDialog::updateSendToTab() {
 
     std::map<std::string, std::string> programKeysAndDetails = itr.second;
 
-    for (const auto pItr : programKeysAndDetails) {
+    for (const auto &pItr : programKeysAndDetails) {
       if (pItr.second != "")
         cfgSvc.setString("workspace.sendto." + itr.first + "." + pItr.first,
                          pItr.second);
@@ -1280,7 +1289,7 @@ void ConfigDialog::refreshTreeCategories() {
   widgetMap categories; // Keeps track of categories added to the tree
 
   // Loop over all categories loaded into Mantid
-  for (const auto i : categoryMap) {
+  for (const auto &i : categoryMap) {
 
     QString catNames = QString::fromStdString(i.first);
     // Start recursion down building tree from names
@@ -1959,7 +1968,7 @@ void ConfigDialog::initFittingPage() {
 
   lblPeaksColor = new QLabel();
   multiPeakLayout->addWidget(lblPeaksColor);
-  boxPeaksColor = new ColorBox(0);
+  boxPeaksColor = new ColorBox(nullptr);
   boxPeaksColor->setCurrentIndex(app->peakCurvesColor);
   multiPeakLayout->addWidget(boxPeaksColor);
 
@@ -2456,8 +2465,8 @@ void ConfigDialog::apply() {
   sep.replace(tr("SPACE"), " ");
   sep.replace("\\s", " ");
 
-  if (sep.contains(QRegExp("[0-9.eE+-]")) != 0) {
-    QMessageBox::warning(0, tr("MantidPlot - Import options error"),
+  if (sep.contains(QRegExp("[0-9.eE+-]"))) {
+    QMessageBox::warning(nullptr, tr("MantidPlot - Import options error"),
                          tr("The separator must not contain the following "
                             "characters: 0-9eE.+-"));
     return;
@@ -2582,9 +2591,10 @@ void ConfigDialog::apply() {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QList<MdiSubWindow *> windows = app->windowsList();
     foreach (MdiSubWindow *w, windows) {
+      auto oldLocale = w->locale();
       w->setLocale(locale);
       if (auto table = dynamic_cast<Table *>(w))
-        table->updateDecimalSeparators();
+        table->updateDecimalSeparators(oldLocale);
       else if (auto matrix = dynamic_cast<Matrix *>(w))
         matrix->resetView();
     }
@@ -2723,6 +2733,10 @@ void ConfigDialog::updateMdPlottingSettings() {
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
   }
 
+  if (vsiAxesColor) {
+    m_mdSettings.setUserSettingAutoColorAxes(vsiAxesColor->isChecked());
+  }
+
   // Read if the usage of the last color map and background color should be
   // performed
   if (mdPlottingVsiFrameBottom->isChecked()) {
@@ -2858,7 +2872,7 @@ QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent) {
     }
 
     QStringList childResults = buildHiddenCategoryString(item);
-    for (const auto it : childResults) {
+    for (const auto &it : childResults) {
       results.append(item->text(0) + "\\" + it);
     }
   }

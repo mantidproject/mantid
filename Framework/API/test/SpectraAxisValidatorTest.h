@@ -34,6 +34,15 @@ public:
     SpectraAxisValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
+
+  void test_axesless_workspace() {
+    auto ws = boost::make_shared<AxeslessWorkspaceTester>();
+    ws->initialize(2, 11, 10);
+    SpectraAxisValidator validator;
+    std::string s;
+    TS_ASSERT_THROWS_NOTHING(s = validator.isValid(ws))
+    TS_ASSERT_DIFFERS(s, "")
+  }
 };
 
 #endif /* MANTID_API_SPECTRAAXISVALIDATORTEST_H_ */

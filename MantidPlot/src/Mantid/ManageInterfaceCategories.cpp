@@ -1,6 +1,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "ManageInterfaceCategories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "../ApplicationWindow.h"
 
 #include <QtGui>

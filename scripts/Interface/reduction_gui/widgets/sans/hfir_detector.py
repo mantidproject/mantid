@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import sys
@@ -13,6 +15,9 @@ try:
     IS_IN_MANTIDPLOT = True
 except:
     pass
+
+if six.PY3:
+    unicode = str
 
 
 class DetectorWidget(BaseWidget):
@@ -152,8 +157,8 @@ class DetectorWidget(BaseWidget):
                 script += "                   PatchWorkspace='%s')\n" % patch_ws
                 mantidplot.runPythonScript(script, True)
             except:
-                print "Could not compute sensitivity"
-                print sys.exc_value
+                print("Could not compute sensitivity")
+                print(sys.exc_info()[1])
 
     def _sensitivity_plot_clicked(self):
         self.show_instrument(file_name=self._content.sensitivity_file_edit.text)

@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_DIFFRACTION_H_
 
 #include "MantidKernel/DllConfig.h"
+#include <functional>
 
 namespace Mantid {
 namespace Kernel {
@@ -37,6 +38,15 @@ MANTID_KERNEL_DLL double calcTofMin(const double difc, const double difa,
 
 MANTID_KERNEL_DLL double calcTofMax(const double difc, const double difa,
                                     const double tzero, const double tofmax);
+
+MANTID_KERNEL_DLL std::function<double(double)>
+getTofToDConversionFunc(const double difc, const double difa,
+                        const double tzero);
+
+MANTID_KERNEL_DLL std::function<double(double)>
+getDToTofConversionFunc(const double difc, const double difa,
+                        const double tzero);
+
 } // Diffraction
 } // namespace Kernel
 } // namespace Mantid

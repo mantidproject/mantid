@@ -1,15 +1,15 @@
-import ui_SpiceViewerDialog
-from PyQt4 import QtGui, QtCore
+from __future__ import (absolute_import, division, print_function)
+from . import ui_SpiceViewerDialog
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 
 
 class ViewSpiceDialog(QtGui.QDialog):
-    """
-    Dialog ot view SPICE
-    """
+    """Dialog ot view SPICE """
     def __init__(self, parent):
-        """
-        Initialization
-        :param parent:
+        """Initialization
+
+        :param parent: parent
         """
         super(ViewSpiceDialog, self).__init__()
 
@@ -24,8 +24,8 @@ class ViewSpiceDialog(QtGui.QDialog):
         return
 
     def do_quit(self):
-        """
-        Quit from the dialog, i.e., close the window
+        """Quit from the dialog, i.e., close the window
+
         :return:
         """
         self.close()
@@ -33,17 +33,17 @@ class ViewSpiceDialog(QtGui.QDialog):
         return
 
     def clear_text(self):
-        """
-        Clear the text of the edit
-        :return:
+        """Clear the text of the edit
+
+        :return: None
         """
         self.ui.textBrowser_spice.clear()
 
         return
 
     def write_text(self, plain_text):
-        """
-        Write the text to text browser
+        """Write the text to text browser
+
         :param plain_text:
         :return:
         """

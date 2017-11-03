@@ -23,11 +23,13 @@ formats such as RST and plain text.
 # Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 from docutils.core import publish_string
 import post_processing as postproc
 import os
+import pymantidplot.qtiplot as qti
+import mantid.simpleapi as msapi
+
 
 # older version of numpy does not support nanmean and nanmedian
 # and nanmean and nanmedian was removed in scipy 0.18 in favor of numpy
@@ -169,11 +171,10 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
     @returns :: list of problems with their description link tags
     """
-    num_tests = len(results_per_test)
     prev_name = ''
     prob_count = 1
     linked_problems = []
-    for test_idx in range(0, num_tests):
+    for test_idx, prob_results in enumerate(results_per_test):
         raw_name = results_per_test[test_idx][0].problem.name
         name = raw_name.split('.')[0]
         if name == prev_name:
@@ -183,6 +184,8 @@ def build_indiv_linked_problems(results_per_test, group_name):
 
         prev_name = name
         name_index = name + ' ' + str(prob_count)
+        if 'neutron' in group_name:
+            name += ' ' + build_visual_display_page(prob_results, group_name)
 
         # TO-DO: move this to the nist loader, not here!
         if 'nist_' in group_name:
@@ -215,6 +218,48 @@ def build_group_linked_names(group_names):
     return linked_names
 
 
+def build_visual_display_page(prob_results, group_name):
+    """
+    Builds a page containing details of the best fit for a problem.
+    @param prob_results:: the list of results for a problem
+    @param group_name :: the name of the group, e.g. "nist_lower"
+    """
+    # Get the best result for a group
+    gb = min((result for result in prob_results), key=lambda result: result.fit_chi2)
+    file_name = (group_name + '_' + gb.problem.name).lower()
+    wks = msapi.CreateWorkspace(OutputWorkspace=gb.problem.name, DataX=gb.problem.data_pattern_in, DataY=gb.problem.data_pattern_out)
+    qti.plot(wks, 0)
+    # Create various page headings, ensuring the adornment is (at least) the length of the title
+    title = '=' * len(gb.problem.name) + '\n'
+    title += gb.problem.name + '\n'
+    title += '=' * len(gb.problem.name) + '\n\n'
+    data_plot = 'Plot of the data' + '\n'
+    data_plot += ('-' * len(data_plot)) + '\n\n'
+    data_plot += '.. image:: ' + file_name + '.png' + '\n\n'
+    starting_plot = 'Plot of the initial starting guess' + '\n'
+    starting_plot += ('-' * len(starting_plot)) + '\n\n'
+    starting_plot += '.. figure:: ' + '\n\n'
+    solution_plot = 'Plot of the solution found' + '\n'
+    solution_plot += ('-' * len(solution_plot)) + '\n\n'
+    solution_plot += '.. figure:: ' + '\n\n'
+    problem = 'Fit problem' + '\n'
+    problem += ('-' * len(problem)) + '\n'
+    rst_text = title + data_plot + starting_plot + solution_plot + problem
+
+    html = publish_string(rst_text, writer_name='html')
+    with open(file_name + '.' + FILENAME_EXT_TXT, 'w') as visual_rst:
+        print(html, file=visual_rst)
+        print('Saved {file_name}.{extension} to {working_directory}'.
+              format(file_name=file_name, extension=FILENAME_EXT_TXT, working_directory=WORKING_DIR))
+    with open(file_name + '.' + FILENAME_EXT_HTML, 'w') as visual_html:
+        print(html, file=visual_html)
+        print('Saved {file_name}.{extension} to {working_directory}'.
+              format(file_name=file_name, extension=FILENAME_EXT_HTML, working_directory=WORKING_DIR))
+
+    rst_link = '`<' + file_name + '.' + FILENAME_EXT_HTML + '>`_'  # `<cutest_palmer6c.dat.html>`_
+    return rst_link
+
+
 def print_overall_results_table(minimizers, group_results, problems, group_names, use_errors,
                                 simple_text=True, save_to_file=False):
 
@@ -232,14 +277,11 @@ def print_overall_results_table(minimizers, group_results, problems, group_names
     if save_to_file:
         save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_acc, use_errors, 'summary', FILENAME_SUFFIX_ACCURACY, FILENAME_EXT_HTML)
-
     header = '**************** Runtime ******** \n\n'
-    print(header)
+    print (header)
     tbl_all_summary_runtime = build_rst_table(minimizers, grp_linked_names, groups_norm_runtime,
                                               comparison_type='summary', comparison_dim='runtime',
                                               using_errors=use_errors)
-    print(tbl_all_summary_runtime)
-
     if save_to_file:
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_TXT)
         save_table_to_file(tbl_all_summary_runtime, use_errors, 'summary', FILENAME_SUFFIX_RUNTIME, FILENAME_EXT_HTML)
@@ -352,7 +394,7 @@ def build_rst_table(columns_txt, rows_txt, cells, comparison_type, comparison_di
         tbl_body += '\n'
         tbl_body += tbl_footer
 
-    return tbl_header + tbl_body
+    return tbl_header  + tbl_body
 
 
 def build_rst_table_header_chunks(first_col_len, cell_len, columns_txt):

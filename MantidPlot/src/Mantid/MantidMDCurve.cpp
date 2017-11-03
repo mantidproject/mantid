@@ -50,11 +50,16 @@ MantidMDCurve::MantidMDCurve(const MantidMDCurve &c)
 
 /**
  *  @param g :: The Graph widget which will display the curve
- *  @param distr :: True if this is a distribution
+ *  @param distr :: True if this is a distribution,
+ *  not applicable here.
  *  @param style :: The graph style to use
+ *  @param multipleSpectra :: True if there are multiple spectra,
+ *  not applicable here.
  */
-void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style) {
+void MantidMDCurve::init(Graph *g, bool distr, GraphOptions::CurveType style,
+                         bool multipleSpectra) {
   UNUSED_ARG(distr);
+  UNUSED_ARG(multipleSpectra);
   IMDWorkspace_const_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(m_wsName.toStdString()));
   if (!ws) {
@@ -168,7 +173,7 @@ void MantidMDCurve::dataReset(const QString &wsName) {
 
   if (!mws)
     return;
-  const MantidQwtIMDWorkspaceData *new_mantidData(NULL);
+  const MantidQwtIMDWorkspaceData *new_mantidData(nullptr);
   try {
     new_mantidData = mantidData()->copy(mws);
     setData(*new_mantidData);

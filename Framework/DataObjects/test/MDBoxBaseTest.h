@@ -28,10 +28,10 @@ public:
 
   MDBoxBaseTester(const std::vector<
       Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
-      : MDBoxBase<MDE, nd>(NULL, 0, 0, extentsVector) {}
+      : MDBoxBase<MDE, nd>(nullptr, 0, 0, extentsVector) {}
   //-----------------------------------------------------------------------------------------------
-  Kernel::ISaveable *getISaveable() override { return NULL; }
-  Kernel::ISaveable *getISaveable() const override { return NULL; }
+  Kernel::ISaveable *getISaveable() override { return nullptr; }
+  Kernel::ISaveable *getISaveable() const override { return nullptr; }
   void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/,
                      const bool /*markSaved*/) override{};
   void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
@@ -76,7 +76,7 @@ public:
   }
 
   /// Return a copy of contained events
-  std::vector<MDE> *getEventsCopy() override { return NULL; }
+  std::vector<MDE> *getEventsCopy() override { return nullptr; }
 
   /// Add a single event
   size_t addEvent(const MDE & /*point*/) override { return 0; }
@@ -108,18 +108,19 @@ public:
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
-  void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL) override{};
-  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) override{};
+  void splitAllIfNeeded(
+      Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   void calculateCentroid(coord_t * /*centroid*/) const override{};
   void calculateCentroid(coord_t * /*centroid*/,
                          const int /*runindex*/) const override{};
-  coord_t *getCentroid() const override { return 0; };
-  void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
-                       const coord_t /*radiusSquared*/, signal_t & /*signal*/,
-                       signal_t & /*errorSquared*/,
-                       const coord_t /*innerRadiusSquared*/) const override{};
+  coord_t *getCentroid() const override { return nullptr; };
+  void integrateSphere(
+      Mantid::API::CoordTransform & /*radiusTransform*/,
+      const coord_t /*radiusSquared*/, signal_t & /*signal*/,
+      signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
+      const bool /*useOnePercentBackgroundCorrection*/) const override{};
   void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/,
                       const coord_t /*radiusSquared*/, coord_t *,
                       signal_t &) const override{};

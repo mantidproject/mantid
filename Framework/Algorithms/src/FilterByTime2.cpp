@@ -73,12 +73,12 @@ void FilterByTime2::exec() {
   std::string absstoptime = this->getProperty("AbsoluteStopTime");
 
   std::string start, stop;
-  if ((absstarttime != "") && (absstoptime != "") && (starttime <= 0.0) &&
+  if ((!absstarttime.empty()) && (!absstoptime.empty()) && (starttime <= 0.0) &&
       (stoptime <= 0.0)) {
     // Use the absolute string
     start = absstarttime;
     stop = absstoptime;
-  } else if ((absstarttime != "" || absstoptime != "") &&
+  } else if ((!absstarttime.empty() || !absstoptime.empty()) &&
              (starttime > 0.0 || stoptime > 0.0)) {
     throw std::invalid_argument(
         "It is not allowed to provide both absolute time and relative time.");

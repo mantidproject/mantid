@@ -5,9 +5,12 @@
 #include <vector>
 
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidIndexing/IndexInfo.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -16,9 +19,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 using Mantid::DataObjects::EventWorkspace;
-using Mantid::DataObjects::EventWorkspace_sptr;
-using Mantid::DataObjects::Workspace2D_sptr;
-using Mantid::MantidVec;
 
 class MultipleScatteringCylinderAbsorptionTest : public CxxTest::TestSuite {
 public:
@@ -62,13 +62,14 @@ public:
   }
 
   void testCalculationHist() {
-    // setup the test workspace
-    Workspace2D_sptr wksp =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(9, 16, 1000, 1000);
-    wksp->setInstrument(
-        ComponentCreationHelper::createTestInstrumentCylindrical(1));
+    using namespace Mantid::HistogramData;
+    auto wksp = DataObjects::create<DataObjects::Workspace2D>(
+        ComponentCreationHelper::createTestInstrumentCylindrical(1),
+        Indexing::IndexInfo(9),
+        Histogram(BinEdges(17, LinearGenerator(1000.0, 1000.0)),
+                  Counts(16, 2.0)));
     wksp->getAxis(0)->setUnit("TOF");
-    AnalysisDataService::Instance().add("TestInputWS", wksp);
+    AnalysisDataService::Instance().add("TestInputWS", std::move(wksp));
 
     // convert to wavelength
     auto convertUnitsAlg =
@@ -132,9 +133,8 @@ public:
         "MultipleScatteringCylinderAbsorptionEventOutput");
 
     // setup the test workspace
-    EventWorkspace_sptr wksp =
-        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 1,
-                                                                        false);
+    auto wksp = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(
+        1, 1, false);
     wksp->getAxis(0)
         ->setUnit("Wavelength"); // cheat and set the units to Wavelength
     wksp->getSpectrum(0)

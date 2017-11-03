@@ -3,12 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -152,6 +153,8 @@ private:
         ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
             dummy, dummy, dummy);
     inputWS->setInstrument(testInst);
+    inputWS->setIndexInfo(
+        Mantid::Indexing::IndexInfo(inputWS->getNumberHistograms()));
 
     // mask the detector
     inputWS->mutableDetectorInfo().setMasked(THEMASKED, true);

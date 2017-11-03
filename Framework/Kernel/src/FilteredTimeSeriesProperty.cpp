@@ -1,4 +1,6 @@
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include <string>
 
 using namespace Mantid::Kernel;
 

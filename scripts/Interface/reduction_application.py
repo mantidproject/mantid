@@ -2,6 +2,8 @@
 """
     Main window for reduction UIs
 """
+from __future__ import (absolute_import, division, print_function)
+import six
 import sys
 import os
 import traceback
@@ -20,6 +22,9 @@ except:
     sip.setapi('QVariant',2)
 
 from PyQt4 import QtGui, QtCore # noqa
+
+if six.PY3:
+    unicode = str
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -191,7 +196,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if load_last:
                 self._interface.load_last_reduction()
         else:
-            print "Could not generate an interface for instrument %s" % self._instrument
+            print("Could not generate an interface for instrument %s" % self._instrument)
             self.close()
 
         return True
@@ -482,7 +487,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                   + file_path+"\n\n" \
                   + "Please make sure it has been produced by this application."
             QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
-            print sys.exc_value
+            print(sys.exc_info()[1])
             return
 
         if not found_instrument == self._instrument:
@@ -546,7 +551,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self._set_window_title()
             except:
                 #TODO: put this in a log window, and in a file
-                print sys.exc_value
+                print(sys.exc_info()[1])
                 self.statusBar().showMessage("Failed to save %s" % self._filename)
 
     def _save_as(self):
@@ -615,6 +620,7 @@ def start(argv):
     reducer.setup_layout(load_last=True)
     reducer.show()
     app.exec_()
+
 
 if __name__ == '__main__':
     start(argv=sys.argv)

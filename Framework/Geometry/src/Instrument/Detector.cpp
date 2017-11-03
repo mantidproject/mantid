@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -14,7 +15,6 @@ Kernel::Logger g_log("Detector");
 }
 
 using Kernel::V3D;
-using Kernel::Quat;
 
 /** Constructor for a parametrized Detector
  * @param base: the base (un-parametrized) IComponent
@@ -92,13 +92,16 @@ double Detector::getSignedTwoTheta(const V3D &observer, const V3D &axis,
   return angle;
 }
 
-/// Get the phi angle between the detector with reference to the origin
-///@return The angle
+/** Get the phi angle between the detector with reference to the origin
+ * This function will not be supported in Instrument-2.0 due to its ambiguity.
+ * DO NOT USE IN NEW CODE
+ * @return The angle
+ */
 double Detector::getPhi() const {
-  double phi = 0.0, dummy;
-  this->getPos().getSpherical(dummy, dummy, phi);
-  return phi * M_PI / 180.0;
+  const Kernel::V3D pos = this->getPos();
+  return std::atan2(pos[1], pos[0]);
 }
+
 /**
  * Calculate the phi angle between detector and beam, and then offset.
  * @param offset in radians
@@ -125,49 +128,14 @@ det_topology Detector::getTopology(V3D &center) const {
   return rect;
 }
 
-/// Return the relative position to the parent
-Kernel::V3D Detector::getRelativePos() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index())) -
-           getParent()->getPos();
-  return ObjComponent::getRelativePos();
-}
-
-/// Return the absolute position of the Detector
-Kernel::V3D Detector::getPos() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toV3D(m_map->detectorInfo().position(index()));
-  return ObjComponent::getPos();
-}
-
-/// Return the relative rotation to the parent
-Kernel::Quat Detector::getRelativeRot() const {
-  if (m_map && hasDetectorInfo()) {
-    auto inverseParentRot = getParent()->getRotation();
-    inverseParentRot.inverse();
-    // Note the unusual order. This matches the convention in Component::getPos
-    // (child rotations first, then parent, then grandparent, ...).
-    return inverseParentRot *
-           Kernel::toQuat(m_map->detectorInfo().rotation(index()));
-  }
-  return ObjComponent::getRelativeRot();
-}
-
-/// Return the absolute rotation of the Detector
-Kernel::Quat Detector::getRotation() const {
-  if (m_map && hasDetectorInfo())
-    return Kernel::toQuat(m_map->detectorInfo().rotation(index()));
-  return ObjComponent::getRotation();
-}
-
 /// Helper for legacy access mode. Returns a reference to the ParameterMap.
 const ParameterMap &Detector::parameterMap() const { return *m_map; }
 
 /// Helper for legacy access mode. Returns the index of the detector.
 size_t Detector::index() const { return m_map->detectorIndex(m_id); }
 
-void Detector::registerContents(ComponentVisitor &componentVisitor) const {
-  componentVisitor.registerDetector(*this);
+size_t Detector::registerContents(ComponentVisitor &componentVisitor) const {
+  return componentVisitor.registerDetector(*this);
 }
 
 bool Detector::hasDetectorInfo() const {

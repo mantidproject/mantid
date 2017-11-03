@@ -10,7 +10,7 @@ Reduction for ORNL SANS
 This document explains how to use Mantid to perform reduction of ORNL SANS data.
 Information about the underlying Mantid algorithms involved can be found in the 
 :ref:`SANSReduction <algm-SANSReduction>` algorithm documentation.
-For HFIR reduction specefically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
+For HFIR reduction specifically, you can also see the :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` algorithm documentation.
 
 
 Contents

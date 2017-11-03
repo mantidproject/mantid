@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Peak.h"
 
 #include <boost/variant.hpp>
+#include <list>
 
 namespace Mantid {
 namespace DataObjects {
@@ -41,7 +42,7 @@ public:
   void read(size_t index, const std::string &text) override;
 
   /// Sets item from a stream
-  void read(const size_t index, std::istream &in) override;
+  void read(const size_t index, std::istringstream &in) override;
 
   /// Specialized type check
   bool isBool() const override;

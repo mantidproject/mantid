@@ -38,7 +38,7 @@ void FFTDerivative::execComplexFFT() {
   MatrixWorkspace_sptr outWS;
 
   size_t n = inWS->getNumberHistograms();
-  API::Progress progress(this, 0, 1, n);
+  API::Progress progress(this, 0.0, 1.0, n);
 
   size_t ny = inWS->y(0).size();
   size_t nx = inWS->x(0).size();

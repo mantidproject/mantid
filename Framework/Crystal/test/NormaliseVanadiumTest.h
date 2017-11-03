@@ -1,11 +1,12 @@
 #ifndef MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 #define MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/Axis.h"
+#include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,8 +17,8 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <math.h>
 #include <cxxtest/TestSuite.h>
+#include <math.h>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -28,6 +29,8 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 /** Create an EventWorkspace containing fake data of single-crystal diffraction.

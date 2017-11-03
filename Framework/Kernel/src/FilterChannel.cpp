@@ -1,9 +1,11 @@
 
 #include "MantidKernel/FilterChannel.h"
+#include <MantidKernel/StringTokenizer.h>
 
 #include <Poco/LoggingRegistry.h>
-#include <MantidKernel/StringTokenizer.h>
 #include <Poco/Message.h>
+
+#include <algorithm>
 
 namespace Poco {
 

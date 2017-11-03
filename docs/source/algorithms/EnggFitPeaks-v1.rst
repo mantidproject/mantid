@@ -32,8 +32,9 @@ Mantid algorithm :ref:`AlignDetectors <algm-AlignDetectors>`
 (following GSAS equations) if the workspace is focused (single
 spectrum) and has a log entry named "difc", where the GSAS DIFC
 parameter is expected. Otherwise the conversion of units is done as in
-the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`. See also
-:ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
+the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
+
+.. seealso:: :ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-BackToBackExponential>`. Other
@@ -80,11 +81,11 @@ Usage
 
 
    # Print the results
-   print "Number of peaks fitted: {0}".format(peaks_tbl.rowCount())
-   print "First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0])
-   print "First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0])
-   print "Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1])
-   print "Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1))
+   print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
+   print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
+   print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
+   print("Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1]))
+   print("Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1)))
 
 Output:
 

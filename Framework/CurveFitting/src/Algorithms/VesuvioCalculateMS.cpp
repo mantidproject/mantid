@@ -5,7 +5,7 @@
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -34,8 +34,6 @@ using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
 using namespace CurveFitting::Functions;
-using Geometry::Link;
-using Geometry::ParameterMap;
 using Geometry::Track;
 
 namespace {

@@ -1,6 +1,6 @@
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -92,7 +92,7 @@ std::map<std::string, std::string> LoadIsawDetCal::validateInputs() {
 
   // two detcal files is only valid for snap
   std::vector<std::string> filenames = getFilenames();
-  if (filenames.size() == 0) {
+  if (filenames.empty()) {
     result["Filename"] = "Must supply .detcal file";
   } else if (filenames.size() == 2) {
     Workspace_const_sptr wksp = getProperty("InputWorkspace");
@@ -196,7 +196,7 @@ void LoadIsawDetCal::exec() {
   }
 
   auto expInfoWS = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
-  auto &detectorInfo = expInfoWS->mutableDetectorInfo();
+  auto &componentInfo = expInfoWS->mutableComponentInfo();
   std::vector<ComponentScaling> rectangularDetectorScalings;
 
   while (std::getline(input, line)) {
@@ -206,26 +206,32 @@ void LoadIsawDetCal::exec() {
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
       if (instname == "WISH")
-        center(0.0, 0.0, -mL1, "undulator", ws, detectorInfo);
+        center(0.0, 0.0, -mL1, "undulator", ws, componentInfo);
       else
-        center(0.0, 0.0, -mL1, "moderator", ws, detectorInfo);
+        center(0.0, 0.0, -mL1, "moderator", ws, componentInfo);
       // mT0 and time of flight are both in microsec
-      if (inputW) {
-        API::Run &run = inputW->mutableRun();
-        // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
-        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-        if (run.hasProperty("T0")) {
-          double T0IDF = run.getPropertyValueAsType<double>("T0");
-          alg1->setProperty("Offset", mT0 - T0IDF);
-        } else {
-          alg1->setProperty("Offset", mT0);
+      if (mT0 != 0.0) {
+        if (inputW) {
+          API::Run &run = inputW->mutableRun();
+          // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+          if (run.hasProperty("T0")) {
+            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            alg1->setProperty("Offset", mT0 - T0IDF);
+          } else {
+            alg1->setProperty("Offset", mT0);
+          }
+          alg1->executeAsChildAlg();
+          inputW = alg1->getProperty("OutputWorkspace");
+          // set T0 in the run parameters
+          run.addProperty<double>("T0", mT0, true);
+        } else if (inputP) {
+          // set T0 in the run parameters
+          API::Run &run = inputP->mutableRun();
+          run.addProperty<double>("T0", mT0, true);
         }
-        alg1->executeAsChildAlg();
-        inputW = alg1->getProperty("OutputWorkspace");
-        // set T0 in the run parameters
-        run.addProperty<double>("T0", mT0, true);
       }
     }
 
@@ -265,15 +271,37 @@ void LoadIsawDetCal::exec() {
 
     if (det) {
       detname = det->getName();
-      center(x, y, z, detname, ws, detectorInfo);
+      center(x, y, z, detname, ws, componentInfo);
 
       ComponentScaling detScaling;
       detScaling.scaleX = CM_TO_M * width / det->xsize();
       detScaling.scaleY = CM_TO_M * height / det->ysize();
       detScaling.componentName = detname;
+      // Scaling will need both scale factors if LoadIsawPeaks or LoadIsawDetCal
+      // has already
+      // applied a calibration
+      if (inputW) {
+        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+      if (inputP) {
+        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+        auto oldscalex = pmap.getDouble(detname, std::string("scalex"));
+        auto oldscaley = pmap.getDouble(detname, std::string("scaley"));
+        if (!oldscalex.empty())
+          detScaling.scaleX *= oldscalex[0];
+        if (!oldscaley.empty())
+          detScaling.scaleY *= oldscaley[0];
+      }
+
       rectangularDetectorScalings.push_back(detScaling);
 
-      doRotation(rX, rY, detectorInfo, det);
+      doRotation(rX, rY, componentInfo, det);
     }
     auto bank = uniqueBanks.find(id);
     if (bank == uniqueBanks.end())
@@ -295,11 +323,11 @@ void LoadIsawDetCal::exec() {
     if (comp) {
       // Omitted scaling tubes
       detname = comp->getFullName();
-      center(x, y, z, detname, ws, detectorInfo);
+      center(x, y, z, detname, ws, componentInfo);
 
       bool doWishCorrection =
           (instname == "WISH"); // TODO: find out why this is needed for WISH
-      doRotation(rX, rY, detectorInfo, comp, doWishCorrection);
+      doRotation(rX, rY, componentInfo, comp, doWishCorrection);
     }
   }
 
@@ -317,11 +345,11 @@ void LoadIsawDetCal::exec() {
  * @param z :: The shift along the Z-axis
  * @param detname :: The detector name
  * @param ws :: The workspace
- * @param detectorInfo :: The detector info object for the workspace
+ * @param componentInfo :: The component info object for the workspace
  */
 void LoadIsawDetCal::center(const double x, const double y, const double z,
                             const std::string &detname, API::Workspace_sptr ws,
-                            API::DetectorInfo &detectorInfo) {
+                            Geometry::ComponentInfo &componentInfo) {
 
   Instrument_sptr inst = getCheckInst(ws);
 
@@ -333,8 +361,8 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
 
   const V3D position(x * CM_TO_M, y * CM_TO_M, z * CM_TO_M);
 
-  // Do the move
-  detectorInfo.setPosition(*comp, position);
+  const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
+  componentInfo.setPosition(componentIndex, position);
 }
 
 /**
@@ -395,11 +423,11 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
  *
  * @param rX the vector of (base_x, base_y, base_z) from the calibration file
  * @param rY the vector of (up_x, up_y, up_z) from the calibration file
- * @param detectorInfo the DetectorInfo object from the workspace
+ * @param componentInfo the ComponentInfo object from the workspace
  * @param comp the component to rotate
  * @param doWishCorrection if true apply a special correction for WISH
  */
-void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
+void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
                                 boost::shared_ptr<const IComponent> comp,
                                 bool doWishCorrection) {
   // These are the ISAW axes
@@ -431,20 +459,9 @@ void LoadIsawDetCal::doRotation(V3D rX, V3D rY, DetectorInfo &detectorInfo,
   Quat Rot = Q2 * Q1;
 
   // Then find the corresponding relative position
-  const auto parent = comp->getParent();
-  if (parent) {
-    Quat rot0 = parent->getRelativeRot();
-    rot0.inverse();
-    Rot *= rot0;
-  }
-  const auto grandparent = parent->getParent();
-  if (grandparent) {
-    Quat rot0 = grandparent->getRelativeRot();
-    rot0.inverse();
-    Rot *= rot0;
-  }
+  const auto componentIndex = componentInfo.indexOf(comp->getComponentID());
 
-  detectorInfo.setRotation(*comp.get(), Rot);
+  componentInfo.setRotation(componentIndex, Rot);
 }
 
 /**

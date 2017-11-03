@@ -930,5 +930,6 @@ class RefineProfileParameters(object):
 
         return
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(RefinePowderDiffProfileSeq)

@@ -86,6 +86,15 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
                     1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
+
+    TS_ASSERT(fun.hasParameter("B20"));
+    TS_ASSERT(fun.hasParameter("B42"));
+    TS_ASSERT(fun.hasParameter("f0.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f0.FWHM"));
+    TS_ASSERT(fun.hasParameter("f2.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f2.PeakCentre"));
+    TS_ASSERT(!fun.hasParameter("Hello"));
+    TS_ASSERT(!fun.hasParameter("f0.Hello"));
   }
 
   void test_evaluate() {
@@ -214,15 +223,15 @@ public:
     auto constraint = fun->getConstraint(i);
     TS_ASSERT(constraint);
     if (constraint) {
-      TS_ASSERT_EQUALS(constraint->asString(), "1.3<FWHM");
-      TS_ASSERT_EQUALS(constraint->getIndex(), 2);
+      TS_ASSERT_EQUALS(constraint->asString(), "1.3<f1.FWHM");
+      TS_ASSERT_EQUALS(constraint->getLocalIndex(), 39);
     }
     i = fun->parameterIndex("B44");
     constraint = fun->getConstraint(i);
     TS_ASSERT(constraint);
     if (constraint) {
       TS_ASSERT_EQUALS(constraint->asString(), "0<B44<10");
-      TS_ASSERT_EQUALS(constraint->getIndex(), 13);
+      TS_ASSERT_EQUALS(constraint->getLocalIndex(), 13);
     }
   }
 
@@ -680,6 +689,159 @@ public:
       }
       TS_ASSERT_EQUALS(tie->asString(), "f0.f1.FWHM=f1.f2.FWHM/2");
     }
+  }
+
+  void test_new_peaks() {
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    TS_ASSERT_EQUALS(fun->nParams(), 40);
+    TS_ASSERT_DELTA(fun->getParameter(34), 310.38, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(37), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(38), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(39), 1.10, 1e-2);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+
+    fun->setParameter("B20", 0.37737);
+    fun->setParameter("B22", 3.977);
+    fun->setParameter("B40", 0.031787);
+    fun->setParameter("B42", -0.11611);
+
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
+    TS_ASSERT_DELTA(fun->getParameter(34), 203.87, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(37), 86.29, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(38), 27.04, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(39), 1.10, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(40), 20.08, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(41), 44.24, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+
+    fun->setParameter("B20", 0);
+    fun->setParameter("B22", 0);
+    fun->setParameter("B40", 0);
+    fun->setParameter("B42", 0);
+
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
+    TS_ASSERT_DELTA(fun->getParameter(34), 310.38, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(37), 0.00, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(39), 1.10, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(40), 0.0, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
+    TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+  }
+
+  void test_new_peaks_fixed_peak_width() {
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    TS_ASSERT_EQUALS(fun->nParams(), 40);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+
+    fun->setParameter("B20", 0.37737);
+    fun->setParameter("B22", 3.977);
+    fun->setParameter("B40", 0.031787);
+    fun->setParameter("B42", -0.11611);
+
+    fun->fix(39);
+
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+
+    fun->setParameter("B20", 0);
+    fun->setParameter("B22", 0);
+    fun->setParameter("B40", 0);
+    fun->setParameter("B42", 0);
+
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+
+    fun->setParameter("B20", 0.37737);
+    fun->setParameter("B22", 3.977);
+    fun->setParameter("B40", 0.031787);
+    fun->setParameter("B42", -0.11611);
+
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+  }
+
+  void test_new_peaks_tied_peak_width() {
+    std::string funDef = "name=CrystalFieldSpectrum,Ion=Ce,Symmetry=C2v,"
+                         "Temperature=44.0,FWHM=1.1";
+    auto fun = FunctionFactory::Instance().createInitialized(funDef);
+    TS_ASSERT_EQUALS(fun->nParams(), 40);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+
+    fun->setParameter("B20", 0.37737);
+    fun->setParameter("B22", 3.977);
+    fun->setParameter("B40", 0.031787);
+    fun->setParameter("B42", -0.11611);
+
+    fun->tie("f1.FWHM", "f0.FWHM");
+
+    TS_ASSERT_EQUALS(fun->nParams(), 49);
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+
+    fun->setParameter("B20", 0);
+    fun->setParameter("B22", 0);
+    fun->setParameter("B40", 0);
+    fun->setParameter("B42", 0);
+
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(!fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
+
+    fun->setParameter("B20", 0.37737);
+    fun->setParameter("B22", 3.977);
+    fun->setParameter("B40", 0.031787);
+    fun->setParameter("B42", -0.11611);
+
+    TS_ASSERT(fun->isActive(36));
+    TS_ASSERT(!fun->isActive(39));
+    TS_ASSERT(fun->isActive(42));
+    TS_ASSERT(!fun->isActive(45));
+    TS_ASSERT(!fun->isActive(48));
   }
 
 private:

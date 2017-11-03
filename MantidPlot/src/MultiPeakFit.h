@@ -38,7 +38,7 @@ class MultiPeakFit : public Fit {
 
 public:
   enum PeakProfile { Gauss, Lorentz };
-  MultiPeakFit(ApplicationWindow *parent, Graph *g = 0,
+  MultiPeakFit(ApplicationWindow *parent, Graph *g = nullptr,
                PeakProfile profile = Gauss, int peaks = 1);
   MultiPeakFit(ApplicationWindow *parent, Table *t, const QString &xCol,
                const QString &yCol, int startRow = 0, int endRow = -1,

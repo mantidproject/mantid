@@ -67,7 +67,9 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Indexing PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Indexing LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
+target_link_libraries ( Indexing LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
+  Parallel
+  )
 
 if( "${UNIX_CODENAME}" STREQUAL "trusty" )
   # Special linking options are required for some older Ubuntu gcc builds to use std::thread, specific options found here:

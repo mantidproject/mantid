@@ -433,16 +433,22 @@ public:
     }
   }
 
-  void test_Make_c_dir() {
+  void test_make_c_dir() {
     V3D a_dir(1, 2, 3);
     V3D b_dir(-3, 2, 1);
 
-    double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
-    double alpha = 123;
-    double beta = 74;
-    double c_length = 10;
-    V3D result =
-        IndexingUtils::Make_c_dir(a_dir, b_dir, c_length, alpha, beta, gamma);
+    const double gamma = a_dir.angle(b_dir) * 180.0 / M_PI;
+    const double alpha = 123;
+    const double beta = 74;
+    const double c_length = 10;
+
+    const double cosAlpha = std::cos(alpha * M_PI / 180);
+    const double cosBeta = std::cos(beta * M_PI / 180);
+    const double cosGamma = std::cos(gamma * M_PI / 180);
+    const double sinGamma = std::sin(gamma * M_PI / 180);
+
+    V3D result = IndexingUtils::makeCDir(a_dir, b_dir, c_length, cosAlpha,
+                                         cosBeta, cosGamma, sinGamma);
 
     double alpha_calc = result.angle(b_dir) * 180 / M_PI;
     double beta_calc = result.angle(a_dir) * 180 / M_PI;

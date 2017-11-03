@@ -9,6 +9,7 @@
 namespace Mantid {
 namespace Beamline {
 
+class ComponentInfo;
 /** Beamline::DetectorInfo provides easy access to commonly used parameters of
   individual detectors (pixels) in a beamline, such as mask and monitor flags,
   positions, L2, and 2-theta.
@@ -68,7 +69,9 @@ public:
   bool isEquivalent(const DetectorInfo &other) const;
 
   size_t size() const;
+  size_t scanSize() const;
   bool isScanning() const;
+  bool isSyncScan() const;
 
   bool isMonitor(const size_t index) const;
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
@@ -92,8 +95,14 @@ public:
   scanInterval(const std::pair<size_t, size_t> &index) const;
   void setScanInterval(const size_t index,
                        const std::pair<int64_t, int64_t> &interval);
+  void setScanInterval(const std::pair<int64_t, int64_t> &interval);
 
   void merge(const DetectorInfo &other);
+  void setComponentInfo(ComponentInfo *componentInfo);
+  bool hasComponentInfo() const;
+  double l1() const;
+  Eigen::Vector3d sourcePosition() const;
+  Eigen::Vector3d samplePosition() const;
 
 private:
   size_t linearIndex(const std::pair<size_t, size_t> &index) const;
@@ -102,6 +111,11 @@ private:
   void initScanIntervals();
   void initIndices();
   std::vector<bool> buildMergeIndices(const DetectorInfo &other) const;
+  std::vector<bool> buildMergeSyncScanIndices(const DetectorInfo &other) const;
+  void checkSizes(const DetectorInfo &other) const;
+  void checkIdenticalIntervals(const DetectorInfo &other, const size_t index1,
+                               const size_t index2) const;
+  bool m_isSyncScan{true};
 
   Kernel::cow_ptr<std::vector<bool>> m_isMonitor{nullptr};
   Kernel::cow_ptr<std::vector<bool>> m_isMasked{nullptr};
@@ -113,7 +127,25 @@ private:
       nullptr};
   Kernel::cow_ptr<std::vector<std::vector<size_t>>> m_indexMap{nullptr};
   Kernel::cow_ptr<std::vector<std::pair<size_t, size_t>>> m_indices{nullptr};
+  ComponentInfo *m_componentInfo = nullptr; // Geometry::ComponentInfo owner
 };
+
+/** Returns the number of detectors in the instrument.
+ *
+ * If a detector is moving, i.e., has more than one associated position, it is
+ * nevertheless only counted as a single detector. */
+inline size_t DetectorInfo::size() const {
+  if (!m_isMonitor)
+    return 0;
+  return m_isMonitor->size();
+}
+
+/// Returns true if the beamline has scanning detectors.
+inline bool DetectorInfo::isScanning() const {
+  if (!m_positions)
+    return false;
+  return size() != m_positions->size();
+}
 
 /** Returns the position of the detector with given detector index.
  *
@@ -124,6 +156,12 @@ inline Eigen::Vector3d DetectorInfo::position(const size_t index) const {
   return (*m_positions)[index];
 }
 
+/// Returns the position of the detector with given index.
+inline Eigen::Vector3d
+DetectorInfo::position(const std::pair<size_t, size_t> &index) const {
+  return (*m_positions)[linearIndex(index)];
+}
+
 /** Returns the rotation of the detector with given detector index.
  *
  * Convenience method for beamlines with static (non-moving) detectors.
@@ -131,6 +169,12 @@ inline Eigen::Vector3d DetectorInfo::position(const size_t index) const {
 inline Eigen::Quaterniond DetectorInfo::rotation(const size_t index) const {
   checkNoTimeDependence();
   return (*m_rotations)[index];
+}
+
+/// Returns the rotation of the detector with given index.
+inline Eigen::Quaterniond
+DetectorInfo::rotation(const std::pair<size_t, size_t> &index) const {
+  return (*m_rotations)[linearIndex(index)];
 }
 
 /** Set the position of the detector with given detector index.
@@ -143,6 +187,12 @@ inline void DetectorInfo::setPosition(const size_t index,
   m_positions.access()[index] = position;
 }
 
+/// Set the position of the detector with given index.
+inline void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
+                                      const Eigen::Vector3d &position) {
+  m_positions.access()[linearIndex(index)] = position;
+}
+
 /** Set the rotation of the detector with given detector index.
  *
  * Convenience method for beamlines with static (non-moving) detectors.
@@ -151,6 +201,33 @@ inline void DetectorInfo::setRotation(const size_t index,
                                       const Eigen::Quaterniond &rotation) {
   checkNoTimeDependence();
   m_rotations.access()[index] = rotation.normalized();
+}
+
+/// Set the rotation of the detector with given index.
+inline void DetectorInfo::setRotation(const std::pair<size_t, size_t> &index,
+                                      const Eigen::Quaterniond &rotation) {
+  m_rotations.access()[linearIndex(index)] = rotation.normalized();
+}
+
+/// Throws if this has time-dependent data.
+inline void DetectorInfo::checkNoTimeDependence() const {
+  if (isScanning())
+    throw std::runtime_error("DetectorInfo accessed without time index but the "
+                             "beamline has time-dependent (moving) detectors.");
+}
+
+/// Returns the linear index for a pair of detector index and time index.
+inline size_t
+DetectorInfo::linearIndex(const std::pair<size_t, size_t> &index) const {
+  // The most common case are beamlines with static detectors. In that case the
+  // time index is always 0 and we avoid expensive map lookups. Linear indices
+  // are ordered such that the first block contains everything for time index 0
+  // so even in the time dependent case no translation is necessary.
+  if (index.second == 0)
+    return index.first;
+  if (m_isSyncScan)
+    return index.first + size() * index.second;
+  return (*m_indexMap)[index.first][index.second];
 }
 
 } // namespace Beamline

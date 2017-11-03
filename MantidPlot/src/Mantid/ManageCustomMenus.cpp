@@ -1,8 +1,8 @@
 #include "ManageCustomMenus.h"
 #include "../ApplicationWindow.h"
 
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <QtGui>
@@ -15,7 +15,7 @@ using MantidQt::API::MantidDesktopServices;
 * @param parent :: pointer to the main MantidPlot ApplicationWindow object
 */
 ManageCustomMenus::ManageCustomMenus(QWidget *parent)
-    : QDialog(parent), m_scriptsTree(0), m_menusTree(0) {
+    : QDialog(parent), m_scriptsTree(nullptr), m_menusTree(nullptr) {
   m_uiForm.setupUi(this);
   m_appWindow = static_cast<ApplicationWindow *>(parent);
   initLayout();
@@ -82,8 +82,7 @@ void ManageCustomMenus::populateMenuTree() {
 * @return list of selected items
 */
 QList<QTreeWidgetItem *> ManageCustomMenus::getCurrentSelection() {
-  QList<QTreeWidgetItem *> result;
-  result = m_scriptsTree->selectedItems();
+  QList<QTreeWidgetItem *> result = m_scriptsTree->selectedItems();
   return result;
 }
 /**
@@ -91,8 +90,7 @@ QList<QTreeWidgetItem *> ManageCustomMenus::getCurrentSelection() {
 * @return pointer to currently selected menu item
 */
 QTreeWidgetItem *ManageCustomMenus::getCurrentMenuSelection() {
-  QTreeWidgetItem *result = 0;
-  result = m_menusTree->currentItem();
+  QTreeWidgetItem *result = m_menusTree->currentItem();
   return result;
 }
 /**
@@ -133,8 +131,9 @@ void ManageCustomMenus::remScriptClicked() {
         this, "MantidPlot",
         "No item selected - please select a script from the left-hand list.");
   } else {
-    QTreeWidgetItem *item;
-    foreach (item, m_scriptsTree->selectedItems()) { delete item; }
+    foreach (QTreeWidgetItem *item, m_scriptsTree->selectedItems()) {
+      delete item;
+    }
   }
 }
 /**
@@ -150,7 +149,7 @@ void ManageCustomMenus::addItemClicked() {
         "No item selected - please select a script in the left-hand list of "
         "scripts.\n"
         "If none are listed, use the 'Add Script' button to add some files.");
-  } else if (menu == 0) {
+  } else if (menu == nullptr) {
     QMessageBox::information(this, "MantidPlot",
                              "No menu selected - please select a menu on the "
                              "right-hand side to which to add this script.\n"
@@ -158,12 +157,11 @@ void ManageCustomMenus::addItemClicked() {
                              "Menu' button to create one.");
   } else {
     // Ensure using top-level menu.
-    if (menu->parent() != 0) {
+    if (menu->parent() != nullptr) {
       menu = menu->parent();
     }
 
-    QTreeWidgetItem *item;
-    foreach (item, selection) { // foreach is a Qt macro (
+    foreach (QTreeWidgetItem *item, selection) { // foreach is a Qt macro (
       // http://doc.qt.nokia.com/4.4/containers.html#the-foreach-keyword
       // )
       menu->addChild(item);
@@ -186,12 +184,12 @@ void ManageCustomMenus::addItemClicked() {
 */
 void ManageCustomMenus::remItemClicked() {
   QTreeWidgetItem *item = getCurrentMenuSelection();
-  if (item == 0) {
+  if (item == nullptr) {
     QMessageBox::information(this, "MantidPlot", "No item selected - please "
                                                  "select a script or menu in "
                                                  "the right-hand list.");
   } else {
-    if (item->parent() != 0) {
+    if (item->parent() != nullptr) {
       // Delete menu sub-item
       QTreeWidgetItem *menu = item->parent();
       m_appWindow->removeUserMenuAction(menu->text(0), item->text(0));

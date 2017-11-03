@@ -14,13 +14,15 @@ from isis_powder.routines import run_details
 class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
     def setup_mock_inst_settings(self, yaml_file_path):
         calibration_dir = tempfile.mkdtemp()
+        # Keep track of list of folders to remove
         self._folders_to_remove = [calibration_dir]
 
+        # Check the required unit test files could be found
         test_configuration_path = mantid.api.FileFinder.getFullPath(yaml_file_path)
         if not test_configuration_path or len(test_configuration_path) <= 0:
             self.fail("Could not find the unit test input file called: " + str(yaml_file_path))
-        mock_inst = MockInstSettings(cal_file_path=test_configuration_path, calibration_dir=calibration_dir)
-        return mock_inst
+
+        return MockInstSettings(cal_file_path=test_configuration_path, calibration_dir=calibration_dir)
 
     def tearDown(self):
         for folder in self._folders_to_remove:
@@ -44,6 +46,9 @@ class ISISPowderInstrumentRunDetailsTest(unittest.TestCase):
         self.assertEqual(output_obj.empty_runs, expected_empty_runs)
         self.assertEqual(output_obj.grouping_file_path,
                          os.path.join(mock_inst.calibration_dir, mock_inst.grouping_file_name))
+        expected_file_ext = mock_inst.file_extension
+        expected_file_ext = expected_file_ext if expected_file_ext.startswith('.') else '.' + expected_file_ext
+        self.assertEqual(output_obj.file_extension, expected_file_ext)
         self.assertEqual(output_obj.label, expected_label)
         self.assertEqual(output_obj.offset_file_path,
                          os.path.join(mock_inst.calibration_dir, expected_label, expected_offset_file_name))
@@ -117,6 +122,7 @@ class MockInstSettings(object):
         self.calibration_dir = calibration_dir
         self.cal_mapping_path = cal_file_path
         self.grouping_file_name = MockInstSettings.gen_random_string()
+        self.file_extension = MockInstSettings.gen_random_string()
 
     @staticmethod
     def gen_random_string():

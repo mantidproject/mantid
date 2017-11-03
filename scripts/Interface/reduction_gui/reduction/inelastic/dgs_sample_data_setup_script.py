@@ -4,6 +4,7 @@
     from the the interface class so that the DgsReduction class could
     be used independently of the interface implementation
 """
+from __future__ import (absolute_import, division, print_function)
 import os
 import xml.dom.minidom
 
@@ -38,7 +39,7 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         SampleSetupScript.monitor1_specid = str(int(ip.get_parameter("ei-mon1-spec")))
         SampleSetupScript.monitor2_specid = str(int(ip.get_parameter("ei-mon2-spec")))
@@ -114,7 +115,7 @@ class SampleSetupScript(BaseScriptElement):
         xml_str += "  <monitor2_specid>%s</monitor2_specid>\n" % self.monitor2_specid
         xml_str += "  <et_range>\n"
         xml_str += "    <low>%s</low>\n" % self.et_range_low
-        xml_str += "    <width>%s</width>\n"  % self.et_range_width
+        xml_str += "    <width>%s</width>\n" % self.et_range_width
         xml_str += "    <high>%s</high>\n" % self.et_range_high
         xml_str += "  </et_range>\n"
         xml_str += "  <sofphie_is_distribution>%s</sofphie_is_distribution>\n" % str(self.et_is_distribution)
@@ -132,7 +133,7 @@ class SampleSetupScript(BaseScriptElement):
         """
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("SampleSetup")
-        if len(element_list)>0:
+        if len(element_list) > 0:
             instrument_dom = element_list[0]
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                   "sample_input_file",

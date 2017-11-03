@@ -56,9 +56,9 @@ public:
   void setHeight(const double h) override;
   void setFwhm(const double w) override;
   void setIntensity(const double i) override { setParameter("Amplitude", i); }
-  void fixCentre() override;
+  void fixCentre(bool isDefault = false) override;
   void unfixCentre() override;
-  void fixIntensity() override;
+  void fixIntensity(bool isDefault = false) override;
   void unfixIntensity() override;
 
   /// overwrite IFunction base class methods

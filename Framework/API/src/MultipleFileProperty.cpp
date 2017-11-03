@@ -33,6 +33,26 @@ Mantid::Kernel::Logger g_log("MultipleFileProperty");
 bool doesNotContainWildCard(const std::string &ext) {
   return std::string::npos == ext.find('*');
 }
+
+static const std::string SUCCESS("");
+
+// Regular expressions for any adjacent + or , operators
+const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
+static const boost::regex REGEX_INVALID(INVALID);
+
+// Regular expressions that represent the allowed instances of , operators
+const std::string NUM_COMMA_ALPHA("(?<=\\d)\\s*,\\s*(?=\\D)");
+const std::string ALPHA_COMMA_ALPHA("(?<=\\D)\\s*,\\s*(?=\\D)");
+const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
+static const boost::regex REGEX_COMMA_OPERATORS(COMMA_OPERATORS);
+
+// Regular expressions that represent the allowed instances of + operators
+const std::string NUM_PLUS_ALPHA("(?<=\\d)\\s*\\+\\s*(?=\\D)");
+const std::string ALPHA_PLUS_ALPHA("(?<=\\D)\\s*\\+\\s*(?=\\D)");
+const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
+static const boost::regex REGEX_PLUS_OPERATORS(PLUS_OPERATORS,
+                                               boost::regex_constants::perl);
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -62,10 +82,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
   std::string allowMultiFileLoading =
       Kernel::ConfigService::Instance().getString("loading.multifile");
 
-  if (boost::iequals(allowMultiFileLoading, "On"))
-    m_multiFileLoadingEnabled = true;
-  else
-    m_multiFileLoadingEnabled = false;
+  m_multiFileLoadingEnabled = boost::iequals(allowMultiFileLoading, "On");
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
@@ -95,7 +112,7 @@ bool MultipleFileProperty::isOptional() const {
  */
 std::string MultipleFileProperty::isEmptyValueValid() const {
   if (isOptional()) {
-    return "";
+    return SUCCESS;
   } else {
     return "No file specified.";
   }
@@ -142,7 +159,7 @@ std::string MultipleFileProperty::setValue(const std::string &propValue) {
     const std::string error = setValueAsSingleFile(propValue);
 
     if (error.empty())
-      return "";
+      return SUCCESS;
 
     // If we failed return the error message from the multiple file load attempt
     // as the single file was a guess
@@ -180,6 +197,13 @@ std::string MultipleFileProperty::getDefault() const {
  */
 std::string
 MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
+  // if value is unchanged use the cached version
+  if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        m_oldFoundValue);
+    return SUCCESS;
+  }
+
   // Use a slave FileProperty to do the job for us.
   FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
                              Direction::Input);
@@ -190,16 +214,22 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
     return error;
 
   // Store.
+  std::vector<std::vector<std::string>> foundFiles;
   try {
-    std::vector<std::vector<std::string>> result;
-    toValue(slaveFileProp(), result, "", "");
-    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(result);
+    toValue(slaveFileProp(), foundFiles, "", "");
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        foundFiles);
   } catch (std::invalid_argument &except) {
     g_log.debug() << "Could not set property " << name() << ": "
                   << except.what();
     return except.what();
   }
-  return "";
+
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = std::move(foundFiles);
+
+  return SUCCESS;
 }
 
 /**
@@ -216,21 +246,18 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
  */
 std::string
 MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
+  // if value is unchanged use the cached version
+  if ((propValue == m_oldPropValue) && (!m_oldFoundValue.empty())) {
+    PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+        m_oldFoundValue);
+    return SUCCESS;
+  }
+
   // Return error if there are any adjacent + or , operators.
-  const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
   boost::smatch invalid_substring;
   if (boost::regex_search(propValue.begin(), propValue.end(), invalid_substring,
-                          boost::regex(INVALID)))
+                          REGEX_INVALID))
     return "Unable to parse filename due to an empty token.";
-
-  // Regular expressions that represent the allowed instances of + or ,
-  // operators.
-  const std::string NUM_COMMA_ALPHA = "(?<=\\d)\\s*,\\s*(?=\\D)";
-  const std::string ALPHA_COMMA_ALPHA = "(?<=\\D)\\s*,\\s*(?=\\D)";
-  const std::string NUM_PLUS_ALPHA = "(?<=\\d)\\s*\\+\\s*(?=\\D)";
-  const std::string ALPHA_PLUS_ALPHA = "(?<=\\D)\\s*\\+\\s*(?=\\D)";
-  const std::string COMMA_OPERATORS = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
-  const std::string PLUS_OPERATORS = NUM_PLUS_ALPHA + "|" + ALPHA_PLUS_ALPHA;
 
   std::stringstream errorMsg;
   std::vector<std::vector<std::string>> fileNames;
@@ -238,15 +265,15 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Tokenise on allowed comma operators, and iterate over each token.
   boost::sregex_token_iterator end;
   boost::sregex_token_iterator commaToken(propValue.begin(), propValue.end(),
-                                          boost::regex(COMMA_OPERATORS), -1);
+                                          REGEX_COMMA_OPERATORS, -1);
 
   for (; commaToken != end; ++commaToken) {
     const std::string commaTokenString = commaToken->str();
 
     // Tokenise on allowed plus operators.
-    boost::sregex_token_iterator plusToken(
-        commaTokenString.begin(), commaTokenString.end(),
-        boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
+    boost::sregex_token_iterator plusToken(commaTokenString.begin(),
+                                           commaTokenString.end(),
+                                           REGEX_PLUS_OPERATORS, -1);
 
     std::vector<std::vector<std::string>> temp;
 
@@ -301,7 +328,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
     }
 
-    fileNames.insert(fileNames.end(), temp.begin(), temp.end());
+    fileNames.insert(fileNames.end(), std::make_move_iterator(temp.begin()),
+                     std::make_move_iterator(temp.end()));
   }
 
   std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
@@ -312,12 +340,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   std::vector<std::string> flattenedAllUnresolvedFileNames =
       VectorHelper::flattenVector(allUnresolvedFileNames);
   std::string defaultExt;
-  auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
-  for (; unresolvedFileName != flattenedAllUnresolvedFileNames.end();
-       ++unresolvedFileName) {
+  for (const auto &unresolvedFileName : flattenedAllUnresolvedFileNames) {
     try {
       // Check for an extension.
-      Poco::Path path(*unresolvedFileName);
+      Poco::Path path(unresolvedFileName);
       if (!path.getExtension().empty()) {
         defaultExt = "." + path.getExtension();
         break;
@@ -332,19 +358,17 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
-  auto unresolvedFileNames = allUnresolvedFileNames.begin();
-  for (; unresolvedFileNames != allUnresolvedFileNames.end();
-       ++unresolvedFileNames) {
+  for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
     // filenames just join them together
     // and search for "*" in the result.)
     if (std::string::npos !=
-        boost::algorithm::join(*unresolvedFileNames, "").find("*"))
+        boost::algorithm::join(unresolvedFileNames, "").find("*"))
       return "Searching for files by wildcards is not currently supported.";
 
     std::vector<std::string> fullFileNames;
 
-    for (auto &unresolvedFileName : *unresolvedFileNames) {
+    for (const auto &unresolvedFileName : unresolvedFileNames) {
       bool useDefaultExt;
 
       try {
@@ -389,15 +413,20 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       // Append the file name to result.
-      fullFileNames.push_back(fullyResolvedFile);
+      fullFileNames.push_back(std::move(fullyResolvedFile));
     }
-
-    allFullFileNames.push_back(fullFileNames);
+    allFullFileNames.push_back(std::move(fullFileNames));
   }
 
   // Now re-set the value using the full paths found.
-  return PropertyWithValue<std::vector<std::vector<std::string>>>::setValue(
-      toString(allFullFileNames));
+  PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(
+      allFullFileNames);
+
+  // cache the new version of things
+  m_oldPropValue = propValue;
+  m_oldFoundValue = std::move(allFullFileNames);
+
+  return SUCCESS;
 }
 
 } // namespace Mantid

@@ -49,7 +49,11 @@
 
   <type name="DetectorArm">
     <component type="panel" idstart="0" idfillbyfirst="y">
-        <location name="detector1" x="0" y="0" z="2.5505"/>
+      <location name="detector1">
+        <parameter name="z">
+          <logfile eq="0.001*value" id="SampleDetDis"/>
+        </parameter>
+      </location>
     </component>
   </type>
   

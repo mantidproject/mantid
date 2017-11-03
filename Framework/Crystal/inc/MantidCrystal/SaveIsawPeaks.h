@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 
@@ -45,7 +45,7 @@ private:
   void sizeBanks(std::string bankName, int &NCOLS, int &NROWS, double &xsize,
                  double &ysize);
   bool bankMasked(Geometry::IComponent_const_sptr parent,
-                  const API::DetectorInfo &detectorInfo);
+                  const Geometry::DetectorInfo &detectorInfo);
   Geometry::Instrument_const_sptr inst;
 };
 

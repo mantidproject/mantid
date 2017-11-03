@@ -31,11 +31,11 @@
 #include "ApplicationWindow.h"
 #include "Graph.h"
 #include "MantidKernel/Strings.h"
-#include "MantidQtAPI/TSVSerialiser.h"
+#include "MantidQtWidgets/Common/TSVSerialiser.h"
 #include "MatrixCommand.h"
 #include "ScriptingEnv.h"
 #include "muParserScript.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QApplication>
 #include <QClipboard>
@@ -63,8 +63,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_math.h>
@@ -77,26 +77,30 @@ using namespace MantidQt::API;
 
 Matrix::Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
                const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),
-      m_bk_color(), d_stack(NULL), d_table_view(NULL), imageLabel(NULL),
-      formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
+      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
+      d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(NULL), d_undo_stack(NULL), d_workspace(NULL) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),
-      m_bk_color(), d_stack(NULL), d_table_view(NULL), imageLabel(NULL),
-      formula_str(), txt_format(), num_precision(0), x_start(0.0), x_end(0.0),
-      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(), txt_format(),
+      num_precision(0), x_start(0.0), x_end(0.0), y_start(0.0), y_end(0.0),
+      d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(NULL), d_undo_stack(NULL), d_workspace(NULL) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initTable(r, c);
@@ -104,22 +108,24 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString &label,
 
 Matrix::Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
                QWidget *parent, const QString &name, Qt::WFlags f)
-    : MdiSubWindow(parent, label, name, f), Scripted(env), d_matrix_model(NULL),
-      m_bk_color(), d_stack(NULL), d_table_view(NULL), imageLabel(NULL),
-      formula_str(), txt_format(QChar()), num_precision(0), x_start(0.0),
-      x_end(0.0), y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
+    : MdiSubWindow(parent, label, name, f), Scripted(env),
+      d_matrix_model(nullptr), m_bk_color(), d_stack(nullptr),
+      d_table_view(nullptr), imageLabel(nullptr), formula_str(),
+      txt_format(QChar()), num_precision(0), x_start(0.0), x_end(0.0),
+      y_start(0.0), y_end(0.0), d_view_type(ViewType::TableView),
       d_header_view_type(HeaderViewType::ColumnRow), d_color_map(),
       d_color_map_type(ColorMapType::Rainbow), d_column_width(0),
-      d_select_all_shortcut(NULL), d_undo_stack(NULL), d_workspace(NULL) {
+      d_select_all_shortcut(nullptr), d_undo_stack(nullptr),
+      d_workspace(nullptr) {
   m_bk_color = QColor(255, 255, 128);
   m_matrix_icon = getQPixmap("matrix_xpm");
   initImage(image);
 }
 
 void Matrix::initGlobals() {
-  d_workspace = NULL;
-  d_table_view = NULL;
-  imageLabel = NULL;
+  d_workspace = nullptr;
+  d_table_view = nullptr;
+  imageLabel = nullptr;
 
   d_header_view_type = ColumnRow;
   d_color_map_type = GrayScale;
@@ -830,7 +836,7 @@ void Matrix::customEvent(QEvent *e) {
 }
 
 void Matrix::exportRasterImage(const QString &fileName, int quality) {
-  d_matrix_model->renderImage().save(fileName, 0, quality);
+  d_matrix_model->renderImage().save(fileName, nullptr, quality);
 }
 
 void Matrix::exportToFile(const QString &fileName) {
@@ -1075,10 +1081,10 @@ void Matrix::range(double *min, double *max) {
 double **Matrix::allocateMatrixData(int rows, int columns) {
   double **data = (double **)malloc(rows * sizeof(double *));
   if (!data) {
-    QMessageBox::critical(0, tr("MantidPlot") + " - " +
-                                 tr("Memory Allocation Error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
+                                       tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
-    return NULL;
+    return nullptr;
   }
 
   for (int i = 0; i < rows; ++i) {
@@ -1088,10 +1094,10 @@ double **Matrix::allocateMatrixData(int rows, int columns) {
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(0, tr("MantidPlot") + " - " +
-                                   tr("Memory Allocation Error"),
+      QMessageBox::critical(nullptr, tr("MantidPlot") + " - " +
+                                         tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
-      return NULL;
+      return nullptr;
     }
   }
   return data;

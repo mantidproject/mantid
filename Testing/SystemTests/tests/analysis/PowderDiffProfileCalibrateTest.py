@@ -8,6 +8,7 @@
 # for powder diffractometers.
 #
 ########################################################################
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 import mantid.simpleapi as api
 from mantid.simpleapi import *
@@ -85,7 +86,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
         ws = mtd[bkgdtablewsname]
         ws.addColumn("str", "Name")
         ws.addColumn("double", "Value")
-        for i in xrange(len(paramnames)):
+        for i in range(len(paramnames)):
             ws.addRow([paramnames[i], paramvalues[i]])
 
         # Examine profile

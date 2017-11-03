@@ -12,11 +12,13 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/CompositeCluster.cpp
 	src/ConnectedComponentLabeling.cpp
+	src/CountReflections.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/DisjointElement.cpp
 	src/FilterPeaks.cpp
 	src/FindClusterFaces.cpp
 	src/FindSXPeaks.cpp
+	src/FindSXPeaksHelper.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
@@ -43,6 +45,7 @@ set ( SRC_FILES
 	src/PeakHKLErrors.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
+	src/PeakStatisticsTools.cpp
 	src/PeaksInRegion.cpp
 	src/PeaksIntersection.cpp
 	src/PeaksOnSurface.cpp
@@ -84,11 +87,13 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/CompositeCluster.h
 	inc/MantidCrystal/ConnectedComponentLabeling.h
+	inc/MantidCrystal/CountReflections.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/DisjointElement.h
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindClusterFaces.h
 	inc/MantidCrystal/FindSXPeaks.h
+	inc/MantidCrystal/FindSXPeaksHelper.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
@@ -117,6 +122,7 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakHKLErrors.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
+	inc/MantidCrystal/PeakStatisticsTools.h
 	inc/MantidCrystal/PeaksInRegion.h
 	inc/MantidCrystal/PeaksIntersection.h
 	inc/MantidCrystal/PeaksOnSurface.h
@@ -160,6 +166,7 @@ set ( TEST_FILES
 	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindClusterFacesTest.h
+	FindSXPeaksHelperTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h
@@ -186,6 +193,7 @@ set ( TEST_FILES
 	PeakHKLErrorsTest.h
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
+	PeakStatisticsToolsTest.h
 	PeaksInRegionTest.h
 	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h

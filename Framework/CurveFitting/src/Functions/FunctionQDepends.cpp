@@ -9,6 +9,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitConversion.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidGeometry/IDetector.h"
 // third party libraries
 // N/A
 // standard library
@@ -139,7 +140,8 @@ std::vector<double> FunctionQDepends::extractQValues(
         const auto detID = spectrumInfo.detector(wi).getID();
         double efixed = workspace.getEFixed(detID);
         double usignTheta = 0.5 * spectrumInfo.twoTheta(wi);
-        double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+        double q = Mantid::Kernel::UnitConversion::convertToElasticQ(usignTheta,
+                                                                     efixed);
         qs.push_back(q);
       } else {
         g_log.debug("Cannot populate Q values from workspace");

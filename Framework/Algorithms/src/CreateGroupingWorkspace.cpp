@@ -1,17 +1,18 @@
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <queue>
 #include <fstream>
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
+#include <queue>
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");

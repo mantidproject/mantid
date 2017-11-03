@@ -111,7 +111,7 @@ void SaveAscii::exec() {
   std::string sep;
   // If the custom separator property is not empty, then we use that under any
   // circumstance.
-  if (custom != "") {
+  if (!custom.empty()) {
     sep = custom;
   }
   // Else if the separator drop down choice is not UserDefined then we use that.
@@ -197,7 +197,7 @@ void SaveAscii::exec() {
   if (prec != EMPTY_INT())
     file.precision(prec);
 
-  Progress progress(this, 0, 1, nBins);
+  Progress progress(this, 0.0, 1.0, nBins);
   auto pointDeltas = ws->pointStandardDeviations(0);
   auto points = ws->points(0);
   for (int bin = 0; bin < nBins; bin++) {

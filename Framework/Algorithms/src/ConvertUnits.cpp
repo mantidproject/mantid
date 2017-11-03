@@ -286,10 +286,10 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
     for (int64_t i = 0; i < static_cast<int64_t>(m_numberOfSpectra); ++i) {
       PARALLEL_START_INTERUPT_REGION
       // Take the bin width dependency out of the Y & E data
-      auto &X = outputWS->x(i);
+      const auto &X = outputWS->x(i);
       auto &Y = outputWS->mutableY(i);
       auto &E = outputWS->mutableE(i);
-      for (size_t j = 0; j < outputWS->blocksize(); ++j) {
+      for (size_t j = 0; j < Y.size(); ++j) {
         const double width = std::abs(X[j + 1] - X[j]);
         Y[j] *= width;
         E[j] *= width;
@@ -337,7 +337,7 @@ ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
   // First a quick check using the validator
   CommonBinsValidator sameBins;
   bool commonBoundaries = false;
-  if (sameBins.isValid(inputWS) == "") {
+  if (sameBins.isValid(inputWS).empty()) {
     commonBoundaries = WorkspaceHelpers::commonBoundaries(*inputWS);
     // Only do the full check if the quick one passes
     if (commonBoundaries) {
@@ -459,9 +459,6 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   int64_t numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
-
-  // Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = inputWS->getInstrument();
 
   Kernel::Unit_const_sptr outputUnit = m_outputUnit;
 

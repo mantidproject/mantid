@@ -30,7 +30,7 @@
 #define MdiSubWindow_H
 
 #include "MantidKernel/RegistrationHelper.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "WindowFactory.h"
 #include <QDockWidget>
 #include <QFrame>
@@ -50,14 +50,14 @@ class Folder;
 class MdiSubWindowParent_t : public QFrame {
   Q_OBJECT
 public:
-  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = 0)
-      : QFrame(parent, f), m_widget(NULL) {}
+  MdiSubWindowParent_t(QWidget *parent, Qt::WFlags f = nullptr)
+      : QFrame(parent, f), m_widget(nullptr) {}
   void setWidget(QWidget *w) {
-    if (w == NULL) { // removing widget
+    if (w == nullptr) { // removing widget
       if (m_widget) {
         layout()->takeAt(0);
       }
-      m_widget = NULL;
+      m_widget = nullptr;
       return;
     }
 
@@ -67,7 +67,7 @@ public:
     }
 
     // setting the internal widget
-    if (this->layout() == NULL) {
+    if (this->layout() == nullptr) {
       QVBoxLayout *layout = new QVBoxLayout(this);
       layout->setContentsMargins(0, 0, 0, 0);
       layout->addWidget(w);
@@ -125,7 +125,7 @@ public:
    * \sa setCaptionPolicy(), captionPolicy()
    */
   MdiSubWindow(QWidget *parent, const QString &label = QString(),
-               const QString &name = QString(), Qt::WFlags f = 0);
+               const QString &name = QString(), Qt::WFlags f = nullptr);
 
   MdiSubWindow();
 

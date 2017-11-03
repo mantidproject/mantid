@@ -15,7 +15,7 @@ if the slice is to be taken from a sample or a can workspace can be specified. N
 
 
 Relevant SANSState entries for SANSSlice
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The required information for the slice operation is retrieved from a state object.
 
@@ -31,10 +31,10 @@ The elements of the slice state are:
 +-------------+---------------+-------------------------------------------------------+------------+---------------+
 
 
-Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.
+**Note that these settings should be only populated via the GUI or the Python Interface of ISIS SANS.**
 
 Slice options for the data type: *Sample*, *Can*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The *Sample* setting performs regular slicing
 

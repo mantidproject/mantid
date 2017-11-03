@@ -83,4 +83,5 @@ class BinWidthAtX(PythonAlgorithm):
         binWidth = roundinghelper.round(binWidth, roundingMode)
         self.setProperty(self._PROP_BIN_WIDTH, numpy.abs(binWidth))
 
+
 AlgorithmFactory.subscribe(BinWidthAtX)

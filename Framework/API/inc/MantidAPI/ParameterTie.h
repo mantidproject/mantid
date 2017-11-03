@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterReference.h"
+#include <map>
 
 namespace mu {
 class Parser;

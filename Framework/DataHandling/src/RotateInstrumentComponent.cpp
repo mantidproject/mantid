@@ -2,7 +2,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -115,10 +115,13 @@ void RotateInstrumentComponent::exec() {
     // Note the unusual order. This is as in Component::getRotation().
     rotation = comp->getRotation() * rotation;
 
+  const auto componentId = comp->getComponentID();
   if (inputW) {
-    inputW->mutableDetectorInfo().setRotation(*comp, rotation);
+    auto &componentInfo = inputW->mutableComponentInfo();
+    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
   } else if (inputP) {
-    inputP->mutableDetectorInfo().setRotation(*comp, rotation);
+    auto &componentInfo = inputP->mutableComponentInfo();
+    componentInfo.setRotation(componentInfo.indexOf(componentId), rotation);
   }
 }
 

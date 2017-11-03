@@ -23,21 +23,23 @@ public:
     instrument.reset(new Instrument);
     ObjComponent *source = new ObjComponent("source");
     source->setPos(0.0, 0.0, -10.0);
+    instrument->add(source);
     instrument->markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
+    instrument->add(sample);
     instrument->markAsSamplePos(sample);
-    det = boost::make_shared<Detector>("det1", 1, nullptr);
+    det = new Detector("det1", 1, nullptr);
     det->setPos(1.0, 0.0, 0.0);
-    instrument->markAsDetector(det.get());
-    det2 = boost::make_shared<Detector>("det2", 10, nullptr);
-    instrument->markAsDetector(det2.get());
-    det3 = boost::make_shared<Detector>("det3", 11, nullptr);
-    instrument->markAsDetector(det3.get());
-    instrument->markAsMonitor(det3.get());
+    instrument->add(det);
+    instrument->markAsDetector(det);
+    det2 = new Detector("det2", 10, nullptr);
+    instrument->add(det2);
+    instrument->markAsDetector(det2);
+    det3 = new Detector("det3", 11, nullptr);
+    instrument->add(det3);
+    instrument->markAsMonitor(det3);
 
     pmap.reset(new ParameterMap);
-    delete source;
-    delete sample;
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers() {
@@ -66,8 +68,8 @@ public:
     TS_ASSERT_EQUALS(pinstrument.getDetector(1)->getID(), det->getID());
     TS_ASSERT_THROWS(pinstrument.getDetector(2), Exception::NotFoundError);
 
-    TS_ASSERT(NULL == pinstrument.getBaseDetector(0));
-    Detector *d = new Detector("det", 2, 0);
+    TS_ASSERT(nullptr == pinstrument.getBaseDetector(0));
+    Detector *d = new Detector("det", 2, nullptr);
     TS_ASSERT_THROWS_NOTHING(instrument->markAsDetector(d));
     TS_ASSERT_EQUALS(pinstrument.getDetector(2)->getID(), d->getID());
 
@@ -99,7 +101,9 @@ public:
 private:
   boost::shared_ptr<Instrument> instrument;
   Mantid::Geometry::ParameterMap_sptr pmap;
-  boost::shared_ptr<Detector> det, det2, det3;
+  Detector *det;
+  Detector *det2;
+  Detector *det3;
 };
 
 #endif /*INSTRUMENTTEST_H_*/

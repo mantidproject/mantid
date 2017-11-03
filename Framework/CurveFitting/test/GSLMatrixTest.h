@@ -57,6 +57,18 @@ public:
     TS_ASSERT_EQUALS(mult2.m_2.gsl(), m2.gsl());
   }
 
+  void test_create_from_initializer_list() {
+    GSLMatrix m({{1.0, 2.0}, {11.0, 12.0}, {21.0, 22.0}});
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 2);
+    TS_ASSERT_EQUALS(m(0, 0), 1.);
+    TS_ASSERT_EQUALS(m(0, 1), 2.);
+    TS_ASSERT_EQUALS(m(1, 0), 11.);
+    TS_ASSERT_EQUALS(m(1, 1), 12.);
+    TS_ASSERT_EQUALS(m(2, 0), 21.);
+    TS_ASSERT_EQUALS(m(2, 1), 22.);
+  }
+
   void test_multiply_two_matrices() {
     GSLMatrix m1(2, 2);
     m1.set(0, 0, 1);
@@ -349,6 +361,64 @@ public:
     TS_ASSERT_EQUALS(m(2, 0), 20.0);
     TS_ASSERT_EQUALS(m(2, 1), 21.0);
     TS_ASSERT_EQUALS(m(2, 2), 22.0);
+  }
+
+  void test_initializer_list() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    TS_ASSERT_EQUALS(m.size1(), 3);
+    TS_ASSERT_EQUALS(m.size2(), 2);
+    TS_ASSERT_EQUALS(m(0, 0), 1.0);
+    TS_ASSERT_EQUALS(m(1, 0), 4.0);
+    TS_ASSERT_EQUALS(m(2, 0), -1.0);
+    TS_ASSERT_EQUALS(m(0, 1), 2.0);
+    TS_ASSERT_EQUALS(m(1, 1), 2.0);
+    TS_ASSERT_EQUALS(m(2, 1), -3.0);
+
+    TS_ASSERT_THROWS(GSLMatrix({{1.0, 2.0}, {4.0, 2.0, 0.0}, {-1.0, -3.0}}),
+                     std::runtime_error);
+  }
+
+  void test_vector_mul() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}, {-1.0, -3.0}});
+    GSLVector b({5.0, 2.0});
+    GSLVector x = m * b;
+    TS_ASSERT_EQUALS(x.size(), 3);
+    TS_ASSERT_EQUALS(x[0], 9.0);
+    TS_ASSERT_EQUALS(x[1], 24.0);
+    TS_ASSERT_EQUALS(x[2], -11.0);
+  }
+
+  void test_solve_singular() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{0.0, 0.0}, {0.0, 0.0}});
+    GSLVector b({1.0, 2.0});
+    GSLVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+  }
+
+  void test_solve_singular_1() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {2.0, 4.0}});
+    GSLVector b({1.0, 2.0});
+    GSLVector x;
+    TS_ASSERT_THROWS(m.solve(b, x), std::runtime_error);
+  }
+
+  void test_solve() {
+    gsl_set_error_handler_off();
+    GSLMatrix m({{1.0, 2.0}, {4.0, 2.0}});
+    GSLVector b({5.0, 2.0});
+    GSLVector x;
+    GSLMatrix mm = m;
+    mm.solve(b, x);
+    TS_ASSERT_EQUALS(x.size(), 2);
+    TS_ASSERT_EQUALS(x[0], -1.0);
+    TS_ASSERT_EQUALS(x[1], 3.0);
+    GSLVector bb = m * x;
+    TS_ASSERT_EQUALS(bb[0], 5.0);
+    TS_ASSERT_EQUALS(bb[1], 2.0);
   }
 };
 

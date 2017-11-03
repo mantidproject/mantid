@@ -72,6 +72,8 @@ class PredictPeaksTestTOPAZ(stresstesting.MantidStressTest):
 
 
 class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
+    expected_num_peaks = 546
+
     def runTest(self):
         simulationWorkspace = CreateSimulationWorkspace(Instrument='WISH',
                                                         BinParams='0,1,2',
@@ -89,9 +91,9 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                              MinDSpacing=0.5, MaxDSpacing=10,
                              CalculateStructureFactors=True)
 
-        self.assertEquals(peaks.getNumberPeaks(), 540)
+        self.assertEquals(peaks.getNumberPeaks(), self.expected_num_peaks)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks.getPeak(i)
             self.assertLessThan(0.0, peak.getIntensity())
 
@@ -100,6 +102,6 @@ class PredictPeaksCalculateStructureFactorsTest(stresstesting.MantidStressTest):
                                    MinDSpacing=0.5, MaxDSpacing=10,
                                    CalculateStructureFactors=False)
 
-        for i in range(540):
+        for i in range(self.expected_num_peaks):
             peak = peaks_no_sf.getPeak(i)
             self.assertEquals(0.0, peak.getIntensity())

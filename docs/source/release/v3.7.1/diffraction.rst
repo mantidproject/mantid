@@ -29,9 +29,10 @@ Powder Diffraction Scripts
 - PowderISIS script has been renamed to CryPowderISIS and can be found within
   the following folder `scripts/CryPowderISIS`
 
-- :ref:`pearl-powder-diffraction-ref` documentation has been implemented and
+- `Pearl Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/PearlPowderDiffractionISIS-v1.html>`_ 
+  documentation has been implemented and
   PowderISIS script documentation has been renamed to
-  :ref:`cry-powder-diffraction-ref`
+  `Crystallography Powder Diffraction Script <http://docs.mantidproject.org/v3.7.1/api/python/techniques/CryPowderDiffractionISIS-v1.html>`_
 
 Single Crystal Improvements
 ---------------------------
@@ -123,10 +124,13 @@ Graphical user interface
 Imaging
 -------
 
-- The new algorithm :ref:`ImggAggregateWavelengths <algm-ImggAggregateWavelengths>`
+- The new algorithm `ImggAggregateWavelengths 
+  <http://docs.mantidproject.org/v3.7.1/algorithms/ImggAggregateWavelengths-v1.html>`_
   aggregates stacks of images from wavelength dependent data.
 
-- The algorithm `ImggTomographicReconstruction <algm-ImggTomographicReconstruction>` has been introduced. This is a
+- The algorithm `ImggTomographicReconstruction 
+  <http://docs.mantidproject.org/v3.7.1/algorithms/ImggTomographicReconstruction-v1.html>`_ 
+  has been introduced. This is a
   first experimental version that implements the Filtered
   Back-Projection (FBP) reconstruction method using the FBP
   implementation of the `TomoPy package
@@ -156,9 +160,8 @@ Improvements in the tomographic reconstruction graphical user interface
 
 - The energy bands tab can now produce multiple output bands in one
   pass, and supports different aggregation methods via the new
-  algorithm :ref:`ImggAggregateWavelengths
-  <algm-ImggAggregateWavelengths>`.
-
+  algorithm `ImggAggregateWavelengths 
+  <http://docs.mantidproject.org/v3.7.1/algorithms/ImggAggregateWavelengths-v1.html>`_.
 
 
 Full list of `diffraction <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.7%22+is%3Amerged+label%3A%22Component%3A+Diffraction%22>`_

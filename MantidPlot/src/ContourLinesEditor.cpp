@@ -26,7 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 #include "ContourLinesEditor.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include "Spectrogram.h"
 #include "PenStyleBox.h"
 #include "ColorButton.h"
@@ -47,11 +47,12 @@
 
 ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
                                        QWidget *parent)
-    : QWidget(parent), table(NULL), insertBtn(NULL), deleteBtn(NULL),
-      d_spectrogram(NULL), d_locale(locale), d_precision(precision),
-      penDialog(NULL), penColorBox(NULL), penStyleBox(NULL), penWidthBox(NULL),
-      applyAllColorBox(NULL), applyAllWidthBox(NULL), applyAllStyleBox(NULL),
-      d_pen_index(0), d_pen_list() {
+    : QWidget(parent), table(nullptr), insertBtn(nullptr), deleteBtn(nullptr),
+      d_spectrogram(nullptr), d_locale(locale), d_precision(precision),
+      penDialog(nullptr), penColorBox(nullptr), penStyleBox(nullptr),
+      penWidthBox(nullptr), applyAllColorBox(nullptr),
+      applyAllWidthBox(nullptr), applyAllStyleBox(nullptr), d_pen_index(0),
+      d_pen_list() {
   table = new QTableWidget();
   table->setColumnCount(2);
   table->hideColumn(1);
@@ -88,7 +89,7 @@ ContourLinesEditor::ContourLinesEditor(const QLocale &locale, int precision,
   setFocusProxy(table);
   setMaximumWidth(200);
 
-  penDialog = NULL;
+  penDialog = nullptr;
 }
 
 void ContourLinesEditor::updateContourLevels() {

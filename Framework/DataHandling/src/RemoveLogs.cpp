@@ -29,7 +29,6 @@ DECLARE_ALGORITHM(RemoveLogs)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 /// Empty default constructor
@@ -62,6 +61,7 @@ void RemoveLogs::exec() {
       localWorkspace->run().getLogData();
   std::vector<std::string> keepLogs = getProperty("KeepLogs");
   std::vector<std::string> logNames;
+  logNames.reserve(logData.size());
   for (const auto property : logData) {
     logNames.push_back(property->name());
   }
