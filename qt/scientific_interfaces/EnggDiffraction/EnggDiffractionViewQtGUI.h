@@ -123,8 +123,6 @@ public:
 
   void enableTabs(bool enable) override;
 
-  void highlightRbNumber(bool isValid) override;
-
   void enableCalibrateFocusFitUserActions(bool enable) override;
 
   std::string focusingDir() const override;
@@ -166,6 +164,8 @@ public:
   void plotCalibOutput(const std::string &pyCode) override;
 
   bool saveFocusedOutputFiles() const override;
+
+  void showInvalidRBNumber(const bool rbNumberIsValid) override;
 
   int currentPlotType() const override { return g_currentType; }
 

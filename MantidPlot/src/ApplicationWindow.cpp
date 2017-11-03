@@ -7546,7 +7546,7 @@ void ApplicationWindow::zoomIn() {
   QList<Graph *> layers = plot->layersList();
   foreach (Graph *g, layers) {
     if (!g->isPiePlot())
-      g->zoom(true);
+      g->zoomMode(true);
   }
 }
 
