@@ -47,6 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Raw"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -93,6 +94,24 @@ public:
     TS_ASSERT_EQUALS(sim->value(), "2017-May-15 14:36:18  5.44174e+06\n")
     TS_ASSERT_EQUALS(spy->value(), "2017-May-15 14:36:18  240\n")
     TS_ASSERT_EQUALS(sample->value(), "2017-May-15 14:36:18  4.9681\n")
+  }
+
+  void test_D20_no_scan_requesting_calibrated_throws() {
+    // Tests the no-scan case for D20
+    // Temperature ramp is not a motor scan so produces a file per T
+
+    LoadILLDiffraction alg;
+    // Don't put output in ADS by default
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e,
+                            std::string(e.what()),
+                            "Some invalid Properties found")
   }
 
   void test_D20_scan() {
@@ -183,9 +202,8 @@ public:
     TS_ASSERT(!outputWS->isDistribution())
   }
 
-  void test_D2B_single_file() {
+  void do_test_D2B_single_file(std::string dataType) {
     // Test a D2B detector scan file with 25 detector positions
-    // TODO: assert on values!
 
     const int NUMBER_OF_TUBES = 128;
     const int NUMBER_OF_PIXELS = 128;
@@ -197,6 +215,7 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "508093.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_outWS"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", dataType))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
 
@@ -280,7 +299,20 @@ public:
     }
 
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
+
+    if (dataType == "Raw")
+      TS_ASSERT_DELTA(outputWS->y(25)[0], 0, 1e-12)
+    else
+      TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
   }
+
+  void test_D2B_single_file() { do_test_D2B_single_file(""); }
+
+  void test_D2B_single_file_calibrated() {
+    do_test_D2B_single_file("Calibrated");
+  }
+
+  void test_D2B_single_file_raw() { do_test_D2B_single_file("Raw"); }
 
 private:
   const double RAD_2_DEG = 180.0 / M_PI;

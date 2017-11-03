@@ -94,10 +94,12 @@ void LoadILLDiffraction::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  std::vector<std::string> calibrationOptions{"Raw", "Calibrated"};
+  std::vector<std::string> calibrationOptions{"", "Raw", "Calibrated"};
   declareProperty("DataType", "Raw",
                   boost::make_shared<StringListValidator>(calibrationOptions),
-                  "Type of data, with or without calibration already applied.");
+                  "Select the type of data, with or without calibration "
+                  "already applied. If blank then the calibrated data is "
+                  "loaded if available, otherwise the raw data is loaded.");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -117,7 +119,7 @@ void LoadILLDiffraction::exec() {
 
   Progress progress(this, 0, 1, 3);
 
-  m_fileName = getPropertyValue("Filename");
+  m_filename = getPropertyValue("Filename");
 
   progress.report("Loading the scanned variables");
   loadScanVars();
@@ -137,7 +139,7 @@ void LoadILLDiffraction::exec() {
 void LoadILLDiffraction::loadDataScan() {
 
   // open the root entry
-  NXRoot dataRoot(m_fileName);
+  NXRoot dataRoot(m_filename);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
   m_instName = firstEntry.getString("instrument/name");
@@ -148,11 +150,12 @@ void LoadILLDiffraction::loadDataScan() {
   // read the detector data
 
   std::string dataName;
-  if (getPropertyValue("DataType") == "Calibrated" ||
-      !containsCalibratedData(m_fileName))
-    dataName = "data_scan/detector_data/data";
-  else
+  if (getPropertyValue("DataType") == "Raw" &&
+      containsCalibratedData(m_filename))
     dataName = "data_scan/detector_data/raw_data";
+  else
+    dataName = "data_scan/detector_data/data";
+  g_log.notice() << "Loading data from " + dataName;
   NXUInt data = firstEntry.openNXDataSet<unsigned int>(dataName);
   data.load();
 
@@ -217,7 +220,7 @@ void LoadILLDiffraction::loadMetaData() {
 
   // Open NeXus file
   NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
+  NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
     m_loadHelper.addNexusFieldsToWsRun(nxHandle, m_outWorkspace->mutableRun());
@@ -442,7 +445,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
  */
 void LoadILLDiffraction::loadScanVars() {
 
-  H5File h5file(m_fileName, H5F_ACC_RDONLY);
+  H5File h5file(m_filename, H5F_ACC_RDONLY);
 
   Group entry0 = h5file.openGroup("entry0");
   Group dataScan = entry0.openGroup("data_scan");
