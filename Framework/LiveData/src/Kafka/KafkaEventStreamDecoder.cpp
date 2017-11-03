@@ -347,9 +347,9 @@ KafkaEventStreamDecoder::getStopOffsets(
     uint64_t stopTime, bool &checkOffsets) const {
   // Wait for max latency so that we don't miss any late messages
   std::this_thread::sleep_for(MAX_LATENCY);
-  stopOffsets = m_eventStream->getOffsetsForTimestamp(static_cast<int64_t>(
-      (stopTime / 1000000) +
-      1)); // Convert nanoseconds to milliseconds and round up
+  stopOffsets = m_eventStream->getOffsetsForTimestamp(
+      static_cast<int64_t>(stopTime / 1000000));
+  // Convert nanosecond precision from message to millisecond precision which Kafka offset query supports
 
   // Set reachedEnd to false for each topic and partition
   for (auto keyValue : stopOffsets) {
@@ -543,7 +543,7 @@ void KafkaEventStreamDecoder::initLocalCaches() {
   auto runStartData = getRunStartMessage(rawMsgBuffer);
   // Load the instrument if possible but continue if we can't
   auto instName = runStartData.instrumentName;
-  if (instName.size() > 0)
+  if (!instName.empty())
     loadInstrument(instName, eventBuffer);
   else
     g_log.warning(
