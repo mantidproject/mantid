@@ -454,6 +454,7 @@ Supported Algorithms
 ================= =============== ========
 Algorithm         Supported modes Comments
 ================= =============== ========
+CompressEvents    all
 CreateWorkspace   all
 FilterBadPulses   all
 FilterByLogValue  all
@@ -464,6 +465,7 @@ LoadParameterFile all             segfaults when used in unit tests with MPI thr
 MaskBins          all
 Rebin             all             min and max bin boundaries must be given explicitly
 RemovePromptPulse all
+SortEvents        all
 ================= =============== ========
 
 .. rubric:: Footnotes
