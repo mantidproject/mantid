@@ -306,7 +306,7 @@ public:
       TS_ASSERT_DELTA(outputWS->y(25)[0], 1, 1e-12)
   }
 
-  void test_D2B_single_file() { do_test_D2B_single_file(""); }
+  void test_D2B_single_file() { do_test_D2B_single_file("Auto"); }
 
   void test_D2B_single_file_calibrated() {
     do_test_D2B_single_file("Calibrated");

@@ -94,8 +94,8 @@ void LoadILLDiffraction::init() {
   declareProperty(make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "The output workspace.");
-  std::vector<std::string> calibrationOptions{"", "Raw", "Calibrated"};
-  declareProperty("DataType", "Raw",
+  std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
+  declareProperty("DataType", "Auto",
                   boost::make_shared<StringListValidator>(calibrationOptions),
                   "Select the type of data, with or without calibration "
                   "already applied. If blank then the calibrated data is "
