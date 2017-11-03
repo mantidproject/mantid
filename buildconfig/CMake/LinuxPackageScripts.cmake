@@ -23,7 +23,8 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/Mantid CACHE PATH "Install path" FORCE )
 endif()
 
-set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
+# We are only generating Qt4 packages at the moment
+set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qt4 )
 
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7

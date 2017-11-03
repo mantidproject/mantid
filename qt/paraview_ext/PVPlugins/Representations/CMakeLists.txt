@@ -8,4 +8,4 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewRepresentationSMPlugin "1.0"
     AlignedCutter.cxx)
 set_pvplugin_properties (MantidParaViewRepresentationSMPlugin QT_VERSION 4)
 
-install( TARGETS MantidParaViewRepresentationSMPlugin ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
+install_pvplugin (MantidParaViewRepresentationSMPlugin QT_VERSION 4)

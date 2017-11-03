@@ -72,11 +72,13 @@ endfunction()
 #          target. It is assumed each was produced with this function and
 #          will have the -Qt{QT_VERSION} suffix appended.
 # keyword: INSTALL_DIR A destination directory for the install command.
+# keyword: INSTALL_DIR_BASE Base directory the build output. The final product goes into a subdirectory based on the Qt version.
 # keyword: OSX_INSTALL_RPATH Install path for osx version > 10.8
 function (mtd_add_qt_target)
   set (options LIBRARY EXECUTABLE NO_SUFFIX EXCLUDE_FROM_ALL)
   set (oneValueArgs
-    TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR INSTALL_DIR PRECOMPILED)
+    TARGET_NAME QT_VERSION OUTPUT_DIR_BASE OUTPUT_SUBDIR
+    INSTALL_DIR INSTALL_DIR_BASE PRECOMPILED)
   set (multiValueArgs SRC QT4_SRC QT5_SRC UI MOC
     NOMOC RES DEFS INCLUDE_DIRS SYSTEM_INCLUDE_DIRS LINK_LIBS
     QT4_LINK_LIBS QT5_LINK_LIBS MTD_QT_LINK_LIBS OSX_INSTALL_RPATH)
@@ -173,10 +175,17 @@ function (mtd_add_qt_target)
   if ( PARSED_EXCLUDE_FROM_ALL )
     set_target_properties ( ${_target} PROPERTIES EXCLUDE_FROM_ALL TRUE )
   else ()
+    if (PARSED_INSTALL_DIR AND PARSED_INSTALL_DIR_BASE)
+      message ( FATAL "Cannot provide both INSTALL_DIR and PARSED_INSTALL_DIR_BASE options" )
+    endif()
+
     if (PARSED_INSTALL_DIR)
-        set ( _install_dir ${PARSED_INSTALL_DIR} )
+      set ( _install_dir ${PARSED_INSTALL_DIR} )
+    elseif (PARSED_INSTALL_DIR_BASE)
+      _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE _install_dir
+                         ${PARSED_INSTALL_DIR_BASE})
     else()
-        set ( _install_dir ${LIB_DIR} )
+      set ( _install_dir ${LIB_DIR} )
     endif()
     install ( TARGETS ${_target} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_install_dir} )
   endif()
@@ -291,10 +300,11 @@ function (_append_qt_suffix)
   cmake_parse_arguments (PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN})
 
- set (_target_suffix "Qt${PARSED_VERSION}")
   if(PARSED_AS_DIR)
+    set (_target_suffix "qt${PARSED_VERSION}")
     set (_sep "/")
   else()
+    set (_target_suffix "Qt${PARSED_VERSION}")
     set (_sep "")
   endif()
   set (_out)

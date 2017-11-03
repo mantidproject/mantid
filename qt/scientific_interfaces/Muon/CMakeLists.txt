@@ -106,8 +106,8 @@ mtd_add_qt_library (TARGET_NAME MantidScientificInterfacesMuon
     MantidScientificInterfacesMultiDatasetFit
   OUTPUT_DIR_BASE
     ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
-  INSTALL_DIR
-    ${PLUGINS_DIR}/qtplugins/mantid
+  INSTALL_DIR_BASE
+    ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../../../Contents/MacOS
     @loader_path/../../../plugins/qtplugins/mantid

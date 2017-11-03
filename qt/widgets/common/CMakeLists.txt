@@ -393,10 +393,10 @@ set ( UI_FILES
 # were moved to a separate library. They cause build problems if they're not
 # deleted
 set ( OLD_UI_HEADERS
-  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_ColorBarWidget.h
-  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_DisplayCurveFit.h
-  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_MWView.h
-  ${CMAKE_CURRENT_BINARY_DIR}/Qt4/ui_PreviewPlot.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_ColorBarWidget.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_DisplayCurveFit.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_MWView.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qt4/ui_PreviewPlot.h
 )
 foreach (_header ${OLD_UI_HEADERS})
   file (REMOVE ${_header})
