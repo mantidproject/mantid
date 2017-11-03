@@ -6,7 +6,6 @@ set ( SRC_FILES
 	StepScan.cpp
 	UserInputValidator.cpp
 	background.cpp
-	deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -21,10 +20,9 @@ set ( INC_FILES
 	StepScan.h
 	Updateable.h
 	UserInputValidator.h
-	deltaECalc.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     Background.h
     DataComparison.h
     MantidEV.h
@@ -32,7 +30,7 @@ set ( MOC_FILES
     StepScan.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     DataComparison.ui
     MantidEV.ui
     SampleTransmission.ui
