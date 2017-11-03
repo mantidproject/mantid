@@ -69,7 +69,6 @@ the same name as the output GSAS-II project file but with extension
 ".lst". This is noted in a log message that specifies where the file
 has been written (next to the output project file).
 
-
 *References*:
 
 .. [LeBail2005] Le Bail, A (2005). "Whole Powder Pattern Decomposition Methods and

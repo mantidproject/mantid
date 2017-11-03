@@ -337,7 +337,12 @@ void CompositePeaksPresenter::setShown(
     return m_default->setShown(shown);
   }
   auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
-  (*iterator)->setShown(shown);
+  if (iterator == m_subjects.end())
+    return;
+
+  auto presenter = *iterator;
+  if (presenter)
+    presenter->setShown(shown);
 }
 
 /**

@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QMdiSubWindow>
-#include <QtGui>
 #include <QList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"

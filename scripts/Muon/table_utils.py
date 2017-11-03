@@ -49,7 +49,11 @@ def addSpinBoxToTable(table,default,row):
     return box
 
 
+# This is a work around a Windows 10
+# bug that stops tables having underlines for
+# the headers.
 def setTableHeaders(table):
+        # is it not windows
         if os.name != "nt":
             return
         version=QtCore.QSysInfo.WindowsVersion

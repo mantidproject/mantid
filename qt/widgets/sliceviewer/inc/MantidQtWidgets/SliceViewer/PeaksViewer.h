@@ -1,7 +1,7 @@
 #ifndef PEAKSVIEWER_H
 #define PEAKSVIEWER_H
 
-#include <QtGui/QWidget>
+#include <QWidget>
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"

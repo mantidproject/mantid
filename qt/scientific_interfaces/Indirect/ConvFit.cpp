@@ -5,7 +5,6 @@
 #include "MantidQtWidgets/Common/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
@@ -30,16 +29,16 @@ namespace IDA {
 
 ConvFit::ConvFit(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_stringManager(nullptr),
-      m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(), m_runMin(-1),
-      m_runMax(-1) {
+      m_cfTree(nullptr), m_fixedProps(), m_confitResFileType(),
+      m_fitFunctions(), m_parameterValues(), m_propertyToParameter() {
   m_uiForm.setupUi(parent);
 }
 
 void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
-  m_runMin = 0;
-  m_runMax = 0;
+  setMinimumSpectrum(0);
+  setMaximumSpectrum(0);
 
   // Initialise fitTypeStrings
   m_fitStrings = {"", "1L", "2L", "IDS", "IDC", "EDS", "EDC", "SFT"};
@@ -56,10 +55,10 @@ void ConvFit::setup() {
   m_cfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   // Create Range Selectors
-  auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("ConvFitRange");
-  auto backRangeSelector = m_uiForm.ppPlot->addRangeSelector(
+  auto fitRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("ConvFitRange");
+  auto backRangeSelector = m_uiForm.ppPlotTop->addRangeSelector(
       "ConvFitBackRange", MantidWidgets::RangeSelector::YSINGLE);
-  auto hwhmRangeSelector = m_uiForm.ppPlot->addRangeSelector("ConvFitHWHM");
+  auto hwhmRangeSelector = m_uiForm.ppPlotTop->addRangeSelector("ConvFitHWHM");
   backRangeSelector->setColour(Qt::darkGreen);
   backRangeSelector->setRange(0.0, 1.0);
   hwhmRangeSelector->setColour(Qt::red);
@@ -175,11 +174,11 @@ void ConvFit::setup() {
 
   // Replot input automatically when file / spec no changes
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updatePlot()));
   connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
           SLOT(updateProperties(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this,
-          SLOT(IndirectDataAnalysisTab::setSelectedSpectrum(int)));
 
   connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(newDataLoaded(const QString &)));
@@ -294,8 +293,8 @@ void ConvFit::initFABADAOptions() {
  */
 void ConvFit::run() {
   // Get input from interface
-  m_runMin = m_uiForm.spSpectraMin->value();
-  m_runMax = m_uiForm.spSpectraMax->value();
+  setMinimumSpectrum(m_uiForm.spSpectraMin->value());
+  setMaximumSpectrum(m_uiForm.spSpectraMax->value());
   const auto specMin = m_uiForm.spSpectraMin->text().toStdString();
   const auto specMax = m_uiForm.spSpectraMax->text().toStdString();
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
@@ -482,7 +481,7 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
   updatePlot();
   updatePlotRange();
 
-  std::string paramWsName = outputPrefix + "_Parameters_new";
+  std::string paramWsName = outputPrefix + "_Parameters";
 
   if (AnalysisDataService::Instance().doesExist(paramWsName)) {
     QString prefixPrefix = "f1.f1.";
@@ -491,8 +490,8 @@ void ConvFit::algorithmComplete(bool error, const QString &outputWSName) {
     m_propertyToParameter = createPropertyToParameterMap(
         m_fitFunctions, prefixPrefix, prefixSuffix);
     m_parameterValues = IndirectTab::extractParametersFromTable(
-        paramWsName, m_propertyToParameter.values().toSet(), m_runMin,
-        m_runMax);
+        paramWsName, m_propertyToParameter.values().toSet(), minimumSpectrum(),
+        maximumSpectrum());
 
     updateProperties(m_uiForm.spPlotSpectrum->value());
   }
@@ -634,6 +633,11 @@ void ConvFit::newDataLoaded(const QString wsName) {
   auto inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
       wsName.toStdString());
   setInputWorkspace(inputWs);
+  setPreviewPlotWorkspace(inputWs);
+  m_baseName.clear();
+  m_parameterValues.clear();
+  m_propertyToParameter.clear();
+  m_fitFunctions.clear();
 
   const int maxWsIndex = static_cast<int>(inputWs->getNumberHistograms()) - 1;
 
@@ -769,7 +773,8 @@ std::string createParName(size_t index, size_t subIndex,
  *
  * @returns the composite fitting function.
  */
-CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
+CompositeFunction_sptr ConvFit::createFunction(bool tieCentres,
+                                               bool addQValues) {
   auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
       FunctionFactory::Instance().createFunction("Convolution"));
   CompositeFunction_sptr comp(new CompositeFunction);
@@ -864,6 +869,13 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
       functionName = "Lorentzian";
     }
     func = FunctionFactory::Instance().createFunction(functionName);
+    // If addQValues is true and the selected fit function is an inelastic
+    // diffusion function, add the Q-Values from the input workspace to the
+    // function.
+    if ((fitTypeIndex == 3 || fitTypeIndex == 4) && addQValues) {
+      func->setWorkspace(inputWorkspace());
+    }
+
     subIndex = product->addFunction(func);
     index = model->addFunction(product);
     prefix1 = createParName(index, subIndex);
@@ -1166,7 +1178,7 @@ QString ConvFit::minimizerString(QString outputName) const {
  */
 void ConvFit::typeSelection(int index) {
 
-  auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+  auto hwhmRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("ConvFitHWHM");
 
   if (index == 0) {
     hwhmRangeSelector->setVisible(false);
@@ -1174,13 +1186,10 @@ void ConvFit::typeSelection(int index) {
     hwhmRangeSelector->setVisible(true);
   } else {
     hwhmRangeSelector->setVisible(false);
-    m_uiForm.ckPlotGuess->setChecked(false);
     m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
   }
 
-  // Disable Plot Guess and Use Delta Function for DiffSphere and
-  // DiffRotDiscreteCircle
-  m_uiForm.ckPlotGuess->setEnabled(index < 3 || index == 7);
+  // Disable Use Delta Function for DiffSphere and DiffRotDiscreteCircle
   m_properties["UseDeltaFunc"]->setEnabled(index < 3 || index == 7);
 
   updatePlotOptions();
@@ -1202,84 +1211,20 @@ void ConvFit::bgTypeSelection(int index) {
  * Updates the plot in the GUI window
  */
 void ConvFit::updatePlot() {
-  using Mantid::Kernel::Exception::NotFoundError;
-
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    g_log.error("No workspace loaded, cannot create preview plot.");
-    return;
-  }
-
-  bool plotGuess = m_uiForm.ckPlotGuess->isChecked();
-  m_uiForm.ckPlotGuess->setChecked(plotGuess);
-
-  int specNo = m_uiForm.spPlotSpectrum->text().toInt();
-
-  m_uiForm.ppPlot->clear();
-  setPreviewPlotWorkspace(inputWs);
-  m_uiForm.ppPlot->addSpectrum("Sample", inputWs, specNo);
-
   // Default FWHM to resolution of instrument
   double resolution = getInstrumentResolution(inputWorkspace());
   if (resolution > 0) {
-    m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
     m_dblManager->setValue(m_properties["InstrumentResolution"], resolution);
   }
 
   // If there is a result workspace plot then plot it
   const auto baseGroupName = m_baseName.toStdString() + "_Workspaces";
-  const auto singleGroupName =
-      m_singleFitOutputName.toStdString() + "_Workspaces";
-
-  if (AnalysisDataService::Instance().doesExist(baseGroupName)) {
-    plotOutput(baseGroupName, specNo);
-  } else if (AnalysisDataService::Instance().doesExist(singleGroupName)) {
-    plotOutput(singleGroupName, specNo);
-  }
+  IndirectDataAnalysisTab::updatePlot(baseGroupName, m_uiForm.ppPlotTop,
+                                      m_uiForm.ppPlotBottom);
 }
 
 void ConvFit::updatePlotRange() {
-
-  try {
-    const QPair<double, double> curveRange =
-        m_uiForm.ppPlot->getCurveRange("Sample");
-    const std::pair<double, double> range(curveRange.first, curveRange.second);
-    m_uiForm.ppPlot->getRangeSelector("ConvFitRange")
-        ->setRange(range.first, range.second);
-    m_dblManager->setValue(m_properties["StartX"], range.first);
-    m_dblManager->setValue(m_properties["EndX"], range.second);
-  } catch (std::invalid_argument &exc) {
-    showMessageBox(exc.what());
-  }
-}
-
-/*
- * Plots the specified spectrum of the output group workspace witht the
- *specified name;
- * created from Convolution Fitting.
- *
- * @param outputWsName  The name of the output workspace whose data to plot.
- * @param specNo        The spectrum number to plot from the output workspace.
- */
-void ConvFit::plotOutput(std::string const &outputWsName, int specNo) {
-  WorkspaceGroup_sptr outputGroup =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName);
-  if (specNo - m_runMin >= static_cast<int>(outputGroup->size()))
-    return;
-  if ((specNo - m_runMin) >= 0) {
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        outputGroup->getItem(specNo - m_runMin));
-    if (ws) {
-      setPreviewPlotWorkspace(ws);
-      m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
-      m_uiForm.ppPlot->addSpectrum("Diff", ws, 2, Qt::blue);
-      if (m_uiForm.ckPlotGuess->isChecked()) {
-        m_uiForm.ppPlot->removeSpectrum("Guess");
-        m_uiForm.ckPlotGuess->setChecked(false);
-      }
-    }
-  }
+  IndirectDataAnalysisTab::updatePlotRange("ConvFitRange", m_uiForm.ppPlotTop);
 }
 
 void ConvFit::updateProperties(int specNo) {
@@ -1293,7 +1238,8 @@ void ConvFit::updateProperties(int specNo) {
 
 void ConvFit::updateProperties(int specNo, const QString &fitFunction) {
   bool isTwoLorentzian = fitFunction == "Lorentzian 2";
-  bool specOutOfBounds = specNo < m_runMin || m_runMax < specNo;
+  bool specOutOfBounds =
+      specNo < minimumSpectrum() || maximumSpectrum() < specNo;
 
   for (auto &param : getFunctionParameters(fitFunction)) {
     auto propertyName = fitFunction + "." + param;
@@ -1344,61 +1290,17 @@ QVector<QString> ConvFit::indexToFitFunctions(const int &fitTypeIndex) {
  * Updates the guess for the plot
  */
 void ConvFit::plotGuess() {
-  m_uiForm.ppPlot->removeSpectrum("Guess");
 
   // Do nothing if there is not a sample and resolution
-  if (!(m_uiForm.dsSampleInput->isValid() && m_uiForm.dsResInput->isValid() &&
-        m_uiForm.ckPlotGuess->isChecked()))
-    return;
-
-  if (m_uiForm.cbFitType->currentIndex() > 2 &&
-      m_uiForm.cbFitType->currentIndex() != 7) {
-    return;
+  if (m_uiForm.dsResInput->isValid() && m_uiForm.ckPlotGuess->isChecked()) {
+    extendResolutionWorkspace();
+    bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
+    IndirectDataAnalysisTab::plotGuess(m_uiForm.ppPlotTop,
+                                       createFunction(tieCentres, true));
+  } else {
+    m_uiForm.ppPlotTop->removeSpectrum("Guess");
+    m_uiForm.ckPlotGuess->setChecked(false);
   }
-
-  bool tieCentres = (m_uiForm.cbFitType->currentIndex() == 2);
-  CompositeFunction_sptr function = createFunction(tieCentres);
-  auto inputWs = inputWorkspace();
-
-  if (!inputWs) {
-    updatePlot();
-    return;
-  }
-
-  const size_t binIndexLow =
-      inputWs->binIndexOf(m_dblManager->value(m_properties["StartX"]));
-  const size_t binIndexHigh =
-      inputWs->binIndexOf(m_dblManager->value(m_properties["EndX"]));
-  const size_t nData = binIndexHigh - binIndexLow;
-
-  const auto &xPoints = inputWs->points(0);
-
-  std::vector<double> dataX(nData);
-  std::copy(&xPoints[binIndexLow], &xPoints[binIndexLow + nData],
-            dataX.begin());
-
-  FunctionDomain1DVector domain(dataX);
-  FunctionValues outputData(domain);
-  function->function(domain, outputData);
-
-  std::vector<double> dataY(nData);
-  for (size_t i = 0; i < nData; i++) {
-    dataY[i] = outputData.getCalculated(i);
-  }
-
-  IAlgorithm_sptr createWsAlg =
-      AlgorithmManager::Instance().create("CreateWorkspace");
-  createWsAlg->initialize();
-  createWsAlg->setChild(true);
-  createWsAlg->setLogging(false);
-  createWsAlg->setProperty("OutputWorkspace", "__GuessAnon");
-  createWsAlg->setProperty("NSpec", 1);
-  createWsAlg->setProperty("DataX", dataX);
-  createWsAlg->setProperty("DataY", dataY);
-  createWsAlg->execute();
-  MatrixWorkspace_sptr guessWs = createWsAlg->getProperty("OutputWorkspace");
-
-  m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
 }
 
 /**
@@ -1415,12 +1317,12 @@ void ConvFit::singleFit() {
   // ensure algorithm was successful
   m_uiForm.ckPlotGuess->setChecked(false);
   int specNo = m_uiForm.spPlotSpectrum->value();
-  m_runMin = specNo;
-  m_runMax = specNo;
+  setMinimumSpectrum(specNo);
+  setMaximumSpectrum(specNo);
   std::string specNoStr = m_uiForm.spPlotSpectrum->text().toStdString();
 
   m_fitFunctions = indexToFitFunctions(m_uiForm.cbFitType->currentIndex());
-  auto cfs = sequentialFit(specNoStr, specNoStr, m_singleFitOutputName);
+  auto cfs = sequentialFit(specNoStr, specNoStr, m_baseName);
 
   // Connection to singleFitComplete SLOT (post algorithm completion)
   m_batchAlgoRunner->addAlgorithm(cfs);
@@ -1438,7 +1340,7 @@ void ConvFit::singleFitComplete(bool error) {
   // Disconnect signal for single fit complete
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(singleFitComplete(bool)));
-  algorithmComplete(error, m_singleFitOutputName);
+  algorithmComplete(error, m_baseName);
 }
 
 /**
@@ -1477,7 +1379,7 @@ void ConvFit::hwhmChanged(double val) {
   // Always want FWHM to display as positive.
   const double hwhm = std::fabs(val - peakCentre);
   // Update the property
-  auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+  auto hwhmRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->blockSignals(true);
   QString propName = "Lorentzian 1.FWHM";
   if (m_uiForm.cbFitType->currentIndex() == 1) {
@@ -1492,9 +1394,9 @@ void ConvFit::backgLevel(double val) {
 }
 
 void ConvFit::updateRS(QtProperty *prop, double val) {
-  auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitRange");
+  auto fitRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("ConvFitRange");
   auto backRangeSelector =
-      m_uiForm.ppPlot->getRangeSelector("ConvFitBackRange");
+      m_uiForm.ppPlotTop->getRangeSelector("ConvFitBackRange");
 
   if (prop == m_properties["StartX"]) {
     fitRangeSelector->setMinimum(val);
@@ -1508,7 +1410,7 @@ void ConvFit::updateRS(QtProperty *prop, double val) {
 }
 
 void ConvFit::hwhmUpdateRS(double val) {
-  auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+  auto hwhmRangeSelector = m_uiForm.ppPlotTop->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->setMinimum(-val / 2);
   hwhmRangeSelector->setMaximum(+val / 2);
 }
@@ -1756,8 +1658,8 @@ void ConvFit::fitFunctionSelected(int fitTypeIndex) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
-  // If there are parameters in the list, add them
   addDefaultParametersToTree(fitFunctions);
+  updateProperties(selectedSpectrum());
 }
 
 /**

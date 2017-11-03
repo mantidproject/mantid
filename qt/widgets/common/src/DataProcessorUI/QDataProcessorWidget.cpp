@@ -5,9 +5,13 @@
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
 
+#include <QClipboard>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QWhatsThis>
 #include <QWidget>
-#include <qinputdialog.h>
-#include <qmessagebox.h>
 
 namespace {
 const QString DataProcessorSettingsGroup =
