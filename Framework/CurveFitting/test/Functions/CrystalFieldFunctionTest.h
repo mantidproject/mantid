@@ -699,9 +699,11 @@ public:
     cf.setAttributeValue("FWHMs", std::vector<double>({1, 2}));
     cf.setParameter("ion0.B20", 1.0);
     cf.setParameter("ion1.B20", 2.0);
+    TS_ASSERT_EQUALS(cf.getParameter("ion0.B20"), 1.0);
+    TS_ASSERT_EQUALS(cf.getParameter("ion1.B20"), 2.0);
     cf.setAttributeValue("PeakShape", "Lorentzian");
-    cf.setParameter("ion0.B20", 1.0);
-    cf.setParameter("ion1.B20", 2.0);
+    TS_ASSERT_EQUALS(cf.getParameter("ion0.B20"), 1.0);
+    TS_ASSERT_EQUALS(cf.getParameter("ion1.B20"), 2.0);
   }
 
 private:
