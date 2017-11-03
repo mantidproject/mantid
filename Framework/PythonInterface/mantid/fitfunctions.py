@@ -15,9 +15,9 @@ class FunctionWrapper(object):
             self.fun = name
         else:
             self.fun = FunctionFactory.createFunction(name)
-        self._init_paramgeters_and_attributes(**kwargs)
+        self.init_paramgeters_and_attributes(**kwargs)
 
-    def _init_paramgeters_and_attributes(self, **kwargs):
+    def init_paramgeters_and_attributes(self, **kwargs):
         # Deal with attributes first
         for key in kwargs:
             if key == "attributes":
@@ -340,14 +340,16 @@ class FunctionWrapper(object):
 class CompositeFunctionWrapper(FunctionWrapper):
     """ Wrapper class for Composite Fitting Function
     """
-    def __init__ (self, *args):
+    def __init__ (self, *args, **kwargs):
         """ Called when creating an instance
            It should not be called directly
            :param *args: names of functions in composite function
+           :param kwargs: any parameters or attributes that must be passed to the
+            composite function itself.
         """
         self.pureAddition = True
         self.pureMultiplication = False
-        self.initByName("CompositeFunction", *args)
+        self.initByName("CompositeFunction", *args, **kwargs)
  
     def initByName(self, name, *args, **kwargs):
         """ intialise composite function of named type.
@@ -359,7 +361,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
 
           :param name: name of class calling this.
           :param *args: names of functions in composite function
-          :param kwargs: any parameters or attributs that must be passed to the
+          :param kwargs: any parameters or attributes that must be passed to the
             composite function itself.
         """
         if len(args) == 1 and  not isinstance(args[0], FunctionWrapper):
@@ -376,8 +378,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
                             self.pureAddition = a.pureAddition
                         if self.pureMultiplication:
                             self.pureMultiplication = a.pureMultiplication
-                    functionToAdd = FunctionFactory.createInitialized( a.fun.__str__() )
+                    functionToAdd = FunctionFactory.createInitialized(a.fun.__str__())
                     self.fun.add(functionToAdd)
+        self.init_paramgeters_and_attributes(**kwargs)
        
     def getParameter(self, name):
         """ get value of parameter of specified name
@@ -589,27 +592,31 @@ class CompositeFunctionWrapper(FunctionWrapper):
 class ProductFunctionWrapper(CompositeFunctionWrapper):
     """ Wrapper class for Product Fitting Function
     """
-    def __init__ (self, *args):
+    def __init__ (self, *args, **kwargs):
         """ Called when creating an instance
-           It should not be called directly.
-           :param *args: names of functions in composite function
+            It should not be called directly.
+            :param *args: names of functions in composite function
+            :param kwargs: any parameters or attributes that must be passed to the
+            composite function itself.
         """
         self.pureAddition = False
         self.pureMultiplication = True
-        return self.initByName("ProductFunction", *args)
+        self.initByName("ProductFunction", *args, **kwargs)
 
 
 class ConvolutionWrapper(CompositeFunctionWrapper):
     """ Wrapper class for Convolution Fitting Function
     """
-    def __init__ (self, *args):
+    def __init__ (self, *args, **kwargs):
         """ Called when creating an instance
            It should not be called directly.
            :param *args: names of functions in composite function
+           :param kwargs: any parameters or attributes that must be passed to the
+            composite function itself.
         """
         self.pureAddition = False
         self.pureMultiplication = False
-        return self.initByName("Convolution", *args)
+        self.initByName("Convolution", *args, **kwargs)
 
 
 class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
@@ -619,6 +626,8 @@ class MultiDomainFunctionWrapper(CompositeFunctionWrapper):
         """ Called when creating an instance
            It should not be called directly
            :param *args: names of functions in composite function
+           :param kwargs: any parameters or attributes that must be passed to the
+            composite function itself.
         """
         # Assume it's not safe to flatten
         self.pureAddition = False
@@ -664,11 +673,10 @@ def _create_wrapper_function(name):
         # constructor is FunctionWrapper if the name is not in the registry.
         if name in name_to_constructor:
             return name_to_constructor[name](*args, **kwargs)
-        return  FunctionWrapper(name, *args, **kwargs)
+        return FunctionWrapper(name, **kwargs)
  
     # ------------------------------------------------------------------------------------------------
     wrapper_function.__name__ = name
-    # _replace_signature(fake_function, ("", ""))
     globals()[name] = wrapper_function
  
 fnames = FunctionFactory.getFunctionNames()

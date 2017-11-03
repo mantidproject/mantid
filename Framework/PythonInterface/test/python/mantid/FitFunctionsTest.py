@@ -8,10 +8,12 @@ import testhelpers
 import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
-from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction
+from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
+    CompositeFunction
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
+
 
 class FitFunctionsTest(unittest.TestCase):
 
@@ -654,10 +656,31 @@ class FitFunctionsTest(unittest.TestCase):
 
     def test_evaluation_with_parameters_set(self):
         p = Polynomial(n=2)
-        result = p([0,1,2],0.0,0.5,0.5)   
-        self.assertAlmostEqual(result[0],0.0)
-        self.assertAlmostEqual(result[1],1.0)
-        self.assertAlmostEqual(result[2],3.0)         
-       
+        result = p([0, 1, 2], 0.0, 0.5, 0.5)
+        self.assertAlmostEqual(result[0], 0.0)
+        self.assertAlmostEqual(result[1], 1.0)
+        self.assertAlmostEqual(result[2], 3.0)
+
+    def test_attributes_passed_to_composite_functions(self):
+        cf = Gaussian() + LinearBackground()
+        self.assertEqual(cf.getAttributeValue('NumDeriv'), False)
+        cf = CompositeFunction(Gaussian(), LinearBackground(), NumDeriv=True)
+        self.assertEqual(cf.getAttributeValue('NumDeriv'), True)
+
+    def test_attributes_passed_to_convolution(self):
+        cf = Convolution(Gaussian(), Gaussian(), NumDeriv=True)
+        self.assertEqual(cf.getAttributeValue('NumDeriv'), True)
+
+    def test_attributes_passed_to_product_functions(self):
+        pf = Gaussian() * LinearBackground()
+        self.assertEqual(pf.getAttributeValue('NumDeriv'), False)
+        pf = ProductFunction(Gaussian(), LinearBackground(), NumDeriv=True)
+        self.assertEqual(pf.getAttributeValue('NumDeriv'), True)
+
+    def test_attributes_passed_to_multidomain_function(self):
+        cf = MultiDomainFunction(Gaussian(), Gaussian(), NumDeriv=True)
+        self.assertEqual(cf.getAttributeValue('NumDeriv'), True)
+
+
 if __name__ == '__main__':
     unittest.main()
