@@ -69,7 +69,7 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
     """
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split('_')[0]
-    if not instrument.startswith("VESUVIO"):
+    if instrument.startswith("VESUVIO"):
         parse_file_range = create_file_range_parser("")
     else:
         parse_file_range = create_file_range_parser(instrument)
