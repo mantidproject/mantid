@@ -36,7 +36,7 @@ std::string qtPluginPathFromCfg(std::string key) {
  * @return The number of libraries successfully loaded
  */
 int loadPluginsFromCfgPath(std::string key) {
-  return loadPluginsFromPath(qtPluginPathFromCfg(key));
+  return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key)));
 }
 
 /**
