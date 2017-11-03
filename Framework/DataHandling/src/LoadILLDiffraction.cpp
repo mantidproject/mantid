@@ -98,7 +98,7 @@ void LoadILLDiffraction::init() {
   declareProperty("DataType", "Auto",
                   boost::make_shared<StringListValidator>(calibrationOptions),
                   "Select the type of data, with or without calibration "
-                  "already applied. If blank then the calibrated data is "
+                  "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
 }
 
@@ -229,10 +229,8 @@ void LoadILLDiffraction::loadMetaData() {
   }
 
   if (mutableRun.hasProperty("Detector.calibration_file")) {
-    if (getPropertyValue("DataType") == "Raw") {
+    if (getPropertyValue("DataType") == "Raw")
       mutableRun.getProperty("Detector.calibration_file")->setValue("none");
-      g_log.error() << "Set to none!" << std::endl;
-    }
   } else
     mutableRun.addProperty("Detector.calibration_file", std::string("none"));
 }
