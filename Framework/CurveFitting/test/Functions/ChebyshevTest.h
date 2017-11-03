@@ -122,6 +122,38 @@ public:
       }
     }
   }
+
+  void test_change_n() {
+    Chebyshev cheb;
+    cheb.setAttributeValue("n", 3);
+    cheb.setParameter("A0", 4.0);
+    cheb.setParameter("A1", 3.0);
+    cheb.setParameter("A2", 2.0);
+    cheb.setParameter("A3", 1.0);
+    cheb.setAttributeValue("n", 5);
+    TS_ASSERT_EQUALS(cheb.getParameter(0), 4.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(1), 3.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(2), 2.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(3), 1.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(4), 0.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(5), 0.0);
+  }
+
+  void test_change_n_1() {
+    Chebyshev cheb;
+    cheb.setAttributeValue("n", 5);
+    cheb.setParameter("A0", 4.0);
+    cheb.setParameter("A1", 3.0);
+    cheb.setParameter("A2", 2.0);
+    cheb.setParameter("A3", 1.0);
+    cheb.setParameter("A4", -1.0);
+    cheb.setParameter("A5", -2.0);
+    cheb.setAttributeValue("n", 3);
+    TS_ASSERT_EQUALS(cheb.getParameter(0), 4.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(1), 3.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(2), 2.0);
+    TS_ASSERT_EQUALS(cheb.getParameter(3), 1.0);
+  }
 };
 
 #endif /*CHEBYSHEVTEST_H_*/
