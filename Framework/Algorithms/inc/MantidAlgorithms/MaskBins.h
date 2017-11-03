@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_MASKBINS_H_
 #define MANTID_ALGORITHMS_MASKBINS_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/TriviallyParallelAlgorithm.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
@@ -52,7 +52,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MaskBins : public API::Algorithm {
+class DLLExport MaskBins : public API::TriviallyParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBins"; }
