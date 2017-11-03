@@ -139,17 +139,6 @@ public:
   static EventParserTest *createSuite() { return new EventParserTest(); }
   static void destroySuite(EventParserTest *suite) { delete suite; }
 
-  void test_conversion_to_time_of_flight() {
-    using detail::microseconds;
-    double tof{1.2345678987654321};
-    TS_ASSERT_EQUALS(microseconds(tof), tof);
-    TS_ASSERT_DELTA(microseconds(static_cast<float>(tof)), tof, 1e-7);
-    TS_ASSERT_EQUALS(microseconds(static_cast<int32_t>(1500)), double{1.5});
-    TS_ASSERT_EQUALS(microseconds(static_cast<int64_t>(1500)), double{1.5});
-    TS_ASSERT_EQUALS(microseconds(static_cast<uint32_t>(1500)), double{1.5});
-    TS_ASSERT_EQUALS(microseconds(static_cast<uint64_t>(1500)), double{1.5});
-  }
-
   void testConstruct() {
     std::vector<std::vector<int>> rankGroups;
     std::vector<int32_t> bankOffsets{1, 2, 3, 4};
@@ -184,7 +173,7 @@ public:
     std::vector<std::vector<EventParser<double>::Event>> rankData;
     // event_id now contains spectrum indices
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
-        1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
+        1, {gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0});
     partitioner.partition(rankData, event_id.data(),
                           event_time_offset.data() + range.eventOffset, range);
 
@@ -206,7 +195,7 @@ public:
     std::vector<std::vector<EventParser<double>::Event>> rankData;
     // event_id now contains spectrum indices
     EventDataPartitioner<int32_t, int64_t, double> partitioner(
-        1, {gen.eventIndex(0), gen.eventTimeZero(), 0});
+        1, {gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0});
     partitioner.partition(rankData, event_id.data(),
                           event_time_offset.data() + range.eventOffset, range);
 
@@ -224,8 +213,9 @@ public:
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
         Kernel::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
-            1, PulseTimeGenerator<int32_t, int32_t>{gen.eventIndex(0),
-                                                    gen.eventTimeZero(), 0}));
+            1, PulseTimeGenerator<int32_t, int32_t>{
+                   gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
+    parser->setEventTimeOffsetUnit("microsecond");
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -241,8 +231,9 @@ public:
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
         Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, float>>(
-            1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(0),
-                                                    gen.eventTimeZero(), 0}));
+            1, PulseTimeGenerator<int32_t, int64_t>{
+                   gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
+    parser->setEventTimeOffsetUnit("microsecond");
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -262,8 +253,9 @@ public:
     for (int i = 0; i < numBanks; i++) {
       parser->setEventDataPartitioner(
           Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
-              1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(i),
-                                                      gen.eventTimeZero(), 0}));
+              1, PulseTimeGenerator<int32_t, int64_t>{
+                     gen.eventIndex(i), gen.eventTimeZero(), "nanosecond", 0}));
+      parser->setEventTimeOffsetUnit("microsecond");
       auto event_id = gen.eventId(i);
       auto event_time_offset = gen.eventTimeOffset(i);
 
@@ -279,8 +271,9 @@ public:
     auto parser = gen.generateTestParser();
     parser->setEventDataPartitioner(
         Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
-            1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(0),
-                                                    gen.eventTimeZero(), 0}));
+            1, PulseTimeGenerator<int32_t, int64_t>{
+                   gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0}));
+    parser->setEventTimeOffsetUnit("microsecond");
     auto event_id = gen.eventId(0);
     auto event_time_offset = gen.eventTimeOffset(0);
 
@@ -311,7 +304,9 @@ public:
       parser->setEventDataPartitioner(
           Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
               1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(bank),
-                                                      gen.eventTimeZero(), 0}));
+                                                      gen.eventTimeZero(),
+                                                      "nanosecond", 0}));
+      parser->setEventTimeOffsetUnit("microsecond");
       auto event_id = gen.eventId(bank);
       auto event_time_offset = gen.eventTimeOffset(bank);
 
@@ -334,6 +329,52 @@ public:
     gen.checkEventLists();
   }
 
+  void test_setEventTimeOffsetUnit() {
+    std::vector<std::vector<int>> rankGroups;
+    std::vector<int32_t> bankOffsets{0};
+    std::vector<TofEvent> eventList;
+    std::vector<std::vector<TofEvent> *> eventLists{&eventList};
+    Parallel::Communicator comm;
+    EventParser<double> parser(comm, rankGroups, bankOffsets, eventLists);
+    PulseTimeGenerator<int32_t, int32_t> pulseTimes({0}, {0}, "nanosecond", 0);
+
+    parser.setEventDataPartitioner(
+        Kernel::make_unique<EventDataPartitioner<int32_t, int32_t, double>>(
+            1, std::move(pulseTimes)));
+
+    int32_t event_id{0};
+    const double event_time_offset{1.5};
+    const Chunker::LoadRange range{0, 0, 1};
+
+    parser.startAsync(&event_id, &event_time_offset, range);
+    parser.wait();
+    TS_ASSERT_EQUALS(eventList.size(), 1);
+    TS_ASSERT_EQUALS(eventList[0].tof(), 0.0);
+
+    parser.setEventTimeOffsetUnit("second");
+    parser.startAsync(&event_id, &event_time_offset, range);
+    parser.wait();
+    TS_ASSERT_EQUALS(eventList.size(), 2);
+    TS_ASSERT_EQUALS(eventList[1].tof(), 1.5e6);
+
+    parser.setEventTimeOffsetUnit("microsecond");
+    parser.startAsync(&event_id, &event_time_offset, range);
+    parser.wait();
+    TS_ASSERT_EQUALS(eventList.size(), 3);
+    TS_ASSERT_EQUALS(eventList[2].tof(), 1.5);
+
+    parser.setEventTimeOffsetUnit("nanosecond");
+    parser.startAsync(&event_id, &event_time_offset, range);
+    parser.wait();
+    TS_ASSERT_EQUALS(eventList.size(), 4);
+    TS_ASSERT_EQUALS(eventList[3].tof(), 1.5e-3);
+
+    TS_ASSERT_THROWS_EQUALS(
+        parser.setEventTimeOffsetUnit("millisecond"),
+        const std::runtime_error &e, std::string(e.what()),
+        "EventParser: unsupported unit `millisecond` for event_time_offset");
+  }
+
 private:
   template <typename T, typename IndexType, typename TimeZeroType,
             typename TimeOffsetType>
@@ -343,7 +384,7 @@ private:
                                                     TimeOffsetType> &gen,
                  const Chunker::LoadRange &range) {
     PulseTimeGenerator<IndexType, TimeZeroType> pulseTimes(
-        gen.eventIndex(0), gen.eventTimeZero(), 0);
+        gen.eventIndex(0), gen.eventTimeZero(), "nanosecond", 0);
     pulseTimes.seek(range.eventOffset);
     TS_ASSERT_EQUALS(rankData[0].size(), range.eventCount);
     for (const auto &item : rankData[0]) {
@@ -380,8 +421,9 @@ public:
     for (size_t i = 0; i < NUM_BANKS; ++i) {
       parser->setEventDataPartitioner(
           Kernel::make_unique<EventDataPartitioner<int32_t, int64_t, double>>(
-              1, PulseTimeGenerator<int32_t, int64_t>{gen.eventIndex(i),
-                                                      gen.eventTimeZero(), 0}));
+              1, PulseTimeGenerator<int32_t, int64_t>{
+                     gen.eventIndex(i), gen.eventTimeZero(), "nanosecond", 0}));
+      parser->setEventTimeOffsetUnit("microsecond");
       parser->startAsync(event_ids[i].data(), event_time_offsets[i].data(),
                          gen.generateBasicRange(i));
       parser->wait();
@@ -391,15 +433,11 @@ public:
   void testExtractEventsPerformance() {
     for (size_t bank = 0; bank < NUM_BANKS; bank++) {
       EventDataPartitioner<int32_t, int64_t, double> partitioner(
-          1, {gen.eventIndex(bank), gen.eventTimeZero(), 0});
+          1, {gen.eventIndex(bank), gen.eventTimeZero(), "nanosecond", 0});
       partitioner.partition(rankData, event_ids[bank].data(),
                             event_time_offsets[bank].data(),
                             gen.generateBasicRange(bank));
     }
-  }
-
-  void testPopulateEventListsPerformance() {
-    detail::populateEventLists(rankData[0], m_eventListPtrs);
   }
 
 private:

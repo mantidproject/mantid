@@ -7,7 +7,6 @@
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
 #include "MantidParallel/IO/EventDataPartitioner.h"
-#include "MantidParallel/IO/PulseTimeGenerator.h"
 #include "MantidTypes/Event/TofEvent.h"
 
 #include <chrono>
@@ -55,32 +54,6 @@ namespace detail {
 void MANTID_PARALLEL_DLL eventIdToGlobalSpectrumIndex(int32_t *event_id_start,
                                                       size_t count,
                                                       const int32_t bankOffset);
-
-template <class TimeOffsetType>
-void redistributeDataMPI(
-    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
-    const std::vector<std::vector<Event<TimeOffsetType>>> &data);
-
-template <class TimeOffsetType>
-void populateEventLists(
-    const std::vector<Event<TimeOffsetType>> &events,
-    std::vector<std::vector<Types::Event::TofEvent> *> &eventLists);
-
-template <class T>
-double
-microseconds(const T &duration,
-             typename std::enable_if<std::is_floating_point<T>::value>::type * =
-                 nullptr) {
-  return duration;
-}
-
-template <class T>
-double microseconds(
-    const T &duration,
-    typename std::enable_if<std::is_integral<T>::value>::type * = nullptr) {
-  // If duration is integer it is assumed to be nanoseconds, like DateAndTime.
-  return static_cast<double>(std::chrono::nanoseconds(duration).count()) / 1000;
-}
 }
 
 template <class TimeOffsetType> class EventParser {
@@ -93,6 +66,7 @@ public:
 
   void setEventDataPartitioner(std::unique_ptr<
       AbstractEventDataPartitioner<TimeOffsetType>> partitioner);
+  void setEventTimeOffsetUnit(const std::string &unit);
 
   void startAsync(int32_t *event_id_start,
                   const TimeOffsetType *event_time_offset_start,
@@ -104,6 +78,12 @@ private:
   void doParsing(int32_t *event_id_start,
                  const TimeOffsetType *event_time_offset_start,
                  const Chunker::LoadRange &range);
+
+  void redistributeDataMPI();
+  void populateEventLists();
+
+  // Default to 0 such that failure to set unit is easily detected.
+  double m_timeOffsetScale{0.0};
   Communicator m_comm;
   std::vector<std::vector<int>> m_rankGroups;
   std::vector<int32_t> m_bankOffsets;
@@ -146,79 +126,93 @@ void EventParser<TimeOffsetType>::setEventDataPartitioner(
   m_partitioner = std::move(partitioner);
 }
 
-namespace detail {
-/** Uses MPI calls to redistribute chunks which must be processed on certain
- * ranks.
- * @param comm MPI communicator.
- * @param result output data which must be processed on current rank. (May
- * be updated by other ranks)
- * @param data Data on this rank which belongs to several other ranks.
- */
+/** Set the unit of the values in `event_time_offset`.
+ *
+ * The unit is used to initialize a scale factor needed for conversion of
+ * time-of-flight to microseconds, the unit used by TofEvent. */
 template <class TimeOffsetType>
-void redistributeDataMPI(
-    Communicator &comm, std::vector<Event<TimeOffsetType>> &result,
-    const std::vector<std::vector<Event<TimeOffsetType>>> &data) {
-  using Event = Event<TimeOffsetType>;
-  if (comm.size() == 1) {
-    result = data.front();
+void EventParser<TimeOffsetType>::setEventTimeOffsetUnit(
+    const std::string &unit) {
+  constexpr char second[] = "second";
+  constexpr char microsecond[] = "microsecond";
+  constexpr char nanosecond[] = "nanosecond";
+
+  if (unit == second) {
+    m_timeOffsetScale = 1e6;
+    return;
+  }
+  if (unit == microsecond) {
+    m_timeOffsetScale = 1.0;
+    return;
+  }
+  if (unit == nanosecond) {
+    m_timeOffsetScale = 1e-3;
+    return;
+  }
+  throw std::runtime_error("EventParser: unsupported unit `" + unit +
+                           "` for event_time_offset");
+}
+
+/// Convert m_allRankData into m_thisRankData by means of redistribution via
+/// MPI.
+template <class TimeOffsetType>
+void EventParser<TimeOffsetType>::redistributeDataMPI() {
+  if (m_comm.size() == 1) {
+    m_thisRankData = m_allRankData.front();
     return;
   }
 
-  std::vector<int> sizes(data.size());
-  std::transform(data.cbegin(), data.cend(), sizes.begin(),
+  std::vector<int> sizes(m_allRankData.size());
+  std::transform(m_allRankData.cbegin(), m_allRankData.cend(), sizes.begin(),
                  [](const std::vector<Event> &vec) {
                    return static_cast<int>(vec.size());
                  });
-  std::vector<int> recv_sizes(data.size());
-  Parallel::all_to_all(comm, sizes, recv_sizes);
+  std::vector<int> recv_sizes(m_allRankData.size());
+  Parallel::all_to_all(m_comm, sizes, recv_sizes);
 
   auto total_size = std::accumulate(recv_sizes.begin(), recv_sizes.end(), 0);
-  result.resize(total_size);
+  m_thisRankData.resize(total_size);
   size_t offset = 0;
   std::vector<Parallel::Request> recv_requests;
-  for (int rank = 0; rank < comm.size(); ++rank) {
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
     if (recv_sizes[rank] == 0)
       continue;
     int tag = 0;
-    auto buffer = reinterpret_cast<char *>(result.data() + offset);
+    auto buffer = reinterpret_cast<char *>(m_thisRankData.data() + offset);
     int size = recv_sizes[rank] * static_cast<int>(sizeof(Event));
-    recv_requests.emplace_back(comm.irecv(rank, tag, buffer, size));
+    recv_requests.emplace_back(m_comm.irecv(rank, tag, buffer, size));
     offset += recv_sizes[rank];
   }
 
   std::vector<Parallel::Request> send_requests;
-  for (int rank = 0; rank < comm.size(); ++rank) {
-    const auto &vec = data[rank];
+  for (int rank = 0; rank < m_comm.size(); ++rank) {
+    const auto &vec = m_allRankData[rank];
     if (vec.size() == 0)
       continue;
     int tag = 0;
     send_requests.emplace_back(
-        comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
-                   static_cast<int>(vec.size() * sizeof(Event))));
+        m_comm.isend(rank, tag, reinterpret_cast<const char *>(vec.data()),
+                     static_cast<int>(vec.size() * sizeof(Event))));
   }
 
   Parallel::wait_all(send_requests.begin(), send_requests.end());
   Parallel::wait_all(recv_requests.begin(), recv_requests.end());
 }
 
-/** Fills the workspace EventList with extracted events
- * @param events Events extracted from file according to mpi rank.
- */
+/// Append events in m_thisRankData to m_eventLists.
 template <class TimeOffsetType>
-void populateEventLists(
-    const std::vector<Event<TimeOffsetType>> &events,
-    std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
-  for (const auto &event : events) {
-    eventLists[event.index]->emplace_back(detail::microseconds(event.tof),
-                                          event.pulseTime);
+void EventParser<TimeOffsetType>::populateEventLists() {
+  for (const auto &event : m_thisRankData) {
+    m_eventLists[event.index]->emplace_back(
+        m_timeOffsetScale * static_cast<double>(event.tof), event.pulseTime);
     // In general `index` is random so this loop suffers from frequent cache
     // misses (probably because the hardware prefetchers cannot keep up with the
     // number of different memory locations that are getting accessed). We
     // manually prefetch into L2 cache to reduce the amount of misses.
-    _mm_prefetch(reinterpret_cast<char *>(&eventLists[event.index]->back() + 1),
-                 _MM_HINT_T1);
+    _mm_prefetch(
+        reinterpret_cast<char *>(&m_eventLists[event.index]->back() + 1),
+        _MM_HINT_T1);
   }
-}
 }
 
 /** Accepts raw data from file which has been pre-treated and sorted into chunks
@@ -256,9 +250,8 @@ void EventParser<TimeOffsetType>::doParsing(
   m_partitioner->partition(m_allRankData, event_id_start,
                            event_time_offset_start, range);
 
-  detail::redistributeDataMPI(m_comm, m_thisRankData, m_allRankData);
-  // TODO: accept something which translates from global to local spectrum index
-  populateEventLists(m_thisRankData, m_eventLists);
+  redistributeDataMPI();
+  populateEventLists();
 }
 
 template <class TimeOffsetType> void EventParser<TimeOffsetType>::wait() {

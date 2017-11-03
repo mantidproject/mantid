@@ -49,6 +49,7 @@ public:
                            size_t count) const = 0;
   virtual void readEventTimeOffset(TimeOffsetType *event_time_offset,
                                    size_t start, size_t count) const = 0;
+  virtual std::string readEventTimeOffsetUnit() const = 0;
 };
 
 } // namespace IO

@@ -38,6 +38,45 @@ namespace IO {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+namespace detail {
+constexpr char second[] = "second";
+constexpr char microsecond[] = "microsecond";
+constexpr char nanosecond[] = "nanosecond";
+
+template <class TimeZeroType>
+double scaleFromUnit(
+    const std::string &unit,
+    typename std::enable_if<
+        std::is_floating_point<TimeZeroType>::value>::type * = nullptr) {
+  if (unit == second)
+    return 1.0;
+  if (unit == microsecond)
+    return 1e-6;
+  if (unit == nanosecond)
+    return 1e-9;
+  throw std::runtime_error("PulseTimeGenerator: unsupported unit `" + unit +
+                           "` for event_time_zero");
+}
+
+template <class TimeZeroType>
+int64_t scaleFromUnit(
+    const std::string &unit,
+    typename std::enable_if<std::is_integral<TimeZeroType>::value>::type * =
+        nullptr) {
+  if (unit == nanosecond)
+    return 1;
+  throw std::runtime_error("PulseTimeGenerator: unsupported unit `" + unit +
+                           "` for event_time_zero");
+}
+
+/// Convert any int or float type to corresponding 64 bit type needed for
+/// passing into DateAndTime.
+template <class T> struct IntOrFloat64Bit { using type = int64_t; };
+template <> struct IntOrFloat64Bit<float> { using type = double; };
+template <> struct IntOrFloat64Bit<double> { using type = double; };
+}
+
 template <class IndexType, class TimeZeroType> class PulseTimeGenerator {
 public:
   PulseTimeGenerator() = default;
@@ -45,8 +84,11 @@ public:
   /// Constructor based on entries in NXevent_data.
   PulseTimeGenerator(std::vector<IndexType> event_index,
                      std::vector<TimeZeroType> event_time_zero,
+                     const std::string &event_time_zero_unit,
                      const int64_t event_time_zero_offset)
       : m_index(std::move(event_index)), m_timeZero(std::move(event_time_zero)),
+        m_timeZeroScale(
+            detail::scaleFromUnit<TimeZeroType>(event_time_zero_unit)),
         m_timeZeroOffset(event_time_zero_offset) {}
 
   /// Seek to given event index.
@@ -74,14 +116,13 @@ public:
   }
 
 private:
-  int64_t cast(const uint64_t time) const { return static_cast<int64_t>(time); }
-  int64_t cast(const int64_t time) const { return static_cast<int64_t>(time); }
-  int64_t cast(const uint32_t time) const { return static_cast<int64_t>(time); }
-  int64_t cast(const int32_t time) const { return static_cast<int64_t>(time); }
-  double cast(const double time) const { return static_cast<double>(time); }
   Types::Core::DateAndTime getPulseTime(const Types::Core::DateAndTime &offset,
                                         const TimeZeroType &eventTimeZero) {
-    return offset + cast(eventTimeZero);
+    return offset +
+           m_timeZeroScale *
+               static_cast<
+                   typename detail::IntOrFloat64Bit<TimeZeroType>::type>(
+                   eventTimeZero);
   }
 
   IndexType m_event{0};
@@ -89,6 +130,7 @@ private:
   Types::Core::DateAndTime m_pulseTime;
   std::vector<IndexType> m_index;
   std::vector<TimeZeroType> m_timeZero;
+  typename detail::IntOrFloat64Bit<TimeZeroType>::type m_timeZeroScale;
   Types::Core::DateAndTime m_timeZeroOffset;
 };
 

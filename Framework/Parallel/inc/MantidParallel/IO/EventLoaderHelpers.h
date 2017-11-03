@@ -81,6 +81,7 @@ void load(const Chunker &chunker, NXEventDataSource<TimeOffsetType> &dataSource,
       dataSink.wait();
     if (static_cast<int64_t>(range.bankIndex) != previousBank) {
       dataSink.setEventDataPartitioner(std::move(partitioner));
+      dataSink.setEventTimeOffsetUnit(dataSource.readEventTimeOffsetUnit());
       previousBank = range.bankIndex;
     }
     dataSink.startAsync(event_id.data() + bufferOffset,
