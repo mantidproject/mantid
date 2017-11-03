@@ -376,8 +376,8 @@ void ApplicationWindow::init(bool factorySettings, const QStringList &args) {
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  ConfigService::Instance(); // Starts logging
-  resultsLog->attachLoggingChannel();       // Must be done after logging starts
+  ConfigService::Instance();          // Starts logging
+  resultsLog->attachLoggingChannel(); // Must be done after logging starts
   // Load Mantid core libraries by starting the framework
   FrameworkManager::Instance();
 #ifdef MAKE_VATES
