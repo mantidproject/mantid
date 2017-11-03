@@ -14,7 +14,7 @@ set ( SRC_FILES
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
 	src/DateAndTime.cpp
-    	src/DataItem.cpp
+	src/DataItem.cpp
 	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
@@ -129,14 +129,14 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
 )
 
 set ( INC_FILES
@@ -286,7 +286,7 @@ set ( INC_FILES
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-    inc/MantidKernel/TimeSeriesProperty.h
+	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
@@ -336,7 +336,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-   	DateAndTimeHelpersTest.h
+	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h

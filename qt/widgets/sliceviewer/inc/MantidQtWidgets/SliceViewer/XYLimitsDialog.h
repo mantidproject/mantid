@@ -1,7 +1,7 @@
 #ifndef XYLIMITSDIALOG_H
 #define XYLIMITSDIALOG_H
 
-#include <QtGui/QDialog>
+#include <QDialog>
 #include "ui_XYLimitsDialog.h"
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"

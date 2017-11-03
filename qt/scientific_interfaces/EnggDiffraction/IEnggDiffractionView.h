@@ -202,14 +202,6 @@ public:
   virtual void enableTabs(bool enable) = 0;
 
   /**
-   * Highlights the RB number box to make it more visible if the
-   * user needs to enter an RB number
-   *
-   * @param isValid Is the current value in RB Number field valid
-   */
-  virtual void highlightRbNumber(bool isValid) = 0;
-
-  /**
    * A (sample) run to focus
    *
    * @return run number, as a string
@@ -316,12 +308,19 @@ public:
   virtual void saveSettings() const = 0;
 
   /**
- * Saves the ouput files which are generated, this can be done
- * via Output Files checkbox on the focus tab
- *
- * @return bool
- */
+  * Saves the ouput files which are generated, this can be done
+  * via Output Files checkbox on the focus tab
+  *
+  * @return bool
+  */
   virtual bool saveFocusedOutputFiles() const = 0;
+
+  /**
+   * Show the message requesting the user to enter a valid RB number, if the
+   * current RB number is not valid
+   * @param rbNumberIsValid True if the current entered RB number is not valid
+   */
+  virtual void showInvalidRBNumber(const bool rbNumberIsValid) = 0;
 
   /**
   * Produces vanadium curves graph with three spectrum and
