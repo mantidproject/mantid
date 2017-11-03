@@ -32,8 +32,8 @@ DECLARE_ALGORITHM(IntegratePeaksMDHKL)
   */
 void IntegratePeaksMDHKL::init() {
   declareProperty(
-      make_unique<WorkspaceProperty<IMDWorkspace> >("InputWorkspace", "",
-                                                    Direction::Input),
+      make_unique<WorkspaceProperty<IMDWorkspace>>("InputWorkspace", "",
+                                                   Direction::Input),
       "An input Sample MDHistoWorkspace or MDEventWorkspace in HKL.");
   declareProperty("DeltaHKL", 0.5,
                   "Distance from integer HKL to integrate peak.");
@@ -49,35 +49,35 @@ void IntegratePeaksMDHKL::init() {
   auto solidAngleValidator = fluxValidator->clone();
 
   declareProperty(
-      make_unique<WorkspaceProperty<> >("FluxWorkspace", "", Direction::Input,
-                                        PropertyMode::Optional, fluxValidator),
+      make_unique<WorkspaceProperty<>>("FluxWorkspace", "", Direction::Input,
+                                       PropertyMode::Optional, fluxValidator),
       "An optional input workspace containing momentum dependent flux for "
       "normalization.");
-  declareProperty(make_unique<WorkspaceProperty<> >(
+  declareProperty(make_unique<WorkspaceProperty<>>(
                       "SolidAngleWorkspace", "", Direction::Input,
                       PropertyMode::Optional, solidAngleValidator),
                   "An optional input workspace containing momentum integrated "
                   "vanadium for normalization "
                   "(a measure of the solid angle).");
 
-  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace> >(
+  declareProperty(make_unique<WorkspaceProperty<PeaksWorkspace>>(
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
   declareProperty(
-      make_unique<WorkspaceProperty<PeaksWorkspace> >("OutputWorkspace", "",
-                                                      Direction::Output),
+      make_unique<WorkspaceProperty<PeaksWorkspace>>("OutputWorkspace", "",
+                                                     Direction::Output),
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
   declareProperty(
-      make_unique<PropertyWithValue<double> >("BackgroundInnerRadius", 0.0,
-                                              Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", 0.0,
+                                             Direction::Input),
       "Optional:Inner radius to use to evaluate the background of the peak.\n"
       "If omitted background is region of HKL box - peak. ");
 
   declareProperty(
-      make_unique<PropertyWithValue<double> >("BackgroundOuterRadius", 0.0,
-                                              Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", 0.0,
+                                             Direction::Input),
       "Optional:Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
@@ -236,7 +236,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
         if (BackgroundOuterRadius2 > 0.0) {
           double radius2 = pow((double(Hindex) - Hcenter) / gridPts[0], 2) +
                            pow((double(Kindex) - Kcenter) / gridPts[1], 2) +
-                           pow(double((Lindex) - Lcenter) / gridPts[2], 2);
+                           pow(double((Lindex)-Lcenter) / gridPts[2], 2);
           if (radius2 < BackgroundOuterRadius2 &&
               BackgroundInnerRadius2 < radius2) {
             backgroundPoints = backgroundPoints + 1;

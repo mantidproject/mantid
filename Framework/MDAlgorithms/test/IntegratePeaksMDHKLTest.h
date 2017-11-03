@@ -48,8 +48,8 @@ public:
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMDHKL with the given peak radius integration param
    */
-  static void doRun(std::string OutputWorkspace =
-                        "IntegratePeaksMDHKLTest_peaks") {
+  static void
+  doRun(std::string OutputWorkspace = "IntegratePeaksMDHKLTest_peaks") {
     IntegratePeaksMDHKL alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
