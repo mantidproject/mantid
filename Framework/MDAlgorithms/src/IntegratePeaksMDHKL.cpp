@@ -70,14 +70,14 @@ void IntegratePeaksMDHKL::init() {
       "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
       "with the peaks' integrated intensities.");
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius", EMPTY_DBL(),
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundInnerRadius",
+                                             EMPTY_DBL(), Direction::Input),
       "Optional:Inner radius to use to evaluate the background of the peak.\n"
       "If omitted background is region of HKL box - peak. ");
 
   declareProperty(
-      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius", EMPTY_DBL(),
-                                             Direction::Input),
+      make_unique<PropertyWithValue<double>>("BackgroundOuterRadius",
+                                             EMPTY_DBL(), Direction::Input),
       "Optional:Outer radius to use to evaluate the background of the peak.\n"
       "The signal density around the peak (BackgroundInnerRadius < r < "
       "BackgroundOuterRadius) is used to estimate the background under the "
@@ -289,7 +289,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     double ratio = 0.0;
     if (backgroundPoints > 0) {
       ratio = float(peakPoints) / float(backgroundPoints);
-    } 
+    }
     intensity = peakSum - ratio * (backgroundSum);
     errorSquared = errSqSum + ratio * ratio * (backgroundErrSqSum);
   } else {
