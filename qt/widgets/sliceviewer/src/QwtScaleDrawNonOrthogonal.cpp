@@ -1,6 +1,7 @@
 #include "MantidQtWidgets/SliceViewer/QwtScaleDrawNonOrthogonal.h"
 
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
+#include <QMatrix>
 #include <QPainter>
 #include <QPalette>
 #include "qwt_layout_metrics.h"
@@ -8,9 +9,6 @@
 #include "qwt_scale_draw.h"
 #include "qwt_scale_engine.h"
 #include "qwt_plot_canvas.h"
-
-#include <qmatrix.h>
-#define QwtMatrix QMatrix
 
 QwtScaleDrawNonOrthogonal::QwtScaleDrawNonOrthogonal(
     QwtPlot *plot, ScreenDimension screenDimension,
@@ -174,7 +172,7 @@ void QwtScaleDrawNonOrthogonal::drawLabelNonOrthogonal(QPainter *painter,
   labelSize = metricsMap.layoutToDevice(labelSize);
   pos = metricsMap.layoutToDevice(pos);
 
-  const QwtMatrix m = labelMatrix(pos, labelSize);
+  const QMatrix m = labelMatrix(pos, labelSize);
 
   painter->save();
   painter->setMatrix(m, true);

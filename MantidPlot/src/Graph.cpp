@@ -62,8 +62,8 @@
 #include "Mantid/ErrorBarSettings.h"
 #include "Mantid/MantidMDCurve.h"
 #include "Mantid/MantidMatrixCurve.h"
-#include "MantidKernel/Strings.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MantidQtWidgets/Common/QwtRasterDataMD.h"
 #include "MantidQtWidgets/Common/QwtWorkspaceSpectrumData.h"
@@ -187,7 +187,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget *parent, Qt::WFlags f)
       new QwtPlotZoomer(QwtPlot::xTop, QwtPlot::yRight,
                         QwtPicker::DragSelection | QwtPicker::CornerToCorner,
                         QwtPicker::AlwaysOff, d_plot->canvas());
-  zoom(false);
+  zoomMode(false);
 
   c_type = QVector<int>();
   c_keys = QVector<int>();
@@ -3357,14 +3357,20 @@ bool Graph::zoomOn() {
   return (d_zoomer[0]->isEnabled() || d_zoomer[1]->isEnabled());
 }
 
-void Graph::zoomed(const QwtDoubleRect &) { emit modifiedGraph(); }
+void Graph::zoomed(const QwtDoubleRect &) {
+  updateSecondaryAxis(QwtPlot::xTop);
+  updateSecondaryAxis(QwtPlot::yRight);
+  d_plot->replot();
+  emit modifiedGraph();
+}
+
 bool Graph::hasActiveTool() {
   return (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
           d_magnifier || d_panner ||
           (d_range_selector && d_range_selector->isVisible()));
 }
 
-void Graph::zoom(bool on) {
+void Graph::zoomMode(bool on) {
   d_zoomer[0]->setEnabled(on);
   d_zoomer[1]->setEnabled(false);
   for (int i = 0; i < n_curves; i++) {
@@ -4566,7 +4572,7 @@ void Graph::setActiveTool(PlotToolInterface *tool) {
 
 void Graph::disableTools() {
   if (zoomOn())
-    zoom(false);
+    zoomMode(false);
   enablePanningMagnifier(false);
   if (drawLineActive())
     drawLine(false);

@@ -405,8 +405,9 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs,
  *  @return True if the bins match
  */
 bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace &WS) {
-  if (!WS.blocksize() || WS.getNumberHistograms() < 2)
+  if (WS.getNumberHistograms() < 2 || WS.size() == 0)
     return true;
+
   // Quickest check is to see if they are actually all the same vector
   if (sharedXData(WS))
     return true;
