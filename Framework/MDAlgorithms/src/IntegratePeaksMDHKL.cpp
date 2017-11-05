@@ -193,11 +193,11 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
   std::vector<int> gridPts;
   /// Background (end) radius
   double BackgroundOuterRadius2 = getProperty("BackgroundOuterRadius");
-  if (BackgroundOuterRadius2 != EMPTY_DBL()) 
+  if (BackgroundOuterRadius2 != EMPTY_DBL())
     BackgroundOuterRadius2 = pow(BackgroundOuterRadius2, 2.0);
   /// Start radius of the background
   double BackgroundInnerRadius2 = getProperty("BackgroundInnerRadius");
-  if (BackgroundInnerRadius2 != EMPTY_DBL()) 
+  if (BackgroundInnerRadius2 != EMPTY_DBL())
     BackgroundInnerRadius2 = pow(BackgroundInnerRadius2, 2.0);
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
