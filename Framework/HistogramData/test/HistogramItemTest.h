@@ -126,29 +126,29 @@ public:
   void test_get_binEdges_from_histogram_with_bins() {
     Histogram hist(BinEdges{0.1, 0.2, 0.4, 0.5}, Frequencies{1, 2, 4});
     HistogramItem item(hist, 1);
-    compare(item.binEdges(), BinEdges{0.2, 0.4}, tolerance);
+    compare(item.binEdges(), BinEdges{0.2, 0.4});
   }
 
   void test_get_binEdges_from_histogram_with_points() {
     Histogram hist(Points{0.1, 0.2, 0.4}, Frequencies{1, 2, 4});
     HistogramItem item(hist, 1);
-    compare(item.binEdges(), BinEdges{0.15, 0.3}, tolerance);
+    compare(item.binEdges(), BinEdges{0.15, 0.3});
   }
 
   void test_get_point_from_histogram_with_bins() {
     Histogram hist(BinEdges{0.1, 0.2, 0.4, 0.5}, Frequencies{1, 2, 4});
     HistogramItem item(hist, 1);
-    compare(item.point(), Points{0.3}, tolerance);
+    compare(item.point(), Points{0.3});
   }
 
   void test_get_point_from_histogram_with_points() {
     Histogram hist(Points{0.1, 0.2, 0.4}, Frequencies{1, 2, 4});
     HistogramItem item(hist, 1);
-    compare(item.point(), Points{0.2}, tolerance);
+    compare(item.point(), Points{0.2});
   }
 
   template<typename T>
-  void compare(const T& lhs, const T& rhs, double tol = 0) {
+  void compare(const T& lhs, const T& rhs) {
       TS_ASSERT_EQUALS(lhs.size(), rhs.size())
 
       for (size_t i = 0; i <  lhs.size(); ++i) {
