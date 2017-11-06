@@ -7,18 +7,6 @@
 */
 /***************************************************************************/
 
-// Define the module name. This has to match the library filename
-%Module mantidqtpython
-
-%UnitCode
-  #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-    #pragma GCC system_header
-  #endif
-%End
-
-/******************************** SIP Imports ****************/
-%Import QtCore/QtCoremod.sip
-%Import QtGui/QtGuimod.sip
 %Include qwttypes.sip
 
 %ModuleHeaderCode
