@@ -76,7 +76,7 @@ mtd_add_sip_module (
   MODULE_NAME mantidqtpython
   TARGET_NAME mantidqtpython
   SIP_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  SIP_SRCS mantidqt.sip
+  SIP_SRCS mantidqtpython_def.sip
   HEADER_DEPS ${HEADER_DEPENDS}
   PYQT_VERSION 4
   LINK_LIBS ${TCMALLOC_LIBRARIES_LINKTIME}
