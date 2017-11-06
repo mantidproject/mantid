@@ -1108,6 +1108,15 @@ public:
     TS_ASSERT(!h.sharedE());
     TS_ASSERT(!h.sharedDx());
   }
+
+  void test_that_can_iterate_hsitogram() {
+    Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
+    double total = 0;
+    for (const auto& item : hist) {
+        total += item.counts();
+    }  
+    TS_ASSERT_EQUALS(total, 7)
+  }
 };
 
 class HistogramTestPerformance : public CxxTest::TestSuite {
@@ -1119,8 +1128,9 @@ public:
 
   HistogramTestPerformance() : xData(histSize, LinearGenerator(0, 2)) {
     BinEdges edges(histSize, LinearGenerator(0, 2));
+    Counts counts(histSize-1, LinearGenerator(0, 2));
     for (size_t i = 0; i < nHists; i++)
-      hists.push_back(Histogram(edges));
+      hists.push_back(Histogram(edges, counts));
   }
 
   void test_copy_X() {
@@ -1138,6 +1148,15 @@ public:
     auto x = Mantid::Kernel::make_cow<HistogramX>(xData);
     for (auto &i : hists)
       i.setSharedX(x);
+  }
+
+  void test_iterate() {
+      double total = 0;
+      for (size_t i =0; i < nHists/10; ++i) {
+          for (auto& item : hists[i]) {
+              total += item.counts();
+          }
+      }
   }
 
 private:

@@ -14,6 +14,7 @@
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
@@ -189,6 +190,9 @@ public:
   void setYMode(YMode ymode) { m_yMode = ymode; }
   void convertToCounts();
   void convertToFrequencies();
+
+  HistogramIterator begin() const { return HistogramIterator(*this, 0); }
+  HistogramIterator end() const { return HistogramIterator(*this, size()); }
 
 private:
   template <class TX> void initX(const TX &x);
