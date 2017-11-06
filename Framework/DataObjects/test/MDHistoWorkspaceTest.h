@@ -269,7 +269,6 @@ public:
     auto cloned = ws->clone();
     TS_ASSERT(cloned->getName().empty())
     AnalysisDataService::Instance().clear();
-
   }
 
   //--------------------------------------------------------------------------------------
