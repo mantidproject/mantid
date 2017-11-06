@@ -1,15 +1,15 @@
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAMITEM_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAMITEM_H_
 
-#include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Points.h"
 #include <utility>
 
 namespace Mantid {
 namespace HistogramData {
 
-// forward declare Histogram    
+// forward declare Histogram
 class Histogram;
 
 /** HistogramItem
@@ -20,10 +20,10 @@ class Histogram;
   Histogram using the foreach loop syntax. HistogramItem provides
   efficient access to a single point in the Histogram.
 
-  HistogramItem will only perform conversions between counts and 
+  HistogramItem will only perform conversions between counts and
   frequencies or points and bins when explicitly told to. Code that
   requires only a few values from a large Histogram may find this faster
-  than converting the whole X, Y or E value. 
+  than converting the whole X, Y or E value.
 
   @author Samuel Jackson
   @date 2017

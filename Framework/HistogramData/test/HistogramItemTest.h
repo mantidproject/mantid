@@ -90,7 +90,8 @@ public:
   void test_get_frequencyStandardDeviation_from_histogram_with_counts() {
     Histogram hist(Points{0.1, 0.2, 0.4}, Counts{1, 2, 4});
     HistogramItem item(hist, 1);
-    TS_ASSERT_DELTA(item.frequencyStandardDeviation(), std::sqrt(88.8888888), tolerance)
+    TS_ASSERT_DELTA(item.frequencyStandardDeviation(), std::sqrt(88.8888888),
+                    tolerance)
   }
 
   void test_get_frequencyStandardDeviation_from_histogram_with_frequencies() {
@@ -147,16 +148,13 @@ public:
     compare(item.point(), Points{0.2});
   }
 
-  template<typename T>
-  void compare(const T& lhs, const T& rhs) {
-      TS_ASSERT_EQUALS(lhs.size(), rhs.size())
+  template <typename T> void compare(const T &lhs, const T &rhs) {
+    TS_ASSERT_EQUALS(lhs.size(), rhs.size())
 
-      for (size_t i = 0; i <  lhs.size(); ++i) {
-        TS_ASSERT_DELTA(lhs[i], rhs[i], tolerance)
-      }
-
+    for (size_t i = 0; i < lhs.size(); ++i) {
+      TS_ASSERT_DELTA(lhs[i], rhs[i], tolerance)
+    }
   }
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMITEMTEST_H_ */
-
