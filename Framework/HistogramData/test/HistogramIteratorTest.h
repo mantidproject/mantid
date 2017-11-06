@@ -17,7 +17,9 @@ class HistogramIteratorTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HistogramIteratorTest *createSuite() { return new HistogramIteratorTest(); }
+  static HistogramIteratorTest *createSuite() {
+    return new HistogramIteratorTest();
+  }
   static void destroySuite(HistogramIteratorTest *suite) { delete suite; }
 
   void test_construction() {
@@ -27,4 +29,3 @@ public:
 };
 
 #endif /* MANTID_HISTOGRAMDATA_HISTOGRAMITERATORTEST_H_ */
-

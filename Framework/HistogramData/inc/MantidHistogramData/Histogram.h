@@ -1,23 +1,23 @@
 #ifndef MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 #define MANTID_HISTOGRAMDATA_HISTOGRAM_H_
 
-#include "MantidHistogramData/DllConfig.h"
-#include "MantidKernel/cow_ptr.h"
 #include "MantidHistogramData/BinEdges.h"
-#include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
 #include "MantidHistogramData/CountVariances.h"
+#include "MantidHistogramData/Counts.h"
+#include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Frequencies.h"
 #include "MantidHistogramData/FrequencyStandardDeviations.h"
 #include "MantidHistogramData/FrequencyVariances.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramIterator.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/HistogramIterator.h"
-#include "MantidHistogramData/Points.h"
 #include "MantidHistogramData/PointStandardDeviations.h"
 #include "MantidHistogramData/PointVariances.h"
+#include "MantidHistogramData/Points.h"
+#include "MantidKernel/cow_ptr.h"
 
 #include <vector>
 
