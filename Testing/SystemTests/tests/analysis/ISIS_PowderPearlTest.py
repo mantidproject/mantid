@@ -26,6 +26,9 @@ calibration_folder_name = os.path.join("calibration", inst_name.lower())
 calibration_map_rel_path = os.path.join("yaml_files", "pearl_system_test_mapping.yaml")
 spline_rel_path = os.path.join("17_1", "VanSplined_98472_tt70_pearl_offset_16_4.cal.nxs")
 
+# Relative to output folder
+unsplined_rel_dir = os.path.join("17_1", "Test")
+
 # Generate paths for the tests
 # This implies DIRS[0] is the system test data folder
 working_dir = os.path.join(DIRS[0], working_folder_name)
@@ -36,22 +39,36 @@ output_dir = os.path.join(working_dir, output_folder_name)
 calibration_map_path = os.path.join(input_dir, calibration_map_rel_path)
 calibration_dir = os.path.join(input_dir, calibration_folder_name)
 spline_path = os.path.join(calibration_dir, spline_rel_path)
+unsplined_dir = os.path.join(output_dir, unsplined_rel_dir)
+unsplined_path = os.path.join(unsplined_dir, "PRL98472_tt70_{}.nxs")
 
 
-class CreateVanadiumTest(stresstesting.MantidStressTest):
+class _CreateVanadiumTest(stresstesting.MantidStressTest):
 
-    calibration_results = None
+    calibration_results_splined = None
+    calibration_results_unsplined = None
     existing_config = config['datasearch.directories']
+    focus_mode = None
 
     def requiredFiles(self):
         return _gen_required_files()
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration()
+        #self.calibration_results_splined, self.calibration_results_unsplined = \
+        _run_vanadium_calibration(focus_mode=self.focus_mode)
+
+    def skipTests(self):
+        # Don't actually run this test, as it is a dummy for the focus-mode-specific tests
+        return True
 
     def validate(self):
-        return calibration_validator(self.calibration_results)
+        return (_compare_ws(reference_file_name="ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode),
+                            results="PEARL98472_tt70-Results-D-Grp") and
+                _compare_ws(reference_file_name="ISIS_Powder-PEARL00098472_splined.nxs",
+                            results="Van_spline_data_tt70"))
+        #return ("PEARL98472_tt70-Results-D-Grp", "ISIS_Powder_PRL98472_tt70_{}.nxs".format(self.focus_mode))
+                #("Van_spline_data_tt70", "ISIS_Powder-PEARL00098472_splined.nxs"))
 
     def cleanup(self):
         try:
@@ -60,6 +77,34 @@ class CreateVanadiumTest(stresstesting.MantidStressTest):
         finally:
             mantid.mtd.clear()
             config['datasearch.directories'] = self.existing_config
+
+
+class CreateVanadiumAllTest(_CreateVanadiumTest):
+    focus_mode = "all"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumTransTest(_CreateVanadiumTest):
+    focus_mode = "trans"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumGroupsTest(_CreateVanadiumTest):
+    focus_mode = "groups"
+
+    def skipTests(self):
+        return False
+
+
+class CreateVanadiumModsTest(_CreateVanadiumTest):
+    focus_mode = "mods"
+
+    def skipTests(self):
+        return False
 
 
 class FocusTest(stresstesting.MantidStressTest):
@@ -97,20 +142,13 @@ def _gen_required_files():
     return input_files
 
 
-def run_vanadium_calibration():
+def _run_vanadium_calibration(focus_mode):
     vanadium_run = 98507  # Choose arbitrary run in the cycle 17_1
 
-    inst_obj = setup_inst_object(mode="tt70")
+    inst_obj = setup_inst_object(tt_mode="tt70", focus_mode=focus_mode)
 
     # Run create vanadium twice to ensure we get two different output splines / files
     inst_obj.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True)
-
-    # Check the spline looks good and was saved
-    if not os.path.exists(spline_path):
-        raise RuntimeError("Could not find output spline at the following path: " + spline_path)
-    splined_ws = mantid.Load(Filename=spline_path)
-
-    return splined_ws
 
 
 def run_focus():
@@ -124,16 +162,9 @@ def run_focus():
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
-    inst_object = setup_inst_object(mode="tt70")
+    inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True,
-                             perform_attenuation=True, attenuation_file_path=attenuation_path,
-                             focus_mode="Trans")
-
-
-def calibration_validator(results):
-    # Get the name of the grouped workspace list
-    reference_file_name = "ISIS_Powder-PEARL00098472_splined.nxs"
-    return _compare_ws(reference_file_name=reference_file_name, results=results)
+                             perform_attenuation=True, attenuation_file_path=attenuation_path)
 
 
 def focus_validation(results):
@@ -144,25 +175,26 @@ def focus_validation(results):
 def _compare_ws(reference_file_name, results):
     ref_ws = mantid.Load(Filename=reference_file_name)
 
-    is_valid = True if len(results) > 0 else False
+    is_valid = len(results) > 0
 
-    for ws, ref in zip(results, ref_ws):
-        if not (mantid.CompareWorkspaces(Workspace1=ws, Workspace2=ref)):
-            is_valid = False
-            print (ws.getName() + " was not equal to: " + ref.getName())
+    if not (mantid.CompareWorkspaces(Workspace1=results, Workspace2=ref_ws)):
+        is_valid = False
+        print (results.getName() + " was not equal to: " + ref_ws.getName())
 
     return is_valid
 
 
 def setup_mantid_paths():
     config['datasearch.directories'] += ";" + input_dir
+    config['datasearch.directories'] += ";" + unsplined_dir
 
 
-def setup_inst_object(mode):
+def setup_inst_object(tt_mode, focus_mode):
     user_name = "Test"
 
     inst_obj = Pearl(user_name=user_name, calibration_mapping_file=calibration_map_path, long_mode=False,
-                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=mode, focus_mode="all")
+                     calibration_directory=calibration_dir, output_directory=output_dir, tt_mode=tt_mode,
+                     focus_mode=focus_mode)
     return inst_obj
 
 
