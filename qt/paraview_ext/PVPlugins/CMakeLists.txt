@@ -17,15 +17,18 @@ add_subdirectory( Sources )
 set ( _plugin_filename ${CMAKE_SHARED_LIBRARY_PREFIX}NonOrthogonalSource${CMAKE_SHARED_LIBRARY_SUFFIX} )
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
   set ( _pv_library_output_dir ${ParaView_DIR}/bin )
+  # add_custom_command doesn't support generator expressions for the OUTPUT argument
+  string ( REPLACE "<CONFIG>" "\${CMAKE_CFG_INTDIR}" _plugin_library_output ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} )
 else ()
   set ( _pv_library_output_dir ${ParaView_DIR}/lib )
+  set ( _plugin_library_output ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} )
 endif()
-add_custom_command ( OUTPUT ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
+add_custom_command ( OUTPUT ${_plugin_library_output}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
   ${_pv_library_output_dir}/${CMAKE_CFG_INTDIR}/${_plugin_filename}
-  ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
+  ${_plugin_library_output}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
 )
-add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename} )
+add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${_plugin_library_output}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename} )
 add_dependencies ( MantidParaViewMDEWSourceSMPlugin copy_nonorthogonal_plugin )
 
 if ( (NOT APPLE) AND NonOrthogonalSourcePlugin_LOCATION)

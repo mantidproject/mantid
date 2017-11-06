@@ -120,7 +120,7 @@ enable_precompiled_headers( inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC
 add_library ( WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

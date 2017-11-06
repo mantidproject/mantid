@@ -14,6 +14,7 @@ if( ParaView_FOUND AND USE_PARAVIEW )
   function (set_pvplugin_properties target QT_VERSION vers)
     set_target_properties ( ${target} PROPERTIES
       LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}
+      RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}
       FOLDER "MantidVatesParaViewPlugins"
     )
   endfunction()
@@ -29,6 +30,5 @@ if( ParaView_FOUND AND USE_PARAVIEW )
   add_subdirectory( PVPlugins )
   add_subdirectory( VatesSimpleGui )
 else( ParaView_FOUND AND USE_PARAVIEW )
-  message( STATUS "Vates-Paraview plugins and widgets will not be built." ) 
+  message( STATUS "Vates-Paraview plugins and widgets will not be built." )
 endif( ParaView_FOUND AND USE_PARAVIEW )
-

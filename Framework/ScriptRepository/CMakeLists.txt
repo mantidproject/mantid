@@ -25,7 +25,7 @@ add_subdirectory ( test )
 # Set the name of the generated library
 set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository 
   COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( ScriptRepository PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

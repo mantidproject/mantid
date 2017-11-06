@@ -232,7 +232,7 @@ endif()
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
   INSTALL_RPATH "@loader_path/../Contents/MacOS/"
 )
 # Add to the 'Framework' group in VS

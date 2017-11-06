@@ -22,7 +22,7 @@ add_library ( MPIAlgorithms ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( MPIAlgorithms PROPERTIES
   OUTPUT_NAME MantidMPIAlgorithms
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )

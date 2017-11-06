@@ -28,10 +28,12 @@ include_directories ( SYSTEM ${PARAVIEW_INCLUDE_DIRS})
 add_definitions( -DIN_MANTID_VATESAPI )
 # Add the target for this directory
 add_library( VatesAlgorithms ${SRC_FILES} ${INC_FILES} )
-# Set the name of the generated library
-set_target_properties( VatesAlgorithms PROPERTIES OUTPUT_NAME MantidVatesAlgorithms )
-# Add to the 'Framework' group in VS
-set_property( TARGET VatesAlgorithms PROPERTY FOLDER "MantidVates" )
+# target properties
+set_target_properties ( VatesAlgorithms PROPERTIES OUTPUT_NAME MantidVatesAlgorithms
+  FOLDER "MantidVates"
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+)
 
 target_link_libraries( VatesAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
 ${MANTID_SUBPROJECT_LIBS}
@@ -44,10 +46,6 @@ vtkFiltersSources
 ${vtkjsoncpp_LIBRARIES}
 vtkPVVTKExtensionsDefault
 ${POCO_LIBRARIES}
-)
-
-set_target_properties ( VatesAlgorithms PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

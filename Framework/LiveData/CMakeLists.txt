@@ -100,7 +100,7 @@ enable_precompiled_headers( inc/MantidLiveData/PrecompiledHeader.h SRC_FILES )
 add_library ( LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( LiveData PROPERTIES OUTPUT_NAME MantidLiveData
-  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY} RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
