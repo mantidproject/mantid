@@ -23,7 +23,7 @@ endif()
 add_custom_command ( OUTPUT ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
   ${_pv_library_output_dir}/${CMAKE_CFG_INTDIR}/${_plugin_filename}
-  ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt${vers}/${_plugin_filename}
+  ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename}
 )
 add_custom_target ( copy_nonorthogonal_plugin DEPENDS ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_SUBDIR}/qt4/${_plugin_filename} )
 add_dependencies ( MantidParaViewMDEWSourceSMPlugin copy_nonorthogonal_plugin )
