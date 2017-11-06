@@ -735,7 +735,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_to_hash = deepcopy(full_state)
 
         # Data
-        state_to_hash.data.sample_scatter = EMPTY_NAME
+        state_to_hash.data.sample_scatter = [EMPTY_NAME]
         state_to_hash.data.sample_scatter_period = ALL_PERIODS
         state_to_hash.data.sample_transmission = EMPTY_NAME
         state_to_hash.data.sample_transmission_period = ALL_PERIODS

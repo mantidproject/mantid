@@ -109,19 +109,43 @@ class StateData(StateBase):
 
     def file_information(self):
         run_numbers = self.sample_scatter
-        return StateData.file_information_from_run_number(run_numbers[0])
+        return [StateData.file_information_from_run_number(file_info)\
+                for file_info in run_numbers]
+
+def ensure_all_same(property_name, items):
+    try:
+        first = next(items)
+        if not all(x == first for x in items):
+            raise RuntimeError('All file informations in a single reduction must have the same {}'\
+                .format(property_name))
+    except StopIteration:
+        return
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Builder
 # ----------------------------------------------------------------------------------------------------------------------
 def set_information_from_file(data_info):
-    file_information = data_info.file_information()
-    data_info.instrument = file_information.get_instrument()
-    data_info.facility = file_information.get_facility()
-    data_info.sample_scatter_run_number = file_information.get_run_number()
-    data_info.sample_scatter_is_multi_period = file_information.get_number_of_periods() > 1
-    data_info.idf_file_path = file_information.get_idf_file_path()
-    data_info.ipf_file_path = file_information.get_ipf_file_path()
+    file_informations = data_info.file_information()
+    first_file_information = file_informations[0]
+
+    ensure_all_same('instrument', (file_information.get_instrument() for file_information in file_informations))
+    data_info.instrument = first_file_information.get_instrument()
+
+    ensure_all_same('facility', (file_information.get_facility() for file_information in file_informations))
+    data_info.facility = first_file_information.get_facility()
+
+    ensure_all_same('sample_scatter_run_number', (file_information.get_run_number() for file_information in file_informations))
+    data_info.sample_scatter_run_number = first_file_information.get_run_number()
+
+    ensure_all_same('sample_scatter.get_number_of_periods()', (file_information.get_number_of_periods() for file_information in file_informations))
+    data_info.sample_scatter_is_multi_period = first_file_information.get_number_of_periods() > 1
+
+    ensure_all_same('idf_file_path', (file_information.get_idf_file_path() for file_information in file_informations))
+    data_info.idf_file_path = first_file_information.get_idf_file_path()
+
+    ensure_all_same('ipf_file_path', (file_information.get_ipf_file_path() for file_information in file_informations))
+    data_info.ipf_file_path = first_file_information.get_ipf_file_path()
 
 
 class StateDataBuilder(object):

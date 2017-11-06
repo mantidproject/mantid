@@ -396,8 +396,9 @@ class MaskFactory(object):
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                         instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
             run_number = data_info.sample_scatter_run_number
-            file_name = data_info.sample_scatter
-            _, ipf_path = get_instrument_paths_for_sans_file(file_name)
+            run_numbers = data_info.sample_scatter
+            first_run_number = run_numbers[0]
+            _, ipf_path = get_instrument_paths_for_sans_file(first_run_number)
             spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
             masker = MaskerISIS(spectra_block, instrument)
         else:

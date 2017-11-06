@@ -63,9 +63,12 @@ from sans.algorithm_detail.calibration import apply_calibration
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
 # ----------------------------------------------------------------------------------------------------------------------
-def update_file_information(file_information_dict, factory, data_type, file_name):
-    info = factory.create_sans_file_information(file_name)
-    file_information_dict.update({data_type: info})
+def update_file_information(file_information_dicts, factory, data_type, file_names):
+    for file_index in range(0, len(file_names)):
+        file_information_dict = file_information_dicts[file_index]
+        file_name = file_names[file_index]
+        info = factory.create_sans_file_information(file_name)
+        file_information_dict.update({data_type: info})
 
 
 def get_file_and_period_information_from_data(data):
@@ -76,33 +79,41 @@ def get_file_and_period_information_from_data(data):
     :return: a map of SANSFileInformation objects and map of period information
     """
     file_information_factory = SANSFileInformationFactory()
-    file_information = dict()
-    period_information = dict()
+    file_informations = [dict() for run_number in data.sample_scatter]\
+                        if data.sample_scatter else []
+    period_informations = [dict() for run_number in data.sample_scatter]\
+                          if data.sample_scatter else []
     if data.sample_scatter:
-        update_file_information(file_information, file_information_factory,
+        update_file_information(file_informations, file_information_factory,
                                 SANSDataType.SampleScatter, data.sample_scatter)
-        period_information.update({SANSDataType.SampleScatter: data.sample_scatter_period})
+        for period_information in period_informations:
+            period_information.update({SANSDataType.SampleScatter: data.sample_scatter_period})
     if data.sample_transmission:
-        update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleTransmission, data.sample_transmission)
-        period_information.update({SANSDataType.SampleTransmission: data.sample_transmission_period})
+        update_file_information(file_informations, file_information_factory,
+                                SANSDataType.SampleTransmission, [data.sample_transmission])
+        for period_information in period_informations:
+            period_information.update({SANSDataType.SampleTransmission: data.sample_transmission_period})
     if data.sample_direct:
-        update_file_information(file_information, file_information_factory,
-                                SANSDataType.SampleDirect, data.sample_direct)
-        period_information.update({SANSDataType.SampleDirect: data.sample_direct_period})
+        update_file_information(file_informations, file_information_factory,
+                                SANSDataType.SampleDirect, [data.sample_direct])
+        for period_information in period_informations:
+            period_information.update({SANSDataType.SampleDirect: data.sample_direct_period})
     if data.can_scatter:
-        update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanScatter, data.can_scatter)
-        period_information.update({SANSDataType.CanScatter: data.can_scatter_period})
+        update_file_information(file_informations, file_information_factory,
+                                SANSDataType.CanScatter, [data.can_scatter])
+        for period_information in period_informations:
+            period_information.update({SANSDataType.CanScatter: data.can_scatter_period})
     if data.can_transmission:
-        update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanTransmission, data.can_transmission)
-        period_information.update({SANSDataType.CanTransmission: data.can_transmission_period})
+        update_file_information(file_informations, file_information_factory,
+                                SANSDataType.CanTransmission, [data.can_transmission])
+        for period_information in period_informations:
+            period_information.update({SANSDataType.CanTransmission: data.can_transmission_period})
     if data.can_direct:
-        update_file_information(file_information, file_information_factory,
-                                SANSDataType.CanDirect, data.can_direct)
-        period_information.update({SANSDataType.CanDirect: data.can_direct_period})
-    return file_information, period_information
+        update_file_information(file_informations, file_information_factory,
+                                SANSDataType.CanDirect, [data.can_direct])
+        for period_information in period_informations:
+            period_information.update({SANSDataType.CanDirect: data.can_direct_period})
+    return file_informations, period_information
 
 
 def is_transmission_type(to_check):
@@ -706,6 +717,7 @@ class SANSLoadDataISIS(SANSLoadData):
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
         # Get all entries from the state file
         file_infos, period_infos = get_file_and_period_information_from_data(data_info)
+        first_file_info = file_infos[0]
 
         # Several important remarks regarding the loading
         # 1. Scatter files are loaded as with monitors and the data in two separate workspaces.
@@ -720,7 +732,7 @@ class SANSLoadDataISIS(SANSLoadData):
         else:
             calibration_file = ""
 
-        for key, value in list(file_infos.items()):
+        for key, value in list(first_file_info.items()):
             # Loading
             report_message = "Loading {0}".format(SANSDataType.to_string(key))
             progress.report(report_message)
@@ -757,8 +769,9 @@ class SANSLoadDataFactory(object):
         data = state.data
         # Get the correct loader based on the sample scatter file from the data sub state
         data.validate()
-        file_info, _ = get_file_and_period_information_from_data(data)
-        sample_scatter_info = file_info[SANSDataType.SampleScatter]
+        file_infos, _ = get_file_and_period_information_from_data(data)
+        first_file_info = file_infos[0]
+        sample_scatter_info = first_file_info[SANSDataType.SampleScatter]
         return sample_scatter_info.get_facility()
 
     @staticmethod

@@ -243,7 +243,7 @@ class FloatListParameter(TypedParameter):
 
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_float_and_not_empty(value):
-            raise TypeError("Trying to set {0} which expects a value of type {1}."
+            raise TypeError("Trying to set {0} which expects a non-empty value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
                                                                                str(value), type(value)))
 
@@ -254,7 +254,7 @@ class StringListParameter(TypedParameter):
 
         def _type_check(self, value):
             if not isinstance(value, self.parameter_type) or not all_list_elements_are_string_and_not_empty(value):
-                raise TypeError("Trying to set {0} which expects a value of type {1}."
+                raise TypeError("Trying to set {0} which expects a non-empty value of type {1}."
                                 " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
                                                                                    str(value), type(value)))
 
@@ -266,7 +266,7 @@ class PositiveIntegerListParameter(TypedParameter):
 
     def _type_check(self, value):
         if not isinstance(value, self.parameter_type) or not all_list_elements_are_int_and_not_empty(value):
-            raise TypeError("Trying to set {0} which expects a value of type {1}."
+            raise TypeError("Trying to set {0} which expects a non-empty value of type {1}."
                             " Got a value of {2} which is of type: {3}".format(self.name, str(self.parameter_type),
                                                                                str(value), type(value)))
 
