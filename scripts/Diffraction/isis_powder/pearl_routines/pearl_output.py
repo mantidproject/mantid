@@ -79,7 +79,7 @@ def _focus_mode_groups(output_file_paths, calibrated_spectra):
     to_save = _sum_groups_of_three_ws(calibrated_spectra=calibrated_spectra, output_file_names=output_file_paths)
 
     workspaces_4_to_9_name = output_file_paths["output_name"] + "_mods4-9"
-    workspaces_4_to_9 = mantid.Plus(LHSWorkspace=to_save[1], RHSWorkspace=to_save[2])
+    workspaces_4_to_9 = mantid.MergeRuns(InputWorkspaces=to_save[1] + to_save[2])
     workspaces_4_to_9 = mantid.Scale(InputWorkspace=workspaces_4_to_9, Factor=0.5,
                                      OutputWorkspace=workspaces_4_to_9_name)
     to_save.append(workspaces_4_to_9)
@@ -165,28 +165,22 @@ def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectr
 
 
 def _sum_groups_of_three_ws(calibrated_spectra, output_file_names):
-    workspace_list = []
     output_list = []
-    for outer_loop_count in range(0, 3):
-        # First clone workspaces 1/4/7
-        pass_multiplier = (outer_loop_count * 3)
-        workspace_names = "focus_mode_groups-" + str(pass_multiplier + 1)
-        workspace_list.append(mantid.CloneWorkspace(InputWorkspace=calibrated_spectra[pass_multiplier],
-                                                    OutputWorkspace=workspace_names))
-        # Then add workspaces 1+2+3 / 4+5+6 / 7+8+9
-        for i in range(1, 3):
-            input_ws_index = i + pass_multiplier  # Workspaces 2/3 * n
-            inner_workspace_names = "focus_mode_groups-" + str(input_ws_index)
-            workspace_list[outer_loop_count] = mantid.Plus(LHSWorkspace=workspace_list[outer_loop_count],
-                                                           RHSWorkspace=calibrated_spectra[input_ws_index],
-                                                           OutputWorkspace=inner_workspace_names)
+    """
+    for outer_counter in range(3):
+        ws_name = output_file_names["output_name"] + "_mods{}-{}".format(outer_counter * 3 + 1, (outer_counter + 1) * 3)
+        ws = mantid.CloneWorkspace(InputWorkspace=calibrated_spectra[outer_counter * 3], OutputWorkspace=ws_name)
 
-        # Finally scale the output workspaces
-        mod_first_number = str((outer_loop_count * 3) + 1)  # Generates 1/4/7
-        mod_last_number = str((outer_loop_count + 1) * 3)  # Generates 3/6/9
-        workspace_names = output_file_names["output_name"] + "_mod" + mod_first_number + '-' + mod_last_number
-        output_list.append(mantid.Scale(InputWorkspace=workspace_list[outer_loop_count],
-                                        OutputWorkspace=workspace_names, Factor=0.333333333333))
+        for inner_counter in range(1, 3):
+            ws = mantid.Plus(LHSWorkspace=calibrated_spectra[outer_counter * 3 + inner_counter], RHSWorkspace=ws)
 
-    common.remove_intermediate_workspace(workspace_list)
+        ws = mantid.Scale(InputWOrkspace=ws, Factor=1./3)
+        output_list.append(ws)
+        """
+    for i in range(3):
+        ws_name = output_file_names["output_name"] + "_mods{}-{}".format(i * 3 + 1, (i + 1) * 3)
+        summed_spectra = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[3 * i: 3 * i + 3], OutputWorkspace=ws_name)
+        scaled = mantid.Scale(InputWorkspace=summed_spectra, Factor=1./3, OutputWorkspace=ws_name)
+        output_list.append(scaled)
+
     return output_list
