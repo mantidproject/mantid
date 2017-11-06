@@ -1952,6 +1952,7 @@ class CWSCDReductionControl(object):
             is_url_good = False
             error_message = None
             try:
+                # TODO/TODO/FIXME/FIXME - urllib2 is not used anymore!
                 result = urllib2.urlopen(self._myServerURL)
             except urllib2.HTTPError as err:
                 error_message = str(err.code)

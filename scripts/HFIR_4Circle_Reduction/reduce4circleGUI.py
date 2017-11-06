@@ -923,30 +923,6 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def do_browse_local_cache_dir(self):
-        """ Browse local cache directory
-        :return:
-        """
-        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
-                                                                     'Get Local Cache Directory',
-                                                                     self._homeSrcDir))
-
-        # Set local directory to control
-        status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
-        if status is False:
-            self.pop_one_button_dialog(error_message)
-            return
-
-        # Synchronize to local data/spice directory and local cache directory
-        if str(self.ui.lineEdit_localSpiceDir.text()) != '':
-            prev_dir = str(self.ui.lineEdit_localSrcDir.text())
-            self.pop_one_button_dialog('Local data directory was set up as %s' %
-                                       prev_dir)
-        self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
-        self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
-
-        return
-
     def do_browse_preprocessed_dir(self):
         """ browse the pre-processed merged scans' directory
         :return:
@@ -3413,9 +3389,15 @@ class MainWindow(QtGui.QMainWindow):
         """ launch a dialog for user to download data
         :return:
         """
+        # create the dialog instance if it is not created
         if self._dataDownloadDialog is None:
             self._dataDownloadDialog = DataDownloadDialog(self)
 
+        # set the experiment number
+        exp_number = int(self.ui.lineEdit_exp.text())
+        self._dataDownloadDialog.set_experiment_number(exp_number)
+
+        # show the dialog
         self._dataDownloadDialog.show()
 
         return

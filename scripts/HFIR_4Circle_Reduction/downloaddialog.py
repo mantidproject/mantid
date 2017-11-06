@@ -1,6 +1,7 @@
 ##########
 # Dialog to set up HTTP data downloading server and download HB3A data to local
 ##########
+import os
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 import HFIR_4Circle_Reduction.fourcircle_utility as hb3a_util
@@ -30,6 +31,9 @@ class DataDownloadDialog(QtGui.QDialog):
         self.ui = ui_http.Ui_Dialog()
         self.ui.setupUi(self)
 
+        # initialize widgets
+        self._init_widgets()
+
         # define event handing
         self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
                      self.do_test_url)
@@ -51,6 +55,50 @@ class DataDownloadDialog(QtGui.QDialog):
         # Set the URL red as it is better not check at this stage. Leave it to user
         self.ui.lineEdit_url.setStyleSheet("color: black;")
 
+        # define class variable
+        self._homeSrcDir = os.getcwd()
+        try:
+            self._myControl = None
+            self._myControl = parent.controller
+        except AttributeError as att_err:
+            print att_err
+
+        # experiment number
+        self._expNumber = None
+
+        return
+
+    def _init_widgets(self):
+        """
+        initialize widgets
+        :return:
+        """
+        self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
+
+        return
+
+    def do_browse_local_cache_dir(self):
+        """ Browse local cache directory
+        :return:
+        """
+        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
+                                                                     'Get Local Cache Directory',
+                                                                     self._homeSrcDir))
+
+        # Set local directory to control
+        status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
+            return
+
+        # Synchronize to local data/spice directory and local cache directory
+        # if str(self.ui.lineEdit_localSpiceDir.text()) != '':
+        #     prev_dir = str(self.ui.lineEdit_localSrcDir.text())
+        #     self.pop_one_button_dialog('Local data directory was set up as %s' %
+        #                                prev_dir)
+        self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
+        # self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
+
         return
 
     def do_change_data_access_mode(self):
@@ -58,31 +106,36 @@ class DataDownloadDialog(QtGui.QDialog):
         Event handling methods
         :return:
         """
-        new_mode = str(self.ui.comboBox_mode.currentText())
-        self._dataAccessMode = new_mode
+        # TODO/FIXME/NOW - Find out whether these widgets are used in the dialog
+        # new_mode = str(self.ui.comboBox_mode.currentText())
+        # self._dataAccessMode = new_mode
 
-        if new_mode.startswith('Local') is True:
-            self.ui.lineEdit_localSpiceDir.setEnabled(True)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
-            self.ui.lineEdit_url.setEnabled(False)
-            self.ui.lineEdit_localSrcDir.setEnabled(False)
-            self.ui.pushButton_browseLocalCache.setEnabled(False)
-            self._allowDownload = False
-        else:
-            self.ui.lineEdit_localSpiceDir.setEnabled(False)
-            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
-            self.ui.lineEdit_url.setEnabled(True)
-            self.ui.lineEdit_localSrcDir.setEnabled(True)
-            self.ui.pushButton_browseLocalCache.setEnabled(True)
-            self._allowDownload = True
+        # if new_mode.startswith('Local') is True:
+        #     self.ui.lineEdit_localSpiceDir.setEnabled(True)
+        #     self.ui.pushButton_browseLocalDataDir.setEnabled(True)
+        #     self.ui.lineEdit_url.setEnabled(False)
+        #     self.ui.lineEdit_localSrcDir.setEnabled(False)
+        #     self.ui.pushButton_browseLocalCache.setEnabled(False)
+        #     self._allowDownload = False
+        # else:
+        #     self.ui.lineEdit_localSpiceDir.setEnabled(False)
+        #     self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+        #     self.ui.lineEdit_url.setEnabled(True)
+        #     self.ui.lineEdit_localSrcDir.setEnabled(True)
+        #     self.ui.pushButton_browseLocalCache.setEnabled(True)
+        #     self._allowDownload = True
 
         return
-
 
     def do_download_spice_data(self):
         """ Download SPICE data
         :return:
         """
+        # get experiment number
+        exp_no = self._expNumber
+        assert isinstance(exp_no, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                        ''.format(exp_no, type(exp_no))
+
         # Check scans to download
         scan_list_str = str(self.ui.lineEdit_downloadScans.text())
         if len(scan_list_str) > 0:
@@ -93,12 +146,6 @@ class DataDownloadDialog(QtGui.QDialog):
                 self.pop_one_button_dialog(error_message)
         else:
             # Get all scans
-            status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
-            if status is False:
-                self.pop_one_button_dialog(ret_obj)
-                return
-            exp_no = ret_obj
-            assert isinstance(exp_no, int)
             server_url = str(self.ui.lineEdit_url.text())
             scan_list = hb3a_util.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
@@ -112,7 +159,6 @@ class DataDownloadDialog(QtGui.QDialog):
             self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
 
         # Set up myControl for downloading data
-        exp_no = int(self.ui.lineEdit_exp.text())
         self._myControl.set_exp_number(exp_no)
 
         server_url = str(self.ui.lineEdit_url.text())
@@ -170,3 +216,16 @@ class DataDownloadDialog(QtGui.QDialog):
         QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
 
         return
+
+    def set_experiment_number(self, exp_number):
+        """set the experiment number
+        :param exp_number:
+        :return:
+        """
+        assert isinstance(exp_number, int), 'Experiment number {0} to set to download dialog must be an integer but ' \
+                                            'not a {1}.'.format(exp_number, type(exp_number))
+
+        self._expNumber = exp_number
+
+        return
+
