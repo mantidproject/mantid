@@ -1,18 +1,19 @@
 #include "MantidDataHandling/LoadSpice2D.h"
-#include "MantidDataHandling/XmlHandler.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -40,15 +41,13 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
-using Poco::XML::NodeList;
-using Poco::XML::Node;
-using Poco::XML::Text;
 
 namespace Mantid {
 namespace DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Types::Core::DateAndTime;
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -467,6 +466,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
 
   // store trap diameters in use
   std::vector<double> trapDiametersInUse;
+  trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
     trapDiametersInUse.push_back(trapDiameters[index]);
   }
@@ -701,7 +701,7 @@ void LoadSpice2D::runLoadInstrument(
     loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(false));
+                          Mantid::Kernel::OptionalBool(true));
     loadInst->execute();
   } catch (std::invalid_argument &) {
     g_log.information("Invalid argument to LoadInstrument Child Algorithm");

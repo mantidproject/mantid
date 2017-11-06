@@ -1,5 +1,6 @@
 // Python header must go first
-#include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtWidgets/Common/PythonThreading.h"
+#include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "AlgorithmDockWidget.h"
 #include "AlgorithmHistoryWindow.h"
@@ -10,20 +11,20 @@
 #include "MantidMDCurveDialog.h"
 #include "MantidMatrix.h"
 #include "MantidMatrixCurve.h"
-#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-#include "MantidQtMantidWidgets/MantidWSIndexDialog.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowser.h"
+#include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidSampleLogDialog.h"
 #include "MantidSampleMaterialDialog.h"
 #include "MantidTable.h"
 #include "MantidUI.h"
 #include "ProjectSerialiser.h"
 
-#include "../../MantidQt/MantidWidgets/ui_SequentialFitDialog.h"
+#include "ui_SequentialFitDialog.h"
 #include "../Folder.h"
 #include "../ScriptingWindow.h"
 #include "../Spectrogram.h"
 #include "../TiledWindow.h"
-#include "MantidQtAPI/pixmaps.h"
+#include "MantidQtWidgets/Common/pixmaps.h"
 
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "MantidAPI/Axis.h"
@@ -40,13 +41,13 @@
 
 #include "InstrumentWidget/InstrumentWindow.h"
 
-#include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
 
-#include "MantidQtMantidWidgets/MantidTreeWidget.h"
-#include "MantidQtMantidWidgets/WorkspacePresenter/QWorkspaceDockView.h"
+#include "MantidQtWidgets/Common/MantidTreeWidget.h"
+#include "MantidQtWidgets/Common/WorkspacePresenter/QWorkspaceDockView.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -56,6 +57,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTypes/SpectrumDefinition.h"
+
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include <QListWidget>
 #include <QMdiArea>
@@ -68,8 +73,8 @@
 #include <QToolBar>
 
 #include <algorithm>
+#include <ctime>
 #include <qwt_plot_curve.h>
-#include <time.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -84,12 +89,13 @@
 #include <boost/tokenizer.hpp>
 
 #include <Poco/ActiveResult.h>
+#include <Poco/Thread.h>
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtFactory/WidgetFactory.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/Factory/WidgetFactory.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 #include <typeinfo>
 
 using namespace std;
@@ -99,7 +105,8 @@ using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using MantidQt::MantidWidgets::MantidWSIndexDialog;
 using MantidQt::MantidWidgets::MantidTreeWidget;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Core::time_duration;
 using MantidQt::SliceViewer::SliceViewerWindow;
 
 namespace MantidException = Mantid::Kernel::Exception;
@@ -210,7 +217,7 @@ MantidUI::MantidUI(ApplicationWindow *aw)
       m_appWindow(aw), m_lastShownInstrumentWin(NULL),
       m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL),
       m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL),
-      m_vatesSubWindow(NULL)
+      m_vatesSubWindow(nullptr)
 //, m_spectrumViewWindow(NULL)
 {
 
@@ -329,8 +336,8 @@ void MantidUI::init() {
 
     m_fitFunction = m_defaultFitFunction;
   } catch (...) {
-    m_defaultFitFunction = NULL;
-    m_fitFunction = NULL;
+    m_defaultFitFunction = nullptr;
+    m_fitFunction = nullptr;
     g_log.warning("Curve fitting plugin not loaded. Some functionality will be "
                   "unavailable.");
   }
@@ -396,10 +403,26 @@ void MantidUI::shutdown() {
       Poco::Thread::sleep(100);
     }
   }
+  // Close any open algorithm dialogs. They contain alorithm references so
+  // should be cleaned up before the framework (and the Python environment)
+  // is destroyed. We traverse the object tree rather than tracking the
+  // creation as it is possible to create a dialog without going through
+  // factory methods.
+  const auto &childWidgets = m_appWindow->children();
+  for (auto child : childWidgets) {
+    if (auto *widget = qobject_cast<MantidQt::API::AlgorithmDialog *>(child)) {
+      // We want to delete this now and not defer it to later in the
+      // event loop
+      widget->setAttribute(Qt::WA_DeleteOnClose, false);
+      widget->close();
+      delete widget;
+      child = nullptr;
+    }
+  }
+
   // If any python objects need to be cleared away then the GIL needs to be
-  // held. This doesn't feel like
-  // it is in the right place but it will do no harm
-  ScopedPythonGIL gil;
+  // held.
+  ScopedPythonGIL lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().shutdown();
@@ -550,7 +573,7 @@ Graph3D *MantidUI::plot3DMatrix(int style) {
     return static_cast<MantidMatrix *>(w)->plotGraph3D(style);
   }
 
-  return 0;
+  return nullptr;
 }
 
 MultiLayer *MantidUI::plotSpectrogram(GraphOptions::CurveType type) {
@@ -559,7 +582,7 @@ MultiLayer *MantidUI::plotSpectrogram(GraphOptions::CurveType type) {
     return drawSingleColorFillPlot(
         QString::fromStdString(m->getWorkspaceName()), type);
   }
-  return 0;
+  return nullptr;
 }
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
@@ -596,7 +619,7 @@ MantidMatrix *MantidUI::importMatrixWorkspace(const QString &wsName, int lower,
 MantidMatrix *
 MantidUI::importMatrixWorkspace(const MatrixWorkspace_sptr workspace, int lower,
                                 int upper, bool showDlg) {
-  MantidMatrix *matrix = 0;
+  MantidMatrix *matrix = nullptr;
   if (workspace) {
     const QString wsName(workspace->getName().c_str());
     if (showDlg) {
@@ -712,7 +735,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
                      const bool showErrors, MultiLayer *plotWindow,
                      bool clearWindow) {
   ScopedOverrideCursor waitCursor;
-  auto firstName = wsNames.at(0);
+  const auto &firstName = wsNames.at(0);
 
   bool isGraphNew = false;
   MultiLayer *ml = appWindow()->prepareMultiLayer(isGraphNew, plotWindow,
@@ -722,7 +745,7 @@ MantidUI::plotMDList(const QStringList &wsNames, const int plotAxis,
   try {
     for (int i = 0; i < wsNames.size(); ++i) {
       // Create the curve with defaults
-      auto wsName = wsNames.at(i);
+      const auto &wsName = wsNames.at(i);
       MantidMDCurve *curve = new MantidMDCurve(wsName, g, showErrors);
       MantidQwtIMDWorkspaceData *data = curve->mantidData();
 
@@ -872,7 +895,7 @@ void MantidUI::showVatesSimpleInterface() {
         appWindow()->modifiedProject();
       } else {
         delete m_vatesSubWindow;
-        m_vatesSubWindow = NULL;
+        m_vatesSubWindow = nullptr;
         return;
       }
     }
@@ -882,7 +905,7 @@ void MantidUI::showVatesSimpleInterface() {
   }
   // reset the qt error redirection that Paraview puts in place
   // this may not be necessary if we move to qt5
-  qInstallMsgHandler(0);
+  qInstallMsgHandler(nullptr);
 }
 
 void MantidUI::showSpectrumViewer() {
@@ -1001,7 +1024,7 @@ void MantidUI::showAlgorithmHistory() {
       // ... create and display the window.
       AlgorithmHistoryWindow *palgHist =
           new AlgorithmHistoryWindow(m_appWindow, wsptr);
-      if (NULL != palgHist) {
+      if (nullptr != palgHist) {
         palgHist->show();
       }
     }
@@ -1027,11 +1050,11 @@ Table *MantidUI::importTableWorkspace(const QString &wsName, bool,
   }
 
   if (!ws.get())
-    return 0;
+    return nullptr;
 
   if (ws->rowCount() == 0 || ws->columnCount() == 0) {
     showCritical("Cannot create an empty table");
-    return 0;
+    return nullptr;
   }
 
   Table *t = new MantidTable(appWindow()->scriptingEnv(), ws, wsName,
@@ -1224,7 +1247,7 @@ Table *MantidUI::createDetectorTable(const QString &wsName,
       return createDetectorTable(wsName, peaks);
     }
   }
-  return NULL;
+  return nullptr;
 }
 
 /**
@@ -1242,6 +1265,9 @@ Table *MantidUI::createDetectorTable(
 
   // check if efixed value is available
   bool calcQ(true);
+
+  // check if we have a scanning workspace
+  bool isScanning = ws->detectorInfo().isScanning();
 
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
@@ -1262,6 +1288,8 @@ Table *MantidUI::createDetectorTable(
   colNames << "Index"
            << "Spectrum No"
            << "Detector ID(s)";
+  if (isScanning)
+    colNames << "Time Indexes";
   if (include_data) {
     colNames << "Data Value"
              << "Data Error";
@@ -1290,10 +1318,15 @@ Table *MantidUI::createDetectorTable(
   }
   t->setHeaderColType();
   t->setTextFormat(2);
+  if (isScanning)
+    t->setTextFormat(3);
   t->setTextFormat(ncols - 1);
 
   // Cache some frequently used values
   IComponent_const_sptr sample = ws->getInstrument()->getSample();
+  const auto beamAxisIndex =
+      ws->getInstrument()->getReferenceFrame()->pointingAlongBeam();
+  const auto sampleDist = sample->getPos()[beamAxisIndex];
   bool signedThetaParamRetrieved(false),
       showSignedTwoTheta(false); // If true,  signedVersion of the two theta
                                  // value should be displayed
@@ -1315,32 +1348,9 @@ Table *MantidUI::createDetectorTable(
     try {
       auto &spectrum = ws->getSpectrum(wsIndex);
       Mantid::specnum_t specNo = spectrum.getSpectrumNo();
-      QString detIds("");
-      const auto &ids = spectrum.getDetectorIDs();
-      size_t ndets = ids.size();
-      auto iter = ids.begin();
-      auto itEnd = ids.end();
-      if (ndets > DET_TABLE_NDETS_GROUP) {
-        detIds = QString("%1,%2...(%3 more)...%4,%5");
-        // post-fix increments and returns last value
-        // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
-        // to result
-        // in an undefined order in which the iterator is dereference and
-        // incremented leading
-        // to the first two items being backward on some systems
-        const Mantid::detid_t first(*iter++), second(*iter++);
-        detIds =
-            detIds.arg(first).arg(second).arg(ndets - 4); // First two + n extra
-        auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so
-                                     // no operator-()
-        const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
-        detIds = detIds.arg(lastm1).arg(last);
-      } else {
-        for (; iter != itEnd; ++iter) {
-          detIds += QString::number(*iter) + ",";
-        }
-        detIds.chop(1); // Drop last comma
-      }
+      const auto &ids =
+          dynamic_cast<const std::set<int> &>(spectrum.getDetectorIDs());
+      QString detIds = createTruncatedList(ids);
 
       // Geometry
       if (!spectrumInfo.hasDetectors(wsIndex))
@@ -1354,11 +1364,13 @@ Table *MantidUI::createDetectorTable(
                                    "Always") != parameters.end());
         signedThetaParamRetrieved = true;
       }
+
       double R(0.0), theta(0.0), phi(0.0);
-      // R and theta used as dummy variables
+      // theta used as a dummy variable
       // Note: phi is the angle around Z, not necessarily the beam direction.
       spectrumInfo.position(wsIndex).getSpherical(R, theta, phi);
-      // R is actually L2 (same as R if sample is at (0,0,0))
+      // R is actually L2 (same as R if sample is at (0,0,0)), except for
+      // monitors which are handled below.
       R = spectrumInfo.l2(wsIndex);
       // Theta is actually 'twoTheta' for detectors (twice the scattering
       // angle), if Z is the beam direction this corresponds to theta in
@@ -1374,28 +1386,51 @@ Table *MantidUI::createDetectorTable(
           // Log the error and leave theta as it is
           g_log.error(ex.what());
         }
+      } else {
+        const auto dist = spectrumInfo.position(wsIndex)[beamAxisIndex];
+        theta = sampleDist > dist ? 180.0 : 0.0;
       }
       const QString isMonitorDisplay = isMonitor ? "yes" : "no";
       colValues << QVariant(specNo) << QVariant(detIds);
+      if (isScanning) {
+        std::set<int> timeIndexSet;
+        for (auto def : spectrumInfo.spectrumDefinition(wsIndex)) {
+          timeIndexSet.insert(int(def.second));
+        }
+
+        QString timeIndexes = createTruncatedList(timeIndexSet);
+        colValues << QVariant(timeIndexes);
+      }
       // Y/E
       if (include_data) {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
+      // If monitors are before the sample in the beam, DetectorInfo
+      // returns a negative l2 distance.
+      if (isMonitor) {
+        R = std::abs(R);
+      }
       colValues << QVariant(R) << QVariant(theta);
 
       if (calcQ) {
+        if (isMonitor) {
+          // twoTheta is not defined for monitors.
+          colValues << QVariant(std::nan(""));
+        } else {
+          try {
 
-        try {
-          // Get unsigned theta and efixed value
-          IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
-                                   Mantid::NoDeleting());
-          double efixed = ws->getEFixed(det);
-          double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
+            // Get unsigned theta and efixed value
+            IDetector_const_sptr det(&spectrumInfo.detector(wsIndex),
+                                     Mantid::NoDeleting());
+            double efixed = ws->getEFixed(det);
+            double usignTheta = spectrumInfo.twoTheta(wsIndex) * 0.5;
 
-          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
-          colValues << QVariant(q);
-        } catch (std::runtime_error &) {
-          colValues << QVariant("No Efixed");
+            double q = Mantid::Kernel::UnitConversion::convertToElasticQ(
+                usignTheta, efixed);
+            colValues << QVariant(q);
+          } catch (std::runtime_error &) {
+            colValues << QVariant("No Efixed");
+          }
         }
       }
 
@@ -1459,11 +1494,41 @@ MantidUI::createDetectorTable(const QString &wsName,
   Table *t = new MantidTable(appWindow()->scriptingEnv(), idtable, tableName,
                              appWindow(), transpose);
   if (!t)
-    return NULL;
+    return nullptr;
   // want all the detector tables as read-only
   t->setReadOnlyAllColumns(true);
   t->showNormal();
   return t;
+}
+
+QString MantidUI::createTruncatedList(const std::set<int> &elements) {
+  QString qString("");
+  size_t ndets = elements.size();
+  auto iter = elements.begin();
+  auto itEnd = elements.end();
+  if (ndets > DET_TABLE_NDETS_GROUP) {
+    qString = QString("%1,%2...(%3 more)...%4,%5");
+    // post-fix increments and returns last value
+    // NOTE: Doing this detIds.arg(*iter++).arg(*iter++).arg(ndets-4) seems
+    // to result
+    // in an undefined order in which the iterator is dereference and
+    // incremented leading
+    // to the first two items being backward on some systems
+    const Mantid::detid_t first(*iter++), second(*iter++);
+    qString =
+        qString.arg(first).arg(second).arg(ndets - 4); // First two + n extra
+    auto revIter = elements.rbegin(); // Set iterators are unidirectional ... so
+                                      // no operator-()
+    const Mantid::detid_t last(*revIter++), lastm1(*revIter++);
+    qString = qString.arg(lastm1).arg(last);
+  } else {
+    for (; iter != itEnd; ++iter) {
+      qString += QString::number(*iter) + ",";
+    }
+    qString.chop(1); // Drop last comma
+  }
+
+  return qString;
 }
 
 /**
@@ -1499,8 +1564,8 @@ bool MantidUI::drop(QDropEvent *e) {
     foreach (const auto &wsName, wsNames) { importWorkspace(wsName, false); }
     return true;
   } else if (e->mimeData()->hasUrls()) {
-    QStringList pyFiles = extractPyFiles(e->mimeData()->urls());
-    if (pyFiles.size() > 0) {
+    const auto pyFiles = DropEventHelper::extractPythonFiles(e);
+    if (!pyFiles.empty()) {
       try {
         MantidQt::API::ProjectSerialiser serialiser(m_appWindow);
         serialiser.openScriptWindow(pyFiles);
@@ -1532,22 +1597,6 @@ bool MantidUI::drop(QDropEvent *e) {
   }
 
   return false;
-}
-
-/// extracts the files from a mimedata object that have a .py extension
-QStringList MantidUI::extractPyFiles(const QList<QUrl> &urlList) const {
-  QStringList filenames;
-  for (int i = 0; i < urlList.size(); ++i) {
-    QString fName = urlList[i].toLocalFile();
-    if (fName.size() > 0) {
-      QFileInfo fi(fName);
-
-      if (fi.suffix().toUpper() == "PY") {
-        filenames.append(fName);
-      }
-    }
-  }
-  return filenames;
 }
 
 /**
@@ -1814,7 +1863,7 @@ void MantidUI::renameWorkspace(QStringList wsName) {
 
 void MantidUI::setFitFunctionBrowser(
     MantidQt::MantidWidgets::FitPropertyBrowser *newBrowser) {
-  if (newBrowser == NULL)
+  if (newBrowser == nullptr)
     m_fitFunction = m_defaultFitFunction;
   else
     m_fitFunction = newBrowser;
@@ -2046,17 +2095,17 @@ void MantidUI::manageMantidWorkspaces() {
 InstrumentWindow *MantidUI::getInstrumentView(const QString &wsName, int tab) {
   if (!Mantid::API::AnalysisDataService::Instance().doesExist(
           wsName.toStdString()))
-    return NULL;
+    return nullptr;
   MatrixWorkspace_const_sptr ws =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
-    return NULL;
+    return nullptr;
   ScopedOverrideCursor waitCursor;
   Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
   if (!instr || instr->getName().empty()) {
     QMessageBox::critical(appWindow(), "MantidPlot - Error",
                           "Instrument view cannot be opened");
-    return NULL;
+    return nullptr;
   }
 
   // Need a new window
@@ -2076,7 +2125,7 @@ InstrumentWindow *MantidUI::getInstrumentView(const QString &wsName, int tab) {
         "Instrument view cannot be created:\n\n" + QString(e.what());
     QMessageBox::critical(appWindow(), "MantidPlot - Error", errorMessage);
 
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -2154,7 +2203,7 @@ void MantidUI::clearAllMemory(const bool prompt) {
   // If any python objects need to be cleared away then the GIL needs to be
   // held. This doesn't feel like
   // it is in the right place but it will do no harm
-  ScopedPythonGIL gil;
+  ScopedPythonGIL lock;
   // Relevant notifications are connected to signals that will close all
   // dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
@@ -2266,7 +2315,7 @@ void MantidUI::setIsRunning(bool) {
 */
 MultiLayer *MantidUI::mergePlots(MultiLayer *mlayer_1, MultiLayer *mlayer_2) {
   if (!mlayer_1)
-    return NULL;
+    return nullptr;
   if (!mlayer_2)
     return mlayer_1;
   int ncurves_on_two = mlayer_2->activeGraph()->visibleCurves();
@@ -2284,7 +2333,7 @@ MultiLayer *MantidUI::mergePlots(MultiLayer *mlayer_1, MultiLayer *mlayer_2) {
 MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   QList<MdiSubWindow *> windows = appWindow()->windowsList();
   QListIterator<MdiSubWindow *> itr(windows);
-  MantidMatrix *m(0);
+  MantidMatrix *m(nullptr);
   while (itr.hasNext()) {
     MdiSubWindow *w = itr.next();
     if (isOfType(w, "MantidMatrix") && w->name() == wsName) {
@@ -2445,7 +2494,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   // the extent of the data, then set this to the index of the row to add the
   // value
   int addFinalFilterValueIndex = 0;
-  Mantid::Kernel::DateAndTime lastFilterTime;
+  Mantid::Types::Core::DateAndTime lastFilterTime;
 
   // Convert input int into enum value
   const Mantid::API::LogFilterGenerator::FilterType filterType = [&filter]() {
@@ -2495,7 +2544,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   formatLogName(label, wsName);
 
   // Get the starting time of the log.
-  Mantid::Kernel::DateAndTime startTime;
+  Mantid::Types::Core::DateAndTime startTime;
   // Toggle to switch between using the real date or the change in seconds.
   bool useAbsoluteDate = false;
 
@@ -2589,7 +2638,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     } // end (valid filter exists)
   }
 
-  Mantid::Kernel::DateAndTime lastTime;
+  Mantid::Types::Core::DateAndTime lastTime;
   double lastValue = 0;
 
   // Iterate through the time-value map.
@@ -2663,7 +2712,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   // Set x-axis label format
   if (useAbsoluteDate) {
-    Mantid::Kernel::DateAndTime label_as_ptime =
+    Mantid::Types::Core::DateAndTime label_as_ptime =
         flt->data()->nthInterval(0).begin();
     QDateTime dt = QDateTime::fromTime_t(uint(label_as_ptime.to_localtime_t()));
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
@@ -2718,17 +2767,16 @@ void MantidUI::configModified() {
       appWindow()->isDeleteWorkspacePromptEnabled());
 }
 
-std::string MantidUI::extractLogTime(Mantid::Kernel::DateAndTime value,
-                                     bool useAbsoluteDate,
-                                     Mantid::Kernel::DateAndTime start) {
+std::string MantidUI::extractLogTime(DateAndTime value, bool useAbsoluteDate,
+                                     DateAndTime start) {
   std::string time_string;
   if (useAbsoluteDate) {
     // Convert time into string
     time_string = value.toSimpleString();
   } else {
     // How many seconds elapsed?
-    Mantid::Kernel::time_duration elapsed = value - start;
-    double seconds = Mantid::Kernel::DateAndTime::secondsFromDuration(elapsed);
+    time_duration elapsed = value - start;
+    double seconds = DateAndTime::secondsFromDuration(elapsed);
 
     // Output with 6 decimal points
     std::ostringstream oss;
@@ -2796,7 +2844,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
     }
   }
   if (indexList.empty())
-    return 0;
+    return nullptr;
 
   int c = errs ? 2 : 1;
   int numRows = static_cast<int>(workspace->blocksize());
@@ -2862,7 +2910,7 @@ Table *MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs,
                                              bool binCentres) {
   const QList<int> &indexList = m->getSelectedRows();
   if (indexList.empty())
-    return NULL;
+    return nullptr;
 
   return createTableFromSpectraList(
       m->name(), QString::fromStdString(m->workspace()->getName()), indexList,
@@ -2879,7 +2927,7 @@ Table *MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs,
 */
 MultiLayer *MantidUI::createGraphFromTable(Table *t, int type) {
   if (!t)
-    return NULL;
+    return nullptr;
   QStringList lst = t->colNames();
   QStringList::const_iterator itr;
   for (itr = lst.begin(); itr != lst.end(); ++itr) {
@@ -3057,7 +3105,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
                              const std::set<double> &customLogValues,
                              bool multipleSpectra) {
   if (toPlot.size() == 0)
-    return NULL;
+    return nullptr;
 
   if (toPlot.size() > 10) {
     QMessageBox ask(appWindow());
@@ -3070,7 +3118,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     ask.setIcon(QMessageBox::Question);
     ask.exec();
     if (ask.clickedButton() != confirmButton)
-      return NULL;
+      return nullptr;
   }
   // Force waterfall option to false if only 1 curve
   if ((NULL == plotWindow || clearWindow) && toPlot.size() == 1)
@@ -3115,7 +3163,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
   Graph *g = ml->activeGraph();
   MantidMatrixCurve::IndexDir indexType =
       (spectrumPlot) ? MantidMatrixCurve::Spectrum : MantidMatrixCurve::Bin;
-  MantidMatrixCurve *firstCurve(NULL);
+  MantidMatrixCurve *firstCurve(nullptr);
   QString logValue("");
   for (size_t i = 0; i < curveSpecList.size(); i++) {
 
@@ -3138,7 +3186,7 @@ MultiLayer *MantidUI::plot1D(const QMultiMap<QString, int> &toPlot,
     g->replot();
   } else {
     if (!firstCurve) {
-      return NULL;
+      return nullptr;
     }
 
     // Ensure plot encompasses all data points
@@ -3332,7 +3380,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
       boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           getWorkspace(wsName));
   if (!workspace)
-    return NULL;
+    return nullptr;
 
   ScopedOverrideCursor waitCursor;
 
@@ -3354,9 +3402,9 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
     window->setCloseOnEmpty(true);
     m_lastShownColorFillWin = window;
   } else {
-    if (NULL == window) {
+    if (nullptr == window) {
       if (NULL == m_lastShownColorFillWin)
-        return NULL;
+        return nullptr;
       window = m_lastShownColorFillWin;
     }
     // start fresh layer
@@ -3394,7 +3442,7 @@ MultiLayer *MantidUI::plotSpectraRange(const QString &wsName, int i0, int i1,
                                        MantidQt::DistributionFlag distr,
                                        bool errs) {
   if (i0 < 0 || i1 < 0)
-    return 0;
+    return nullptr;
   /** For instrument with one to many spectra-detector mapping,
   * different pixels with correspond to the same specta so
   * we need to remove doublons in this case.
@@ -3670,7 +3718,7 @@ Table *MantidUI::createTableFromBins(
     const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
   if (bins.empty())
-    return NULL;
+    return nullptr;
 
   int c = errs ? 2 : 1;
   int numRows = static_cast<int>(workspace->getNumberHistograms());
@@ -3679,7 +3727,7 @@ Table *MantidUI::createTableFromBins(
   int j1 = toRow >= 0 ? toRow : numRows - 1;
 
   if (j0 >= numRows || j1 >= numRows)
-    return NULL;
+    return nullptr;
 
   Table *t = new Table(appWindow()->scriptingEnv(), numRows,
                        c * bins.size() + 1, "", appWindow(), 0);
@@ -3716,7 +3764,7 @@ Table *MantidUI::createTableFromBins(
 Table *MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs) {
   const QList<int> &cols = m->getSelectedColumns();
   if (cols.empty())
-    return 0;
+    return nullptr;
 
   int j0 = m->workspaceIndex(0);
   int j1 = m->workspaceIndex(m->numRows() - 1);

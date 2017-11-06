@@ -81,5 +81,6 @@ class VesuvioPreFit(VesuvioBase):
 
         return data
 
+
 # -----------------------------------------------------------------------------------------
 AlgorithmFactory.subscribe(VesuvioPreFit)

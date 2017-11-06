@@ -2,7 +2,7 @@
 // MantidApplciation definitions
 //==============================
 #include "MantidApplication.h"
-#include "MantidQtAPI/MantidDialog.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UsageService.h"

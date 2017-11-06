@@ -14,7 +14,7 @@ namespace {
  */
 class DataNotCopiedValidator : public Mantid::Kernel::IValidator {
 public:
-  DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(NULL) {}
+  DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(nullptr) {}
 
   Mantid::Kernel::IValidator_sptr clone() const override {
     return boost::make_shared<DataNotCopiedValidator>();

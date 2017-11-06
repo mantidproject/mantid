@@ -13,7 +13,6 @@ using namespace API;
 using DataObjects::PeaksWorkspace;
 using DataObjects::PeaksWorkspace_const_sptr;
 using DataObjects::PeaksWorkspace_sptr;
-using DataObjects::Peak;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {
@@ -73,8 +72,9 @@ void DiffPeaksWorkspaces::exec() {
   // Get hold of the peaks in the first workspace as we'll need to examine them
   auto &lhsPeaks = output->getPeaks();
 
-  Progress progress(this, 0, 1, rhsPeaks.size());
+  Progress progress(this, 0.0, 1.0, rhsPeaks.size());
 
+  std::vector<int> badPeaks;
   // Loop over the peaks in the second workspace, searching for a match in the
   // first
   for (const auto &currentPeak : rhsPeaks) {
@@ -88,14 +88,14 @@ void DiffPeaksWorkspaces::exec() {
       {
         // As soon as we find a match, remove it from the output and move onto
         // the next rhs peak
-        output->removePeak(j);
+        badPeaks.push_back(j);
         break;
       }
     }
 
     progress.report();
   }
-
+  output->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", output);
 }
 

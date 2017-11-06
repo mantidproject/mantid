@@ -4,7 +4,7 @@ import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
-from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService)
+from mantid.api import (mtd, WorkspaceGroup, AlgorithmManager, AnalysisDataService, FileFinder)
 from mantid.kernel import (DateAndTime, time_duration, FloatTimeSeriesProperty,
                            BoolTimeSeriesProperty,StringTimeSeriesProperty,
                            StringPropertyWithValue, V3D, Quat)
@@ -1675,6 +1675,16 @@ class TestRenamingOfBatchModeWorkspaces(unittest.TestCase):
         args = ["SANS2D", "jsdlkfsldkfj", "test", workspace]
         self.assertRaises(RuntimeError, su.rename_workspace_correctly, *args)
         AnalysisDataService.remove("ws")
+
+
+class TestEventWorkspaceCheck(unittest.TestCase):
+    def test_that_can_identify_event_workspace(self):
+        file_name = FileFinder.findRuns("SANS2D00022048")[0]
+        self.assertTrue(su.can_load_as_event_workspace(file_name))
+
+    def test_that_can_identify_histo_workspace_as_not_being_event_workspace(self):
+        file_name = FileFinder.findRuns("SANS2D00022024")[0]
+        self.assertFalse(su.can_load_as_event_workspace(file_name))
 
 
 if __name__ == "__main__":

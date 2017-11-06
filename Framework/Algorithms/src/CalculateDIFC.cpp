@@ -8,7 +8,7 @@ namespace {
 
 void calculate(API::Progress &progress, API::MatrixWorkspace_sptr &outputWs,
                DataObjects::OffsetsWorkspace_sptr &offsetsWS,
-               const API::DetectorInfo &detectorInfo) {
+               const Geometry::DetectorInfo &detectorInfo) {
   DataObjects::SpecialWorkspace2D_sptr localWS =
       boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(outputWs);
 
@@ -102,7 +102,7 @@ void CalculateDIFC::exec() {
 
   const auto &detectorInfo = inputWs->detectorInfo();
 
-  API::Progress progress(this, 0, 1, detectorInfo.size());
+  API::Progress progress(this, 0.0, 1.0, detectorInfo.size());
   calculate(progress, outputWs, offsetsWs, detectorInfo);
 
   setProperty("OutputWorkspace", outputWs);

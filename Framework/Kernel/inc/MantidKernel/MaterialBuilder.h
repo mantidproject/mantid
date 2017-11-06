@@ -8,6 +8,11 @@
 #include <tuple>
 
 namespace Mantid {
+// Forward declare
+namespace PhysicalConstants {
+struct NeutronAtom;
+}
+
 namespace Kernel {
 
 /**

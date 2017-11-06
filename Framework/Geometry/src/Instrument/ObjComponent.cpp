@@ -1,4 +1,6 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -138,6 +140,11 @@ int ObjComponent::interceptSurface(Track &track) const {
 * set
 */
 double ObjComponent::solidAngle(const V3D &observer) const {
+  if (m_map) {
+    if (hasComponentInfo()) {
+      return m_map->componentInfo().solidAngle(index(), observer);
+    }
+  }
   // If the form of this component is not defined, throw NullPointerException
   if (!shape())
     throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle",
@@ -169,7 +176,12 @@ double ObjComponent::solidAngle(const V3D &observer) const {
   * the absoluteBB
   */
 void ObjComponent::getBoundingBox(BoundingBox &absoluteBB) const {
-
+  if (m_map) {
+    if (hasComponentInfo()) {
+      absoluteBB = m_map->componentInfo().boundingBox(index(), &absoluteBB);
+      return;
+    }
+  }
   // Start with the box in the shape's coordinates
   const Object_const_sptr s = shape();
   if (!s) {
@@ -322,6 +334,15 @@ void ObjComponent::initDraw() const {
   if (shape() != nullptr)
     shape()->initDraw();
   Handle()->Initialize();
+}
+
+/**
+ * Register the contents of this ObjComponent
+ */
+size_t
+ObjComponent::registerContents(class ComponentVisitor &componentVisitor) const {
+
+  return componentVisitor.registerGenericObjComponent(*this);
 }
 
 } // namespace Geometry

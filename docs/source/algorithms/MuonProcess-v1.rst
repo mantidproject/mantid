@@ -99,7 +99,7 @@ Usage
    processed = mtd['MuonProcess_output']
    output_int = Integration(processed)
 
-   print 'Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0])
+   print('Integrated asymmetry for the run: {0:.3f}'.format(output_int.readY(0)[0]))
 
 Output:
 
@@ -132,7 +132,7 @@ Output:
 			PairSecondIndex = 0,
 			Alpha = 0.5)
    
-   print 'Output:', output.readY(0)
+   print('Output: {}'.format(output.readY(0)))
 
 Output:
 
@@ -172,13 +172,13 @@ Output:
 			OutputType = 'GroupAsymmetry',
 			GroupIndex = 0,Xmin=0,Xmax=4)
 
-   print 'Output:', output.readY(0)
+   print('Output: {}'.format(output.readY(0)))
 
 Output:
 
 .. testoutput:: ExGroupAsymmetryMultiPeriod
 
-   Output: [-0.73202334  0.89476186  0.40866102]
+   Output: [-0.6449185   0.78829245  0.36003367]
 
 .. categories::
 

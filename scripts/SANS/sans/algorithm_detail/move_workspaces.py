@@ -243,6 +243,37 @@ def get_detector_component(move_info, component):
     return component_selection
 
 
+def move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=True):
+    # REAR_DET_Z
+    if use_rear_det_z:
+        lab_detector_z_tag = "Rear_Det_Z"
+
+        log_names = [lab_detector_z_tag]
+        log_types = [float]
+        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
+                                                           convert_from_millimeter_to_meter=True)
+
+        lab_detector_z = move_info.lab_detector_z \
+            if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
+    else:
+        lab_detector_z = 0.
+
+    # Perform x and y tilt
+    lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
+    SANSMoveSANS2D.perform_x_and_y_tilts(workspace, lab_detector)
+
+    lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
+    x_shift = -coordinates[0]
+    y_shift = -coordinates[1]
+
+    z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
+    detector_name = lab_detector.detector_name
+    offset = {CanonicalCoordinates.X: x_shift,
+              CanonicalCoordinates.Y: y_shift,
+              CanonicalCoordinates.Z: z_shift}
+    move_component(workspace, offset, detector_name)
+
+
 # -------------------------------------------------
 # Move classes
 # -------------------------------------------------
@@ -420,41 +451,18 @@ class SANSMoveSANS2D(SANSMove):
 
     @staticmethod
     def _move_low_angle_bank(move_info, workspace, coordinates):
-        # REAR_DET_Z
-        lab_detector_z_tag = "Rear_Det_Z"
-
-        log_names = [lab_detector_z_tag]
-        log_types = [float]
-        log_values = get_single_valued_logs_from_workspace(workspace, log_names, log_types,
-                                                           convert_from_millimeter_to_meter=True)
-
-        lab_detector_z = move_info.lab_detector_z \
-            if log_values[lab_detector_z_tag] is None else log_values[lab_detector_z_tag]
-
-        # Perform x and y tilt
-        lab_detector = move_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        SANSMoveSANS2D.perform_x_and_y_tilts(workspace, lab_detector)
-
-        lab_detector_default_sd_m = move_info.lab_detector_default_sd_m
-        x_shift = -coordinates[0]
-        y_shift = -coordinates[1]
-
-        z_shift = (lab_detector_z + lab_detector.z_translation_correction) - lab_detector_default_sd_m
-        detector_name = lab_detector.detector_name
-        offset = {CanonicalCoordinates.X: x_shift,
-                  CanonicalCoordinates.Y: y_shift,
-                  CanonicalCoordinates.Z: z_shift}
-        move_component(workspace, offset, detector_name)
+        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates)
 
     @staticmethod
-    def _move_monitor_4(workspace, move_info):
-        if move_info.monitor_4_offset != 0.0:
-            monitor_4_name = move_info.monitor_names["4"]
+    def _move_monitor_n(workspace, move_info, monitor_spectrum_number):
+        if move_info.monitor_n_offset != 0.0:
+            monitor_spectrum_number_as_string = str(monitor_spectrum_number)
+            monitor_n_name = move_info.monitor_names[monitor_spectrum_number_as_string]
             instrument = workspace.getInstrument()
-            monitor_4 = instrument.getComponentByName(monitor_4_name)
+            monitor_n = instrument.getComponentByName(monitor_n_name)
 
-            # Get position of monitor 4
-            monitor_position = monitor_4.getPos()
+            # Get position of monitor n
+            monitor_position = monitor_n.getPos()
             z_position_monitor = monitor_position.getZ()
 
             # The location is relative to the rear-detector, get this position
@@ -464,17 +472,16 @@ class SANSMoveSANS2D(SANSMove):
             detector_position = lab_detector_component.getPos()
             z_position_detector = detector_position.getZ()
 
-            monitor_4_offset = move_info.monitor_4_offset
-            z_new = z_position_detector + monitor_4_offset
+            monitor_n_offset = move_info.monitor_n_offset
+            z_new = z_position_detector + monitor_n_offset
             z_move = z_new - z_position_monitor
             offset = {CanonicalCoordinates.Z: z_move}
 
-            move_component(workspace, offset, monitor_4_name)
+            move_component(workspace, offset, monitor_n_name)
 
     def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
         # For LOQ we only have to coordinates
         assert len(coordinates) == 2
-
         _component = component  # noqa
         _is_transmission_workspace = is_transmission_workspace  # noqa
 
@@ -487,8 +494,9 @@ class SANSMoveSANS2D(SANSMove):
         # Move the sample holder
         move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
 
-        # Move monitor 4
-        self._move_monitor_4(workspace, move_info)
+        # Move monitor
+        monitor_spectrum_number = 4
+        self._move_monitor_n(workspace, move_info, monitor_spectrum_number=monitor_spectrum_number)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -501,7 +509,7 @@ class SANSMoveSANS2D(SANSMove):
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
-        return True if instrument_type is SANSInstrument.SANS2D else False
+        return instrument_type is SANSInstrument.SANS2D
 
 
 class SANSMoveLOQ(SANSMove):
@@ -523,19 +531,21 @@ class SANSMoveLOQ(SANSMove):
             x_shift = center_position - x
             y_shift = center_position - y
 
-            # Get the detector name
-            component_name = move_info.detectors[component].detector_name
+            detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)]
+            for detector in detectors:
+                # Get the detector name
+                component_name = move_info.detectors[detector].detector_name
 
-            # Shift the detector by the the input amount
-            offset = {CanonicalCoordinates.X: x_shift,
-                      CanonicalCoordinates.Y: y_shift}
-            move_component(workspace, offset, component_name)
+                # Shift the detector by the the input amount
+                offset = {CanonicalCoordinates.X: x_shift,
+                          CanonicalCoordinates.Y: y_shift}
+                move_component(workspace, offset, component_name)
 
-            # Shift the detector according to the corrections of the detector under investigation
-            offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[component].x_translation_correction,
-                                       CanonicalCoordinates.Y: move_info.detectors[component].y_translation_correction,
-                                       CanonicalCoordinates.Z: move_info.detectors[component].z_translation_correction}
-            move_component(workspace, offset_from_corrections, component_name)
+                # Shift the detector according to the corrections of the detector under investigation
+                offset_from_corrections = {CanonicalCoordinates.X: move_info.detectors[detector].x_translation_correction,
+                                           CanonicalCoordinates.Y: move_info.detectors[detector].y_translation_correction,
+                                           CanonicalCoordinates.Z: move_info.detectors[detector].z_translation_correction}
+                move_component(workspace, offset_from_corrections, component_name)
 
     def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
         # For LOQ we only have to coordinates
@@ -548,7 +558,7 @@ class SANSMoveLOQ(SANSMove):
 
     @staticmethod
     def is_correct(instrument_type, run_number, **kwargs):
-        return True if instrument_type is SANSInstrument.LOQ else False
+        return instrument_type is SANSInstrument.LOQ
 
 
 class SANSMoveLARMOROldStyle(SANSMove):
@@ -598,7 +608,7 @@ class SANSMoveLARMOROldStyle(SANSMove):
     def is_correct(instrument_type, run_number, **kwargs):
         is_correct_instrument = instrument_type is SANSInstrument.LARMOR
         is_correct_run_number = run_number < 2217
-        return True if is_correct_instrument and is_correct_run_number else False
+        return is_correct_instrument and is_correct_run_number
 
 
 class SANSMoveLARMORNewStyle(SANSMove):
@@ -665,7 +675,39 @@ class SANSMoveLARMORNewStyle(SANSMove):
     def is_correct(instrument_type, run_number, **kwargs):
         is_correct_instrument = instrument_type is SANSInstrument.LARMOR
         is_correct_run_number = run_number >= 2217
-        return True if is_correct_instrument and is_correct_run_number else False
+        return is_correct_instrument and is_correct_run_number
+
+
+class SANSMoveZOOM(SANSMove):
+    @staticmethod
+    def _move_low_angle_bank(move_info, workspace, coordinates):
+        move_low_angle_bank_for_SANS2D_and_ZOOM(move_info, workspace, coordinates, use_rear_det_z=False)
+
+    def do_move_initial(self, move_info, workspace, coordinates, component, is_transmission_workspace):
+        # For ZOOM we only have to coordinates
+        assert len(coordinates) == 2
+
+        _component = component  # noqa
+        _is_transmission_workspace = is_transmission_workspace  # noqa
+
+        # Move the low angle bank
+        self._move_low_angle_bank(move_info, workspace, coordinates)
+
+        # Move the sample holder
+        move_sample_holder(workspace, move_info.sample_offset, move_info.sample_offset_direction)
+
+    def do_move_with_elementary_displacement(self, move_info, workspace, coordinates, component):
+        # For ZOOM we only have to coordinates
+        assert len(coordinates) == 2
+        coordinates_to_move = [-coordinates[0], -coordinates[1]]
+        apply_standard_displacement(move_info, workspace, coordinates_to_move, component)
+
+    def do_set_to_zero(self, move_info, workspace, component):
+        set_components_to_original_for_isis(move_info, workspace, component)
+
+    @staticmethod
+    def is_correct(instrument_type, run_number, **kwargs):
+        return instrument_type is SANSInstrument.ZOOM
 
 
 class SANSMoveFactory(object):
@@ -688,6 +730,8 @@ class SANSMoveFactory(object):
             mover = SANSMoveLARMOROldStyle()
         elif SANSMoveLARMORNewStyle.is_correct(instrument_type, run_number):
             mover = SANSMoveLARMORNewStyle()
+        elif SANSMoveZOOM.is_correct(instrument_type, run_number):
+            mover = SANSMoveZOOM()
         else:
             mover = None
             NotImplementedError("SANSLoaderFactory: Other instruments are not implemented yet.")

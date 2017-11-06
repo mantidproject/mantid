@@ -16,9 +16,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
     _alignment_files = None
     _background_files = None
     _calibration_files = None
+    _background_calib_files = None
     _sum_all_runs = None
     _unmirror_option = None
     _back_scaling = None
+    _back_calib_scaling = None
     _criteria = None
     _progress = None
     _red_ws = None
@@ -52,6 +54,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                                                   extensions=['nxs']),
                              doc='Run number(s) of vanadium calibration run(s).')
 
+        self.declareProperty(MultipleFileProperty('CalibrationBackgroundRun',
+                                                  action=FileAction.OptionalLoad,
+                                                  extensions=['nxs']),
+                             doc='Run number(s) of background (empty can) run(s) for vanadium run.')
+
         self.declareProperty(MultipleFileProperty('AlignmentRun',
                                                   action=FileAction.OptionalLoad,
                                                   extensions=['nxs']),
@@ -81,6 +88,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self.declareProperty(name='BackgroundScalingFactor', defaultValue=1.,
                              validator=FloatBoundedValidator(lower=0),
                              doc='Scaling factor for background subtraction')
+
+        self.declareProperty(name='CalibrationBackgroundScalingFactor', defaultValue=1.,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc='Scaling factor for background subtraction for vanadium calibration')
 
         self.declareProperty(name='CalibrationPeakRange', defaultValue=[-0.003,0.003],
                              validator=FloatArrayMandatoryValidator(),
@@ -136,6 +147,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
                 issues['CalibrationPeakRange'] = 'Please provide valid calibration range. ' \
                                                  'Start energy is bigger than end energy.'
 
+        if self.getPropertyValue('CalibrationBackgroundRun') and not self.getPropertyValue('CalibrationRun'):
+            issues['CalibrationRun'] = 'Calibration run is required when calibration background is given.'
+
         return issues
 
     def setUp(self):
@@ -144,9 +158,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         self._alignment_file = self.getPropertyValue('AlignmentRun').replace(',', '+') # automatic summing
         self._background_file = self.getPropertyValue('BackgroundRun').replace(',', '+') # automatic summing
         self._calibration_file = self.getPropertyValue('CalibrationRun').replace(',', '+') # automatic summing
+        self._background_calib_files = self.getPropertyValue('CalibrationBackgroundRun').replace(',', '+') # automatic summing
         self._sum_all_runs = self.getProperty('SumRuns').value
         self._unmirror_option = self.getProperty('UnmirrorOption').value
         self._back_scaling = self.getProperty('BackgroundScalingFactor').value
+        self._back_calib_scaling = self.getProperty('CalibrationBackgroundScalingFactor').value
         self._peak_range = self.getProperty('CalibrationPeakRange').value
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
 
@@ -232,6 +248,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             self._calibration_file = self._filter_files(self._calibration_file, 'calibration')
 
+        if self._background_calib_files:
+            self._background_calib_files = self._filter_files(self._background_calib_files, 'calibration background')
+
         if self._alignment_file:
             self._alignment_file = self._filter_files(self._alignment_file, 'alignment')
 
@@ -267,7 +286,17 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             calibration = '__calibration_'+self._red_ws
             IndirectILLEnergyTransfer(Run = self._calibration_file, OutputWorkspace = calibration, **self._common_args)
-            MatchPeaks(InputWorkspace=calibration,OutputWorkspace=calibration,MaskBins=True)
+
+            if self._background_calib_files:
+                back_calibration = '__calibration_back_'+self._red_ws
+                IndirectILLEnergyTransfer(Run = self._background_calib_files, OutputWorkspace = back_calibration, **self._common_args)
+                Scale(InputWorkspace=back_calibration, Factor=self._back_calib_scaling, OutputWorkspace=back_calibration)
+                Minus(LHSWorkspace=calibration, RHSWorkspace=back_calibration, OutputWorkspace=calibration)
+
+            # MatchPeaks does not play nicely with the ws groups
+            for ws in mtd[calibration]:
+                MatchPeaks(InputWorkspace=ws.getName(), OutputWorkspace=ws.getName(), MaskBins=True, BinRangeTable = '')
+
             Integration(InputWorkspace=calibration,RangeLower=self._peak_range[0],RangeUpper=self._peak_range[1],
                         OutputWorkspace=calibration)
             self._warn_negative_integral(calibration,'in calibration run.')
@@ -289,6 +318,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         if self._calibration_file:
             DeleteWorkspace(calibration)
 
+        if self._background_calib_files:
+            DeleteWorkspace(back_calibration)
+
         if self._unmirror_option == 5 or self._unmirror_option == 7:
             DeleteWorkspace(alignment)
 
@@ -304,6 +336,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         '''
         Reduces the given (single or summed multiple) run
         @param run :: run path
+        @throws RuntimeError : if inconsistent mirror sense is found in container or calibration run
         '''
 
         runs_list = run.split('+')
@@ -370,6 +403,9 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         for two-wing data or centering the one wing data
         @param ws  :: workspace
         @param run :: runnumber
+        @throws RuntimeError : if the size of the left and right wings do not match in 2-wings case
+                               and the unmirror option is 1 or >3
+        @throws RuntimeError : if the mirros sense in the alignment run is inconsistent
         '''
 
         outname = ws + '_tmp'
@@ -393,10 +429,10 @@ class IndirectILLReductionQENS(PythonAlgorithm):
             if self._unmirror_option < 6:  # do unmirror 0, i.e. nothing
                 CloneWorkspace(InputWorkspace = name, OutputWorkspace = outname)
             elif self._unmirror_option == 6:
-                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True)
+                MatchPeaks(InputWorkspace = name, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
             elif self._unmirror_option == 7:
                 MatchPeaks(InputWorkspace = name, InputWorkspace2 = mtd[alignment].getItem(0).getName(),
-                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True)
+                           MatchInput2ToCenter = True, OutputWorkspace = outname, MaskBins = True, BinRangeTable = '')
 
         elif wings == 2:  # two wing
 
@@ -405,6 +441,14 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
             mask_min = 0
             mask_max = mtd[left].blocksize()
+
+            if (self._common_args['CropDeadMonitorChannels'] and
+                    (self._unmirror_option == 1 or self._unmirror_option > 3) and
+                    mtd[left].blocksize() != mtd[right].blocksize()):
+                raise RuntimeError("Different number of bins found in the left and right wings"
+                                   " after cropping the dead monitor channels. "
+                                   "Unable to perform the requested unmirror option, consider using option "
+                                   "0, 2 or 3 or switch off the CropDeadMonitorChannels.")
 
             if self._unmirror_option == 0:
                 left_out = '__'+run+'_'+self._red_ws+'_left'
@@ -466,6 +510,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         DeleteWorkspace(ws)
         RenameWorkspace(InputWorkspace=outname,OutputWorkspace=ws)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLReductionQENS)

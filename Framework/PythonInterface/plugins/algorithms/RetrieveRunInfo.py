@@ -249,5 +249,6 @@ class RetrieveRunInfo(PythonAlgorithm):
 
         self.setPropertyValue('OutputWorkspace', output_ws_name)
 
+
 # Register algorthm with Mantid.
 AlgorithmFactory.subscribe(RetrieveRunInfo)

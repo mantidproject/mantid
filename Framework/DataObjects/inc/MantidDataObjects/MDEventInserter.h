@@ -63,15 +63,15 @@ public:
   determined internally using type information on the MDEventType.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runno : run number
+  @param runindex : run index (index into the vector of ExperimentInfo)
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runno,
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
                      int32_t detectno, Mantid::coord_t *coords) {
     // compile-time overload selection based on nested type information on the
     // MDEventType.
-    insertMDEvent(signal, errorSQ, runno, detectno, coords,
+    insertMDEvent(signal, errorSQ, runindex, detectno, coords,
                   IntToType<MDEventType::is_full_mdevent>());
   }
 
@@ -94,14 +94,14 @@ private:
   Creates a FULL MDEvent and adds it to the MDEW.
   @param signal : intensity
   @param errorSQ : squared value of the error
-  @param runno : run number
+  @param runindex : run index
   @param detectno : detector number
   @param coords : pointer to coordinates array
   */
-  void insertMDEvent(float signal, float errorSQ, uint16_t runno,
+  void insertMDEvent(float signal, float errorSQ, uint16_t runindex,
                      int32_t detectno, Mantid::coord_t *coords,
                      IntToType<true>) {
-    m_ws->addEvent(MDEventType(signal, errorSQ, runno, detectno, coords));
+    m_ws->addEvent(MDEventType(signal, errorSQ, runindex, detectno, coords));
   }
 };
 

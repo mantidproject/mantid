@@ -5,16 +5,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include <MantidQtMantidWidgets/MantidDisplayBase.h>
+#include <MantidQtWidgets/Common/MantidDisplayBase.h>
 
 using namespace MantidQt::MantidWidgets;
 using Mantid::API::WorkspaceGroup_const_sptr;
 using Mantid::API::WorkspaceGroup_sptr;
 using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::MatrixWorkspace;
-using Mantid::API::ExperimentInfo;
-using Mantid::HistogramData::Histogram;
 
 /**Compare two CurveSpecs to sort according to log value and
 * if equal by workspace index.

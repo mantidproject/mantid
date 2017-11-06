@@ -36,6 +36,14 @@ public:
     TS_ASSERT_EQUALS(gv[2], 6);
   }
 
+  void test_create_from_initializer() {
+    GSLVector gv({2.0, 4.0, 6.0});
+    TS_ASSERT_EQUALS(gv.size(), 3);
+    TS_ASSERT_EQUALS(gv[0], 2);
+    TS_ASSERT_EQUALS(gv[1], 4);
+    TS_ASSERT_EQUALS(gv[2], 6);
+  }
+
   void test_copy_constructor() {
     std::vector<double> v(3);
     v[0] = 2;

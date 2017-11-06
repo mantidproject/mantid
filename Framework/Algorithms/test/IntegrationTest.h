@@ -701,6 +701,79 @@ public:
     }
   }
 
+  template <typename F>
+  void wsBoundsTest(std::string workspace, int startIndex, int endIndex,
+                    F boundsAssert) {
+    MatrixWorkspace_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            workspace));
+
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", workspace));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("StartWorkspaceIndex", startIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(
+        output =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out"));
+    boundsAssert(input, output, startIndex, endIndex);
+  }
+
+  void testStartWsIndexOutOfBounds() {
+    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
+                           int, int endIndex) {
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
+    };
+
+    wsBoundsTest("testSpace", 100, 4, boundsAssert);
+  }
+
+  void testStartWSIndexGreaterThanEnd() {
+    auto boundsAssert = [](MatrixWorkspace_sptr input,
+                           MatrixWorkspace_sptr output, int startIndex, int) {
+      TS_ASSERT_EQUALS(output->getNumberHistograms(),
+                       input->getNumberHistograms() - startIndex);
+    };
+
+    wsBoundsTest("testSpace", 4, 2, boundsAssert);
+  }
+
+  void testStartWSIndexEqualsEnd() {
+    auto boundsAssert =
+        [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output, int, int) {
+          TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+        };
+
+    wsBoundsTest("testSpace", 3, 3, boundsAssert);
+  }
+
+  void testNegativeWsBounds() {
+    const int startIndex = -1;
+    const int endIndex = -2;
+
+    MatrixWorkspace_sptr input;
+    TS_ASSERT_THROWS_NOTHING(
+        input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "testSpace"));
+
+    Integration alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", "testSpace"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out"));
+    TS_ASSERT_THROWS_ANYTHING(
+        alg.setProperty("StartWorkspaceIndex", startIndex));
+    TS_ASSERT_THROWS_ANYTHING(alg.setProperty("EndWorkspaceIndex", endIndex));
+  }
+
 private:
   void assertRangeWithPartialBins(Workspace_sptr input) {
     Integration alg;

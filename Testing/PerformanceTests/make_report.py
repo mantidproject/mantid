@@ -6,7 +6,8 @@ import os
 import subprocess
 import sqlite3
 
-#====================================================================================
+
+# ====================================================================================
 def getSourceDir():
     """Returns the location of the source code."""
     import os
@@ -15,7 +16,6 @@ def getSourceDir():
     if os.path.islink(script):
         script = os.path.realpath(script)
     return os.path.dirname(script)
-
 
 
 def join_databases(dbfiles):
@@ -40,15 +40,15 @@ def join_databases(dbfiles):
     return outfile
 
 
-
-#====================================================================================
+# ====================================================================================
 if __name__ == "__main__":
     # Parse the command line
-    parser = argparse.ArgumentParser(description='Generates a HTML report using the Mantid System Tests results database')
+    parser = argparse.ArgumentParser(
+        description='Generates a HTML report using the Mantid System Tests results database')
 
     parser.add_argument('--path', dest='path',
                         default="./Report",
-                        help='Path to the ouput HTML. Default "./Report".' )
+                        help='Path to the ouput HTML. Default "./Report".')
 
     parser.add_argument('--x_field', dest='x_field',
                         default="revision",
@@ -58,11 +58,15 @@ if __name__ == "__main__":
                         default=["./MantidSystemTests.db"],
                         help='Required: Path to the SQL database file(s).')
 
-
     args = parser.parse_args()
 
     # Import the manager definition
-    import analysis
+    try:
+        import analysis
+    except:
+        # plotly not available, use matplotlib fallback
+        import analysis_mpl as analysis
+
     import sqlresults
 
     if len(args.dbfile) > 1:
@@ -71,7 +75,6 @@ if __name__ == "__main__":
     else:
         # Only one file - use it
         dbfile = args.dbfile[0]
-
 
     if not os.path.exists(dbfile):
         print "Error! Could not find", dbfile

@@ -82,6 +82,13 @@ public:
     checkData(input, inOut, expectedY);
   }
 
+  void test_interpolateLinearInplace_interpolates() {
+    Histogram input(Points(2, LinearGenerator(0, 1.0)), {-0.72, -0.72});
+    Histogram output(Points(1, LinearGenerator(0.5, 1.0)), {0.0});
+    interpolateLinearInplace(input, output);
+    TS_ASSERT_EQUALS(output.y()[0], -0.72)
+  }
+
   // ---------------------------------------------------------------------------
   // Success cases - cspline in-place no copy
   // ---------------------------------------------------------------------------
@@ -114,6 +121,13 @@ public:
 
     checkSizesUnchanged(input, inOut);
     checkData(input, inOut, expectedY);
+  }
+
+  void test_interpolateCSplineInplace_interpolates() {
+    Histogram input(Points(3, LinearGenerator(0, 1.0)), {-0.72, -0.72, -0.72});
+    Histogram output(Points(1, LinearGenerator(0.1, 1.0)), {0.0});
+    interpolateCSplineInplace(input, output);
+    TS_ASSERT_EQUALS(output.y()[0], -0.72);
   }
 
   // ---------------------------------------------------------------------------
@@ -250,6 +264,14 @@ public:
         interpolateLinear(Histogram(Points(2, LinearGenerator(0, 0.5))), 1),
         std::runtime_error);
   }
+
+  void test_interpolatelinearinplace_throws_if_input_has_less_than_2_points() {
+    Histogram input(Points(1, LinearGenerator(0.1, 0.1)));
+    Histogram output(Points(1, LinearGenerator(0.1, 0.1)));
+    TS_ASSERT_THROWS(interpolateLinearInplace(input, output),
+                     std::runtime_error)
+  }
+
   void
   test_interpolatelinear_throws_if_stepsize_greater_or_equal_number_points() {
     TS_ASSERT_THROWS(
@@ -277,6 +299,14 @@ public:
         interpolateCSpline(Histogram(Points(3, LinearGenerator(0, 0.5))), 1),
         std::runtime_error);
   }
+
+  void test_interpolatecsplineinplace_throws_if_input_has_less_than_3_points() {
+    Histogram input(Points(2, LinearGenerator(0, 1.0)));
+    Histogram output(Points(5, LinearGenerator(0.1, 0.1)));
+    TS_ASSERT_THROWS(interpolateCSplineInplace(input, output),
+                     std::runtime_error)
+  }
+
   void
   test_interpolatecspline_throws_if_stepsize_greater_or_equal_number_points() {
     TS_ASSERT_THROWS(

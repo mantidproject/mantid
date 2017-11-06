@@ -72,6 +72,7 @@
 
 class ColorPickerPopup;
 
+// cppcheck-suppress ConfigurationNotChecked
 class QT_QTCOLORPICKER_EXPORT QtColorPicker : public QPushButton {
   Q_OBJECT
 
@@ -79,7 +80,7 @@ class QT_QTCOLORPICKER_EXPORT QtColorPicker : public QPushButton {
                  setColorDialogEnabled)
 
 public:
-  QtColorPicker(QWidget *parent = 0, int columns = -1,
+  QtColorPicker(QWidget *parent = nullptr, int columns = -1,
                 bool enableColorDialog = true);
 
   ~QtColorPicker() override;

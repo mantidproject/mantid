@@ -138,7 +138,7 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
   auto &properties = minimizer.getProperties();
   for (auto property : properties) {
     if ((*property).direction() == Kernel::Direction::Output &&
-        (*property).isValid() == "") {
+        (*property).isValid().empty()) {
       auto clonedProperty =
           std::unique_ptr<Kernel::Property>((*property).clone());
       declareProperty(std::move(clonedProperty));
@@ -178,13 +178,12 @@ size_t Fit::runMinimizer() {
     }
 
     prog->report();
-
+    ++iter;
     if (isFinished) {
       // It was the last iteration. Break out of the loop and return the number
       // of finished iterations.
       break;
     }
-    ++iter;
   }
   g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
   return iter;
@@ -199,11 +198,6 @@ void Fit::finalizeMinimizer(size_t nIterations) {
   g_log.debug() << "Iteration stopped. Minimizer status string=" << errorString
                 << "\n";
 
-  bool success = errorString.empty() || errorString == "success";
-  if (success) {
-    errorString = "success";
-  }
-
   if (nIterations >= m_maxIterations) {
     if (!errorString.empty()) {
       errorString += '\n';
@@ -212,8 +206,18 @@ void Fit::finalizeMinimizer(size_t nIterations) {
                    std::to_string(m_maxIterations) + " iterations.";
   }
 
+  if (errorString.empty()) {
+    errorString = "success";
+  }
+
   // return the status flag
   setPropertyValue("OutputStatus", errorString);
+  if (!this->isChild()) {
+    auto &logStream =
+        errorString == "success" ? g_log.notice() : g_log.warning();
+    logStream << "Fit status: " << errorString << '\n';
+    logStream << "Stopped after " << nIterations << " iterations" << '\n';
+  }
 }
 
 /// Create algorithm output worksapces.

@@ -6,16 +6,17 @@ from mantid.kernel import Direction, Stats
 import mantid.simpleapi as ms
 from mantid import mtd, logger
 import numpy as np
+import collections
 from six import iteritems
 
 
 def _stats_to_dict(stats):
     """
-    Converts a Statstics object to a dictionary.
+    Converts a Statstics object to an ordered dictionary.
     @param stats Statistics object to convertToWaterfall
     @return Dictionary of statistics
     """
-    stat_dict = dict()
+    stat_dict = collections.OrderedDict()
     stat_dict['standard_deviation'] = stats.standard_deviation
     stat_dict['maximum'] = stats.maximum
     stat_dict['minimum'] = stats.minimum
@@ -46,13 +47,13 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
 
         out_ws.addColumn('str', 'statistic')
 
-        stats = {
-            'standard_deviation': dict(),
-            'maximum': dict(),
-            'minimum': dict(),
-            'mean': dict(),
-            'median': dict(),
-        }
+        stats = collections.OrderedDict([
+            ('standard_deviation', collections.OrderedDict()),
+            ('minimum', collections.OrderedDict()),
+            ('median', collections.OrderedDict()),
+            ('maximum', collections.OrderedDict()),
+            ('mean', collections.OrderedDict()),
+        ])
 
         for name in in_ws.getColumnNames():
             try:
@@ -64,7 +65,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
 
         for name, stat in iteritems(stats):
-            stat1 = dict(stat)
+            stat1 = collections.OrderedDict(stat)
             stat1['statistic'] = name
             out_ws.addRow(stat1)
 

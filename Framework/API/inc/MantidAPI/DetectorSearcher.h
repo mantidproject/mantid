@@ -1,9 +1,9 @@
 #ifndef MANTID_DETECTOR_SEARCHER_H_
 #define MANTID_DETECTOR_SEARCHER_H_
 
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidKernel/V3D.h"
@@ -60,7 +60,7 @@ public:
 
   /// Create a new DetectorSearcher with the given instrument & detectors
   DetectorSearcher(Geometry::Instrument_const_sptr instrument,
-                   const DetectorInfo &detInfo);
+                   const Geometry::DetectorInfo &detInfo);
   /// Find a detector that intsects with the given Qlab vector
   DetectorSearchResult findDetectorIndex(const Kernel::V3D &q);
 
@@ -91,7 +91,7 @@ private:
   /// flag for whether the crystallography convention is to be used
   const double m_crystallography_convention;
   /// detector info for the instrument
-  const DetectorInfo &m_detInfo;
+  const Geometry::DetectorInfo &m_detInfo;
   /// handle to the instrument to search for detectors in
   Geometry::Instrument_const_sptr m_instrument;
   /// vector of detector indicies used in the search

@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/FilterPeaks.cpp
 	src/FindClusterFaces.cpp
 	src/FindSXPeaks.cpp
+	src/FindSXPeaksHelper.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
@@ -92,6 +93,7 @@ set ( INC_FILES
 	inc/MantidCrystal/FilterPeaks.h
 	inc/MantidCrystal/FindClusterFaces.h
 	inc/MantidCrystal/FindSXPeaks.h
+	inc/MantidCrystal/FindSXPeaksHelper.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
@@ -160,10 +162,11 @@ set ( TEST_FILES
 	CombinePeaksWorkspacesTest.h
 	CompositeClusterTest.h
 	ConnectedComponentLabelingTest.h
-        DiffPeaksWorkspacesTest.h
+	DiffPeaksWorkspacesTest.h
 	DisjointElementTest.h
 	FilterPeaksTest.h
 	FindClusterFacesTest.h
+	FindSXPeaksHelperTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h

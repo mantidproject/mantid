@@ -1,9 +1,9 @@
 #include "FirstTimeSetup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/HelpWindow.h"
-#include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtAPI/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 
 #include <QMessageBox>
 #include <QPainter>
@@ -138,8 +138,12 @@ void FirstTimeSetup::allowUsageDataStateChanged(int checkedState) {
     msgBox.setWindowTitle("Mantid: Report Usage Data ");
     msgBox.setTextFormat(Qt::RichText); // this is what makes the links
                                         // clickable
-    msgBox.setText("Are you sure you want to disable reporting <a "
-                   "href='http://reports.mantidproject.org'>usage data</a>?");
+    msgBox.setText("Are you sure you want to disable reporting of <a "
+                   "href='http://reports.mantidproject.org'>usage data</a>?"
+                   "\t(full details in our <a "
+                   "href='http://www.mantidproject.org/"
+                   "MantidProject:Privacy_policy#Usage_Data_recorded_in_Mantid'"
+                   ">Privacy Policy</a>)");
     msgBox.setInformativeText(
         "All usage data is anonymous and untraceable.\n"
         "We use the usage data to inform the future development of Mantid.\n"

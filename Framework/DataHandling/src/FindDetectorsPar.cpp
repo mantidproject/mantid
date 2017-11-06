@@ -98,7 +98,7 @@ void FindDetectorsPar::exec() {
   DetParameters AverageDetector;
   this->m_nDetectors = 0;
 
-  Progress progress(this, 0, 1, 100);
+  Progress progress(this, 0.0, 1.0, 100);
   const int progStep = static_cast<int>(ceil(double(nHist) / 100.0));
 
   const auto &spectrumInfo = inputWS->spectrumInfo();

@@ -1,8 +1,10 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
+
+from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.hfir_command_interface import DirectBeamCenter, NoSolidAngle, SetTransmission
 
 import os
 

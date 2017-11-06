@@ -82,6 +82,15 @@ public:
     tester.checkResult();
   }
 
+  void test_1D_range_outside_workspace_fails() {
+    Tester1D tester;
+    tester.setRange(0, 30);
+    tester.setWorkspaceRange(40, 50);
+    tester.setWorkspaceIndex();
+    tester.runAlgorithm();
+    tester.checkResult(true);
+  }
+
   void test_MD_histo() {
     int nx = 5;
     int ny = 6;
@@ -235,6 +244,16 @@ private:
       EndX = 10;
     }
 
+    void setRange(double newStartX, double newEndX) {
+      StartX = newStartX;
+      EndX = newEndX;
+    }
+
+    void setWorkspaceRange(double newXMin, double newXMax) {
+      xMin = newXMin;
+      xMax = newXMax;
+    }
+
     void setWorkspaceIndex() { workspaceIndex = 1; }
 
     void runAlgorithm() {
@@ -255,6 +274,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(
           alg.setProperty("OutputWorkspace", "EvaluateFunction_outWS"));
       TS_ASSERT_THROWS_NOTHING(alg.execute());
+
       isExecuted = alg.isExecuted();
       if (isExecuted) {
         outputWorkspace =
@@ -264,7 +284,13 @@ private:
       AnalysisDataService::Instance().clear();
     }
 
-    void checkResult() {
+    void checkResult(bool shouldFail = false) {
+
+      if (shouldFail) {
+        TS_ASSERT(!isExecuted);
+        return;
+      }
+
       TS_ASSERT(isExecuted);
       if (!isExecuted)
         return;

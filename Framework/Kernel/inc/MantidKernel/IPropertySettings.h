@@ -85,10 +85,9 @@ public:
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of IPropertySettings
-  virtual IPropertySettings *clone() = 0;
+  virtual IPropertySettings *clone() const = 0;
 
 protected:
-private:
   // non-copyable directly
   IPropertySettings(const IPropertySettings &) = default;
 };

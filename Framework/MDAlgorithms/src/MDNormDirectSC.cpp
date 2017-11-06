@@ -106,6 +106,20 @@ void MDNormDirectSC::init() {
                   "ConvertToMD algorithm was run, and assume that the direct "
                   "geometry inelastic mode is used.");
 
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate normalization "
+                  "from multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
+
+  declareProperty(make_unique<WorkspaceProperty<IMDHistoWorkspace>>(
+                      "TemporaryDataWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "An input MDHistoWorkspace used to accumulate data from "
+                  "multiple MDEventWorkspaces. If unspecified a blank "
+                  "MDHistoWorkspace will be created.");
+
   declareProperty(make_unique<WorkspaceProperty<Workspace>>(
                       "OutputWorkspace", "", Direction::Output),
                   "A name for the output data MDHistoWorkspace.");
@@ -249,6 +263,7 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
   for (auto prop : props) {
     const auto &propName = prop->name();
     if (propName != "SolidAngleWorkspace" &&
+        propName != "TemporaryNormalizationWorkspace" &&
         propName != "OutputNormalizationWorkspace" &&
         propName != "SkipSafetyCheck") {
       binMD->setPropertyValue(propName, prop->value());
@@ -265,8 +280,15 @@ MDHistoWorkspace_sptr MDNormDirectSC::binInputWS() {
  */
 void MDNormDirectSC::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = dataWS.clone();
-  m_normWS->setTo(0., 0., 0.);
+  boost::shared_ptr<IMDHistoWorkspace> tmp =
+      this->getProperty("TemporaryNormalizationWorkspace");
+  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  if (!m_normWS) {
+    m_normWS = dataWS.clone();
+    m_normWS->setTo(0., 0., 0.);
+  } else {
+    m_accumulate = true;
+  }
 }
 
 /**
@@ -383,21 +405,21 @@ void MDNormDirectSC::cacheDimensionXValues() {
                                (PhysicalConstants::h * PhysicalConstants::h);
   if (!m_hIntegrated) {
     auto &hDim = *m_normWS->getDimension(m_hIdx);
-    m_hX.resize(hDim.getNBins());
+    m_hX.resize(hDim.getNBoundaries());
     for (size_t i = 0; i < m_hX.size(); ++i) {
       m_hX[i] = hDim.getX(i);
     }
   }
   if (!m_kIntegrated) {
     auto &kDim = *m_normWS->getDimension(m_kIdx);
-    m_kX.resize(kDim.getNBins());
+    m_kX.resize(kDim.getNBoundaries());
     for (size_t i = 0; i < m_kX.size(); ++i) {
       m_kX[i] = kDim.getX(i);
     }
   }
   if (!m_lIntegrated) {
     auto &lDim = *m_normWS->getDimension(m_lIdx);
-    m_lX.resize(lDim.getNBins());
+    m_lX.resize(lDim.getNBoundaries());
     for (size_t i = 0; i < m_lX.size(); ++i) {
       m_lX[i] = lDim.getX(i);
     }
@@ -405,7 +427,7 @@ void MDNormDirectSC::cacheDimensionXValues() {
   if (!m_dEIntegrated) {
     // NOTE: store k final instead
     auto &eDim = *m_normWS->getDimension(m_eIdx);
-    m_eX.resize(eDim.getNBins());
+    m_eX.resize(eDim.getNBoundaries());
     for (size_t i = 0; i < m_eX.size(); ++i) {
       double temp = m_Ei - eDim.getX(i);
       temp = std::max(temp, 0.);
@@ -461,6 +483,7 @@ void MDNormDirectSC::calculateNormalization(
   std::vector<std::array<double, 4>> intersections;
   std::vector<coord_t> pos, posNew;
   auto prog = make_unique<API::Progress>(this, 0.3, 1.0, ndets);
+  // cppcheck-suppress syntaxError
 PRAGMA_OMP(parallel for private(intersections, pos, posNew))
 for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_START_INTERUPT_REGION
@@ -525,7 +548,15 @@ for (int64_t i = 0; i < ndets; i++) {
   PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
-std::copy(signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray());
+if (m_accumulate) {
+  std::transform(
+      signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
+      m_normWS->getSignalArray(),
+      [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
+} else {
+  std::copy(signalArray.cbegin(), signalArray.cend(),
+            m_normWS->getSignalArray());
+}
 }
 
 /**

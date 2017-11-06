@@ -343,6 +343,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         d['dimIndex']=self.dimIndex
         self.changed.emit(d)
 
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     mainForm=DimensionSelectorWidget()

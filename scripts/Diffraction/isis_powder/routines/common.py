@@ -148,6 +148,29 @@ def generate_run_numbers(run_number_string):
     return run_list
 
 
+def _generate_vanadium_name(vanadium_string, is_spline, *args):
+    """
+    :param vanadium_string: The number of the run being processed
+    :param is_spline: True if the workspace to save out is a spline
+    :param args: Any other strings to append to the filename
+    :return: A filename for the vanadium
+    """
+    out_name = 'Van'
+    if is_spline:
+        out_name += 'Splined'
+
+    out_name += '_' + str(vanadium_string)
+    for passed_arg in args:
+        if isinstance(passed_arg, list):
+            for arg in passed_arg:
+                out_name += '_' + str(arg)
+        else:
+            out_name += '_' + (str(passed_arg))
+
+    out_name += ".nxs"
+    return out_name
+
+
 def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
@@ -159,16 +182,21 @@ def generate_splined_name(vanadium_string, *args):
     :param args: Any identifying properties to append to the name
     :return: The splined vanadium name
     """
-    out_name = "VanSplined" + '_' + str(vanadium_string)
-    for passed_arg in args:
-        if isinstance(passed_arg, list):
-            for arg in passed_arg:
-                out_name += '_' + str(arg)
-        else:
-            out_name += '_' + (str(passed_arg))
+    return _generate_vanadium_name(vanadium_string, True, *args)
 
-    out_name += ".nxs"
-    return out_name
+
+def generate_unsplined_name(vanadium_string, *args):
+    """
+    Generates a unique unsplined vanadium name which encapsulates
+    any properties passed into this method so that the vanadium
+    can be later loaded. This acts as a fingerprint for the vanadium
+    as some properties (such as offset file used) can impact
+    on the correct splined vanadium file to use.
+    :param vanadium_string: The name of this vanadium run
+    :param args: Any identifying properties to append to the name
+    :return: The splined vanadium name
+    """
+    return _generate_vanadium_name(vanadium_string, False, *args)
 
 
 def get_first_run_number(run_number_string):
@@ -184,20 +212,16 @@ def get_first_run_number(run_number_string):
     return run_numbers
 
 
-def get_monitor_ws(ws_to_process, run_number_string, instrument):
+def extract_single_spectrum(ws_to_process, spectrum_number_to_extract):
     """
     Extracts the monitor spectrum into its own individual workspaces from the input workspace
-    based on the number of this spectrum in the instrument object. The run number is used
-    to determine the monitor spectrum number on instruments who potentially have differing
-    monitor numbers depending on the age of the run.
+    based on the number of the spectrum given
     :param ws_to_process: The workspace to extract the monitor from
-    :param run_number_string: The run number as a string to determine the correct monitor position
-    :param instrument: The instrument to query for the monitor position
+    :param spectrum_number_to_extract: The spectrum of the workspace to extract
     :return: The extracted monitor as a workspace
     """
-    first_run_number = get_first_run_number(run_number_string)
-    monitor_spectra = instrument._get_monitor_spectra_index(first_run_number)
-    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process, WorkspaceIndex=monitor_spectra)
+    load_monitor_ws = mantid.ExtractSingleSpectrum(InputWorkspace=ws_to_process,
+                                                   WorkspaceIndex=spectrum_number_to_extract)
     return load_monitor_ws
 
 
@@ -350,10 +374,7 @@ def spline_vanadium_workspaces(focused_vanadium_spectra, spline_coefficient):
     :param spline_coefficient: The coefficient to use when creating the splined vanadium workspaces
     :return: The splined vanadium workspace
     """
-    stripped_ws_list = _strip_vanadium_peaks(workspaces_to_strip=focused_vanadium_spectra)
-    splined_workspaces = spline_workspaces(stripped_ws_list, num_splines=spline_coefficient)
-
-    remove_intermediate_workspace(stripped_ws_list)
+    splined_workspaces = spline_workspaces(focused_vanadium_spectra, num_splines=spline_coefficient)
     return splined_workspaces
 
 
@@ -385,6 +406,7 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     :param ws_to_correct: The workspace to subtract the empty instrument runs from
     :param empty_sample_ws_string: The empty run numbers to subtract from the workspace
     :param instrument: The instrument object these runs belong to
+    :param scale_factor: The percentage to scale the loaded runs by
     :return: The workspace with the empty runs subtracted
     """
     # If an empty string was not specified just return to skip this step
@@ -397,7 +419,12 @@ def subtract_summed_runs(ws_to_correct, empty_sample_ws_string, instrument, scal
     if scale_factor:
         empty_sample = mantid.Scale(InputWorkspace=empty_sample, OutputWorkspace=empty_sample, Factor=scale_factor,
                                     Operation="Multiply")
-    mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    try:
+        mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_sample, OutputWorkspace=ws_to_correct)
+    except ValueError:
+        raise ValueError("The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
+                         " the empty and sample match?")
+
     remove_intermediate_workspace(empty_sample)
 
     return ws_to_correct
@@ -432,7 +459,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws, run_details=run_details))
+        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
 
     return output_list
 
@@ -488,7 +515,7 @@ def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
 def _strip_vanadium_peaks(workspaces_to_strip):
     out_list = []
     for i, ws in enumerate(workspaces_to_strip):
-        out_name = ws.getName() + "_splined-" + str(i+1)
+        out_name = ws.getName() + "_toSpline-" + str(i+1)
         out_list.append(mantid.StripVanadiumPeaks(InputWorkspace=ws, OutputWorkspace=out_name))
     return out_list
 

@@ -3,8 +3,8 @@
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include <MantidQtAPI/GraphOptions.h>
-#include <MantidQtAPI/IProjectSerialisable.h>
+#include <MantidQtWidgets/Common/GraphOptions.h>
+#include <MantidQtWidgets/Common/IProjectSerialisable.h>
 
 #include <MdiSubWindow.h>
 #include <boost/shared_ptr.hpp>

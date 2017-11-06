@@ -1,5 +1,5 @@
 #include "TextFileIO.h"
-#include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtWidgets/Common/FileDialogHandler.h"
 
 #include <QApplication>
 #include <QFile>
@@ -28,7 +28,7 @@ bool TextFileIO::save(const QString &txt, const QString &filename) const {
   QFile file(saved);
   if (!file.open(QIODevice::WriteOnly)) {
     QMessageBox::critical(
-        NULL, "MantidPlot - File error",
+        nullptr, "MantidPlot - File error",
         QString("Could not open file \"%1\" for writing.").arg(saved));
     return false;
   }
@@ -45,8 +45,8 @@ bool TextFileIO::save(const QString &txt, const QString &filename) const {
 QString TextFileIO::askWhereToSave() const {
   QString selectedFilter;
   QString filter = m_filters.join(";;");
-  QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",
-                                                  filter, &selectedFilter);
+  QString filename = QFileDialog::getSaveFileName(nullptr, "MantidPlot - Save",
+                                                  "", filter, &selectedFilter);
   return MantidQt::API::FileDialogHandler::addExtension(filename,
                                                         selectedFilter);
 }

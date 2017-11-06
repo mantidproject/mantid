@@ -76,7 +76,7 @@ void SumNeighbours::exec() {
 
   Mantid::API::MatrixWorkspace_sptr outWS;
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   progress.report("Smoothing Neighbours...");
 

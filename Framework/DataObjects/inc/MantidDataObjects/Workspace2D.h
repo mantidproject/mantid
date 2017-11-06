@@ -48,7 +48,8 @@ public:
    */
   const std::string id() const override { return "Workspace2D"; }
 
-  Workspace2D();
+  Workspace2D(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned);
   Workspace2D &operator=(const Workspace2D &other) = delete;
   ~Workspace2D() override;
 
@@ -101,11 +102,7 @@ protected:
   /// Called by initialize()
   void init(const std::size_t &NVectors, const std::size_t &XLength,
             const std::size_t &YLength) override;
-  void init(const std::size_t &NVectors,
-            const HistogramData::Histogram &histogram) override;
-
-  /// The number of vectors in the workspace
-  std::size_t m_noVectors;
+  void init(const HistogramData::Histogram &histogram) override;
 
   /// a vector holding workspace index of monitors in the workspace
   std::vector<specnum_t> m_monitorList;
@@ -114,8 +111,8 @@ protected:
   std::vector<Histogram1D *> data;
 
 private:
-  Workspace2D *doClone() const override { return new Workspace2D(*this); }
-  Workspace2D *doCloneEmpty() const override { return new Workspace2D(); }
+  Workspace2D *doClone() const override;
+  Workspace2D *doCloneEmpty() const override;
 
   virtual std::size_t getHistogramNumberHelper() const;
 };

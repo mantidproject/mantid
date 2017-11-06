@@ -1,6 +1,6 @@
-#include "MantidQtAPI/IProjectSerialisable.h"
-#include "MantidQtAPI/WindowIcons.h"
-#include "MantidQtMantidWidgets/ProjectSavePresenter.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/WindowIcons.h"
+#include "MantidQtWidgets/Common/ProjectSavePresenter.h"
 
 #include "ProjectSaveView.h"
 
@@ -91,7 +91,7 @@ void ProjectSaveView::setProjectPath(const QString &path) {
 void ProjectSaveView::updateWorkspacesList(
     const std::vector<WorkspaceInfo> &workspaces) {
   m_ui.workspaceList->clear();
-  for (auto info : workspaces) {
+  for (const auto &info : workspaces) {
     addWorkspaceItem(info);
   }
   // pad the header for longish workspace names
@@ -108,7 +108,7 @@ void ProjectSaveView::updateWorkspacesList(
 void ProjectSaveView::updateIncludedWindowsList(
     const std::vector<WindowInfo> &windows) {
   m_ui.includedWindows->clear();
-  for (auto info : windows) {
+  for (const auto &info : windows) {
     addWindowItem(m_ui.includedWindows, info);
   }
 
@@ -125,7 +125,7 @@ void ProjectSaveView::updateIncludedWindowsList(
 void ProjectSaveView::updateExcludedWindowsList(
     const std::vector<WindowInfo> &windows) {
   m_ui.excludedWindows->clear();
-  for (auto info : windows) {
+  for (const auto &info : windows) {
     addWindowItem(m_ui.excludedWindows, info);
   }
 
@@ -138,7 +138,7 @@ void ProjectSaveView::updateExcludedWindowsList(
  */
 void ProjectSaveView::removeFromIncludedWindowsList(
     const std::vector<std::string> &windows) {
-  for (auto name : windows) {
+  for (const auto &name : windows) {
     removeItem(m_ui.includedWindows, name);
   }
 }
@@ -149,7 +149,7 @@ void ProjectSaveView::removeFromIncludedWindowsList(
  */
 void ProjectSaveView::removeFromExcludedWindowsList(
     const std::vector<std::string> &windows) {
-  for (auto name : windows) {
+  for (const auto &name : windows) {
     removeItem(m_ui.excludedWindows, name);
   }
 }
@@ -312,7 +312,7 @@ void ProjectSaveView::addWindowItem(QTreeWidget *widget,
 void ProjectSaveView::addWorkspaceItem(const WorkspaceInfo &info) {
   auto item = makeWorkspaceItem(info);
 
-  for (auto subInfo : info.subWorkspaces) {
+  for (const auto &subInfo : info.subWorkspaces) {
     auto subItem = makeWorkspaceItem(subInfo);
     item->addChild(subItem);
   }

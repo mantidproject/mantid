@@ -4,15 +4,13 @@
 #include <qwt_symbol.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidQtWidgets/Common/MantidQwtWorkspaceData.h"
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include "../MultiLayer.h"
 #include "ErrorBarSettings.h"
 #include "MantidKernel/CPUTimer.h"
-
-using Mantid::Kernel::CPUTimer;
 
 /**
 Constructor

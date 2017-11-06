@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/FrequencyStandardDeviations.cpp
 	src/FrequencyVariances.cpp
 	src/Histogram.cpp
+	src/HistogramBuilder.cpp
 	src/HistogramMath.cpp
 	src/Interpolate.cpp
 	src/Points.cpp
@@ -27,6 +28,7 @@ set ( INC_FILES
 	inc/MantidHistogramData/FrequencyStandardDeviations.h
 	inc/MantidHistogramData/FrequencyVariances.h
 	inc/MantidHistogramData/Histogram.h
+	inc/MantidHistogramData/HistogramBuilder.h
 	inc/MantidHistogramData/HistogramDx.h
 	inc/MantidHistogramData/HistogramE.h
 	inc/MantidHistogramData/HistogramMath.h
@@ -62,6 +64,7 @@ set ( TEST_FILES
 	FrequenciesTest.h
 	FrequencyStandardDeviationsTest.h
 	FrequencyVariancesTest.h
+	HistogramBuilderTest.h
 	HistogramDxTest.h
 	HistogramETest.h
 	HistogramMathTest.h

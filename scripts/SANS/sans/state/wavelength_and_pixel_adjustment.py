@@ -8,7 +8,7 @@ import copy
 from sans.state.state_base import (StateBase, rename_descriptor_names, StringParameter,
                                    ClassTypeParameter, PositiveFloatParameter, DictParameter)
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
-from sans.common.enums import (RangeStepType, DetectorType, SANSInstrument)
+from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 from sans.state.automatic_setters import (automatic_setters)
 
 
@@ -96,8 +96,8 @@ class StateWavelengthAndPixelAdjustmentBuilder(object):
 
 
 def get_wavelength_and_pixel_adjustment_builder(data_info):
-    instrument = data_info.instrument
-    if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ:
+    facility = data_info.facility
+    if facility is SANSFacility.ISIS:
         return StateWavelengthAndPixelAdjustmentBuilder(data_info)
     else:
         raise NotImplementedError("StateWavelengthAndPixelAdjustmentBuilder: Could not find any valid "

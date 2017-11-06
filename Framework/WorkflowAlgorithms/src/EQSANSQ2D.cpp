@@ -90,6 +90,8 @@ void EQSANSQ2D::exec() {
     qmax = getRunProperty(inputWS, "qmax");
     g_log.debug() << "Using Qmax from run properties = " << qmax << std::endl;
   } else {
+    // This is pointing to the correct parameter in the workspace,
+    // which has been changed to the right distance in EQSANSLoad.cpp
     const double sample_detector_distance =
         getRunProperty(inputWS, "sample_detector_distance");
 
@@ -109,6 +111,8 @@ void EQSANSQ2D::exec() {
     double dymax = pixel_size_y * std::max(beam_ctr_y, ny_pixels - beam_ctr_y);
     double maxdist = std::max(dxmax, dymax);
 
+    // This uses the correct parameter in the workspace, which has been
+    // changed to the right distance in EQSANSLoad.cpp
     qmax = 4 * M_PI / wavelength_min *
            std::sin(0.5 * std::atan(maxdist / sample_detector_distance));
     g_log.debug() << "Using calculated Qmax = " << qmax << std::endl;

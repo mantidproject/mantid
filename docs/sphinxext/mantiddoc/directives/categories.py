@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
+import posixpath
 from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
@@ -19,7 +20,7 @@ CATEGORIES_DIR = "categories"
 # List of category names that are considered the index for everything in that type
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
-INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Interfaces"]
+INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
 
 class LinkItem(object):
     """
@@ -36,9 +37,7 @@ class LinkItem(object):
           name (str): Display name of document
           location (str): Location of item relative to source directory
         """
-        name = str(name)
-        name = name.replace("\\\\","\\")
-        self.name = name
+        self.name = str(name).replace("\\\\","/")
         self.location = location
 
     def __eq__(self, other):
@@ -70,7 +69,7 @@ class LinkItem(object):
         Returns:
           str: A string containing the link to reach this item
         """
-        link = relative_uri(base=base, to=self.location)
+        link = relative_uri(base=to_unix_style_path(base), to=self.location)
         if not link.endswith(ext):
             link += ext
         return link
@@ -106,12 +105,11 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
+        docname = to_unix_style_path(docname)
 
-        if "\\" in docname:
-            docname = docname.replace("\\", "/")
-        dirpath, filename = os.path.split(docname)
+        dirpath, filename = posixpath.split(docname)
         html_dir = dirpath + "/" + CATEGORIES_DIR
-        self.html_path = html_dir + "/" + name.replace("\\\\", "/") + ".html"
+        self.html_path = html_dir + "/" + to_unix_style_path(name) + ".html"
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
@@ -291,6 +289,18 @@ class CategoriesDirective(AlgorithmBaseDirective):
 
 #---------------------------------------------------------------------------------
 
+def to_unix_style_path(path):
+    """
+    Replaces any backslashes in the given string with forward slashes
+    and replace consecutive forward slashes with a single forward slash.
+
+    Arguments:
+      path: A string possibly containing backslashes
+    """
+    return path.replace("\\", "/").replace("//", "/")
+
+#---------------------------------------------------------------------------------
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -342,19 +352,19 @@ def create_category_pages(app):
         context["outpath"] = category.html_path
 
         #jinja appends .html to output name
-        category_html_path_noext = os.path.splitext(category.html_path)[0]
+        category_html_path_noext = posixpath.splitext(category.html_path)[0]
         yield (category_html_path_noext, context, template)
 
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = os.path.join(category.name.lower(), 'categories')
-            category_html_path_noext = os.path.join(category_html_dir, 'index')
+            category_html_dir = posixpath.join(category.name.lower(), 'categories')
+            category_html_path_noext = posixpath.join(category_html_dir, 'index')
             yield (category_html_path_noext, context, template)
 
             # index in document directory
-            document_dir = os.path.dirname(category_html_dir)
-            category_html_path_noext = os.path.join(document_dir, 'index')
+            document_dir = posixpath.dirname(category_html_dir)
+            category_html_path_noext = posixpath.join(document_dir, 'index')
             context['outpath'] = category_html_path_noext + '.html'
             yield (category_html_path_noext, context, template)
 # enddef

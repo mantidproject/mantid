@@ -15,6 +15,7 @@
 #include <vector>
 
 using namespace Mantid::Kernel;
+using Mantid::Types::Core::DateAndTime;
 
 class TimeSeriesPropertyTest : public CxxTest::TestSuite {
   // Create a small TSP<double>. Callee owns the returned object.
@@ -222,13 +223,13 @@ public:
 
   void test_Casting() {
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(iProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(dProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<Property *>(sProp),
-                      static_cast<Property *>(0));
+                      static_cast<Property *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<ITimeSeriesProperty *>(iProp),
-                      static_cast<ITimeSeriesProperty *>(0));
+                      static_cast<ITimeSeriesProperty *>(nullptr));
   }
 
   //----------------------------------------------------------------------------
@@ -282,8 +283,8 @@ public:
     log1->addValue("2016-03-17T01:30:00", 4);
     log1->addValue("2016-03-17T02:00:00", 5);
     TimeSeriesProperty<bool> *filter1 = new TimeSeriesProperty<bool>("filter");
-    filter1->addValue("2016-Mar-17T00:00:00", 1);
-    filter1->addValue("2016-Mar-17T01:00:00", 0);
+    filter1->addValue("2016-Mar-17 00:00:00", 1);
+    filter1->addValue("2016-Mar-17 01:00:00", 0);
     log1->filterWith(filter1);
 
     TimeSeriesProperty<int> *log2 = new TimeSeriesProperty<int>("count_rate");
@@ -292,8 +293,8 @@ public:
     log2->addValue("2016-03-17T05:00:00", 3);
     log2->addValue("2016-03-17T06:00:0", 4);
     TimeSeriesProperty<bool> *filter2 = new TimeSeriesProperty<bool>("filter");
-    filter2->addValue("2016-Mar-17T03:00:00", 1);
-    filter2->addValue("2016-Mar-17T05:00:00", 0);
+    filter2->addValue("2016-Mar-17 03:00:00", 1);
+    filter2->addValue("2016-Mar-17 05:00:00", 0);
     log2->filterWith(filter2);
 
     TS_ASSERT(!(*log1 == *log2));
@@ -786,7 +787,9 @@ public:
       TS_ASSERT_EQUALS(out_3->nthValue(j), j + 4);
     }
 
-    return;
+    for (auto outputPtr : outputs) {
+      delete outputPtr;
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -1100,11 +1103,11 @@ public:
   void test_firstLastTimeValue() {
     TimeSeriesProperty<double> *p = createDoubleTSP();
 
-    Mantid::Kernel::DateAndTime t0 = p->firstTime();
-    Mantid::Kernel::DateAndTime tf = p->lastTime();
+    Mantid::Types::Core::DateAndTime t0 = p->firstTime();
+    Mantid::Types::Core::DateAndTime tf = p->lastTime();
 
-    Mantid::Kernel::DateAndTime t0c("2007-11-30T16:17:00");
-    Mantid::Kernel::DateAndTime tfc("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t0c("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tfc("2007-11-30T16:17:30");
 
     double v0 = p->firstValue();
     double vf = p->lastValue();
@@ -1168,9 +1171,9 @@ public:
     p1->merge(p2);
 
     // 3. Verify
-    Mantid::Kernel::DateAndTime t0("2007-11-30T16:17:00");
-    Mantid::Kernel::DateAndTime tf("2007-11-30T16:17:35");
-    Mantid::Kernel::DateAndTime t1("2007-11-30T16:17:05");
+    Mantid::Types::Core::DateAndTime t0("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tf("2007-11-30T16:17:35");
+    Mantid::Types::Core::DateAndTime t1("2007-11-30T16:17:05");
 
     TS_ASSERT_EQUALS(p1->firstTime(), t0);
     TS_ASSERT_EQUALS(p1->lastTime(), tf);
@@ -1260,10 +1263,11 @@ public:
         dynamic_cast<TimeSeriesProperty<double> *>(p->clone());
 
     // 3. Check
-    std::vector<Mantid::Kernel::DateAndTime> times1 = p->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times1 = p->timesAsVector();
     std::vector<double> values1 = p->valuesAsVector();
 
-    std::vector<Mantid::Kernel::DateAndTime> times2 = newp->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times2 =
+        newp->timesAsVector();
     std::vector<double> values2 = newp->valuesAsVector();
 
     TS_ASSERT_EQUALS(times1, times2);
@@ -1386,11 +1390,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Create method 1
-    std::vector<Mantid::Kernel::DateAndTime> times;
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(3.00);
@@ -1403,8 +1407,9 @@ public:
 
     TS_ASSERT_EQUALS(p->size(), p1->size());
     if (p->size() == p1->size()) {
-      std::vector<Mantid::Kernel::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Kernel::DateAndTime> times1 = p1->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 =
+          p1->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1413,7 +1418,7 @@ public:
     }
 
     // 3 Create method 2
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
 
@@ -1428,8 +1433,9 @@ public:
 
     TS_ASSERT_EQUALS(p->size(), p2->size());
     if (p->size() == p2->size()) {
-      std::vector<Mantid::Kernel::DateAndTime> times0 = p->timesAsVector();
-      std::vector<Mantid::Kernel::DateAndTime> times1 = p2->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times0 = p->timesAsVector();
+      std::vector<Mantid::Types::Core::DateAndTime> times1 =
+          p2->timesAsVector();
       for (size_t i = 0; i < static_cast<size_t>(p->size()); i++) {
         TS_ASSERT_EQUALS(times0[i], times1[i]);
         TS_ASSERT_DELTA(p->getSingleValue(times0[i]),
@@ -1491,21 +1497,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsCorrectMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap =
+        p->valueAsCorrectMap();
 
     // 3. Check
-    std::vector<Mantid::Kernel::DateAndTime> times;
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(2.00);
     values.push_back(3.00);
     values.push_back(4.00);
 
-    std::map<Mantid::Kernel::DateAndTime, double>::iterator tit;
+    std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
     for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
       TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1530,16 +1537,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get multimap
-    std::multimap<Mantid::Kernel::DateAndTime, double> tmap =
+    std::multimap<Mantid::Types::Core::DateAndTime, double> tmap =
         p->valueAsMultiMap();
 
     // 3. Check
-    std::vector<Mantid::Kernel::DateAndTime> times;
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(1.99);
@@ -1573,21 +1580,21 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsMap();
 
     // 3. Check
-    std::vector<Mantid::Kernel::DateAndTime> times;
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
-    times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+    std::vector<Mantid::Types::Core::DateAndTime> times;
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
     values.push_back(1.00);
     values.push_back(2.00);
     values.push_back(3.00);
     values.push_back(4.00);
 
-    std::map<Mantid::Kernel::DateAndTime, double>::iterator tit;
+    std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
     for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
       TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1616,24 +1623,24 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 2. Get map
-    std::map<Mantid::Kernel::DateAndTime, double> tmap = p->valueAsMap();
+    std::map<Mantid::Types::Core::DateAndTime, double> tmap = p->valueAsMap();
 
     // 3. Check
     TS_ASSERT_EQUALS(tmap.size(), 4);
 
     if (tmap.size() == 4) {
-      std::vector<Mantid::Kernel::DateAndTime> times;
-      times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
-      times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
-      times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
-      times.push_back(Mantid::Kernel::DateAndTime("2007-11-30T16:17:30"));
+      std::vector<Mantid::Types::Core::DateAndTime> times;
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
       std::vector<double> values;
       values.push_back(1.00);
       values.push_back(2.00);
       values.push_back(3.00);
       values.push_back(4.00);
 
-      std::map<Mantid::Kernel::DateAndTime, double>::iterator tit;
+      std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
       size_t index = 0;
       for (tit = tmap.begin(); tit != tmap.end(); ++tit) {
         TS_ASSERT_EQUALS(tit->first, times[index]);
@@ -1665,20 +1672,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(p->addValue("2007-11-30T16:17:30", 4.00));
 
     // 3. Test with term
-    Mantid::Kernel::DateAndTime t0 = p->nthTime(0);
-    Mantid::Kernel::DateAndTime t0c("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime t0 = p->nthTime(0);
+    Mantid::Types::Core::DateAndTime t0c("2007-11-30T16:17:00");
     TS_ASSERT_EQUALS(t0, t0c);
 
-    Mantid::Kernel::DateAndTime t2 = p->nthTime(2);
-    Mantid::Kernel::DateAndTime t2c("2007-11-30T16:17:20");
+    Mantid::Types::Core::DateAndTime t2 = p->nthTime(2);
+    Mantid::Types::Core::DateAndTime t2c("2007-11-30T16:17:20");
     TS_ASSERT_EQUALS(t2, t2c);
 
-    Mantid::Kernel::DateAndTime t3 = p->nthTime(3);
-    Mantid::Kernel::DateAndTime t3c("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t3 = p->nthTime(3);
+    Mantid::Types::Core::DateAndTime t3c("2007-11-30T16:17:30");
     TS_ASSERT_EQUALS(t3, t3c);
 
-    Mantid::Kernel::DateAndTime t100 = p->nthTime(100);
-    Mantid::Kernel::DateAndTime t100c("2007-11-30T16:17:30");
+    Mantid::Types::Core::DateAndTime t100 = p->nthTime(100);
+    Mantid::Types::Core::DateAndTime t100c("2007-11-30T16:17:30");
     TS_ASSERT_EQUALS(t100, t100c);
 
     // 4. Double time
@@ -1712,21 +1719,21 @@ public:
     // 3. Test
     Mantid::Kernel::TimeInterval dt0 = p->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:05"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
 
     Mantid::Kernel::TimeInterval dt1 = p->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:05"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:05"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
 
     Mantid::Kernel::TimeInterval dt2 = p->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:15"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:35"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:35"));
 
     // -1 Clean
     delete p;
@@ -1739,7 +1746,7 @@ public:
    */
   void test_filter() {
     // 1. Create a base property
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1750,7 +1757,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // b) Copy size and interval information in order to verify clearFilter()
@@ -1776,15 +1783,15 @@ public:
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
 
     // 4. Clear filter
     p1->clearFilter();
@@ -1835,7 +1842,7 @@ public:
    */
   void test_filterBoundary1() {
     // 1. Create a base property
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1846,7 +1853,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -1865,33 +1872,33 @@ public:
     // 4. Check interval & Value
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:00"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 1, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 0.00000001);
 
     Mantid::Kernel::TimeInterval dt12 = p1->nthInterval(11);
     TS_ASSERT_EQUALS(dt12.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:20:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:20:10"));
     TS_ASSERT_EQUALS(dt12.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T17:19:30"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T17:19:30"));
     double v12 = p1->nthValue(11);
     TS_ASSERT_DELTA(v12, 20, 1.0E-8);
 
@@ -1911,7 +1918,7 @@ public:
     */
   void test_filterBoundary2() {
     // 1. Create a base property
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1922,7 +1929,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -1941,9 +1948,9 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -1963,7 +1970,7 @@ public:
     */
   void test_filterBoundary3() {
     // 1. Create a base property
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -1974,7 +1981,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -1993,17 +2000,17 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt1 = p1->nthInterval(1);
     TS_ASSERT_EQUALS(dt1.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:10"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
     TS_ASSERT_EQUALS(dt1.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     double v1 = p1->nthValue(1);
     TS_ASSERT_DELTA(v1, 2, 1.0E-8);
 
     Mantid::Kernel::TimeInterval dt2 = p1->nthInterval(2);
     TS_ASSERT_EQUALS(dt2.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:40"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:40"));
     TS_ASSERT_EQUALS(dt2.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:18:50"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:18:50"));
     double v2 = p1->nthValue(2);
     TS_ASSERT_DELTA(v2, 11, 1.0E-8);
 
@@ -2024,7 +2031,7 @@ public:
 
   void test_filterBoundary4() {
     // 1. Create a base property
-    Mantid::Kernel::DateAndTime tStart("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime tStart("2007-11-30T16:17:00");
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
@@ -2035,7 +2042,7 @@ public:
         new TimeSeriesProperty<double>("BaseProperty");
     p1->create(tStart, deltaTs, valueXs);
 
-    std::vector<Mantid::Kernel::DateAndTime> times = p1->timesAsVector();
+    std::vector<Mantid::Types::Core::DateAndTime> times = p1->timesAsVector();
     std::vector<double> values = p1->valuesAsVector();
 
     // 2. Create a filter for T. F. T. F...
@@ -2054,9 +2061,9 @@ public:
     // 4. Check interval
     Mantid::Kernel::TimeInterval dt0 = p1->nthInterval(0);
     TS_ASSERT_EQUALS(dt0.begin(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:16"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:16"));
     TS_ASSERT_EQUALS(dt0.end(),
-                     Mantid::Kernel::DateAndTime("2007-11-30T16:17:20"));
+                     Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
     double v0 = p1->nthValue(0);
     TS_ASSERT_DELTA(v0, 2, 1.0E-8);
 
@@ -2260,7 +2267,7 @@ public:
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Kernel::DateAndTime firstStart("2007-11-30T16:17:00"),
+    Mantid::Types::Core::DateAndTime firstStart("2007-11-30T16:17:00"),
         firstEnd("2007-11-30T16:17:15"), secondStart("2007-11-30T16:18:35"),
         secondEnd("2007-11-30T16:18:40");
     filter->addValue(firstStart.toISO8601String(), true);
@@ -2287,7 +2294,7 @@ public:
     // Add the filter
     auto filter =
         Mantid::Kernel::make_unique<TimeSeriesProperty<bool>>("Filter");
-    Mantid::Kernel::DateAndTime firstEnd("2007-11-30T16:17:05"),
+    Mantid::Types::Core::DateAndTime firstEnd("2007-11-30T16:17:05"),
         secondStart("2007-11-30T16:17:10"), secondEnd("2007-11-30T16:17:15"),
         thirdStart("2007-11-30T16:18:35");
     filter->addValue(log->firstTime(), true);
@@ -2314,7 +2321,7 @@ private:
     // Build the log
     auto log =
         Mantid::Kernel::make_unique<TimeSeriesProperty<double>>("DoubleLog");
-    Mantid::Kernel::DateAndTime logTime("2007-11-30T16:17:00");
+    Mantid::Types::Core::DateAndTime logTime("2007-11-30T16:17:00");
     const double incrementSecs(10.0);
     for (int i = 1; i < 12; ++i) {
       const double val = static_cast<double>(i);

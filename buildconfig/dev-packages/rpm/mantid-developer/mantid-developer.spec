@@ -5,7 +5,7 @@
 %endif
 
 Name:           mantid-developer
-Version:        1.22
+Version:        1.23
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -33,7 +33,7 @@ Requires: hdf-devel
 Requires: hdf5-devel
 Requires: h5py >= 2.3.1
 Requires: jsoncpp-devel >= 0.7.0
-Requires: librdkafka-dev
+Requires: librdkafka-devel
 Requires: muParser-devel
 Requires: mxml-devel
 Requires: nexus >= 4.2
@@ -54,6 +54,7 @@ Requires: python-matplotlib
 %{?fedora:Requires: python2-matplotlib-qt4}
 %{?el7:Requires: python-matplotlib-qt4}
 Requires: python-pip
+%{?fedora:Requires: python2-qtconsole}
 Requires: python-sphinx
 Requires: python2-sphinx-bootstrap-theme
 Requires: PyYAML
@@ -103,6 +104,7 @@ Requires: python3-dateutil
 Requires: python3-h5py
 Requires: python3-ipython-gui
 Requires: python3-matplotlib
+%{?fedora:Requires: python3-qtconsole}
 Requires: python3-PyYAML
 Requires: python3-mock
 Requires: boost-python3-devel
@@ -131,8 +133,11 @@ required for Mantid development.
 
 %changelog
 
+* Thu Jul 20 2017 Peter Peterson <petersonpf@ornl.gov>
+- Added python-qtconsole for fedora
+
 * Sat Feb 18 2017 Stuart Campbell <scampbell@bnl.gov>
-- Updated to use upstream sphinx-bootstrap-theme 
+- Updated to use upstream sphinx-bootstrap-theme
 
 * Mon Jan 09 2017 Lamar Moore <lamar.moore@stfc.ac.uk>
 - Require librdkafka-dev

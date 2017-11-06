@@ -10,6 +10,8 @@
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
 
+#include <Poco/Thread.h>
+
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/BinEdgeAxis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -407,7 +407,6 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   int nBins = static_cast<int>(max / delta);
 
   HistogramData::BinEdges axis;
-  double startVal;
   if (log_binning) {
     // get qmin from the run properties
     double qmin = getQminFromWs(*inputWorkspace);
@@ -427,7 +426,7 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
     if (nBins * delta != max)
       ++nBins; // Stop at first boundary past MaxQxy if max is not a multiple of
                // delta
-    startVal = -1.0 * delta * nBins;
+    double startVal = -1.0 * delta * nBins;
     nBins *= 2; // go from -max to +max
     nBins += 1; // Add 1 - this is a histogram
 
@@ -440,6 +439,9 @@ Qxy::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace) {
   // Create an output workspace with the same meta-data as the input
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, nBins - 1, nBins, nBins - 1);
+  // Legacy compatibility. Setting detector IDs not actually meaningful.
+  for (size_t i = 0; i < outputWorkspace->getNumberHistograms(); ++i)
+    outputWorkspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
   // ... but clear the masking from the parameter map as we don't want to carry
   // that over since this is essentially a 2D rebin
   outputWorkspace->mutableDetectorInfo().clearMaskFlags();

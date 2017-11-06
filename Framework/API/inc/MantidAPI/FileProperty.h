@@ -99,11 +99,6 @@ private:
   std::string setLoadProperty(const std::string &propValue);
   /// Handles the filename if this is a save property
   std::string setSaveProperty(const std::string &propValue);
-  /// Check that a given directory exists
-  std::string createDirectory(const std::string &path) const;
-  /// Check file extension to see if a lower- or upper-cased version will also
-  /// match if the first does not exist
-  std::string convertExtension(const std::string &filepath) const;
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
   /// The default file extension associated with the type of file this property

@@ -128,7 +128,7 @@ MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
     has_lattice = false;
 
   if (!(powderMode || has_lattice)) {
-    std::string inWsName = TargWSDescription.getWSName();
+    const std::string &inWsName = TargWSDescription.getWSName();
     // notice about 3D case without lattice
     g_Log.information()
         << "Can not obtain transformation matrix from the input workspace: "

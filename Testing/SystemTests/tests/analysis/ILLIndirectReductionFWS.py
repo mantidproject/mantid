@@ -48,6 +48,8 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
 
         self._run_efws_mirror_sense()
 
+        self._run_calib_bg()
+
         self.tearDown()
 
     def _run_ifws(self):
@@ -83,7 +85,6 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
             self.assertTrue(result[0], "Mismatch in EFWS: " + result[1].row(0)['Message'])
 
     def _run_sum_interpolate(self):
-
         # this cross-tests if only one background point is given,
         # sum and interpolate options should give identical output
         IndirectILLReductionFWS(Run="143720:143728:2",
@@ -114,3 +115,15 @@ class ILLIndirectReductionFWSTest(stresstesting.MantidStressTest):
         avg = numpy.average(yData)
         for y in numpy.nditer(yData):
             self.assertDelta(y, avg, 0.001)
+
+    def _run_calib_bg(self):
+        # this tests with the background file for calibration
+        IndirectILLReductionFWS(Run="143720:143728:2",
+                                CalibrationRun="143721",
+                                CalibrationBackgroundRun="143723",
+                                CalibrationBackgroundScalingFactor=0.1,
+                                OutputWorkspace="efws_calib_bg")
+
+        self.assertEquals(mtd['efws_calib_bg_red'].getItem(0).getNumberHistograms(), 18)
+
+        self.assertDelta(mtd['efws_calib_bg_red'].getItem(0).readY(0)[0], 0.218, 0.001)

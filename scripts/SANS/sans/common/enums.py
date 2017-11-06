@@ -81,7 +81,7 @@ def string_convertible(cls):
 #  Instrument and facility types
 # --------------------------------
 @string_convertible
-@serializable_enum("LOQ", "LARMOR", "SANS2D", "NoInstrument")
+@serializable_enum("LOQ", "LARMOR", "SANS2D", "ZOOM", "NoInstrument")
 class SANSInstrument(object):
     pass
 
@@ -120,6 +120,7 @@ class CanonicalCoordinates(Coordinates):
 # --------------------------
 #  ReductionMode
 # --------------------------
+@string_convertible
 @serializable_enum("Merged", "All")
 class ReductionMode(object):
     """
@@ -258,7 +259,7 @@ class SaveType(object):
 # Fit type for the transmission calculation
 # ------------------------------------------
 @string_convertible
-@serializable_enum("Linear", "Log", "Polynomial", "NoFit")
+@serializable_enum("Linear", "Logarithmic", "Polynomial", "NoFit")
 class FitType(object):
     """
     Defines possible fit types
@@ -269,6 +270,7 @@ class FitType(object):
 # --------------------------
 #  SampleShape
 # --------------------------
+@string_convertible
 @serializable_enum("CylinderAxisUp", "Cuboid", "CylinderAxisAlong")
 class SampleShape(object):
     """
@@ -321,6 +323,30 @@ class OutputMode(object):
                    "Output", "UserFile", "SampleScatterPeriod", "SampleTransmissionPeriod", "SampleDirectPeriod",
                    "CanScatterPeriod", "CanTransmissionPeriod", "CanDirectPeriod",)
 class BatchReductionEntry(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
+
+
+# ------------------------------
+# Quadrants for beam centre finder
+# -------------------------------
+@string_convertible
+@serializable_enum("Left", "Right", "Top", "Bottom")
+class MaskingQuadrant(object):
+    """
+    Defines the entries of a batch reduction file.
+    """
+    pass
+
+
+# ------------------------------
+# Directions for Beam centre finder
+# -------------------------------
+@string_convertible
+@serializable_enum("All", "Up_Down", "Left_Right")
+class FindDirectionEnum(object):
     """
     Defines the entries of a batch reduction file.
     """

@@ -85,6 +85,9 @@ public:
   /// directed along dimension would have getNBins+1 axis points.
   virtual size_t getNBins() const = 0;
 
+  /// @return number of bin boundaries (axis points)
+  virtual size_t getNBoundaries() const = 0;
+
   /// @return an XML string representation of the dimension.
   virtual std::string toXMLString() const = 0;
 

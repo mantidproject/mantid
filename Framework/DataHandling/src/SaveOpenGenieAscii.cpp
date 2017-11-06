@@ -66,7 +66,7 @@ void SaveOpenGenieAscii::exec() {
   // Whilst this doesn't weigh in the processing
   // required it breaks down the algorithm nicely for the moment
   const int numOfSteps = 6;
-  Progress progressBar(this, 0, 1, numOfSteps);
+  Progress progressBar(this, 0.0, 1.0, numOfSteps);
 
   const std::string formatType = getProperty("OpenGenieFormat");
   // If we had a basic format this is where the specialization would go
@@ -377,7 +377,7 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
     // First the parameter name
     outfile << "  " << '"' << std::get<0>(outTuple) << '"' << "\r\n";
 
-    const std::string outputType = std::get<1>(outTuple);
+    const std::string &outputType = std::get<1>(outTuple);
     outfile << "    " << outputType << "\r\n";
 
     // Then the data values - the formatting depends on data type

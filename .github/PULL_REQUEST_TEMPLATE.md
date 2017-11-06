@@ -4,9 +4,10 @@ Description of work.
 
 <!-- Instructions for testing. -->
 
-Fixes #xxxx.
+Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 
-<!-- RELEASE NOTES
+**Release Notes** 
+<!--
 Either edit the file in docs/source/release/... and it will be in your pull request or state
 *Does not need to be in the release notes.*
 -->
@@ -20,16 +21,14 @@ Please comment on the following ([full description](http://www.mantidproject.org
 ##### Code Review #####
 
 - [ ] Is the code of an acceptable quality?
-- [ ] Does the code conform to the [coding standards](http://www.mantidproject.org/Coding_Standards)? Is it well structured with small focussed classes/methods/functions?
-- [ ] Are there unit/system tests in place? Are the unit tests small and test the a class in isolation?
+- [ ] Does the code conform to the [coding standards](http://www.mantidproject.org/Coding_Standards)?
+- [ ] Are the unit tests small and test the class in isolation?
 - [ ] If there are changes in the release notes then do they describe the changes appropriately?
 
 ##### Functional Tests #####
 
 - [ ] Do changes function as described? Add comments below that describe the tests performed?
-- [ ] How do the changes handle unexpected situations, e.g. bad input?
-- [ ] Has the relevant documentation been added/updated?
-- [ ] Is user-facing documentation written in a user-friendly manner?
-- [ ] Has developer documentation been updated if required?
+- [ ] Do the changes handle unexpected situations, e.g. bad input?
+- [ ] Has the relevant (user and developer) documentation been added/updated?
 
-- Does everything look good? Comment with the ship it emoji but don't merge. A member of `@mantidproject/gatekeepers` will take care of it.
+Does everything look good? Mark the review as **Approve**. A member of `@mantidproject/gatekeepers` will take care of it.

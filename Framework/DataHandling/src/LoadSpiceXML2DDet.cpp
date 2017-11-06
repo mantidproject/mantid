@@ -1,12 +1,13 @@
 #include "MantidDataHandling/LoadSpiceXML2DDet.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string.hpp>
@@ -230,7 +231,7 @@ void LoadSpiceXML2DDet::processInputs() {
   if (vec_pixelgeom.size() == 2) {
     m_numPixelX = vec_pixelgeom[0];
     m_numPixelY = vec_pixelgeom[1];
-  } else if (vec_pixelgeom.size() == 0) {
+  } else if (vec_pixelgeom.empty()) {
     m_numPixelX = 0;
     m_numPixelY = 0;
   } else {
@@ -273,7 +274,7 @@ bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
     setupSampleLogFromSpiceTable(outws, spicetablews, m_ptNumber4Log);
   }
 
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   // Process 2theta
   bool return_true = true;
@@ -713,7 +714,7 @@ LoadSpiceXML2DDet::parseDetectorNode(const std::string &detvaluestr,
   size_t num_empty_line = 0;
   size_t num_weird_line = 0;
   for (size_t iline = 0; iline < vecLines.size(); ++iline) {
-    if (vecLines[iline].size() == 0)
+    if (vecLines[iline].empty())
       ++num_empty_line;
     else if (vecLines[iline].size() < 100)
       ++num_weird_line;
@@ -832,7 +833,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   size_t numrows = spicetablews->rowCount();
   std::vector<std::string> colnames = spicetablews->getColumnNames();
   // FIXME - Shouldn't give a better value?
-  Kernel::DateAndTime anytime(1000);
+  Types::Core::DateAndTime anytime(1000);
 
   bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {

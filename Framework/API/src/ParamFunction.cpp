@@ -138,6 +138,16 @@ double ParamFunction::getParameter(const std::string &name) const {
 }
 
 /**
+ * Check if function has a parameter with a particular name.
+ * @param name :: A name of a parameter.
+ * @return True if the parameter exists.
+*/
+bool ParamFunction::hasParameter(const std::string &name) const {
+  return std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name) !=
+         m_parameterNames.end();
+}
+
+/**
  * Returns the index of the parameter named name.
  * @param name :: The name of the parameter.
  * @return the index of the named parameter

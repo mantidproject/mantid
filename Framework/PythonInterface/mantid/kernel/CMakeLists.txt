@@ -55,6 +55,7 @@ set ( EXPORT_FILES
   src/Exports/OptionalBool.cpp
   src/Exports/UsageService.cpp
   src/Exports/Atom.cpp
+  src/Exports/StringContainsValidator.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
@@ -75,6 +76,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
   src/Registry/MappingTypeHandler.cpp
+  src/Registry/PropertyManagerFactory.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
@@ -109,6 +111,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Registry/MappingTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/PropertyManagerFactory.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
@@ -152,11 +155,20 @@ if ( WIN32 ) #.lib -> .dll
   string ( REPLACE "/lib/" "/bin/" NEXUSLIB ${NEXUSLIB} )
   string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
 endif()
+set ( MPISETUP_PY mpisetup )
+if ( MPI_EXPERIMENTAL )
+  set ( IMPORT_MPI_IN_PYTHON True )
+else()
+  set ( IMPORT_MPI_IN_PYTHON False )
+endif()
 
 # Build version
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.py )
 # Copy py to build directory, taking care of multi-config (MSVC) builds
 copy_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+                    PYTHON_INSTALL_FILES )
+copy_files_to_dir ( ${MPISETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
                     PYTHON_INSTALL_FILES )
 
 # Package version
@@ -166,6 +178,7 @@ if ( WIN32 OR APPLE )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
 endif()
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py )
 
 #############################################################################################
 # Create the target for this directory
@@ -175,7 +188,7 @@ add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILE
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Kernel ${Boost_LIBRARIES}
+target_link_libraries ( PythonKernelModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Types Kernel ${Boost_LIBRARIES}
                         ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} ${TBB_LIBRARIES} 
 			${TBB_MALLOC_LIBRARIES} )
 
@@ -194,3 +207,5 @@ install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/kernel )
 # packagesetup.py that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.py )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${MPISETUP_PY}.py )

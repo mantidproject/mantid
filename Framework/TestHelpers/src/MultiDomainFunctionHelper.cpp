@@ -103,10 +103,12 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace1() {
   ws1->initialize(1, nbins, nbins);
   auto &x = ws1->mutableX(0);
   auto &y = ws1->mutableY(0);
-  for (size_t i = 0; i < ws1->blocksize(); ++i) {
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
     x[i] = -1.0 + dX * double(i);
     const double t = x[i];
-    y[i] = A0 + B0 * t + (A1 + B1 * t) * pow(t, 2) + (A2 + B2 * t) * pow(t, 4);
+    const double t2 = t * t;
+    y[i] = A0 + B0 * t + (A1 + B1 * t) * t2 + (A2 + B2 * t) * t2 * t2;
   }
 
   return ws1;
@@ -118,10 +120,11 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2() {
 
   auto &x = ws2->mutableX(0);
   auto &y = ws2->mutableY(0);
-  for (size_t i = 0; i < ws2->blocksize(); ++i) {
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
     x[i] = -1.0 + dX * double(i);
     const double t = x[i];
-    y[i] = A0 + B0 * t + (A1 + B1 * t) * pow(t, 2);
+    y[i] = A0 + B0 * t + (A1 + B1 * t) * t * t;
   }
 
   return ws2;
@@ -132,10 +135,11 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
   ws3->initialize(1, nbins, nbins);
   auto &x = ws3->mutableX(0);
   auto &y = ws3->mutableY(0);
-  for (size_t i = 0; i < ws3->blocksize(); ++i) {
+  const size_t numBins = y.size();
+  for (size_t i = 0; i < numBins; ++i) {
     x[i] = -1.0 + dX * double(i);
     const double t = x[i];
-    y[i] = A0 + B0 * t + (A2 + B2 * t) * pow(t, 4);
+    y[i] = A0 + B0 * t + (A2 + B2 * t) * t * t * t * t;
   }
 
   return ws3;

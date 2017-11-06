@@ -384,5 +384,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         return dataws
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CollectHB3AExperimentInfo)

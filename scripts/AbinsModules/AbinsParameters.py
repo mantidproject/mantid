@@ -30,7 +30,7 @@ tosca_c = 2.5
 # Parameters which can be changed by a user if necessary
 
 # name of the group in the hdf file in which extracted  data from DFT phonon calculations are stored
-dft_group = "PhononAB"
+ab_initio_group = "ABData"
 
 powder_data_group = "Powder"  # name of the group where PowderData is stored
 
@@ -39,10 +39,11 @@ crystal_data_group = "SingleCrystal"  # name of the group where SingleCrystalDat
 s_data_group = "S"  # name of the group where dynamical factor is stored
 
 pkt_per_peak = 50  # number of points for each peak broadened by the experimental resolution
-bin_width = 1.0  # defines width of bins used in rebinning of S
 max_wavenumber = 4100.0  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
 min_wavenumber = 0.0  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
-acoustic_phonon_threshold = 0.0  # frequencies below this value are treated as acoustic and neglected.
+
+# frequencies below this value are treated as acoustic or as translations/rotations and are neglected.
+frequencies_threshold = 0.0
 
 # threshold expressed as a fraction of max S intensity below which S values are treated as zero
 s_relative_threshold = 0.01
@@ -54,6 +55,5 @@ s_absolute_threshold = 10e-8
 optimal_size = 5000000  # this is used to create optimal size of chunk energies for which S is calculated
 # Actual chunk of energies < optimal_size
 
-atoms_threads = 3  # number of threads used in parallel calculations over atoms
-q_threads = 1  # number of threads used in parallel calculations over q
+threads = 3  # number of threads used in parallel calculations
 # Abins internal parameters end ###########################

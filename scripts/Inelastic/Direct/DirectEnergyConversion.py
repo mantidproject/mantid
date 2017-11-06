@@ -194,8 +194,7 @@ class DirectEnergyConversion(object):
         """
         # output workspace name.
         try:
-#pylint: disable=unused-variable
-            n,r = funcinspect.lhs_info('both')
+            _,r = funcinspect.lhs_info('both')
             out_ws_name = r[0]
 #pylint: disable=bare-except
         except:
@@ -205,9 +204,6 @@ class DirectEnergyConversion(object):
         # obtain proper run descriptor in case it is not a run descriptor but
         # something else
         white = self.get_run_descriptor(white)
-
-        # return all diagnostics parameters
-        diag_params = self.prop_man.get_diagnostics_parameters()
 
         if self.use_hard_mask_only:
             # build hard mask
@@ -238,17 +234,21 @@ class DirectEnergyConversion(object):
                 return None
 
         # Get the white beam vanadium integrals
-        whiteintegrals = self.do_white(white, None, None) # No grouping yet
+        white_integrals = self.do_white(white, None, None) # No grouping yet
 #pylint: disable=access-member-before-definition
         if self.second_white:
             #TODO: fix THIS DOES NOT WORK!
 #pylint: disable=unused-variable
             # second_white = self.second_white
-            other_whiteintegrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
+            other_white_integrals = self.do_white(PropertyManager.second_white, None, None) # No grouping yet
 #pylint: disable=attribute-defined-outside-init
-            self.second_white = other_whiteintegrals
+            self.second_white = other_white_integrals
+
+        # return all diagnostics parameters
+        diag_params = self.prop_man.get_diagnostics_parameters()
 
         # Get the background/total counts from the sample run if present
+        name_to_clean = None
         if diag_sample is not None:
             diag_sample = self.get_run_descriptor(diag_sample)
             sample_mask = diag_sample.get_masking(1)
@@ -266,12 +266,11 @@ class DirectEnergyConversion(object):
                 if (PropertyManager.incident_energy.multirep_mode() and self.normalise_method == 'monitor-2')\
                         or self.bleed_test: # bleed test below needs no normalization so normalize cloned workspace
                     result_ws  = diag_sample.get_ws_clone('sample_ws_clone')
-                    wb_normalization_method = whiteintegrals.getRun().getLogData('DirectInelasticReductionNormalisedBy').value
+                    wb_normalization_method = white_integrals.getRun().getLogData('DirectInelasticReductionNormalisedBy').value
                     result_ws = self.normalise(result_ws, wb_normalization_method)
                     name_to_clean = result_ws.name()
                 else:
                     result_ws = self.normalise(diag_sample, self.normalise_method)
-                    name_to_clean = None
 
                 #>>>here result workspace is being processed
                 #-- not touching result ws
@@ -285,12 +284,10 @@ class DirectEnergyConversion(object):
                 self.prop_man.log("Diagnose: finished convertUnits ",'information')
 
                 background_int *= self.scale_factor
-                diagnostics.normalise_background(background_int, whiteintegrals,
+                diagnostics.normalise_background(background_int, white_integrals,
                                                  diag_params.get('second_white',None))
                 diag_params['background_int'] = background_int
                 diag_params['sample_counts'] = total_counts
-        else: # diag_sample is None
-            name_to_clean = None
 
         # extract existing white mask if one is defined and provide it for
         # diagnose to use instead of constantly diagnosing the same vanadium
@@ -311,7 +308,7 @@ class DirectEnergyConversion(object):
         # keep white mask workspace for further usage
         if diag_spectra_blocks is None:
             # Do the whole lot at once
-            white_masked_ws = diagnostics.diagnose(whiteintegrals, **diag_params)
+            white_masked_ws = diagnostics.diagnose(white_integrals, **diag_params)
             if white_masked_ws:
                 white.add_masked_ws(white_masked_ws)
                 DeleteWorkspace(white_masked_ws)
@@ -319,22 +316,30 @@ class DirectEnergyConversion(object):
             for bank in diag_spectra_blocks:
                 diag_params['start_index'] = bank[0] - 1
                 diag_params['end_index'] = bank[1] - 1
-                white_masked_ws = diagnostics.diagnose(whiteintegrals, **diag_params)
+                white_masked_ws = diagnostics.diagnose(white_integrals, **diag_params)
                 if white_masked_ws:
                     white.add_masked_ws(white_masked_ws)
                     DeleteWorkspace(white_masked_ws)
 
         if out_ws_name:
             if diag_sample is not None:
-                diag_sample.add_masked_ws(whiteintegrals)
+                diag_sample.add_masked_ws(white_integrals)
                 mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
             else: # either WB was diagnosed or WB masks were applied to it
                 # Extract the mask workspace
-                diag_mask, _ = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=out_ws_name)
+                diag_mask, _ = ExtractMask(InputWorkspace=white_integrals,OutputWorkspace=out_ws_name)
         else:
             diag_mask = None
-        # Clean up
+
+        self.clean_up(diag_params, name_to_clean, white_integrals)
+
+        return diag_mask
+
+#-------------------------------------------------------------------------------
+    # Clean up unrequired workspaces
+
+    def clean_up(self, diag_params, name_to_clean, white_integrals):
         if 'sample_counts' in diag_params:
             DeleteWorkspace(Workspace='background_int')
             DeleteWorkspace(Workspace='total_counts')
@@ -344,9 +349,8 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(name_to_clean)
             if name_to_clean+'_monitors' in mtd:
                 DeleteWorkspace(name_to_clean+'_monitors')
-        DeleteWorkspace(Workspace=whiteintegrals)
+        DeleteWorkspace(Workspace=white_integrals)
 
-        return diag_mask
 #-------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-branches
@@ -390,43 +394,25 @@ class DirectEnergyConversion(object):
 
         PropertyManager.sample_run.set_action_suffix('')
         sample_ws = PropertyManager.sample_run.get_workspace()
-        # Check auto-ei mode and calculate incident energies if necessary
-        if PropertyManager.incident_energy.autoEi_mode():
-            mon_ws = PropertyManager.sample_run.get_monitors_ws()
-            # sum monitor spectra if this is requested
-            ei_mon_spec = self.ei_mon_spectra
-            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
-                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
-                sample_ws.setMonitorWorkspace(mon_ws)
-            else:
-                pass
 
-            try:
-                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
-                EiToProcessAvailible = True
-            except RuntimeError as er:
-                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.
-                             format(str(er)))
-                EiToProcessAvailible = False
-        else:
-            EiToProcessAvailible = True
+        ei_to_process_available = self.calc_incident_energies(PropertyManager, prop_man, sample_ws)
 
         # Update reduction properties which may change in the workspace but have
         # not been modified from input parameters.
         # E.g.  detector number have changed
-        oldChanges = self.prop_man.getChangedProperties()
-        allChanges = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
-        workspace_defined_prop = allChanges.difference(oldChanges)
+        old_changes = self.prop_man.getChangedProperties()
+        all_changes = self.prop_man.update_defaults_from_instrument(sample_ws.getInstrument())
+        workspace_defined_prop = all_changes.difference(old_changes)
         if len(workspace_defined_prop) > 0:
             prop_man.log("****************************************************************")
             prop_man.log('*** Sample run {0} properties change default reduction properties: '.
                          format(PropertyManager.sample_run.get_workspace().name()))
-            prop_man.log_changed_values('notice',False,oldChanges)
+            prop_man.log_changed_values('notice',False,old_changes)
             prop_man.log("****************************************************************")
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
-        if not EiToProcessAvailible:
+        if not ei_to_process_available:
             prop_man.log("*** NO GUESS INCIDENT ENERGIES IDENTIFIED FOR THIS RUN *********")
             prop_man.log("*** NOTHING TO REDUCE ******************************************")
             prop_man.log("****************************************************************")
@@ -453,12 +439,12 @@ class DirectEnergyConversion(object):
             masking = self.spectra_masks
 
         # estimate and report the number of failing detectors
-        nMaskedSpectra = get_failed_spectra_list_from_masks(masking,prop_man)
+        n_masked_spectra = get_failed_spectra_list_from_masks(masking,prop_man)
         if masking:
-            nSpectra = masking.getNumberHistograms()
+            n_spectra = masking.getNumberHistograms()
         else:
-            nSpectra = 0
-        prop_man.log(header.format(nSpectra,nMaskedSpectra),'notice')
+            n_spectra = 0
+        prop_man.log(header.format(n_spectra,n_masked_spectra),'notice')
 #--------------------------------------------------------------------------------------------------
 #  now reduction
 #--------------------------------------------------------------------------------------------------
@@ -475,12 +461,12 @@ class DirectEnergyConversion(object):
         #end
         #
         if self.monovan_run is not None:
-            MonovanCashNum = PropertyManager.monovan_run.run_number()
+            mono_van_cache_num = PropertyManager.monovan_run.run_number()
         else:
-            MonovanCashNum = None
+            mono_van_cache_num = None
         #Set or clear monovan run number to use in cash ID to return correct
         #cashed value of monovan integral
-        PropertyManager.mono_correction_factor.set_cash_mono_run_number(MonovanCashNum)
+        PropertyManager.mono_correction_factor.set_cash_mono_run_number(mono_van_cache_num)
 
         mono_ws_base = None
         if PropertyManager.incident_energy.multirep_mode():
@@ -541,7 +527,7 @@ class DirectEnergyConversion(object):
             # calculate absolute units integral and apply it to the workspace
             # or use previously cashed value
             cashed_mono_int = PropertyManager.mono_correction_factor.get_val_from_cash(prop_man)
-            if MonovanCashNum is not None or self.mono_correction_factor or cashed_mono_int:
+            if mono_van_cache_num is not None or self.mono_correction_factor or cashed_mono_int:
                 deltaE_ws_sample,mono_ws_base = self._do_abs_corrections(deltaE_ws_sample,cashed_mono_int,
                                                                          ei_guess,mono_ws_base,tof_range, cut_ind,num_ei_cuts)
             else:
@@ -572,23 +558,54 @@ class DirectEnergyConversion(object):
 # END Main loop over incident energies
 #------------------------------------------------------------------------------------------
 
+        self.clean_up_convert_to_energy(start_time)
+        return result
+
+
+#------------------------------------------------------------------------------------------
+    # Handles cleanup of the convert_to_energy method
+
+    def clean_up_convert_to_energy(self, start_time):
+
         #Must! clear background ws (if present in multirep) to calculate background
         #source for next workspace
         if 'bkgr_ws_source' in mtd:
             DeleteWorkspace('bkgr_ws_source')
 
-        # CLEAR existing workspaces only if it is not run within loop
-
-        #prop_man.monovan_run = None
-        #prop_man.wb_run = None
         # clear combined mask
         self.spectra_masks = None
         end_time = time.time()
-        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
-        prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".
-                     format(end_time - start_time),'notice')
-        prop_man.log("****************************************************************")
-        return result
+        self.prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WORKFLOW FINISHED  *********")
+        self.prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".
+                          format(end_time - start_time),'notice')
+        self.prop_man.log("****************************************************************")
+
+#------------------------------------------------------------------------------------------
+    # Check auto-ei mode and calculate incident energies if necessary
+    # Returns if there is a processible Ei
+
+    def calc_incident_energies(self, PropertyManager, prop_man, sample_ws):
+        if PropertyManager.incident_energy.autoEi_mode():
+            mon_ws = PropertyManager.sample_run.get_monitors_ws()
+            # sum monitor spectra if this is requested
+            ei_mon_spec = self.ei_mon_spectra
+            if PropertyManager.ei_mon_spectra.need_to_sum_monitors(prop_man):
+                ei_mon_spec,mon_ws = self.sum_monitors_spectra(mon_ws,ei_mon_spec)
+                sample_ws.setMonitorWorkspace(mon_ws)
+            else:
+                pass
+
+            try:
+                PropertyManager.incident_energy.set_auto_Ei(mon_ws,prop_man,ei_mon_spec)
+                return True
+            except RuntimeError as er:
+                prop_man.log('*** Error while calculating autoEi: {0}. See algorithm log for details.'.
+                             format(str(er)))
+                return False
+        else:
+            return True
+
+#------------------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,
@@ -864,7 +881,7 @@ class DirectEnergyConversion(object):
         if separate_monitors:
             # copy incident energy obtained on monitor workspace to detectors
             # workspace
-            AddSampleLog(Workspace=data_ws,LogName='Ei',LogText=str(ei),LogType='Number')
+            AddSampleLog(Workspace=data_ws,LogName='Ei',LogText='{0:.10f}'.format(ei),LogType='Number')
 
         resultws_name = data_ws.name()
         # Adjust the TOF such that the first monitor peak is at t=0
@@ -1914,6 +1931,8 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
 
     n_spectra = len(sp_list)
     return n_spectra
+
+
 #-----------------------------------------------------------------
 if __name__ == "__main__":
     pass

@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 import sip
 import os
@@ -191,7 +192,7 @@ class ReflData(object):
             xmin, xmax = self._data[ReflData.OFF_OFF].get_skipped_range()
             self._data[ReflData.OFF_OFF].set_range(xmin, xmax)
         else:
-            print "No Off-Off data to process"
+            print("No Off-Off data to process")
             return xmin, xmax
 
         for polarization in [ReflData.ON_OFF,
@@ -321,7 +322,7 @@ class StitcherWidget(BaseWidget):
         try:
             self._scale_data_sets()
         except:
-            message = "Could not scale data\n  %s" % sys.exc_value
+            message = "Could not scale data\n  %s" % sys.exc_info()[1]
             if self._content.scale_to_one_chk.isChecked():
                 message += "\n\nCheck your Q range near the critical edge"
             QtGui.QMessageBox.warning(self,

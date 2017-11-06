@@ -86,6 +86,15 @@ public:
     TS_ASSERT_DELTA(fun.getParameter("f2.Amplitude"), 0.4298 * c_mbsr,
                     1e-3 * c_mbsr);
     TS_ASSERT_DELTA(fun.getParameter("f2.FWHM"), 1.5, 1e-3);
+
+    TS_ASSERT(fun.hasParameter("B20"));
+    TS_ASSERT(fun.hasParameter("B42"));
+    TS_ASSERT(fun.hasParameter("f0.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f0.FWHM"));
+    TS_ASSERT(fun.hasParameter("f2.Amplitude"));
+    TS_ASSERT(fun.hasParameter("f2.PeakCentre"));
+    TS_ASSERT(!fun.hasParameter("Hello"));
+    TS_ASSERT(!fun.hasParameter("f0.Hello"));
   }
 
   void test_evaluate() {
@@ -712,10 +721,8 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(41), 44.24, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(44), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(47), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(fun->isActive(39));
@@ -733,16 +740,12 @@ public:
     TS_ASSERT_DELTA(fun->getParameter(35), 0.00, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(36), 1.10, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(37), 0.00, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(38), 27.04, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(39), 1.10, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(40), 0.0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(41), 44.24, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(42), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(43), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(44), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(45), 1.1, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(46), 0, 1e-2);
-    TS_ASSERT_DELTA(fun->getParameter(47), 0, 1e-2);
     TS_ASSERT_DELTA(fun->getParameter(48), 1.1, 1e-2);
     TS_ASSERT(fun->isActive(36));
     TS_ASSERT(!fun->isActive(39));

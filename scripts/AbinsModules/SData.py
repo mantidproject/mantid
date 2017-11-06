@@ -21,6 +21,10 @@ class SData(AbinsModules.GeneralData):
             raise ValueError("Invalid sample form %s" % sample_form)
 
         self._data = None  # dictionary which stores dynamical structure factor for all atoms
+        self._bin_width = None
+
+    def set_bin_width(self, width=None):
+        self._bin_width = width
 
     def set(self, items=None):
         """
@@ -44,12 +48,13 @@ class SData(AbinsModules.GeneralData):
 
             elif "frequencies" == item:
 
+                step = self._bin_width
                 bins = np.arange(start=AbinsModules.AbinsParameters.min_wavenumber,
-                                 stop=AbinsModules.AbinsParameters.max_wavenumber,
-                                 step=AbinsModules.AbinsParameters.bin_width,
+                                 stop=AbinsModules.AbinsParameters.max_wavenumber + step,
+                                 step=step,
                                  dtype=AbinsModules.AbinsConstants.FLOAT_TYPE)
 
-                if not np.array_equal(items[item], bins[1:]):
+                if not np.array_equal(items[item], bins[AbinsModules.AbinsConstants.FIRST_BIN_INDEX:-1]):
                     raise ValueError("Invalid frequencies.")
 
             else:
@@ -61,7 +66,7 @@ class SData(AbinsModules.GeneralData):
     def extract(self):
         """
         Returns the data.
-        @return: data
+        :returns: data
         """
         return self._data
 

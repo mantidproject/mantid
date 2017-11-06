@@ -1,13 +1,13 @@
 #include <vector>
 #include <cmath>
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/CacheGeometryGenerator.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
-#include "MantidGeometry/Rendering/OCGeometryHandler.h"
 
-#include <boost/make_shared.hpp>
+#ifdef ENABLE_OPENCASCADE
+#include "MantidGeometry/Rendering/OCGeometryHandler.h"
+#endif
 
 namespace Mantid {
 

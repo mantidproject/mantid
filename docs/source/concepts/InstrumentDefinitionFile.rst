@@ -320,7 +320,7 @@ example of specifying a Source and SamplePos is shown below
 
 
 Using detector/monitor IDs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Any component that is either a detector or monitor must be assigned a
 unique detector/monitor ID numbers (note this is *not* spectrum
@@ -350,6 +350,8 @@ important reason to insist on this.
    trying to remember a sequence of IDs. Note the counts in a histogram
    spectrum may be the sum of counts from a number of detectors and
    Mantid, behind the scene, use the IDs to keep track of this.
+
+.. warning:: As of version 3.12 of Mantid, Instruments in Mantid will no longer silently discard detectors defined with duplicate IDs. Detector IDs (including Monitors) must be unique across the Instrument. IDFs cannot be loaded if they violate this.
 
 The <idlist> element and the idlist attribute of the elements is used to assign
 detector IDs. The notation for using idlist is
@@ -1405,6 +1407,8 @@ this component relative to its parent component.
 Reference frame in which instrument is described. The author/reader of
 an IDF can chose the reference coordinate system in which the instrument
 is described. The default reference system is the one shown below.
+The direction here means the direction of the beam if it was not
+modified by any mirrors etc.
 
 .. code-block:: xml
 
@@ -1419,8 +1423,16 @@ is described. The default reference system is the one shown below.
 
 This reference frame is e.g. used when a signed theta detector values
 are calculated where it is needed to know which direction is defined as
-up. The direction here means the direction of the beam if it was not
-modified by any mirrors etc.
+up. By default, the axis defining the sign of the scattering angle is the one pointing up.
+Optionally this can be customized by inserting the following line into the reference-frame node:
+
+.. code-block:: xml
+
+      <theta-sign axis="x"/>
+
+In this case, negative x will correspond to negative theta.
+Note that both the pointing-up and theta-sign axes cannot be the same as the along-beam axis.
+
 
 .. _default-view:
 

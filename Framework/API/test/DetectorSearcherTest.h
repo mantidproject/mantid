@@ -2,9 +2,8 @@
 #define MANTID_API_DETECTORSEARCHERTEST_H_
 
 #include "MantidAPI/DetectorSearcher.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidBeamline/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
 

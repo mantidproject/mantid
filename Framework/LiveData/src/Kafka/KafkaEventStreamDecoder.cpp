@@ -4,8 +4,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidKernel/make_unique.h"
 #include "MantidLiveData/Exception.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 
@@ -16,6 +21,8 @@ GCC_DIAG_OFF(conversion)
 #include "private/Schema/is84_isis_events_generated.h"
 #include "private/Schema/f142_logdata_generated.h"
 GCC_DIAG_ON(conversion)
+
+using namespace Mantid::Types;
 
 namespace {
 /// Logger
@@ -44,7 +51,7 @@ const std::chrono::seconds MAX_LATENCY(1);
  */
 template <typename T>
 void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
-                 const Mantid::Kernel::DateAndTime &time, T value) {
+                 const Core::DateAndTime &time, T value) {
   if (mutableRunInfo.hasProperty(name)) {
     auto property = mutableRunInfo.getTimeSeriesProperty<T>(name);
     property->addValue(time, value);
@@ -58,8 +65,8 @@ void appendToLog(Mantid::API::Run &mutableRunInfo, const std::string &name,
 
 namespace Mantid {
 namespace LiveData {
-using DataObjects::TofEvent;
-using Kernel::DateAndTime;
+using Types::Event::TofEvent;
+using Types::Core::DateAndTime;
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -79,7 +86,7 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
       m_spDetTopic(spDetTopic), m_sampleEnvTopic(sampleEnvTopic),
       m_interrupt(false), m_localEvents(), m_specToIdx(), m_runStart(),
       m_runNumber(-1), m_thread(), m_capturing(false), m_exception(),
-      m_extractWaiting(false) {}
+      m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
 /**
  * Destructor.
@@ -120,7 +127,7 @@ void KafkaEventStreamDecoder::startCapture(bool startNow) {
   m_spDetStream =
       m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
 
-  auto m_thread = std::thread([this]() { this->captureImpl(); });
+  m_thread = std::thread([this]() { this->captureImpl(); });
   m_thread.detach();
 }
 
@@ -223,8 +230,10 @@ void KafkaEventStreamDecoder::captureImpl() noexcept {
   try {
     captureImplExcept();
   } catch (std::exception &exc) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(exc.what());
   } catch (...) {
+    m_cbError();
     m_exception = boost::make_shared<std::runtime_error>(
         "KafkaEventStreamDecoder: Unknown exception type caught.");
   }
@@ -253,12 +262,13 @@ void KafkaEventStreamDecoder::captureImplExcept() {
 
   while (!m_interrupt) {
     waitForDataExtraction();
-
     // Pull in events
     m_eventStream->consumeMessage(&buffer, offset, partition, topicName);
     // No events, wait for some to come along...
-    if (buffer.empty())
+    if (buffer.empty()) {
+      m_cbIterationEnd();
       continue;
+    }
 
     if (checkOffsets) {
       if (reachedEnd.count(topicName) &&
@@ -310,6 +320,7 @@ void KafkaEventStreamDecoder::captureImplExcept() {
             getStopOffsets(stopOffsets, reachedEnd, stopTime, checkOffsets);
       }
     }
+    m_cbIterationEnd();
   }
   g_log.debug("Event capture finished");
 }
@@ -423,8 +434,8 @@ void KafkaEventStreamDecoder::sampleDataFromMessage(const std::string &buffer) {
     // Convert time from nanoseconds since 1 Jan 1970 to nanoseconds since 1 Jan
     // 1990 to create a Mantid timestamp
     const int64_t nanoseconds1970To1990 = 631152000000000000L;
-    auto time = Mantid::Kernel::DateAndTime(seEvent->timestamp() -
-                                            nanoseconds1970To1990);
+    auto time = Core::DateAndTime(seEvent->timestamp() -
+                                  nanoseconds1970To1990);
 
     // If sample log with this name already exists then append to it
     // otherwise create a new log
@@ -478,6 +489,7 @@ void KafkaEventStreamDecoder::eventDataFromMessage(const std::string &buffer) {
                                       pulseTime));
   }
 }
+
 
 KafkaEventStreamDecoder::RunStartStruct
 KafkaEventStreamDecoder::getRunStartMessage(std::string &rawMsgBuffer) {
@@ -696,6 +708,6 @@ void KafkaEventStreamDecoder::loadInstrument(
                     << "': " << exc.what() << "\n";
   }
 }
-}
+} // namespace LiveData
 
 } // namespace Mantid

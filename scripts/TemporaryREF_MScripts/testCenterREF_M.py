@@ -1,4 +1,5 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import mantid
 
@@ -20,6 +21,7 @@ def calculateCenter(ws):
     rotation010=np.degrees(mantid.kernel.V3D(avex,0,avez).angle(mantid.kernel.V3D(0,0,1)))
     return (-avey,-rotation010)
 
+
 central=mantid.simpleapi.LoadEventNexus('REF_M_22715',NXentryName='entry-Off_Off')
 original=mantid.simpleapi.CloneWorkspace(central)
 translation,rotation=calculateCenter(original)
@@ -30,12 +32,12 @@ atangle=mantid.simpleapi.LoadEventNexus('REF_M_22710',NXentryName='entry-Off_Off
 mantid.simpleapi.MoveInstrumentComponent(Workspace=atangle,ComponentName="DetectorArm",X=0,Y=translation,Z=1,RelativePosition=1)
 mantid.simpleapi.RotateInstrumentComponent(Workspace=atangle,ComponentName="DetectorArm",X=0,Y=1,Z=0,Angle=rotation,RelativeRotation=1)
 
-central=ConvertUnits(central,Target="Wavelength",EMode="Elastic")
-central=Rebin(central,"3.5,0.1,7")
+central=mantid.simpleapi.ConvertUnits(central,Target="Wavelength",EMode="Elastic")
+central=mantid.simpleapi.Rebin(central,"3.5,0.1,7")
 
-atangle=ConvertUnits(atangle,Target="Wavelength",EMode="Elastic")
-atangle=Rebin(atangle,"3.5,0.1,7")
+atangle=mantid.simpleapi.ConvertUnits(atangle,Target="Wavelength",EMode="Elastic")
+atangle=mantid.simpleapi.Rebin(atangle,"3.5,0.1,7")
 
-csum=SumSpectra(central)
-asum=SumSpectra(atangle)
+csum=mantid.simpleapi.SumSpectra(central)
+asum=mantid.simpleapi.SumSpectra(atangle)
 normalized=asum/csum

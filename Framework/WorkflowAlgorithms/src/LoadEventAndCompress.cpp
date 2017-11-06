@@ -205,7 +205,7 @@ void LoadEventAndCompress::exec() {
 
   m_chunkingTable = determineChunk(filename);
 
-  Progress progress(this, 0, 1, 2);
+  Progress progress(this, 0.0, 1.0, 2);
 
   // first run is free
   progress.report("Loading Chunk");

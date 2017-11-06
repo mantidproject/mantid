@@ -12,33 +12,37 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/InstrumentCreationHelper.h"
 
-#include "MantidHistogramData/LinearGenerator.h"
-#include "MantidAPI/Run.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/make_unique.h"
+#include "MantidIndexing/IndexInfo.h"
 
 #include <cmath>
 #include <sstream>
+#include <utility>
 
 namespace WorkspaceCreationHelper {
 using namespace Mantid;
@@ -49,15 +53,23 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
-MockAlgorithm::MockAlgorithm(size_t nSteps) {
-  m_Progress = Mantid::Kernel::make_unique<API::Progress>(this, 0, 1, nSteps);
-}
+MockAlgorithm::MockAlgorithm(size_t nSteps)
+    : m_Progress(
+          Mantid::Kernel::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_,
                          const double height_, const FitStatus fitStatus_)
-    : peakCentre(peakCentre_), peakCentreError(0), sigma(sigma_), sigmaError(0),
-      height(height_), heightError(0), chiSq(0), fitStatus(fitStatus_) {}
+    : peakCentre(peakCentre_), sigma(sigma_), height(height_),
+      fitStatus(fitStatus_) {}
+
+EPPTableRow::EPPTableRow(const int index, const double peakCentre_,
+                         const double sigma_, const double height_,
+                         const FitStatus fitStatus_)
+    : workspaceIndex(index), peakCentre(peakCentre_), sigma(sigma_),
+      height(height_), fitStatus(fitStatus_) {}
 
 /**
  * @param name :: The name of the workspace
@@ -94,11 +106,13 @@ Histogram createHisto(bool isHistogram, YType &&yAxis, EType &&eAxis) {
   const size_t yValsSize = yAxis.size();
   if (isHistogram) {
     BinEdges xAxis(yValsSize + 1, LinearGenerator(1, 1));
-    Histogram histo{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram histo{std::move(xAxis), std::forward<YType>(yAxis),
+                    std::forward<EType>(eAxis)};
     return histo;
   } else {
     Points xAxis(yValsSize, LinearGenerator(1, 1));
-    Histogram pointsHisto{std::move(xAxis), std::move(yAxis), std::move(eAxis)};
+    Histogram pointsHisto{std::move(xAxis), std::forward<YType>(yAxis),
+                          std::forward<EType>(eAxis)};
     return pointsHisto;
   }
 }
@@ -247,12 +261,15 @@ Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
     for (int i = 0; i < nhist; ++i) {
-      Detector *det = new Detector("det", detid_t(i), shape, nullptr);
+      Detector *det = new Detector("det", detid_t(i + 1), shape, nullptr);
       det->setPos(i, i + 1, 1);
       instrument->add(det);
       instrument->markAsDetector(det);
     }
     workspace->setInstrument(instrument);
+    // Set IndexInfo without explicit spectrum definitions to trigger building
+    // default mapping of spectra to detectors in new instrument.
+    workspace->setIndexInfo(Indexing::IndexInfo(nhist));
   }
 
   auto &spectrumInfo = workspace->mutableSpectrumInfo();
@@ -369,6 +386,32 @@ create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors,
       *space, includeMonitors, startYNegative, instrumentName);
 
   return space;
+}
+
+//================================================================================================================
+/*
+ * startTime is in seconds
+ */
+MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
+    int nhist, int nbins, size_t nTimeIndexes, size_t startTime,
+    size_t firstInterval, bool includeMonitors, bool startYNegative,
+    bool isHistogram, const std::string &instrumentName) {
+
+  auto baseWS = create2DWorkspaceWithFullInstrument(
+      nhist, nbins, includeMonitors, startYNegative, isHistogram,
+      instrumentName);
+
+  auto builder =
+      ScanningWorkspaceBuilder(baseWS->getInstrument(), nTimeIndexes, nbins);
+
+  std::vector<double> timeRanges;
+  for (size_t i = 0; i < nTimeIndexes; ++i) {
+    timeRanges.push_back(double(i + firstInterval));
+  }
+
+  builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
+
+  return builder.buildWorkspace();
 }
 
 //================================================================================================================
@@ -830,6 +873,8 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
           static_cast<int>(numHist)));
   for (int g = 0; g < static_cast<int>(numHist); g++) {
     auto &spec = retVal->getSpectrum(g);
+    spec.addDetectorID(
+        g + 1); // Legacy comptibilty: Used to be default IDs in Workspace2D.
     for (int i = 1; i <= 9; i++)
       spec.addDetectorID(g * 9 + i);
     spec.setSpectrumNo(g + 1); // Match detector ID and spec NO
@@ -839,27 +884,27 @@ createGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins,
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(const MatrixWorkspace_sptr ws) {
+void displayDataY(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &y = ws->y(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < y.size(); ++j) {
       std::cout << y[j] << " ";
     }
     std::cout << '\n';
   }
 }
-void displayData(const MatrixWorkspace_sptr ws) { displayDataX(ws); }
+void displayData(MatrixWorkspace_const_sptr ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(const MatrixWorkspace_sptr ws) {
+void displayDataX(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &x = ws->x(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < x.size(); ++j) {
       std::cout << x[j] << " ";
     }
     std::cout << '\n';
@@ -868,12 +913,12 @@ void displayDataX(const MatrixWorkspace_sptr ws) {
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(const MatrixWorkspace_sptr ws) {
+void displayDataE(MatrixWorkspace_const_sptr ws) {
   const size_t numHists = ws->getNumberHistograms();
   for (size_t i = 0; i < numHists; ++i) {
     std::cout << "Histogram " << i << " = ";
     const auto &e = ws->e(i);
-    for (size_t j = 0; j < ws->blocksize(); ++j) {
+    for (size_t j = 0; j < e.size(); ++j) {
       std::cout << e[j] << " ";
     }
     std::cout << '\n';
@@ -1408,7 +1453,11 @@ createEPPTableWorkspace(const std::vector<EPPTableRow> &rows) {
   auto statusColumn = ws->addColumn("str", "FitStatus");
   for (size_t i = 0; i != rows.size(); ++i) {
     const auto &row = rows[i];
-    wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    if (row.workspaceIndex < 0) {
+      wsIndexColumn->cell<int>(i) = static_cast<int>(i);
+    } else {
+      wsIndexColumn->cell<int>(i) = row.workspaceIndex;
+    }
     centreColumn->cell<double>(i) = row.peakCentre;
     centreErrorColumn->cell<double>(i) = row.peakCentreError;
     sigmaColumn->cell<double>(i) = row.sigma;

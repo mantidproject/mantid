@@ -44,6 +44,9 @@ namespace LiveData {
 */
 class DLLExport KafkaEventStreamDecoder {
 public:
+  using CallbackFn = std::function<void()>;
+
+public:
   KafkaEventStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                           const std::string &eventTopic,
                           const std::string &runInfoTopic,
@@ -66,6 +69,14 @@ public:
   bool hasData() const noexcept;
   int runNumber() const noexcept { return m_runNumber; }
   bool hasReachedEndOfRun() noexcept;
+  ///@}
+
+  ///@name Callbacks
+  ///@{
+  void registerIterationEndCb(CallbackFn cb) {
+    m_cbIterationEnd = std::move(cb);
+  }
+  void registerErrorCb(CallbackFn cb) { m_cbError = std::move(cb); }
   ///@}
 
   ///@name Modifying
@@ -117,7 +128,7 @@ private:
   /// Mapping of spectrum number to workspace index.
   spec2index_map m_specToIdx;
   /// Start time of the run
-  Kernel::DateAndTime m_runStart;
+  Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
   /// Subscriber for the run info stream
@@ -159,6 +170,10 @@ private:
 
   void checkIfAllStopOffsetsReached(
       const std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
+      
+  // Callbacks
+  CallbackFn m_cbIterationEnd;
+  CallbackFn m_cbError;
 };
 
 } // namespace LiveData

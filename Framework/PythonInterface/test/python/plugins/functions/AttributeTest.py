@@ -54,6 +54,12 @@ class AttributeTest(unittest.TestCase):
         self.assertAlmostEqual(res[1],  0.29960535, 7)
         self.assertAlmostEqual(res[2],  0.07493335, 7)
         self.assertAlmostEqual(res[3], -0.09645745, 7)
+
+    def test_set_and_get_attribute_value(self):
+        fun = FunctionFactory.createFunction("AttributeExample")
+        self.assertEqual(fun.getAttributeValue('Frequency'), 0.26)
+        fun.setAttributeValue('Frequency', 6.2)
+        self.assertEqual(fun.getAttributeValue('Frequency'), 6.2)
         
 if __name__ == '__main__':
     unittest.main()

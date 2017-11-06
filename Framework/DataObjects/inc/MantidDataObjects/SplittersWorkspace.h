@@ -53,6 +53,12 @@ public:
   std::unique_ptr<SplittersWorkspace> clone() const {
     return std::unique_ptr<SplittersWorkspace>(doClone());
   }
+
+  /// Returns a default-initialized clone of the workspace
+  std::unique_ptr<SplittersWorkspace> cloneEmpty() const {
+    return std::unique_ptr<SplittersWorkspace>(doCloneEmpty());
+  }
+
   SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
   void addSplitter(Kernel::SplittingInterval splitter) override;
 
@@ -69,6 +75,9 @@ protected:
 private:
   SplittersWorkspace *doClone() const override {
     return new SplittersWorkspace(*this);
+  }
+  SplittersWorkspace *doCloneEmpty() const override {
+    return new SplittersWorkspace();
   }
 };
 

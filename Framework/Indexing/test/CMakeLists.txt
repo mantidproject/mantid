@@ -1,10 +1,15 @@
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( ../../TestHelpers/inc)
+  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
+  # It will go out of scope at the end of this file so doesn't need un-setting
+  set ( TESTHELPER_SRCS ../../TestHelpers/src/ParallelRunner.cpp
+    )
 
   cxxtest_add_test ( IndexingTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-  target_link_libraries( IndexingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries( IndexingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
     Indexing
-    ${Boost_LIBRARIES}
+    Parallel
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES} )
 

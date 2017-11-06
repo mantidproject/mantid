@@ -30,14 +30,14 @@ Usage
     ws = Load("PG3_733.nxs")
     wsOut = StripVanadiumPeaks(ws,BackgroundType="Linear",WorkspaceIndex=2)
     i = 1529
-    print "This peak at %.4f Angstroms has been reduced from %.0f to a background level of %.0f" % (wsOut.readX(2)[i],ws.readY(2)[i], wsOut.readY(2)[i])
+    print("This peak at %.4f Angstroms has been reduced from %.0f to a background level of %.0f" % (wsOut.readX(2)[i],ws.readY(2)[i], wsOut.readY(2)[i]))
 
 
 Output:
 
 .. testoutput:: ExStripPeak
 
-    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10771
+    This peak at 0.8116 Angstroms has been reduced from 11569 to a background level of 10845
 
 .. categories::
 

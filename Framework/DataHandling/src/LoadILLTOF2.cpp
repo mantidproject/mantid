@@ -6,6 +6,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -143,7 +144,7 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
 
   m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
 
-  if (m_instrumentPath == "") {
+  if (m_instrumentPath.empty()) {
     throw std::runtime_error(
         "Cannot set the instrument name from the Nexus file!");
   }
@@ -356,7 +357,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
 
   const std::vector<detid_t> detectorIDs = instrument->getDetectorIDs(true);
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube);
 
   loadSpectra(spec, m_numberOfTubes, detectorIDs, data, progress);
 
@@ -375,7 +376,7 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
     // load the counts from the file into memory
     dataRosace.load();
 
-    Progress progressRosace(this, 0, 1,
+    Progress progressRosace(this, 0.0, 1.0,
                             numberOfTubes * m_numberOfPixelsPerTube);
 
     loadSpectra(spec, numberOfTubes, detectorIDs, dataRosace, progressRosace);

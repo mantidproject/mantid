@@ -104,6 +104,24 @@ for a given sample log.
         <value val="0, 0.1, 2" />
     </parameter>
 
+Merging Workspaces with Detector Scans
+######################################
+
+If the workspaces being merged contain detector scans then there are currently two options:
+
+1. The workspaces have identical scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this case the workspaces will be merged as they normally would be by MergeRuns,
+that is the counts in the two workspaces are summed. The detectors must have the same
+positions, rotations etc. for all time intervals, else the algorithm will throw.
+
+2. The workspaces have different scan intervals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For this case the scan intervals must not overlap. The merged workspace histograms are
+appended to the end of the first workspace.
+
 
 ChildAlgorithms used
 ####################
@@ -129,9 +147,9 @@ Usage
 
    merged = MergeRuns(InputWorkspaces="a, b")
 
-   print "a      = " + str(a.readY(0))
-   print "b      = " + str(b.readY(0))
-   print "merged = " + str(merged.readY(0))
+   print("a      = {}".format(a.readY(0)))
+   print("b      = {}".format(b.readY(0)))
+   print("merged = {}".format(merged.readY(0)))
 
 Output:
 
@@ -158,13 +176,13 @@ Output:
 
    merged = MergeRuns(InputWorkspaces="group_1, group_2")
 
-   print "group_1 = [" + str(group_1[0].readY(0)) + ","
-   print "           " + str(group_1[1].readY(0)) + "]"
+   print("group_1 = [{},".format(group_1[0].readY(0)))
+   print("           {}]".format(group_1[1].readY(0)))
+	      
+   print("group_2 = [{},".format(group_2[0].readY(0)))
+   print("           {}]".format(group_2[1].readY(0)))
 
-   print "group_2 = [" + str(group_2[0].readY(0)) + ","
-   print "           " + str(group_2[1].readY(0)) + "]"
-
-   print "merged   = " + str(merged.readY(0))
+   print("merged   = {}".format(merged.readY(0)))
 
 Output:
 
@@ -266,6 +284,11 @@ Output:
 .. testoutput:: MergeSampleLogs
 
   1
+
+Related Algorithms
+------------------
+:ref:`ConjoinXRuns <algm-ConjoinXRuns>` concatenates the workspaces in the x dimension by handling the merging of the Sample Logs.
+:ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` combines workspaces by appending their spectra.
 
 .. categories::
 

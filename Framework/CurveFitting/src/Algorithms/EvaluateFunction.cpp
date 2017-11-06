@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace CurveFitting {

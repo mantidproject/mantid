@@ -1,4 +1,4 @@
-/* Test functions for algorithms for single crysal diffraction
+/* Test functions for algorithms for single crystal diffraction
  */
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace SingleCrystalDiffractionTestHelper {

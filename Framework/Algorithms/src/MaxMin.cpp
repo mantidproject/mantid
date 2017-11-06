@@ -87,7 +87,7 @@ void MaxMin::exec() {
       API::WorkspaceFactory::Instance().create(localworkspace,
                                                MaxSpec - MinSpec + 1, 2, 1);
 
-  Progress progress(this, 0, 1, (MaxSpec - MinSpec + 1));
+  Progress progress(this, 0.0, 1.0, (MaxSpec - MinSpec + 1));
   PARALLEL_FOR_IF(Kernel::threadSafe(*localworkspace, *outputWorkspace))
   // Loop over spectra
   for (int i = MinSpec; i <= MaxSpec; ++i) {

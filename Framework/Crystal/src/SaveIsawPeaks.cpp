@@ -58,7 +58,7 @@ void SaveIsawPeaks::exec() {
   PeaksWorkspace_sptr ws = getProperty("InputWorkspace");
   std::vector<Peak> peaks = ws->getPeaks();
   inst = ws->getInstrument();
-  const DetectorInfo &detectorInfo = ws->detectorInfo();
+  const auto &detectorInfo = ws->detectorInfo();
 
   // We must sort the peaks first by run, then bank #, and save the list of
   // workspace indices of it
@@ -151,7 +151,7 @@ void SaveIsawPeaks::exec() {
     // TODO: The experiment date might be more useful than the instrument date.
     // For now, this allows the proper instrument to be loaded back after
     // saving.
-    Kernel::DateAndTime expDate = inst->getValidFromDate() + 1.0;
+    Types::Core::DateAndTime expDate = inst->getValidFromDate() + 1.0;
     out << expDate.toISO8601String() << '\n';
 
     out << "6         L1    T0_SHIFT\n";
@@ -162,8 +162,7 @@ void SaveIsawPeaks::exec() {
     const API::Run &run = ws->run();
     double T0 = 0.0;
     if (run.hasProperty("T0")) {
-      Kernel::Property *prop = run.getProperty("T0");
-      T0 = boost::lexical_cast<double, std::string>(prop->value());
+      T0 = run.getPropertyValueAsType<double>("T0");
       if (T0 != 0) {
         g_log.notice() << "T0 = " << T0 << '\n';
       }
@@ -396,7 +395,7 @@ void SaveIsawPeaks::exec() {
 }
 
 bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
-                               const DetectorInfo &detectorInfo) {
+                               const Geometry::DetectorInfo &detectorInfo) {
   std::vector<Geometry::IComponent_const_sptr> children;
   boost::shared_ptr<const Geometry::ICompAssembly> asmb =
       boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);

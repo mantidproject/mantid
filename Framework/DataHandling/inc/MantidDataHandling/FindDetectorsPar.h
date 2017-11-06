@@ -1,9 +1,8 @@
 #ifndef DATAHANDLING_FIND_DETPAR_H_
 #define DATAHANDLING_FIND_DETPAR_H_
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+
 #include <fstream>
+#include <float.h>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/IDetector.h"

@@ -314,5 +314,6 @@ class SaveNexusPD(mantid.api.PythonAlgorithm):
 
         self._deleteTmpWksp()
 
+
 if 'h5py' in locals():
     mantid.api.AlgorithmFactory.subscribe(SaveNexusPD)

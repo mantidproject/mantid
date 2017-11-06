@@ -1,16 +1,17 @@
 #ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 #define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/NexusFileIO.h"
+#include <nexus/NeXusFile.hpp>
+#include <boost/optional.hpp>
 #include <climits>
 
 namespace Mantid {
+namespace NeXus {
+class NexusFileIO;
+}
 namespace DataHandling {
 /** @class SaveNexusProcessed SaveNexusProcessed.h
 DataHandling/SaveNexusProcessed.h
@@ -66,6 +67,11 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   const std::string category() const override { return "DataHandling\\Nexus"; }
 
+  void saveSpectraMapNexus(
+      const API::MatrixWorkspace &ws, ::NeXus::File *file,
+      const std::vector<int> &spec,
+      const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
+
 protected:
   /// Override process groups
   bool processGroups() override;
@@ -92,10 +98,9 @@ private:
                           int perioidNum) override;
   /// execute the algorithm.
   void doExec(Mantid::API::Workspace_sptr inputWorkspace,
-              Mantid::NeXus::NexusFileIO_sptr &nexusFile,
+              boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
-              NeXus::NexusFileIO::optional_size_t entryNumber =
-                  NeXus::NexusFileIO::optional_size_t());
+              boost::optional<size_t> entryNumber = boost::optional<size_t>());
 
   /// The name and path of the input file
   std::string m_filename;
@@ -110,7 +115,7 @@ private:
   /// Proportion of progress time expected to write initial part
   double m_timeProgInit;
   /// Progress bar
-  API::Progress *prog;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace DataHandling

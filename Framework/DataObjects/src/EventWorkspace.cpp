@@ -13,24 +13,25 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include "MantidAPI/Algorithm.tcc"
 #include "tbb/parallel_for.h"
-
 #include <limits>
 #include <numeric>
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
-using Mantid::Kernel::DateAndTime;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataObjects {
 namespace {
 // static logger
 Kernel::Logger g_log("EventWorkspace");
-}
+} // namespace
 
 DECLARE_WORKSPACE(EventWorkspace)
 
@@ -38,7 +39,8 @@ using Kernel::Exception::NotImplementedError;
 using std::size_t;
 using namespace Mantid::Kernel;
 
-EventWorkspace::EventWorkspace() : mru(new EventWorkspaceMRU) {}
+EventWorkspace::EventWorkspace(const Parallel::StorageMode storageMode)
+    : IEventWorkspace(storageMode), mru(new EventWorkspaceMRU) {}
 
 EventWorkspace::EventWorkspace(const EventWorkspace &other)
     : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
@@ -108,8 +110,7 @@ void EventWorkspace::init(const std::size_t &NVectors,
   m_axes[1] = new API::SpectraAxis(this);
 }
 
-void EventWorkspace::init(const std::size_t &NVectors,
-                          const HistogramData::Histogram &histogram) {
+void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   if (histogram.xMode() != HistogramData::Histogram::XMode::BinEdges)
     throw std::runtime_error(
         "EventWorkspace can only be initialized with XMode::BinEdges");
@@ -118,10 +119,10 @@ void EventWorkspace::init(const std::size_t &NVectors,
     throw std::runtime_error(
         "EventWorkspace cannot be initialized non-NULL Y or E data");
 
-  data.resize(NVectors, nullptr);
+  data.resize(numberOfDetectorGroups(), nullptr);
   EventList el;
   el.setHistogram(histogram);
-  for (size_t i = 0; i < NVectors; i++) {
+  for (size_t i = 0; i < data.size(); i++) {
     data[i] = new EventList(el);
     data[i]->setMRU(mru);
     data[i]->setSpectrumNo(specnum_t(i));
@@ -135,19 +136,25 @@ void EventWorkspace::init(const std::size_t &NVectors,
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
-  return this->data.size() * this->blocksize();
+  return std::accumulate(data.begin(), data.end(), static_cast<size_t>(0),
+                         [](size_t value, EventList *histo) {
+                           return value + histo->histogram_size();
+                         });
 }
 
 /// Get the blocksize, aka the number of bins in the histogram
 /// @returns the number of bins in the Y data
 size_t EventWorkspace::blocksize() const {
-  // Pick the first pixel to find the blocksize.
-  auto it = data.begin();
-  if (it == data.end()) {
+  if (data.empty()) {
     throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, "
                            "therefore cannot determine blocksize (# of bins).");
   } else {
-    return (*it)->histogram_size();
+    size_t numBins = data[0]->histogram_size();
+    for (const auto *iter : data)
+      if (numBins != iter->histogram_size())
+        throw std::length_error(
+            "blocksize undefined because size of histograms is not equal");
+    return numBins;
   }
 }
 
@@ -184,7 +191,7 @@ double EventWorkspace::getTofMax() const { return this->getEventXMax(); }
  */
 DateAndTime EventWorkspace::getPulseTimeMin() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -203,7 +210,7 @@ DateAndTime EventWorkspace::getPulseTimeMin() const {
  */
 DateAndTime EventWorkspace::getPulseTimeMax() const {
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -221,8 +228,8 @@ Get the maximum and mimumum pulse time for events accross the entire workspace.
 @param Tmax maximal pulse time as a DateAndTime.
 */
 void EventWorkspace::getPulseTimeMinMax(
-    Mantid::Kernel::DateAndTime &Tmin,
-    Mantid::Kernel::DateAndTime &Tmax) const {
+    Mantid::Types::Core::DateAndTime &Tmin,
+    Mantid::Types::Core::DateAndTime &Tmax) const {
 
   Tmax = DateAndTime::minimum();
   Tmin = DateAndTime::maximum();
@@ -259,7 +266,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMin(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+  Mantid::Types::Core::DateAndTime tMin = DateAndTime::maximum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
 
@@ -286,7 +293,7 @@ DateAndTime EventWorkspace::getTimeAtSampleMax(double tofOffset) const {
   const auto L1 = specInfo.l1();
 
   // set to crazy values to start
-  Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+  Mantid::Types::Core::DateAndTime tMax = DateAndTime::minimum();
   size_t numWorkspace = this->data.size();
   DateAndTime temp;
   for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace;
@@ -664,6 +671,45 @@ void EventWorkspace::getIntegratedSpectra(std::vector<double> &out,
 }
 
 } // namespace DataObjects
+} // namespace Mantid
+
+// Explicit Instantiations of IndexProperty Methods in Algorithm
+namespace Mantid {
+namespace API {
+template DLLExport void
+Algorithm::declareWorkspaceInputProperties<DataObjects::EventWorkspace>(
+    const std::string &propertyName, const int allowedIndexTypes,
+    PropertyMode::Type optional, LockMode::Type lock, const std::string &doc);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
+    const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
+    IndexType type, const std::vector<int> &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(
+    const std::string &name, const DataObjects::EventWorkspace_sptr &wksp,
+    IndexType type, const std::string &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::vector<int>>(
+    const std::string &name, const std::string &wsName, IndexType type,
+    const std::vector<int> &list);
+
+template DLLExport void
+Algorithm::setWorkspaceInputProperties<DataObjects::EventWorkspace,
+                                       std::string>(const std::string &name,
+                                                    const std::string &wsName,
+                                                    IndexType type,
+                                                    const std::string &list);
+
+template DLLExport std::tuple<boost::shared_ptr<DataObjects::EventWorkspace>,
+                              Indexing::SpectrumIndexSet>
+Algorithm::getWorkspaceAndIndices(const std::string &name) const;
+} // namespace API
 } // namespace Mantid
 
 namespace Mantid {

@@ -78,7 +78,7 @@ def energy2output(Energy, outOption, theta, flightpath):
     if outOption == 'Wavelength (Angstroms)':
         OutputVal =  (e2lam/ Energy)**0.5
 
-    elif outOption == 'Nu (THz)':
+    elif outOption == 'Nu (Thz)':
         OutputVal = Energy / e2nu
 
     elif outOption == 'Velocity (m/s)':

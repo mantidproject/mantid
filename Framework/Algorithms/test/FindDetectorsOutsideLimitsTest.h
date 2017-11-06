@@ -19,6 +19,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 class FindDetectorsOutsideLimitsTest : public CxxTest::TestSuite {
 public:
@@ -69,7 +71,7 @@ public:
       work_in->getSpectrum(i).setSpectrumNo(i);
 
       Mantid::Geometry::Detector *det =
-          new Mantid::Geometry::Detector("", i, NULL);
+          new Mantid::Geometry::Detector("", i, nullptr);
       instr->add(det);
       instr->markAsDetector(det);
       work_in->getSpectrum(i).setDetectorID(i);

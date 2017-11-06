@@ -7,7 +7,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class DetectorInfo;
 }
 namespace Poldi {
@@ -48,7 +48,7 @@ public:
   PoldiDeadWireDecorator(std::set<int> deadWires,
                          boost::shared_ptr<PoldiAbstractDetector> detector =
                              boost::shared_ptr<PoldiAbstractDetector>());
-  PoldiDeadWireDecorator(const API::DetectorInfo &poldiDetectorInfo,
+  PoldiDeadWireDecorator(const Geometry::DetectorInfo &poldiDetectorInfo,
                          boost::shared_ptr<PoldiAbstractDetector> detector =
                              boost::shared_ptr<PoldiAbstractDetector>());
 

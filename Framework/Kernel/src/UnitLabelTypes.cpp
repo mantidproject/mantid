@@ -1,4 +1,5 @@
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/UnitLabel.h"
 
 namespace Mantid {
 namespace Kernel {

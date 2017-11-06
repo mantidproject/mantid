@@ -8,10 +8,16 @@ import re
 from copy import deepcopy
 import json
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
-from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, EMPTY_NAME,
+from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, LOQ, LARMOR, ZOOM, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode)
+from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
+                               SANSInstrument, SANSFacility)
+
+# -------------------------------------------
+# Constants
+# -------------------------------------------
+ALTERNATIVE_SANS2D_NAME = "SAN"
 
 
 # -------------------------------------------
@@ -273,6 +279,7 @@ def convert_bank_name_to_detector_type_isis(detector_name):
             HAB                -> HAB
             but also allowed main
     LARMOR: DetectorBench      -> LAB
+    ZOOM:   rear-detector -> LAB
 
     :param detector_name: a string with a valid detector name
     :return: a detector type depending on the input string, or a runtime exception.
@@ -288,6 +295,20 @@ def convert_bank_name_to_detector_type_isis(detector_name):
         raise RuntimeError("There is not detector type conversion for a detector with the "
                            "name {0}".format(detector_name))
     return detector_type
+
+
+def convert_instrument_and_detector_type_to_bank_name(instrument, detector_type):
+    if instrument is SANSInstrument.SANS2D:
+        bank_name = "front-detector" if detector_type is DetectorType.HAB else "rear-detector"
+    elif instrument is SANSInstrument.LOQ:
+        bank_name = "HAB" if detector_type is DetectorType.HAB else "main-detector-bank"
+    elif instrument is SANSInstrument.LARMOR:
+        bank_name = "DetectorBench"
+    elif instrument is SANSInstrument.ZOOM:
+        bank_name = "rear-detector"
+    else:
+        raise RuntimeError("SANSCrop: The instrument {0} is currently not supported.".format(instrument))
+    return bank_name
 
 
 def is_part_of_reduced_output_workspace_group(state):
@@ -660,7 +681,39 @@ def sanitise_instrument_name(instrument_name):
         instrument_name = SANS2D
     elif re.search(LARMOR, instrument_name_upper):
         instrument_name = LARMOR
+    elif re.search(ZOOM, instrument_name_upper):
+        instrument_name = ZOOM
     return instrument_name
+
+
+def get_facility(instrument):
+    if (instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.LOQ or
+        instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.ZOOM):  # noqa
+        return SANSFacility.ISIS
+    else:
+        return SANSFacility.NoFacility
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Other
+# ----------------------------------------------------------------------------------------------------------------------
+def instrument_name_correction(instrument_name):
+    return SANS2D if instrument_name == ALTERNATIVE_SANS2D_NAME else instrument_name
+
+
+def get_instrument(instrument_name):
+    instrument_name = instrument_name.upper()
+    if instrument_name == SANS2D:
+        instrument = SANSInstrument.SANS2D
+    elif instrument_name == LARMOR:
+        instrument = SANSInstrument.LARMOR
+    elif instrument_name == LOQ:
+        instrument = SANSInstrument.LOQ
+    elif instrument_name == ZOOM:
+        instrument = SANSInstrument.ZOOM
+    else:
+        instrument = SANSInstrument.NoInstrument
+    return instrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -773,3 +826,24 @@ def does_can_workspace_exist_on_ads(can_workspace):
         if has_hash(REDUCED_CAN_TAG, hash_value_to_compare, workspace):
             return True
     return False
+
+
+def get_bank_for_spectrum_number(spectrum_number, instrument):
+    """
+    This is not very nice since we have to hard-code some instrument information here. But at the moment there is no
+    other (efficient and easy) way to check on which detector the spectrum is living.
+
+    The solution here is ugly and should be improved in the future. It is uses the same approach as in the old
+    framework.
+    :param spectrum_number: The spectrum number to check
+    :param instrument: the SANS instrument
+    :returns: either LAB or HAB
+    """
+    detector = DetectorType.LAB
+    if instrument is SANSInstrument.LOQ:
+        if 16387 <= spectrum_number <= 17784:
+            detector = DetectorType.HAB
+    elif instrument is SANSInstrument.LOQ:
+        if 36873 <= spectrum_number <= 73736:
+            detector = DetectorType.HAB
+    return detector

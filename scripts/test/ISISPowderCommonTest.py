@@ -288,7 +288,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(summed_ws[0])
 
     def test_load_current_normalised_ws_respects_ext(self):
-        run_number = "100"
+        run_number = "102"
         file_ext_one = ".s1"
         file_ext_two = ".s2"
 
@@ -311,6 +311,8 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Ensure it loaded two different workspaces
         self.assertAlmostEqual(result_ws_one, result_ext_one)
+
+        # If this next line fails it means it loaded the .s1 file INSTEAD of the .s2 file
         self.assertAlmostEqual(result_ws_two, result_ext_two)
         self.assertNotAlmostEqual(result_ext_one, result_ext_two)
 
@@ -463,6 +465,23 @@ class ISISPowderCommonTest(unittest.TestCase):
         common.run_normalise_by_current(ws)
         self.assertAlmostEqual(expected_value, ws.dataY(0)[0], delta=1e-8)
 
+    def test_spline_workspaces(self):
+        ws_list = []
+        for i in range(1, 4):
+            out_name = "test_spline_vanadium-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
+                                                        XMax=100, BinWidth=1))
+
+        splined_list = common.spline_workspaces(focused_vanadium_spectra=ws_list, num_splines=10)
+        for ws in splined_list:
+            self.assertAlmostEqual(ws.dataY(0)[25], 0.28576649, delta=1e-8)
+            self.assertAlmostEqual(ws.dataY(0)[50], 0.37745918, delta=1e-8)
+            self.assertAlmostEqual(ws.dataY(0)[75], 0.28133096, delta=1e-8)
+
+        for input_ws, splined_ws in zip(ws_list, splined_list):
+            mantid.DeleteWorkspace(input_ws)
+            mantid.DeleteWorkspace(splined_ws)
+
     def test_subtract_summed_runs(self):
         # Load a vanadium workspace for this test
         sample_empty_number = "100"
@@ -488,22 +507,17 @@ class ISISPowderCommonTest(unittest.TestCase):
         mantid.DeleteWorkspace(returned_ws)
         mantid.DeleteWorkspace(scaled_ws)
 
-    def test_spline_workspaces(self):
-        ws_list = []
-        for i in range(1, 4):
-            out_name = "test_spline_vanadium-" + str(i)
-            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, NumBanks=1, BankPixelWidth=1,
-                                                        XMax=100, BinWidth=1))
+    def test_subtract_summed_runs_throw_on_tof_mismatch(self):
+        # Create a sample workspace which will have mismatched TOF range
+        sample_ws = mantid.CreateSampleWorkspace()
+        ws_file_name = "100"  # Load POL100
 
-        splined_list = common.spline_workspaces(focused_vanadium_spectra=ws_list, num_splines=10)
-        for ws in splined_list:
-            self.assertAlmostEqual(ws.dataY(0)[25], 0.28576649, delta=1e-8)
-            self.assertAlmostEqual(ws.dataY(0)[50], 0.37745918, delta=1e-8)
-            self.assertAlmostEqual(ws.dataY(0)[75], 0.28133096, delta=1e-8)
+        # This should throw as the TOF ranges do not match
+        with assertRaisesRegex(self, ValueError, "specified for this file do not have matching binning. Do the "):
+            common.subtract_summed_runs(ws_to_correct=sample_ws, instrument=ISISPowderMockInst(),
+                                        empty_sample_ws_string=ws_file_name)
 
-        for input_ws, splined_ws in zip(ws_list, splined_list):
-            mantid.DeleteWorkspace(input_ws)
-            mantid.DeleteWorkspace(splined_ws)
+        mantid.DeleteWorkspace(sample_ws)
 
 
 class ISISPowderMockInst(object):

@@ -121,7 +121,7 @@ def mask_with_mask_files(mask_info, workspace):
 
         # Masker
         mask_name = "MaskDetectors"
-        mask_options = {}
+        mask_options = {"ForceInstrumentMasking": True}
         mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
         for mask_file in mask_files:
             mask_file = find_full_file_path(mask_file)
@@ -161,24 +161,24 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
 
     total_spectra = []
 
+    # All masks are detector-specific, hence we pull out only the relevant part
+    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
+
     # ----------------------
     # Single spectra
     # -----------------------
-    single_spectra = mask_info.single_spectra
+    single_spectra = detector.single_spectra
     if single_spectra:
         total_spectra.extend(single_spectra)
 
     # ----------------------
     # Spectrum range
     # -----------------------
-    spectrum_range_start = mask_info.spectrum_range_start
-    spectrum_range_stop = mask_info.spectrum_range_stop
+    spectrum_range_start = detector.spectrum_range_start
+    spectrum_range_stop = detector.spectrum_range_stop
     if spectrum_range_start and spectrum_range_stop:
         for start, stop in zip(spectrum_range_start, spectrum_range_stop):
             total_spectra.extend(list(range(start, stop + 1)))
-
-    # Detector specific masks
-    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
 
     # ---------------------------
     # Horizontal single spectrum
@@ -394,7 +394,7 @@ class MaskFactory(object):
         data_info = state.data
         instrument = data_info.instrument
         if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
-                        instrument is SANSInstrument.SANS2D:  # noqa
+                        instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
             run_number = data_info.sample_scatter_run_number
             file_name = data_info.sample_scatter
             _, ipf_path = get_instrument_paths_for_sans_file(file_name)

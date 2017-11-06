@@ -364,6 +364,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
             self.signaldict.update(kwargs)
         self.changed.emit(self.signaldict)
 
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     mainForm=InstrumentSetupWidget()

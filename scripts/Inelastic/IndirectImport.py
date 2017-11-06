@@ -5,6 +5,7 @@ the Indirect scripts depending on platform and numpy package version.
 We also deal with importing the mantidplot module outside of MantidPlot here.
 """
 
+from __future__ import (absolute_import, division, print_function)
 import numpy
 import platform
 import sys

@@ -147,6 +147,31 @@ public:
         "curvefitting.peakRadius", m_preSetupPeakRadius);
   }
 
+  void test_has_parameter() {
+    auto composite = boost::make_shared<CompositeFunction>();
+    auto gauss = boost::make_shared<CurveFittingGauss>();
+    auto gauss1 = boost::make_shared<CurveFittingGauss>();
+    auto gauss2 = boost::make_shared<CurveFittingGauss>();
+    auto linear = boost::make_shared<CurveFittingLinear>();
+    auto innerComposite = boost::make_shared<CompositeFunction>();
+
+    composite->addFunction(linear);
+    composite->addFunction(gauss);
+    innerComposite->addFunction(gauss1);
+    innerComposite->addFunction(gauss2);
+    composite->addFunction(innerComposite);
+
+    TS_ASSERT(composite->hasParameter("f0.a"));
+    TS_ASSERT(composite->hasParameter("f0.b"));
+    TS_ASSERT(composite->hasParameter("f1.h"));
+    TS_ASSERT(composite->hasParameter("f1.c"));
+    TS_ASSERT(composite->hasParameter("f2.f0.c"));
+    TS_ASSERT(composite->hasParameter("f2.f1.h"));
+    TS_ASSERT(!composite->hasParameter("h"));
+    TS_ASSERT(!composite->hasParameter("f0.h"));
+    TS_ASSERT(!composite->hasParameter("f2.f3.a"));
+  }
+
   void testFit() {
     boost::shared_ptr<CompositeFunction> mfun =
         boost::make_shared<CompositeFunction>();

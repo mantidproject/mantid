@@ -13,6 +13,7 @@
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 
 #include <Poco/Path.h>
+#include <condition_variable>
 #include <thread>
 
 class KafkaEventStreamDecoderTest : public CxxTest::TestSuite {
@@ -67,8 +68,9 @@ public:
     auto decoder = createTestDecoder(mockBroker);
     TSM_ASSERT("Decoder should not have create data buffers yet",
                !decoder->hasData());
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    startCapturing(*decoder, 1);
+
+    // Checks
     Workspace_sptr workspace;
     TSM_ASSERT("Decoder's data buffers should be created now",
                decoder->hasData());
@@ -103,8 +105,9 @@ public:
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(2)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    // Need 2 full loops to get both periods
+    startCapturing(*decoder, 2);
+
     Workspace_sptr workspace;
     TS_ASSERT_THROWS_NOTHING(workspace = decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
@@ -176,8 +179,8 @@ public:
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    startCapturing(*decoder, 1);
+
     TS_ASSERT_THROWS_NOTHING(decoder->extractData());
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -197,8 +200,8 @@ public:
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber))
         .WillOnce(Return(new FakeExceptionThrowingStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    startCapturing(*decoder, 1);
+
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -215,8 +218,8 @@ public:
         .WillOnce(Return(new FakeISISRunInfoStreamSubscriber(1)))
         .WillOnce(Return(new FakeEmptyStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    startCapturing(*decoder, 1);
+
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
@@ -233,14 +236,39 @@ public:
         .WillOnce(Return(new FakeEmptyStreamSubscriber))
         .WillOnce(Return(new FakeISISSpDetStreamSubscriber));
     auto decoder = createTestDecoder(mockBroker);
-    TS_ASSERT_THROWS_NOTHING(decoder->startCapture());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    startCapturing(*decoder, 1);
     TS_ASSERT_THROWS(decoder->extractData(), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(decoder->stopCapture());
     TS_ASSERT(!decoder->isCapturing());
   }
 
 private:
+  // Start decoding and wait until we have gathered enough data to test
+  void startCapturing(Mantid::LiveData::KafkaEventStreamDecoder &decoder,
+                      uint8_t maxIterations) {
+    // Register callback to know when a whole loop as been iterated through
+    m_niterations = 0;
+    auto callback = [this, maxIterations]() {
+      {
+        std::unique_lock<std::mutex> lock(this->m_callbackMutex);
+        this->m_niterations++;
+        if (this->m_niterations == maxIterations) {
+          lock.unlock();
+          this->m_callbackCondition.notify_one();
+        }
+      }
+    };
+    decoder.registerIterationEndCb(callback);
+    decoder.registerErrorCb(callback);
+    TS_ASSERT_THROWS_NOTHING(decoder.startCapture());
+    {
+      std::unique_lock<std::mutex> lk(m_callbackMutex);
+      this->m_callbackCondition.wait(lk, [this, maxIterations]() {
+        return this->m_niterations == maxIterations;
+      });
+    }
+  }
+
   std::unique_ptr<Mantid::LiveData::KafkaEventStreamDecoder>
   createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
     using namespace Mantid::LiveData;
@@ -286,6 +314,11 @@ private:
       TS_ASSERT_EQUALS(log->firstValue(), 42)
     }
   }
+
+private:
+  std::mutex m_callbackMutex;
+  std::condition_variable m_callbackCondition;
+  uint8_t m_niterations = 0;
 };
 
 #endif /* MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTEST_H_ */

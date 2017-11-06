@@ -288,7 +288,19 @@ public:
     TS_ASSERT_DELTA(ratio3, numWeakEvents / 2, 0.0001);
   }
 
-  void test_estimateSignalToNoiseRatioWithBackground() {
+  void test_estimateSignalToNoiseRatioWithBackgroundAndOnePercentCulling() {
+    doTestSignalToNoiseRatio(true, 171.90, 1.2632, 0.1824);
+  }
+
+  void test_estimateSignalToNoiseRatioWithBackgroundAndNoOnePercentCulling() {
+    doTestSignalToNoiseRatio(false, 160.33, 1.088, 0.094);
+  }
+
+private:
+  void doTestSignalToNoiseRatio(const bool useOnePercentBackgroundCorrection,
+                                const double expectedRatio1,
+                                const double expectedRatio2,
+                                const double expectedRatio3) {
     V3D peak_1(20, 0, 0);
     V3D peak_2(0, 20, 0);
     V3D peak_3(0, 0, 20);
@@ -310,7 +322,8 @@ public:
     generateUniformBackground(event_Qs, 10, -30, 30);
 
     // Create integraton region + events & UB
-    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5);
+    Integrate3DEvents integrator(peak_q_list, UBinv, 1.5,
+                                 useOnePercentBackgroundCorrection);
     integrator.addEvents(event_Qs, false);
 
     IntegrationParameters params;
@@ -324,9 +337,9 @@ public:
     const auto ratio2 = integrator.estimateSignalToNoiseRatio(params, peak_2);
     const auto ratio3 = integrator.estimateSignalToNoiseRatio(params, peak_3);
 
-    TS_ASSERT_DELTA(ratio1, 171.90, 0.05);
-    TS_ASSERT_DELTA(ratio2, 1.2632, 0.05);
-    TS_ASSERT_DELTA(ratio3, 0.1824, 0.05);
+    TS_ASSERT_DELTA(ratio1, expectedRatio1, 0.05);
+    TS_ASSERT_DELTA(ratio2, expectedRatio2, 0.05);
+    TS_ASSERT_DELTA(ratio3, expectedRatio3, 0.05);
   }
 
   /** Generate a symmetric Gaussian peak

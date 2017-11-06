@@ -5,17 +5,18 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/RawFileInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/RawFileInfo.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -35,6 +36,7 @@ namespace DataHandling {
 
 using namespace Kernel;
 using namespace API;
+using Types::Core::DateAndTime;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
@@ -838,7 +840,7 @@ void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
  * @param isisRaw: pointer to the raw file
  * @return the endtime
  */
-Kernel::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
   std::string isisDate = std::string(isisRaw->rpb.r_enddate, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
@@ -853,7 +855,7 @@ Kernel::DateAndTime LoadRawHelper::extractEndTime(ISISRAW *isisRaw) {
  * @param isisRaw: pointer to the raw file
  * @return the start time
  */
-Kernel::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
+Types::Core::DateAndTime LoadRawHelper::extractStartTime(ISISRAW *isisRaw) {
   auto isisDate = std::string(isisRaw->hdr.hd_date, 11);
   if (isisDate[0] == ' ')
     isisDate[0] = '0';
@@ -1307,9 +1309,7 @@ bool LoadRawHelper::isAscii(const std::string &filename) {
  *  @return true if Exclude Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) {
-  bool bExclude;
-  monitorOption.compare("Exclude") ? (bExclude = false) : (bExclude = true);
-  return bExclude;
+  return (monitorOption == "Exclude");
 }
 
 /**This method checks the value of LoadMonitors property and returns true or
@@ -1317,10 +1317,7 @@ bool LoadRawHelper::isExcludeMonitors(const std::string &monitorOption) {
  * @return true if Include Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) {
-  bool bExclude;
-  monitorOption.compare("Include") ? (bExclude = false) : (bExclude = true);
-
-  return bExclude;
+  return (monitorOption == "Include");
 }
 
 /** This method checks the value of LoadMonitors property and returns true or
@@ -1328,9 +1325,7 @@ bool LoadRawHelper::isIncludeMonitors(const std::string &monitorOption) {
  *  @return true if Separate Monitors option is selected,otherwise false
  */
 bool LoadRawHelper::isSeparateMonitors(const std::string &monitorOption) {
-  bool bSeparate;
-  monitorOption.compare("Separate") ? (bSeparate = false) : (bSeparate = true);
-  return bSeparate;
+  return (monitorOption == "Separate");
 }
 /**The method to interpret LoadMonitors property options and convert then into
  * boolean values

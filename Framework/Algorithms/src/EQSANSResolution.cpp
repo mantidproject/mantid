@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/EQSANSResolution.h"
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {

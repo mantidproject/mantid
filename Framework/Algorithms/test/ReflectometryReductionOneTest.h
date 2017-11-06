@@ -169,7 +169,7 @@ public:
     instrument->markAsSamplePos(sample);
 
     // add a detector
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(V3D(0, 1, 1));
     instrument->add(det);
     instrument->markAsDetector(det);
@@ -241,10 +241,10 @@ public:
     auto alg = construct_standard_algorithm();
     auto inWS = create2DWorkspace154(1, 10, true);
     // this instrument does not have a "slit-gap" property
-    // defined in the IPF, so CalculateResolution should throw.
+    // defined in the IPF, so NRCalculateSlitResolution should throw.
     inWS->setInstrument(m_tinyReflWS->getInstrument());
     inWS->getAxis(0)->setUnit("Wavelength");
-    // Setup bad bin edges, Rebin will throw (not CalculateResolution?)
+    // Setup bad bin edges, Rebin will throw (not NRCalculateSlitResolution?)
     inWS->mutableX(0) = inWS->x(0)[0];
     alg->setProperty("InputWorkspace", inWS);
     alg->setProperty("OutputWorkspace", "rebinnedWS");
@@ -329,7 +329,7 @@ public:
     instrument->markAsSamplePos(sample);
 
     // add a detector
-    Detector *det = new Detector("point-detector", 1, NULL);
+    Detector *det = new Detector("point-detector", 1, nullptr);
     det->setPos(V3D(0, 1, 1));
     instrument->add(det);
     instrument->markAsDetector(det);

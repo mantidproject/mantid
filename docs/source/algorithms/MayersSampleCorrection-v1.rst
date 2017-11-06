@@ -9,39 +9,42 @@
 Description
 -----------
 
-Calculates and applies corrections due to the effects of absorption, and optionally multiple scattering,
-to the signal and error values for a given workspace. The full background to the algorithm is described
-by Lindley et al. [1]_ and is briefly described here.
-
-The aim is to correct the number of neutrons detected at a given detector (:math:`N_d`) to compute the
-number of incident neutrons (:math:`N_0`):
-
-.. math::
-
-   N_d = \frac{N_0 nV}{A_s} \frac{\sigma_s}{4\pi} \frac{\eta\Delta\Omega}{1-\beta}
-
-where :math:`n` is the sample number density, :math:`V` is the sample volume, :math:`A_s` is the self-shielding factor,
-:math:`\sigma_s` is the scattering cross section, :math:`\eta` is the detector efficiency, :math:`\Delta\Omega` is the solid
-angle and :math:`\beta` is the ratio of twice to once scattered intensity.
+Calculates and applies corrections due to the effects of absorption (plus optionally multiple scattering) 
+on the signal and error values for a given workspace. The full background to the algorithm 
+is described by Lindley et al. [1]_ and is briefly described here.
 
 The following assumptions are made:
 
 * the sample shape is a cylinder
 * for multiple scattering:
    * the scattering is assumed to be elastic and isotropic
-   * the ratio of successive orders of scattering are equal.
+   * the ratio of successive orders of scattering are all equal to :math:`\beta(\theta, \phi, E)`
 
-The input time of flight range combined with the cylinder radius (:math:`r`) and scattering cross-sections gives a range
-of :math:`\mu r` for the cylinder, where :math:`\mu` is the inverse attenutation length. The :math:`\mu r` range is divided
-in to a discrete number of points for each point:
+The aim is to correct the number of neutrons at a given detector (:math:`N_d`) to compute the number 
+of neutrons (:math:`N_c`) that would reach the detector if there was no absorption (or multiple scattering). Ignoring 
+detector efficiency we can write:
 
-* the attentuation factor is computed by numerical integration over the sample cylinder
-* the multiple scattering factor (if requested) is computed by simulating over a fixed number of second order scattering events
-  and computing the ratio of second order and first order scattering.
+.. math::
 
-A weighted least-squares fit is applied to both the set of attenuation and multiple scattering factors to allow interpolation of the
-correction factor from any time-of-flight value in the input range. For each time-of-flight value the factor is computed from the fit
-coefficients and the correction applied multiplicatively:
+   N_d = \frac{N_c}{A_s} \cdot \frac{1}{1-\beta}
+
+where :math:`A_s(\theta, \phi, E)` is the absorption and self-shielding factor and is computed by 
+numerical integration over the sample cylinder.
+
+The multiple scattering factor (if requested) is computed by simulating over a fixed number of 
+second order scattering events and computing the ratio of second order and first order scattering. 
+Since we have assumed the ratio is the same between succesive orders, the :math:`\frac{1}{1-\beta}` 
+factor simply comes from taking the sum of a geometric series.
+
+The cylinder radius :math:`r` combined with the inverse attenuation length :math:`\mu = \mu(E)` 
+(derived from the total scattering cross-section) gives a range of :math:`\mu r` against input 
+time-of-flight ("energy") for the cylinder.
+The :math:`\mu r` range is divided into a discrete number of points for each point.
+
+A weighted least-squares fit is applied to both the set of attenuation and multiple scattering factors 
+to allow interpolation of the correction factor from any time-of-flight value in the input range. 
+For each time-of-flight value the factor is computed from the fit coefficients and the correction 
+applied multiplicatively:
 
 .. math::
 
@@ -78,8 +81,8 @@ Usage
                                              MultipleScattering=True)
 
    # Print a bin
-   print "Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25])
-   print "Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25])
+   print("Uncorrected signal: {0:.4f}".format(sample_ws.readY(0)[25]))
+   print("Corrected signal: {0:.4f}".format(corrected_sample.readY(0)[25]))
 
 Output:
 
@@ -92,6 +95,9 @@ References
 ----------
 
 .. [1] Lindley, E.J., & Mayers, J. Cywinski, R. (Ed.). (1988). Experimental method and corrections to data. United Kingdom: Adam Hilger. - https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
+
+
+.. seealso :: Algorithm :ref:`algm-MultipleScatteringCylinderAbsorption`
 
 .. categories::
 

@@ -3,18 +3,19 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadFullprofResolution.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include <fstream>
+#include "MantidKernel/OptionalBool.h"
 #include <Poco/File.h>
+#include <fstream>
 
 using Mantid::DataHandling::LoadFullprofResolution;
 

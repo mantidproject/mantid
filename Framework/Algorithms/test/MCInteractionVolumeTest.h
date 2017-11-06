@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
+#include "MantidKernel/MersenneTwister.h"
 #include "MonteCarloTesting.h"
 
 #include <gmock/gmock.h>
@@ -139,6 +140,26 @@ public:
     sample.setShape(*ComponentCreationHelper::createSphere(1));
     TS_ASSERT_THROWS_NOTHING(
         MCInteractionVolume mcv(sample, sample.getShape().getBoundingBox()));
+  }
+
+  void test_Throws_If_Point_Cannot_Be_Generated() {
+    using namespace Mantid::Kernel;
+    using namespace MonteCarloTesting;
+    using namespace ::testing;
+
+    // Testing inputs
+    const V3D startPos(-2.0, 0.0, 0.0), endPos(2.0, 0.0, 0.0);
+    const double lambdaBefore(2.5), lambdaAfter(3.5);
+
+    auto sample = createTestSample(TestSampleType::ThinAnnulus);
+    MersenneTwister rng;
+    rng.setSeed(1);
+    const size_t maxTries(1);
+    MCInteractionVolume interactor(sample, sample.getShape().getBoundingBox(),
+                                   maxTries);
+    TS_ASSERT_THROWS(interactor.calculateAbsorption(rng, startPos, endPos,
+                                                    lambdaBefore, lambdaAfter),
+                     std::runtime_error);
   }
 };
 

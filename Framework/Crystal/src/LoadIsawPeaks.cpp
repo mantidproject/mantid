@@ -1,6 +1,6 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
@@ -70,7 +70,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       throw std::logic_error(std::string("No Instrument for Peaks file"));
 
     // Date: use the current date/time if not found
-    Kernel::DateAndTime C_experimentDate;
+    Types::Core::DateAndTime C_experimentDate;
     tag = getWord(in, false);
     if (tag == "Date:")
       getWord(in, false);
@@ -147,11 +147,11 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
     throw std::logic_error(std::string("No Instrument for Peaks file"));
 
   // Date: use the current date/time if not found
-  Kernel::DateAndTime C_experimentDate;
+  Types::Core::DateAndTime C_experimentDate;
   std::string date;
   tag = getWord(in, false);
   if (tag.empty())
-    date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+    date = Types::Core::DateAndTime::getCurrentTime().toISO8601String();
   else if (tag == "Date:")
     date = getWord(in, false);
   readToEndOfLine(in, true);

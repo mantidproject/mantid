@@ -3,13 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/LiveListenerInfo.h"
 
-#include <iosfwd>
-
-#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Logger.h"
 
 #include <Poco/DOM/Element.h>
+
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

@@ -20,6 +20,7 @@
         <file>increase_indent.png</file>
         <file>decrease_indent.png</file>
         <file>play.png</file>
+        <file>play2.png</file>
         <file>arrow_down.png</file>
         <file>arrow_up.png</file>
         <file>drag_curves.png</file>
@@ -241,5 +242,6 @@
         <file>mdPlotting32x32.png</file>
         <file>expand_all.png</file>
         <file>collapse_all.png</file>
+        <file>pause.png</file>
     </qresource>
 </RCC>

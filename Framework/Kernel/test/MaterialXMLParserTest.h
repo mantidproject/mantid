@@ -37,15 +37,16 @@ public:
   }
 
   void test_AtomicNumber_Attribute() {
-    auto mat = parseMaterial("<material id=\"n\" atomicnumber=\"28\"/>");
+    auto mat = parseMaterial(
+        "<material id=\"n\" atomicnumber=\"28\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.49, 0.0001);
   }
 
   void test_MassNumber_Attribute() {
-    auto mat = parseMaterial(
-        "<material id=\"n\" atomicnumber=\"28\" massnumber=\"58\"/>");
+    auto mat = parseMaterial("<material id=\"n\" atomicnumber=\"28\" "
+                             "massnumber=\"58\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 26.1, 0.0001);
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.6, 0.0001);
@@ -69,33 +70,36 @@ public:
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
                              "massdensity=\"4\" />");
 
-    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252, 1e-07);
+    TS_ASSERT_DELTA(mat.numberDensity(), 0.0236252 * 5, 1e-07);
   }
 
   void test_TotalScattering_Attribute() {
-    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                             "totalscatterxsec=\"18.1\"/>");
+    auto mat =
+        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                      "totalscatterxsec=\"18.1\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.totalScatterXSection(), 18.1, 1e-04);
   }
 
   void test_CoherentScattering_Attribute() {
     auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                             "cohscatterxsec=\"4.6\"/>");
+                             "cohscatterxsec=\"4.6\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.cohScatterXSection(), 4.6, 1e-04);
   }
 
   void test_IncoherentScattering_Attribute() {
-    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                             "incohscatterxsec=\"0.1\"/>");
+    auto mat =
+        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                      "incohscatterxsec=\"0.1\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.incohScatterXSection(), 0.1, 1e-04);
   }
 
   void test_Absorption_Attribute() {
-    auto mat = parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
-                             "absorptionxsec=\"4.45\"/>");
+    auto mat =
+        parseMaterial("<material id=\"a\" formula=\"Al2-O3\" "
+                      "absorptionxsec=\"4.45\" numberdensity=\"0.12\"/>");
 
     TS_ASSERT_DELTA(mat.absorbXSection(), 4.45, 1e-04);
   }

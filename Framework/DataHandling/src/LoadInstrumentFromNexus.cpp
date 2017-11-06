@@ -59,7 +59,6 @@ void LoadInstrumentFromNexus::exec() {
   // Create a new Instrument with the right name and add it to the workspace
   Geometry::Instrument_sptr instrument(
       new Geometry::Instrument(nxload.getInstrumentName()));
-  localWorkspace->setInstrument(instrument);
 
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from nexus file assumed to be relative to sample
@@ -85,6 +84,7 @@ void LoadInstrumentFromNexus::exec() {
       l1 = 10.0;
   }
   source->setPos(0.0, -1.0 * l1, 0.0);
+  localWorkspace->setInstrument(instrument);
   progress(1.0);
 }
 

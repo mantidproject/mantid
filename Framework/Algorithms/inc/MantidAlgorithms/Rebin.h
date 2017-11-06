@@ -90,6 +90,10 @@ protected:
 
   void propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
                       API::MatrixWorkspace_sptr outputWS, int hist);
+
+  Parallel::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, Parallel::StorageMode> &storageModes)
+      const override;
 };
 
 } // namespace Algorithms

@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <map>
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/Group.h"

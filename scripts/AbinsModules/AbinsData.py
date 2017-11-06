@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-# Abins modules
 import AbinsModules
 
 
@@ -17,8 +16,8 @@ class AbinsData(AbinsModules.GeneralData):
     def set(self, k_points_data=None, atoms_data=None):
         """
 
-        @param k_points_data: object of type KpointsData
-        @param atoms_data: object of type AtomsData
+        :param k_points_data: object of type KpointsData
+        :param atoms_data: object of type AtomsData
         """
 
         if isinstance(k_points_data, AbinsModules.KpointsData):
@@ -40,8 +39,9 @@ class AbinsData(AbinsModules.GeneralData):
             return self._atoms_data
 
     def extract(self):
-        if self._data["k_points_data"]["atomic_displacements"].shape[1] != len(self._data["atoms_data"]):
-            raise ValueError("Abins data is inconsistent.")
+        for k in self._data["k_points_data"]["atomic_displacements"]:
+            if self._data["k_points_data"]["atomic_displacements"][k].shape[0] != len(self._data["atoms_data"]):
+                raise ValueError("Abins data is inconsistent.")
 
         return self._data
 

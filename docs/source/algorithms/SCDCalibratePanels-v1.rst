@@ -30,7 +30,9 @@ modify the instrument parameters, p, and then find  Q in the sample frame,
 NINT is the nearest integer function.
 B is fixed from the input lattice parameters, but U is modified by :ref:`CalculateUMatrix <algm-CalculateUMatrix>` 
 for all peaks before and after optimization.
-The initial path, L1, is optimized for all peaks before and after each panel or pack's parameters are optimized.
+When the peaks are indexed, sample offsets are adjusted to better index the peaks. 
+The initial time-of-flight, T0, is optimized for all peaks before any parameters are optimized. 
+The initial path, L1, is optimized for all peaks before and after all panels or packs' parameters are optimized.
 The panels and packs' parameters are optimized in parallel.
 An option is available to adjust the panel widths and heights for Rectangular Detectors in a second iteration with all the other parameters fixed.
 
@@ -87,7 +89,7 @@ Usage
     det1 = mtd['MANDI_801_event_DetCal'].getInstrument().getDetector(327680)
     det2 = mtd['MANDI_801_event_xml'].getInstrument().getDetector(327680)
     if det1.getPos() == det2.getPos():
-        print "matches"
+        print("matches")
     
 .. testcleanup:: SCDCalibratePanels
 

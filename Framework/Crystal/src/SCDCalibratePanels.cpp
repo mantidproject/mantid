@@ -14,6 +14,8 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/Peak.h"
 #include <fstream>
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -52,8 +54,8 @@ void SCDCalibratePanels::exec() {
   peaksWs->sort(criteria);
   // Remove peaks on edge
   int edge = this->getProperty("EdgePixels");
+  Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
-    Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
     std::vector<Peak> &peaks = peaksWs->getPeaks();
     auto it = std::remove_if(peaks.begin(), peaks.end(), [&peaksWs, edge, inst](
                                                              const Peak &pk) {
@@ -71,154 +73,82 @@ void SCDCalibratePanels::exec() {
 
   int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
-  bool changeSize = getProperty("ChangePanelSize");
+  bool changeT0 = getProperty("ChangeT0");
+  bool bankPanels = getProperty("CalibrateBanks");
+  bool snapPanels = getProperty("CalibrateSNAPPanels");
 
+  if (changeT0)
+    findT0(nPeaks, peaksWs);
   if (changeL1)
     findL1(nPeaks, peaksWs);
+
   boost::container::flat_set<string> MyBankNames;
-  for (int i = 0; i < nPeaks; ++i) {
-    MyBankNames.insert(peaksWs->getPeak(i).getBankName());
+  boost::container::flat_set<string> MyPanels;
+  if (snapPanels) {
+    MyPanels.insert("East");
+    MyPanels.insert("West");
+    for (int i = 1; i < 19; ++i)
+      MyBankNames.insert("bank" + boost::lexical_cast<std::string>(i));
+  } else {
+    for (int i = 0; i < nPeaks; ++i) {
+      std::string name = peaksWs->getPeak(i).getBankName();
+      if (name != "None")
+        MyBankNames.insert(name);
+    }
   }
 
-  std::vector<std::string> fit_workspaces(MyBankNames.size(), "fit_");
-  std::vector<std::string> parameter_workspaces(MyBankNames.size(), "params_");
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
-  for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
-    const std::string &iBank = *std::next(MyBankNames.begin(), i);
-    const std::string bankName = "__PWS_" + iBank;
-    PeaksWorkspace_sptr local = peaksWs->clone();
-    AnalysisDataService::Instance().addOrReplace(bankName, local);
-    std::vector<Peak> &localPeaks = local->getPeaks();
-    auto lit = std::remove_if(
-        localPeaks.begin(), localPeaks.end(),
-        [&iBank](const Peak &pk) { return pk.getBankName() != iBank; });
-    localPeaks.erase(lit, localPeaks.end());
-
-    int nBankPeaks = local->getNumberPeaks();
-    if (nBankPeaks < 6) {
-      g_log.notice() << "Too few peaks for " << iBank << "\n";
-      continue;
-    }
-
-    MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
-
-    auto &outSpec = q3DWS->getSpectrum(0);
-    auto &yVec = outSpec.mutableY();
-    auto &eVec = outSpec.mutableE();
-    auto &xVec = outSpec.mutableX();
-    yVec = 0.0;
-
-    for (int i = 0; i < nBankPeaks; i++) {
-      const DataObjects::Peak &peak = local->getPeak(i);
-      // 1/sigma is considered the weight for the fit
-      double weight = 1.;                // default is even weighting
-      if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
-        weight = 1.0 / peak.getSigmaIntensity();
-      else if (peak.getIntensity() > 0.) // next favorite weight by I
-        weight = 1.0 / peak.getIntensity();
-      else if (peak.getBinCount() > 0.) // then by counts in peak centre
-        weight = 1.0 / peak.getBinCount();
-      for (int j = 0; j < 3; j++) {
-        int k = i * 3 + j;
-        xVec[k] = k;
-        eVec[k] = weight;
-      }
-    }
-
-    IAlgorithm_sptr fit_alg;
-    try {
-      fit_alg = createChildAlgorithm("Fit", -1, -1, false);
-    } catch (Exception::NotFoundError &) {
-      g_log.error("Can't locate Fit algorithm");
-      throw;
-    }
-    std::ostringstream fun_str;
-    fun_str << "name=SCDPanelErrors,Workspace=" + bankName << ",Bank=" << iBank;
-    fit_alg->setPropertyValue("Function", fun_str.str());
-    std::ostringstream tie_str;
-    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0";
-    fit_alg->setProperty("Ties", tie_str.str());
-    fit_alg->setProperty("InputWorkspace", q3DWS);
-    fit_alg->setProperty("CreateOutput", true);
-    fit_alg->setProperty("Output", "fit");
-    fit_alg->executeAsChildAlg();
-    std::string fitStatus = fit_alg->getProperty("OutputStatus");
-    double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
-                   << "\n";
-    MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-    AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
-    ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
-    AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS);
-    double xShift = paramsWS->getRef<double>("Value", 0);
-    double yShift = paramsWS->getRef<double>("Value", 1);
-    double zShift = paramsWS->getRef<double>("Value", 2);
-    double xRotate = paramsWS->getRef<double>("Value", 3);
-    double yRotate = paramsWS->getRef<double>("Value", 4);
-    double zRotate = paramsWS->getRef<double>("Value", 5);
-    double scaleWidth = 1.0;
-    double scaleHeight = 1.0;
-    // Scaling only implemented for Rectangular Detectors
-    Geometry::IComponent_const_sptr comp =
-        peaksWs->getInstrument()->getComponentByName(iBank);
-    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    if (rectDet && changeSize) {
-      IAlgorithm_sptr fit2_alg;
-      try {
-        fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError &) {
-        g_log.error("Can't locate Fit algorithm");
-        throw;
-      }
-      fit2_alg->setPropertyValue("Function", fun_str.str());
-      std::ostringstream tie_str2;
-      tie_str2 << "XShift=" << xShift << ",YShift=" << yShift
-               << ",ZShift=" << zShift << ",XRotate=" << xRotate
-               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate;
-      fit2_alg->setProperty("Ties", tie_str2.str());
-      fit2_alg->setProperty("InputWorkspace", q3DWS);
-      fit2_alg->setProperty("CreateOutput", true);
-      fit2_alg->setProperty("Output", "fit");
-      fit2_alg->executeAsChildAlg();
-      std::string fitStatus = fit2_alg->getProperty("OutputStatus");
-      double chisq = fit2_alg->getProperty("OutputChi2overDoF");
-      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
-                     << "\n";
-      fitWS = fit2_alg->getProperty("OutputWorkspace");
-      AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
-      paramsWS = fit2_alg->getProperty("OutputParameters");
-      AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS);
-      scaleWidth = paramsWS->getRef<double>("Value", 6);
-      scaleHeight = paramsWS->getRef<double>("Value", 7);
-    }
-    AnalysisDataService::Instance().remove(bankName);
-    SCDPanelErrors det;
-    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
-                     scaleWidth, scaleHeight, iBank, peaksWs);
-    parameter_workspaces[i] += iBank;
-    fit_workspaces[i] += iBank;
-    PARALLEL_END_INTERUPT_REGION
+  std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(),
+                                          "fit_");
+  std::vector<std::string> parameter_workspaces(
+      MyBankNames.size() + MyPanels.size(), "params_");
+  int i = 0;
+  for (auto iBank = MyPanels.begin(); iBank != MyPanels.end(); ++iBank) {
+    fit_workspaces[i] += *iBank;
+    parameter_workspaces[i] += *iBank;
+    i++;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  if (snapPanels) {
+    findL2(MyPanels, peaksWs);
+    ITableWorkspace_sptr results =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            "params_West");
+    double delta = results->cell<double>(4, 1);
+    g_log.notice() << "For west rotation change det_arc1 " << delta
+                   << " degrees\n";
+    results = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+        "params_East");
+    delta = results->cell<double>(4, 1);
+    g_log.notice() << "For east rotation change det_arc2 " << delta
+                   << " degrees\n";
+  }
+
+  for (auto iBank = MyBankNames.begin(); iBank != MyBankNames.end(); ++iBank) {
+    fit_workspaces[i] += *iBank;
+    parameter_workspaces[i] += *iBank;
+    i++;
+  }
+  if (bankPanels) {
+    findL2(MyBankNames, peaksWs);
+  }
 
   // remove skipped banks
-  fit_workspaces.erase(
-      std::remove(fit_workspaces.begin(), fit_workspaces.end(), "fit_"),
-      fit_workspaces.end());
-  parameter_workspaces.erase(std::remove(parameter_workspaces.begin(),
-                                         parameter_workspaces.end(), "params_"),
-                             parameter_workspaces.end());
+  for (int j = i - 1; j >= 0; j--) {
+    if (!AnalysisDataService::Instance().doesExist(fit_workspaces[j]))
+      fit_workspaces.erase(fit_workspaces.begin() + j);
+    if (!AnalysisDataService::Instance().doesExist(parameter_workspaces[j]))
+      parameter_workspaces.erase(parameter_workspaces.begin() + j);
+  }
 
   // Try again to optimize L1
   if (changeL1) {
     findL1(nPeaks, peaksWs);
     parameter_workspaces.push_back("params_L1");
     fit_workspaces.push_back("fit_L1");
+  }
+  // Add T0 files to groups
+  if (changeT0) {
+    parameter_workspaces.push_back("params_T0");
+    fit_workspaces.push_back("fit_T0");
   }
   std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
   std::sort(fit_workspaces.begin(), fit_workspaces.end());
@@ -238,7 +168,7 @@ void SCDCalibratePanels::exec() {
   groupAlg->execute();
 
   // Use new instrument for PeaksWorkspace
-  Geometry::Instrument_sptr inst =
+  Geometry::Instrument_sptr inst2 =
       boost::const_pointer_cast<Geometry::Instrument>(peaksWs->getInstrument());
   Geometry::OrientedLattice lattice0 =
       peaksWs->mutableSample().getOrientedLattice();
@@ -250,34 +180,45 @@ void SCDCalibratePanels::exec() {
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice0.qFromHKL(hkl);
-    peak.setInstrument(inst);
-    peak.setQSampleFrame(Q2);
-    peak.setHKL(hkl);
+    try {
+      peak.setInstrument(inst2);
+      peak.setQSampleFrame(Q2);
+      peak.setHKL(hkl);
+    } catch (const std::exception &exc) {
+      g_log.notice() << "Problem in applying calibration to peak " << i << " : "
+                     << exc.what() << "\n";
+    }
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   // Find U again for optimized geometry and index peaks
   findU(peaksWs);
   // Save as DetCal and XML if requested
   string DetCalFileName = getProperty("DetCalFilename");
-  saveIsawDetCal(inst, MyBankNames, 0.0, DetCalFileName);
+  API::Run &run = peaksWs->mutableRun();
+  double mT0 = 0.0;
+  if (run.hasProperty("T0")) {
+    mT0 = run.getPropertyValueAsType<double>("T0");
+  }
+  saveIsawDetCal(inst2, MyBankNames, mT0, DetCalFileName);
   string XmlFileName = getProperty("XmlFilename");
-  saveXmlFile(XmlFileName, MyBankNames, *inst);
+  saveXmlFile(XmlFileName, MyBankNames, *inst2);
   // create table of theoretical vs calculated
   //----------------- Calculate & Create Calculated vs Theoretical
   // workspaces------------------,);
   MatrixWorkspace_sptr ColWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  ColWksp->setInstrument(inst);
+  ColWksp->setInstrument(inst2);
   MatrixWorkspace_sptr RowWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  RowWksp->setInstrument(inst);
+  RowWksp->setInstrument(inst2);
   MatrixWorkspace_sptr TofWksp =
       Mantid::API::WorkspaceFactory::Instance().create(
           "Workspace2D", MyBankNames.size(), nPeaks, nPeaks);
-  TofWksp->setInstrument(inst);
+  TofWksp->setInstrument(inst2);
   OrientedLattice lattice = peaksWs->mutableSample().getOrientedLattice();
   const DblMatrix &UB = lattice.getUB();
   // sort again since edge peaks can trace to other banks
@@ -345,29 +286,6 @@ void SCDCalibratePanels::findL1(int nPeaks,
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
 
-  auto &outSp = L1WS->getSpectrum(0);
-  auto &yVec = outSp.mutableY();
-  auto &eVec = outSp.mutableE();
-  auto &xVec = outSp.mutableX();
-  yVec = 0.0;
-
-  for (int i = 0; i < nPeaks; i++) {
-    const DataObjects::Peak &peak = peaksWs->getPeak(i);
-
-    // 1/sigma is considered the weight for the fit
-    double weight = 1.;                // default is even weighting
-    if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
-      weight = 1.0 / peak.getSigmaIntensity();
-    else if (peak.getIntensity() > 0.) // next favorite weight by I
-      weight = 1.0 / peak.getIntensity();
-    else if (peak.getBinCount() > 0.) // then by counts in peak centre
-      weight = 1.0 / peak.getBinCount();
-    for (int j = 0; j < 3; j++) {
-      int k = i * 3 + j;
-      xVec[k] = k;
-      eVec[k] = weight;
-    }
-  }
   IAlgorithm_sptr fitL1_alg;
   try {
     fitL1_alg = createChildAlgorithm("Fit", -1, -1, false);
@@ -380,7 +298,7 @@ void SCDCalibratePanels::findL1(int nPeaks,
           << ",Bank=moderator";
   std::ostringstream tie_str;
   tie_str << "XShift=0.0,YShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
-             "ScaleWidth=1.0,ScaleHeight=1.0";
+             "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
   fitL1_alg->setPropertyValue("Function", fun_str.str());
   fitL1_alg->setProperty("Ties", tie_str.str());
   fitL1_alg->setProperty("InputWorkspace", L1WS);
@@ -400,6 +318,62 @@ void SCDCalibratePanels::findL1(int nPeaks,
   g_log.notice() << "L1 = "
                  << -peaksWs->getInstrument()->getSource()->getPos().Z() << "  "
                  << fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
+}
+
+void SCDCalibratePanels::findT0(int nPeaks,
+                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+  MatrixWorkspace_sptr T0WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
+                                               3 * nPeaks));
+
+  IAlgorithm_sptr fitT0_alg;
+  try {
+    fitT0_alg = createChildAlgorithm("Fit", -1, -1, false);
+  } catch (Exception::NotFoundError &) {
+    g_log.error("Can't locate Fit algorithm");
+    throw;
+  }
+  std::ostringstream fun_str;
+  fun_str << "name=SCDPanelErrors,Workspace=" << peaksWs->getName()
+          << ",Bank=none";
+  std::ostringstream tie_str;
+  tie_str
+      << "XShift=0.0,YShift=0.0,ZShift=0.0,XRotate=0.0,YRotate=0.0,ZRotate=0.0,"
+         "ScaleWidth=1.0,ScaleHeight=1.0";
+  fitT0_alg->setPropertyValue("Function", fun_str.str());
+  fitT0_alg->setProperty("Ties", tie_str.str());
+  fitT0_alg->setProperty("InputWorkspace", T0WS);
+  fitT0_alg->setProperty("CreateOutput", true);
+  fitT0_alg->setProperty("Output", "fit");
+  // Does not converge with derviative minimizers
+  fitT0_alg->setProperty("Minimizer", "Simplex");
+  fitT0_alg->setProperty("MaxIterations", 1000);
+  fitT0_alg->executeAsChildAlg();
+  std::string fitT0Status = fitT0_alg->getProperty("OutputStatus");
+  double chisqT0 = fitT0_alg->getProperty("OutputChi2overDoF");
+  MatrixWorkspace_sptr fitT0 = fitT0_alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace("fit_T0", fitT0);
+  ITableWorkspace_sptr paramsT0 = fitT0_alg->getProperty("OutputParameters");
+  AnalysisDataService::Instance().addOrReplace("params_T0", paramsT0);
+  mT0 = paramsT0->getRef<double>("Value", 8);
+  API::Run &run = peaksWs->mutableRun();
+  // set T0 in the run parameters adding to value in peaks file
+  double oldT0 = 0.0;
+  if (run.hasProperty("T0")) {
+    oldT0 = run.getPropertyValueAsType<double>("T0");
+  }
+  run.addProperty<double>("T0", mT0 + oldT0, true);
+  g_log.notice() << "T0 = " << mT0 << "  " << fitT0Status << " Chi2overDoF "
+                 << chisqT0 << "\n";
+  for (int i = 0; i < peaksWs->getNumberPeaks(); i++) {
+    DataObjects::Peak &peak = peaksWs->getPeak(i);
+
+    Units::Wavelength wl;
+
+    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
+                  peak.getInitialEnergy(), 0.0);
+    peak.setWavelength(wl.singleFromTOF(peak.getTOF() + mT0));
+  }
 }
 
 void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
@@ -437,9 +411,13 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
   ub_alg->executeAsChildAlg();
 
   // Reindex peaks with new UB
-  Mantid::API::IAlgorithm_sptr alg = createChildAlgorithm("IndexPeaks");
+  Mantid::API::IAlgorithm_sptr alg =
+      createChildAlgorithm("OptimizeCrystalPlacement");
   alg->setPropertyValue("PeaksWorkspace", peaksWs->getName());
-  alg->setProperty("Tolerance", 0.15);
+  alg->setPropertyValue("ModifiedPeaksWorkspace", peaksWs->getName());
+  alg->setProperty("AdjustSampleOffsets", true);
+  alg->setProperty("MaxAngularChange", 0.0);
+  alg->setProperty("MaxIndexingError", 0.15);
   alg->executeAsChildAlg();
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
@@ -512,12 +490,17 @@ void SCDCalibratePanels::init() {
                   "Lattice Parameter gamma in degrees (Leave empty to use "
                   "lattice constants in peaks workspace)");
   declareProperty("ChangeL1", true, "Change the L1(source to sample) distance");
+  declareProperty("ChangeT0", false, "Change the T0 (initial TOF)");
   declareProperty("ChangePanelSize", true, "Change the height and width of the "
                                            "detectors.  Implemented only for "
                                            "RectangularDetectors.");
 
   declareProperty("EdgePixels", 0,
                   "Remove peaks that are at pixels this close to edge. ");
+  declareProperty("CalibrateBanks", true, "Calibrate the panels of the banks.");
+  declareProperty("CalibrateSNAPPanels", false,
+                  "Calibrate the 3 X 3 panels of the "
+                  "sides of SNAP.");
 
   // ---------- outputs
   const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
@@ -642,6 +625,146 @@ void SCDCalibratePanels::saveXmlFile(
   oss3.flush();
   oss3.close();
 }
+void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
+                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+  bool changeSize = getProperty("ChangePanelSize");
+  Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
 
+  PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
+  for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    const std::string &iBank = *std::next(MyBankNames.begin(), i);
+    const std::string bankName = "__PWS_" + iBank;
+    PeaksWorkspace_sptr local = peaksWs->clone();
+    AnalysisDataService::Instance().addOrReplace(bankName, local);
+    std::vector<Peak> &localPeaks = local->getPeaks();
+    auto lit = std::remove_if(
+        localPeaks.begin(), localPeaks.end(), [&iBank](const Peak &pk) {
+          std::string name = pk.getBankName();
+          IComponent_const_sptr det =
+              pk.getInstrument()->getComponentByName(name);
+          if (det && iBank.substr(0, 4) != "bank") {
+            IComponent_const_sptr parent = det->getParent();
+            if (parent) {
+              IComponent_const_sptr grandparent = parent->getParent();
+              if (grandparent) {
+                name = grandparent->getName();
+              }
+            }
+          }
+
+          return name != iBank;
+        });
+    localPeaks.erase(lit, localPeaks.end());
+
+    int nBankPeaks = local->getNumberPeaks();
+    if (nBankPeaks < 6) {
+      g_log.notice() << "Too few peaks for " << iBank << "\n";
+      continue;
+    }
+
+    MatrixWorkspace_sptr q3DWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        API::WorkspaceFactory::Instance().create(
+            "Workspace2D", 1, 3 * nBankPeaks, 3 * nBankPeaks));
+
+    auto &outSpec = q3DWS->getSpectrum(0);
+    auto &yVec = outSpec.mutableY();
+    auto &eVec = outSpec.mutableE();
+    auto &xVec = outSpec.mutableX();
+    yVec = 0.0;
+
+    for (int i = 0; i < nBankPeaks; i++) {
+      const DataObjects::Peak &peak = local->getPeak(i);
+      // 1/sigma is considered the weight for the fit
+      double weight = 1.;                // default is even weighting
+      if (peak.getSigmaIntensity() > 0.) // prefer weight by sigmaI
+        weight = 1.0 / peak.getSigmaIntensity();
+      else if (peak.getIntensity() > 0.) // next favorite weight by I
+        weight = 1.0 / peak.getIntensity();
+      else if (peak.getBinCount() > 0.) // then by counts in peak centre
+        weight = 1.0 / peak.getBinCount();
+      for (int j = 0; j < 3; j++) {
+        int k = i * 3 + j;
+        xVec[k] = k;
+        eVec[k] = weight;
+      }
+    }
+
+    IAlgorithm_sptr fit_alg;
+    try {
+      fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+    } catch (Exception::NotFoundError &) {
+      g_log.error("Can't locate Fit algorithm");
+      throw;
+    }
+    std::ostringstream fun_str;
+    fun_str << "name=SCDPanelErrors,Workspace=" + bankName << ",Bank=" << iBank;
+    fit_alg->setPropertyValue("Function", fun_str.str());
+    std::ostringstream tie_str;
+    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
+    fit_alg->setProperty("Ties", tie_str.str());
+    fit_alg->setProperty("InputWorkspace", q3DWS);
+    fit_alg->setProperty("CreateOutput", true);
+    fit_alg->setProperty("Output", "fit");
+    fit_alg->executeAsChildAlg();
+    std::string fitStatus = fit_alg->getProperty("OutputStatus");
+    double chisq = fit_alg->getProperty("OutputChi2overDoF");
+    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
+                   << "\n";
+    MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+    AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
+    ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
+    AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS);
+    double xShift = paramsWS->getRef<double>("Value", 0);
+    double yShift = paramsWS->getRef<double>("Value", 1);
+    double zShift = paramsWS->getRef<double>("Value", 2);
+    double xRotate = paramsWS->getRef<double>("Value", 3);
+    double yRotate = paramsWS->getRef<double>("Value", 4);
+    double zRotate = paramsWS->getRef<double>("Value", 5);
+    double scaleWidth = 1.0;
+    double scaleHeight = 1.0;
+    // Scaling only implemented for Rectangular Detectors
+    Geometry::IComponent_const_sptr comp =
+        peaksWs->getInstrument()->getComponentByName(iBank);
+    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    if (rectDet && changeSize) {
+      IAlgorithm_sptr fit2_alg;
+      try {
+        fit2_alg = createChildAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError &) {
+        g_log.error("Can't locate Fit algorithm");
+        throw;
+      }
+      fit2_alg->setPropertyValue("Function", fun_str.str());
+      std::ostringstream tie_str2;
+      tie_str2 << "XShift=" << xShift << ",YShift=" << yShift
+               << ",ZShift=" << zShift << ",XRotate=" << xRotate
+               << ",YRotate=" << yRotate << ",ZRotate=" << zRotate
+               << ",T0Shift =" << mT0;
+      fit2_alg->setProperty("Ties", tie_str2.str());
+      fit2_alg->setProperty("InputWorkspace", q3DWS);
+      fit2_alg->setProperty("CreateOutput", true);
+      fit2_alg->setProperty("Output", "fit");
+      fit2_alg->executeAsChildAlg();
+      std::string fitStatus = fit2_alg->getProperty("OutputStatus");
+      double chisq = fit2_alg->getProperty("OutputChi2overDoF");
+      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
+                     << "\n";
+      fitWS = fit2_alg->getProperty("OutputWorkspace");
+      AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
+      paramsWS = fit2_alg->getProperty("OutputParameters");
+      AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS);
+      scaleWidth = paramsWS->getRef<double>("Value", 6);
+      scaleHeight = paramsWS->getRef<double>("Value", 7);
+    }
+    AnalysisDataService::Instance().remove(bankName);
+    SCDPanelErrors det;
+    det.moveDetector(xShift, yShift, zShift, xRotate, yRotate, zRotate,
+                     scaleWidth, scaleHeight, iBank, peaksWs);
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+}
 } // namespace Crystal
 } // namespace Mantid

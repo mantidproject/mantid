@@ -150,3 +150,7 @@ class FittingBenchmars(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
+
+    # exclude from PR for being slow
+    def excludeInPullRequests(self):
+        return True

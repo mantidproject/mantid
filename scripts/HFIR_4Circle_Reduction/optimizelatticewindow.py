@@ -1,7 +1,8 @@
 #pylint: disable=C0103
+from __future__ import (absolute_import, division, print_function)
 from PyQt4 import QtGui, QtCore
 
-import ui_OptimizeLattice
+from . import ui_OptimizeLattice
 
 
 class OptimizeLatticeWindow(QtGui.QMainWindow):

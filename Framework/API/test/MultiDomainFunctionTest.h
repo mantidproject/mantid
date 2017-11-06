@@ -468,6 +468,30 @@ public:
                      "name=MultiDomainFunctionTest_Function,A=2,B=4");
   }
 
+  void test_string_nested_composite() {
+    std::string ini = "composite=MultiDomainFunction;"
+                      "(composite=CompositeFunction,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function; "
+                      "(name=MultiDomainFunctionTest_Function;name="
+                      "MultiDomainFunctionTest_Function));"
+                      "(composite=CompositeFunction,$domains=i;"
+                      "name=MultiDomainFunctionTest_Function; "
+                      "(name=MultiDomainFunctionTest_Function;name="
+                      "MultiDomainFunctionTest_Function))";
+    auto f = FunctionFactory::Instance().createInitialized(ini);
+    auto g = FunctionFactory::Instance().createInitialized(f->asString());
+    TS_ASSERT_EQUALS(g->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=false;(composite="
+                     "CompositeFunction,NumDeriv=false,$domains=i;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0));(composite="
+                     "CompositeFunction,NumDeriv=false,$domains=i;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;(name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0;name="
+                     "MultiDomainFunctionTest_Function,A=0,B=0))");
+  }
+
 private:
   MultiDomainFunction multi;
   JointDomain domain;

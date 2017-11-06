@@ -104,6 +104,8 @@ public:
 
   std::string value() const override;
 
+  bool isValueSerializable() const override;
+
   std::string getDefault() const override;
 
   std::string setValue(const std::string &value) override;
@@ -125,6 +127,8 @@ public:
   bool store() override;
 
   Workspace_sptr getWorkspace() const override;
+
+  void setIsMasterRank(bool isMasterRank) override;
 
 private:
   std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const;
@@ -150,6 +154,8 @@ private:
 
   /// for access to logging streams
   static Kernel::Logger g_log;
+
+  bool m_isMasterRank{true};
 };
 
 template <typename TYPE>

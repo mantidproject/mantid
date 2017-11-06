@@ -1,11 +1,12 @@
 #include "MantidDataHandling/LoadILLIndirect2.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
@@ -40,7 +41,7 @@ const std::string LoadILLIndirect2::name() const { return "LoadILLIndirect"; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLIndirect2::category() const {
-  return "DataHandling\\Nexus";
+  return "DataHandling\\Nexus;ILL\\Indirect";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -129,7 +130,7 @@ void LoadILLIndirect2::exec() {
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
 
-  if (instrumentNamePath == "") {
+  if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
     throw std::runtime_error(message);
@@ -269,9 +270,9 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(
 
   size_t spec = 0;
 
-  Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube +
-                                    m_numberOfMonitors +
-                                    m_numberOfSimpleDetectors);
+  Progress progress(this, 0.0, 1.0, m_numberOfTubes * m_numberOfPixelsPerTube +
+                                        m_numberOfMonitors +
+                                        m_numberOfSimpleDetectors);
 
   // Assign fake values to first X axis <<to be completed>>
   for (size_t i = 0; i <= m_numberOfChannels; ++i) {
@@ -406,7 +407,9 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
     g_log.debug() << componentName << " : t = " << theta
                   << " ==> t = " << twoTheta << "\n";
 
-    m_localWorkspace->mutableDetectorInfo().setPosition(*component, newPos);
+    auto &compInfo = m_localWorkspace->mutableComponentInfo();
+    const auto componentIndex = compInfo.indexOf(component->getComponentID());
+    compInfo.setPosition(componentIndex, newPos);
 
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     throw std::runtime_error("Error when trying to move the " + componentName +

@@ -1,4 +1,4 @@
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 
 #include <algorithm>
@@ -18,7 +18,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 }
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
-    const API::DetectorInfo &poldiDetectorInfo,
+    const Geometry::DetectorInfo &poldiDetectorInfo,
     boost::shared_ptr<PoldiAbstractDetector> detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);

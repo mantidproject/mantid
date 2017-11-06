@@ -1,10 +1,11 @@
 #ifndef MANTID_KERNEL_MEMORY_H_
 #define MANTID_KERNEL_MEMORY_H_
 
-#include <string>
 #include "MantidKernel/DllConfig.h"
 
 #include <mutex>
+#include <iosfwd>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

@@ -6,7 +6,7 @@ import stresstesting
 
 import mantid  # noqa
 from mantid.api import AlgorithmManager
-from sans.user_file.user_file_state_director import UserFileStateDirectorISIS
+from sans.user_file.state_director import StateDirectorISIS
 from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.common.constants import EMPTY_NAME
@@ -138,7 +138,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = UserFileStateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)
@@ -190,7 +190,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = UserFileStateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.HAB)
@@ -242,7 +242,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = UserFileStateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.Merged)
@@ -305,7 +305,7 @@ class SANSSingleReductionTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = UserFileStateDirectorISIS(data_info)
+        user_file_director = StateDirectorISIS(data_info)
         user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
         # Set the reduction mode to LAB
         user_file_director.set_reduction_builder_reduction_mode(ISISReductionMode.LAB)

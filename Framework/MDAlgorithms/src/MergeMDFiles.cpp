@@ -1,16 +1,16 @@
+#include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/MDBoxBase.h"
-#include "MantidDataObjects/MDEventFactory.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidMDAlgorithms/MergeMDFiles.h"
 
-#include <boost/scoped_ptr.hpp>
 #include <Poco/File.h>
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -27,8 +27,8 @@ DECLARE_ALGORITHM(MergeMDFiles)
  */
 MergeMDFiles::MergeMDFiles()
     : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
-      m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
-      statsMutex(), prog(nullptr) {}
+      m_EventLoader(), m_OutIWS(), m_totalEvents(0), m_totalLoaded(0),
+      m_fileMutex(), m_statsMutex() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -75,7 +75,7 @@ void MergeMDFiles::loadBoxData() {
   targetEventIndexes.assign(targetEventIndexes.size(), 0);
 
   // Total number of events in ALL files.
-  totalEvents = 0;
+  m_totalEvents = 0;
 
   m_fileComponentsStructure.resize(m_Filenames.size());
   m_EventLoader.assign(m_Filenames.size(), nullptr);
@@ -105,7 +105,8 @@ void MergeMDFiles::loadBoxData() {
         size_t ID = Boxes[j]->getID();
         targetEventIndexes[2 * ID + 1] +=
             m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
-        totalEvents += m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
+        m_totalEvents +=
+            m_fileComponentsStructure[i].getEventIndex()[2 * ID + 1];
       }
 
       // Open the event data, track the total number of events
@@ -142,7 +143,7 @@ void MergeMDFiles::loadBoxData() {
     eventsStart += nEvents;
   }
 
-  g_log.notice() << totalEvents << " events in " << m_Filenames.size()
+  g_log.notice() << m_totalEvents << " events in " << m_Filenames.size()
                  << " files.\n";
 }
 
@@ -230,11 +231,11 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
 
   size_t numBoxes = m_BoxStruct.getNBoxes();
   // Progress report based on events processed.
-  this->prog = new Progress(this, 0.1, 0.9, size_t(numBoxes));
-  prog->setNotifyStep(0.1);
+  m_progress = Kernel::make_unique<Progress>(this, 0.1, 0.9, size_t(numBoxes));
+  m_progress->setNotifyStep(0.1);
 
   // For tracking progress
-  // uint64_t totalEventsInTasks = 0;
+  // uint64_t m_totalEventsInTasks = 0;
 
   // Prepare thread pool
   CPUTimer overallTime;
@@ -247,7 +248,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
     DiskBuf = bc->getFileIO();
   }
 
-  this->totalLoaded = 0;
+  this->m_totalLoaded = 0;
   std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
 
   for (size_t ib = 0; ib < numBoxes; ib++) {
@@ -284,7 +285,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
     //  ts->push(task);
     //}
 
-    prog->reportIncrement(ib, "Loading and merging box data");
+    m_progress->reportIncrement(ib, "Loading and merging box data");
   }
   if (DiskBuf) {
     DiskBuf->flushCache();
@@ -332,7 +333,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // OK, we've filled these big arrays of data representing flat box
     // structure. Save them.
     progress(0.91, "Writing Box Data");
-    prog->resetNumSteps(8, 0.92, 1.00);
+    m_progress->resetNumSteps(8, 0.92, 1.00);
 
     // Save box structure;
     m_BoxStruct.saveBoxStructure(outputFile);

@@ -140,7 +140,7 @@ private:
   API::MatrixWorkspace_sptr m_correctedWS;
 
   /// Pointer to progress reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithms

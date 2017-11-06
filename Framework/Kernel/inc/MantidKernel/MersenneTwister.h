@@ -5,7 +5,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/ClassMacros.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/random/mersenne_twister.hpp>

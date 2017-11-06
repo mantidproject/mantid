@@ -3,7 +3,9 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <unordered_map>
@@ -111,6 +113,18 @@ bool Property::remember() const { return m_remember; }
  */
 void Property::setRemember(bool remember) { m_remember = remember; }
 
+/**
+* Returns the value as a pretty printed string
+* The default implementation just returns the value with the size limit applied
+* @param maxLength :: The Max length of the returned string
+* @param collapseLists :: Whether to collapse 1,2,3 into 1-3
+*/
+std::string Property::valueAsPrettyStr(const size_t maxLength,
+                                       const bool collapseLists) const {
+  UNUSED_ARG(collapseLists);
+  return Strings::shorten(value(), maxLength);
+}
+
 /** Sets the user level description of the property.
  *  In addition, if the brief documentation string is empty it will be set to
  *  the portion of the provided string up to the first period
@@ -195,8 +209,8 @@ void Property::setUnits(const std::string &unit) { m_units = unit; }
  * @param start :: the beginning time to filter from
  * @param stop :: the ending time to filter to
  * */
-void Property::filterByTime(const Kernel::DateAndTime &start,
-                            const Kernel::DateAndTime &stop) {
+void Property::filterByTime(const Types::Core::DateAndTime &start,
+                            const Types::Core::DateAndTime &stop) {
   UNUSED_ARG(start);
   UNUSED_ARG(stop);
   // Do nothing in general
@@ -330,6 +344,8 @@ std::string getUnmangledTypeName(const std::type_info &type) {
     typestrings.emplace(typeid(std::vector<double>).name(), string("dbl list"));
     typestrings.emplace(typeid(std::vector<std::vector<string>>).name(),
                         string("list of str lists"));
+    typestrings.emplace(typeid(OptionalBool).name(),
+                        string("optional boolean"));
 
     // Workspaces
     typestrings.emplace(typeid(boost::shared_ptr<Workspace>).name(),

@@ -12,12 +12,12 @@
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <nexus/NeXusFile.hpp>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
@@ -27,6 +27,7 @@ DECLARE_ALGORITHM(LoadIDFFromNexus)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadIDFFromNexus::LoadIDFFromNexus() {}
@@ -87,7 +88,7 @@ void LoadIDFFromNexus::exec() {
   // Look for parameter correction file
   std::string parameterCorrectionFile =
       getPropertyValue("ParameterCorrectionFilePath");
-  if (parameterCorrectionFile == "") {
+  if (parameterCorrectionFile.empty()) {
     parameterCorrectionFile =
         getParameterCorrectionFile(localWorkspace->getInstrument()->getName());
   }
@@ -97,7 +98,7 @@ void LoadIDFFromNexus::exec() {
   // Read parameter correction file, if found
   std::string correctionParameterFile;
   bool append = false;
-  if (parameterCorrectionFile != "") {
+  if (!parameterCorrectionFile.empty()) {
     // Read parameter correction file
     // to find out which parameter file to use
     // and whether it is appended to default parameters.
@@ -111,7 +112,7 @@ void LoadIDFFromNexus::exec() {
 
   // Load default parameters if either there is no correction parameter file or
   // it is to be appended.
-  if (correctionParameterFile == "" || append) {
+  if (correctionParameterFile.empty() || append) {
     LoadParameters(&nxfile, localWorkspace);
   } else { // Else clear the parameters
     g_log.notice() << "Parameters to be replaced are cleared.\n";
@@ -119,7 +120,7 @@ void LoadIDFFromNexus::exec() {
   }
 
   // Load parameters from correction parameter file, if it exists
-  if (correctionParameterFile != "") {
+  if (!correctionParameterFile.empty()) {
     Poco::Path corrFilePath(parameterCorrectionFile);
     g_log.debug() << "Correction file path: " << corrFilePath.toString()
                   << "\n";
@@ -199,7 +200,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile(
   append = false;
 
   // Check the date.
-  if (date == "") {
+  if (date.empty()) {
     g_log.notice() << "No date is supplied for parameter correction file "
                    << correction_file << ". Correction file is ignored.\n";
     return;

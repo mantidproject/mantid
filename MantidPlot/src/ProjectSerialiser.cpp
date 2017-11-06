@@ -15,10 +15,10 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidQtAPI/PlotAxis.h"
-#include "MantidQtAPI/VatesViewerInterface.h"
-#include "MantidQtSliceViewer/SliceViewerWindow.h"
-#include "MantidQtSpectrumViewer/SpectrumView.h"
+#include "MantidQtWidgets/Common/PlotAxis.h"
+#include "MantidQtWidgets/Common/VatesViewerInterface.h"
+#include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
+#include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 
 #include <QTextCodec>
 #include <QTextStream>
@@ -592,7 +592,7 @@ void ProjectSerialiser::saveProjectFile(QFile *fileHandle,
 
   // compress the project if needed
   if (compress) {
-    file_compress(projectName.toLatin1().constData(), "w9");
+    file_compress(qPrintable(projectName), "w9");
   }
 
   QApplication::restoreOverrideCursor();

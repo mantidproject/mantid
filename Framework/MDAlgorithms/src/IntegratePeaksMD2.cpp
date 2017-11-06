@@ -1,7 +1,7 @@
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Column.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -143,6 +143,11 @@ void IntegratePeaksMD2::init() {
       "Only warning if all of peak outer radius is not on detector (default).\n"
       "If false, correct for volume off edge for both background and "
       "intensity.");
+
+  declareProperty("UseOnePercentBackgroundCorrection", true,
+                  "If this options is enabled, then the the top 1% of the "
+                  "background will be removed"
+                  "before the background subtraction.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -184,6 +189,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
   /// Start radius of the background
   double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+  /// One percent background correction
+  bool useOnePercentBackgroundCorrection =
+      getProperty("UseOnePercentBackgroundCorrection");
+
   if (BackgroundInnerRadius < PeakRadius)
     BackgroundInnerRadius = PeakRadius;
   /// Cylinder Length to use around peaks for cylinder
@@ -367,7 +376,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Perform the integration into whatever box is contained within.
       ws->getBox()->integrateSphere(
           sphere, static_cast<coord_t>(adaptiveRadius * adaptiveRadius), signal,
-          errorSquared);
+          errorSquared, 0.0 /* innerRadiusSquared */,
+          useOnePercentBackgroundCorrection);
 
       // Integrate around the background radius
 
@@ -383,7 +393,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
             static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak +
                                   BackgroundInnerRadius) *
                                  (adaptiveQBackgroundMultiplier * lenQpeak +
-                                  BackgroundInnerRadius)));
+                                  BackgroundInnerRadius)),
+            useOnePercentBackgroundCorrection);
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
         double ratio = (PeakRadius / BackgroundOuterRadius);
@@ -672,7 +683,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param inst: instrument
  */
-void IntegratePeaksMD2::calculateE1(const API::DetectorInfo &detectorInfo) {
+void IntegratePeaksMD2::calculateE1(
+    const Geometry::DetectorInfo &detectorInfo) {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     if (detectorInfo.isMonitor(i))
       continue; // skip monitor

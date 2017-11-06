@@ -29,6 +29,7 @@ namespace {
  * @param Pointer to byte src
  */
 template <typename InterpretType> double toDouble(uint8_t *src) {
+  // cppcheck-suppress invalidPointerCast
   return static_cast<double>(*reinterpret_cast<InterpretType *>(src));
 }
 }
@@ -47,12 +48,8 @@ struct FITSInfo {
   int offset;
   int headerSizeMultiplier;
   std::vector<size_t> axisPixelLengths;
-  double tof;
-  double timeBin;
   double scale;
   std::string imageKey;
-  long int countsInImage;
-  long int numberOfTriggers;
   std::string extension;
   std::string filePath;
   bool isFloat;
@@ -296,7 +293,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // scale parameter, header BSCALE in the fits standard
-  if ("" == header.headerKeys[m_headerScaleKey]) {
+  if (header.headerKeys[m_headerScaleKey].empty()) {
     header.scale = 1;
   } else {
     try {
@@ -311,7 +308,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   }
 
   // data offsset parameter, header BZERO in the fits standard
-  if ("" == header.headerKeys[m_headerOffsetKey]) {
+  if (header.headerKeys[m_headerOffsetKey].empty()) {
     header.offset = 0;
   } else {
     try {
@@ -364,7 +361,7 @@ void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
 void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
                                  const FITSInfo &hdrFirst) {
   bool valid = true;
-  if (hdr.extension != "") {
+  if (!hdr.extension.empty()) {
     valid = false;
     g_log.error() << "File " << hdr.filePath
                   << ": extensions found in the header.\n";
@@ -492,7 +489,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   size_t totalWS = headers.size();
   // Create a progress reporting object
-  API::Progress progress(this, 0, 1, totalWS + 1);
+  API::Progress progress(this, 0.0, 1.0, totalWS + 1);
   progress.report(0, "Loading file(s) into workspace(s)");
 
   // Create first workspace (with instrument definition). This is also used as
@@ -628,7 +625,7 @@ void LoadFITS::parseHeader(FITSInfo &headerInfo) {
         if (key == g_END_KEYNAME)
           endFound = true;
 
-        if (key != "")
+        if (!key.empty())
           headerInfo.headerKeys[key] = value;
       }
     }
@@ -942,9 +939,11 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
         val = static_cast<double>(*reinterpret_cast<uint64_t *>(tmp));
       // cppcheck doesn't realise that these are safe casts
       if (fileInfo.bitsPerPixel == 32 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = static_cast<double>(*reinterpret_cast<float *>(tmp));
       }
       if (fileInfo.bitsPerPixel == 64 && fileInfo.isFloat) {
+        // cppcheck-suppress invalidPointerCast
         val = *reinterpret_cast<double *>(tmp);
       }
       val = fileInfo.scale * val - fileInfo.offset;
@@ -1142,7 +1141,7 @@ void LoadFITS::setupDefaultKeywordNames() {
  *  Maps the header keys to specified values
  */
 void LoadFITS::mapHeaderKeys() {
-  if ("" == getPropertyValue(g_HEADER_MAP_NAME))
+  if (getPropertyValue(g_HEADER_MAP_NAME).empty())
     return;
 
   // If a map file is selected, use that.
@@ -1158,19 +1157,19 @@ void LoadFITS::mapHeaderKeys() {
       while (getline(fStream, line)) {
         boost::split(lineSplit, line, boost::is_any_of("="));
 
-        if (lineSplit[0] == g_ROTATION_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_ROTATION_NAME && !lineSplit[1].empty())
           m_headerRotationKey = lineSplit[1];
 
-        if (lineSplit[0] == g_BIT_DEPTH_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_BIT_DEPTH_NAME && !lineSplit[1].empty())
           m_headerBitDepthKey = lineSplit[1];
 
-        if (lineSplit[0] == g_AXIS_NAMES_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_AXIS_NAMES_NAME && !lineSplit[1].empty()) {
           m_headerAxisNameKeys.clear();
           boost::split(m_headerAxisNameKeys, lineSplit[1],
                        boost::is_any_of(","));
         }
 
-        if (lineSplit[0] == g_IMAGE_KEY_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_IMAGE_KEY_NAME && !lineSplit[1].empty()) {
           m_headerImageKeyKey = lineSplit[1];
         }
       }

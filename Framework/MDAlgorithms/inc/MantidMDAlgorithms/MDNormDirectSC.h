@@ -85,6 +85,7 @@ private:
   Kernel::V3D m_beamDir;
   /// ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;
+  bool m_accumulate{false};
 };
 
 } // namespace MDAlgorithms

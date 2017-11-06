@@ -106,4 +106,5 @@ class FindReflectometryLines(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", output_ws)
 
+
 AlgorithmFactory.subscribe(FindReflectometryLines())

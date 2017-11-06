@@ -17,6 +17,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Core::DateAndTime;
 
 class AppendSpectraTest : public CxxTest::TestSuite {
 public:
@@ -163,6 +164,19 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
+  void testExecNonConstantBins() {
+    AppendSpectra alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace1", WorkspaceCreationHelper::create2DWorkspace(10, 10)));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "InputWorkspace2", WorkspaceCreationHelper::create2DWorkspace(10, 15)));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "outExecNonConstantBins"));
+    alg.execute();
+    TS_ASSERT(!alg.isExecuted());
+  }
+
   //----------------------------------------------------------------------------------------------
   void doTest(bool event, bool combineLogs = false) {
     MatrixWorkspace_sptr ws1, ws2, out;
@@ -216,8 +230,9 @@ public:
     for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
       TS_ASSERT_EQUALS(out->getSpectrum(wi).getSpectrumNo(), specnum_t(wi));
       TS_ASSERT(!out->getSpectrum(wi).getDetectorIDs().empty());
-      for (size_t x = 0; x < out->blocksize(); x++)
-        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
     }
 
     if (combineLogs) {

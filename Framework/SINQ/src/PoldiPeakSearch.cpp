@@ -564,7 +564,7 @@ void PoldiPeakSearch::exec() {
 
   Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
 
-  if (xUnit->caption() == "") {
+  if (xUnit->caption().empty()) {
     g_log.information()
         << "   Workspace does not have unit, defaulting to MomentumTransfer.\n";
 

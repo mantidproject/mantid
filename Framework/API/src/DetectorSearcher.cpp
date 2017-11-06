@@ -7,8 +7,6 @@
 
 using Mantid::Kernel::V3D;
 using Mantid::Geometry::InstrumentRayTracer;
-using Mantid::Geometry::IDetector;
-using Mantid::Geometry::ReferenceFrame;
 using namespace Mantid;
 using namespace Mantid::API;
 
@@ -24,10 +22,10 @@ double getQSign() {
  * given instrument geometry
  *
  * @param instrument :: the instrument to find detectors in
- * @param detInfo :: the API::DetectorInfo object for this instrument
+ * @param detInfo :: the Geometry::DetectorInfo object for this instrument
  */
 DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
-                                   const API::DetectorInfo &detInfo)
+                                   const Geometry::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
       m_crystallography_convention(getQSign()), m_detInfo(detInfo),
@@ -148,7 +146,7 @@ DetectorSearcher::searchUsingNearestNeighbours(const V3D &q) {
   // find where this Q vector should intersect with "extended" space
   const auto neighbours =
       m_detectorCacheSearch->findNearest(Eigen::Vector3d(q[0], q[1], q[2]), 5);
-  if (neighbours.size() == 0)
+  if (neighbours.empty())
     return std::make_tuple(false, 0);
 
   const auto result = checkInteceptWithNeighbours(detectorDir, neighbours);

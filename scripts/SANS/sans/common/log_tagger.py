@@ -96,7 +96,10 @@ def has_hash(tag, hashed_value, workspace):
     if isinstance(workspace, WorkspaceGroup):
         return False
 
-    check_if_valid_tag_and_workspace(tag, workspace)
+    try:
+        check_if_valid_tag_and_workspace(tag, workspace)
+    except RuntimeError:
+        return False
 
     if not has_tag(tag, workspace):
         return False

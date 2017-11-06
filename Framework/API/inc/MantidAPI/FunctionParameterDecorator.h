@@ -76,6 +76,8 @@ public:
 
   /// Get parameter of decorated function by name.
   double getParameter(const std::string &name) const override;
+  /// Check if the decorated function has a parameter with this name.
+  bool hasParameter(const std::string &name) const override;
   /// Total number of parameters of decorated function.
   size_t nParams() const override;
   /// Returns the index of parameter of decorated function name.

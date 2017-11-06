@@ -129,15 +129,14 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
   }
 
   qvmod.reserve(nq);
-  auto curr = buf.cbegin();
-  for (int iq = 0; iq < nq; iq++) {
+  for (auto curr = buf.cbegin(); curr != buf.cend(); curr += 3) {
     qvmod.push_back(
         sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
-    std::next(curr, 3);
   }
 
   if (getProperty("SortByQVectors")) {
     std::vector<mypair> qvmodpair;
+    qvmodpair.reserve(nq);
     for (int iq = 0; iq < nq; iq++)
       qvmodpair.emplace_back(qvmod[iq], iq);
     std::sort(qvmodpair.begin(), qvmodpair.end(), compare);
@@ -156,7 +155,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
   for (int iq = 0; iq < nq; iq++) {
     auto &Y = ws->mutableY(iq);
-    curr = std::next(buf.cbegin(), 3 * sorting_indexes[iq]);
+    auto curr = std::next(buf.cbegin(), 3 * sorting_indexes[iq]);
     Y.assign(curr, std::next(curr, 3));
   }
 

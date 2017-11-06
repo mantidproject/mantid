@@ -10,10 +10,6 @@
 
 #include <vector>
 
-using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Geometry;
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -22,7 +18,9 @@ DECLARE_ALGORITHM(EQSANSTofStructure)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using namespace Geometry;
+using Types::Event::TofEvent;
 
 EQSANSTofStructure::EQSANSTofStructure()
     : API::Algorithm(), frame_tof0(0.), flight_path_correction(false),
@@ -118,14 +116,15 @@ void EQSANSTofStructure::execEvent(
   const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this, 0.0, 1.0, numHists);
 
-  // Get the nominal sample-to-detector distance (in mm)
+  // This now points to the correct distance and makes the naming clearer
+  // Get the nominal sample flange-to-detector distance (in mm)
   Mantid::Kernel::Property *prop =
-      inputWS->run().getProperty("sample_detector_distance");
+      inputWS->run().getProperty("sampleflange_detector_distance");
   auto dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
-    throw std::runtime_error("sample_detector_distance log not found.");
+    throw std::runtime_error("sampleflange_detector_distance log not found.");
   }
-  const double SDD = *dp / 1000.0;
+  const double SFDD = *dp / 1000.0;
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const auto l1 = spectrumInfo.l1();
@@ -141,7 +140,7 @@ void EQSANSTofStructure::execEvent(
       continue;
     }
     const auto l2 = spectrumInfo.l2(ispec);
-    double tof_factor = (l1 + l2) / (l1 + SDD);
+    double tof_factor = (l1 + l2) / (l1 + SFDD);
 
     // Get the pointer to the output event list
     std::vector<TofEvent> &events = inputWS->getSpectrum(ispec).getEvents();
@@ -431,6 +430,8 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   else
     det_name = temp[0];
 
+  // Checked 8/11/2017 here detector_z is sfdd which has been updated
+  // in eqsansload.cpp
   double source_z = inputWS->getInstrument()->getSource()->getPos().Z();
   double detector_z =
       inputWS->getInstrument()->getComponentByName(det_name)->getPos().Z();
@@ -452,6 +453,7 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
     g_log.information() << i << "    " << chopper_actual_phase[i] << "  "
                         << chopper_wl_1[i] << "  " << chopper_wl_2[i] << '\n';
 
+  // Checked 8/10/2017
   double low_wl_discard = 3.9560346 * low_tof_cut / source_to_detector;
   double high_wl_discard = 3.9560346 * high_tof_cut / source_to_detector;
 

@@ -1,10 +1,14 @@
 #include "MantidKernel/DateTimeValidator.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/System.h"
+
 #include <boost/make_shared.hpp>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
 
+using namespace DateAndTimeHelpers;
 /**
  * @return A clone of the current state of the validator
  */
@@ -29,15 +33,14 @@ void DateTimeValidator::allowEmpty(const bool &allow) {
  */
 std::string DateTimeValidator::checkValidity(const std::string &value) const {
   // simply pass off the work DateAndTime constructor
-  // the DateAndTime::stringIsISO8601 does not seem strict enough, it accepts
-  // empty strings & strings of letters!
+  // the DateAndTimeHelpers::stringIsISO8601 does not seem strict enough, it
+  // accepts empty strings & strings of letters!
   if (m_allowedEmpty && value.empty()) {
     return "";
   } else {
     std::string error;
     try {
-      auto displayLogs = false;
-      DateAndTime timestamp(value, displayLogs);
+      Types::Core::DateAndTime timestamp(value);
       UNUSED_ARG(timestamp);
     } catch (std::invalid_argument &exc) {
       error = exc.what();
@@ -45,5 +48,5 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
     return error;
   }
 }
-}
-}
+} // namespace Kernel
+} // namespace Mantid

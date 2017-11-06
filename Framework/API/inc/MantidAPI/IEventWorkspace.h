@@ -37,7 +37,9 @@ namespace API {
 */
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
-  IEventWorkspace() : MatrixWorkspace() {}
+  IEventWorkspace(
+      const Parallel::StorageMode storageMode = Parallel::StorageMode::Cloned)
+      : MatrixWorkspace(storageMode) {}
   IEventWorkspace &operator=(const IEventWorkspace &) = delete;
   /// Returns a clone of the workspace
   IEventWorkspace_uptr clone() const { return IEventWorkspace_uptr(doClone()); }
@@ -54,11 +56,11 @@ public:
   virtual std::size_t getNumberEvents() const = 0;
   virtual double getTofMin() const = 0;
   virtual double getTofMax() const = 0;
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
-  virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMax() const = 0;
+  virtual Mantid::Types::Core::DateAndTime getPulseTimeMin() const = 0;
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMax(double tofOffset = 0) const = 0;
-  virtual Mantid::Kernel::DateAndTime
+  virtual Mantid::Types::Core::DateAndTime
   getTimeAtSampleMin(double tofOffset = 0) const = 0;
   virtual EventType getEventType() const = 0;
   void generateHistogram(const std::size_t index, const MantidVec &X,

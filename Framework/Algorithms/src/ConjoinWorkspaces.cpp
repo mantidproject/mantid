@@ -1,8 +1,10 @@
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CommonBinsValidator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,17 +20,21 @@ DECLARE_ALGORITHM(ConjoinWorkspaces)
 //----------------------------------------------------------------------------------------------
 /** Initialize the properties */
 void ConjoinWorkspaces::init() {
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace1", "", Direction::InOut,
-                      boost::make_shared<CommonBinsValidator>()),
-                  "The name of the first input workspace");
-  declareProperty(make_unique<WorkspaceProperty<>>(
-                      "InputWorkspace2", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
-                  "The name of the second input workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace1", "", Direction::InOut),
+      "The name of the first input workspace");
+  declareProperty(
+      make_unique<WorkspaceProperty<>>("InputWorkspace2", "", Direction::Input),
+      "The name of the second input workspace");
   declareProperty(make_unique<PropertyWithValue<bool>>("CheckOverlapping", true,
                                                        Direction::Input),
                   "Verify that the supplied data do not overlap");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisLabel", "",
+                                                              Direction::Input),
+                  "The label to set the Y axis to");
+  declareProperty(make_unique<PropertyWithValue<std::string>>("YAxisUnit", "",
+                                                              Direction::Input),
+                  "The unit to set the Y axis to");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -55,41 +61,20 @@ void ConjoinWorkspaces::exec() {
   }
 
   if (event_ws1 && event_ws2) {
-    // We do not need to check that binning is compatible, just that there is no
-    // overlap
-    // make sure we should bother checking
-    if (this->getProperty("CheckOverlapping")) {
-      this->checkForOverlap(*event_ws1, *event_ws2, false);
-      m_overlapChecked = true;
-    }
-
-    // Both are event workspaces. Use the special method
-    MatrixWorkspace_sptr output = this->execEvent();
-    // Copy the history from the original workspace
-    output->history().addHistory(ws1->getHistory());
-    // Delete the second input workspace from the ADS
-    AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
+    this->validateInputs(*event_ws1, *event_ws2, false);
+    auto output = conjoinEvents(*event_ws1, *event_ws2);
+    setYUnitAndLabel(*output);
     // Set the result workspace to the first input
     setProperty("InputWorkspace1", output);
-    return;
+  } else {
+    auto output = conjoinHistograms(*ws1, *ws2);
+    setYUnitAndLabel(*output);
+    // Set the result workspace to the first input
+    setProperty("InputWorkspace1", output);
   }
-
-  // Check that the input workspaces meet the requirements for this algorithm
-  this->validateInputs(*ws1, *ws2);
-
-  if (this->getProperty("CheckOverlapping")) {
-    this->checkForOverlap(*ws1, *ws2, true);
-    m_overlapChecked = true;
-  }
-
-  MatrixWorkspace_sptr output = execWS2D(*ws1, *ws2);
-  // Copy the history from the original workspace
-  output->history().addHistory(ws1->getHistory());
 
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
-  // Set the result workspace to the first input
-  setProperty("InputWorkspace1", output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -146,6 +131,57 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
   }
 }
 
+/**
+ * Conjoin two event workspaces together, including the history
+ *
+ * @param ws1:: The first workspace
+ * @param ws2:: The second workspace
+ * @return :: A new workspace containing the conjoined workspaces
+*/
+API::MatrixWorkspace_sptr
+ConjoinWorkspaces::conjoinEvents(const DataObjects::EventWorkspace &ws1,
+                                 const DataObjects::EventWorkspace &ws2) {
+  this->validateInputs(ws1, ws2, false);
+
+  // Check there is no overlap
+  if (this->getProperty("CheckOverlapping")) {
+    this->checkForOverlap(ws1, ws2, false);
+    m_overlapChecked = true;
+  }
+
+  // Both are event workspaces. Use the special method
+  auto output = this->execEvent();
+
+  // Copy the history from the original workspace
+  output->history().addHistory(ws1.getHistory());
+  return output;
+}
+
+/**
+* Conjoin two histogram workspaces together, including the history
+*
+* @param ws1:: The first workspace
+* @param ws2:: The second workspace
+* @return :: A new workspace containing the conjoined workspaces
+*/
+API::MatrixWorkspace_sptr
+ConjoinWorkspaces::conjoinHistograms(const API::MatrixWorkspace &ws1,
+                                     const API::MatrixWorkspace &ws2) {
+  // Check that the input workspaces meet the requirements for this algorithm
+  this->validateInputs(ws1, ws2, false);
+
+  if (this->getProperty("CheckOverlapping")) {
+    this->checkForOverlap(ws1, ws2, true);
+    m_overlapChecked = true;
+  }
+
+  auto output = execWS2D(ws1, ws2);
+
+  // Copy the history from the original workspace
+  output->history().addHistory(ws1.getHistory());
+  return output;
+}
+
 /***
  * This will ensure the spectrum numbers do not overlap by starting the second
  *on at the first + 1
@@ -157,40 +193,36 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1,
 void ConjoinWorkspaces::fixSpectrumNumbers(const MatrixWorkspace &ws1,
                                            const MatrixWorkspace &ws2,
                                            MatrixWorkspace &output) {
-  bool needsFix(false);
 
   if (this->getProperty("CheckOverlapping")) {
     // If CheckOverlapping is required, then either skip fixing spectrum number
     // or get stopped by an exception
     if (!m_overlapChecked)
+      // This throws if the spectrum numbers overlap
       checkForOverlap(ws1, ws2, true);
-    needsFix = false;
-  } else {
-    // It will be determined later whether spectrum number needs to be fixed.
-    needsFix = true;
-  }
-  if (!needsFix)
+    // At this point, we don't have to do anything
     return;
+  }
 
-  // is everything possibly ok?
-  specnum_t min;
-  specnum_t max;
+  // Because we were told not to check overlapping, fix up any errors we might
+  // run into
+  specnum_t min = -1;
+  specnum_t max = -1;
   getMinMax(output, min, max);
   if (max - min >= static_cast<specnum_t>(
                        output.getNumberHistograms())) // nothing to do then
     return;
 
   // information for remapping the spectra numbers
-  specnum_t ws1min;
-  specnum_t ws1max;
+  specnum_t ws1min = -1;
+  specnum_t ws1max = -1;
   getMinMax(ws1, ws1min, ws1max);
 
   // change the axis by adding the maximum existing spectrum number to the
   // current value
   for (size_t i = ws1.getNumberHistograms(); i < output.getNumberHistograms();
        i++) {
-    specnum_t origid;
-    origid = output.getSpectrum(i).getSpectrumNo();
+    specnum_t origid = output.getSpectrum(i).getSpectrumNo();
     output.getSpectrum(i).setSpectrumNo(origid + ws1max);
   }
 }
@@ -207,6 +239,18 @@ bool ConjoinWorkspaces::processGroups() {
     AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
 
   return retval;
+}
+
+void ConjoinWorkspaces::setYUnitAndLabel(API::MatrixWorkspace &ws) const {
+  const std::string yLabel = getPropertyValue("YAXisLabel");
+  const std::string yUnit = getPropertyValue("YAxisUnit");
+
+  // Unit must be moved before label, as changing the unit resets the label
+  if (!yUnit.empty())
+    ws.setYUnit(yUnit);
+
+  if (!yLabel.empty())
+    ws.setYUnitLabel(yLabel);
 }
 
 } // namespace Algorithm

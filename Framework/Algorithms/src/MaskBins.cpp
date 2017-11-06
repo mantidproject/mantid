@@ -21,7 +21,6 @@ DECLARE_ALGORITHM(MaskBins)
 using namespace Kernel;
 using namespace API;
 using namespace Mantid;
-using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::EventWorkspace_const_sptr;

@@ -8,6 +8,7 @@
 #include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/make_shared.hpp>
+#include <map>
 #include <unordered_set>
 
 namespace Mantid {

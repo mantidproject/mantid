@@ -4,11 +4,11 @@
 
 #include "ScaleDetails.h"
 #include "ApplicationWindow.h"
-#include "MantidQtMantidWidgets/DoubleSpinBox.h"
+#include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-#include "MantidQtAPI/qwt_compat.h"
+#include "MantidQtWidgets/Common/qwt_compat.h"
 #include "Plot.h"
-#include "MantidQtAPI/ScaleEngine.h"
+#include "MantidQtWidgets/Common/ScaleEngine.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -378,7 +378,7 @@ void ScaleDetails::initWidgets() {
       m_grpAxesBreaks->setEnabled(false);
     }
 
-    QwtValueList lst = scDiv->ticks(QwtScaleDiv::MajorTick);
+    const QwtValueList &lst = scDiv->ticks(QwtScaleDiv::MajorTick);
     m_spnMajorValue->setValue(lst.count());
 
     checkstep();

@@ -16,6 +16,7 @@
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 
 #include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
@@ -320,9 +321,9 @@ public:
       e[i] = 1.0;
     }
     const double sqrh = 0.70710678; // cos( 45 degrees )
-    y = {0.01 * sqrh,  0.00,  -1.2 * sqrh,  -5.6, -18.2 * sqrh,  0.0,
-         80.08 * sqrh, 114.4, 128.7 * sqrh, 0.0,  -80.08 * sqrh, -43.68,
-         -18.2 * sqrh, 0.0,   1.2 * sqrh,   0.16, 0.01 * sqrh,   0.00};
+    y = {1.e-4 * sqrh, 0.00, -1.2e-2 * sqrh, -5.6e-2, -18.2e-2 * sqrh, 0.0,
+         0.8008 * sqrh, 1.144, 1.287 * sqrh, 0.0, -0.8008 * sqrh, -0.4368,
+         -0.182 * sqrh, 0.0, 1.2e-2 * sqrh, 0.16e-2, 1.e-4 * sqrh, 0.00};
 
     Fit fit;
     fit.initialize();
@@ -336,7 +337,7 @@ public:
 
     // Test the fitting parameters
     IFunction_sptr func = fit.getProperty("Function");
-    TS_ASSERT_DELTA(func->getParameter("A"), 129.300, 0.001);
+    TS_ASSERT_DELTA(func->getParameter("A"), 1.29300, 0.00001);
     TS_ASSERT_DELTA(func->getParameter("Sigma"), 0.348, 0.001);
     TS_ASSERT_DELTA(func->getParameter("Frequency"), 1 / 8.0,
                     0.01);                                    // Period of 8
@@ -2128,6 +2129,34 @@ public:
       TS_ASSERT_EQUALS(status, "success");
     }
 
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_exclude_ranges_with_unweighted_least_squares() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(
+        DataObjects::create<Workspace2D>(
+            1, HistogramData::Histogram(points, counts)).release());
+    Fit fit;
+    fit.initialize();
+    fit.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Function", "name=FlatBackground,A0=0.1"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(fit.setPropertyValue("Exclude", "-0.5, 0.5"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("Minimizer", "Levenberg-MarquardtMD"))
+    TS_ASSERT_THROWS_NOTHING(
+        fit.setProperty("CostFunction", "Unweighted least squares"))
+    TS_ASSERT_THROWS_NOTHING(fit.setProperty("Output", "fit_test_output"))
+    TS_ASSERT_THROWS_NOTHING(fit.execute())
+    const std::string status = fit.getProperty("OutputStatus");
+    TS_ASSERT_EQUALS(status, "success")
+    API::IFunction_sptr function = fit.getProperty("Function");
+    TS_ASSERT_DELTA(function->getParameter(0), 0.0, 1e-12)
     AnalysisDataService::Instance().clear();
   }
 

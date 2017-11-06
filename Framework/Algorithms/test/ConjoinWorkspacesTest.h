@@ -4,11 +4,15 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <string>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -27,6 +31,13 @@ public:
   ConjoinWorkspacesTest()
       : ws1Name("ConjoinWorkspacesTest_grp1"),
         ws2Name("ConjoinWorkspacesTest_grp2") {}
+
+  MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
+    auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsName));
+    TS_ASSERT(out);
+    return out;
+  }
 
   void setupWS() {
     IAlgorithm *loader;
@@ -98,9 +109,7 @@ public:
     TS_ASSERT(conj.isExecuted());
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING(
-        output = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve("top")));
+    TS_ASSERT_THROWS_NOTHING(output = getWSFromADS("top"););
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 25);
     // Check a few values
     TS_ASSERT_EQUALS(output->readX(0)[0], in1->readX(0)[0]);
@@ -148,19 +157,35 @@ public:
     TS_ASSERT(!conj.isExecuted());
   }
 
+  void testMismatchedEventWorkspace() {
+    setupMismatchedWorkspace("testMismatchedEventWorkspace1", 0, 2,
+                             "100,200,700");
+    setupMismatchedWorkspace("testMismatchedEventWorkspace2", 3, 5,
+                             "100,200,1000");
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    conj.setRethrows(true);
+
+    conj.setProperty("InputWorkspace1", "testMismatchedEventWorkspace1");
+    conj.setProperty("InputWorkspace2", "testMismatchedEventWorkspace2");
+
+    TS_ASSERT_THROWS(conj.execute(), std::invalid_argument);
+    TS_ASSERT(!conj.isExecuted());
+  }
+
   void testDoCheckForOverlap() {
     MatrixWorkspace_sptr ws1, ws2;
     int numPixels = 10;
     int numBins = 20;
     ws1 = WorkspaceCreationHelper::createEventWorkspace(numPixels, numBins);
-    const std::string ws1_name = "ConjoinWorkspaces_testDoCheckForOverlap";
-    AnalysisDataService::Instance().add(ws1_name, ws1);
+
+    AnalysisDataService::Instance().add(ws1Name, ws1);
     ws2 = WorkspaceCreationHelper::createEventWorkspace(5, numBins);
 
     ConjoinWorkspaces conj;
     conj.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-        conj.setPropertyValue("InputWorkspace1", ws1_name));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", true));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
@@ -182,9 +207,7 @@ public:
     TS_ASSERT(conj.isExecuted());
 
     // Test output
-    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(ws1_name));
-    TS_ASSERT(output);
+    MatrixWorkspace_sptr output = getWSFromADS(ws1Name);
     // Check the first spectrum has the correct ID
     TS_ASSERT_EQUALS(output->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS(output->getSpectrum(0).getSpectrumNo(),
@@ -193,12 +216,12 @@ public:
     TS_ASSERT_EQUALS(output->getSpectrum(10).getSpectrumNo(), start);
     TS_ASSERT(!output->getSpectrum(11).getDetectorIDs().empty());
 
-    AnalysisDataService::Instance().remove(ws1_name);
+    AnalysisDataService::Instance().remove(ws1Name);
   }
 
   void performTestNoOverlap(bool event) {
     MatrixWorkspace_sptr ws1, ws2, out;
-    int numBins = 20;
+    const int numBins = 20;
 
     if (event) {
       ws1 = WorkspaceCreationHelper::createEventWorkspace2(
@@ -219,28 +242,177 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.execute();)
     TS_ASSERT(conj.isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            AnalysisDataService::Instance().retrieve(ws1Name));)
-    TS_ASSERT(out);
+    TS_ASSERT_THROWS_NOTHING(out = getWSFromADS(ws1Name););
     if (!out)
       return;
 
     TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS(out->blocksize(), numBins);
 
-    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++)
-      for (size_t x = 0; x < out->blocksize(); x++)
-        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
+    }
   }
 
   void test_DONTCheckForOverlap_Events() { performTestNoOverlap(true); }
-
   void test_DONTCheckForOverlap_2D() { performTestNoOverlap(false); }
 
+  void performNonConstantBins(bool event) {
+    MatrixWorkspace_sptr ws1, ws2, out;
+    const int numBins = 20;
+
+    if (event) {
+      ws1 = WorkspaceCreationHelper::createEventWorkspace2(
+          10, numBins); // 2 events per bin
+      ws2 = WorkspaceCreationHelper::createEventWorkspace2(5, numBins + 1);
+    } else {
+      ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+      ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins + 1);
+    }
+    AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
+    AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", ws2Name));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", false));
+    TS_ASSERT_THROWS_NOTHING(conj.execute();)
+    TS_ASSERT(conj.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(out = getWSFromADS(ws1Name););
+    if (!out)
+      return;
+
+    TS_ASSERT_EQUALS(out->getNumberHistograms(), 15);
+
+    for (size_t wi = 0; wi < out->getNumberHistograms(); wi++) {
+      const auto &y = out->y(wi);
+      if (wi < 10) {
+        TS_ASSERT_EQUALS(y.size(), numBins);
+      } else {
+        TS_ASSERT_EQUALS(y.size(), numBins + 1);
+      }
+      for (const auto value : y)
+        TS_ASSERT_DELTA(value, 2.0, 1e-5);
+    }
+  }
+
+  void test_NonConstantBins_Events() { performNonConstantBins(true); }
+  void test_NonConstantBins_2D() { performNonConstantBins(false); }
+
+  void setupAlgForSetYUnitAndLabel(ConjoinWorkspaces &conj) {
+    MatrixWorkspace_sptr ws1, ws2, out;
+    int numBins = 20;
+
+    ws1 = WorkspaceCreationHelper::create2DWorkspace(10, numBins);
+    ws2 = WorkspaceCreationHelper::create2DWorkspace(5, numBins);
+
+    AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
+    AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
+
+    conj.initialize();
+    conj.setRethrows(true);
+    conj.setPropertyValue("InputWorkspace1", ws1Name);
+    conj.setPropertyValue("InputWorkspace2", ws2Name);
+    conj.setProperty("CheckOverlapping", false);
+  }
+
+  void test_setYUnitAndLabel() {
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
+    const std::string label = "Modified y label";
+    const std::string unit = "Modified y unit";
+
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
+
+    TS_ASSERT_EQUALS(label, out->YUnitLabel());
+    TS_ASSERT_EQUALS(unit, out->YUnit());
+  }
+
+  void test_setYUnit() {
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
+
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
+
+    const std::string label = "Should be unmodified";
+    out->setYUnitLabel(label);
+
+    const std::string unit = "Modified y unit";
+
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+
+    auto result = getWSFromADS(ws1Name);
+
+    TSM_ASSERT_EQUALS("YUnitLabel was not reset after YUnit changed",
+                      result->YUnitLabel(), label);
+    TS_ASSERT_EQUALS(unit, result->YUnit());
+  }
+
+  void test_setYLabel() {
+    ConjoinWorkspaces conj;
+    setupAlgForSetYUnitAndLabel(conj);
+
+    auto out = getWSFromADS(ws1Name);
+    if (!out)
+      return;
+
+    const std::string unit = "Should be unmodified";
+    out->setYUnit(unit);
+
+    const std::string label = "Modified y label";
+
+    TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+
+    auto result = getWSFromADS(ws1Name);
+
+    TS_ASSERT_EQUALS(unit, result->YUnit());
+    TS_ASSERT_EQUALS(label, result->YUnitLabel());
+  }
+
 private:
-  const std::string ws1Name;
-  const std::string ws2Name;
+  const std::string ws1Name{"ws1name"};
+  const std::string ws2Name{"ws2name"};
+
+  void setupMismatchedWorkspace(const std::string &name, int startIndex,
+                                int endIndex,
+                                const std::string &rebinParams) const {
+    MatrixWorkspace_sptr ews =
+        WorkspaceCreationHelper::createEventWorkspace(10, 10);
+    AnalysisDataService::Instance().addOrReplace(name, ews);
+
+    // Crop ews to have first 3 spectra, ews2 to have second 3
+    CropWorkspace crop;
+    crop.setChild(true);
+    crop.initialize();
+    crop.setProperty("InputWorkspace", ews);
+    crop.setProperty("StartWorkspaceIndex", startIndex);
+    crop.setProperty("EndWorkspaceIndex", endIndex);
+    crop.setProperty("OutputWorkspace", name);
+    crop.execute();
+
+    Rebin rebin;
+    rebin.setChild(true);
+    rebin.initialize();
+    rebin.setProperty("InputWorkspace", name);
+    rebin.setProperty("Params", rebinParams);
+    rebin.setProperty("OutputWorkspace", name);
+    rebin.execute();
+  }
 };
 
 #endif /*CONJOINWORKSPACESTEST_H_*/

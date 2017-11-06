@@ -2,7 +2,7 @@
 #include "ConfigDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"
-#include <MantidQtAPI/pixmaps.h>
+#include <MantidQtWidgets/Common/pixmaps.h>
 
 #include <QComboBox>
 #include <QFileDialog>

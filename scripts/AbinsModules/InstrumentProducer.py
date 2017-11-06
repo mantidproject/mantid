@@ -1,5 +1,5 @@
 from __future__ import (absolute_import, division, print_function)
-from AbinsModules.Instruments import ToscaInstrument, TwoDMap
+from AbinsModules.Instruments import ToscaInstrument
 from AbinsModules import AbinsConstants
 
 
@@ -14,5 +14,3 @@ class InstrumentProducer(object):
             raise ValueError("Unknown instrument: %s" % name)
         elif name == "TOSCA":
             return ToscaInstrument("TOSCA")
-        elif name == "TwoDMap":
-            return TwoDMap("TwoDMap")

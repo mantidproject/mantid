@@ -2,7 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.gem_routines import gem_advanced_config, gem_algs, gem_param_mapping
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import absorb_corrections, common, instrument_settings
 
 
 class Gem(AbstractInst):
@@ -16,17 +16,31 @@ class Gem(AbstractInst):
                                   output_dir=self._inst_settings.output_dir, inst_prefix="GEM")
 
         self._cached_run_details = {}
+        self._sample_details = None
+
+    # Public API
 
     def focus(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
-        return self._focus(run_number_string=self._inst_settings.run_number,
-                           do_van_normalisation=self._inst_settings.do_van_norm)
+        return self._focus(
+            run_number_string=self._inst_settings.run_number, do_van_normalisation=self._inst_settings.do_van_norm,
+            do_absorb_corrections=self._inst_settings.do_absorb_corrections)
 
     def create_vanadium(self, **kwargs):
         self._inst_settings.update_attributes(kwargs=kwargs)
 
         return self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
                                      do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+
+    def set_sample_details(self, **kwargs):
+        kwarg_name = "sample"
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key=kwarg_name,
+            exception_msg="The argument containing sample details was not found. Please"
+                          " set the following argument: " + kwarg_name)
+        self._sample_details = sample_details_obj
+
+    # Private methods
 
     def _get_run_details(self, run_number_string):
         run_number_string_key = self._generate_run_details_fingerprint(run_number_string,
@@ -38,9 +52,6 @@ class Gem(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
         return self._cached_run_details[run_number_string_key]
 
-    def _generate_auto_vanadium_calibration(self, run_details):
-        raise NotImplementedError()
-
     def _generate_output_file_name(self, run_number_string):
         return self._generate_input_file_name(run_number_string)
 
@@ -48,9 +59,15 @@ class Gem(AbstractInst):
     def _generate_input_file_name(run_number):
         return _gem_generate_inst_name(run_number=run_number)
 
-    def _apply_absorb_corrections(self, run_details, van_ws):
-        return gem_algs.calculate_absorb_corrections(ws_to_correct=van_ws,
-                                                     multiple_scattering=self._inst_settings.multiple_scattering)
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        if self._is_vanadium:
+            return gem_algs.calculate_van_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                is_vanadium=self._is_vanadium)
+        else:
+            return absorb_corrections.run_cylinder_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=self._inst_settings.multiple_scattering,
+                sample_details_obj=self._sample_details)
 
     def _crop_banks_to_user_tof(self, focused_banks):
         return common.crop_banks_using_crop_list(focused_banks, self._inst_settings.focused_cropping_values)

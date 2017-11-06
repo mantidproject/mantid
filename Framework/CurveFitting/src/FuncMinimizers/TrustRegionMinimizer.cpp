@@ -6,7 +6,7 @@
 #include "MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h"
 #include "MantidCurveFitting/RalNlls/TrustRegion.h"
 
-#include <math.h>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -287,6 +287,7 @@ bool TrustRegionMinimizer::iterate(size_t) {
       // finally, check d makes progress
       if (norm2(w.d) < std::numeric_limits<double>::epsilon() * norm2(w.Xnew)) {
         inform.status = NLLS_ERROR::X_NO_PROGRESS;
+        m_errorString = "Failed to make progress.";
         return false;
       }
     }

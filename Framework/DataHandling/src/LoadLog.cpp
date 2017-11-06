@@ -1,27 +1,30 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/LoadLog.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/LogParser.h"
-#include "MantidKernel/make_unique.h"
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/make_unique.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
-#include <boost/regex.hpp>
-#include <boost/algorithm/string.hpp>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DirectoryIterator.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DateTimeFormat.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
+
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace DataHandling {
@@ -29,12 +32,12 @@ namespace DataHandling {
 DECLARE_ALGORITHM(LoadLog)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
+using API::FileProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
-using API::FileProperty;
-using DataObjects::Workspace2D;
+using API::WorkspaceProperty;
 using DataObjects::Workspace2D_sptr;
+using Types::Core::DateAndTime;
 
 /// Empty default constructor
 LoadLog::LoadLog() {}
@@ -209,7 +212,7 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
   }
 
   while (Mantid::Kernel::Strings::extractToEOL(logFileStream, str)) {
-    if (!isDateTimeString(str)) {
+    if (!isDateTimeString(str) && !str.empty()) {
       throw std::invalid_argument("File" + logFileName +
                                   " is not a standard ISIS log file. Expected "
                                   "to be a file starting with DateTime String "
@@ -217,8 +220,8 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     }
 
     if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) ||
-        (str[0] ==
-         '#')) { // if the line doesn't start with a time read the next line
+        (str.empty() || str[0] == '#')) {
+      // if the line doesn't start with a time read the next line
       continue;
     }
 
@@ -229,6 +232,12 @@ void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
     std::string blockcolumn;
     line >> blockcolumn;
     l_kind = classify(blockcolumn);
+
+    if (LoadLog::empty == l_kind) {
+      g_log.warning() << "Failed to parse line in log file: " << timecolumn
+                      << "\t" << blockcolumn;
+      continue;
+    }
 
     if (LoadLog::string != l_kind) {
       throw std::invalid_argument(
@@ -404,9 +413,23 @@ LoadLog::kind LoadLog::classify(const std::string &s) const {
 
   if (letters.find_first_of(s) != string::npos) {
     return LoadLog::string;
-  } else {
-    return LoadLog::number;
   }
+
+  const auto isNumber = [](const std::string &str) {
+    // try and get stold to parse a number out of the string
+    // if this throws then we don't have a number
+    try {
+      // cppcheck-suppress ignoredReturnValue
+      std::stold(str);
+      return true;
+    } catch (const std::invalid_argument &) {
+      return false;
+    } catch (const std::out_of_range &) {
+      return false;
+    }
+  };
+
+  return (isNumber(s)) ? LoadLog::number : LoadLog::empty;
 }
 
 /**
@@ -445,13 +468,12 @@ bool LoadLog::isAscii(const std::string &filename) {
 }
 
 /**
- * Check if first 19 characters of a string is date-time string according to
- * yyyy-mm-ddThh:mm:ss
+ * Check if the string conforms to the ISO8601 standard.
  * @param str :: The string to test
  * @returns true if the strings format matched the expected date format
  */
 bool LoadLog::isDateTimeString(const std::string &str) const {
-  return DateAndTime::stringIsISO8601(str.substr(0, 19));
+  return Types::Core::DateAndTimeHelpers::stringIsISO8601(str.substr(0, 19));
 }
 
 /**

@@ -14,8 +14,8 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
 
-#include <nexus/NeXusException.hpp>
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -25,7 +25,6 @@ DECLARE_ALGORITHM(SaveNXTomo)
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
-using Geometry::RectangularDetector;
 
 const std::string SaveNXTomo::NXTOMO_VER = "2.0";
 
@@ -163,7 +162,7 @@ void SaveNXTomo::processAll() {
   ::NeXus::File nxFile = setupFile();
 
   // Create a progress reporting object
-  Progress progress(this, 0, 1, m_workspaces.size());
+  Progress progress(this, 0.0, 1.0, m_workspaces.size());
 
   for (auto &workspace : m_workspaces) {
     writeSingleWorkspace(workspace, nxFile);

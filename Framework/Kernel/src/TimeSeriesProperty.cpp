@@ -9,6 +9,7 @@
 #include <boost/regex.hpp>
 
 namespace Mantid {
+using namespace Types::Core;
 namespace Kernel {
 namespace {
 /// static Logger definition
@@ -86,7 +87,7 @@ TimeSeriesProperty<TYPE>::getDerivative() const {
     if (t1 != t0) {
       double deriv = 1.e+9 * (double(v1 - v0) / double(t1 - t0));
       int64_t tm = static_cast<int64_t>((t1 + t0) / 2);
-      timeSeriesDeriv->addValue(Kernel::DateAndTime(tm), deriv);
+      timeSeriesDeriv->addValue(Types::Core::DateAndTime(tm), deriv);
     }
     t0 = t1;
     v0 = v1;
@@ -257,8 +258,9 @@ void TimeSeriesProperty<TYPE>::setName(const std::string name) {
  *are kept.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
-                                            const Kernel::DateAndTime &stop) {
+void TimeSeriesProperty<TYPE>::filterByTime(
+    const Types::Core::DateAndTime &start,
+    const Types::Core::DateAndTime &stop) {
   // 0. Sort
   sortIfNecessary();
 
@@ -333,8 +335,8 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
 
   // 4. Create new
   for (const auto &splitter : splittervec) {
-    Kernel::DateAndTime t_start = splitter.start();
-    Kernel::DateAndTime t_stop = splitter.stop();
+    Types::Core::DateAndTime t_start = splitter.start();
+    Types::Core::DateAndTime t_stop = splitter.stop();
 
     int tstartindex = findIndex(t_start);
     if (tstartindex < 0) {
@@ -530,9 +532,14 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     std::vector<DateAndTime> &splitter_time_vec, std::vector<int> &target_vec,
     std::vector<TimeSeriesProperty *> outputs) {
   // check inputs
-  if (splitter_time_vec.size() != target_vec.size() + 1)
-    throw std::runtime_error("Input time vector's size does not match taget "
-                             "workspace index vector's size.");
+  if (splitter_time_vec.size() != target_vec.size() + 1) {
+    std::stringstream errss;
+    errss << "Try to split TSP " << this->m_name
+          << ": Input time vector's size " << splitter_time_vec.size()
+          << " does not match (one more larger than) taget "
+             "workspace index vector's size " << target_vec.size() << "\n";
+    throw std::runtime_error(errss.str());
+  }
   // return if the output vector TimeSeriesProperties is not defined
   if (outputs.empty())
     return;
@@ -541,7 +548,7 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
   sortIfNecessary();
 
   // work on m_values, m_size, and m_time
-  std::vector<Kernel::DateAndTime> tsp_time_vec = this->timesAsVector();
+  std::vector<Types::Core::DateAndTime> tsp_time_vec = this->timesAsVector();
 
   // go over both filter time vector and time series property time vector
   size_t index_splitter = 0;
@@ -596,61 +603,56 @@ void TimeSeriesProperty<TYPE>::splitByTimeVector(
     }
   }
 
-  g_log.debug() << "TSP entry: " << index_tsp_time
-                << ", Splitter index = " << index_splitter << "\n";
-
   // now it is the time to put TSP's entries to corresponding
   continue_search = !no_entry_in_range;
   while (continue_search) {
-    // get the first entry index
+    // get next target
+    int target = target_vec[index_splitter];
+
+    // get the first entry index (overlap)
     if (index_tsp_time > 0)
       --index_tsp_time;
 
-    int target = target_vec[index_splitter];
-
-    g_log.debug() << "Target = " << target
-                  << " with splitter index = " << index_splitter << "\n"
-                  << "\t"
-                  << "Time index = " << index_tsp_time << "\n\n";
-
+    // add the continous entries to same target time series property
     bool continue_add = true;
+    const size_t tspTimeVecSize = tsp_time_vec.size();
     while (continue_add) {
+      if (index_tsp_time == tspTimeVecSize) {
+        // last entry. quit all loops
+        continue_add = false;
+        continue_search = false;
+        break;
+      }
+
       // add current entry
-      g_log.debug() << "Add entry " << index_tsp_time << " to target " << target
-                    << "\n";
       if (outputs[target]->size() == 0 ||
-          outputs[target]->lastTime() < tsp_time) {
+          outputs[target]->lastTime() < tsp_time_vec[index_tsp_time]) {
         // avoid to add duplicate entry
         outputs[target]->addValue(m_values[index_tsp_time].time(),
                                   m_values[index_tsp_time].value());
       }
 
+      const size_t nextTspIndex = index_tsp_time + 1;
+      if (nextTspIndex < tspTimeVecSize) {
+        if (tsp_time_vec[nextTspIndex] > split_stop_time) {
+          // next entry is out of this splitter: add the next one and quit
+          if (outputs[target]->lastTime() < m_values[nextTspIndex].time()) {
+            // avoid the duplicate cases occurred in fast frequency issue
+            outputs[target]->addValue(m_values[nextTspIndex].time(),
+                                      m_values[nextTspIndex].value());
+          }
+          // FIXME - in future, need to find out WHETHER there is way to
+          // skip the
+          // rest without going through the whole sequence
+          continue_add = false;
+          // reset time entry as the next splitter will add
+          // --index_tsp_time;
+        }
+      }
+
       // advance to next entry
       ++index_tsp_time;
 
-      g_log.debug() << "\tEntry time " << tsp_time_vec[index_tsp_time]
-                    << ", stop time " << split_stop_time << "\n";
-
-      if (index_tsp_time == tsp_time_vec.size()) {
-        // last entry. quit all loops
-        continue_add = false;
-        continue_search = false;
-      } else if (tsp_time_vec[index_tsp_time] > split_stop_time) {
-        // next entry is out of this splitter: add the next one and quit
-        if (outputs[target]->lastTime() < m_values[index_tsp_time].time()) {
-          // avoid the duplicate cases occured in fast frequency issue
-          outputs[target]->addValue(m_values[index_tsp_time].time(),
-                                    m_values[index_tsp_time].value());
-        }
-        // FIXME - in future, need to find out WHETHER there is way to skip the
-        // rest without going through the whole sequence
-        continue_add = false;
-        // reset time entry as the next splitter will add
-        // --index_tsp_time;
-      } else {
-        // advance to next time
-        tsp_time = tsp_time_vec[index_tsp_time];
-      }
     } // END-WHILE continue add
 
     // make splitters to advance to next
@@ -1027,7 +1029,7 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
   std::vector<double> out;
   out.reserve(m_values.size());
 
-  Kernel::DateAndTime start = m_values[0].time();
+  Types::Core::DateAndTime start = m_values[0].time();
   for (size_t i = 0; i < m_values.size(); i++) {
     out.push_back(DateAndTime::secondsFromDuration(m_values[i].time() - start));
   }
@@ -1041,7 +1043,7 @@ std::vector<double> TimeSeriesProperty<TYPE>::timesAsVectorSeconds() const {
  *  @param value  The associated value
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
+void TimeSeriesProperty<TYPE>::addValue(const Types::Core::DateAndTime &time,
                                         const TYPE value) {
   TimeValueUnit<TYPE> newvalue(time, value);
   // Add the value to the back of the vector
@@ -1077,7 +1079,7 @@ void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time,
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValue(const std::string &time,
                                         const TYPE value) {
-  return addValue(Kernel::DateAndTime(time), value);
+  return addValue(Types::Core::DateAndTime(time), value);
 }
 
 /**
@@ -1089,7 +1091,7 @@ void TimeSeriesProperty<TYPE>::addValue(const std::string &time,
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time,
                                         const TYPE value) {
-  Kernel::DateAndTime dt;
+  Types::Core::DateAndTime dt;
   dt.set_from_time_t(time);
   return addValue(dt, value);
 }
@@ -1101,7 +1103,7 @@ void TimeSeriesProperty<TYPE>::addValue(const std::time_t &time,
  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::addValues(
-    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<Types::Core::DateAndTime> &times,
     const std::vector<TYPE> &values) {
   size_t length = std::min(times.size(), values.size());
   m_size += static_cast<int>(length);
@@ -1120,7 +1122,7 @@ void TimeSeriesProperty<TYPE>::addValues(
 */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::replaceValues(
-    const std::vector<Kernel::DateAndTime> &times,
+    const std::vector<Types::Core::DateAndTime> &times,
     const std::vector<TYPE> &values) {
   clear();
   addValues(times, values);
@@ -1352,9 +1354,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::clearOutdated() {
  *    Vector sizes must match.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time,
-                                      const std::vector<double> &time_sec,
-                                      const std::vector<TYPE> &new_values) {
+void TimeSeriesProperty<TYPE>::create(
+    const Types::Core::DateAndTime &start_time,
+    const std::vector<double> &time_sec, const std::vector<TYPE> &new_values) {
   if (time_sec.size() != new_values.size())
     throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
                                 "for the time and values vectors.");
@@ -1375,8 +1377,9 @@ void TimeSeriesProperty<TYPE>::create(const Kernel::DateAndTime &start_time,
  *                      Vector sizes must match.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
-                                      const std::vector<TYPE> &new_values) {
+void TimeSeriesProperty<TYPE>::create(
+    const std::vector<Types::Core::DateAndTime> &new_times,
+    const std::vector<TYPE> &new_values) {
   if (new_times.size() != new_values.size())
     throw std::invalid_argument("TimeSeriesProperty::create: mismatched size "
                                 "for the time and values vectors.");
@@ -1406,7 +1409,8 @@ void TimeSeriesProperty<TYPE>::create(const std::vector<DateAndTime> &new_times,
  *  @return Value at time \a t
  */
 template <typename TYPE>
-TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
+TYPE TimeSeriesProperty<TYPE>::getSingleValue(
+    const Types::Core::DateAndTime &t) const {
   if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
                             "' is empty");
@@ -1454,7 +1458,7 @@ TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t) const {
  *  @return Value at time \a t
  */
 template <typename TYPE>
-TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime &t,
+TYPE TimeSeriesProperty<TYPE>::getSingleValue(const Types::Core::DateAndTime &t,
                                               int &index) const {
   if (m_values.empty()) {
     const std::string error("getSingleValue(): TimeSeriesProperty '" + name() +
@@ -1558,16 +1562,16 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       // 2. n = size of the allowed region, duplicate the last one
       long ind_t1 = static_cast<long>(m_filterQuickRef.back().first);
       long ind_t2 = ind_t1 - 1;
-      Kernel::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
-      Kernel::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
+      Types::Core::DateAndTime t1 = (m_values.begin() + ind_t1)->time();
+      Types::Core::DateAndTime t2 = (m_values.begin() + ind_t2)->time();
       time_duration d = t1 - t2;
-      Kernel::DateAndTime t3 = t1 + d;
+      Types::Core::DateAndTime t3 = t1 + d;
       Kernel::TimeInterval dt(t1, t3);
       deltaT = dt;
     } else {
       // 3. n < size
-      Kernel::DateAndTime t0;
-      Kernel::DateAndTime tf;
+      Types::Core::DateAndTime t0;
+      Types::Core::DateAndTime tf;
 
       size_t refindex = this->findNthIndexFromQuickRef(n);
       if (refindex + 3 >= m_filterQuickRef.size())
@@ -1578,11 +1582,11 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
         throw std::logic_error("nthInterval:  diff cannot be less than 0.");
 
       // i) start time
-      Kernel::DateAndTime ftime0 =
+      Types::Core::DateAndTime ftime0 =
           m_filter[m_filterQuickRef[refindex].first].first;
       size_t iStartIndex =
           m_filterQuickRef[refindex + 1].first + static_cast<size_t>(diff);
-      Kernel::DateAndTime ltime0 = m_values[iStartIndex].time();
+      Types::Core::DateAndTime ltime0 = m_values[iStartIndex].time();
       if (iStartIndex == 0 && ftime0 < ltime0) {
         // a) Special case that True-filter time starts before log time
         t0 = ltime0;
@@ -1599,13 +1603,13 @@ TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const {
       size_t iStopIndex = iStartIndex + 1;
       if (iStopIndex >= m_values.size()) {
         // a) Last log entry is for the start
-        Kernel::DateAndTime ftimef =
+        Types::Core::DateAndTime ftimef =
             m_filter[m_filterQuickRef[refindex + 3].first].first;
         tf = ftimef;
       } else {
         // b) Using the earlier value of next log entry and next filter entry
-        Kernel::DateAndTime ltimef = m_values[iStopIndex].time();
-        Kernel::DateAndTime ftimef =
+        Types::Core::DateAndTime ltimef = m_values[iStopIndex].time();
+        Types::Core::DateAndTime ftimef =
             m_filter[m_filterQuickRef[refindex + 3].first].first;
         if (ltimef < ftimef)
           tf = ltimef;
@@ -1661,8 +1665,8 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
       value = m_values[ilog].value();
     } else {
       // 2. n < size
-      Kernel::DateAndTime t0;
-      Kernel::DateAndTime tf;
+      Types::Core::DateAndTime t0;
+      Types::Core::DateAndTime tf;
 
       size_t refindex = findNthIndexFromQuickRef(n);
       if (refindex + 3 >= m_filterQuickRef.size()) {
@@ -1684,7 +1688,7 @@ template <typename TYPE> TYPE TimeSeriesProperty<TYPE>::nthValue(int n) const {
  *  @return DateAndTime
  */
 template <typename TYPE>
-Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
+Types::Core::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
   sortIfNecessary();
 
   if (m_values.empty()) {
@@ -1730,7 +1734,7 @@ void TimeSeriesProperty<TYPE>::filterWith(
   }
 
   // 2. Construct mFilter
-  std::vector<Kernel::DateAndTime> filtertimes = filter->timesAsVector();
+  std::vector<Types::Core::DateAndTime> filtertimes = filter->timesAsVector();
   std::vector<bool> filtervalues = filter->valuesAsVector();
   assert(filtertimes.size() == filtervalues.size());
   const size_t nFilterTimes(filtertimes.size());
@@ -1889,9 +1893,9 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
 
   typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
   vit = m_values.begin() + 1;
-  Kernel::DateAndTime prevtime = m_values.begin()->time();
+  Types::Core::DateAndTime prevtime = m_values.begin()->time();
   while (vit != m_values.end()) {
-    Kernel::DateAndTime currtime = vit->time();
+    Types::Core::DateAndTime currtime = vit->time();
     if (prevtime == currtime) {
       // Print out warning
       g_log.debug() << "Entry @ Time = " << prevtime
@@ -1964,7 +1968,7 @@ void TimeSeriesProperty<TYPE>::sortIfNecessary() const {
  *           if t is later (larger) than the ending time, return m_value.size
  */
 template <typename TYPE>
-int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
+int TimeSeriesProperty<TYPE>::findIndex(Types::Core::DateAndTime t) const {
   // 0. Return with an empty container
   if (m_values.empty())
     return 0;
@@ -1998,7 +2002,7 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
  *        mP.size():   exceeding upper bound
  */
 template <typename TYPE>
-int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
+int TimeSeriesProperty<TYPE>::upperBound(Types::Core::DateAndTime t, int istart,
                                          int iend) const {
   // 0. Check validity
   if (istart < 0) {
@@ -2233,7 +2237,7 @@ void TimeSeriesProperty<std::string>::saveProperty(::NeXus::File *file) {
   std::vector<std::string> values = this->valuesAsVector();
   if (values.empty())
     return;
-  file->makeGroup(this->name(), "NXlog", 1);
+  file->makeGroup(this->name(), "NXlog", true);
 
   // Find the max length of any string
   auto max_it =
@@ -2271,7 +2275,7 @@ template <> void TimeSeriesProperty<bool>::saveProperty(::NeXus::File *file) {
   if (value.empty())
     return;
   std::vector<uint8_t> asUint(value.begin(), value.end());
-  file->makeGroup(this->name(), "NXlog", 1);
+  file->makeGroup(this->name(), "NXlog", true);
   file->writeData("value", asUint);
   file->putAttr("boolean", "1");
   saveTimeVector(file);
@@ -2303,7 +2307,7 @@ void TimeSeriesProperty<TYPE>::saveProperty(::NeXus::File *file) {
 *  where dT = (tMax-tMin)/counts.size()  */
 template <typename TYPE>
 void TimeSeriesProperty<TYPE>::histogramData(
-    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
     std::vector<double> &counts) const {
 
   size_t nPoints = counts.size();
@@ -2329,7 +2333,7 @@ void TimeSeriesProperty<TYPE>::histogramData(
 
 template <>
 void TimeSeriesProperty<std::string>::histogramData(
-    const Kernel::DateAndTime &tMin, const Kernel::DateAndTime &tMax,
+    const Types::Core::DateAndTime &tMin, const Types::Core::DateAndTime &tMax,
     std::vector<double> &counts) const {
   UNUSED_ARG(tMin);
   UNUSED_ARG(tMax);
@@ -2377,7 +2381,7 @@ std::vector<TYPE> TimeSeriesProperty<TYPE>::filteredValuesAsVector() const {
  */
 template <typename TYPE>
 bool TimeSeriesProperty<TYPE>::isTimeFiltered(
-    const Kernel::DateAndTime &time) const {
+    const Types::Core::DateAndTime &time) const {
   if (m_filter.empty()) {
     return false; // no filter
   }
@@ -2389,8 +2393,8 @@ bool TimeSeriesProperty<TYPE>::isTimeFiltered(
   // Find which range it lives in
   auto filterEntry = std::lower_bound(
       m_filter.begin(), m_filter.end(), time,
-      [](const std::pair<Kernel::DateAndTime, bool> &filterEntry,
-         const Kernel::DateAndTime &t) { return filterEntry.first < t; });
+      [](const std::pair<Types::Core::DateAndTime, bool> &filterEntry,
+         const Types::Core::DateAndTime &t) { return filterEntry.first < t; });
 
   if (filterEntry != m_filter.begin()) {
     --filterEntry; // get the latest time BEFORE the given time
@@ -2434,7 +2438,6 @@ TimeSeriesProperty<TYPE>::getSplittingIntervals() const {
   size_t index = 0;
   while (index < m_filter.size()) {
     DateAndTime start, stop;
-    // cppcheck-suppress knownConditionTrueFalse
     if (index == 0) {
       if (m_filter[0].second) {
         start = m_filter[0].first;

@@ -167,6 +167,7 @@ void IFunctionAdapter::setAttribute(const std::string &attName,
     object value = object(handle<>(getAttributeValue(*this, attr)));
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue",
                                           attName, value);
+    storeAttributeValue(attName, attr);
   } catch (UndefinedAttributeError &) {
     IFunction::setAttribute(attName, attr);
   }
@@ -182,7 +183,7 @@ boost::python::object
 IFunctionAdapter::createPythonEquivalentFunctions(IFunction &self) {
   auto functions = self.createEquivalentFunctions();
   boost::python::list list;
-  for (auto fun : functions) {
+  for (const auto &fun : functions) {
     list.append(fun);
   }
   return list;

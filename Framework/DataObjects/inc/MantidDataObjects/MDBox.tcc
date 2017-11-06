@@ -555,7 +555,8 @@ TMDE(void MDBox)::generalBin(
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
                                   const coord_t radiusSquared, signal_t &signal,
                                   signal_t &errorSquared,
-                                  const coord_t innerRadiusSquared) const {
+                                  const coord_t innerRadiusSquared,
+                                  const bool useOnePercentBackgroundCorrection) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
   if (innerRadiusSquared == 0.0) {
@@ -588,8 +589,8 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform,
               });
 
     // Remove top 1% of background
-    const size_t endIndex =
-        static_cast<size_t>(0.99 * static_cast<double>(vals.size()));
+    const size_t endIndex = useOnePercentBackgroundCorrection ?
+        static_cast<size_t>(0.99 * static_cast<double>(vals.size())) : vals.size();
 
     for (size_t k = 0; k < endIndex; k++) {
       signal += vals[k].first;

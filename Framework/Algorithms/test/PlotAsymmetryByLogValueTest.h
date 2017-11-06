@@ -530,15 +530,8 @@ public:
     PlotAsymmetryByLogValue alg;
     alg.initialize();
 
-    // Find path to data file by going via an algorithm property...
-    alg.setPropertyValue("FirstRun", "MUSR00015190.nxs");
-    const std::string &middleFile = alg.getPropertyValue("FirstRun");
-
-    // Temporarily rename MUSR00015190.nxs so it's "missing" for this test
-    TemporaryRenamer renamedFile(middleFile);
-
-    alg.setPropertyValue("FirstRun", "MUSR00015189.nxs");
-    alg.setPropertyValue("LastRun", "MUSR00015191.nxs");
+    alg.setPropertyValue("FirstRun", "MUSR00015193.nxs");
+    alg.setPropertyValue("LastRun", "MUSR00015195.nxs");
     alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
     alg.setPropertyValue("LogValue", "run_number");
     alg.setPropertyValue("Red", "2");
@@ -552,8 +545,8 @@ public:
     TS_ASSERT(outWS);
     const auto &outputX = outWS->points(0);
     TS_ASSERT_EQUALS(outputX.size(), 2);
-    TS_ASSERT_DELTA(outputX[0], 15189.0, 1.e-7);
-    TS_ASSERT_DELTA(outputX[1], 15191.0, 1.e-7);
+    TS_ASSERT_DELTA(outputX[0], 15193.0, 1.e-7);
+    TS_ASSERT_DELTA(outputX[1], 15195.0, 1.e-7);
   }
 
   void test_extend_run_sequence() {

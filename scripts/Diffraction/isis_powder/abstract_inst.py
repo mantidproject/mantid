@@ -36,7 +36,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections=True):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
@@ -49,7 +49,7 @@ class AbstractInst(object):
         return calibrate.create_van(instrument=self, run_details=run_details,
                                     absorb=do_absorb_corrections)
 
-    def _focus(self, run_number_string, do_van_normalisation):
+    def _focus(self, run_number_string, do_van_normalisation, do_absorb_corrections):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -58,7 +58,7 @@ class AbstractInst(object):
         """
         self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string, perform_vanadium_norm=do_van_normalisation,
-                           instrument=self)
+                           instrument=self, absorb=do_absorb_corrections)
 
     # Mandatory overrides
 
@@ -70,14 +70,22 @@ class AbstractInst(object):
         """
         raise NotImplementedError("get_run_details must be implemented per instrument")
 
-    @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(self, run_number):
         """
         Generates a name which Mantid uses within Load to find the file.
         :param run_number: The run number to convert into a valid format for Mantid
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
-        raise NotImplementedError("generate_input_file_name must be implemented per instrument")
+        return self._generate_inst_filename(run_number=run_number)
+
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        """
+                Generates absorption corrections to compensate for the container. The overriding instrument
+                should handle the difference between a vanadium workspace and regular workspace
+                :param ws_to_correct: A reference vanadium workspace to match the binning of or correct
+                :return: A workspace containing the corrections
+                """
+        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
 
     def _generate_output_file_name(self, run_number_string):
         """
@@ -86,7 +94,7 @@ class AbstractInst(object):
         :param run_number_string: The run string to uniquely identify the run
         :return: The file name which identifies the run and appropriate parameter settings
         """
-        raise NotImplementedError("generate_output_file_name must be implemented per instrument")
+        return self._generate_input_file_name(run_number=run_number_string)
 
     def _spline_vanadium_ws(self, focused_vanadium_banks):
         """
@@ -97,32 +105,6 @@ class AbstractInst(object):
         # XXX: Although this could be moved to common if enough instruments spline the same way and have
         # the instrument override the optional behaviour
         raise NotImplementedError("spline_vanadium_ws must be implemented per instrument")
-
-    # Optional overrides
-    def _apply_absorb_corrections(self, run_details, van_ws):
-        """
-        Generates vanadium absorption corrections to compensate for the container
-        :param van_ws: A reference vanadium workspace to match the binning of or correct
-        :return: A workspace containing the corrections
-        """
-        raise NotImplementedError("apply_absorb_corrections Not implemented for this instrument yet")
-
-    def _attenuate_workspace(self, input_workspace):
-        """
-        Applies an attenuation correction to the workspace
-        :param input_workspace: The workspace to correct
-        :return: The corrected workspace
-        """
-        return input_workspace
-
-    @staticmethod
-    def _can_auto_gen_vanadium_cal():
-        """
-        Can be overridden and returned true by instruments who can automatically run generate vanadium calculation
-        if the splines cannot be found during the focus routine
-        :return: False by default, True by instruments who can automatically generate these
-        """
-        return False
 
     def _crop_banks_to_user_tof(self, focused_banks):
         """
@@ -168,17 +150,6 @@ class AbstractInst(object):
         """
         return None
 
-    def _generate_auto_vanadium_calibration(self, run_details):
-        """
-        Used by focus if a vanadium spline was not found to automatically generate said spline if the instrument
-        has indicated support by overriding can_auto_gen_vanadium_cal
-        :param run_details: The run details of the current run
-        :return: None
-        """
-        # If the instrument overrides can_auto_gen_vanadium_cal it needs to implement this method to perform the
-        # automatic calibration
-        raise NotImplementedError("Automatic vanadium corrections have not been implemented for this instrument.")
-
     def _get_input_batching_mode(self):
         """
         Returns the user specified input batching (e.g. summed or individual processing). This is set to summed
@@ -187,21 +158,20 @@ class AbstractInst(object):
         """
         return common_enums.INPUT_BATCHING.Summed
 
-    def _get_monitor_spectra_index(self, run_number):
+    def _get_current_tt_mode(self):
         """
-        Returns the spectra number a monitor is located at
-        :param run_number: The run number to locate the monitor spectra of
-        :return: The monitor spectra for the current workspace
+        Returns the current tt_mode this is only applicable
+        to PEARL. Otherwise returns None
+        :return: Current tt_mode on PEARL, otherwise None
         """
-        return str()
+        return None
 
-    def _normalise_ws_current(self, ws_to_correct, run_details=None):
+    def _normalise_ws_current(self, ws_to_correct):
         """
         Normalises the workspace by the beam current at the time it was taken using
         normalise by current unless the instrument overrides it with its own custom
         method of normalising by current.
         :param ws_to_correct: The workspace to normalise the current of
-        :param run_details: The run details associated to the run
         :return: The normalised workspace
         """
         return common.run_normalise_by_current(ws_to_correct)
@@ -218,9 +188,12 @@ class AbstractInst(object):
                                                                                    processed_spectra=processed_spectra)
         output_paths = self._generate_out_file_paths(run_details=run_details)
 
+        file_ext = run_details.file_extension[1:] if run_details.file_extension else ""
+
         common_output.save_focused_data(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                         output_paths=output_paths, inst_prefix=self._inst_prefix,
-                                        run_number_string=run_details.output_run_string)
+                                        run_number_string=run_details.output_run_string,
+                                        file_ext=file_ext)
 
         return d_spacing_group, tof_group
 
@@ -259,3 +232,11 @@ class AbstractInst(object):
                           "output_folder": output_directory}
 
         return out_file_names
+
+    def _generate_inst_filename(self, run_number):
+        if isinstance(run_number, list):
+            # Multiple entries
+            return [self._generate_inst_filename(run) for run in run_number]
+        else:
+            # Individual entry
+            return self._inst_prefix + str(run_number)

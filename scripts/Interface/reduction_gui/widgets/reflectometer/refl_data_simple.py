@@ -1,4 +1,6 @@
 # pylint: disable=too-many-lines, invalid-name, too-many-arguments
+from __future__ import (absolute_import, division, print_function)
+import six
 import math
 import time
 import sys
@@ -17,8 +19,11 @@ try:
     from mantid.simpleapi import *
     from reduction.instruments.reflectometer import data_manipulation
     IS_IN_MANTIDPLOT = True
-except ImportError, e:
+except ImportError as e:
     logger.error(e.message())
+
+if six.PY3:
+    unicode = str
 
 
 class DataReflWidget(BaseWidget):
@@ -229,7 +234,7 @@ class DataReflWidget(BaseWidget):
             self._summary.auto_reduce_check.hide()
 
     def _my_test(self):
-        print "I'm in my test"
+        print("I'm in my test")
 
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -495,7 +500,7 @@ class DataReflWidget(BaseWidget):
                     f.close()
                     QtGui.QMessageBox.information(self, "Automated reduction script saved",
                                                   "The automated reduction script has been updated")
-                except IOError, fileError:
+                except IOError as fileError:
                     _report_error("Failed to open file: " + fileError.filename())
             else:
                 _report_error("You do not have permissions to write to %s." % sns_path)

@@ -26,7 +26,6 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/ClassMacros.h"
 
 #include <boost/python/object.hpp>
 
@@ -40,6 +39,12 @@ class IFunctionAdapter : virtual public API::IFunction {
 public:
   /// A constructor that looks like a Python __init__ method
   IFunctionAdapter(PyObject *self);
+
+  /// The PyObject must be supplied to construct the object
+  IFunctionAdapter(const IFunctionAdapter &) = delete;
+
+  /// Disable assignment operator
+  IFunctionAdapter &operator=(const IFunctionAdapter &) = delete;
 
   /// Returns the name of the function
   std::string name() const override;
@@ -111,9 +116,6 @@ protected:
   inline PyObject *getSelf() const { return m_self; }
 
 private:
-  /// The PyObject must be supplied to construct the object
-  DISABLE_COPY_AND_ASSIGN(IFunctionAdapter)
-
   /// The name of the function
   std::string m_name;
   /// The Python portion of the object

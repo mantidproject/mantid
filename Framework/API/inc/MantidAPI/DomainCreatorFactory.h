@@ -2,7 +2,6 @@
 #define MANTID_API_DOMAINCREATORFACTORY_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
@@ -58,8 +57,14 @@ private:
 
   /// Private Constructor for singleton class
   DomainCreatorFactoryImpl() = default;
+
+  /// Disable copy and assignment operator
+  DomainCreatorFactoryImpl(const DomainCreatorFactoryImpl &) = delete;
+
   /// No copying
-  DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
+  DomainCreatorFactoryImpl &
+  operator=(const DomainCreatorFactoryImpl &) = delete;
+
   /// Private Destructor for singleton
   ~DomainCreatorFactoryImpl() override = default;
 

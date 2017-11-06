@@ -2,12 +2,14 @@
 #define MANTID_KERNEL_QUAT_H_
 
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Matrix.h"
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace Kernel {
 // Forward declarations
 class V3D;
+template <class T> class Matrix;
 
 /** @class Quat Quat.h Geometry/Quat.h
 @brief Class for quaternions
@@ -63,7 +65,7 @@ public:
   //! Set quaternion form an angle in degrees and an axis
   Quat(const double _deg, const V3D &_axis);
   // set a quaternion from a rotational matrix;
-  Quat(const DblMatrix &RotMat);
+  Quat(const Matrix<double> &RotMat);
   void operator()(const Quat &);
   void operator()(const double ww, const double aa, const double bb,
                   const double cc);
@@ -105,7 +107,7 @@ public:
   void setQuat(double mat[16]);
   //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not
   // rotational;
-  void setQuat(const DblMatrix &rMat);
+  void setQuat(const Matrix<double> &rMat);
   //! Rotate a vector
   void rotate(V3D &) const;
 

@@ -288,6 +288,8 @@ public:
     bool asBool() const;
     /// Returns bool value if attribute is a vector, throws exception otherwise
     std::vector<double> asVector() const;
+    /// Check if a string attribute is empty
+    bool isEmpty() const;
 
     /// Sets new value if attribute is a string
     void setString(const std::string &str);
@@ -324,7 +326,7 @@ public:
   /// Returns the function's name
   virtual std::string name() const = 0;
   /// Writes itself into a string
-  virtual std::string asString() const;
+  std::string asString() const;
   /// Virtual copy constructor
   virtual boost::shared_ptr<IFunction> clone() const;
   /// Set the workspace.
@@ -396,6 +398,8 @@ public:
                                        const std::string &description) = 0;
   /// Get parameter by name.
   virtual double getParameter(const std::string &name) const = 0;
+  /// Check if function has a parameter with this name.
+  virtual bool hasParameter(const std::string &name) const = 0;
   /// Total number of parameters
   virtual size_t nParams() const = 0;
   /// Returns the index of parameter name
@@ -589,6 +593,9 @@ protected:
                               const API::IFunction::Attribute &value) const;
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(std::unique_ptr<ParameterTie> tie);
+  /// Writes itself into a string
+  virtual std::string
+  writeToString(const std::string &parentLocalAttributesStr = "") const;
 
   friend class ParameterTie;
   friend class CompositeFunction;

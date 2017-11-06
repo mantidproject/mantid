@@ -6,6 +6,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -34,6 +35,8 @@ using namespace HistogramData;
 using namespace Indexing;
 using Mantid::MantidVec;
 using Mantid::MantidVecPtr;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSampleWorkspace)
@@ -159,6 +162,13 @@ void CreateSampleWorkspace::init() {
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the source to "
                   "the sample in M (default:10.0)");
+  declareProperty("NumScanPoints", 1,
+                  boost::make_shared<BoundedValidator<int>>(0, 360, true),
+                  "Add a number of time indexed detector scan points to the "
+                  "instrument. The detectors are rotated in 1 degree "
+                  "increments around the the sample position in the x-z plane. "
+                  "Minimum (default) is 1 scan point, which gives a "
+                  "non-scanning workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -180,6 +190,7 @@ void CreateSampleWorkspace::exec() {
   const double pixelSpacing = getProperty("PixelSpacing");
   const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
   const double sourceSampleDistance = getProperty("SourceDistanceFromSample");
+  const int numScanPoints = getProperty("NumScanPoints");
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
@@ -213,7 +224,7 @@ void CreateSampleWorkspace::exec() {
 
   int numPixels = numBanks * bankPixelWidth * bankPixelWidth;
 
-  Progress progress(this, 0, 1, numBanks);
+  Progress progress(this, 0.0, 1.0, numBanks);
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
@@ -226,6 +237,9 @@ void CreateSampleWorkspace::exec() {
   if (wsType == "Event") {
     ws = createEventWorkspace(numPixels, numBins, numMonitors, numEvents, xMin,
                               binWidth, inst, functionString, isRandom);
+  } else if (numScanPoints > 1) {
+    ws = createScanningWorkspace(numBins, xMin, binWidth, inst, functionString,
+                                 isRandom, numScanPoints);
   } else {
     ws = createHistogramWorkspace(numPixels, numBins, numMonitors, xMin,
                                   binWidth, inst, functionString, isRandom);
@@ -297,6 +311,8 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
+  // there is a oddity here that y is evaluated from x=0, and x is from XMin
+  // changing it requires changing unit tests that use this algorithm
   std::vector<double> xValues(cbegin(x), cend(x) - 1);
   Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
 
@@ -307,6 +323,34 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
   indexInfo.setSpectrumDefinitions(std::move(specDefs));
 
   return create<Workspace2D>(inst, indexInfo, Histogram(x, y));
+}
+
+/** Create scanning histogram workspace
+ */
+MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
+    int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
+    const std::string &functionString, bool isRandom, int numScanPoints) {
+  auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
+
+  auto angles = std::vector<double>();
+  auto timeRanges = std::vector<double>();
+  for (int i = 0; i < numScanPoints; ++i) {
+    angles.push_back(double(i));
+    timeRanges.push_back(double(i + 1));
+  }
+
+  builder.setTimeRanges(Types::Core::DateAndTime(0), timeRanges);
+  builder.setRelativeRotationsForScans(angles, inst->getSample()->getPos(),
+                                       V3D(0, 1, 0));
+
+  BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
+
+  std::vector<double> xValues(cbegin(x), cend(x) - 1);
+  Counts y(evalFunction(functionString, xValues, isRandom ? 1 : 0));
+
+  builder.setHistogram(Histogram(x, y));
+
+  return builder.buildWorkspace();
 }
 
 /** Create event workspace
@@ -392,6 +436,7 @@ CreateSampleWorkspace::evalFunction(const std::string &functionString,
     std::string replaceStr = boost::lexical_cast<std::string>(replace_val);
     replaceAll(parsedFuncString, token, replaceStr);
   }
+  g_log.information(parsedFuncString);
 
   IFunction_sptr func_sptr =
       FunctionFactory::Instance().createInitialized(parsedFuncString);

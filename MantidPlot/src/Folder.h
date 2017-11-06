@@ -34,7 +34,7 @@
 #include <QEvent>
 #include <QTreeWidget>
 
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 
 class FolderListItem;
@@ -208,7 +208,7 @@ class FolderListView : public QTreeWidget {
   Q_OBJECT
 
 public:
-  FolderListView(QWidget *parent = 0, const char *name = 0);
+  FolderListView(QWidget *parent = nullptr, const char *name = nullptr);
   QTreeWidgetItem *firstChild();
 
 public slots:

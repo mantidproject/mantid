@@ -181,5 +181,6 @@ class VisionReduction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", ws)
         DeleteWorkspace(INS)
 
+
 # Register
 AlgorithmFactory.subscribe(VisionReduction)

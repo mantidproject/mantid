@@ -33,9 +33,9 @@ in the first group before stitching workspaces from the next group on top
 of the previous ones.
 
 When stitching the workspaces, either the RHS or LHS workspaces can be scaled.
-We can specify a manual scale factor to use by setting
-:literal:`UseManualScaleFactor` true and passing a value to
-:literal:`ManualScaleFactor`. For group workspaces, we can also use
+We can specify manual scale factors to use by setting
+:literal:`UseManualScaleFactors` true and passing values to
+:literal:`ManualScaleFactors`. For group workspaces, we can also use
 :literal:`ScaleFactorFromPeriod` to select a period which will obtain a vector
 of scale factors from the selected period. These scale factors are then applied
 to all other periods when stitching.
@@ -56,8 +56,8 @@ The algorithm workflow is as follows:
 #. If group workspaces are supplied, the algorithm checks whether or not to
    scale workspaces using scale factors from a specific period (given by
    :literal:`ScaleFactorFromPeriod`). This is done only if
-   :literal:`UseManualScaleFactor` is true and :literal:`ManualScaleFactor` is
-   set to its default value.
+   :literal:`UseManualScaleFactors` is true and :literal:`ManualScaleFactors` is
+   set to its default value (empty).
 #. If not using :literal:`ScaleFactorFromPeriod`, the algorithm collects the
    workspaces belonging to each period across all groups and calls
    :literal:`Stitch1DMany` for each period. As a selection of non-group
@@ -80,8 +80,8 @@ The algorithm workflow is as follows:
    is outputted.
 
 In the diagram below, all input parameters other than
-:literal:`InputWorkspaces`, :literal:`UseManualScaleFactor`,
-:literal:`ManualScaleFactor` and :literal:`ScaleFactorFromPeriod` have been
+:literal:`InputWorkspaces`, :literal:`UseManualScaleFactors`,
+:literal:`ManualScaleFactors` and :literal:`ScaleFactorFromPeriod` have been
 omitted as they do not serve any purpose other than to be passed to the
 :literal:`Stitch1DMany` algorithm.
 

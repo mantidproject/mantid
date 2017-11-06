@@ -1,7 +1,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/DetectorInfo.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
@@ -14,6 +13,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/muParser_Silent.h"
@@ -395,11 +395,21 @@ std::string IFunction::writeConstraints() const {
 }
 
 /**
- * Writes a string that can be used in Fit.IFunction to create a copy of this
+ * Writes a string that can be used in FunctionFunctory to create a copy of this
  * IFunction
  * @return string representation of the function
  */
-std::string IFunction::asString() const {
+std::string IFunction::asString() const { return writeToString(); }
+
+/**
+ * Writes this function into a string.
+ * @param parentLocalAttributesStr :: A preformatted string with local
+ * attributes of a parent composite function. Can be passed in by a
+ * CompositeFunction (eg MultiDomainFunction).
+ * @return string representation of the function
+ */
+std::string
+IFunction::writeToString(const std::string &parentLocalAttributesStr) const {
   std::ostringstream ostr;
   ostr << "name=" << this->name();
   // print the attributes
@@ -439,6 +449,8 @@ std::string IFunction::asString() const {
     ostr << ",ties=(" << Kernel::Strings::join(ties.begin(), ties.end(), ",")
          << ")";
   }
+  // "local" attributes of a parent composite function
+  ostr << parentLocalAttributesStr;
   return ostr.str();
 }
 
@@ -759,6 +771,16 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() + " attribute "
                                                               "as vector");
+  }
+}
+
+/// Check if a string attribute is empty
+bool IFunction::Attribute::isEmpty() const {
+  try {
+    return boost::get<std::string>(m_data).empty();
+  } catch (...) {
+    throw std::runtime_error("Trying to access a " + type() +
+                             " attribute as string");
   }
 }
 
@@ -1375,14 +1397,18 @@ void IFunction::unfixParameter(const std::string &name) {
 /// @param isDefault :: If true fix them by default
 void IFunction::fixAll(bool isDefault) {
   for (size_t i = 0; i < nParams(); ++i) {
-    fix(i, isDefault);
+    if (isActive(i)) {
+      fix(i, isDefault);
+    }
   }
 }
 
 /// Free all parameters
 void IFunction::unfixAll() {
   for (size_t i = 0; i < nParams(); ++i) {
-    unfix(i);
+    if (isFixed(i)) {
+      unfix(i);
+    }
   }
 }
 

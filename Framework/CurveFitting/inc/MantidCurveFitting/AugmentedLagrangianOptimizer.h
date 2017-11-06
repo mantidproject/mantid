@@ -23,8 +23,6 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidCurveFitting/DllConfig.h"
-
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 #include <boost/function.hpp>
@@ -137,6 +135,16 @@ public:
     checkConstraints(equality, inequality);
   }
 
+  /// Disable default constructor
+  AugmentedLagrangianOptimizer() = delete;
+
+  /// Disable copy operator
+  AugmentedLagrangianOptimizer(const AugmentedLagrangianOptimizer &) = delete;
+
+  /// Disable assignment operator
+  AugmentedLagrangianOptimizer &
+  operator=(const AugmentedLagrangianOptimizer &) = delete;
+
   /// @returns The number of parameters under minimization
   inline size_t numParameters() const { return m_nparams; }
   /// @returns The number of equality constraints
@@ -154,9 +162,6 @@ public:
   void minimize(std::vector<double> &xv) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(AugmentedLagrangianOptimizer)
-  DISABLE_COPY_AND_ASSIGN(AugmentedLagrangianOptimizer)
-
   friend class UnconstrainedCostFunction;
   /// Using gradient optimizer to perform limited optimization of current set
   void unconstrainedOptimization(const std::vector<double> &lambda,

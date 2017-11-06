@@ -2,6 +2,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
 
 #include <map>
@@ -17,6 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::Types::Event::TofEvent;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSwans)

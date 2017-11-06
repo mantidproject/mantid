@@ -56,7 +56,7 @@ namespace Algorithms {
 class DLLExport CalculateFlatBackground : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  CalculateFlatBackground() : API::Algorithm(), m_progress(nullptr) {}
+  CalculateFlatBackground() : API::Algorithm() {}
   /// Virtual destructor
   ~CalculateFlatBackground() = default;
 
@@ -92,7 +92,7 @@ private:
                      const size_t windowWidth) const;
 
   /// Progress reporting
-  std::unique_ptr<API::Progress> m_progress;
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace Algorithms

@@ -263,7 +263,7 @@ void FunctionDialog::acceptFunction() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Start limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxFrom->setFocus();
     return;
@@ -273,7 +273,7 @@ void FunctionDialog::acceptFunction() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - End limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxTo->setFocus();
     return;
@@ -281,7 +281,7 @@ void FunctionDialog::acceptFunction() {
 
   if (start >= end) {
     QMessageBox::critical(
-        0, tr("MantidPlot - Input error"),
+        nullptr, tr("MantidPlot - Input error"),
         tr("Please enter x limits that satisfy: from < end!"));
     boxTo->setFocus();
     return;
@@ -299,7 +299,7 @@ void FunctionDialog::acceptFunction() {
     x = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxFunction->setFocus();
     error = true;
@@ -334,7 +334,7 @@ void FunctionDialog::acceptParametric() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Start limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxParFrom->setFocus();
     return;
@@ -345,7 +345,7 @@ void FunctionDialog::acceptParametric() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - End limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxParTo->setFocus();
     return;
@@ -353,7 +353,7 @@ void FunctionDialog::acceptParametric() {
 
   if (start >= end) {
     QMessageBox::critical(
-        0, tr("MantidPlot - Input error"),
+        nullptr, tr("MantidPlot - Input error"),
         tr("Please enter parameter limits that satisfy: from < end!"));
     boxParTo->setFocus();
     return;
@@ -372,7 +372,7 @@ void FunctionDialog::acceptParametric() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxXFunction->setFocus();
     error = true;
@@ -386,7 +386,7 @@ void FunctionDialog::acceptParametric() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxYFunction->setFocus();
     error = true;
@@ -424,7 +424,7 @@ void FunctionDialog::acceptPolar() {
     parser.SetExpr(from.toAscii().constData());
     start = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Start limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Start limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxPolarFrom->setFocus();
     return;
@@ -435,7 +435,7 @@ void FunctionDialog::acceptPolar() {
     parser.SetExpr(to.toAscii().constData());
     end = parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - End limit error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - End limit error"),
                           QString::fromStdString(e.GetMsg()));
     boxPolarTo->setFocus();
     return;
@@ -443,7 +443,7 @@ void FunctionDialog::acceptPolar() {
 
   if (start >= end) {
     QMessageBox::critical(
-        0, tr("MantidPlot - Input error"),
+        nullptr, tr("MantidPlot - Input error"),
         tr("Please enter parameter limits that satisfy: from < end!"));
     boxPolarTo->setFocus();
     return;
@@ -464,7 +464,7 @@ void FunctionDialog::acceptPolar() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxPolarRadius->setFocus();
     error = true;
@@ -480,7 +480,7 @@ void FunctionDialog::acceptPolar() {
     parameter = end;
     parser.Eval();
   } catch (mu::ParserError &e) {
-    QMessageBox::critical(0, tr("MantidPlot - Input function error"),
+    QMessageBox::critical(nullptr, tr("MantidPlot - Input function error"),
                           QString::fromStdString(e.GetMsg()));
     boxPolarTheta->setFocus();
     error = true;

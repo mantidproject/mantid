@@ -21,7 +21,6 @@ using API::ITableWorkspace;
 using API::ITableWorkspace_sptr;
 using API::IMDEventWorkspace;
 using API::IMDEventWorkspace_sptr;
-using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using API::WorkspaceProperty;
 

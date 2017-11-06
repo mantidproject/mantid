@@ -40,9 +40,9 @@
 #include "PlotCurve.h"
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidQtAPI/MantidColorMap.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include <MantidQtMantidWidgets/InstrumentView/InstrumentWidget.h>
+#include "MantidQtWidgets/Common/MantidColorMap.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <fstream>
 #include <float.h>
@@ -190,6 +190,8 @@ protected:
                     const QwtScaleMap &yMap,
                     const QwtRasterData::ContourLines &lines) const;
   void createLabels();
+  void checkRaggedMatrixWorkspace(const Mantid::API::Workspace *workspace,
+                                  Mantid::coord_t &minX, Mantid::coord_t &maxX);
 
   //! Pointer to the source data matrix
   Matrix *d_matrix;

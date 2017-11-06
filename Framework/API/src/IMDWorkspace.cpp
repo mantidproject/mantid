@@ -13,7 +13,8 @@ namespace Mantid {
 namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Default constructor */
-IMDWorkspace::IMDWorkspace() : Workspace(), Mantid::API::MDGeometry() {
+IMDWorkspace::IMDWorkspace(const Parallel::StorageMode storageMode)
+    : Workspace(storageMode), Mantid::API::MDGeometry() {
   m_convention = Kernel::ConfigService::Instance().getString("Q.convention");
 }
 

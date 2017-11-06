@@ -32,7 +32,7 @@ Description          : Preferences dialog
 #include <QDialog>
 #include <QCheckBox>
 #include <map>
-#include "MantidQtAPI/MdSettings.h"
+#include "MantidQtWidgets/Common/MdSettings.h"
 
 class QLineEdit;
 class QGroupBox;
@@ -70,7 +70,7 @@ public:
   * @param parent :: parent widget (must be the application window!=
   * @param fl :: window flags
   */
-  ConfigDialog(QWidget *parent, Qt::WFlags fl = 0);
+  ConfigDialog(QWidget *parent, Qt::WFlags fl = nullptr);
   void setColumnSeparator(const QString &sep);
   void gotoMantidDirectories();
 
@@ -178,7 +178,7 @@ private:
 
   QTreeWidgetItem *createCheckedTreeItem(QString name,
                                          Qt::CheckState checkBoxState);
-  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
+  QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = nullptr);
 
   std::map<std::string, std::map<std::string, std::string>> m_sendToSettings;
 

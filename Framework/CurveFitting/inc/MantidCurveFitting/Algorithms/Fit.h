@@ -4,10 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "MantidAPI/Algorithm.h"
-//#include "MantidAPI/IFunction.h"
-//#include "MantidAPI/Workspace_fwd.h"
-//#include "MantidAPI/IDomainCreator.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 
 namespace Mantid {

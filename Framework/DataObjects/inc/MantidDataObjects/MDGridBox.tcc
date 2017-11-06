@@ -1088,7 +1088,8 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
                                       const coord_t radiusSquared,
                                       signal_t &signal,
                                       signal_t &errorSquared, 
-                                      const coord_t innerRadiusSquared) const {
+                                      const coord_t innerRadiusSquared,
+                                      const bool useOnePercentBackgroundCorrection) const {
   // We start by looking at the vertices at every corner of every box contained,
   // to see which boxes are partially contained/fully contained.
 
@@ -1234,7 +1235,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform,
     if (partialBox) {
       // Use the detailed integration method.
       box->integrateSphere(radiusTransform, radiusSquared, signal,
-                           errorSquared, innerRadiusSquared);
+                           errorSquared, innerRadiusSquared, useOnePercentBackgroundCorrection);
       //        std::cout << ".signal=" << signal << "\n";
       numPartiallyContained++;
     }

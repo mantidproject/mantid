@@ -341,7 +341,7 @@ void CompareMDWorkspaces::exec() {
 
   this->doComparison();
 
-  if (m_result != "") {
+  if (!m_result.empty()) {
     g_log.notice() << "The workspaces did not match: " << m_result << '\n';
     this->setProperty("Equals", false);
   } else {

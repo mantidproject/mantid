@@ -17,9 +17,10 @@ Description
 
 Set properties of the sample & its environment on a workspace.
 
-The 3 arguments to this algorithm ``Environment``, ``Geometry`` & ``Material``
-are all expected to be dictionaries specifying multiple parameters that
-relate to the respective argument.
+The 3 arguments to this algorithm ``Environment``, ``Geometry`` and
+:py:obj:`Material <mantid.kernel.Material>` are all expected to be
+dictionaries specifying multiple parameters that relate to the
+respective argument.
 
 Environment
 ###########
@@ -119,7 +120,8 @@ The following example uses a test file called ``CRYO-01.xml`` in the
 
    # Use geometry as is from environment defintion
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 **Example - Override height of preset cylinder sample**
 
@@ -130,7 +132,8 @@ The following example uses a test file called ``CRYO-01.xml`` in the
    # Use geometry from environment but set differnet height for sample
    SetSample(ws, Environment={'Name': 'CRYO-01', 'Container': '8mm'},
              Geometry={'Height': 4.0},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 **Example - Override complete sample geometry**
 
@@ -143,7 +146,8 @@ The following example uses a test file called ``CRYO-01.xml`` in the
              Geometry={'Shape': 'HollowCylinder', 'Height': 4.0,
                        'InnerRadius': 0.8, 'OuterRadius': 1.0,
                        'Center': [0.,0.,0.]},
-             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6'})
+             Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                       'SampleNumberDensity': 0.1})
 
 .. categories::
 

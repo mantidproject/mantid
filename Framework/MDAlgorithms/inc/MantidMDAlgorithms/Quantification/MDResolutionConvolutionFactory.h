@@ -24,7 +24,6 @@
 */
 #include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
@@ -51,12 +50,19 @@ public:
   createConvolution(const std::string &name, const std::string &fgModelName,
                     const API::IFunctionMD &fitFunction);
 
+  /// Disable copy operator
+  MDResolutionConvolutionFactoryImpl(
+      const MDResolutionConvolutionFactoryImpl &) = delete;
+
+  /// Disable assignment operator
+  MDResolutionConvolutionFactoryImpl &
+  operator=(const MDResolutionConvolutionFactoryImpl &) = delete;
+
 private:
   /// Policy needs to access constructor
   friend struct Kernel::CreateUsingNew<MDResolutionConvolutionFactoryImpl>;
   /// Default constructor. Private for singleton holder
   MDResolutionConvolutionFactoryImpl();
-  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolutionFactoryImpl)
 
   // Do not allow the default create & createUnwrapped to be called
   using BaseClass::create;

@@ -8,16 +8,18 @@
 # - Download from internet to cache (download-mode)
 #
 ################################################################################
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import csv
 import random
 import os
 
-from fourcircle_utility import *
-from peakprocesshelper import PeakProcessRecord
-import fputility
-import project_manager
-import peak_integration_utility
-import absorption
+from HFIR_4Circle_Reduction.fourcircle_utility import *
+from HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
+from HFIR_4Circle_Reduction import fputility
+from HFIR_4Circle_Reduction import project_manager
+from HFIR_4Circle_Reduction import peak_integration_utility
+from HFIR_4Circle_Reduction import absorption
 
 import mantid
 import mantid.simpleapi as mantidsimple
@@ -110,6 +112,8 @@ class CWSCDReductionControl(object):
 
         # detector geometry: initialized to unphysical value
         self._detectorSize = [-1, -1]
+        self._defaultPixelNumberX = None
+        self._defaultPixelNumberY = None
 
         # reference workspace for LoadMask
         self._refWorkspaceForMask = None
@@ -680,8 +684,8 @@ class CWSCDReductionControl(object):
 
                 if intensity < std_dev:
                     # error is huge, very likely bad gaussian fit
-                    print '[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} Excluded from exporting.' \
-                          ''.format(algorithm_type, scan_number, intensity, std_dev)
+                    print('[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {2} '
+                          'Excluded from exporting.'.format(algorithm_type, scan_number, intensity, std_dev))
                     continue
                 # END-IF
 
@@ -783,7 +787,7 @@ class CWSCDReductionControl(object):
 
         pt_number_list = []
         num_rows = table_ws.rowCount()
-        for i in xrange(num_rows):
+        for i in range(num_rows):
             pt_number = table_ws.cell(i, i_pt)
             pt_number_list.append(pt_number)
 
@@ -805,8 +809,8 @@ class CWSCDReductionControl(object):
         # Convert to numpy array
         det_shape = (self._detectorSize[0], self._detectorSize[1])
         array2d = numpy.ndarray(shape=det_shape, dtype='float')
-        for i in xrange(det_shape[0]):
-            for j in xrange(det_shape[1]):
+        for i in range(det_shape[0]):
+            for j in range(det_shape[1]):
                 array2d[i][j] = raw_ws.readY(j * det_shape[0] + i)[0]
 
         # Flip the 2D array to look detector from sample
@@ -924,9 +928,6 @@ class CWSCDReductionControl(object):
                                                                 'it is of type %s now.' % (str(pt_number),
                                                                                            type(pt_number))
 
-        # print '[DB...BAT] Retrieve: Exp {0} Scan {1} Peak Info Object. Current keys are {0}.' \
-        #       ''.format(exp_number, scan_number, self._myPeakInfoDict.keys())
-
         # construct key
         if pt_number is None:
             p_key = (exp_number, scan_number)
@@ -936,8 +937,6 @@ class CWSCDReductionControl(object):
         # Check for existence
         if p_key in self._myPeakInfoDict:
             ret_value = self._myPeakInfoDict[p_key]
-            # print '[DB...BAT] Retrieved: Exp {0} Scan {1} Peak Info Object {2}.'.format(exp_number, scan_number,
-            #                                                                             hex(id(ret_value)))
         else:
             ret_value = None
 
@@ -973,7 +972,7 @@ class CWSCDReductionControl(object):
         array_size = num_peaks
         vec_x = numpy.ndarray(shape=(array_size,))
         vec_y = numpy.ndarray(shape=(array_size,))
-        for index in xrange(array_size):
+        for index in range(array_size):
             peak_i = int_peak_ws.getPeak(index)
             # Note: run number in merged workspace is a combination of pt number and scan number
             #       so it should have 1000 divided for the correct pt number
@@ -1223,7 +1222,6 @@ class CWSCDReductionControl(object):
         assert isinstance(scale_factor, float) or isinstance(scale_factor, int),\
             'Scale factor {0} must be a float or integer but not a {1}.'.format(scale_factor, type(scale_factor))
         assert len(peak_centre) == 3, 'Peak center {0} must have 3 elements for (Qx, Qy, Qz).'.format(peak_centre)
-        # print '[DB...BAT] Background tuple {0} is of type {1}.'.format(background_pt_tuple, type(background_pt_tuple))
         assert len(background_pt_tuple) == 2, 'Background tuple {0} must be of length 2.'.format(background_pt_tuple)
 
         # get input MDEventWorkspace name for merged scan
@@ -1672,8 +1670,8 @@ class CWSCDReductionControl(object):
                 # Add Detector Center and Detector Distance!!!  - Trace up how to calculate shifts!
                 # calculate the sample-detector distance shift if it is defined
                 if exp_no in self._detSampleDistanceDict:
-                    alg_args['DetectorSampleDistanceShift'] = self._detSampleDistanceDict[exp_no] - \
-                                                              self._defaultDetectorSampleDistance
+                    alg_args['DetectorSampleDistanceShift'] \
+                        = self._detSampleDistanceDict[exp_no] - self._defaultDetectorSampleDistance
                 # calculate the shift of detector center
                 if exp_no in self._detCenterDict:
                     user_center_row, user_center_col = self._detCenterDict[exp_no]
@@ -1743,6 +1741,32 @@ class CWSCDReductionControl(object):
 
         return True, out_hkl_name
 
+    def save_merged_scan(self, exp_number, scan_number, pt_number_list, merged_ws_name, output):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number_list:
+        :param merged_ws_name:
+        :param output: output file path
+        :return:
+        """
+        assert isinstance(exp_number, int), 'Experiment number {0} must be an integer but not a {1}.' \
+                                            ''.format(scan_number, type(scan_number))
+        assert isinstance(scan_number, int), 'Scan number {0} must be an integer but not a {1}.' \
+                                             ''.format(exp_number, type(exp_number))
+        assert isinstance(output, str), 'Output file name {0} must be give as a string but not {1}.' \
+                                        ''.format(output, type(output))
+
+        # get input workspace
+
+        if merged_ws_name is None:
+            merged_ws_name = get_merged_md_name(self._instrumentName, exp_number, scan_number,
+                                                pt_list=pt_number_list)
+        mantidsimple.SaveMD(InputWorkspace=merged_ws_name, Filename=output)
+
+        return
+
     def set_roi(self, exp_number, scan_number, lower_left_corner, upper_right_corner):
         """
         Purpose: Set region of interest and record it by the combination of experiment number
@@ -1786,9 +1810,11 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int) and exp_number > 0, 'Experiment number must be integer'
         assert center_row is None or (isinstance(center_row, int) and center_row >= 0), \
-            'Center row number must either None or non-negative integer.'
+            'Center row number {0} of type {1} must either None or non-negative integer.' \
+            ''.format(center_row, type(center_row))
         assert center_col is None or (isinstance(center_col, int) and center_col >= 0), \
-            'Center column number must be either Noe or non-negative integer.'
+            'Center column number {0} of type {1} must be either Noe or non-negative integer.' \
+            ''.format(center_col, type(center_col))
 
         if default:
             self._defaultDetectorCenter = (center_row, center_col)
@@ -1833,8 +1859,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_detector_sample_distance(self, default_det_sample_distance):
-        """
-        set default detector-sample distance
+        """set default detector-sample distance
         :param default_det_sample_distance:
         :return:
         """
@@ -1846,8 +1871,7 @@ class CWSCDReductionControl(object):
         return
 
     def set_default_pixel_size(self, pixel_x_size, pixel_y_size):
-        """
-        set default pixel size
+        """set default pixel size, i.e., physical dimension of a pixel
         :param pixel_x_size:
         :param pixel_y_size:
         :return:
@@ -1857,6 +1881,21 @@ class CWSCDReductionControl(object):
 
         self._defaultPixelSizeX = pixel_x_size
         self._defaultPixelSizeY = pixel_y_size
+
+        return
+
+    def set_default_pixel_number(self, num_pixel_x, num_pixel_y):
+        """
+        set the default number of pixels on the detector
+        :param num_pixel_x:
+        :param num_pixel_y:
+        :return:
+        """
+        assert isinstance(num_pixel_x, int) and num_pixel_x > 0, 'Wrong input'
+        assert isinstance(num_pixel_y, int) and num_pixel_y > 0, 'Wrong input'
+
+        self._defaultPixelNumberX = num_pixel_x
+        self._defaultPixelNumberY = num_pixel_y
 
         return
 
@@ -1877,9 +1916,9 @@ class CWSCDReductionControl(object):
             error_message = None
             try:
                 result = urllib2.urlopen(self._myServerURL)
-            except urllib2.HTTPError, err:
+            except urllib2.HTTPError as err:
                 error_message = str(err.code)
-            except urllib2.URLError, err:
+            except urllib2.URLError as err:
                 error_message = str(err.args)
             else:
                 is_url_good = True
@@ -2183,7 +2222,7 @@ class CWSCDReductionControl(object):
 
         # add peak
         num_peak_info = len(peak_info_list)
-        for i_peak_info in xrange(num_peak_info):
+        for i_peak_info in range(num_peak_info):
             # Set HKL as optional
             peak_info_i = peak_info_list[i_peak_info]
             peak_ws_i = peak_info_i.get_peak_workspace()
@@ -2345,12 +2384,12 @@ class CWSCDReductionControl(object):
         # check whether there is a redundant creation of PeakProcessRecord for the same (exp, scan) combination
         if (exp_number, scan_number) in self._myPeakInfoDict:
             peak_info = self._myPeakInfoDict[(exp_number, scan_number)]
-            print '[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not be created twice!' \
-                  ''.format(exp_number, scan_number)
-            print '[CONTINUE] New PeaksWorkspace = {0} vs Existing PeaksWorkspace = {1}.' \
-                  ''.format(peak_ws_name, peak_info.peaks_workspace)
-            print '[CONTINUE] New MDEventWorkspace = {0} vs Existing MDEventWorkspace = {1}.' \
-                  ''.format(md_ws_name, peak_info.md_workspace)
+            print('[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not '
+                  'be created twice!'.format(exp_number, scan_number))
+            print('[CONTINUE] New PeaksWorkspace = {0} vs Existing '
+                  'PeaksWorkspace = {1}.'.format(peak_ws_name, peak_info.peaks_workspace))
+            print('[CONTINUE] New MDEventWorkspace = {0} vs Existing '
+                  'MDEventWorkspace = {1}.'.format(md_ws_name, peak_info.md_workspace))
             return False, peak_info
         # END-IF
 
@@ -2413,7 +2452,7 @@ class CWSCDReductionControl(object):
         """
         numrows = spice_table_ws.rowCount()
         ptlist = []
-        for irow in xrange(numrows):
+        for irow in range(numrows):
             ptno = int(spice_table_ws.cell(irow, 0))
             ptlist.append(ptno)
 
@@ -2495,8 +2534,8 @@ class CWSCDReductionControl(object):
                 try:
                     mantidsimple.DownloadFile(Address=spice_file_url, Filename=spice_file_name)
                 except RuntimeError as download_error:
-                    print '[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
-                                                                                     str(download_error))
+                    print('[ERROR] Unable to download scan %d from %s due to %s.' % (scan_number,spice_file_url,
+                                                                                     str(download_error)))
                     break
             else:
                 spice_file_name = get_spice_file_name(self._instrumentName, exp_number, scan_number)
@@ -2535,7 +2574,7 @@ class CWSCDReductionControl(object):
 
                 two_theta = m1 = -1
 
-                for i_row in xrange(num_rows):
+                for i_row in range(num_rows):
                     det_count = spice_table_ws.cell(i_row, 5)
                     if det_count > max_count:
                         max_count = det_count
@@ -2556,7 +2595,7 @@ class CWSCDReductionControl(object):
                 wavelength = get_hb3a_wavelength(m1)
                 if wavelength is None:
                     q_range = 0.
-                    print '[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number)
+                    print('[ERROR] Scan number {0} has invalid m1 for wavelength.'.format(scan_number))
                 else:
                     q_range = 4.*math.pi*math.sin(two_theta/180.*math.pi*0.5)/wavelength
 
@@ -2572,7 +2611,7 @@ class CWSCDReductionControl(object):
         # END-FOR (scan_number)
 
         if error_message != '':
-            print '[Error]\n%s' % error_message
+            print('[Error]\n%s' % error_message)
 
         self._scanSummaryList = scan_sum_list
 
@@ -2609,7 +2648,7 @@ class CWSCDReductionControl(object):
         assert isinstance(project_file_name, str), 'Project file name must be a string but not of type ' \
                                                    '%s.' % type(project_file_name)
 
-        print '[INFO] Load project from %s.' % project_file_name
+        print('[INFO] Load project from %s.' % project_file_name)
 
         # instantiate a project manager instance and load the project
         saved_project = project_manager.ProjectManager(mode='import', project_file_path=project_file_name)
@@ -2636,13 +2675,13 @@ def convert_spice_ub_to_mantid(spice_ub):
     """
     mantid_ub = numpy.ndarray((3, 3), 'float')
     # row 0
-    for i in xrange(3):
+    for i in range(3):
         mantid_ub[0][i] = spice_ub[0][i]
     # row 1
-    for i in xrange(3):
+    for i in range(3):
         mantid_ub[1][i] = spice_ub[2][i]
     # row 2
-    for i in xrange(3):
+    for i in range(3):
         mantid_ub[2][i] = -1.*spice_ub[1][i]
 
     return mantid_ub

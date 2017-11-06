@@ -1,5 +1,5 @@
-from interface import InstrumentInterface
-
+from __future__ import (absolute_import, division, print_function)
+from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.reflectometer.refl_sf_calculator import DataReflSFCalculatorWidget
 from reduction_gui.reduction.reflectometer.refl_sf_calculator import REFLSFCalculatorScripter
 

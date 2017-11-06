@@ -30,7 +30,7 @@ From this assignment it is possible to calculate the following indicators:
 
 Furthermore, the algorithm optionally produces a list of missing reflections. In this list,
 each missing unique reflection is expanded to all symmetry equivalents according to the point
-group. For example, if the reflection family :math:`\left{001\right}` was missing
+group. For example, if the reflection family :math:`\{001\}` was missing
 with point group :math:`\bar{1}`, the list would contain :math:`(001)` and :math:`(00\bar{1})`.
 
 The reason for expanding the unique reflections is to make the list more useful as an input
@@ -62,12 +62,12 @@ data, because some intensities in the input file are 0, so these reflections are
                                                                   LatticeCentering='Robv', MinDSpacing=0.205,
                                                                   MaxDSpacing=2.08, MissingReflectionsWorkspace='')
 
-    print 'Data set statistics:'
-    print '             Peaks: {0}'.format(peaks.getNumberPeaks())
-    print '            Unique: {0}'.format(unique)
-    print '      Completeness: {0}%'.format(round(completeness * 100, 2))
-    print '        Redundancy: {0}'.format(round(redundancy, 2))
-    print ' Multiply observed: {0}%'.format(round(multiple*100, 2))
+    print('Data set statistics:')
+    print('             Peaks: {0}'.format(peaks.getNumberPeaks()))
+    print('            Unique: {0}'.format(unique))
+    print('      Completeness: {0}%'.format(round(completeness * 100, 2)))
+    print('        Redundancy: {0}'.format(round(redundancy, 2)))
+    print(' Multiply observed: {0}%'.format(round(multiple*100, 2)))
 
 Output:
 

@@ -9,6 +9,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::Types::Core::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -133,7 +134,7 @@ void AddLogDerivative::exec() {
                                                    ") so we can't perform its "
                                                    "derivative.");
 
-  Progress progress(this, 0, 1, Derivative);
+  Progress progress(this, 0.0, 1.0, Derivative);
 
   // Perform derivative
   TimeSeriesProperty<double> *output =

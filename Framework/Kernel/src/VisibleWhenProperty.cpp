@@ -119,7 +119,7 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
   *
   * @return Pointer to cloned VisisbleWhenProperty object
   */
-IPropertySettings *VisibleWhenProperty::clone() {
+IPropertySettings *VisibleWhenProperty::clone() const {
   return new VisibleWhenProperty(*this);
 }
 

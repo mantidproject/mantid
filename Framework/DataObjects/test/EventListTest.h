@@ -17,6 +17,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::HistogramData;
 using namespace Mantid::DataObjects;
 
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
@@ -1778,7 +1780,7 @@ public:
     std::vector<int64_t> vec_splitTimes{1000000, 2000000, 3000000, 4000000,
                                         5000000, 6000000, 7000000, 8000000,
                                         9000000, 10000000};
-    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1, -1};
+    std::vector<int> vec_splitGroup{-1, 2, -1, 4, -1, 6, -1, 8, -1};
     // Do the splitting
     el.splitByFullTimeMatrixSplitter(vec_splitTimes, vec_splitGroup, outputs,
                                      false, 1.0, 0.0);
@@ -2376,7 +2378,7 @@ public:
     for (int time = 0; time < 1000; time++) {
       // All pulse times from 0 to 999 in seconds
       el += TofEvent(rand() % 1000,
-                     time); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     time); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 
@@ -2393,7 +2395,7 @@ public:
       // All pulse times from 0 to 999 in seconds
       DateAndTime pulsetime(static_cast<int64_t>(time * 1000000));
       el += TofEvent(rand() % 1000,
-                     pulsetime); // Kernel::DateAndTime(time*1.0, 0.0) );
+                     pulsetime); // Types::Core::DateAndTime(time*1.0, 0.0) );
     }
   }
 

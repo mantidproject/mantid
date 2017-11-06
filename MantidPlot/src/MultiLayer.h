@@ -33,7 +33,7 @@
 #define MULTILAYER_H
 
 #include "Graph.h"
-#include "MantidQtAPI/IProjectSerialisable.h"
+#include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
 #include <QLayout>
 #include <QPointer>
@@ -82,7 +82,8 @@ class MultiLayer : public MdiSubWindow {
 
 public:
   MultiLayer(QWidget *parent, int layers = 1, int rows = 1, int cols = 1,
-             const QString &label = "", const char *name = 0, Qt::WFlags f = 0);
+             const QString &label = "", const char *name = nullptr,
+             Qt::WFlags f = nullptr);
   ~MultiLayer() override;
 
   /// Get the window type as a string
@@ -283,7 +284,7 @@ class LayerButton : public QPushButton {
   Q_OBJECT
 
 public:
-  LayerButton(const QString &text = QString::null, QWidget *parent = 0);
+  LayerButton(const QString &text = QString::null, QWidget *parent = nullptr);
   static int btnSize() { return 20; };
 
 protected:

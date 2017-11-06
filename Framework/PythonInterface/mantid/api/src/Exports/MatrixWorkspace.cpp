@@ -1,8 +1,10 @@
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 #include "MantidPythonInterface/kernel/GetPointer.h"
@@ -46,9 +48,13 @@ typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
 #pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedef"
 #endif
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GCC_DIAG_OFF(conversion)
 // Overloads for binIndexOf function which has 1 optional argument
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads,
                                        MatrixWorkspace::binIndexOf, 1, 2)
+GCC_DIAG_ON(conversion)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -168,7 +174,7 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
  */
 size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getNumberBins' is deprecated, use 'blocksize' instead.");
+             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
   return self.blocksize();
 }
 
@@ -180,7 +186,7 @@ size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
  */
 Mantid::API::Run &getSampleDetailsDeprecated(MatrixWorkspace &self) {
   PyErr_Warn(PyExc_DeprecationWarning,
-             "'getSampleDetails' is deprecated, use 'getRun' instead.");
+             "``getSampleDetails`` is deprecated, use ``getRun`` instead.");
   return self.mutableRun();
 }
 }
@@ -221,19 +227,19 @@ void export_MatrixWorkspace() {
       .def("getDetector", &MatrixWorkspace::getDetector,
            return_value_policy<RemoveConstSharedPtr>(),
            (arg("self"), arg("workspaceIndex")),
-           "Return the Detector or "
-           "DetectorGroup that is linked to "
+           "Return the :class:`~mantid.geometry.Detector` or "
+           ":class:`~mantid.geometry.DetectorGroup` that is linked to "
            "the given workspace index")
       .def("getRun", &MatrixWorkspace::mutableRun, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace")
+           "Return the :class:`~mantid.api.Run` object for this workspace")
       .def("axes", &MatrixWorkspace::axes, arg("self"),
            "Returns the number of axes attached to the workspace")
       .def("getAxis", &MatrixWorkspace::getAxis,
            (arg("self"), arg("axis_index")), return_internal_reference<>(),
            "Get a pointer to a workspace axis")
       .def("isHistogramData", &MatrixWorkspace::isHistogramData, arg("self"),
-           "Returns True if this is considered to be binned data.")
+           "Returns ``True`` if this is considered to be binned data.")
       .def("isDistribution", (bool (MatrixWorkspace::*)() const) &
                                  MatrixWorkspace::isDistribution,
            arg("self"), "Returns the status of the distribution flag")
@@ -244,15 +250,18 @@ void export_MatrixWorkspace() {
 
       .def("spectrumInfo", &MatrixWorkspace::spectrumInfo,
            return_value_policy<reference_existing_object>(), args("self"),
-           "Return a const reference to the SpectrumInfo object.")
+           "Return a const reference to the :class:`~mantid.api.SpectrumInfo` "
+           "object.")
 
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use blocksize "
+           "Returns size of the Y data array (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
            "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
-           "Return the Run object for this workspace (deprecated, use getRun "
+           "Return the Run object for this workspace (deprecated, use "
+           ":class:`~mantid.api.MatrixWorkspace.getRun` "
            "instead)")
 
       //--------------------------------------- Setters

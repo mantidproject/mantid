@@ -43,6 +43,8 @@ namespace CostFunctions {
 class DLLExport CostFuncFitting : public API::ICostFunction {
 public:
   CostFuncFitting();
+  /// Number of parameters
+  size_t nParams() const override;
   /// Get i-th parameter
   /// @param i :: Index of a parameter
   /// @return :: Value of the parameter
@@ -51,8 +53,8 @@ public:
   /// @param i :: Index of a parameter
   /// @param value :: New value of the parameter
   void setParameter(size_t i, const double &value) override;
-  /// Number of parameters
-  size_t nParams() const override;
+  /// Get name of i-th parameter
+  std::string parameterName(size_t i) const;
 
   /// Set fitting function.
   virtual void setFittingFunction(API::IFunction_sptr function,

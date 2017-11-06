@@ -3,15 +3,15 @@
 These system tests are to verify that the IDF and parameter files for POLREF, CRISP, INTER and SURF are read properly
 """
 
+from __future__ import (absolute_import, division, print_function)
 import stresstesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
+from six import with_metaclass
 
 
-class ISISReflInstrumentIDFTest(stresstesting.MantidStressTest):
-
-    __metaclass__ = ABCMeta # Mark as an abstract class
+class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, stresstesting.MantidStressTest)):
 
     @abstractmethod
     def get_IDF_name(self):

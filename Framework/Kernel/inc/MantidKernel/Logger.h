@@ -18,7 +18,6 @@
 /// @cond Exclude from doxygen documentation
 namespace Poco {
 class Logger;
-class NullOutputStream;
 }
 /// @endcond
 

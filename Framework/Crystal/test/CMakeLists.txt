@@ -10,18 +10,11 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/MDEventsTestHelper.cpp )
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  target_link_libraries ( CrystalTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS}
             Crystal
-            API
             DataHandling
-            DataObjects
-            Geometry
-            HistogramData
-            Indexing
-            Kernel
             MDAlgorithms
-            ${Boost_LIBRARIES}
-            ${POCO_LIBRARIES}
+            Nexus
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES} )
   add_dependencies ( CrystalTest Algorithms CurveFitting )

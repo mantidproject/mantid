@@ -49,7 +49,6 @@ void CloneMDWorkspace::init() {
 template <typename MDE, size_t nd>
 void CloneMDWorkspace::doClone(
     const typename MDEventWorkspace<MDE, nd>::sptr ws) {
-  Progress prog(this, 0.0, 10.0, 100);
   BoxController_sptr bc = ws->getBoxController();
 
   if (!bc)
@@ -65,7 +64,6 @@ void CloneMDWorkspace::doClone(
     }
 
     // Generate a new filename to copy to
-    prog.report("Copying File");
     std::string originalFile = bc->getFilename();
     std::string outFilename = getPropertyValue("Filename");
     if (outFilename.empty()) {

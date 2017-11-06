@@ -1,5 +1,3 @@
-#include <string>
-
 /*
  If the OS is Windows then LoadLibrary, GetProcAddress and FreeLibrary are used.
  Some casting to HINSTANCE is required.
@@ -15,9 +13,10 @@
 #include <dlfcn.h>
 #endif /* _WIN32 */
 
-#include "MantidKernel/Strings.h"
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/Logger.h"
+
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

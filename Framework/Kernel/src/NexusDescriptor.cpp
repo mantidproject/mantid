@@ -1,7 +1,5 @@
 #include "MantidKernel/NexusDescriptor.h"
 
-#include <boost/algorithm/string.hpp>
-
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 
@@ -9,6 +7,7 @@
 #include <Poco/Path.h>
 
 #include <cstring>
+#include <string>
 
 namespace Mantid {
 namespace Kernel {

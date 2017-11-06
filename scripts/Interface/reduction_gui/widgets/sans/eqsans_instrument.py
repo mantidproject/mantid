@@ -1,4 +1,6 @@
 #pylint: disable=invalid-name
+from __future__ import (absolute_import, division, print_function)
+import six
 from PyQt4 import QtGui, QtCore
 import reduction_gui.widgets.util as util
 import os
@@ -7,6 +9,9 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
+
+if six.PY3:
+    unicode = str
 
 
 class SANSInstrumentWidget(BaseWidget):

@@ -5,7 +5,7 @@
 // Includes
 //----------------------
 #include "ui_MantidAbout.h"
-#include <MantidQtAPI/MantidDialog.h>
+#include <MantidQtWidgets/Common/MantidDialog.h>
 
 /**
 This class implements About MantidPlot dialog for mnatid help menu.
@@ -41,7 +41,7 @@ class MantidAbout : public MantidQt::API::MantidDialog {
 
 public:
   /// constructor
-  explicit MantidAbout(QWidget *parent = 0);
+  explicit MantidAbout(QWidget *parent = nullptr);
   /// destructor
   ~MantidAbout() override {}
 

@@ -5,7 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/MaskDetectors.h"
@@ -31,6 +31,7 @@ using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:
@@ -79,23 +80,15 @@ public:
       spaceEvent->setAllX(BinEdges{0.0, 10.0});
 
     } else if (!asMaskWorkspace) {
-      auto space2D = createWorkspace<Workspace2D>(numspec, 6, 5);
-      space = space2D;
+      space = createWorkspace<Workspace2D>(numspec, 6, 5);
       space->setInstrument(instr);
 
       BinEdges x(6, LinearGenerator(10.0, 1.0));
       Counts y(5, 1.0);
-      CountStandardDeviations e(5, 1.0);
-      const auto &spectrumInfo = space2D->spectrumInfo();
-
-      for (size_t j = 0; j < space2D->getNumberHistograms(); ++j) {
-        space2D->setBinEdges(j, x);
-        space2D->setCounts(j, y);
-        space2D->setCountStandardDeviations(j, e);
-        space2D->getSpectrum(j).setSpectrumNo(static_cast<int>(j + 1));
-        const auto &detector = spectrumInfo.detector(j);
-        auto id = detector.getID();
-        space2D->getSpectrum(j).setDetectorID(id);
+      for (size_t j = 0; j < space->getNumberHistograms(); ++j) {
+        space->setHistogram(j, x, y);
+        space->getSpectrum(j).setSpectrumNo(static_cast<int>(j + 1));
+        space->getSpectrum(j).setDetectorID(static_cast<detid_t>(j + 1));
       }
     } else {
       // In case of MaskWorkspace
@@ -104,6 +97,7 @@ public:
       for (size_t i = 0; i < specspace->getNumberHistograms(); i++) {
         // default to use all the detectors
         specspace->mutableY(i)[0] = 0.0;
+        specspace->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
       }
       space = boost::dynamic_pointer_cast<MatrixWorkspace>(specspace);
       // Does not have connection between instrument and spectra though has to
@@ -678,6 +672,7 @@ public:
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
+      maskWs->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
     }
 
     maskWs->mutableY(10)[0] = 0;
@@ -745,6 +740,7 @@ public:
     maskWs->setInstrument(inputWS->getInstrument());
     for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
       maskWs->mutableY(i)[0] = 1.0;
+      maskWs->getSpectrum(i).setDetectorID(static_cast<detid_t>(i + 1));
     }
 
     maskWs->mutableY(10)[0] = 0;

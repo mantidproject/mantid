@@ -1,6 +1,7 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 
 #include <boost/make_shared.hpp>
+#include <cstdint>
 
 using namespace Mantid::Kernel;
 

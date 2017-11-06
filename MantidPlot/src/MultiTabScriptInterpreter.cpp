@@ -12,7 +12,7 @@
 #include "ScriptingLangDialog.h"
 #include "MultiTabScriptInterpreter.h"
 
-#include "MantidQtMantidWidgets/ScriptEditor.h"
+#include "MantidQtWidgets/Common/ScriptEditor.h"
 
 // Qt
 #include <QPoint>

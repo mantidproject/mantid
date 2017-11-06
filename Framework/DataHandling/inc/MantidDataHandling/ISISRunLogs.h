@@ -1,7 +1,6 @@
 #ifndef MANTID_DATAHANDLING_ISISRUNLOGS_H_
 #define MANTID_DATAHANDLING_ISISRUNLOGS_H_
 
-#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/LogParser.h"
 #include "MantidKernel/System.h"
 

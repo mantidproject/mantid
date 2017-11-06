@@ -160,6 +160,9 @@ Desktop.ini
 # PyCharm IDE
 .idea/
 
+# VSCode cache
+.vscode/
+
 # Mac OS X Finder
 .DS_Store
 

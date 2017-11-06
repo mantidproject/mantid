@@ -1,5 +1,4 @@
 #include "MantidKernel/Glob.h"
-#include <Poco/DirectoryIterator.h>
 
 namespace Mantid {
 namespace Kernel {

@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/ExtractMaskToTable.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/MaskWorkspace.h"

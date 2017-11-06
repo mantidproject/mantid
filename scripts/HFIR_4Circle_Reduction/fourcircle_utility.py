@@ -1,6 +1,13 @@
 #pylint: disable=W0633,R0913,too-many-branches
+from __future__ import (absolute_import, division, print_function)
+from six.moves import range
 import os
-import urllib2
+try: # python3
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import URLError
 import socket
 import numpy
 import math
@@ -22,12 +29,12 @@ def check_url(url, read_lines=False):
     lines = None
     try:
         # Access URL
-        url_stream = urllib2.urlopen(url, timeout=2)
+        url_stream = urlopen(url, timeout=2)
 
         # Read lines
         if read_lines is True:
             lines = url_stream.readlines()
-    except urllib2.URLError as url_error:
+    except URLError as url_error:
         url_stream = url_error
     except socket.timeout:
         return False, 'Time out. Try again!'
@@ -95,7 +102,7 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     if rectangular is False:
         raise RuntimeError('Non-rectangular detector is not supported yet.')
 
-    print '[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner))
+    print('[INFO] Mask from %s to %s.' % (str(ll_corner), str(ur_corner)))
 
     # part 1
     xml_str = '<?xml version="1.0"?>\n'
@@ -127,13 +134,13 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
 
     det_sub_xml = ''
     if False:
-        for col_number in xrange(start_col, end_col+1):
+        for col_number in range(start_col, end_col+1):
             start_det_id = 1 + col_number * NUM_DET_ROW + start_row
             end_det_id = 1 + col_number * NUM_DET_ROW + end_row
             det_sub_xml += '%d-%d,' % (start_det_id, end_det_id)
     else:
-        # print '[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row)
-        # print '[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col)
+        # print('[DB...BAT] Row numbers from {0} to {1}'.format(start_row, end_row))
+        # print('[DB...BAT] Col numbers from {0} to {1}'.format(start_col, end_col))
         for row_number in range(start_row, end_row+1):
             start_det_id = 1 + row_number * num_det_row + start_col
             end_det_id = 1 + row_number * num_det_row + end_col
@@ -325,7 +332,7 @@ def parse_int_array(int_array_str):
             # Integer range
             two_terms = level0_term.split("-")
             temp_list = []
-            for i in xrange(2):
+            for i in range(2):
                 value_str = two_terms[i]
                 try:
                     int_value = int(value_str)
@@ -551,7 +558,9 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
     assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+
+    if len(pt_list) == 0:
+        raise RuntimeError('Pt number list {0} cannot be empty.', pt_list)
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_MD' % (instrument_name, exp_no, scan_no,
                                                      pt_list[0], pt_list[-1])
@@ -570,10 +579,10 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     :return:
     """
     # check
-    assert isinstance(instrument_name, str)
-    assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list)
-    assert len(pt_list) > 0
+    assert isinstance(instrument_name, str), 'blabla'
+    assert isinstance(exp_no, int) and isinstance(scan_no, int), 'blabla'
+    assert isinstance(pt_list, list), 'blabla'
+    assert len(pt_list) > 0, 'blabla'
 
     merged_ws_name = '%s_Exp%d_Scan%d_Pt%d_%d_HKL_MD' % (instrument_name, exp_no, scan_no,
                                                          pt_list[0], pt_list[-1])
@@ -664,7 +673,7 @@ def load_hb3a_md_data(file_name):
     intensities = numpy.zeros((len(raw_lines), ))
 
     # parse
-    for i in xrange(len(raw_lines)):
+    for i in range(len(raw_lines)):
         line = raw_lines[i].strip()
 
         # skip empty line
@@ -673,7 +682,7 @@ def load_hb3a_md_data(file_name):
 
         # set value
         terms = line.split(',')
-        for j in xrange(3):
+        for j in range(3):
             xyz_points[i][j] = float(terms[j])
         intensities[i] = float(terms[3])
     # END-FOR

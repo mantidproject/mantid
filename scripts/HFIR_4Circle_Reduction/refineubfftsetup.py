@@ -1,6 +1,8 @@
+from __future__ import (absolute_import, division, print_function)
 import ui_RefineUbFftDialog
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
+from PyQt4 import QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -9,12 +11,12 @@ except AttributeError:
 
 
 class RefineUBFFTSetupDialog(QtGui.QDialog):
-    """
-    A dialog window to get the setup for refining UB matrix by FFT.
+    """A dialog window to get the setup for refining UB matrix by FFT.
+
     """
     def __init__(self, parent):
-        """
-        Initialization
+        """Initialization
+
         :param parent:
         """
         super(RefineUBFFTSetupDialog, self).__init__(parent)
@@ -43,8 +45,8 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         return
 
     def do_ok(self):
-        """
-        accept the current set up and return
+        """accept the current set up and return
+
         :return:
         """
         try:
@@ -76,7 +78,7 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         return
 
     def do_cancel(self):
-        """
+        """cancel window
 
         :return:
         """
@@ -85,8 +87,8 @@ class RefineUBFFTSetupDialog(QtGui.QDialog):
         return
 
     def get_values(self):
-        """
-        get the setup: min D, max D and tolerance
+        """get the setup: min D, max D and tolerance
+
         :return: 3-tuple
         """
         return self._minD, self._maxD, self._tolerance

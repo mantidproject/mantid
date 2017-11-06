@@ -1,3 +1,4 @@
+from __future__ import (absolute_import, division, print_function)
 #pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
@@ -37,7 +38,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.reset()
 
     def set_default_pars(self, inst_name):
-        import dgs_utils
+        from . import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
         DiagnoseDetectorsScript.high_counts = ip.get_parameter("diag_huge")
         DiagnoseDetectorsScript.low_counts = ip.get_parameter("diag_tiny")

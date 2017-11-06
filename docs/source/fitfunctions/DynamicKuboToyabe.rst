@@ -12,7 +12,7 @@ Description
 Dynamic Kubo Toyabe fitting function for use by Muon scientists defined
 by
 
-.. math:: G_z \left(t\right) = g_z\left(t\right) e^{-\nu t} + \nu \int_0^t g_z\left(\tau\right) e^{-\nu\tau} G_z\left(t-\tau\right) d\tau
+.. math:: G_z \left(t\right) = g_z\left(t\right) + \nu \int_0^t g_z\left(\tau\right) G_z\left(t-\tau\right) d\tau
 
 where :math:`g_z\left(t\right)` is the static KT function, and :math:`\nu` the muon hopping rate.
 
@@ -30,6 +30,11 @@ small values will lead to long calculation times, while large values will produc
 .. attributes::
 
 .. properties::
+
+References
+----------
+
+[1]  `Hayano et al., PRB 20 (1979) 50 <https://journals.aps.org/prb/abstract/10.1103/PhysRevB.20.850>`_.
 
 .. categories::
 

@@ -13,8 +13,9 @@ set ( SRC_FILES
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/DataItem.cpp
 	src/DateAndTime.cpp
+	src/DataItem.cpp
+	src/DateAndTimeHelpers.cpp
 	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
@@ -43,6 +44,7 @@ set ( SRC_FILES
 	src/InstrumentInfo.cpp
 	src/InternetHelper.cpp
 	src/Interpolation.cpp
+	src/InvisibleProperty.cpp
 	src/LibraryManager.cpp
 	src/LibraryWrapper.cpp
 	src/LiveListenerInfo.cpp
@@ -127,14 +129,14 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
-        src/NeutronAtom.cpp
-        src/FacilityInfo.cpp
-        src/FilterChannel.cpp
-        src/FileValidator.cpp
-        src/DirectoryValidator.cpp
-        src/PropertyManager.cpp
-        src/Unit.cpp
-        src/System.cpp
+	src/NeutronAtom.cpp
+	src/FacilityInfo.cpp
+	src/FilterChannel.cpp
+	src/FileValidator.cpp
+	src/DirectoryValidator.cpp
+	src/PropertyManager.cpp
+	src/Unit.cpp
+	src/System.cpp
 )
 
 set ( INC_FILES
@@ -157,13 +159,13 @@ set ( INC_FILES
 	inc/MantidKernel/Chainable.h
 	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
-	inc/MantidKernel/ClassMacros.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
+    	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
-	inc/MantidKernel/DateAndTime.h
+	inc/MantidKernel/DateAndTimeHelpers.h
 	inc/MantidKernel/DateTimeValidator.h
 	inc/MantidKernel/DateValidator.h
 	inc/MantidKernel/DeltaEMode.h
@@ -202,6 +204,7 @@ set ( INC_FILES
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/InternetHelper.h
 	inc/MantidKernel/Interpolation.h
+	inc/MantidKernel/InvisibleProperty.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
@@ -235,8 +238,8 @@ set ( INC_FILES
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NetworkProxy.h
-        inc/MantidKernel/NearestNeighbours.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NormalDistribution.h
@@ -333,7 +336,7 @@ set ( TEST_FILES
 	ConfigServiceTest.h
 	CowPtrTest.h
 	DataServiceTest.h
-	DateAndTimeTest.h
+	DateAndTimeHelpersTest.h
 	DateTimeValidatorTest.h
 	DateValidatorTest.h
 	DeltaEModeTest.h
@@ -362,6 +365,7 @@ set ( TEST_FILES
 	InstrumentInfoTest.h
 	InternetHelperTest.h
 	InterpolationTest.h
+	InvisiblePropertyTest.h
 	ListValidatorTest.h
 	LiveListenerInfoTest.h
 	LogFilterTest.h
@@ -389,7 +393,7 @@ set ( TEST_FILES
 	MutexTest.h
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
-        NearestNeighboursTest.h
+	NearestNeighboursTest.h
 	NeutronAtomTest.h
 	NexusDescriptorTest.h
 	NormalDistributionTest.h
@@ -474,7 +478,7 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
-target_include_directories ( Kernel PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
+target_include_directories ( Kernel SYSTEM PUBLIC ${EIGEN3_INCLUDE_DIR} PRIVATE ${GSL_INCLUDE_DIR} ${OPENSSL_INCLUDE_DIR})
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")

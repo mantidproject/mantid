@@ -31,6 +31,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::Types::Event::TofEvent;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -490,7 +491,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   size_t totalEvents = m_inWS->size();
   if (m_inEventWS && !OneEventPerBin)
     totalEvents = m_inEventWS->getNumberEvents();
-  prog = boost::make_shared<Progress>(this, 0, 1.0, totalEvents);
+  prog = boost::make_shared<Progress>(this, 0.0, 1.0, totalEvents);
 
   // Create the thread pool that will run all of these.
   ThreadScheduler *ts = new ThreadSchedulerFIFO();

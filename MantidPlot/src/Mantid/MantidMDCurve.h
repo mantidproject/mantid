@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCurve.h"
-#include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
+#include "MantidQtWidgets/Common/MantidQwtIMDWorkspaceData.h"
 #include <boost/shared_ptr.hpp>
 
 // Forward definitions
@@ -48,6 +48,8 @@ public:
   MantidMDCurve(const MantidMDCurve &c);
 
   ~MantidMDCurve() override;
+
+  MantidMDCurve &operator=(const MantidMDCurve &rhs) = delete;
 
   MantidMDCurve *clone(const Graph *) const override;
 

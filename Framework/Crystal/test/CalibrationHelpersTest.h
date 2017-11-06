@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/DetectorInfo.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidCrystal/CalibrationHelpers.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
@@ -37,22 +38,18 @@ public:
     const auto &positionSampleOld = wsOld->detectorInfo().samplePosition();
     const auto &positionSourceOld = wsOld->detectorInfo().sourcePosition();
 
-    const auto &instNew = wsNew->getInstrument();
     const double l1 = wsOld->detectorInfo().l1() - 1.23;
     const double newZ = 3.0;
     const auto &positionSampleNew = V3D(1.0, 2.0, newZ);
     const auto &positionSourceNew = V3D(1.0, 2.0, newZ - l1);
 
     // Check what happens if l1 is negative
-    TS_ASSERT_THROWS(
-        CalibrationHelpers::adjustUpSampleAndSourcePositions(
-            *instNew, -l1, positionSampleNew, wsNew->mutableDetectorInfo()),
-        std::runtime_error);
-
-    // Make a first move
+    TS_ASSERT_THROWS(CalibrationHelpers::adjustUpSampleAndSourcePositions(
+                         -l1, positionSampleNew, wsNew->mutableComponentInfo()),
+                     std::runtime_error);
 
     CalibrationHelpers::adjustUpSampleAndSourcePositions(
-        *instNew, l1, positionSampleNew, wsNew->mutableDetectorInfo());
+        l1, positionSampleNew, wsNew->mutableComponentInfo());
 
     TS_ASSERT_EQUALS(wsOld->detectorInfo().samplePosition(), positionSampleOld);
     TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
@@ -64,40 +61,24 @@ public:
                      positionSourceNew.Y());
     TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition().Z(),
                      positionSourceNew.Z());
-
-    // Make a second move - here the old and new workspaces have different
-    // positions
-
-    const auto &instNew2 = wsNew->getInstrument();
-
-    auto wsNew2 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        2, 1000, true);
-    const auto &positionSampleNew2 = V3D(-1.0, -2.0, -3.0);
-    CalibrationHelpers::adjustUpSampleAndSourcePositions(
-        *instNew2, l1, positionSampleNew2, wsNew2->mutableDetectorInfo());
-
-    TS_ASSERT_EQUALS(wsNew2->detectorInfo().samplePosition(),
-                     positionSampleOld);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().samplePosition(), positionSampleNew);
-    TS_ASSERT_EQUALS(wsNew2->detectorInfo().sourcePosition(),
-                     positionSourceOld);
-    TS_ASSERT_EQUALS(wsNew->detectorInfo().sourcePosition(), positionSourceNew);
   }
 
   void test_fixUpBankParameterMap_applies_move_to_rectangular_detectors() {
     setUpFixUpBankParameterMap();
 
-    auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
-    const auto &instNew = wsNew->getInstrument();
+    auto &componentInfoWsNew = wsNew->mutableComponentInfo();
     const auto &newPos = V3D(1.0, 2.0, 3.0);
     const auto &newRot = Quat(1.0, 0.0, 0.0, 0.0);
     const double heightScale = 1.0;
     const double widthScale = 1.0;
     std::vector<std::string> bankNames = {"bank1", "bank3"};
+    auto newInstr = wsNew->getInstrument();
 
     CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        detectorInfoWsNew);
+        bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+        componentInfoWsNew);
+
+    const auto &detectorInfoWsNew = wsNew->detectorInfo();
 
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);
@@ -117,17 +98,19 @@ public:
   void test_fixUpBankParameterMap_applies_scale_to_rectangular_detectors() {
     setUpFixUpBankParameterMap();
 
-    auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
-    const auto &instNew = wsNew->getInstrument();
+    auto &componentInfoWsNew = wsNew->mutableComponentInfo();
     const auto &newPos = V3D(0.0, 0.0, 0.0);
     const auto &newRot = Quat(1.0, 0.0, 0.0, 0.0);
     const double heightScale = 2.0;
     const double widthScale = 3.0;
 
-    CalibrationHelpers::adjustBankPositionsAndSizes(
-        bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        detectorInfoWsNew);
+    auto newInstr = wsNew->getInstrument();
 
+    CalibrationHelpers::adjustBankPositionsAndSizes(
+        bankNames, *newInstr, newPos, newRot, heightScale, widthScale,
+        componentInfoWsNew);
+
+    const auto &detectorInfoWsNew = wsNew->detectorInfo();
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).X(),
                      heightScale * oldPosLastBank1.X());
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(LAST_DET_INDEX_BANK_1).Y(),
@@ -147,7 +130,7 @@ public:
   void test_fixUpBankParameterMap_applies_rotation_to_rectangular_detectors() {
     setUpFixUpBankParameterMap();
 
-    auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
+    auto &componentInfoWsNew = wsNew->mutableComponentInfo();
     const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(0.0, 0.0, 0.0);
     auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
@@ -157,8 +140,9 @@ public:
 
     CalibrationHelpers::adjustBankPositionsAndSizes(
         bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        detectorInfoWsNew);
+        componentInfoWsNew);
 
+    const auto &detectorInfoWsNew = wsNew->detectorInfo();
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      oldPosFirstBank1);
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2),
@@ -178,7 +162,7 @@ public:
   test_fixUpBankParameterMap_applies_all_changes_to_rectangular_detectors() {
     setUpFixUpBankParameterMap();
 
-    auto &detectorInfoWsNew = wsNew->mutableDetectorInfo();
+    auto &componentInfoWsNew = wsNew->mutableComponentInfo();
     const auto &instNew = wsNew->getInstrument();
     const auto &newPos = V3D(1.0, 2.0, 3.0);
     auto newRot = Quat(0.2, 0.2, 0.2, 0.2);
@@ -190,8 +174,9 @@ public:
 
     CalibrationHelpers::adjustBankPositionsAndSizes(
         bankNames, *instNew, newPos, newRot, heightScale, widthScale,
-        detectorInfoWsNew);
+        componentInfoWsNew);
 
+    const auto &detectorInfoWsNew = wsNew->detectorInfo();
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_1),
                      newPos + oldPosFirstBank1);
     TS_ASSERT_EQUALS(detectorInfoWsNew.position(FIRST_DET_INDEX_BANK_2),
