@@ -84,7 +84,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
         self.declareProperty(name='CropNegative2Theta', defaultValue=True,
                              doc='Whether or not to crop out the bins corresponding to negative scattering angle.')
 
-        self.declareProperty(name='ZeroCountingCells', defaultValue='Crop',
+        self.declareProperty(name='ZeroCountingCells', defaultValue='Interpolate',
                              validator=StringListValidator(['Crop','Interpolate','Leave']),
                              doc='Crop out the zero counting cells or interpolate the counts from the neighbours.')
 
@@ -290,6 +290,7 @@ class PowderDiffILLReduction(PythonAlgorithm):
             @param ws : input workspace with raw spectrum axis
         """
         roi_ws = self._hide('roi')
+        theta_ws = self._hide('theta_ROI')
         ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=theta_ws, Target='SignedTheta')
         roi_pattern = self._parse_roi(theta_ws)
         SumSpectra(InputWorkspace=ws, OutputWorkspace=roi_ws, ListOfWorkspaceIndices=roi_pattern)
