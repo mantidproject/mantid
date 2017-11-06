@@ -30,13 +30,14 @@ void HistogramIterator::decrement() {
     }
 }
 
-void HistogramIterator::advance(uint64_t delta) {
+void HistogramIterator::advance(int64_t delta) {
     m_index = delta < 0 ? std::max(static_cast<uint64_t>(0),
             static_cast<uint64_t>(m_index) + delta)
         : std::min(m_histogram.size(),
                 m_index + static_cast<size_t>(delta));
     m_currentItem = make_unique<HistogramItem>(m_histogram, m_index); 
 }
+
 uint64_t HistogramIterator::distance_to(const HistogramIterator &other) const {
     return static_cast<uint64_t>(other.m_index) -
         static_cast<uint64_t>(m_index);

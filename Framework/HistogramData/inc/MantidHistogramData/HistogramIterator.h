@@ -13,6 +13,10 @@ namespace Mantid {
 namespace HistogramData {
 
 /** HistogramIterator
+ 
+  HistogramIterator implements an the iterator interface for HistogramData.
+  At each position the iterator will point to an instance of a HistogramItem.
+  This item provides direct access to the values at a particular index.
 
   @author Samuel Jackson
   @date 2017
@@ -53,7 +57,7 @@ private:
     bool equal(const HistogramIterator &other) const;
     HistogramItem& dereference() const;
     void decrement();
-    void advance(uint64_t delta);
+    void advance(int64_t delta);
     uint64_t distance_to(const HistogramIterator &other) const;
 
     const Histogram& m_histogram;

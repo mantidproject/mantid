@@ -14,6 +14,17 @@ class Histogram;
 
 /** HistogramItem
 
+  HistogramItem represents a single index in a Histogram object.
+
+  HistogramItem is the type that is returned when iterating over a
+  Histogram using the foreach loop syntax. HistogramItem provides
+  efficient access to a single point in the Histogram.
+
+  HistogramItem will only perform conversions between counts and 
+  frequencies or points and bins when explicitly told to. Code that
+  requires only a few values from a large Histogram may find this faster
+  than converting the whole X, Y or E value. 
+
   @author Samuel Jackson
   @date 2017
 
