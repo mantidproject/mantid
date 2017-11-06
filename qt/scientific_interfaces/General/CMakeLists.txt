@@ -1,14 +1,11 @@
 set ( SRC_FILES
 	DataComparison.cpp
-	DirectConvertToEnergy.cpp
-	Homer.cpp
 	MantidEV.cpp
 	MantidEVWorker.cpp
 	SampleTransmission.cpp
 	StepScan.cpp
 	UserInputValidator.cpp
 	background.cpp
-	deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -16,31 +13,25 @@ set ( SRC_FILES
 set ( INC_FILES
 	Background.h
 	DataComparison.h
-	DirectConvertToEnergy.h
 	DllConfig.h
-	Homer.h
 	MantidEV.h
 	MantidEVWorker.h
 	SampleTransmission.h
 	StepScan.h
 	Updateable.h
 	UserInputValidator.h
-	deltaECalc.h
 )
 
-set ( MOC_FILES 
+set ( MOC_FILES
     Background.h
     DataComparison.h
-    DirectConvertToEnergy.h
-    Homer.h
     MantidEV.h
     SampleTransmission.h
     StepScan.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
     DataComparison.ui
-    DirectConvertToEnergy.ui
     MantidEV.ui
     SampleTransmission.ui
     StepScan.ui
