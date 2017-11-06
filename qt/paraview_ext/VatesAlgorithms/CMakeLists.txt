@@ -46,21 +46,9 @@ vtkPVVTKExtensionsDefault
 ${POCO_LIBRARIES}
 )
 
-# if ( MSVC )
-  # # To simplify developer builds from the IDE we copy the ParaView DLLs to the
-  # # appropriate buildbinary folder. This avoids have to set the PATH to point to
-  # # a different ParaView build directory for each configuration
-  # set ( _src_dir ${ParaView_DIR}/bin/${CMAKE_CFG_INTDIR} )
-  # set ( _dest_dir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
-  # add_custom_command (
-    # TARGET VatesAlgorithms POST_BUILD
-    # COMMAND xcopy ARGS \"${_src_dir}/*.dll\" \"${_dest_dir}\" /D /Y /F
-    # COMMENT "Updating ParaView DLLs in bin/${CMAKE_CFG_INTDIR}"
-  # )
-  # unset ( _dest_dir )
-  # unset ( _src_dir )
-# endif()
-
+set_target_properties ( VatesAlgorithms PROPERTIES
+  LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_LIBRARY_OUTPUT_DIRECTORY}
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( VatesAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
