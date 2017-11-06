@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="TOPAZ" valid-from   ="2017-08-08 10:00:00"
-              valid-to     ="2017-11-03 15:59:59"
-                     last-modified="2017-09-09 10:00:00">
+ name="TOPAZ" valid-from   ="2017-11-03 16:00:00"
+              valid-to     ="2100-01-31 23:59:59"
+                     last-modified="2017-11-03 16:30:00">
 
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
@@ -47,7 +47,7 @@
     </component>
   </type>
 
-<!-- XML Code automatically generated on 2017-08-08 17:03:05.631322 for the Mantid instrument definition file -->
+<!-- XML Code automatically generated on 2017-11-03 14:50:15.127696 for the Mantid instrument definition file -->
 <component type="panel" idstart="851968" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.455000" t="105.192621" p="-33.305992" name="bank13" rot="-99.919712" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
@@ -125,6 +125,13 @@
   </rot>
 </location>
 </component>
+<component type="panel" idstart="1769472" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.425000" t="90.000202" p="-163.999982" name="bank27" rot="74.589577" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
+  </rot>
+</location>
+</component>
 <component type="panel" idstart="1835008" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.425000" t="55.596651" p="-160.483782" name="bank28" rot="110.589776" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
@@ -181,13 +188,6 @@
   </rot>
 </location>
 </component>
-<component type="panel" idstart="2818048" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="124.403098" p="19.516157" name="bank43" rot="-38.590066" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="47.178655">
-    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
-  </rot>
-</location>
-</component>
 <component type="panel" idstart="3014656" idfillbyfirst="y" idstepbyrow="256">
 <location r="0.425000" t="124.403098" p="160.483843" name="bank46" rot="69.410491" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
@@ -217,7 +217,7 @@
 </location>
 </component>
 <!-- List of all the bank names:
-     bank13,bank14,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank26,bank28,bank29,bank33,bank34,bank36,bank37,bank38,bank39,bank43,bank46,bank47,bank48,bank49
+     bank13,bank14,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank26,bank27,bank28,bank29,bank33,bank34,bank36,bank37,bank38,bank39,bank46,bank47,bank48,bank49
 -->
 
 <!-- NOTE: This detector is the same as the SNAP detector -->
