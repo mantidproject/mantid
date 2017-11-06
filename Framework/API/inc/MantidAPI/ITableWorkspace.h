@@ -121,8 +121,10 @@ public:
   /// Constructor
   ITableWorkspace() {}
 
-  /// Returns a nameless clone of the workspace
-  ITableWorkspace_uptr clone() const;
+  /// Returns a clone of the workspace
+  ITableWorkspace_uptr clone() const {
+    return std::unique_ptr<ITableWorkspace>(doClone());
+  }
 
   /// Returns a default-initialized clone of the workspace
   ITableWorkspace_uptr cloneEmpty() const {

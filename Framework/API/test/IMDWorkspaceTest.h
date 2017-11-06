@@ -45,14 +45,6 @@ public:
     }
   }
 
-  void testCloneNameIsCleared() {
-    WorkspaceTester matrixWS;
-    matrixWS.initialize(1, 1, 1);
-    const IMDWorkspace &imdWS = static_cast<IMDWorkspace &>(matrixWS);
-    auto cloned = imdWS.clone();
-    TS_ASSERT_EQUALS("", cloned->getName())
-  }
-
   void testGetXDimension() {
     WorkspaceTester matrixWS;
     matrixWS.initialize(1, 1, 1);

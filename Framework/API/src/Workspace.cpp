@@ -22,12 +22,6 @@ Workspace::Workspace(const Workspace &other)
       m_history(Kernel::make_unique<WorkspaceHistory>(other.getHistory())),
       m_storageMode(other.m_storageMode) {}
 
-Workspace_uptr Workspace::clone() const {
-  Workspace_uptr ws{doClone()};
-  ws->m_name.clear();
-  return ws;
-}
-
 /** Set the title of the workspace
  *
  *  @param t :: The title

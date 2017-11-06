@@ -87,8 +87,8 @@ public:
   /// Delete
   ~MatrixWorkspace() override;
 
-  /// Returns a clone of the workspace clearing the clone's name
-  MatrixWorkspace_uptr clone() const;
+  /// Returns a clone of the workspace
+  MatrixWorkspace_uptr clone() const { return MatrixWorkspace_uptr(doClone()); }
 
   /// Returns a default-initialized clone of the workspace
   MatrixWorkspace_uptr cloneEmpty() const {

@@ -13,17 +13,6 @@ ITableWorkspace::cloneColumns(const std::vector<std::string> &colNames) const {
   return ITableWorkspace_uptr(doCloneColumns(colNames));
 }
 
-/** Returns a clone of the workspace. The clone's name is cleare as
- * it is not stored in the ADS.
- * This method shadows Workspace::clone().
- * @return a nameless clone.
- */
-ITableWorkspace_uptr ITableWorkspace::clone() const {
-  std::unique_ptr<ITableWorkspace> ws{doClone()};
-  ws->clearName();
-  return ws;
-}
-
 const std::string ITableWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n";

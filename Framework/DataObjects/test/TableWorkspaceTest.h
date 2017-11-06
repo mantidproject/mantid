@@ -337,13 +337,6 @@ public:
     TS_ASSERT_EQUALS("c", cloned->getColumn(1)->cell<std::string>(0));
   }
 
-  void testCloneNameIsCleared() {
-    TableWorkspace tw(0);
-    boost::scoped_ptr<ITableWorkspace> cloned(tw.clone().release());
-
-    TS_ASSERT_EQUALS("", cloned->getName())
-  }
-
   void test_toDouble() {
     TableWorkspace tw(1);
     tw.addColumn("int", "X");
