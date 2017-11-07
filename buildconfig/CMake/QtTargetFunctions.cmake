@@ -230,7 +230,8 @@ function (mtd_add_qt_test_executable)
                      ${PARSED_TARGET_NAME})
   # test generation
   list (APPEND PARSED_SRC ${PARSED_QT${PARSED_QT_VERSION}_SRC})
-  set (CXXTEST_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/Qt${PARSED_QT_VERSION})
+  _append_qt_suffix (AS_DIR VERSION ${PARSED_QT_VERSION} OUTPUT_VARIABLE CXXTEST_OUTPUT_DIR
+                     ${CMAKE_CURRENT_BINARY_DIR})
   set (TESTHELPER_SRCS ${PARSED_TEST_HELPER_SRCS})
   cxxtest_add_test ( ${_target_name} ${PARSED_SRC} )
 
