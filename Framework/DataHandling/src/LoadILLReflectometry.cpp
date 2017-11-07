@@ -508,13 +508,9 @@ std::vector<double> LoadILLReflectometry::getXValues() {
       std::string chopper{"Chopper"};
       double chop1Speed{0.0}, chop1Phase{0.0}, chop2Speed{0.0}, chop2Phase{0.0};
       if (m_instrumentName == "D17") {
-        // TODO: This is a temporary hack. It seems that some VirtualChopper
-        // fields in the NeXus files are mixed so we need to load chopper 1
-        // phase from the chopper2_speed_average field.
         chop1Speed = doubleFromRun("VirtualChopper.chopper1_speed_average");
-        chop1Phase = doubleFromRun("VirtualChopper.chopper2_speed_average");
-        // TODO: This is a temporary hack, see above.
-        chop2Speed = doubleFromRun("VirtualChopper.chopper1_phase_average");
+        chop1Phase = doubleFromRun("VirtualChopper.chopper1_phase_average");
+        chop2Speed = doubleFromRun("VirtualChopper.chopper2_speed_average");
         chop2Phase = doubleFromRun("VirtualChopper.chopper2_phase_average");
       } else if (m_instrumentName == "Figaro") {
         chop1Phase = doubleFromRun(m_chopper1Name + ".phase");

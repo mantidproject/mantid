@@ -131,7 +131,7 @@ public:
     const auto chopper1Speed = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper1_speed_average");
     const auto chopper1Phase =
-        run.getPropertyValueAsType<double>("Chopper1.phase");
+        run.getPropertyValueAsType<double>("VirtualChopper.chopper1_phase_average");
     const auto chopper2Phase = run.getPropertyValueAsType<double>(
         "VirtualChopper.chopper2_phase_average");
     const auto pOffset =
@@ -139,7 +139,7 @@ public:
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
     const auto tof0 =
-        tofDelay + 0.5 * channelWidth -
+        tofDelay - 0.5 * channelWidth -
         60e6 * (pOffset - 45 + chopper2Phase - chopper1Phase + openOffset) /
             (2 * 360 * chopper1Speed);
     TS_ASSERT_EQUALS(output->blocksize(), channelCount);
