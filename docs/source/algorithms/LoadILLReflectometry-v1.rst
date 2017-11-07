@@ -28,13 +28,18 @@ This loader will update the detector position from what is defined in the instru
 
 The rotation angle can be one of the following:
 
-* The detector angle in the sample logs. This is the default behavior if :literal:`BraggAngle` and :literal:`BeamPosition` are not given.
+* The detector angle in the sample logs. This is the default behavior if :literal:`BraggAngle` is not given.
 
-* User-specified angle given by the :literal:`BraggAngle` input property. This option will always take precedence over other options.
+* An angle calculated from the reflected beam position and a user-specified angle given by the :literal:`BraggAngle` input property.
 
-* A calibrated detector angle. The calibration is done using a direct beam measurement. This option is triggered when the :literal:`BeamPosition` property is specified.
+The :literal:`BraggAngle` option rotates the detector such that the angle between the direct beam axis and the reflected peak centre is twice :literal:`BraggAngle`.  The reflected peak centre is found by fitting a Gaussian to the data and calculating an offset angle :math:`\Delta` between the detector centre and the peak (see the Direct beam calibration section for details). The detector angle \alpha_{R} is then given by
 
-For the direct beam calibration, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
+.. math::
+   \alpha_{R} = 2 \theta_{user} - \Delta
+
+where :math:`\theta_{user}` is :literal:`BraggAngle`
+
+In both cases the rotation angle can be further calibrated using a direct beam measurement. This option is triggered when the :literal:`BeamPosition` property is specified. For the direct beam calibration, a direct beam file should be loaded separately and the :literal:`OutputBeamPosition` output property used to obtain a special :ref:`TableWorkspace <Table Workspaces>` containing information on the direct beam position. This workspace can be further given as the :literal:`BeamPosition` input to proceeding loads as exemplified in the following:
 
 .. code-block:: python
 
