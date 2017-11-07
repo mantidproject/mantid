@@ -2,7 +2,6 @@ from __future__ import (absolute_import, division, print_function)
 
 import mantid.simpleapi as mantid
 
-import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.pearl_routines import pearl_algs
 
