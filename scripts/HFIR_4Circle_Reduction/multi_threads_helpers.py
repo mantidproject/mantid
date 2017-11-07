@@ -193,9 +193,13 @@ class IntegratePeaksThread(QThread):
             if merged is False:
                 merged_ws_name = 'X'
                 try:
+                    # TODO/TODO/ISSUE/NOW - rewrite and processed_dir shall be set from caller
                     status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                     scan_no=scan_number,
-                                                                                    pt_num_list=pt_number_list)
+                                                                                    pt_num_list=pt_number_list,
+                                                                                    rewrite=True,
+                                                                                    preprocessed_dir=None)
+
                     if status:
                         merged_ws_name = str(ret_tup[0])
                         error_message = ''
@@ -418,9 +422,12 @@ class MergePeaksThread(QThread):
             merged_ws_name = None
             out_file_name = 'No File To Save'
             try:
+                # TODO/ISSUE - rewrite and preprocessed_dir shall be set by caller of this class
                 status, ret_tup = self._mainWindow.controller.merge_pts_in_scan(exp_no=self._expNumber,
                                                                                 scan_no=scan_number,
-                                                                                pt_num_list=pt_number_list)
+                                                                                pt_num_list=pt_number_list,
+                                                                                rewrite=False,
+                                                                                preprocessed_dir=None)
                 if status:
                     merged_ws_name = str(ret_tup[0])
                     error_message = ''
@@ -435,6 +442,7 @@ class MergePeaksThread(QThread):
                                                                  pt_number_list=pt_number_list,
                                                                  merged_ws_name=merged_ws_name,
                                                                  output=out_file_name)
+                    # TODO/ISSUE/NOW - Need to write to a file with calibration information
                 # END-IF-ELSE
 
             except RuntimeError as run_err:

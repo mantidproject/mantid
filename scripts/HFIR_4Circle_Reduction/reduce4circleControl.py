@@ -9,6 +9,15 @@
 #
 ################################################################################
 from __future__ import (absolute_import, division, print_function)
+try:
+    # python3
+    from urllib.request import urlopen
+    from urllib.error import HTTPError
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen
+    from urllib2 import HTTPError
+    from urllib2 import URLError
 from six.moves import range
 import csv
 import random
@@ -1605,6 +1614,8 @@ class CWSCDReductionControl(object):
                 print('[DB] Unable to load file {0} due to IOError {1}.'.format(md_file_path, run_err))
         # END-FOR
 
+        return False
+
     # TODO/TODO/FIXME - Signature changed... Applied to all callers
     def merge_pts_in_scan(self, exp_no, scan_no, pt_num_list, rewrite, preprocessed_dir):
         """
@@ -1724,6 +1735,8 @@ class CWSCDReductionControl(object):
                 # set up the user-defined wave length
                 if exp_no in self._userWavelengthDict:
                     alg_args['UserDefinedWavelength'] = self._userWavelengthDict[exp_no]
+
+                # TODO/ISSUE/NOW - Need to record all the shift, return and for further check!
 
                 # call:
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
@@ -1952,11 +1965,10 @@ class CWSCDReductionControl(object):
             is_url_good = False
             error_message = None
             try:
-                # TODO/TODO/FIXME/FIXME - urllib2 is not used anymore!
-                result = urllib2.urlopen(self._myServerURL)
-            except urllib2.HTTPError as err:
+                result = urlopen(self._myServerURL)
+            except HTTPError as err:
                 error_message = str(err.code)
-            except urllib2.URLError as err:
+            except URLError as err:
                 error_message = str(err.args)
             else:
                 is_url_good = True

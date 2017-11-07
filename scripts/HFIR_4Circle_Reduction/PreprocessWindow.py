@@ -341,6 +341,8 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
             # END-IF
         # END-IF
 
+        # TODO/ISSUE/NEW IMPLEMENTATION - class variables:  det_center, det_sample_distance, wave_length
+
         return
 
     def setup(self, controller):
@@ -378,6 +380,12 @@ class ScanPreProcessWindow(QtGui.QMainWindow):
         row_number = self._rowScanDict[scan_number]
         self.ui.tableView_scanProcessState.set_status(row_number, message)
         self.ui.tableView_scanProcessState.resizeColumnsToContents()
+
+        # TODO/TODO/ISSUE/NOW - write the result to file
+        # 1. a CSV file in appending mode
+        # 2. file's name is standard and defined in fourcircile_utility
+        # 3. csv file contains: exp, scan, pt_list, center (7 float), wave (7 float), det shift (int, int), det size
+        #                       file name, workspace name
 
         return
 
