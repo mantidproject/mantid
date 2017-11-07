@@ -6,6 +6,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
+from functools import cmp_to_key
 
 try:
     import mantidplot
@@ -545,7 +546,7 @@ class Stitcher(object):
             if p2[0] == p1[0]:
                 return 0
             return -1 if p2[0] > p1[0] else 1
-        combined = sorted(zipped, cmp)
+        combined = sorted(zipped, key=cmp_to_key(cmp))
         x, y, e, dx = list(zip(*combined))
 
         CreateWorkspace(DataX=x, DataY=y, DataE=e,
