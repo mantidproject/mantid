@@ -172,7 +172,8 @@ def _sum_groups_of_three_ws(calibrated_spectra, output_file_names):
 
     for i in range(3):
         ws_name = output_file_names["output_name"] + "_mods{}-{}".format(i * 3 + 1, (i + 1) * 3)
-        summed_spectra = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[3 * i: 3 * i + 3], OutputWorkspace=ws_name)
+        summed_spectra = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[i * 3: (i + 1) * 3],
+                                          OutputWorkspace=ws_name)
         scaled = mantid.Scale(InputWorkspace=summed_spectra, Factor=1./3, OutputWorkspace=ws_name)
         output_list.append(scaled)
 
