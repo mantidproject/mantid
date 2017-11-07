@@ -332,12 +332,26 @@ public:
     check_zeroed_data(*ws);
   }
 
-  void test_create_parent_IndexInfo_same_size() {
+  void test_create_parent_same_size_does_not_ignore_IndexInfo_no_instrument() {
     const auto parent = create<Workspace2D>(2, Histogram(BinEdges{1, 2, 4}));
     const auto ws = create<Workspace2D>(*parent, make_indices_no_detectors(),
                                         parent->histogram(0));
-    // If parent has same size, data in IndexInfo is ignored
-    check_default_indices(*ws);
+    // Even if parent has same size data in IndexInfo should not be ignored
+    // since it is given explicitly.
+    check_indices_no_detectors(*ws);
+    check_zeroed_data(*ws);
+  }
+
+  void test_create_parent_same_size_does_not_ignore_IndexInfo() {
+    auto parentIndices = make_indices();
+    parentIndices.setSpectrumNumbers({666, 1});
+    const auto parent = create<Workspace2D>(m_instrument, parentIndices,
+                                            Histogram(BinEdges{1, 2, 4}));
+    const auto ws =
+        create<Workspace2D>(*parent, make_indices(), parent->histogram(0));
+    // Even if parent has same size data in IndexInfo should not be ignored
+    // since it is given explicitly.
+    check_indices(*ws);
     check_zeroed_data(*ws);
   }
 

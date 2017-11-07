@@ -9,6 +9,9 @@
 #include <type_traits>
 
 namespace Mantid {
+namespace Indexing {
+class IndexInfo;
+}
 namespace Geometry {
 class Instrument;
 }
@@ -142,9 +145,13 @@ MANTID_DATAOBJECTS_DLL void
 fixDistributionFlag(API::MatrixWorkspace &workspace,
                     const HistogramData::Histogram &histArg);
 
-MANTID_DATAOBJECTS_DLL void
-initializeFromParent(const API::MatrixWorkspace &parent,
-                     API::MatrixWorkspace &ws);
+template <class T> struct IsIndexInfo { using type = std::false_type; };
+template <> struct IsIndexInfo<Indexing::IndexInfo> {
+  using type = std::true_type;
+};
+template <class UseIndexInfo>
+void initializeFromParent(const API::MatrixWorkspace &parent,
+                          API::MatrixWorkspace &workspace);
 
 MANTID_DATAOBJECTS_DLL void
 initializeFromParentWithoutLogs(const API::MatrixWorkspace &parent,
@@ -185,7 +192,8 @@ std::unique_ptr<T> create(const P &parent, const IndexArg &indexArg,
   // future of WorkspaceFactory.
   ws->setInstrument(parent.getInstrument());
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  detail::initializeFromParent(parent, *ws);
+  detail::initializeFromParent<typename detail::IsIndexInfo<IndexArg>::type>(
+      parent, *ws);
   // initializeFromParent sets the distribution flag to the same value as
   // parent. In case histArg is an actual Histogram that is not the correct
   // behavior so we have to set it back to the value given by histArg.
