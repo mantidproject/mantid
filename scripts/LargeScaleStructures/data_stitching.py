@@ -479,7 +479,7 @@ class Stitcher(object):
                           WriteXError=True, WriteSpectrumID=False)
 
     def trim_zeros(self, x, y, e, dx):
-        zipped = zip(x, y, e, dx)
+        zipped = list(zip(x, y, e, dx))
         trimmed = []
 
         data_started = False
@@ -498,7 +498,7 @@ class Stitcher(object):
                 zipped.append(trimmed[i])
 
         if len(zipped) > 0:
-            x, y, e, dx = zip(*zipped)
+            x, y, e, dx = list(zip(*zipped))
         else:
             return [], [], [], []
         return list(x), list(y), list(e), list(dx)
@@ -539,14 +539,14 @@ class Stitcher(object):
                 e.extend(_e)
                 dx.extend(_dx)
 
-        zipped = zip(x, y, e, dx)
+        zipped = list(zip(x, y, e, dx))
 
         def cmp(p1, p2):
             if p2[0] == p1[0]:
                 return 0
             return -1 if p2[0] > p1[0] else 1
         combined = sorted(zipped, cmp)
-        x, y, e, dx = zip(*combined)
+        x, y, e, dx = list(zip(*combined))
 
         CreateWorkspace(DataX=x, DataY=y, DataE=e,
                         OutputWorkspace=ws_combined,
