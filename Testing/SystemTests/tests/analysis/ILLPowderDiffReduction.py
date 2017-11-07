@@ -62,17 +62,15 @@ class ILLPowderDiffReductionTest(stresstesting.MantidStressTest):
         self.assertEquals(calib.getNumberHistograms(),3072)
 
     def _check_combined_reponse_output(self, response):
-        self.assertEquals(response.blocksize(),1)
-        self.assertEquals(response.getNumberHistograms(),3642)
-        spectrum_axis = response.getAxis(1)
-        spectrum_unit = spectrum_axis.getUnit().unitID()
-        self.assertEquals(spectrum_unit,'Degrees')
-        theta_values = spectrum_axis.extractValues()
+        self.assertEquals(response.blocksize(),3642)
+        self.assertEquals(response.getNumberHistograms(),1)
+        self.assertEquals(response.getAxis(0).getUnit().unitID(),'Degrees')
+        theta_values = response.readX(0)
         self.assertAlmostEqual(theta_values[0], -34.2243, 4)
-        self.assertAlmostEqual(theta_values[1], -34.1743, 4)
-        self.assertAlmostEqual(theta_values[-2], 147.775, 4)
-        self.assertAlmostEqual(theta_values[-1], 147.8253,4)
+        self.assertAlmostEqual(theta_values[1], -34.1746, 4)
+        self.assertAlmostEqual(theta_values[-2], 147.7254, 4)
+        self.assertAlmostEqual(theta_values[-1], 147.7754, 4)
 
     def _check_calibrated_sample(self, calibrated):
-        self.assertEquals(calibrated.blocksize(),3072)
+        self.assertEquals(calibrated.blocksize(),3008)
         self.assertEquals(calibrated.getNumberHistograms(),2)

@@ -219,7 +219,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         self._n_det = mtd[raw_ws].detectorInfo().size() - 1
         self.log().information('Number of detector pixels is: ' + str(self._n_det))
         pixel_size = mtd[raw_ws].getRun().getLogData('PixelSize').value
-        theta_zeros = mtd[raw_ws].getRun().getLogData('2theta')
+        theta_zeros = mtd[raw_ws].getRun().getLogData('2theta.Position')
         scan_step_in_pixel_numbers = (theta_zeros.nthValue(1) - theta_zeros.nthValue(0)) / pixel_size
         self._bin_offset = int(math.ceil(scan_step_in_pixel_numbers))
         self.log().information('Bin offset is: ' + str(self._bin_offset))
@@ -301,7 +301,7 @@ class PowderDiffILLCalibration(PythonAlgorithm):
         for pixel in range(0,self._n_det):
             x[index:(index+self._bin_offset)] = x_2d[pixel,-self._bin_offset:]
             index += self._bin_offset
-        CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, OutputWorkspace=response_ws)
+        CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='Degrees', OutputWorkspace=response_ws)
 
     def _perform_absolute_normalisation(self, constants_ws):
         """
