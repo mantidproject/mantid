@@ -87,44 +87,48 @@ void EnggDiffFittingPresenter::notify(
   switch (notif) {
 
   case IEnggDiffFittingPresenter::Start:
-    processStart();
-    break;
+	  processStart();
+	  break;
 
   case IEnggDiffFittingPresenter::FittingRunNo:
-    fittingRunNoChanged();
-    break;
+	  fittingRunNoChanged();
+	  break;
 
   case IEnggDiffFittingPresenter::Load:
-    processLoad();
-    break;
+	  processLoad();
+	  break;
 
   case IEnggDiffFittingPresenter::FitPeaks:
-    processFitPeaks();
-    break;
+	  processFitPeaks();
+	  break;
 
   case IEnggDiffFittingPresenter::FitAllPeaks:
-    processFitAllPeaks();
-    break;
+	  processFitAllPeaks();
+	  break;
 
   case IEnggDiffFittingPresenter::addPeaks:
-    addPeakToList();
-    break;
+	  addPeakToList();
+	  break;
 
   case IEnggDiffFittingPresenter::browsePeaks:
-    browsePeaksToFit();
-    break;
+	  browsePeaksToFit();
+	  break;
 
   case IEnggDiffFittingPresenter::savePeaks:
-    savePeakList();
-    break;
+	  savePeakList();
+	  break;
 
   case IEnggDiffFittingPresenter::ShutDown:
-    processShutDown();
-    break;
+	  processShutDown();
+	  break;
 
   case IEnggDiffFittingPresenter::LogMsg:
-    processLogMsg();
-    break;
+	  processLogMsg();
+	  break;
+
+  case IEnggDiffFittingPresenter::selectRun:
+	  processSelectRun();
+	  break;
   }
 }
 
@@ -344,6 +348,13 @@ std::vector<std::string> EnggDiffFittingPresenter::processFullPathInput(
   }
 
   return foundFullFilePaths;
+}
+
+void EnggDiffFittingPresenter::processSelectRun() {
+	const auto runNumber = m_view->getFittingListWidgetCurrentValue();
+	// Do NOT leave bank as 1 - work out how to do this properly
+	const auto ws = m_model.getWorkspace(std::stoi(runNumber), 1);
+	plotFocusedFile(false, ws);
 }
 
 /**
@@ -715,7 +726,8 @@ MatrixWorkspace_sptr EnggDiffFittingPresenter::loadSingleFile(const std::string 
 			runLoadAlg(filename, focusedWS);
 			setDifcTzero(focusedWS);
 			convertUnits(g_focusedFittingWSName);
-			plotFocusedFile(false);
+			throw new std::runtime_error("LOAD SINGLE FILE STILL BEING USED. SORT IT JOE");
+			//plotFocusedFile(false);
 
 			m_view->showStatus(
 				"Focused file loaded! (Click 'Select "
@@ -791,6 +803,7 @@ void EnggDiffFittingPresenter::processLoad() {
 	std::transform(runNumberInts.begin(), runNumberInts.end(), std::back_inserter(runNumbers),
 		[](const int num) {return std::to_string(num); });
 
+	m_view->enableFittingListWidget(true);
 	m_view->clearFittingListWidget();
 	std::for_each(runNumbers.begin(), runNumbers.end(),
 		[&](const std::string &runNumber) {
@@ -1752,19 +1765,9 @@ bool EnggDiffFittingPresenter::isDigit(const std::string &text) const {
   return std::all_of(text.cbegin(), text.cend(), ::isdigit);
 }
 
-void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks) {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-
-  if (!ADS.doesExist(g_focusedFittingWSName)) {
-    g_log.error() << "Focused workspace could not be plotted as there is no " +
-                         g_focusedFittingWSName + " workspace found.\n";
-    m_view->showStatus("Error while plotting focused workspace");
-    return;
-  }
+void EnggDiffFittingPresenter::plotFocusedFile(bool plotSinglePeaks, MatrixWorkspace_sptr focusedPeaksWS) {
 
   try {
-    auto focusedPeaksWS =
-        ADS.retrieveWS<MatrixWorkspace>(g_focusedFittingWSName);
     auto focusedData = QwtHelper::curveDataFromWs(focusedPeaksWS);
 
     // Check that the number of curves to plot isn't excessive
@@ -1812,7 +1815,8 @@ void EnggDiffFittingPresenter::plotFitPeaksCurves() {
     m_view->resetCanvas();
 
     // plots focused workspace
-    plotFocusedFile(m_fittingFinishedOK);
+	throw new std::runtime_error("PLOTTING FIT NOT IMPLEMENTED. SORT IT JOE");
+    //plotFocusedFile(m_fittingFinishedOK);
 
     if (m_fittingFinishedOK) {
       g_log.debug() << "single peaks fitting being plotted now.\n";

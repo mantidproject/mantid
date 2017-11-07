@@ -88,7 +88,7 @@ public:
                      std::string tableName, size_t row, std::string &startX,
                      std::string &endX);
 
-  void plotFocusedFile(bool plotSinglePeaks);
+  void plotFocusedFile(bool plotSinglePeaks, Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
 
   void plotFitPeaksCurves();
 
@@ -234,6 +234,9 @@ private:
 
   /// Holds if the view is in the process of being closed
   bool m_viewHasClosed;
+
+  /// Handle the user selecting a different run to plot
+  void processSelectRun();
 };
 
 } // namespace CustomInterfaces

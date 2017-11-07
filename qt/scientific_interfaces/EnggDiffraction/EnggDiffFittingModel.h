@@ -21,6 +21,7 @@ public:
 	std::vector<int> getAllRunNumbers();
 
 private:
+
 	static const int MAX_BANKS = 2;
 	std::array<std::unordered_map<int, Mantid::API::MatrixWorkspace_sptr>, MAX_BANKS> m_wsMap;
 

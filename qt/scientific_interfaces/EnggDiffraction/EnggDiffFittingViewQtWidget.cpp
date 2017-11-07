@@ -126,6 +126,9 @@ void EnggDiffFittingViewQtWidget::doSetup() {
   connect(m_ui.pushButton_plot_separate_window, SIGNAL(released()),
           SLOT(plotSeparateWindow()));
 
+  connect(m_ui.listWidget_fitting_run_num, SIGNAL(itemClicked(QListWidgetItem*)),
+	  this, SLOT(listWidget_fitting_run_num_clicked(QListWidgetItem*)));
+
   // Tool-tip button
   connect(m_ui.pushButton_tooltip, SIGNAL(released()), SLOT(showToolTipHelp()));
 
@@ -274,6 +277,11 @@ void EnggDiffFittingViewQtWidget::listViewFittingRun() {
     setFittingRunNo(itemText.toStdString());
     FittingRunNo();
   }
+}
+
+void EnggDiffFittingViewQtWidget::listWidget_fitting_run_num_clicked(QListWidgetItem *clickedItem){
+	const auto label = clickedItem->text();
+	m_presenter->notify(IEnggDiffFittingPresenter::selectRun);
 }
 
 void EnggDiffFittingViewQtWidget::resetFittingMode() {
@@ -502,6 +510,10 @@ void EnggDiffFittingViewQtWidget::enableFittingListWidget(bool enable) const {
 
 int EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentRow() const {
   return m_ui.listWidget_fitting_run_num->currentRow();
+}
+
+std::string EnggDiffFittingViewQtWidget::getFittingListWidgetCurrentValue() const {
+	return m_ui.listWidget_fitting_run_num->currentItem()->text().toStdString();
 }
 
 void EnggDiffFittingViewQtWidget::setFittingListWidgetCurrentRow(
