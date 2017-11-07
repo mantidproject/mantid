@@ -57,6 +57,7 @@ Changes
    Diffraction <diffraction>
    LowQ <lowq>
    Muon Analysis <muon>
+   Reflectometry <reflectometry>
    Spectroscopy <spectroscopy>
 
 Full Change Listings
