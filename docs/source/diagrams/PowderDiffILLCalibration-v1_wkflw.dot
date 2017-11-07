@@ -7,6 +7,7 @@ digraph PowderDiffILLCalibration {
     reference
     factor
     single_cell_response
+    single_cell_responseAfter [label="single_cell_response"]
     factors
   }
 
@@ -15,6 +16,7 @@ digraph PowderDiffILLCalibration {
     CalibrationMethod
     CalibrationProvided
     NormaliseTo
+    InterpolateOverlappingAngles
   }
 
   subgraph params {
@@ -24,6 +26,7 @@ digraph PowderDiffILLCalibration {
     ExcludedRange
     OutputWorkspace
     OutputResponseWorkspace
+    PixelRange
   }
 
   subgraph algorithms {
@@ -34,6 +37,7 @@ digraph PowderDiffILLCalibration {
     ConvertSpectrumAxis
     Divide
     Scale
+    SplineInterpolation
   }
 
   subgraph process {
@@ -56,9 +60,16 @@ digraph PowderDiffILLCalibration {
   NormaliseTo -> normalise
   normalise -> ConvertSpectrumAxis
   ConvertSpectrumAxis -> extract_single_cell [label="i-th"]
+  PixelRange -> extract_single_cell
   extract_single_cell -> single_cell_response
+  single_cell_response -> reference [label="For the first pixel"]
   reference -> Divide [label="LHS"]
-  single_cell_response -> Divide [label="RHS"]
+  single_cell_response -> InterpolateOverlappingAngles
+  InterpolateOverlappingAngles -> SplineInterpolation [label="yes"]
+  single_cell_response -> SplineInterpolation [label="WorkspaceToInterpolate"]
+  InterpolateOverlappingAngles -> Divide [label="No"]
+  reference -> SplineInterpolation [label="WorkspaceToMatch"]
+  SplineInterpolation -> Divide [label="RHS"]
   Divide -> exclude_ranges
   ExcludedRange -> exclude_ranges
   exclude_ranges -> CalibrationMethod
@@ -68,9 +79,9 @@ digraph PowderDiffILLCalibration {
   MostLikelyMean -> factor
   mean -> factor
   median -> factor
-  Scale -> single_cell_response
-  factor -> single_cell_response
-  single_cell_response -> WeightedMean
+  Scale -> single_cell_responseAfter
+  factor -> single_cell_responseAfter
+  single_cell_responseAfter -> WeightedMean
   reference -> WeightedMean
   WeightedMean -> reference
   factor -> factors

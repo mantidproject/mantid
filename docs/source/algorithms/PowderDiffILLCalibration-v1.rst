@@ -17,7 +17,7 @@ It performs as follows:
 
 2. Takes the second cell, and divides the reference to the second cell response in the overlapping region in terms of scattering angle. This results in the array of relative response ratios.
 
-3. Uses one of the 3 suggested options to retrieve the relative calibration factor from the array of relative response ratios. This factor is saved in the output as the calibration factor for the second cell.
+3. Uses one of the 3 suggested options to compute the relative calibration factor from the array of relative response ratios. This factor is saved in the output as the calibration factor for the second cell.
 
 4. The response of the second cell is scaled up with that factor, and then merged (in the overlapping region) with the reference using :ref:`WeightedMean <algm-WeightedMean>`.
 
@@ -31,7 +31,7 @@ in order to absolutely normalise the calibration curve.
 Input
 -----
 
-Input must be a single **detector-scan** run in `.nxs` format produced for vanadium.
+The input must be a single **detector-scan** run in `.nxs` format produced for vanadium.
 
 Optionally the previously derived calibration file can be seeded, and the algorithm will then compute the residual calibration factors on top of that.
 
@@ -45,7 +45,7 @@ Excluded range
 --------------
 
 Provide ranges in scattering angle in degrees, to exclude non-desired regions, e.g. the beam stop.
-Multiple regions can be set, `-20,0,10,20` will exclude `[-20,0]` and `[10,20]`.
+Multiple regions can be set, **-20,0,10,20** will exclude **[-20,0]** and **[10,20]**.
 This exclusion will happen at Step 3.
 
 Pixel range
@@ -61,13 +61,6 @@ Output will be a single-column workspace containing the calibration factors for 
 :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` to be later used in :ref:`PowderDiffILLReduction <algm-PowderDiffILLReduction>`.
 
 Optionally, the full absolute response resulted from the combination of the data for all the cells (see Step 4 above) can also be output.
-
-Limitations
------------
-
-In Step 2, the division is done bin-to-bin, with no rebinning or interpolation as a function of the scattering angle.
-The overlapping region is computed based on the bin offset, which is the number of bins for two neighbouring cells, that do not overlap during the scan.
-Since there is no interpolation, the output will be meaningful only if the scan step (i.e. the two theta jump of a given cell to the next time index) is an integer multiple (at least approximately) of the cell size in scattering angle.
 
 Workflow
 --------

@@ -11,8 +11,7 @@ digraph PowderDiffILLReduction {
     CalibrationProvided
     NormaliseTo
     SortObservableAxis
-    Unit
-    PrepareToSaveAs
+    ROCCorrectionProvided
   }
 
   subgraph params {
@@ -22,6 +21,9 @@ digraph PowderDiffILLReduction {
     Observable
     CalibrationFile
     OutputWorkspace
+    RebinToWidth
+    ROCCorrectionFile
+    Unit
   }
 
   subgraph algorithms {
@@ -31,41 +33,51 @@ digraph PowderDiffILLReduction {
     SortXAxis
     ConvertSpectrumAxis
     Transpose
+    Rebin
+    Calibrate [label="Multiply"]
+    ROCCorrect [label="Multiply"]
+    NormaliseToMonitor [label="Divide"]
+    NormaliseToTime [label="Divide"]
+    NormaliseToROI [label="Divide"]
+    LoadCalibration [label="LoadNexusProcessed"]
+    LoadROC [label="LoadNexusProcessed"]
   }
 
   subgraph processes {
     $process_style
-    normalise_to_monitor
-    normalise_to_ROI
-    normalise_to_time
-    calibrate
     crop_negative_2theta
-    crop_zero_counting_cells
+    treat_zero_counting_cells
   }
 
   Run -> LoadILLDiffraction
   LoadILLDiffraction -> ConjoinXRuns
   Observable -> ConjoinXRuns
   ConjoinXRuns -> NormaliseTo
-  NormaliseTo -> normalise_to_monitor [label="Monitor"]
-  NormaliseTo -> normalise_to_ROI [label="ROI"]
-  ROI -> normalise_to_ROI
-  NormaliseTo -> normalise_to_time [label="Time"]
-  normalise_to_time -> CalibrationProvided
-  normalise_to_ROI -> CalibrationProvided
-  normalise_to_monitor -> CalibrationProvided
-  CalibrationProvided -> calibrate [label="Yes"]
-  CalibrationFile -> calibrate
-  CalibrationProvided -> SortObservableAxis [label="No"]
-  calibrate -> SortObservableAxis
+  NormaliseTo -> NormaliseToMonitor [label="Monitor"]
+  NormaliseTo -> NormaliseToROI [label="ROI"]
+  ROI -> NormaliseToROI
+  NormaliseTo -> NormaliseToTime [label="Time"]
+  NormaliseToTime -> CalibrationProvided
+  NormaliseToROI -> CalibrationProvided
+  NormaliseToMonitor -> CalibrationProvided
+  CalibrationProvided -> Calibrate [label="Yes"]
+  CalibrationFile -> LoadCalibration
+  LoadCalibration -> Calibrate
+  CalibrationProvided -> ROCCorrectionProvided [label="No"]
+  Calibrate -> ROCCorrectionProvided
+  ROCCorrectionProvided -> ROCCorrect [label="Yes"]
+  ROCCorrectionFile -> LoadROC
+  LoadROC -> ROCCorrect
+  ROCCorrect -> SortObservableAxis
+  ROCCorrectionProvided -> SortObservableAxis [label="No"]
   SortObservableAxis -> SortXAxis [label="Yes"]
-  SortXAxis -> PrepareToSaveAs
-  SortObservableAxis -> PrepareToSaveAs [label="No"]
-  PrepareToSaveAs -> crop_negative_2theta [label="FullProf"]
-  crop_negative_2theta -> crop_zero_counting_cells
-  crop_zero_counting_cells -> ConvertSpectrumAxis
-  PrepareToSaveAs -> ConvertSpectrumAxis [label="NexusProcessed"]
+  SortXAxis -> crop_negative_2theta
+  SortObservableAxis -> crop_negative_2theta
+  crop_negative_2theta -> treat_zero_counting_cells
+  treat_zero_counting_cells -> ConvertSpectrumAxis
   Unit -> ConvertSpectrumAxis
-  ConvertSpectrumAxis -> Transpose
+  ConvertSpectrumAxis -> Rebin
+  RebinToWidth -> Rebin
+  Rebin -> Transpose
   Transpose -> OutputWorkspace
 }
